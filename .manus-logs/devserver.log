@@ -1,3 +1,62 @@
 [2026-02-06T01:25:13.615Z] Starting dev server with command: pnpm run dev
 [2026-02-06T01:25:14.035Z] ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND  No package.json (or package.yaml, or package.json5) was found in "/home/ubuntu/sgh-crm-portal".
 [2026-02-06T01:25:14.055Z] Dev server exited with code 1
+[2026-02-06T01:36:46.495Z] Starting dev server with command: pnpm run dev
+[2026-02-06T01:36:47.514Z] 
+[2026-02-06T01:36:47.514Z] > sgh-crm-portal@1.0.0 dev /home/ubuntu/sgh-crm-portal
+[2026-02-06T01:36:47.515Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-06T01:36:47.515Z] 
+[2026-02-06T01:36:49.244Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-06T01:36:49.529Z] Server running on http://localhost:3000/
+[2026-02-06T01:36:49.530Z] [Cron] Initializing simple scheduler (24h interval)...
+[2026-02-06T01:36:49.531Z] [Cron] Running deactivation jobs...
+[2026-02-06T01:36:49.534Z] [Cron] Simple scheduler initialized. Running every 24 hours.
+[2026-02-06T01:36:49.669Z] [Cron] Error deactivating expired offers: DrizzleQueryError: Failed query: select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)
+[2026-02-06T01:36:49.669Z] params: true,2026-02-06 01:36:49.534
+[2026-02-06T01:36:49.670Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T01:36:49.670Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T01:36:49.670Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T01:36:49.671Z] at async deactivateExpiredOffers (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:24:27)
+[2026-02-06T01:36:49.671Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:112:24) {
+[2026-02-06T01:36:49.671Z] query: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)',
+[2026-02-06T01:36:49.672Z] params: [ true, '2026-02-06 01:36:49.534' ],
+[2026-02-06T01:36:49.672Z] cause: Error: Table 'efgar5cna7pmtfg6jqysk6.offers' doesn't exist
+[2026-02-06T01:36:49.672Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T01:36:49.672Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T01:36:49.673Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T01:36:49.673Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T01:36:49.673Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T01:36:49.673Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T01:36:49.674Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T01:36:49.674Z] code: 'ER_NO_SUCH_TABLE',
+[2026-02-06T01:36:49.674Z] errno: 1146,
+[2026-02-06T01:36:49.674Z] sql: "select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = true and `offers`.`endDate` <= '2026-02-06 01:36:49.534')",
+[2026-02-06T01:36:49.675Z] sqlState: '42S02',
+[2026-02-06T01:36:49.675Z] sqlMessage: "Table 'efgar5cna7pmtfg6jqysk6.offers' doesn't exist"
+[2026-02-06T01:36:49.675Z] }
+[2026-02-06T01:36:49.676Z] }
+[2026-02-06T01:36:49.676Z] [Cron] Error deactivating expired camps: DrizzleQueryError: Failed query: select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)
+[2026-02-06T01:36:49.676Z] params: true,2026-02-06 01:36:49.669
+[2026-02-06T01:36:49.676Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T01:36:49.677Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T01:36:49.677Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T01:36:49.677Z] at async deactivateExpiredCamps (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:72:26)
+[2026-02-06T01:36:49.678Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:113:23) {
+[2026-02-06T01:36:49.678Z] query: 'select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)',
+[2026-02-06T01:36:49.678Z] params: [ true, '2026-02-06 01:36:49.669' ],
+[2026-02-06T01:36:49.678Z] cause: Error: Table 'efgar5cna7pmtfg6jqysk6.camps' doesn't exist
+[2026-02-06T01:36:49.679Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T01:36:49.679Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T01:36:49.679Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T01:36:49.679Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T01:36:49.680Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T01:36:49.680Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T01:36:49.680Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T01:36:49.681Z] code: 'ER_NO_SUCH_TABLE',
+[2026-02-06T01:36:49.681Z] errno: 1146,
+[2026-02-06T01:36:49.681Z] sql: "select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = true and `camps`.`endDate` <= '2026-02-06 01:36:49.669')",
+[2026-02-06T01:36:49.681Z] sqlState: '42S02',
+[2026-02-06T01:36:49.682Z] sqlMessage: "Table 'efgar5cna7pmtfg6jqysk6.camps' doesn't exist"
+[2026-02-06T01:36:49.682Z] }
+[2026-02-06T01:36:49.682Z] }
+[2026-02-06T01:36:49.683Z] [Cron] Deactivation jobs completed. Total deactivated: 0
