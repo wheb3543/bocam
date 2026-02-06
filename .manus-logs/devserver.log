@@ -1,0 +1,3 @@
+[2026-02-06T01:25:13.615Z] Starting dev server with command: pnpm run dev
+[2026-02-06T01:25:14.035Z] ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND  No package.json (or package.yaml, or package.json5) was found in "/home/ubuntu/sgh-crm-portal".
+[2026-02-06T01:25:14.055Z] Dev server exited with code 1

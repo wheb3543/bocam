@@ -1,0 +1,104 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1761875201205,
+      "tag": "0000_smiling_gwen_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1761875269802,
+      "tag": "0001_bored_steve_rogers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1761978959933,
+      "tag": "0002_ancient_overlord",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1761981634209,
+      "tag": "0003_condemned_winter_soldier",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1761983884590,
+      "tag": "0004_big_pretty_boy",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1762000348059,
+      "tag": "0005_wakeful_arachne",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1766177737902,
+      "tag": "0006_tricky_grim_reaper",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1766190555754,
+      "tag": "0007_furry_prism",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1766363129718,
+      "tag": "0008_aromatic_hitman",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1767373617898,
+      "tag": "0009_regular_risque",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1767629690854,
+      "tag": "0010_puzzling_warpath",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1767836927341,
+      "tag": "0011_lean_kingpin",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1768058673935,
+      "tag": "0012_bizarre_madrox",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1768059573119,
+      "tag": "0013_powerful_mad_thinker",
+      "breakpoints": true
+    }
+  ]
+}
