@@ -1,0 +1,9 @@
+{
+  "query": "DROP TABLE IF EXISTS `leadStatusHistory`;\nDROP TABLE IF EXISTS `offerLeads`;\nDROP TABLE IF EXISTS `campRegistrations`;\nDROP TABLE IF EXISTS `appointments`;\nDROP TABLE IF EXISTS `accessRequests`;\nDROP TABLE IF EXISTS `camps`;\nDROP TABLE IF EXISTS `offers`;\nDROP TABLE IF EXISTS `doctors`;\nDROP TABLE IF EXISTS `leads`;\nDROP TABLE IF EXISTS `campaigns`;\nDROP TABLE IF EXISTS `settings`;\nDROP TABLE IF EXISTS `users`;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user SJfVht37Be96bRv.root --database efgAR5CnA7PmtFg6jqYsk6 --execute DROP TABLE IF EXISTS `leadStatusHistory`;\nDROP TABLE IF EXISTS `offerLeads`;\nDROP TABLE IF EXISTS `campRegistrations`;\nDROP TABLE IF EXISTS `appointments`;\nDROP TABLE IF EXISTS `accessRequests`;\nDROP TABLE IF EXISTS `camps`;\nDROP TABLE IF EXISTS `offers`;\nDROP TABLE IF EXISTS `doctors`;\nDROP TABLE IF EXISTS `leads`;\nDROP TABLE IF EXISTS `campaigns`;\nDROP TABLE IF EXISTS `settings`;\nDROP TABLE IF EXISTS `users`;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1909
+}
