@@ -61,3 +61,25 @@
 [2026-02-06T01:36:49.682Z] }
 [2026-02-06T01:36:49.683Z] [Cron] Deactivation jobs completed. Total deactivated: 0
 [2026-02-06T01:40:18.083Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-02-06T01:48:56.194Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/vite@7.1.9_@types+node@24.7.0_jiti@2.6.1_lightningcss@1.30.1_tsx@4.20.6/node_modules/vite/dist/node/chunks/dep-CCSnTAeo.js' imported from /home/ubuntu/sgh-crm-portal/node_modules/.pnpm/vite@7.1.9_@types+node@24.7.0_jiti@2.6.1_lightningcss@1.30.1_tsx@4.20.6/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js
+[2026-02-06T01:48:56.195Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-02-06T01:48:56.195Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-02-06T01:48:56.195Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-06T01:48:56.196Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-06T01:48:56.196Z] at resolveBase (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1770341807799:2:3744)
+[2026-02-06T01:48:56.196Z] at resolveDirectory (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1770341807799:2:4243)
+[2026-02-06T01:48:56.196Z] at resolveTsPaths (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1770341807799:2:4984)
+[2026-02-06T01:48:56.197Z] at resolve (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1770341807799:2:5361)
+[2026-02-06T01:48:56.197Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-06T01:48:56.197Z] at o (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@tailwindcss+node@4.1.14/node_modules/@tailwindcss/node/dist/esm-cache.loader.mjs:1:69)
+[2026-02-06T01:48:59.470Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/vite@7.1.9_@types+node@24.7.0_jiti@2.6.1_lightningcss@1.30.1_tsx@4.20.6/node_modules/vite/dist/node/chunks/dep-CCSnTAeo.js' imported from /home/ubuntu/sgh-crm-portal/node_modules/.pnpm/vite@7.1.9_@types+node@24.7.0_jiti@2.6.1_lightningcss@1.30.1_tsx@4.20.6/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js
+[2026-02-06T01:48:59.499Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-02-06T01:48:59.549Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-02-06T01:48:59.598Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-06T01:48:59.638Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-06T01:48:59.654Z] at resolveBase (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1770341807799:2:3744)
+[2026-02-06T01:48:59.688Z] at resolveDirectory (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1770341807799:2:4243)
+[2026-02-06T01:48:59.708Z] at resolveTsPaths (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1770341807799:2:4984)
+[2026-02-06T01:48:59.708Z] at resolve (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1770341807799:2:5361)
+[2026-02-06T01:48:59.708Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-06T01:48:59.709Z] at o (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@tailwindcss+node@4.1.14/node_modules/@tailwindcss/node/dist/esm-cache.loader.mjs:1:69)
