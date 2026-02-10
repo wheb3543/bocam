@@ -83,3 +83,501 @@
 [2026-02-06T01:48:59.708Z] at resolve (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1770341807799:2:5361)
 [2026-02-06T01:48:59.708Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
 [2026-02-06T01:48:59.709Z] at o (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@tailwindcss+node@4.1.14/node_modules/@tailwindcss/node/dist/esm-cache.loader.mjs:1:69)
+[2026-02-06T01:53:16.657Z] Dev server process group stopped
+[2026-02-06T01:53:16.661Z] ELIFECYCLE  Command failed.
+[2026-02-06T01:53:16.704Z] Dev server exited with code -15
+[2026-02-06T01:53:19.685Z] Starting dev server with command: pnpm run dev
+[2026-02-06T01:53:20.368Z] 
+[2026-02-06T01:53:20.368Z] > sgh-crm-portal@1.0.0 dev /home/ubuntu/sgh-crm-portal
+[2026-02-06T01:53:20.369Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-06T01:53:20.369Z] 
+[2026-02-06T01:53:22.003Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-06T01:53:22.271Z] Server running on http://localhost:3000/
+[2026-02-06T01:53:22.272Z] [Cron] Initializing simple scheduler (24h interval)...
+[2026-02-06T01:53:22.272Z] [Cron] Running deactivation jobs...
+[2026-02-06T01:53:22.276Z] [Cron] Simple scheduler initialized. Running every 24 hours.
+[2026-02-06T01:53:22.397Z] [Cron] Error deactivating expired offers: DrizzleQueryError: Failed query: select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)
+[2026-02-06T01:53:22.398Z] params: true,2026-02-06 01:53:22.276
+[2026-02-06T01:53:22.398Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T01:53:22.398Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T01:53:22.399Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T01:53:22.399Z] at async deactivateExpiredOffers (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:24:27)
+[2026-02-06T01:53:22.399Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:112:24) {
+[2026-02-06T01:53:22.400Z] query: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)',
+[2026-02-06T01:53:22.400Z] params: [ true, '2026-02-06 01:53:22.276' ],
+[2026-02-06T01:53:22.400Z] cause: Error: Unknown column 'offers.enddate' in 'where clause'
+[2026-02-06T01:53:22.400Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T01:53:22.401Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T01:53:22.401Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T01:53:22.401Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T01:53:22.402Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T01:53:22.402Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T01:53:22.402Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T01:53:22.402Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T01:53:22.403Z] errno: 1054,
+[2026-02-06T01:53:22.403Z] sql: "select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = true and `offers`.`endDate` <= '2026-02-06 01:53:22.276')",
+[2026-02-06T01:53:22.403Z] sqlState: '42S22',
+[2026-02-06T01:53:22.403Z] sqlMessage: "Unknown column 'offers.enddate' in 'where clause'"
+[2026-02-06T01:53:22.404Z] }
+[2026-02-06T01:53:22.404Z] }
+[2026-02-06T01:53:22.404Z] [Cron] Error deactivating expired camps: DrizzleQueryError: Failed query: select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)
+[2026-02-06T01:53:22.405Z] params: true,2026-02-06 01:53:22.397
+[2026-02-06T01:53:22.405Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T01:53:22.405Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T01:53:22.405Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T01:53:22.406Z] at async deactivateExpiredCamps (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:72:26)
+[2026-02-06T01:53:22.406Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:113:23) {
+[2026-02-06T01:53:22.406Z] query: 'select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)',
+[2026-02-06T01:53:22.406Z] params: [ true, '2026-02-06 01:53:22.397' ],
+[2026-02-06T01:53:22.407Z] cause: Error: Unknown column 'slug' in 'field list'
+[2026-02-06T01:53:22.407Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T01:53:22.407Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T01:53:22.408Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T01:53:22.408Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T01:53:22.408Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T01:53:22.408Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T01:53:22.409Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T01:53:22.409Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T01:53:22.409Z] errno: 1054,
+[2026-02-06T01:53:22.409Z] sql: "select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = true and `camps`.`endDate` <= '2026-02-06 01:53:22.397')",
+[2026-02-06T01:53:22.410Z] sqlState: '42S22',
+[2026-02-06T01:53:22.410Z] sqlMessage: "Unknown column 'slug' in 'field list'"
+[2026-02-06T01:53:22.410Z] }
+[2026-02-06T01:53:22.411Z] }
+[2026-02-06T01:53:22.411Z] [Cron] Deactivation jobs completed. Total deactivated: 0
+[2026-02-06T01:53:34.801Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-02-06T01:53:50.765Z] [Auth] Missing session cookie
+[2026-02-06T01:53:50.776Z] Error fetching offers: DrizzleQueryError: Failed query: select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = ? order by `offers`.`createdAt`
+[2026-02-06T01:53:50.777Z] params: true
+[2026-02-06T01:53:50.777Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T01:53:50.778Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T01:53:50.778Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T01:53:50.778Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/server/routers/offers.ts:38:25)
+[2026-02-06T01:53:50.779Z] at async resolveMiddleware (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:571:22)
+[2026-02-06T01:53:50.779Z] at async callRecursive (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:633:20)
+[2026-02-06T01:53:50.779Z] at async procedure (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:673:20)
+[2026-02-06T01:53:50.779Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/http/resolveResponse.ts:347:31)
+[2026-02-06T01:53:50.780Z] at async Promise.all (index 0)
+[2026-02-06T01:53:50.780Z] at async resolveResponse (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/http/resolveResponse.ts:613:35)
+[2026-02-06T01:53:50.780Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/adapters/node-http/nodeHTTPRequestHandler.ts:100:26) {
+[2026-02-06T01:53:50.781Z] query: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = ? order by `offers`.`createdAt`',
+[2026-02-06T01:53:50.781Z] params: [ true ],
+[2026-02-06T01:53:50.781Z] cause: Error: Unknown column 'title' in 'field list'
+[2026-02-06T01:53:50.782Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T01:53:50.782Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T01:53:50.782Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T01:53:50.782Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T01:53:50.783Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T01:53:50.783Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T01:53:50.783Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T01:53:50.783Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T01:53:50.784Z] errno: 1054,
+[2026-02-06T01:53:50.784Z] sql: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = true order by `offers`.`createdAt`',
+[2026-02-06T01:53:50.784Z] sqlState: '42S22',
+[2026-02-06T01:53:50.784Z] sqlMessage: "Unknown column 'title' in 'field list'"
+[2026-02-06T01:53:50.785Z] }
+[2026-02-06T01:53:50.785Z] }
+[2026-02-06T01:53:52.002Z] [Auth] Missing session cookie
+[2026-02-06T01:53:52.007Z] Error fetching offers: DrizzleQueryError: Failed query: select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = ? order by `offers`.`createdAt`
+[2026-02-06T01:53:52.008Z] params: true
+[2026-02-06T01:53:52.008Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T01:53:52.008Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T01:53:52.009Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T01:53:52.009Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/server/routers/offers.ts:38:25)
+[2026-02-06T01:53:52.009Z] at async resolveMiddleware (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:571:22)
+[2026-02-06T01:53:52.009Z] at async callRecursive (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:633:20)
+[2026-02-06T01:53:52.010Z] at async procedure (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:673:20)
+[2026-02-06T01:53:52.010Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/http/resolveResponse.ts:347:31)
+[2026-02-06T01:53:52.010Z] at async Promise.all (index 0)
+[2026-02-06T01:53:52.011Z] at async resolveResponse (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/http/resolveResponse.ts:613:35)
+[2026-02-06T01:53:52.011Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/adapters/node-http/nodeHTTPRequestHandler.ts:100:26) {
+[2026-02-06T01:53:52.011Z] query: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = ? order by `offers`.`createdAt`',
+[2026-02-06T01:53:52.011Z] params: [ true ],
+[2026-02-06T01:53:52.012Z] cause: Error: Unknown column 'title' in 'field list'
+[2026-02-06T01:53:52.012Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T01:53:52.012Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T01:53:52.013Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T01:53:52.013Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T01:53:52.013Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T01:53:52.013Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T01:53:52.014Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T01:53:52.014Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T01:53:52.014Z] errno: 1054,
+[2026-02-06T01:53:52.014Z] sql: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = true order by `offers`.`createdAt`',
+[2026-02-06T01:53:52.015Z] sqlState: '42S22',
+[2026-02-06T01:53:52.015Z] sqlMessage: "Unknown column 'title' in 'field list'"
+[2026-02-06T01:53:52.015Z] }
+[2026-02-06T01:53:52.016Z] }
+[2026-02-06T01:53:52.256Z] [Auth] Missing session cookie
+[2026-02-06T01:53:53.854Z] [Auth] Missing session cookie
+[2026-02-06T01:53:56.171Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:54:00.412Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:54:14.862Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:54:16.144Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:54:21.967Z] [OAuth] Unauthorized access attempt by wheb3543@gmail.com
+[2026-02-06T01:54:21.972Z] [OAuth] Callback failed DrizzleQueryError: Failed query: select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = ? limit ?
+[2026-02-06T01:54:21.972Z] params: wheb3543@gmail.com,1
+[2026-02-06T01:54:21.973Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T01:54:21.973Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T01:54:21.973Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T01:54:21.974Z] at async Module.createAccessRequest (/home/ubuntu/sgh-crm-portal/server/db.ts:110:20)
+[2026-02-06T01:54:21.974Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/server/_core/oauth.ts:43:9) {
+[2026-02-06T01:54:21.974Z] query: 'select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = ? limit ?',
+[2026-02-06T01:54:21.974Z] params: [ 'wheb3543@gmail.com', 1 ],
+[2026-02-06T01:54:21.975Z] cause: Error: Unknown column 'accessrequests.email' in 'where clause'
+[2026-02-06T01:54:21.975Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T01:54:21.975Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T01:54:21.976Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T01:54:21.976Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T01:54:21.976Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T01:54:21.977Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T01:54:21.977Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T01:54:21.977Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T01:54:21.978Z] errno: 1054,
+[2026-02-06T01:54:21.978Z] sql: "select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = 'wheb3543@gmail.com' limit 1",
+[2026-02-06T01:54:21.978Z] sqlState: '42S22',
+[2026-02-06T01:54:21.979Z] sqlMessage: "Unknown column 'accessrequests.email' in 'where clause'"
+[2026-02-06T01:54:21.979Z] }
+[2026-02-06T01:54:21.979Z] }
+[2026-02-06T01:54:34.132Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:54:35.395Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:54:58.684Z] [OAuth] Unauthorized access attempt by wheb3543@gmail.com
+[2026-02-06T01:54:58.687Z] [OAuth] Callback failed DrizzleQueryError: Failed query: select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = ? limit ?
+[2026-02-06T01:54:58.688Z] params: wheb3543@gmail.com,1
+[2026-02-06T01:54:58.688Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T01:54:58.688Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T01:54:58.689Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T01:54:58.689Z] at async Module.createAccessRequest (/home/ubuntu/sgh-crm-portal/server/db.ts:110:20)
+[2026-02-06T01:54:58.689Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/server/_core/oauth.ts:43:9) {
+[2026-02-06T01:54:58.689Z] query: 'select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = ? limit ?',
+[2026-02-06T01:54:58.690Z] params: [ 'wheb3543@gmail.com', 1 ],
+[2026-02-06T01:54:58.690Z] cause: Error: Unknown column 'accessrequests.email' in 'where clause'
+[2026-02-06T01:54:58.690Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T01:54:58.691Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T01:54:58.691Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T01:54:58.691Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T01:54:58.691Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T01:54:58.692Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T01:54:58.692Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T01:54:58.692Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T01:54:58.692Z] errno: 1054,
+[2026-02-06T01:54:58.693Z] sql: "select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = 'wheb3543@gmail.com' limit 1",
+[2026-02-06T01:54:58.693Z] sqlState: '42S22',
+[2026-02-06T01:54:58.693Z] sqlMessage: "Unknown column 'accessrequests.email' in 'where clause'"
+[2026-02-06T01:54:58.694Z] }
+[2026-02-06T01:54:58.694Z] }
+[2026-02-06T01:55:08.602Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:55:09.885Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:55:12.149Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:55:17.399Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:55:38.323Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:55:39.124Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:55:39.133Z] Error fetching offers: DrizzleQueryError: Failed query: select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = ? order by `offers`.`createdAt`
+[2026-02-06T01:55:39.133Z] params: true
+[2026-02-06T01:55:39.133Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T01:55:39.134Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T01:55:39.134Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T01:55:39.134Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/server/routers/offers.ts:38:25)
+[2026-02-06T01:55:39.134Z] at async resolveMiddleware (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:571:22)
+[2026-02-06T01:55:39.135Z] at async callRecursive (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:633:20)
+[2026-02-06T01:55:39.135Z] at async procedure (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:673:20)
+[2026-02-06T01:55:39.135Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/http/resolveResponse.ts:347:31)
+[2026-02-06T01:55:39.136Z] at async Promise.all (index 0)
+[2026-02-06T01:55:39.136Z] at async resolveResponse (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/http/resolveResponse.ts:613:35)
+[2026-02-06T01:55:39.136Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/adapters/node-http/nodeHTTPRequestHandler.ts:100:26) {
+[2026-02-06T01:55:39.136Z] query: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = ? order by `offers`.`createdAt`',
+[2026-02-06T01:55:39.137Z] params: [ true ],
+[2026-02-06T01:55:39.137Z] cause: Error: Unknown column 'title' in 'field list'
+[2026-02-06T01:55:39.137Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T01:55:39.137Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T01:55:39.138Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T01:55:39.138Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T01:55:39.138Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T01:55:39.139Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T01:55:39.139Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T01:55:39.139Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T01:55:39.139Z] errno: 1054,
+[2026-02-06T01:55:39.140Z] sql: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = true order by `offers`.`createdAt`',
+[2026-02-06T01:55:39.140Z] sqlState: '42S22',
+[2026-02-06T01:55:39.140Z] sqlMessage: "Unknown column 'title' in 'field list'"
+[2026-02-06T01:55:39.140Z] }
+[2026-02-06T01:55:39.141Z] }
+[2026-02-06T01:55:39.879Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:55:41.188Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:55:43.511Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:55:47.854Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:56:02.647Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:56:03.917Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T01:56:08.730Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:01:45.739Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:01:46.975Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:01:49.232Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:01:53.517Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:04:34.049Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:04:35.389Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:04:38.385Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:04:43.385Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:05:03.449Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:05:04.710Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:05:08.593Z] [OAuth] Unauthorized access attempt by wheb3543@gmail.com
+[2026-02-06T02:05:08.597Z] [OAuth] Callback failed DrizzleQueryError: Failed query: select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = ? limit ?
+[2026-02-06T02:05:08.597Z] params: wheb3543@gmail.com,1
+[2026-02-06T02:05:08.598Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T02:05:08.598Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T02:05:08.599Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T02:05:08.599Z] at async Module.createAccessRequest (/home/ubuntu/sgh-crm-portal/server/db.ts:110:20)
+[2026-02-06T02:05:08.600Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/server/_core/oauth.ts:43:9) {
+[2026-02-06T02:05:08.600Z] query: 'select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = ? limit ?',
+[2026-02-06T02:05:08.600Z] params: [ 'wheb3543@gmail.com', 1 ],
+[2026-02-06T02:05:08.601Z] cause: Error: Unknown column 'accessrequests.email' in 'where clause'
+[2026-02-06T02:05:08.601Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T02:05:08.601Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T02:05:08.601Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T02:05:08.602Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T02:05:08.602Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T02:05:08.602Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T02:05:08.603Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T02:05:08.603Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T02:05:08.603Z] errno: 1054,
+[2026-02-06T02:05:08.603Z] sql: "select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = 'wheb3543@gmail.com' limit 1",
+[2026-02-06T02:05:08.604Z] sqlState: '42S22',
+[2026-02-06T02:05:08.604Z] sqlMessage: "Unknown column 'accessrequests.email' in 'where clause'"
+[2026-02-06T02:05:08.604Z] }
+[2026-02-06T02:05:08.604Z] }
+[2026-02-06T02:05:19.076Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:05:20.332Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:05:25.909Z] [OAuth] Unauthorized access attempt by wheb3543@gmail.com
+[2026-02-06T02:05:25.914Z] [OAuth] Callback failed DrizzleQueryError: Failed query: select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = ? limit ?
+[2026-02-06T02:05:25.914Z] params: wheb3543@gmail.com,1
+[2026-02-06T02:05:25.915Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T02:05:25.915Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T02:05:25.915Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T02:05:25.916Z] at async Module.createAccessRequest (/home/ubuntu/sgh-crm-portal/server/db.ts:110:20)
+[2026-02-06T02:05:25.916Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/server/_core/oauth.ts:43:9) {
+[2026-02-06T02:05:25.916Z] query: 'select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = ? limit ?',
+[2026-02-06T02:05:25.916Z] params: [ 'wheb3543@gmail.com', 1 ],
+[2026-02-06T02:05:25.917Z] cause: Error: Unknown column 'accessrequests.email' in 'where clause'
+[2026-02-06T02:05:25.917Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T02:05:25.917Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T02:05:25.918Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T02:05:25.918Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T02:05:25.918Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T02:05:25.919Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T02:05:25.919Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T02:05:25.919Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T02:05:25.919Z] errno: 1054,
+[2026-02-06T02:05:25.920Z] sql: "select `id`, `openId`, `name`, `email`, `phone`, `reason`, `status`, `requestedAt`, `reviewedAt`, `reviewedBy` from `accessRequests` where `accessRequests`.`email` = 'wheb3543@gmail.com' limit 1",
+[2026-02-06T02:05:25.920Z] sqlState: '42S22',
+[2026-02-06T02:05:25.920Z] sqlMessage: "Unknown column 'accessrequests.email' in 'where clause'"
+[2026-02-06T02:05:25.920Z] }
+[2026-02-06T02:05:25.921Z] }
+[2026-02-06T02:06:31.752Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:06:48.335Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:06:50.627Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:07:00.001Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:07:01.256Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:07:02.090Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:07:02.098Z] Error fetching offers: DrizzleQueryError: Failed query: select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = ? order by `offers`.`createdAt`
+[2026-02-06T02:07:02.099Z] params: true
+[2026-02-06T02:07:02.099Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-06T02:07:02.099Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-06T02:07:02.099Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-06T02:07:02.100Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/server/routers/offers.ts:38:25)
+[2026-02-06T02:07:02.100Z] at async resolveMiddleware (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:571:22)
+[2026-02-06T02:07:02.100Z] at async callRecursive (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:633:20)
+[2026-02-06T02:07:02.101Z] at async procedure (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/procedureBuilder.ts:673:20)
+[2026-02-06T02:07:02.101Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/http/resolveResponse.ts:347:31)
+[2026-02-06T02:07:02.101Z] at async Promise.all (index 0)
+[2026-02-06T02:07:02.101Z] at async resolveResponse (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/unstable-core-do-not-import/http/resolveResponse.ts:613:35)
+[2026-02-06T02:07:02.102Z] at async <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/@trpc+server@11.6.0_typescript@5.9.3/node_modules/@trpc/server/src/adapters/node-http/nodeHTTPRequestHandler.ts:100:26) {
+[2026-02-06T02:07:02.102Z] query: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = ? order by `offers`.`createdAt`',
+[2026-02-06T02:07:02.102Z] params: [ true ],
+[2026-02-06T02:07:02.102Z] cause: Error: Unknown column 'title' in 'field list'
+[2026-02-06T02:07:02.103Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-06T02:07:02.103Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-06T02:07:02.103Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-06T02:07:02.103Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-06T02:07:02.104Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-06T02:07:02.104Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-06T02:07:02.104Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-06T02:07:02.105Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-06T02:07:02.105Z] errno: 1054,
+[2026-02-06T02:07:02.105Z] sql: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where `offers`.`isActive` = true order by `offers`.`createdAt`',
+[2026-02-06T02:07:02.105Z] sqlState: '42S22',
+[2026-02-06T02:07:02.106Z] sqlMessage: "Unknown column 'title' in 'field list'"
+[2026-02-06T02:07:02.106Z] }
+[2026-02-06T02:07:02.106Z] }
+[2026-02-06T02:07:03.053Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:07:04.291Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:07:06.591Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-06T02:07:10.939Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-02-10T22:53:44.217Z] [Cron] Running deactivation jobs...
+[2026-02-10T22:53:42.868Z] [Cron] Error deactivating expired offers: DrizzleQueryError: Failed query: select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)
+[2026-02-10T22:53:42.869Z] params: true,2026-02-10 22:53:44.402
+[2026-02-10T22:53:42.870Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-10T22:53:42.870Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-10T22:53:42.871Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-10T22:53:42.871Z] at async deactivateExpiredOffers (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:24:27)
+[2026-02-10T22:53:42.872Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:112:24) {
+[2026-02-10T22:53:42.872Z] query: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)',
+[2026-02-10T22:53:42.873Z] params: [ true, '2026-02-10 22:53:44.402' ],
+[2026-02-10T22:53:42.873Z] cause: Error: Unknown column 'offers.enddate' in 'where clause'
+[2026-02-10T22:53:42.873Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-10T22:53:42.874Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-10T22:53:42.874Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-10T22:53:42.874Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-10T22:53:42.875Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-10T22:53:42.875Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-10T22:53:42.875Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-10T22:53:42.876Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-10T22:53:42.876Z] errno: 1054,
+[2026-02-10T22:53:42.876Z] sql: "select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = true and `offers`.`endDate` <= '2026-02-10 22:53:44.402')",
+[2026-02-10T22:53:42.877Z] sqlState: '42S22',
+[2026-02-10T22:53:42.877Z] sqlMessage: "Unknown column 'offers.enddate' in 'where clause'"
+[2026-02-10T22:53:42.877Z] }
+[2026-02-10T22:53:42.877Z] }
+[2026-02-10T22:53:42.878Z] [Cron] Error deactivating expired camps: DrizzleQueryError: Failed query: select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)
+[2026-02-10T22:53:42.878Z] params: true,2026-02-10 22:53:42.868
+[2026-02-10T22:53:42.879Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-10T22:53:42.879Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-10T22:53:42.879Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-10T22:53:42.880Z] at async deactivateExpiredCamps (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:72:26)
+[2026-02-10T22:53:42.880Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:113:23) {
+[2026-02-10T22:53:42.881Z] query: 'select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)',
+[2026-02-10T22:53:42.881Z] params: [ true, '2026-02-10 22:53:42.868' ],
+[2026-02-10T22:53:42.881Z] cause: Error: Unknown column 'slug' in 'field list'
+[2026-02-10T22:53:42.882Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-10T22:53:42.882Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-10T22:53:42.882Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-10T22:53:42.883Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-10T22:53:42.883Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-10T22:53:42.883Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-10T22:53:42.884Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-10T22:53:42.884Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-10T22:53:42.884Z] errno: 1054,
+[2026-02-10T22:53:42.885Z] sql: "select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = true and `camps`.`endDate` <= '2026-02-10 22:53:42.868')",
+[2026-02-10T22:53:42.885Z] sqlState: '42S22',
+[2026-02-10T22:53:42.885Z] sqlMessage: "Unknown column 'slug' in 'field list'"
+[2026-02-10T22:53:42.886Z] }
+[2026-02-10T22:53:42.886Z] }
+[2026-02-10T22:53:42.886Z] [Cron] Deactivation jobs completed. Total deactivated: 0
+[2026-02-10T22:54:15.549Z] Dev server process group stopped
+[2026-02-10T22:54:18.574Z] Starting dev server with command: pnpm run dev
+[2026-02-10T22:54:19.400Z] 
+[2026-02-10T22:54:19.400Z] > sgh-crm-portal@1.0.0 dev /home/ubuntu/sgh-crm-portal
+[2026-02-10T22:54:19.401Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-10T22:54:19.401Z] 
+[2026-02-10T22:54:22.029Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-10T22:54:22.805Z] Server running on http://localhost:3000/
+[2026-02-10T22:54:22.807Z] [Cron] Initializing simple scheduler (24h interval)...
+[2026-02-10T22:54:22.808Z] [Cron] Running deactivation jobs...
+[2026-02-10T22:54:22.814Z] [Cron] Simple scheduler initialized. Running every 24 hours.
+[2026-02-10T22:54:23.198Z] [Cron] Error deactivating expired offers: DrizzleQueryError: Failed query: select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)
+[2026-02-10T22:54:23.199Z] params: true,2026-02-10 22:54:22.807
+[2026-02-10T22:54:23.199Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-10T22:54:23.200Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-10T22:54:23.200Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-10T22:54:23.200Z] at async deactivateExpiredOffers (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:24:27)
+[2026-02-10T22:54:23.200Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:112:24) {
+[2026-02-10T22:54:23.201Z] query: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)',
+[2026-02-10T22:54:23.201Z] params: [ true, '2026-02-10 22:54:22.807' ],
+[2026-02-10T22:54:23.201Z] cause: Error: Unknown column 'offers.enddate' in 'where clause'
+[2026-02-10T22:54:23.201Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-10T22:54:23.202Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-10T22:54:23.202Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-10T22:54:23.202Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-10T22:54:23.203Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-10T22:54:23.203Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-10T22:54:23.203Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-10T22:54:23.204Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-10T22:54:23.204Z] errno: 1054,
+[2026-02-10T22:54:23.204Z] sql: "select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = true and `offers`.`endDate` <= '2026-02-10 22:54:22.807')",
+[2026-02-10T22:54:23.204Z] sqlState: '42S22',
+[2026-02-10T22:54:23.205Z] sqlMessage: "Unknown column 'offers.enddate' in 'where clause'"
+[2026-02-10T22:54:23.205Z] }
+[2026-02-10T22:54:23.205Z] }
+[2026-02-10T22:54:23.205Z] [Cron] Error deactivating expired camps: DrizzleQueryError: Failed query: select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)
+[2026-02-10T22:54:23.206Z] params: true,2026-02-10 22:54:23.163
+[2026-02-10T22:54:23.206Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-10T22:54:23.206Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-10T22:54:23.206Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-10T22:54:23.207Z] at async deactivateExpiredCamps (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:72:26)
+[2026-02-10T22:54:23.207Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:113:23) {
+[2026-02-10T22:54:23.207Z] query: 'select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)',
+[2026-02-10T22:54:23.207Z] params: [ true, '2026-02-10 22:54:23.163' ],
+[2026-02-10T22:54:23.208Z] cause: Error: Unknown column 'slug' in 'field list'
+[2026-02-10T22:54:23.234Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-10T22:54:23.236Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-10T22:54:23.238Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-10T22:54:23.289Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-10T22:54:23.294Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-10T22:54:23.296Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-10T22:54:23.298Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-10T22:54:23.299Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-10T22:54:23.311Z] errno: 1054,
+[2026-02-10T22:54:23.316Z] sql: "select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = true and `camps`.`endDate` <= '2026-02-10 22:54:23.163')",
+[2026-02-10T22:54:23.319Z] sqlState: '42S22',
+[2026-02-10T22:54:23.322Z] sqlMessage: "Unknown column 'slug' in 'field list'"
+[2026-02-10T22:54:23.329Z] }
+[2026-02-10T22:54:23.330Z] }
+[2026-02-10T22:54:23.337Z] [Cron] Deactivation jobs completed. Total deactivated: 0
+[2026-02-10T22:54:31.007Z] Starting dev server with command: pnpm run dev
+[2026-02-10T22:54:31.809Z] 
+[2026-02-10T22:54:31.810Z] > sgh-crm-portal@1.0.0 dev /home/ubuntu/sgh-crm-portal
+[2026-02-10T22:54:31.810Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-10T22:54:31.810Z] 
+[2026-02-10T22:54:33.795Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-10T22:54:34.100Z] Server running on http://localhost:3000/
+[2026-02-10T22:54:34.101Z] [Cron] Initializing simple scheduler (24h interval)...
+[2026-02-10T22:54:34.101Z] [Cron] Running deactivation jobs...
+[2026-02-10T22:54:34.102Z] [Cron] Simple scheduler initialized. Running every 24 hours.
+[2026-02-10T22:54:34.147Z] [Cron] Error deactivating expired offers: DrizzleQueryError: Failed query: select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)
+[2026-02-10T22:54:34.169Z] params: true,2026-02-10 22:54:34.017
+[2026-02-10T22:54:34.171Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-10T22:54:34.187Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-10T22:54:34.187Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-10T22:54:34.188Z] at async deactivateExpiredOffers (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:24:27)
+[2026-02-10T22:54:34.188Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:112:24) {
+[2026-02-10T22:54:34.188Z] query: 'select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = ? and `offers`.`endDate` <= ?)',
+[2026-02-10T22:54:34.188Z] params: [ true, '2026-02-10 22:54:34.017' ],
+[2026-02-10T22:54:34.189Z] cause: Error: Unknown column 'offers.enddate' in 'where clause'
+[2026-02-10T22:54:34.189Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-10T22:54:34.189Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-10T22:54:34.189Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-10T22:54:34.190Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-10T22:54:34.190Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-10T22:54:34.192Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-10T22:54:34.193Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-10T22:54:34.194Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-10T22:54:34.194Z] errno: 1054,
+[2026-02-10T22:54:34.195Z] sql: "select `id`, `title`, `slug`, `description`, `imageUrl`, `isActive`, `startDate`, `endDate`, `createdAt`, `updatedAt` from `offers` where (`offers`.`isActive` = true and `offers`.`endDate` <= '2026-02-10 22:54:34.017')",
+[2026-02-10T22:54:34.195Z] sqlState: '42S22',
+[2026-02-10T22:54:34.195Z] sqlMessage: "Unknown column 'offers.enddate' in 'where clause'"
+[2026-02-10T22:54:34.196Z] }
+[2026-02-10T22:54:34.196Z] }
+[2026-02-10T22:54:34.197Z] [Cron] Error deactivating expired camps: DrizzleQueryError: Failed query: select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)
+[2026-02-10T22:54:34.197Z] params: true,2026-02-10 22:54:34.142
+[2026-02-10T22:54:34.198Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:79:11)
+[2026-02-10T22:54:34.198Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-02-10T22:54:34.198Z] at async MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:18)
+[2026-02-10T22:54:34.199Z] at async deactivateExpiredCamps (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:72:26)
+[2026-02-10T22:54:34.199Z] at async runDeactivationJobs (/home/ubuntu/sgh-crm-portal/server/cron/deactivateExpired.ts:113:23) {
+[2026-02-10T22:54:34.200Z] query: 'select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = ? and `camps`.`endDate` <= ?)',
+[2026-02-10T22:54:34.203Z] params: [ true, '2026-02-10 22:54:34.142' ],
+[2026-02-10T22:54:34.203Z] cause: Error: Unknown column 'slug' in 'field list'
+[2026-02-10T22:54:34.204Z] at PromisePool.query (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/mysql2@3.15.1/node_modules/mysql2/lib/promise/pool.js:36:22)
+[2026-02-10T22:54:34.206Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:133:24)
+[2026-02-10T22:54:34.206Z] at MySql2PreparedQuery.queryWithCache (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/session.ts:77:18)
+[2026-02-10T22:54:34.206Z] at MySql2PreparedQuery.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql2/session.ts:132:29)
+[2026-02-10T22:54:34.207Z] at MySqlSelectBase.execute (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/mysql-core/query-builders/select.ts:1145:25)
+[2026-02-10T22:54:34.209Z] at MySqlSelectBase.then (/home/ubuntu/sgh-crm-portal/node_modules/.pnpm/drizzle-orm@0.44.6_mysql2@3.15.1/node_modules/src/query-promise.ts:31:15)
+[2026-02-10T22:54:34.209Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+[2026-02-10T22:54:34.210Z] code: 'ER_BAD_FIELD_ERROR',
+[2026-02-10T22:54:34.212Z] errno: 1054,
+[2026-02-10T22:54:34.212Z] sql: "select `id`, `name`, `slug`, `description`, `imageUrl`, `startDate`, `endDate`, `isActive`, `freeOffers`, `discountedOffers`, `availableProcedures`, `galleryImages`, `createdAt`, `updatedAt` from `camps` where (`camps`.`isActive` = true and `camps`.`endDate` <= '2026-02-10 22:54:34.142')",
+[2026-02-10T22:54:34.214Z] sqlState: '42S22',
+[2026-02-10T22:54:34.215Z] sqlMessage: "Unknown column 'slug' in 'field list'"
+[2026-02-10T22:54:34.215Z] }
+[2026-02-10T22:54:34.216Z] }
+[2026-02-10T22:54:34.216Z] [Cron] Deactivation jobs completed. Total deactivated: 0
+[2026-02-10T22:54:46.507Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
