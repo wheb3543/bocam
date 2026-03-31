@@ -20,12 +20,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Phone as PhoneIcon } from "lucide-react";
+import { Loader2, Plus, Phone as PhoneIcon, Printer } from "lucide-react";
 import { toast } from "sonner";
+import { printReceipt } from "./PrintReceipt";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function ManualRegistrationForm() {
+  const { user } = useAuth();
+  const generateAppointmentReceiptMutation = trpc.appointments.generateReceiptNumber.useMutation();
+  const generateOfferLeadReceiptMutation = trpc.offerLeads.generateReceiptNumber.useMutation();
+  const generateCampRegistrationReceiptMutation = trpc.campRegistrations.generateReceiptNumber.useMutation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [registrationType, setRegistrationType] = useState<"lead" | "appointment" | "offer" | "camp">("lead");
+  const [shouldPrint, setShouldPrint] = useState(false);
   
   // Form fields
   const [fullName, setFullName] = useState("");
@@ -49,6 +56,7 @@ export default function ManualRegistrationForm() {
   const [campAge, setCampAge] = useState("");
   const [campProcedure, setCampProcedure] = useState("");
   const [medicalCondition, setMedicalCondition] = useState("");
+  const [registrationStatus, setRegistrationStatus] = useState<"new" | "contacted" | "booked" | "not_interested" | "no_answer" | "pending" | "confirmed" | "completed" | "cancelled">("new");
 
   const { data: doctors } = trpc.doctors.list.useQuery();
   const { data: offers } = trpc.offers.getAll.useQuery();
@@ -71,47 +79,132 @@ export default function ManualRegistrationForm() {
     setCampProcedure("");
   }, [campId]);
 
+  // Update registration status when registration type changes
+  useEffect(() => {
+    if (registrationType === 'appointment') {
+      setRegistrationStatus('confirmed');
+    } else if (registrationType === 'offer') {
+      setRegistrationStatus('confirmed');
+    } else if (registrationType === 'camp') {
+      setRegistrationStatus('confirmed');
+    } else {
+      setRegistrationStatus('new');
+    }
+  }, [registrationType]);
+
   const createLeadMutation = trpc.leads.submit.useMutation({
     onSuccess: () => {
       toast.success("تم إضافة العميل بنجاح");
+      if (shouldPrint) {
+        printReceipt({
+          fullName,
+          phone,
+          age: undefined,
+          registrationDate: new Date(),
+          type: "appointment",
+          typeName: "عميل محتمل",
+        }, user?.name || "غير معروف");
+      }
       resetForm();
       setDialogOpen(false);
+      setShouldPrint(false);
     },
     onError: () => {
       toast.error("حدث خطأ أثناء إضافة العميل");
+      setShouldPrint(false);
     },
   });
 
   const createAppointmentMutation = trpc.appointments.submit.useMutation({
-    onSuccess: () => {
+    onSuccess: async (data) => {
       toast.success("تم إضافة الموعد بنجاح");
+      if (shouldPrint && data?.insertId) {
+        try {
+          const result = await generateAppointmentReceiptMutation.mutateAsync({ id: data.insertId });
+          const doctor = doctors?.find((d: any) => d.id.toString() === doctorId);
+          printReceipt({
+            fullName,
+            phone,
+            age: appointmentAge ? parseInt(appointmentAge) : undefined,
+            registrationDate: new Date(),
+            type: "appointment",
+            typeName: doctor?.name || "غير محدد",
+            receiptNumber: result.receiptNumber,
+          }, user?.name || "غير معروف");
+        } catch (error) {
+          console.error('Error generating receipt number:', error);
+          toast.error('فشل في توليد رقم السند');
+        }
+      }
       resetForm();
       setDialogOpen(false);
+      setShouldPrint(false);
     },
     onError: () => {
       toast.error("حدث خطأ أثناء إضافة الموعد");
+      setShouldPrint(false);
     },
   });
 
   const createOfferLeadMutation = trpc.offerLeads.submit.useMutation({
-    onSuccess: () => {
+    onSuccess: async (data) => {
       toast.success("تم إضافة حجز العرض بنجاح");
+      if (shouldPrint && data?.id) {
+        try {
+          const result = await generateOfferLeadReceiptMutation.mutateAsync({ id: data.id });
+          const offer = offers?.find((o: any) => o.id.toString() === offerId);
+          printReceipt({
+            fullName,
+            phone,
+            age: undefined,
+            registrationDate: new Date(),
+            type: "offer",
+            typeName: offer?.title || "غير محدد",
+            receiptNumber: result.receiptNumber,
+          }, user?.name || "غير معروف");
+        } catch (error) {
+          console.error('Error generating receipt number:', error);
+          toast.error('فشل في توليد رقم السند');
+        }
+      }
       resetForm();
       setDialogOpen(false);
+      setShouldPrint(false);
     },
     onError: () => {
       toast.error("حدث خطأ أثناء إضافة حجز العرض");
+      setShouldPrint(false);
     },
   });
 
   const createCampRegistrationMutation = trpc.campRegistrations.submit.useMutation({
-    onSuccess: () => {
+    onSuccess: async (data) => {
       toast.success("تم إضافة تسجيل المخيم بنجاح");
+      if (shouldPrint && data?.id) {
+        try {
+          const result = await generateCampRegistrationReceiptMutation.mutateAsync({ id: data.id });
+          const camp = camps?.find((c: any) => c.id.toString() === campId);
+          printReceipt({
+            fullName,
+            phone,
+            age: campAge ? parseInt(campAge) : undefined,
+            registrationDate: new Date(),
+            type: "camp",
+            typeName: camp?.name || "غير محدد",
+            receiptNumber: result.receiptNumber,
+          }, user?.name || "غير معروف");
+        } catch (error) {
+          console.error('Error generating receipt number:', error);
+          toast.error('فشل في توليد رقم السند');
+        }
+      }
       resetForm();
       setDialogOpen(false);
+      setShouldPrint(false);
     },
     onError: () => {
       toast.error("حدث خطأ أثناء إضافة تسجيل المخيم");
+      setShouldPrint(false);
     },
   });
 
@@ -131,6 +224,7 @@ export default function ManualRegistrationForm() {
     setCampAge("");
     setCampProcedure("");
     setMedicalCondition("");
+    setRegistrationStatus("new");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -146,7 +240,8 @@ export default function ManualRegistrationForm() {
       phone,
       email: email || undefined,
       notes: notes || undefined,
-      source: "phone" as const,
+      source: "manual" as const,
+      status: registrationStatus as any, // Type will be validated by backend schema
     };
 
     switch (registrationType) {
@@ -158,10 +253,15 @@ export default function ManualRegistrationForm() {
           toast.error("الرجاء اختيار الطبيب");
           return;
         }
+        const parsedDoctorId = parseInt(doctorId);
+        if (isNaN(parsedDoctorId)) {
+          toast.error("معرف الطبيب غير صالح");
+          return;
+        }
         createAppointmentMutation.mutate({
           ...baseData,
           campaignSlug: "manual",
-          doctorId: parseInt(doctorId),
+          doctorId: parsedDoctorId,
           preferredDate: preferredDate || undefined,
           preferredTime: preferredTime || undefined,
           age: appointmentAge ? parseInt(appointmentAge) : undefined,
@@ -174,9 +274,14 @@ export default function ManualRegistrationForm() {
           toast.error("الرجاء اختيار العرض");
           return;
         }
+        const parsedOfferId = parseInt(offerId);
+        if (isNaN(parsedOfferId)) {
+          toast.error("معرف العرض غير صالح");
+          return;
+        }
         createOfferLeadMutation.mutate({
           ...baseData,
-          offerId: parseInt(offerId),
+          offerId: parsedOfferId,
         });
         break;
       case "camp":
@@ -184,9 +289,17 @@ export default function ManualRegistrationForm() {
           toast.error("الرجاء اختيار المخيم");
           return;
         }
+        const parsedCampId = parseInt(campId);
+        if (isNaN(parsedCampId)) {
+          toast.error("معرف المخيم غير صالح");
+          return;
+        }
+        // Convert 'completed' to 'attended' for camp registrations
+        const campStatus = registrationStatus === 'completed' ? 'attended' : registrationStatus;
         createCampRegistrationMutation.mutate({
           ...baseData,
-          campId: parseInt(campId),
+          status: campStatus as any,
+          campId: parsedCampId,
           age: campAge ? parseInt(campAge) : undefined,
           procedures: campProcedure || undefined,
           medicalCondition: medicalCondition || undefined,
@@ -220,19 +333,47 @@ export default function ManualRegistrationForm() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Registration Type */}
-          <div className="space-y-2">
-            <Label>نوع الحجز</Label>
-            <Select value={registrationType} onValueChange={(value: any) => setRegistrationType(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="اختر نوع الحجز" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="lead">عميل عام</SelectItem>
-                <SelectItem value="appointment">موعد طبيب</SelectItem>
-                <SelectItem value="offer">حجز عرض</SelectItem>
-                <SelectItem value="camp">تسجيل مخيم</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>نوع الحجز</Label>
+              <Select value={registrationType} onValueChange={(value: any) => setRegistrationType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر نوع الحجز" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lead">عميل عام</SelectItem>
+                  <SelectItem value="appointment">موعد طبيب</SelectItem>
+                  <SelectItem value="offer">حجز عرض</SelectItem>
+                  <SelectItem value="camp">تسجيل مخيم</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>حالة التسجيل</Label>
+              <Select value={registrationStatus} onValueChange={(value: any) => setRegistrationStatus(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الحالة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {registrationType === "lead" ? (
+                    <>
+                      <SelectItem value="new">جديد</SelectItem>
+                      <SelectItem value="contacted">تم التواصل</SelectItem>
+                      <SelectItem value="booked">تم الحجز</SelectItem>
+                      <SelectItem value="not_interested">غير مهتم</SelectItem>
+                      <SelectItem value="no_answer">لم يرد</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="confirmed">مؤكد</SelectItem>
+                      <SelectItem value="completed">حضر/مكتمل</SelectItem>
+                      <SelectItem value="cancelled">ملغي</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Basic Info */}
@@ -465,8 +606,33 @@ export default function ManualRegistrationForm() {
             >
               إلغاء
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? (
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={(e) => {
+                setShouldPrint(true);
+                handleSubmit(e as any);
+              }}
+              disabled={isPending}
+            >
+              {isPending && shouldPrint ? (
+                <>
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                  جاري الحفظ والطباعة...
+                </>
+              ) : (
+                <>
+                  <Printer className="ml-2 h-4 w-4" />
+                  حفظ وطباعة
+                </>
+              )}
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isPending}
+              onClick={() => setShouldPrint(false)}
+            >
+              {isPending && !shouldPrint ? (
                 <>
                   <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                   جاري الحفظ...

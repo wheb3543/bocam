@@ -1,23 +1,21 @@
-import { useState, useMemo } from "react";
+import { useFormatDate } from "@/hooks/useFormatDate";
+import { useState, useMemo, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import OfferLeadsManagement from "@/components/OfferLeadsManagement";
 import CampRegistrationsManagement from "@/components/CampRegistrationsManagement";
+import CustomerProfilesTab from "@/components/CustomerProfilesTab";
 import ManualRegistrationForm from "@/components/ManualRegistrationForm";
-import LeadCard from "@/components/LeadCard";
-import AppointmentCard from "@/components/AppointmentCard";
+import LeadsTab from "@/components/LeadsTab";
+import AppointmentsTab from "@/components/AppointmentsTab";
+import TasksSection from "@/components/TasksSection";
+import CommentsSection from "@/components/CommentsSection";
+import AuditLogSection from "@/components/AuditLogSection";
+import { DateRangePicker } from "@/components/DateRangePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -32,89 +30,112 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { 
-  Users, 
-  UserCheck, 
-  Calendar, 
-  Search, 
+import {
+  Users,
+  UserCheck,
+  Calendar,
   TrendingUp,
-  Phone,
-  Mail,
-  Loader2,
-  Download,
-  ArrowRight,
   Plus,
-  Settings,
   BarChart3,
+  CheckSquare,
 } from "lucide-react";
 import { toast } from "sonner";
-import { exportToExcel, formatLeadsForExport, formatAppointmentsForExport } from "@/lib/exportToExcel";
+import { useFilterUtils } from "@/hooks/useFilterUtils";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
-
-const statusLabels = {
-  new: "جديد",
-  contacted: "تم التواصل",
-  booked: "تم الحجز",
-  not_interested: "غير مهتم",
-  no_answer: "لم يرد",
-};
-
-const statusColors = {
-  new: "bg-blue-500",
-  contacted: "bg-yellow-500",
-  booked: "bg-green-500",
-  not_interested: "bg-red-500",
-  no_answer: "bg-gray-500",
-};
+import { SOURCE_LABELS } from "@shared/sources";
+import { usePhoneFormat } from "@/hooks/usePhoneFormat";
 
 export default function BookingsManagementPage() {
+  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
+  const { formatDate, formatDateTime } = useFormatDate();
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
+  const utils = trpc.useUtils();
+  const [location, setLocation] = useLocation();
+  const [activeTab, setActiveTab] = useState<"leads" | "appointments" | "offerLeads" | "campRegistrations" | "tasks" | "customers">("leads");
+
+  // === Lead Status Dialog State ===
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState("");
   const [statusNotes, setStatusNotes] = useState("");
-  const [leadsDateFilter, setLeadsDateFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState<"leads" | "appointments" | "offerLeads" | "campRegistrations">("leads");
-  const [manualRegistrationOpen, setManualRegistrationOpen] = useState(false);
 
-  const { data: unifiedLeads, isLoading: leadsLoading, refetch: refetchLeads } = trpc.leads.unifiedList.useQuery();
-  const { data: stats } = trpc.leads.stats.useQuery();
-  const { data: appointments, isLoading: appointmentsLoading, refetch: refetchAppointments } = trpc.appointments.list.useQuery();
-  const { data: doctors = [] } = trpc.doctors.list.useQuery();
-  
-  // Count pending (not updated) bookings
-  const [offerLeadsPendingCount, setOfferLeadsPendingCount] = useState(0);
-  const [campRegistrationsPendingCount, setCampRegistrationsPendingCount] = useState(0);
-  
-  const pendingCounts = useMemo(() => {
-    const leadsPending = unifiedLeads?.filter(l => l.status === 'pending').length || 0;
-    const appointmentsPending = appointments?.filter(a => a.status === 'pending').length || 0;
-    return {
-      leads: leadsPending,
-      appointments: appointmentsPending,
-      offerLeads: offerLeadsPendingCount,
-      campRegistrations: campRegistrationsPendingCount,
-    };
-  }, [unifiedLeads, appointments, offerLeadsPendingCount, campRegistrationsPendingCount]);
-  
-  const [appointmentSearchTerm, setAppointmentSearchTerm] = useState("");
+  // === Appointment Status Dialog State ===
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [appointmentStatusDialogOpen, setAppointmentStatusDialogOpen] = useState(false);
   const [newAppointmentStatus, setNewAppointmentStatus] = useState("");
   const [appointmentStatusNotes, setAppointmentStatusNotes] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
-  const [selectedDoctor, setSelectedDoctor] = useState("all");
-  const [dateFilter, setDateFilter] = useState("all");
-  const [appointmentStatusFilter, setAppointmentStatusFilter] = useState("all");
-  const [appointmentSourceFilter, setAppointmentSourceFilter] = useState("all");
-  const [leadsStatusFilter, setLeadsStatusFilter] = useState("all");
-  const [leadsSourceFilter, setLeadsSourceFilter] = useState("all");
 
+  // === Manual Registration Dialog ===
+  const [manualRegistrationOpen, setManualRegistrationOpen] = useState(false);
+
+  // === Pending counts from child components ===
+  const [offerLeadsPendingCount, setOfferLeadsPendingCount] = useState(0);
+  const [campRegistrationsPendingCount, setCampRegistrationsPendingCount] = useState(0);
+
+  // === Filter state ===
+  const leadsFilter = useFilterUtils<any>({
+    data: undefined,
+    searchFields: [],
+  });
+  const appointmentFilter = useFilterUtils<any>();
+  const dateRange = appointmentFilter.filters.dateRange;
+  const setDateRange = appointmentFilter.filters.setDateRange;
+
+  // === Data queries for pending counts ===
+  const { data: unifiedLeads, refetch: refetchLeads } = trpc.leads.list.useQuery();
+  const { data: appointmentsData } = trpc.appointments.listPaginated.useQuery({
+    page: 1,
+    limit: 1,
+    dateFrom: dateRange.from.toISOString(),
+    dateTo: dateRange.to.toISOString(),
+  });
+  const { data: offerLeadsData } = trpc.offerLeads.list.useQuery();
+  const { data: campRegistrationsData } = trpc.campRegistrations.list.useQuery();
+
+  // Handle query parameters for direct navigation from notifications
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const type = params.get('type');
+    const tab = params.get('tab');
+
+    if (id && type) {
+      if (type === 'appointment') setActiveTab('appointments');
+      else if (type === 'offer') setActiveTab('offerLeads');
+      else if (type === 'camp') setActiveTab('campRegistrations');
+      window.history.replaceState({}, '', '/dashboard/bookings');
+    } else if (tab) {
+      if (tab === 'appointments' || tab === 'offerLeads' || tab === 'campRegistrations' || tab === 'leads') {
+        setActiveTab(tab as any);
+      }
+      window.history.replaceState({}, '', '/dashboard/bookings');
+    }
+  }, [location]);
+
+  const pendingCounts = useMemo(() => {
+    const leadsPending = unifiedLeads?.filter(l => l.status === 'new').length || 0;
+    const appointmentsPending = appointmentsData?.total || 0;
+    const offerLeadsPending = offerLeadsData?.filter((o: any) => o.status === 'pending').length || offerLeadsPendingCount;
+    const campRegistrationsPending = campRegistrationsData?.filter((c: any) => c.status === 'pending').length || campRegistrationsPendingCount;
+    return {
+      leads: leadsPending,
+      appointments: appointmentsPending > 0 ? 0 : 0, // Count from actual data
+      offerLeads: offerLeadsPending,
+      campRegistrations: campRegistrationsPending,
+    };
+  }, [unifiedLeads, appointmentsData, offerLeadsData, campRegistrationsData, offerLeadsPendingCount, campRegistrationsPendingCount]);
+
+  // === Lead Status Update ===
   const updateStatusMutation = trpc.leads.updateStatus.useMutation({
     onSuccess: () => {
       toast.success("تم تحديث حالة العميل بنجاح");
@@ -129,144 +150,24 @@ export default function BookingsManagementPage() {
     },
   });
 
+  // === Appointment Status Update ===
   const updateAppointmentStatusMutation = trpc.appointments.updateStatus.useMutation({
     onSuccess: () => {
       toast.success("تم تحديث حالة الموعد بنجاح");
-      refetchAppointments();
+      utils.appointments.listPaginated.invalidate();
       setAppointmentStatusDialogOpen(false);
       setSelectedAppointment(null);
       setNewAppointmentStatus("");
       setAppointmentStatusNotes("");
+      setAppointmentDate("");
     },
     onError: () => {
       toast.error("حدث خطأ أثناء تحديث الحالة");
     },
   });
 
-  const filteredLeads = useMemo(() => {
-    if (!unifiedLeads) return [];
-    
-    let filtered = unifiedLeads;
-    
-    // Filter by search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (lead: any) =>
-          lead.fullName.toLowerCase().includes(term) ||
-          lead.phone.includes(term) ||
-          (lead.email && lead.email.toLowerCase().includes(term))
-      );
-    }
-    
-    // Filter by date
-    if (leadsDateFilter && leadsDateFilter !== "all") {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
-      filtered = filtered.filter((lead: any) => {
-        const leadDate = new Date(lead.createdAt);
-        
-        if (leadsDateFilter === "today") {
-          return leadDate >= today;
-        } else if (leadsDateFilter === "week") {
-          const weekAgo = new Date(today);
-          weekAgo.setDate(weekAgo.getDate() - 7);
-          return leadDate >= weekAgo;
-        } else if (leadsDateFilter === "month") {
-          const monthAgo = new Date(today);
-          monthAgo.setMonth(monthAgo.getMonth() - 1);
-          return leadDate >= monthAgo;
-        }
-        
-        return true;
-      });
-    }
-    
-    // Filter by status
-    if (leadsStatusFilter && leadsStatusFilter !== "all") {
-      filtered = filtered.filter((lead: any) => lead.status === leadsStatusFilter);
-    }
-    
-    // Filter by source
-    if (leadsSourceFilter && leadsSourceFilter !== "all") {
-      filtered = filtered.filter((lead: any) => lead.source === leadsSourceFilter);
-    }
-    
-    return filtered;
-  }, [unifiedLeads, searchTerm, leadsDateFilter, leadsStatusFilter, leadsSourceFilter]);
-
-  const filteredAppointments = useMemo(() => {
-    if (!appointments) return [];
-    
-    let filtered = appointments;
-    
-    // Filter by search term
-    if (appointmentSearchTerm) {
-      const term = appointmentSearchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (appointment: any) =>
-          appointment.patientName.toLowerCase().includes(term) ||
-          appointment.phone.includes(term) ||
-          (appointment.email && appointment.email.toLowerCase().includes(term))
-      );
-    }
-    
-    // Filter by doctor
-    if (selectedDoctor !== "all") {
-      filtered = filtered.filter(appointment => appointment.doctorId === parseInt(selectedDoctor));
-    }
-    
-    // Filter by date
-    if (dateFilter && dateFilter !== "all") {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
-      filtered = filtered.filter((appointment: any) => {
-        const appointmentDate = new Date(appointment.appointmentDate);
-        
-        if (dateFilter === "today") {
-          return appointmentDate >= today && appointmentDate < new Date(today.getTime() + 24 * 60 * 60 * 1000);
-        } else if (dateFilter === "week") {
-          const weekAgo = new Date(today);
-          weekAgo.setDate(weekAgo.getDate() - 7);
-          return appointmentDate >= weekAgo;
-        } else if (dateFilter === "month") {
-          const monthAgo = new Date(today);
-          monthAgo.setMonth(monthAgo.getMonth() - 1);
-          return appointmentDate >= monthAgo;
-        }
-        
-        return true;
-      });
-    }
-    
-    // Filter by status
-    if (appointmentStatusFilter && appointmentStatusFilter !== "all") {
-      filtered = filtered.filter(appointment => appointment.status === appointmentStatusFilter);
-    }
-    
-    // Filter by source
-    if (appointmentSourceFilter && appointmentSourceFilter !== "all") {
-      filtered = filtered.filter(appointment => (appointment as any).source === appointmentSourceFilter);
-    }
-    
-    return filtered;
-  }, [appointments, appointmentSearchTerm, selectedDoctor, dateFilter, appointmentStatusFilter, appointmentSourceFilter]);
-
-  const appointmentStats = useMemo(() => {
-    if (!appointments) return { total: 0, pending: 0, confirmed: 0, cancelled: 0 };
-    return {
-      total: appointments.length,
-      pending: appointments.filter((a: any) => a.status === "pending").length,
-      confirmed: appointments.filter((a: any) => a.status === "confirmed").length,
-      cancelled: appointments.filter((a: any) => a.status === "cancelled").length,
-    };
-  }, [appointments]);
-
   const handleStatusUpdate = () => {
     if (!selectedLead || !newStatus) return;
-    
     updateStatusMutation.mutate({
       id: selectedLead.id,
       status: newStatus as "new" | "contacted" | "booked" | "not_interested" | "no_answer",
@@ -276,7 +177,6 @@ export default function BookingsManagementPage() {
 
   const handleAppointmentStatusUpdate = () => {
     if (!selectedAppointment || !newAppointmentStatus) return;
-    
     updateAppointmentStatusMutation.mutate({
       id: selectedAppointment.id,
       status: newAppointmentStatus,
@@ -284,83 +184,55 @@ export default function BookingsManagementPage() {
     });
   };
 
-  const handleExportLeads = () => {
-    if (!filteredLeads || filteredLeads.length === 0) {
-      toast.error("لا توجد بيانات للتصدير");
-      return;
-    }
-    
-    const formattedData = formatLeadsForExport(filteredLeads);
-    exportToExcel(formattedData, "تسجيلات_العملاء");
-    toast.success("تم تصدير البيانات بنجاح");
+  const openLeadStatusDialog = (lead: any) => {
+    setSelectedLead(lead);
+    setNewStatus(lead.status || "new");
+    setStatusNotes("");
+    setStatusDialogOpen(true);
   };
 
-  const handleExportAppointments = () => {
-    if (!filteredAppointments || filteredAppointments.length === 0) {
-      toast.error("لا توجد بيانات للتصدير");
-      return;
-    }
-    
-    const formattedData = formatAppointmentsForExport(filteredAppointments);
-    exportToExcel(formattedData, "مواعيد_الأطباء");
-    toast.success("تم تصدير البيانات بنجاح");
+  const openAppointmentDialog = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setNewAppointmentStatus(appointment.status);
+    setAppointmentDate(appointment.appointmentDate);
+    setAppointmentStatusDialogOpen(true);
   };
 
   return (
-    <DashboardLayout>
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div className="container py-3 md:py-4">
-          <div className="flex items-center justify-between gap-2">
-            {/* Logo and Title */}
-            <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
-              <img 
-                src="/assets/new-logo.png" 
-                alt="المستشفى السعودي الألماني" 
-                className="h-10 md:h-12 flex-shrink-0"
-              />
-              <div className="min-w-0">
-                <h1 className="text-base md:text-xl font-bold text-foreground truncate">إدارة الحجوزات</h1>
-                <p className="text-xs md:text-sm text-muted-foreground hidden sm:block truncate">إدارة جميع الحجوزات والتسجيلات</p>
-              </div>
-            </div>
-            
-            {/* Actions */}
-            <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-              {/* User Info - Desktop Only */}
-              <div className="text-left hidden lg:block">
-                <p className="text-sm font-semibold truncate max-w-[150px]">{user?.name}</p>
-                <p className="text-xs text-muted-foreground truncate max-w-[150px]">{user?.email}</p>
-              </div>
-              
-              {/* Manual Registration Button */}
-              <Button
-                onClick={() => setManualRegistrationOpen(true)}
-                className="gap-2 hidden md:flex"
-                size="sm"
-              >
-                <Plus className="h-4 w-4" />
-                تسجيل يدوي
-              </Button>
-              
-              {/* Manual Registration Button - Mobile */}
-              <Button
-                onClick={() => setManualRegistrationOpen(true)}
-                size="icon"
-                className="md:hidden h-9 w-9"
-                title="تسجيل يدوي"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+    <DashboardLayout
+      pageTitle="إدارة الحجوزات"
+      pageDescription="إدارة ومتابعة جميع الحجوزات والمواعيد"
+    >
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6" dir="rtl">
+        {/* Quick Actions */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <DateRangePicker
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setLocation('/dashboard/camp-stats')}
+              variant="outline"
+              className="gap-2"
+              size="sm"
+            >
+              <BarChart3 className="h-4 w-4" />
+              إحصائيات المخيمات
+            </Button>
+            <Button
+              onClick={() => setManualRegistrationOpen(true)}
+              className="gap-2"
+              size="sm"
+            >
+              <Plus className="h-4 w-4" />
+              تسجيل يدوي
+            </Button>
           </div>
         </div>
-      </header>
-      
-      <div className="container mx-auto py-6 space-y-6" dir="rtl">
 
         {/* Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-2 overflow-x-auto pt-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
           <Button
             variant={activeTab === "leads" ? "default" : "outline"}
             onClick={() => setActiveTab("leads")}
@@ -381,11 +253,6 @@ export default function BookingsManagementPage() {
           >
             <Calendar className="h-4 w-4" />
             مواعيد الأطباء
-            {pendingCounts.appointments > 0 && (
-              <Badge variant="destructive" className="absolute -top-2 -left-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-bold rounded-full shadow-lg">
-                {pendingCounts.appointments}
-              </Badge>
-            )}
           </Button>
           <Button
             variant={activeTab === "offerLeads" ? "default" : "outline"}
@@ -413,476 +280,79 @@ export default function BookingsManagementPage() {
               </Badge>
             )}
           </Button>
+          <Button
+            variant={activeTab === "customers" ? "default" : "outline"}
+            onClick={() => setActiveTab("customers")}
+            className="flex-shrink-0 gap-2"
+          >
+            <Users className="h-4 w-4" />
+            ملفات العملاء
+          </Button>
+          <Button
+            variant={activeTab === "tasks" ? "default" : "outline"}
+            onClick={() => setActiveTab("tasks")}
+            className="flex-shrink-0 gap-2"
+          >
+            <CheckSquare className="h-4 w-4" />
+            المهام
+          </Button>
         </div>
 
         {/* Tab Content */}
         {activeTab === "leads" && (
-          <div className="space-y-4">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">إجمالي العملاء</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats?.total || 0}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">جديد</CardTitle>
-                  <UserCheck className="h-4 w-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats?.new || 0}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">تم التواصل</CardTitle>
-                  <Phone className="h-4 w-4 text-yellow-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats?.contacted || 0}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">تم الحجز</CardTitle>
-                  <Calendar className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats?.booked || 0}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Filters */}
-            <Card>
-              <CardHeader>
-                <CardTitle>تسجيلات العملاء</CardTitle>
-                <CardDescription>إدارة ومتابعة تسجيلات العملاء</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Filters - Responsive Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
-                  <div className="relative sm:col-span-2 lg:col-span-1">
-                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="ابحث..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pr-10 h-9"
-                    />
-                  </div>
-                  <Select value={leadsDateFilter} onValueChange={setLeadsDateFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="كل الفترات" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">كل الفترات</SelectItem>
-                      <SelectItem value="today">اليوم</SelectItem>
-                      <SelectItem value="week">هذا الأسبوع</SelectItem>
-                      <SelectItem value="month">هذا الشهر</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={leadsStatusFilter} onValueChange={setLeadsStatusFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="كل الحالات" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">كل الحالات</SelectItem>
-                      <SelectItem value="pending">قيد الانتظار</SelectItem>
-                      <SelectItem value="contacted">تم التواصل</SelectItem>
-                      <SelectItem value="booked">تم الحجز</SelectItem>
-                      <SelectItem value="not_interested">غير مهتم</SelectItem>
-                      <SelectItem value="no_answer">لم يرد</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={leadsSourceFilter} onValueChange={setLeadsSourceFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="كل المصادر" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">كل المصادر</SelectItem>
-                      <SelectItem value="website">موقع</SelectItem>
-                      <SelectItem value="phone">هاتف</SelectItem>
-                      <SelectItem value="manual">يدوي</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleExportLeads}
-                    className="gap-2 h-9"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span className="hidden sm:inline">تصدير</span>
-                  </Button>
-                </div>
-
-                {/* Mobile Cards View */}
-                <div className="md:hidden space-y-4">
-                  {leadsLoading ? (
-                    <div className="flex justify-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                  ) : filteredLeads.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      لا توجد تسجيلات
-                    </div>
-                  ) : (
-                    filteredLeads.map((lead: any) => (
-                      <LeadCard
-                        key={lead.id}
-                        lead={lead}
-                        onUpdateStatus={(lead) => {
-                          setSelectedLead(lead);
-                          setNewStatus(lead.status);
-                          setStatusDialogOpen(true);
-                        }}
-                        onWhatsApp={(phone) => {
-                          window.open(`https://wa.me/${phone.replace(/\D/g, '')}`, '_blank');
-                        }}
-                      />
-                    ))
-                  )}
-                </div>
-
-                {/* Desktop Table View */}
-                <div className="hidden md:block rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>الاسم</TableHead>
-                        <TableHead>الهاتف</TableHead>
-                        <TableHead>البريد الإلكتروني</TableHead>
-                        <TableHead>المصدر</TableHead>
-                        <TableHead>الحالة</TableHead>
-                        <TableHead>التاريخ</TableHead>
-                        <TableHead>الإجراءات</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {leadsLoading ? (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center py-8">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                          </TableCell>
-                        </TableRow>
-                      ) : filteredLeads.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                            لا توجد تسجيلات
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        filteredLeads.map((lead: any) => (
-                          <TableRow 
-                            key={lead.id}
-                            className={lead.status === 'pending' ? 'bg-red-50 hover:bg-red-100' : ''}
-                          >
-                            <TableCell className="font-medium">{lead.fullName}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono">{lead.phone}</span>
-                                <a href={`tel:${lead.phone}`} className="text-primary hover:underline">
-                                  <Phone className="h-4 w-4" />
-                                </a>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {lead.email ? (
-                                <a href={`mailto:${lead.email}`} className="text-primary hover:underline">
-                                  {lead.email}
-                                </a>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              {lead.source === 'website' && 'موقع'}
-                              {lead.source === 'phone' && 'هاتف'}
-                              {lead.source === 'manual' && 'يدوي'}
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={statusColors[lead.status as keyof typeof statusColors]}>
-                                {statusLabels[lead.status as keyof typeof statusLabels]}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {new Date(lead.createdAt).toLocaleDateString("ar-EG")}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedLead(lead);
-                                  setNewStatus(lead.status);
-                                  setStatusDialogOpen(true);
-                                }}
-                              >
-                                تحديث الحالة
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <LeadsTab
+            leadsFilter={leadsFilter}
+            onOpenStatusDialog={openLeadStatusDialog}
+            pendingCount={pendingCounts.leads}
+          />
         )}
 
         {activeTab === "appointments" && (
-          <div className="space-y-4">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">إجمالي المواعيد</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{appointmentStats.total}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">قيد الانتظار</CardTitle>
-                  <Calendar className="h-4 w-4 text-yellow-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{appointmentStats.pending}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">مؤكد</CardTitle>
-                  <Calendar className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{appointmentStats.confirmed}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">ملغي</CardTitle>
-                  <Calendar className="h-4 w-4 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{appointmentStats.cancelled}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Filters */}
-            <Card>
-              <CardHeader>
-                <CardTitle>مواعيد الأطباء</CardTitle>
-                <CardDescription>إدارة ومتابعة مواعيد الأطباء</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Filters - Responsive Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2">
-                  <div className="relative sm:col-span-2 lg:col-span-1">
-                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="ابحث..."
-                      value={appointmentSearchTerm}
-                      onChange={(e) => setAppointmentSearchTerm(e.target.value)}
-                      className="pr-10 h-9"
-                    />
-                  </div>
-                  <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="كل الأطباء" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">كل الأطباء</SelectItem>
-                      {doctors.map((doctor: any) => (
-                        <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                          {doctor.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={dateFilter} onValueChange={setDateFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="كل الفترات" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">كل الفترات</SelectItem>
-                      <SelectItem value="today">اليوم</SelectItem>
-                      <SelectItem value="week">هذا الأسبوع</SelectItem>
-                      <SelectItem value="month">هذا الشهر</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={appointmentStatusFilter} onValueChange={setAppointmentStatusFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="كل الحالات" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">كل الحالات</SelectItem>
-                      <SelectItem value="pending">قيد الانتظار</SelectItem>
-                      <SelectItem value="confirmed">مؤكد</SelectItem>
-                      <SelectItem value="cancelled">ملغي</SelectItem>
-                      <SelectItem value="completed">مكتمل</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={appointmentSourceFilter} onValueChange={setAppointmentSourceFilter}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="كل المصادر" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">كل المصادر</SelectItem>
-                      <SelectItem value="website">موقع</SelectItem>
-                      <SelectItem value="phone">هاتف</SelectItem>
-                      <SelectItem value="manual">يدوي</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleExportAppointments}
-                    className="gap-2 h-9"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span className="hidden sm:inline">تصدير</span>
-                  </Button>
-                </div>
-
-                {/* Mobile Cards View */}
-                <div className="md:hidden space-y-4">
-                  {appointmentsLoading ? (
-                    <div className="flex justify-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                  ) : filteredAppointments.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      لا توجد مواعيد
-                    </div>
-                  ) : (
-                    filteredAppointments.map((appointment: any) => (
-                      <AppointmentCard
-                        key={appointment.id}
-                        appointment={appointment}
-                        onViewDetails={(appointment: any) => {
-                          setSelectedAppointment(appointment);
-                          setNewAppointmentStatus(appointment.status);
-                          setAppointmentDate(appointment.appointmentDate);
-                          setAppointmentStatusDialogOpen(true);
-                        }}
-                      />
-                    ))
-                  )}
-                </div>
-
-                {/* Desktop Table View */}
-                <div className="hidden md:block rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>اسم المريض</TableHead>
-                        <TableHead>الهاتف</TableHead>
-                        <TableHead>الطبيب</TableHead>
-                        <TableHead>التخصص</TableHead>
-                        <TableHead>موعد الحجز</TableHead>
-                        <TableHead>المصدر</TableHead>
-                        <TableHead>الحالة</TableHead>
-                        <TableHead>الإجراءات</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {appointmentsLoading ? (
-                        <TableRow>
-                          <TableCell colSpan={8} className="text-center py-8">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                          </TableCell>
-                        </TableRow>
-                      ) : filteredAppointments.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                            لا توجد مواعيد
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        filteredAppointments.map((appointment: any) => (
-                          <TableRow 
-                            key={appointment.id}
-                            className={appointment.status === 'pending' ? 'bg-red-50 hover:bg-red-100' : ''}
-                          >
-                            <TableCell className="font-medium">{appointment.patientName}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono">{appointment.phone}</span>
-                                <a href={`tel:${appointment.phone}`} className="text-primary hover:underline">
-                                  <Phone className="h-4 w-4" />
-                                </a>
-                              </div>
-                            </TableCell>
-                            <TableCell>{appointment.doctorName}</TableCell>
-                            <TableCell>{appointment.doctorSpecialty}</TableCell>
-                            <TableCell>
-                              {new Date(appointment.appointmentDate).toLocaleDateString("ar-EG")}
-                            </TableCell>
-                            <TableCell>
-                              {(appointment as any).source === 'website' && 'موقع'}
-                              {(appointment as any).source === 'phone' && 'هاتف'}
-                              {(appointment as any).source === 'manual' && 'يدوي'}
-                              {!(appointment as any).source && '-'}
-                            </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant={
-                                  appointment.status === "confirmed"
-                                    ? "default"
-                                    : appointment.status === "cancelled"
-                                    ? "destructive"
-                                    : "secondary"
-                                }
-                              >
-                                {appointment.status === "pending" && "قيد الانتظار"}
-                                {appointment.status === "confirmed" && "مؤكد"}
-                                {appointment.status === "cancelled" && "ملغي"}
-                                {appointment.status === "completed" && "مكتمل"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedAppointment(appointment);
-                                  setNewAppointmentStatus(appointment.status);
-                                  setAppointmentDate(appointment.appointmentDate);
-                                  setAppointmentStatusDialogOpen(true);
-                                }}
-                              >
-                                تحديث الحالة
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <AppointmentsTab
+            appointmentFilter={appointmentFilter}
+            dateRange={dateRange}
+            onOpenAppointmentDialog={openAppointmentDialog}
+          />
         )}
 
         {activeTab === "offerLeads" && (
-          <OfferLeadsManagement onPendingCountChange={setOfferLeadsPendingCount} />
+          <OfferLeadsManagement
+            onPendingCountChange={setOfferLeadsPendingCount}
+            dateRange={dateRange}
+          />
         )}
 
         {activeTab === "campRegistrations" && (
-          <CampRegistrationsManagement onPendingCountChange={setCampRegistrationsPendingCount} />
+          <CampRegistrationsManagement
+            onPendingCountChange={setCampRegistrationsPendingCount}
+            dateRange={dateRange}
+          />
+        )}
+
+        {activeTab === "customers" && (
+          <CustomerProfilesTab />
+        )}
+
+        {activeTab === "tasks" && (
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckSquare className="h-5 w-5" />
+                  جميع المهام
+                </CardTitle>
+                <CardDescription>
+                  عرض وإدارة جميع المهام من كل الأقسام
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TasksSection
+                  entityType="all"
+                  entityId={0}
+                />
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Update Lead Status Dialog */}
@@ -898,7 +368,7 @@ export default function BookingsManagementPage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <p className="text-sm"><span className="font-medium">الاسم:</span> {selectedLead.fullName}</p>
-                  <p className="text-sm"><span className="font-medium">الهاتف:</span> {selectedLead.phone}</p>
+                  <p className="text-sm"><span className="font-medium">الهاتف:</span> {formatPhoneDisplay(selectedLead.phone)}</p>
                   {selectedLead.email && (
                     <p className="text-sm"><span className="font-medium">البريد:</span> {selectedLead.email}</p>
                   )}
@@ -907,16 +377,14 @@ export default function BookingsManagementPage() {
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">المصدر:</span>{' '}
-                    {selectedLead.source === 'website' && 'موقع'}
-                    {selectedLead.source === 'phone' && 'هاتف'}
-                    {selectedLead.source === 'manual' && 'يدوي'}
+                    {selectedLead.source ? SOURCE_LABELS[selectedLead.source] || selectedLead.source : '-'}
                   </p>
                   {selectedLead.notes && (
                     <p className="text-sm"><span className="font-medium">الملاحظات:</span> {selectedLead.notes}</p>
                   )}
                   <p className="text-sm">
                     <span className="font-medium">تاريخ التسجيل:</span>{' '}
-                    {new Date(selectedLead.createdAt).toLocaleString("ar-EG")}
+                    {formatDateTime(selectedLead.createdAt)}
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -966,7 +434,7 @@ export default function BookingsManagementPage() {
 
         {/* Update Appointment Status Dialog */}
         <Dialog open={appointmentStatusDialogOpen} onOpenChange={setAppointmentStatusDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle>تحديث حالة الموعد</DialogTitle>
               <DialogDescription>
@@ -974,65 +442,103 @@ export default function BookingsManagementPage() {
               </DialogDescription>
             </DialogHeader>
             {selectedAppointment && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <p className="text-sm"><span className="font-medium">المريض:</span> {selectedAppointment.patientName}</p>
-                  <p className="text-sm"><span className="font-medium">الهاتف:</span> {selectedAppointment.phone}</p>
-                  {selectedAppointment.email && (
-                    <p className="text-sm"><span className="font-medium">البريد:</span> {selectedAppointment.email}</p>
-                  )}
-                  <p className="text-sm"><span className="font-medium">الطبيب:</span> {selectedAppointment.doctorName}</p>
-                  <p className="text-sm"><span className="font-medium">التخصص:</span> {selectedAppointment.doctorSpecialty}</p>
-                  {selectedAppointment.procedure && (
-                    <p className="text-sm"><span className="font-medium">الإجراء:</span> {selectedAppointment.procedure}</p>
-                  )}
-                  <p className="text-sm">
-                    <span className="font-medium">المصدر:</span>{' '}
-                    {(selectedAppointment as any).source === 'website' && 'موقع'}
-                    {(selectedAppointment as any).source === 'phone' && 'هاتف'}
-                    {(selectedAppointment as any).source === 'manual' && 'يدوي'}
-                    {!(selectedAppointment as any).source && '-'}
-                  </p>
-                  {selectedAppointment.patientNotes && (
-                    <p className="text-sm"><span className="font-medium">ملاحظات المريض:</span> {selectedAppointment.patientNotes}</p>
-                  )}
-                  <p className="text-sm">
-                    <span className="font-medium">تاريخ التسجيل:</span>{' '}
-                    {new Date(selectedAppointment.createdAt).toLocaleString("ar-EG")}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label>الحالة الجديدة</Label>
-                  <Select value={newAppointmentStatus} onValueChange={setNewAppointmentStatus}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">قيد الانتظار</SelectItem>
-                      <SelectItem value="confirmed">مؤكد</SelectItem>
-                      <SelectItem value="cancelled">ملغي</SelectItem>
-                      <SelectItem value="completed">مكتمل</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>تاريخ الموعد</Label>
-                  <Input
-                    type="date"
-                    value={appointmentDate ? new Date(appointmentDate).toISOString().split('T')[0] : ''}
-                    onChange={(e) => setAppointmentDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>ملاحظات (اختياري)</Label>
-                  <Textarea
-                    placeholder="أضف ملاحظات..."
-                    value={appointmentStatusNotes}
-                    onChange={(e) => setAppointmentStatusNotes(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
+              <div className="flex-1 overflow-hidden flex flex-col">
+                <Tabs defaultValue="info" className="flex-1 overflow-hidden flex flex-col">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+                    <TabsTrigger value="info" className="text-xs sm:text-sm">معلومات الموعد</TabsTrigger>
+                    <TabsTrigger value="comments" className="text-xs sm:text-sm">التعليقات</TabsTrigger>
+                    <TabsTrigger value="tasks" className="text-xs sm:text-sm">المهام</TabsTrigger>
+                    <TabsTrigger value="history" className="text-xs sm:text-sm">سجل التغييرات</TabsTrigger>
+                  </TabsList>
+
+                  <div className="flex-1 overflow-y-auto mt-4">
+                    <TabsContent value="info" className="space-y-4 mt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <p className="text-sm"><span className="font-medium">المريض:</span> {selectedAppointment.patientName}</p>
+                          <p className="text-sm"><span className="font-medium">الهاتف:</span> {formatPhoneDisplay(selectedAppointment.phone)}</p>
+                          {selectedAppointment.email && (
+                            <p className="text-sm"><span className="font-medium">البريد:</span> {selectedAppointment.email}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm"><span className="font-medium">الطبيب:</span> {selectedAppointment.doctorName}</p>
+                          <p className="text-sm"><span className="font-medium">التخصص:</span> {selectedAppointment.doctorSpecialty}</p>
+                          {selectedAppointment.procedure && (
+                            <p className="text-sm"><span className="font-medium">الإجراء:</span> {selectedAppointment.procedure}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          <span className="font-medium">المصدر:</span>{' '}
+                          {(selectedAppointment as any).source ? SOURCE_LABELS[(selectedAppointment as any).source] || (selectedAppointment as any).source : '-'}
+                        </p>
+                        {selectedAppointment.patientNotes && (
+                          <p className="text-sm"><span className="font-medium">ملاحظات المريض:</span> {selectedAppointment.patientNotes}</p>
+                        )}
+                        <p className="text-sm">
+                          <span className="font-medium">تاريخ التسجيل:</span>{' '}
+                          {formatDateTime(selectedAppointment.createdAt)}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>الحالة الجديدة</Label>
+                        <Select value={newAppointmentStatus} onValueChange={setNewAppointmentStatus}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">قيد الانتظار</SelectItem>
+                            <SelectItem value="confirmed">مؤكد</SelectItem>
+                            <SelectItem value="cancelled">ملغي</SelectItem>
+                            <SelectItem value="completed">مكتمل</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>تاريخ الموعد</Label>
+                        <Input
+                          type="date"
+                          value={appointmentDate ? new Date(appointmentDate).toISOString().split('T')[0] : ''}
+                          onChange={(e) => setAppointmentDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>ملاحظات (اختياري)</Label>
+                        <Textarea
+                          placeholder="أضف ملاحظات..."
+                          value={appointmentStatusNotes}
+                          onChange={(e) => setAppointmentStatusNotes(e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="comments" className="mt-0">
+                      <CommentsSection
+                        entityType="appointment"
+                        entityId={selectedAppointment.id}
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="tasks" className="mt-0">
+                      <TasksSection
+                        entityType="appointment"
+                        entityId={selectedAppointment.id}
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="history" className="mt-0">
+                      <AuditLogSection
+                        entityType="appointment"
+                        entityId={selectedAppointment.id}
+                      />
+                    </TabsContent>
+                  </div>
+                </Tabs>
+
+                <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
                   <Button
                     variant="outline"
                     onClick={() => {

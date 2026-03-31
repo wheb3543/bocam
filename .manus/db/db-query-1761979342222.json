@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO campaigns (name, slug, description, isActive, whatsappEnabled, whatsappWelcomeMessage) VALUES ('حجز مواعيد الأطباء', 'doctor-appointments', 'حجز مواعيد مع أفضل الأطباء في المستشفى السعودي الألماني', 1, 1, 'مرحباً بك في المستشفى السعودي الألماني 🏥\\n\\nشكراً لحجز موعدك معنا. سيتم التواصل معك قريباً لتأكيد موعدك.\\n\\nللاستفسارات: 8000018 📞\\n\\nنرعاكم كأهالينا 💚');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xtgvXGdr7mxJSP.root --database HgGpRPs4xs9xrzjfX4xmFY --execute INSERT INTO campaigns (name, slug, description, isActive, whatsappEnabled, whatsappWelcomeMessage) VALUES ('حجز مواعيد الأطباء', 'doctor-appointments', 'حجز مواعيد مع أفضل الأطباء في المستشفى السعودي الألماني', 1, 1, 'مرحباً بك في المستشفى السعودي الألماني 🏥\\n\\nشكراً لحجز موعدك معنا. سيتم التواصل معك قريباً لتأكيد موعدك.\\n\\nللاستفسارات: 8000018 📞\\n\\nنرعاكم كأهالينا 💚');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 59
+}

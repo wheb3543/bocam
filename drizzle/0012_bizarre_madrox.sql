@@ -1,1 +1,1 @@
-ALTER TABLE `campRegistrations` ADD `procedures` text;
+-- migration already applied

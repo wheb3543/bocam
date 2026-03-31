@@ -1,7 +1,10 @@
+import { useFormatDate } from "@/hooks/useFormatDate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Phone, MessageCircle, Edit } from "lucide-react";
+import { Calendar, Phone, MessageCircle, Edit, Printer, Tag, User, Mail } from "lucide-react";
+import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
+import { usePhoneFormat } from "@/hooks/usePhoneFormat";
 
 interface OfferLead {
   id: number;
@@ -10,31 +13,34 @@ interface OfferLead {
   email?: string | null;
   status: string;
   offerName?: string;
+  source?: string;
   createdAt: Date;
 }
 
 interface OfferLeadCardProps {
   lead: OfferLead;
   onEdit: () => void;
+  onPrint?: () => void;
 }
 
-const statusColors: Record<string, string> = {
-  new: "bg-blue-100 text-blue-800",
-  contacted: "bg-yellow-100 text-yellow-800",
-  booked: "bg-green-100 text-green-800",
-  notInterested: "bg-red-100 text-red-800",
+const statusConfig: Record<string, { bg: string; text: string; dot: string; border: string; label: string }> = {
+  new: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", border: "border-blue-200", label: "جديد" },
+  contacted: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", border: "border-amber-200", label: "تم التواصل" },
+  booked: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200", label: "تم الحجز" },
+  notInterested: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", border: "border-red-200", label: "غير مهتم" },
+  not_interested: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", border: "border-red-200", label: "غير مهتم" },
+  no_answer: { bg: "bg-muted/50", text: "text-foreground", dot: "bg-gray-500", border: "border-border", label: "لم يرد" },
+  pending: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", border: "border-amber-200", label: "قيد الانتظار" },
 };
 
-const statusLabels: Record<string, string> = {
-  new: "جديد",
-  contacted: "تم التواصل",
-  booked: "تم الحجز",
-  notInterested: "غير مهتم",
-};
+export default function OfferLeadCard({ lead, onEdit, onPrint }: OfferLeadCardProps) {
+  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
+  const { formatDate, formatDateTime } = useFormatDate();
+  const status = statusConfig[lead.status] || { bg: "bg-muted/50", text: "text-foreground", dot: "bg-gray-500", border: "border-border", label: lead.status };
+  const isUrgent = lead.status === 'new' || lead.status === 'pending';
 
-export default function OfferLeadCard({ lead, onEdit }: OfferLeadCardProps) {
   const handleCall = () => {
-    window.location.href = `tel:${lead.phone}`;
+    window.location.href = `tel:${formatPhoneDisplay(lead.phone)}`;
   };
 
   const handleWhatsApp = () => {
@@ -45,80 +51,122 @@ export default function OfferLeadCard({ lead, onEdit }: OfferLeadCardProps) {
   };
 
   return (
-    <Card className="mb-3 hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <h3 className="font-semibold text-base mb-1">{lead.fullName}</h3>
-            <Badge className={statusColors[lead.status] || "bg-gray-100 text-gray-800"}>
-              {statusLabels[lead.status] || lead.status}
-            </Badge>
+    <Card className={`group relative overflow-hidden hover:shadow-md transition-all duration-200 ${
+      isUrgent ? 'border-amber-200 bg-amber-50/30' : ''
+    }`}>
+      {/* Status indicator bar */}
+      <div className={`absolute top-0 right-0 w-1 h-full ${status.dot} rounded-r-lg`} />
+      
+      <CardContent className="p-4 pr-5">
+        {/* Header: Name + Status */}
+        <div className="flex items-start justify-between mb-3 gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className={`${status.bg} p-1.5 rounded-lg flex-shrink-0`}>
+              <User className={`w-4 h-4 ${status.text}`} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-sm leading-tight truncate">{lead.fullName}</h3>
+              {lead.source && (
+                <span
+                  className="text-[10px] font-medium px-1.5 py-0.5 rounded-full inline-block mt-0.5"
+                  style={{
+                    backgroundColor: SOURCE_COLORS[lead.source] ? `${SOURCE_COLORS[lead.source]}15` : '#f3f4f6',
+                    color: SOURCE_COLORS[lead.source] || '#6b7280',
+                  }}
+                >
+                  {SOURCE_LABELS[lead.source] || lead.source}
+                </span>
+              )}
+            </div>
           </div>
+          <Badge className={`${status.bg} ${status.text} border ${status.border} text-[10px] px-2 py-0.5 flex-shrink-0`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${status.dot} ml-1.5 inline-block`} />
+            {status.label}
+          </Badge>
         </div>
 
-        {/* Info */}
-        <div className="space-y-2 mb-3 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Phone className="w-4 h-4 flex-shrink-0" />
-            <span dir="ltr" className="font-medium">{lead.phone}</span>
+        {/* Info Section */}
+        <div className="space-y-1.5 mb-3">
+          <div className="flex items-center gap-2 text-sm">
+            <Phone className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+            <span dir="ltr" className="font-mono text-xs">{formatPhoneDisplay(lead.phone)}</span>
           </div>
           
           {lead.email && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MessageCircle className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate text-xs">{lead.email}</span>
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+              <span className="truncate text-xs text-muted-foreground">{lead.email}</span>
             </div>
           )}
 
           {lead.offerName && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate">{lead.offerName}</span>
+            <div className="flex items-center gap-2 text-sm">
+              <Tag className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+              <span className="truncate text-xs font-medium">{lead.offerName}</span>
             </div>
           )}
 
-          <div className="text-xs text-muted-foreground">
-            {new Date(lead.createdAt).toLocaleDateString('ar-YE', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground pt-1 border-t border-dashed">
+            <Calendar className="w-3 h-3" />
+            <span>
+              {formatDate(lead.createdAt)}
+            </span>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="grid grid-cols-3 gap-2 mb-2">
           <Button
             variant="outline"
             size="sm"
+            className="h-8 text-xs gap-1"
             onClick={handleCall}
-            className="flex-1"
           >
-            <Phone className="w-4 h-4 ml-1" />
+            <Phone className="w-3.5 h-3.5" />
             اتصال
           </Button>
           <Button
             variant="outline"
             size="sm"
+            className="h-8 text-xs gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
             onClick={handleWhatsApp}
-            className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
           >
-            <MessageCircle className="w-4 h-4 ml-1" />
+            <MessageCircle className="w-3.5 h-3.5" />
             واتساب
           </Button>
+          {onPrint ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs gap-1"
+              onClick={onPrint}
+            >
+              <Printer className="w-3.5 h-3.5" />
+              طباعة
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs gap-1"
+              onClick={onEdit}
+            >
+              <Edit className="w-3.5 h-3.5" />
+              تحديث
+            </Button>
+          )}
+        </div>
+        {onPrint && (
           <Button
             variant="outline"
             size="sm"
             onClick={onEdit}
-            className="flex-1"
+            className="w-full h-8 text-xs gap-1"
           >
-            <Edit className="w-4 h-4 ml-1" />
-            تحديث
+            <Edit className="w-3.5 h-3.5" />
+            تحديث الحالة
           </Button>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

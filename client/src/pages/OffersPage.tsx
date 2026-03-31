@@ -3,7 +3,9 @@
  * 
  * Displays all active medical offers with registration forms.
  */
+import { useFormatDate } from "@/hooks/useFormatDate";
 import { useState } from "react";
+import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2, Gift, Calendar, Phone, Mail, User, CheckCircle } from "lucide-react";
+import { getRegistrationSource } from "@/lib/tracking";
 import { APP_LOGO, APP_TITLE } from "@/const";
 
 interface OfferFormData {
@@ -22,6 +25,15 @@ interface OfferFormData {
 }
 
 export default function OffersPage() {
+  return (
+    <DashboardLayout pageTitle="إدارة العروض" pageDescription="إدارة العروض الطبية والخصومات">
+      <OffersPageContent />
+    </DashboardLayout>
+  );
+}
+
+function OffersPageContent() {
+  const { formatDate, formatDateTime } = useFormatDate();
   const [selectedOffer, setSelectedOffer] = useState<number | null>(null);
   const [formData, setFormData] = useState<OfferFormData>({
     fullName: "",
@@ -61,8 +73,8 @@ export default function OffersPage() {
         fullName: formData.fullName,
         phone: formData.phone,
         email: formData.email || undefined,
-        
         campaignSlug: "offers",
+        source: getRegistrationSource(), // Auto-detect source from UTM
         utmSource: "website",
         utmMedium: "offers-page",
         utmCampaign: `offer-${selectedOffer}`,
@@ -86,8 +98,8 @@ export default function OffersPage() {
         <Card className="max-w-md mx-4">
           <CardContent className="pt-6 text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">تم التسجيل بنجاح!</h2>
-            <p className="text-gray-600 mb-4">
+            <h2 className="text-2xl font-bold text-foreground mb-2">تم التسجيل بنجاح!</h2>
+            <p className="text-muted-foreground mb-4">
               شكراً لاهتمامك بعروضنا الطبية. سيتواصل معك فريقنا خلال 24 ساعة.
             </p>
             <Button onClick={() => setSubmitted(false)} variant="outline">
@@ -102,13 +114,13 @@ export default function OffersPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-50">
+        <div className="container mx-auto px-5 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={APP_LOGO} alt={APP_TITLE} className="h-12 w-auto" />
+            <img src={APP_LOGO} alt={APP_TITLE} className="h-9 sm:h-12 w-auto" />
             <div>
-              <h1 className="text-lg font-bold text-blue-900">{APP_TITLE}</h1>
-              <p className="text-sm text-gray-500">العروض الطبية</p>
+              <h1 className="text-sm sm:text-lg font-bold text-blue-900 leading-tight">{APP_TITLE}</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">العروض الطبية</p>
             </div>
           </div>
           <a href="tel:8000018" className="flex items-center gap-2 text-blue-600 hover:text-blue-800">
@@ -119,23 +131,23 @@ export default function OffersPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-12 md:py-16">
-        <div className="container mx-auto px-4 text-center">
-          <Gift className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-          <h1 className="text-3xl md:text-4xl font-bold text-blue-900 mb-4">
+      <section className="py-8 sm:py-12 md:py-16">
+        <div className="container mx-auto px-5 sm:px-6 text-center">
+          <Gift className="h-12 sm:h-16 w-12 sm:w-16 text-blue-600 mx-auto mb-3 sm:mb-4" />
+          <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-blue-900 mb-3 sm:mb-4">
             العروض الطبية الخاصة
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة
           </p>
         </div>
       </section>
 
       {/* Offers Grid */}
-      <section className="py-8">
-        <div className="container mx-auto px-4">
+      <section className="py-6 sm:py-8">
+        <div className="container mx-auto px-5 sm:px-6">
           {offers && offers.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {offers.map((offer) => (
                 <Card 
                   key={offer.id} 
@@ -145,7 +157,7 @@ export default function OffersPage() {
                   onClick={() => setSelectedOffer(offer.id)}
                 >
                   {offer.imageUrl && (
-                    <div className="relative h-48 overflow-hidden rounded-t-lg">
+                    <div className="relative h-40 sm:h-48 overflow-hidden rounded-t-lg">
                       <img 
                         src={offer.imageUrl} 
                         alt={offer.title}
@@ -154,16 +166,16 @@ export default function OffersPage() {
                     </div>
                   )}
                   <CardHeader>
-                    <CardTitle className="text-xl text-blue-900">{offer.title}</CardTitle>
+                    <CardTitle className="text-base sm:text-xl text-blue-900">{offer.title}</CardTitle>
                     {offer.endDate && (
                       <CardDescription className="flex items-center gap-1 text-orange-600">
                         <Calendar className="h-4 w-4" />
-                        العرض ساري حتى {new Date(offer.endDate).toLocaleDateString("ar-SA")}
+                        العرض ساري حتى {formatDate(offer.endDate)}
                       </CardDescription>
                     )}
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600">{offer.description}</p>
+                    <p className="text-muted-foreground">{offer.description}</p>
                     <Button 
                       className="w-full mt-4" 
                       variant={selectedOffer === offer.id ? "default" : "outline"}
@@ -177,8 +189,8 @@ export default function OffersPage() {
           ) : (
             <Card className="max-w-md mx-auto">
               <CardContent className="pt-6 text-center">
-                <Gift className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">لا توجد عروض متاحة حالياً</p>
+                <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">لا توجد عروض متاحة حالياً</p>
               </CardContent>
             </Card>
           )}
@@ -187,11 +199,11 @@ export default function OffersPage() {
 
       {/* Registration Form */}
       {selectedOffer && (
-        <section className="py-12 bg-white">
-          <div className="container mx-auto px-4">
+        <section className="py-12 bg-white dark:bg-card">
+          <div className="container mx-auto px-5 sm:px-6">
             <Card className="max-w-lg mx-auto">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-blue-900">سجل الآن</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl text-blue-900">سجل الآن</CardTitle>
                 <CardDescription>
                   أكمل بياناتك وسنتواصل معك خلال 24 ساعة
                 </CardDescription>
@@ -274,8 +286,8 @@ export default function OffersPage() {
 
       {/* Footer */}
       <footer className="bg-blue-900 text-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <img src={APP_LOGO} alt={APP_TITLE} className="h-12 w-auto mx-auto mb-4 brightness-0 invert" />
+        <div className="container mx-auto px-5 sm:px-6 text-center">
+          <img src={APP_LOGO} alt={APP_TITLE} className="h-10 sm:h-12 w-auto mx-auto mb-3 sm:mb-4 brightness-0 invert" />
           <p className="text-blue-200">{APP_TITLE}</p>
           <p className="text-sm text-blue-300 mt-2">
             للاستفسارات: <a href="tel:8000018" className="hover:text-white">8000018</a>

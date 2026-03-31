@@ -1,1 +1,1 @@
-ALTER TABLE `appointments` ADD `appointmentDate` timestamp;
+-- migration already applied

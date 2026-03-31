@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO campaigns (name, slug, description, startDate, endDate, isActive, whatsappEnabled, whatsappWelcomeMessage)\nVALUES (\n  'المخيم الطبي الخيري',\n  'medical-camp-charity',\n  'مخيم طبي خيري يقدم خدمات طبية مجانية ومخفضة للمرضى',\n  '2025-10-20 00:00:00',\n  '2025-11-10 23:59:59',\n  1,\n  1,\n  'شكراً لتسجيلك في المخيم الطبي الخيري بالمستشفى السعودي الألماني. سنتواصل معك قريباً لتحديد موعدك. للاستفسار: 8000018'\n)\nON DUPLICATE KEY UPDATE\n  name = VALUES(name),\n  description = VALUES(description),\n  startDate = VALUES(startDate),\n  endDate = VALUES(endDate),\n  isActive = VALUES(isActive);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xtgvXGdr7mxJSP.root --database HgGpRPs4xs9xrzjfX4xmFY --execute INSERT INTO campaigns (name, slug, description, startDate, endDate, isActive, whatsappEnabled, whatsappWelcomeMessage)\nVALUES (\n  'المخيم الطبي الخيري',\n  'medical-camp-charity',\n  'مخيم طبي خيري يقدم خدمات طبية مجانية ومخفضة للمرضى',\n  '2025-10-20 00:00:00',\n  '2025-11-10 23:59:59',\n  1,\n  1,\n  'شكراً لتسجيلك في المخيم الطبي الخيري بالمستشفى السعودي الألماني. سنتواصل معك قريباً لتحديد موعدك. للاستفسار: 8000018'\n)\nON DUPLICATE KEY UPDATE\n  name = VALUES(name),\n  description = VALUES(description),\n  startDate = VALUES(startDate),\n  endDate = VALUES(endDate),\n  isActive = VALUES(isActive);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 936
+}

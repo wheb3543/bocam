@@ -21,7 +21,9 @@ export default function CampStatsPage() {
 
   if (campsLoading || registrationsLoading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout
+      pageTitle="إحصائيات المخيمات"
+      pageDescription="تقارير وإحصائيات شاملة للمخيمات">
         <div className="flex items-center justify-center min-h-screen" dir="rtl">
           <Loader2 className="w-12 h-12 animate-spin text-primary" />
         </div>
@@ -97,21 +99,38 @@ export default function CampStatsPage() {
     .sort((a, b) => b.value - a.value)
     .slice(0, 10); // Top 10 procedures
 
-  // Registrations by source
-  const sourceCounts = {
-    web: filteredRegistrations.filter((r: any) => r.source === "web" || r.source === "website").length,
-    phone: filteredRegistrations.filter((r: any) => r.source === "phone").length,
-    manual: filteredRegistrations.filter((r: any) => r.source === "manual").length,
+  // Registrations by source - Dynamic detection
+  const sourceCountsMap = new Map<string, number>();
+  filteredRegistrations.forEach((r: any) => {
+    const source = r.source || "direct";
+    sourceCountsMap.set(source, (sourceCountsMap.get(source) || 0) + 1);
+  });
+
+  // Map sources to Arabic names and colors
+  const sourceDisplayMap: Record<string, { name: string; color: string }> = {
+    facebook: { name: "فيسبوك", color: "#1877F2" },
+    instagram: { name: "إنستغرام", color: "#E4405F" },
+    telegram: { name: "تيليجرام", color: "#0088CC" },
+    manual: { name: "يدوي", color: "#FFA500" },
+    direct: { name: "مباشر", color: "#6B7280" },
+    // للتوافق مع التسجيلات القديمة
+    web: { name: "موقع الويب", color: "#0066CC" },
+    website: { name: "موقع الويب", color: "#0066CC" },
+    phone: { name: "هاتف", color: "#00A651" },
   };
 
-  const sourceData = [
-    { name: "موقع الويب", value: sourceCounts.web, color: "#0066CC" },
-    { name: "هاتف", value: sourceCounts.phone, color: "#00A651" },
-    { name: "يدوي", value: sourceCounts.manual, color: "#FFA500" },
-  ].filter(item => item.value > 0);
+  const sourceData = Array.from(sourceCountsMap.entries())
+    .map(([source, value]) => ({
+      name: sourceDisplayMap[source]?.name || source,
+      value,
+      color: sourceDisplayMap[source]?.color || "#9CA3AF",
+    }))
+    .sort((a, b) => b.value - a.value);
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      pageTitle="إحصائيات المخيمات"
+      pageDescription="تقارير وإحصائيات شاملة للمخيمات">
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-3 sm:p-4 md:p-6 lg:p-8" dir="rtl">
         <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
           {/* Header */}
@@ -125,10 +144,10 @@ export default function CampStatsPage() {
                 <ArrowRight className="w-4 h-4 ml-2" />
                 عودة إلى لوحة التحكم
               </Button>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
                 تقارير إحصائية للمخيمات
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-muted-foreground mt-1">
                 تحليل شامل لتسجيلات المخيمات الطبية
               </p>
             </div>
@@ -155,7 +174,7 @@ export default function CampStatsPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 إجمالي التسجيلات
               </CardTitle>
@@ -167,7 +186,7 @@ export default function CampStatsPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 قيد الانتظار
               </CardTitle>
@@ -179,7 +198,7 @@ export default function CampStatsPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Activity className="w-4 h-4" />
                 مؤكد
               </CardTitle>
@@ -191,7 +210,7 @@ export default function CampStatsPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" />
                 حضر
               </CardTitle>
@@ -328,11 +347,11 @@ export default function CampStatsPage() {
         {totalRegistrations === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
-              <Users className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <Users className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
                 لا توجد تسجيلات
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 لا توجد تسجيلات للمخيم المحدد حالياً
               </p>
             </CardContent>

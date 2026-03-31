@@ -4,10 +4,12 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
+import { createUploadRouter } from "../uploadRoute";
+import { createWebhookRouter } from "../webhookRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { initSimpleCronScheduler } from "../cron/scheduler";
+// import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -36,6 +38,10 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // File upload route
+  app.use(createUploadRouter());
+  // WhatsApp Webhook routes (direct Express, not tRPC - Meta requirement)
+  app.use(createWebhookRouter());
   // tRPC API
   app.use(
     "/api/trpc",
@@ -62,7 +68,7 @@ async function startServer() {
     console.log(`Server running on http://localhost:${port}/`);
     
     // Initialize cron scheduler for automatic deactivation
-    initSimpleCronScheduler();
+    // initSimpleCronScheduler(); // Disabled: Auto-deactivation feature removed per user request
   });
 }
 

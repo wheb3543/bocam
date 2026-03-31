@@ -1,32 +1,12 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { getDb } from "./db";
-import { appointments } from "../drizzle/schema";
+import { users } from "../drizzle/schema";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { 
-  createLead, 
-  getCampaignBySlug, 
-  getAllLeads, 
-  getLeadById, 
-  updateLead,
-  createLeadStatusHistory,
-  getLeadStatusHistory,
-  getAllCampaigns,
-  getCampaignById,
-  createCampaign,
-  updateCampaign,
-  getLeadsStats,
-  getCampaignStats,
-  searchLeads,
-  getLeadsByCampaign,
-  getAllDoctors,
-  getDoctorById,
-  createAppointment,
-  getAllAppointments,
-  updateAppointmentStatus,
   getAllAccessRequests,
   getPendingAccessRequests,
   approveAccessRequest,
@@ -39,15 +19,154 @@ import { offerLeadsRouter } from "./routers/offerLeads";
 import { campRegistrationsRouter } from "./routers/campRegistrations";
 import { doctorsRouter } from "./routers/doctors";
 import { usersRouter } from "./routers/users";
-import { sendNewLeadNotification, sendNewAppointmentEmail } from "./email";
-import { trackLead, trackCompleteRegistration } from "./facebookConversion";
-import { sendWelcomeMessage, sendBookingConfirmation, sendCustomMessage } from "./whatsapp";
-import { sendNewLeadTelegram, sendNewAppointmentTelegram } from "./telegram";
+import { reportsRouter } from "./routers/reports";
+import { campaignsRouter } from "./routers/campaigns";
+import { tasksRouter } from "./routers/tasks";
+import { whatsappRouter } from "./routers/whatsapp";
+import { whatsappBroadcastsRouter } from "./routers/whatsappBroadcasts";
+import { messageSettingsRouter } from "./routers/messageSettings";
+import { webhooksRouter } from "./routers/webhooks";
+import { commentsRouter } from "./routers/comments";
+import { followUpTasksRouter } from "./routers/followUpTasks";
+import { appointmentsRouter } from "./routers/appointments";
+import { leadsRouter } from "./routers/leads";
+
+
 import { getCombinedSocialMediaStats } from "./metaGraphAPI";
 import { runDeactivationJobs } from "./cron/deactivateExpired";
+import { queueRouter } from "./routers/queue";
+import { customersRouter } from "./routers/customers";
+import { auditLogsRouter } from "./routers/auditLogs";
+import { savedFiltersRouter } from "./routers/savedFilters";
+import { chartsRouter } from "./routers/charts";
+import { patientPortalRouter } from "./routers/patientPortal";
+import { generatePDF, type ExportMetadata } from "./pdfService";
 
 export const appRouter = router({
+  campaigns: campaignsRouter,
+  tasks: tasksRouter,
   system: systemRouter,
+  charts: chartsRouter,
+  patientPortal: patientPortalRouter,
+  whatsapp: whatsappRouter,
+  whatsappBroadcasts: whatsappBroadcastsRouter,
+  messageSettings: messageSettingsRouter,
+  webhooks: webhooksRouter,
+  queue: queueRouter,
+  
+  // User Preferences
+  preferences: router({
+    get: protectedProcedure
+      .input(z.object({ key: z.string() }))
+      .query(async ({ ctx, input }) => {
+        const { getUserPreference } = await import("./db");
+        const pref = await getUserPreference(ctx.user.id, input.key);
+        return pref ? JSON.parse(pref.preferenceValue) : null;
+      }),
+    
+    set: protectedProcedure
+      .input(z.object({
+        key: z.string(),
+        value: z.any(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { setUserPreference } = await import("./db");
+        await setUserPreference(
+          ctx.user.id,
+          input.key,
+          JSON.stringify(input.value)
+        );
+        return { success: true };
+      }),
+    
+    getAll: protectedProcedure
+      .query(async ({ ctx }) => {
+        const { getAllUserPreferences } = await import("./db");
+        const prefs = await getAllUserPreferences(ctx.user.id);
+        return prefs.reduce((acc, pref) => {
+          acc[pref.preferenceKey] = JSON.parse(pref.preferenceValue);
+          return acc;
+        }, {} as Record<string, any>);
+      }),
+  }),
+
+  // Shared Column Templates (admin-managed, visible to all)
+  sharedTemplates: router({
+    list: protectedProcedure
+      .input(z.object({ tableKey: z.string() }))
+      .query(async ({ input }) => {
+        const { getSharedTemplates } = await import("./db");
+        const templates = await getSharedTemplates(input.tableKey);
+        return templates.map(t => ({
+          ...t,
+          columns: JSON.parse(t.columns),
+        }));
+      }),
+
+    listAll: protectedProcedure
+      .query(async () => {
+        const { getAllSharedTemplates } = await import("./db");
+        const templates = await getAllSharedTemplates();
+        return templates.map(t => ({
+          ...t,
+          columns: JSON.parse(t.columns),
+        }));
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        tableKey: z.string(),
+        columns: z.record(z.string(), z.boolean()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Only admin can create shared templates
+        if (ctx.user.role !== 'admin') {
+          throw new Error('غير مصرح لك بإنشاء قوالب مشتركة');
+        }
+        const { createSharedTemplate } = await import("./db");
+        await createSharedTemplate({
+          name: input.name,
+          tableKey: input.tableKey,
+          columns: JSON.stringify(input.columns),
+          createdBy: ctx.user.id,
+          createdByName: ctx.user.name || null,
+        });
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        // Only admin can delete shared templates
+        if (ctx.user.role !== 'admin') {
+          throw new Error('غير مصرح لك بحذف قوالب مشتركة');
+        }
+        const { deleteSharedTemplate } = await import("./db");
+        await deleteSharedTemplate(input.id);
+        return { success: true };
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        columns: z.record(z.string(), z.boolean()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Only admin can update shared templates
+        if (ctx.user.role !== 'admin') {
+          throw new Error('غير مصرح لك بتعديل قوالب مشتركة');
+        }
+        const { updateSharedTemplate } = await import("./db");
+        await updateSharedTemplate(input.id, {
+          name: input.name,
+          columns: input.columns ? JSON.stringify(input.columns) : undefined,
+        });
+        return { success: true };
+      }),
+  }),
+  
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -57,421 +176,39 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    updateProfile: protectedProcedure
+      .input(z.object({
+        name: z.string().min(2, 'الاسم يجب أن يكون حرفين على الأقل').optional(),
+        email: z.string().email('بريد إلكتروني غير صحيح').optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('فشل الاتصال بقاعدة البيانات');
+
+        const updateData: any = {};
+        if (input.name !== undefined) updateData.name = input.name;
+        if (input.email !== undefined) updateData.email = input.email;
+
+        if (Object.keys(updateData).length === 0) {
+          throw new Error('لا توجد بيانات للتحديث');
+        }
+
+        await db.update(users).set(updateData).where(eq(users.id, ctx.user.id));
+
+        // Return updated user
+        const updatedUser = await db.select().from(users).where(eq(users.id, ctx.user.id)).limit(1);
+        return updatedUser[0];
+      }),
   }),
 
   // Leads management
-  leads: router({
-    // Public endpoint for lead submission from landing page
-    submit: publicProcedure
-      .input(z.object({
-        campaignSlug: z.string(),
-        fullName: z.string().min(1),
-        phone: z.string().min(1),
-        email: z.string().email().optional(),
-        utmSource: z.string().optional(),
-        utmMedium: z.string().optional(),
-        utmCampaign: z.string().optional(),
-        utmContent: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        // Get or create campaign by slug
-        let campaign = await getCampaignBySlug(input.campaignSlug);
-        if (!campaign) {
-          // Auto-create campaign for appointments
-          await createCampaign({
-            name: `حجز موعد - ${input.campaignSlug}`,
-            slug: input.campaignSlug,
-            description: `حجز موعد تلقائي`,
-            isActive: true,
-            whatsappEnabled: false,
-          });
-          campaign = await getCampaignBySlug(input.campaignSlug);
-        }
-        
-        if (!campaign) {
-          throw new Error("Failed to create or retrieve campaign");
-        }
-
-        // Create lead
-        await createLead({
-          campaignId: campaign.id,
-          fullName: input.fullName,
-          phone: input.phone,
-          email: input.email,
-          status: "new",
-          utmSource: input.utmSource,
-          utmMedium: input.utmMedium,
-          utmCampaign: input.utmCampaign,
-          utmContent: input.utmContent,
-          emailSent: false,
-          whatsappSent: false,
-          bookingConfirmationSent: false,
-        });
-
-         // Track Facebook Conversion API - Lead (DISABLED to avoid account restrictions)
-        // await trackLead({
-        //   email: input.email,
-        //   phone: input.phone,
-        //   firstName: input.fullName.split(' ')[0],
-        //   contentName: campaign.name,
-        // });
-
-        // Send notification to owner
-        await notifyOwner({
-          title: "تسجيل جديد في المخيم الطبي الخيري",
-          content: `تم تسجيل عميل جديد:
-الاسم: ${input.fullName}
-الهاتف: ${input.phone}
-البريد: ${input.email || "غير متوفر"}`,
-        });
-
-        // Send Telegram notification
-        await sendNewLeadTelegram({
-          fullName: input.fullName,
-          phone: input.phone,
-          email: input.email,
-          source: input.utmSource || "direct",
-        });
-
-        // Send email notification
-        await sendNewLeadNotification({
-          fullName: input.fullName,
-          phone: input.phone,
-          email: input.email,
-          campaignName: campaign.name,
-          utmSource: input.utmSource,
-          utmMedium: input.utmMedium,
-          createdAt: new Date(),
-        });
-
-        // Send WhatsApp welcome message if enabled
-        if (campaign.whatsappEnabled) {
-          await sendWelcomeMessage({
-            phone: input.phone,
-            fullName: input.fullName,
-            campaignName: campaign.name,
-            welcomeMessage: campaign.whatsappWelcomeMessage || undefined,
-          });
-        }
-
-        // Track Facebook Conversion API - CompleteRegistration (DISABLED to avoid account restrictions)
-        // await trackCompleteRegistration({
-        //   email: input.email,
-        //   phone: input.phone,
-        //   firstName: input.fullName.split(' ')[0],
-        //   contentName: campaign.name,
-        // });
-
-        return { success: true };
-      }),
-
-    // Admin endpoints
-    list: protectedProcedure.query(async () => {
-      return getAllLeads();
-    }),
-
-    // Unified list from all sources
-    unifiedList: protectedProcedure.query(async () => {
-      const { getAllUnifiedLeads } = await import('./db');
-      return getAllUnifiedLeads();
-    }),
-
-    getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return getLeadById(input.id);
-      }),
-
-    search: protectedProcedure
-      .input(z.object({ searchTerm: z.string() }))
-      .query(async ({ input }) => {
-        return searchLeads(input.searchTerm);
-      }),
-
-    getByCampaign: protectedProcedure
-      .input(z.object({ campaignId: z.number() }))
-      .query(async ({ input }) => {
-        return getLeadsByCampaign(input.campaignId);
-      }),
-
-    updateStatus: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        status: z.enum(["new", "contacted", "booked", "not_interested", "no_answer"]),
-        notes: z.string().optional(),
-      }))
-      .mutation(async ({ input, ctx }) => {
-        const lead = await getLeadById(input.id);
-        if (!lead) {
-          throw new Error("Lead not found");
-        }
-
-        // Update lead status
-        await updateLead(input.id, { status: input.status });
-
-        // Create status history
-        await createLeadStatusHistory({
-          leadId: input.id,
-          userId: ctx.user.id,
-          oldStatus: lead.status,
-          newStatus: input.status,
-          notes: input.notes,
-        });
-
-        return { success: true };
-      }),
-
-    getStatusHistory: protectedProcedure
-      .input(z.object({ leadId: z.number() }))
-      .query(async ({ input }) => {
-        return getLeadStatusHistory(input.leadId);
-      }),
-
-    stats: protectedProcedure.query(async () => {
-      return getLeadsStats();
-    }),
-
-    sendWhatsApp: protectedProcedure
-      .input(z.object({
-        leadId: z.number(),
-        message: z.string().min(1),
-      }))
-      .mutation(async ({ input }) => {
-        const lead = await getLeadById(input.leadId);
-        if (!lead) {
-          throw new Error("Lead not found");
-        }
-
-        const success = await sendCustomMessage(lead.phone, input.message);
-        
-        if (success) {
-          await updateLead(input.leadId, {
-            whatsappSent: true,
-          });
-        }
-
-        return { success };
-      }),
-
-    sendBookingConfirmation: protectedProcedure
-      .input(z.object({
-        leadId: z.number(),
-        appointmentDate: z.string().optional(),
-        appointmentTime: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const lead = await getLeadById(input.leadId);
-        if (!lead) {
-          throw new Error("Lead not found");
-        }
-
-        const success = await sendBookingConfirmation({
-          phone: lead.phone,
-          fullName: lead.fullName,
-          appointmentDate: input.appointmentDate,
-          appointmentTime: input.appointmentTime,
-        });
-
-        if (success) {
-          await updateLead(input.leadId, {
-            bookingConfirmationSent: true,
-          });
-        }
-
-        return { success };
-      }),
-  }),
-
-  // Campaigns management
-  campaigns: router({
-    list: protectedProcedure.query(async () => {
-      return getAllCampaigns();
-    }),
-
-    getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return getCampaignById(input.id);
-      }),
-
-    create: protectedProcedure
-      .input(z.object({
-        name: z.string(),
-        slug: z.string(),
-        description: z.string().optional(),
-        startDate: z.date().optional(),
-        endDate: z.date().optional(),
-        metaPixelId: z.string().optional(),
-        whatsappEnabled: z.boolean().optional(),
-        whatsappWelcomeMessage: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        return createCampaign(input);
-      }),
-
-    update: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        name: z.string().optional(),
-        description: z.string().optional(),
-        isActive: z.boolean().optional(),
-        metaPixelId: z.string().optional(),
-        whatsappEnabled: z.boolean().optional(),
-        whatsappWelcomeMessage: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const { id, ...data } = input;
-        return updateCampaign(id, data);
-      }),
-
-    stats: protectedProcedure
-      .input(z.object({ campaignId: z.number() }))
-      .query(async ({ input }) => {
-        return getCampaignStats(input.campaignId);
-      }),
-  }),
+  leads: leadsRouter,
 
   // Doctors router
   doctors: doctorsRouter,
 
   // Appointments router
-  appointments: router({
-    submit: publicProcedure
-      .input(z.object({
-        fullName: z.string(),
-        phone: z.string(),
-        email: z.string().optional(),
-        doctorId: z.number(),
-        age: z.number().optional(),
-        procedure: z.string().optional(),
-        preferredDate: z.string().optional(),
-        preferredTime: z.string().optional(),
-        additionalNotes: z.string().optional(),
-        campaignSlug: z.string(),
-        utmSource: z.string().optional(),
-        utmMedium: z.string().optional(),
-        utmCampaign: z.string().optional(),
-        utmContent: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        // Get or create campaign by slug
-        let campaign = await getCampaignBySlug(input.campaignSlug);
-        if (!campaign) {
-          // Auto-create campaign for appointments
-          await createCampaign({
-            name: `حجز موعد - ${input.campaignSlug}`,
-            slug: input.campaignSlug,
-            description: `حجز موعد تلقائي`,
-            isActive: true,
-            whatsappEnabled: false,
-          });
-          campaign = await getCampaignBySlug(input.campaignSlug);
-        }
-        
-        if (!campaign) {
-          throw new Error("Failed to create or retrieve campaign");
-        }
-
-        // Create appointment
-        const appointment = await createAppointment({
-          campaignId: campaign.id,
-          doctorId: input.doctorId,
-          fullName: input.fullName,
-          phone: input.phone,
-          email: input.email,
-          age: input.age,
-          procedure: input.procedure,
-          preferredDate: input.preferredDate,
-          preferredTime: input.preferredTime,
-          additionalNotes: input.additionalNotes,
-          status: "pending",
-          utmSource: input.utmSource,
-          utmMedium: input.utmMedium,
-          utmCampaign: input.utmCampaign,
-          utmContent: input.utmContent,
-        });
-
-        // Send email notification
-        const doctor = await getDoctorById(input.doctorId);
-        await sendNewAppointmentEmail({
-          appointment: {
-            ...input,
-            doctorName: doctor?.name || "غير محدد",
-            doctorSpecialty: doctor?.specialty || "",
-          },
-          campaign: campaign.name,
-        });
-
-        // Send WhatsApp message if enabled
-        if (campaign.whatsappEnabled && campaign.whatsappWelcomeMessage) {
-          await sendWelcomeMessage({
-            phone: input.phone,
-            fullName: input.fullName,
-            campaignName: campaign.name,
-            welcomeMessage: campaign.whatsappWelcomeMessage,
-          });
-        }
-
-        // Notify owner
-        await notifyOwner({
-          title: "حجز موعد جديد",
-          content: `تم حجز موعد جديد من ${input.fullName} مع ${doctor?.name || "غير محدد"}`,
-        });
-
-        // Send Telegram notification
-        await sendNewAppointmentTelegram({
-          fullName: input.fullName,
-          phone: input.phone,
-          email: input.email,
-          doctorName: doctor?.name || "غير محدد",
-          preferredDate: input.preferredDate,
-          preferredTime: input.preferredTime,
-        });
-
-        return appointment;
-      }),
-
-    list: protectedProcedure.query(async () => {
-      return getAllAppointments();
-    }),
-
-    updateStatus: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        status: z.string(),
-        staffNotes: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        await updateAppointmentStatus(input.id, input.status, input.staffNotes);
-        return { success: true };
-      }),
-
-    updateAppointment: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        appointmentDate: z.string().optional(),
-        status: z.string().optional(),
-        staffNotes: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const db = await getDb();
-        if (!db) throw new Error("Database not available");
-
-        const updateData: any = {};
-        if (input.appointmentDate) {
-          updateData.appointmentDate = new Date(input.appointmentDate);
-        }
-        if (input.status) {
-          updateData.status = input.status;
-        }
-        if (input.staffNotes !== undefined) {
-          updateData.staffNotes = input.staffNotes;
-        }
-
-        await db.update(appointments).set(updateData).where(eq(appointments.id, input.id));
-        return { success: true };
-      }),
-  }),
+  appointments: appointmentsRouter,
 
   // Offers management
   offers: offersRouter,
@@ -484,6 +221,15 @@ export const appRouter = router({
 
   // Camp registrations management
   campRegistrations: campRegistrationsRouter,
+
+  // Customer profiles (unified)
+  customers: customersRouter,
+
+  // Audit logs
+  auditLogs: auditLogsRouter,
+
+  // Saved filters
+  savedFilters: savedFiltersRouter,
 
   // Social Media Insights
   socialMedia: router({
@@ -527,6 +273,9 @@ export const appRouter = router({
   // Users management (admin only)
   users: usersRouter,
 
+  // Reports (admin only)
+  reports: reportsRouter,
+
   // Cron jobs (admin only)
   cron: router({
     // Run deactivation jobs manually
@@ -534,6 +283,82 @@ export const appRouter = router({
       const result = await runDeactivationJobs();
       return result;
     }),
+  }),
+
+  // Comments system
+  comments: commentsRouter,
+  followUpTasks: followUpTasksRouter,
+
+  // Sidebar badges - aggregated counts for sidebar icons
+  sidebarBadges: protectedProcedure.query(async () => {
+    try {
+      const { getLeadsStats } = await import("./db");
+      const { getTasksStats } = await import("./db/tasks");
+      const { getUnreadWhatsAppConversationsCount } = await import("./db");
+      const { getPendingAccessRequests } = await import("./db");
+
+      // Fetch all stats in parallel
+      const [leadsStats, tasksStats, whatsappUnread, pendingAccess] = await Promise.allSettled([
+        getLeadsStats(),
+        getTasksStats(),
+        getUnreadWhatsAppConversationsCount(),
+        getPendingAccessRequests(),
+      ]);
+
+      const newLeads = leadsStats.status === 'fulfilled' && leadsStats.value ? Number(leadsStats.value.new) || 0 : 0;
+      const pendingTasks = tasksStats.status === 'fulfilled' && tasksStats.value
+        ? (Number(tasksStats.value.todo) || 0) + (Number(tasksStats.value.overdue) || 0)
+        : 0;
+      const unreadMessages = whatsappUnread.status === 'fulfilled' ? Number(whatsappUnread.value) || 0 : 0;
+      const pendingAccessCount = pendingAccess.status === 'fulfilled' ? pendingAccess.value.length : 0;
+
+      return {
+        leads: newLeads,
+        tasks: pendingTasks,
+        whatsapp: unreadMessages,
+        management: pendingAccessCount,
+      };
+    } catch (error) {
+      console.error('[SidebarBadges] Error fetching badge counts:', error);
+      return { leads: 0, tasks: 0, whatsapp: 0, management: 0 };
+    }
+  }),
+
+  // Export to PDF
+  export: router({
+    generatePDF: protectedProcedure
+      .input(z.object({
+        metadata: z.object({
+          tableName: z.string(),
+          dateRange: z.string().optional(),
+          filters: z.record(z.string(), z.unknown()).optional(),
+          totalRecords: z.number(),
+          exportedRecords: z.number(),
+          exportDate: z.string(),
+          exportedBy: z.string(),
+        }),
+        columns: z.array(z.object({
+          key: z.string(),
+          label: z.string(),
+        })),
+        data: z.array(z.record(z.string(), z.any())),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const pdfBuffer = await generatePDF({
+            metadata: input.metadata,
+            columns: input.columns,
+            data: input.data,
+          });
+
+          // تحويل Buffer إلى base64 للإرسال عبر tRPC
+          const base64 = pdfBuffer.toString('base64');
+          return { success: true, pdf: base64 };
+        } catch (error) {
+          console.error('PDF generation error:', error);
+          throw new Error('فشل إنشاء ملف PDF');
+        }
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;

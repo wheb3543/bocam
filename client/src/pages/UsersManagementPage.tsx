@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useFormatDate, formatDateUtil } from "@/hooks/useFormatDate";
+import { useState, useMemo } from "react";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -18,19 +23,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { UserPlus, Edit, Trash2, Power, Search, ArrowRight, UserCheck, UserX, Mail, Phone } from "lucide-react";
+import { 
+  UserPlus, 
+  Edit, 
+  Trash2, 
+  Power, 
+  Search, 
+  UserCheck, 
+  UserX, 
+  Mail, 
+  Phone,
+  Users,
+  UserCog,
+  Shield,
+  Download,
+  Loader2,
+  Filter,
+} from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardLayout from "@/components/DashboardLayout";
-import { useLocation } from "wouter";
+import RecentActivity from "@/components/RecentActivity";
+import { type ColumnConfig } from "@/components/ColumnVisibility";
+import { ColumnVisibility } from "@/components/ColumnVisibility";
+import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/ResizableTable";
+import { useTableFeatures } from "@/hooks/useTableFeatures";
+import { usePhoneFormat } from "@/hooks/usePhoneFormat";
 
 const roleLabels: Record<string, string> = {
   admin: "مسؤول",
@@ -41,19 +66,77 @@ const roleLabels: Record<string, string> = {
 };
 
 const roleColors: Record<string, string> = {
-  admin: "bg-red-100 text-red-800",
-  manager: "bg-blue-100 text-blue-800",
-  staff: "bg-green-100 text-green-800",
-  viewer: "bg-gray-100 text-gray-800",
-  user: "bg-purple-100 text-purple-800",
+  admin: "bg-red-100 text-red-800 border-red-200",
+  manager: "bg-blue-100 text-blue-800 border-blue-200",
+  staff: "bg-green-100 text-green-800 border-green-200",
+  viewer: "bg-muted text-foreground border-border",
+  user: "bg-purple-100 text-purple-800 border-purple-200",
 };
 
+// Helper function to get initials from name
+const getInitials = (name: string) => {
+  if (!name) return "؟";
+  const parts = name.split(" ");
+  if (parts.length >= 2) {
+    return parts[0][0] + parts[1][0];
+  }
+  return name[0];
+};
+
+// Helper function to export users to CSV
+const exportToCSV = (users: any[]) => {
+  const headers = ["اسم المستخدم", "الاسم الكامل", "البريد الإلكتروني", "الدور", "الحالة", "آخر تسجيل دخول"];
+  const rows = users.map(user => [
+    user.username,
+    user.name || "-",
+    user.email || "-",
+    roleLabels[user.role],
+    user.isActive === "yes" ? "نشط" : "معطل",
+    formatDateUtil(user.lastSignedIn)
+  ]);
+  
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => row.join(","))
+  ].join("\n");
+  
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `users_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+};
+
+// === تعريف أعمدة جدول طلبات الوصول ===
+const requestColumns: ColumnConfig[] = [
+  { key: "name", label: "الاسم", defaultVisible: true, defaultWidth: 180, minWidth: 120, maxWidth: 350, sortType: 'string' },
+  { key: "email", label: "البريد الإلكتروني", defaultVisible: true, defaultWidth: 220, minWidth: 140, maxWidth: 400, sortType: 'string' },
+  { key: "phone", label: "الهاتف", defaultVisible: true, defaultWidth: 150, minWidth: 100, maxWidth: 250, sortType: 'string' },
+  { key: "reason", label: "السبب", defaultVisible: true, defaultWidth: 200, minWidth: 120, maxWidth: 400, sortType: 'string' },
+  { key: "requestedAt", label: "تاريخ الطلب", defaultVisible: true, defaultWidth: 140, minWidth: 100, maxWidth: 250, sortType: 'date' },
+  { key: "actions", label: "الإجراءات", defaultVisible: true, defaultWidth: 180, minWidth: 140, maxWidth: 280, sortable: false },
+];
+
+// === تعريف أعمدة جدول المستخدمين ===
+const userColumns: ColumnConfig[] = [
+  { key: "user", label: "المستخدم", defaultVisible: true, defaultWidth: 220, minWidth: 150, maxWidth: 400, sortType: 'string' },
+  { key: "email", label: "البريد الإلكتروني", defaultVisible: true, defaultWidth: 200, minWidth: 120, maxWidth: 400, sortType: 'string' },
+  { key: "role", label: "الدور", defaultVisible: true, defaultWidth: 120, minWidth: 80, maxWidth: 200, sortType: 'string' },
+  { key: "status", label: "الحالة", defaultVisible: true, defaultWidth: 100, minWidth: 80, maxWidth: 180, sortType: 'string' },
+  { key: "lastSignedIn", label: "آخر تسجيل", defaultVisible: true, defaultWidth: 140, minWidth: 100, maxWidth: 250, sortType: 'date' },
+  { key: "createdAt", label: "تاريخ الإنشاء", defaultVisible: false, defaultWidth: 140, minWidth: 100, maxWidth: 250, sortType: 'date' },
+  { key: "actions", label: "الإجراءات", defaultVisible: true, defaultWidth: 150, minWidth: 120, maxWidth: 250, sortable: false },
+];
+
 export default function UsersManagementPage() {
-  const [, setLocation] = useLocation();
+  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
+  const { formatDate, formatDateTime } = useFormatDate();
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [activeSection, setActiveSection] = useState<"users" | "requests">("users");
+  const [activeSection, setActiveSection] = useState<"users" | "requests" | "activity">("users");
   const [editingUser, setEditingUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -61,6 +144,20 @@ export default function UsersManagementPage() {
     email: "",
     role: "user" as "user" | "admin" | "manager" | "staff" | "viewer",
     isActive: "yes" as "yes" | "no",
+  });
+
+  // === useTableFeatures hook ===
+  const userTable = useTableFeatures({
+    tableKey: 'users',
+    columns: userColumns,
+    defaultFrozenColumns: ['user'],
+  });
+
+  // === useTableFeatures hook لجدول طلبات الوصول ===
+  const requestTable = useTableFeatures({
+    tableKey: 'accessRequests',
+    columns: requestColumns,
+    defaultFrozenColumns: ['name'],
   });
 
   const { data: users, isLoading, refetch } = trpc.users.getAll.useQuery();
@@ -148,7 +245,6 @@ export default function UsersManagementPage() {
         id: editingUser.id,
         ...formData,
       };
-      // Don't send password if empty
       if (!formData.password) {
         delete updateData.password;
       }
@@ -171,29 +267,72 @@ export default function UsersManagementPage() {
     setShowAddDialog(true);
   };
 
-  const handleDelete = (userId: number) => {
-    if (confirm("هل أنت متأكد من حذف هذا المستخدم؟")) {
-      deleteMutation.mutate({ id: userId });
-    }
-  };
+  const deleteConfirm = useConfirmDialog<{ id: number; name: string }>();
 
   const handleToggleActive = (userId: number) => {
     toggleActiveMutation.mutate({ id: userId });
   };
 
-  const filteredUsers = users?.filter((user) =>
-    user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter and sort users
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    
+    let filtered = users.filter((user) => {
+      const matchesSearch = 
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesRole = roleFilter === "all" || user.role === roleFilter;
+      const matchesStatus = statusFilter === "all" || user.isActive === statusFilter;
+      
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+
+    // Apply sorting using useTableFeatures
+    return userTable.sortData(filtered, (item: any, key: string) => {
+      switch (key) {
+        case 'user': return item.name || item.username;
+        case 'email': return item.email;
+        case 'role': return roleLabels[item.role] || item.role;
+        case 'status': return item.isActive === 'yes' ? 'نشط' : 'معطل';
+        case 'lastSignedIn': return item.lastSignedIn;
+        case 'createdAt': return item.createdAt;
+        default: return item[key];
+      }
+    });
+  }, [users, searchQuery, roleFilter, statusFilter, userTable.sortState, userTable.sortData]);
+
+  // Sort access requests using useTableFeatures
+  const sortedRequests = useMemo(() => {
+    if (!accessRequests) return [];
+    return requestTable.sortData(accessRequests, (item: any, key: string) => {
+      switch (key) {
+        case 'name': return item.name;
+        case 'email': return item.email;
+        case 'phone': return item.phone;
+        case 'reason': return item.reason;
+        case 'requestedAt': return item.requestedAt;
+        default: return item[key];
+      }
+    });
+  }, [accessRequests, requestTable.sortState, requestTable.sortData]);
+
+  // Calculate statistics
+  const totalUsers = users?.length || 0;
+  const activeUsers = users?.filter(u => u.isActive === "yes").length || 0;
+  const adminUsers = users?.filter(u => u.role === "admin").length || 0;
 
   if (isLoading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-screen">
+      <DashboardLayout
+        pageTitle="إدارة المستخدمين"
+        pageDescription="إدارة ومتابعة مستخدمي النظام"
+      >
+        <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">جاري التحميل...</p>
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-muted-foreground dark:text-muted-foreground">جاري التحميل...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -201,27 +340,19 @@ export default function UsersManagementPage() {
   }
 
   return (
-    <DashboardLayout>
-    <div className="min-h-screen bg-gray-50 p-6" dir="rtl">
-      <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => setLocation("/dashboard")}
-          className="mb-4 gap-2"
-        >
-          <ArrowRight className="w-4 h-4" />
-          عودة إلى لوحة التحكم
-        </Button>
-
+    <DashboardLayout
+      pageTitle="إدارة المستخدمين"
+      pageDescription="إدارة ومتابعة مستخدمي النظام"
+    >
+      <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
         {/* Section Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={activeSection === "users" ? "default" : "outline"}
             onClick={() => setActiveSection("users")}
             className="flex-1 sm:flex-none"
           >
-            <UserPlus className="w-4 h-4 mr-2" />
+            <Users className="w-4 h-4 ml-2" />
             إدارة المستخدمين
           </Button>
           <Button
@@ -229,352 +360,590 @@ export default function UsersManagementPage() {
             onClick={() => setActiveSection("requests")}
             className="flex-1 sm:flex-none relative"
           >
-            <UserCheck className="w-4 h-4 mr-2" />
+            <UserCheck className="w-4 h-4 ml-2" />
             طلبات التصريح
             {accessRequests && accessRequests.length > 0 && (
-              <Badge className="mr-2 bg-red-500">
+              <Badge className="mr-2 bg-red-500 text-white">
                 {accessRequests.length}
               </Badge>
             )}
+          </Button>
+          <Button
+            variant={activeSection === "activity" ? "default" : "outline"}
+            onClick={() => setActiveSection("activity")}
+            className="flex-1 sm:flex-none"
+          >
+            <UserCog className="w-4 h-4 ml-2" />
+            تتبع النشاط
           </Button>
         </div>
 
         {/* Users Section */}
         {activeSection === "users" && (
-        <>
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">إدارة المستخدمين</h1>
-              <p className="text-gray-600 mt-1">إدارة المستخدمين والأدوار والصلاحيات</p>
+          <>
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground dark:text-muted-foreground flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    إجمالي المستخدمين
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{totalUsers}</div>
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">جميع المستخدمين المسجلين</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground dark:text-muted-foreground flex items-center gap-2">
+                    <UserCheck className="h-4 w-4" />
+                    المستخدمون النشطون
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-green-600">{activeUsers}</div>
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">مستخدمون نشطون حالياً</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground dark:text-muted-foreground flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    المسؤولون
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-red-600">{adminUsers}</div>
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">مستخدمون بصلاحيات كاملة</p>
+                </CardContent>
+              </Card>
             </div>
-            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-              <DialogTrigger asChild>
-                <Button onClick={resetForm} className="gap-2">
-                  <UserPlus className="w-4 h-4" />
-                  إضافة مستخدم جديد
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md" dir="rtl">
-                <DialogHeader>
-                  <DialogTitle className="text-right">
-                    {editingUser ? "تعديل مستخدم" : "إضافة مستخدم جديد"}
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="username" className="text-right block">اسم المستخدم *</Label>
-                    <Input
-                      id="username"
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      placeholder="أدخل اسم المستخدم"
-                      className="text-right"
-                      disabled={!!editingUser}
-                    />
+
+            {/* Main Card */}
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <CardTitle>قائمة المستخدمين</CardTitle>
+                    <CardDescription>إدارة المستخدمين والأدوار والصلاحيات</CardDescription>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-right block">
-                      كلمة المرور {editingUser ? "(اتركها فارغة لعدم التغيير)" : "*"}
-                    </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="أدخل كلمة المرور"
-                      className="text-right"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-right block">الاسم الكامل</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="أدخل الاسم الكامل"
-                      className="text-right"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-right block">البريد الإلكتروني</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="أدخل البريد الإلكتروني"
-                      className="text-right"
-                      dir="ltr"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="role" className="text-right block">الدور *</Label>
-                    <Select
-                      value={formData.role}
-                      onValueChange={(value: any) => setFormData({ ...formData, role: value })}
-                    >
-                      <SelectTrigger className="text-right">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="user">مستخدم</SelectItem>
-                        <SelectItem value="viewer">مشاهد</SelectItem>
-                        <SelectItem value="staff">موظف</SelectItem>
-                        <SelectItem value="manager">مدير</SelectItem>
-                        <SelectItem value="admin">مسؤول</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="isActive" className="text-right block">الحالة *</Label>
-                    <Select
-                      value={formData.isActive}
-                      onValueChange={(value: any) => setFormData({ ...formData, isActive: value })}
-                    >
-                      <SelectTrigger className="text-right">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="yes">نشط</SelectItem>
-                        <SelectItem value="no">معطل</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex gap-2 pt-4">
-                    <Button onClick={handleSubmit} className="flex-1">
-                      {editingUser ? "تحديث" : "إضافة"}
-                    </Button>
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <Button
                       variant="outline"
-                      onClick={() => {
-                        resetForm();
-                        setShowAddDialog(false);
-                      }}
-                      className="flex-1"
+                      size="sm"
+                      onClick={() => filteredUsers && exportToCSV(filteredUsers)}
+                      className="flex-1 sm:flex-none"
                     >
-                      إلغاء
+                      <Download className="w-4 h-4 ml-2" />
+                      تصدير
                     </Button>
+                    <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+                      <DialogTrigger asChild>
+                        <Button onClick={resetForm} size="sm" className="flex-1 sm:flex-none">
+                          <UserPlus className="w-4 h-4 ml-2" />
+                          إضافة مستخدم
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>
+                            {editingUser ? "تعديل مستخدم" : "إضافة مستخدم جديد"}
+                          </DialogTitle>
+                          <DialogDescription>
+                            {editingUser ? "تحديث معلومات المستخدم" : "إنشاء حساب مستخدم جديد في النظام"}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="username">اسم المستخدم *</Label>
+                            <Input
+                              id="username"
+                              value={formData.username}
+                              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                              placeholder="أدخل اسم المستخدم"
+                              disabled={!!editingUser}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="password">
+                              كلمة المرور {editingUser ? "(اتركها فارغة لعدم التغيير)" : "*"}
+                            </Label>
+                            <Input
+                              id="password"
+                              type="password"
+                              value={formData.password}
+                              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                              placeholder="أدخل كلمة المرور"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="name">الاسم الكامل</Label>
+                            <Input
+                              id="name"
+                              value={formData.name}
+                              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                              placeholder="أدخل الاسم الكامل"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email">البريد الإلكتروني</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                              placeholder="example@domain.com"
+                              dir="ltr"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="role">الدور *</Label>
+                            <Select
+                              value={formData.role}
+                              onValueChange={(value: any) => setFormData({ ...formData, role: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="user">مستخدم</SelectItem>
+                                <SelectItem value="viewer">مشاهد</SelectItem>
+                                <SelectItem value="staff">موظف</SelectItem>
+                                <SelectItem value="manager">مدير</SelectItem>
+                                <SelectItem value="admin">مسؤول</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="isActive">الحالة *</Label>
+                            <Select
+                              value={formData.isActive}
+                              onValueChange={(value: any) => setFormData({ ...formData, isActive: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="yes">نشط</SelectItem>
+                                <SelectItem value="no">معطل</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              resetForm();
+                              setShowAddDialog(false);
+                            }}
+                          >
+                            إلغاء
+                          </Button>
+                          <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+                            {(createMutation.isPending || updateMutation.isPending) && (
+                              <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                            )}
+                            {editingUser ? "تحديث" : "إضافة"}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Filters & Column Controls */}
+                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                  <div className="relative flex-1 w-full">
+                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      type="text"
+                      placeholder="بحث عن مستخدم..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pr-10"
+                    />
+                  </div>
+                  <Select value={roleFilter} onValueChange={setRoleFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <Filter className="w-4 h-4 ml-2" />
+                      <SelectValue placeholder="الدور" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الأدوار</SelectItem>
+                      <SelectItem value="admin">مسؤول</SelectItem>
+                      <SelectItem value="manager">مدير</SelectItem>
+                      <SelectItem value="staff">موظف</SelectItem>
+                      <SelectItem value="viewer">مشاهد</SelectItem>
+                      <SelectItem value="user">مستخدم</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <Filter className="w-4 h-4 ml-2" />
+                      <SelectValue placeholder="الحالة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الحالات</SelectItem>
+                      <SelectItem value="yes">نشط</SelectItem>
+                      <SelectItem value="no">معطل</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <ColumnVisibility {...userTable.columnVisibilityProps} />
+                </div>
 
-        {/* Search */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input
-              type="text"
-              placeholder="بحث عن مستخدم..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-10 text-right"
-            />
-          </div>
-        </div>
+                {/* Users Table - ResizableTable */}
+                <ResizableTable {...userTable.resizableTableProps}>
+                  <TableHeader>
+                    <TableRow>
+                      {userTable.visibleColumnOrder.map(colKey => {
+                        const col = userColumns.find(c => c.key === colKey);
+                        if (!col || !userTable.visibleColumns[colKey]) return null;
+                        return (
+                          <ResizableHeaderCell
+                            key={colKey}
+                            columnKey={colKey}
+                            width={userTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150}
+                            minWidth={col.minWidth || 80}
+                            maxWidth={col.maxWidth || 500}
+                            onResize={userTable.columnWidths.handleResize}
+                            {...userTable.getSortProps(colKey)}
+                          >
+                            {col.label}
+                          </ResizableHeaderCell>
+                        );
+                      })}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className={filteredUsers && filteredUsers.length > 0 ? 'stagger-rows' : ''}>
+                    {filteredUsers && filteredUsers.length > 0 ? (
+                      filteredUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          {userTable.visibleColumnOrder.map(colKey => {
+                            if (!userTable.visibleColumns[colKey]) return null;
+                            
+                            switch (colKey) {
+                              case 'user':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey}>
+                                    <div className="flex items-center gap-3">
+                                      <Avatar className="h-10 w-10 flex-shrink-0">
+                                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                                          {getInitials(user.name || user.username)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="min-w-0">
+                                        <div className="font-medium truncate">{user.name || user.username}</div>
+                                        <div className="text-sm text-muted-foreground truncate">@{user.username}</div>
+                                      </div>
+                                    </div>
+                                  </FrozenTableCell>
+                                );
+                              case 'email':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey}>
+                                    <span dir="ltr" className="truncate">{user.email || "-"}</span>
+                                  </FrozenTableCell>
+                                );
+                              case 'role':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey}>
+                                    <Badge className={roleColors[user.role] + " border"}>
+                                      {roleLabels[user.role]}
+                                    </Badge>
+                                  </FrozenTableCell>
+                                );
+                              case 'status':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey}>
+                                    <Badge variant={user.isActive === "yes" ? "default" : "secondary"}>
+                                      {user.isActive === "yes" ? "نشط" : "معطل"}
+                                    </Badge>
+                                  </FrozenTableCell>
+                                );
+                              case 'lastSignedIn':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground">
+                                    {formatDate(user.lastSignedIn)}
+                                  </FrozenTableCell>
+                                );
+                              case 'createdAt':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground">
+                                    {formatDate(user.createdAt)}
+                                  </FrozenTableCell>
+                                );
+                              case 'actions':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey}>
+                                    <div className="flex gap-1">
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleEdit(user)}
+                                        title="تعديل"
+                                      >
+                                        <Edit className="w-4 h-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleToggleActive(user.id)}
+                                        title={user.isActive === "yes" ? "تعطيل" : "تفعيل"}
+                                      >
+                                        <Power className="w-4 h-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => deleteConfirm.openConfirm({ id: user.id, name: user.name || user.username })}
+                                        className="text-red-600 hover:text-red-700"
+                                        title="حذف"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </FrozenTableCell>
+                                );
+                              default:
+                                return null;
+                            }
+                          })}
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <FrozenTableCell columnKey="" colSpan={userTable.visibleColumnOrder.filter(k => userTable.visibleColumns[k]).length} className="text-center py-12">
+                          <div className="text-muted-foreground">
+                            <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                            <p>لا توجد نتائج</p>
+                          </div>
+                        </FrozenTableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </ResizableTable>
 
-        {/* Users Table */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-right">اسم المستخدم</TableHead>
-                <TableHead className="text-right">الاسم الكامل</TableHead>
-                <TableHead className="text-right">البريد الإلكتروني</TableHead>
-                <TableHead className="text-right">الدور</TableHead>
-                <TableHead className="text-right">الحالة</TableHead>
-                <TableHead className="text-right">آخر تسجيل دخول</TableHead>
-                <TableHead className="text-right">الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers?.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="text-right font-medium">{user.username}</TableCell>
-                  <TableCell className="text-right">{user.name || "-"}</TableCell>
-                  <TableCell className="text-right" dir="ltr">{user.email || "-"}</TableCell>
-                  <TableCell className="text-right">
-                    <Badge className={roleColors[user.role]}>
-                      {roleLabels[user.role]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant={user.isActive === "yes" ? "default" : "secondary"}>
-                      {user.isActive === "yes" ? "نشط" : "معطل"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {user.lastSignedIn
-                      ? new Date(user.lastSignedIn).toLocaleDateString("ar-EG")
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex gap-2 justify-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(user)}
-                        className="gap-1"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleActive(user.id)}
-                        className="gap-1"
-                      >
-                        <Power className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(user.id)}
-                        className="gap-1 text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          {filteredUsers?.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500">لا توجد مستخدمين</p>
-            </div>
-          )}
-        </div>
+                {/* Results Count */}
+                {filteredUsers && filteredUsers.length > 0 && (
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    عرض {filteredUsers.length} من أصل {totalUsers} مستخدم
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-        {/* Role Descriptions */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">وصف الأدوار</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border border-gray-200 rounded-lg">
-              <Badge className={roleColors.admin + " mb-2"}>مسؤول</Badge>
-              <p className="text-sm text-gray-600">
-                صلاحيات كاملة لإدارة النظام، المستخدمين، والإعدادات
-              </p>
-            </div>
-            <div className="p-4 border border-gray-200 rounded-lg">
-              <Badge className={roleColors.manager + " mb-2"}>مدير</Badge>
-              <p className="text-sm text-gray-600">
-                إدارة المحتوى والحجوزات والتقارير
-              </p>
-            </div>
-            <div className="p-4 border border-gray-200 rounded-lg">
-              <Badge className={roleColors.staff + " mb-2"}>موظف</Badge>
-              <p className="text-sm text-gray-600">
-                معالجة الحجوزات وتحديث البيانات
-              </p>
-            </div>
-            <div className="p-4 border border-gray-200 rounded-lg">
-              <Badge className={roleColors.viewer + " mb-2"}>مشاهد</Badge>
-              <p className="text-sm text-gray-600">
-                عرض البيانات والتقارير فقط دون تعديل
-              </p>
-            </div>
-          </div>
-        </div>
-        </>
+            {/* Role Descriptions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>وصف الأدوار والصلاحيات</CardTitle>
+                <CardDescription>تفاصيل الصلاحيات لكل دور في النظام</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="p-4 border rounded-lg">
+                    <Badge className={roleColors.admin + " mb-2 border"}>مسؤول</Badge>
+                    <p className="text-sm text-muted-foreground">
+                      صلاحيات كاملة لإدارة النظام، المستخدمين، والإعدادات
+                    </p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <Badge className={roleColors.manager + " mb-2 border"}>مدير</Badge>
+                    <p className="text-sm text-muted-foreground">
+                      إدارة المحتوى والحجوزات والتقارير
+                    </p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <Badge className={roleColors.staff + " mb-2 border"}>موظف</Badge>
+                    <p className="text-sm text-muted-foreground">
+                      معالجة الحجوزات وتحديث البيانات
+                    </p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <Badge className={roleColors.viewer + " mb-2 border"}>مشاهد</Badge>
+                    <p className="text-sm text-muted-foreground">
+                      عرض البيانات والتقارير فقط دون تعديل
+                    </p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <Badge className={roleColors.user + " mb-2 border"}>مستخدم</Badge>
+                    <p className="text-sm text-muted-foreground">
+                      صلاحيات محدودة للوصول الأساسي
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
         )}
 
         {/* Access Requests Section */}
         {activeSection === "requests" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>طلبات التصريح المعلقة</CardTitle>
-            <CardDescription>مراجعة والموافقة على طلبات الوصول الجديدة</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!accessRequests || accessRequests.length === 0 ? (
-              <div className="text-center py-12">
-                <UserCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg font-semibold text-muted-foreground">
-                  لا توجد طلبات معلقة
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-right">الاسم</TableHead>
-                      <TableHead className="text-right">البريد الإلكتروني</TableHead>
-                      <TableHead className="text-right">الهاتف</TableHead>
-                      <TableHead className="text-right">السبب</TableHead>
-                      <TableHead className="text-right">تاريخ الطلب</TableHead>
-                      <TableHead className="text-right">الإجراءات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {accessRequests.map((request) => (
-                      <TableRow key={request.id}>
-                        <TableCell className="font-medium">{request.name}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm" dir="ltr">{request.email}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {request.phone ? (
-                            <div className="flex items-center gap-2">
-                              <Phone className="w-4 h-4 text-muted-foreground" />
-                              <span dir="ltr">{request.phone}</span>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">غير متوفر</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-muted-foreground">
-                            {request.reason || "غير محدد"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(request.requestedAt).toLocaleDateString('ar-YE')}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={() => approveMutation.mutate({ requestId: request.id })}
-                              disabled={approveMutation.isPending || rejectMutation.isPending}
+          <Card>
+            <CardHeader>
+              <CardTitle>طلبات التصريح المعلقة</CardTitle>
+              <CardDescription>مراجعة والموافقة على طلبات الوصول الجديدة</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!accessRequests || accessRequests.length === 0 ? (
+                <div className="text-center py-12">
+                  <UserCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-lg font-semibold text-muted-foreground mb-2">
+                    لا توجد طلبات معلقة
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    جميع طلبات الوصول تمت معالجتها
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Column Controls */}
+                  <div className="flex justify-end">
+                    <ColumnVisibility {...requestTable.columnVisibilityProps} />
+                  </div>
+
+                  {/* Requests Table - ResizableTable */}
+                  <ResizableTable {...requestTable.resizableTableProps}>
+                    <TableHeader>
+                      <TableRow>
+                        {requestTable.visibleColumnOrder.map(colKey => {
+                          const col = requestColumns.find(c => c.key === colKey);
+                          if (!col || !requestTable.visibleColumns[colKey]) return null;
+                          return (
+                            <ResizableHeaderCell
+                              key={colKey}
+                              columnKey={colKey}
+                              width={requestTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150}
+                              minWidth={col.minWidth || 80}
+                              maxWidth={col.maxWidth || 500}
+                              onResize={requestTable.columnWidths.handleResize}
+                              {...requestTable.getSortProps(colKey)}
                             >
-                              <UserCheck className="w-4 h-4 mr-1" />
-                              موافقة
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => rejectMutation.mutate({ requestId: request.id })}
-                              disabled={approveMutation.isPending || rejectMutation.isPending}
-                            >
-                              <UserX className="w-4 h-4 mr-1" />
-                              رفض
-                            </Button>
-                          </div>
-                        </TableCell>
+                              {col.label}
+                            </ResizableHeaderCell>
+                          );
+                        })}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    </TableHeader>
+                    <TableBody className={sortedRequests.length > 0 ? 'stagger-rows' : ''}>
+                      {sortedRequests.map((request) => (
+                        <TableRow key={request.id}>
+                          {requestTable.visibleColumnOrder.map(colKey => {
+                            if (!requestTable.visibleColumns[colKey]) return null;
+                            
+                            switch (colKey) {
+                              case 'name':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey} className="font-medium">
+                                    {request.name}
+                                  </FrozenTableCell>
+                                );
+                              case 'email':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey}>
+                                    <div className="flex items-center gap-2">
+                                      <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                      <span className="text-sm truncate" dir="ltr">{request.email}</span>
+                                    </div>
+                                  </FrozenTableCell>
+                                );
+                              case 'phone':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey}>
+                                    {request.phone ? (
+                                      <div className="flex items-center gap-2">
+                                        <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                        <span dir="ltr">{formatPhoneDisplay(request.phone)}</span>
+                                      </div>
+                                    ) : (
+                                      <span className="text-muted-foreground text-sm">-</span>
+                                    )}
+                                  </FrozenTableCell>
+                                );
+                              case 'reason':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey} wrap>
+                                    <span className="text-sm text-muted-foreground">
+                                      {request.reason || "غير محدد"}
+                                    </span>
+                                  </FrozenTableCell>
+                                );
+                              case 'requestedAt':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground">
+                                    {formatDate(request.requestedAt)}
+                                  </FrozenTableCell>
+                                );
+                              case 'actions':
+                                return (
+                                  <FrozenTableCell key={colKey} columnKey={colKey}>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="default"
+                                        onClick={() => approveMutation.mutate({ requestId: request.id })}
+                                        disabled={approveMutation.isPending || rejectMutation.isPending}
+                                      >
+                                        <UserCheck className="w-4 h-4 ml-1" />
+                                        موافقة
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => rejectMutation.mutate({ requestId: request.id })}
+                                        disabled={approveMutation.isPending || rejectMutation.isPending}
+                                      >
+                                        <UserX className="w-4 h-4 ml-1" />
+                                        رفض
+                                      </Button>
+                                    </div>
+                                  </FrozenTableCell>
+                                );
+                              default:
+                                return null;
+                            }
+                          })}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </ResizableTable>
+
+                  {/* Results Count */}
+                  <div className="text-sm text-muted-foreground">
+                    عرض {sortedRequests.length} طلب معلق
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
 
+        {/* Activity Section */}
+        {activeSection === "activity" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>تتبع النشاط الحي</CardTitle>
+              <CardDescription>عرض آخر الأنشطة والعمليات في النظام</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RecentActivity />
+            </CardContent>
+          </Card>
+        )}
       </div>
-    </div>
+      <ConfirmDeleteDialog
+        open={deleteConfirm.isOpen}
+        onOpenChange={deleteConfirm.closeConfirm}
+        itemName={deleteConfirm.item?.name}
+        itemType="المستخدم"
+        onConfirm={() => deleteConfirm.confirm(() => deleteMutation.mutate({ id: deleteConfirm.item!.id }))}
+        isLoading={deleteMutation.isPending}
+      />
     </DashboardLayout>
   );
 }

@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO users (openId, username, password, name, email, loginMethod, role, isActive) VALUES\n('nYkQcQYVoSqNwdJKXQyoho', 'abood22828', 'temp_password', 'Abdullkwy Alhatef', 'abood22828@gmail.com', 'oauth', 'user', 'yes'),\n('Q2sBnCUd5KquS6ZfACTpvg', 'nusaibalhatef', 'temp_password', 'Nusaibah Al hatef', 'nusaibalhatef@gmail.com', 'oauth', 'admin', 'yes');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xtgvXGdr7mxJSP.root --database HgGpRPs4xs9xrzjfX4xmFY --execute INSERT INTO users (openId, username, password, name, email, loginMethod, role, isActive) VALUES\n('nYkQcQYVoSqNwdJKXQyoho', 'abood22828', 'temp_password', 'Abdullkwy Alhatef', 'abood22828@gmail.com', 'oauth', 'user', 'yes'),\n('Q2sBnCUd5KquS6ZfACTpvg', 'nusaibalhatef', 'temp_password', 'Nusaibah Al hatef', 'nusaibalhatef@gmail.com', 'oauth', 'admin', 'yes');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 61
+}

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `users` (\n  `id` int AUTO_INCREMENT PRIMARY KEY,\n  `username` varchar(50) NOT NULL UNIQUE,\n  `password` varchar(255) NOT NULL,\n  `name` text,\n  `email` varchar(320),\n  `role` enum('user', 'admin') NOT NULL DEFAULT 'user',\n  `isActive` enum('yes', 'no') NOT NULL DEFAULT 'yes',\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `lastSignedIn` timestamp NULL\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xtgvXGdr7mxJSP.root --database HgGpRPs4xs9xrzjfX4xmFY --execute CREATE TABLE `users` (\n  `id` int AUTO_INCREMENT PRIMARY KEY,\n  `username` varchar(50) NOT NULL UNIQUE,\n  `password` varchar(255) NOT NULL,\n  `name` text,\n  `email` varchar(320),\n  `role` enum('user', 'admin') NOT NULL DEFAULT 'user',\n  `isActive` enum('yes', 'no') NOT NULL DEFAULT 'yes',\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `lastSignedIn` timestamp NULL\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 163
+}

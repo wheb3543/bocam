@@ -1,8 +1,10 @@
+import { useFormatDate } from "@/hooks/useFormatDate";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { WifiOff, RefreshCw, Calendar, Users, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import DashboardLayout from "@/components/DashboardLayout";
 
 interface CachedAppointment {
   id: number;
@@ -14,6 +16,7 @@ interface CachedAppointment {
 }
 
 export default function OfflinePage() {
+  const { formatDate, formatDateTime } = useFormatDate();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [cachedAppointments, setCachedAppointments] = useState<CachedAppointment[]>([]);
   const [lastSync, setLastSync] = useState<string | null>(null);
@@ -45,7 +48,7 @@ export default function OfflinePage() {
       // Get last sync time
       const lastSyncTime = localStorage.getItem('lastSyncTime');
       if (lastSyncTime) {
-        setLastSync(new Date(lastSyncTime).toLocaleString('ar-YE'));
+        setLastSync(formatDateTime(lastSyncTime));
       }
     } catch (error) {
       console.error('Error loading cached data:', error);
@@ -100,8 +103,12 @@ export default function OfflinePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl space-y-6">
+    <DashboardLayout
+      pageTitle="العمل بدون اتصال"
+      pageDescription="عرض البيانات المحفوظة محلياً"
+    >
+      <main className="container py-6 sm:py-8 md:py-12 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto space-y-6">
         {/* Status Card */}
         <Card className="border-2">
           <CardHeader className="text-center">
@@ -175,7 +182,7 @@ export default function OfflinePage() {
                         الهاتف: {appointment.phone}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {new Date(appointment.createdAt).toLocaleString('ar-YE')}
+                        {formatDateTime(appointment.createdAt)}
                       </div>
                     </div>
                     <div>
@@ -219,7 +226,8 @@ export default function OfflinePage() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+        </div>
+      </main>
+    </DashboardLayout>
   );
 }

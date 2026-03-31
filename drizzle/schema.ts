@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, index } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -11,7 +11,7 @@ export const users = mysqlTable("users", {
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin", "manager", "staff", "viewer"]).default("user").notNull(),
+  role: mysqlEnum("role", ["user", "admin", "manager", "staff", "viewer", "team_leader"]).default("user").notNull(),
   isActive: mysqlEnum("isActive", ["yes", "no"]).default("yes").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -22,20 +22,52 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 /**
- * Campaigns table - stores marketing campaign information
+ * Campaigns table - stores comprehensive marketing campaign information
+ * يخزّن معلومات شاملة عن الحملات التسويقية
  */
 export const campaigns = mysqlTable("campaigns", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   description: text("description"),
+  
+  // Campaign Type & Status
+  type: mysqlEnum("type", ["digital", "field", "awareness", "mixed"]).default("digital").notNull(),
+  status: mysqlEnum("status", ["draft", "active", "paused", "completed", "cancelled"]).default("draft").notNull(),
+  
+  // Budget
+  plannedBudget: int("plannedBudget"), // الميزانية المخططة
+  actualBudget: int("actualBudget"), // الميزانية الفعلية
+  currency: varchar("currency", { length: 10 }).default("YER"),
+  
+  // Dates
   startDate: timestamp("startDate"),
   endDate: timestamp("endDate"),
-  isActive: boolean("isActive").default(true).notNull(),
+  
+  // Platforms (JSON array)
+  platforms: text("platforms"), // ["facebook", "instagram", "google", "whatsapp", "field"]
+  
+  // Goals & KPIs
+  goals: text("goals"), // الأهداف (JSON)
+  targetLeads: int("targetLeads"), // هدف العملاء المحتملين
+  targetBookings: int("targetBookings"), // هدف الحجوزات
+  targetROI: int("targetROI"), // هدف عائد الاستثمار (%)
+  
+  // Team
+  teamLeaderId: int("teamLeaderId"), // قائد الفريق
+  teamMembers: text("teamMembers"), // JSON array of user IDs
+  
+  // Meta/Facebook Integration
   metaPixelId: varchar("metaPixelId", { length: 100 }),
   metaAccessToken: text("metaAccessToken"),
+  
+  // WhatsApp Integration
   whatsappEnabled: boolean("whatsappEnabled").default(false).notNull(),
   whatsappWelcomeMessage: text("whatsappWelcomeMessage"),
+  
+  // Legacy field
+  isActive: boolean("isActive").default(true).notNull(),
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -52,12 +84,14 @@ export const leads = mysqlTable("leads", {
   fullName: varchar("fullName", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 20 }).notNull(),
   email: varchar("email", { length: 320 }),
-  status: mysqlEnum("status", ["new", "contacted", "booked", "not_interested", "no_answer"]).default("new").notNull(),
+  status: mysqlEnum("status", ["new", "contacted", "booked", "not_interested", "no_answer", "pending", "confirmed", "completed", "cancelled"]).default("new").notNull(),
   source: varchar("source", { length: 100 }),
   utmSource: varchar("utmSource", { length: 100 }),
   utmMedium: varchar("utmMedium", { length: 100 }),
   utmCampaign: varchar("utmCampaign", { length: 100 }),
+  utmTerm: varchar("utmTerm", { length: 100 }),
   utmContent: varchar("utmContent", { length: 100 }),
+  utmPlacement: varchar("utmPlacement", { length: 100 }),
   notes: text("notes"),
   emailSent: boolean("emailSent").default(false).notNull(),
   whatsappSent: boolean("whatsappSent").default(false).notNull(),
@@ -145,10 +179,22 @@ export const appointments = mysqlTable("appointments", {
   utmSource: varchar("utmSource", { length: 100 }),
   utmMedium: varchar("utmMedium", { length: 100 }),
   utmCampaign: varchar("utmCampaign", { length: 100 }),
+  utmTerm: varchar("utmTerm", { length: 100 }),
   utmContent: varchar("utmContent", { length: 100 }),
+  utmPlacement: varchar("utmPlacement", { length: 100 }),
+  referrer: varchar("referrer", { length: 500 }),
+  fbclid: varchar("fbclid", { length: 255 }),
+  gclid: varchar("gclid", { length: 255 }),
+  receiptNumber: varchar("receiptNumber", { length: 50 }), // رقم السند التسلسلي
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  phoneIdx: index("appointments_phone_idx").on(table.phone),
+  emailIdx: index("appointments_email_idx").on(table.email),
+  statusIdx: index("appointments_status_idx").on(table.status),
+  createdAtIdx: index("appointments_createdAt_idx").on(table.createdAt),
+  doctorIdIdx: index("appointments_doctorId_idx").on(table.doctorId),
+}));
 
 export type Appointment = typeof appointments.$inferSelect;
 export type InsertAppointment = typeof appointments.$inferInsert;
@@ -224,16 +270,33 @@ export type InsertCamp = typeof camps.$inferInsert;
 export const offerLeads = mysqlTable("offerLeads", {
   id: int("id").autoincrement().primaryKey(),
   offerId: int("offerId").notNull(),
+  campaignId: int("campaignId"), // Optional: link to campaign
   fullName: varchar("fullName", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 20 }).notNull(),
   email: varchar("email", { length: 320 }),
   notes: text("notes"),
-  status: mysqlEnum("status", ["new", "contacted", "booked", "not_interested", "no_answer"]).default("new").notNull(),
+  status: mysqlEnum("status", ["new", "contacted", "booked", "not_interested", "no_answer", "pending", "confirmed", "completed", "cancelled"]).default("new").notNull(),
   statusNotes: text("statusNotes"),
   source: varchar("source", { length: 100 }),
+  utmSource: varchar("utmSource", { length: 100 }),
+  utmMedium: varchar("utmMedium", { length: 100 }),
+  utmCampaign: varchar("utmCampaign", { length: 100 }),
+  utmTerm: varchar("utmTerm", { length: 100 }),
+  utmContent: varchar("utmContent", { length: 100 }),
+  utmPlacement: varchar("utmPlacement", { length: 100 }),
+  referrer: varchar("referrer", { length: 500 }),
+  fbclid: varchar("fbclid", { length: 255 }),
+  gclid: varchar("gclid", { length: 255 }),
+  receiptNumber: varchar("receiptNumber", { length: 50 }), // رقم السند التسلسلي
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  phoneIdx: index("offerLeads_phone_idx").on(table.phone),
+  emailIdx: index("offerLeads_email_idx").on(table.email),
+  statusIdx: index("offerLeads_status_idx").on(table.status),
+  createdAtIdx: index("offerLeads_createdAt_idx").on(table.createdAt),
+  offerIdIdx: index("offerLeads_offerId_idx").on(table.offerId),
+}));
 
 export type OfferLead = typeof offerLeads.$inferSelect;
 export type InsertOfferLead = typeof offerLeads.$inferInsert;
@@ -245,19 +308,680 @@ export type InsertOfferLead = typeof offerLeads.$inferInsert;
 export const campRegistrations = mysqlTable("campRegistrations", {
   id: int("id").autoincrement().primaryKey(),
   campId: int("campId").notNull(),
+  campaignId: int("campaignId"), // Optional: link to campaign
   fullName: varchar("fullName", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 20 }).notNull(),
   email: varchar("email", { length: 320 }),
   age: int("age"),
+  gender: mysqlEnum("gender", ["male", "female"]),
   procedures: text("procedures"), // JSON array of selected procedures
   medicalCondition: text("medicalCondition"),
   notes: text("notes"),
   status: mysqlEnum("status", ["pending", "confirmed", "attended", "cancelled"]).default("pending").notNull(),
   statusNotes: text("statusNotes"),
+  attendanceDate: timestamp("attendanceDate"),
   source: varchar("source", { length: 100 }),
+  utmSource: varchar("utmSource", { length: 100 }),
+  utmMedium: varchar("utmMedium", { length: 100 }),
+  utmCampaign: varchar("utmCampaign", { length: 100 }),
+  utmTerm: varchar("utmTerm", { length: 100 }),
+  utmContent: varchar("utmContent", { length: 100 }),
+  utmPlacement: varchar("utmPlacement", { length: 100 }),
+  referrer: varchar("referrer", { length: 500 }),
+  fbclid: varchar("fbclid", { length: 255 }),
+  gclid: varchar("gclid", { length: 255 }),
+  receiptNumber: varchar("receiptNumber", { length: 50 }), // رقم السند التسلسلي
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  phoneIdx: index("campRegistrations_phone_idx").on(table.phone),
+  emailIdx: index("campRegistrations_email_idx").on(table.email),
+  statusIdx: index("campRegistrations_status_idx").on(table.status),
+  createdAtIdx: index("campRegistrations_createdAt_idx").on(table.createdAt),
+  campIdIdx: index("campRegistrations_campId_idx").on(table.campId),
+}));
+
+export type CampRegistration = typeof campRegistrations.$inferSelect;
+export type InsertCampRegistration = typeof campRegistrations.$inferInsert;
+
+/**
+ * Teams table - stores team information
+ * جدول الفرق - يخزن معلومات الفرق
+ */
+export const teams = mysqlTable("teams", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  leaderId: int("leaderId"), // User ID of team leader
+  isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type CampRegistration = typeof campRegistrations.$inferSelect;
-export type InsertCampRegistration = typeof campRegistrations.$inferInsert;
+export type Team = typeof teams.$inferSelect;
+export type InsertTeam = typeof teams.$inferInsert;
+
+/**
+ * Team Members table - stores team membership
+ * جدول أعضاء الفرق - يخزن عضوية الفرق
+ */
+export const teamMembers = mysqlTable("teamMembers", {
+  id: int("id").autoincrement().primaryKey(),
+  teamId: int("teamId").notNull(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["leader", "member"]).default("member").notNull(),
+  joinedAt: timestamp("joinedAt").defaultNow().notNull(),
+});
+
+export type TeamMember = typeof teamMembers.$inferSelect;
+export type InsertTeamMember = typeof teamMembers.$inferInsert;
+
+/**
+ * Projects table - stores project/campaign information for task management
+ * جدول المشاريع - يخزن معلومات المشاريع/الحملات لإدارة المهام
+ */
+export const projects = mysqlTable("projects", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  startDate: timestamp("startDate"),
+  endDate: timestamp("endDate"),
+  status: mysqlEnum("status", ["planning", "active", "completed", "on_hold", "cancelled"]).default("planning").notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).default("medium").notNull(),
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
+
+/**
+ * Tasks table - stores task information for digital marketing team
+ * جدول المهام - يخزن معلومات مهام فريق التسويق الرقمي
+ */
+export const tasks = mysqlTable("tasks", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId"), // Optional: link to project
+  teamId: int("teamId"),
+  campaignId: int("campaignId"), // Link to campaign
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  assignedTo: int("assignedTo"), // User ID
+  priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).default("medium").notNull(),
+  status: mysqlEnum("status", ["todo", "in_progress", "review", "completed", "cancelled"]).default("todo").notNull(),
+  category: mysqlEnum("category", ["content", "design", "ads", "seo", "social_media", "analytics", "other"]).default("other").notNull(),
+  dueDate: timestamp("dueDate"),
+  completedAt: timestamp("completedAt"),
+  estimatedHours: int("estimatedHours"),
+  actualHours: int("actualHours"),
+  tags: text("tags"), // JSON array of tags
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Task = typeof tasks.$inferSelect;
+export type InsertTask = typeof tasks.$inferInsert;
+
+/**
+ * Task Deliverables table - stores task deliverables/submissions
+ * جدول تسليمات المهام - يخزن تسليمات/تقديمات المهام
+ */
+export const taskDeliverables = mysqlTable("taskDeliverables", {
+  id: int("id").autoincrement().primaryKey(),
+  taskId: int("taskId").notNull(),
+  userId: int("userId").notNull(), // Who submitted
+  fileUrl: varchar("fileUrl", { length: 500 }),
+  notes: text("notes"),
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "revision_needed"]).default("pending").notNull(),
+  reviewNotes: text("reviewNotes"),
+  submittedAt: timestamp("submittedAt").defaultNow().notNull(),
+  reviewedBy: int("reviewedBy"), // Who reviewed
+  reviewedAt: timestamp("reviewedAt"),
+});
+
+export type TaskDeliverable = typeof taskDeliverables.$inferSelect;
+export type InsertTaskDeliverable = typeof taskDeliverables.$inferInsert;
+
+/**
+ * Task Comments table - stores comments on tasks
+ * جدول تعليقات المهام - يخزن التعليقات على المهام
+ */
+export const taskComments = mysqlTable("task_comments", {
+  id: int("id").autoincrement().primaryKey(),
+  taskId: int("taskId").notNull(),
+  userId: int("userId").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TaskComment = typeof taskComments.$inferSelect;
+export type InsertTaskComment = typeof taskComments.$inferInsert;
+
+/**
+ * Task Attachments table - stores attachments/deliverables for tasks
+ * جدول مرفقات المهام - يخزن المرفقات والتسليمات للمهام
+ */
+export const taskAttachments = mysqlTable("task_attachments", {
+  id: int("id").autoincrement().primaryKey(),
+  taskId: int("taskId").notNull(),
+  userId: int("userId").notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileUrl: text("fileUrl").notNull(),
+  fileType: varchar("fileType", { length: 100 }),
+  fileSize: int("fileSize"),
+  attachmentType: mysqlEnum("attachmentType", ["deliverable", "reference", "other"]).default("other").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TaskAttachment = typeof taskAttachments.$inferSelect;
+export type InsertTaskAttachment = typeof taskAttachments.$inferInsert;
+
+/**
+ * WhatsApp Conversations table - stores all WhatsApp conversations
+ * جدول محادثات واتساب - يخزن جميع محادثات واتساب
+ */
+export const whatsappConversations = mysqlTable("whatsapp_conversations", {
+  id: int("id").autoincrement().primaryKey(),
+  phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
+  customerName: varchar("customerName", { length: 255 }),
+  lastMessage: text("lastMessage"),
+  lastMessageAt: timestamp("lastMessageAt"),
+  unreadCount: int("unreadCount").default(0).notNull(),
+  isImportant: int("isImportant").default(0).notNull(), // 0 = false, 1 = true
+  isArchived: int("isArchived").default(0).notNull(),
+  // Link to booking/appointment
+  leadId: int("leadId"),
+  appointmentId: int("appointmentId"),
+  offerLeadId: int("offerLeadId"),
+  campRegistrationId: int("campRegistrationId"),
+  assignedToUserId: int("assignedToUserId"), // Assigned staff member
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WhatsAppConversation = typeof whatsappConversations.$inferSelect;
+export type InsertWhatsAppConversation = typeof whatsappConversations.$inferInsert;
+
+/**
+ * WhatsApp Messages table - stores all messages in conversations
+ * جدول رسائل واتساب - يخزن جميع الرسائل في المحادثات
+ */
+export const whatsappMessages = mysqlTable("whatsapp_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  conversationId: int("conversationId").notNull(),
+  direction: mysqlEnum("direction", ["inbound", "outbound"]).notNull(),
+  content: text("content").notNull(),
+  messageType: mysqlEnum("messageType", ["text", "image", "document", "audio", "video", "location"]).default("text").notNull(),
+  mediaUrl: varchar("mediaUrl", { length: 500 }),
+  status: mysqlEnum("status", ["sent", "delivered", "read", "failed"]).default("sent").notNull(),
+  whatsappMessageId: varchar("whatsappMessageId", { length: 255 }), // WhatsApp API message ID
+  sentBy: int("sentBy"), // User ID who sent (for outbound)
+  isAutomated: int("isAutomated").default(0).notNull(), // 0 = manual, 1 = automated
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WhatsAppMessage = typeof whatsappMessages.$inferSelect;
+export type InsertWhatsAppMessage = typeof whatsappMessages.$inferInsert;
+
+/**
+ * WhatsApp Templates table - stores message templates
+ * جدول قوالب واتساب - يخزن قوالب الرسائل
+ */
+export const whatsappTemplates = mysqlTable("whatsapp_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  category: mysqlEnum("category", ["confirmation", "reminder", "thank_you", "follow_up", "cancellation", "custom"]).notNull(),
+  content: text("content").notNull(),
+  variables: text("variables"), // JSON array of variable names like ["name", "date", "time"]
+  isActive: int("isActive").default(1).notNull(),
+  usageCount: int("usageCount").default(0).notNull(),
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WhatsAppTemplate = typeof whatsappTemplates.$inferSelect;
+export type InsertWhatsAppTemplate = typeof whatsappTemplates.$inferInsert;
+
+/**
+ * WhatsApp Broadcasts table - stores broadcast campaigns
+ * جدول الرسائل الجماعية - يخزن حملات الرسائل الجماعية
+ */
+export const whatsappBroadcasts = mysqlTable("whatsapp_broadcasts", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  templateId: int("templateId"),
+  targetFilter: text("targetFilter"), // JSON filter criteria
+  recipientCount: int("recipientCount").default(0).notNull(),
+  sentCount: int("sentCount").default(0).notNull(),
+  deliveredCount: int("deliveredCount").default(0).notNull(),
+  readCount: int("readCount").default(0).notNull(),
+  failedCount: int("failedCount").default(0).notNull(),
+  status: mysqlEnum("status", ["draft", "scheduled", "sending", "completed", "failed"]).default("draft").notNull(),
+  scheduledAt: timestamp("scheduledAt"),
+  completedAt: timestamp("completedAt"),
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WhatsAppBroadcast = typeof whatsappBroadcasts.$inferSelect;
+export type InsertWhatsAppBroadcast = typeof whatsappBroadcasts.$inferInsert;
+
+/**
+ * WhatsApp Auto Replies table - stores automatic reply rules
+ * جدول الردود التلقائية - يخزن قواعد الردود التلقائية
+ */
+export const whatsappAutoReplies = mysqlTable("whatsapp_auto_replies", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  triggerType: mysqlEnum("triggerType", ["keyword", "outside_hours", "first_message", "faq"]).notNull(),
+  triggerValue: varchar("triggerValue", { length: 500 }), // Keyword or FAQ question
+  replyMessage: text("replyMessage").notNull(),
+  isActive: int("isActive").default(1).notNull(),
+  priority: int("priority").default(0).notNull(), // Higher priority rules are checked first
+  usageCount: int("usageCount").default(0).notNull(),
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WhatsAppAutoReply = typeof whatsappAutoReplies.$inferSelect;
+export type InsertWhatsAppAutoReply = typeof whatsappAutoReplies.$inferInsert;
+
+/**
+ * WhatsApp Analytics table - stores daily analytics data
+ * جدول تحليلات واتساب - يخزن بيانات التحليلات اليومية
+ */
+export const whatsappAnalytics = mysqlTable("whatsapp_analytics", {
+  id: int("id").autoincrement().primaryKey(),
+  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
+  messagesSent: int("messagesSent").default(0).notNull(),
+  messagesReceived: int("messagesReceived").default(0).notNull(),
+  conversationsStarted: int("conversationsStarted").default(0).notNull(),
+  averageResponseTime: int("averageResponseTime").default(0).notNull(), // in minutes
+  conversionRate: int("conversionRate").default(0).notNull(), // percentage * 100
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WhatsAppAnalytics = typeof whatsappAnalytics.$inferSelect;
+export type InsertWhatsAppAnalytics = typeof whatsappAnalytics.$inferInsert;
+
+/**
+ * Message Settings table - stores automated message configurations
+ * جدول إعدادات الرسائل - يخزن إعدادات الرسائل التلقائية
+ */
+export const messageSettings = mysqlTable("message_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  // Message Type Identifier
+  messageType: varchar("messageType", { length: 100 }).notNull().unique(),
+  // Display name in Arabic
+  displayName: varchar("displayName", { length: 255 }).notNull(),
+  // Category: patient_journey, executive_reports, task_management, doctor_notifications
+  category: mysqlEnum("category", ["patient_journey", "executive_reports", "task_management", "doctor_notifications"]).notNull(),
+  // Message content template
+  messageContent: text("messageContent").notNull(),
+  // Enabled/Disabled
+  isEnabled: int("isEnabled").default(1).notNull(), // 1 = enabled, 0 = disabled
+  // Delivery channel: whatsapp_api, whatsapp_integration, both
+  deliveryChannel: mysqlEnum("deliveryChannel", ["whatsapp_api", "whatsapp_integration", "both"]).default("whatsapp_integration").notNull(),
+  // Variables available in template (JSON array)
+  availableVariables: text("availableVariables"), // ["name", "date", "time", "doctor", "service"]
+  // Description
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MessageSetting = typeof messageSettings.$inferSelect;
+export type InsertMessageSetting = typeof messageSettings.$inferInsert;
+
+/**
+ * Message Templates table - stores WhatsApp Business API approved templates
+ * جدول قوالب الرسائل - يخزن القوالب المعتمدة من Meta لـ WhatsApp Business API
+ */
+export const messageTemplates = mysqlTable("message_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  // Template name in Meta (must match exactly)
+  templateName: varchar("templateName", { length: 255 }).notNull().unique(),
+  // Display name in Arabic for UI
+  displayName: varchar("displayName", { length: 255 }).notNull(),
+  // Template category in Meta
+  category: mysqlEnum("category", ["MARKETING", "UTILITY", "AUTHENTICATION"]).notNull(),
+  // Template language code (e.g., "ar", "en")
+  languageCode: varchar("languageCode", { length: 10 }).default("ar").notNull(),
+  // Template status from Meta
+  status: mysqlEnum("status", ["PENDING", "APPROVED", "REJECTED", "DISABLED"]).default("PENDING").notNull(),
+  // Template content (for reference)
+  headerText: text("headerText"),
+  bodyText: text("bodyText").notNull(),
+  footerText: text("footerText"),
+  // Buttons configuration (JSON)
+  buttons: text("buttons"), // [{"type": "QUICK_REPLY", "text": "تأكيد الحجز ✅"}, {"type": "QUICK_REPLY", "text": "إلغاء الحجز ❌"}]
+  // Variables in template (JSON array)
+  variables: text("variables"), // ["name", "date", "time", "doctor"]
+  // Meta template ID (if available)
+  metaTemplateId: varchar("metaTemplateId", { length: 255 }),
+  // Link to message_settings (optional)
+  linkedMessageType: varchar("linkedMessageType", { length: 100 }),
+  // Usage tracking
+  usageCount: int("usageCount").default(0).notNull(),
+  lastUsedAt: timestamp("lastUsedAt"),
+  // Metadata
+  description: text("description"),
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MessageTemplate = typeof messageTemplates.$inferSelect;
+export type InsertMessageTemplate = typeof messageTemplates.$inferInsert;
+
+/**
+ * Comments table - stores comments on various entities (appointments, leads, etc.)
+ * يخزن التعليقات على مختلف السجلات
+ */
+export const comments = mysqlTable("comments", {
+  id: int("id").autoincrement().primaryKey(),
+  // Entity type and ID (polymorphic relationship)
+  entityType: mysqlEnum("entityType", ["appointment", "lead", "offerLead", "campRegistration"]).notNull(),
+  entityId: int("entityId").notNull(),
+  // Comment content
+  content: text("content").notNull(),
+  // Author
+  userId: int("userId").notNull(),
+  userName: varchar("userName", { length: 255 }).notNull(),
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  entityIdx: index("comments_entity_idx").on(table.entityType, table.entityId),
+  createdAtIdx: index("comments_createdAt_idx").on(table.createdAt),
+}));
+
+export type Comment = typeof comments.$inferSelect;
+export type InsertComment = typeof comments.$inferInsert;
+
+/**
+ * Follow-up Tasks table - stores follow-up tasks for various entities
+ * جدول مهام المتابعة - يخزن مهام المتابعة للسجلات المختلفة
+ */
+export const followUpTasks = mysqlTable("followUpTasks", {
+  id: int("id").autoincrement().primaryKey(),
+  // Entity type and ID (polymorphic relationship)
+  entityType: mysqlEnum("entityType", ["appointment", "lead", "offerLead", "campRegistration"]).notNull(),
+  entityId: int("entityId").notNull(),
+  // Task details
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  // Status and priority
+  status: mysqlEnum("status", ["pending", "in_progress", "completed", "cancelled"]).default("pending").notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high"]).default("medium").notNull(),
+  // Due date
+  dueDate: timestamp("dueDate"),
+  // Assignment
+  assignedToId: int("assignedToId"),
+  assignedToName: varchar("assignedToName", { length: 255 }),
+  // Creator
+  createdById: int("createdById").notNull(),
+  createdByName: varchar("createdByName", { length: 255 }).notNull(),
+  // Completion
+  completedAt: timestamp("completedAt"),
+  completedById: int("completedById"),
+  completedByName: varchar("completedByName", { length: 255 }),
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  entityIdx: index("tasks_entity_idx").on(table.entityType, table.entityId),
+  statusIdx: index("tasks_status_idx").on(table.status),
+  dueDateIdx: index("tasks_dueDate_idx").on(table.dueDate),
+  assignedToIdx: index("tasks_assignedTo_idx").on(table.assignedToId),
+}));
+
+export type FollowUpTask = typeof followUpTasks.$inferSelect;
+export type InsertFollowUpTask = typeof followUpTasks.$inferInsert;
+
+/**
+ * User Preferences table - stores user-specific preferences and settings
+ * جدول تفضيلات المستخدم - يخزن إعدادات وتفضيلات كل مستخدم
+ */
+export const userPreferences = mysqlTable("userPreferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  // Preference key (e.g., 'appointmentVisibleColumns', 'offerLeadVisibleColumns')
+  preferenceKey: varchar("preferenceKey", { length: 100 }).notNull(),
+  // Preference value (JSON string)
+  preferenceValue: text("preferenceValue").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userKeyIdx: index("userPreferences_userKey_idx").on(table.userId, table.preferenceKey),
+}));
+
+export type UserPreference = typeof userPreferences.$inferSelect;
+export type InsertUserPreference = typeof userPreferences.$inferInsert;
+
+/**
+ * جدول القوالب المشتركة للأعمدة - يخزن القوالب التي ينشئها المدير وتظهر لجميع المستخدمين
+ */
+export const sharedColumnTemplates = mysqlTable("sharedColumnTemplates", {
+  id: int("id").autoincrement().primaryKey(),
+  /** اسم القالب */
+  name: varchar("name", { length: 100 }).notNull(),
+  /** نوع الجدول: appointments, offerLeads, campRegistrations */
+  tableKey: varchar("tableKey", { length: 50 }).notNull(),
+  /** إعدادات الأعمدة المرئية (JSON) */
+  columns: text("columns").notNull(),
+  /** معرف المستخدم الذي أنشأ القالب (المدير) */
+  createdBy: int("createdBy").notNull(),
+  /** اسم المنشئ */
+  createdByName: varchar("createdByName", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  tableKeyIdx: index("sharedColumnTemplates_tableKey_idx").on(table.tableKey),
+}));
+
+export type SharedColumnTemplate = typeof sharedColumnTemplates.$inferSelect;
+export type InsertSharedColumnTemplate = typeof sharedColumnTemplates.$inferInsert;
+
+
+/**
+ * جدول سجل التغييرات - يتتبع جميع التغييرات على السجلات
+ * Audit log table - tracks all changes to records
+ */
+export const auditLogs = mysqlTable("auditLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  /** نوع الكيان: appointment, offerLead, campRegistration, lead */
+  entityType: varchar("entityType", { length: 50 }).notNull(),
+  /** معرف الكيان */
+  entityId: int("entityId").notNull(),
+  /** نوع الإجراء: status_change, bulk_update, delete, create, update */
+  action: varchar("action", { length: 50 }).notNull(),
+  /** القيمة القديمة (JSON) */
+  oldValue: text("oldValue"),
+  /** القيمة الجديدة (JSON) */
+  newValue: text("newValue"),
+  /** معرف المستخدم الذي أجرى التغيير */
+  userId: int("userId"),
+  /** اسم المستخدم الذي أجرى التغيير */
+  userName: varchar("userName", { length: 255 }),
+  /** ملاحظات إضافية */
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  entityIdx: index("auditLogs_entity_idx").on(table.entityType, table.entityId),
+  actionIdx: index("auditLogs_action_idx").on(table.action),
+  userIdx: index("auditLogs_user_idx").on(table.userId),
+}));
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = typeof auditLogs.$inferInsert;
+
+/**
+ * جدول الفلاتر المحفوظة - يخزن إعدادات الفلاتر المفضلة للمستخدمين
+ * Saved filters table - stores user's favorite filter configurations
+ */
+export const savedFilters = mysqlTable("savedFilters", {
+  id: int("id").autoincrement().primaryKey(),
+  /** اسم الفلتر */
+  name: varchar("name", { length: 100 }).notNull(),
+  /** نوع الصفحة: appointments, offerLeads, campRegistrations */
+  pageType: varchar("pageType", { length: 50 }).notNull(),
+  /** إعدادات الفلاتر (JSON) */
+  filterConfig: text("filterConfig").notNull(),
+  /** معرف المستخدم */
+  userId: int("userId").notNull(),
+  /** هل هو فلتر افتراضي */
+  isDefault: boolean("isDefault").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userPageIdx: index("savedFilters_userPage_idx").on(table.userId, table.pageType),
+}));
+export type SavedFilter = typeof savedFilters.$inferSelect;
+export type InsertSavedFilter = typeof savedFilters.$inferInsert;
+
+
+/**
+ * جدول المرضى - يخزن بيانات المرضى المسجلين في بوابة المريض
+ * Patients table - stores patient portal registered users
+ */
+export const patients = mysqlTable("patients", {
+  id: int("id").autoincrement().primaryKey(),
+  /** الاسم الكامل */
+  fullName: varchar("fullName", { length: 255 }).notNull(),
+  /** رقم الهاتف (فريد - يستخدم لتسجيل الدخول) */
+  phone: varchar("phone", { length: 20 }).notNull().unique(),
+  /** العنوان */
+  address: text("address"),
+  /** العمر */
+  age: int("age"),
+  /** الجنس */
+  gender: mysqlEnum("gender", ["male", "female"]).notNull(),
+  /** البريد الإلكتروني (اختياري) */
+  email: varchar("email", { length: 320 }),
+  /** حالة الحساب */
+  isActive: boolean("isActive").default(true).notNull(),
+  /** آخر تسجيل دخول */
+  lastLoginAt: timestamp("lastLoginAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  phoneIdx: index("patients_phone_idx").on(table.phone),
+}));
+
+export type Patient = typeof patients.$inferSelect;
+export type InsertPatient = typeof patients.$inferInsert;
+
+/**
+ * جدول رموز التحقق للمرضى - يخزن رموز OTP لتسجيل الدخول
+ * Patient OTP table - stores one-time passwords for patient login
+ */
+export const patientOtps = mysqlTable("patientOtps", {
+  id: int("id").autoincrement().primaryKey(),
+  /** رقم الهاتف */
+  phone: varchar("phone", { length: 20 }).notNull(),
+  /** رمز التحقق */
+  code: varchar("code", { length: 6 }).notNull(),
+  /** تاريخ الانتهاء */
+  expiresAt: timestamp("expiresAt").notNull(),
+  /** هل تم استخدامه */
+  isUsed: boolean("isUsed").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  phoneIdx: index("patientOtps_phone_idx").on(table.phone),
+}));
+
+export type PatientOtp = typeof patientOtps.$inferSelect;
+export type InsertPatientOtp = typeof patientOtps.$inferInsert;
+
+/**
+ * جدول نتائج المريض - يخزن نتائج التحاليل والأشعة والتقارير
+ * Patient Results table - stores lab results, radiology, and reports
+ */
+export const patientResults = mysqlTable("patientResults", {
+  id: int("id").autoincrement().primaryKey(),
+  /** معرف المريض */
+  patientId: int("patientId").notNull(),
+  /** نوع النتيجة */
+  resultType: mysqlEnum("resultType", ["lab", "radiology", "report"]).notNull(),
+  /** عنوان النتيجة */
+  title: varchar("title", { length: 255 }).notNull(),
+  /** وصف */
+  description: text("description"),
+  /** رابط الملف */
+  fileUrl: varchar("fileUrl", { length: 500 }),
+  /** اسم الطبيب */
+  doctorName: varchar("doctorName", { length: 255 }),
+  /** تاريخ النتيجة */
+  resultDate: timestamp("resultDate"),
+  /** حالة النتيجة */
+  status: mysqlEnum("status", ["pending", "ready", "delivered"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  patientIdx: index("patientResults_patient_idx").on(table.patientId),
+}));
+
+export type PatientResult = typeof patientResults.$inferSelect;
+export type InsertPatientResult = typeof patientResults.$inferInsert;
+
+/**
+ * Campaign-Offers linking table (many-to-many)
+ * جدول ربط الحملات بالعروض
+ */
+export const campaignOffers = mysqlTable("campaignOffers", {
+  id: int("id").autoincrement().primaryKey(),
+  campaignId: int("campaignId").notNull(),
+  offerId: int("offerId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  campaignIdx: index("campaignOffers_campaign_idx").on(table.campaignId),
+  offerIdx: index("campaignOffers_offer_idx").on(table.offerId),
+  uniqueIdx: index("campaignOffers_unique_idx").on(table.campaignId, table.offerId),
+}));
+
+export type CampaignOffer = typeof campaignOffers.$inferSelect;
+export type InsertCampaignOffer = typeof campaignOffers.$inferInsert;
+
+/**
+ * Campaign-Camps linking table (many-to-many)
+ * جدول ربط الحملات بالمخيمات
+ */
+export const campaignCamps = mysqlTable("campaignCamps", {
+  id: int("id").autoincrement().primaryKey(),
+  campaignId: int("campaignId").notNull(),
+  campId: int("campId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  campaignIdx: index("campaignCamps_campaign_idx").on(table.campaignId),
+  campIdx: index("campaignCamps_camp_idx").on(table.campId),
+  uniqueIdx: index("campaignCamps_unique_idx").on(table.campaignId, table.campId),
+}));
+
+export type CampaignCamp = typeof campaignCamps.$inferSelect;
+export type InsertCampaignCamp = typeof campaignCamps.$inferInsert;
+
+/**
+ * Campaign-Doctors linking table (many-to-many)
+ * جدول ربط الحملات بالأطباء
+ */
+export const campaignDoctors = mysqlTable("campaignDoctors", {
+  id: int("id").autoincrement().primaryKey(),
+  campaignId: int("campaignId").notNull(),
+  doctorId: int("doctorId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  campaignIdx: index("campaignDoctors_campaign_idx").on(table.campaignId),
+  doctorIdx: index("campaignDoctors_doctor_idx").on(table.doctorId),
+  uniqueIdx: index("campaignDoctors_unique_idx").on(table.campaignId, table.doctorId),
+}));
+
+export type CampaignDoctor = typeof campaignDoctors.$inferSelect;
+export type InsertCampaignDoctor = typeof campaignDoctors.$inferInsert;

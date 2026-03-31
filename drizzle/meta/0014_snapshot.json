@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "64ccc6d5-362a-4eb2-a176-516a59783ad1",
+  "id": "89aa4add-a440-4062-9505-f95e2ae31d6a",
   "prevId": "52ec2a20-be6b-49b8-876b-d3f61455351e",
   "tables": {
     "accessRequests": {
@@ -313,6 +313,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "gender": {
+          "name": "gender",
+          "type": "enum('male','female')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "procedures": {
           "name": "procedures",
           "type": "text",
@@ -345,6 +352,13 @@
         "statusNotes": {
           "name": "statusNotes",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "attendanceDate": {
+          "name": "attendanceDate",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
