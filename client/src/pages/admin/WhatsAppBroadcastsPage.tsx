@@ -102,14 +102,14 @@ function WhatsAppBroadcastsContent() {
                 </div>
                 <div>
                   <Label>قالب جاهز (اختياري)</Label>
-                  <Select value={templateId ?? ""} onValueChange={(v: any) => setTemplateId(v ? Number(v) : null)}>
+                  <Select value={templateId ? String(templateId) : ""} onValueChange={(v: any) => setTemplateId(v ? Number(v) : null)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">لا يوجد</SelectItem>
                       {templates?.map((t: any) => (
-                        <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>
+                        <SelectItem key={t.id} value={String(t.id) || ""}>{t.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

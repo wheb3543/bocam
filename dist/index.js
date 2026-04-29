@@ -3177,11 +3177,11 @@ var SDKServer = class {
       throw ForbiddenError("User not found");
     }
     if (user.email) {
-      const { eq: eq23 } = await import("drizzle-orm");
+      const { eq: eq24 } = await import("drizzle-orm");
       const { users: users2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
       const dbConn = await getDb();
       if (dbConn) {
-        await dbConn.update(users2).set({ lastSignedIn: signedInAt }).where(eq23(users2.email, user.email));
+        await dbConn.update(users2).set({ lastSignedIn: signedInAt }).where(eq24(users2.email, user.email));
       }
     }
     return user;
@@ -3235,11 +3235,11 @@ function registerOAuthRoutes(app) {
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
       const user = await getUserByEmail(userEmail);
       if (user && user.id) {
-        const { eq: eq23 } = await import("drizzle-orm");
+        const { eq: eq24 } = await import("drizzle-orm");
         const { users: users2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
         const dbConn = await getDb();
         if (dbConn) {
-          await dbConn.update(users2).set({ lastSignedIn: /* @__PURE__ */ new Date() }).where(eq23(users2.id, user.id));
+          await dbConn.update(users2).set({ lastSignedIn: /* @__PURE__ */ new Date() }).where(eq24(users2.id, user.id));
         }
       }
       res.redirect(302, "/admin");
@@ -3470,7 +3470,7 @@ function createWebhookRouter() {
 init_db();
 init_schema();
 import { z as z25 } from "zod";
-import { eq as eq22 } from "drizzle-orm";
+import { eq as eq23 } from "drizzle-orm";
 
 // server/_core/systemRouter.ts
 import { z } from "zod";
@@ -6073,6 +6073,7 @@ var whatsappRouter = router({
 
 // server/routers/whatsappBroadcasts.ts
 import { z as z13 } from "zod";
+import { eq as eq13 } from "drizzle-orm";
 var whatsappBroadcastsRouter = router({
   list: protectedProcedure.query(async () => {
     const { getDb: getDb2 } = await Promise.resolve().then(() => (init_db(), db_exports));
@@ -6086,7 +6087,7 @@ var whatsappBroadcastsRouter = router({
     const db = await getDb2();
     if (!db) return null;
     const { whatsappBroadcasts: whatsappBroadcasts2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
-    const res = await db.select().from(whatsappBroadcasts2).where(whatsappBroadcasts2.id.eq(input.id)).limit(1);
+    const res = await db.select().from(whatsappBroadcasts2).where(eq13(whatsappBroadcasts2.id, input.id)).limit(1);
     return res[0] || null;
   }),
   create: protectedProcedure.input(z13.object({ name: z13.string(), message: z13.string(), templateId: z13.number().optional(), targetFilter: z13.string().optional(), scheduledAt: z13.string().optional() })).mutation(async ({ ctx, input }) => {
@@ -6116,7 +6117,7 @@ var whatsappBroadcastsRouter = router({
     if (typeof input.targetFilter !== "undefined") updateObj.targetFilter = input.targetFilter;
     if (typeof input.scheduledAt !== "undefined") updateObj.scheduledAt = input.scheduledAt ? new Date(input.scheduledAt) : null;
     if (typeof input.status !== "undefined") updateObj.status = input.status;
-    await db.update(whatsappBroadcasts2).set(updateObj).where(whatsappBroadcasts2.id.eq(input.id));
+    await db.update(whatsappBroadcasts2).set(updateObj).where(eq13(whatsappBroadcasts2.id, input.id));
     return { success: true };
   }),
   delete: protectedProcedure.input(z13.object({ id: z13.number() })).mutation(async ({ input }) => {
@@ -6124,7 +6125,7 @@ var whatsappBroadcastsRouter = router({
     const db = await getDb2();
     if (!db) throw new Error("Database not available");
     const { whatsappBroadcasts: whatsappBroadcasts2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
-    await db.delete(whatsappBroadcasts2).where(whatsappBroadcasts2.id.eq(input.id));
+    await db.delete(whatsappBroadcasts2).where(eq13(whatsappBroadcasts2.id, input.id));
     return { success: true };
   })
 });
@@ -6183,7 +6184,7 @@ import { z as z15 } from "zod";
 init_db();
 init_schema();
 import { TRPCError as TRPCError4 } from "@trpc/server";
-import { eq as eq13 } from "drizzle-orm";
+import { eq as eq14 } from "drizzle-orm";
 var verifyWebhookSchema = z15.object({
   "hub.mode": z15.string(),
   "hub.verify_token": z15.string(),
@@ -6309,15 +6310,15 @@ var webhooksRouter = router({
               }
               if (type === "APPOINTMENT") {
                 const newStatus = action === "CONFIRM" ? "confirmed" : "cancelled";
-                await db.update(appointments).set({ status: newStatus, updatedAt: /* @__PURE__ */ new Date() }).where(eq13(appointments.id, bookingId));
+                await db.update(appointments).set({ status: newStatus, updatedAt: /* @__PURE__ */ new Date() }).where(eq14(appointments.id, bookingId));
                 console.log(`[Webhook] Appointment ${bookingId} updated to ${newStatus}`);
               } else if (type === "OFFER") {
                 const newStatus = action === "CONFIRM" ? "confirmed" : "cancelled";
-                await db.update(offerLeads).set({ status: newStatus, updatedAt: /* @__PURE__ */ new Date() }).where(eq13(offerLeads.id, bookingId));
+                await db.update(offerLeads).set({ status: newStatus, updatedAt: /* @__PURE__ */ new Date() }).where(eq14(offerLeads.id, bookingId));
                 console.log(`[Webhook] Offer lead ${bookingId} updated to ${newStatus}`);
               } else if (type === "CAMP") {
                 const newStatus = action === "CONFIRM" ? "confirmed" : "cancelled";
-                await db.update(campRegistrations).set({ status: newStatus, updatedAt: /* @__PURE__ */ new Date() }).where(eq13(campRegistrations.id, bookingId));
+                await db.update(campRegistrations).set({ status: newStatus, updatedAt: /* @__PURE__ */ new Date() }).where(eq14(campRegistrations.id, bookingId));
                 console.log(`[Webhook] Camp registration ${bookingId} updated to ${newStatus}`);
               }
             } else if (message.type === "text" && message.text) {
@@ -6343,7 +6344,7 @@ import { z as z16 } from "zod";
 // server/comments.ts
 init_schema();
 init_db();
-import { eq as eq14, and as and8, desc as desc8 } from "drizzle-orm";
+import { eq as eq15, and as and9, desc as desc8 } from "drizzle-orm";
 async function getCommentsByEntity(entityType, entityId) {
   const db = await getDb();
   if (!db) {
@@ -6351,7 +6352,7 @@ async function getCommentsByEntity(entityType, entityId) {
     return [];
   }
   try {
-    const result = await db.select().from(comments).where(and8(eq14(comments.entityType, entityType), eq14(comments.entityId, entityId))).orderBy(desc8(comments.createdAt));
+    const result = await db.select().from(comments).where(and9(eq15(comments.entityType, entityType), eq15(comments.entityId, entityId))).orderBy(desc8(comments.createdAt));
     return result;
   } catch (error) {
     console.error("[Database] Failed to get comments:", error);
@@ -6377,14 +6378,14 @@ async function deleteComment(commentId, userId, isAdmin = false) {
     throw new Error("Database not available");
   }
   try {
-    const [comment] = await db.select().from(comments).where(eq14(comments.id, commentId)).limit(1);
+    const [comment] = await db.select().from(comments).where(eq15(comments.id, commentId)).limit(1);
     if (!comment) {
       throw new Error("Comment not found");
     }
     if (comment.userId !== userId && !isAdmin) {
       throw new Error("Unauthorized to delete this comment");
     }
-    await db.delete(comments).where(eq14(comments.id, commentId));
+    await db.delete(comments).where(eq15(comments.id, commentId));
     return { success: true };
   } catch (error) {
     console.error("[Database] Failed to delete comment:", error);
@@ -6397,7 +6398,7 @@ async function getCommentCount(entityType, entityId) {
     return 0;
   }
   try {
-    const result = await db.select().from(comments).where(and8(eq14(comments.entityType, entityType), eq14(comments.entityId, entityId)));
+    const result = await db.select().from(comments).where(and9(eq15(comments.entityType, entityType), eq15(comments.entityId, entityId)));
     return result.length;
   } catch (error) {
     console.error("[Database] Failed to get comment count:", error);
@@ -6463,7 +6464,7 @@ import { z as z17 } from "zod";
 // server/followUpTasks.ts
 init_db();
 init_schema();
-import { eq as eq15, and as and9, desc as desc9 } from "drizzle-orm";
+import { eq as eq16, and as and10, desc as desc9 } from "drizzle-orm";
 async function createFollowUpTask(task) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -6474,9 +6475,9 @@ async function getFollowUpTasksByEntity(entityType, entityId) {
   const db = await getDb();
   if (!db) return [];
   const tasks2 = await db.select().from(followUpTasks).where(
-    and9(
-      eq15(followUpTasks.entityType, entityType),
-      eq15(followUpTasks.entityId, entityId)
+    and10(
+      eq16(followUpTasks.entityType, entityType),
+      eq16(followUpTasks.entityId, entityId)
     )
   ).orderBy(desc9(followUpTasks.createdAt));
   return tasks2;
@@ -6485,9 +6486,9 @@ async function getFollowUpTaskCount(entityType, entityId) {
   const db = await getDb();
   if (!db) return 0;
   const tasks2 = await db.select().from(followUpTasks).where(
-    and9(
-      eq15(followUpTasks.entityType, entityType),
-      eq15(followUpTasks.entityId, entityId)
+    and10(
+      eq16(followUpTasks.entityType, entityType),
+      eq16(followUpTasks.entityId, entityId)
     )
   );
   return tasks2.length;
@@ -6504,12 +6505,12 @@ async function updateFollowUpTaskStatus(taskId, status, completedById, completed
     if (completedById) updateData.completedById = completedById;
     if (completedByName) updateData.completedByName = completedByName;
   }
-  await db.update(followUpTasks).set(updateData).where(eq15(followUpTasks.id, taskId));
+  await db.update(followUpTasks).set(updateData).where(eq16(followUpTasks.id, taskId));
 }
 async function deleteFollowUpTask(taskId) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.delete(followUpTasks).where(eq15(followUpTasks.id, taskId));
+  await db.delete(followUpTasks).where(eq16(followUpTasks.id, taskId));
 }
 
 // server/routers/followUpTasks.ts
@@ -6595,7 +6596,7 @@ var followUpTasksRouter = router({
 init_db();
 init_schema();
 import { z as z18 } from "zod";
-import { eq as eq16 } from "drizzle-orm";
+import { eq as eq17 } from "drizzle-orm";
 init_db();
 
 // server/email.ts
@@ -7053,7 +7054,7 @@ var appointmentsRouter = router({
     const dbForAudit = await getDb();
     let oldStatus = "";
     if (dbForAudit) {
-      const [old] = await dbForAudit.select({ status: appointments.status }).from(appointments).where(eq16(appointments.id, input.id)).limit(1);
+      const [old] = await dbForAudit.select({ status: appointments.status }).from(appointments).where(eq17(appointments.id, input.id)).limit(1);
       oldStatus = old?.status || "";
     }
     await updateAppointmentStatus(input.id, input.status, input.staffNotes);
@@ -7073,7 +7074,7 @@ var appointmentsRouter = router({
     if (input.status === "\u062D\u0636\u0631" || input.status === "attended") {
       const db = await getDb();
       if (db) {
-        const [appointment] = await db.select().from(appointments).where(eq16(appointments.id, input.id)).limit(1);
+        const [appointment] = await db.select().from(appointments).where(eq17(appointments.id, input.id)).limit(1);
         if (appointment && appointment.phone) {
           const { sendPatientArrivalWelcome: sendPatientArrivalWelcome2 } = await Promise.resolve().then(() => (init_messaging(), messaging_exports));
           const doctor = await getDoctorById(appointment.doctorId || 0);
@@ -7106,7 +7107,7 @@ var appointmentsRouter = router({
     if (input.staffNotes !== void 0) {
       updateData.staffNotes = input.staffNotes;
     }
-    await db.update(appointments).set(updateData).where(eq16(appointments.id, input.id));
+    await db.update(appointments).set(updateData).where(eq17(appointments.id, input.id));
     serverCache.invalidateByPrefix("paginated:appointments:");
     serverCache.invalidate("list:appointments");
     return { success: true };
@@ -7117,7 +7118,7 @@ var appointmentsRouter = router({
   })).mutation(async ({ input }) => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
-    const appointment = await db.select().from(appointments).where(eq16(appointments.id, input.appointmentId)).limit(1);
+    const appointment = await db.select().from(appointments).where(eq17(appointments.id, input.appointmentId)).limit(1);
     if (appointment.length === 0) {
       throw new Error("\u0627\u0644\u062D\u062C\u0632 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F");
     }
@@ -7161,7 +7162,7 @@ var appointmentsRouter = router({
   })).mutation(async ({ input }) => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
-    const [appointment] = await db.select().from(appointments).where(eq16(appointments.id, input.id)).limit(1);
+    const [appointment] = await db.select().from(appointments).where(eq17(appointments.id, input.id)).limit(1);
     if (!appointment) {
       throw new Error("\u0627\u0644\u062D\u062C\u0632 \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F");
     }
@@ -7179,7 +7180,7 @@ var appointmentsRouter = router({
     const sequenceNumber = count3 + 1;
     const paddedNumber = String(sequenceNumber).padStart(3, "0");
     const receiptNumber = `SGH-${year}-${paddedNumber}`;
-    await db.update(appointments).set({ receiptNumber }).where(eq16(appointments.id, input.id));
+    await db.update(appointments).set({ receiptNumber }).where(eq17(appointments.id, input.id));
     return { receiptNumber };
   })
 });
@@ -7491,7 +7492,7 @@ async function getCombinedSocialMediaStats() {
 // server/cron/deactivateExpired.ts
 init_db();
 init_schema();
-import { eq as eq17, and as and10, lte as lte4 } from "drizzle-orm";
+import { eq as eq18, and as and11, lte as lte5 } from "drizzle-orm";
 async function deactivateExpiredOffers() {
   const db = await getDb();
   if (!db) {
@@ -7501,9 +7502,9 @@ async function deactivateExpiredOffers() {
   try {
     const now = /* @__PURE__ */ new Date();
     const expiredOffers = await db.select().from(offers).where(
-      and10(
-        eq17(offers.isActive, true),
-        lte4(offers.endDate, now)
+      and11(
+        eq18(offers.isActive, true),
+        lte5(offers.endDate, now)
       )
     );
     if (expiredOffers.length === 0) {
@@ -7511,7 +7512,7 @@ async function deactivateExpiredOffers() {
       return { success: true, deactivated: 0 };
     }
     for (const offer of expiredOffers) {
-      await db.update(offers).set({ isActive: false }).where(eq17(offers.id, offer.id));
+      await db.update(offers).set({ isActive: false }).where(eq18(offers.id, offer.id));
       console.log(`[Cron] Deactivated expired offer: ${offer.title} (ID: ${offer.id})`);
     }
     console.log(`[Cron] Deactivated ${expiredOffers.length} expired offer(s)`);
@@ -7530,9 +7531,9 @@ async function deactivateExpiredCamps() {
   try {
     const now = /* @__PURE__ */ new Date();
     const expiredCamps = await db.select().from(camps).where(
-      and10(
-        eq17(camps.isActive, true),
-        lte4(camps.endDate, now)
+      and11(
+        eq18(camps.isActive, true),
+        lte5(camps.endDate, now)
       )
     );
     if (expiredCamps.length === 0) {
@@ -7540,7 +7541,7 @@ async function deactivateExpiredCamps() {
       return { success: true, deactivated: 0 };
     }
     for (const camp of expiredCamps) {
-      await db.update(camps).set({ isActive: false }).where(eq17(camps.id, camp.id));
+      await db.update(camps).set({ isActive: false }).where(eq18(camps.id, camp.id));
       console.log(`[Cron] Deactivated expired camp: ${camp.name} (ID: ${camp.id})`);
     }
     console.log(`[Cron] Deactivated ${expiredCamps.length} expired camp(s)`);
@@ -7639,7 +7640,7 @@ var queueRouter = router({
 import { z as z21 } from "zod";
 init_db();
 init_schema();
-import { eq as eq18, desc as desc10, sql as sql6 } from "drizzle-orm";
+import { eq as eq19, desc as desc10, sql as sql6 } from "drizzle-orm";
 async function getCustomerByPhone(phone) {
   const db = await getDb();
   if (!db) return null;
@@ -7659,8 +7660,8 @@ async function getCustomerByPhone(phone) {
       createdAt: appointments.createdAt,
       doctorName: doctors.name,
       doctorSpecialty: doctors.specialty
-    }).from(appointments).leftJoin(doctors, eq18(appointments.doctorId, doctors.id)).where(eq18(appointments.phone, normalizedPhone)).orderBy(desc10(appointments.createdAt)),
-    db.select().from(leads).where(eq18(leads.phone, normalizedPhone)).orderBy(desc10(leads.createdAt)),
+    }).from(appointments).leftJoin(doctors, eq19(appointments.doctorId, doctors.id)).where(eq19(appointments.phone, normalizedPhone)).orderBy(desc10(appointments.createdAt)),
+    db.select().from(leads).where(eq19(leads.phone, normalizedPhone)).orderBy(desc10(leads.createdAt)),
     db.select({
       id: offerLeads.id,
       fullName: offerLeads.fullName,
@@ -7672,7 +7673,7 @@ async function getCustomerByPhone(phone) {
       offerId: offerLeads.offerId,
       createdAt: offerLeads.createdAt,
       offerTitle: offers.title
-    }).from(offerLeads).leftJoin(offers, eq18(offerLeads.offerId, offers.id)).where(eq18(offerLeads.phone, normalizedPhone)).orderBy(desc10(offerLeads.createdAt)),
+    }).from(offerLeads).leftJoin(offers, eq19(offerLeads.offerId, offers.id)).where(eq19(offerLeads.phone, normalizedPhone)).orderBy(desc10(offerLeads.createdAt)),
     db.select({
       id: campRegistrations.id,
       fullName: campRegistrations.fullName,
@@ -7685,7 +7686,7 @@ async function getCustomerByPhone(phone) {
       procedures: campRegistrations.procedures,
       createdAt: campRegistrations.createdAt,
       campName: camps.name
-    }).from(campRegistrations).leftJoin(camps, eq18(campRegistrations.campId, camps.id)).where(eq18(campRegistrations.phone, normalizedPhone)).orderBy(desc10(campRegistrations.createdAt))
+    }).from(campRegistrations).leftJoin(camps, eq19(campRegistrations.campId, camps.id)).where(eq19(campRegistrations.phone, normalizedPhone)).orderBy(desc10(campRegistrations.createdAt))
   ]);
   const allRecords = [
     ...appointmentRecords.map((r) => ({ name: r.fullName, email: r.email, date: r.createdAt })),
@@ -7789,7 +7790,7 @@ var customersRouter = router({
 import { z as z22 } from "zod";
 init_db();
 init_schema();
-import { eq as eq19, and as and12, desc as desc11 } from "drizzle-orm";
+import { eq as eq20, and as and13, desc as desc11 } from "drizzle-orm";
 var savedFiltersRouter = router({
   /**
    * Get saved filters for a specific page type
@@ -7800,9 +7801,9 @@ var savedFiltersRouter = router({
   })).query(async ({ ctx, input }) => {
     const db = await getDb();
     if (!db) return [];
-    return db.select().from(savedFilters).where(and12(
-      eq19(savedFilters.userId, ctx.user.id),
-      eq19(savedFilters.pageType, input.pageType)
+    return db.select().from(savedFilters).where(and13(
+      eq20(savedFilters.userId, ctx.user.id),
+      eq20(savedFilters.pageType, input.pageType)
     )).orderBy(desc11(savedFilters.updatedAt));
   }),
   /**
@@ -7819,9 +7820,9 @@ var savedFiltersRouter = router({
     const db = await getDb();
     if (!db) throw new Error("Database not available");
     if (input.isDefault) {
-      await db.update(savedFilters).set({ isDefault: false }).where(and12(
-        eq19(savedFilters.userId, ctx.user.id),
-        eq19(savedFilters.pageType, input.pageType)
+      await db.update(savedFilters).set({ isDefault: false }).where(and13(
+        eq20(savedFilters.userId, ctx.user.id),
+        eq20(savedFilters.pageType, input.pageType)
       ));
     }
     const result = await db.insert(savedFilters).values({
@@ -7847,20 +7848,20 @@ var savedFiltersRouter = router({
     if (!db) throw new Error("Database not available");
     const { id, ...updateData } = input;
     if (updateData.isDefault) {
-      const filter = await db.select().from(savedFilters).where(and12(
-        eq19(savedFilters.id, id),
-        eq19(savedFilters.userId, ctx.user.id)
+      const filter = await db.select().from(savedFilters).where(and13(
+        eq20(savedFilters.id, id),
+        eq20(savedFilters.userId, ctx.user.id)
       )).limit(1);
       if (filter.length > 0) {
-        await db.update(savedFilters).set({ isDefault: false }).where(and12(
-          eq19(savedFilters.userId, ctx.user.id),
-          eq19(savedFilters.pageType, filter[0].pageType)
+        await db.update(savedFilters).set({ isDefault: false }).where(and13(
+          eq20(savedFilters.userId, ctx.user.id),
+          eq20(savedFilters.pageType, filter[0].pageType)
         ));
       }
     }
-    await db.update(savedFilters).set(updateData).where(and12(
-      eq19(savedFilters.id, id),
-      eq19(savedFilters.userId, ctx.user.id)
+    await db.update(savedFilters).set(updateData).where(and13(
+      eq20(savedFilters.id, id),
+      eq20(savedFilters.userId, ctx.user.id)
     ));
     return { success: true };
   }),
@@ -7873,9 +7874,9 @@ var savedFiltersRouter = router({
   })).mutation(async ({ ctx, input }) => {
     const db = await getDb();
     if (!db) throw new Error("Database not available");
-    await db.delete(savedFilters).where(and12(
-      eq19(savedFilters.id, input.id),
-      eq19(savedFilters.userId, ctx.user.id)
+    await db.delete(savedFilters).where(and13(
+      eq20(savedFilters.id, input.id),
+      eq20(savedFilters.userId, ctx.user.id)
     ));
     return { success: true };
   })
@@ -8233,17 +8234,17 @@ import jwt from "jsonwebtoken";
 // server/db/patients.ts
 init_db();
 init_schema();
-import { eq as eq21, and as and14, gt, desc as desc12 } from "drizzle-orm";
+import { eq as eq22, and as and15, gt, desc as desc12 } from "drizzle-orm";
 async function getPatientByPhone(phone) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(patients).where(eq21(patients.phone, phone)).limit(1);
+  const result = await db.select().from(patients).where(eq22(patients.phone, phone)).limit(1);
   return result.length > 0 ? result[0] : null;
 }
 async function getPatientById(id) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(patients).where(eq21(patients.id, id)).limit(1);
+  const result = await db.select().from(patients).where(eq22(patients.id, id)).limit(1);
   return result.length > 0 ? result[0] : null;
 }
 async function createPatient(data) {
@@ -8262,7 +8263,7 @@ async function createPatient(data) {
 async function updatePatientLastLogin(patientId) {
   const db = await getDb();
   if (!db) return;
-  await db.update(patients).set({ lastLoginAt: /* @__PURE__ */ new Date() }).where(eq21(patients.id, patientId));
+  await db.update(patients).set({ lastLoginAt: /* @__PURE__ */ new Date() }).where(eq22(patients.id, patientId));
 }
 async function updatePatientProfile(patientId, data) {
   const db = await getDb();
@@ -8273,7 +8274,7 @@ async function updatePatientProfile(patientId, data) {
   if (data.age !== void 0) updateData.age = data.age;
   if (data.email !== void 0) updateData.email = data.email;
   if (Object.keys(updateData).length > 0) {
-    await db.update(patients).set(updateData).where(eq21(patients.id, patientId));
+    await db.update(patients).set(updateData).where(eq22(patients.id, patientId));
   }
   return getPatientById(patientId);
 }
@@ -8282,7 +8283,7 @@ async function createOtp(phone) {
   if (!db) throw new Error("Database not available");
   const code = Math.floor(1e5 + Math.random() * 9e5).toString();
   const expiresAt = new Date(Date.now() + 5 * 60 * 1e3);
-  await db.update(patientOtps).set({ isUsed: true }).where(and14(eq21(patientOtps.phone, phone), eq21(patientOtps.isUsed, false)));
+  await db.update(patientOtps).set({ isUsed: true }).where(and15(eq22(patientOtps.phone, phone), eq22(patientOtps.isUsed, false)));
   await db.insert(patientOtps).values({
     phone,
     code,
@@ -8294,39 +8295,39 @@ async function verifyOtp(phone, code) {
   const db = await getDb();
   if (!db) return false;
   const result = await db.select().from(patientOtps).where(
-    and14(
-      eq21(patientOtps.phone, phone),
-      eq21(patientOtps.code, code),
-      eq21(patientOtps.isUsed, false),
+    and15(
+      eq22(patientOtps.phone, phone),
+      eq22(patientOtps.code, code),
+      eq22(patientOtps.isUsed, false),
       gt(patientOtps.expiresAt, /* @__PURE__ */ new Date())
     )
   ).limit(1);
   if (result.length === 0) return false;
-  await db.update(patientOtps).set({ isUsed: true }).where(eq21(patientOtps.id, result[0].id));
+  await db.update(patientOtps).set({ isUsed: true }).where(eq22(patientOtps.id, result[0].id));
   return true;
 }
 async function getPatientAppointments(phone) {
   const db = await getDb();
   if (!db) return [];
-  const result = await db.select().from(appointments).where(eq21(appointments.phone, phone)).orderBy(desc12(appointments.createdAt));
+  const result = await db.select().from(appointments).where(eq22(appointments.phone, phone)).orderBy(desc12(appointments.createdAt));
   return result;
 }
 async function getPatientOfferLeads(phone) {
   const db = await getDb();
   if (!db) return [];
-  const result = await db.select().from(offerLeads).where(eq21(offerLeads.phone, phone)).orderBy(desc12(offerLeads.createdAt));
+  const result = await db.select().from(offerLeads).where(eq22(offerLeads.phone, phone)).orderBy(desc12(offerLeads.createdAt));
   return result;
 }
 async function getPatientCampRegistrations(phone) {
   const db = await getDb();
   if (!db) return [];
-  const result = await db.select().from(campRegistrations).where(eq21(campRegistrations.phone, phone)).orderBy(desc12(campRegistrations.createdAt));
+  const result = await db.select().from(campRegistrations).where(eq22(campRegistrations.phone, phone)).orderBy(desc12(campRegistrations.createdAt));
   return result;
 }
 async function getPatientResults(patientId) {
   const db = await getDb();
   if (!db) return [];
-  const result = await db.select().from(patientResults).where(eq21(patientResults.patientId, patientId)).orderBy(desc12(patientResults.createdAt));
+  const result = await db.select().from(patientResults).where(eq22(patientResults.patientId, patientId)).orderBy(desc12(patientResults.createdAt));
   return result;
 }
 
@@ -8714,8 +8715,8 @@ var appRouter = router({
       if (Object.keys(updateData).length === 0) {
         throw new Error("\u0644\u0627 \u062A\u0648\u062C\u062F \u0628\u064A\u0627\u0646\u0627\u062A \u0644\u0644\u062A\u062D\u062F\u064A\u062B");
       }
-      await db.update(users).set(updateData).where(eq22(users.id, ctx.user.id));
-      const updatedUser = await db.select().from(users).where(eq22(users.id, ctx.user.id)).limit(1);
+      await db.update(users).set(updateData).where(eq23(users.id, ctx.user.id));
+      const updatedUser = await db.select().from(users).where(eq23(users.id, ctx.user.id)).limit(1);
       return updatedUser[0];
     })
   }),

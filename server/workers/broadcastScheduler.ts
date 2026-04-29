@@ -1,4 +1,5 @@
 import { queueWhatsAppMessage } from '../queues/whatsappQueue';
+import { eq, lte, and } from 'drizzle-orm';
 
 async function processScheduledBroadcasts() {
   try {
@@ -8,13 +9,16 @@ async function processScheduledBroadcasts() {
     const { whatsappBroadcasts } = await import('../../drizzle/schema');
 
     const now = new Date();
-    const rows = await db.select().from(whatsappBroadcasts).where(whatsappBroadcasts.status.eq('scheduled')).where(whatsappBroadcasts.scheduledAt.lte(now));
+    const rows = await db.select().from(whatsappBroadcasts).where(and(
+      eq(whatsappBroadcasts.status, 'scheduled'),
+      lte(whatsappBroadcasts.scheduledAt, now)
+    ));
 
     for (const b of rows) {
       try {
         console.log('[Broadcast Scheduler] Enqueuing broadcast', b.id, b.name);
         // Mark as sending
-        await db.update(whatsappBroadcasts).set({ status: 'sending' }).where(whatsappBroadcasts.id.eq(b.id));
+        await db.update(whatsappBroadcasts).set({ status: 'sending' }).where(eq(whatsappBroadcasts.id, b.id));
 
         // TODO: expand targetFilter into recipient list. For now we enqueue a placeholder job
         await queueWhatsAppMessage({
@@ -28,11 +32,11 @@ async function processScheduledBroadcasts() {
         });
 
         // mark as completed (or keep status sending if processing continues)
-        await db.update(whatsappBroadcasts).set({ status: 'completed', completedAt: new Date() }).where(whatsappBroadcasts.id.eq(b.id));
+        await db.update(whatsappBroadcasts).set({ status: 'completed', completedAt: new Date() }).where(eq(whatsappBroadcasts.id, b.id));
         console.log('[Broadcast Scheduler] Broadcast processed', b.id);
       } catch (err) {
         console.error('[Broadcast Scheduler] Failed to process broadcast', b.id, err);
-        await db.update(whatsappBroadcasts).set({ status: 'failed' }).where(whatsappBroadcasts.id.eq(b.id));
+        await db.update(whatsappBroadcasts).set({ status: 'failed' }).where(eq(whatsappBroadcasts.id, b.id));
       }
     }
   } catch (err) {

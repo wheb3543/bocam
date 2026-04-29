@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { eq, lte, and } from 'drizzle-orm';
 import { router, protectedProcedure } from '../_core/trpc';
 
 export const whatsappBroadcastsRouter = router({
@@ -18,7 +19,7 @@ export const whatsappBroadcastsRouter = router({
       const db = await getDb();
       if (!db) return null;
       const { whatsappBroadcasts } = await import('../../drizzle/schema');
-      const res = await db.select().from(whatsappBroadcasts).where(whatsappBroadcasts.id.eq(input.id)).limit(1 as any);
+      const res = await db.select().from(whatsappBroadcasts).where(eq(whatsappBroadcasts.id, input.id)).limit(1 as any);
       return res[0] || null;
     }),
 
@@ -55,7 +56,7 @@ export const whatsappBroadcastsRouter = router({
       if (typeof input.scheduledAt !== 'undefined') updateObj.scheduledAt = input.scheduledAt ? new Date(input.scheduledAt) : null;
       if (typeof input.status !== 'undefined') updateObj.status = input.status;
 
-      await db.update(whatsappBroadcasts).set(updateObj).where(whatsappBroadcasts.id.eq(input.id));
+      await db.update(whatsappBroadcasts).set(updateObj).where(eq(whatsappBroadcasts.id, input.id));
       return { success: true };
     }),
 
@@ -66,7 +67,7 @@ export const whatsappBroadcastsRouter = router({
       const db = await getDb();
       if (!db) throw new Error('Database not available');
       const { whatsappBroadcasts } = await import('../../drizzle/schema');
-      await db.delete(whatsappBroadcasts).where(whatsappBroadcasts.id.eq(input.id));
+      await db.delete(whatsappBroadcasts).where(eq(whatsappBroadcasts.id, input.id));
       return { success: true };
     })
 });

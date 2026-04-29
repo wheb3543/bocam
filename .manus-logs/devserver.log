@@ -425,3 +425,34 @@
 [2026-03-31T21:01:18.727Z] c[OAuth] Initialized with baseURL: https://api.manus.im
 [2026-03-31T21:01:19.210Z] Server running on http://localhost:3000/
 [2026-03-31T21:01:36.861Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-04-29T20:06:12.031Z] Starting dev server with command: pnpm run dev
+[2026-04-29T20:06:12.908Z] 
+[2026-04-29T20:06:12.908Z] > sgh-crm-portal@1.0.0 dev /home/ubuntu/sgh-crm-portal
+[2026-04-29T20:06:12.909Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-29T20:06:12.909Z] 
+[2026-04-29T20:06:14.745Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-04-29T20:06:15.361Z] Server running on http://localhost:3000/
+[2026-04-29T20:06:17.407Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-04-29T20:06:57.738Z] [Database] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-04-29T20:07:46.212Z] 4:07:46 PM [tsx] change in ./server/routers/whatsappBroadcasts.ts Restarting...
+[2026-04-29T20:07:48.208Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-04-29T20:07:48.890Z] Server running on http://localhost:3000/
+[2026-04-29T20:07:50.142Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-04-29T20:07:56.989Z] 4:07:56 PM [tsx] change in ./server/routers/whatsappBroadcasts.ts Restarting...
+[2026-04-29T20:07:58.762Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-04-29T20:07:59.273Z] Server running on http://localhost:3000/
+[2026-04-29T20:08:00.765Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-04-29T20:08:50.643Z] 4:08:50 PM [vite] (client) hmr update /src/index.css
+[2026-04-29T20:08:50.723Z] 4:08:50 PM [tsx] change in ./server/db.ts Restarting...
+[2026-04-29T20:08:52.300Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-04-29T20:08:52.788Z] Server running on http://localhost:3000/
+[2026-04-29T20:10:47.083Z] Dev server process group stopped
+[2026-04-29T20:10:47.207Z] ELIFECYCLE  Command failed.
+[2026-04-29T20:10:47.313Z] Dev server exited with code -15
+[2026-04-29T20:10:50.113Z] Starting dev server with command: pnpm run dev
+[2026-04-29T20:10:50.995Z] 
+[2026-04-29T20:10:50.996Z] > sgh-crm-portal@1.0.0 dev /home/ubuntu/sgh-crm-portal
+[2026-04-29T20:10:50.996Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-29T20:10:50.997Z] 
+[2026-04-29T20:10:53.216Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-04-29T20:10:53.996Z] Server running on http://localhost:3000/
