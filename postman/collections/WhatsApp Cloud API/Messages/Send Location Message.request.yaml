@@ -1,0 +1,30 @@
+$kind: http-request
+description: |-
+  To send location messages, make a **POST** call to **`/{{Phone-Number-ID}}/messages`** and attach a message object with type = `location`. Then, add a location object.
+
+  For more information on the structure of `Location Object`, see [Location Object](https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#location-object).
+
+  ## Response
+
+  A successful response includes an object with an identifier prefixed with **`wamid`**.
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": "{{Recipient-Phone-Number}}",
+        "type": "location",
+        "location": {
+            "latitude": "<LOCATION_LATITUDE>",
+            "longitude": "<LOCATION_LONGITUDE>",
+            "name": "<LOCATION_NAME>",
+            "address": "<LOCATION_ADDRESS>"
+        }
+    }
+examples: ./.resources/Send Location Message.resources/examples
+order: 28000

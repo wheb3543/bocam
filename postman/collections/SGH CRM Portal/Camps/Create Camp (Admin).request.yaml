@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Create Camp (Admin)'
+method: POST
+url: '{{baseUrl}}/api/trpc/camps.create'
+order: 6000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"name":"مخيم طبي 2026","isActive":true,"morningTime":"09:00","eveningTime":"17:00","dailyCapacity":20}}

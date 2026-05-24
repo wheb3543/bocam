@@ -1,0 +1,10 @@
+$kind: collection
+description: |-
+  | Field | Description |
+  | --- | --- |
+  | **`name`** |  **Optional.**<br/> Specifies the sender's profile name. |
+auth:
+  - id: ""
+    type: noauth
+    name: No Auth
+order: 6000

@@ -1,0 +1,69 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "recipient_type": "individual",
+          "to": "+16505551234",
+          "type": "interactive",
+          "interactive": {
+              "type": "catalog_message",
+              "body": {
+                  "text": "Hello! Thanks for your interest. Ordering is easy. Just visit our catalog and add items to purchase."
+              },
+              "action": {
+                  "name": "catalog_message",
+                  "parameters": {
+                      "thumbnail_product_retailer_id": "2lc20305pt"
+                  }
+              },
+              "footer": {
+                  "text": "Best grocery deals on WhatsApp!"
+              }
+          }
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=UTF-8
+    Vary: Origin
+    x-business-use-case-usage: '{"104996122399160":[{"type":"whatsapp","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    Access-Control-Allow-Origin: "*"
+    facebook-api-version: v17.0
+    Strict-Transport-Security: max-age=15552000; preload
+    Pragma: no-cache
+    Cache-Control: private, no-cache, no-store, must-revalidate
+    Expires: Sat, 01 Jan 2000 00:00:00 GMT
+    x-fb-request-id: Aw3rl09JmaSC43LvqSra8Wo
+    x-fb-trace-id: BINWLl+juwM
+    x-fb-rev: "1007674581"
+    X-FB-Debug: QHCq1sCilMV6uusUBKtpCSiVKmcPAD85rWpN+a7A+lQLKJH1N5h2VAdbTiE+8Gmdreo04CEQ503ETjOQ+n0lCA==
+    Date: Tue, 13 Jun 2023 22:45:17 GMT
+    Alt-Svc: h3=":443"; ma=86400
+    Connection: keep-alive
+    Content-Length: "173"
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "contacts": [
+              {
+                  "input": "+16505551234",
+                  "wa_id": "16505551234"
+              }
+          ],
+          "messages": [
+              {
+                  "id": "wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBI3NDMzMjc2N0VDNUVFNURBQzQA"
+              }
+          ]
+      }
+order: 1000

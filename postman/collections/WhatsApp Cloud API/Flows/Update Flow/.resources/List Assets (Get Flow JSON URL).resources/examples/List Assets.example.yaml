@@ -1,0 +1,26 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}/assets
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: json
+    content: |-
+      {
+          "data": [
+              {
+                  "name": "flow.json",
+                  "asset_type": "FLOW_JSON",
+                  "download_url": "https://scontent.xx.fbcdn.net/m1/v/t0.57323-24/An_Hq0jnfJ..."
+              }
+          ],
+          "paging": {
+              "cursors": {
+                  "before": "QVFIU...",
+                  "after": "QVFIU..."
+              }
+          }
+      }
+order: 1000

@@ -1,0 +1,93 @@
+import "dotenv/config";
+import express from "express";
+import { createServer } from "http";
+import net from "net";
+import path from "path";
+import fs from "fs";
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import { registerOAuthRoutes } from "./oauth";
+import { createUploadRouter } from "../uploadRoute";
+import { createWebhookRouter } from "../webhookRoutes";
+import { createWhatsAppSseRouter } from "../whatsappSse";
+import { appRouter } from "../routers";
+import { createContext } from "./context";
+import { serveStatic, setupVite } from "./vite";
+// import { initSimpleCronScheduler } from "../cron/scheduler";
+
+function isPortAvailable(port: number): Promise<boolean> {
+  return new Promise(resolve => {
+    const server = net.createServer();
+    server.listen(port, () => {
+      server.close(() => resolve(true));
+    });
+    server.on("error", () => resolve(false));
+  });
+}
+
+async function findAvailablePort(startPort: number = 3000): Promise<number> {
+  for (let port = startPort; port < startPort + 20; port++) {
+    if (await isPortAvailable(port)) {
+      return port;
+    }
+  }
+  throw new Error(`No available port found starting from ${startPort}`);
+}
+
+async function startServer() {
+  const app = express();
+  const server = createServer(app);
+  // Configure body parser with larger size limit for file uploads
+  // Capture raw body for WhatsApp webhook signature verification (X-Hub-Signature-256)
+  app.use(express.json({
+    limit: "50mb",
+    verify: (req: any, _res, buf) => {
+      req.rawBody = buf;
+    },
+  }));
+  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // OAuth callback under /api/oauth/callback
+  registerOAuthRoutes(app);
+  // File upload route
+  app.use(createUploadRouter());
+  // WhatsApp Webhook routes (direct Express, not tRPC - Meta requirement)
+  app.use(createWebhookRouter());
+  // WhatsApp SSE endpoints for realtime chat updates
+  app.use(createWhatsAppSseRouter());
+  // tRPC API
+  app.use(
+    "/api/trpc",
+    createExpressMiddleware({
+      router: appRouter,
+      createContext,
+    })
+  );
+  // development mode uses Vite, production mode uses static files
+  // NOTE: SW routes and manifest routes are handled inside serveStatic/setupVite
+  if (process.env.NODE_ENV === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+
+  const preferredPort = parseInt(process.env.PORT || "3000");
+  const port = await findAvailablePort(preferredPort);
+
+  if (port !== preferredPort) {
+    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+  }
+
+  server.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}/`);
+    
+    // Initialize cron scheduler for automatic deactivation
+    // initSimpleCronScheduler(); // Disabled: Auto-deactivation feature removed per user request
+
+    // Initialize WhatsApp appointment reminders scheduler (every 30 minutes)
+    import("../cron/appointmentReminders").then(({ initAppointmentRemindersScheduler }) => {
+      initAppointmentRemindersScheduler();
+    }).catch(console.error);
+  });
+}
+
+startServer().catch(console.error);

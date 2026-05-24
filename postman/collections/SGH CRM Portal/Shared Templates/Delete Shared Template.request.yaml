@@ -1,0 +1,12 @@
+$kind: http-request
+name: Delete Shared Template
+method: POST
+url: '{{baseUrl}}/api/trpc/sharedTemplates.delete'
+order: 5000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1}}

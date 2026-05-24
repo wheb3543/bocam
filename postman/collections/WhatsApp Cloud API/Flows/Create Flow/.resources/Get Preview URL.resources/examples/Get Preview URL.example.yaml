@@ -1,0 +1,27 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}?fields=preview.invalidate(false)
+  method: GET
+  queryParams:
+    - key: fields
+      value: preview.invalidate(false)
+      description: Set to true to generate a new preview link and expire old link
+    - key: date_format
+      value: U
+      disabled: true
+      description: Returns date as unix timestamp in seconds
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: json
+    content: |-
+      {
+          "preview": {
+              "preview_url": "https://business.facebook.com/wa/manage/flows/550.../preview/?token=b9d6....",
+              "expires_at": "2023-05-21T11:18:09+0000"
+          },
+          "id": "flow-1"
+
+      }
+order: 1000

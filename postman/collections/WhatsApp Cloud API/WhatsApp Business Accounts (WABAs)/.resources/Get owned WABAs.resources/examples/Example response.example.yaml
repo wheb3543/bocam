@@ -1,0 +1,76 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Business-ID}}/owned_whatsapp_business_accounts
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Encoding
+      value: br
+    - key: ETag
+      value: '"366ab827015bbd04e3737a8e0e33b755ebdb1190"'
+    - key: Content-Type
+      value: application/json; charset=UTF-8
+    - key: Vary
+      value: Origin
+    - key: Vary
+      value: Accept-Encoding
+    - key: x-business-use-case-usage
+      value: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}],"104996122399160":[{"type":"whatsapp_business_management","call_count":0,"total_cputime":0,"total_time":0,"estimated_time_to_regain_access":0}]}'
+    - key: x-fb-rlafr
+      value: "0"
+    - key: Access-Control-Allow-Origin
+      value: "*"
+    - key: facebook-api-version
+      value: v16.0
+    - key: Strict-Transport-Security
+      value: max-age=15552000; preload
+    - key: Pragma
+      value: no-cache
+    - key: Cache-Control
+      value: private, no-cache, no-store, must-revalidate
+    - key: Expires
+      value: Sat, 01 Jan 2000 00:00:00 GMT
+    - key: x-fb-request-id
+      value: Ah4MqTo1ZUzj81zkb2XbBje
+    - key: x-fb-trace-id
+      value: EjCBhZpFH17
+    - key: x-fb-rev
+      value: "1007269544"
+    - key: X-FB-Debug
+      value: VZi3ZGTNb0Rd+lKKWI0HEaur9OTNIBff6mO7rsXN/IeCzQa8AcsdK0ef8XPzSYrHjrpTulugwFludywozAfNOQ==
+    - key: Date
+      value: Sat, 08 Apr 2023 01:06:45 GMT
+    - key: Alt-Svc
+      value: h3=":443"; ma=86400
+    - key: Connection
+      value: keep-alive
+    - key: Content-Length
+      value: "422"
+  body:
+    type: json
+    content: |-
+      {
+          "data": [
+              {
+                  "id": "104996122399160",
+                  "name": "Lucky Shrub",
+                  "timezone_id": "1",
+                  "message_template_namespace": "58e6d318_b627_4112_b9c7_2961197553ea"
+              },
+              {
+                  "id": "102290129340398",
+                  "name": "Test WhatsApp Business Account",
+                  "timezone_id": "1",
+                  "message_template_namespace": "ba30dd89_2ebd_41e4_b805_f2c05ae04cc9"
+              }
+          ],
+          "paging": {
+              "cursors": {
+                  "before": "QVFIUnpPVXRnY3BPN19rTVItOG51T291YURjV3BaeXRXU29adDVreS04ekhSNl9YWTlfdmN3SHlyTEk1a2FRdnlWanBqM1FuQm1uZAHhfYl9UMTNCYjM3MWV3",
+                  "after": "QVFIUjBrRUs5QVJuUDhDSmZARMlc2dXRYNXBmMjMtRUt3SmFlbk9PRk43azdiN1VQaW1HcnRkejFzZATNoNDdTdGVWMDhjamVvY25HWnI4WjIzX0hYSk40NHhB"
+              }
+          }
+      }
+order: 1000

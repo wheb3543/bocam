@@ -1,0 +1,5 @@
+$kind: http-request
+name: WhatsApp SSE Conversation
+method: GET
+url: '{{baseUrl}}/api/sse/whatsapp/conversation/1'
+order: 5000

@@ -1,0 +1,73 @@
+$kind: http-example
+name: 'Incoming Interactive Button Reply'
+request:
+  url: '{{baseUrl}}/api/webhooks/whatsapp'
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: X-Hub-Signature-256
+      value: 'sha256=mno345examplesignature'
+  body:
+    type: json
+    content: |-
+      {
+        "object": "whatsapp_business_account",
+        "entry": [
+          {
+            "id": "123456789",
+            "changes": [
+              {
+                "value": {
+                  "messaging_product": "whatsapp",
+                  "metadata": {
+                    "display_phone_number": "15550000001",
+                    "phone_number_id": "987654321"
+                  },
+                  "contacts": [
+                    {
+                      "profile": {
+                        "name": "Omar Hassan"
+                      },
+                      "wa_id": "966500000005"
+                    }
+                  ],
+                  "messages": [
+                    {
+                      "from": "966500000005",
+                      "id": "wamid.HBgLNTU1MjEyMzQ1NjcVAgARGBI1RjQyNUE3NEYxMzAzMzQ1AA==",
+                      "timestamp": "1700000400",
+                      "type": "interactive",
+                      "interactive": {
+                        "type": "button_reply",
+                        "button_reply": {
+                          "id": "btn_reschedule",
+                          "title": "Reschedule"
+                        }
+                      },
+                      "context": {
+                        "from": "15550000001",
+                        "id": "wamid.original_interactive_message_id"
+                      }
+                    }
+                  ]
+                },
+                "field": "messages"
+              }
+            ]
+          }
+        ]
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Type
+      value: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true
+      }
+order: 5000

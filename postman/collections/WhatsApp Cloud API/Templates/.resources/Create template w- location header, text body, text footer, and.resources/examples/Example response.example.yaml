@@ -1,0 +1,74 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/message_templates
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "name": "order_delivery_update",
+          "language": "en_US",
+          "category": "UTILITY",
+          "components": [
+              {
+                  "type": "HEADER",
+                  "format": "LOCATION"
+              },
+              {
+                  "type": "BODY",
+                  "text": "Good news {{1}}! Your order #{{2}} is on its way to the location above. Thank you for your order!",
+                  "example": {
+                      "body_text": [
+                          [
+                              "Mark",
+                              "566701"
+                          ]
+                      ]
+                  }
+              },
+              {
+                  "type": "FOOTER",
+                  "text": "To stop receiving delivery updates, tap the button below."
+              },
+              {
+                  "type":"BUTTONS",
+                  "buttons": [
+                      {
+                          "type": "QUICK_REPLY",
+                          "text": "Stop Delivery Updates"
+                      }
+                  ]
+              }
+          ]
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=UTF-8
+    Vary: Origin
+    x-business-use-case-usage: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    x-fb-rlafr: "0"
+    Access-Control-Allow-Origin: "*"
+    facebook-api-version: v16.0
+    Strict-Transport-Security: max-age=15552000; preload
+    Pragma: no-cache
+    Cache-Control: private, no-cache, no-store, must-revalidate
+    Expires: Sat, 01 Jan 2000 00:00:00 GMT
+    x-fb-request-id: AubwVT4uq_U6uQOGumC32Hn
+    x-fb-trace-id: Hcn1fh7XKeE
+    x-fb-rev: "1007266633"
+    X-FB-Debug: I5PZsVqJRarPN8lrGXwSOUDp5VtgobB98YBrVVqgAK6qIYAmci7WaCoXSKIxZ8ggtXH/6/pE413yIo3Gl4+DVw==
+    Date: Fri, 07 Apr 2023 05:36:15 GMT
+    Alt-Svc: h3=":443"; ma=86400
+    Connection: keep-alive
+    Content-Length: "65"
+  body:
+    type: json
+    content: |-
+      {
+          "id": "1667192013751005",
+          "status": "PENDING",
+          "category": "UTILITY"
+      }
+order: 1000

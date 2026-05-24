@@ -1,0 +1,1 @@
+-- Migration already applied (duplicate sentAt column)

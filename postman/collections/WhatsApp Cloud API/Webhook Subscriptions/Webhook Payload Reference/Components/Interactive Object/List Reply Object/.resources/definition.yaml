@@ -1,0 +1,8 @@
+$kind: collection
+description: |-
+  | Field | Description |
+  | --- | --- |
+  | **`id`** | The unique identifier (ID) of the selected row. |
+  | **`title`** | The title of the selected row. |
+  | **`description`** | The description of the selected row. |
+order: 2000

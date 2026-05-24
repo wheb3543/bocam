@@ -1,0 +1,5 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/whatsapp_business_encryption
+method: GET
+examples: ./.resources/Get Encryption Public Key.resources/examples
+order: 2000

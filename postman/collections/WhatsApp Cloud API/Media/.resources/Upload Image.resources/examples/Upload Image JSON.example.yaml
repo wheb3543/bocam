@@ -1,0 +1,27 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/media
+  method: POST
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          
+          "file": "@/local/path/file.jpg;type=image/jpeg",
+          "messaging_product": "whatsapp"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "id": "4490709327384033"
+      }
+order: 2000

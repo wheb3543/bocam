@@ -1,0 +1,12 @@
+$kind: http-request
+name: Set Preference
+method: POST
+url: '{{baseUrl}}/api/trpc/preferences.set'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"key":"theme","value":"dark"}}

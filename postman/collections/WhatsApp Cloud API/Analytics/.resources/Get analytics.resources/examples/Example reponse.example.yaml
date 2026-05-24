@@ -1,0 +1,76 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}?fields=analytics.start(1543543200).end(1544148000).granularity(DAY).phone_numbers([]).country_codes(["US", "BR"])
+  method: GET
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+  queryParams:
+    fields: analytics.start(1543543200).end(1544148000).granularity(DAY).phone_numbers([]).country_codes(["US", "BR"])
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "analytics": {
+              "phone_numbers": [
+                  "16505550111",
+                  "16505550112",
+                  "16505550113"
+              ],
+              "country_codes": [
+                  "US",
+                  "BR"
+              ],
+              "granularity": "DAY",
+              "data_points": [
+                  {
+                      "start": 1543543200,
+                      "end": 1543629600,
+                      "sent": 196093,
+                      "delivered": 179715
+                  },
+                  {
+                      "start": 1543629600,
+                      "end": 1543716000,
+                      "sent": 147649,
+                      "delivered": 139032
+                  },
+                  {
+                      "start": 1543716000,
+                      "end": 1543802400,
+                      "sent": 61988,
+                      "delivered": 58830
+                  },
+                  {
+                      "start": 1543802400,
+                      "end": 1543888800,
+                      "sent": 132465,
+                      "delivered": 124392
+                  },
+                  {
+                      "start": 1543888800,
+                      "end": 1543975200,
+                      "sent": 181002,
+                      "delivered": 167335
+                  },
+                  {
+                      "start": 1543975200,
+                      "end": 1544061600,
+                      "sent": 168687,
+                      "delivered": 157838
+                  },
+                  {
+                      "start": 1544061600,
+                      "end": 1544148000,
+                      "sent": 161832,
+                      "delivered": 152383
+                  }
+              ]
+          },
+          "id": "952305634918047"
+      }
+order: 1000

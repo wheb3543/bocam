@@ -1,0 +1,8 @@
+$kind: http-request
+name: Get Campaign by Slug
+method: GET
+url: '{{baseUrl}}/api/trpc/campaigns.getBySlug'
+order: 3000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22slug%22%3A%22summer-2026%22%7D%7D'

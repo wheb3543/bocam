@@ -1,0 +1,37 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    ETag: '"c39946d41277419f1b3eb1f9761f2068612715ed"'
+    Content-Type: application/json; charset=UTF-8
+    Vary: Origin
+    x-business-use-case-usage: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    x-fb-rlafr: "0"
+    Access-Control-Allow-Origin: "*"
+    facebook-api-version: v16.0
+    Strict-Transport-Security: max-age=15552000; preload
+    Pragma: no-cache
+    Cache-Control: private, no-cache, no-store, must-revalidate
+    Expires: Sat, 01 Jan 2000 00:00:00 GMT
+    x-fb-request-id: AuECIG8CyNuAbaHekReCMDU
+    x-fb-trace-id: Au3qI883HZc
+    x-fb-rev: "1007269544"
+    X-FB-Debug: Ja/wv3Ohd34TUOD8zF8ba70aUikGGCX1SwPAPuFErmXs69aTDV0YPXaxA2Xdj+bpGHniTzMRpaJYaOyGZYEtLA==
+    Date: Sat, 08 Apr 2023 01:05:37 GMT
+    Alt-Svc: h3=":443"; ma=86400
+    Connection: keep-alive
+    Content-Length: "150"
+  body:
+    type: json
+    content: |-
+      {
+          "id": "104996122399160",
+          "name": "Lucky Shrub",
+          "timezone_id": "1",
+          "message_template_namespace": "58e6d318_b627_4112_b9c7_2961197553ea"
+      }
+order: 1000

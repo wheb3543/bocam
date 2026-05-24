@@ -1,0 +1,36 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/message_templates?hsm_id=1407680676729941&name=order_confirmation
+  method: DELETE
+  queryParams:
+    hsm_id: "1407680676729941"
+    name: order_confirmation
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=UTF-8
+    Vary: Origin
+    x-business-use-case-usage: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    x-fb-rlafr: "0"
+    Access-Control-Allow-Origin: "*"
+    facebook-api-version: v16.0
+    Strict-Transport-Security: max-age=15552000; preload
+    Pragma: no-cache
+    Cache-Control: private, no-cache, no-store, must-revalidate
+    Expires: Sat, 01 Jan 2000 00:00:00 GMT
+    x-fb-request-id: AdYqACouwJuFZWuJ6z-Zb-6
+    x-fb-trace-id: ADp6tYI5dOX
+    x-fb-rev: "1007383760"
+    X-FB-Debug: bZ8hhZfdE97MVE74znlGSPtmnavHwev8Zkxa0dKIYEozk4+GVC1MXXCGbrfC25WV0ku5G1VmB3u7M9uq9ye/2w==
+    Date: Wed, 26 Apr 2023 22:10:27 GMT
+    Alt-Svc: h3=":443"; ma=86400
+    Connection: keep-alive
+    Content-Length: "16"
+  body:
+    type: json
+    content: |-
+      {
+          "success": true
+      }
+order: 1000

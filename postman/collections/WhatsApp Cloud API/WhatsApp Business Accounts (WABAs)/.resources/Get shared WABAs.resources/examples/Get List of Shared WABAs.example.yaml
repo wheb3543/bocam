@@ -1,0 +1,40 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Business-ID}}/client_whatsapp_business_accounts
+  method: GET
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      { 
+          "data": [
+              {
+                  "id": 1906385232743451, 
+                  "name": "My WhatsApp Business Account", 
+                  "currency": "USD", 
+                  "timezone_id": "1", 
+                  "message_template_namespace": "abcdefghijk_12lmnop" 
+              },
+             {
+                  "id": 1972385232742141, 
+                  "name": "My Regional Account", 
+                  "currency": "INR", 
+                  "timezone_id": "5", 
+                  "message_template_namespace": "12abcdefghijk_34lmnop" 
+              }
+
+          ],
+          "paging": {
+      	"cursors": {
+      		"before": "abcdefghij",
+      		"after": "klmnopqr"
+      	}
+         }
+      }
+order: 1000

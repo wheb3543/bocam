@@ -1,0 +1,87 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/message_templates
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+        "name": "limited_time_offer_tuscan_getaway_2023",
+        "language": "en_US",
+        "category": "MARKETING",
+        "components": [
+          {
+            "type": "HEADER",
+            "format": "IMAGE",
+            "example": {
+              "header_handle": [
+                "4::aW1hZ2UvanBn:ARYytyb0kLp5htbBB8vWlclG5M9gMBxiEyt4FNCvrueWBOmFmRAztEuNtPGUnEC22Etc_SAAVU0YJOk3B7A-JuR1241_nq7gfITFxXKdDGnfvw:e:1681000441:634974688087057:100089620928913:ARbB4l0IPRncfMF-1sE\n4::aW1hZ2UvanBn:ARZewDmbZuoq3rGUO1WgXjJEYcI1Tt7jr_Z6o2-oD5rg4--AQarBV_S1BYEcR8INJkctK0lNJmQ5v7PsBo-vqB-N0DSTe2-G6jHOlxKc12KSSg:e:1681000441:634974688087057:100089620928913:ARZQmT7tfO0sW--3oLo\n4::aW1hZ2UvanBn:ARZkcJXFoEMa0YMMd2WQT8aVMJFaUPlSYW9xXshyh1bP-Pd6JP4t2VbrZezqGOEfC-acYkRZA5Q31FX7dEE_hQ9a-0i-b-RaueQrWO6vWk-7bQ:e:1681000441:634974688087057:100089620928913:ARYlgv7ErOQGsZYClfs"
+              ]
+            }
+          },
+          {
+            "type": "BODY",
+            "text": "Hi {{1}}! For a limited time only you can get our {{2}} for as low as {{3}}. Tap the Offer Details button for more information.",
+            "example": {
+              "body_text": [
+                [
+                  "Mark","Tuscan Getaway package","800"
+                ]
+              ]
+            }
+          },
+          {
+            "type": "FOOTER",
+            "text": "Offer valid until May 31, 2023"
+          },
+          {
+            "type": "BUTTONS",
+            "buttons": [
+              {
+                "type": "PHONE_NUMBER",
+                "text": "Call",
+                "phone_number": "16467043595"
+              },
+              {
+                "type": "URL",
+                "text": "Shop Now",
+                "url": "https://damp-sea-63235.herokuapp.com/shop?promo={{1}}",
+                "example": [
+                  "summer2023"
+                 ]
+              }
+            ]
+          }
+        ]
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=UTF-8
+    Vary: Origin
+    x-business-use-case-usage: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    x-fb-rlafr: "0"
+    Access-Control-Allow-Origin: "*"
+    facebook-api-version: v16.0
+    Strict-Transport-Security: max-age=15552000; preload
+    Pragma: no-cache
+    Cache-Control: private, no-cache, no-store, must-revalidate
+    Expires: Sat, 01 Jan 2000 00:00:00 GMT
+    x-fb-request-id: A8B59xsqDRPZs4cmEVzDXyW
+    x-fb-trace-id: EIhIwSCVG3y
+    x-fb-rev: "1007263228"
+    X-FB-Debug: MCgT301EhTnmJPNQ3EvAkMyMb/+PcRdwjElfb/Ag/RkFLf37QJ2dZq6KZ/PKeWyksWL2JblPXyKF3uBeIMSyLQ==
+    Date: Fri, 07 Apr 2023 00:27:06 GMT
+    Alt-Svc: h3=":443"; ma=86400
+    Connection: keep-alive
+    Content-Length: "66"
+  body:
+    type: json
+    content: |-
+      {
+          "id": "558456123149285",
+          "status": "PENDING",
+          "category": "MARKETING"
+      }
+order: 1000

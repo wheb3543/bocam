@@ -1,0 +1,5 @@
+$kind: http-request
+name: Lead Stats
+method: GET
+url: '{{baseUrl}}/api/trpc/leads.stats'
+order: 9000

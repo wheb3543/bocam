@@ -1,0 +1,19 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/deregister
+  method: POST
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer {{User-Access-Token}}
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "success": true
+      }
+order: 1000

@@ -1,0 +1,12 @@
+$kind: http-request
+name: Send Arrival Welcome
+method: POST
+url: '{{baseUrl}}/api/trpc/appointments.sendArrivalWelcome'
+order: 6000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"appointmentId":1}}

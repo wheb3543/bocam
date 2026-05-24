@@ -1,0 +1,6 @@
+$kind: http-request
+description: "- Endpoint reference: [WhatsApp Business Account](https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account)"
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}
+method: GET
+examples: ./.resources/Get WABA.resources/examples
+order: 1000

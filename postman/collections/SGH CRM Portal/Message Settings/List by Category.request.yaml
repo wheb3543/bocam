@@ -1,0 +1,8 @@
+$kind: http-request
+name: List by Category
+method: GET
+url: '{{baseUrl}}/api/trpc/messageSettings.listByCategory'
+order: 2000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22category%22%3A%22patient_journey%22%7D%7D'

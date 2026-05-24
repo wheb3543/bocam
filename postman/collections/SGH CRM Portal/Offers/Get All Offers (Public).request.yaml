@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'Get All Offers (Public)'
+method: GET
+url: '{{baseUrl}}/api/trpc/offers.getAll'
+order: 1000

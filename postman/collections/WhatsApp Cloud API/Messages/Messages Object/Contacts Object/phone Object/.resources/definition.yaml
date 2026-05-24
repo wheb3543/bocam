@@ -1,0 +1,8 @@
+$kind: collection
+description: |-
+  | Name | Description |
+  | --- | --- |
+  | **`phone`** | **Optional.**  <br>Automatically populated with the **`wa_id`** value as a formatted phone number. |
+  | **`type`** | **Optional.**  <br>Standard Values: `CELL`, `MAIN`, `IPHONE`, `HOME`, `WORK` |
+  | **`wa_id`** | **Optional.**  <br>WhatsApp ID. |
+order: 5000

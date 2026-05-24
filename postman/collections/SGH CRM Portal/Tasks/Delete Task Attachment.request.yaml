@@ -1,0 +1,12 @@
+$kind: http-request
+name: Delete Task Attachment
+method: POST
+url: '{{baseUrl}}/api/trpc/tasks.deleteAttachment'
+order: 15000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1}}

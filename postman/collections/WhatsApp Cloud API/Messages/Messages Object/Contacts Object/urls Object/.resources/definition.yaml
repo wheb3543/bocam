@@ -1,0 +1,7 @@
+$kind: collection
+description: |-
+  | Name | Description |
+  | --- | --- |
+  | **`url`** | **Optional.**  <br>The URL. |
+  | **`type`** | **Optional.**  <br>Standard Values: `HOME`, `WORK` |
+order: 6000

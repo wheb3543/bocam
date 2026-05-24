@@ -1,0 +1,2 @@
+-- Migration 0058: targetRevenue column already exists in campaigns table
+-- This migration is a no-op as the schema changes were already applied

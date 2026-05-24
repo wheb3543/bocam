@@ -1,0 +1,7 @@
+$kind: collection
+description: |-
+  | Name | Description |
+  | --- | --- |
+  | **`email`** | **Optional**.  <br>Email address. |
+  | **`type`** | **Optional**.  <br>Standard Values: `HOME`, `WORK` |
+order: 2000

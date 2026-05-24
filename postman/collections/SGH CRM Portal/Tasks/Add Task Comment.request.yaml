@@ -1,0 +1,12 @@
+$kind: http-request
+name: Add Task Comment
+method: POST
+url: '{{baseUrl}}/api/trpc/tasks.addComment'
+order: 11000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"taskId":1,"content":"تعليق على المهمة"}}

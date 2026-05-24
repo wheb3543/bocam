@@ -1,0 +1,5 @@
+$kind: http-request
+name: WhatsApp SSE Global
+method: GET
+url: '{{baseUrl}}/api/sse/whatsapp/global'
+order: 4000

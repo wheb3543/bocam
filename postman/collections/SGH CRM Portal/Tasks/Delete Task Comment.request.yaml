@@ -1,0 +1,12 @@
+$kind: http-request
+name: Delete Task Comment
+method: POST
+url: '{{baseUrl}}/api/trpc/tasks.deleteComment'
+order: 12000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1}}

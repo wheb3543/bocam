@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Camp Registration Status
+method: POST
+url: '{{baseUrl}}/api/trpc/campRegistrations.updateStatus'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1,"status":"confirmed"}}

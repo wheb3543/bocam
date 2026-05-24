@@ -1,0 +1,10 @@
+$kind: collection
+description: |-
+  | Field                 | Description                      |
+  |-------------------------|----------------------------------|
+  | **`body`**              | The text of the text message.    |
+auth:
+  - id: ""
+    type: noauth
+    name: No Auth
+order: 8000

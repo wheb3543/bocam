@@ -1,0 +1,18 @@
+$kind: http-request
+name: Update Message QR Code.
+description: |-
+  - Guide: [QR Codes](https://developers.facebook.com/docs/whatsapp/business-management-api/qr-codes)
+  - Endpoint reference: [WhatsApp Business Phone Number > Message Qrdls](https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account-to-number-current-status/message_qrdls/)
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/message_qrdls
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "prefilled_message": "<PREFILLED_MESSAGE>",
+        "code": "<CODE>"
+    }
+examples: ./.resources/Update Message QR Code-.resources/examples
+order: 7000

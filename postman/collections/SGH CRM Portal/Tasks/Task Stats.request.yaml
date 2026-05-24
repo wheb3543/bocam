@@ -1,0 +1,5 @@
+$kind: http-request
+name: Task Stats
+method: GET
+url: '{{baseUrl}}/api/trpc/tasks.stats'
+order: 7000

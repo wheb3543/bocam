@@ -1,0 +1,19 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/whatsapp_business_encryption
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: json
+    content: |-
+      {
+          "data": [
+              {
+                  "business_public_key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqh...AQAB\n-----END PUBLIC KEY-----",
+                  "business_public_key_signature_status": "VALID"
+              }
+          ]
+      }
+order: 1000

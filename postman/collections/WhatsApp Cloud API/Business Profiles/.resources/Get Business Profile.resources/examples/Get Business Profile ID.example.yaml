@@ -1,0 +1,36 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical
+  method: GET
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+  queryParams:
+    fields: about,address,description,email,profile_picture_url,websites,vertical
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "data": [
+              {
+                  "business_profile": {
+                      "messaging_product": "whatsapp",
+                      "address": "business-address",
+                      "description": "business-description",
+                      "vertical": "business-industry",
+                      "about": "profile-about-text",
+                      "email": "business-email",
+                      "websites": [
+                          "https://website-1",
+                          "https://website-2"
+                      ],
+                      "profile_picture_url": "<PROFILE_PICTURE_URL>"                
+                  }
+              }
+          ]
+      }
+order: 1000

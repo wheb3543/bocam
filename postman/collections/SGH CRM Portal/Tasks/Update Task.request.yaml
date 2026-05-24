@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Task
+method: POST
+url: '{{baseUrl}}/api/trpc/tasks.update'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1,"title":"مهمة محدثة","status":"in_progress"}}

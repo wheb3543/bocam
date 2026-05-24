@@ -1,0 +1,11 @@
+$kind: collection
+description: |-
+  | Field                 | Description                      |
+  |-----------------------|----------------------------------|
+  | **`code`**            | The error code. |
+  | **`title`**           | The error title.|
+auth:
+  - id: ""
+    type: noauth
+    name: No Auth
+order: 16000

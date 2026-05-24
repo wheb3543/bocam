@@ -1,0 +1,12 @@
+$kind: http-request
+name: Create Doctor
+method: POST
+url: '{{baseUrl}}/api/trpc/doctors.create'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"name":"د. أحمد","slug":"dr-ahmed","specialty":"جراحة","isAvailable":true}}

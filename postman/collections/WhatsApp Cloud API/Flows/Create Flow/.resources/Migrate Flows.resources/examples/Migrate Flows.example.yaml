@@ -1,0 +1,38 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/migrate_flows
+  method: POST
+  body:
+    type: formdata
+    content:
+      - type: text
+        key: source_waba_id
+        value: <SOURCE_WABA_ID>
+        description: The ID of the source WABA from which the flows will be copied
+      - type: text
+        key: source_flow_names
+        value: '["appointment", "leadgen"]'
+        description: "[Optional] The names of the flows that will be copied from the source WABA. If not specified, all flows in the source WABA will be copied"
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: json
+    content: |-
+      {
+          "migrated_flows": [
+              {
+                  "source_id": "source-flow-1",
+                  "source_name": "appointment",
+                  "migrated_id": "dest-flow-1"
+              }
+          ],
+          "failed_flows": [
+              {
+                  "source_name": "leadgen",
+                  "error_code": "4233041",
+                  "error_message": "Flows Migration Error: Flow name not found in source WABA."
+              }
+          ]
+      }
+order: 1000

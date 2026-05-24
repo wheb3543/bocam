@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Webhook Events
+method: GET
+url: '{{baseUrl}}/api/trpc/whatsapp.webhookEvents.getAll'
+order: 11000

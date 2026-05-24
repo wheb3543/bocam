@@ -1,0 +1,43 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/v14.0/{{Phone-Number-ID}}/messages
+  method: POST
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer {{User-Access-Token}}
+  body:
+    type: json
+    content: |
+      {
+          "messaging_product": "whatsapp",
+          "recipient_type": "individual",
+          "to": "{{Recipient-Phone-Number}}",
+          "type": "reaction",
+          "reaction": {
+              "message_id": "wamid.HBgLM...",
+              "emoji": "\uD83D\uDE00"
+          }
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "contacts": [
+              {
+                  "input": "<PHONE_NUMBER>",
+                  "wa_id": "<WHATSAPP_ID>"
+              }
+          ],
+          "messages": [
+              {
+                  "id": "wamid.HBgLM..."
+              }
+          ]
+      }
+order: 1000

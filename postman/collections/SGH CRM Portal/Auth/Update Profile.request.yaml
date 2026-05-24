@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Profile
+method: POST
+url: '{{baseUrl}}/api/trpc/auth.updateProfile'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"name":"John Doe","email":"john@example.com"}}

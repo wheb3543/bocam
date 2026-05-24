@@ -1,0 +1,9 @@
+$kind: http-request
+description: Returns all assets attached to the flow. Currently only FLOW_JSON asset is supported
+url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}/assets
+method: GET
+body:
+  type: formdata
+  content: []
+examples: ./.resources/List Assets (Get Flow JSON URL).resources/examples
+order: 4000

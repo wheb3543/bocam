@@ -1,0 +1,16 @@
+$kind: http-request
+description: |-
+  - Guide: [Message Templates](https://developers.facebook.com/docs/whatsapp/business-management-api/message-templates)
+  - Guide: [How To Monitor Quality Signals](https://developers.facebook.com/docs/whatsapp/guides/how-to-monitor-quality-signals)
+  - Endpoint reference: [WhatsApp Business Account > Message Templates](https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account/message_templates/)
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/message_templates?hsm_id=<HSM_ID>&name=<NAME>
+method: DELETE
+queryParams:
+  - key: hsm_id
+    value: <HSM_ID>
+    description: Template ID
+  - key: name
+    value: <NAME>
+    description: Template name
+examples: ./.resources/Delete template by ID.resources/examples
+order: 15000

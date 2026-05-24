@@ -1,0 +1,28 @@
+$kind: http-request
+description: |-
+  You can query the status of an upload session by making a **GET** call to an endpoint that is named based on the **`Upload-ID`** that was returned through the **Resumable Upload - Create an Upload Session** request.
+
+  When uploading data, you **must include the access token as an HTTP header.**
+
+  **Example**
+  ``` bash
+  GET https://graph.facebook.com/v14.0/upload:MTphdHRhY2htZW50Ojlk2mJiZxUwLWV6MDUtNDIwMy05yTA3LWQ4ZDPmZGFkNTM0NT8=?sig=ARZqkGCA_uQMxC8nHKI HTTP/1.1
+  Authorization: OAuth {{USER_ACCESS_TOKEN}}
+
+  ```
+
+  For more information, see [Query File Upload Status after an Interruption](https://developers.facebook.com/docs/graph-api/guides/upload#interruptions).
+
+  **Response**
+  The result will be a JSON-encoded ID and offset that looks like the following:
+
+  ``` json
+  { "id": "upload:MTphdHRhY2htZW50Ojlk2mJiZxUwLWV6MDUtNDIwMy05yTA3LWQ4ZDPmZGFkNTM0NT8=?sig=ARZqkGCA_uQMxC8nHKI", "file_offset": 0 }
+  ```
+url: https://graph.facebook.com/{{Version}}/{{Upload-ID}}
+method: GET
+headers:
+  Cache-Control: no-cache
+  Authorization: OAuth {{User-Access-Token}}
+examples: ./.resources/Resumable Upload - Query File Upload Status.resources/examples
+order: 3000

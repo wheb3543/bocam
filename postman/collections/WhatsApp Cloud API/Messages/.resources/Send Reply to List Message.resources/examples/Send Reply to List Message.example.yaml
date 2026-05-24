@@ -1,0 +1,85 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/v13.0/{{Phone-Number-ID}}/messages
+  method: POST
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer {{User-Access-Token}}
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "recipient_type": "individual",
+          "to": "{{Recipient-Phone-Number}}",
+          "context": {
+              "message_id": "<MSGID_OF_PREV_MSG>"
+          },
+          "interactive": {
+              "type": "list",
+              "header": {
+                  "type": "text",
+                  "text": "<HEADER_TEXT>"
+              },
+              "body": {
+                  "text": "<BODY_TEXT>"
+              },
+              "footer": {
+                  "text": "<FOOTER_TEXT>"
+              },
+              "action": {
+                  "button": "<BUTTON_TEXT>",
+                  "sections": [
+                      {
+                          "title": "<LIST_SECTION_1_TITLE>",
+                          "rows": [
+                              {
+                                  "id": "<LIST_SECTION_1_ROW_1_ID>",
+                                  "title": "<SECTION_1_ROW_1_TITLE>",
+                                  "description": "<SECTION_1_ROW_1_DESC>"
+                              },
+                              {
+                                  "id": "<LIST_SECTION_1_ROW_2_ID>",
+                                  "title": "<SECTION_1_ROW_2_TITLE>",
+                                  "description": "<SECTION_1_ROW_2_DESC>"
+                              }
+                          ]
+                      },
+                      {
+                          "title": "<LIST_SECTION_2_TITLE>",
+                          "rows": [
+                              {
+                                  "id": "<LIST_SECTION_2_ROW_1_ID>",
+                                  "title": "<SECTION_2_ROW_1_TITLE>",
+                                  "description": "<SECTION_2_ROW_1_DESC>"
+                              },
+                              {
+                                  "id": "<LIST_SECTION_2_ROW_2_ID>",
+                                  "title": "<SECTION_2_ROW_2_TITLE>",
+                                  "description": "<SECTION_2_ROW_2_DESC>"
+                              }
+                          ]
+                      }
+                  ]
+              }
+          }
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "messaging_product": "whatsapp",
+        "contacts": [{
+            "input": "15555551234",
+            "wa_id": "<WHATSAPP_ID>"
+          }],
+        "messages": [{
+            "id": "wamid.ID"
+          }]
+      }
+order: 1000

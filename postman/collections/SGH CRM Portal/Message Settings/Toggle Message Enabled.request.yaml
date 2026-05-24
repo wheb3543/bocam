@@ -1,0 +1,12 @@
+$kind: http-request
+name: Toggle Message Enabled
+method: POST
+url: '{{baseUrl}}/api/trpc/messageSettings.toggleEnabled'
+order: 5000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1}}

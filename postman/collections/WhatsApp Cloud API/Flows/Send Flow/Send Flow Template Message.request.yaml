@@ -1,0 +1,37 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "messaging_product": "whatsapp",
+        "to": "{{Recipient-Phone-Number}}",
+        "type": "template",
+        "template": {
+            "name": "<TEMPLATE_NAME>",
+            "language": {
+                "code": "en_US"
+            },
+            "components": [
+                {
+                    "type": "button",
+                    "sub_type": "flow",
+                    "index": "0",
+                    "parameters": [
+                        {
+                            "type": "action",
+                            "action": {
+                                "flow_token": "<FLOW_TOKEN>",
+                                "flow_action_data": {
+                                    "<CUSTOM_KEY>": "<CUSTOM_VALUE>"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+examples: ./.resources/Send Flow Template Message.resources/examples
+order: 8000

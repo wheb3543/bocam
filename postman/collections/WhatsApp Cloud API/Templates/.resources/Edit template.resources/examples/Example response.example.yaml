@@ -1,0 +1,73 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/920070352646140
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "name": "2023_april_promo",
+          "components": [
+              {
+                  "type": "HEADER",
+                  "format": "TEXT",
+                  "text": "Fall Sale"
+              },
+              {
+                  "type": "BODY",
+                  "text": "Hi {{1}}, our Fall Sale is on! Use promo code {{2}} Get an extra 25% off every order above $350!",
+                  "example": {
+                      "body_text": [
+                          [
+                              "Mark",
+                              "FALL25"
+                          ]
+                      ]
+                  }
+              },
+              {
+                  "type": "FOOTER",
+                  "text": "Not interested in any of our sales? Tap Stop Promotions"
+              },
+              {
+                  "type": "BUTTONS",
+                  "buttons": [
+                      {
+                          "type": "QUICK_REPLY",
+                          "text": "Stop promotions"
+                      }
+                  ]
+              }
+          ],
+          "language": "en_US",
+          "category": "MARKETING"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=UTF-8
+    Vary: Origin
+    x-business-use-case-usage: '{"634974688087057":[{"type":"whatsapp_business_management","call_count":0,"total_cputime":0,"total_time":0,"estimated_time_to_regain_access":0}]}'
+    x-fb-rlafr: "0"
+    Access-Control-Allow-Origin: "*"
+    facebook-api-version: v16.0
+    Strict-Transport-Security: max-age=15552000; preload
+    Pragma: no-cache
+    Cache-Control: private, no-cache, no-store, must-revalidate
+    Expires: Sat, 01 Jan 2000 00:00:00 GMT
+    x-fb-request-id: AxL3yVE-rzEh1hPOKywIZDW
+    x-fb-trace-id: BfPPcrAeZzp
+    x-fb-rev: "1007268877"
+    X-FB-Debug: zbNYNbDIkRVjsYZD3iU+7DGcNYKDv3s4901qpUuDTKGBq20h5dU5YjKCRIlIc2+Mzs/ZqnnGk0U68tK3eYVjvA==
+    Date: Fri, 07 Apr 2023 19:32:22 GMT
+    Alt-Svc: h3=":443"; ma=86400
+    Connection: keep-alive
+    Content-Length: "16"
+  body:
+    type: json
+    content: |-
+      {
+          "success": true
+      }
+order: 1000

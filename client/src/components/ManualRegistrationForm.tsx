@@ -1,0 +1,769 @@
+import { useState, useEffect } from "react";
+import { trpc } from "@/lib/trpc";
+import { processPhoneInput, validateYemeniPhone } from "@/hooks/usePhoneFormat";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Loader2, Plus, Phone as PhoneIcon, Printer } from "lucide-react";
+import { toast } from "sonner";
+import { printReceipt } from "./PrintReceipt";
+import { useAuth } from "@/_core/hooks/useAuth";
+
+export default function ManualRegistrationForm() {
+  const { user } = useAuth();
+  const generateAppointmentReceiptMutation = trpc.appointments.generateReceiptNumber.useMutation();
+  const generateOfferLeadReceiptMutation = trpc.offerLeads.generateReceiptNumber.useMutation();
+  const generateCampRegistrationReceiptMutation = trpc.campRegistrations.generateReceiptNumber.useMutation();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [registrationType, setRegistrationType] = useState<"lead" | "appointment" | "offer" | "camp">("lead");
+  const [shouldPrint, setShouldPrint] = useState(false);
+  
+  // Form fields
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [notes, setNotes] = useState("");
+  
+  // Appointment specific
+  const [doctorId, setDoctorId] = useState("");
+  const [preferredDate, setPreferredDate] = useState("");
+  const [preferredTime, setPreferredTime] = useState("");
+  const [appointmentAge, setAppointmentAge] = useState("");
+  const [appointmentProcedure, setAppointmentProcedure] = useState("");
+  const [additionalNotes, setAdditionalNotes] = useState("");
+  
+  // Gender
+  const [gender, setGender] = useState<"male" | "female" | "">("" );
+
+  // Offer specific
+  const [offerId, setOfferId] = useState("");
+  
+  // Camp specific
+  const [campId, setCampId] = useState("");
+  const [campAge, setCampAge] = useState("");
+  const [campProcedures, setCampProcedures] = useState<string[]>([]);
+  const [campPreferredDate, setCampPreferredDate] = useState("");
+  const [campPreferredTimeSlot, setCampPreferredTimeSlot] = useState<"" | "morning" | "evening">("");
+  const [medicalCondition, setMedicalCondition] = useState("");
+  const [registrationStatus, setRegistrationStatus] = useState<"pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled" | "new" | "booked" | "not_interested">("confirmed");
+
+  const { data: doctors } = trpc.doctors.list.useQuery();
+  const { data: offers } = trpc.offers.getAll.useQuery();
+  const { data: camps } = trpc.camps.getAll.useQuery();
+
+  // Get selected doctor's procedures
+  const selectedDoctor = doctors?.find((d: any) => d.id.toString() === doctorId);
+  const doctorProcedures = selectedDoctor?.procedures ? selectedDoctor.procedures.split(',').map((p: string) => p.trim()).filter(Boolean) : [];
+
+  // Get selected camp's procedures
+  const selectedCamp = camps?.find((c: any) => c.id.toString() === campId);
+  const availableCampProcedures = (() => {
+    if (!selectedCamp?.availableProcedures) return [];
+    const raw = selectedCamp.availableProcedures;
+    // Try JSON parse first (array format)
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map((p: string) => p.trim()).filter(Boolean);
+    } catch {}
+    // Try newline-separated
+    if (raw.includes('\n')) return raw.split('\n').map((p: string) => p.trim()).filter(Boolean);
+    // Fallback: comma-separated
+    return raw.split(',').map((p: string) => p.trim()).filter(Boolean);
+  })();
+
+  // Reset procedure when doctor/camp changes
+  useEffect(() => {
+    setAppointmentProcedure("");
+  }, [doctorId]);
+
+  useEffect(() => {
+    setCampProcedures([]);
+    setCampPreferredDate("");
+    setCampPreferredTimeSlot("");
+  }, [campId]);
+
+  // Update registration status when registration type changes
+  useEffect(() => {
+    if (registrationType === 'appointment') {
+      setRegistrationStatus('confirmed');
+    } else if (registrationType === 'offer') {
+      setRegistrationStatus('confirmed');
+    } else if (registrationType === 'camp') {
+      setRegistrationStatus('confirmed');
+    } else {
+      setRegistrationStatus('new');
+    }
+  }, [registrationType]);
+
+  const createLeadMutation = trpc.leads.submit.useMutation({
+    onSuccess: () => {
+      toast.success("تم إضافة العميل بنجاح");
+      if (shouldPrint) {
+        printReceipt({
+          fullName,
+          phone,
+          age: undefined,
+          registrationDate: new Date(),
+          type: "appointment",
+          typeName: "عميل محتمل",
+        }, user?.name || "غير معروف");
+      }
+      resetForm();
+      setDialogOpen(false);
+      setShouldPrint(false);
+    },
+    onError: () => {
+      toast.error("حدث خطأ أثناء إضافة العميل");
+      setShouldPrint(false);
+    },
+  });
+
+  const createAppointmentMutation = trpc.appointments.submit.useMutation({
+    onSuccess: async (data) => {
+      toast.success("تم إضافة الموعد بنجاح");
+      if (shouldPrint && data?.insertId) {
+        try {
+          const result = await generateAppointmentReceiptMutation.mutateAsync({ id: data.insertId });
+          const doctor = doctors?.find((d: any) => d.id.toString() === doctorId);
+          printReceipt({
+            fullName,
+            phone,
+            age: appointmentAge ? parseInt(appointmentAge) : undefined,
+            registrationDate: new Date(),
+            type: "appointment",
+            typeName: doctor?.name || "غير محدد",
+            receiptNumber: result.receiptNumber,
+          }, user?.name || "غير معروف");
+        } catch (error) {
+          console.error('Error generating receipt number:', error);
+          toast.error('فشل في توليد رقم السند');
+        }
+      }
+      resetForm();
+      setDialogOpen(false);
+      setShouldPrint(false);
+    },
+    onError: (error: any) => {
+      const msg = error?.message;
+      if (msg && (msg.includes("تكرار") || msg.includes("حجز"))) {
+        toast.error(msg);
+      } else {
+        toast.error("حدث خطأ أثناء إضافة الموعد");
+      }
+      setShouldPrint(false);
+    },
+  });
+
+  const createOfferLeadMutation = trpc.offerLeads.submit.useMutation({
+    onSuccess: async (data) => {
+      toast.success("تم إضافة حجز العرض بنجاح");
+      if (shouldPrint && data?.id) {
+        try {
+          const result = await generateOfferLeadReceiptMutation.mutateAsync({ id: data.id });
+          const offer = offers?.find((o: any) => o.id.toString() === offerId);
+          printReceipt({
+            fullName,
+            phone,
+            age: undefined,
+            registrationDate: new Date(),
+            type: "offer",
+            typeName: offer?.title || "غير محدد",
+            receiptNumber: result.receiptNumber,
+          }, user?.name || "غير معروف");
+        } catch (error) {
+          console.error('Error generating receipt number:', error);
+          toast.error('فشل في توليد رقم السند');
+        }
+      }
+      resetForm();
+      setDialogOpen(false);
+      setShouldPrint(false);
+    },
+    onError: (error: any) => {
+      const msg = error?.message;
+      if (msg && (msg.includes("تكرار") || msg.includes("طلب"))) {
+        toast.error(msg);
+      } else {
+        toast.error("حدث خطأ أثناء إضافة حجز العرض");
+      }
+      setShouldPrint(false);
+    },
+  });
+
+  const createCampRegistrationMutation = trpc.campRegistrations.submit.useMutation({
+    onSuccess: async (data) => {
+      toast.success("تم إضافة تسجيل المخيم بنجاح");
+      if (shouldPrint && data?.id) {
+        try {
+          const result = await generateCampRegistrationReceiptMutation.mutateAsync({ id: data.id });
+          const camp = camps?.find((c: any) => c.id.toString() === campId);
+          printReceipt({
+            fullName,
+            phone,
+            age: campAge ? parseInt(campAge) : undefined,
+            registrationDate: new Date(),
+            type: "camp",
+            typeName: camp?.name || "غير محدد",
+            receiptNumber: result.receiptNumber,
+          }, user?.name || "غير معروف");
+        } catch (error) {
+          console.error('Error generating receipt number:', error);
+          toast.error('فشل في توليد رقم السند');
+        }
+      }
+      resetForm();
+      setDialogOpen(false);
+      setShouldPrint(false);
+    },
+    onError: (error: any) => {
+      const msg = error?.message;
+      if (msg && (msg.includes("تكرار") || msg.includes("مخيم"))) {
+        toast.error(msg);
+      } else {
+        toast.error("حدث خطأ أثناء إضافة تسجيل المخيم");
+      }
+      setShouldPrint(false);
+    },
+  });
+
+  const resetForm = () => {
+    setFullName("");
+    setPhone("");
+    setEmail("");
+    setNotes("");
+    setDoctorId("");
+    setPreferredDate("");
+    setPreferredTime("");
+    setAppointmentAge("");
+    setAppointmentProcedure("");
+    setAdditionalNotes("");
+    setOfferId("");
+    setCampId("");
+    setCampAge("");
+    setCampProcedures([]);
+    setCampPreferredDate("");
+    setCampPreferredTimeSlot("");
+    setMedicalCondition("");
+    setGender("");
+    setRegistrationStatus("new");
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!fullName || !phone) {
+      toast.error("الرجاء إدخال الاسم ورقم الهاتف");
+      return;
+    }
+
+    // التحقق من الجنس لأنواع الحجز غير العام
+    if (registrationType !== "lead" && !gender) {
+      toast.error("الرجاء تحديد الجنس");
+      return;
+    }
+
+    // التحقق من رقم الهاتف اليمني
+    const phoneValidation = validateYemeniPhone(phone);
+    if (!phoneValidation.valid) {
+      toast.error(phoneValidation.message || "رقم الهاتف غير صحيح");
+      return;
+    }
+
+    const baseData = {
+      fullName,
+      phone,
+      email: email || undefined,
+      gender: gender as "male" | "female" | undefined || undefined,
+      notes: notes || undefined,
+      source: "manual" as const,
+      status: registrationStatus as any, // Type will be validated by backend schema
+    };
+
+    switch (registrationType) {
+      case "lead":
+        createLeadMutation.mutate({ ...baseData, campaignSlug: "manual" });
+        break;
+      case "appointment":
+        if (!doctorId) {
+          toast.error("الرجاء اختيار الطبيب");
+          return;
+        }
+        const parsedDoctorId = parseInt(doctorId);
+        if (isNaN(parsedDoctorId)) {
+          toast.error("معرف الطبيب غير صالح");
+          return;
+        }
+        createAppointmentMutation.mutate({
+          ...baseData,
+          campaignSlug: "manual",
+          doctorId: parsedDoctorId,
+          preferredDate: preferredDate || undefined,
+          preferredTime: preferredTime || undefined,
+          age: appointmentAge ? parseInt(appointmentAge) : undefined,
+          procedure: appointmentProcedure || undefined,
+          additionalNotes: additionalNotes || undefined,
+        });
+        break;
+      case "offer":
+        if (!offerId) {
+          toast.error("الرجاء اختيار العرض");
+          return;
+        }
+        const parsedOfferId = parseInt(offerId);
+        if (isNaN(parsedOfferId)) {
+          toast.error("معرف العرض غير صالح");
+          return;
+        }
+        createOfferLeadMutation.mutate({
+          ...baseData,
+          offerId: parsedOfferId,
+          gender: (gender as "male" | "female") || "male", // default to male if not set
+        });
+        break;
+      case "camp":
+        if (!campId) {
+          toast.error("الرجاء اختيار المخيم");
+          return;
+        }
+        if (!campAge) {
+          toast.error("الرجاء إدخال العمر");
+          return;
+        }
+        const parsedCampId = parseInt(campId);
+        if (isNaN(parsedCampId)) {
+          toast.error("معرف المخيم غير صالح");
+          return;
+        }
+        // Convert 'completed' to 'attended' for camp registrations
+        const campStatus = registrationStatus === 'completed' ? 'attended' : registrationStatus;
+        createCampRegistrationMutation.mutate({
+          ...baseData,
+          status: campStatus as any,
+          campId: parsedCampId,
+          age: campAge ? parseInt(campAge) : undefined,
+          procedures: campProcedures.length > 0 ? JSON.stringify(campProcedures) : undefined,
+          medicalCondition: medicalCondition || undefined,
+          preferredDate: campPreferredDate || undefined,
+          preferredTimeSlot: campPreferredTimeSlot || undefined,
+        });
+        break;
+    }
+  };
+
+  const isPending = 
+    createLeadMutation.isPending ||
+    createAppointmentMutation.isPending ||
+    createOfferLeadMutation.isPending ||
+    createCampRegistrationMutation.isPending;
+
+  return (
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="gap-1 md:gap-2">
+          <Plus className="h-3 w-3 md:h-4 md:w-4" />
+          <PhoneIcon className="h-3 w-3 md:h-4 md:w-4" />
+          <span className="hidden md:inline">تسجيل يدوي (هاتفي)</span>
+          <span className="md:hidden text-xs">تسجيل</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogHeader>
+          <DialogTitle>تسجيل حجز يدوي</DialogTitle>
+          <DialogDescription>
+            إضافة حجز تم استلامه عبر الهاتف (8000018) مباشرة في النظام
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Registration Type */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>نوع الحجز</Label>
+              <Select value={registrationType} onValueChange={(value: any) => setRegistrationType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر نوع الحجز" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lead">عميل عام</SelectItem>
+                  <SelectItem value="appointment">موعد طبيب</SelectItem>
+                  <SelectItem value="offer">حجز عرض</SelectItem>
+                  <SelectItem value="camp">تسجيل مخيم</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>حالة التسجيل</Label>
+              <Select value={registrationStatus} onValueChange={(value: any) => setRegistrationStatus(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الحالة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">قيد الانتظار</SelectItem>
+                  <SelectItem value="contacted">تم التواصل</SelectItem>
+                  <SelectItem value="no_answer">لم يرد</SelectItem>
+                  <SelectItem value="confirmed">مؤكد</SelectItem>
+                  <SelectItem value="attended">حضر</SelectItem>
+                  <SelectItem value="completed">مكتمل</SelectItem>
+                  <SelectItem value="cancelled">ملغي</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Basic Info */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">الاسم الكامل *</Label>
+              <Input
+                id="fullName"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="أدخل الاسم الكامل"
+                className="text-right"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">رقم الهاتف *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(processPhoneInput(e.target.value))}
+                placeholder="مثال: 771234567"
+                dir="ltr"
+                inputMode="numeric"
+                required
+              />
+              <p className="text-xs text-muted-foreground">يجب أن يبدأ بالرقم 7 ويتكون من 9 أرقام</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">البريد الإلكتروني (اختياري)</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="example@email.com"
+              className="text-right"
+            />
+          </div>
+
+          {/* Appointment Specific Fields */}
+          {registrationType === "appointment" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="doctorId">الطبيب *</Label>
+                <Select value={doctorId} onValueChange={setDoctorId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر الطبيب" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {doctors?.map((doctor: any) => (
+                      <SelectItem key={doctor.id} value={doctor.id.toString()}>
+                        {doctor.name} - {doctor.specialty}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="preferredDate">التاريخ المفضل</Label>
+                  <Input
+                    id="preferredDate"
+                    type="date"
+                    value={preferredDate}
+                    onChange={(e) => setPreferredDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="preferredTime">الوقت المفضل</Label>
+                  <Input
+                    id="preferredTime"
+                    type="time"
+                    value={preferredTime}
+                    onChange={(e) => setPreferredTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="appointmentAge">العمر *</Label>
+                <Input
+                  id="appointmentAge"
+                  type="number"
+                  value={appointmentAge}
+                  onChange={(e) => setAppointmentAge(e.target.value)}
+                  placeholder="أدخل العمر"
+                  className="text-right"
+                  required
+                />
+              </div>
+
+              {doctorProcedures.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="appointmentProcedure">الإجراء المطلوب</Label>
+                  <Select value={appointmentProcedure} onValueChange={setAppointmentProcedure}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر الإجراء" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {doctorProcedures.map((proc: string, idx: number) => (
+                        <SelectItem key={idx} value={proc}>
+                          {proc}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="additionalNotes">ملاحظات المريض الإضافية</Label>
+                <Textarea
+                  id="additionalNotes"
+                  value={additionalNotes}
+                  onChange={(e) => setAdditionalNotes(e.target.value)}
+                  placeholder="أي ملاحظات من المريض..."
+                  className="text-right"
+                  rows={2}
+                />
+              </div>
+            </>
+          )}
+
+          {/* Offer Specific Fields */}
+          {registrationType === "offer" && (
+            <div className="space-y-2">
+              <Label htmlFor="offerId">العرض *</Label>
+              <Select value={offerId} onValueChange={setOfferId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر العرض" />
+                </SelectTrigger>
+                <SelectContent>
+                  {offers?.map((offer: any) => (
+                    <SelectItem key={offer.id} value={offer.id.toString()}>
+                      {offer.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Camp Specific Fields */}
+          {registrationType === "camp" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="campId">المخيم *</Label>
+                <Select value={campId} onValueChange={setCampId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر المخيم" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {camps?.map((camp: any) => (
+                      <SelectItem key={camp.id} value={camp.id.toString()}>
+                        {camp.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="campAge">العمر</Label>
+                <Input
+                  id="campAge"
+                  type="number"
+                  value={campAge}
+                  onChange={(e) => setCampAge(e.target.value)}
+                  placeholder="أدخل العمر"
+                  className="text-right"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="campPreferredDate">تاريخ الحضور المفضل (اختياري)</Label>
+                  <Input
+                    id="campPreferredDate"
+                    type="date"
+                    value={campPreferredDate}
+                    onChange={(e) => setCampPreferredDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>الفترة المفضلة (اختياري)</Label>
+                  <Select
+                    value={campPreferredTimeSlot || "none"}
+                    onValueChange={(v) => setCampPreferredTimeSlot(v === "none" ? "" : (v as "morning" | "evening"))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">—</SelectItem>
+                      <SelectItem value="morning">صباحي</SelectItem>
+                      <SelectItem value="evening">مسائي</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {availableCampProcedures.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="campProcedure">الإجراء المطلوب</Label>
+                  <Select
+                    value={campProcedures[0] || ""}
+                    onValueChange={(val) => setCampProcedures(val ? [val] : [])}
+                  >
+                    <SelectTrigger id="campProcedure">
+                      <SelectValue placeholder="اختر الإجراء" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableCampProcedures.map((proc: string, idx: number) => (
+                        <SelectItem key={idx} value={proc}>
+                          {proc}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="medicalCondition">الحالة الطبية</Label>
+                <Textarea
+                  id="medicalCondition"
+                  value={medicalCondition}
+                  onChange={(e) => setMedicalCondition(e.target.value)}
+                  placeholder="أدخل الحالة الطبية إن وجدت"
+                  className="text-right"
+                  rows={2}
+                />
+              </div>
+            </>
+          )}
+
+          {/* Gender - required for non-lead types */}
+          {registrationType !== "lead" && (
+            <div className="space-y-2">
+              <Label>
+                الجنس *
+                {!gender && <span className="text-destructive text-xs mr-1">(مطلوب)</span>}
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGender("male")}
+                  className={`h-10 rounded-lg border-2 text-sm font-medium transition-colors ${
+                    gender === "male"
+                      ? "border-blue-600 bg-blue-50 text-blue-700"
+                      : "border-border bg-background text-foreground hover:border-blue-400"
+                  }`}
+                >
+                  ذكر
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGender("female")}
+                  className={`h-10 rounded-lg border-2 text-sm font-medium transition-colors ${
+                    gender === "female"
+                      ? "border-pink-500 bg-pink-50 text-pink-700"
+                      : "border-border bg-background text-foreground hover:border-pink-400"
+                  }`}
+                >
+                  أنثى
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="notes">ملاحظات الموظف</Label>
+            <Textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="أي ملاحظات من الموظف..."
+              className="text-right"
+              rows={3}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 justify-end pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                resetForm();
+                setDialogOpen(false);
+              }}
+              disabled={isPending}
+            >
+              إلغاء
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={(e) => {
+                setShouldPrint(true);
+                handleSubmit(e as any);
+              }}
+              disabled={isPending}
+            >
+              {isPending && shouldPrint ? (
+                <>
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                  جاري الحفظ والطباعة...
+                </>
+              ) : (
+                <>
+                  <Printer className="ml-2 h-4 w-4" />
+                  حفظ وطباعة
+                </>
+              )}
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isPending}
+              onClick={() => setShouldPrint(false)}
+            >
+              {isPending && !shouldPrint ? (
+                <>
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                  جاري الحفظ...
+                </>
+              ) : (
+                "حفظ الحجز"
+              )}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

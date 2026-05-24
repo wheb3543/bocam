@@ -1,0 +1,32 @@
+$kind: http-request
+description: |-
+  Creates a new flow. To clone an existing flow you can add the parameter
+
+  `"clone_flow_id": "original-flow-id"`
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/flows
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: <FLOW_NAME>
+    - type: text
+      key: categories
+      value: '["OTHER"]'
+      description: |-
+        A list of Flow categories. Multiple values are possible, but at least one is required. Choose the values which represent your business use case. 
+
+        Possible values: "SIGN_UP", "SIGN_IN", "APPOINTMENT_BOOKING", "LEAD_GENERATION", "CONTACT_US", "CUSTOMER_SUPPORT", "SURVEY", "OTHER"
+    - type: text
+      key: clone_flow_id
+      value: <EXISTING_FLOW_ID>
+      description: Creates a copy of the existing flow specified
+      disabled: true
+    - type: text
+      key: endpoint_uri
+      value: https://example.com
+      description: Endpoint URI for the Flow
+      disabled: true
+examples: ./.resources/Create Flow.resources/examples
+order: 1000

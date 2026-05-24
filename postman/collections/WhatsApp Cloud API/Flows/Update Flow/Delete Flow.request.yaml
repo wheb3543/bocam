@@ -1,0 +1,6 @@
+$kind: http-request
+description: Deletes the flow entirely. This action is not reversible. Only a DRAFT flow can be deleted.
+url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}
+method: DELETE
+examples: ./.resources/Delete Flow.resources/examples
+order: 6000

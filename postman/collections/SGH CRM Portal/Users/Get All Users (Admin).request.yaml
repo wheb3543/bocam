@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'Get All Users (Admin)'
+method: GET
+url: '{{baseUrl}}/api/trpc/users.getAll'
+order: 2000

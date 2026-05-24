@@ -1,0 +1,12 @@
+$kind: http-request
+name: Create Task
+method: POST
+url: '{{baseUrl}}/api/trpc/tasks.create'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"title":"مهمة جديدة","priority":"medium","status":"todo","category":"other"}}

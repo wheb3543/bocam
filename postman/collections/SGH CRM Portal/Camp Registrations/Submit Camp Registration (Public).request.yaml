@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Submit Camp Registration (Public)'
+method: POST
+url: '{{baseUrl}}/api/trpc/campRegistrations.submit'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"campId":1,"fullName":"محمد علي","phone":"771234567","gender":"male","preferredDate":"2026-06-01","preferredTimeSlot":"morning"}}

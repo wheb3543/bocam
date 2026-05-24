@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'List Doctors (Public)'
+method: GET
+url: '{{baseUrl}}/api/trpc/doctors.list'
+order: 1000

@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'Get All Camps (Public)'
+method: GET
+url: '{{baseUrl}}/api/trpc/camps.getAll'
+order: 1000

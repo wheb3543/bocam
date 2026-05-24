@@ -1,0 +1,75 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/business_compliance_info
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Encoding
+      value: br
+    - key: ETag
+      value: '"5d9b0d60e85289ecf991fc9d1374a2dea2bb1933"'
+    - key: Content-Type
+      value: application/json; charset=UTF-8
+    - key: Vary
+      value: Origin
+    - key: Vary
+      value: Accept-Encoding
+    - key: x-business-use-case-usage
+      value: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    - key: x-fb-rlafr
+      value: "0"
+    - key: Access-Control-Allow-Origin
+      value: "*"
+    - key: facebook-api-version
+      value: v16.0
+    - key: Strict-Transport-Security
+      value: max-age=15552000; preload
+    - key: Pragma
+      value: no-cache
+    - key: Cache-Control
+      value: private, no-cache, no-store, must-revalidate
+    - key: Expires
+      value: Sat, 01 Jan 2000 00:00:00 GMT
+    - key: x-fb-request-id
+      value: Adxmksg34KENIcsc9IhuPOx
+    - key: x-fb-trace-id
+      value: CWbAtEYpDno
+    - key: x-fb-rev
+      value: "1007307139"
+    - key: X-FB-Debug
+      value: KnAizExvSQwkzX5kWoW0eWjbmGFhM7YuFXw9Bvo1fYDJJDurr0s+57kYrB1rNo7DRBOExt0rYt+uc2cFp3YB5w==
+    - key: Date
+      value: Thu, 13 Apr 2023 21:46:15 GMT
+    - key: Alt-Svc
+      value: h3=":443"; ma=86400
+    - key: Connection
+      value: keep-alive
+    - key: Content-Length
+      value: "224"
+  body:
+    type: json
+    content: |-
+      {
+          "data": [
+              {
+                  "entity_name": "Lucky Shrub",
+                  "entity_type": "Partnership",
+                  "is_registered": true,
+                  "grievance_officer_details": {
+                      "name": "Chandravati P.",
+                      "email": "chandravati@luckyshrub.com",
+                      "landline_number": "+913857614343",
+                      "mobile_number": "+913854559033"
+                  },
+                  "customer_care_details": {
+                      "email": "support@luckyshrub.com",
+                      "landline_number": "+913857614343",
+                      "mobile_number": "+913854559033"
+                  },
+                  "messaging_product": "whatsapp"
+              }
+          ]
+      }
+order: 1000

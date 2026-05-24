@@ -1,0 +1,11 @@
+$kind: collection
+description: |-
+  | Field                 | Description                      |
+  |-----------------------|----------------------------------|
+  | **`payload`**         | The developer-defined payload for the button when a business account sends interactive messages. |
+  | **`text`**            | The button text.|
+auth:
+  - id: ""
+    type: noauth
+    name: No Auth
+order: 17000

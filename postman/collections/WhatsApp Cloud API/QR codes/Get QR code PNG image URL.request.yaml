@@ -1,0 +1,11 @@
+$kind: http-request
+description: |-
+  - Guide: [QR Codes](https://developers.facebook.com/docs/whatsapp/business-management-api/qr-codes)
+  - Endpoint reference: [WhatsApp Business Phone Number > Message Qrdls](https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account-to-number-current-status/message_qrdls/)
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/message_qrdls?fields=prefilled_message,deep_link_url,qr_image_url.format(PNG)&code=<QR_CODE_ID>
+method: GET
+queryParams:
+  fields: prefilled_message,deep_link_url,qr_image_url.format(PNG)
+  code: <QR_CODE_ID>
+examples: ./.resources/Get QR code PNG image URL.resources/examples
+order: 5000

@@ -1,0 +1,61 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+         "messaging_product": "whatsapp",
+         "to": "{{Recipient-Phone-Number}}",
+         "type": "template",
+         "template": {
+             "name": "sample_issue_resolution",
+             "language": {
+                 "code": "en_US",
+                 "policy": "deterministic"
+             },
+             "components": [
+                 {
+                     "type": "body",
+                     "parameters": [
+                         {
+                             "type": "text",
+                             "text": "*Mr. Jones*"
+                         }
+                     ]
+                 },
+                 {
+                     "type": "button",
+                     "sub_type": "quick_reply",
+                     "index": 0,
+                     "parameters": [
+                         {
+                             "type": "text",
+                             "text": "Yes"
+                         }
+                     ]
+                 },
+                 {
+                     "type": "button",
+                     "sub_type": "quick_reply",
+                     "index": 1,
+                     "parameters": [
+                         {
+                             "type": "text",
+                             "text": "No"
+                         }
+                     ]
+                 }
+             ]
+         }
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: ""
+order: 1000

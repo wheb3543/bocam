@@ -1,0 +1,10 @@
+$kind: http-request
+description: |-
+  - Guide: [Analytics](https://developers.facebook.com/docs/whatsapp/business-management-api/analytics)
+  - Endpoint reference: [WhatsApp Business Account > Analytics](https://developers.facebook.com/docs/graph-api/reference/waba-analytics/)
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}?fields=conversation_analytics.start(1656661480).end(1674859480).granularity(MONTHLY).conversation_directions(["business_initiated"]).dimensions(["conversation_type", "conversation_direction"])
+method: GET
+queryParams:
+  fields: conversation_analytics.start(1656661480).end(1674859480).granularity(MONTHLY).conversation_directions(["business_initiated"]).dimensions(["conversation_type", "conversation_direction"])
+examples: ./.resources/Get conversation analytics.resources/examples
+order: 2000

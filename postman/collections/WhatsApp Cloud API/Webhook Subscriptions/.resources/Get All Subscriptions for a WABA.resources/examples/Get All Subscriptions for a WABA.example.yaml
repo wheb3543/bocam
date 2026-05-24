@@ -1,0 +1,34 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/subscribed_apps
+  method: GET
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+    Content-Type: application/json
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |
+      {
+          "data": [
+              {
+                  "whatsapp_business_api_data": {
+                      "link": "<APP1_LINK>",
+                      "name": "<APP1_NAME>",
+                      "id": "7234002551525653"
+                  }
+              },
+              {
+                  "whatsapp_business_api_data": {
+                      "link": "<APP2_LINK>",
+                      "name": "<APP2_LINK>",
+                      "id": "3736565603394103"
+                  }
+              }
+          ]
+      }
+order: 1000

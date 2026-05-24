@@ -1,0 +1,8 @@
+$kind: http-request
+name: Get Bookings Report
+method: GET
+url: '{{baseUrl}}/api/trpc/reports.getBookingsReport'
+order: 1000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22startDate%22%3A%222026-01-01%22%2C%22endDate%22%3A%222026-12-31%22%7D%7D'

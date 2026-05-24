@@ -1,0 +1,5 @@
+$kind: http-request
+name: Connection Status
+method: GET
+url: '{{baseUrl}}/api/trpc/whatsapp.connection.status'
+order: 1000

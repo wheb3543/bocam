@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Campaign
+method: POST
+url: '{{baseUrl}}/api/trpc/campaigns.update'
+order: 5000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1,"name":"حملة صيف 2026 محدثة"}}

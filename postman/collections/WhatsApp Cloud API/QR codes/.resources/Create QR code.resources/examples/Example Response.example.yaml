@@ -1,0 +1,65 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/message_qrdls
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "prefilled_message": "Show me Cyber Monday deals!",
+          "generate_qr_image": "SVG"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Encoding
+      value: br
+    - key: Content-Type
+      value: application/json; charset=UTF-8
+    - key: Vary
+      value: Origin
+    - key: Vary
+      value: Accept-Encoding
+    - key: cross-origin-resource-policy
+      value: cross-origin
+    - key: x-app-usage
+      value: '{"call_count":2,"total_cputime":0,"total_time":4}'
+    - key: Access-Control-Allow-Origin
+      value: "*"
+    - key: facebook-api-version
+      value: v17.0
+    - key: Strict-Transport-Security
+      value: max-age=15552000; preload
+    - key: Pragma
+      value: no-cache
+    - key: Cache-Control
+      value: private, no-cache, no-store, must-revalidate
+    - key: Expires
+      value: Sat, 01 Jan 2000 00:00:00 GMT
+    - key: x-fb-request-id
+      value: AmoOQGTJFcmUuZO8YUS3OKd
+    - key: x-fb-trace-id
+      value: EItwrXJiz+3
+    - key: x-fb-rev
+      value: "1007848995"
+    - key: X-FB-Debug
+      value: Ksgfum34ZCdBYgGDNUidde6xFR+1D4pD7Vr6IQji0TjOJT5QejgxGt7iyBbo0fEdKNZXB0QdimJ3Qv4mkvKyLw==
+    - key: Date
+      value: Mon, 17 Jul 2023 17:27:29 GMT
+    - key: Alt-Svc
+      value: h3=":443"; ma=86400
+    - key: Connection
+      value: keep-alive
+    - key: Content-Length
+      value: "347"
+  body:
+    type: json
+    content: |-
+      {
+          "code": "ANED2T5QRU7HG1",
+          "prefilled_message": "Show me Cyber Monday deals!",
+          "deep_link_url": "https://wa.me/message/ANED2T5QRU7HG1",
+          "qr_image_url": "https://scontent-iad3-2.xx.fbcdn.net/m1/v/t6/An-psFmLBls2NFXnhhkSVqwIHEqCTQoNKTLxxlOeci0Wbsukd2RLiwZalHrXwqT5RTFSzOhyw6OLvJJO0itaQtJI1BS2WkNcV67wR3GNx7ZX1tFSNCbpo1e6KPptKF1GbVGzmUfkgSPX?ccb=10-5&oh=00_AfAOAr6oRA2OKV_Ur3GUh4em57sACxUkfhXHsObiFrxOsA&oe=64DCCEF6&_nc_sid=5a413f"
+      }
+order: 1000

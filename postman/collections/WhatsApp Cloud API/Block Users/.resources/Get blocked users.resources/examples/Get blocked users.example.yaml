@@ -1,0 +1,68 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/block_users
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Encoding
+      value: br
+    - key: ETag
+      value: '"479d4d6b1605dd222ded4e7fb450229b1d19dbc6"'
+    - key: Content-Type
+      value: application/json; charset=UTF-8
+    - key: Vary
+      value: Origin
+    - key: Vary
+      value: Accept-Encoding
+    - key: x-business-use-case-usage
+      value: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0},{"type":"whatsapp","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    - key: Access-Control-Allow-Origin
+      value: "*"
+    - key: facebook-api-version
+      value: v22.0
+    - key: Strict-Transport-Security
+      value: max-age=15552000; preload
+    - key: Pragma
+      value: no-cache
+    - key: Cache-Control
+      value: private, no-cache, no-store, must-revalidate
+    - key: Expires
+      value: Sat, 01 Jan 2000 00:00:00 GMT
+    - key: x-fb-request-id
+      value: AGaOBl2yM-g8gdON-dhzl5y
+    - key: x-fb-trace-id
+      value: E7riEe9OW2e
+    - key: x-fb-rev
+      value: "1019544279"
+    - key: X-FB-Debug
+      value: 52zkUgodnaVRhbBE+3RiGz6TnmjmDEGunwYd+vKSc4synE+Xii//dy6twB/7yKgOJiMUuV0OF248UAZ1qL3v0A==
+    - key: Date
+      value: Fri, 24 Jan 2025 00:48:41 GMT
+    - key: X-FB-Connection-Quality
+      value: EXCELLENT; q=0.9, rtt=7, rtx=0, c=10, mss=1380, tbw=372, tp=-1, tpl=-1, uplat=527, ullat=0
+    - key: Alt-Svc
+      value: h3=":443"; ma=86400
+    - key: Connection
+      value: keep-alive
+    - key: Content-Length
+      value: "155"
+  body:
+    type: json
+    content: |-
+      {
+          "data": [
+              {
+                  "messaging_product": "whatsapp",
+                  "wa_id": "16505551234"
+              }
+          ],
+          "paging": {
+              "cursors": {
+                  "before": "eyJvZAmZAzZAXQiOjAsInZAlcnNpb25JZACI6IjE3Mzc2Nzk2ODgzODM1ODQifQZDZD",
+                  "after": "eyJvZAmZAzZAXQiOjAsInZAlcnNpb25JZACI6IjE3Mzc2Nzk2ODgzODM1ODQifQZDZD"
+              }
+          }
+      }
+order: 1000

@@ -1,0 +1,63 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/message_templates
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "name": "authentication_code_copy_code_button",
+          "language": "en_US",
+          "category": "AUTHENTICATION",
+          "components": [
+              {
+                  "type": "BODY",
+                  "add_security_recommendation": true
+              },
+              {
+                  "type": "FOOTER",
+                  "code_expiration_minutes": 10
+              },
+              {
+                  "type": "BUTTONS",
+                  "buttons": [
+                      {
+                          "type": "OTP",
+                          "otp_type": "COPY_CODE",
+                          "text": "Copy Code"
+                      }
+                  ]
+              }
+          ]
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=UTF-8
+    Vary: Origin
+    x-business-use-case-usage: '{"104996122399160":[{"type":"whatsapp_business_management","call_count":0,"total_cputime":0,"total_time":0,"estimated_time_to_regain_access":0}]}'
+    x-fb-rlafr: "0"
+    Access-Control-Allow-Origin: "*"
+    facebook-api-version: v16.0
+    Strict-Transport-Security: max-age=15552000; preload
+    Pragma: no-cache
+    Cache-Control: private, no-cache, no-store, must-revalidate
+    Expires: Sat, 01 Jan 2000 00:00:00 GMT
+    x-fb-request-id: AKDIp932lVvZuHIQyIS952l
+    x-fb-trace-id: G95hQDucvX9
+    x-fb-rev: "1007468797"
+    X-FB-Debug: 5laZch8UZd8gq/YUm4wPBo3Xo64o7SnELEqsMjdcW7ZIwi75buqMYyvxZXGOaCWur1/zh2hAQakRlkFkeJ7FKQ==
+    Date: Wed, 10 May 2023 20:33:46 GMT
+    Alt-Svc: h3=":443"; ma=86400
+    Connection: keep-alive
+    Content-Length: "73"
+  body:
+    type: json
+    content: |-
+      {
+          "id": "1473688840035974",
+          "status": "APPROVED",
+          "category": "AUTHENTICATION"
+      }
+order: 1000

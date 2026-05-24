@@ -1,0 +1,35 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/v15.0/{{WABA-ID}}/subscribed_apps
+  method: POST
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "override_callback_uri": "https://alternate-endpoint-callback.com/webhook",
+          "verify_token": "myvoiceismypassport?"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "data" : [
+          {
+            "override_callback_uri" : "https://alternate-endpoint-callback.com/webhook",
+            "whatsapp_business_api_data" : {
+              "id" : "670843887433847",
+              "link" : "https://www.facebook.com/games/?app_id=67084...",
+              "name" : "Jaspers Market"
+            }
+          }
+        ]
+      }
+order: 1000

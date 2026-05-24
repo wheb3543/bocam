@@ -1,0 +1,8 @@
+$kind: http-request
+description: To unsubscribe your app from webhooks for a WhatsApp Business Account, send a **DELETE** request to the `/subscribed_apps/` endpoint on the WABA.
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/subscribed_apps
+method: DELETE
+headers:
+  Authorization: Bearer {{User-Access-Token}}
+examples: ./.resources/Unsubscribe from a WABA.resources/examples
+order: 4000

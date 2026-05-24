@@ -1,0 +1,28 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/app/uploads/?file_length=14502&file_type=image/jpeg&file_name=myprofile.jpg
+  method: POST
+  headers:
+    Authorization: OAuth {{User-Access-Token}}
+  queryParams:
+    - key: file_length
+      value: "14502"
+      description: "**Required**<br/>Specifies the size of your file in bytes."
+    - key: file_type
+      value: image/jpeg
+      description: "**Required**<br/>Specifies the MIME type. Values are <ul><li>`image/jpeg`</li><li>`video/mp4`</li></ul>"
+    - key: file_name
+      value: myprofile.jpg
+      description: "**Optional**<br/>Specifies the file name you are using to create the session."
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "id": "upload:MTphdHRhY2htZW50Ojlk2mJiZxUwLWV6MDUtNDIwMy05yTA3LWQ4ZDPmZGFkNTM0NT8=?sig=ARZqkGCA_uQMxC8nHKI"
+      }
+order: 1000

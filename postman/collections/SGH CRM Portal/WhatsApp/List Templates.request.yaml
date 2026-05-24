@@ -1,0 +1,5 @@
+$kind: http-request
+name: List Templates
+method: GET
+url: '{{baseUrl}}/api/trpc/whatsapp.templates.list'
+order: 8000

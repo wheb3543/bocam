@@ -1,0 +1,93 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/920070352646140
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Encoding
+      value: br
+    - key: ETag
+      value: '"e5d8c11dc8393ffe82fb32bea775f609f0efcc87"'
+    - key: Content-Type
+      value: application/json; charset=UTF-8
+    - key: Vary
+      value: Origin
+    - key: Vary
+      value: Accept-Encoding
+    - key: x-business-use-case-usage
+      value: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    - key: x-fb-rlafr
+      value: "0"
+    - key: Access-Control-Allow-Origin
+      value: "*"
+    - key: facebook-api-version
+      value: v16.0
+    - key: Strict-Transport-Security
+      value: max-age=15552000; preload
+    - key: Pragma
+      value: no-cache
+    - key: Cache-Control
+      value: private, no-cache, no-store, must-revalidate
+    - key: Expires
+      value: Sat, 01 Jan 2000 00:00:00 GMT
+    - key: x-fb-request-id
+      value: AQShOun0F8Erf0hMbGBGLmQ
+    - key: x-fb-trace-id
+      value: Hvd7hnyFd49
+    - key: x-fb-rev
+      value: "1007251231"
+    - key: X-FB-Debug
+      value: svLARzFgDoUSQya1fv6vGYZoY4BkzPQToXrpR3W6k/OOk8NYFcZVvLhceUdli74kBn9gG8AobKUZdAljEF4NFw==
+    - key: Date
+      value: Wed, 05 Apr 2023 18:49:23 GMT
+    - key: Alt-Svc
+      value: h3=":443"; ma=86400
+    - key: Connection
+      value: keep-alive
+    - key: Content-Length
+      value: "362"
+  body:
+    type: json
+    content: |-
+      {
+          "name": "2023_april_promo",
+          "components": [
+              {
+                  "type": "HEADER",
+                  "format": "TEXT",
+                  "text": "Fall Sale"
+              },
+              {
+                  "type": "BODY",
+                  "text": "Hi {{1}}, our Fall Sale is on! Use promo code {{2}} Get an extra 25% off every order above $350!",
+                  "example": {
+                      "body_text": [
+                          [
+                              "Mark",
+                              "FALL25"
+                          ]
+                      ]
+                  }
+              },
+              {
+                  "type": "FOOTER",
+                  "text": "Not interested in any of our sales? Tap Stop Promotions"
+              },
+              {
+                  "type": "BUTTONS",
+                  "buttons": [
+                      {
+                          "type": "QUICK_REPLY",
+                          "text": "Stop promotions"
+                      }
+                  ]
+              }
+          ],
+          "language": "en_US",
+          "status": "APPROVED",
+          "category": "MARKETING",
+          "id": "920070352646140"
+      }
+order: 1000

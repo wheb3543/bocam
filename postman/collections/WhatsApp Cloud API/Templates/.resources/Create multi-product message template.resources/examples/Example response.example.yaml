@@ -1,0 +1,75 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/message_templates
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "name": "abandoned_cart",
+          "language": "en_US",
+          "category": "MARKETING",
+          "components": [
+              {
+                  "type": "HEADER",
+                  "format": "TEXT",
+                  "text": "Forget something {{1}}?",
+                  "example": {
+                      "header_text": [
+                          "Pablo"
+                      ]
+                  }
+              },
+              {
+                  "type": "BODY",
+                  "text": "Looks like you left some items in your cart! Use code {{1}} and you can get 10% off of all of them!",
+                  "example": {
+                      "body_text": [
+                          [
+                              "10OFF"
+                          ]
+                      ]
+                  }
+              },
+              {
+                  "type":"BUTTONS",
+                  "buttons": [
+                      {
+                          "type": "MPM",
+                          "text": "View items"
+                      }
+                  ]
+              }
+          ]
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=UTF-8
+    Vary: Origin
+    x-business-use-case-usage: '{"104996122399160":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    x-fb-rlafr: "0"
+    Access-Control-Allow-Origin: "*"
+    facebook-api-version: v16.0
+    Strict-Transport-Security: max-age=15552000; preload
+    Pragma: no-cache
+    Cache-Control: private, no-cache, no-store, must-revalidate
+    Expires: Sat, 01 Jan 2000 00:00:00 GMT
+    x-fb-request-id: A3RpRCRYq_2lAy6Wxi8LHKA
+    x-fb-trace-id: Bw/YMwRpjl4
+    x-fb-rev: "1007468797"
+    X-FB-Debug: PUCQeqJ37UQ+sft7EingcX61vzlQ66E+YYidBn/TRmvZr4c+cmh/1L1Vi0IwsGuBeB1rTgXk4LrOevOiTagYMg==
+    Date: Wed, 10 May 2023 21:28:52 GMT
+    Alt-Svc: h3=":443"; ma=86400
+    Connection: keep-alive
+    Content-Length: "67"
+  body:
+    type: json
+    content: |-
+      {
+          "id": "1986030731777856",
+          "status": "PENDING",
+          "category": "MARKETING"
+      }
+order: 1000

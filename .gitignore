@@ -1,0 +1,15 @@
+node_modules
+# macOS system files
+.DS_Store
+
+# Build production output
+dist/
+
+# Local backups (حظر مجلد النسخ الاحتياطية)
+backups/
+
+.env
+.env.local
+node_modules/
+.vite/
+dist/

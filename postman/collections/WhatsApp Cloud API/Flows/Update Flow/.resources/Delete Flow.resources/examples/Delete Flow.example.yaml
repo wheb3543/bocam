@@ -1,0 +1,14 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}
+  method: DELETE
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: json
+    content: |-
+      {
+          "success": true
+      }
+order: 1000

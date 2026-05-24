@@ -1,0 +1,66 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/message_templates
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "name": "authentication_code_autofill_button",
+          "language": "en_US",
+          "category": "AUTHENTICATION",
+          "components": [
+              {
+                  "type": "BODY",
+                  "add_security_recommendation": true
+              },
+              {
+                  "type": "FOOTER",
+                  "code_expiration_minutes": 10
+              },
+              {
+                  "type": "BUTTONS",
+                  "buttons": [
+                      {
+                          "type": "OTP",
+                          "otp_type": "ONE_TAP",
+                          "text": "Copy Code",
+                          "autofill_text": "Autofill",
+                          "package_name": "com.example.luckyshrub",
+                          "signature_hash": "K8a%2FAINcGX7"
+                      }
+                  ]
+              }
+          ]
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=UTF-8
+    Vary: Origin
+    x-business-use-case-usage: '{"104996122399160":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
+    x-fb-rlafr: "0"
+    Access-Control-Allow-Origin: "*"
+    facebook-api-version: v16.0
+    Strict-Transport-Security: max-age=15552000; preload
+    Pragma: no-cache
+    Cache-Control: private, no-cache, no-store, must-revalidate
+    Expires: Sat, 01 Jan 2000 00:00:00 GMT
+    x-fb-request-id: ADlZKG2UmdFA85rJ2B8_Ozi
+    x-fb-trace-id: D+M6cMp+D1L
+    x-fb-rev: "1007468797"
+    X-FB-Debug: //U2RB2hd4nk+GqaJM9kjVybDBP6Xw6k2lvMIpqAMJDKK8USOjNWRKbG5vpJNjp6y9N2a9zM1ZOhlE+4/5GB6w==
+    Date: Wed, 10 May 2023 21:04:23 GMT
+    Alt-Svc: h3=":443"; ma=86400
+    Connection: keep-alive
+    Content-Length: "72"
+  body:
+    type: json
+    content: |-
+      {
+          "category" : "MARKETING",
+          "id" : "188720130491317",
+          "status" : "PENDING"
+      }
+order: 1000

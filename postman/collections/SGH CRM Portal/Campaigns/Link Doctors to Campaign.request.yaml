@@ -1,0 +1,12 @@
+$kind: http-request
+name: Link Doctors to Campaign
+method: POST
+url: '{{baseUrl}}/api/trpc/campaigns.linkDoctors'
+order: 12000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"campaignId":1,"doctorIds":[1,2]}}

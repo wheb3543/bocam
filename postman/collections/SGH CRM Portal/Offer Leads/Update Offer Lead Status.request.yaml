@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Offer Lead Status
+method: POST
+url: '{{baseUrl}}/api/trpc/offerLeads.updateStatus'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1,"status":"confirmed"}}

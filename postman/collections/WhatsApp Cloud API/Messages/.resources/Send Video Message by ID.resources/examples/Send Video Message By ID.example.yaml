@@ -1,0 +1,43 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+  method: POST
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer {{AdminAuthToken}}
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "recipient_type": "individual",
+          "to": "{{Recipient-Phone-Number}}",
+          "type": "video",
+          "video": {
+              "caption": "<VIDEO_CAPTION_TEXT>",
+              "id": "<VIDEO_OBJECT_ID>"
+          }
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "contacts": [
+              {
+                  "input": "48XXXXXXXXX",
+                  "wa_id": "48XXXXXXXXX "
+              }
+          ],
+          "messages": [
+              {
+                  "id": "wamid.gBGGSFcCNEOPAgkO_KJ55r4w_ww"
+              }
+          ]
+      }
+order: 1000

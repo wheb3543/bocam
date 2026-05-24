@@ -1,0 +1,6 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/debug_token?input_token={{User-Access-Token}}
+method: GET
+queryParams:
+  input_token: "{{User-Access-Token}}"
+order: 5000

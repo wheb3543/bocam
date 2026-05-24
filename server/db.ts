@@ -1,0 +1,1739 @@
+import { eq, desc, and, like, or, sql, inArray } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/mysql2";
+import { InsertUser, users, campaigns, leads, leadStatusHistory, settings, doctors, appointments, accessRequests, InsertCampaign, InsertLead, InsertLeadStatusHistory, InsertSetting, InsertAppointment, InsertAccessRequest, sharedColumnTemplates, InsertSharedColumnTemplate } from "../drizzle/schema";
+import { ENV } from './_core/env';
+import { publish, channelForConversation } from './_core/pubsub';
+
+/**
+ * Normalize phone number to standard format (remove +, spaces, dashes)
+ * Example: "+967 777 165 305" -> "967777165305"
+ */
+export function normalizePhoneNumber(phone: string): string {
+  if (!phone) return '';
+  // إزالة جميع الأحرف غير الرقمية
+  let cleaned = phone.replace(/[^0-9]/g, '');
+  // توحيد صيغة الرقم اليمني: دائماً بصيغة 967XXXXXXXXX
+  if (cleaned.startsWith('00967')) {
+    cleaned = cleaned.substring(2); // 00967 → 967
+  } else if (cleaned.startsWith('967') && cleaned.length >= 12) {
+    // صحيح بالفعل
+  } else if (cleaned.startsWith('0') && cleaned.length === 10) {
+    cleaned = '967' + cleaned.substring(1); // 0XXXXXXXXX → 967XXXXXXXXX
+  } else if (cleaned.length === 9 && !cleaned.startsWith('967')) {
+    cleaned = '967' + cleaned; // XXXXXXXXX → 967XXXXXXXXX
+  }
+  return cleaned;
+}
+
+let _db: ReturnType<typeof drizzle> | null = null;
+
+export async function getDb() {
+  if (!_db && process.env.DATABASE_URL) {
+    try {
+      _db = drizzle(process.env.DATABASE_URL);
+    } catch (error) {
+      console.warn("[Database] Failed to connect:", error);
+      _db = null;
+    }
+  }
+  return _db;
+}
+
+// User management for OAuth
+export async function upsertUser(user: { openId?: string; name?: string; email?: string; loginMethod?: string; lastSignedIn?: Date }): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot upsert user: database not available");
+    return;
+  }
+
+  if (!user.openId) {
+    console.warn("[Database] Cannot upsert user: openId is required");
+    return;
+  }
+
+  try {
+    // Check if user exists
+    const existing = await getUserByOpenId(user.openId);
+    
+    if (existing) {
+      // Update existing user
+      await db.update(users)
+        .set({
+          name: user.name ?? existing.name,
+          email: user.email ?? existing.email,
+          loginMethod: user.loginMethod ?? existing.loginMethod,
+          lastSignedIn: user.lastSignedIn ?? new Date(),
+        })
+        .where(eq(users.openId, user.openId));
+      console.log('[Database] User updated:', user.email);
+    } else {
+      // User doesn't exist - this shouldn't happen in our flow
+      // because users must be approved first
+      console.warn('[Database] User not found, cannot create via upsertUser:', user.email);
+    }
+  } catch (error) {
+    console.error("[Database] Failed to upsert user:", error);
+    throw error;
+  }
+}
+
+export async function getUserByOpenId(openId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserByUsername(username: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserById(id: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function isUserAllowed(email: string): Promise<boolean> {
+  const user = await getUserByEmail(email);
+  return user !== undefined && user.isActive === 'yes';
+}
+
+// Access request queries
+export async function createAccessRequest(request: InsertAccessRequest) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Check if request already exists
+  const existing = await db.select().from(accessRequests)
+    .where(eq(accessRequests.email, request.email!))
+    .limit(1);
+  
+  if (existing.length > 0) {
+    return existing[0];
+  }
+  
+  const result = await db.insert(accessRequests).values(request);
+  return { id: Number(result[0].insertId), ...request };
+}
+
+export async function getAllAccessRequests() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(accessRequests).orderBy(desc(accessRequests.requestedAt));
+}
+
+export async function getPendingAccessRequests() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(accessRequests)
+    .where(eq(accessRequests.status, 'pending'))
+    .orderBy(desc(accessRequests.requestedAt));
+}
+
+export async function approveAccessRequest(requestId: number, reviewerId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get request details
+  const request = await db.select().from(accessRequests)
+    .where(eq(accessRequests.id, requestId))
+    .limit(1);
+  
+  if (request.length === 0) {
+    throw new Error("Request not found");
+  }
+  
+  if (!request[0].openId) {
+    throw new Error("Request missing openId");
+  }
+  
+  // Create user account with openId from OAuth
+  await db.insert(users).values({
+    openId: request[0].openId,
+    username: request[0].email.split('@')[0],
+    password: 'temp_password',
+    name: request[0].name,
+    email: request[0].email,
+    role: 'user',
+    isActive: 'yes',
+  });
+  
+  // Update request status
+  await db.update(accessRequests)
+    .set({ 
+      status: 'approved', 
+      reviewedAt: new Date(),
+      reviewedBy: reviewerId 
+    })
+    .where(eq(accessRequests.id, requestId));
+}
+
+export async function rejectAccessRequest(requestId: number, reviewerId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(accessRequests)
+    .set({ 
+      status: 'rejected', 
+      reviewedAt: new Date(),
+      reviewedBy: reviewerId 
+    })
+    .where(eq(accessRequests.id, requestId));
+}
+
+// Campaign queries
+export async function getAllCampaigns() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(campaigns).orderBy(desc(campaigns.createdAt));
+}
+
+export async function getCampaignBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(campaigns).where(eq(campaigns.slug, slug)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getCampaignById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createCampaign(campaign: InsertCampaign) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(campaigns).values(campaign);
+  return result;
+}
+
+export async function updateCampaign(id: number, campaign: Partial<InsertCampaign>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(campaigns).set(campaign).where(eq(campaigns.id, id));
+}
+
+// Lead queries
+export async function getAllLeads() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(leads).orderBy(desc(leads.createdAt));
+}
+
+export async function getLeadsByStatus(status: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(leads).where(eq(leads.status, status as "new" | "contacted" | "booked" | "not_interested" | "no_answer")).orderBy(desc(leads.createdAt));
+}
+
+export async function getLeadsByCampaign(campaignId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(leads).where(eq(leads.campaignId, campaignId)).orderBy(desc(leads.createdAt));
+}
+
+export async function getLeadById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(leads).where(eq(leads.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createLead(lead: InsertLead) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(leads).values(lead);
+  return result;
+}
+
+export async function updateLead(id: number, lead: Partial<InsertLead>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(leads).set(lead).where(eq(leads.id, id));
+}
+
+export async function searchLeads(searchTerm: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(leads).where(
+    or(
+      like(leads.fullName, `%${searchTerm}%`),
+      like(leads.phone, `%${searchTerm}%`),
+      like(leads.email, `%${searchTerm}%`)
+    )
+  ).orderBy(desc(leads.createdAt));
+}
+
+// Lead status history queries
+export async function getLeadStatusHistory(leadId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(leadStatusHistory).where(eq(leadStatusHistory.leadId, leadId)).orderBy(desc(leadStatusHistory.createdAt));
+}
+
+export async function createLeadStatusHistory(history: InsertLeadStatusHistory) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(leadStatusHistory).values(history);
+}
+
+// Settings queries
+export async function getSetting(key: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(settings).where(eq(settings.key, key)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function upsertSetting(setting: InsertSetting) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(settings).values(setting).onDuplicateKeyUpdate({
+    set: { value: setting.value, updatedAt: new Date() },
+  });
+}
+
+// Statistics queries
+export async function getLeadsStats() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select({
+    total: sql<number>`count(*)`,
+    new: sql<number>`sum(case when status = 'new' then 1 else 0 end)`,
+    contacted: sql<number>`sum(case when status = 'contacted' then 1 else 0 end)`,
+    booked: sql<number>`sum(case when status = 'booked' then 1 else 0 end)`,
+    notInterested: sql<number>`sum(case when status = 'not_interested' then 1 else 0 end)`,
+    noAnswer: sql<number>`sum(case when status = 'no_answer' then 1 else 0 end)`,
+  }).from(leads);
+  
+  return result[0];
+}
+
+export async function getCampaignStats(campaignId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select({
+    total: sql<number>`count(*)`,
+    new: sql<number>`sum(case when status = 'new' then 1 else 0 end)`,
+    contacted: sql<number>`sum(case when status = 'contacted' then 1 else 0 end)`,
+    booked: sql<number>`sum(case when status = 'booked' then 1 else 0 end)`,
+    notInterested: sql<number>`sum(case when status = 'not_interested' then 1 else 0 end)`,
+    noAnswer: sql<number>`sum(case when status = 'no_answer' then 1 else 0 end)`,
+  }).from(leads).where(eq(leads.campaignId, campaignId));
+  
+  return result[0];
+}
+
+// Doctors queries
+export async function getAllDoctors() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(doctors).where(eq(doctors.available, "yes"));
+  return result;
+}
+
+export async function getDoctorById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(doctors).where(eq(doctors.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// Appointments queries
+export async function createAppointment(appointment: InsertAppointment) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create appointment: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db.insert(appointments).values(appointment);
+    return { success: true, insertId: Number(result[0].insertId) };
+  } catch (error) {
+    console.error("[Database] Failed to create appointment:", error);
+    throw error;
+  }
+}
+
+export async function getAllAppointments() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: appointments.id,
+      campaignId: appointments.campaignId,
+      doctorId: appointments.doctorId,
+      fullName: appointments.fullName,
+      phone: appointments.phone,
+      email: appointments.email,
+      age: appointments.age,
+      procedure: appointments.procedure,
+      preferredDate: appointments.preferredDate,
+      preferredTime: appointments.preferredTime,
+      additionalNotes: appointments.additionalNotes,
+      staffNotes: appointments.staffNotes,
+      notes: appointments.notes,
+      status: appointments.status,
+      statusNotes: appointments.staffNotes,
+      contactedAt: appointments.contactedAt,
+      confirmedAt: appointments.confirmedAt,
+      attendedAt: appointments.attendedAt,
+      completedAt: appointments.completedAt,
+      cancelledAt: appointments.cancelledAt,
+      patientMessage: appointments.patientMessage,
+      source: appointments.source,
+      receiptNumber: appointments.receiptNumber,
+      appointmentDate: appointments.appointmentDate,
+      utmSource: appointments.utmSource,
+      utmMedium: appointments.utmMedium,
+      utmCampaign: appointments.utmCampaign,
+      utmTerm: appointments.utmTerm,
+      utmContent: appointments.utmContent,
+      utmPlacement: appointments.utmPlacement,
+      referrer: appointments.referrer,
+      fbclid: appointments.fbclid,
+      gclid: appointments.gclid,
+      createdAt: appointments.createdAt,
+      updatedAt: appointments.updatedAt,
+      doctorName: doctors.name,
+      doctorSpecialty: doctors.specialty,
+    })
+    .from(appointments)
+    .leftJoin(doctors, eq(appointments.doctorId, doctors.id));
+  
+  return result;
+}
+
+export async function getAppointmentsPaginated(
+  page: number = 1,
+  limit: number = 20,
+  searchTerm?: string,
+  doctorIds?: number[],
+  sources?: string[],
+  statuses?: string[],
+  dateFilter?: "all" | "today" | "week" | "month",
+  dateFrom?: string,
+  dateTo?: string
+) {
+  const db = await getDb();
+  if (!db) return { data: [], total: 0, page, limit, totalPages: 0 };
+  
+  // Support limit=-1 for "all" records
+  const isShowAll = limit === -1;
+  const offset = isShowAll ? 0 : (page - 1) * limit;
+  
+  // Build WHERE conditions for search and filters
+  const whereConditions = [];
+  if (searchTerm && searchTerm.trim()) {
+    const searchPattern = `%${searchTerm.trim()}%`;
+    whereConditions.push(
+      or(
+        like(appointments.fullName, searchPattern),
+        like(appointments.phone, searchPattern),
+        like(appointments.email, searchPattern)
+      )
+    );
+  }
+  
+  // Filter by doctor (multi-select)
+  if (doctorIds && doctorIds.length > 0) {
+    whereConditions.push(inArray(appointments.doctorId, doctorIds));
+  }
+  
+  // Filter by source (multi-select)
+  if (sources && sources.length > 0) {
+    whereConditions.push(inArray(appointments.source, sources));
+  }
+  
+  // Filter by status (multi-select)
+  if (statuses && statuses.length > 0) {
+    whereConditions.push(inArray(appointments.status, statuses as ("pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled")[]));
+  }
+  
+  // Filter by date range (custom dateFrom/dateTo takes priority)
+  if (dateFrom && dateTo) {
+    const from = new Date(dateFrom);
+    const to = new Date(dateTo);
+    // Set to end of day for 'to' date
+    to.setHours(23, 59, 59, 999);
+    whereConditions.push(
+      and(
+        sql`${appointments.createdAt} >= ${from.toISOString()}`,
+        sql`${appointments.createdAt} <= ${to.toISOString()}`
+      )
+    );
+  } else if (dateFilter && dateFilter !== "all") {
+    // Fallback to old dateFilter logic
+    const now = new Date();
+    let startDate: Date;
+    
+    if (dateFilter === "today") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (dateFilter === "week") {
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (dateFilter === "month") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    
+    if (startDate!) {
+      whereConditions.push(sql`${appointments.createdAt} >= ${startDate.toISOString()}`);
+    }
+  }
+  
+  const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+  
+  // Get total count with search filter
+  const countQuery = db.select({ count: sql<number>`count(*)` }).from(appointments);
+  if (whereClause) {
+    countQuery.where(whereClause);
+  }
+  const [countResult] = await countQuery;
+  const total = Number(countResult?.count || 0);
+  
+  // Get paginated data with search filter
+  const dataQuery = db
+    .select({
+      id: appointments.id,
+      campaignId: appointments.campaignId,
+      doctorId: appointments.doctorId,
+      fullName: appointments.fullName,
+      phone: appointments.phone,
+      email: appointments.email,
+      age: appointments.age,
+      procedure: appointments.procedure,
+      preferredDate: appointments.preferredDate,
+      preferredTime: appointments.preferredTime,
+      additionalNotes: appointments.additionalNotes,
+      staffNotes: appointments.staffNotes,
+      notes: appointments.notes,
+      status: appointments.status,
+      statusNotes: appointments.staffNotes,
+      contactedAt: appointments.contactedAt,
+      confirmedAt: appointments.confirmedAt,
+      attendedAt: appointments.attendedAt,
+      completedAt: appointments.completedAt,
+      cancelledAt: appointments.cancelledAt,
+      patientMessage: appointments.patientMessage,
+      source: appointments.source,
+      receiptNumber: appointments.receiptNumber,
+      appointmentDate: appointments.appointmentDate,
+      utmSource: appointments.utmSource,
+      utmMedium: appointments.utmMedium,
+      utmCampaign: appointments.utmCampaign,
+      utmTerm: appointments.utmTerm,
+      utmContent: appointments.utmContent,
+      utmPlacement: appointments.utmPlacement,
+      referrer: appointments.referrer,
+      fbclid: appointments.fbclid,
+      gclid: appointments.gclid,
+      createdAt: appointments.createdAt,
+      updatedAt: appointments.updatedAt,
+      doctorName: doctors.name,
+      doctorSpecialty: doctors.specialty,
+    })
+    .from(appointments)
+    .leftJoin(doctors, eq(appointments.doctorId, doctors.id));
+  
+  if (whereClause) {
+    dataQuery.where(whereClause);
+  }
+  
+  let result;
+  if (isShowAll) {
+    result = await dataQuery;
+  } else {
+    result = await dataQuery.limit(limit).offset(offset);
+  }
+  
+  return {
+    data: result,
+    total,
+    page,
+    limit,
+    totalPages: isShowAll ? 1 : Math.ceil(total / limit),
+  };
+}
+
+export async function updateAppointmentStatus(id: number, status: string, staffNotes?: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update appointment: database not available");
+    return;
+  }
+
+  try {
+    const now = new Date();
+    const updateData: { status: "pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled"; staffNotes?: string; contactedAt?: Date; confirmedAt?: Date; attendedAt?: Date; completedAt?: Date; cancelledAt?: Date } = { status: status as "pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled" };
+    if (staffNotes !== undefined) updateData.staffNotes = staffNotes;
+    // حفظ وقت كل حالة
+    if (status === 'contacted') updateData.contactedAt = now;
+    else if (status === 'confirmed') updateData.confirmedAt = now;
+    else if (status === 'attended') updateData.attendedAt = now;
+    else if (status === 'completed') updateData.completedAt = now;
+    else if (status === 'cancelled') updateData.cancelledAt = now;
+    await db.update(appointments).set(updateData).where(eq(appointments.id, id));
+  } catch (error) {
+    console.error("[Database] Failed to update appointment:", error);
+    throw error;
+  }
+}
+
+export async function bulkUpdateAppointmentStatus(ids: number[], status: string, staffNotes?: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot bulk update appointments: database not available");
+    return { success: false, count: 0 };
+  }
+
+  try {
+    const now = new Date();
+    const updateData: { status: "pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled"; staffNotes?: string; contactedAt?: Date; confirmedAt?: Date; attendedAt?: Date; completedAt?: Date; cancelledAt?: Date } = { status: status as "pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled" };
+    if (staffNotes !== undefined) updateData.staffNotes = staffNotes;
+    // حفظ وقت كل حالة
+    if (status === 'contacted') updateData.contactedAt = now;
+    else if (status === 'confirmed') updateData.confirmedAt = now;
+    else if (status === 'attended') updateData.attendedAt = now;
+    else if (status === 'completed') updateData.completedAt = now;
+    else if (status === 'cancelled') updateData.cancelledAt = now;
+    
+    // Update all selected appointments
+    for (const id of ids) {
+      await db.update(appointments).set(updateData).where(eq(appointments.id, id));
+    }
+    
+    return { success: true, count: ids.length };
+  } catch (error) {
+    console.error("[Database] Failed to bulk update appointments:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get all unified leads from all sources
+ * Combines: appointments, offer leads, camp registrations, visiting doctor appointments
+ */
+export async function getAllUnifiedLeads() {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    // Get appointments
+    const appointmentsData = await db
+      .select({
+        id: appointments.id,
+        fullName: appointments.fullName,
+        phone: appointments.phone,
+        email: appointments.email,
+        notes: appointments.notes,
+        status: appointments.status,
+        createdAt: appointments.createdAt,
+        utmSource: appointments.utmSource,
+        utmMedium: appointments.utmMedium,
+        utmCampaign: appointments.utmCampaign,
+        doctorId: appointments.doctorId,
+      })
+      .from(appointments)
+      .orderBy(desc(appointments.createdAt));
+
+    // Get offer leads
+    const { offerLeads } = await import('../drizzle/schema');
+    const offerLeadsData = await db
+      .select({
+        id: offerLeads.id,
+        fullName: offerLeads.fullName,
+        phone: offerLeads.phone,
+        email: offerLeads.email,
+        notes: offerLeads.notes,
+        status: offerLeads.status,
+        createdAt: offerLeads.createdAt,
+        source: offerLeads.source,
+        offerId: offerLeads.offerId,
+      })
+      .from(offerLeads)
+      .orderBy(desc(offerLeads.createdAt));
+
+    // Get camp registrations
+    const { campRegistrations } = await import('../drizzle/schema');
+    const campRegistrationsData = await db
+      .select({
+        id: campRegistrations.id,
+        fullName: campRegistrations.fullName,
+        phone: campRegistrations.phone,
+        email: campRegistrations.email,
+        notes: campRegistrations.notes,
+        status: campRegistrations.status,
+        createdAt: campRegistrations.createdAt,
+        source: campRegistrations.source,
+        campId: campRegistrations.campId,
+      })
+      .from(campRegistrations)
+      .orderBy(desc(campRegistrations.createdAt));
+
+    // Note: visitingDoctorAppointments table doesn't exist yet in schema
+
+    // Combine all leads with type indicator
+    const unifiedLeads = [
+      ...appointmentsData.map((a: typeof appointmentsData[0]) => ({
+        ...a,
+        type: 'appointment' as const,
+        typeLabel: 'موعد طبيب',
+        relatedId: a.doctorId,
+      })),
+      ...offerLeadsData.map((o: typeof offerLeadsData[0]) => ({
+        ...o,
+        type: 'offer' as const,
+        typeLabel: 'حجز عرض',
+        relatedId: o.offerId,
+        utmSource: o.source || '',
+        utmMedium: '',
+        utmCampaign: '',
+      })),
+      ...campRegistrationsData.map((c: typeof campRegistrationsData[0]) => ({
+        ...c,
+        type: 'camp' as const,
+        typeLabel: 'تسجيل مخيم',
+        relatedId: c.campId,
+        utmSource: c.source || '',
+        utmMedium: '',
+        utmCampaign: '',
+      })),
+      // visitingDoctorAppointments will be added here when table is created
+    ];
+
+    // Sort by createdAt descending
+    unifiedLeads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return unifiedLeads;
+  } catch (error) {
+    console.error('[Database] Error getting unified leads:', error);
+    return [];
+  }
+}
+
+// WhatsApp queries
+// Get customer info from phone number (searches across leads, appointments, offers, registrations)
+export async function getCustomerInfoByPhone(phone: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const { leads, appointments, offerLeads, campRegistrations } = await import('../drizzle/schema');
+  const normalizedPhone = normalizePhoneNumber(phone);
+  
+  // Search in leads - compare normalized phone numbers
+  const leadResult = await db.select().from(leads).limit(1000);
+  const matchedLead = leadResult.find(l => normalizePhoneNumber(l.phone) === normalizedPhone);
+  if (matchedLead) {
+    return {
+      type: 'lead',
+      id: matchedLead.id,
+      name: matchedLead.fullName,
+      phone: matchedLead.phone,
+      email: matchedLead.email,
+      status: matchedLead.status,
+      source: matchedLead.source,
+      createdAt: matchedLead.createdAt,
+    };
+  }
+  
+  // Search in appointments
+  const appointmentResult = await db.select().from(appointments).limit(1000);
+  const matchedAppointment = appointmentResult.find(a => normalizePhoneNumber(a.phone) === normalizedPhone);
+  if (matchedAppointment) {
+    return {
+      type: 'appointment',
+      id: matchedAppointment.id,
+      name: matchedAppointment.fullName,
+      phone: matchedAppointment.phone,
+      email: matchedAppointment.email,
+      status: matchedAppointment.status,
+      createdAt: matchedAppointment.createdAt,
+    };
+  }
+  
+  // Search in offer leads
+  const offerResult = await db.select().from(offerLeads).limit(1000);
+  const matchedOffer = offerResult.find(o => normalizePhoneNumber(o.phone) === normalizedPhone);
+  if (matchedOffer) {
+    return {
+      type: 'offer',
+      id: matchedOffer.id,
+      name: matchedOffer.fullName,
+      phone: matchedOffer.phone,
+      email: matchedOffer.email,
+      status: matchedOffer.status,
+      createdAt: matchedOffer.createdAt,
+    };
+  }
+  
+  // Search in camp registrations
+  const campResult = await db.select().from(campRegistrations).limit(1000);
+  const matchedCamp = campResult.find(c => normalizePhoneNumber(c.phone) === normalizedPhone);
+  if (matchedCamp) {
+    return {
+      type: 'camp',
+      id: matchedCamp.id,
+      name: matchedCamp.fullName,
+      phone: matchedCamp.phone,
+      email: matchedCamp.email,
+      status: matchedCamp.status,
+      createdAt: matchedCamp.createdAt,
+    };
+  }
+  
+  return null;
+}
+
+// Get all customer records by phone number
+export async function getAllCustomerRecordsByPhone(phone: string) {
+  const db = await getDb();
+  if (!db) return { leads: [], appointments: [], offers: [], camps: [] };
+  
+  const { leads, appointments, offerLeads, campRegistrations } = await import('../drizzle/schema');
+  const normalizedPhone = normalizePhoneNumber(phone);
+  
+  const [leadsList, appointmentsList, offersList, campsList] = await Promise.all([
+    db.select().from(leads).limit(1000).then(items => items.filter(l => normalizePhoneNumber(l.phone) === normalizedPhone).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
+    db.select().from(appointments).limit(1000).then(items => items.filter(a => normalizePhoneNumber(a.phone) === normalizedPhone).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
+    db.select().from(offerLeads).limit(1000).then(items => items.filter(o => normalizePhoneNumber(o.phone) === normalizedPhone).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
+    db.select().from(campRegistrations).limit(1000).then(items => items.filter(c => normalizePhoneNumber(c.phone) === normalizedPhone).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
+  ]);
+  
+  return {
+    leads: leadsList,
+    appointments: appointmentsList,
+    offers: offersList,
+    camps: campsList,
+  };
+}
+
+export async function getAllWhatsAppConversations() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { whatsappConversations } = await import('../drizzle/schema');
+  return db.select().from(whatsappConversations).orderBy(desc(whatsappConversations.lastMessageAt));
+}
+
+export async function getWhatsAppConversationById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const { whatsappConversations } = await import('../drizzle/schema');
+  const result = await db.select().from(whatsappConversations).where(eq(whatsappConversations.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getWhatsAppConversationByPhone(phone: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const { whatsappConversations } = await import('../drizzle/schema');
+  const normalizedPhone = normalizePhoneNumber(phone);
+  
+  // Use SQL query to directly filter by normalized phone number
+  // This is much more efficient than fetching all conversations
+  // Remove common phone number formatting characters: +, spaces, -, (, )
+  const result = await db.execute(sql`
+    SELECT * FROM whatsapp_conversations
+    WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(phoneNumber, '+', ''), ' ', ''), '-', ''), '(', ''), ')', '') = ${normalizedPhone}
+    LIMIT 1
+  `);
+
+  const rows = result as any;
+  return rows?.length > 0 ? rows[0] : undefined;
+}
+export async function createWhatsAppConversation(conversation: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { whatsappConversations } = await import('../drizzle/schema');
+  const result = await db.insert(whatsappConversations).values(conversation);
+  return result;
+}
+
+export async function updateWhatsAppConversation(id: number, conversation: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { whatsappConversations } = await import('../drizzle/schema');
+  const result = await db.update(whatsappConversations).set(conversation).where(eq(whatsappConversations.id, id));
+  try {
+    publish(channelForConversation(id), 'conversation_updated', { id, ...conversation });
+  } catch (err) {
+    console.warn('[db] failed to publish conversation update event', err);
+  }
+  return result;
+}
+
+export async function getWhatsAppMessagesByConversation(conversationId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { whatsappMessages } = await import('../drizzle/schema');
+  return db.select().from(whatsappMessages).where(eq(whatsappMessages.conversationId, conversationId)).orderBy(whatsappMessages.createdAt);
+}
+
+export async function getWhatsAppMessageByWhatsAppId(whatsappId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const { whatsappMessages } = await import('../drizzle/schema');
+  const result = await db.select().from(whatsappMessages).where(eq(whatsappMessages.whatsappMessageId, whatsappId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createWhatsAppMessage(message: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { whatsappMessages } = await import('../drizzle/schema');
+  const result = await db.insert(whatsappMessages).values(message);
+  // NOTE: SSE publishing for INBOUND messages is handled by webhookRoutes.ts
+  // to avoid double-publishing. For OUTBOUND messages, publish here.
+  try {
+    const convId = message.conversationId;
+    if (convId && message.direction === 'outbound') {
+      publish(channelForConversation(convId), 'message_created', { ...message, id: (result as any)?.[0]?.insertId || null });
+    }
+  } catch (err) {
+    console.warn('[db] failed to publish whatsapp message event', err);
+  }
+  return result;
+}
+
+export async function updateWhatsAppMessage(id: number, message: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { whatsappMessages } = await import('../drizzle/schema');
+  const result = await db.update(whatsappMessages).set(message).where(eq(whatsappMessages.id, id));
+  try {
+    // fetch the updated message to get conversationId
+    const updated = await db.select().from(whatsappMessages).where(eq(whatsappMessages.id, id)).limit(1);
+    const msg = updated.length > 0 ? updated[0] : null;
+    if (msg) {
+      publish(channelForConversation(msg.conversationId), 'message_updated', { id, ...message, conversationId: msg.conversationId });
+    }
+  } catch (err) {
+    console.warn('[db] failed to publish whatsapp message update event', err);
+  }
+  return result;
+}
+
+export async function getAllWhatsAppTemplates() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { whatsappTemplates } = await import('../drizzle/schema');
+  return db.select().from(whatsappTemplates).where(eq(whatsappTemplates.isActive, 1)).orderBy(whatsappTemplates.name);
+}
+
+export async function getWhatsAppTemplateById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const { whatsappTemplates } = await import('../drizzle/schema');
+  const result = await db.select().from(whatsappTemplates).where(eq(whatsappTemplates.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createWhatsAppTemplate(template: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { whatsappTemplates } = await import('../drizzle/schema');
+  const result = await db.insert(whatsappTemplates).values(template);
+  return result;
+}
+
+export async function updateWhatsAppTemplate(id: number, template: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { whatsappTemplates } = await import('../drizzle/schema');
+  return db.update(whatsappTemplates).set(template).where(eq(whatsappTemplates.id, id));
+}
+
+export async function deleteWhatsAppTemplate(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { whatsappTemplates } = await import('../drizzle/schema');
+  return db.delete(whatsappTemplates).where(eq(whatsappTemplates.id, id));
+}
+
+// ─── WhatsApp Event Logging Functions ─────────────────────────────────────────
+
+export async function createWhatsAppAccountAlert(alert: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { whatsappAccountAlerts } = await import('../drizzle/schema');
+  return db.insert(whatsappAccountAlerts).values(alert);
+}
+
+export async function createWhatsAppSecurityEvent(event: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { whatsappSecurityEvents } = await import('../drizzle/schema');
+  return db.insert(whatsappSecurityEvents).values(event);
+}
+
+export async function createWhatsAppPhoneQuality(quality: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { whatsappPhoneQuality } = await import('../drizzle/schema');
+  return db.insert(whatsappPhoneQuality).values(quality);
+}
+
+export async function createWhatsAppConversationQuality(quality: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { whatsappConversationQuality } = await import('../drizzle/schema');
+  return db.insert(whatsappConversationQuality).values(quality);
+}
+
+export async function createWhatsAppUserOptIn(optIn: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { whatsappUserOptIns } = await import('../drizzle/schema');
+  return db.insert(whatsappUserOptIns).values(optIn);
+}
+
+export async function updateWhatsAppUserOptIn(phone: string, updates: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { whatsappUserOptIns } = await import('../drizzle/schema');
+  return db.update(whatsappUserOptIns).set(updates).where(eq(whatsappUserOptIns.phoneNumber, phone));
+}
+
+export async function createWhatsAppTemplateQuality(quality: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { whatsappTemplateQuality } = await import('../drizzle/schema');
+  return db.insert(whatsappTemplateQuality).values(quality);
+}
+
+/**
+ * تسجيل حدث webhook في قاعدة البيانات
+ * يستخدم لاكتشاف الأحداث الجديدة وتحليلها
+ */
+export async function logWebhookEvent(event: {
+  eventId?: string;
+  eventType: string;
+  subType?: string;
+  phoneNumber?: string;
+  rawPayload: string;
+  processed?: boolean;
+  handlerExists?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) {
+    console.error("[Webhook Logger] Database not available");
+    return;
+  }
+
+  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+
+  try {
+    await db.insert(whatsappWebhookEvents).values({
+      eventId: event.eventId || null,
+      eventType: event.eventType,
+      subType: event.subType || null,
+      phoneNumber: event.phoneNumber || null,
+      rawPayload: event.rawPayload,
+      processed: event.processed ?? false,
+      handlerExists: event.handlerExists ?? false,
+    });
+
+    // إذا كان الحدث جديداً (لا يوجد معالج له)، نسجل تحذير
+    if (!event.handlerExists) {
+      console.warn(`[Webhook Logger] ⚠️ New unhandled event type detected: ${event.eventType}${event.subType ? `/${event.subType}` : ''}`);
+    }
+  } catch (error) {
+    console.error("[Webhook Logger] Error logging webhook event:", error);
+  }
+}
+
+/**
+ * تحديث حالة معالجة حدث webhook
+ */
+export async function markWebhookEventAsProcessed(eventId: number, handlerExists: boolean = true) {
+  const db = await getDb();
+  if (!db) return;
+
+  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { eq } = await import('drizzle-orm');
+
+  await db
+    .update(whatsappWebhookEvents)
+    .set({
+      processed: true,
+      processedAt: new Date(),
+      handlerExists,
+    })
+    .where(eq(whatsappWebhookEvents.id, eventId));
+}
+
+export async function getWhatsAppTemplateByMetaName(metaName: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const { whatsappTemplates } = await import('../drizzle/schema');
+  const result = await db.select().from(whatsappTemplates)
+    .where(eq(whatsappTemplates.metaName, metaName))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function searchWhatsAppConversations(searchTerm: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const { whatsappConversations } = await import('../drizzle/schema');
+  return db.select().from(whatsappConversations).where(
+    or(
+      like(whatsappConversations.customerName, `%${searchTerm}%`),
+      like(whatsappConversations.phoneNumber, `%${searchTerm}%`)
+    )
+  ).orderBy(desc(whatsappConversations.lastMessageAt));
+}
+
+// ==================== Webhook Events Functions ====================
+
+export async function getWebhookEvents(filters: {
+  eventType?: string;
+  processed?: boolean;
+  handlerExists?: boolean;
+  limit?: number;
+} = {}) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { eq, and, desc } = await import('drizzle-orm');
+
+  let query = db.select().from(whatsappWebhookEvents);
+
+  const conditions = [];
+  if (filters.eventType) {
+    conditions.push(eq(whatsappWebhookEvents.eventType, filters.eventType));
+  }
+  if (filters.processed !== undefined) {
+    conditions.push(eq(whatsappWebhookEvents.processed, filters.processed));
+  }
+  if (filters.handlerExists !== undefined) {
+    conditions.push(eq(whatsappWebhookEvents.handlerExists, filters.handlerExists));
+  }
+
+  const finalQuery = conditions.length > 0
+    ? query.where(and(...conditions))
+    : query;
+
+  return await finalQuery
+    .orderBy(desc(whatsappWebhookEvents.createdAt))
+    .limit(filters.limit || 100);
+}
+
+export async function getUnhandledWebhookEventsCount() {
+  const db = await getDb();
+  if (!db) return 0;
+
+  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { eq, and, sql } = await import('drizzle-orm');
+
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(whatsappWebhookEvents)
+    .where(
+      and(
+        eq(whatsappWebhookEvents.processed, false),
+        eq(whatsappWebhookEvents.handlerExists, false)
+      )
+    );
+
+  return result[0]?.count || 0;
+}
+
+export async function getUniqueEventTypes() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { sql } = await import('drizzle-orm');
+
+  const result = await db
+    .select({
+      eventType: whatsappWebhookEvents.eventType,
+      count: sql<number>`count(*)`,
+    })
+    .from(whatsappWebhookEvents)
+    .groupBy(whatsappWebhookEvents.eventType)
+    .orderBy(sql`count(*) DESC`);
+
+  return result;
+}
+
+export async function getUnreadWhatsAppConversationsCount() {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const { whatsappConversations } = await import('../drizzle/schema');
+  const result = await db.select({
+    count: sql<number>`count(*)`
+  }).from(whatsappConversations).where(eq(whatsappConversations.unreadCount, 0));
+  
+  return result[0]?.count || 0;
+}
+
+// ==================== Message Settings Functions ====================
+
+export async function getAllMessageSettings() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { messageSettings } = await import('../drizzle/schema');
+  return db.select().from(messageSettings).orderBy(messageSettings.category, messageSettings.id);
+}
+
+export async function getMessageSettingsByCategory(category: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { messageSettings } = await import('../drizzle/schema');
+  const { sql } = await import('drizzle-orm');
+  return db.select().from(messageSettings).where(sql`${messageSettings.category} = ${category}`).orderBy(messageSettings.id);
+}
+
+export async function getMessageSettingByType(messageType: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const { messageSettings } = await import('../drizzle/schema');
+  const result = await db.select().from(messageSettings).where(eq(messageSettings.messageType, messageType)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateMessageSetting(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { messageSettings } = await import('../drizzle/schema');
+  const { id, ...updateData } = data;
+  return db.update(messageSettings).set(updateData).where(eq(messageSettings.id, id));
+}
+
+export async function toggleMessageSettingEnabled(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { messageSettings } = await import('../drizzle/schema');
+  
+  // Get current value
+  const current = await db.select().from(messageSettings).where(eq(messageSettings.id, id)).limit(1);
+  if (current.length === 0) throw new Error("Message setting not found");
+  
+  const newValue = current[0].isEnabled === 1 ? 0 : 1;
+  return db.update(messageSettings).set({ isEnabled: newValue }).where(eq(messageSettings.id, id));
+}
+
+export async function getOfferLeadsPaginated(
+  page: number = 1,
+  limit: number = 20,
+  searchTerm?: string,
+  offerIds?: number[],
+  sources?: string[],
+  statuses?: string[],
+  dateFilter?: "all" | "today" | "week" | "month",
+  dateFrom?: string,
+  dateTo?: string
+) {
+  const db = await getDb();
+  if (!db) return { data: [], total: 0, page, limit, totalPages: 0 };
+  
+  // Support limit=-1 for "all" records
+  const isShowAll = limit === -1;
+  const offset = isShowAll ? 0 : (page - 1) * limit;
+  
+  // Import offerLeads and offers
+  const { offerLeads, offers } = await import('../drizzle/schema');
+  
+  // Build WHERE conditions for search and filters
+  const whereConditions = [];
+  if (searchTerm && searchTerm.trim()) {
+    const searchPattern = `%${searchTerm.trim()}%`;
+    whereConditions.push(
+      or(
+        like(offerLeads.fullName, searchPattern),
+        like(offerLeads.phone, searchPattern),
+        like(offerLeads.email, searchPattern)
+      )
+    );
+  }
+  
+  // Filter by offer (multi-select)
+  if (offerIds && offerIds.length > 0) {
+    whereConditions.push(inArray(offerLeads.offerId, offerIds));
+  }
+  
+  // Filter by source (multi-select)
+  if (sources && sources.length > 0) {
+    whereConditions.push(inArray(offerLeads.source, sources));
+  }
+  
+  // Filter by status (multi-select)
+  if (statuses && statuses.length > 0) {
+    whereConditions.push(inArray(offerLeads.status, statuses as any));
+  }
+  
+  // Filter by date range (custom dateFrom/dateTo takes priority)
+  if (dateFrom && dateTo) {
+    const from = new Date(dateFrom);
+    const to = new Date(dateTo);
+    // Set to end of day for 'to' date
+    to.setHours(23, 59, 59, 999);
+    whereConditions.push(
+      and(
+        sql`${offerLeads.createdAt} >= ${from.toISOString()}`,
+        sql`${offerLeads.createdAt} <= ${to.toISOString()}`
+      )
+    );
+  } else if (dateFilter && dateFilter !== "all") {
+    // Fallback to old dateFilter logic
+    const now = new Date();
+    let startDate: Date;
+    
+    if (dateFilter === "today") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (dateFilter === "week") {
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (dateFilter === "month") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    
+    if (startDate!) {
+      whereConditions.push(sql`${offerLeads.createdAt} >= ${startDate.toISOString()}`);
+    }
+  }
+  
+  const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+  
+  // Get total count with search filter
+  const countQuery = db.select({ count: sql<number>`count(*)` }).from(offerLeads);
+  if (whereClause) {
+    countQuery.where(whereClause);
+  }
+  const [countResult] = await countQuery;
+  const total = Number(countResult?.count || 0);
+  
+  // Get paginated data with offer details and search filter
+  const dataQuery = db
+    .select({
+      id: offerLeads.id,
+      offerId: offerLeads.offerId,
+      offerTitle: offers.title,
+      fullName: offerLeads.fullName,
+      phone: offerLeads.phone,
+      email: offerLeads.email,
+      notes: offerLeads.notes,
+      status: offerLeads.status,
+      statusNotes: offerLeads.statusNotes,
+      contactedAt: offerLeads.contactedAt,
+      confirmedAt: offerLeads.confirmedAt,
+      attendedAt: offerLeads.attendedAt,
+      completedAt: offerLeads.completedAt,
+      cancelledAt: offerLeads.cancelledAt,
+      source: offerLeads.source,
+      utmSource: offerLeads.utmSource,
+      utmMedium: offerLeads.utmMedium,
+      utmCampaign: offerLeads.utmCampaign,
+      utmContent: offerLeads.utmContent,
+      utmTerm: offerLeads.utmTerm,
+      utmPlacement: offerLeads.utmPlacement,
+      referrer: offerLeads.referrer,
+      fbclid: offerLeads.fbclid,
+      gclid: offerLeads.gclid,
+      receiptNumber: offerLeads.receiptNumber,
+      campaignId: offerLeads.campaignId,
+      createdAt: offerLeads.createdAt,
+      updatedAt: offerLeads.updatedAt,
+    })
+    .from(offerLeads)
+    .leftJoin(offers, eq(offerLeads.offerId, offers.id));
+  
+  if (whereClause) {
+    dataQuery.where(whereClause);
+  }
+  
+  let result;
+  if (isShowAll) {
+    result = await dataQuery.orderBy(desc(offerLeads.createdAt));
+  } else {
+    result = await dataQuery
+      .orderBy(desc(offerLeads.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+  
+  return {
+    data: result,
+    total,
+    page,
+    limit,
+    totalPages: isShowAll ? 1 : Math.ceil(total / limit),
+  };
+}
+
+export async function getCampRegistrationsPaginated(
+  page: number = 1,
+  limit: number = 20,
+  searchTerm?: string,
+  campIds?: number[],
+  sources?: string[],
+  statuses?: string[],
+  dateFilter?: "all" | "today" | "week" | "month",
+  dateFrom?: string,
+  dateTo?: string
+) {
+  const db = await getDb();
+  if (!db) return { data: [], total: 0, page, limit, totalPages: 0 };
+  
+  // Support limit=-1 for "all" records
+  const isShowAll = limit === -1;
+  const offset = isShowAll ? 0 : (page - 1) * limit;
+  
+  // Import campRegistrations and camps
+  const { campRegistrations, camps } = await import('../drizzle/schema');
+  
+  // Build WHERE conditions for search and filters
+  const whereConditions = [];
+  if (searchTerm && searchTerm.trim()) {
+    const searchPattern = `%${searchTerm.trim()}%`;
+    whereConditions.push(
+      or(
+        like(campRegistrations.fullName, searchPattern),
+        like(campRegistrations.phone, searchPattern),
+        like(campRegistrations.email, searchPattern)
+      )
+    );
+  }
+  
+  // Filter by camp (multi-select)
+  if (campIds && campIds.length > 0) {
+    whereConditions.push(inArray(campRegistrations.campId, campIds));
+  }
+  
+  // Filter by source (multi-select)
+  if (sources && sources.length > 0) {
+    whereConditions.push(inArray(campRegistrations.source, sources));
+  }
+  
+  // Filter by status (multi-select)
+  if (statuses && statuses.length > 0) {
+    whereConditions.push(inArray(campRegistrations.status, statuses as any));
+  }
+  
+  // Date filtering: dateFrom/dateTo and dateFilter combine with AND when both are set
+  // (so quick presets like "today" still narrow rows inside the parent date range).
+  const dateParts: any[] = [];
+  if (dateFrom && dateTo) {
+    const from = new Date(dateFrom);
+    const to = new Date(dateTo);
+    to.setHours(23, 59, 59, 999);
+    dateParts.push(
+      and(
+        sql`${campRegistrations.createdAt} >= ${from.toISOString()}`,
+        sql`${campRegistrations.createdAt} <= ${to.toISOString()}`
+      )
+    );
+  }
+  if (dateFilter && dateFilter !== "all") {
+    const now = new Date();
+    let startDate: Date;
+    let endDate: Date | undefined;
+    if (dateFilter === "today") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    } else if (dateFilter === "week") {
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    } else if (dateFilter === "month") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    } else {
+      startDate = new Date(0);
+    }
+    if (endDate) {
+      dateParts.push(
+        and(
+          sql`${campRegistrations.createdAt} >= ${startDate.toISOString()}`,
+          sql`${campRegistrations.createdAt} <= ${endDate.toISOString()}`
+        )
+      );
+    } else {
+      dateParts.push(sql`${campRegistrations.createdAt} >= ${startDate.toISOString()}`);
+    }
+  }
+  if (dateParts.length > 0) {
+    whereConditions.push(dateParts.length === 1 ? dateParts[0]! : and(...dateParts));
+  }
+  
+  const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+  
+  // Get total count with search filter
+  const countQuery = db.select({ count: sql<number>`count(*)` }).from(campRegistrations);
+  if (whereClause) {
+    countQuery.where(whereClause);
+  }
+  const [countResult] = await countQuery;
+  const total = Number(countResult?.count || 0);
+  
+  // Get paginated data with camp details and search filter
+  const dataQuery = db
+    .select({
+      id: campRegistrations.id,
+      campId: campRegistrations.campId,
+      campName: camps.name,
+      campSlug: camps.slug,
+      fullName: campRegistrations.fullName,
+      phone: campRegistrations.phone,
+      email: campRegistrations.email,
+      age: campRegistrations.age,
+      gender: campRegistrations.gender,
+      procedures: campRegistrations.procedures,
+      medicalCondition: campRegistrations.medicalCondition,
+      notes: campRegistrations.notes,
+      patientMessage: campRegistrations.patientMessage,
+      status: campRegistrations.status,
+      statusNotes: campRegistrations.statusNotes,
+      contactedAt: campRegistrations.contactedAt,
+      confirmedAt: campRegistrations.confirmedAt,
+      attendedAt: campRegistrations.attendedAt,
+      completedAt: campRegistrations.completedAt,
+      cancelledAt: campRegistrations.cancelledAt,
+      attendanceDate: campRegistrations.attendanceDate,
+      preferredDate: campRegistrations.preferredDate,
+      preferredTimeSlot: campRegistrations.preferredTimeSlot,
+      source: campRegistrations.source,
+      utmSource: campRegistrations.utmSource,
+      utmMedium: campRegistrations.utmMedium,
+      utmCampaign: campRegistrations.utmCampaign,
+      utmContent: campRegistrations.utmContent,
+      utmTerm: campRegistrations.utmTerm,
+      utmPlacement: campRegistrations.utmPlacement,
+      referrer: campRegistrations.referrer,
+      fbclid: campRegistrations.fbclid,
+      gclid: campRegistrations.gclid,
+      receiptNumber: campRegistrations.receiptNumber,
+      campaignId: campRegistrations.campaignId,
+      createdAt: campRegistrations.createdAt,
+      updatedAt: campRegistrations.updatedAt,
+    })
+    .from(campRegistrations)
+    .leftJoin(camps, eq(campRegistrations.campId, camps.id));
+  
+  if (whereClause) {
+    dataQuery.where(whereClause);
+  }
+  
+  let result;
+  if (isShowAll) {
+    result = await dataQuery.orderBy(desc(campRegistrations.createdAt));
+  } else {
+    result = await dataQuery
+      .orderBy(desc(campRegistrations.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+  
+  return {
+    data: result,
+    total,
+    page,
+    limit,
+    totalPages: isShowAll ? 1 : Math.ceil(total / limit),
+  };
+}
+
+// User Preferences Management
+export async function getUserPreference(userId: number, preferenceKey: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user preference: database not available");
+    return undefined;
+  }
+
+  const { userPreferences } = await import("../drizzle/schema");
+  const result = await db
+    .select()
+    .from(userPreferences)
+    .where(and(
+      eq(userPreferences.userId, userId),
+      eq(userPreferences.preferenceKey, preferenceKey)
+    ))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function setUserPreference(userId: number, preferenceKey: string, preferenceValue: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot set user preference: database not available");
+    return;
+  }
+
+  const { userPreferences } = await import("../drizzle/schema");
+  
+  // Check if preference exists
+  const existing = await getUserPreference(userId, preferenceKey);
+  
+  if (existing) {
+    // Update existing preference
+    await db
+      .update(userPreferences)
+      .set({ preferenceValue, updatedAt: new Date() })
+      .where(and(
+        eq(userPreferences.userId, userId),
+        eq(userPreferences.preferenceKey, preferenceKey)
+      ));
+  } else {
+    // Insert new preference
+    await db.insert(userPreferences).values({
+      userId,
+      preferenceKey,
+      preferenceValue,
+    });
+  }
+}
+
+export async function getAllUserPreferences(userId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user preferences: database not available");
+    return [];
+  }
+
+  const { userPreferences } = await import("../drizzle/schema");
+  return await db
+    .select()
+    .from(userPreferences)
+    .where(eq(userPreferences.userId, userId));
+}
+
+// === Shared Column Templates ===
+
+export async function getSharedTemplates(tableKey: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get shared templates: database not available");
+    return [];
+  }
+
+  return await db
+    .select()
+    .from(sharedColumnTemplates)
+    .where(eq(sharedColumnTemplates.tableKey, tableKey))
+    .orderBy(desc(sharedColumnTemplates.createdAt));
+}
+
+export async function getAllSharedTemplates() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get all shared templates: database not available");
+    return [];
+  }
+
+  return await db
+    .select()
+    .from(sharedColumnTemplates)
+    .orderBy(desc(sharedColumnTemplates.createdAt));
+}
+
+export async function createSharedTemplate(data: {
+  name: string;
+  tableKey: string;
+  columns: string;
+  createdBy: number;
+  createdByName: string | null;
+}) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create shared template: database not available");
+    return null;
+  }
+
+  const result = await db.insert(sharedColumnTemplates).values({
+    name: data.name,
+    tableKey: data.tableKey,
+    columns: data.columns,
+    createdBy: data.createdBy,
+    createdByName: data.createdByName,
+  });
+
+  return result;
+}
+
+export async function deleteSharedTemplate(id: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot delete shared template: database not available");
+    return;
+  }
+
+  await db.delete(sharedColumnTemplates).where(eq(sharedColumnTemplates.id, id));
+}
+
+export async function updateSharedTemplate(id: number, data: { name?: string; columns?: string }) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update shared template: database not available");
+    return;
+  }
+
+  const updateSet: Record<string, unknown> = {};
+  if (data.name !== undefined) updateSet.name = data.name;
+  if (data.columns !== undefined) updateSet.columns = data.columns;
+
+  if (Object.keys(updateSet).length > 0) {
+    await db.update(sharedColumnTemplates).set(updateSet).where(eq(sharedColumnTemplates.id, id));
+  }
+}

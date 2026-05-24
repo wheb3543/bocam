@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'WhatsApp Webhook Verify (Meta)'
+method: GET
+url: '{{baseUrl}}/api/webhooks/whatsapp'
+order: 2000
+queryParams:
+  - key: hub.mode
+    value: subscribe
+  - key: hub.verify_token
+    value: sgh_crm_webhook_2024
+  - key: hub.challenge
+    value: CHALLENGE_ACCEPTED

@@ -1,0 +1,5 @@
+$kind: http-request
+name: List Tasks
+method: GET
+url: '{{baseUrl}}/api/trpc/tasks.list'
+order: 1000

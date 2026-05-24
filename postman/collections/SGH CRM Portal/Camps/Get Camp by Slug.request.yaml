@@ -1,0 +1,8 @@
+$kind: http-request
+name: Get Camp by Slug
+method: GET
+url: '{{baseUrl}}/api/trpc/camps.getBySlug'
+order: 4000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22slug%22%3A%22camp-slug%22%7D%7D'

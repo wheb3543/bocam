@@ -1,0 +1,26 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Upload-ID}}
+  method: POST
+  headers:
+    - key: Content-Type
+      value: image/jpeg
+    - key: file_offset
+      value: "0"
+      description: Specifies the offset to start the upload. The offset value should always be `0`.
+    - key: Authorization
+      value: OAuth {{User-Access-Token}}
+  body:
+    type: file
+    content:
+      src: /Users/Sample.jpg
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: json
+    content: |-
+      {
+          "h":"2:c2FtcGxlLm1wNA==:image/jpeg:GKAj0gAUCZmJ1voFADip2iIAAAAAbugbAAAA:e:1472075513:ARZ_3ybzrQqEaluMUdI"
+      }
+order: 1000
