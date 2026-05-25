@@ -87,6 +87,7 @@ const PWAStatsPage = lazy(() => import("./pages/PWAStatsPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const BIPage = lazy(() => import("./pages/BIPage"));
 const TrackingSettingsPage = lazy(() => import("./pages/TrackingSettingsPage"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 
 
 function Router() {
@@ -118,6 +119,21 @@ function Router() {
       <Route path={"/privacy-policy"} component={PrivacyPolicyPage} />
       <Route path={"/unauthorized"} component={Unauthorized} />
       <Route path={"/access-request"} component={AccessRequest} />
+      <Route path={"/admin-login"} component={AdminLogin} />
+
+      {/* Admin routes with persistent sidebar */}
+      <Route path="/admin">
+        <DashboardShell>
+          <AdminDashboard />
+        </DashboardShell>
+      </Route>
+      <Route path="/admin/*">
+        <DashboardShell>
+          <Switch>
+            <Route path={"/admin/offline"} component={OfflinePage} />
+          </Switch>
+        </DashboardShell>
+      </Route>
 
       {/* Dashboard routes with persistent sidebar */}
       <Route path="/dashboard">
@@ -179,11 +195,14 @@ function Router() {
       </Route>
 
       {/* Admin routes with persistent sidebar */}
+      <Route path="/admin">
+        <DashboardShell>
+          <AdminDashboard />
+        </DashboardShell>
+      </Route>
       <Route path="/admin/*">
         <DashboardShell>
           <Switch>
-            <Route path={"/admin"} component={AdminDashboard} />
-            <Route path={"/admin/"} component={AdminDashboard} />
             <Route path={"/admin/offline"} component={OfflinePage} />
           </Switch>
         </DashboardShell>

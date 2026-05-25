@@ -21,3 +21,8 @@ export const getLoginUrl = () => {
 
   return url.toString();
 };
+
+// Local authentication login URL
+export const getLocalLoginUrl = () => {
+  return "/admin-login";
+};

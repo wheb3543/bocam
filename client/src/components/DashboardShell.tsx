@@ -1,5 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { APP_TITLE, getLoginUrl } from "@/const";
+import { APP_TITLE, getLoginUrl, getLocalLoginUrl } from "@/const";
 import { Button } from "./ui/button";
 import DashboardSidebarV2 from "./DashboardSidebarV2";
 import { useLocation } from "wouter";
@@ -37,7 +37,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
           </div>
           <Button
             onClick={() => {
-              window.location.href = getLoginUrl();
+              window.location.href = getLocalLoginUrl();
             }}
             size="lg"
             className="w-full"

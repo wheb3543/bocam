@@ -1,6 +1,11 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { User } from "../../drizzle/schema";
 import { sdk } from "./sdk";
+import jwt from "jsonwebtoken";
+import { getUserById } from "../db";
+
+const JWT_SECRET = process.env.JWT_SECRET || "admin-auth-secret";
+const COOKIE_NAME = "admin_session";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
@@ -8,16 +13,58 @@ export type TrpcContext = {
   user: User | null;
 };
 
+// Helper to parse cookies from header
+function parseCookies(cookieHeader: string | undefined): Record<string, string> {
+  if (!cookieHeader) return {};
+  
+  const cookies: Record<string, string> = {};
+  cookieHeader.split(';').forEach(cookie => {
+    const [name, value] = cookie.trim().split('=');
+    if (name && value) {
+      cookies[name] = decodeURIComponent(value);
+    }
+  });
+  
+  return cookies;
+}
+
+// Helper to verify local auth token
+function verifyLocalAuthToken(token: string): { userId: number; username: string; role: string } | null {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (decoded.type !== "admin") return null;
+    return { userId: decoded.userId, username: decoded.username, role: decoded.role };
+  } catch {
+    return null;
+  }
+}
+
 export async function createContext(
   opts: CreateExpressContextOptions
 ): Promise<TrpcContext> {
   let user: User | null = null;
 
-  try {
-    user = await sdk.authenticateRequest(opts.req);
-  } catch (error) {
-    // Authentication is optional for public procedures.
-    user = null;
+  // Try local auth first (username/password)
+  const cookies = parseCookies(opts.req.headers.cookie);
+  const localToken = cookies[COOKIE_NAME];
+  if (localToken) {
+    const decoded = verifyLocalAuthToken(localToken);
+    if (decoded) {
+      const localUser = await getUserById(decoded.userId);
+      if (localUser && localUser.isActive === "yes") {
+        user = localUser;
+      }
+    }
+  }
+
+  // Fall back to OAuth if local auth failed
+  if (!user) {
+    try {
+      user = await sdk.authenticateRequest(opts.req);
+    } catch (error) {
+      // Authentication is optional for public procedures.
+      user = null;
+    }
   }
 
   return {
