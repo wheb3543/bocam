@@ -940,3 +940,179 @@ img {
     overflow-wrap: break-word;
   }
 }
+
+/* ============================================
+   Public Page Animations
+   ============================================ */
+
+/* Particle animation for background */
+@keyframes particle {
+  0% {
+    transform: translateY(100vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(50px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Ribbon animation for hero sections */
+@keyframes ribbonGreen {
+  0% {
+    transform: translateX(100%) translateY(100%) rotate(30deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateX(50%) translateY(50%) rotate(15deg);
+    opacity: 0.3;
+  }
+  60% {
+    opacity: 0.4;
+  }
+  80% {
+    transform: translateX(0%) translateY(-50%) rotate(-15deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(-100%) translateY(-200%) rotate(-30deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ribbonBlue {
+  0% {
+    transform: translateX(100%) translateY(100%) rotate(-30deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateX(50%) translateY(50%) rotate(-15deg);
+    opacity: 0.3;
+  }
+  60% {
+    opacity: 0.4;
+  }
+  80% {
+    transform: translateX(0%) translateY(-50%) rotate(15deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(-100%) translateY(-200%) rotate(30deg);
+    opacity: 0;
+  }
+}
+
+/* Text shimmer animation */
+@keyframes text-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Heart pulse animation */
+@keyframes heart-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Glow animation */
+@keyframes glow {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Float image animation */
+@keyframes float-image {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+/* Logo float animation */
+@keyframes logo-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Logo glow animation */
+@keyframes logo-glow {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Icon bounce animation */
+@keyframes icon-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Sparkle animation */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+/* Card appear animation */
+@keyframes card-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Disable animations when animations are disabled */
+.animations-disabled * {
+  animation: none !important;
+  transition: none !important;
+}

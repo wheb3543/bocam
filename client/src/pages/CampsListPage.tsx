@@ -16,6 +16,8 @@ import AnimatedCard from "@/components/AnimatedCard";
 import SectionDivider from "@/components/SectionDivider";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import BackToTopButton from "@/components/BackToTopButton";
+import ScrollReveal from "@/components/ScrollReveal";
+import TextShimmer from "@/components/TextShimmer";
 
 export default function CampsListPage() {
   return (
@@ -199,72 +201,77 @@ function CampsListContent() {
       />
 
       {/* About Section */}
-      <section className="py-6 sm:py-8 md:py-12 bg-white dark:bg-card">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6">
-              عن المخيمات الطبية الخيرية
-            </h2>
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-foreground leading-relaxed text-right px-1">
-              يأتي تنظيم المخيمات الطبية الخيرية ضمن مبادرات المستشفى السعودي الألماني
-              في إطار المسؤولية المجتمعية، حيث نسعى لتقديم خدمات طبية عالية الجودة
-              للمحتاجين والمستحقين بأسعار رمزية أو مجاناً. يشرف على المخيمات نخبة من
-              أفضل الأطباء والجراحين المتخصصين، مع توفير أحدث الأجهزة والتقنيات الطبية.
-            </p>
+      <ScrollReveal delay={0.1}>
+        <section className="py-6 sm:py-8 md:py-12 bg-white dark:bg-card">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6">
+                عن المخيمات الطبية الخيرية
+              </h2>
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-foreground leading-relaxed text-right px-1">
+                يأتي تنظيم المخيمات الطبية الخيرية ضمن مبادرات المستشفى السعودي الألماني
+                في إطار المسؤولية المجتمعية، حيث نسعى لتقديم خدمات طبية عالية الجودة
+                للمحتاجين والمستحقين بأسعار رمزية أو مجاناً. يشرف على المخيمات نخبة من
+                أفضل الأطباء والجراحين المتخصصين، مع توفير أحدث الأجهزة والتقنيات الطبية.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
       <SectionDivider color="red" />
 
       {/* Search Section */}
-      <section className="py-4 sm:py-6 md:py-8 bg-muted/50">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-2xl mx-auto relative">
-            <Search className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="ابحث عن مخيم..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pr-9 sm:pr-12 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg text-right"
-            />
+      <ScrollReveal delay={0.2}>
+        <section className="py-4 sm:py-6 md:py-8 bg-muted/50">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="max-w-2xl mx-auto relative">
+              <Search className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="ابحث عن مخيم..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pr-9 sm:pr-12 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg text-right"
+              />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
       {/* Camps Tabs */}
-      <section className="py-6 sm:py-10 md:py-16">
-        <div className="container mx-auto px-4 sm:px-6">
-          {isLoading ? (
-            <div className="flex justify-center items-center min-h-[300px] sm:min-h-[400px]">
-              <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-green-600" />
-            </div>
-          ) : (
-            <Tabs defaultValue="active" className="w-full" dir="rtl">
-              <TabsList className="grid w-full max-w-sm sm:max-w-md mx-auto grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
-                <TabsTrigger value="active" className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm">
-                  <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span>الجارية ({filteredActiveCamps?.length || 0})</span>
-                </TabsTrigger>
-                <TabsTrigger value="expired" className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm">
-                  <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span>المنتهية ({filteredExpiredCamps?.length || 0})</span>
-                </TabsTrigger>
-              </TabsList>
+      <ScrollReveal delay={0.3}>
+        <section className="py-6 sm:py-10 md:py-16">
+          <div className="container mx-auto px-4 sm:px-6">
+            {isLoading ? (
+              <div className="flex justify-center items-center min-h-[300px] sm:min-h-[400px]">
+                <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-green-600" />
+              </div>
+            ) : (
+              <Tabs defaultValue="active" className="w-full" dir="rtl">
+                <TabsList className="grid w-full max-w-sm sm:max-w-md mx-auto grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
+                  <TabsTrigger value="active" className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm">
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span>الجارية ({filteredActiveCamps?.length || 0})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="expired" className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm">
+                    <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span>المنتهية ({filteredExpiredCamps?.length || 0})</span>
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="active">
-                {filteredActiveCamps && filteredActiveCamps.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-                    {filteredActiveCamps.map((camp: any, index: number) => (
-                      <CampCard key={camp.id} camp={camp} isExpired={false} index={index} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-10 sm:py-16">
-                    <Heart className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-gray-300 mb-3 sm:mb-4" />
-                    <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">
-                      لا توجد مخيمات جارية حالياً
+                <TabsContent value="active">
+                  {filteredActiveCamps && filteredActiveCamps.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                      {filteredActiveCamps.map((camp: any, index: number) => (
+                        <CampCard key={camp.id} camp={camp} isExpired={false} index={index} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 sm:py-16">
+                      <Heart className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-gray-300 mb-3 sm:mb-4" />
+                      <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">
+                        لا توجد مخيمات جارية حالياً
                     </h3>
                     <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
                       تابعنا للحصول على آخر التحديثات عن المخيمات القادمة
@@ -296,6 +303,7 @@ function CampsListContent() {
           )}
         </div>
       </section>
+      </ScrollReveal>
 
       <BackToTopButton threshold={300} />
     </div>

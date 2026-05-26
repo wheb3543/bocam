@@ -19,6 +19,8 @@ import AnimatedCard from "@/components/AnimatedCard";
 import SectionDivider from "@/components/SectionDivider";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import BackToTopButton from "@/components/BackToTopButton";
+import ScrollReveal from "@/components/ScrollReveal";
+import TextShimmer from "@/components/TextShimmer";
 
 export default function PrivacyPolicyPage() {
   useEffect(() => {
@@ -53,95 +55,96 @@ function PrivacyPolicyContent() {
 
       {/* Content */}
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-4xl">
-        <AnimatedCard className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 md:p-10 space-y-8 text-gray-700 leading-relaxed" delay={0.1} hoverEffect={false}>
+        <ScrollReveal delay={0.1}>
+          <AnimatedCard className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 md:p-10 space-y-8 text-gray-700 leading-relaxed" delay={0.1} hoverEffect={false}>
 
-          {/* Introduction */}
-          <section>
-            <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-3 border-b border-green-100 pb-2">
-              1. المقدمة
-            </h2>
-            <p className="text-sm sm:text-base">
-              يلتزم المستشفى السعودي الألماني - صنعاء بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL) وأفضل الممارسات الدولية. تُوضّح هذه السياسة كيفية جمع بياناتك واستخدامها وتخزينها ومشاركتها، وكيف نضمن التعامل معها بمسؤولية وشفافية تامة.
-            </p>
-            <p className="text-sm sm:text-base mt-3">
-              تنطبق هذه السياسة على جميع الخدمات الرقمية التي نقدمها، بما في ذلك موقعنا الإلكتروني، وتطبيق الجوال، وخدمات الحجز الإلكتروني، والتواصل عبر واتساب وفيسبوك وإنستغرام.
-            </p>
-          </section>
-
-          <SectionDivider color="green" />
-
-          {/* Data Collected */}
-          <section>
-            <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-3 border-b border-green-100 pb-2">
-              2. البيانات التي نجمعها
-            </h2>
-            <p className="text-sm sm:text-base mb-4">
-              نجمع فقط البيانات الضرورية لتقديم خدماتنا الصحية وإدارة عملياتنا وتلبية المتطلبات القانونية والتنظيمية، وتشمل:
-            </p>
-            <div className="space-y-4">
-              <AnimatedCard className="bg-green-50 rounded-lg p-4" delay={0.1} hoverEffect={false}>
-                <h3 className="font-semibold text-green-800 text-sm sm:text-base mb-2">أ. بيانات المريض والمستخدم</h3>
-                <p className="text-sm">الاسم الكامل، رقم الهاتف، البريد الإلكتروني، العمر، الجنس، والبيانات الصحية الضرورية لتقديم الرعاية الطبية ومعالجة مطالبات التأمين.</p>
-              </AnimatedCard>
-              <AnimatedCard className="bg-blue-50 rounded-lg p-4" delay={0.2} hoverEffect={false}>
-                <h3 className="font-semibold text-blue-800 text-sm sm:text-base mb-2">ب. بيانات الخدمات الرقمية</h3>
-                <p className="text-sm">تفاصيل التسجيل عبر الإنترنت، بيانات الحجز والمواعيد، والتفاعلات عبر تطبيقاتنا ومنصاتنا الرقمية.</p>
-              </AnimatedCard>
-              <AnimatedCard className="bg-purple-50 rounded-lg p-4" delay={0.3} hoverEffect={false}>
-                <h3 className="font-semibold text-purple-800 text-sm sm:text-base mb-2">ج. بيانات التتبع والتحليل</h3>
-                <p className="text-sm">مصدر الزيارة (فيسبوك، واتساب، جوجل، أو مباشر)، مسار التنقل داخل الموقع، ومعلومات الجهاز والمتصفح — وذلك بناءً على موافقتك فقط.</p>
-              </AnimatedCard>
-              <AnimatedCard className="bg-orange-50 rounded-lg p-4" delay={0.4} hoverEffect={false}>
-                <h3 className="font-semibold text-orange-800 text-sm sm:text-base mb-2">د. مسودات النماذج غير المكتملة (Lead Recovery)</h3>
-                <p className="text-sm">في حال بدأت ملء نموذج حجز ولم تكمله، قد نحفظ البيانات المُدخلة مؤقتاً (رقم الهاتف أو الاسم) للتواصل معك ومساعدتك في إتمام الحجز. يمكنك طلب حذف هذه البيانات في أي وقت.</p>
-              </AnimatedCard>
-            </div>
-          </section>
-
-          <SectionDivider color="green" />
-
-          {/* Collection Methods */}
-          <section>
-            <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-3 border-b border-green-100 pb-2">
-              3. طرق جمع البيانات
-            </h2>
-            <p className="text-sm sm:text-base">
-              نجمع بياناتك من خلال وسائل آمنة وقانونية، تشمل: النماذج الإلكترونية وتطبيقات الجوال وبوابات المرضى، وأنظمة المعلومات الصحية والسجلات الطبية الإلكترونية، وملفات تعريف الارتباط (Cookies) عند استخدامك لموقعنا أو منصاتنا الرقمية، والتواصل المباشر عبر الهاتف أو واتساب أو وسائل التواصل الاجتماعي.
-            </p>
-          </section>
-
-          {/* WhatsApp API */}
-          <section>
-            <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-3 border-b border-green-100 pb-2">
-              4. استخدام واتساب للأعمال (WhatsApp Business API)
-            </h2>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-5">
-              <p className="text-sm sm:text-base mb-3">
-                يستخدم المستشفى السعودي الألماني - صنعاء واجهة برمجة تطبيقات واتساب للأعمال المُقدَّمة من شركة Meta Platforms, Inc. لأغراض التواصل مع المرضى والمستخدمين، وتشمل:
+            {/* Introduction */}
+            <section>
+              <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-3 border-b border-green-100 pb-2">
+                1. المقدمة
+              </h2>
+              <p className="text-sm sm:text-base">
+                يلتزم المستشفى السعودي الألماني - صنعاء بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL) وأفضل الممارسات الدولية. تُوضّح هذه السياسة كيفية جمع بياناتك واستخدامها وتخزينها ومشاركتها، وكيف نضمن التعامل معها بمسؤولية وشفافية تامة.
               </p>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold mt-0.5">•</span>
-                  <span>إرسال تأكيدات الحجز والمواعيد الطبية فور التسجيل.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold mt-0.5">•</span>
-                  <span>إرسال تذكيرات بالمواعيد والفحوصات الطبية.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold mt-0.5">•</span>
-                  <span>إرسال عروض طبية وحملات توعوية صحية (بموافقتك المسبقة فقط).</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold mt-0.5">•</span>
-                  <span>التواصل لمتابعة الحجوزات غير المكتملة وتقديم المساعدة.</span>
-                </li>
-              </ul>
-              <p className="text-sm mt-3 text-gray-600">
-                <strong>ملاحظة:</strong> يُعالَج رقم هاتفك عبر خوادم Meta وفقاً لسياسة خصوصية Meta المتاحة على <a href="https://www.whatsapp.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-green-700 underline">whatsapp.com/legal/privacy-policy</a>. يمكنك إلغاء الاشتراك في رسائل واتساب التسويقية في أي وقت بإرسال كلمة "إلغاء" أو التواصل معنا مباشرة.
+              <p className="text-sm sm:text-base mt-3">
+                تنطبق هذه السياسة على جميع الخدمات الرقمية التي نقدمها، بما في ذلك موقعنا الإلكتروني، وتطبيق الجوال، وخدمات الحجز الإلكتروني، والتواصل عبر واتساب وفيسبوك وإنستغرام.
               </p>
-            </div>
-          </section>
+            </section>
+
+            <SectionDivider color="green" />
+
+            {/* Data Collected */}
+            <section>
+              <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-3 border-b border-green-100 pb-2">
+                2. البيانات التي نجمعها
+              </h2>
+              <p className="text-sm sm:text-base mb-4">
+                نجمع فقط البيانات الضرورية لتقديم خدماتنا الصحية وإدارة عملياتنا وتلبية المتطلبات القانونية والتنظيمية، وتشمل:
+              </p>
+              <div className="space-y-4">
+                <AnimatedCard className="bg-green-50 rounded-lg p-4" delay={0.1} hoverEffect={false}>
+                  <h3 className="font-semibold text-green-800 text-sm sm:text-base mb-2">أ. بيانات المريض والمستخدم</h3>
+                  <p className="text-sm">الاسم الكامل، رقم الهاتف، البريد الإلكتروني، العمر، الجنس، والبيانات الصحية الضرورية لتقديم الرعاية الطبية ومعالجة مطالبات التأمين.</p>
+                </AnimatedCard>
+                <AnimatedCard className="bg-blue-50 rounded-lg p-4" delay={0.2} hoverEffect={false}>
+                  <h3 className="font-semibold text-blue-800 text-sm sm:text-base mb-2">ب. بيانات الخدمات الرقمية</h3>
+                  <p className="text-sm">تفاصيل التسجيل عبر الإنترنت، بيانات الحجز والمواعيد، والتفاعلات عبر تطبيقاتنا ومنصاتنا الرقمية.</p>
+                </AnimatedCard>
+                <AnimatedCard className="bg-purple-50 rounded-lg p-4" delay={0.3} hoverEffect={false}>
+                  <h3 className="font-semibold text-purple-800 text-sm sm:text-base mb-2">ج. بيانات التتبع والتحليل</h3>
+                  <p className="text-sm">مصدر الزيارة (فيسبوك، واتساب، جوجل، أو مباشر)، مسار التنقل داخل الموقع، ومعلومات الجهاز والمتصفح — وذلك بناءً على موافقتك فقط.</p>
+                </AnimatedCard>
+                <AnimatedCard className="bg-orange-50 rounded-lg p-4" delay={0.4} hoverEffect={false}>
+                  <h3 className="font-semibold text-orange-800 text-sm sm:text-base mb-2">د. مسودات النماذج غير المكتملة (Lead Recovery)</h3>
+                  <p className="text-sm">في حال بدأت ملء نموذج حجز ولم تكمله، قد نحفظ البيانات المُدخلة مؤقتاً (رقم الهاتف أو الاسم) للتواصل معك ومساعدتك في إتمام الحجز. يمكنك طلب حذف هذه البيانات في أي وقت.</p>
+                </AnimatedCard>
+              </div>
+            </section>
+
+            <SectionDivider color="green" />
+
+            {/* Collection Methods */}
+            <section>
+              <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-3 border-b border-green-100 pb-2">
+                3. طرق جمع البيانات
+              </h2>
+              <p className="text-sm sm:text-base">
+                نجمع بياناتك من خلال وسائل آمنة وقانونية، تشمل: النماذج الإلكترونية وتطبيقات الجوال وبوابات المرضى، وأنظمة المعلومات الصحية والسجلات الطبية الإلكترونية، وملفات تعريف الارتباط (Cookies) عند استخدامك لموقعنا أو منصاتنا الرقمية، والتواصل المباشر عبر الهاتف أو واتساب أو وسائل التواصل الاجتماعي.
+              </p>
+            </section>
+
+            {/* WhatsApp API */}
+            <section>
+              <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-3 border-b border-green-100 pb-2">
+                4. استخدام واتساب للأعمال (WhatsApp Business API)
+              </h2>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-5">
+                <p className="text-sm sm:text-base mb-3">
+                  يستخدم المستشفى السعودي الألماني - صنعاء واجهة برمجة تطبيقات واتساب للأعمال المُقدَّمة من شركة Meta Platforms, Inc. لأغراض التواصل مع المرضى والمستخدمين، وتشمل:
+                </p>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold mt-0.5">•</span>
+                    <span>إرسال تأكيدات الحجز والمواعيد الطبية فور التسجيل.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold mt-0.5">•</span>
+                    <span>إرسال تذكيرات بالمواعيد والفحوصات الطبية.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold mt-0.5">•</span>
+                    <span>إرسال عروض طبية وحملات توعوية صحية (بموافقتك المسبقة فقط).</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold mt-0.5">•</span>
+                    <span>التواصل لمتابعة الحجوزات غير المكتملة وتقديم المساعدة.</span>
+                  </li>
+                </ul>
+                <p className="text-sm mt-3 text-gray-600">
+                  <strong>ملاحظة:</strong> يُعالَج رقم هاتفك عبر خوادم Meta وفقاً لسياسة خصوصية Meta المتاحة على <a href="https://www.whatsapp.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-green-700 underline">whatsapp.com/legal/privacy-policy</a>. يمكنك إلغاء الاشتراك في رسائل واتساب التسويقية في أي وقت بإرسال كلمة "إلغاء" أو التواصل معنا مباشرة.
+                </p>
+              </div>
+            </section>
 
           {/* Meta Pixel & Ads */}
           <section>
@@ -387,6 +390,7 @@ function PrivacyPolicyContent() {
           </section>
 
         </AnimatedCard>
+        </ScrollReveal>
       </main>
 
       <BackToTopButton threshold={300} />

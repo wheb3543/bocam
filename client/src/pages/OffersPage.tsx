@@ -22,6 +22,8 @@ import AnimatedCard from "@/components/AnimatedCard";
 import SectionDivider from "@/components/SectionDivider";
 import ReadingProgressBar from "@/components/ReadingProgressBar";
 import BackToTopButton from "@/components/BackToTopButton";
+import ScrollReveal from "@/components/ScrollReveal";
+import TextShimmer from "@/components/TextShimmer";
 
 interface OfferFormData {
   fullName: string;
@@ -150,74 +152,77 @@ function OffersPageContent() {
       />
 
       {/* Offers Grid */}
-      <section className="py-6 sm:py-8">
-        <div className="container mx-auto px-5 sm:px-6">
-          {offers && offers.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {offers.map((offer, index) => (
-                <AnimatedCard 
-                  key={offer.id} 
-                  className={`cursor-pointer transition-all hover:shadow-lg ${
-                    selectedOffer === offer.id ? "ring-2 ring-blue-500" : ""
-                  }`}
-                  delay={index * 0.1}
-                  onClick={() => setSelectedOffer(offer.id)}
-                >
-                  {offer.imageUrl && (
-                    <div className="relative h-40 sm:h-48 overflow-hidden rounded-t-lg">
-                      <img 
-                        src={offer.imageUrl} 
-                        alt={offer.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="text-base sm:text-xl text-blue-900">{offer.title}</CardTitle>
-                    {offer.endDate && (
-                      <CardDescription className="flex items-center gap-1 text-orange-600">
-                        <Calendar className="h-4 w-4" />
-                        العرض ساري حتى {formatDate(offer.endDate)}
-                      </CardDescription>
+      <ScrollReveal delay={0.1}>
+        <section className="py-6 sm:py-8">
+          <div className="container mx-auto px-5 sm:px-6">
+            {offers && offers.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {offers.map((offer, index) => (
+                  <AnimatedCard 
+                    key={offer.id} 
+                    className={`cursor-pointer transition-all hover:shadow-lg ${
+                      selectedOffer === offer.id ? "ring-2 ring-blue-500" : ""
+                    }`}
+                    delay={index * 0.1}
+                    onClick={() => setSelectedOffer(offer.id)}
+                  >
+                    {offer.imageUrl && (
+                      <div className="relative h-40 sm:h-48 overflow-hidden rounded-t-lg">
+                        <img 
+                          src={offer.imageUrl} 
+                          alt={offer.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     )}
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{offer.description}</p>
-                    <Button 
-                      className="w-full mt-4" 
-                      variant={selectedOffer === offer.id ? "default" : "outline"}
-                    >
-                      {selectedOffer === offer.id ? "تم الاختيار" : "اختر هذا العرض"}
-                    </Button>
-                  </CardContent>
-                </AnimatedCard>
-              ))}
-            </div>
-          ) : (
-            <AnimatedCard className="max-w-md mx-auto" delay={0}>
-              <CardContent className="pt-6 text-center">
-                <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">لا توجد عروض متاحة حالياً</p>
-              </CardContent>
-            </AnimatedCard>
-          )}
-        </div>
-      </section>
+                    <CardHeader>
+                      <CardTitle className="text-base sm:text-xl text-blue-900">{offer.title}</CardTitle>
+                      {offer.endDate && (
+                        <CardDescription className="flex items-center gap-1 text-orange-600">
+                          <Calendar className="h-4 w-4" />
+                          العرض ساري حتى {formatDate(offer.endDate)}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">{offer.description}</p>
+                      <Button 
+                        className="w-full mt-4" 
+                        variant={selectedOffer === offer.id ? "default" : "outline"}
+                      >
+                        {selectedOffer === offer.id ? "تم الاختيار" : "اختر هذا العرض"}
+                      </Button>
+                    </CardContent>
+                  </AnimatedCard>
+                ))}
+              </div>
+            ) : (
+              <AnimatedCard className="max-w-md mx-auto" delay={0}>
+                <CardContent className="pt-6 text-center">
+                  <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">لا توجد عروض متاحة حالياً</p>
+                </CardContent>
+              </AnimatedCard>
+            )}
+          </div>
+        </section>
+      </ScrollReveal>
 
       <SectionDivider color="blue" />
 
       {/* Registration Form */}
       {selectedOffer && (
-        <section className="py-12 bg-white dark:bg-card">
-          <div className="container mx-auto px-5 sm:px-6">
-            <AnimatedCard className="max-w-lg mx-auto" delay={0.2}>
-              <CardHeader className="text-center">
-                <CardTitle className="text-xl sm:text-2xl text-blue-900">سجل الآن</CardTitle>
-                <CardDescription>
-                  أكمل بياناتك وسنتواصل معك خلال 24 ساعة
-                </CardDescription>
-              </CardHeader>
+        <ScrollReveal delay={0.2}>
+          <section className="py-12 bg-white dark:bg-card">
+            <div className="container mx-auto px-5 sm:px-6">
+              <AnimatedCard className="max-w-lg mx-auto" delay={0.2}>
+                <CardHeader className="text-center">
+                  <CardTitle className="text-xl sm:text-2xl text-blue-900">سجل الآن</CardTitle>
+                  <CardDescription>
+                    أكمل بياناتك وسنتواصل معك خلال 24 ساعة
+                  </CardDescription>
+                </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
@@ -310,6 +315,7 @@ function OffersPageContent() {
             </AnimatedCard>
           </div>
         </section>
+        </ScrollReveal>
       )}
 
       <BackToTopButton threshold={300} />
