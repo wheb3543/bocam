@@ -19,7 +19,7 @@ export default function HomePage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
   const [animatedStats, setAnimatedStats] = useState({ doctors: 0, specialties: 0, patients: 0 });
-  const [visibleSections, setVisibleSections] = useState({});
+  const [visibleSections, setVisibleSections] = useState<Record<string, boolean>>({});
   const [scrollProgress, setScrollProgress] = useState(0);
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const statsRef = useState({ doctors: 22, specialties: 15, patients: 1000 })[0];

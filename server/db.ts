@@ -906,6 +906,25 @@ export async function getWhatsAppMessagesByConversation(conversationId: number) 
   return db.select().from(whatsappMessages).where(eq(whatsappMessages.conversationId, conversationId)).orderBy(whatsappMessages.createdAt);
 }
 
+export async function getLatestInboundWhatsAppMessage(conversationId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const { whatsappMessages } = await import('../drizzle/schema');
+  const result = await db
+    .select()
+    .from(whatsappMessages)
+    .where(
+      and(
+        eq(whatsappMessages.conversationId, conversationId),
+        eq(whatsappMessages.direction, 'inbound')
+      )
+    )
+    .orderBy(desc(whatsappMessages.createdAt))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 export async function getWhatsAppMessageByWhatsAppId(whatsappId: string) {
   const db = await getDb();
   if (!db) return undefined;
@@ -995,6 +1014,14 @@ export async function deleteWhatsAppTemplate(id: number) {
 }
 
 // ─── WhatsApp Event Logging Functions ─────────────────────────────────────────
+
+export async function createWhatsAppWebhookEvent(event: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  return db.insert(whatsappWebhookEvents).values(event);
+}
 
 export async function createWhatsAppAccountAlert(alert: any) {
   const db = await getDb();

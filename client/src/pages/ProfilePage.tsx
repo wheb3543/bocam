@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const [email, setEmail] = useState(user?.email || "");
 
   const updateProfileMutation = trpc.auth.updateProfile.useMutation({
-    onSuccess: (updatedUser) => {
+    onSuccess: (updatedUser: any) => {
       toast.success("تم تحديث الملف الشخصي بنجاح");
       setIsEditing(false);
       // Update local state
@@ -27,7 +27,7 @@ export default function ProfilePage() {
       // Reload page to update auth context
       window.location.reload();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message || "فشل تحديث الملف الشخصي");
     },
   });
@@ -198,7 +198,7 @@ export default function ProfilePage() {
                   <div className="flex-1">
                     <p className="text-sm text-muted-foreground">تاريخ التسجيل</p>
                     <p className="font-medium">
-                      {user.createdAt ? formatDate(user.createdAt) : 'غير محدد'}
+                      {user.lastSignedIn ? formatDate(user.lastSignedIn) : 'غير محدد'}
                     </p>
                   </div>
                 </div>
