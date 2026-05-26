@@ -4,6 +4,7 @@ import { useFormatDate } from "@/hooks/useFormatDate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Calendar, FileText, Gift, Phone, Plus, ArrowLeft } from "lucide-react";
+import AnimatedCard from "@/components/AnimatedCard";
 
 export default function PatientHomePage() {
   const { formatDate } = useFormatDate();
@@ -18,16 +19,19 @@ export default function PatientHomePage() {
 
   return (
     <div className="space-y-4">
-      <Card className="rounded-2xl shadow-sm border-green-100 dark:border-gray-700 bg-gradient-to-l from-green-50 to-white dark:from-gray-800 dark:to-gray-900">
+      <AnimatedCard
+        className="rounded-2xl shadow-sm border-green-100 dark:border-gray-700 bg-gradient-to-l from-green-50 to-white dark:from-gray-800 dark:to-gray-900"
+        delay={0}
+      >
         <CardContent className="p-5">
           <p className="text-xs text-muted-foreground">أهلاً بك</p>
           <h2 className="text-lg font-bold mt-1">{patient?.fullName || "مستخدم بوابة المريض"}</h2>
           <p className="text-sm text-muted-foreground mt-1">تابع مواعيدك ونتائجك وكل ما يخص رحلتك العلاجية.</p>
         </CardContent>
-      </Card>
+      </AnimatedCard>
 
       <div className="grid grid-cols-1 gap-3">
-        <Card className="rounded-2xl shadow-sm">
+        <AnimatedCard className="rounded-2xl shadow-sm" delay={0.1}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Calendar className="h-4 w-4 text-green-600" />
@@ -43,9 +47,9 @@ export default function PatientHomePage() {
               <p className="text-muted-foreground">لا توجد مواعيد حالياً</p>
             )}
           </CardContent>
-        </Card>
+        </AnimatedCard>
 
-        <Card className="rounded-2xl shadow-sm">
+        <AnimatedCard className="rounded-2xl shadow-sm" delay={0.2}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <FileText className="h-4 w-4 text-amber-600" />
@@ -61,9 +65,9 @@ export default function PatientHomePage() {
               <p className="text-muted-foreground">لا توجد نتائج جديدة</p>
             )}
           </CardContent>
-        </Card>
+        </AnimatedCard>
 
-        <Card className="rounded-2xl shadow-sm">
+        <AnimatedCard className="rounded-2xl shadow-sm" delay={0.3}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Gift className="h-4 w-4 text-blue-600" />
@@ -79,7 +83,7 @@ export default function PatientHomePage() {
               <p className="text-muted-foreground">لا توجد عروض محجوزة</p>
             )}
           </CardContent>
-        </Card>
+        </AnimatedCard>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

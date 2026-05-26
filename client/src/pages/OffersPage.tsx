@@ -6,7 +6,6 @@
 import { useFormatDate } from "@/hooks/useFormatDate";
 import { useState } from "react";
 import { usePhoneFormat } from "@/hooks/usePhoneFormat";
-import Navbar from "@/components/Navbar";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +16,12 @@ import { toast } from "sonner";
 import { Loader2, Gift, Calendar, Phone, Mail, User, CheckCircle } from "lucide-react";
 import { getRegistrationSource } from "@/lib/tracking";
 import { APP_LOGO, APP_TITLE } from "@/const";
+import PageLayout from "@/components/PageLayout";
+import HeroSection from "@/components/HeroSection";
+import AnimatedCard from "@/components/AnimatedCard";
+import SectionDivider from "@/components/SectionDivider";
+import ReadingProgressBar from "@/components/ReadingProgressBar";
+import BackToTopButton from "@/components/BackToTopButton";
 
 interface OfferFormData {
   fullName: string;
@@ -27,10 +32,14 @@ interface OfferFormData {
 
 export default function OffersPage() {
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      <Navbar />
+    <PageLayout
+      title="العروض الطبية - المستشفى السعودي الألماني"
+      description="استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة"
+      keywords="عروض طبية, خصومات, حجز عرض"
+      showInstallPWA={false}
+    >
       <OffersPageContent />
-    </div>
+    </PageLayout>
   );
 }
 
@@ -130,47 +139,28 @@ function OffersPageContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Header */}
-      <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-5 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={APP_LOGO} alt={APP_TITLE} className="h-9 sm:h-12 w-auto" />
-            <div>
-              <h1 className="text-sm sm:text-lg font-bold text-blue-900 leading-tight">{APP_TITLE}</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">العروض الطبية</p>
-            </div>
-          </div>
-          <a href="tel:8000018" className="flex items-center gap-2 text-blue-600 hover:text-blue-800">
-            <Phone className="h-5 w-5" />
-            <span className="font-semibold">8000018</span>
-          </a>
-        </div>
-      </header>
+      <ReadingProgressBar color="blue" />
 
       {/* Hero Section */}
-      <section className="py-8 sm:py-12 md:py-16">
-        <div className="container mx-auto px-5 sm:px-6 text-center">
-          <Gift className="h-12 sm:h-16 w-12 sm:w-16 text-blue-600 mx-auto mb-3 sm:mb-4" />
-          <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-blue-900 mb-3 sm:mb-4">
-            العروض الطبية الخاصة
-          </h1>
-          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-            استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة
-          </p>
-        </div>
-      </section>
+      <HeroSection
+        title="العروض الطبية الخاصة"
+        description="استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة"
+        badge={{ text: "عروض مميزة", icon: Gift }}
+        backgroundGradient="from-blue-600 via-blue-700 to-green-600"
+      />
 
       {/* Offers Grid */}
       <section className="py-6 sm:py-8">
         <div className="container mx-auto px-5 sm:px-6">
           {offers && offers.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {offers.map((offer) => (
-                <Card 
+              {offers.map((offer, index) => (
+                <AnimatedCard 
                   key={offer.id} 
                   className={`cursor-pointer transition-all hover:shadow-lg ${
                     selectedOffer === offer.id ? "ring-2 ring-blue-500" : ""
                   }`}
+                  delay={index * 0.1}
                   onClick={() => setSelectedOffer(offer.id)}
                 >
                   {offer.imageUrl && (
@@ -178,6 +168,7 @@ function OffersPageContent() {
                       <img 
                         src={offer.imageUrl} 
                         alt={offer.title}
+                        loading="lazy"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -200,25 +191,27 @@ function OffersPageContent() {
                       {selectedOffer === offer.id ? "تم الاختيار" : "اختر هذا العرض"}
                     </Button>
                   </CardContent>
-                </Card>
+                </AnimatedCard>
               ))}
             </div>
           ) : (
-            <Card className="max-w-md mx-auto">
+            <AnimatedCard className="max-w-md mx-auto" delay={0}>
               <CardContent className="pt-6 text-center">
                 <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">لا توجد عروض متاحة حالياً</p>
               </CardContent>
-            </Card>
+            </AnimatedCard>
           )}
         </div>
       </section>
+
+      <SectionDivider color="blue" />
 
       {/* Registration Form */}
       {selectedOffer && (
         <section className="py-12 bg-white dark:bg-card">
           <div className="container mx-auto px-5 sm:px-6">
-            <Card className="max-w-lg mx-auto">
+            <AnimatedCard className="max-w-lg mx-auto" delay={0.2}>
               <CardHeader className="text-center">
                 <CardTitle className="text-xl sm:text-2xl text-blue-900">سجل الآن</CardTitle>
                 <CardDescription>
@@ -314,21 +307,12 @@ function OffersPageContent() {
                   </Button>
                 </form>
               </CardContent>
-            </Card>
+            </AnimatedCard>
           </div>
         </section>
       )}
 
-      {/* Footer */}
-      <footer className="bg-blue-900 text-white py-8">
-        <div className="container mx-auto px-5 sm:px-6 text-center">
-          <img src={APP_LOGO} alt={APP_TITLE} className="h-10 sm:h-12 w-auto mx-auto mb-3 sm:mb-4 brightness-0 invert" />
-          <p className="text-blue-200">{APP_TITLE}</p>
-          <p className="text-sm text-blue-300 mt-2">
-            للاستفسارات: <a href="tel:8000018" className="hover:text-white">8000018</a>
-          </p>
-        </div>
-      </footer>
+      <BackToTopButton threshold={300} />
     </div>
   );
 }

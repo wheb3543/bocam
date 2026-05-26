@@ -194,6 +194,145 @@
 
 ---
 
+### HeroSection
+**الوصف**: قسم رئيسي موحد مع تدرج لوني، جزيئات متحركة، وشارة اختيارية
+
+**المحتوى**:
+- عنوان ووصف قابل للتخصيص
+- شارة (badge) اختيارية مع أيقونة
+- جزيئات خلفية متحركة
+- تدرج لوني قابل للتخصيص
+- تأثير لمعان النص (text shimmer)
+- دعم RTL
+
+**أماكن التطبيق**:
+- `NotFound.tsx` - صفحة الخطأ
+- `Doctors.tsx` - صفحة الأطباء
+- `OffersPage.tsx` - صفحة العروض
+- `CampsListPage.tsx` - صفحة المخيمات
+- `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
+
+**المسار**: `client/src/components/HeroSection.tsx`
+
+---
+
+### PageLayout
+**الوصف**: تخطيط صفحة موحد يشمل SEO، Navbar، Footer، و Skip Links
+
+**المحتوى**:
+- SEO Component (meta tags ديناميكية)
+- Navbar للواجهة العامة
+- Footer للواجهة العامة
+- Skip Links للوصولية
+- InstallPWAButton اختياري
+- دعم RTL
+
+**أماكن التطبيق**:
+- `NotFound.tsx` - صفحة الخطأ
+- `Doctors.tsx` - صفحة الأطباء
+- `OffersPage.tsx` - صفحة العروض
+- `CampsListPage.tsx` - صفحة المخيمات
+- `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
+
+**المسار**: `client/src/components/PageLayout.tsx`
+
+---
+
+### AnimatedCard
+**الوصف**: بطاقة متحركة موحدة مع تأثيرات hover وتأخير في الأنيميشن
+
+**المحتوى**:
+- تأثيرات hover (scale, shadow)
+- تأخير في الأنيميشن (delay)
+- إمكانية تعطيل hover effect
+- دعم RTL
+- تصميم responsive
+
+**أماكن التطبيق**:
+- `PatientHomePage.tsx` - بطاقات الصفحة الرئيسية
+- `Doctors.tsx` - بطاقات الأطباء
+- `OffersPage.tsx` - بطاقات العروض
+- `CampsListPage.tsx` - بطاقات المخيمات
+- `PrivacyPolicyPage.tsx` - بطاقات المحتوى
+
+**المسار**: `client/src/components/AnimatedCard.tsx`
+
+---
+
+### SectionDivider
+**الوصف**: فاصل أقسام موحد مع تدرج لوني
+
+**المحتوى**:
+- تدرج لوني قابل للتخصيص (gray, green, blue, purple)
+- ارتفاع قابل للتخصيص
+- تصميم responsive
+
+**أماكن التطبيق**:
+- `Doctors.tsx` - فصل الأقسام
+- `OffersPage.tsx` - فصل الأقسام
+- `CampsListPage.tsx` - فصل الأقسام
+- `PrivacyPolicyPage.tsx` - فصل الأقسام
+
+**المسار**: `client/src/components/SectionDivider.tsx`
+
+---
+
+### BackToTopButton
+**الوصف**: زر العودة للأعلى مع تمرير سلس
+
+**المحتوى**:
+- ظهور عند التمرير (threshold قابل للتخصيص)
+- تمرير سلس للأعلى
+- أيقونة ArrowUp
+- تصميم responsive
+- دعم RTL
+
+**أماكن التطبيق**:
+- `Doctors.tsx` - صفحة الأطباء
+- `OffersPage.tsx` - صفحة العروض
+- `CampsListPage.tsx` - صفحة المخيمات
+- `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
+
+**المسار**: `client/src/components/BackToTopButton.tsx`
+
+---
+
+### AnimationToggle
+**الوصف**: زر التحكم في الحركات مع أيقونات Pause/Play
+
+**المحتوى**:
+- تبديل حالة الحركات (enabled/disabled)
+- أيقونات Pause/Play
+- callback عند تغيير الحالة
+- تصميم responsive
+- دعم RTL
+
+**أماكن التطبيق**:
+- (قيد التطبيق) جميع الصفحات التي تحتوي أنيميشن
+
+**المسار**: `client/src/components/AnimationToggle.tsx`
+
+---
+
+### ReadingProgressBar
+**الوصف**: شريط تقدم القراءة مع تدرج لوني
+
+**المحتوى**:
+- تتبع نسبة التمرير
+- تدرج لوني قابل للتخصيص (green, blue, purple)
+- ارتفاع قابل للتخصيص
+- تحديث في الوقت الفعلي
+
+**أماكن التطبيق**:
+- `Doctors.tsx` - صفحة الأطباء
+- `OffersPage.tsx` - صفحة العروض
+- `CampsListPage.tsx` - صفحة المخيمات
+- `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
+
+**المسار**: `client/src/components/ReadingProgressBar.tsx`
+
+---
+
 ## مكونات الإدارة
 
 ### LeadsManagementPage
@@ -1348,6 +1487,6 @@ function MyTable() {
 
 ---
 
-**آخر تحديث**: 2026-02-24
-**عدد المكونات**: 120+
+**آخر تحديث**: 2026-05-26
+**عدد المكونات**: 127+
 **عدد الـ Hooks**: 15+

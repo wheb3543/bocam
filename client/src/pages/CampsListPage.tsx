@@ -1,7 +1,6 @@
 import { useFormatDate } from "@/hooks/useFormatDate";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import Navbar from "@/components/Navbar";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -11,13 +10,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Heart, Calendar, ArrowLeft, Clock, CheckCircle2, Users } from "lucide-react";
 import InstallPWAButton from "@/components/InstallPWAButton";
+import PageLayout from "@/components/PageLayout";
+import HeroSection from "@/components/HeroSection";
+import AnimatedCard from "@/components/AnimatedCard";
+import SectionDivider from "@/components/SectionDivider";
+import ReadingProgressBar from "@/components/ReadingProgressBar";
+import BackToTopButton from "@/components/BackToTopButton";
 
 export default function CampsListPage() {
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      <Navbar />
+    <PageLayout
+      title="المخيمات الطبية الخيرية - المستشفى السعودي الألماني"
+      description="مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين"
+      keywords="مخيمات طبية, خيرية, مجانية, مسؤولية مجتمعية"
+    >
       <CampsListContent />
-    </div>
+    </PageLayout>
   );
 }
 
@@ -59,13 +67,14 @@ function CampsListContent() {
     return { total, confirmed, attended };
   };
 
-  const CampCard = ({ camp, isExpired = false }: { camp: any; isExpired?: boolean }) => {
+  const CampCard = ({ camp, isExpired = false, index = 0 }: { camp: any; isExpired?: boolean; index?: number }) => {
     const stats = getCampStats(camp.id);
     
     return (
-      <Card
+      <AnimatedCard
         key={camp.id}
         className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-t-4 border-red-500 overflow-hidden"
+        delay={index * 0.1}
         onClick={() => setLocation(`/camps/${camp.slug || camp.id}`)}
       >
         <CardContent className="p-0">
@@ -74,6 +83,7 @@ function CampsListContent() {
               <img
                 src={camp.imageUrl}
                 alt={camp.name}
+                loading="lazy"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -172,27 +182,21 @@ function CampsListContent() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </AnimatedCard>
     );
   };
 
   return (
     <div className="space-y-6" dir="rtl">
+      <ReadingProgressBar color="purple" />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-600 to-blue-600 text-white py-8 sm:py-12 md:py-16">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <Heart className="h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16 mx-auto mb-3 sm:mb-5 md:mb-6 fill-red-400 text-red-400" />
-            <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">
-              المخيمات الطبية الخيرية
-            </h1>
-            <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-white/90 px-2">
-              مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين
-            </p>
-          </div>
-        </div>
-      </section>
+      <HeroSection
+        title="المخيمات الطبية الخيرية"
+        description="مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين"
+        badge={{ text: "مخيمات خيرية", icon: Heart }}
+        backgroundGradient="from-red-600 via-red-700 to-orange-600"
+      />
 
       {/* About Section */}
       <section className="py-6 sm:py-8 md:py-12 bg-white dark:bg-card">
@@ -210,6 +214,8 @@ function CampsListContent() {
           </div>
         </div>
       </section>
+
+      <SectionDivider color="red" />
 
       {/* Search Section */}
       <section className="py-4 sm:py-6 md:py-8 bg-muted/50">
@@ -250,8 +256,8 @@ function CampsListContent() {
               <TabsContent value="active">
                 {filteredActiveCamps && filteredActiveCamps.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-                    {filteredActiveCamps.map((camp: any) => (
-                      <CampCard key={camp.id} camp={camp} isExpired={false} />
+                    {filteredActiveCamps.map((camp: any, index: number) => (
+                      <CampCard key={camp.id} camp={camp} isExpired={false} index={index} />
                     ))}
                   </div>
                 ) : (
@@ -270,8 +276,8 @@ function CampsListContent() {
               <TabsContent value="expired">
                 {filteredExpiredCamps && filteredExpiredCamps.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-                    {filteredExpiredCamps.map((camp: any) => (
-                      <CampCard key={camp.id} camp={camp} isExpired={true} />
+                    {filteredExpiredCamps.map((camp: any, index: number) => (
+                      <CampCard key={camp.id} camp={camp} isExpired={true} index={index} />
                     ))}
                   </div>
                 ) : (
@@ -291,7 +297,7 @@ function CampsListContent() {
         </div>
       </section>
 
-      <InstallPWAButton />
+      <BackToTopButton threshold={300} />
     </div>
   );
 }

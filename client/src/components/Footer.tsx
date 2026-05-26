@@ -15,9 +15,9 @@ export default function Footer() {
           {/* Logo and Description */}
           <div className="text-center sm:text-right">
             <img
-              src="/assets/new-logo.png"
+              src="/sgh-logo-full.png"
               alt={APP_TITLE}
-              className="h-10 sm:h-12 w-auto mx-auto sm:mx-0 mb-3 sm:mb-4 brightness-0 invert"
+              className="h-8 sm:h-10 w-auto mx-auto sm:mx-0 mb-2 sm:mb-3"
             />
             <p className="text-green-100 text-xs sm:text-sm font-medium">{APP_TITLE}</p>
             <p className="text-green-300 text-[10px] sm:text-xs mt-1 sm:mt-1.5">نرعاكم كأهالينا - Caring like family</p>

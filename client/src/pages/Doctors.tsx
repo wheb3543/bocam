@@ -16,13 +16,22 @@ import { Loader2, Search, Stethoscope, Calendar, User } from "lucide-react";
 import { APP_LOGO } from "@/const";
 import SEO from "@/components/SEO";
 import InstallPWAButton from "@/components/InstallPWAButton";
+import PageLayout from "@/components/PageLayout";
+import HeroSection from "@/components/HeroSection";
+import AnimatedCard from "@/components/AnimatedCard";
+import SectionDivider from "@/components/SectionDivider";
+import ReadingProgressBar from "@/components/ReadingProgressBar";
+import BackToTopButton from "@/components/BackToTopButton";
 
 export default function Doctors() {
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      <Navbar />
+    <PageLayout
+      title="الأطباء - المستشفى السعودي الألماني"
+      description="احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء"
+      keywords="أطباء, استشاريين, تخصصات طبية, حجز موعد"
+    >
       <DoctorsContent />
-    </div>
+    </PageLayout>
   );
 }
 
@@ -58,27 +67,19 @@ function DoctorsContent() {
 
   return (
     <div className="space-y-6" dir="rtl">
+      <ReadingProgressBar color="green" />
 
         {/* Hero Section */}
-        <section className="pt-6 sm:pt-10 md:pt-24 pb-4 sm:pb-8 md:pb-12 px-4 sm:px-5 md:px-6">
-          <div className="container mx-auto text-center">
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-3 sm:mb-6">
-              <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-xs sm:text-sm font-medium">أطباء متخصصون</span>
-            </div>
-            <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold text-foreground dark:text-white mb-2 sm:mb-3 md:mb-4">
-              أطباؤنا المتميزون
-            </h1>
-            <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-muted-foreground dark:text-muted-foreground max-w-2xl mx-auto px-2">
-              فريق طبي متكامل من أفضل الأطباء في مختلف التخصصات
-            </p>
-          </div>
-        </section>
+        <HeroSection
+          title="أطباؤنا المتميزون"
+          description="فريق طبي متكامل من أفضل الأطباء في مختلف التخصصات"
+          badge={{ text: "أطباء متخصصون", icon: Stethoscope }}
+        />
 
         {/* Search and Filter */}
         <section className="pb-4 sm:pb-6 md:pb-8 px-4 sm:px-5 md:px-6">
           <div className="container mx-auto max-w-4xl">
-            <Card className="dark:bg-gray-800/50 dark:border-gray-700/50">
+            <AnimatedCard className="dark:bg-gray-800/50 dark:border-gray-700/50" delay={0.1}>
               <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4">
                   <div className="relative">
@@ -105,9 +106,11 @@ function DoctorsContent() {
                   </Select>
                 </div>
               </CardContent>
-            </Card>
+            </AnimatedCard>
           </div>
         </section>
+
+        <SectionDivider />
 
         {/* Doctors Grid */}
         <section className="pb-8 sm:pb-12 md:pb-16 px-4 sm:px-5 md:px-6">
@@ -118,13 +121,13 @@ function DoctorsContent() {
               </div>
             ) : filteredDoctors && filteredDoctors.length > 0 ? (
               <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-                {filteredDoctors.map((doctor) => (
-                  <Card
+                {filteredDoctors.map((doctor, index) => (
+                  <AnimatedCard
                     key={doctor.id}
                     className="hover:shadow-lg transition-all cursor-pointer group dark:bg-gray-800/50 dark:border-gray-700/50 dark:hover:border-emerald-600/50 overflow-hidden"
+                    delay={index * 0.1}
                     onClick={() => setLocation(`/doctors/${doctor.slug}`)}
                   >
-                    {/* Mobile: Horizontal layout | Desktop: Vertical layout */}
                     <div className="flex flex-row sm:flex-col">
                       {/* Image */}
                       <div className="flex items-center justify-center p-2.5 sm:p-0 sm:pt-5">
@@ -132,6 +135,7 @@ function DoctorsContent() {
                           <img
                             src={doctor.image}
                             alt={doctor.name}
+                            loading="lazy"
                             className="w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-full object-cover border-2 border-emerald-100 dark:border-emerald-800 group-hover:border-emerald-300 dark:group-hover:border-emerald-600 transition-colors shrink-0"
                           />
                         ) : (
@@ -174,7 +178,7 @@ function DoctorsContent() {
                         </Button>
                       </div>
                     </div>
-                  </Card>
+                  </AnimatedCard>
                 ))}
               </div>
             ) : (
@@ -186,7 +190,8 @@ function DoctorsContent() {
             )}
           </div>
         </section>
-        <InstallPWAButton />
+
+        <BackToTopButton threshold={300} />
     </div>
   );
 }

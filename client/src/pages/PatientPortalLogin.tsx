@@ -13,6 +13,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Phone, KeyRound, UserPlus, ArrowRight, Heart, Shield, FileText, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import PageLayout from "@/components/PageLayout";
+import HeroSection from "@/components/HeroSection";
+import AnimatedCard from "@/components/AnimatedCard";
 
 type Step = "phone" | "otp" | "register";
 type LoginMethod = "otp" | "password";
@@ -149,30 +152,36 @@ export default function PatientPortalLogin() {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-50 to-white">
-        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-      </div>
+      <PageLayout
+        title="بوابة المريض"
+        description="سجّل دخولك لإدارة حجوزاتك ومواعيدك واستلام نتائجك"
+        keywords="بوابة المريض, تسجيل دخول, تسجيل جديد"
+      >
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+        </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900" dir="rtl">
-      <main className="min-h-screen flex items-center justify-center px-4 py-8 sm:py-12 md:py-16">
-        <div className="w-full max-w-md">
-          {/* Header */}
-          <div className="text-center mb-6 sm:mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
-              <Heart className="h-8 w-8 sm:h-10 sm:w-10 text-green-600 dark:text-green-400" />
-            </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-green-900 dark:text-green-400">بوابة المريض</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-2">
-              سجّل دخولك لإدارة حجوزاتك ومواعيدك واستلام نتائجك
-            </p>
-          </div>
+    <PageLayout
+      title="بوابة المريض"
+      description="سجّل دخولك لإدارة حجوزاتك ومواعيدك واستلام نتائجك"
+      keywords="بوابة المريض, تسجيل دخول, تسجيل جديد"
+      showInstallPWA={false}
+    >
+      <HeroSection
+        title="بوابة المريض"
+        description="سجّل دخولك لإدارة حجوزاتك ومواعيدك واستلام نتائجك"
+        badge={{ text: "بوابة المريض", icon: Heart }}
+      />
 
+      <main className="min-h-screen flex items-center justify-center px-4 py-8 sm:py-12 md:py-16 -mt-32">
+        <div className="w-full max-w-md">
           {/* Step: Phone Number */}
           {step === "phone" && (
-            <Card className="shadow-lg border-green-100 dark:border-green-900/30">
+            <AnimatedCard className="shadow-lg border-green-100 dark:border-green-900/30" delay={0}>
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
                   <Phone className="h-5 w-5 text-green-600" />
@@ -267,12 +276,12 @@ export default function PatientPortalLogin() {
                   </>
                 )}
               </CardContent>
-            </Card>
+            </AnimatedCard>
           )}
 
           {/* Step: OTP Verification */}
           {step === "otp" && (
-            <Card className="shadow-lg border-green-100 dark:border-green-900/30">
+            <AnimatedCard className="shadow-lg border-green-100 dark:border-green-900/30" delay={0}>
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
                   <KeyRound className="h-5 w-5 text-green-600" />
@@ -330,12 +339,12 @@ export default function PatientPortalLogin() {
                   إعادة إرسال الرمز
                 </Button>
               </CardContent>
-            </Card>
+            </AnimatedCard>
           )}
 
           {/* Step: Registration */}
           {step === "register" && (
-            <Card className="shadow-lg border-green-100 dark:border-green-900/30">
+            <AnimatedCard className="shadow-lg border-green-100 dark:border-green-900/30" delay={0}>
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
                   <UserPlus className="h-5 w-5 text-green-600" />
@@ -442,30 +451,30 @@ export default function PatientPortalLogin() {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+            </AnimatedCard>
           )}
 
           {/* Features */}
           <div className="mt-8 sm:mt-10 grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-green-50 dark:border-gray-700">
+            <AnimatedCard className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-green-50 dark:border-gray-700" delay={0.1} hoverEffect={false}>
               <Calendar className="h-6 w-6 sm:h-7 sm:w-7 text-green-600 dark:text-green-400 mb-2" />
               <span className="text-xs sm:text-sm font-medium text-foreground">إدارة المواعيد</span>
-            </div>
-            <div className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-green-50 dark:border-gray-700">
+            </AnimatedCard>
+            <AnimatedCard className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-green-50 dark:border-gray-700" delay={0.2} hoverEffect={false}>
               <FileText className="h-6 w-6 sm:h-7 sm:w-7 text-green-600 dark:text-green-400 mb-2" />
               <span className="text-xs sm:text-sm font-medium text-foreground">النتائج والتقارير</span>
-            </div>
-            <div className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-green-50 dark:border-gray-700">
+            </AnimatedCard>
+            <AnimatedCard className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-green-50 dark:border-gray-700" delay={0.3} hoverEffect={false}>
               <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-green-600 dark:text-green-400 mb-2" />
               <span className="text-xs sm:text-sm font-medium text-foreground">خصوصية وأمان</span>
-            </div>
-            <div className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-green-50 dark:border-gray-700">
+            </AnimatedCard>
+            <AnimatedCard className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-green-50 dark:border-gray-700" delay={0.4} hoverEffect={false}>
               <Heart className="h-6 w-6 sm:h-7 sm:w-7 text-green-600 dark:text-green-400 mb-2" />
               <span className="text-xs sm:text-sm font-medium text-foreground">ملفك الطبي</span>
-            </div>
+            </AnimatedCard>
           </div>
         </div>
       </main>
-    </div>
+    </PageLayout>
   );
 }

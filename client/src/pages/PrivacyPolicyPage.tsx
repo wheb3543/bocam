@@ -13,6 +13,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Shield, Phone, Mail, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
+import PageLayout from "@/components/PageLayout";
+import HeroSection from "@/components/HeroSection";
+import AnimatedCard from "@/components/AnimatedCard";
+import SectionDivider from "@/components/SectionDivider";
+import ReadingProgressBar from "@/components/ReadingProgressBar";
+import BackToTopButton from "@/components/BackToTopButton";
 
 export default function PrivacyPolicyPage() {
   useEffect(() => {
@@ -21,34 +27,33 @@ export default function PrivacyPolicyPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50" dir="rtl">
-      <Navbar />
+    <PageLayout
+      title="سياسة الخصوصية - المستشفى السعودي الألماني"
+      description="سياسة حماية البيانات الشخصية والخصوصية وفقاً لنظام حماية البيانات في المملكة العربية السعودية"
+      keywords="سياسة الخصوصية, حماية البيانات, PDPL"
+    >
+      <PrivacyPolicyContent />
+    </PageLayout>
+  );
+}
+
+function PrivacyPolicyContent() {
+  return (
+    <div className="space-y-6" dir="rtl">
+      <ReadingProgressBar color="green" />
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-l from-green-800 to-green-600 text-white py-10 sm:py-14">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-2 text-green-200 text-sm mb-3">
-            <Link href="/">
-              <span className="hover:text-white cursor-pointer">الرئيسية</span>
-            </Link>
-            <ChevronRight className="w-4 h-4 rotate-180" />
-            <span>سياسة الخصوصية</span>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-green-300 shrink-0" />
-            <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">سياسة الخصوصية</h1>
-              <p className="text-green-200 text-sm sm:text-base mt-1">
-                آخر تحديث: مارس 2026 | المستشفى السعودي الألماني - صنعاء
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <HeroSection
+        title="سياسة الخصوصية"
+        subtitle="آخر تحديث: مارس 2026 | المستشفى السعودي الألماني - صنعاء"
+        description="يلتزم المستشفى السعودي الألماني - صنعاء بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL)"
+        badge={{ text: "حماية البيانات", icon: Shield }}
+        backgroundGradient="from-green-800 to-green-600"
+      />
 
       {/* Content */}
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-4xl">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 md:p-10 space-y-8 text-gray-700 leading-relaxed">
+        <AnimatedCard className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 md:p-10 space-y-8 text-gray-700 leading-relaxed" delay={0.1} hoverEffect={false}>
 
           {/* Introduction */}
           <section>
@@ -63,6 +68,8 @@ export default function PrivacyPolicyPage() {
             </p>
           </section>
 
+          <SectionDivider color="green" />
+
           {/* Data Collected */}
           <section>
             <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-3 border-b border-green-100 pb-2">
@@ -72,24 +79,26 @@ export default function PrivacyPolicyPage() {
               نجمع فقط البيانات الضرورية لتقديم خدماتنا الصحية وإدارة عملياتنا وتلبية المتطلبات القانونية والتنظيمية، وتشمل:
             </p>
             <div className="space-y-4">
-              <div className="bg-green-50 rounded-lg p-4">
+              <AnimatedCard className="bg-green-50 rounded-lg p-4" delay={0.1} hoverEffect={false}>
                 <h3 className="font-semibold text-green-800 text-sm sm:text-base mb-2">أ. بيانات المريض والمستخدم</h3>
                 <p className="text-sm">الاسم الكامل، رقم الهاتف، البريد الإلكتروني، العمر، الجنس، والبيانات الصحية الضرورية لتقديم الرعاية الطبية ومعالجة مطالبات التأمين.</p>
-              </div>
-              <div className="bg-blue-50 rounded-lg p-4">
+              </AnimatedCard>
+              <AnimatedCard className="bg-blue-50 rounded-lg p-4" delay={0.2} hoverEffect={false}>
                 <h3 className="font-semibold text-blue-800 text-sm sm:text-base mb-2">ب. بيانات الخدمات الرقمية</h3>
                 <p className="text-sm">تفاصيل التسجيل عبر الإنترنت، بيانات الحجز والمواعيد، والتفاعلات عبر تطبيقاتنا ومنصاتنا الرقمية.</p>
-              </div>
-              <div className="bg-purple-50 rounded-lg p-4">
+              </AnimatedCard>
+              <AnimatedCard className="bg-purple-50 rounded-lg p-4" delay={0.3} hoverEffect={false}>
                 <h3 className="font-semibold text-purple-800 text-sm sm:text-base mb-2">ج. بيانات التتبع والتحليل</h3>
                 <p className="text-sm">مصدر الزيارة (فيسبوك، واتساب، جوجل، أو مباشر)، مسار التنقل داخل الموقع، ومعلومات الجهاز والمتصفح — وذلك بناءً على موافقتك فقط.</p>
-              </div>
-              <div className="bg-orange-50 rounded-lg p-4">
+              </AnimatedCard>
+              <AnimatedCard className="bg-orange-50 rounded-lg p-4" delay={0.4} hoverEffect={false}>
                 <h3 className="font-semibold text-orange-800 text-sm sm:text-base mb-2">د. مسودات النماذج غير المكتملة (Lead Recovery)</h3>
                 <p className="text-sm">في حال بدأت ملء نموذج حجز ولم تكمله، قد نحفظ البيانات المُدخلة مؤقتاً (رقم الهاتف أو الاسم) للتواصل معك ومساعدتك في إتمام الحجز. يمكنك طلب حذف هذه البيانات في أي وقت.</p>
-              </div>
+              </AnimatedCard>
             </div>
           </section>
+
+          <SectionDivider color="green" />
 
           {/* Collection Methods */}
           <section>
@@ -377,10 +386,10 @@ export default function PrivacyPolicyPage() {
             </p>
           </section>
 
-        </div>
+        </AnimatedCard>
       </main>
 
-      <Footer />
+      <BackToTopButton threshold={300} />
     </div>
   );
 }
