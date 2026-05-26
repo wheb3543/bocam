@@ -1,10 +1,10 @@
 /**
  * ScrollReveal - تأثير ظهور العناصر عند التمرير
- * 
+ *
  * مكون يضيف تأثير ظهور العناصر عند التمرير باستخدام Intersection Observer
  * يدعم إيقاف الحركات عبر AnimationToggle
  */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface ScrollRevealProps {
@@ -25,6 +25,7 @@ export default function ScrollReveal({
   disabled = false,
 }: ScrollRevealProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (disabled) {
@@ -48,7 +49,7 @@ export default function ScrollReveal({
       });
     }, observerOptions);
 
-    const element = document.currentScript?.parentElement;
+    const element = elementRef.current;
     if (element) {
       observer.observe(element);
     }
@@ -58,6 +59,7 @@ export default function ScrollReveal({
 
   return (
     <div
+      ref={elementRef}
       className={cn(
         "transition-all duration-700 ease-out",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",

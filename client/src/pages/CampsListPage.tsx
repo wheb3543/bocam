@@ -219,7 +219,7 @@ function CampsListContent() {
         </section>
       </ScrollReveal>
 
-      <SectionDivider color="red" />
+      <SectionDivider color="gray" />
 
       {/* Search Section */}
       <ScrollReveal delay={0.2}>
