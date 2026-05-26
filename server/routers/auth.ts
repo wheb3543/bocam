@@ -170,4 +170,42 @@ export const authRouter = router({
       
       return { success: true, userId: Number(result[0].insertId) };
     }),
+
+  // تحديث الملف الشخصي
+  updateProfile: publicProcedure
+    .input(z.object({
+      name: z.string().min(2, "الاسم يجب أن يكون حرفين على الأقل").optional(),
+      email: z.string().email("البريد الإلكتروني غير صحيح").optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "يجب تسجيل الدخول أولاً" });
+      }
+
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      }
+
+      // Check if email already exists (if provided and different from current)
+      if (input.email && input.email !== ctx.user.email) {
+        const existingEmail = await getUserByEmail(input.email);
+        if (existingEmail) {
+          throw new TRPCError({ code: "CONFLICT", message: "البريد الإلكتروني موجود بالفعل" });
+        }
+      }
+
+      // Update user
+      const updateData: any = {};
+      if (input.name !== undefined) updateData.name = input.name;
+      if (input.email !== undefined) updateData.email = input.email;
+
+      await db.update(users)
+        .set(updateData)
+        .where(eq(users.id, ctx.user.id));
+
+      // Return updated user
+      const updatedUser = await getUserById(ctx.user.id);
+      return updatedUser;
+    }),
 });
