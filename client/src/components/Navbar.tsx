@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { Phone, Menu, X, ChevronLeft } from "lucide-react";
-import { APP_LOGO, APP_TITLE } from "@/const";
+import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME } from "@/const";
 import { Link } from "wouter";
 import InstallPWAButton from "@/components/InstallPWAButton";
 
@@ -103,11 +103,11 @@ export default function Navbar() {
 
               {/* Contact Button */}
               <a
-                href="tel:8000018"
+                href={`tel:${COMPANY_PHONE}`}
                 className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-green-600 text-white px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm md:text-base"
               >
                 <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="font-semibold">8000018</span>
+                <span className="font-semibold">{COMPANY_PHONE}</span>
               </a>
             </div>
           </div>
@@ -168,11 +168,11 @@ export default function Navbar() {
         {/* Menu Footer - Contact */}
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 border-t border-border dark:border-gray-700">
           <a
-            href="tel:8000018"
+            href={`tel:${COMPANY_PHONE}`}
             className="flex items-center justify-center gap-2 w-full bg-green-600 text-white py-2.5 sm:py-3 rounded-lg sm:rounded-xl hover:bg-green-700 transition-colors font-semibold text-sm sm:text-base"
           >
             <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span>اتصل بنا: 8000018</span>
+            <span>اتصل بنا: {COMPANY_PHONE}</span>
           </a>
           <Link href="/patient-portal/login">
             <div className="flex items-center justify-center gap-2 w-full mt-2 border border-green-600 dark:border-green-500 text-green-700 dark:text-green-400 py-2.5 sm:py-3 rounded-lg sm:rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors font-medium cursor-pointer text-xs sm:text-sm">

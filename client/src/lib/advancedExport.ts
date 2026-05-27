@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
 import { trpc } from './trpc';
+import { APP_LOGO, COMPANY_PHONE, COMPANY_EMAIL, COMPANY_ARABIC_NAME } from "@/const";
 
 /**
  * معلومات التصدير (Metadata)
@@ -275,11 +276,11 @@ export function printTable(options: ExportOptions): void {
     <body>
       <div class="page-header">
         <div class="header-right">
-          <img src="/sgh-logo-full.png" alt="المستشفى السعودي الألماني">
+          <img src="${APP_LOGO}" alt="${COMPANY_ARABIC_NAME}">
         </div>
         <div class="header-left">
-          <p><strong>الرقم المجاني:</strong> 8000018</p>
-          <p><strong>البريد الإلكتروني:</strong> info@sghsanaa.net</p>
+          <p><strong>الرقم المجاني:</strong> ${COMPANY_PHONE}</p>
+          <p><strong>البريد الإلكتروني:</strong> ${COMPANY_EMAIL}</p>
         </div>
       </div>
       <div class="report-title">

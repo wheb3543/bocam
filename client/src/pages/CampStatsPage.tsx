@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { APP_LOGO, COMPANY_PHONE, COMPANY_ARABIC_NAME } from "@/const";
 
 export default function CampStatsPage() {
   const [, setLocation] = useLocation();
@@ -271,8 +272,8 @@ export default function CampStatsPage() {
       </head>
       <body>
         <div class="header">
-          <img src="/sgh-logo-full.png" alt="المستشفى السعودي الألماني">
-          <div class="phone">8000018</div>
+          <img src="${APP_LOGO}" alt="${COMPANY_ARABIC_NAME}">
+          <div class="phone">${COMPANY_PHONE}</div>
         </div>
         
         <div class="report-title">تقرير إحصائيات المخيمات</div>

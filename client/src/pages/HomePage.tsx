@@ -11,7 +11,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import InstallPWAButton from "@/components/InstallPWAButton";
-import { APP_LOGO, APP_TITLE } from "@/const";
+import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, COMPANY_NAME } from "@/const";
 import { Link } from "wouter";
 import { useState, useEffect } from "react";
 
@@ -149,11 +149,11 @@ export default function HomePage() {
 
   return (
     <>
-      <SEO 
-        title="المستشفى السعودي الألماني - صنعاء | احجز موعدك الآن"
-        description="احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: 8000018"
-        image="/sgh-logo-full.png"
-        keywords="المستشفى السعودي الألماني, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية, 8000018"
+      <SEO
+        title={`${COMPANY_ARABIC_NAME} - صنعاء | احجز موعدك الآن`}
+        description={`احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME} بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: ${COMPANY_PHONE}`}
+        image={APP_LOGO}
+        keywords={`${COMPANY_ARABIC_NAME}, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية, ${COMPANY_PHONE}`}
       />
       <div className={`min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 relative overflow-hidden ${!animationsEnabled ? 'animations-disabled' : ''}`} dir="rtl">
       
@@ -268,7 +268,7 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="relative inline-block mb-6 sm:mb-8 md:mb-10">
               <img
-                src="/sgh-logo-full.png"
+                src={APP_LOGO}
                 alt={APP_TITLE}
                 className="h-20 sm:h-24 md:h-32 lg:h-36 w-auto mx-auto animate-logo-float"
               />
@@ -278,13 +278,13 @@ export default function HomePage() {
               {APP_TITLE}
             </h1>
             <p className="text-base sm:text-xl md:text-3xl mb-2 sm:mb-3 text-green-100 font-semibold">
-              Saudi German Hospital
+              {COMPANY_NAME}
             </p>
             <p className="text-sm sm:text-lg md:text-2xl mb-6 sm:mb-8 md:mb-10 text-blue-100 font-medium">
               نرعاكم كأهالينا - Caring like family
             </p>
             <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto px-2 text-white/95 bg-black/20 rounded-lg p-4">
-              منصة الحجز الإلكترونية للمستشفى السعودي الألماني - صنعاء. احجز موعدك مع أفضل
+              منصة الحجز الإلكترونية لـ {COMPANY_ARABIC_NAME}. احجز موعدك مع أفضل
               الأطباء والاستشاريين في مختلف التخصصات الطبية، استفد من العروض الطبية المميزة
               والخصومات الخاصة، وشارك في المخيمات الطبية الخيرية المجانية التي ننظمها
               بشكل دوري لخدمة المجتمع. نوفر لك تجربة حجز سهلة وسريعة من خلال منصتنا
@@ -292,8 +292,8 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-3 sm:px-0">
               <Link href="/doctors">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="w-full sm:w-auto bg-white dark:bg-card text-green-600 hover:bg-green-50 text-base sm:text-lg font-semibold shadow-xl hover:shadow-2xl hover:shadow-green-500/30 hover:scale-105 transition-all h-12 sm:h-14 px-6 sm:px-8"
                   aria-label="احجز موعدك الآن مع أفضل الأطباء"
                 >
@@ -301,14 +301,14 @@ export default function HomePage() {
                   <ArrowLeft className="mr-2 h-5 w-5 sm:h-6 sm:w-6 rotate-180" aria-hidden="true" />
                 </Button>
               </Link>
-              <a href="tel:8000018" className="w-full sm:w-auto">
+              <a href={`tel:${COMPANY_PHONE}`} className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="outline"
                   className="w-full sm:w-auto border-2 border-white/90 text-white hover:bg-white/20 text-base sm:text-lg font-medium backdrop-blur-sm h-12 sm:h-14 px-6 sm:px-8 hover:scale-105 transition-all"
-                  aria-label="اتصل بالمستشفى على الرقم 8000018"
+                  aria-label={`اتصل بالمستشفى على الرقم ${COMPANY_PHONE}`}
                 >
-                  اتصل بنا: 8000018
+                  اتصل بنا: {COMPANY_PHONE}
                 </Button>
               </a>
             </div>
@@ -399,10 +399,10 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground dark:text-white mb-6 sm:mb-8 md:mb-10 text-center animate-text-shimmer bg-gradient-to-r from-green-600 via-blue-600 to-green-600 bg-clip-text text-transparent bg-[length:200%_auto]">
-              عن المستشفى السعودي الألماني
+              عن {COMPANY_ARABIC_NAME}
             </h2>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground dark:text-muted-foreground text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 leading-relaxed px-2 bg-gray-200/70 dark:bg-gray-800/70 rounded-lg p-4">
-              المستشفى السعودي الألماني - صنعاء هو أحد أبرز المؤسسات الصحية في اليمن، حيث نقدم خدمات طبية
+              {COMPANY_ARABIC_NAME} هو أحد أبرز المؤسسات الصحية في اليمن، حيث نقدم خدمات طبية
               متميزة بمعايير عالمية. نحن ملتزمون بتوفير رعاية صحية شاملة ومتكاملة لجميع المرضى،
               مع نخبة من الأطباء والاستشاريين المتخصصين في مختلف التخصصات الطبية. نؤمن بأهمية
               المسؤولية المجتمعية، ولذلك نقيم بشكل دوري مخيمات طبية خيرية مجانية لخدمة المجتمع
@@ -441,15 +441,15 @@ export default function HomePage() {
               <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-shadow duration-300">
                 <div className="aspect-video bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 flex items-center justify-center relative overflow-hidden">
                   <img
-                    src="/sgh-logo-full.png"
-                    alt="صورة شعار المستشفى السعودي الألماني - صنعاء"
+                    src={APP_LOGO}
+                    alt={`صورة شعار ${COMPANY_ARABIC_NAME}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
                     style={{ transform: `scale(1.1) translateY(${parallaxOffset}px)` }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end justify-center pb-8 sm:pb-12">
                     <div className="text-center text-white">
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">المستشفى السعودي الألماني - صنعاء</h3>
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">{COMPANY_ARABIC_NAME}</h3>
                       <p className="text-sm sm:text-base md:text-lg opacity-90">نقدم خدمات طبية متميزة بمعايير عالمية</p>
                     </div>
                   </div>
@@ -507,12 +507,12 @@ export default function HomePage() {
           </h2>
           <p className="text-base sm:text-lg md:text-2xl lg:text-3xl mb-8 sm:mb-10 md:mb-12 max-w-2xl mx-auto text-white/95 px-2 bg-black/20 rounded-lg p-4">
             فريقنا الطبي المتميز من الأطباء والاستشاريين في انتظارك. احجز موعدك الآن أو اتصل بنا
-            على الرقم المجاني 8000018 للاستفسار والحصول على المعلومات الطبية التي تحتاجها.
+            على الرقم المجاني {COMPANY_PHONE} للاستفسار والحصول على المعلومات الطبية التي تحتاجها.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center px-3 sm:px-0">
             <Link href="/doctors">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="w-full sm:w-auto bg-white dark:bg-card text-green-600 hover:bg-green-50 text-base sm:text-lg md:text-xl font-semibold shadow-xl hover:shadow-2xl hover:shadow-green-500/30 hover:scale-105 transition-all h-12 sm:h-14 px-8 sm:px-10"
                 aria-label="احجز موعدك مع أفضل الأطباء"
               >
@@ -520,14 +520,14 @@ export default function HomePage() {
                 <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
               </Button>
             </Link>
-            <a href="tel:8000018" className="w-full sm:w-auto">
+            <a href={`tel:${COMPANY_PHONE}`} className="w-full sm:w-auto">
               <Button
                 size="lg"
                 variant="outline"
                 className="w-full sm:w-auto border-2 border-white/90 text-white hover:bg-white/20 text-base sm:text-lg md:text-xl font-medium backdrop-blur-sm h-12 sm:h-14 px-8 sm:px-10 hover:scale-105 transition-all"
-                aria-label="اتصل بالمستشفى على الرقم 8000018"
+                aria-label={`اتصل بالمستشفى على الرقم ${COMPANY_PHONE}`}
               >
-                اتصل: 8000018
+                اتصل: {COMPANY_PHONE}
               </Button>
             </a>
           </div>

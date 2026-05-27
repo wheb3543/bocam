@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { APP_LOGO, COMPANY_PHONE, COMPANY_ARABIC_NAME, COMPANY_NAME } from "@/const";
 
 interface PrintReceiptProps {
   data: {
@@ -14,12 +15,13 @@ interface PrintReceiptProps {
   userName: string; // اسم المستخدم الذي طبع السند
 }
 
-// دالة لتنسيق رقم تسلسلي بسيط (SGH-2026-001)
+// دالة لتنسيق رقم تسلسلي بسيط (تستخدم كود الشركة)
 // سيتم توليد الرقم الفعلي من السيرفر لضمان التسلسل الصحيح
 function formatReceiptNumber(sequenceNumber: number): string {
   const year = new Date().getFullYear();
   const paddedNumber = String(sequenceNumber).padStart(3, '0');
-  return `SGH-${year}-${paddedNumber}`;
+  const companyCode = COMPANY_NAME.substring(0, 3).toUpperCase();
+  return `${companyCode}-${year}-${paddedNumber}`;
 }
 
 // معلومات إضافية للطباعة مع رقم تسلسلي
@@ -75,8 +77,8 @@ export function printReceipt(data: PrintReceiptProps["data"], userName: string) 
   const singleReceiptHTML = `
     <div class="receipt">
       <div class="header">
-        <img src="/sgh-logo-full.png" alt="المستشفى السعودي الألماني">
-        <div class="phone">8000018</div>
+        <img src="${APP_LOGO}" alt="${COMPANY_ARABIC_NAME}">
+        <div class="phone">${COMPANY_PHONE}</div>
       </div>
       
       <div class="receipt-number">#${displayNumber}</div>

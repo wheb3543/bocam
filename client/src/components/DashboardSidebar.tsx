@@ -55,6 +55,7 @@ import { trpc } from "@/lib/trpc";
 import { useNotificationSound } from "@/hooks/useNotificationSound";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { APP_TITLE, APP_LOGO, COMPANY_ARABIC_NAME } from "@/const";
 import {
   DndContext,
   closestCenter,
@@ -622,8 +623,8 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
       {/* Logo */}
       <div className="flex items-center justify-center py-2 border-b border-gray-100 dark:border-gray-700">
         <img
-          src="/icon-72x72.png"
-          alt="المستشفى السعودي الألماني"
+          src={APP_LOGO}
+          alt={COMPANY_ARABIC_NAME}
           className="h-8 w-8 object-contain"
         />
       </div>
@@ -1100,12 +1101,12 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
           <div className="flex items-center gap-3">
             <img
-              src="/icon-72x72.png"
-              alt="المستشفى السعودي الألماني"
+              src={APP_LOGO}
+              alt={COMPANY_ARABIC_NAME}
               className="h-9 w-9 object-contain"
             />
             <div>
-              <h2 className="text-sm font-bold text-foreground dark:text-gray-100">المستشفى السعودي الألماني</h2>
+              <h2 className="text-sm font-bold text-foreground dark:text-gray-100">{COMPANY_ARABIC_NAME}</h2>
               <p className="text-[10px] text-muted-foreground dark:text-muted-foreground">لوحة التحكم</p>
             </div>
           </div>

@@ -171,7 +171,7 @@ export const ENV = {
 ### المرحلة 1: Code Decoupling (الأولوية القصوى)
 
 **المدة:** 2-3 أسابيع  
-**الحالة:** جاهزة للبدء  
+**الحالة:** مكتملة بنجاح ✅ - بتاريخ 2026-05-27  
 **الهدف:** استخراج جميع البيانات الثابتة وجعلها ديناميكية
 
 #### 1.1 التحليل الشامل للكود
@@ -264,6 +264,8 @@ OWNER_NAME=Your Name
 VITE_APP_TITLE=المستشفى السعودي الألماني - صنعاء
 VITE_APP_LOGO=/SGHHospitalColorBilingual.png
 PORT=3000
+# ملاحظة: إذا كان البورت 3000 مشغول، سيقوم النظام تلقائياً بالتحويل إلى بورت متاح آخر (مثل 3004)
+# يمكنك تحديد بورت معين عبر تعديل متغير PORT في .env
 NODE_ENV=development
 
 # License Configuration (Internal - not manually set)
@@ -562,7 +564,7 @@ const licenseKey = generateLicenseKey({
 console.log('License Key:', licenseKey);
 ```
 
-3. إنشاء أمر npm:
+3. إنشاء أوامر pnpm:
 ```json
 {
   "scripts": {
@@ -575,7 +577,7 @@ console.log('License Key:', licenseKey);
 **المخرجات:**
 - أداة توليد أزواج المفاتيح
 - أداة توليد License Keys
-- أوامر npm سهلة الاستخدام
+- أوامر pnpm سهلة الاستخدام
 
 #### 2.3 تطبيق التحقق المحلي
 
@@ -1119,7 +1121,7 @@ export async function sendHeartbeat() {
       expiryDate: license.expiryDate,
       features: license.features,
       timestamp: Date.now(),
-      version: process.env.npm_package_version || '1.0.0'
+      version: process.env.npm_package_version || process.env.PACKAGE_VERSION || '1.0.0'
     };
     
     await fetch(HEARTBEAT_URL, {
@@ -1329,7 +1331,7 @@ command -v mysql >/dev/null 2>&1 || { echo "MySQL is required"; exit 1; }
 
 # Install dependencies
 echo "Installing dependencies..."
-npm install
+pnpm install
 
 # Setup environment
 echo "Setting up environment..."
@@ -1338,7 +1340,7 @@ echo "Please edit .env with your configuration"
 
 # Setup database
 echo "Setting up database..."
-npm run db:push
+pnpm db:push
 
 # Generate hardware ID
 echo "Your Hardware ID:"
