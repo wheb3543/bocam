@@ -11,6 +11,7 @@ export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
   user: User | null;
+  features?: Record<string, boolean>;
 };
 
 // Helper to parse cookies from header

@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  bocam-crm:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: bocam-crm
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - OAUTH_SERVER_URL=${OAUTH_SERVER_URL}
+      - VITE_OAUTH_PORTAL_URL=${VITE_OAUTH_PORTAL_URL}
+      - VITE_APP_ID=${VITE_APP_ID}
+      - CENTRAL_ACTIVATION_URL=${CENTRAL_ACTIVATION_URL}
+      - COMPANY_NAME=${COMPANY_NAME}
+      - COMPANY_ARABIC_NAME=${COMPANY_ARABIC_NAME}
+      - COMPANY_ENGLISH_NAME=${COMPANY_ENGLISH_NAME}
+      - COMPANY_PHONE=${COMPANY_PHONE}
+      - COMPANY_EMAIL=${COMPANY_EMAIL}
+      - WHATSAPP_ACCESS_TOKEN=${WHATSAPP_ACCESS_TOKEN}
+      - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID}
+      - WHATSAPP_BUSINESS_ACCOUNT_ID=${WHATSAPP_BUSINESS_ACCOUNT_ID}
+      - WHATSWEBHOOK_VERIFY_TOKEN=${WHATSWEBHOOK_VERIFY_TOKEN}
+      - META_PIXEL_ID=${META_PIXEL_ID}
+      - META_ACCESS_TOKEN=${META_ACCESS_TOKEN}
+    volumes:
+      # Mount license file
+      - ../license.json:/app/license.json:ro
+      # Mount license keys
+      - ../license-keys:/app/license-keys:ro
+      # Mount last successful run for heartbeat
+      - ../.last-successful-run:/app/.last-successful-run
+    networks:
+      - bocam-network
+    depends_on:
+      - mysql
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/trpc/license.getInfo', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mysql:
+    image: mysql:8.0
+    container_name: bocam-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../server/drizzle/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - bocam-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Optional: Redis for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: bocam-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - bocam-network
+
+  # Optional: Nginx reverse proxy
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: bocam-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - bocam-crm
+  #   networks:
+  #     - bocam-network
+
+networks:
+  bocam-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local

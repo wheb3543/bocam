@@ -142,12 +142,10 @@ export const checkFeatures = (features: string[]) => {
       return acc;
     }, {} as Record<string, boolean>);
 
-    return next({
-      ctx: {
-        ...ctx,
-        features: featureStatus,
-      },
-    });
+    // Add features to context
+    ctx.features = featureStatus;
+
+    return next();
   };
 };
 
