@@ -12,6 +12,7 @@ import { createWhatsAppSseRouter } from "../whatsappSse";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { initializeLicense } from "./license";
 // import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -34,6 +35,9 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  // Initialize license validation (Kill Switch)
+  initializeLicense();
+  
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads

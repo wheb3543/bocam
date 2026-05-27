@@ -46,6 +46,7 @@ import { pwaRouter } from "./routers/pwa";
 import { metaSyncRouter } from "./routers/metaSync";
 import { authRouter } from "./routers/auth";
 import { generatePDF, type ExportMetadata } from "./pdfService";
+import { licenseRouter } from "./routers/license";
 
 export const appRouter = router({
   campaigns: campaignsRouter,
@@ -177,6 +178,9 @@ export const appRouter = router({
   }),
   
   auth: authRouter,
+
+  // License management
+  license: licenseRouter,
 
   // Leads management
   leads: leadsRouter,

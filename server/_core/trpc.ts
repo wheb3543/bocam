@@ -43,3 +43,6 @@ export const adminProcedure = t.procedure.use(
     });
   }),
 );
+
+// Export feature middleware
+export * from "./featureMiddleware";
