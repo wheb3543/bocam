@@ -450,7 +450,7 @@ pnpm dev
 ### المرحلة 2: نظام الترخيص المحلي
 
 **المدة:** 3-4 أسابيع  
-**الحالة:** تعتمد على إكمال المرحلة 1  
+**الحالة:** مكتملة بنجاح ✅ - بتاريخ 2026-05-27  
 **الهدف:** تطبيق نظام ترخيص محلي مشفر يعمل بدون إنترنت
 
 #### 2.1 تصميم نظام الترخيص
@@ -846,6 +846,67 @@ pnpm license:generate <hardwareId> <expiryTimestamp> whatsapp,reports,patient_po
 - تقرير اختبار شامل
 - تأكيد عمل نظام الترخيص
 - وثائق الاستخدام
+
+#### 2.6 الملخص التنفيذي للمرحلة 2
+
+**تم تنفيذ المرحلة 2 بنجاح في 2026-05-27**
+
+**المكونات المُنفذة:**
+1. **أدوات CLI:**
+   - `tools/generate-key-pair.ts` - توليد زوج مفاتيح RSA-2048
+   - `tools/generate-license-key.ts` - توليد تراخيص موقعة
+   - `tools/get-hardware-id.ts` - استخراج معرف العتاد
+
+2. **نظام التحقق من الترخيص (`server/_core/license.ts`):**
+   - التحقق من التوقيع الرقمي RSA-PSS مع SHA-256
+   - التحقق من تطابق Hardware-ID
+   - التحقق من تاريخ الانتهاء
+   - Kill Switch يوقف السيرفر عند فشل التحقق
+   - دعم Feature Flags
+
+3. **Feature Middleware (`server/_core/featureMiddleware.ts`):**
+   - `requireWhatsAppFeature()` - حماية إجراءات WhatsApp
+   - `requireReportsFeature()` - حماية التقارير
+   - `requireCampsFeature()` - حماية إدارة المخيمات
+   - `requireOffersFeature()` - حماية إدارة العروض
+
+4. **tRPC Router (`server/_core/licenseRouter.ts`):**
+   - نقطة نهاية للاستعلام عن معلومات الترخيص
+   - نقطة نهاية لاستخراج Hardware-ID
+
+5. **تكامل Routers:**
+   - تم حماية جميع الإجراءات الحساسة في:
+     * `server/routers/whatsapp.ts`
+     * `server/routers/reports.ts`
+     * `server/routers/camps.ts`
+     * `server/routers/offers.ts`
+
+**اختبارات التحقق:**
+- ✅ توليد زوج المفاتيح بنجاح
+- ✅ استخراج Hardware-ID: 086D41DCC716
+- ✅ توليد ترخيص صالح (سنة واحدة)
+- ✅ السيرفر يعمل مع ترخيص صالح
+- ✅ Kill Switch يعمل عند التلاعب بالترخيص
+- ✅ Type check و Build بدون أخطاء
+
+**الملفات المُضافة:**
+- `tools/generate-key-pair.ts`
+- `tools/generate-license-key.ts`
+- `tools/get-hardware-id.ts`
+- `server/_core/license.ts`
+- `server/_core/licenseRouter.ts`
+- `server/_core/featureMiddleware.ts`
+- `license-keys/` (مُضاف إلى .gitignore)
+- `license-files/` (لتخزين التراخيص المُولدة)
+
+**الملفات المُعدلة:**
+- `.gitignore` - إضافة license-keys/
+- `package.json` - إضافة أوامر الترخيص
+- `server/_core/license.ts` - تحميل المفتاح العام من ملف
+- `server/routers/whatsapp.ts` - إضافة Feature Middleware
+- `server/routers/reports.ts` - إضافة Feature Middleware
+- `server/routers/camps.ts` - إضافة Feature Middleware
+- `server/routers/offers.ts` - إضافة Feature Middleware
 
 ---
 
