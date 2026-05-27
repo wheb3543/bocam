@@ -13,5 +13,11 @@ backups/
 node_modules/
 .vite/
 dist/
-# License keys - keep private key secure
+# License files - keep private
 license-keys/
+license.json
+license-files/
+
+# Heartbeat system files - keep for local tracking
+.last-successful-run
+.heartbeat-log
