@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod';
-import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { publicProcedure, protectedProcedure, router, requireOffersFeature } from '../_core/trpc';
 import { getDb } from '../db';
 import { offers } from '../../drizzle/schema';
 import { eq, and, isNotNull } from 'drizzle-orm';
@@ -116,6 +116,7 @@ export const offersRouter = router({
    * إنشاء عرض جديد (مسؤول فقط)
    */
   create: protectedProcedure
+    .use(requireOffersFeature())
     .input(offerInputSchema)
     .mutation(async ({ input, ctx }) => {
       // Verify user is admin
@@ -178,6 +179,7 @@ export const offersRouter = router({
    * تحديث عرض موجود (مسؤول فقط)
    */
   update: protectedProcedure
+    .use(requireOffersFeature())
     .input(
       z.object({
         id: z.number(),
@@ -241,6 +243,7 @@ export const offersRouter = router({
    * إلغاء تفعيل عرض (مسؤول فقط)
    */
   deactivate: protectedProcedure
+    .use(requireOffersFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       // Verify user is admin
@@ -272,6 +275,7 @@ export const offersRouter = router({
    * حذف عرض (مسؤول فقط)
    */
   delete: protectedProcedure
+    .use(requireOffersFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       // Verify user is admin

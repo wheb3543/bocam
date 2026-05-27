@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod';
-import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { publicProcedure, protectedProcedure, router, requireCampsFeature } from '../_core/trpc';
 import { getDb } from '../db';
 import { camps, campRegistrations } from '../../drizzle/schema';
 import { eq, and, desc, gte, lte, sql } from 'drizzle-orm';
@@ -225,6 +225,7 @@ export const campsRouter = router({
    * إنشاء مخيم جديد (للإدارة فقط)
    */
   create: protectedProcedure
+    .use(requireCampsFeature())
     .input(campInputSchema)
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -284,6 +285,7 @@ export const campsRouter = router({
    * تحديث مخيم (للإدارة فقط)
    */
   update: protectedProcedure
+    .use(requireCampsFeature())
     .input(z.object({
       id: z.number(),
       ...campInputSchema.shape,
@@ -360,6 +362,7 @@ export const campsRouter = router({
    * حذف مخيم (للإدارة فقط)
    */
   delete: protectedProcedure
+    .use(requireCampsFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -379,6 +382,7 @@ export const campsRouter = router({
    * تبديل حالة نشاط المخيم (للإدارة فقط)
    */
   toggleActive: protectedProcedure
+    .use(requireCampsFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();

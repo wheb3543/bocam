@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { router, protectedProcedure } from "../_core/trpc";
+import { router, protectedProcedure, requireReportsFeature } from "../_core/trpc";
 import { getDb } from "../db";
 import { appointments, campRegistrations, offerLeads, leads, camps, offers, doctors } from "../../drizzle/schema";
 import { and, between, count, eq, gte, lte, sql } from "drizzle-orm";
@@ -20,6 +20,7 @@ export const reportsRouter = router({
    * Returns statistics for appointments, camp registrations, and offer leads
    */
   getBookingsReport: protectedProcedure
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
       const db = await getDb();
@@ -92,6 +93,7 @@ export const reportsRouter = router({
    * Returns statistics for new customer registrations
    */
   getNewLeadsReport: protectedProcedure
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
       const db = await getDb();
@@ -183,6 +185,7 @@ export const reportsRouter = router({
    * Returns conversion statistics from leads to bookings
    */
   getConversionRatesReport: protectedProcedure
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
       const db = await getDb();
@@ -321,6 +324,7 @@ export const reportsRouter = router({
    * Returns revenue and profit statistics
    */
   getRevenueReport: protectedProcedure
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
       // This is a placeholder for future revenue tracking
@@ -338,6 +342,7 @@ export const reportsRouter = router({
    * Get detailed bookings list for export
    */
   getDetailedBookingsList: protectedProcedure
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
       const db = await getDb();

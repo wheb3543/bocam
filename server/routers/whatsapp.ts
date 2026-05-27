@@ -1,4 +1,4 @@
-import { protectedProcedure, publicProcedure, router, adminProcedure } from "../_core/trpc";
+import { protectedProcedure, publicProcedure, router, adminProcedure, requireWhatsAppFeature } from "../_core/trpc";
 import * as db from "../db";
 import { meta } from "../MetaApiService";
 import { z } from "zod";
@@ -427,6 +427,7 @@ export const whatsappRouter = router({
       }),
 
     send: protectedProcedure
+      .use(requireWhatsAppFeature())
       .input(
         z.object({
           conversationId: z.number(),
@@ -1026,6 +1027,7 @@ sendTypingIndicator: protectedProcedure
     }),
 
   sendBroadcast: protectedProcedure
+    .use(requireWhatsAppFeature())
     .input(
       z.object({
         message: z.string().min(1).max(4096),

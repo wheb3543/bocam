@@ -13,3 +13,5 @@ backups/
 node_modules/
 .vite/
 dist/
+# License keys - keep private key secure
+license-keys/
