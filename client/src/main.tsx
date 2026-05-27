@@ -18,44 +18,35 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  window.location.href = getLocalLoginUrl();
+  const currentPath = window.location.pathname;
+  const adminLoginUrl = getLocalLoginUrl();
+  const loginUrl = getLoginUrl();
+
+  // Redirect to login page if not already there
+  if (currentPath !== adminLoginUrl && currentPath !== '/login') {
+    window.location.href = loginUrl;
+  }
 };
 
-queryClient.getQueryCache().subscribe(event => {
-  if (event.type === "updated" && event.action.type === "error") {
-    const error = event.query.state.error;
-    redirectToLoginIfUnauthorized(error);
-    console.error("[API Query Error]", error);
-  }
-});
+trpc.client.setLink(() =>
+  httpBatchLink({
+    url: '/api/trpc',
+    headers: () => {
+      const cookie = document.cookie;
+      return {
+        cookie,
+      };
+    },
+  })
+);
 
-queryClient.getMutationCache().subscribe(event => {
-  if (event.type === "updated" && event.action.type === "error") {
-    const error = event.mutation.state.error;
-    redirectToLoginIfUnauthorized(error);
-    console.error("[API Mutation Error]", error);
-  }
-});
-
-const trpcClient = trpc.createClient({
-  links: [
-    httpBatchLink({
-      url: "/api/trpc",
-      transformer: superjson,
-      fetch(input, init) {
-        return globalThis.fetch(input, {
-          ...(init ?? {}),
-          credentials: "include",
-        });
-      },
-    }),
-  ],
+// Global error handler for unauthorized errors
+trpc.useQuery(['example'], () => ({ data: null }), {
+  onError: redirectToLoginIfUnauthorized,
 });
 
 createRoot(document.getElementById("root")!).render(
-  <trpc.Provider client={trpcClient} queryClient={queryClient}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </trpc.Provider>
+  <QueryClientProvider client={queryClient}>
+    <App />
+  </QueryClientProvider>
 );
