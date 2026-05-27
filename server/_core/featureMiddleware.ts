@@ -13,7 +13,7 @@
 
 import { TRPCError } from "@trpc/server";
 import { isFeatureEnabled } from "./license";
-import { Context } from "./context";
+import type { TrpcContext } from "./context";
 
 /**
  * Feature requirement options
@@ -40,10 +40,12 @@ export const requireFeature = (
   const featureArray = Array.isArray(features) ? features : [features];
   const { requireAll = true, errorMessage } = options;
 
-  return ({
+  return async ({
     ctx,
+    next,
   }: {
-    ctx: Context;
+    ctx: TrpcContext;
+    next: () => Promise<any>;
   }) => {
     if (requireAll) {
       // All features must be enabled
@@ -68,7 +70,7 @@ export const requireFeature = (
       }
     }
 
-    return { ctx };
+    return next();
   };
 };
 
@@ -128,22 +130,24 @@ export const requireAllFeatures = () => requireFeature("*");
  * @returns tRPC middleware
  */
 export const checkFeatures = (features: string[]) => {
-  return ({
+  return async ({
     ctx,
+    next,
   }: {
-    ctx: Context;
+    ctx: TrpcContext;
+    next: () => Promise<any>;
   }) => {
     const featureStatus = features.reduce((acc, feature) => {
       acc[feature] = isFeatureEnabled(feature);
       return acc;
     }, {} as Record<string, boolean>);
 
-    return {
+    return next({
       ctx: {
         ...ctx,
         features: featureStatus,
       },
-    };
+    });
   };
 };
 
@@ -163,14 +167,16 @@ export const requireFeatureWithAdminBypass = (
   const featureArray = Array.isArray(features) ? features : [features];
   const { requireAll = true, errorMessage } = options;
 
-  return ({
+  return async ({
     ctx,
+    next,
   }: {
-    ctx: Context;
+    ctx: TrpcContext;
+    next: () => Promise<any>;
   }) => {
     // Admin bypass
     if (ctx.user?.role === "admin") {
-      return { ctx };
+      return next();
     }
 
     if (requireAll) {
@@ -194,6 +200,6 @@ export const requireFeatureWithAdminBypass = (
       }
     }
 
-    return { ctx };
+    return next();
   };
 };

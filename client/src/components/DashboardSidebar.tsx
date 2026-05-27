@@ -53,6 +53,7 @@ import {
 import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
 import { useNotificationSound } from "@/hooks/useNotificationSound";
+import { useLicense } from "@/hooks/useLicense";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { APP_TITLE, APP_LOGO, COMPANY_ARABIC_NAME } from "@/const";
@@ -81,6 +82,7 @@ interface NavItem {
   badge?: number;
   hasDot?: boolean;
   id: string; // unique identifier for customization
+  feature?: string; // feature required for this item
 }
 
 interface NavGroup {
@@ -116,12 +118,14 @@ const allNavItems: NavItem[] = [
     title: "عروض العملاء",
     href: "/dashboard/bookings/offer-leads",
     icon: Gift,
+    feature: "offers",
   },
   {
     id: "camp-registrations",
     title: "تسجيلات المخيمات",
     href: "/dashboard/bookings/camp-registrations",
     icon: Tent,
+    feature: "camps",
   },
   {
     id: "customers",
@@ -140,12 +144,14 @@ const allNavItems: NavItem[] = [
     title: "التقارير",
     href: "/dashboard/reports",
     icon: BarChart3,
+    feature: "reports",
   },
   {
     id: "whatsapp",
     title: "واتساب",
     href: "/dashboard/whatsapp",
     icon: MessageCircle,
+    feature: "whatsapp",
   },
   {
     id: "management",
@@ -176,6 +182,7 @@ const allNavItems: NavItem[] = [
     title: "التحليلات",
     href: "/dashboard/analytics",
     icon: BarChart3,
+    feature: "reports",
   },
 ];
 
@@ -212,11 +219,11 @@ const allToolsGroups: NavGroup[] = [
       { id: "bookings", title: "الحجوزات", href: "/dashboard/bookings", icon: FolderKanban },
       { id: "leads", title: "العملاء المحتملين", href: "/dashboard/bookings/leads", icon: UserCheck },
       { id: "appointments", title: "مواعيد الأطباء", href: "/dashboard/bookings/appointments", icon: Calendar },
-      { id: "offer-leads", title: "عروض العملاء", href: "/dashboard/bookings/offer-leads", icon: Gift },
-      { id: "camp-registrations", title: "تسجيلات المخيمات", href: "/dashboard/bookings/camp-registrations", icon: Tent },
+      { id: "offer-leads", title: "عروض العملاء", href: "/dashboard/bookings/offer-leads", icon: Gift, feature: "offers" },
+      { id: "camp-registrations", title: "تسجيلات المخيمات", href: "/dashboard/bookings/camp-registrations", icon: Tent, feature: "camps" },
       { id: "customers", title: "ملفات العملاء", href: "/dashboard/bookings/customers", icon: Contact },
       { id: "tasks", title: "المهام", href: "/dashboard/bookings/tasks", icon: CheckSquare },
-      { id: "camp-stats", title: "إحصائيات المخيمات", href: "/dashboard/camp-stats", icon: Database },
+      { id: "camp-stats", title: "إحصائيات المخيمات", href: "/dashboard/camp-stats", icon: Database, feature: "camps" },
     ],
   },
   {
@@ -232,19 +239,19 @@ const allToolsGroups: NavGroup[] = [
     label: "التواصل",
     icon: MessageCircle,
     items: [
-      { id: "whatsapp", title: "واتساب", href: "/dashboard/whatsapp", icon: MessageCircle },
-      { id: "whatsapp-templates", title: "قوالب واتساب", href: "/dashboard/whatsapp/templates", icon: FileText },
-      { id: "whatsapp-connection", title: "اتصال واتساب", href: "/dashboard/whatsapp/connection", icon: Cloud },
-      { id: "whatsapp-auto-reply", title: "الردود التلقائية", href: "/dashboard/whatsapp/auto-reply", icon: SettingsIcon },
-      { id: "whatsapp-analytics", title: "تحليلات واتساب", href: "/dashboard/whatsapp/analytics", icon: TrendingUp },
-      { id: "whatsapp-broadcast", title: "بث واتساب", href: "/dashboard/whatsapp/broadcast", icon: Radio },
-      { id: "whatsapp-compliance", title: "الامتثال والأمان", href: "/dashboard/whatsapp/compliance", icon: Shield },
-      { id: "whatsapp-appointments", title: "سجل الإشعارات", href: "/dashboard/whatsapp/appointments", icon: Smartphone },
-      { id: "whatsapp-integration", title: "تكامل واتساب", href: "/dashboard/whatsapp/integration", icon: Cloud },
-      { id: "whatsapp-costs", title: "تكاليف واتساب", href: "/dashboard/whatsapp/costs", icon: TrendingUp },
-      { id: "whatsapp-orders", title: "طلبات واتساب", href: "/dashboard/whatsapp/orders", icon: ShoppingCart },
-      { id: "whatsapp-products", title: "منتجات واتساب", href: "/dashboard/whatsapp/products", icon: Package },
-      { id: "whatsapp-referrals", title: "إحالات واتساب", href: "/dashboard/whatsapp/referrals", icon: Megaphone },
+      { id: "whatsapp", title: "واتساب", href: "/dashboard/whatsapp", icon: MessageCircle, feature: "whatsapp" },
+      { id: "whatsapp-templates", title: "قوالب واتساب", href: "/dashboard/whatsapp/templates", icon: FileText, feature: "whatsapp" },
+      { id: "whatsapp-connection", title: "اتصال واتساب", href: "/dashboard/whatsapp/connection", icon: Cloud, feature: "whatsapp" },
+      { id: "whatsapp-auto-reply", title: "الردود التلقائية", href: "/dashboard/whatsapp/auto-reply", icon: SettingsIcon, feature: "whatsapp" },
+      { id: "whatsapp-analytics", title: "تحليلات واتساب", href: "/dashboard/whatsapp/analytics", icon: TrendingUp, feature: "whatsapp" },
+      { id: "whatsapp-broadcast", title: "بث واتساب", href: "/dashboard/whatsapp/broadcast", icon: Radio, feature: "whatsapp" },
+      { id: "whatsapp-compliance", title: "الامتثال والأمان", href: "/dashboard/whatsapp/compliance", icon: Shield, feature: "whatsapp" },
+      { id: "whatsapp-appointments", title: "سجل الإشعارات", href: "/dashboard/whatsapp/appointments", icon: Smartphone, feature: "whatsapp" },
+      { id: "whatsapp-integration", title: "تكامل واتساب", href: "/dashboard/whatsapp/integration", icon: Cloud, feature: "whatsapp" },
+      { id: "whatsapp-costs", title: "تكاليف واتساب", href: "/dashboard/whatsapp/costs", icon: TrendingUp, feature: "whatsapp" },
+      { id: "whatsapp-orders", title: "طلبات واتساب", href: "/dashboard/whatsapp/orders", icon: ShoppingCart, feature: "whatsapp" },
+      { id: "whatsapp-products", title: "منتجات واتساب", href: "/dashboard/whatsapp/products", icon: Package, feature: "whatsapp" },
+      { id: "whatsapp-referrals", title: "إحالات واتساب", href: "/dashboard/whatsapp/referrals", icon: Megaphone, feature: "whatsapp" },
       { id: "messages", title: "الرسائل", href: "/dashboard/messages", icon: MessageSquare },
       { id: "message-settings", title: "إعدادات الرسائل", href: "/dashboard/message-settings", icon: SettingsIcon },
     ],
@@ -263,8 +270,8 @@ const allToolsGroups: NavGroup[] = [
     label: "التقارير والتحليلات",
     icon: BarChart3,
     items: [
-      { id: "reports", title: "التقارير", href: "/dashboard/reports", icon: FileText },
-      { id: "analytics", title: "التحليلات", href: "/dashboard/analytics", icon: BarChart3 },
+      { id: "reports", title: "التقارير", href: "/dashboard/reports", icon: FileText, feature: "reports" },
+      { id: "analytics", title: "التحليلات", href: "/dashboard/analytics", icon: BarChart3, feature: "reports" },
       { id: "bi", title: "تحليلات الأعمال", href: "/dashboard/bi", icon: PieChart },
       { id: "pwa-stats", title: "إحصائيات PWA", href: "/dashboard/pwa-stats", icon: Gauge },
     ],
@@ -425,6 +432,9 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
   // Theme toggle
   const { theme, toggleTheme } = useTheme();
 
+  // License features check
+  const { hasFeature } = useLicense();
+
   // Fetch sidebar badge counts (auto-refresh every 60 seconds)
   const { data: badgeCounts } = trpc.sidebarBadges.useQuery(undefined, {
     refetchInterval: 60_000,
@@ -445,17 +455,26 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
     return mapping[itemId] || 0;
   }, [badgeCounts]);
 
-  // العناصر الرئيسية المعروضة في الشريط الضيق
+  // العناصر الرئيسية المعروضة في الشريط الضيق (مع التحقق من الميزات)
   const primaryNavItems = useMemo(() => {
     return visibleItemIds
       .map(id => allNavItems.find(item => item.id === id))
-      .filter(Boolean) as NavItem[];
-  }, [visibleItemIds]);
+      .filter((item): item is NavItem => item !== undefined)
+      .filter(item => !item.feature || hasFeature(item.feature));
+  }, [visibleItemIds, hasFeature]);
+
+  // تصفية مجموعات الأدوات بناءً على الميزات
+  const filteredToolsGroups = useMemo(() => {
+    return allToolsGroups.map(group => ({
+      ...group,
+      items: group.items.filter(item => !item.feature || hasFeature(item.feature)),
+    })).filter(group => group.items.length > 0);
+  }, [hasFeature]);
 
   // Auto-expand groups that contain the active page
   useEffect(() => {
     const newExpanded: Record<string, boolean> = {};
-    allToolsGroups.forEach(group => {
+    filteredToolsGroups.forEach(group => {
       const hasActive = group.items.some(item => {
         if (item.href === "/dashboard") return currentPath === "/dashboard";
         return currentPath === item.href || currentPath.startsWith(item.href + "/");
@@ -544,8 +563,11 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
   const editOrderedItems = useMemo(() => {
     const checkedItems = editingItemIds
       .map(id => allNavItems.find(item => item.id === id))
-      .filter(Boolean) as NavItem[];
-    const uncheckedItems = allNavItems.filter(item => !editingItemIds.includes(item.id));
+      .filter((item): item is NavItem => item !== undefined)
+      .filter(item => !item.feature || hasFeature(item.feature));
+    const uncheckedItems = allNavItems
+      .filter(item => !editingItemIds.includes(item.id))
+      .filter(item => !item.feature || hasFeature(item.feature));
     return [...checkedItems, ...uncheckedItems];
   }, [editingItemIds]);
 
@@ -608,7 +630,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
   }, []);
 
   // Filter items based on search query
-  const filteredGroups = allToolsGroups.map(group => ({
+  const filteredGroups = filteredToolsGroups.map(group => ({
     ...group,
     items: group.items.filter(item =>
       !searchQuery || item.title.includes(searchQuery)
@@ -1151,7 +1173,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
             </button>
 
             {/* Groups */}
-            {(searchQuery ? filteredGroups : allToolsGroups).map((group, index) => {
+            {(searchQuery ? filteredGroups : filteredToolsGroups).map((group, index) => {
               const isExpanded = expandedGroups[group.label] !== false;
               const hasActiveItem = group.items.some(item => isItemActive(item.href));
 

@@ -88,6 +88,8 @@ const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const BIPage = lazy(() => import("./pages/BIPage"));
 const TrackingSettingsPage = lazy(() => import("./pages/TrackingSettingsPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const FeatureLockedPage = lazy(() => import("./pages/FeatureLockedPage"));
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 function Router() {
@@ -120,6 +122,9 @@ function Router() {
       <Route path={"/unauthorized"} component={Unauthorized} />
       <Route path={"/access-request"} component={AccessRequest} />
       <Route path={"/admin-login"} component={AdminLogin} />
+      <Route path="/feature-locked/:feature">
+        <FeatureLockedPage />
+      </Route>
 
       {/* Admin routes with persistent sidebar */}
       <Route path="/admin">
@@ -149,37 +154,129 @@ function Router() {
             <Route path={"/dashboard/content"} component={ContentManagementPage} />
             <Route path={"/dashboard/users"} component={UsersManagementPage} />
             <Route path={"/dashboard/publishing"} component={PublishingPage} />
-            <Route path={"/dashboard/whatsapp"} component={WhatsAppPage} />
-            <Route path={"/dashboard/whatsapp/whatsapp-dashboard"} component={WhatsAppDashboard} />
-            <Route path={"/dashboard/whatsapp/templates"} component={WhatsAppTemplatesPage} />
-            <Route path={"/dashboard/whatsapp/connection"} component={WhatsAppConnectionPage} />
-            <Route path={"/dashboard/whatsapp/analytics"} component={WhatsAppAnalytics} />
-            <Route path={"/dashboard/whatsapp/broadcast"} component={WhatsAppBroadcast} />
-            <Route path={"/dashboard/whatsapp/auto-reply"} component={WhatsAppAutoReply} />
-            <Route path={"/dashboard/whatsapp/compliance"} component={WhatsAppCompliance} />
-            <Route path={"/dashboard/whatsapp/appointments"} component={WhatsAppAppointments} />
-            <Route path={"/dashboard/whatsapp/integration"} component={WhatsAppIntegration} />
-            <Route path={"/dashboard/whatsapp/account-health"} component={WhatsAppAccountHealthPage} />
-            <Route path={"/dashboard/whatsapp/phone-quality"} component={WhatsAppPhoneQualityPage} />
-            <Route path={"/dashboard/whatsapp/subscriptions"} component={WhatsAppUserSubscriptionsPage} />
-            <Route path={"/dashboard/whatsapp/webhook-inspector"} component={WhatsAppWebhookInspectorPage} />
-            <Route path={"/dashboard/whatsapp/costs"} component={WhatsAppCostsPage} />
-            <Route path={"/dashboard/whatsapp/orders"} component={WhatsAppOrdersPage} />
-            <Route path={"/dashboard/whatsapp/products"} component={WhatsAppProductsPage} />
-            <Route path={"/dashboard/whatsapp/referrals"} component={WhatsAppReferralsPage} />
+            <Route path={"/dashboard/whatsapp"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/whatsapp-dashboard"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppDashboard />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/templates"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppTemplatesPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/connection"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppConnectionPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/analytics"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppAnalytics />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/broadcast"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppBroadcast />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/auto-reply"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppAutoReply />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/compliance"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppCompliance />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/appointments"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppAppointments />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/integration"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppIntegration />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/account-health"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppAccountHealthPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/phone-quality"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppPhoneQualityPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/subscriptions"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppUserSubscriptionsPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/webhook-inspector"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppWebhookInspectorPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/costs"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppCostsPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/orders"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppOrdersPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/products"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppProductsPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/referrals"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppReferralsPage />
+              </ProtectedRoute>
+            </Route>
             <Route path={"/dashboard/messages"} component={MessagesPage} />
             <Route path={"/dashboard/message-settings"} component={MessageSettingsPage} />
-            <Route path={"/dashboard/reports"} component={ReportsPageNew} />
+            <Route path={"/dashboard/reports"}>
+              <ProtectedRoute feature="reports">
+                <ReportsPageNew />
+              </ProtectedRoute>
+            </Route>
             <Route path={"/dashboard/campaigns"} component={CampaignsPage} />
-            <Route path={"/dashboard/analytics"} component={AnalyticsPage} />
+            <Route path={"/dashboard/analytics"}>
+              <ProtectedRoute feature="reports">
+                <AnalyticsPage />
+              </ProtectedRoute>
+            </Route>
             <Route path={"/dashboard/bi"} component={BIPage} />
             <Route path={"/dashboard/tracking-settings"} component={TrackingSettingsPage} />
-            <Route path={"/dashboard/camp-stats"} component={CampStatsPage} />
+            <Route path={"/dashboard/camp-stats"}>
+              <ProtectedRoute feature="camps">
+                <CampStatsPage />
+              </ProtectedRoute>
+            </Route>
             <Route path={"/dashboard/bookings"} component={BookingsManagementPage} />
             <Route path={"/dashboard/bookings/leads"} component={LeadsManagementPage} />
             <Route path={"/dashboard/bookings/appointments"} component={AppointmentsManagementPage} />
-            <Route path={"/dashboard/bookings/offer-leads"} component={OfferLeadsPage} />
-            <Route path={"/dashboard/bookings/camp-registrations"} component={CampRegistrationsPage} />
+            <Route path={"/dashboard/bookings/offer-leads"}>
+              <ProtectedRoute feature="offers">
+                <OfferLeadsPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/bookings/camp-registrations"}>
+              <ProtectedRoute feature="camps">
+                <CampRegistrationsPage />
+              </ProtectedRoute>
+            </Route>
             <Route path={"/dashboard/bookings/customers"} component={CustomersPage} />
             <Route path={"/dashboard/bookings/tasks"} component={TasksPage} />
             <Route path={"/dashboard/teams/digital-marketing"} component={DigitalMarketingTasksPage} />
