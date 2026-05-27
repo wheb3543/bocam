@@ -1,7 +1,11 @@
 import bcrypt from 'bcryptjs';
 import { drizzle } from 'drizzle-orm/mysql2';
-import { users } from './drizzle/schema';
+import mysql from 'mysql2/promise';
+import { users } from './drizzle/schema.ts';
 import { eq } from 'drizzle-orm';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
@@ -11,8 +15,26 @@ async function createAdmin() {
     process.exit(1);
   }
 
+  // Parse connection string to extract components
+  const url = new URL(DATABASE_URL);
+  const host = url.hostname;
+  const port = url.port || '3306';
+  const user = url.username;
+  const password = url.password;
+  const database = url.pathname.slice(1); // Remove leading slash
+
   console.log('🔗 جاري الاتصال بقاعدة البيانات...');
-  const db = drizzle(DATABASE_URL);
+  const connection = mysql.createPool({
+    host,
+    port: parseInt(port),
+    user,
+    password,
+    database,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  });
+  const db = drizzle(connection);
   
   try {
     // Check if admin already exists

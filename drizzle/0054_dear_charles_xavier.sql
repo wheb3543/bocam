@@ -1,1 +1,0 @@
-ALTER TABLE `whatsapp_messages` ADD `sentAt` timestamp;

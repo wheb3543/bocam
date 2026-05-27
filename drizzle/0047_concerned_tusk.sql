@@ -1,2 +1,0 @@
-ALTER TABLE `whatsapp_messages` MODIFY COLUMN `messageType` enum('text','image','document','audio','video','location','template','interactive','contacts','unknown') NOT NULL DEFAULT 'text';--> statement-breakpoint
-ALTER TABLE `whatsapp_messages` ADD `metadata` text;

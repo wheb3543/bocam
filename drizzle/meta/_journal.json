@@ -3,31 +3,10 @@
   "dialect": "mysql",
   "entries": [
     {
-      "idx": 0,
-      "version": "5",
-      "when": 1761875201205,
-      "tag": "0000_smiling_gwen_stacy",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1761875269802,
-      "tag": "0001_bored_steve_rogers",
-      "breakpoints": true
-    },
-    {
       "idx": 2,
       "version": "5",
       "when": 1761978959933,
       "tag": "0002_ancient_overlord",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1761981634209,
-      "tag": "0003_condemned_winter_soldier",
       "breakpoints": true
     },
     {
@@ -425,8 +404,8 @@
     {
       "idx": 60,
       "version": "5",
-      "when": 1778892030052,
-      "tag": "0060_condemned_flatman",
+      "when": 1779838762986,
+      "tag": "0060_overjoyed_mariko_yashida",
       "breakpoints": true
     }
   ]
