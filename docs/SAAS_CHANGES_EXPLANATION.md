@@ -1,81 +1,48 @@
-# شرح التغييرات المطلوبة لنموذج Self-Hosted SaaS
+# شرح التغييرات المطلوبة لنموذج Isolated Instance per Tenant
 
-هذا الملف سيحتوي على شرح التغييرات المطلوبة في المشروع لتحويله إلى نموذج Self-Hosted SaaS.
+هذا الملف يحتوي على شرح التغييرات المطلوبة في المشروع لتحويله إلى نموذج **Isolated Instance per Tenant with Local Cryptographic Licensing**.
 
 ## جدول المحتويات
 
-1. التغييرات في قاعدة البيانات
-2. التغييرات في Client Frontend
-3. التغييرات في Server Backend
-4. قائمة الملفات المحددة للتعديل
+1. معمارية النظام
+2. التغييرات في قاعدة البيانات
+3. التغييرات في Client Frontend
+4. التغييرات في Server Backend
+5. قائمة الملفات المحددة للتعديل
+
+---
+
+## معمارية النظام
+
+### المعمارية المستهدفة: Isolated Instance per Tenant
+
+**المبدأ الأساسي:**
+- كل مستشفى أو عميل يحصل على نسخة كود معزولة تماماً
+- قاعدة بيانات محلية (Standalone/Localized) على استضافة العميل
+- لا توجد قاعدة بيانات مركزية (No Centralized DB)
+- كل نسخة تعمل على قاعدة بيانات منفصلة تماماً
+- الجداول نظيفة ومجردة (White-Label Core) بدون tenantId
+- الهوية تتحدد عبر ملفات .env والإعدادات المحلية
+
+**ملاحظة هامة:** 
+- المشروع الحالي لا يحتوي على tenantId في الجداول - هذا صحيح ومقصود
+- لا نحتاج لإزالة أي جداول أو حقول tenantId لأننا لم نكن نستخدم multi-tenant architecture
+- التغييرات المطلوبة هي إضافة نظام الترخيص المحلي وفصل البيانات الثابتة
 
 ---
 
 ## التغييرات في قاعدة البيانات
 
-### المعمارية الجديدة: Single-Tenant Architecture
+### 1. التأكد من عدم وجود tenantId
 
-**المبدأ الأساسي:**
-- قاعدة بيانات محلية (Standalone/Localized) على استضافة العميل
-- لا توجد قاعدة بيانات مركزية (No Centralized DB)
-- كل نسخة تعمل على قاعدة بيانات منفصلة تماماً
-- إزالة عمود tenantId من جميع الجداول
-- التثبيت التلقائي للجداول عند بدء السيرفر (Auto-Migrations on Startup)
+**الوضع الحالي:**
+- المشروع لا يحتوي على tenantId في الجداول ✅
+- لا توجد جداول multi-tenant ✅
+- الجداول نظيفة ومجردة (White-Label Core) ✅
 
-### 1. إزالة جداول Multi-Tenant
+**لا تغيير مطلوب في هذا الجزء** - المشروع مصمم بشكل صحيح للمعمارية الجديدة.
 
-**الجداول التي يجب حذفها:**
-```typescript
-// حذف هذه الجداول من drizzle/schema.ts
-export const tenants = mysqlTable('tenants', { ... }); // حذف
-export const tenantFeatures = mysqlTable('tenantFeatures', { ... }); // حذف
-export const tenantConfig = mysqlTable('tenantConfig', { ... }); // حذف
-```
-
-### 2. إزالة tenantId من جميع الجداول
-
-**قبل:**
-```typescript
-export const leads = mysqlTable('leads', {
-  id: serial('id').primaryKey(),
-  tenantId: varchar('tenantId', { length: 255 }).notNull(), // إزالة
-  name: varchar('name', { length: 255 }).notNull(),
-  phone: varchar('phone', { length: 20 }).notNull(),
-  // ... باقي الحقول
-}, (table) => ({
-  tenantIdIdx: index('tenantId_idx').on(table.tenantId), // إزالة
-}));
-```
-
-**بعد:**
-```typescript
-export const leads = mysqlTable('leads', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
-  phone: varchar('phone', { length: 20 }).notNull(),
-  // ... باقي الحقول
-});
-```
-
-**الجداول التي يجب تعديلها:**
-- `leads` - العملاء المحتملين
-- `appointments` - المواعيد
-- `users` - المستخدمين
-- `doctors` - الأطباء
-- `offers` - العروض
-- `camps` - المعسكرات
-- `offerLeads` - عملاء محتملين للعروض
-- `campRegistrations` - تسجيلات المعسكرات
-- `customers` - العملاء
-- `whatsappConversations` - محادثات WhatsApp
-- `whatsappMessages` - رسائل WhatsApp
-- `tasks` - المهام
-- `comments` - التعليقات
-- `auditLogs` - سجلات التدقيق
-- `savedFilters` - الفلاتر المحفوظة
-- `sharedTemplates` - القوالب المشتركة
-- `userPreferences` - تفضيلات المستخدم
-- `accessRequests` - طلبات الوصول
+### 2. Auto-Migrations on Startup
 
 ### 3. Auto-Migrations on Startup
 

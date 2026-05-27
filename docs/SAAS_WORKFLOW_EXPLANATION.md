@@ -1,13 +1,31 @@
 # شرح آلية العمل بعد التغييرات
 
-هذا الملف سيحتوي على شرح آلية عمل النظام بعد تحويله إلى نموذج Self-Hosted SaaS.
+هذا الملف يحتوي على شرح آلية عمل النظام بعد تحويله إلى نموذج **Isolated Instance per Tenant with Local Cryptographic Licensing**.
 
 ## جدول المحتويات
 
-1. آلية التثبيت والتشغيل (Installation & Startup)
-2. آلية التحقق من الترخيص
-3. آلية التحقق من الميزات
-4. تدفق البيانات بين Client و Server
+1. معمارية النظام
+2. آلية التثبيت والتشغيل (Installation & Startup)
+3. آلية الترخيص والحماية (Licensing & Security)
+4. آلية التحقق من الميزات (Feature Validation)
+5. Silent Heartbeat (اختياري)
+6. تدفق البيانات بين Client و Server
+
+---
+
+## معمارية النظام
+
+**المعمارية المستخدمة:**
+- Isolated Instance per Tenant / Database per Tenant
+- كل عميل = نسخة كود معزولة + قاعدة بيانات مستقلة
+- الترخيص محلي بالكامل (Local Cryptographic Licensing)
+- يعمل بدون إنترنت (Offline-First)
+
+**المزايا:**
+- عزل كامل للبيانات والأداء
+- عمل بدون إنترنت
+- أمان عالي عبر التشفير
+- سهولة النشر والصيانة
 
 ---
 
@@ -106,90 +124,169 @@ export async function getDb() {
 
 ---
 
-## آلية التحقق من الترخيص
+## آلية الترخيص والحماية (Licensing & Security)
 
-### 1. عند بدء التطبيق (Client-side)
+### مبدأ الترخيص المحلي المشفر
 
-**الخطوة 1: تحميل config.json**
+**الهدف:** نظام ترخيص يعمل بدون إنترنت، يعتمد على Hardware-ID وتشفير صارم.
+
+**المبدأ:**
+- عند تثبيت النسخة، يقرأ النظام معرّفات الجهاز الثابتة (Hardware-ID / MAC Address)
+- يتم دمج هذا المعرّف مع تاريخ انتهاء الاشتراك
+- يتم تشفيرهما لتوليد مفتاح ترخيص (License Key) موضع في ملف license.json
+- السيرفر المركزي يقوم فقط بـ Silent Heartbeat عند توفر الإنترنت
+- Kill Switch يعمل محلياً بناءً على فك تشفير المفتاح وقراءة عتاد الجهاز
+
+---
+
+### 1. توليد مفتاح الترخيص (License Key Generation)
+
+**أداة CLI لتوليد المفاتيح:**
+```typescript
+// tools/generate-license-key.ts
+import crypto from 'crypto';
+
+interface LicenseData {
+  hardwareId: string;
+  expiryDate: number;
+  features: string[];
+}
+
+export function generateLicenseKey(data: LicenseData, privateKey: string): string {
+  const payload = JSON.stringify({
+    hid: data.hardwareId,
+    exp: data.expiryDate,
+    feat: data.features
+  });
+  
+  const signature = crypto.sign(
+    'SHA256',
+    Buffer.from(payload),
+    privateKey
+  );
+  
+  return Buffer.from(JSON.stringify({
+    payload,
+    signature: signature.toString('base64')
+  })).toString('base64');
+}
+```
+
+### 2. التحقق المحلي من الترخيص (Local License Validation)
+
+**عند بدء السيرفر:**
+```typescript
+// server/_core/license.ts
+import crypto from 'crypto';
+
+interface LicenseInfo {
+  hardwareId: string;
+  expiryDate: number;
+  features: string[];
+}
+
+export async function validateLicense(): Promise<LicenseInfo | null> {
+  try {
+    // قراءة ملف license.json
+    const licensePath = path.join(process.cwd(), 'license.json');
+    const licenseData = JSON.parse(fs.readFileSync(licensePath, 'utf-8'));
+    
+    // فك تشفير المفتاح
+    const decoded = JSON.parse(Buffer.from(licenseData.key, 'base64').toString());
+    const payload = JSON.parse(decoded.payload);
+    const signature = Buffer.from(decoded.signature, 'base64');
+    
+    // التحقق من التوقيع
+    const isValid = crypto.verify(
+      'SHA256',
+      Buffer.from(payload),
+      publicKey,
+      signature
+    );
+    
+    if (!isValid) {
+      throw new Error('Invalid license signature');
+    }
+    
+    // التحقق من Hardware-ID
+    const currentHardwareId = await getHardwareId();
+    if (payload.hid !== currentHardwareId) {
+      throw new Error('Hardware ID mismatch');
+    }
+    
+    // التحقق من تاريخ الانتهاء
+    if (payload.exp < Date.now()) {
+      throw new Error('License expired');
+    }
+    
+    return {
+      hardwareId: payload.hid,
+      expiryDate: payload.exp,
+      features: payload.feat
+    };
+  } catch (error) {
+    console.error('License validation failed:', error);
+    return null;
+  }
+}
+
+export async function getHardwareId(): Promise<string> {
+  // قراءة MAC Address أو معرّفات الجهاز الأخرى
+  const networkInterfaces = require('os').networkInterfaces();
+  const macAddress = Object.values(networkInterfaces)[0][0].mac;
+  return macAddress.replace(/:/g, '').toUpperCase();
+}
+```
+
+### 3. التحقق عند بدء التطبيق (Client-side)
+
+**الخطوة 1: تحميل license.json**
 ```typescript
 // client/src/const.ts
-export const loadConfig = async () => {
-  const response = await fetch('/config.json');
-  const config = await response.json();
-  return config;
-};
-```
-
-**الخطوة 2: تحميل license.json**
-```typescript
 export const loadLicense = async () => {
-  const response = await fetch('/license.json');
-  const license = await response.json();
-  return license;
+  try {
+    const response = await fetch('/api/license/info');
+    const license = await response.json();
+    return license;
+  } catch (error) {
+    console.error('Failed to load license:', error);
+    return null;
+  }
 };
 ```
 
-**الخطوة 3: التحقق من الترخيص**
+**الخطوة 2: التحقق من الترخيص**
 ```typescript
 export const validateLicense = async (license: any) => {
-  const config = await loadConfig();
-  
-  // التحقق من التوقيع الرقمي
-  const isValidSignature = verifySignature(license.key, license.signature, config.publicKey);
-  if (!isValidSignature) return false;
+  if (!license) return false;
   
   // التحقق من تاريخ الانتهاء
   if (license.expiryDate < Date.now()) return false;
   
-  // التحقق من Hardware ID
-  const hardwareId = await generateHardwareId();
-  if (license.hardwareId !== hardwareId) return false;
+  // التحقق من حالة الترخيص
+  if (!license.isValid) return false;
   
   return true;
 };
 ```
 
-**الخطوة 4: التحقق من السيرفر المركزي (اختياري)**
-```typescript
-export const validateWithCentralServer = async (license: any) => {
-  const config = await loadConfig();
-  try {
-    const response = await fetch(`${config.licenseServerUrl}/api/validate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ licenseKey: license.key, signature: license.signature })
-    });
-    const result = await response.json();
-    return result.valid;
-  } catch (error) {
-    // Grace Period: السماح بالعمل لمدة 7 أيام بدون اتصال
-    const daysSinceValidation = (Date.now() - license.lastValidation) / (1000 * 60 * 60 * 24);
-    return daysSinceValidation <= 7;
-  }
-};
-```
-
-**الخطوة 5: تهيئة التطبيق**
+**الخطوة 3: تهيئة التطبيق**
 ```typescript
 // client/src/main.tsx
 const initializeApp = async () => {
-  const config = await loadConfig();
   const license = await loadLicense();
   
-  // التحقق المحلي
+  // التحقق المحلي فقط (لا يعتمد على الإنترنت)
   if (!await validateLicense(license)) {
     window.location.href = '/license-error';
     return false;
   }
   
-  // التحقق من السيرفر المركزي (مع Grace Period)
-  if (!await validateWithCentralServer(license)) {
-    window.location.href = '/license-error';
-    return false;
-  }
-  
   // تحميل الميزات المفعلة
-  window.__APP_CONFIG__ = { config, license, features: license.features };
+  window.__APP_CONFIG__ = { 
+    license, 
+    features: license.features 
+  };
   
   return true;
 };
