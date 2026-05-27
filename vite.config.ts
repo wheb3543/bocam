@@ -101,9 +101,9 @@ export default defineConfig({
       "127.0.0.1",
     ],
     hmr: {
-      protocol: 'wss',
-      host: process.env.VITE_HMR_HOST || undefined,
-      clientPort: 443,
+      protocol: 'ws',
+      host: 'localhost',
+      port: 5173,
     },
     fs: {
       strict: true,
