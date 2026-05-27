@@ -1,10 +1,48 @@
-export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { 
+  COOKIE_NAME, 
+  ONE_YEAR_MS,
+  COMPANY_NAME,
+  COMPANY_LOGO,
+  COMPANY_ARABIC_NAME,
+  COMPANY_ENGLISH_NAME,
+  COMPANY_PHONE,
+  COMPANY_EMAIL,
+  FACEBOOK_URL,
+  INSTAGRAM_URL,
+  TWITTER_URL,
+  LINKEDIN_URL,
+  getCompanyName,
+  getAppTitle,
+  getContactInfo,
+  getSocialMediaUrl,
+  getSocialMediaUrls
+} from "@shared/const";
 
-export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "App";
+// Use centralized configuration
+export const APP_TITLE = getAppTitle('ar');
+export const APP_LOGO = COMPANY_LOGO;
 
-export const APP_LOGO =
-  import.meta.env.VITE_APP_LOGO ||
-  "https://placehold.co/128x128/E1E7EF/1F2937?text=App";
+// Re-export company info for easy access
+export {
+  COMPANY_NAME,
+  COMPANY_ARABIC_NAME,
+  COMPANY_ENGLISH_NAME,
+  COMPANY_PHONE,
+  COMPANY_EMAIL,
+  FACEBOOK_URL,
+  INSTAGRAM_URL,
+  TWITTER_URL,
+  LINKEDIN_URL
+};
+
+// Re-export helper functions
+export {
+  getCompanyName,
+  getAppTitle,
+  getContactInfo,
+  getSocialMediaUrl,
+  getSocialMediaUrls
+};
 
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
