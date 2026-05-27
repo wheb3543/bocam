@@ -1,6 +1,4 @@
 import { 
-  COOKIE_NAME, 
-  ONE_YEAR_MS,
   COMPANY_NAME,
   COMPANY_LOGO,
   COMPANY_ARABIC_NAME,
@@ -16,7 +14,14 @@ import {
   getContactInfo,
   getSocialMediaUrl,
   getSocialMediaUrls
-} from "@shared/const";
+} from "./config";
+
+// Constants that should remain shared
+export const COOKIE_NAME = "app_session_id";
+export const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;
+export const AXIOS_TIMEOUT_MS = 30_000;
+export const UNAUTHED_ERR_MSG = 'Please login (10001)';
+export const NOT_ADMIN_ERR_MSG = 'You do not have required permission (10002)';
 
 // Use centralized configuration
 export const APP_TITLE = getAppTitle('ar');
