@@ -1190,7 +1190,7 @@ const ReportsPage = lazy(() => import("./pages/ReportsPage"));
 ### المرحلة 4: Silent Heartbeat (اختياري)
 
 **المدة:** 1-2 أسابيع  
-**الحالة:** تعتمد على إكمال المرحلة 3  
+**الحالة:** مكتملة بنجاح ✅ - بتاريخ 2026-05-27  
 **الهدف:** تطبيق Silent Heartbeat للسيرفر المركزي
 
 #### 4.1 تصميم Silent Heartbeat
@@ -1355,6 +1355,53 @@ export default router;
 - تقرير اختبار شامل
 - تأكيد عمل Silent Heartbeat
 - وثائق الاستخدام
+
+#### 4.5 الملخص التنفيذي للمرحلة 4
+
+تم تنفيذ المرحلة 4 بنجاح في 2026-05-27
+
+**المكونات المُنفذة:**
+1. **Silent Heartbeat System** (`server/_core/heartbeat.ts`):
+   - Cron Job يعمل كل 24 ساعة
+   - جمع بيانات مشفرة خفيفة:
+     * Hardware ID
+     * إصدار الرخصة
+     * تاريخ السيرفر الحالي
+     * الميزات المفعلة
+   - توقيع رقمي SHA-256 للبيانات
+   - إرسال POST صامت إلى السيرفر المركزي
+   - Silent failure handling (لا يوقف السيرفر عند الفشل)
+   - تسجيل النجاح والفشل في ملف مخفي
+
+2. **Anti-Clock-Tampering System**:
+   - حفظ تاريخ آخر تشغيل ناجح في ملف مخفي (.last-successful-run)
+   - التحقق عند الإقلاع من التلاعب بالوقت:
+     * إذا كان الوقت الحالي أقدم من وقت آخر تشغيل = تلاعب
+     * إذا كان الفرق > 48 ساعة في الاتجاه الخاطئ = تلاعب محتمل
+   - Kill Switch فوري عند رصد التلاعب
+   - حماية من نقل الملف (التحقق من Hardware ID)
+   - رسائل تحذير واضحة
+
+3. **التحديثات:**
+   - `server/_core/index.ts`: إضافة initializeHeartbeat()
+   - `.env.example`: إضافة CENTRAL_ACTIVATION_URL
+   - `.env`: إضافة CENTRAL_ACTIVATION_URL
+
+**الملفات المُضافة:**
+- `server/_core/heartbeat.ts` (401 lines)
+
+**الملفات المُعدلة:**
+- `server/_core/index.ts` - إضافة initializeHeartbeat()
+- `.env.example` - إضافة CENTRAL_ACTIVATION_URL
+- `.env` - إضافة CENTRAL_ACTIVATION_URL
+
+**الميزات الأمنية:**
+- ✅ Kill Switch عند التلاعب بالوقت
+- ✅ حماية من نقل ملف التحقق
+- ✅ تشفير البيانات المرسلة
+- ✅ توقيع رقمي للتحقق من الصحة
+- ✅ Silent operation (لا يؤثر على الأداء)
+- ✅ مقاومة أخطاء الشبكة
 
 ---
 

@@ -13,6 +13,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { initializeLicense } from "./license";
+import { initializeHeartbeat } from "./heartbeat";
 // import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -37,6 +38,9 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   // Initialize license validation (Kill Switch)
   initializeLicense();
+  
+  // Initialize heartbeat system (Anti-Clock-Tampering)
+  initializeHeartbeat();
   
   const app = express();
   const server = createServer(app);
