@@ -25,40 +25,48 @@ async function getAppointmentsNeedingReminder(
   notifType: "reminder_24h" | "reminder_1h"
 ) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    console.warn(`${LOG_PREFIX} Database not available, skipping reminder check`);
+    return [];
+  }
 
-  // جلب المواعيد في النافذة الزمنية المحددة
-  const upcomingAppointments = await db
-    .select()
-    .from(appointments)
-    .where(
-      and(
-        between(appointments.appointmentDate, windowStart, windowEnd),
-        // فقط المواعيد المؤكدة أو المعلقة
-        sql`${appointments.status} IN ('pending', 'confirmed', 'contacted')`
-      )
-    );
+  try {
+    // جلب المواعيد في النافذة الزمنية المحددة
+    const upcomingAppointments = await db
+      .select()
+      .from(appointments)
+      .where(
+        and(
+          between(appointments.appointmentDate, windowStart, windowEnd),
+          // فقط المواعيد المؤكدة أو المعلقة
+          sql`${appointments.status} IN ('pending', 'confirmed', 'contacted')`
+        )
+      );
 
-  if (upcomingAppointments.length === 0) return [];
+    if (upcomingAppointments.length === 0) return [];
 
-  // التحقق من أنه لم يُرسل تذكير من هذا النوع مسبقاً
-  const appointmentIds = upcomingAppointments.map((a) => a.id);
-  const alreadySent = await db
-    .select({ entityId: whatsappNotifications.entityId })
-    .from(whatsappNotifications)
-    .where(
-      and(
-        eq(whatsappNotifications.entityType, "appointment"),
-        eq(whatsappNotifications.notificationType, notifType),
-        sql`${whatsappNotifications.entityId} IN (${sql.join(
-          appointmentIds.map((id) => sql`${id}`),
-          sql`, `
-        )})`
-      )
-    );
+    // التحقق من أنه لم يُرسل تذكير من هذا النوع مسبقاً
+    const appointmentIds = upcomingAppointments.map((a) => a.id);
+    const alreadySent = await db
+      .select({ entityId: whatsappNotifications.entityId })
+      .from(whatsappNotifications)
+      .where(
+        and(
+          eq(whatsappNotifications.entityType, "appointment"),
+          eq(whatsappNotifications.notificationType, notifType),
+          sql`${whatsappNotifications.entityId} IN (${sql.join(
+            appointmentIds.map((id) => sql`${id}`),
+            sql`, `
+          )})`
+        )
+      );
 
-  const alreadySentIds = new Set(alreadySent.map((r) => r.entityId));
-  return upcomingAppointments.filter((a) => !alreadySentIds.has(a.id));
+    const alreadySentIds = new Set(alreadySent.map((r) => r.entityId));
+    return upcomingAppointments.filter((a) => !alreadySentIds.has(a.id));
+  } catch (error) {
+    console.error(`${LOG_PREFIX} Error fetching appointments:`, error);
+    return [];
+  }
 }
 
 /**

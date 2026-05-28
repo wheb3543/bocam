@@ -61,9 +61,9 @@ export default function WhatsAppCostsPage() {
   }));
 
   // Calculate totals
-  const totalCost = conversationCosts?.reduce((sum: number, conv: any) => sum + (conv.conversationCost || 0), 0) || 0;
-  const billableCount = conversationCosts?.filter((conv: any) => conv.billable).length || 0;
-  const totalCount = conversationCosts?.length || 0;
+  const totalCost = Array.isArray(conversationCosts) ? conversationCosts.reduce((sum: number, conv: any) => sum + (conv.conversationCost || 0), 0) : 0;
+  const billableCount = Array.isArray(conversationCosts) ? conversationCosts.filter((conv: any) => conv.billable).length : 0;
+  const totalCount = Array.isArray(conversationCosts) ? conversationCosts.length : 0;
 
   const handleExport = () => {
     // Export functionality placeholder

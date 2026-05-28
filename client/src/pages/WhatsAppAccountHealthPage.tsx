@@ -74,13 +74,13 @@ export default function WhatsAppAccountHealthPage() {
   });
 
   // حساب التنبيهات الذكية
-  const windowExpiredConversations = conversations?.filter((c: any) => {
+  const windowExpiredConversations = Array.isArray(conversations) ? conversations.filter((c: any) => {
     if (!c.lastMessageAt) return false;
     const hoursSinceLastMessage = (Date.now() - new Date(c.lastMessageAt).getTime()) / (1000 * 60 * 60);
     return hoursSinceLastMessage > 24;
-  }) || [];
+  }) : [];
 
-  const highCostConversations = conversationCosts?.filter((c: any) => (c.conversationCost || 0) > 1.0) || [];
+  const highCostConversations = Array.isArray(conversationCosts) ? conversationCosts.filter((c: any) => (c.conversationCost || 0) > 1.0) : [];
 
   const totalHighCost = highCostConversations.reduce((sum: number, c: any) => sum + (c.conversationCost || 0), 0);
 
@@ -204,7 +204,7 @@ export default function WhatsAppAccountHealthPage() {
               <div>
                 <p className="text-sm text-gray-600">تنبيهات حرجة</p>
                 <p className="text-2xl font-bold text-red-600">
-                  {alerts?.filter((a: any) => a.severity === "critical" && !a.resolved).length || 0}
+                  {Array.isArray(alerts) ? alerts.filter((a: any) => a.severity === "critical" && !a.resolved).length : 0}
                 </p>
               </div>
               <AlertTriangle className="h-8 w-8 text-red-500" />
@@ -218,7 +218,7 @@ export default function WhatsAppAccountHealthPage() {
               <div>
                 <p className="text-sm text-gray-600">تنبيهات عالية</p>
                 <p className="text-2xl font-bold text-orange-600">
-                  {alerts?.filter((a: any) => a.severity === "high" && !a.resolved).length || 0}
+                  {Array.isArray(alerts) ? alerts.filter((a: any) => a.severity === "high" && !a.resolved).length : 0}
                 </p>
               </div>
               <AlertCircle className="h-8 w-8 text-orange-500" />
@@ -246,7 +246,7 @@ export default function WhatsAppAccountHealthPage() {
               <div>
                 <p className="text-sm text-gray-600">تم حلها</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {alerts?.filter((a: any) => a.resolved).length || 0}
+                  {Array.isArray(alerts) ? alerts.filter((a: any) => a.resolved).length : 0}
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />

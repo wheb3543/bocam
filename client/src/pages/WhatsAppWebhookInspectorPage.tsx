@@ -183,12 +183,12 @@ export default function WhatsAppWebhookInspectorPage() {
     markAsProcessedMutation.mutate({ id: eventId, handlerExists: hasHandler });
   };
 
-  const filteredEvents = displayEvents?.filter((event: any) => {
+  const filteredEvents = Array.isArray(displayEvents) ? displayEvents.filter((event: any) => {
     const matchesSearch =
       event.eventType.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (event.rawPayload && event.rawPayload.includes(searchTerm));
     return matchesSearch;
-  });
+  }) : [];
 
   const categories = [
     { value: "all", label: "جميع الفئات", icon: BarChart3 },
@@ -201,8 +201,8 @@ export default function WhatsAppWebhookInspectorPage() {
     { value: "subscriptions", label: "الاشتراكات", icon: Users },
   ];
 
-  const totalEvents = statsByType?.reduce((sum, stat) => sum + (stat.count || 0), 0) || 0;
-  const processedEvents = displayEvents?.filter((e: any) => e.processed).length || 0;
+  const totalEvents = Array.isArray(statsByType) ? statsByType.reduce((sum, stat) => sum + (stat.count || 0), 0) : 0;
+  const processedEvents = Array.isArray(displayEvents) ? displayEvents.filter((e: any) => e.processed).length : 0;
 
   return (
     <div className="container mx-auto py-6 px-4" dir="rtl">

@@ -66,14 +66,14 @@ export default function WhatsAppUserSubscriptionsPage() {
     });
   };
 
-  const filteredSubscriptions = subscriptions?.filter((sub: any) => {
-    const matchesSearch = sub.phoneNumber.includes(searchTerm) || 
+  const filteredSubscriptions = Array.isArray(subscriptions) ? subscriptions.filter((sub: any) => {
+    const matchesSearch = sub.phoneNumber.includes(searchTerm) ||
                          (sub.details && JSON.parse(sub.details).name?.includes(searchTerm));
-    const matchesTab = activeTab === "all" || 
+    const matchesTab = activeTab === "all" ||
                       (activeTab === "opted_in" && sub.status === "opted_in") ||
                       (activeTab === "opted_out" && sub.status === "opted_out");
     return matchesSearch && matchesTab;
-  });
+  }) : [];
 
   return (
     <div className="container mx-auto py-6 px-4" dir="rtl">

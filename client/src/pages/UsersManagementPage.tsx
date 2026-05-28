@@ -319,9 +319,9 @@ export default function UsersManagementPage() {
   }, [accessRequests, requestTable.sortState, requestTable.sortData]);
 
   // Calculate statistics
-  const totalUsers = users?.length || 0;
-  const activeUsers = users?.filter(u => u.isActive === "yes").length || 0;
-  const adminUsers = users?.filter(u => u.role === "admin").length || 0;
+  const totalUsers = Array.isArray(users) ? users.length : 0;
+  const activeUsers = Array.isArray(users) ? users.filter(u => u.isActive === "yes").length : 0;
+  const adminUsers = Array.isArray(users) ? users.filter(u => u.role === "admin").length : 0;
 
   if (isLoading) {
     return (

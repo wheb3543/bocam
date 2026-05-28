@@ -101,16 +101,16 @@ interface StatsBarProps {
 }
 
 const StatsBar = memo(function StatsBar({ conversations }: StatsBarProps) {
-  const total = conversations?.length || 0;
-  const unread = conversations?.filter(c => c.unreadCount > 0).length || 0;
-  const important = conversations?.filter(c => c.isImportant === 1).length || 0;
-  const archived = conversations?.filter(c => c.isArchived === 1).length || 0;
+  const total = Array.isArray(conversations) ? conversations.length : 0;
+  const unread = Array.isArray(conversations) ? conversations.filter(c => c.unreadCount > 0).length : 0;
+  const important = Array.isArray(conversations) ? conversations.filter(c => c.isImportant === 1).length : 0;
+  const archived = Array.isArray(conversations) ? conversations.filter(c => c.isArchived === 1).length : 0;
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const active = conversations?.filter(c =>
+  const active = Array.isArray(conversations) ? conversations.filter(c =>
     !c.isArchived &&
     c.lastMessageAt &&
     new Date(c.lastMessageAt) >= sevenDaysAgo
-  ).length || 0;
+  ).length : 0;
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-3">
@@ -376,9 +376,9 @@ const ConversationsList = memo(function ConversationsList({
             <TabsTrigger value="all" className="text-[var(--text-xs)] h-6 px-1 text-xs">الكل</TabsTrigger>
             <TabsTrigger value="unread" className="text-[var(--text-xs)] h-6 px-1 text-xs">
               غير مقروءة
-              {(allConversations?.filter(c => c.unreadCount > 0).length || 0) > 0 && (
+              {(Array.isArray(allConversations) ? allConversations.filter(c => c.unreadCount > 0).length : 0) > 0 && (
                 <Badge variant="destructive" className="mr-1 h-3.5 px-1 text-[var(--text-xs)] rounded-full">
-                  {allConversations?.filter(c => c.unreadCount > 0).length}
+                  {Array.isArray(allConversations) ? allConversations.filter(c => c.unreadCount > 0).length : 0}
                 </Badge>
               )}
             </TabsTrigger>

@@ -209,7 +209,7 @@ export default function LeadsManagementPage() {
     setLeadsSourceFilter(value);
   }, [setLeadsSourceFilter]);
 
-  const pendingCount = unifiedLeads?.filter((l: any) => l.status === 'new').length || 0;
+  const pendingCount = Array.isArray(unifiedLeads) ? unifiedLeads.filter((l: any) => l.status === 'new').length : 0;
 
   return (
     <DashboardLayout

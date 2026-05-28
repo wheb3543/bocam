@@ -93,8 +93,14 @@ async function startServer() {
 
     // Initialize WhatsApp appointment reminders scheduler (every 30 minutes)
     import("../cron/appointmentReminders").then(({ initAppointmentRemindersScheduler }) => {
-      initAppointmentRemindersScheduler();
-    }).catch(console.error);
+      try {
+        initAppointmentRemindersScheduler();
+      } catch (error) {
+        console.error("[AppointmentReminders] Failed to initialize scheduler:", error);
+      }
+    }).catch((error) => {
+      console.error("[AppointmentReminders] Failed to load appointment reminders module:", error);
+    });
   });
 }
 

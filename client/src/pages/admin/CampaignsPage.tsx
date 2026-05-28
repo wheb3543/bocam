@@ -373,7 +373,7 @@ export default function CampaignsPage() {
                 <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-yellow-600" />
               ) : (
                 <div className="text-xl sm:text-2xl font-bold text-yellow-800">
-                  {campaigns?.filter((c: any) => c.status === "paused").length || 0}
+                  {Array.isArray(campaigns) ? campaigns.filter((c: any) => c.status === "paused").length : 0}
                 </div>
               )}
             </CardContent>

@@ -148,7 +148,7 @@ function MessageSettingsContent() {
   });
 
   // Handlers
-  const filteredMessages = allMessages?.filter((msg: any) => msg.category === selectedCategory);
+  const filteredMessages = Array.isArray(allMessages) ? allMessages.filter((msg: any) => msg.category === selectedCategory) : [];
 
   const handleEdit = (message: any) => {
     setSelectedMessage(message);
@@ -310,8 +310,8 @@ function MessageSettingsContent() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {Object.entries(categoryLabels).map(([key, label]) => {
               const Icon = categoryIcons[key] || MessageSquare;
-              const count = allMessages?.filter((m: any) => m.category === key).length || 0;
-              const enabled = allMessages?.filter((m: any) => m.category === key && m.isEnabled === 1).length || 0;
+              const count = Array.isArray(allMessages) ? allMessages.filter((m: any) => m.category === key).length : 0;
+              const enabled = Array.isArray(allMessages) ? allMessages.filter((m: any) => m.category === key && m.isEnabled === 1).length : 0;
               return (
                 <button
                   key={key}

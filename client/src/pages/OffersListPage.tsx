@@ -29,20 +29,20 @@ function OffersListContent() {
 
   // Separate active and expired offers based on endDate
   const now = new Date();
-  const activeOffers = offers?.filter((offer: any) => {
+  const activeOffers = Array.isArray(offers) ? offers.filter((offer: any) => {
     if (!offer.endDate) return true;
     return new Date(offer.endDate) >= now;
-  });
-  const expiredOffers = offers?.filter((offer: any) => {
+  }) : [];
+  const expiredOffers = Array.isArray(offers) ? offers.filter((offer: any) => {
     if (!offer.endDate) return false;
     return new Date(offer.endDate) < now;
-  });
+  }) : [];
 
-  const filteredActiveOffers = activeOffers?.filter((offer: any) =>
+  const filteredActiveOffers = activeOffers.filter((offer: any) =>
     offer.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredExpiredOffers = expiredOffers?.filter((offer: any) =>
+  const filteredExpiredOffers = expiredOffers.filter((offer: any) =>
     offer.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

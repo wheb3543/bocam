@@ -43,26 +43,26 @@ function CampsListContent() {
 
   // Separate active and expired camps based on endDate
   const now = new Date();
-  const activeCamps = camps?.filter((camp: any) => {
+  const activeCamps = Array.isArray(camps) ? camps.filter((camp: any) => {
     if (!camp.endDate) return true;
     return new Date(camp.endDate) >= now;
-  });
-  const expiredCamps = camps?.filter((camp: any) => {
+  }) : [];
+  const expiredCamps = Array.isArray(camps) ? camps.filter((camp: any) => {
     if (!camp.endDate) return false;
     return new Date(camp.endDate) < now;
-  });
+  }) : [];
 
-  const filteredActiveCamps = activeCamps?.filter((camp: any) =>
+  const filteredActiveCamps = activeCamps.filter((camp: any) =>
     camp.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredExpiredCamps = expiredCamps?.filter((camp: any) =>
+  const filteredExpiredCamps = expiredCamps.filter((camp: any) =>
     camp.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Calculate registration stats for each camp
   const getCampStats = (campId: number) => {
-    const campRegistrations = registrations?.filter((r: any) => r.campId === campId) || [];
+    const campRegistrations = Array.isArray(registrations) ? registrations.filter((r: any) => r.campId === campId) : [];
     const total = campRegistrations.length;
     const confirmed = campRegistrations.filter((r: any) => r.status === "confirmed" || r.status === "attended" || r.status === "completed").length;
     const attended = campRegistrations.filter((r: any) => r.status === "attended" || r.status === "completed").length;

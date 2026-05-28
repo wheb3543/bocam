@@ -46,7 +46,7 @@ function DoctorsContent() {
   const { data: doctors, isLoading } = trpc.doctors.list.useQuery();
 
   // Filter doctors based on search and specialty
-  const filteredDoctors = doctors?.filter((doctor) => {
+  const filteredDoctors = Array.isArray(doctors) ? doctors.filter((doctor) => {
     // Only show available doctors
     if (doctor.available !== "yes") return false;
 
@@ -60,11 +60,11 @@ function DoctorsContent() {
       specialtyFilter === "all" || doctor.specialty === specialtyFilter;
 
     return matchesSearch && matchesSpecialty;
-  });
+  }) : [];
 
   // Get unique specialties for filter
   const specialties = Array.from(
-    new Set(doctors?.filter((d) => d.available === "yes").map((d) => d.specialty) || [])
+    new Set(Array.isArray(doctors) ? doctors.filter((d) => d.available === "yes").map((d) => d.specialty) : [])
   );
 
   return (

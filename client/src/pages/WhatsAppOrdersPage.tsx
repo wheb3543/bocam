@@ -40,10 +40,10 @@ export default function WhatsAppOrdersPage() {
   });
 
   // Calculate stats
-  const totalOrders = orders?.length || 0;
-  const pendingOrders = orders?.filter((o: any) => o.status === 'pending').length || 0;
-  const confirmedOrders = orders?.filter((o: any) => o.status === 'confirmed').length || 0;
-  const completedOrders = orders?.filter((o: any) => o.status === 'completed').length || 0;
+  const totalOrders = Array.isArray(orders) ? orders.length : 0;
+  const pendingOrders = Array.isArray(orders) ? orders.filter((o: any) => o.status === 'pending').length : 0;
+  const confirmedOrders = Array.isArray(orders) ? orders.filter((o: any) => o.status === 'confirmed').length : 0;
+  const completedOrders = Array.isArray(orders) ? orders.filter((o: any) => o.status === 'completed').length : 0;
 
   const getStatusBadge = (status: string) => {
     const statusColors: Record<string, string> = {

@@ -36,9 +36,9 @@ export default function WhatsAppReferralsPage() {
   });
 
   // Calculate stats
-  const totalReferrals = referrals?.length || 0;
-  const adReferrals = referrals?.filter((r: any) => r.sourceType === 'ad').length || 0;
-  const organicReferrals = referrals?.filter((r: any) => r.sourceType === 'organic').length || 0;
+  const totalReferrals = Array.isArray(referrals) ? referrals.length : 0;
+  const adReferrals = Array.isArray(referrals) ? referrals.filter((r: any) => r.sourceType === 'ad').length : 0;
+  const organicReferrals = Array.isArray(referrals) ? referrals.filter((r: any) => r.sourceType === 'organic').length : 0;
   const conversionRate = totalReferrals > 0 ? ((adReferrals / totalReferrals) * 100).toFixed(1) : '0';
 
   const getSourceTypeBadge = (sourceType: string) => {

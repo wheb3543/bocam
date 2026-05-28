@@ -127,10 +127,10 @@ export default function BookingsManagementPage() {
   }, [location]);
 
   const pendingCounts = useMemo(() => {
-    const leadsPending = unifiedLeads?.filter(l => l.status === 'new').length || 0;
+    const leadsPending = Array.isArray(unifiedLeads) ? unifiedLeads.filter(l => l.status === 'new').length : 0;
     const appointmentsPending = appointmentsData?.total || 0;
-    const offerLeadsPending = offerLeadsData?.filter((o: any) => o.status === 'pending').length || offerLeadsPendingCount;
-    const campRegistrationsPending = campRegistrationsData?.filter((c: any) => c.status === 'pending').length || campRegistrationsPendingCount;
+    const offerLeadsPending = Array.isArray(offerLeadsData) ? offerLeadsData.filter((o: any) => o.status === 'pending').length : offerLeadsPendingCount;
+    const campRegistrationsPending = Array.isArray(campRegistrationsData) ? campRegistrationsData.filter((c: any) => c.status === 'pending').length : campRegistrationsPendingCount;
     return {
       leads: leadsPending,
       appointments: appointmentsPending > 0 ? 0 : 0, // Count from actual data

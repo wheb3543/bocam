@@ -220,11 +220,11 @@ export default function WhatsAppCompliance() {
   };
 
   // Filter blocked phones
-  const filteredPhones = blockedPhonesQuery.data?.phones?.filter((phone: any) => {
+  const filteredPhones = Array.isArray(blockedPhonesQuery.data?.phones) ? blockedPhonesQuery.data.phones.filter((phone: any) => {
     const matchesSearch = searchQuery === "" || phone.phone.includes(searchQuery);
     const matchesFilter = filterReason === "all" || phone.reason?.includes(filterReason);
     return matchesSearch && matchesFilter;
-  }) || [];
+  }) : [];
 
   // Calculate compliance percentage from real data
   const auditStats = auditStatsQuery.data?.stats;

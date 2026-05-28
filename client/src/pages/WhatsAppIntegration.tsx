@@ -147,13 +147,13 @@ export default function WhatsAppIntegration() {
   };
 
   // Filter templates
-  const filteredTemplates = templates?.templates?.filter((tmpl: any) => {
-    const matchesSearch = searchQuery === "" || 
+  const filteredTemplates = Array.isArray(templates?.templates) ? templates.templates.filter((tmpl: any) => {
+    const matchesSearch = searchQuery === "" ||
       tmpl.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tmpl.metaName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = filterCategory === "all" || tmpl.category === filterCategory;
     return matchesSearch && matchesCategory;
-  }) || [];
+  }) : [];
 
   // Get unique categories
   const categories = Array.from(new Set(templates?.templates?.map((t: any) => t.category) || []));
