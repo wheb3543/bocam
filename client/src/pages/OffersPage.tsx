@@ -6,6 +6,7 @@
 import { useFormatDate } from "@/hooks/useFormatDate";
 import { useState } from "react";
 import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { getCompanyName } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,9 +34,10 @@ interface OfferFormData {
 }
 
 export default function OffersPage() {
+  const companyName = getCompanyName('ar');
   return (
     <PageLayout
-      title="العروض الطبية - المستشفى السعودي الألماني"
+      title={`العروض الطبية - ${companyName}`}
       description="استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة"
       keywords="عروض طبية, خصومات, حجز عرض"
       showInstallPWA={false}

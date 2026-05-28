@@ -7,6 +7,7 @@ import { useFormatDate } from "@/hooks/useFormatDate";
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import Navbar from "@/components/Navbar";
+import { getCompanyName } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -214,13 +215,14 @@ function CampDetailContent({ slug }: { slug: string }) {
     }
   };
 
-  const seoTitle = camp 
-    ? `${camp.name} | المستشفى السعودي الألماني`
-    : "المخيمات الطبية | المستشفى السعودي الألماني";
-  
+  const companyName = getCompanyName('ar');
+  const seoTitle = camp
+    ? `${camp.name} | ${companyName}`
+    : `المخيمات الطبية | ${companyName}`;
+
   const seoDescription = camp
     ? `${(camp.description || camp.name).substring(0, 150)}... سجل الآن في مخيمنا الطبي المجاني. اتصل: 8000018`
-    : "مخيمات طبية مجانية لخدمة المجتمع في المستشفى السعودي الألماني";
+    : `مخيمات طبية مجانية لخدمة المجتمع في ${companyName}`;
 
   // Loading Skeleton
   if (isLoading) {

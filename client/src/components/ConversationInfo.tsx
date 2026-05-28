@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, Calendar, MessageSquare, Clock, MoreVertical, Loader2, AlertCircle, MessageCircle, ChevronDown, ChevronUp, Link2, Bell, BellOff, DollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getCompanyName } from "@/const";
 import { trpc } from "@/lib/trpc";
 import {
   DropdownMenu,
@@ -205,7 +206,8 @@ export default function ConversationInfo({
   };
 
   const handleWhatsApp = () => {
-    const message = encodeURIComponent("مرحباً! هذه رسالة من المستشفى السعودي الألماني");
+    const companyName = getCompanyName('ar');
+    const message = encodeURIComponent(`مرحباً! هذه رسالة من ${companyName}`);
     window.open(`https://wa.me/${conversation.phoneNumber}?text=${message}`, '_blank');
   };
 

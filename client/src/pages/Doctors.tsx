@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Search, Stethoscope, Calendar, User } from "lucide-react";
-import { APP_LOGO } from "@/const";
+import { APP_LOGO, getCompanyName } from "@/const";
 import SEO from "@/components/SEO";
 import InstallPWAButton from "@/components/InstallPWAButton";
 import PageLayout from "@/components/PageLayout";
@@ -26,10 +26,11 @@ import ScrollReveal from "@/components/ScrollReveal";
 import TextShimmer from "@/components/TextShimmer";
 
 export default function Doctors() {
+  const companyName = getCompanyName('ar');
   return (
     <PageLayout
-      title="الأطباء - المستشفى السعودي الألماني"
-      description="احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء"
+      title={`الأطباء - ${companyName}`}
+      description={`احجز موعدك مع أفضل الأطباء في ${companyName} بصنعاء`}
       keywords="أطباء, استشاريين, تخصصات طبية, حجز موعد"
     >
       <DoctorsContent />

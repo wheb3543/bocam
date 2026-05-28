@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getCompanyName } from "@/const";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,9 +21,10 @@ import ScrollReveal from "@/components/ScrollReveal";
 import TextShimmer from "@/components/TextShimmer";
 
 export default function CampsListPage() {
+  const companyName = getCompanyName('ar');
   return (
     <PageLayout
-      title="المخيمات الطبية الخيرية - المستشفى السعودي الألماني"
+      title={`المخيمات الطبية الخيرية - ${companyName}`}
       description="مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين"
       keywords="مخيمات طبية, خيرية, مجانية, مسؤولية مجتمعية"
     >
@@ -32,6 +34,7 @@ export default function CampsListPage() {
 }
 
 function CampsListContent() {
+  const companyName = getCompanyName('ar');
   const { formatDate, formatDateTime } = useFormatDate();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -209,7 +212,7 @@ function CampsListContent() {
                 عن المخيمات الطبية الخيرية
               </h2>
               <p className="text-xs sm:text-sm md:text-base lg:text-lg text-foreground leading-relaxed text-right px-1">
-                يأتي تنظيم المخيمات الطبية الخيرية ضمن مبادرات المستشفى السعودي الألماني
+                يأتي تنظيم المخيمات الطبية الخيرية ضمن مبادرات {companyName}
                 في إطار المسؤولية المجتمعية، حيث نسعى لتقديم خدمات طبية عالية الجودة
                 للمحتاجين والمستحقين بأسعار رمزية أو مجاناً. يشرف على المخيمات نخبة من
                 أفضل الأطباء والجراحين المتخصصين، مع توفير أحدث الأجهزة والتقنيات الطبية.

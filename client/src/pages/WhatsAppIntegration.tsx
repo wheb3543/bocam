@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getCompanyName } from "@/const";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/useWhatsAppSSE";
 
 export default function WhatsAppIntegration() {
+  const companyName = getCompanyName('ar');
   const [phone, setPhone] = useState("");
   const [fullName, setFullName] = useState("");
   const [templateName, setTemplateName] = useState("sgh_welcome_greeting_ar");
@@ -273,7 +275,7 @@ export default function WhatsAppIntegration() {
                     <div className="text-gray-600">
                       <p>مرحباً بك عزيزي العميل،</p>
                       <p className="mt-2">
-                        أهلاً وسهلاً في المستشفى السعودي الألماني. 👋
+                        أهلاً وسهلاً في {companyName}. 👋
                       </p>
                       <p className="mt-2">
                         نحن هنا لتقديم أفضل الخدمات الطبية لك ولعائلتك.
@@ -285,7 +287,7 @@ export default function WhatsAppIntegration() {
                         <li>عروض خاصة وحزم علاجية</li>
                       </ul>
                       <p className="mt-3">
-                        شكراً لاختيارك المستشفى السعودي الألماني
+                        شكراً لاختيارك {companyName}
                       </p>
                       <p className="mt-2 text-xs text-gray-500">
                         #نرعاكم_كأهالينا

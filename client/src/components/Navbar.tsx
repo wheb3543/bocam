@@ -132,7 +132,7 @@ export default function Navbar() {
             <img src="/icon-72x72.png" alt={APP_TITLE} className="h-8 w-auto" />
             <div>
               <h2 className="text-xs sm:text-sm font-bold text-green-900 dark:text-green-400 leading-tight">
-                المستشفى السعودي الألماني
+                {COMPANY_ARABIC_NAME}
               </h2>
               <p className="text-[9px] sm:text-[10px] text-muted-foreground dark:text-muted-foreground">نرعاكم كأهالينا</p>
             </div>
