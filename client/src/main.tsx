@@ -28,23 +28,6 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
   }
 };
 
-trpc.client.setLink(() =>
-  httpBatchLink({
-    url: '/api/trpc',
-    headers: () => {
-      const cookie = document.cookie;
-      return {
-        cookie,
-      };
-    },
-  })
-);
-
-// Global error handler for unauthorized errors
-trpc.useQuery(['example'], () => ({ data: null }), {
-  onError: redirectToLoginIfUnauthorized,
-});
-
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     <App />
