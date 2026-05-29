@@ -478,3 +478,4 @@
 [2026-05-29T21:19:48.147Z] Node.js v22.13.0
 [2026-05-29T21:19:51.076Z] 9:19:51 PM [tsx] unlink in ./server/routers/patientPortal.ts Rerunning...
 [2026-05-29T21:19:51.076Z] c
+[2026-05-29T21:19:52.083Z] [OAuth] Initialized with baseURL: https://api.manus.im
