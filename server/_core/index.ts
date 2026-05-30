@@ -1,5 +1,7 @@
 import "dotenv/config";
 import express from "express";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { createServer } from "http";
 import net from "net";
 import path from "path";
@@ -44,6 +46,26 @@ async function startServer() {
   
   const app = express();
   const server = createServer(app);
+
+  // Security headers
+  app.use(helmet({
+    contentSecurityPolicy: false, // CSP is managed separately for Vite dev/prod
+  }));
+
+  // Rate limiting for auth endpoints
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // limit each IP to 20 auth requests per window
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests, please try again later" },
+  });
+  app.use("/api/trpc/auth.login", authLimiter);
+  app.use("/api/trpc/auth.register", authLimiter);
+  app.use("/api/trpc/patientPortal.sendOtp", authLimiter);
+  app.use("/api/trpc/patientPortal.verifyOtp", authLimiter);
+  app.use("/api/trpc/patientPortal.loginWithPassword", authLimiter);
+
   // Configure body parser with larger size limit for file uploads
   // Capture raw body for WhatsApp webhook signature verification (X-Hub-Signature-256)
   app.use(express.json({

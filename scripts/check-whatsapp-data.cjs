@@ -1,6 +1,10 @@
 const mysql = require('mysql2/promise');
 
-const DATABASE_URL = 'mysql://2xtgvXGdr7mxJSP.root:5iQN6bbdle0K4JiaV41w@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/HgGpRPs4xs9xrzjfX4xmFY';
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL) {
+  console.error('❌ Missing required DATABASE_URL environment variable.');
+  process.exit(1);
+}
 
 (async () => {
   const connection = await mysql.createConnection(DATABASE_URL);

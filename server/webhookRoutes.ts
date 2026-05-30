@@ -1,8 +1,21 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 import { publish } from "./_core/pubsub";
 import { processWebhookEvent, verifyWebhookSignature, verifyWebhookToken } from "./webhooks/whatsappWebhook";
 import { ENV } from "./_core/env";
 import multer from "multer";
+
+function requireAuth(req: Request, res: Response, next: NextFunction) {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) { res.status(401).json({ error: "Authentication required" }); return; }
+  const cookies: Record<string, string> = {};
+  cookieHeader.split(";").forEach(c => { const [n, v] = c.trim().split("="); if (n && v) cookies[n] = decodeURIComponent(v); });
+  const token = cookies["admin_session"];
+  if (!token) { res.status(401).json({ error: "Authentication required" }); return; }
+  const secret = process.env.JWT_SECRET;
+  if (!secret) { res.status(500).json({ error: "Server misconfiguration" }); return; }
+  try { jwt.verify(token, secret); next(); } catch { res.status(401).json({ error: "Invalid or expired session" }); }
+}
 
 /**
  * WhatsApp Webhook Express Routes
@@ -11,7 +24,10 @@ import multer from "multer";
  * POST /api/webhooks/whatsapp → Receive messages & statuses
  */
 
-const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || "sgh_crm_webhook_2024";
+const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
+if (!VERIFY_TOKEN) {
+  console.warn("[Webhook] WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests");
+}
 
 // Global channel for all users to receive new message notifications
 const GLOBAL_CHANNEL = "global:whatsapp";
@@ -40,7 +56,7 @@ export function createWebhookRouter(): Router {
    * GET /api/whatsapp/media/:mediaId
    * Proxy endpoint to download media from WhatsApp Media API
    */
-  router.get("/api/whatsapp/media/:mediaId", async (req: Request, res: Response) => {
+  router.get("/api/whatsapp/media/:mediaId", requireAuth, async (req: Request, res: Response) => {
     try {
       const { mediaId } = req.params;
       const accessToken = ENV.metaAccessToken;
@@ -91,7 +107,7 @@ export function createWebhookRouter(): Router {
    * POST /api/whatsapp/upload
    * Upload media file and return base64 data URL
    */
-  router.post("/api/whatsapp/upload", upload.single("file"), async (req: Request, res: Response) => {
+  router.post("/api/whatsapp/upload", requireAuth, upload.single("file"), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
         res.status(400).json({ error: "No file uploaded" });
@@ -143,7 +159,7 @@ export function createWebhookRouter(): Router {
         return;
       }
 
-      console.log("[Webhook] Received:", JSON.stringify(body, null, 2));
+      console.log("[Webhook] Received webhook event for object:", body.object);
 
       // تسجيل الحدث في قاعدة البيانات للتحليل
       try {

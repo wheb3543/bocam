@@ -1,7 +1,37 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import multer from "multer";
+import jwt from "jsonwebtoken";
 import { storagePut } from "./storage";
 import crypto from "crypto";
+
+function requireAuth(req: Request, res: Response, next: NextFunction) {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
+  const cookies: Record<string, string> = {};
+  cookieHeader.split(";").forEach(c => {
+    const [name, value] = c.trim().split("=");
+    if (name && value) cookies[name] = decodeURIComponent(value);
+  });
+  const token = cookies["admin_session"];
+  if (!token) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    res.status(500).json({ error: "Server misconfiguration" });
+    return;
+  }
+  try {
+    jwt.verify(token, secret);
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid or expired session" });
+  }
+}
 
 /**
  * Upload Route - يوفر endpoint لرفع الملفات إلى S3
@@ -50,7 +80,7 @@ function generateUniqueFileName(originalName: string): string {
 export function createUploadRouter(): Router {
   const router = Router();
 
-  router.post("/api/upload", upload.single("file"), async (req: Request, res: Response) => {
+  router.post("/api/upload", requireAuth, upload.single("file"), async (req: Request, res: Response) => {
     try {
       const file = req.file;
       if (!file) {

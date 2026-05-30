@@ -124,7 +124,7 @@ export const webhooksRouter = router({
       })
     )
     .query(({ input }) => {
-      const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || "sgh_crm_webhook_2024";
+      const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
 
       if (input.mode === "subscribe" && input.token === VERIFY_TOKEN) {
         console.log("[Webhook] Verification successful");
@@ -144,7 +144,7 @@ export const webhooksRouter = router({
    */
   receive: publicProcedure.input(webhookSchema).mutation(async ({ input }) => {
     try {
-      console.log("[Webhook] Received:", JSON.stringify(input, null, 2));
+      console.log("[Webhook] Received webhook event for object:", input.object);
 
       const db = await getDb();
       if (!db) {

@@ -1,11 +1,16 @@
 import mysql from "mysql2/promise";
 
+if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_NAME) {
+  console.error('❌ Missing required DB_HOST, DB_USER, DB_PASSWORD, or DB_NAME environment variables.');
+  process.exit(1);
+}
+
 const pool = mysql.createPool({
-  host: 'gateway02.us-east-1.prod.aws.tidbcloud.com',
-  port: 4000,
-  user: '2xtgvXGdr7mxJSP.root',
-  password: '5iQN6bbdle0K4JiaV41w',
-  database: 'HgGpRPs4xs9xrzjfX4xmFY',
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT || '4000', 10),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -35,7 +40,7 @@ async function checkData() {
     const [sentAtCheck] = await connection.query(`
       SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE 
       FROM INFORMATION_SCHEMA.COLUMNS 
-      WHERE TABLE_SCHEMA = 'HgGpRPs4xs9xrzjfX4xmFY' 
+      WHERE TABLE_SCHEMA = '${process.env.DB_NAME}' 
       AND TABLE_NAME = 'whatsapp_messages' 
       AND COLUMN_NAME = 'sentAt'
     `);
