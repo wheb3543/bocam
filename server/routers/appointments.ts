@@ -98,7 +98,10 @@ export const appointmentsRouter = router({
       }
       
       if (!campaign) {
-        throw new Error("Failed to create or retrieve campaign");
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "فشل في إنشاء أو استرجاع الحملة",
+        });
       }
 
       // Build timestamp fields based on initial status
@@ -396,7 +399,7 @@ export const appointmentsRouter = router({
     }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const updateData: any = {};
       if (input.appointmentDate) {
@@ -425,12 +428,12 @@ export const appointmentsRouter = router({
     }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // Get appointment details
       const appointment = await db.select().from(appointments).where(eq(appointments.id, input.appointmentId)).limit(1);
       if (appointment.length === 0) {
-        throw new Error("الحجز غير موجود");
+        throw new TRPCError({ code: "NOT_FOUND", message: "الحجز غير موجود" });
       }
 
       const appt = appointment[0];
@@ -486,12 +489,12 @@ export const appointmentsRouter = router({
     }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // Check if receipt number already exists
       const [appointment] = await db.select().from(appointments).where(eq(appointments.id, input.id)).limit(1);
       if (!appointment) {
-        throw new Error("الحجز غير موجود");
+        throw new TRPCError({ code: "NOT_FOUND", message: "الحجز غير موجود" });
       }
 
       // If already has receipt number, return it
@@ -525,7 +528,7 @@ export const appointmentsRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       await db.delete(appointments).where(eq(appointments.id, input.id));
       // Invalidate appointment caches after deletion
       serverCache.invalidateByPrefix("paginated:appointments:");

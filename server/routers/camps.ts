@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 import { publicProcedure, protectedProcedure, router, requireCampsFeature } from '../_core/trpc';
 import { getDb } from '../db';
 import { camps, campRegistrations } from '../../drizzle/schema';
@@ -229,7 +230,7 @@ export const campsRouter = router({
     .input(campInputSchema)
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       
       // Generate slug if not provided (normalize to lowercase)
       let slug = (input.slug && input.slug.trim())
@@ -292,7 +293,7 @@ export const campsRouter = router({
     }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       
       const { id, ...data } = input;
 
@@ -325,7 +326,7 @@ export const campsRouter = router({
         .limit(1);
       
       if (existing.length > 0 && existing[0].id !== id) {
-        throw new Error("هذا الرابط مستخدم بالفعل");
+        throw new TRPCError({ code: "CONFLICT", message: "هذا الرابط مستخدم بالفعل" });
       }
 
       // Normalize imageUrl: treat empty string as undefined
@@ -366,7 +367,7 @@ export const campsRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       
       await db.delete(camps).where(eq(camps.id, input.id));
       
@@ -386,7 +387,7 @@ export const campsRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       
       // Get current status
       const current = await db
@@ -396,7 +397,7 @@ export const campsRouter = router({
         .limit(1);
       
       if (current.length === 0) {
-        throw new Error("المخيم غير موجود");
+        throw new TRPCError({ code: "NOT_FOUND", message: "المخيم غير موجود" });
       }
       
       // Toggle status
