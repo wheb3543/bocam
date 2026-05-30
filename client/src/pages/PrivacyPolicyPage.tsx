@@ -11,6 +11,7 @@
 import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getCompanyName, getAppTitle } from "@/const";
 import { Shield, Phone, Mail, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import PageLayout from "@/components/PageLayout";
@@ -23,14 +24,17 @@ import ScrollReveal from "@/components/ScrollReveal";
 import TextShimmer from "@/components/TextShimmer";
 
 export default function PrivacyPolicyPage() {
+  const companyName = getCompanyName('ar');
+  const appTitle = getAppTitle('ar');
+
   useEffect(() => {
-    document.title = "سياسة الخصوصية | المستشفى السعودي الألماني - صنعاء";
+    document.title = `سياسة الخصوصية | ${appTitle}`;
     window.scrollTo(0, 0);
-  }, []);
+  }, [appTitle]);
 
   return (
     <PageLayout
-      title="سياسة الخصوصية - المستشفى السعودي الألماني"
+      title={`سياسة الخصوصية - ${companyName}`}
       description="سياسة حماية البيانات الشخصية والخصوصية وفقاً لنظام حماية البيانات في المملكة العربية السعودية"
       keywords="سياسة الخصوصية, حماية البيانات, PDPL"
     >
@@ -40,6 +44,9 @@ export default function PrivacyPolicyPage() {
 }
 
 function PrivacyPolicyContent() {
+  const companyName = getCompanyName('ar');
+  const appTitle = getAppTitle('ar');
+
   return (
     <div className="space-y-6" dir="rtl">
       <ReadingProgressBar color="green" />
@@ -47,8 +54,8 @@ function PrivacyPolicyContent() {
       {/* Hero Section */}
       <HeroSection
         title="سياسة الخصوصية"
-        subtitle="آخر تحديث: مارس 2026 | المستشفى السعودي الألماني - صنعاء"
-        description="يلتزم المستشفى السعودي الألماني - صنعاء بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL)"
+        subtitle={`آخر تحديث: مارس 2026 | ${appTitle}`}
+        description={`يلتزم ${companyName} بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL)`}
         badge={{ text: "حماية البيانات", icon: Shield }}
         backgroundGradient="from-green-800 to-green-600"
       />
@@ -64,7 +71,7 @@ function PrivacyPolicyContent() {
                 1. المقدمة
               </h2>
               <p className="text-sm sm:text-base">
-                يلتزم المستشفى السعودي الألماني - صنعاء بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL) وأفضل الممارسات الدولية. تُوضّح هذه السياسة كيفية جمع بياناتك واستخدامها وتخزينها ومشاركتها، وكيف نضمن التعامل معها بمسؤولية وشفافية تامة.
+                يلتزم {companyName} بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL) وأفضل الممارسات الدولية. تُوضّح هذه السياسة كيفية جمع بياناتك واستخدامها وتخزينها ومشاركتها، وكيف نضمن التعامل معها بمسؤولية وشفافية تامة.
               </p>
               <p className="text-sm sm:text-base mt-3">
                 تنطبق هذه السياسة على جميع الخدمات الرقمية التي نقدمها، بما في ذلك موقعنا الإلكتروني، وتطبيق الجوال، وخدمات الحجز الإلكتروني، والتواصل عبر واتساب وفيسبوك وإنستغرام.
@@ -120,7 +127,7 @@ function PrivacyPolicyContent() {
               </h2>
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-5">
                 <p className="text-sm sm:text-base mb-3">
-                  يستخدم المستشفى السعودي الألماني - صنعاء واجهة برمجة تطبيقات واتساب للأعمال المُقدَّمة من شركة Meta Platforms, Inc. لأغراض التواصل مع المرضى والمستخدمين، وتشمل:
+                  يستخدم {companyName} واجهة برمجة تطبيقات واتساب للأعمال المُقدَّمة من شركة Meta Platforms, Inc. لأغراض التواصل مع المرضى والمستخدمين، وتشمل:
                 </p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
@@ -353,7 +360,7 @@ function PrivacyPolicyContent() {
               14. التواصل مع مسؤول حماية البيانات
             </h2>
             <p className="text-sm sm:text-base mb-4">
-              إذا كنت ترغب في ممارسة أي من حقوقك المتعلقة بحماية البيانات، أو إذا كنت تعتقد أن بياناتك الشخصية قد تعرضت لسوء المعالجة، يمكنك التواصل مع مسؤول حماية البيانات في المستشفى السعودي الألماني - صنعاء :
+              إذا كنت ترغب في ممارسة أي من حقوقك المتعلقة بحماية البيانات، أو إذا كنت تعتقد أن بياناتك الشخصية قد تعرضت لسوء المعالجة، يمكنك التواصل مع مسؤول حماية البيانات في {companyName} :
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <a href="tel:+967734000018" className="flex items-center gap-3 bg-green-50 rounded-lg p-4 hover:bg-green-100 transition-colors">

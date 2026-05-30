@@ -132,8 +132,8 @@ export function getCompanyName(lang: 'ar' | 'en' = 'ar'): string {
  * Get app title based on language
  */
 export function getAppTitle(lang: 'ar' | 'en' = 'ar'): string {
-  const arabicTitle = `${COMPANY_ARABIC_NAME} `;
-  const englishTitle = `${COMPANY_ENGLISH_NAME} `;
+  const arabicTitle = COMPANY_ARABIC_NAME;
+  const englishTitle = COMPANY_ENGLISH_NAME;
   return lang === 'ar' ? arabicTitle : englishTitle;
 }
 
