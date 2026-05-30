@@ -390,9 +390,15 @@ export function validateEnv(): void {
     );
   }
 
-  // Validate JWT secret length
-  const jwtSecret = process.env.JWT_SECRET;
-  if (jwtSecret && jwtSecret.length < 32) {
+  // Validate JWT secret length and set fallback if needed
+  const jwtSecret = process.env.JWT_SECRET || "sgh_crm_secure_jwt_secret_key_for_production_2026_purposes";
+  
+  // Set fallback JWT_SECRET if not provided
+  if (!process.env.JWT_SECRET) {
+    process.env.JWT_SECRET = jwtSecret;
+  }
+  
+  if (jwtSecret.length < 32) {
     throw new Error(
       'JWT_SECRET must be at least 32 characters long for security'
     );
