@@ -48,7 +48,7 @@ export const campRegistrationsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const normalizedPhone = normalizePhoneNumber(input.phone);
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // التحقق من عدم تكرار التسجيل بنفس الرقم ونفس المخيم خلال 3 أيام - معطل
       // const threeDaysAgo = new Date();
@@ -423,7 +423,7 @@ export const campRegistrationsRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // Get old status for audit log
       const [old] = await db.select({ status: campRegistrations.status }).from(campRegistrations).where(eq(campRegistrations.id, input.id)).limit(1);
@@ -545,7 +545,7 @@ export const campRegistrationsRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const now = new Date();
       const updateData: any = {
@@ -644,7 +644,7 @@ export const campRegistrationsRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       await db.delete(campRegistrations).where(eq(campRegistrations.id, input.id));
 
@@ -663,12 +663,12 @@ export const campRegistrationsRouter = router({
     }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // Check if receipt number already exists
       const [registration] = await db.select().from(campRegistrations).where(eq(campRegistrations.id, input.id)).limit(1);
       if (!registration) {
-        throw new Error("التسجيل غير موجود");
+        throw new TRPCError({ code: "NOT_FOUND", message: "التسجيل غير موجود" });
       }
 
       // If already has receipt number, return it

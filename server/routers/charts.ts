@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getDb } from "../db";
 import { leads, appointments, offerLeads, campRegistrations, whatsappConversations, whatsappMessages } from "../../drizzle/schema";
@@ -56,7 +57,7 @@ export const chartsRouter = router({
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const { startDate, groupBy, dateFormat } = getDateRange(input.period);
 
@@ -146,7 +147,7 @@ export const chartsRouter = router({
   leadStatusDistribution: protectedProcedure
     .query(async () => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const result = await db
         .select({
@@ -169,7 +170,7 @@ export const chartsRouter = router({
   registrationsBySource: protectedProcedure
     .query(async () => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // Leads by source
       const leadsResult = await db.execute(sql`
@@ -220,7 +221,7 @@ export const chartsRouter = router({
   offersAndCampsPerformance: protectedProcedure
     .query(async () => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // Offer leads count per offer
       const offersPerformance = await db.execute(sql`
@@ -266,7 +267,7 @@ export const chartsRouter = router({
   appointmentStatusDistribution: protectedProcedure
     .query(async () => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const result = await db
         .select({
@@ -290,7 +291,7 @@ export const chartsRouter = router({
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const { startDate, groupBy, dateFormat } = getDateRange(input.period);
 
@@ -348,7 +349,7 @@ export const chartsRouter = router({
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const now = new Date();
       let periodDays: number;

@@ -1,4 +1,5 @@
 import { protectedProcedure, publicProcedure, router, adminProcedure, requireWhatsAppFeature } from "../_core/trpc";
+import { TRPCError } from "@trpc/server";
 import * as db from "../db";
 import { meta } from "../MetaApiService";
 import { z } from "zod";
@@ -133,13 +134,13 @@ export const whatsappRouter = router({
     }),
 
     getCustomerInfo: protectedProcedure
-      .input(z.object({ phone: z.string() }))
+      .input(z.object({ phone: z.string().min(1, "رقم الهاتف مطلوب") }))
       .query(async ({ input }) => {
         return await db.getCustomerInfoByPhone(input.phone);
       }),
 
     getCustomerRecords: protectedProcedure
-      .input(z.object({ phone: z.string() }))
+      .input(z.object({ phone: z.string().min(1, "رقم الهاتف مطلوب") }))
       .query(async ({ input }) => {
         return await db.getAllCustomerRecordsByPhone(input.phone);
       }),
@@ -151,7 +152,7 @@ export const whatsappRouter = router({
       }),
 
     search: protectedProcedure
-      .input(z.object({ searchTerm: z.string() }))
+      .input(z.object({ searchTerm: z.string().min(1, "مصطلح البحث مطلوب") }))
       .query(async ({ input }) => {
         return await db.searchWhatsAppConversations(input.searchTerm);
       }),
@@ -163,8 +164,8 @@ export const whatsappRouter = router({
     create: protectedProcedure
       .input(
         z.object({
-          customerName: z.string(),
-          customerPhone: z.string(),
+          customerName: z.string().min(1, "اسم العميل مطلوب"),
+          customerPhone: z.string().min(9, "رقم الهاتف يجب أن يكون 9 أرقام على الأقل").max(15, "رقم الهاتف طويل جداً"),
           leadId: z.number().optional(),
           appointmentId: z.number().optional(),
           offerLeadId: z.number().optional(),
@@ -259,7 +260,7 @@ export const whatsappRouter = router({
         logOperation("deleteConversation", ctx.user.id, { conversationId: input.id });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         const { whatsappConversations, whatsappMessages } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
@@ -278,12 +279,12 @@ export const whatsappRouter = router({
       }),
 
     bulkArchive: adminProcedure
-      .input(z.object({ ids: z.array(z.number()) }))
+      .input(z.object({ ids: z.array(z.number()).min(1, "يجب تحديد محادثة واحدة على الأقل") }))
       .mutation(async ({ input, ctx }) => {
         logOperation("bulkArchive", ctx.user.id, { conversationIds: input.ids });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         const { whatsappConversations } = await import("../../drizzle/schema");
         const { eq, inArray } = await import("drizzle-orm");
@@ -297,12 +298,12 @@ export const whatsappRouter = router({
       }),
 
     bulkMarkImportant: adminProcedure
-      .input(z.object({ ids: z.array(z.number()), important: z.number() }))
+      .input(z.object({ ids: z.array(z.number()).min(1, "يجب تحديد محادثة واحدة على الأقل"), important: z.number().min(0).max(1) }))
       .mutation(async ({ input, ctx }) => {
         logOperation("bulkMarkImportant", ctx.user.id, { conversationIds: input.ids, important: input.important });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         const { whatsappConversations } = await import("../../drizzle/schema");
         const { inArray } = await import("drizzle-orm");
@@ -319,7 +320,7 @@ export const whatsappRouter = router({
       .input(z.object({ conversationId: z.number() }))
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         const { whatsappMessages } = await import("../../drizzle/schema");
         const { eq, count, sql } = await import("drizzle-orm");
@@ -368,7 +369,7 @@ export const whatsappRouter = router({
         logOperation("exportConversation", ctx.user.id, { conversationId: input.conversationId, format: input.format || "json" });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         const { whatsappMessages, whatsappConversations } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
@@ -380,7 +381,7 @@ export const whatsappRouter = router({
           .limit(1);
 
         if (!conversation || conversation.length === 0) {
-          throw new Error("Conversation not found");
+          throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة غير موجودة" });
         }
 
         const messages = await dbConn
@@ -450,11 +451,14 @@ export const whatsappRouter = router({
           const rateLimit = checkRateLimit(ctx.user.id);
           if (!rateLimit.allowed) {
             const resetInSeconds = Math.ceil((rateLimit.resetTime - Date.now()) / 1000);
-            throw new Error(`Rate limit exceeded. Please wait ${resetInSeconds} seconds before sending more messages.`);
+            throw new TRPCError({
+              code: "TOO_MANY_REQUESTS",
+              message: `تم تجاوز حد الإرسال. يرجى الانتظار ${resetInSeconds} ثانية قبل إرسال رسائل أخرى`,
+            });
           }
 
           const conv = await db.getWhatsAppConversationById(input.conversationId);
-          if (!conv) throw new Error("Conversation not found");
+          if (!conv) throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة غير موجودة" });
 
           // Server-side 24-hour window validation
           const latestInboundMessage = await db.getLatestInboundWhatsAppMessage(input.conversationId);
@@ -529,7 +533,11 @@ export const whatsappRouter = router({
           return { ...result, rateLimit };
         } catch (error: any) {
           console.error("[WhatsApp] Failed to send message:", error);
-          throw new Error(error.message || "Failed to send message");
+          if (error instanceof TRPCError) throw error;
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: error.message || "فشل إرسال الرسالة",
+          });
         }
       }),
 
@@ -552,7 +560,10 @@ export const whatsappRouter = router({
           return result;
         } catch (error: any) {
           console.error("[WhatsApp] Failed to upload media:", error);
-          throw new Error(error.message || "Failed to upload media");
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: error.message || "فشل رفع الملف",
+          });
         }
       }),
 
@@ -562,7 +573,7 @@ export const whatsappRouter = router({
         logOperation("deleteMessage", ctx.user.id, { messageId: input.messageId });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         const { whatsappMessages } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
@@ -580,7 +591,7 @@ export const whatsappRouter = router({
 
         try {
           const dbConn = await db.getDb();
-          if (!dbConn) throw new Error("Database not available");
+          if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
           const { whatsappMessages, whatsappConversations } = await import("../../drizzle/schema");
           const { eq } = await import("drizzle-orm");
@@ -592,7 +603,7 @@ export const whatsappRouter = router({
             .where(eq(whatsappConversations.id, input.conversationId));
 
           if (!conversations || conversations.length === 0) {
-            throw new Error("Conversation not found");
+            throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة غير موجودة" });
           }
 
           const conversation = conversations[0];
@@ -627,18 +638,22 @@ export const whatsappRouter = router({
           return { success: true, data: exportData };
         } catch (error: any) {
           console.error("[WhatsApp] Failed to export conversation:", error);
-          throw new Error(error.message || "Failed to export conversation");
+          if (error instanceof TRPCError) throw error;
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: error.message || "فشل تصدير المحادثة",
+          });
         }
       }),
 
     searchInConversation: protectedProcedure
       .input(z.object({
         conversationId: z.number(),
-        searchTerm: z.string(),
+        searchTerm: z.string().min(1, "مصطلح البحث مطلوب"),
       }))
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         const { whatsappMessages } = await import("../../drizzle/schema");
         const { eq, or, like, and } = await import("drizzle-orm");
@@ -672,7 +687,7 @@ export const whatsappRouter = router({
         });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         const { whatsappMessages, whatsappConversations } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
@@ -684,7 +699,7 @@ export const whatsappRouter = router({
           .where(eq(whatsappMessages.id, input.messageId))
           .limit(1);
 
-        if (!originalMessages.length) throw new Error("Original message not found");
+        if (!originalMessages.length) throw new TRPCError({ code: "NOT_FOUND", message: "الرسالة الأصلية غير موجودة" });
         const original = originalMessages[0];
 
         // Get target conversation
@@ -694,7 +709,7 @@ export const whatsappRouter = router({
           .where(eq(whatsappConversations.id, input.targetConversationId))
           .limit(1);
 
-        if (!targetConvs.length) throw new Error("Target conversation not found");
+        if (!targetConvs.length) throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة الهدف غير موجودة" });
         const targetConv = targetConvs[0];
 
         // Send the message to target conversation
@@ -896,7 +911,7 @@ sendTypingIndicator: protectedProcedure
     }))
     .mutation(async ({ input, ctx }) => {
       const conv = await db.getWhatsAppConversationById(input.conversationId);
-      if (!conv) throw new Error("Conversation not found");
+      if (!conv) throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة غير موجودة" });
 
       if (!input.typing) {
         return { success: true };
@@ -1061,7 +1076,7 @@ sendTypingIndicator: protectedProcedure
   getMessageStats: protectedProcedure.query(async () => {
     try {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const { whatsappMessages } = await import("../../drizzle/schema");
       const { gte, lte, and, sql } = await import("drizzle-orm");
@@ -1548,7 +1563,7 @@ sendTypingIndicator: protectedProcedure
       }))
       .mutation(async ({ input, ctx }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { quickReplies } = await import("../../drizzle/schema");
         const insertId = await dbConn.insert(quickReplies).values({
           name: input.name,
@@ -1569,7 +1584,7 @@ sendTypingIndicator: protectedProcedure
       }))
       .mutation(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { quickReplies } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
         const { id, ...updateData } = input;
@@ -1584,7 +1599,7 @@ sendTypingIndicator: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { quickReplies } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
         await dbConn.delete(quickReplies).where(eq(quickReplies.id, input.id));
@@ -1612,7 +1627,7 @@ sendTypingIndicator: protectedProcedure
       }))
       .mutation(async ({ input, ctx }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { savedSearches } = await import("../../drizzle/schema");
         const insertId = await dbConn.insert(savedSearches).values({
           userId: ctx.user.id,
@@ -1629,7 +1644,7 @@ sendTypingIndicator: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { savedSearches } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
         await dbConn.delete(savedSearches).where(eq(savedSearches.id, input.id));
@@ -1649,7 +1664,7 @@ sendTypingIndicator: protectedProcedure
       }).optional())
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappAccountAlerts } = await import("../../drizzle/schema");
         const { eq, and, desc } = await import("drizzle-orm");
 
@@ -1672,7 +1687,7 @@ sendTypingIndicator: protectedProcedure
       .input(z.object({ id: z.number(), resolvedBy: z.number() }))
       .mutation(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappAccountAlerts } = await import("../../drizzle/schema");
         const { eq } = await import("drizzle-orm");
 
@@ -1696,7 +1711,7 @@ sendTypingIndicator: protectedProcedure
       }).optional())
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappSecurityEvents } = await import("../../drizzle/schema");
         const { eq, desc } = await import("drizzle-orm");
 
@@ -1716,7 +1731,7 @@ sendTypingIndicator: protectedProcedure
       }).optional())
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappPhoneQuality } = await import("../../drizzle/schema");
         const { eq, desc } = await import("drizzle-orm");
 
@@ -1729,7 +1744,7 @@ sendTypingIndicator: protectedProcedure
 
     getCurrent: protectedProcedure.query(async () => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappPhoneQuality } = await import("../../drizzle/schema");
       const { desc } = await import("drizzle-orm");
 
@@ -1751,7 +1766,7 @@ sendTypingIndicator: protectedProcedure
       }).optional())
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappConversationQuality } = await import("../../drizzle/schema");
         const { eq, desc } = await import("drizzle-orm");
 
@@ -1772,7 +1787,7 @@ sendTypingIndicator: protectedProcedure
       }).optional())
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappUserOptIns } = await import("../../drizzle/schema");
         const { eq, and, desc } = await import("drizzle-orm");
 
@@ -1800,7 +1815,7 @@ sendTypingIndicator: protectedProcedure
       }))
       .mutation(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappUserOptIns } = await import("../../drizzle/schema");
         const { eq, and } = await import("drizzle-orm");
 
@@ -1843,7 +1858,7 @@ sendTypingIndicator: protectedProcedure
 
     getStats: protectedProcedure.query(async () => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappUserOptIns } = await import("../../drizzle/schema");
       const { eq, sql } = await import("drizzle-orm");
 
@@ -1870,7 +1885,7 @@ sendTypingIndicator: protectedProcedure
       }).optional())
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappTemplateQuality } = await import("../../drizzle/schema");
         const { eq, desc } = await import("drizzle-orm");
 
@@ -1894,7 +1909,7 @@ sendTypingIndicator: protectedProcedure
       }).optional())
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappWebhookEvents } = await import("../../drizzle/schema");
         const { eq, and, desc } = await import("drizzle-orm");
 
@@ -1936,7 +1951,7 @@ sendTypingIndicator: protectedProcedure
     // إحصائيات الأحداث حسب النوع
     getStatsByType: protectedProcedure.query(async () => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappWebhookEvents } = await import("../../drizzle/schema");
       const { sql } = await import("drizzle-orm");
 
@@ -1959,7 +1974,7 @@ sendTypingIndicator: protectedProcedure
       }))
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappWebhookEvents } = await import("../../drizzle/schema");
         const { like, desc } = await import("drizzle-orm");
 
@@ -1989,7 +2004,7 @@ sendTypingIndicator: protectedProcedure
       }))
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new Error("Database not available");
+        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
         const { whatsappWebhookEvents } = await import("../../drizzle/schema");
         const { like, desc, eq } = await import("drizzle-orm");
 
@@ -2021,7 +2036,7 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ startDate: z.string().optional(), endDate: z.string().optional() }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappConversations } = await import("../../drizzle/schema");
       const { desc, and, gte, lte } = await import("drizzle-orm");
 
@@ -2040,7 +2055,7 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ phoneNumber: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappContacts } = await import("../../drizzle/schema");
       const { desc, eq } = await import("drizzle-orm");
 
@@ -2055,7 +2070,7 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ status: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappOrders } = await import("../../drizzle/schema");
       const { desc, eq } = await import("drizzle-orm");
 
@@ -2070,7 +2085,7 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ sourceType: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappReferrals } = await import("../../drizzle/schema");
       const { desc, eq } = await import("drizzle-orm");
 
@@ -2085,7 +2100,7 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ emoji: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappReactions } = await import("../../drizzle/schema");
       const { desc, eq } = await import("drizzle-orm");
 
@@ -2100,7 +2115,7 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ status: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappTransactions } = await import("../../drizzle/schema");
       const { desc, eq } = await import("drizzle-orm");
 
@@ -2115,7 +2130,7 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ templateName: z.string().optional(), startDate: z.string(), endDate: z.string() }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new Error("Database not available");
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
       const { whatsappTemplates, whatsappNotifications } = await import("../../drizzle/schema");
       const { sql, and, gte, lte, eq, like } = await import("drizzle-orm");
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import { createAuditLog } from "./auditLogs";
 import {
@@ -57,7 +58,10 @@ export const leadsRouter = router({
       }
       
       if (!campaign) {
-        throw new Error("Failed to create or retrieve campaign");
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "فشل في إنشاء أو استرجاع الحملة",
+        });
       }
 
       // Create lead
@@ -157,7 +161,7 @@ export const leadsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const lead = await getLeadById(input.id);
       if (!lead) {
-        throw new Error("Lead not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "العميل غير موجود" });
       }
 
       // Update lead status
@@ -205,7 +209,7 @@ export const leadsRouter = router({
     .mutation(async ({ input }) => {
       const lead = await getLeadById(input.leadId);
       if (!lead) {
-        throw new Error("Lead not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "العميل غير موجود" });
       }
 
       const success = await sendCustomMessage(lead.phone, input.message);
@@ -228,7 +232,7 @@ export const leadsRouter = router({
     .mutation(async ({ input }) => {
       const lead = await getLeadById(input.leadId);
       if (!lead) {
-        throw new Error("Lead not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "العميل غير موجود" });
       }
 
       const success = await sendBookingConfirmation({

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure, requireReportsFeature } from "../_core/trpc";
 import { getDb } from "../db";
 import { appointments, campRegistrations, offerLeads, leads, camps, offers, doctors } from "../../drizzle/schema";
@@ -24,7 +25,7 @@ export const reportsRouter = router({
     .input(dateRangeSchema)
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const { startDate, endDate } = input;
 
@@ -97,7 +98,7 @@ export const reportsRouter = router({
     .input(dateRangeSchema)
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const { startDate, endDate } = input;
 
@@ -189,7 +190,7 @@ export const reportsRouter = router({
     .input(dateRangeSchema)
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const { startDate, endDate } = input;
 
@@ -346,7 +347,7 @@ export const reportsRouter = router({
     .input(dateRangeSchema)
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const { startDate, endDate } = input;
 

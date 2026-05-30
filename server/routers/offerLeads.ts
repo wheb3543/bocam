@@ -44,7 +44,7 @@ export const offerLeadsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const normalizedPhone = normalizePhoneNumber(input.phone);
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // التحقق من عدم تكرار الطلب بنفس الرقم ونفس العرض خلال 3 أيام - معطل
       // const threeDaysAgo = new Date();
@@ -279,7 +279,7 @@ export const offerLeadsRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // Get old status for audit log
       const [old] = await db.select({ status: offerLeads.status }).from(offerLeads).where(eq(offerLeads.id, input.id)).limit(1);
@@ -385,7 +385,7 @@ export const offerLeadsRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // حفظ وقت كل حالة
       const now = new Date();
@@ -435,7 +435,7 @@ export const offerLeadsRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       await db.delete(offerLeads).where(eq(offerLeads.id, input.id));
 
@@ -454,12 +454,12 @@ export const offerLeadsRouter = router({
     }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       // Check if receipt number already exists
       const [lead] = await db.select().from(offerLeads).where(eq(offerLeads.id, input.id)).limit(1);
       if (!lead) {
-        throw new Error("الحجز غير موجود");
+        throw new TRPCError({ code: "NOT_FOUND", message: "الحجز غير موجود" });
       }
 
       // If already has receipt number, return it

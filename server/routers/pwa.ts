@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 import { getDb } from '../db';
 import { pwaInstalls } from '../../drizzle/schema';
 import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
@@ -22,7 +23,7 @@ export const pwaRouter = router({
     }))
     .mutation(async ({ input, ctx }) => {
       const db = await getDb();
-      if (!db) throw new Error('Database not available');
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const ipAddress = ctx.req.headers['x-forwarded-for'] as string ||
         ctx.req.socket?.remoteAddress || null;

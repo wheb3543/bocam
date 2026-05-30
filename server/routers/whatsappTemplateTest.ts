@@ -1,4 +1,5 @@
 import { router, protectedProcedure } from "../_core/trpc";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getDb } from "../db";
 import { eq } from "drizzle-orm";
@@ -25,7 +26,7 @@ export const whatsappTemplateTestRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await getDb();
-        if (!db) throw new Error("Database not available");
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         // تطبيع رقم الهاتف
         const normalizedPhone = normalizePhoneNumber(input.phone);
@@ -100,7 +101,7 @@ export const whatsappTemplateTestRouter = router({
   listApprovedTemplates: protectedProcedure.query(async () => {
     try {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
       const templates = await db
         .select()
@@ -144,7 +145,7 @@ export const whatsappTemplateTestRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await getDb();
-        if (!db) throw new Error("Database not available");
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         // تطبيع رقم الهاتف
         const normalizedPhone = normalizePhoneNumber(input.phone);
@@ -229,7 +230,7 @@ export const whatsappTemplateTestRouter = router({
     .query(async ({ input }) => {
       try {
         const db = await getDb();
-        if (!db) throw new Error("Database not available");
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
 
         const template = await db
           .select()
