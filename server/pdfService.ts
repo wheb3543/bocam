@@ -1,6 +1,7 @@
 import PDFDocument from 'pdfkit';
 import { Readable } from 'stream';
 import path from 'path';
+import { COMPANY_SLOGAN_AR } from '@shared/config';
 
 // مسارات الخطوط العربية
 const AMIRI_REGULAR = path.join(process.cwd(), 'server', 'fonts', 'Amiri-Regular.ttf');
@@ -126,7 +127,7 @@ function addFooter(doc: PDFKit.PDFDocument, metadata: ExportMetadata) {
     .text(metadata.exportDate, 50, footerY, { align: 'left' });
 
   // شعار "نرعاكم كأهالينا" في المنتصف
-  doc.text('نرعاكم كأهالينا', 0, footerY, {
+  doc.text(COMPANY_SLOGAN_AR, 0, footerY, {
     align: 'center',
     width: doc.page.width,
   });

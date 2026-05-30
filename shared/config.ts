@@ -25,6 +25,16 @@ export const COMPANY_NAME = process.env.COMPANY_NAME || 'App';
 export const COMPANY_ARABIC_NAME = process.env.COMPANY_ARABIC_NAME || 'تطبيق';
 
 /**
+ * Company slogan (Arabic)
+ */
+export const COMPANY_SLOGAN_AR = process.env.COMPANY_SLOGAN_AR || 'نرعاكم كأهالينا';
+
+/**
+ * Company slogan (English)
+ */
+export const COMPANY_SLOGAN_EN = process.env.COMPANY_SLOGAN_EN || 'Caring like family';
+
+/**
  * Company name (English) - preferred for international contexts
  */
 export const COMPANY_ENGLISH_NAME = process.env.COMPANY_ENGLISH_NAME || 'App';

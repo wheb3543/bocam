@@ -3,6 +3,8 @@
  * Sends email notifications to hospital staff when new leads are registered
  */
 
+import { COMPANY_SLOGAN_AR, COMPANY_ARABIC_NAME } from '@shared/config';
+
 interface EmailParams {
   to: string;
   subject: string;
@@ -162,8 +164,8 @@ export function generateNewLeadEmail(lead: {
           </p>
         </div>
         <div class="footer">
-          <p>المستشفى السعودي الألماني - صنعاء</p>
-          <p>نرعاكم كأهالينا</p>
+          <p>${COMPANY_ARABIC_NAME}</p>
+          <p>${COMPANY_SLOGAN_AR}</p>
           <p style="margin-top: 10px;">
             <a href="tel:8000018" style="color: #00A3E0; text-decoration: none;">
               الرقم المجاني: 8000018
@@ -336,8 +338,8 @@ export async function sendNewAppointmentEmail(params: {
           </p>
         </div>
         <div class="footer">
-          <p>المستشفى السعودي الألماني - صنعاء</p>
-          <p>نرعاكم كأهالينا</p>
+          <p>${COMPANY_ARABIC_NAME}</p>
+          <p>${COMPANY_SLOGAN_AR}</p>
           <p style="margin-top: 10px;">
             <a href="tel:8000018" style="color: #00A3E0; text-decoration: none;">
               الرقم المجاني: 8000018

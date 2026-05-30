@@ -7,6 +7,7 @@
  */
 
 import { sendWhatsAppTextMessage, formatPhoneNumber } from './whatsappCloudAPI';
+import { COMPANY_SLOGAN_AR } from '@shared/config';
 
 interface WhatsAppMessage {
   to: string;
@@ -51,7 +52,7 @@ export async function sendWelcomeMessage(lead: {
 
 للاستفسارات العاجلة، يمكنك التواصل معنا على الرقم المجاني: 8000018
 
-نرعاكم كأهالينا 💚`;
+${COMPANY_SLOGAN_AR} 💚`;
 
   const message = lead.welcomeMessage || defaultMessage;
   
@@ -86,7 +87,7 @@ ${lead.appointmentDate && lead.appointmentTime ? `
 
 للاستفسارات: 8000018
 
-نرعاكم كأهالينا 💚
+${COMPANY_SLOGAN_AR} 💚
 المستشفى السعودي الألماني`;
 
   return sendWhatsAppMessage({

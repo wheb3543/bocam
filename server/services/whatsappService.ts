@@ -10,6 +10,7 @@ import { normalizePhoneNumber } from "../db";
 import { sendWhatsAppTextMessage } from "../whatsappCloudAPI";
 import { ENV } from "../_core/env";
 import { meta } from "../MetaApiService";
+import { COMPANY_SLOGAN_AR } from "@shared/config";
 
 /**
  * Send a simple text message via Cloud API
@@ -60,7 +61,7 @@ export async function sendWelcomeMessage(params: {
 
 للاستفسارات: 8000018
 
-نرعاكم كأهالينا 💚`;
+${COMPANY_SLOGAN_AR} 💚`;
 
   return sendTextMessage(params.phone, message, { priority: "high" });
 }
@@ -88,7 +89,7 @@ ${params.appointmentDate && params.appointmentTime ? `📅 التاريخ: ${par
 
 للاستفسارات: 8000018
 
-نرعاكم كأهالينا 💚`;
+${COMPANY_SLOGAN_AR} 💚`;
 
   return sendTextMessage(params.phone, message, { priority: "high" });
 }
