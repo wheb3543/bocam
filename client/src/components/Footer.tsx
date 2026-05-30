@@ -4,7 +4,7 @@
  * Unified footer for all public pages with improved responsive layout
  */
 import { Phone, MapPin, Clock } from "lucide-react";
-import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME } from "@/const";
+import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from "@/const";
 import { Link } from "wouter";
 
 export default function Footer() {
@@ -20,7 +20,7 @@ export default function Footer() {
               className="h-8 sm:h-10 w-auto mx-auto sm:mx-0 mb-2 sm:mb-3"
             />
             <p className="text-green-100 text-xs sm:text-sm font-medium">{APP_TITLE}</p>
-            <p className="text-green-300 text-[10px] sm:text-xs mt-1 sm:mt-1.5">نرعاكم كأهالينا - Caring like family</p>
+            <p className="text-green-300 text-[10px] sm:text-xs mt-1 sm:mt-1.5">{getCompanySlogan()} - Caring like family</p>
             <p className="text-green-400/70 text-[10px] sm:text-xs mt-2 sm:mt-3 leading-relaxed max-w-xs mx-auto sm:mx-0">
               منصة الحجز الإلكترونية لـ {COMPANY_ARABIC_NAME}
             </p>

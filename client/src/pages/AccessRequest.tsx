@@ -2,6 +2,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Clock, Home } from "lucide-react";
+import { COMPANY_ARABIC_NAME, getCompanySlogan } from "@/const";
 
 export default function AccessRequest() {
   const [, setLocation] = useLocation();
@@ -62,8 +63,8 @@ export default function AccessRequest() {
           </Button>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>المستشفى السعودي الألماني - صنعاء</p>
-            <p className="mt-1">نرعاكم كأهالينا</p>
+            <p>{COMPANY_ARABIC_NAME}</p>
+            <p className="mt-1">{getCompanySlogan()}</p>
           </div>
         </CardContent>
       </Card>

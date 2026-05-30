@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { Phone, Menu, X, ChevronLeft } from "lucide-react";
-import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME } from "@/const";
+import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from "@/const";
 import { Link } from "wouter";
 import InstallPWAButton from "@/components/InstallPWAButton";
 
@@ -68,7 +68,7 @@ export default function Navbar() {
                 <img src="/icon-72x72.png" alt={APP_TITLE} className="h-6 w-auto" />
                 <div className="hidden xs:block sm:block">
                   <h1 className="text-[11px] sm:text-sm md:text-lg font-bold text-green-900 dark:text-green-400 leading-tight line-clamp-1">{APP_TITLE}</h1>
-                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground dark:text-muted-foreground">نرعاكم كأهالينا</p>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground dark:text-muted-foreground">{getCompanySlogan()}</p>
                 </div>
               </div>
             </Link>

@@ -13,6 +13,7 @@ import { useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { getCompanySlogan } from "@/const";
 import { ar } from "date-fns/locale";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { APP_LOGO, COMPANY_PHONE, COMPANY_ARABIC_NAME } from "@/const";
@@ -412,7 +413,7 @@ export default function CampStatsPage() {
         </div>
         
         <div class="footer">
-          <div class="slogan">نرعاكم كأهالينا</div>
+          <div class="slogan">{getCompanySlogan()}</div>
           <div class="meta">
             <div>المستخدم: ${userName}</div>
             <div>${format(printDate, "dd/MM/yyyy HH:mm", { locale: ar })}</div>

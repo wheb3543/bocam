@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { APP_LOGO, COMPANY_PHONE, COMPANY_ARABIC_NAME, COMPANY_NAME } from "@/const";
+import { APP_LOGO, COMPANY_PHONE, COMPANY_ARABIC_NAME, COMPANY_NAME, getCompanySlogan } from "@/const";
 
 interface PrintReceiptProps {
   data: {
@@ -122,7 +122,7 @@ export function printReceipt(data: PrintReceiptProps["data"], userName: string) 
       </div>
       
       <div class="footer">
-        <div class="slogan">نرعاكم كأهالينا</div>
+        <div class="slogan">{getCompanySlogan()}</div>
         <div class="meta">
           <div>${userName}</div>
           <div>${format(printDate, "dd/MM/yyyy HH:mm", { locale: ar })}</div>

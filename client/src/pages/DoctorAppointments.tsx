@@ -18,6 +18,7 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, CheckCircle2, Phone, Mail, MapPin, Calendar, Clock, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { getCompanySlogan, COMPANY_ARABIC_NAME } from "@/const";
 
 export default function DoctorAppointments() {
   return (
@@ -401,9 +402,9 @@ function DoctorAppointmentsContent() {
               alt="المستشفى السعودي الألماني" 
               className="h-16 mx-auto mb-4"
             />
-            <p className="text-lg font-semibold mb-2">نرعاكم كأهالينا</p>
+            <p className="text-lg font-semibold mb-2">{getCompanySlogan()}</p>
             <p className="text-sm opacity-90">
-              © 2025 المستشفى السعودي الألماني - صنعاء. جميع الحقوق محفوظة.
+              © 2025 {COMPANY_ARABIC_NAME}. جميع الحقوق محفوظة.
             </p>
           </div>
         </footer>

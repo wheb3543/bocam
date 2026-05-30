@@ -11,7 +11,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import InstallPWAButton from "@/components/InstallPWAButton";
-import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, COMPANY_NAME } from "@/const";
+import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, COMPANY_NAME, getCompanySlogan } from "@/const";
 import { Link } from "wouter";
 import { useState, useEffect } from "react";
 
@@ -281,7 +281,7 @@ export default function HomePage() {
               {COMPANY_NAME}
             </p>
             <p className="text-sm sm:text-lg md:text-2xl mb-6 sm:mb-8 md:mb-10 text-blue-100 font-medium">
-              نرعاكم كأهالينا - Caring like family
+              {getCompanySlogan()}
             </p>
             <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto px-2 text-white/95 bg-black/20 rounded-lg p-4">
               منصة الحجز الإلكترونية لـ {COMPANY_ARABIC_NAME}. احجز موعدك مع أفضل

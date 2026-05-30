@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
+import { getCompanySlogan, COMPANY_ARABIC_NAME } from "@/const";
 
 export default function ThankYou() {
   const { formatDate, formatDateTime } = useFormatDate();
@@ -177,9 +178,9 @@ export default function ThankYou() {
               className="h-10 sm:h-12 md:h-16 mx-auto mb-2 sm:mb-3"
             />
             <p className="text-sm text-muted-foreground">
-              المستشفى السعودي الألماني - صنعاء
+              {COMPANY_ARABIC_NAME}
               <br />
-              نرعاكم كأهالينا
+              {getCompanySlogan()}
             </p>
           </div>
         </CardContent>

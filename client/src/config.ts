@@ -47,6 +47,11 @@ export const COMPANY_EMAIL = import.meta.env.VITE_COMPANY_EMAIL || '';
 export const COMPANY_ADDRESS = import.meta.env.VITE_COMPANY_ADDRESS || '';
 
 /**
+ * Company slogan/tagline
+ */
+export const COMPANY_SLOGAN = import.meta.env.VITE_COMPANY_SLOGAN || 'نرعاكم كأهالينا';
+
+/**
  * Social Media URLs
  * External social media links
  */
@@ -127,8 +132,8 @@ export function getCompanyName(lang: 'ar' | 'en' = 'ar'): string {
  * Get app title based on language
  */
 export function getAppTitle(lang: 'ar' | 'en' = 'ar'): string {
-  const arabicTitle = `${COMPANY_ARABIC_NAME} - صنعاء`;
-  const englishTitle = `${COMPANY_ENGLISH_NAME} - Sana'a`;
+  const arabicTitle = `${COMPANY_ARABIC_NAME} `;
+  const englishTitle = `${COMPANY_ENGLISH_NAME} `;
   return lang === 'ar' ? arabicTitle : englishTitle;
 }
 
@@ -175,4 +180,11 @@ export function getSocialMediaUrls(): {
     twitter: TWITTER_URL,
     linkedin: LINKEDIN_URL,
   };
+}
+
+/**
+ * Get company slogan
+ */
+export function getCompanySlogan(): string {
+  return COMPANY_SLOGAN;
 }

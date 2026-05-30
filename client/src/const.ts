@@ -3,6 +3,7 @@ import {
   COMPANY_LOGO,
   COMPANY_ARABIC_NAME,
   COMPANY_ENGLISH_NAME,
+  COMPANY_SLOGAN,
   COMPANY_PHONE,
   COMPANY_EMAIL,
   FACEBOOK_URL,
@@ -13,7 +14,8 @@ import {
   getAppTitle,
   getContactInfo,
   getSocialMediaUrl,
-  getSocialMediaUrls
+  getSocialMediaUrls,
+  getCompanySlogan
 } from "./config";
 
 // Constants that should remain shared (copied from shared/const.ts)
@@ -32,6 +34,7 @@ export {
   COMPANY_NAME,
   COMPANY_ARABIC_NAME,
   COMPANY_ENGLISH_NAME,
+  COMPANY_SLOGAN,
   COMPANY_PHONE,
   COMPANY_EMAIL,
   FACEBOOK_URL,
@@ -46,7 +49,8 @@ export {
   getAppTitle,
   getContactInfo,
   getSocialMediaUrl,
-  getSocialMediaUrls
+  getSocialMediaUrls,
+  getCompanySlogan
 };
 
 // Generate login URL at runtime so redirect URI reflects the current origin.

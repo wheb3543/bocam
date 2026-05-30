@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { trpc } from './trpc';
-import { APP_LOGO, COMPANY_PHONE, COMPANY_EMAIL, COMPANY_ARABIC_NAME } from "@/const";
+import { APP_LOGO, COMPANY_PHONE, COMPANY_EMAIL, COMPANY_ARABIC_NAME, getCompanySlogan } from "@/const";
 
 /**
  * معلومات التصدير (Metadata)
@@ -299,7 +299,7 @@ export function printTable(options: ExportOptions): void {
       </table>
       <div class="page-footer">
         <div class="footer-left"><p>وقت الطباعة: ${formatDateTime(new Date())}</p></div>
-        <div class="footer-center"><p>نرعاكم كأهالينا</p></div>
+        <div class="footer-center"><p>${getCompanySlogan()}</p></div>
         <div class="footer-right"><p>المستخدم: ${metadata.exportedBy}</p></div>
       </div>
       <script>
