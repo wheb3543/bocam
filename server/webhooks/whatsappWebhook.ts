@@ -93,7 +93,7 @@ export function verifyWebhookToken(req: Request, res: Response): boolean {
     return false;
   }
 
-  const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || process.env.WEBHOOK_VERIFY_TOKEN || "sgh_crm_webhook_2024";
+  const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || process.env.WEBHOOK_VERIFY_TOKEN;
 
   if (token !== VERIFY_TOKEN) {
     console.warn("[WhatsApp Webhook] ❌ Invalid verify token");
@@ -252,8 +252,6 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     }
 
     console.log(`[WhatsApp Webhook] 📩 Incoming ${type} message from ${from} (msgId: ${messageId})`);
-    console.log(`[WhatsApp Webhook] 📩 Full message object:`, JSON.stringify(message, null, 2));
-    console.log(`[WhatsApp Webhook] 📩 Full metadata object:`, JSON.stringify(metadata, null, 2));
 
     // ── استخراج بيانات identity للتحقق من هوية المستخدم ─────────────────────
     let identityData = null;

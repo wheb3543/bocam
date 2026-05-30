@@ -2,13 +2,16 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { publicProcedure, router } from "../_core/trpc";
+import { publicProcedure, adminProcedure, router } from "../_core/trpc";
 import { getUserByUsername, getUserByEmail, getUserById } from "../db";
 import { users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { getDb } from "../db";
 
-const JWT_SECRET = process.env.JWT_SECRET || "admin-auth-secret";
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
+const JWT_SECRET: string = process.env.JWT_SECRET;
 const COOKIE_NAME = "admin_session";
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
@@ -126,7 +129,7 @@ export const authRouter = router({
   }),
 
   // تسجيل مستخدم جديد (للمسؤولين فقط)
-  register: publicProcedure
+  register: adminProcedure
     .input(z.object({
       username: z.string().min(3, "اسم المستخدم يجب أن يكون 3 أحرف على الأقل"),
       password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),

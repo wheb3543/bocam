@@ -18,7 +18,10 @@ import {
 } from "../db/patients";
 import { meta } from "../MetaApiService";
 
-const PATIENT_JWT_SECRET = process.env.JWT_SECRET || "patient-portal-secret";
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
+const PATIENT_JWT_SECRET: string = process.env.JWT_SECRET;
 const PATIENT_COOKIE_NAME = "patient_session";
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
@@ -92,8 +95,6 @@ export const patientPortalRouter = router({
       return { 
         success: true, 
         message: "تم إرسال رمز التحقق",
-        // في التطوير، نعيد الرمز للاختبار
-        devCode: process.env.NODE_ENV === "development" ? code : undefined,
       };
     }),
 

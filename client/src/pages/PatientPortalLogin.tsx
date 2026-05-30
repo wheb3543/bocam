@@ -27,7 +27,7 @@ export default function PatientPortalLogin() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
-  const [devCode, setDevCode] = useState<string | null>(null);
+
 
   // Registration fields
   const [fullName, setFullName] = useState("");
@@ -48,11 +48,8 @@ export default function PatientPortalLogin() {
   }, [patient, navigate]);
 
   const sendOtpMutation = trpc.patientPortal.sendOtp.useMutation({
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("تم إرسال رمز التحقق إلى هاتفك");
-      if (data.devCode) {
-        setDevCode(data.devCode);
-      }
       setStep("otp");
     },
     onError: (err) => {
@@ -290,12 +287,7 @@ export default function PatientPortalLogin() {
                 <CardDescription>أدخل الرمز المرسل إلى {phone}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {devCode && (
-                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-center">
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mb-1">رمز التحقق (للتطوير):</p>
-                    <p className="text-2xl font-bold text-amber-800 dark:text-amber-300 tracking-widest" dir="ltr">{devCode}</p>
-                  </div>
-                )}
+
                 <div>
                   <Label htmlFor="otp" className="text-sm font-medium">رمز التحقق</Label>
                   <Input
@@ -312,7 +304,7 @@ export default function PatientPortalLogin() {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => { setStep("phone"); setOtp(""); setDevCode(null); }}
+                    onClick={() => { setStep("phone"); setOtp(""); }}
                     className="flex-1 h-11"
                   >
                     <ArrowRight className="h-4 w-4 ml-1" />

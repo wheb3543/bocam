@@ -1,12 +1,17 @@
 import mysql from 'mysql2/promise';
 import readline from 'readline';
 
-// Database connection details
-const DB_HOST = 'gateway02.us-east-1.prod.aws.tidbcloud.com';
-const DB_PORT = 4000;
-const DB_USER = '2xtgvXGdr7mxJSP.root';
-const DB_PASSWORD = '5iQN6bbdle0K4JiaV41w';
-const DB_NAME = 'HgGpRPs4xs9xrzjfX4xmFY';
+// Database connection details — read from environment
+const DB_HOST = process.env.DB_HOST;
+const DB_PORT = parseInt(process.env.DB_PORT || '4000', 10);
+const DB_USER = process.env.DB_USER;
+const DB_PASSWORD = process.env.DB_PASSWORD;
+const DB_NAME = process.env.DB_NAME;
+
+if (!DB_HOST || !DB_USER || !DB_PASSWORD || !DB_NAME) {
+  console.error('❌ Missing required DB_HOST, DB_USER, DB_PASSWORD, or DB_NAME environment variables.');
+  process.exit(1);
+}
 
 // Table configurations with phone number columns
 const TABLE_CONFIG = {

@@ -1,5 +1,6 @@
 import { eq, desc, and, like, or, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import crypto from "crypto";
 import { InsertUser, users, campaigns, leads, leadStatusHistory, settings, doctors, appointments, accessRequests, InsertCampaign, InsertLead, InsertLeadStatusHistory, InsertSetting, InsertAppointment, InsertAccessRequest, sharedColumnTemplates, InsertSharedColumnTemplate } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { publish, channelForConversation } from './_core/pubsub';
@@ -173,10 +174,12 @@ export async function approveAccessRequest(requestId: number, reviewerId: number
   }
   
   // Create user account with openId from OAuth
+  // Generate a random password — user authenticates via OAuth, not this password
+  const randomPassword = crypto.randomBytes(32).toString('hex');
   await db.insert(users).values({
     openId: request[0].openId,
     username: request[0].email.split('@')[0],
-    password: 'temp_password',
+    password: randomPassword,
     name: request[0].name,
     email: request[0].email,
     role: 'user',
