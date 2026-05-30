@@ -122,7 +122,7 @@ export function printReceipt(data: PrintReceiptProps["data"], userName: string) 
       </div>
       
       <div class="footer">
-        <div class="slogan">{getCompanySlogan()}</div>
+        <div class="slogan">${getCompanySlogan()}</div>
         <div class="meta">
           <div>${userName}</div>
           <div>${format(printDate, "dd/MM/yyyy HH:mm", { locale: ar })}</div>

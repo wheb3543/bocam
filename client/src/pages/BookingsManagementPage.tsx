@@ -133,7 +133,7 @@ export default function BookingsManagementPage() {
     const campRegistrationsPending = Array.isArray(campRegistrationsData) ? campRegistrationsData.filter((c: any) => c.status === 'pending').length : campRegistrationsPendingCount;
     return {
       leads: leadsPending,
-      appointments: appointmentsPending > 0 ? 0 : 0, // Count from actual data
+      appointments: appointmentsPending,
       offerLeads: offerLeadsPending,
       campRegistrations: campRegistrationsPending,
     };

@@ -413,7 +413,7 @@ export default function CampStatsPage() {
         </div>
         
         <div class="footer">
-          <div class="slogan">{getCompanySlogan()}</div>
+          <div class="slogan">${getCompanySlogan()}</div>
           <div class="meta">
             <div>المستخدم: ${userName}</div>
             <div>${format(printDate, "dd/MM/yyyy HH:mm", { locale: ar })}</div>

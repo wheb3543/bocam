@@ -101,16 +101,17 @@ interface StatsBarProps {
 }
 
 const StatsBar = memo(function StatsBar({ conversations }: StatsBarProps) {
-  const total = Array.isArray(conversations) ? conversations.length : 0;
-  const unread = Array.isArray(conversations) ? conversations.filter(c => c.unreadCount > 0).length : 0;
-  const important = Array.isArray(conversations) ? conversations.filter(c => c.isImportant === 1).length : 0;
-  const archived = Array.isArray(conversations) ? conversations.filter(c => c.isArchived === 1).length : 0;
+  const safeConversations = Array.isArray(conversations) ? conversations : [];
+  const total = safeConversations.length;
+  const unread = safeConversations.filter(c => c.unreadCount > 0).length;
+  const important = safeConversations.filter(c => c.isImportant === 1).length;
+  const archived = safeConversations.filter(c => c.isArchived === 1).length;
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const active = Array.isArray(conversations) ? conversations.filter(c =>
+  const active = safeConversations.filter(c =>
     !c.isArchived &&
     c.lastMessageAt &&
     new Date(c.lastMessageAt) >= sevenDaysAgo
-  ).length : 0;
+  ).length;
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-3">
@@ -376,11 +377,14 @@ const ConversationsList = memo(function ConversationsList({
             <TabsTrigger value="all" className="text-[var(--text-xs)] h-6 px-1 text-xs">الكل</TabsTrigger>
             <TabsTrigger value="unread" className="text-[var(--text-xs)] h-6 px-1 text-xs">
               غير مقروءة
-              {(Array.isArray(allConversations) ? allConversations.filter(c => c.unreadCount > 0).length : 0) > 0 && (
-                <Badge variant="destructive" className="mr-1 h-3.5 px-1 text-[var(--text-xs)] rounded-full">
-                  {Array.isArray(allConversations) ? allConversations.filter(c => c.unreadCount > 0).length : 0}
-                </Badge>
-              )}
+              {(() => {
+                const unreadCount = Array.isArray(allConversations) ? allConversations.filter(c => c.unreadCount > 0).length : 0;
+                return unreadCount > 0 ? (
+                  <Badge variant="destructive" className="mr-1 h-3.5 px-1 text-[var(--text-xs)] rounded-full">
+                    {unreadCount}
+                  </Badge>
+                ) : null;
+              })()}
             </TabsTrigger>
             <TabsTrigger value="important" className="text-[var(--text-xs)] h-6 px-1 text-xs">مهمة</TabsTrigger>
             <TabsTrigger value="archived" className="text-[var(--text-xs)] h-6 px-1 text-xs sm:inline">مؤرشفة</TabsTrigger>
