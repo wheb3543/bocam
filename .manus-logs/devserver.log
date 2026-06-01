@@ -479,3 +479,25 @@
 [2026-05-29T21:19:51.076Z] 9:19:51 PM [tsx] unlink in ./server/routers/patientPortal.ts Rerunning...
 [2026-05-29T21:19:51.076Z] c
 [2026-05-29T21:19:52.083Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-06-01T19:34:34.827Z] 7:34:34 PM [tsx] unlink in ./shared/config.ts Rerunning...
+[2026-06-01T19:34:34.827Z] c
+[2026-06-01T19:34:34.964Z] node:internal/modules/run_main:122
+[2026-06-01T19:34:34.964Z] triggerUncaughtException(
+[2026-06-01T19:34:34.964Z] ^
+[2026-06-01T19:34:34.964Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/sgh-crm-portal/server/whatsappSse' imported from /home/ubuntu/sgh-crm-portal/server/_core/index.ts
+[2026-06-01T19:34:34.964Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-06-01T19:34:34.964Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-06-01T19:34:34.964Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-06-01T19:34:34.964Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-06-01T19:34:34.964Z] at resolveBase (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1780342474886:2:3744)
+[2026-06-01T19:34:34.964Z] at async resolveDirectory (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1780342474886:2:4237)
+[2026-06-01T19:34:34.964Z] at async resolve (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1780342474886:2:5355)
+[2026-06-01T19:34:34.964Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-06-01T19:34:34.964Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24)
+[2026-06-01T19:34:34.964Z] at async handleMessage (node:internal/modules/esm/worker:199:18) {
+[2026-06-01T19:34:34.964Z] code: 'ERR_MODULE_NOT_FOUND',
+[2026-06-01T19:34:34.964Z] url: 'file:///home/ubuntu/sgh-crm-portal/server/whatsappSse'
+[2026-06-01T19:34:34.964Z] }
+[2026-06-01T19:34:34.964Z] Node.js v22.13.0
+[2026-06-01T19:34:37.530Z] 7:34:37 PM [tsx] change in ./vite.config.ts Rerunning...
+[2026-06-01T19:34:37.530Z] c
