@@ -501,3 +501,4 @@
 [2026-06-01T19:34:34.964Z] Node.js v22.13.0
 [2026-06-01T19:34:37.530Z] 7:34:37 PM [tsx] change in ./vite.config.ts Rerunning...
 [2026-06-01T19:34:37.530Z] c
+[2026-06-01T19:34:38.629Z] [OAuth] Initialized with baseURL: https://api.manus.im
