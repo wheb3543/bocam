@@ -138,6 +138,23 @@ function getLicenseFilePath(): string {
 }
 
 /**
+ * Check if license file exists
+ * 
+ * Checks if the license.json file exists.
+ * 
+ * @param licensePath - Path to license file
+ * @returns True if license file exists, false otherwise
+ */
+export function licenseFileExists(licensePath?: string): boolean {
+  try {
+    const path = licensePath || getLicenseFilePath();
+    return fs.existsSync(path);
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
  * Load license file
  * 
  * Reads and parses the license.json file.
@@ -430,12 +447,26 @@ export function getEnabledFeatures(): string[] {
  * Initializes the license validation system.
  * This should be called during application startup.
  * 
- * @returns License information
+ * @param allowMissing - If true, allows server to start even if license file is missing
+ * @returns License information or null if license is missing and allowMissing is true
  */
-export function initializeLicense(): LicenseInfo {
+export function initializeLicense(allowMissing: boolean = false): LicenseInfo | null {
   try {
     console.log('🚀 Initializing License System...');
     console.log('');
+    
+    // Check if license file exists
+    const licensePath = getLicenseFilePath();
+    if (!licenseFileExists(licensePath)) {
+      if (allowMissing) {
+        console.log('⚠️  License file not found. Server will start in activation mode.');
+        console.log(`   Expected path: ${licensePath}`);
+        console.log('');
+        return null;
+      } else {
+        throw new Error(`License file not found: ${licensePath}`);
+      }
+    }
     
     const licenseInfo = validateLicense();
     

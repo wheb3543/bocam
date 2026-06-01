@@ -1,5 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, useState } from "react";
 import { initializeTracking } from "./lib/tracking";
 import { TooltipProvider } from "@/components/ui/tooltip";
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -7,6 +7,7 @@ import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import DashboardShell from "./components/DashboardShell";
+import { trpc } from "@/lib/trpc";
 // Lazy load pages for better performance
 const Home = lazy(() => import("./pages/Home"));
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -89,16 +90,31 @@ const BIPage = lazy(() => import("./pages/BIPage"));
 const TrackingSettingsPage = lazy(() => import("./pages/TrackingSettingsPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const FeatureLockedPage = lazy(() => import("./pages/FeatureLockedPage"));
+const ActivationPage = lazy(() => import("./pages/ActivationPage"));
 import ProtectedRoute from "./components/ProtectedRoute";
 
 
 function Router() {
   const [location] = useLocation();
+  const { data: licenseCheck, isLoading: checkingLicense } = trpc.license.checkLicenseExists.useQuery();
   
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
+  
+  // Show activation page if license doesn't exist (unless on activation page)
+  if (!checkingLicense && !licenseCheck?.exists && location !== "/activation") {
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <ActivationPage />
+      </Suspense>
+    );
+  }
   
   // make sure to consider if you need authentication for certain routes
   return (
@@ -108,6 +124,7 @@ function Router() {
       </div>
     }>
       <Switch>
+      <Route path={"/activation"} component={ActivationPage} />
       <Route path={"/"} component={HomePage} />
       <Route path={"/doctors"} component={Doctors} />
       <Route path={"/visiting-doctors"} component={VisitingDoctors} />

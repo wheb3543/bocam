@@ -39,10 +39,13 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 
 async function startServer() {
   // Initialize license validation (Kill Switch)
-  initializeLicense();
+  // Allow server to start in activation mode if license is missing
+  const licenseInfo = initializeLicense(true);
   
-  // Initialize heartbeat system (Anti-Clock-Tampering)
-  initializeHeartbeat();
+  // Initialize heartbeat system (Anti-Clock-Tampering) - only if license is valid
+  if (licenseInfo) {
+    initializeHeartbeat();
+  }
   
   const app = express();
   const server = createServer(app);
