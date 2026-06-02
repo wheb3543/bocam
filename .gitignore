@@ -21,3 +21,7 @@ license-files/
 # Heartbeat system files - keep for local tracking
 .last-successful-run
 .heartbeat-log
+
+# Update checker system files - keep for local tracking
+.update-state
+.update-log
