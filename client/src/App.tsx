@@ -99,6 +99,7 @@ const ActivationPage = lazy(() => import("./pages/ActivationPage"));
 const UpdateManagementPage = lazy(() => import("./pages/UpdateManagementPage"));
 const SystemStatusPage = lazy(() => import("./pages/SystemStatusPage"));
 const BackupManagementPage = lazy(() => import("./pages/BackupManagementPage"));
+const AdvancedSettingsPage = lazy(() => import("./pages/AdvancedSettingsPage"));
 import ProtectedRoute from "./components/ProtectedRoute";
 
 
@@ -315,6 +316,7 @@ function Router() {
             <Route path={"/dashboard/updates"} component={UpdateManagementPage} />
             <Route path={"/dashboard/system-status"} component={SystemStatusPage} />
             <Route path={"/dashboard/backups"} component={BackupManagementPage} />
+            <Route path={"/dashboard/advanced-settings"} component={AdvancedSettingsPage} />
           </Switch>
         </DashboardShell>
       </Route>

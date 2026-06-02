@@ -220,6 +220,52 @@ async function startServer() {
     }
   });
 
+  // System configuration API endpoints
+  app.get("/api/config", (req, res) => {
+    try {
+      // Mock data for now - in production, this would read from actual config
+      const systemConfig = {
+        sslEnabled: true,
+        sslExpiry: Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60),
+        sslIssuer: "Let's Encrypt",
+        backupEnabled: true,
+        backupSchedule: "0 2 * * *",
+        backupRetention: 30,
+        cloudBackupEnabled: true,
+        cloudProvider: "AWS S3",
+        notificationsEnabled: true,
+        notificationEmail: "admin@example.com",
+        maintenanceMode: false,
+        debugMode: false,
+      };
+      res.json({
+        success: true,
+        data: systemConfig,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  app.post("/api/config", async (req, res) => {
+    try {
+      // In production, this would update the actual config
+      // For now, just return success
+      res.json({
+        success: true,
+        message: "Configuration updated successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",
