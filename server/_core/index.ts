@@ -17,6 +17,7 @@ import { serveStatic, setupVite } from "./vite";
 import { initializeLicense } from "./license";
 import { initializeHeartbeat } from "./heartbeat";
 import { initializeUpdateChecker, getUpdateStatus, startManualUpdate, startManualRollback } from "./updateChecker";
+import { logActivity, logUpdate, updateUpdateLog, logBackup, updateBackupLog, createNotification } from "./activityLogger";
 // import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -91,8 +92,21 @@ async function startServer() {
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
 
+  // Rate limiting for API endpoints
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+  });
+
+  const sensitiveApiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // limit each IP to 10 requests per windowMs for sensitive operations
+    message: 'Too many requests from this IP, please try again later.',
+  });
+
   // Update management API endpoints
-  app.get("/api/update/status", (req, res) => {
+  app.get("/api/update/status", apiLimiter, (req, res) => {
     try {
       const status = getUpdateStatus();
       res.json({
@@ -107,14 +121,28 @@ async function startServer() {
     }
   });
 
-  app.post("/api/update/install", async (req, res) => {
+  app.post("/api/update/install", sensitiveApiLimiter, async (req, res) => {
     try {
       await startManualUpdate();
+      await logActivity({
+        action: 'update_install',
+        description: 'Manual update started',
+        ip_address: req.ip,
+        user_agent: req.get('user-agent'),
+      });
       res.json({
         success: true,
         message: "Update started successfully",
       });
     } catch (error) {
+      await logActivity({
+        action: 'update_install',
+        description: 'Manual update failed',
+        status: 'error',
+        error_message: error instanceof Error ? error.message : "Unknown error",
+        ip_address: req.ip,
+        user_agent: req.get('user-agent'),
+      });
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -122,14 +150,28 @@ async function startServer() {
     }
   });
 
-  app.post("/api/update/rollback", async (req, res) => {
+  app.post("/api/update/rollback", sensitiveApiLimiter, async (req, res) => {
     try {
       await startManualRollback();
+      await logActivity({
+        action: 'update_rollback',
+        description: 'Manual rollback started',
+        ip_address: req.ip,
+        user_agent: req.get('user-agent'),
+      });
       res.json({
         success: true,
         message: "Rollback started successfully",
       });
     } catch (error) {
+      await logActivity({
+        action: 'update_rollback',
+        description: 'Manual rollback failed',
+        status: 'error',
+        error_message: error instanceof Error ? error.message : "Unknown error",
+        ip_address: req.ip,
+        user_agent: req.get('user-agent'),
+      });
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -138,7 +180,7 @@ async function startServer() {
   });
 
   // Backup management API endpoints
-  app.get("/api/backup/status", (req, res) => {
+  app.get("/api/backup/status", apiLimiter, (req, res) => {
     try {
       // Mock data for now - in production, this would read from actual backup system
       const backupStatus = {
@@ -163,7 +205,7 @@ async function startServer() {
     }
   });
 
-  app.get("/api/backup/history", (req, res) => {
+  app.get("/api/backup/history", apiLimiter, (req, res) => {
     try {
       // Mock data for now - in production, this would read from actual backup system
       const backupHistory = [
@@ -204,15 +246,29 @@ async function startServer() {
     }
   });
 
-  app.post("/api/backup/create", async (req, res) => {
+  app.post("/api/backup/create", sensitiveApiLimiter, async (req, res) => {
     try {
       // In production, this would trigger the backup script
       // For now, just return success
+      await logActivity({
+        action: 'backup_create',
+        description: 'Manual backup started',
+        ip_address: req.ip,
+        user_agent: req.get('user-agent'),
+      });
       res.json({
         success: true,
         message: "Backup started successfully",
       });
     } catch (error) {
+      await logActivity({
+        action: 'backup_create',
+        description: 'Manual backup failed',
+        status: 'error',
+        error_message: error instanceof Error ? error.message : "Unknown error",
+        ip_address: req.ip,
+        user_agent: req.get('user-agent'),
+      });
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -221,7 +277,7 @@ async function startServer() {
   });
 
   // System configuration API endpoints
-  app.get("/api/config", (req, res) => {
+  app.get("/api/config", apiLimiter, (req, res) => {
     try {
       // Mock data for now - in production, this would read from actual config
       const systemConfig = {
@@ -250,15 +306,31 @@ async function startServer() {
     }
   });
 
-  app.post("/api/config", async (req, res) => {
+  app.post("/api/config", sensitiveApiLimiter, async (req, res) => {
     try {
       // In production, this would update the actual config
       // For now, just return success
+      await logActivity({
+        action: 'config_update',
+        description: 'System configuration updated',
+        metadata: req.body,
+        ip_address: req.ip,
+        user_agent: req.get('user-agent'),
+      });
       res.json({
         success: true,
         message: "Configuration updated successfully",
       });
     } catch (error) {
+      await logActivity({
+        action: 'config_update',
+        description: 'System configuration update failed',
+        status: 'error',
+        error_message: error instanceof Error ? error.message : "Unknown error",
+        metadata: req.body,
+        ip_address: req.ip,
+        user_agent: req.get('user-agent'),
+      });
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
