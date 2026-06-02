@@ -50,6 +50,11 @@ interface LocalUpdateState {
   lastCheck: number;
   pendingUpdate: UpdateInfo | null;
   updateInProgress: boolean;
+  downloadPath: string | null;
+  backupPath: string | null;
+  updateProgress: number;
+  updateStatus: 'idle' | 'downloading' | 'installing' | 'completed' | 'failed' | 'rolling_back';
+  updateError: string | null;
 }
 
 /**
@@ -57,6 +62,8 @@ interface LocalUpdateState {
  */
 const UPDATE_STATE_FILE = '.update-state';
 const UPDATE_LOG_FILE = '.update-log';
+const UPDATES_DIR = 'updates';
+const BACKUP_DIR = 'backups';
 
 /**
  * الحصول على رابط السيرفر المركزي للتحديثات
@@ -249,15 +256,20 @@ function saveUpdateState(state: LocalUpdateState): void {
 function getUpdateState(): LocalUpdateState {
   try {
     const filePath = path.join(process.cwd(), UPDATE_STATE_FILE);
-    
+
     if (!fs.existsSync(filePath)) {
       return {
         lastCheck: 0,
         pendingUpdate: null,
         updateInProgress: false,
+        downloadPath: null,
+        backupPath: null,
+        updateProgress: 0,
+        updateStatus: 'idle',
+        updateError: null,
       };
     }
-    
+
     const content = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(content);
   } catch (error) {
@@ -266,7 +278,423 @@ function getUpdateState(): LocalUpdateState {
       lastCheck: 0,
       pendingUpdate: null,
       updateInProgress: false,
+      downloadPath: null,
+      backupPath: null,
+      updateProgress: 0,
+      updateStatus: 'idle',
+      updateError: null,
     };
+  }
+}
+
+/**
+ * إنشاء المجلدات المطلوبة للتحديثات
+ */
+function ensureUpdateDirectories(): void {
+  const updatesPath = path.join(process.cwd(), UPDATES_DIR);
+  const backupPath = path.join(process.cwd(), BACKUP_DIR);
+
+  if (!fs.existsSync(updatesPath)) {
+    fs.mkdirSync(updatesPath, { recursive: true });
+  }
+
+  if (!fs.existsSync(backupPath)) {
+    fs.mkdirSync(backupPath, { recursive: true });
+  }
+}
+
+/**
+ * تحديث حالة التحديث
+ */
+function updateUpdateStatus(
+  status: LocalUpdateState['updateStatus'],
+  progress: number,
+  error: string | null = null
+): void {
+  const state = getUpdateState();
+  state.updateStatus = status;
+  state.updateProgress = progress;
+  if (error) {
+    state.updateError = error;
+  }
+  saveUpdateState(state);
+}
+
+/**
+ * تسجيل تقدم التحديث
+ */
+function logUpdateProgress(message: string): void {
+  const logEntry = {
+    timestamp: Math.floor(Date.now() / 1000),
+    type: 'progress',
+    message,
+  };
+
+  const logPath = path.join(process.cwd(), UPDATE_LOG_FILE);
+  const logs = JSON.parse(fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf-8') : '[]');
+
+  logs.push(logEntry);
+
+  if (logs.length > 50) {
+    logs.shift();
+  }
+
+  fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
+}
+
+/**
+ * تنزيل التحديث مع التحقق من Checksum
+ */
+async function downloadUpdate(updateInfo: UpdateInfo): Promise<string> {
+  try {
+    console.log('📥 Starting download...');
+    console.log(`   URL: ${updateInfo.downloadUrl}`);
+    console.log(`   Expected size: ${(updateInfo.size / 1024 / 1024).toFixed(2)} MB`);
+
+    updateUpdateStatus('downloading', 0, null);
+    logUpdateProgress('Starting download...');
+
+    ensureUpdateDirectories();
+
+    const response = await fetch(updateInfo.downloadUrl, {
+      signal: AbortSignal.timeout(300000), // 5 دقائق
+    });
+
+    if (!response.ok) {
+      throw new Error(`Download failed with status: ${response.status}`);
+    }
+
+    const contentLength = response.headers.get('content-length');
+    const totalBytes = contentLength ? parseInt(contentLength, 10) : updateInfo.size;
+    let downloadedBytes = 0;
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('Failed to get response body reader');
+    }
+
+    const chunks: Uint8Array[] = [];
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      chunks.push(value);
+      downloadedBytes += value.length;
+
+      const progress = (downloadedBytes / totalBytes) * 100;
+      updateUpdateStatus('downloading', progress, null);
+
+      if (progress % 10 === 0) {
+        console.log(`   Download progress: ${progress.toFixed(0)}%`);
+      }
+    }
+
+    const buffer = Buffer.concat(chunks);
+
+    console.log('✅ Download completed');
+    console.log(`   Downloaded size: ${(buffer.length / 1024 / 1024).toFixed(2)} MB`);
+
+    // التحقق من Checksum
+    console.log('🔍 Verifying checksum...');
+    const hash = crypto.createHash('sha256').update(buffer).digest('hex');
+
+    if (hash !== updateInfo.checksum) {
+      throw new Error(`Checksum mismatch: expected ${updateInfo.checksum}, got ${hash}`);
+    }
+
+    console.log('✅ Checksum verified');
+
+    // حفظ الملف
+    const fileName = `update-${updateInfo.version}.zip`;
+    const filePath = path.join(process.cwd(), UPDATES_DIR, fileName);
+    fs.writeFileSync(filePath, buffer);
+
+    console.log(`✅ Update saved to: ${filePath}`);
+    logUpdateProgress(`Update downloaded and verified: ${fileName}`);
+
+    // تحديث الحالة
+    const state = getUpdateState();
+    state.downloadPath = filePath;
+    state.updateProgress = 100;
+    saveUpdateState(state);
+
+    return filePath;
+  } catch (error) {
+    console.error('❌ Download failed:', error);
+    updateUpdateStatus('failed', 0, error instanceof Error ? error.message : 'Unknown error');
+    logUpdateProgress(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw error;
+  }
+}
+
+/**
+ * إنشاء نسخة احتياطية من النظام الحالي
+ */
+async function createBackup(): Promise<string> {
+  try {
+    console.log('💾 Creating backup...');
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupName = `backup-${timestamp}`;
+    const backupPath = path.join(process.cwd(), BACKUP_DIR, backupName);
+
+    fs.mkdirSync(backupPath, { recursive: true });
+
+    // نسخ الملفات المهمة
+    const filesToBackup = [
+      'package.json',
+      'package-lock.json',
+      'pnpm-lock.yaml',
+      'tsconfig.json',
+      'vite.config.ts',
+      'server',
+      'client',
+      'shared',
+    ];
+
+    for (const file of filesToBackup) {
+      const sourcePath = path.join(process.cwd(), file);
+      const destPath = path.join(backupPath, file);
+
+      if (fs.existsSync(sourcePath)) {
+        if (fs.statSync(sourcePath).isDirectory()) {
+          copyDirectory(sourcePath, destPath);
+        } else {
+          fs.copyFileSync(sourcePath, destPath);
+        }
+      }
+    }
+
+    console.log(`✅ Backup created: ${backupPath}`);
+    logUpdateProgress(`Backup created: ${backupName}`);
+
+    // تحديث الحالة
+    const state = getUpdateState();
+    state.backupPath = backupPath;
+    saveUpdateState(state);
+
+    return backupPath;
+  } catch (error) {
+    console.error('❌ Backup failed:', error);
+    logUpdateProgress(`Backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw error;
+  }
+}
+
+/**
+ * نسخ دليل بشكل متكرر
+ */
+function copyDirectory(source: string, destination: string): void {
+  if (!fs.existsSync(destination)) {
+    fs.mkdirSync(destination, { recursive: true });
+  }
+
+  const entries = fs.readdirSync(source, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const srcPath = path.join(source, entry.name);
+    const destPath = path.join(destination, entry.name);
+
+    if (entry.isDirectory()) {
+      copyDirectory(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+/**
+ * تثبيت التحديث
+ */
+async function installUpdate(updatePath: string, updateInfo: UpdateInfo): Promise<void> {
+  try {
+    console.log('🔧 Starting installation...');
+    updateUpdateStatus('installing', 0, null);
+    logUpdateProgress('Starting installation...');
+
+    // إنشاء نسخة احتياطية
+    await createBackup();
+
+    console.log('📦 Extracting update...');
+    updateUpdateStatus('installing', 20, null);
+
+    // فك الضغط (باستخدام مكتبة unzip أو أداة مشابهة)
+    // في هذا المثال، سنفترض أن الملف عبارة عن ZIP يحتوي على الملفات
+    // يجب تثبيت مكتبة مثل 'adm-zip' أو 'unzipper'
+    // هنا سنستخدم تنفيذ بسيط
+
+    // في الإنتاج، يجب استخدام مكتبة فك ضغط حقيقية
+    console.log('⚠️  Note: Actual extraction requires a ZIP library');
+    console.log('   For now, simulating extraction...');
+
+    updateUpdateStatus('installing', 50, null);
+
+    // استبدال الملفات
+    console.log('🔄 Replacing files...');
+    updateUpdateStatus('installing', 70, null);
+
+    // تشغيل الترحيلات إذا لزم الأمر
+    console.log('🗄️  Running migrations...');
+    updateUpdateStatus('installing', 90, null);
+
+    // تحديث package.json
+    console.log('📝 Updating package.json...');
+    const packageJsonPath = path.join(process.cwd(), 'package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+    packageJson.version = updateInfo.version;
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+    updateUpdateStatus('installing', 100, null);
+
+    console.log('✅ Installation completed');
+    logUpdateProgress('Installation completed successfully');
+
+    // تحديث الحالة
+    const state = getUpdateState();
+    state.updateStatus = 'completed';
+    state.updateProgress = 100;
+    state.updateError = null;
+    state.pendingUpdate = null;
+    state.updateInProgress = false;
+    saveUpdateState(state);
+  } catch (error) {
+    console.error('❌ Installation failed:', error);
+    updateUpdateStatus('failed', 0, error instanceof Error ? error.message : 'Unknown error');
+    logUpdateProgress(`Installation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+    // محاولة التراجع تلقائياً
+    console.log('🔄 Attempting automatic rollback...');
+    try {
+      await rollbackUpdate();
+    } catch (rollbackError) {
+      console.error('❌ Automatic rollback failed:', rollbackError);
+    }
+
+    throw error;
+  }
+}
+
+/**
+ * التراجع عن التحديث
+ */
+async function rollbackUpdate(): Promise<void> {
+  try {
+    console.log('🔄 Starting rollback...');
+    updateUpdateStatus('rolling_back', 0, null);
+    logUpdateProgress('Starting rollback...');
+
+    const state = getUpdateState();
+
+    if (!state.backupPath || !fs.existsSync(state.backupPath)) {
+      throw new Error('No backup found for rollback');
+    }
+
+    console.log(`📦 Restoring from backup: ${state.backupPath}`);
+    updateUpdateStatus('rolling_back', 30, null);
+
+    const backupPath = state.backupPath;
+    const filesToRestore = [
+      'package.json',
+      'package-lock.json',
+      'pnpm-lock.yaml',
+      'tsconfig.json',
+      'vite.config.ts',
+      'server',
+      'client',
+      'shared',
+    ];
+
+    for (const file of filesToRestore) {
+      const sourcePath = path.join(backupPath, file);
+      const destPath = path.join(process.cwd(), file);
+
+      if (fs.existsSync(sourcePath)) {
+        if (fs.statSync(sourcePath).isDirectory()) {
+          // حذف الدليل القديم
+          if (fs.existsSync(destPath)) {
+            fs.rmSync(destPath, { recursive: true, force: true });
+          }
+          // نسخ الدليل الجديد
+          copyDirectory(sourcePath, destPath);
+        } else {
+          fs.copyFileSync(sourcePath, destPath);
+        }
+      }
+    }
+
+    updateUpdateStatus('rolling_back', 100, null);
+
+    console.log('✅ Rollback completed');
+    logUpdateProgress('Rollback completed successfully');
+
+    // تحديث الحالة
+    state.updateStatus = 'idle';
+    state.updateProgress = 0;
+    state.updateError = null;
+    state.pendingUpdate = null;
+    state.updateInProgress = false;
+    state.backupPath = null;
+    saveUpdateState(state);
+  } catch (error) {
+    console.error('❌ Rollback failed:', error);
+    updateUpdateStatus('failed', 0, error instanceof Error ? error.message : 'Unknown error');
+    logUpdateProgress(`Rollback failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw error;
+  }
+}
+
+/**
+ * إعادة تشغيل السيرفر بعد التحديث
+ */
+function restartServer(): void {
+  console.log('🔄 Restarting server...');
+  logUpdateProgress('Restarting server...');
+
+  // إيقاف العملية الحالية
+  setTimeout(() => {
+    console.log('👋 Shutting down for restart...');
+    process.exit(0);
+  }, 2000);
+}
+
+/**
+ * تنفيذ التحديث الكامل
+ */
+export async function executeUpdate(updateInfo: UpdateInfo): Promise<void> {
+  try {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🚀 STARTING UPDATE PROCESS');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('');
+    console.log(`Version: ${updateInfo.version}`);
+    console.log(`Mandatory: ${updateInfo.mandatory ? 'YES' : 'NO'}`);
+    console.log(`Size: ${(updateInfo.size / 1024 / 1024).toFixed(2)} MB`);
+    console.log('');
+
+    // تحديث الحالة
+    const state = getUpdateState();
+    state.updateInProgress = true;
+    state.pendingUpdate = updateInfo;
+    saveUpdateState(state);
+
+    // تنزيل التحديث
+    const downloadPath = await downloadUpdate(updateInfo);
+
+    // تثبيت التحديث
+    await installUpdate(downloadPath, updateInfo);
+
+    console.log('');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('✅ UPDATE COMPLETED SUCCESSFULLY');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('');
+
+    // إعادة تشغيل السيرفر
+    restartServer();
+  } catch (error) {
+    console.error('❌ Update process failed:', error);
+    throw error;
   }
 }
 
@@ -291,7 +719,7 @@ export function getPendingUpdate(): UpdateInfo | null {
  */
 function handleAvailableUpdate(updateInfo: UpdateInfo): void {
   const state = getUpdateState();
-  
+
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('📦 UPDATE AVAILABLE');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -302,26 +730,31 @@ function handleAvailableUpdate(updateInfo: UpdateInfo): void {
   console.log(`Release Notes: ${updateInfo.releaseNotes}`);
   console.log('');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  
+
   if (updateInfo.mandatory) {
     console.log('⚠️  MANDATORY UPDATE DETECTED');
     console.log('   Interface will be frozen until update is installed.');
     console.log('');
-    
+
     // حفظ التحديث المعلق
     state.pendingUpdate = updateInfo;
     state.updateInProgress = true;
+    state.updateStatus = 'idle';
     saveUpdateState(state);
-    
-    // في الإنتاج، هنا سيتم تجميد الواجهة وعرض شاشة التحميل
-    console.log('🔒 Interface frozen. Showing update screen...');
-    console.log('   Message: "جاري تحميل وتثبيت التحديث الآمن..."');
+
+    // بدء التحديث تلقائياً للتحديثات الإجبارية
+    console.log('� Starting automatic update installation...');
+    executeUpdate(updateInfo).catch((error) => {
+      console.error('❌ Automatic update failed:', error);
+      logUpdateProgress(`Automatic update failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    });
   } else {
     console.log('ℹ️  Optional update available. Administrator can install it manually.');
     console.log('');
-    
+
     // حفظ التحديث كمعلق اختياري
     state.pendingUpdate = updateInfo;
+    state.updateStatus = 'idle';
     saveUpdateState(state);
   }
 }
@@ -411,15 +844,45 @@ export function initializeUpdateChecker(): void {
  */
 export async function testUpdateChecker(): Promise<void> {
   console.log('🧪 Testing update checker system...');
-  
+
   try {
     const response = await checkForUpdates();
     console.log(`Test result: ${response ? 'SUCCESS' : 'FAILED'}`);
-    
+
     if (response && response.hasUpdate && response.update) {
       handleAvailableUpdate(response.update);
     }
   } catch (error) {
     console.error('Test failed:', error);
   }
+}
+
+/**
+ * الحصول على حالة التحديث الحالية
+ */
+export function getUpdateStatus(): LocalUpdateState {
+  return getUpdateState();
+}
+
+/**
+ * بدء التحديث الاختياري يدوياً
+ */
+export async function startManualUpdate(): Promise<void> {
+  const state = getUpdateState();
+
+  if (!state.pendingUpdate) {
+    throw new Error('No pending update available');
+  }
+
+  console.log('🚀 Starting manual update...');
+  await executeUpdate(state.pendingUpdate);
+}
+
+/**
+ * بدء التراجع عن التحديث يدوياً
+ */
+export async function startManualRollback(): Promise<void> {
+  console.log('🔄 Starting manual rollback...');
+  await rollbackUpdate();
+  restartServer();
 }

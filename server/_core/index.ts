@@ -16,7 +16,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { initializeLicense } from "./license";
 import { initializeHeartbeat } from "./heartbeat";
-import { initializeUpdateChecker } from "./updateChecker";
+import { initializeUpdateChecker, getUpdateStatus, startManualUpdate, startManualRollback } from "./updateChecker";
 // import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -90,6 +90,53 @@ async function startServer() {
   app.use(createWebhookRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
+
+  // Update management API endpoints
+  app.get("/api/update/status", (req, res) => {
+    try {
+      const status = getUpdateStatus();
+      res.json({
+        success: true,
+        data: status,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  app.post("/api/update/install", async (req, res) => {
+    try {
+      await startManualUpdate();
+      res.json({
+        success: true,
+        message: "Update started successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  app.post("/api/update/rollback", async (req, res) => {
+    try {
+      await startManualRollback();
+      res.json({
+        success: true,
+        message: "Rollback started successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

@@ -8,6 +8,9 @@ dist/
 # Local backups (حظر مجلد النسخ الاحتياطية)
 backups/
 
+# Update files (حظر مجلد التحديثات)
+updates/
+
 .env
 .env.local
 node_modules/
