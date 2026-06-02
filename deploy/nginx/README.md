@@ -6,6 +6,8 @@ This directory contains all the necessary files to set up SSL/HTTPS for the BOCA
 
 - `nginx.conf` - Nginx configuration with SSL support
 - `setup-ssl.sh` - Automated SSL setup script
+- `setup-auto-renewal.sh` - Automated SSL auto-renewal setup script
+- `verify-ssl.sh` - SSL verification and testing script
 - `certbot-renewal.service` - Systemd service for auto-renewal
 - `certbot-renewal.timer` - Systemd timer for daily renewal checks
 - `docker-compose.yml` - Docker Compose configuration for containerized setup
@@ -90,7 +92,23 @@ docker-compose up -d
 
 ## Auto-Renewal Setup
 
-### Systemd (Recommended for Linux)
+### Automated Setup (Recommended)
+
+```bash
+# Make the script executable
+chmod +x setup-auto-renewal.sh
+
+# Run the auto-renewal setup script
+sudo ./setup-auto-renewal.sh
+```
+
+The script will:
+- Copy systemd service and timer files
+- Enable and start the timer
+- Verify the timer is running
+- Test renewal with dry-run
+
+### Manual Systemd Setup
 
 ```bash
 # 1. Copy service and timer files
@@ -116,6 +134,28 @@ sudo crontab -e
 ```
 
 ## Verification
+
+### Automated Verification
+
+```bash
+# Make the verification script executable
+chmod +x verify-ssl.sh
+
+# Run verification (with optional domain)
+sudo ./verify-ssl.sh yourdomain.com
+```
+
+The script will check:
+- Certbot installation
+- Nginx installation
+- SSL certificate files
+- Let's Encrypt certificates
+- Nginx configuration
+- Auto-renewal setup
+- Certificate renewal test
+- Port 443 status
+
+### Manual Verification
 
 After setup, verify your SSL configuration:
 
