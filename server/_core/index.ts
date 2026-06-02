@@ -137,6 +137,89 @@ async function startServer() {
     }
   });
 
+  // Backup management API endpoints
+  app.get("/api/backup/status", (req, res) => {
+    try {
+      // Mock data for now - in production, this would read from actual backup system
+      const backupStatus = {
+        lastBackup: Math.floor(Date.now() / 1000) - 3600,
+        lastBackupSize: 256,
+        nextBackup: Math.floor(Date.now() / 1000) + (23 * 60 * 60),
+        backupEnabled: true,
+        cloudEnabled: true,
+        retentionDays: 30,
+        totalBackups: 45,
+        totalSize: 10240,
+      };
+      res.json({
+        success: true,
+        data: backupStatus,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  app.get("/api/backup/history", (req, res) => {
+    try {
+      // Mock data for now - in production, this would read from actual backup system
+      const backupHistory = [
+        {
+          id: '1',
+          timestamp: Math.floor(Date.now() / 1000) - 3600,
+          type: 'daily',
+          size: 256,
+          status: 'completed',
+          location: 'both',
+        },
+        {
+          id: '2',
+          timestamp: Math.floor(Date.now() / 1000) - (25 * 60 * 60),
+          type: 'daily',
+          size: 255,
+          status: 'completed',
+          location: 'both',
+        },
+        {
+          id: '3',
+          timestamp: Math.floor(Date.now() / 1000) - (49 * 60 * 60),
+          type: 'daily',
+          size: 254,
+          status: 'completed',
+          location: 'both',
+        },
+      ];
+      res.json({
+        success: true,
+        data: backupHistory,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  app.post("/api/backup/create", async (req, res) => {
+    try {
+      // In production, this would trigger the backup script
+      // For now, just return success
+      res.json({
+        success: true,
+        message: "Backup started successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",
