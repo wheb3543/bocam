@@ -156,5 +156,13 @@
     "onlyBuiltDependencies": [
       "bcrypt"
     ]
-  }
+  },
+  "overrides": {
+    "tailwindcss>nanoid": "3.3.7",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "onlyBuiltDependencies": [
+    "bcrypt"
+  ]
 }
