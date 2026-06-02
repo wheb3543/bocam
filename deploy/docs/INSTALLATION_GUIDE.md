@@ -491,6 +491,125 @@ sudo journalctl -u certbot-renewal.service -f
 
 للمزيد من التفاصيل، راجع `deploy/nginx/README.md`
 
+---
+
+## إعداد النسخ الاحتياطي التلقائي (مطلوب للإنتاج)
+
+### نظرة عامة
+
+النظام يدعم النسخ الاحتياطي التلقائي لقاعدة البيانات والملفات، مع إمكانية الرفع إلى التخزين السحابي (AWS S3, Cloudflare R2). تم توفير جميع الملفات اللازمة في مجلد `deploy/backup/`.
+
+### الميزات
+
+- نسخ احتياطي تلقائي لقاعدة البيانات MySQL
+- نسخ احتياطي للملفات والتكوين
+- رفع تلقائي إلى التخزين السحابي
+- سياسة الاحتفاظ التلقائية (cleanup)
+- التحقق من سلامة النسخ الاحتياطية
+- إشعارات Webhook والبريد الإلكتروني
+
+### الإعداد
+
+**1. تثبيت المتطلبات:**
+```bash
+sudo apt-get update
+sudo apt-get install -y mysql-client gzip tar cron
+
+# لتخزين السحابة (اختياري)
+sudo apt-get install -y awscli  # لـ AWS S3
+# أو
+sudo apt-get install -y rclone  # لـ R2 وغيرها
+```
+
+**2. إعداد التكوين:**
+```bash
+# إنشاء مجلد التكوين
+sudo mkdir -p /etc/bocam-backup
+
+# نسخ ملف التكوين
+sudo cp deploy/backup/config.sh /etc/bocam-backup/config.sh
+
+# تعديل التكوين
+sudo nano /etc/bocam-backup/config.sh
+```
+
+**3. تثبيت السكريبتات:**
+```bash
+cd deploy/backup
+
+# جعل السكريبتات قابلة للتنفيذ
+chmod +x backup.sh upload-to-cloud.sh cleanup-old-backups.sh
+
+# نسخ إلى موقع النظام
+sudo cp backup.sh /usr/local/bin/bocam-backup.sh
+sudo cp upload-to-cloud.sh /usr/local/bin/bocam-upload-to-cloud.sh
+sudo cp cleanup-old-backups.sh /usr/local/bin/bocam-cleanup-backups.sh
+```
+
+**4. إعداد Cron Jobs:**
+```bash
+# نسخ تكوين Cron
+sudo cp bocam-backup.cron /etc/cron.d/bocam-backup
+
+# إعادة تحميل Cron
+sudo service cron reload
+```
+
+جدول Cron الافتراضي:
+- نسخ احتياطي يومي: الساعة 2:00 صباحاً
+- نسخ احتياطي أسبوعي كامل: الأحد الساعة 3:00 صباحاً
+- نسخ احتياطي ساعي للقاعدة: كل ساعة
+
+**5. إعداد التخزين السحابي (اختياري):**
+
+**AWS S3:**
+```bash
+aws configure
+# أدخل بيانات الاعتماد
+```
+
+**Cloudflare R2 (باستخدام Rclone):**
+```bash
+rclone config
+# اتبع التعليمات لإضافة R2 remote
+```
+
+### الاختبار
+
+```bash
+# تشغيل نسخ احتياطي يدوي
+sudo /usr/local/bin/bocam-backup.sh
+
+# التحقق من النسخ الاحتياطية
+ls -la /var/backups/bocam/
+
+# التحقق من سلامة النسخ الاحتياطية
+gzip -t /var/backups/bocam/*/database_*.sql.gz
+```
+
+### استعادة النسخ الاحتياطية
+
+**استعادة قاعدة البيانات:**
+```bash
+gunzip < /var/backups/bocam/2024-06-02/database_20240602_020000.sql.gz | mysql -u root -p bocam_crm
+```
+
+**استعادة الملفات:**
+```bash
+tar -xzf /var/backups/bocam/2024-06-02/files_20240602_020000.tar.gz -C /path/to/restore
+```
+
+### الملفات المتوفرة
+
+- `deploy/backup/backup.sh` - سكريبت النسخ الاحتياطي الرئيسي
+- `deploy/backup/config.sh` - ملف التكوين
+- `deploy/backup/upload-to-cloud.sh` - سكريبت رفع السحابة
+- `deploy/backup/cleanup-old-backups.sh` - سكريبت التنظيف
+- `deploy/backup/bocam-backup.cron` - تكوين Cron
+- `deploy/backup/README.md` - دليل مفصل
+
+للمزيد من التفاصيل، راجع `deploy/backup/README.md`
+
 ## الخطوات التالية
 
 بعد التثبيت الناجح:

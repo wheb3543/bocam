@@ -124,6 +124,48 @@ mv update.log logs/archive/
 gzip logs/archive/*.log
 ```
 
+### النسخ الاحتياطي التلقائي
+
+النظام لديه نظام نسخ احتياطي تلقائي يعمل عبر Cron Jobs:
+
+**فحص حالة النسخ الاحتياطي:**
+```bash
+# عرض سجلات النسخ الاحتياطي
+tail -f /var/log/bocam-backup/backup.log
+
+# عرض النسخ الاحتياطية المتوفرة
+ls -la /var/backups/bocam/
+
+# عرض تقرير التنظيف
+cat /var/log/bocam-backup/cleanup-report-*.txt
+```
+
+**تشغيل نسخ احتياطي يدوي:**
+```bash
+sudo /usr/local/bin/bocam-backup.sh
+```
+
+**تنظيف النسخ الاحتياطية القديمة:**
+```bash
+sudo /usr/local/bin/bocam-cleanup-backups.sh
+```
+
+**استعادة قاعدة البيانات:**
+```bash
+gunzip < /var/backups/bocam/2024-06-02/database_20240602_020000.sql.gz | mysql -u root -p bocam_crm
+```
+
+**استعادة الملفات:**
+```bash
+tar -xzf /var/backups/bocam/2024-06-02/files_20240602_020000.tar.gz -C /path/to/restore
+```
+
+**استكشاف أخطاء النسخ الاحتياطي:**
+- تحقق من اتصال قاعدة البيانات
+- تحقق من المساحة المتوفرة على القرص
+- تحقق من صلاحيات المجلدات
+- تحقق من تكوين السحابة (إذا كان مُستخدم)
+
 ### فحص أداء قاعدة البيانات
 
 ```bash
