@@ -16,6 +16,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { initializeLicense } from "./license";
 import { initializeHeartbeat } from "./heartbeat";
+import { initializeUpdateChecker } from "./updateChecker";
 // import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -45,6 +46,8 @@ async function startServer() {
   // Initialize heartbeat system (Anti-Clock-Tampering) - only if license is valid
   if (licenseInfo) {
     initializeHeartbeat();
+    // Initialize update checker system - only if license is valid
+    initializeUpdateChecker();
   }
   
   const app = express();
