@@ -83,6 +83,12 @@ pnpm update
 # سجلات Heartbeat
 cat .heartbeat-log | tail -20
 
+# سجلات Update Checker
+cat .update-log | tail -20
+
+# حالة التحديث المعلق
+cat .update-state
+
 # سجلات الأخطاء
 tail -f server.log | grep ERROR
 ```
@@ -112,6 +118,7 @@ mkdir -p logs/archive
 # نقل السجلات القديمة
 mv server_*.log logs/archive/
 mv heartbeat.log logs/archive/
+mv update.log logs/archive/
 
 # ضغط السجلات القديمة
 gzip logs/archive/*.log
@@ -347,6 +354,48 @@ cookie: {
 
 النظام لديه حماية ضد التلاعب بوقت النظام. راجع `LICENSE_GUIDE.md` للاختبار.
 
+### نظام Heartbeat
+
+النظام يرسل نبضة كل 24 ساعة إلى السيرفر المركزي للمراقبة عن بعد:
+
+**فحص Heartbeat:**
+```bash
+# عرض سجل Heartbeat
+cat .heartbeat-log
+
+# عرض آخر 10 نبضات
+cat .heartbeat-log | tail -10
+
+# عرض وقت آخر تشغيل ناجح
+cat .last-successful-run
+```
+
+**استكشاف أخطاء Heartbeat:**
+- إذا لم تكن هناك نبضات جديدة، تحقق من اتصال الإنترنت
+- تحقق من صحة `CENTRAL_ACTIVATION_URL` في `.env`
+- تحقق من أن الترخيص صالح
+
+### نظام Update Checker
+
+النظام يتحقق من التحديثات عند الإقلاع وكل 6 ساعات:
+
+**فحص Update Checker:**
+```bash
+# عرض سجل التحقق من التحديثات
+cat .update-log
+
+# عرض حالة التحديث المعلق
+cat .update-state
+
+# عرض آخر 10 عمليات تحقق
+cat .update-log | tail -10
+```
+
+**استكشاف أخطاء Update Checker:**
+- إذا فشل التحقق، تحقق من اتصال الإنترنت
+- تحقق من صحة `CENTRAL_UPDATE_URL` في `.env`
+- تحقق من إصدار البروتوكول `PROTOCOL_VERSION`
+
 ## المراقبة والتنبيهات
 
 ### إعداد التنبيهات
@@ -364,7 +413,8 @@ cookie: {
 - ✅ وقت استجابة API < 200ms
 - ✅ استخدام CPU < 80%
 - ✅ استخدام الذاكرة < 80%
-- ✅ Heartbeat يعمل يومياً
+- ✅ Heartbeat يعمل يومياً (كل 24 ساعة)
+- ✅ Update Checker يعمل (كل 6 ساعات)
 - ✅ الترخيص صالح > 30 يوم
 
 ## النسخ الاحتياطية والاستعادة

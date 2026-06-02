@@ -1276,13 +1276,16 @@ export function initHeartbeatScheduler() {
 
 2. تحديث `server/_core/index.ts`:
 ```typescript
-import { initHeartbeatScheduler } from '../services/heartbeat';
+import { initializeHeartbeat } from './heartbeat';
+import { initializeUpdateChecker } from './updateChecker';
 
 async function startServer() {
-  // ... license validation
+  const licenseInfo = initializeLicense(true);
   
-  // Initialize heartbeat scheduler
-  initHeartbeatScheduler();
+  if (licenseInfo) {
+    initializeHeartbeat();
+    initializeUpdateChecker();
+  }
   
   // ... rest of server startup
 }
@@ -1383,17 +1386,20 @@ export default router;
    - رسائل تحذير واضحة
 
 3. **التحديثات:**
-   - `server/_core/index.ts`: إضافة initializeHeartbeat()
-   - `.env.example`: إضافة CENTRAL_ACTIVATION_URL
-   - `.env`: إضافة CENTRAL_ACTIVATION_URL
+   - `server/_core/index.ts`: إضافة initializeHeartbeat() و initializeUpdateChecker()
+   - `.env.example`: إضافة CENTRAL_ACTIVATION_URL, CENTRAL_UPDATE_URL, PROTOCOL_VERSION
+   - `.env`: إضافة CENTRAL_ACTIVATION_URL, CENTRAL_UPDATE_URL, PROTOCOL_VERSION
+   - `.gitignore`: إضافة .update-state و .update-log
 
 **الملفات المُضافة:**
-- `server/_core/heartbeat.ts` (401 lines)
+- `server/_core/heartbeat.ts` (402 lines)
+- `server/_core/updateChecker.ts` (426 lines)
 
 **الملفات المُعدلة:**
-- `server/_core/index.ts` - إضافة initializeHeartbeat()
-- `.env.example` - إضافة CENTRAL_ACTIVATION_URL
-- `.env` - إضافة CENTRAL_ACTIVATION_URL
+- `server/_core/index.ts` - إضافة initializeHeartbeat() و initializeUpdateChecker()
+- `.env.example` - إضافة متغيرات السيرفر المركزي
+- `.env` - إضافة متغيرات السيرفر المركزي
+- `.gitignore` - إضافة ملفات سجل Update Checker
 
 **الميزات الأمنية:**
 - ✅ Kill Switch عند التلاعب بالوقت
@@ -1402,6 +1408,179 @@ export default router;
 - ✅ توقيع رقمي للتحقق من الصحة
 - ✅ Silent operation (لا يؤثر على الأداء)
 - ✅ مقاومة أخطاء الشبكة
+
+---
+
+### المرحلة 5: نظام التحقق من التحديثات (Update Checker)
+
+**المدة:** 1-2 أسابيع  
+**الحالة:** مكتملة بنجاح ✅ - بتاريخ 2026-06-02  
+**الهدف:** تطبيق نظام التحقق من التحديثات من السيرفر المركزي
+
+#### 5.1 تصميم نظام Update Checker
+
+**الهدف:** تصميم معمارية Update Checker
+
+**المتطلبات:**
+- التحقق من التحديثات عند الإقلاع
+- التحقق الدوري كل 6 ساعات
+- دعم التحديثات الإجبارية والاختيارية
+- تجميد الواجهة عند وجود تحديث إجباري
+- Silent failure (لا يوقف السيرفر)
+
+**هيكل البيانات:**
+```typescript
+interface UpdateInfo {
+  version: string;
+  mandatory: boolean;
+  releaseDate: number;
+  downloadUrl: string;
+  checksum: string;
+  size: number;
+  releaseNotes: string;
+  protocolVersion: string;
+}
+
+interface UpdateCheckResponse {
+  hasUpdate: boolean;
+  currentVersion: string;
+  latestVersion: string;
+  update?: UpdateInfo;
+  serverTime: number;
+}
+```
+
+#### 5.2 تطبيق Update Checker Client
+
+**الهدف:** تطبيق التحقق من التحديثات
+
+**الخطوات:**
+1. إنشاء `server/_core/updateChecker.ts`:
+```typescript
+import crypto from 'crypto';
+import { getHardwareId, validateLicense } from './license';
+
+function getCentralUpdateUrl(): string {
+  return process.env.CENTRAL_UPDATE_URL || 'https://api.ideahub.com/updates/check';
+}
+
+async function checkForUpdates(): Promise<UpdateCheckResponse | null> {
+  try {
+    const hardwareId = getHardwareId();
+    const licenseInfo = validateLicense();
+    const currentTime = Math.floor(Date.now() / 1000);
+    
+    // إنشاء توقيع رقمي للطلب
+    const payload = JSON.stringify({
+      hid: hardwareId,
+      ts: currentTime,
+      ver: getCurrentVersion(),
+      proto: getCurrentProtocolVersion(),
+    });
+    
+    const signature = crypto.createHash('sha256').update(payload).digest('hex');
+    
+    const checkData = {
+      hardwareId,
+      currentVersion: getCurrentVersion(),
+      protocolVersion: getCurrentProtocolVersion(),
+      licenseVersion: licenseInfo.version,
+      timestamp: currentTime,
+      signature,
+    };
+    
+    const url = getCentralUpdateUrl();
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'BOCAM-CRM-UpdateChecker/1.0',
+      },
+      body: JSON.stringify(checkData),
+      signal: AbortSignal.timeout(15000), // 15 ثانية
+    });
+    
+    if (response.ok) {
+      const data: UpdateCheckResponse = await response.json();
+      return data;
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('⚠️  Update check failed (silent):', error instanceof Error ? error.message : 'Unknown error');
+    return null;
+  }
+}
+
+export function initializeUpdateChecker(): void {
+  const checkInterval = 6 * 60 * 60 * 1000; // 6 ساعات
+  
+  // التحقق فوري عند البدء
+  checkForUpdates().then((response) => {
+    if (response && response.hasUpdate && response.update) {
+      handleAvailableUpdate(response.update);
+    }
+  });
+  
+  // جدولة التحقق الدوري
+  setInterval(() => {
+    checkForUpdates().then((response) => {
+      if (response && response.hasUpdate && response.update) {
+        handleAvailableUpdate(response.update);
+      }
+    });
+  }, checkInterval);
+}
+```
+
+2. تحديث `server/_core/index.ts`:
+```typescript
+import { initializeUpdateChecker } from './updateChecker';
+
+async function startServer() {
+  const licenseInfo = initializeLicense(true);
+  
+  if (licenseInfo) {
+    initializeHeartbeat();
+    initializeUpdateChecker();
+  }
+  
+  // ... rest of server startup
+}
+```
+
+#### 5.3 الملخص التنفيذي للمرحلة 5
+
+تم تنفيذ المرحلة 5 بنجاح في 2026-06-02
+
+**المكونات المُنفذة:**
+1. **Update Checker System** (`server/_core/updateChecker.ts`):
+   - التحقق من التحديثات عند الإقلاع
+   - التحقق الدوري كل 6 ساعات
+   - جمع بيانات مشفرة:
+     * Hardware ID
+     * إصدار النظام الحالي
+     * إصدار البروتوكول
+     * إصدار الترخيص
+   - توقيع رقمي SHA-256 للطلب
+   - دعم التحديثات الإجبارية والاختيارية
+   - تجميد الواجهة عند وجود تحديث إجباري
+   - Silent failure handling
+
+2. **التحديثات:**
+   - `server/_core/index.ts`: إضافة initializeUpdateChecker()
+   - `.env.example`: إضافة CENTRAL_UPDATE_URL و PROTOCOL_VERSION
+   - `.env`: إضافة CENTRAL_UPDATE_URL و PROTOCOL_VERSION
+   - `.gitignore`: إضافة .update-state و .update-log
+
+**الملفات المُضافة:**
+- `server/_core/updateChecker.ts` (426 lines)
+
+**الملفات المُعدلة:**
+- `server/_core/index.ts` - إضافة initializeUpdateChecker()
+- `.env.example` - إضافة متغيرات Update Checker
+- `.env` - إضافة متغيرات Update Checker
+- `.gitignore` - إضافة ملفات سجل Update Checker
 
 ---
 

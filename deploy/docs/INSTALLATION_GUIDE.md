@@ -86,7 +86,13 @@ VITE_OAUTH_PORTAL_URL=http://localhost:3000
 VITE_APP_ID=your-oauth-app-id
 
 # سيرفر النبضات (مطلوب)
-CENTRAL_ACTIVATION_URL=https://api.ideahub.com/heartbeat
+CENTRAL_ACTIVATION_URL=https://ideahub-op7dfwr6.manus.space/heartbeat
+
+# سيرفر التحقق من التحديثات (مطلوب)
+CENTRAL_UPDATE_URL=https://ideahub-op7dfwr6.manus.space/updates/check
+
+# إصدار البروتوكول (مطلوب)
+PROTOCOL_VERSION=1.0.0
 
 # معلومات الشركة (موصى)
 COMPANY_NAME=Your Hospital Name
@@ -187,7 +193,9 @@ pnpm dev
 ```
 🚀 Initializing License System...
 ✅ License validation successful
+💓 Initializing Silent Heartbeat System...
 💓 Starting heartbeat scheduler...
+🔄 Initializing Update Checker System...
 Server running on http://localhost:3000/
 ```
 
@@ -335,8 +343,61 @@ server {
 1. 📖 اقرأ `docs/LICENSE_GUIDE.md` لفهم نظام الترخيص
 2. 📖 اقرأ `docs/MAINTENANCE_GUIDE.md` للصيانة
 3. 🚀 قم بتشغيل السيرفر واختبار جميع الميزات
-4. 📊 إعداد سيرفر مركزي لاستقبال Heartbeat (اختياري)
-5. 🎉 بدأ استخدام النظام في الإنتاج!
+4. 📊 تأكد من أن نظام Heartbeat يعمل (يرسل كل 24 ساعة)
+5. 🔄 تأكد من أن نظام Update Checker يعمل (يتحقق كل 6 ساعات)
+6. 🎉 بدأ استخدام النظام في الإنتاج!
+
+---
+
+## نظام السيرفر المركزي
+
+### نظام Heartbeat (النبضات)
+
+النظام يرسل نبضة كل 24 ساعة إلى السيرفر المركزي للمراقبة عن بعد:
+
+**البيانات المرسلة:**
+- Hardware ID (معرف الجهاز)
+- إصدار الترخيص
+- الوقت الحالي (Unix timestamp)
+- المنطقة الزمنية
+- الميزات المفعلة
+- توقيع رقمي SHA-256
+
+**التكوين:**
+```env
+CENTRAL_ACTIVATION_URL=https://ideahub-op7dfwr6.manus.space/heartbeat
+```
+
+**السجلات:**
+- `.heartbeat-log` - سجل النبضات (آخر 30 سجل)
+- `.last-successful-run` - وقت آخر تشغيل ناجح
+
+### نظام Update Checker (التحقق من التحديثات)
+
+النظام يتحقق من التحديثات عند الإقلاع وكل 6 ساعات:
+
+**البيانات المرسلة:**
+- Hardware ID
+- إصدار النظام الحالي
+- إصدار البروتوكول
+- إصدار الترخيص
+- الوقت الحالي
+- توقيع رقمي SHA-256
+
+**التكوين:**
+```env
+CENTRAL_UPDATE_URL=https://ideahub-op7dfwr6.manus.space/updates/check
+PROTOCOL_VERSION=1.0.0
+```
+
+**السجلات:**
+- `.update-log` - سجل التحقق من التحديثات (آخر 50 سجل)
+- `.update-state` - حالة التحديث المعلق
+
+**التحديثات الإجبارية:**
+- عند وجود تحديث إجباري، سيتم تجميد الواجهة
+- ستظهر رسالة: "جاري تحميل وتثبيت التحديث الآمن..."
+- يجب تثبيت التحديث لاستمرار العمل
 
 ---
 
