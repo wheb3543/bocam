@@ -1,0 +1,139 @@
+# Alertmanager Configuration for BOCAM CRM Platform
+# This file configures alert routing and notification channels
+
+global:
+  resolve_timeout: 5m
+  # Slack webhook URL (set in environment or replace)
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'
+
+# Route configuration
+route:
+  receiver: 'default-receiver'
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  routes:
+    # Critical alerts
+    - match:
+        severity: critical
+      receiver: 'critical-receiver'
+      continue: false
+    
+    # Warning alerts
+    - match:
+        severity: warning
+      receiver: 'warning-receiver'
+      continue: false
+    
+    # Database alerts
+    - match:
+        service: mysql
+      receiver: 'database-receiver'
+      continue: true
+    
+    # Application alerts
+    - match:
+        service: bocam-app
+      receiver: 'app-receiver'
+      continue: true
+
+# Receivers configuration
+receivers:
+  - name: 'default-receiver'
+    slack_configs:
+      - channel: '#alerts'
+        send_resolved: true
+        title: '{{ .Status | toUpper }}: {{ .CommonLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Labels.alertname }}
+          *Severity:* {{ .Labels.severity }}
+          *Description:* {{ .Annotations.description }}
+          *Details:*
+          {{ range .Labels.SortedPairs }} • *{{ .Name }}:* {{ .Value }}
+          {{ end }}
+          {{ end }}
+
+  - name: 'critical-receiver'
+    slack_configs:
+      - channel: '#critical-alerts'
+        send_resolved: true
+        title: '🚨 CRITICAL: {{ .CommonLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Labels.alertname }}
+          *Severity:* {{ .Labels.severity }}
+          *Description:* {{ .Annotations.description }}
+          *Details:*
+          {{ range .Labels.SortedPairs }} • *{{ .Name }}:* {{ .Value }}
+          {{ end }}
+          {{ end }}
+    email_configs:
+      - to: 'admin@example.com'
+        from: 'alerts@bocam-crm.com'
+        subject: '🚨 CRITICAL: {{ .CommonLabels.alertname }}'
+        html: >-
+          {{ range .Alerts }}
+          <h3>{{ .Labels.alertname }}</h3>
+          <p><strong>Severity:</strong> {{ .Labels.severity }}</p>
+          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+          <ul>
+          {{ range .Labels.SortedPairs }}<li><strong>{{ .Name }}:</strong> {{ .Value }}</li>{{ end }}
+          </ul>
+          {{ end }}
+
+  - name: 'warning-receiver'
+    slack_configs:
+      - channel: '#alerts'
+        send_resolved: true
+        title: '⚠️ WARNING: {{ .CommonLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Labels.alertname }}
+          *Severity:* {{ .Labels.severity }}
+          *Description:* {{ .Annotations.description }}
+          *Details:*
+          {{ range .Labels.SortedPairs }} • *{{ .Name }}:* {{ .Value }}
+          {{ end }}
+          {{ end }}
+
+  - name: 'database-receiver'
+    slack_configs:
+      - channel: '#database-alerts'
+        send_resolved: true
+        title: '🗄️ Database Alert: {{ .CommonLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Labels.alertname }}
+          *Database:* {{ .Labels.database }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+
+  - name: 'app-receiver'
+    slack_configs:
+      - channel: '#app-alerts'
+        send_resolved: true
+        title: '🚀 Application Alert: {{ .CommonLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Labels.alertname }}
+          *Service:* {{ .Labels.service }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+
+# Inhibit rules to suppress duplicate alerts
+inhibit_rules:
+  # Inhibit warning alerts if critical alert is firing for same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'service']
+    
+  # Inhibit database alerts if the entire service is down
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match_re:
+      alertname: '.*Database.*'
+    equal: ['service']

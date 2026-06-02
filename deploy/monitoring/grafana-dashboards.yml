@@ -1,0 +1,15 @@
+# Grafana Dashboards Provisioning Configuration
+# This file configures automatic dashboard provisioning
+
+apiVersion: 1
+
+providers:
+  - name: 'BOCAM CRM Dashboards'
+    orgId: 1
+    folder: 'BOCAM CRM'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
