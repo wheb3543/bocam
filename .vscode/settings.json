@@ -1,2 +1,8 @@
 {
+    "workbench.editor.defaultBinaryEditor": "default",
+    "files.exclude": {
+        "/.next": true,
+        "/dist": true,
+        "/node_modules": true
+    }
 }
