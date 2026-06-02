@@ -333,8 +333,163 @@ server {
 2. ✅ استخدم كلمات مرور قوية لقاعدة البيانات
 3. ✅ لا تضفِ `.env` إلى Git
 4. ✅ قم بتغيير `JWT_SECRET` في الإنتاج
-5.يمكن استخدام SSL/HTTPS في الإنتاج
+5. ✅ استخدم SSL/HTTPS في الإنتاج (مطلوب)
 6. ✅ حافظ على النظام محدثاً (security updates)
+
+---
+
+## إعداد SSL/HTTPS (مطلوب للإنتاج)
+
+### نظرة عامة
+
+النظام يدعم SSL/HTTPS باستخدام Let's Encrypt و Nginx. تم توفير جميع الملفات اللازمة في مجلد `deploy/nginx/`.
+
+### الطريقة 1: الإعداد الآلي (موصى به)
+
+```bash
+# 1. انتقل إلى مجلد nginx
+cd deploy/nginx
+
+# 2. اجعل السكريبت قابلاً للتنفيذ
+chmod +x setup-ssl.sh
+
+# 3. شغل السكريبت
+sudo ./setup-ssl.sh
+```
+
+السكريبت سيطلب:
+- اسم النطاق (domain name)
+- البريد الإلكتروني لإشعارات Let's Encrypt
+
+### الطريقة 2: إعداد Docker Compose
+
+```bash
+# 1. انتقل إلى مجلد nginx
+cd deploy/nginx
+
+# 2. أنشئ المجلدات المطلوبة
+mkdir -p ssl certbot-webroot letsencrypt certbot-logs
+
+# 3. عدّل docker-compose.yml
+# استبدل YOUR_EMAIL@EXAMPLE.COM ببريدك
+# استبدل YOUR_DOMAIN.COM بنطاقك
+
+# 4. احصل على الشهادة الأولية
+docker-compose --profile init run certbot-init
+
+# 5. انسخ الشهادات إلى مجلد ssl
+cp letsencrypt/live/YOUR_DOMAIN.COM/fullchain.pem ssl/fullchain.pem
+cp letsencrypt/live/YOUR_DOMAIN.COM/privkey.pem ssl/privkey.pem
+cp letsencrypt/live/YOUR_DOMAIN.COM/chain.pem ssl/chain.pem
+
+# 6. ابدأ nginx و certbot
+docker-compose up -d
+```
+
+### الطريقة 3: الإعداد اليدوي
+
+```bash
+# 1. ثبت Certbot
+sudo apt-get update
+sudo apt-get install certbot python3-certbot-nginx
+
+# 2. احصل على شهادة SSL
+sudo certbot certonly --nginx -d yourdomain.com
+
+# 3. انسخ الشهادات
+sudo mkdir -p /etc/nginx/ssl
+sudo cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem /etc/nginx/ssl/fullchain.pem
+sudo cp /etc/letsencrypt/live/yourdomain.com/privkey.pem /etc/nginx/ssl/privkey.pem
+sudo cp /etc/letsencrypt/live/yourdomain.com/chain.pem /etc/nginx/ssl/chain.pem
+
+# 4. اضبط الأذونات
+sudo chmod 644 /etc/nginx/ssl/fullchain.pem
+sudo chmod 644 /etc/nginx/ssl/chain.pem
+sudo chmod 600 /etc/nginx/ssl/privkey.pem
+
+# 5. انسخ تكوين nginx
+sudo cp deploy/nginx/nginx.conf /etc/nginx/nginx.conf
+
+# 6. عدّل اسم النطاق في التكوين
+sudo sed -i 's/server_name _;/server_name yourdomain.com;/g' /etc/nginx/nginx.conf
+
+# 7. اختبر وأعد تحميل nginx
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### التجديد التلقائي
+
+الشهادات صالحة لمدة 90 يوم. Certbot يجددها تلقائياً قبل 30 يوم من انتهاء الصلاحية.
+
+**إعداد Systemd:**
+```bash
+# انسخ ملفات service و timer
+sudo cp deploy/nginx/certbot-renewal.service /etc/systemd/system/
+sudo cp deploy/nginx/certbot-renewal.timer /etc/systemd/system/
+
+# فعّل وابدأ الـ timer
+sudo systemctl enable certbot-renewal.timer
+sudo systemctl start certbot-renewal.timer
+
+# تحقق من الحالة
+sudo systemctl status certbot-renewal.timer
+```
+
+**إعداد Cron (بديل):**
+```bash
+# أضف إلى crontab
+sudo crontab -e
+
+# أضف هذا السطر (يعمل مرتين يومياً)
+0 */12 * * * certbot renew --quiet --deploy-hook "/etc/letsencrypt/renewal-hooks/deploy/nginx-reload.sh"
+```
+
+### التحقق من SSL
+
+```bash
+# تحقق من الشهادات
+sudo certbot certificates
+
+# اختبر تكوين nginx
+sudo nginx -t
+
+# تحقق من تقييم SSL (خارجي)
+# زر: https://www.ssllabs.com/ssltest/analyze.html?d=yourdomain.com
+```
+
+### استكشاف الأخطاء
+
+**الشهادة غير موجودة:**
+```bash
+sudo ls -la /etc/letsencrypt/live/yourdomain.com/
+sudo certbot certonly --nginx -d yourdomain.com --force-renewal
+```
+
+**Nginx لا يعمل:**
+```bash
+sudo tail -f /var/log/nginx/error.log
+sudo nginx -t
+sudo netstat -tulpn | grep :443
+```
+
+**التجديد التلقائي لا يعمل:**
+```bash
+sudo certbot renew --dry-run
+sudo systemctl status certbot-renewal.timer
+sudo journalctl -u certbot-renewal.service -f
+```
+
+### الملفات المتوفرة
+
+- `deploy/nginx/nginx.conf` - تكوين Nginx مع SSL
+- `deploy/nginx/setup-ssl.sh` - سكريبت الإعداد الآلي
+- `deploy/nginx/certbot-renewal.service` - Systemd service
+- `deploy/nginx/certbot-renewal.timer` - Systemd timer
+- `deploy/nginx/docker-compose.yml` - Docker Compose
+- `deploy/nginx/README.md` - دليل مفصل
+
+للمزيد من التفاصيل، راجع `deploy/nginx/README.md`
 
 ## الخطوات التالية
 

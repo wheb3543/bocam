@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Nginx Reverse Proxy with SSL
+  nginx:
+    image: nginx:alpine
+    container_name: bocam_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./certbot-webroot:/var/www/certbot:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - certbot
+    restart: unless-stopped
+    networks:
+      - bocam-network
+
+  # Certbot for SSL Certificate Management
+  certbot:
+    image: certbot/certbot:latest
+    container_name: bocam_certbot
+    volumes:
+      - ./certbot-webroot:/var/www/certbot
+      - ./letsencrypt:/etc/letsencrypt
+      - ./certbot-logs:/var/log/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    restart: unless-stopped
+    networks:
+      - bocam-network
+
+  # Certbot Initial Setup (run once to obtain certificates)
+  certbot-init:
+    image: certbot/certbot:latest
+    container_name: bocam_certbot_init
+    volumes:
+      - ./certbot-webroot:/var/www/certbot
+      - ./letsencrypt:/etc/letsencrypt
+      - ./certbot-logs:/var/log/letsencrypt
+    entrypoint: "/bin/sh -c 'certbot certonly --webroot --webroot-path /var/www/certbot --email YOUR_EMAIL@EXAMPLE.COM --agree-tos --no-eff-email -d YOUR_DOMAIN.COM'"
+    profiles:
+      - init
+    networks:
+      - bocam-network
+
+networks:
+  bocam-network:
+    driver: bridge
+
+volumes:
+  nginx-logs:
+  certbot-logs:
