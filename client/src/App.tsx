@@ -8,6 +8,11 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import DashboardShell from "./components/DashboardShell";
 import { trpc } from "@/lib/trpc";
+import { UpdateStatusBadge } from "@/components/update/UpdateStatusBadge";
+import { UpdateProgressModal } from "@/components/update/UpdateProgressModal";
+import { MandatoryUpdateModal } from "@/components/update/MandatoryUpdateModal";
+import { OptionalUpdateBanner } from "@/components/update/OptionalUpdateBanner";
+import { useUpdateChecker } from "@/hooks/useUpdateChecker";
 // Lazy load pages for better performance
 const Home = lazy(() => import("./pages/Home"));
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -91,6 +96,8 @@ const TrackingSettingsPage = lazy(() => import("./pages/TrackingSettingsPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const FeatureLockedPage = lazy(() => import("./pages/FeatureLockedPage"));
 const ActivationPage = lazy(() => import("./pages/ActivationPage"));
+const UpdateManagementPage = lazy(() => import("./pages/UpdateManagementPage"));
+const SystemStatusPage = lazy(() => import("./pages/SystemStatusPage"));
 import ProtectedRoute from "./components/ProtectedRoute";
 
 
@@ -304,6 +311,8 @@ function Router() {
             <Route path={"/dashboard/review-approval"} component={ReviewApprovalPage} />
             <Route path={"/dashboard/pwa-stats"} component={PWAStatsPage} />
             <Route path={"/dashboard/settings"} component={SettingsPage} />
+            <Route path={"/dashboard/updates"} component={UpdateManagementPage} />
+            <Route path={"/dashboard/system-status"} component={SystemStatusPage} />
           </Switch>
         </DashboardShell>
       </Route>
@@ -361,6 +370,24 @@ function App() {
     initializeTracking();
   }, []);
 
+  const { isMandatoryUpdate, isUpdateInProgress } = useUpdateChecker();
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [showMandatoryModal, setShowMandatoryModal] = useState(false);
+
+  // Show mandatory update modal
+  useEffect(() => {
+    if (isMandatoryUpdate) {
+      setShowMandatoryModal(true);
+    }
+  }, [isMandatoryUpdate]);
+
+  // Show progress modal when update is in progress
+  useEffect(() => {
+    if (isUpdateInProgress) {
+      setShowProgressModal(true);
+    }
+  }, [isUpdateInProgress]);
+
   return (
     <ErrorBoundary>
       <ThemeProvider
@@ -373,6 +400,9 @@ function App() {
           <OfflineIndicator />
           <CookieConsentBanner />
           <MetaPixel />
+          <OptionalUpdateBanner />
+          <UpdateProgressModal open={showProgressModal} onOpenChange={setShowProgressModal} />
+          <MandatoryUpdateModal open={showMandatoryModal} onOpenChange={setShowMandatoryModal} />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
