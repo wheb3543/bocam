@@ -18,6 +18,8 @@ import { initializeLicense } from "./license";
 import { initializeHeartbeat } from "./heartbeat";
 import { initializeUpdateChecker, getUpdateStatus, startManualUpdate, startManualRollback } from "./updateChecker";
 import { logActivity, logUpdate, updateUpdateLog, logBackup, updateBackupLog, createNotification } from "./activityLogger";
+import { cacheManager } from "../redis";
+import { CacheKeys, CacheTTL, cachedQuery } from "./cacheHelper";
 // import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -106,9 +108,22 @@ async function startServer() {
   });
 
   // Update management API endpoints
-  app.get("/api/update/status", apiLimiter, (req, res) => {
+  app.get("/api/update/status", apiLimiter, async (req, res) => {
     try {
+      // Try to get from cache first
+      const cachedStatus = await cacheManager.get(CacheKeys.UPDATE_STATUS);
+      if (cachedStatus) {
+        return res.json({
+          success: true,
+          data: cachedStatus,
+        });
+      }
+
       const status = getUpdateStatus();
+
+      // Cache the status
+      await cacheManager.set(CacheKeys.UPDATE_STATUS, status, CacheTTL.SHORT);
+
       res.json({
         success: true,
         data: status,
@@ -277,8 +292,17 @@ async function startServer() {
   });
 
   // System configuration API endpoints
-  app.get("/api/config", apiLimiter, (req, res) => {
+  app.get("/api/config", apiLimiter, async (req, res) => {
     try {
+      // Try to get from cache first
+      const cachedConfig = await cacheManager.get(CacheKeys.CONFIG);
+      if (cachedConfig) {
+        return res.json({
+          success: true,
+          data: cachedConfig,
+        });
+      }
+
       // Mock data for now - in production, this would read from actual config
       const systemConfig = {
         sslEnabled: true,
@@ -294,6 +318,10 @@ async function startServer() {
         maintenanceMode: false,
         debugMode: false,
       };
+
+      // Cache the configuration
+      await cacheManager.set(CacheKeys.CONFIG, systemConfig, CacheTTL.LONG);
+
       res.json({
         success: true,
         data: systemConfig,
@@ -310,6 +338,10 @@ async function startServer() {
     try {
       // In production, this would update the actual config
       // For now, just return success
+      
+      // Invalidate cache after update
+      await cacheManager.delete(CacheKeys.CONFIG);
+      
       await logActivity({
         action: 'config_update',
         description: 'System configuration updated',
