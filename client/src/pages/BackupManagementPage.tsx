@@ -52,18 +52,11 @@ export default function BackupManagementPage() {
 
   const fetchBackupStatus = async () => {
     try {
-      // Mock data for now - in production, this would call an API endpoint
-      const mockStatus: BackupStatus = {
-        lastBackup: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
-        lastBackupSize: 256, // MB
-        nextBackup: Math.floor(Date.now() / 1000) + (23 * 60 * 60), // 23 hours from now
-        backupEnabled: true,
-        cloudEnabled: true,
-        retentionDays: 30,
-        totalBackups: 45,
-        totalSize: 10240, // MB
-      };
-      setStatus(mockStatus);
+      const response = await fetch('/api/backup/status');
+      const data = await response.json();
+      if (data.success) {
+        setStatus(data.data);
+      }
     } catch (error) {
       console.error('Failed to fetch backup status:', error);
     } finally {
@@ -73,50 +66,11 @@ export default function BackupManagementPage() {
 
   const fetchBackupHistory = async () => {
     try {
-      // Mock data for now - in production, this would call an API endpoint
-      const mockHistory: BackupHistory[] = [
-        {
-          id: '1',
-          timestamp: Math.floor(Date.now() / 1000) - 3600,
-          type: 'daily',
-          size: 256,
-          status: 'completed',
-          location: 'both',
-        },
-        {
-          id: '2',
-          timestamp: Math.floor(Date.now() / 1000) - (25 * 60 * 60),
-          type: 'daily',
-          size: 255,
-          status: 'completed',
-          location: 'both',
-        },
-        {
-          id: '3',
-          timestamp: Math.floor(Date.now() / 1000) - (49 * 60 * 60),
-          type: 'daily',
-          size: 254,
-          status: 'completed',
-          location: 'both',
-        },
-        {
-          id: '4',
-          timestamp: Math.floor(Date.now() / 1000) - (73 * 60 * 60),
-          type: 'daily',
-          size: 253,
-          status: 'completed',
-          location: 'both',
-        },
-        {
-          id: '5',
-          timestamp: Math.floor(Date.now() / 1000) - (97 * 60 * 60),
-          type: 'daily',
-          size: 252,
-          status: 'completed',
-          location: 'both',
-        },
-      ];
-      setHistory(mockHistory);
+      const response = await fetch('/api/backup/history');
+      const data = await response.json();
+      if (data.success) {
+        setHistory(data.data);
+      }
     } catch (error) {
       console.error('Failed to fetch backup history:', error);
     }
@@ -129,15 +83,77 @@ export default function BackupManagementPage() {
 
     try {
       setIsCreatingBackup(true);
-      // In production, this would call an API endpoint
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('تم إنشاء النسخة الاحتياطية بنجاح');
-      fetchBackupStatus();
-      fetchBackupHistory();
+      const response = await fetch('/api/backup/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ type: 'manual' }),
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('تم بدء النسخة الاحتياطية بنجاح');
+        fetchBackupStatus();
+        fetchBackupHistory();
+      } else {
+        alert('فشل بدء النسخة الاحتياطية: ' + data.error);
+      }
     } catch (error) {
-      alert('فشل إنشاء النسخة الاحتياطية');
+      alert('فشل بدء النسخة الاحتياطية');
     } finally {
       setIsCreatingBackup(false);
+    }
+  };
+
+  const handleRestoreBackup = async (backupId: string) => {
+    if (!confirm('هل أنت متأكد من أنك تريد استعادة هذه النسخة الاحتياطية؟ سيتم استعادة النظام إلى الحالة عند هذه النسخة.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/backup/restore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ backupId }),
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('تم استعادة النسخة الاحتياطية بنجاح. سيتم إعادة تشغيل النظام.');
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      } else {
+        alert('فشل استعادة النسخة الاحتياطية: ' + data.error);
+      }
+    } catch (error) {
+      alert('فشل استعادة النسخة الاحتياطية');
+    }
+  };
+
+  const handleDeleteBackup = async (backupId: string) => {
+    if (!confirm('هل أنت متأكد من أنك تريد حذف هذه النسخة الاحتياطية؟ لا يمكن التراجع عن هذا الإجراء.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/backup/${backupId}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('تم حذف النسخة الاحتياطية بنجاح');
+        fetchBackupStatus();
+        fetchBackupHistory();
+      } else {
+        alert('فشل حذف النسخة الاحتياطية: ' + data.error);
+      }
+    } catch (error) {
+      alert('فشل حذف النسخة الاحتياطية');
     }
   };
 
@@ -383,10 +399,20 @@ export default function BackupManagementPage() {
                     <TableCell>{getLocationBadge(backup.location)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleRestoreBackup(backup.id)}
+                          disabled={backup.status !== 'completed'}
+                        >
                           <Download className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteBackup(backup.id)}
+                          disabled={backup.status === 'in_progress'}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

@@ -16,7 +16,12 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import AdmZip from 'adm-zip';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { getHardwareId, validateLicense } from './license';
+
+const execAsync = promisify(exec);
 
 /**
  * بيانات التحديث من السيرفر المركزي
@@ -518,24 +523,82 @@ async function installUpdate(updatePath: string, updateInfo: UpdateInfo): Promis
 
     console.log('📦 Extracting update...');
     updateUpdateStatus('installing', 20, null);
+    logUpdateProgress('Extracting update package...');
 
-    // فك الضغط (باستخدام مكتبة unzip أو أداة مشابهة)
-    // في هذا المثال، سنفترض أن الملف عبارة عن ZIP يحتوي على الملفات
-    // يجب تثبيت مكتبة مثل 'adm-zip' أو 'unzipper'
-    // هنا سنستخدم تنفيذ بسيط
-
-    // في الإنتاج، يجب استخدام مكتبة فك ضغط حقيقية
-    console.log('⚠️  Note: Actual extraction requires a ZIP library');
-    console.log('   For now, simulating extraction...');
-
+    // فك الضغط باستخدام adm-zip
+    const zip = new AdmZip(updatePath);
+    const extractPath = path.join(process.cwd(), 'temp-update');
+    
+    // حذف مجلد temp-update إذا موجود
+    if (fs.existsSync(extractPath)) {
+      fs.rmSync(extractPath, { recursive: true, force: true });
+    }
+    
+    // فك الضغط
+    zip.extractAllTo(extractPath, true);
+    console.log(`✅ Update extracted to: ${extractPath}`);
+    logUpdateProgress('Update extracted successfully');
+    
     updateUpdateStatus('installing', 50, null);
 
     // استبدال الملفات
     console.log('🔄 Replacing files...');
+    updateUpdateStatus('installing', 60, null);
+    logUpdateProgress('Replacing files...');
+
+    const filesToReplace = [
+      'package.json',
+      'package-lock.json',
+      'pnpm-lock.yaml',
+      'tsconfig.json',
+      'vite.config.ts',
+      'server',
+      'client',
+      'shared',
+    ];
+
+    for (const file of filesToReplace) {
+      const sourcePath = path.join(extractPath, file);
+      const destPath = path.join(process.cwd(), file);
+
+      if (fs.existsSync(sourcePath)) {
+        console.log(`   Replacing: ${file}`);
+        
+        if (fs.statSync(sourcePath).isDirectory()) {
+          // حذف الدليل القديم
+          if (fs.existsSync(destPath)) {
+            fs.rmSync(destPath, { recursive: true, force: true });
+          }
+          // نسخ الدليل الجديد
+          copyDirectory(sourcePath, destPath);
+        } else {
+          fs.copyFileSync(sourcePath, destPath);
+        }
+      }
+    }
+
+    console.log('✅ Files replaced');
+    logUpdateProgress('Files replaced successfully');
     updateUpdateStatus('installing', 70, null);
+
+    // حذف مجلد temp-update
+    fs.rmSync(extractPath, { recursive: true, force: true });
+    console.log('✅ Cleanup completed');
 
     // تشغيل الترحيلات إذا لزم الأمر
     console.log('🗄️  Running migrations...');
+    updateUpdateStatus('installing', 80, null);
+    logUpdateProgress('Running database migrations...');
+    
+    try {
+      await execAsync('pnpm db:push');
+      console.log('✅ Migrations completed');
+      logUpdateProgress('Database migrations completed');
+    } catch (migrationError) {
+      console.warn('⚠️  Migration failed (might not have migrations):', migrationError);
+      logUpdateProgress('Migration skipped or failed');
+    }
+
     updateUpdateStatus('installing', 90, null);
 
     // تحديث package.json
@@ -544,6 +607,8 @@ async function installUpdate(updatePath: string, updateInfo: UpdateInfo): Promis
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
     packageJson.version = updateInfo.version;
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+    console.log('✅ Version updated');
+    logUpdateProgress('Version updated successfully');
 
     updateUpdateStatus('installing', 100, null);
 
@@ -558,6 +623,11 @@ async function installUpdate(updatePath: string, updateInfo: UpdateInfo): Promis
     state.pendingUpdate = null;
     state.updateInProgress = false;
     saveUpdateState(state);
+
+    // إعادة التشغيل التلقائية
+    console.log('🔄 Restarting server...');
+    logUpdateProgress('Restarting server...');
+    await restartServer();
   } catch (error) {
     console.error('❌ Installation failed:', error);
     updateUpdateStatus('failed', 0, error instanceof Error ? error.message : 'Unknown error');
@@ -569,6 +639,7 @@ async function installUpdate(updatePath: string, updateInfo: UpdateInfo): Promis
       await rollbackUpdate();
     } catch (rollbackError) {
       console.error('❌ Automatic rollback failed:', rollbackError);
+      logUpdateProgress('Automatic rollback failed');
     }
 
     throw error;
@@ -647,15 +718,32 @@ async function rollbackUpdate(): Promise<void> {
 /**
  * إعادة تشغيل السيرفر بعد التحديث
  */
-function restartServer(): void {
+async function restartServer(): Promise<void> {
   console.log('🔄 Restarting server...');
   logUpdateProgress('Restarting server...');
 
   // إيقاف العملية الحالية
-  setTimeout(() => {
-    console.log('👋 Shutting down for restart...');
-    process.exit(0);
-  }, 2000);
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  console.log('👋 Shutting down for restart...');
+  logUpdateProgress('Shutting down...');
+  
+  // إعادة تشغيل السيرفر باستخدام PM2 أو systemd
+  try {
+    // محاولة استخدام PM2 إذا كان موجوداً
+    await execAsync('pm2 restart bocam-crm');
+    console.log('✅ Server restarted via PM2');
+  } catch (pm2Error) {
+    // إذا فشل PM2، حاول استخدام systemd
+    try {
+      await execAsync('sudo systemctl restart bocam-crm');
+      console.log('✅ Server restarted via systemd');
+    } catch (systemdError) {
+      // إذا فشل كل شيء، أوقف العملية الحالية
+      console.log('⚠️  Could not restart via PM2 or systemd, exiting...');
+      process.exit(0);
+    }
+  }
 }
 
 /**
