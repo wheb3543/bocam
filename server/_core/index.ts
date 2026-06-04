@@ -44,18 +44,21 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  // TEMPORARY: Disable license validation for deployment until central server is ready
   // Initialize license validation (Kill Switch)
   // Allow server to start in activation mode if license is missing
-  const licenseInfo = initializeLicense(true);
+  // const licenseInfo = initializeLicense(true);
+  const licenseInfo = null; // Temporarily disabled
   
+  // TEMPORARY: Disable heartbeat, update checker, and backup cron jobs for deployment
   // Initialize heartbeat system (Anti-Clock-Tampering) - only if license is valid
-  if (licenseInfo) {
-    initializeHeartbeat();
-    // Initialize update checker system - only if license is valid
-    initializeUpdateChecker();
-    // Initialize backup cron jobs - only if license is valid
-    startBackupCronJobs();
-  }
+  // if (licenseInfo) {
+  //   initializeHeartbeat();
+  //   // Initialize update checker system - only if license is valid
+  //   initializeUpdateChecker();
+  //   // Initialize backup cron jobs - only if license is valid
+  //   startBackupCronJobs();
+  // }
   
   const app = express();
   const server = createServer(app);
