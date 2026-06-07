@@ -37,6 +37,8 @@ import {
   HOSPITAL_DB_NAME,
   HOSPITAL_DB_USER,
   HOSPITAL_DB_PASSWORD,
+  FILE_UPLOAD_BASE_URL,
+  FILE_UPLOAD_PATH,
   JWT_SECRET,
   OAUTH_SERVER_URL,
   VITE_OAUTH_PORTAL_URL,
@@ -122,7 +124,11 @@ export const ENV = {
   hospitalDbName: HOSPITAL_DB_NAME,
   hospitalDbUser: HOSPITAL_DB_USER,
   hospitalDbPassword: HOSPITAL_DB_PASSWORD,
-  
+
+  // File Upload Configuration
+  fileUploadBaseUrl: FILE_UPLOAD_BASE_URL,
+  fileUploadPath: FILE_UPLOAD_PATH,
+
   // OAuth Configuration
   appId: process.env.META_APP_ID ?? process.env.VITE_APP_ID ?? "",
   cookieSecret: JWT_SECRET,

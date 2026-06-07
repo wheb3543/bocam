@@ -1,6 +1,7 @@
 import { getDb, getHospitalDb } from '../db';
 import { sql } from 'drizzle-orm';
 import { generateLabResultPDF } from '../services/labPdfGenerator';
+import { uploadPdfFile } from '../services/fileUploadService';
 import { messageSettings, whatsappTemplates } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { sendWhatsAppTemplateMessage, sendWhatsAppDocumentMessage } from '../whatsappCloudAPI';
@@ -94,8 +95,10 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
     const pdfBuffer = await generateLabResultPDF(order.ORDER_ID);
     console.log(`[Lab Results Poller] PDF generated for order ${order.ORDER_ID} (${pdfBuffer.length} bytes)`);
 
-    // TODO: رفع PDF إلى سيرفر الملفات والحصول على URL
-    const pdfUrl = `https://your-server.com/lab-results/${order.ORDER_ID}.pdf`;
+    // رفع PDF إلى سيرفر الملفات والحصول على URL عام
+    const filename = `lab-result-${order.ORDER_ID}-${Date.now()}.pdf`;
+    const pdfUrl = await uploadPdfFile(pdfBuffer, filename);
+    console.log(`[Lab Results Poller] PDF uploaded to: ${pdfUrl}`);
 
     const normalizedPhone = normalizePhoneNumber(order.PHONE_NO);
     if (!normalizedPhone) {

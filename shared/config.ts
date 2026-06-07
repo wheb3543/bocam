@@ -285,6 +285,21 @@ export const HOSPITAL_DB_USER = process.env.HOSPITAL_DB_USER || 'root';
 export const HOSPITAL_DB_PASSWORD = process.env.HOSPITAL_DB_PASSWORD || '';
 
 /**
+ * File Upload Configuration
+ * File upload service for lab results PDFs
+ */
+
+/**
+ * File Upload Base URL (public URL for accessing uploaded files)
+ */
+export const FILE_UPLOAD_BASE_URL = process.env.FILE_UPLOAD_BASE_URL || 'http://localhost:5173/lab-results';
+
+/**
+ * File Upload Path (local directory for storing uploaded files)
+ */
+export const FILE_UPLOAD_PATH = process.env.FILE_UPLOAD_PATH || './public/lab-results';
+
+/**
  * Server Configuration
  * Application server settings
  */
