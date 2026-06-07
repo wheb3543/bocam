@@ -13,3 +13,18 @@
 [2026-05-30T21:49:28.901Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
 [2026-05-30T21:49:28.901Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
 [2026-05-30T21:49:28.901Z] Node.js v22.13.0
+[2026-06-07T18:22:56.300Z] ELIFECYCLE  Command failed.
+[2026-06-07T18:22:56.305Z] Dev server exited with code -1
+[2026-06-07T18:22:57.401Z] Starting dev server with command: pnpm run dev
+[2026-06-07T18:22:57.722Z] > sgh-crm-portal@1.0.0 dev /home/ubuntu/sgh-crm-portal
+[2026-06-07T18:22:57.722Z] > cross-env NODE_ENV=development tsx watch server/_core/index.ts
+[2026-06-07T18:22:58.713Z] /home/ubuntu/sgh-crm-portal/shared/config.ts:398
+[2026-06-07T18:22:58.713Z] throw new Error(
+[2026-06-07T18:22:58.713Z] ^
+[2026-06-07T18:22:58.713Z] Error: JWT_SECRET must be at least 32 characters long for security
+[2026-06-07T18:22:58.713Z] at validateEnv (/home/ubuntu/sgh-crm-portal/shared/config.ts:398:11)
+[2026-06-07T18:22:58.713Z] at <anonymous> (/home/ubuntu/sgh-crm-portal/server/_core/env.ts:58:1)
+[2026-06-07T18:22:58.713Z] at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+[2026-06-07T18:22:58.713Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-06-07T18:22:58.713Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-06-07T18:22:58.713Z] Node.js v22.13.0

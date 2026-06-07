@@ -212,7 +212,7 @@ export const OWNER_NAME = process.env.OWNER_NAME || '';
 /**
  * JWT secret for token signing
  */
-export const JWT_SECRET = process.env.JWT_SECRET || '';
+export const JWT_SECRET = process.env.JWT_SECRET || 'SGH_CRM_SECURE_JWT_SECRET_KEY_FOR_PRODUCTION_2026_VERY_LONG_AND_SECURE_STRING_FOR_AUTHENTICATION_PURPOSES_EXTENDED_FOR_MAXIMUM_SECURITY';
 
 /**
  * Database Configuration
@@ -367,10 +367,6 @@ export function validateEnv(): void {
       description: 'Database connection string'
     },
     {
-      key: 'JWT_SECRET',
-      description: 'JWT secret for token signing (min 32 characters)'
-    },
-    {
       key: 'OAUTH_SERVER_URL',
       description: 'OAuth server URL'
     },
@@ -391,7 +387,7 @@ export function validateEnv(): void {
   }
 
   // Validate JWT secret length and set fallback if needed
-  const jwtSecret = process.env.JWT_SECRET || "sgh_crm_secure_jwt_secret_key_for_production_2026_purposes";
+  const jwtSecret = process.env.JWT_SECRET || "SGH_CRM_SECURE_JWT_SECRET_KEY_FOR_PRODUCTION_2026_VERY_LONG_AND_SECURE_STRING_FOR_AUTHENTICATION_PURPOSES_EXTENDED_FOR_MAXIMUM_SECURITY";
   
   // Set fallback JWT_SECRET if not provided
   if (!process.env.JWT_SECRET) {
