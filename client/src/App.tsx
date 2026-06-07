@@ -112,18 +112,19 @@ function Router() {
     window.scrollTo(0, 0);
   }, [location]);
   
+  // TEMPORARY: Skip activation page for deployment until central server is ready
   // Show activation page if license doesn't exist (unless on activation page)
-  if (!checkingLicense && !licenseCheck?.exists && location !== "/activation") {
-    return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      }>
-        <ActivationPage />
-      </Suspense>
-    );
-  }
+  // if (!checkingLicense && !licenseCheck?.exists && location !== "/activation") {
+  //   return (
+  //     <Suspense fallback={
+  //       <div className="flex items-center justify-center min-h-screen">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  //       </div>
+  //     }>
+  //       <ActivationPage />
+  //     </Suspense>
+  //   );
+  // }
   
   // make sure to consider if you need authentication for certain routes
   return (
