@@ -325,9 +325,9 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
   }, []);
 
   const handleDownloadMedia = useCallback((media: any) => {
-    if (media.mediaUrl) {
+    if (media.mediaId) {
       const link = document.createElement('a');
-      link.href = `/api/whatsapp/media/${media.mediaUrl}`;
+      link.href = `/api/whatsapp/media/${media.mediaId}`;
       link.download = media.content || 'media';
       link.click();
     }
@@ -752,7 +752,7 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
         return;
       }
 
-      const audioMediaUrl = data.dataUrl;
+      const audioMediaId = data.mediaId || data.dataUrl;
 
       // For now, just send the audio directly without uploading to WhatsApp Media API
       // This is a temporary solution until uploadMedia is properly configured
@@ -766,7 +766,7 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
         sentAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         sentBy: userId,
-        mediaUrl: audioMediaUrl,
+        mediaId: audioMediaId,
       };
       setLocalMessages((prev) => [...prev, optimistic]);
       scrollToBottom();
@@ -774,7 +774,7 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
       sendMessageMutation.mutate({
         conversationId,
         message: "رسالة صوتية",
-        mediaUrl: audioMediaUrl,
+        mediaId: audioMediaId,
         messageType: "audio",
       });
 
@@ -943,7 +943,6 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
     if (!messageText.trim() && !attachedFile) return;
     if (!conversationId) return;
 
-    let mediaUrl = null;
     let mediaId = null;
     let messageType: "text" | "image" | "document" | "video" | "audio" = "text";
 
@@ -965,7 +964,7 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
           return;
         }
 
-        mediaUrl = data.dataUrl;
+        mediaId = data.mediaId || data.dataUrl; // Use mediaId if available, fallback to dataUrl
 
         // For now, just send the file directly without uploading to WhatsApp Media API
         // This is a temporary solution until uploadMedia is properly configured
@@ -997,7 +996,7 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
       createdAt: new Date().toISOString(),
       sentBy: userId,
       replyToMessageId: replyToMessage?.id,
-      mediaUrl,
+      mediaId,
     };
     setLocalMessages((prev) => [...prev, optimistic]);
     scrollToBottom();
@@ -1005,7 +1004,7 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
       conversationId,
       message: messageText.trim(),
       replyToMessageId: replyToMessage?.id || undefined,
-      mediaUrl: mediaUrl || undefined,
+      mediaId: mediaId || undefined,
       messageType,
     });
     setMessageText("");
@@ -1310,8 +1309,8 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
                     ) : msg.messageType === 'image' ? (
                       /* عرض الصور */
                       <div>
-                        {msg.mediaUrl ? (
-                          <LazyImage src={`/api/whatsapp/media/${msg.mediaUrl}`} alt={msg.content} className="max-w-full h-auto rounded" />
+                        {msg.mediaId ? (
+                          <LazyImage src={`/api/whatsapp/media/${msg.mediaId}`} alt={msg.content} className="max-w-full h-auto rounded" />
                         ) : (
                           <div className="flex items-center gap-2">
                             <Image className="h-8 w-8" />
@@ -1322,8 +1321,8 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
                     ) : msg.messageType === 'video' ? (
                       /* عرض الفيديو */
                       <div>
-                        {msg.mediaUrl ? (
-                          <video src={`/api/whatsapp/media/${msg.mediaUrl}`} controls className="max-w-full h-auto rounded" />
+                        {msg.mediaId ? (
+                          <video src={`/api/whatsapp/media/${msg.mediaId}`} controls className="max-w-full h-auto rounded" />
                         ) : (
                           <div className="flex items-center gap-2">
                             <Video className="h-8 w-8" />
@@ -1334,8 +1333,8 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
                     ) : msg.messageType === 'audio' ? (
                       /* عرض الصوت */
                       <div>
-                        {msg.mediaUrl ? (
-                          <audio src={`/api/whatsapp/media/${msg.mediaUrl}`} controls className="w-full" />
+                        {msg.mediaId ? (
+                          <audio src={`/api/whatsapp/media/${msg.mediaId}`} controls className="w-full" />
                         ) : (
                           <div className="flex items-center gap-2">
                             <Music className="h-8 w-8" />
@@ -1364,14 +1363,14 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
                             })()}
                           </div>
                           <div className="flex gap-1">
-                            {msg.mediaUrl && (
+                            {msg.mediaId && (
                               <>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   className="h-7 w-7"
                                   onClick={() => {
-                                    window.open(`/api/whatsapp/media/${msg.mediaUrl}`, '_blank');
+                                    window.open(`/api/whatsapp/media/${msg.mediaId}`, '_blank');
                                   }}
                                   title="معاينة"
                                 >
@@ -1383,7 +1382,7 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
                                   className="h-7 w-7"
                                   onClick={() => {
                                     const link = document.createElement('a');
-                                    link.href = `/api/whatsapp/media/${msg.mediaUrl}`;
+                                    link.href = `/api/whatsapp/media/${msg.mediaId}`;
                                     link.download = msg.content;
                                     link.click();
                                   }}
@@ -1436,9 +1435,9 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
                     ) : msg.messageType === 'sticker' ? (
                       /* عرض الملصقات */
                       <div>
-                        {msg.mediaUrl ? (
+                        {msg.mediaId ? (
                           <img
-                            src={`/api/whatsapp/media/${msg.mediaUrl}`}
+                            src={`/api/whatsapp/media/${msg.mediaId}`}
                             alt={msg.content || 'ملصق'}
                             className="w-32 h-32 object-contain rounded-lg"
                           />
@@ -2010,14 +2009,14 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
                             <div key={media.id} className="relative group">
                               {media.messageType === 'image' ? (
                                 <img
-                                  src={`/api/whatsapp/media/${media.mediaUrl}`}
+                                  src={`/api/whatsapp/media/${media.mediaId}`}
                                   alt={media.content}
                                   className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => setSelectedMedia(media)}
                                 />
                               ) : (
                                 <video
-                                  src={`/api/whatsapp/media/${media.mediaUrl}`}
+                                  src={`/api/whatsapp/media/${media.mediaId}`}
                                   className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => setSelectedMedia(media)}
                                 />
@@ -2066,13 +2065,13 @@ export default function ChatWindow({ conversationId, lastMessageAt, onConversati
                       <div className="py-4">
                         {selectedMedia.messageType === 'image' ? (
                           <img
-                            src={`/api/whatsapp/media/${selectedMedia.mediaUrl}`}
+                            src={`/api/whatsapp/media/${selectedMedia.mediaId}`}
                             alt={selectedMedia.content}
                             className="w-full max-h-[60vh] object-contain rounded-lg"
                           />
                         ) : (
                           <video
-                            src={`/api/whatsapp/media/${selectedMedia.mediaUrl}`}
+                            src={`/api/whatsapp/media/${selectedMedia.mediaId}`}
                             controls
                             className="w-full max-h-[60vh] object-contain rounded-lg"
                           />

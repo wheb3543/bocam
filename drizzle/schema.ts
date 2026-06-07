@@ -562,7 +562,8 @@ export const whatsappMessages = mysqlTable("whatsapp_messages", {
   direction: mysqlEnum("direction", ["inbound", "outbound"]).notNull(),
   content: text("content").notNull(),
   messageType: mysqlEnum("messageType", ["text", "image", "document", "audio", "video", "location", "template", "interactive", "contacts", "unknown", "button_reply", "list_reply", "sticker", "reaction", "order", "referral", "product_enquiry", "unsupported"]).default("text").notNull(),
-  mediaUrl: varchar("mediaUrl", { length: 500 }),
+  mediaId: varchar("mediaId", { length: 255 }), // WhatsApp Media ID for retrieving media from Meta API
+  mediaUrl: varchar("mediaUrl", { length: 500 }), // Temporary media URL from Meta (deprecated, use mediaId instead)
   status: mysqlEnum("status", ["sent", "delivered", "read", "failed", "received"]).default("sent").notNull(),
   whatsappMessageId: varchar("whatsappMessageId", { length: 255 }), // WhatsApp API message ID
   sentBy: int("sentBy"), // User ID who sent (for outbound)

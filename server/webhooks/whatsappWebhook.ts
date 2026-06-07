@@ -572,32 +572,17 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     }
 
     // حفظ الرسالة
-    let mediaUrl = null;
-    
-    // تنزيل الوسائط من WhatsApp Media API
+    let mediaId = null;
+
+    // حفظ mediaId من الوسائط الواردة
     if (metaPayload?.mediaId) {
-      try {
-        const accessToken = process.env.META_ACCESS_TOKEN;
-        if (accessToken) {
-          const mediaResponse = await fetch(`https://graph.facebook.com/v25.0/${metaPayload.mediaId}`, {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          });
-          if (mediaResponse.ok) {
-            const mediaData = await mediaResponse.json();
-            mediaUrl = mediaData.url;
-            console.log(`[WhatsApp Webhook] ✅ Downloaded media URL for ${type}: ${mediaUrl}`);
-          }
-        }
-      } catch (error) {
-        console.error(`[WhatsApp Webhook] Failed to download media for ${type}:`, error);
-      }
+      mediaId = metaPayload.mediaId;
+      console.log(`[WhatsApp Webhook] ✅ Saved mediaId for ${type}: ${mediaId}`);
     }
 
     console.log(`[WhatsApp Webhook] Debug: conversation.id = ${conversation.id}, type = ${typeof conversation.id}`);
     console.log(`[WhatsApp Webhook] Debug: Saving message to DB - content: ${content}, type: ${messageType}`);
-    
+
     const newMessageResult = await createWhatsAppMessage({
       conversationId: conversation.id,
       direction: "inbound",
@@ -607,7 +592,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       whatsappMessageId: messageId || null,
       sentAt: new Date(parseInt(timestamp) * 1000),
       metadata: metaPayload ? JSON.stringify(metaPayload) : null,
-      mediaUrl: mediaUrl,
+      mediaId: mediaId,
       // حفظ identity data
       identityAcknowledged: identityData?.acknowledged || false,
       identityHash: identityData?.hash || null,
