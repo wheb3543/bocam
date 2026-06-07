@@ -39,11 +39,17 @@ export default function WhatsAppLabResultsPage() {
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
 
   // Mock data - في الإنتاج، سيتم استبدال هذا بـ tRPC query
-  const { data: labOrders, isLoading, refetch } = trpc.lab.getLabOrders.useQuery({
-    search: searchQuery,
-    status: statusFilter,
-    dateFilter,
-  });
+  const [labOrders, setLabOrders] = useState<LabOrder[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const refetch = () => {
+    setIsLoading(true);
+    // Mock data - سيتم استبدال هذا بـ tRPC query
+    setTimeout(() => {
+      setLabOrders([]);
+      setIsLoading(false);
+    }, 500);
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
