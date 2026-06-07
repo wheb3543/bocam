@@ -54,6 +54,7 @@ interface Conversation {
   leadId?: number | null;
   offerLeadId?: number | null;
   campRegistrationId?: number | null;
+  labOrderId?: number | null;
 }
 
 interface User {
@@ -73,7 +74,7 @@ interface Template {
   languageCode?: string | null;
 }
 
-type FilterType = "all" | "unread" | "important" | "archived" | "unnamed" | "unreplied";
+type FilterType = "all" | "unread" | "important" | "archived" | "unnamed" | "unreplied" | "lab_results";
 
 // Helper function to get time elapsed color
 function getTimeElapsedColor(lastMessageAt: string | Date | null): string {
@@ -106,6 +107,7 @@ const StatsBar = memo(function StatsBar({ conversations }: StatsBarProps) {
   const unread = safeConversations.filter(c => c.unreadCount > 0).length;
   const important = safeConversations.filter(c => c.isImportant === 1).length;
   const archived = safeConversations.filter(c => c.isArchived === 1).length;
+  const labResults = safeConversations.filter(c => c.labOrderId !== null && c.labOrderId !== undefined).length;
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const active = safeConversations.filter(c =>
     !c.isArchived &&
@@ -119,8 +121,8 @@ const StatsBar = memo(function StatsBar({ conversations }: StatsBarProps) {
         { label: "الكل", value: total, icon: MessageSquare, color: "text-[var(--whatsapp-blue)]", bg: "bg-[var(--whatsapp-blue)]/10 dark:bg-[var(--whatsapp-blue)]/20" },
         { label: "نشطة", value: active, icon: Users, color: "text-[var(--whatsapp-green)]", bg: "bg-[var(--whatsapp-green)]/10 dark:bg-[var(--whatsapp-green)]/20" },
         { label: "غير مقروءة", value: unread, icon: MessageCircle, color: "text-[var(--whatsapp-orange)]", bg: "bg-[var(--whatsapp-orange)]/10 dark:bg-[var(--whatsapp-orange)]/20" },
+        { label: "نتائج مختبر", value: labResults, icon: FileText, color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-900/20" },
         { label: "مهمة", value: important, icon: Star, color: "text-[var(--whatsapp-yellow)]", bg: "bg-[var(--whatsapp-yellow)]/10 dark:bg-[var(--whatsapp-yellow)]/20" },
-        { label: "مؤرشفة", value: archived, icon: Archive, color: "text-[var(--whatsapp-gray)]", bg: "bg-[var(--whatsapp-gray-light)] dark:bg-[var(--whatsapp-gray-dark)]/20" },
       ].map(({ label, value, icon: Icon, color, bg }) => (
         <div key={label} className={`${bg} rounded-lg p-2 sm:p-3 text-center`}>
           <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${color} mx-auto mb-0.5`} />
@@ -373,7 +375,7 @@ const ConversationsList = memo(function ConversationsList({
       {/* Filter Tabs */}
       <div className="px-2 pt-2 pb-1 border-b dark:border-gray-800">
         <Tabs value={activeFilter} onValueChange={(v) => onFilterChange(v as FilterType)}>
-          <TabsList className="h-7 w-full grid grid-cols-3 sm:grid-cols-6 bg-muted/50">
+          <TabsList className="h-7 w-full grid grid-cols-3 sm:grid-cols-7 bg-muted/50">
             <TabsTrigger value="all" className="text-[var(--text-xs)] h-6 px-1 text-xs">الكل</TabsTrigger>
             <TabsTrigger value="unread" className="text-[var(--text-xs)] h-6 px-1 text-xs">
               غير مقروءة
@@ -387,6 +389,7 @@ const ConversationsList = memo(function ConversationsList({
               })()}
             </TabsTrigger>
             <TabsTrigger value="important" className="text-[var(--text-xs)] h-6 px-1 text-xs">مهمة</TabsTrigger>
+            <TabsTrigger value="lab_results" className="text-[var(--text-xs)] h-6 px-1 text-xs sm:inline">نتائج مختبر</TabsTrigger>
             <TabsTrigger value="archived" className="text-[var(--text-xs)] h-6 px-1 text-xs sm:inline">مؤرشفة</TabsTrigger>
             <TabsTrigger value="unnamed" className="text-[var(--text-xs)] h-6 px-1 text-xs sm:inline">بدون اسم</TabsTrigger>
             <TabsTrigger value="unreplied" className="text-[var(--text-xs)] h-6 px-1 text-xs sm:inline">لم يُرد</TabsTrigger>
@@ -564,6 +567,11 @@ const ConversationsList = memo(function ConversationsList({
                           {conv.lastMessage || "لا توجد رسائل"}
                         </p>
                         <div className="flex items-center gap-1">
+                          {conv.labOrderId && (
+                            <Badge variant="outline" className="text-[8px] sm:text-[9px] h-4 sm:h-5 px-1 bg-[var(--whatsapp-blue)]/10 border-[var(--whatsapp-blue)]/30 text-[var(--whatsapp-blue)]">
+                              #{conv.labOrderId}
+                            </Badge>
+                          )}
                           <div className={`w-1.5 h-1.5 rounded-full ${getTimeElapsedColor(conv.lastMessageAt || null)}`} />
                           <p className={`text-[10px] sm:text-xs flex-shrink-0 ${getTimeElapsedColor(conv.lastMessageAt || null)}`}>
                             {getTimeElapsedText(conv.lastMessageAt || null)}
@@ -984,6 +992,7 @@ function WhatsAppContent() {
           return c.unreadCount > 0 || (c.lastMessage && !c.lastMessage.startsWith("تم الرد"));
         });
         break;
+      case "lab_results": result = result.filter(c => c.labOrderId !== null && c.labOrderId !== undefined); break;
     }
 
     // Apply date filter

@@ -53,6 +53,7 @@ const WhatsAppCostsPage = lazy(() => import("./pages/WhatsAppCostsPage"));
 const WhatsAppOrdersPage = lazy(() => import("./pages/WhatsAppOrdersPage"));
 const WhatsAppProductsPage = lazy(() => import("./pages/WhatsAppProductsPage"));
 const WhatsAppReferralsPage = lazy(() => import("./pages/WhatsAppReferralsPage"));
+const WhatsAppLabResultsPage = lazy(() => import("./pages/WhatsAppLabResultsPage"));
 const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 const ReportsPage = lazy(() => import("./pages/ReportsPage"));
 const ReportsPageNew = lazy(() => import("./pages/admin/ReportsPage"));
@@ -269,6 +270,11 @@ function Router() {
             <Route path={"/dashboard/whatsapp/referrals"}>
               <ProtectedRoute feature="whatsapp">
                 <WhatsAppReferralsPage />
+              </ProtectedRoute>
+            </Route>
+            <Route path={"/dashboard/whatsapp/lab-results"}>
+              <ProtectedRoute feature="whatsapp">
+                <WhatsAppLabResultsPage />
               </ProtectedRoute>
             </Route>
             <Route path={"/dashboard/messages"} component={MessagesPage} />
