@@ -124,10 +124,10 @@ const StatsBar = memo(function StatsBar({ conversations }: StatsBarProps) {
         { label: "نتائج مختبر", value: labResults, icon: FileText, color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-900/20" },
         { label: "مهمة", value: important, icon: Star, color: "text-[var(--whatsapp-yellow)]", bg: "bg-[var(--whatsapp-yellow)]/10 dark:bg-[var(--whatsapp-yellow)]/20" },
       ].map(({ label, value, icon: Icon, color, bg }) => (
-        <div key={label} className={`${bg} rounded-lg p-2 sm:p-3 text-center`}>
-          <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${color} mx-auto mb-0.5`} />
-          <p className={`text-sm sm:text-base font-bold ${color}`}>{value}</p>
-          <p className="text-[var(--text-xs)] text-muted-foreground">{label}</p>
+        <div key={label} className={`${bg} rounded-lg p-1.5 sm:p-2 md:p-3 text-center`}>
+          <Icon className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${color} mx-auto mb-0.5`} />
+          <p className={`text-xs sm:text-sm md:text-base font-bold ${color}`}>{value}</p>
+          <p className="text-[10px] sm:text-[var(--text-xs)] text-muted-foreground">{label}</p>
         </div>
       ))}
     </div>
@@ -375,24 +375,24 @@ const ConversationsList = memo(function ConversationsList({
       {/* Filter Tabs */}
       <div className="px-2 pt-2 pb-1 border-b dark:border-gray-800">
         <Tabs value={activeFilter} onValueChange={(v) => onFilterChange(v as FilterType)}>
-          <TabsList className="h-7 w-full grid grid-cols-3 sm:grid-cols-7 bg-muted/50">
-            <TabsTrigger value="all" className="text-[var(--text-xs)] h-6 px-1 text-xs">الكل</TabsTrigger>
-            <TabsTrigger value="unread" className="text-[var(--text-xs)] h-6 px-1 text-xs">
+          <TabsList className="h-7 w-full grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 bg-muted/50">
+            <TabsTrigger value="all" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs">الكل</TabsTrigger>
+            <TabsTrigger value="unread" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs">
               غير مقروءة
               {(() => {
                 const unreadCount = Array.isArray(allConversations) ? allConversations.filter(c => c.unreadCount > 0).length : 0;
                 return unreadCount > 0 ? (
-                  <Badge variant="destructive" className="mr-1 h-3.5 px-1 text-[var(--text-xs)] rounded-full">
+                  <Badge variant="destructive" className="mr-1 h-3 px-0.5 text-[8px] sm:h-3.5 sm:px-1 sm:text-[var(--text-xs)] rounded-full">
                     {unreadCount}
                   </Badge>
                 ) : null;
               })()}
             </TabsTrigger>
-            <TabsTrigger value="important" className="text-[var(--text-xs)] h-6 px-1 text-xs">مهمة</TabsTrigger>
-            <TabsTrigger value="lab_results" className="text-[var(--text-xs)] h-6 px-1 text-xs sm:inline">نتائج مختبر</TabsTrigger>
-            <TabsTrigger value="archived" className="text-[var(--text-xs)] h-6 px-1 text-xs sm:inline">مؤرشفة</TabsTrigger>
-            <TabsTrigger value="unnamed" className="text-[var(--text-xs)] h-6 px-1 text-xs sm:inline">بدون اسم</TabsTrigger>
-            <TabsTrigger value="unreplied" className="text-[var(--text-xs)] h-6 px-1 text-xs sm:inline">لم يُرد</TabsTrigger>
+            <TabsTrigger value="important" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs">مهمة</TabsTrigger>
+            <TabsTrigger value="lab_results" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">نتائج مختبر</TabsTrigger>
+            <TabsTrigger value="archived" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">مؤرشفة</TabsTrigger>
+            <TabsTrigger value="unnamed" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">بدون اسم</TabsTrigger>
+            <TabsTrigger value="unreplied" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">لم يُرد</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -558,22 +558,22 @@ const ConversationsList = memo(function ConversationsList({
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-0.5">
-                        <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                        <span dir="ltr" className="truncate text-[10px] sm:text-xs">{conv.phoneNumber}</span>
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground mb-0.5">
+                        <Phone className="h-2 w-2 sm:h-2.5 sm:w-2.5 flex-shrink-0" />
+                        <span dir="ltr" className="truncate text-[9px] sm:text-[10px] md:text-xs">{conv.phoneNumber}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[100px] sm:max-w-[140px]">
+                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground truncate max-w-[80px] sm:max-w-[100px] md:max-w-[140px]">
                           {conv.lastMessage || "لا توجد رسائل"}
                         </p>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5 sm:gap-1">
                           {conv.labOrderId && (
-                            <Badge variant="outline" className="text-[8px] sm:text-[9px] h-4 sm:h-5 px-1 bg-[var(--whatsapp-blue)]/10 border-[var(--whatsapp-blue)]/30 text-[var(--whatsapp-blue)]">
+                            <Badge variant="outline" className="text-[7px] sm:text-[8px] md:text-[9px] h-3 sm:h-4 md:h-5 px-0.5 sm:px-1 bg-[var(--whatsapp-blue)]/10 border-[var(--whatsapp-blue)]/30 text-[var(--whatsapp-blue)]">
                               #{conv.labOrderId}
                             </Badge>
                           )}
-                          <div className={`w-1.5 h-1.5 rounded-full ${getTimeElapsedColor(conv.lastMessageAt || null)}`} />
-                          <p className={`text-[10px] sm:text-xs flex-shrink-0 ${getTimeElapsedColor(conv.lastMessageAt || null)}`}>
+                          <div className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${getTimeElapsedColor(conv.lastMessageAt || null)}`} />
+                          <p className={`text-[9px] sm:text-[10px] md:text-xs flex-shrink-0 ${getTimeElapsedColor(conv.lastMessageAt || null)}`}>
                             {getTimeElapsedText(conv.lastMessageAt || null)}
                           </p>
                         </div>
@@ -1391,64 +1391,64 @@ function WhatsAppContent() {
         {/* Page Header */}
         <div className="mb-3 sm:mb-4 md:mb-6">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="bg-gradient-to-br from-[var(--whatsapp-green)] to-[var(--whatsapp-emerald)] p-2 sm:p-3 rounded-xl shadow-lg flex-shrink-0">
-              <MessageCircle className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
+            <div className="bg-gradient-to-br from-[var(--whatsapp-green)] to-[var(--whatsapp-emerald)] p-1.5 sm:p-2 md:p-3 rounded-xl shadow-lg flex-shrink-0">
+              <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-7 md:w-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-[var(--text-base)] sm:text-[var(--text-xl)] md:text-[var(--text-2xl)] font-bold text-foreground truncate">إدارة محادثات واتساب</h1>
-              <p className="text-[var(--text-xs)] sm:text-[var(--text-sm)] md:text-[var(--text-base)] text-muted-foreground hidden xs:block">تواصل مع العملاء عبر واتساب بيزنس</p>
+              <h1 className="text-[var(--text-sm)] sm:text-[var(--text-base)] md:text-[var(--text-xl)] lg:text-[var(--text-2xl)] font-bold text-foreground truncate">إدارة محادثات واتساب</h1>
+              <p className="text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] text-muted-foreground hidden sm:block">تواصل مع العملاء عبر واتساب بيزنس</p>
             </div>
-            <div className="flex gap-1 sm:gap-2 items-center flex-shrink-0">
+            <div className="flex gap-0.5 sm:gap-1 md:gap-2 items-center flex-shrink-0">
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1 text-[var(--text-xs)] sm:text-[var(--text-sm)] h-7 sm:h-8 px-1.5 sm:px-2.5"
+                className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5"
                 onClick={() => setIsDetailsCollapsed(!isDetailsCollapsed)}
                 aria-label={isDetailsCollapsed ? "إظهار تفاصيل المحادثة" : "إخفاء تفاصيل المحادثة"}
                 title={isDetailsCollapsed ? "إظهار تفاصيل المحادثة" : "إخفاء تفاصيل المحادثة"}
               >
-                <StickyNote className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">{isDetailsCollapsed ? "التفاصيل" : "إخفاء"}</span>
+                <StickyNote className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="hidden lg:inline">{isDetailsCollapsed ? "التفاصيل" : "إخفاء"}</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1 text-[var(--text-xs)] sm:text-[var(--text-sm)] h-7 sm:h-8 px-1.5 sm:px-2.5"
+                className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5"
                 onClick={() => setIsSplitView(!isSplitView)}
                 disabled={!selectedConversation}
                 aria-label={isSplitView ? "إلغاء تقسيم الشاشة" : "تقسيم الشاشة"}
                 title={isSplitView ? "إلغاء تقسيم الشاشة" : "تقسيم الشاشة"}
               >
-                <LayoutGrid className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">{isSplitView ? "إلغاء التقسيم" : "تقسيم"}</span>
+                <LayoutGrid className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="hidden lg:inline">{isSplitView ? "إلغاء التقسيم" : "تقسيم"}</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1 text-[var(--text-xs)] sm:text-[var(--text-sm)] h-7 sm:h-8 px-1.5 sm:px-2.5"
+                className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5"
                 onClick={() => refetchConversations()}
                 aria-label="تحديث قائمة المحادثات"
                 title="تحديث قائمة المحادثات"
               >
-                <RefreshCw className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">تحديث</span>
+                <RefreshCw className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="hidden lg:inline">تحديث</span>
               </Button>
               <Link href="/dashboard/whatsapp/connection">
-                <Button variant="outline" size="sm" className="gap-1 text-[var(--text-xs)] sm:text-[var(--text-sm)] h-7 sm:h-8 px-1.5 sm:px-2.5" aria-label="إعدادات الاتصال" title="إعدادات الاتصال">
-                  <Smartphone className="h-3.5 w-3.5" />
-                  <span className="hidden md:inline">الاتصال</span>
+                <Button variant="outline" size="sm" className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden sm:flex" aria-label="إعدادات الاتصال" title="إعدادات الاتصال">
+                  <Smartphone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span className="hidden lg:inline">الاتصال</span>
                 </Button>
               </Link>
               <Link href="/dashboard/whatsapp/templates">
-                <Button variant="outline" size="sm" className="gap-1 text-[var(--text-xs)] sm:text-[var(--text-sm)] h-7 sm:h-8 px-1.5 sm:px-2.5" aria-label="إدارة القوالب" title="إدارة القوالب">
-                  <FileText className="h-3.5 w-3.5" />
-                  <span className="hidden md:inline">القوالب</span>
+                <Button variant="outline" size="sm" className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden md:flex" aria-label="إدارة القوالب" title="إدارة القوالب">
+                  <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span className="hidden lg:inline">القوالب</span>
                 </Button>
               </Link>
               <Link href="/dashboard/whatsapp/analytics">
-                <Button variant="outline" size="sm" className="gap-1 text-[var(--text-xs)] sm:text-[var(--text-sm)] h-7 sm:h-8 px-1.5 sm:px-2.5" aria-label="التحليلات والإحصائيات" title="التحليلات والإحصائيات">
-                  <BarChart2 className="h-3.5 w-3.5" />
-                  <span className="hidden md:inline">التحليلات</span>
+                <Button variant="outline" size="sm" className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden md:flex" aria-label="التحليلات والإحصائيات" title="التحليلات والإحصائيات">
+                  <BarChart2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span className="hidden lg:inline">التحليلات</span>
                 </Button>
               </Link>
             </div>
@@ -1656,7 +1656,7 @@ function WhatsAppContent() {
         {/* Main Chat Layout */}
         <div
           className="bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden border dark:border-gray-800"
-          style={{ height: "calc(100vh - 8.75rem)", minHeight: "400px" }}
+          style={{ height: "calc(100vh - 8.75rem)", minHeight: "300px", maxHeight: "calc(100vh - 5rem)" }}
         >
           {/* Desktop */}
           <div className={`hidden lg:grid h-full transition-all duration-300 ${isSplitView ? 'lg:grid-cols-[340px_1fr_1fr]' : isDetailsCollapsed ? 'lg:grid-cols-[340px_1fr_0px]' : 'lg:grid-cols-[340px_1fr_280px]'}`}>
