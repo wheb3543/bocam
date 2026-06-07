@@ -357,6 +357,8 @@ export async function ensureConversationAndSaveMessage(params: {
   messageId?: string;
   entityType?: string;
   entityId?: number;
+  labOrderId?: number; // جديد
+  mediaUrl?: string; // جديد
 }): Promise<void> {
   try {
     const normalizedPhone = normalizePhoneNumber(params.phone);
@@ -380,6 +382,10 @@ export async function ensureConversationAndSaveMessage(params: {
           entityLinks.offerLeadId = params.entityId;
           break;
       }
+    }
+    // إضافة labOrderId إذا كان موجوداً
+    if (params.labOrderId) {
+      entityLinks.labOrderId = params.labOrderId;
     }
 
     if (!conversation) {
@@ -413,11 +419,12 @@ export async function ensureConversationAndSaveMessage(params: {
       conversationId: conversation.id,
       direction: "outbound",
       content: params.messageContent,
-      messageType: "text",
+      messageType: params.mediaUrl ? "document" : "text", // استخدام document إذا كان هناك mediaUrl
       status: "sent",
       whatsappMessageId: params.messageId || null,
       sentAt: new Date(),
       isAutomated: 1,
+      mediaUrl: params.mediaUrl || null, // حفظ رابط الملف إذا كان موجوداً
     });
   } catch (err) {
     console.error("[WhatsApp Dispatcher] Failed to ensure conversation/message:", err);

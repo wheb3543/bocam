@@ -3,6 +3,7 @@
  * جدولة المهام التلقائية - تشغيل مهام إلغاء التنشيط يومياً في منتصف الليل
  */
 import { runDeactivationJobs } from "./deactivateExpired";
+import { pollLabResults } from "./labResultsPoller";
 
 // Run every day at midnight (00:00)
 const CRON_SCHEDULE = "0 0 * * *"; // minute hour day month weekday
@@ -13,7 +14,11 @@ const CRON_SCHEDULE = "0 0 * * *"; // minute hour day month weekday
  */
 export function initCronScheduler() {
   console.log("[Cron] Initializing scheduler...");
-  
+
+  // Run lab results polling immediately and every 60 seconds
+  pollLabResults();
+  setInterval(pollLabResults, 60 * 1000);
+
   // Run immediately on startup (for testing)
   runDeactivationJobs().then(() => {
     console.log("[Cron] Initial deactivation job completed");
@@ -23,20 +28,20 @@ export function initCronScheduler() {
   const now = new Date();
   const midnight = new Date();
   midnight.setHours(24, 0, 0, 0); // Next midnight
-  
+
   const msUntilMidnight = midnight.getTime() - now.getTime();
-  
+
   // Wait until midnight, then run every 24 hours
   setTimeout(() => {
     runDeactivationJobs();
-    
+
     // Run every 24 hours
     setInterval(() => {
       runDeactivationJobs();
     }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
   }, msUntilMidnight);
-  
-  console.log(`[Cron] Scheduler initialized. Next run in ${Math.round(msUntilMidnight / 1000 / 60)} minutes`);
+
+  console.log(`[Cron] Scheduler initialized. Lab results polling every 60 seconds. Next deactivation run in ${Math.round(msUntilMidnight / 1000 / 60)} minutes`);
 }
 
 /**

@@ -40,6 +40,20 @@ export async function getDb() {
   return _db;
 }
 
+let _hospitalDb: ReturnType<typeof drizzle> | null = null;
+
+export async function getHospitalDb() {
+  if (!_hospitalDb && process.env.HOSPITAL_DB_URL) {
+    try {
+      _hospitalDb = drizzle(process.env.HOSPITAL_DB_URL);
+    } catch (error) {
+      console.warn("[Hospital Database] Failed to connect:", error);
+      _hospitalDb = null;
+    }
+  }
+  return _hospitalDb;
+}
+
 // User management for OAuth
 export async function upsertUser(user: { openId?: string; name?: string; email?: string; loginMethod?: string; lastSignedIn?: Date }): Promise<void> {
   const db = await getDb();

@@ -1,4 +1,4 @@
-import { 
+import {
   COMPANY_NAME,
   COMPANY_ARABIC_NAME,
   COMPANY_ENGLISH_NAME,
@@ -31,6 +31,12 @@ import {
   DB_NAME,
   DB_USER,
   DB_PASSWORD,
+  HOSPITAL_DB_URL,
+  HOSPITAL_DB_HOST,
+  HOSPITAL_DB_PORT,
+  HOSPITAL_DB_NAME,
+  HOSPITAL_DB_USER,
+  HOSPITAL_DB_PASSWORD,
   JWT_SECRET,
   OAUTH_SERVER_URL,
   VITE_OAUTH_PORTAL_URL,
@@ -108,6 +114,14 @@ export const ENV = {
   dbName: DB_NAME,
   dbUser: DB_USER,
   dbPassword: DB_PASSWORD,
+
+  // Hospital Database Configuration
+  hospitalDbUrl: HOSPITAL_DB_URL,
+  hospitalDbHost: HOSPITAL_DB_HOST,
+  hospitalDbPort: HOSPITAL_DB_PORT,
+  hospitalDbName: HOSPITAL_DB_NAME,
+  hospitalDbUser: HOSPITAL_DB_USER,
+  hospitalDbPassword: HOSPITAL_DB_PASSWORD,
   
   // OAuth Configuration
   appId: process.env.META_APP_ID ?? process.env.VITE_APP_ID ?? "",

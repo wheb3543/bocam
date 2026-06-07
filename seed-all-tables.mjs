@@ -367,6 +367,14 @@ async function seedAllTables() {
       ['appointment_confirmation', 'تأكيد الحجز', 'patient_journey', 'تم تأكيد موعدك بنجاح', 1, 'both', 'appointment', 'on_confirmed']
     );
 
+    // إضافة إعداد رسالة نتائج المختبر
+    await connection.execute(
+      `INSERT INTO message_settings (messageType, displayName, category, messageContent, isEnabled, deliveryChannel, availableVariables, description, entityType, triggerEvent) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+       ON DUPLICATE KEY UPDATE messageType=messageType`,
+      ['lab_result_ready', 'إرسال نتيجة فحص مختبر', 'patient_journey', 'مرحباً {name}، نتائج فحصك الجديدة جاهزة.\n\n📋 نوع الفحص: {test_type}\n👨‍⚕️ الطبيب: {doctor}\n📅 التاريخ: {date}\n\nيمكنك تحميل النتيجة من الملف المرفق.', 1, 'whatsapp_api', '["name", "test_type", "doctor", "date"]', 'إرسال نتائج فحوصات المختبر عبر واتساب باستخدام قالب Meta المعتمد', 'all', 'manual']
+    );
+
     // 32. Message Templates
     console.log('  - messageTemplates');
     await connection.execute(

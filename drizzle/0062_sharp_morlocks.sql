@@ -1,0 +1,1 @@
+CREATE INDEX `labOrderIdx` ON `whatsapp_conversations` (`labOrderId`);

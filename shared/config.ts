@@ -250,6 +250,41 @@ export const DB_USER = process.env.DB_USER || 'root';
 export const DB_PASSWORD = process.env.DB_PASSWORD || '';
 
 /**
+ * Hospital Database Configuration
+ * Hospital system intermediate database connection
+ */
+
+/**
+ * Hospital Database URL (connection string)
+ */
+export const HOSPITAL_DB_URL = process.env.HOSPITAL_DB_URL || '';
+
+/**
+ * Hospital Database host
+ */
+export const HOSPITAL_DB_HOST = process.env.HOSPITAL_DB_HOST || 'localhost';
+
+/**
+ * Hospital Database port
+ */
+export const HOSPITAL_DB_PORT = process.env.HOSPITAL_DB_PORT || '3306';
+
+/**
+ * Hospital Database name
+ */
+export const HOSPITAL_DB_NAME = process.env.HOSPITAL_DB_NAME || 'hospital_db';
+
+/**
+ * Hospital Database user
+ */
+export const HOSPITAL_DB_USER = process.env.HOSPITAL_DB_USER || 'root';
+
+/**
+ * Hospital Database password
+ */
+export const HOSPITAL_DB_PASSWORD = process.env.HOSPITAL_DB_PASSWORD || '';
+
+/**
  * Server Configuration
  * Application server settings
  */

@@ -531,6 +531,7 @@ export const whatsappConversations = mysqlTable("whatsapp_conversations", {
   appointmentId: int("appointmentId"),
   offerLeadId: int("offerLeadId"),
   campRegistrationId: int("campRegistrationId"),
+  labOrderId: int("labOrderId"), // Link to lab order from hospital database
   assignedToUserId: int("assignedToUserId"), // Assigned staff member
   notes: text("notes"), // Notes about the conversation
   // Conversation data from Meta
@@ -544,7 +545,9 @@ export const whatsappConversations = mysqlTable("whatsapp_conversations", {
   messageCount: int("messageCount").default(0).notNull(), // Total messages in conversation
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  labOrderIdx: index("labOrderIdx").on(table.labOrderId),
+}));
 
 export type WhatsAppConversation = typeof whatsappConversations.$inferSelect;
 export type InsertWhatsAppConversation = typeof whatsappConversations.$inferInsert;
