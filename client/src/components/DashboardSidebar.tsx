@@ -287,6 +287,11 @@ const allToolsGroups: NavGroup[] = [
       { id: "review-approval", title: "المراجعة والاعتماد", href: "/dashboard/review-approval", icon: CheckSquare },
       { id: "tracking-settings", title: "إعدادات التتبع", href: "/dashboard/tracking-settings", icon: SettingsIcon },
       { id: "settings", title: "الإعدادات", href: "/dashboard/settings", icon: SettingsIcon },
+      { id: "updates", title: "إدارة التحديثات", href: "/dashboard/updates", icon: RotateCw },
+      { id: "system-status", title: "حالة النظام", href: "/dashboard/system-status", icon: Gauge },
+      { id: "backups", title: "النسخ الاحتياطي", href: "/dashboard/backups", icon: Database },
+      { id: "advanced-settings", title: "إعدادات متقدمة", href: "/dashboard/advanced-settings", icon: MoreHorizontal },
+      { id: "departments-specialties", title: "الأقسام والتخصصات", href: "/dashboard/departments-specialties", icon: LayoutDashboard },
     ],
   },
 ];
