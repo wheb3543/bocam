@@ -291,14 +291,25 @@ export function validateLicense(): LicenseInfo {
     console.log(`🔍 Verifying digital signature...`);
     const { valid, payload } = verifySignature(licenseFile.key);
     
+    // TEMPORARY: Disable Kill Switch for deployment until central server is ready
+    // Return invalid license info instead of crashing server
     if (!valid || !payload) {
       console.error('❌ LICENSE VALIDATION FAILED: Invalid digital signature');
       console.error('');
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('KILL SWITCH ACTIVATED: License signature is invalid');
+      console.error('LICENSE INVALID: License signature is invalid');
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.error('');
-      process.exit(1);
+      // process.exit(1); // TEMPORARILY DISABLED
+      return {
+        hardwareId: getHardwareId(),
+        expiryDate: 0,
+        features: [],
+        issuedAt: 0,
+        version: "1.0",
+        isValid: false,
+        validationMessage: 'Invalid digital signature',
+      };
     }
     
     console.log(`✅ Digital signature verified`);
@@ -308,11 +319,13 @@ export function validateLicense(): LicenseInfo {
     console.log(`   - License Hardware ID: ${payload.hid}`);
     console.log(`   - Current Hardware ID: ${currentHardwareId}`);
     
+    // TEMPORARY: Disable Kill Switch for deployment until central server is ready
+    // Return invalid license info instead of crashing server
     if (payload.hid !== currentHardwareId) {
       console.error('❌ LICENSE VALIDATION FAILED: Hardware ID mismatch');
       console.error('');
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('KILL SWITCH ACTIVATED: Hardware ID does not match license');
+      console.error('LICENSE INVALID: Hardware ID does not match license');
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.error('');
       console.error(`Expected: ${payload.hid}`);
@@ -322,7 +335,16 @@ export function validateLicense(): LicenseInfo {
       console.error('1. Generate a new license for this machine');
       console.error('2. Run: pnpm license:generate <hardwareId> <expiry> <features>');
       console.error('');
-      process.exit(1);
+      // process.exit(1); // TEMPORARILY DISABLED
+      return {
+        hardwareId: currentHardwareId,
+        expiryDate: 0,
+        features: [],
+        issuedAt: 0,
+        version: "1.0",
+        isValid: false,
+        validationMessage: 'Hardware ID mismatch',
+      };
     }
     
     console.log(`✅ Hardware ID matched`);
@@ -333,11 +355,13 @@ export function validateLicense(): LicenseInfo {
     console.log(`   - License expiry: ${new Date(payload.exp * 1000).toISOString()}`);
     console.log(`   - Current time: ${new Date(currentTime * 1000).toISOString()}`);
     
+    // TEMPORARY: Disable Kill Switch for deployment until central server is ready
+    // Return invalid license info instead of crashing server
     if (payload.exp < currentTime) {
       console.error('❌ LICENSE VALIDATION FAILED: License has expired');
       console.error('');
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('KILL SWITCH ACTIVATED: License has expired');
+      console.error('LICENSE INVALID: License has expired');
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.error('');
       console.error(`License expired on: ${new Date(payload.exp * 1000).toISOString()}`);
@@ -346,7 +370,16 @@ export function validateLicense(): LicenseInfo {
       console.error('1. Renew your license');
       console.error('2. Contact support for a new license key');
       console.error('');
-      process.exit(1);
+      // process.exit(1); // TEMPORARILY DISABLED
+      return {
+        hardwareId: payload.hid,
+        expiryDate: payload.exp,
+        features: payload.feat,
+        issuedAt: payload.iat,
+        version: payload.ver,
+        isValid: false,
+        validationMessage: 'License has expired',
+      };
     }
     
     console.log(`✅ License is valid (not expired)`);
@@ -359,14 +392,25 @@ export function validateLicense(): LicenseInfo {
     console.log(`🔍 Validating features...`);
     console.log(`   - Enabled features: ${payload.feat.join(', ')}`);
     
+    // TEMPORARY: Disable Kill Switch for deployment until central server is ready
+    // Return invalid license info instead of crashing server
     if (!payload.feat || payload.feat.length === 0) {
       console.error('❌ LICENSE VALIDATION FAILED: No features enabled');
       console.error('');
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('KILL SWITCH ACTIVATED: No features enabled in license');
+      console.error('LICENSE INVALID: No features enabled in license');
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.error('');
-      process.exit(1);
+      // process.exit(1); // TEMPORARILY DISABLED
+      return {
+        hardwareId: payload.hid,
+        expiryDate: payload.exp,
+        features: [],
+        issuedAt: payload.iat,
+        version: payload.ver,
+        isValid: false,
+        validationMessage: 'No features enabled',
+      };
     }
     
     console.log(`✅ Features validated (${payload.feat.length} features enabled)`);
@@ -389,6 +433,8 @@ export function validateLicense(): LicenseInfo {
     
     return licenseInfo;
   } catch (error) {
+    // TEMPORARY: Disable Kill Switch for deployment until central server is ready
+    // Return invalid license info instead of crashing server
     if (error instanceof Error && error.message.includes('process.exit')) {
       // Re-throw process.exit errors
       throw error;
@@ -397,12 +443,21 @@ export function validateLicense(): LicenseInfo {
     console.error('❌ LICENSE VALIDATION FAILED:', error);
     console.error('');
     console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.error('KILL SWITCH ACTIVATED: License validation error');
+    console.error('LICENSE INVALID: License validation error');
     console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.error('');
     console.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     console.error('');
-    process.exit(1);
+    // process.exit(1); // TEMPORARILY DISABLED
+    return {
+      hardwareId: getHardwareId(),
+      expiryDate: 0,
+      features: [],
+      issuedAt: 0,
+      version: "1.0",
+      isValid: false,
+      validationMessage: error instanceof Error ? error.message : 'Unknown error',
+    };
   }
 }
 
