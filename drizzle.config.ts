@@ -10,7 +10,9 @@ const url = new URL(connectionString);
 const host = url.hostname;
 const port = url.port || '3306';
 const user = url.username;
-const password = url.password;
+// If the URL contains an empty password, treat it as undefined so the
+// MySQL driver won't reject the connection for a deliberately passwordless DB.
+const password = url.password || undefined;
 const database = url.pathname.slice(1); // Remove leading slash
 
 export default defineConfig({
