@@ -1,7 +1,15 @@
 import { eq, and, gt, desc } from "drizzle-orm";
 import { getDb, normalizePhoneNumber } from "../db";
-import { patients, patientOtps, patientResults, appointments, offerLeads, campRegistrations } from "../../drizzle/schema";
+import { patients, patientOtps, patientResults, appointments, offerLeads, campRegistrations, type Patient } from "../../drizzle/schema";
 import bcrypt from "bcrypt";
+
+export type SafePatient = Omit<Patient, "password">;
+
+export function sanitizePatient(patient: Patient | null): SafePatient | null {
+  if (!patient) return null;
+  const { password: _password, ...safe } = patient;
+  return safe;
+}
 
 function normalizePatientPhone(phone: string): string {
   return normalizePhoneNumber(phone);
@@ -111,10 +119,15 @@ export async function createOtp(phone: string): Promise<string> {
   return code;
 }
 
-export async function verifyOtp(phone: string, code: string): Promise<boolean> {
+export async function verifyOtp(
+  phone: string,
+  code: string,
+  options?: { consume?: boolean }
+): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
   const normalizedPhone = normalizePatientPhone(phone);
+  const consume = options?.consume !== false;
   
   const result = await db.select().from(patientOtps).where(
     and(
@@ -127,8 +140,9 @@ export async function verifyOtp(phone: string, code: string): Promise<boolean> {
   
   if (result.length === 0) return false;
   
-  // Mark OTP as used
-  await db.update(patientOtps).set({ isUsed: true }).where(eq(patientOtps.id, result[0].id));
+  if (consume) {
+    await db.update(patientOtps).set({ isUsed: true }).where(eq(patientOtps.id, result[0].id));
+  }
   
   return true;
 }
@@ -138,22 +152,15 @@ export async function verifyPatientPassword(phone: string, password: string): Pr
   if (!db) return { success: false, hasPassword: false };
   const normalizedPhone = normalizePatientPhone(phone);
   
-  console.log(`[verifyPatientPassword] Input phone: ${phone}, Normalized: ${normalizedPhone}`);
-  
   const patient = await getPatientByPhone(normalizedPhone);
   if (!patient) {
-    console.log(`[verifyPatientPassword] Patient not found for phone: ${normalizedPhone}`);
     return { success: false, hasPassword: false };
   }
   if (!patient.password) {
-    console.log(`[verifyPatientPassword] Patient exists but has no password set. Patient ID: ${patient.id}`);
     return { success: false, hasPassword: false };
   }
   
-  console.log(`[verifyPatientPassword] Patient found: ${patient.fullName}, has password: ${!!patient.password}`);
   const isValid = await bcrypt.compare(password, patient.password);
-  console.log(`[verifyPatientPassword] Password comparison result: ${isValid}`);
-  
   return { success: isValid, hasPassword: true };
 }
 

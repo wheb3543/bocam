@@ -223,6 +223,7 @@ const allToolsGroups: NavGroup[] = [
       { id: "offer-leads", title: "عروض العملاء", href: "/dashboard/bookings/offer-leads", icon: Gift, feature: "offers" },
       { id: "camp-registrations", title: "تسجيلات المخيمات", href: "/dashboard/bookings/camp-registrations", icon: Tent, feature: "camps" },
       { id: "customers", title: "ملفات العملاء", href: "/dashboard/bookings/customers", icon: Contact },
+      { id: "patient-results", title: "نتائج بوابة المريض", href: "/dashboard/bookings/patient-results", icon: FileText, feature: "patient_portal" },
       { id: "tasks", title: "المهام", href: "/dashboard/bookings/tasks", icon: CheckSquare },
       { id: "camp-stats", title: "إحصائيات المخيمات", href: "/dashboard/camp-stats", icon: Database, feature: "camps" },
     ],

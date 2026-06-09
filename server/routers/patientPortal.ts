@@ -15,6 +15,7 @@ import {
   getPatientOfferLeads,
   getPatientCampRegistrations,
   getPatientResults,
+  sanitizePatient,
 } from "../db/patients";
 import { meta } from "../MetaApiService";
 
@@ -105,14 +106,16 @@ export const patientPortalRouter = router({
       code: z.string().length(6, "رمز التحقق يجب أن يكون 6 أرقام"),
     }))
     .mutation(async ({ ctx, input }) => {
-      const isValid = await verifyOtp(input.phone, input.code);
+      const patient = await getPatientByPhone(input.phone);
+      const consumeOtp = !!patient;
+
+      const isValid = await verifyOtp(input.phone, input.code, { consume: consumeOtp });
       if (!isValid) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "رمز التحقق غير صحيح أو منتهي الصلاحية" });
       }
       
-      const patient = await getPatientByPhone(input.phone);
       if (!patient) {
-        // المريض غير مسجل - يحتاج تسجيل جديد
+        // المريض غير مسجل - يُبقي الرمز صالحاً لخطوة التسجيل
         return { success: true, needsRegistration: true, phone: input.phone };
       }
       
@@ -128,7 +131,7 @@ export const patientPortalRouter = router({
         path: "/",
       });
       
-      return { success: true, needsRegistration: false, patient };
+      return { success: true, needsRegistration: false, patient: sanitizePatient(patient) };
     }),
 
   // تسجيل مريض جديد
@@ -183,7 +186,7 @@ export const patientPortalRouter = router({
         path: "/",
       });
       
-      return { success: true, patient };
+      return { success: true, patient: sanitizePatient(patient) };
     }),
 
   // تسجيل دخول بكلمة المرور
@@ -222,7 +225,7 @@ export const patientPortalRouter = router({
         path: "/",
       });
       
-      return { success: true, patient };
+      return { success: true, patient: sanitizePatient(patient) };
     }),
 
   // الحصول على بيانات المريض الحالي
@@ -235,7 +238,7 @@ export const patientPortalRouter = router({
     
     const patient = await getPatientById(decoded.patientId);
     if (!patient?.isActive) return null;
-    return patient;
+    return sanitizePatient(patient);
   }),
 
   // تسجيل الخروج
@@ -254,7 +257,7 @@ export const patientPortalRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       const updated = await updatePatientProfile((ctx as any).patient.id, input);
-      return updated;
+      return sanitizePatient(updated);
     }),
 
   // الحصول على حجوزات المريض (مواعيد الأطباء)

@@ -87,6 +87,7 @@ const PatientOffersPage = lazy(() => import("./pages/PatientOffersPage"));
 const PatientCampsPage = lazy(() => import("./pages/PatientCampsPage"));
 const PatientResultsPage = lazy(() => import("./pages/PatientResultsPage"));
 const PatientResultDetailsPage = lazy(() => import("./pages/PatientResultDetailsPage"));
+const PatientResultsAdminPage = lazy(() => import("./pages/PatientResultsAdminPage"));
 const PatientProfilePage = lazy(() => import("./pages/PatientProfilePage"));
 const PatientPortalLayout = lazy(() => import("./components/patient/PatientPortalLayout"));
 const MessageSettingsPage = lazy(() => import("./pages/MessageSettingsPage"));
@@ -311,6 +312,11 @@ function Router() {
               </ProtectedRoute>
             </Route>
             <Route path={"/dashboard/bookings/customers"} component={CustomersPage} />
+            <Route path={"/dashboard/bookings/patient-results"}>
+              <ProtectedRoute feature="patient_portal">
+                <PatientResultsAdminPage />
+              </ProtectedRoute>
+            </Route>
             <Route path={"/dashboard/bookings/tasks"} component={TasksPage} />
             <Route path={"/dashboard/teams/digital-marketing"} component={DigitalMarketingTasksPage} />
             <Route path={"/dashboard/teams/media"} component={MediaTeamPage} />

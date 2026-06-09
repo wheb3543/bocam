@@ -5,6 +5,7 @@ import {
   createPatientResult,
   getPatientByPhone,
   getPatientResults,
+  sanitizePatient,
   updatePatientResultStatus,
 } from "../db/patients";
 
@@ -23,7 +24,7 @@ export const patientResultsRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "لا يوجد مريض بهذا الرقم" });
       }
       const results = await getPatientResults(patient.id);
-      return { patient, results };
+      return { patient: sanitizePatient(patient), results };
     }),
 
   create: adminProcedure
