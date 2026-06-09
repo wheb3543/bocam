@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Users, Calendar, TrendingUp, UserCheck } from "lucide-react";
+import { ChevronDown, ChevronUp, Users, Calendar, TrendingUp, UserCheck, AlertCircle, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function NotificationCenter() {
@@ -16,13 +16,16 @@ export default function NotificationCenter() {
   });
 
   // Fetch all pending bookings
-  const { data: appointments } = trpc.appointments.list.useQuery();
-  const { data: offerLeads } = trpc.offerLeads.list.useQuery();
-  const { data: campRegsPaged } = trpc.campRegistrations.listPaginated.useQuery({
+  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery();
+  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery();
+  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery({
     page: 1,
     limit: 50,
   });
   const campRegistrations = campRegsPaged?.data ?? [];
+
+  const isLoading = appointmentsLoading || offerLeadsLoading || campLoading;
+  const hasError = appointmentsError || offerLeadsError || campError;
 
   // Get last 5 pending items for each type
   const pendingItems = useMemo(() => {
@@ -105,6 +108,48 @@ export default function NotificationCenter() {
     },
   ];
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">طلبات قيد الانتظار</h2>
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">جاري تحميل الإشعارات...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Error state
+  if (hasError) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">طلبات قيد الانتظار</h2>
+        </div>
+        <Card className="border-destructive bg-destructive/10">
+          <CardContent className="p-6 text-center">
+            <AlertCircle className="h-8 w-8 mx-auto mb-3 text-destructive" />
+            <p className="text-sm font-semibold text-destructive mb-2">فشل تحميل الإشعارات</p>
+            <p className="text-xs text-muted-foreground mb-4">حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm"
+            >
+              إعادة المحاولة
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {/* Header */}
@@ -120,10 +165,14 @@ export default function NotificationCenter() {
       {/* Notification Sections */}
       {totalCount === 0 ? (
         <Card>
-          <CardContent className="p-6 text-center text-muted-foreground">
-            <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-            <p>لا توجد طلبات قيد الانتظار</p>
-            <p className="text-sm mt-1">جميع الحجوزات محدثة</p>
+          <CardContent className="p-8 sm:p-12 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+            </div>
+            <p className="text-lg font-semibold text-muted-foreground mb-2">لا توجد طلبات قيد الانتظار</p>
+            <p className="text-sm text-muted-foreground">جميع الحجوزات محدثة ومعالجة</p>
           </CardContent>
         </Card>
       ) : (

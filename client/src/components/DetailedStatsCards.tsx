@@ -10,18 +10,23 @@ import {
   Clock,
   XCircle,
   UserCheck,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { AnimatedCounter } from "@/components/animations";
 
 export default function DetailedStatsCards() {
-  const { data: leads } = trpc.leads.unifiedList.useQuery();
-  const { data: appointments } = trpc.appointments.list.useQuery();
-  const { data: offerLeads } = trpc.offerLeads.list.useQuery();
-  const { data: campRegsPaged } = trpc.campRegistrations.listPaginated.useQuery({
+  const { data: leads, isLoading: leadsLoading, error: leadsError } = trpc.leads.unifiedList.useQuery();
+  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery();
+  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery();
+  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery({
     page: 1,
     limit: 500,
   });
   const campRegistrations = campRegsPaged?.data ?? [];
+
+  const isLoading = leadsLoading || appointmentsLoading || offerLeadsLoading || campLoading;
+  const hasError = leadsError || appointmentsError || offerLeadsError || campError;
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -66,6 +71,59 @@ export default function DetailedStatsCards() {
       offers: offerStats,
     };
   }, [leads, appointments, offerLeads, campRegistrations]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-3 sm:p-4 md:p-6">
+              <div className="h-4 bg-muted rounded w-16 mb-2" />
+              <div className="h-8 bg-muted rounded w-12 mb-3" />
+              <div className="space-y-2">
+                <div className="h-3 bg-muted rounded w-full" />
+                <div className="h-3 bg-muted rounded w-3/4" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  // Error state
+  if (hasError) {
+    return (
+      <Card className="border-destructive bg-destructive/10 mb-4 sm:mb-6 md:mb-8">
+        <CardContent className="p-6 text-center">
+          <AlertCircle className="h-12 w-12 mx-auto mb-3 text-destructive" />
+          <p className="text-lg font-semibold text-destructive mb-2">فشل تحميل الإحصائيات</p>
+          <p className="text-sm text-muted-foreground mb-4">حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            إعادة المحاولة
+          </button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Empty state
+  if (stats.total.total === 0) {
+    return (
+      <Card className="mb-4 sm:mb-6 md:mb-8">
+        <CardContent className="p-12 text-center">
+          <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
+          <p className="text-lg font-semibold text-muted-foreground mb-2">لا توجد بيانات</p>
+          <p className="text-sm text-muted-foreground">لم يتم العثور على أي تسجيلات في النظام</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8 stagger-cards">

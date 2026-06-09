@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Globe, Phone, Edit, TrendingUp, Facebook, Instagram, Send } from "lucide-react";
+import { Globe, Phone, Edit, TrendingUp, Facebook, Instagram, Send, AlertCircle, Loader2 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 // Map sources to display info
@@ -66,14 +66,17 @@ const sourceDisplayMap: Record<string, { name: string; color: string; lightColor
 };
 
 export default function SourceAnalytics() {
-  const { data: leads } = trpc.leads.unifiedList.useQuery();
-  const { data: appointments } = trpc.appointments.list.useQuery();
-  const { data: offerLeads } = trpc.offerLeads.list.useQuery();
-  const { data: campRegsPaged } = trpc.campRegistrations.listPaginated.useQuery({
+  const { data: leads, isLoading: leadsLoading, error: leadsError } = trpc.leads.unifiedList.useQuery();
+  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery();
+  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery();
+  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery({
     page: 1,
     limit: 500,
   });
   const campRegistrations = campRegsPaged?.data ?? [];
+
+  const isLoading = leadsLoading || appointmentsLoading || offerLeadsLoading || campLoading;
+  const hasError = leadsError || appointmentsError || offerLeadsError || campError;
 
   // Calculate source statistics dynamically
   const sourceStats = useMemo(() => {
@@ -122,6 +125,77 @@ export default function SourceAnalytics() {
 
   // Get top source for insights
   const topSource = sourceStats.sources[0];
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Card className="col-span-full lg:col-span-2">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <CardTitle>تحليل مصادر التسجيل</CardTitle>
+          </div>
+          <CardDescription>توزيع الحجوزات حسب المصدر</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">جاري تحميل البيانات...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Error state
+  if (hasError) {
+    return (
+      <Card className="col-span-full lg:col-span-2 border-destructive bg-destructive/10">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-destructive" />
+            <CardTitle className="text-destructive">فشل تحميل البيانات</CardTitle>
+          </div>
+          <CardDescription className="text-destructive/70">حدث خطأ أثناء تحميل البيانات</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <AlertCircle className="h-12 w-12 mx-auto mb-3 text-destructive" />
+            <p className="text-sm font-semibold text-destructive mb-2">فشل تحميل تحليل المصادر</p>
+            <p className="text-xs text-muted-foreground mb-4">حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              إعادة المحاولة
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Empty state
+  if (sourceStats.total === 0) {
+    return (
+      <Card className="col-span-full lg:col-span-2">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <CardTitle>تحليل مصادر التسجيل</CardTitle>
+          </div>
+          <CardDescription>توزيع الحجوزات حسب المصدر</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <Globe className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
+            <p className="text-lg font-semibold text-muted-foreground mb-2">لا توجد بيانات</p>
+            <p className="text-sm text-muted-foreground">لم يتم العثور على أي حجوزات في النظام</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="col-span-full lg:col-span-2">

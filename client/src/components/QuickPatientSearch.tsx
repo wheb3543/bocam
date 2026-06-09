@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Phone, MessageCircle, Edit, X, Calendar, Mail, User, MapPin, Printer } from "lucide-react";
+import { Search, Phone, MessageCircle, Edit, X, Calendar, Mail, User, MapPin, Printer, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { printReceipt } from "./PrintReceipt";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -311,14 +311,17 @@ export default function QuickPatientSearch() {
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const { data: leads } = trpc.leads.unifiedList.useQuery();
-  const { data: appointments } = trpc.appointments.list.useQuery();
-  const { data: offerLeads } = trpc.offerLeads.list.useQuery();
-  const { data: campRegsPaged } = trpc.campRegistrations.listPaginated.useQuery({
+  const { data: leads, isLoading: leadsLoading, error: leadsError } = trpc.leads.unifiedList.useQuery();
+  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery();
+  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery();
+  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery({
     page: 1,
     limit: 200,
   });
   const campRegistrations = campRegsPaged?.data ?? [];
+
+  const isLoading = leadsLoading || appointmentsLoading || offerLeadsLoading || campLoading;
+  const hasError = leadsError || appointmentsError || offerLeadsError || campError;
 
   const updateLeadMutation = trpc.leads.updateStatus.useMutation();
   const updateAppointmentMutation = trpc.appointments.updateStatus.useMutation();
@@ -390,15 +393,43 @@ export default function QuickPatientSearch() {
     <div ref={searchRef} className="relative w-full">
       {/* Search Input */}
       <div className="relative">
-        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" aria-hidden="true" />
         <Input
           type="text"
           placeholder="ابحث بالاسم أو رقم الهاتف (3 أحرف على الأقل)..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pr-10 h-12 text-base md:text-lg"
+          disabled={isLoading}
+          aria-label="بحث عن مريض"
+          aria-describedby="search-hint"
         />
+        <span id="search-hint" className="sr-only">
+          أدخل 3 أحرف على الأقل للبحث عن مريض بالاسم أو رقم الهاتف
+        </span>
+        {isLoading && (
+          <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+        )}
       </div>
+
+      {/* Error state */}
+      {hasError && (
+        <div className="absolute top-full mt-2 w-full z-50">
+          <Card className="border-destructive bg-destructive/10">
+            <CardContent className="p-4 text-center">
+              <AlertCircle className="h-8 w-8 mx-auto mb-2 text-destructive" />
+              <p className="text-sm font-semibold text-destructive mb-1">فشل تحميل البيانات</p>
+              <p className="text-xs text-muted-foreground mb-3">حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm"
+              >
+                إعادة المحاولة
+              </button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Search Results List */}
       {searchQuery.length >= 3 && searchResults.length > 0 && !selectedPatient && (
@@ -448,11 +479,13 @@ export default function QuickPatientSearch() {
       )}
 
       {/* No Results */}
-      {searchQuery.length >= 3 && searchResults.length === 0 && (
+      {searchQuery.length >= 3 && searchResults.length === 0 && !hasError && (
         <div className="absolute top-full mt-2 w-full z-50">
           <Card>
-            <CardContent className="p-4 text-center text-muted-foreground">
-              <p className="text-sm">لا توجد نتائج</p>
+            <CardContent className="p-8 text-center">
+              <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-30" />
+              <p className="text-sm font-semibold text-muted-foreground mb-1">لا توجد نتائج</p>
+              <p className="text-xs text-muted-foreground">لم يتم العثور على أي مريض يطابق البحث</p>
             </CardContent>
           </Card>
         </div>

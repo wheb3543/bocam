@@ -64,9 +64,12 @@ export default function ManualRegistrationForm() {
   const [medicalCondition, setMedicalCondition] = useState("");
   const [registrationStatus, setRegistrationStatus] = useState<"pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled" | "new" | "booked" | "not_interested">("confirmed");
 
-  const { data: doctors } = trpc.doctors.list.useQuery();
-  const { data: offers } = trpc.offers.getAll.useQuery();
-  const { data: camps } = trpc.camps.getAll.useQuery();
+  const { data: doctors, isLoading: doctorsLoading, error: doctorsError } = trpc.doctors.list.useQuery();
+  const { data: offers, isLoading: offersLoading, error: offersError } = trpc.offers.getAll.useQuery();
+  const { data: camps, isLoading: campsLoading, error: campsError } = trpc.camps.getAll.useQuery();
+
+  const isLoading = doctorsLoading || offersLoading || campsLoading;
+  const hasError = doctorsError || offersError || campsError;
 
   // Get selected doctor's procedures
   const selectedDoctor = doctors?.find((d: any) => d.id.toString() === doctorId);
@@ -376,11 +379,12 @@ export default function ManualRegistrationForm() {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-1 md:gap-2">
+        <Button size="sm" className="gap-1 md:gap-2" disabled={isLoading}>
           <Plus className="h-3 w-3 md:h-4 md:w-4" />
           <PhoneIcon className="h-3 w-3 md:h-4 md:w-4" />
           <span className="hidden md:inline">تسجيل يدوي (هاتفي)</span>
           <span className="md:hidden text-xs">تسجيل</span>
+          {isLoading && <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
@@ -390,7 +394,37 @@ export default function ManualRegistrationForm() {
             إضافة حجز تم استلامه عبر الهاتف (8000018) مباشرة في النظام
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        
+        {/* Loading state */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">جاري تحميل البيانات...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {hasError && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <AlertCircle className="h-12 w-12 mx-auto mb-3 text-destructive" />
+              <p className="text-sm font-semibold text-destructive mb-2">فشل تحميل البيانات</p>
+              <p className="text-xs text-muted-foreground mb-4">حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</p>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                إعادة المحاولة
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!isLoading && !hasError && (
+          <form onSubmit={handleSubmit} className="space-y-4">
           {/* Registration Type */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -763,6 +797,7 @@ export default function ManualRegistrationForm() {
             </Button>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );
