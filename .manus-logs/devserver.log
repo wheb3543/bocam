@@ -502,3 +502,38 @@
 [2026-06-01T19:34:37.530Z] 7:34:37 PM [tsx] change in ./vite.config.ts Rerunning...
 [2026-06-01T19:34:37.530Z] c
 [2026-06-01T19:34:38.629Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-06-09T01:23:38.638Z] 1:23:38 AM [vite] (client) page reload index.html
+[2026-06-09T01:23:38.705Z] 1:23:38 AM [vite] (client) page reload index-admin.html
+[2026-06-09T01:23:38.828Z] 1:23:38 AM [tsx] change in ./drizzle/schema.ts Restarting...
+[2026-06-09T01:23:38.844Z] c
+[2026-06-09T01:23:39.017Z] node:internal/modules/run_main:122
+[2026-06-09T01:23:39.017Z] triggerUncaughtException(
+[2026-06-09T01:23:39.017Z] ^
+[2026-06-09T01:23:39.017Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/sgh-crm-portal/server/whatsappSse' imported from /home/ubuntu/sgh-crm-portal/server/_core/index.ts
+[2026-06-09T01:23:39.017Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-06-09T01:23:39.017Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-06-09T01:23:39.017Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-06-09T01:23:39.017Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-06-09T01:23:39.017Z] at resolveBase (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1780968218916:2:3744)
+[2026-06-09T01:23:39.017Z] at async resolveDirectory (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1780968218916:2:4237)
+[2026-06-09T01:23:39.017Z] at async resolve (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1780968218916:2:5355)
+[2026-06-09T01:23:39.017Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-06-09T01:23:39.017Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24)
+[2026-06-09T01:23:39.017Z] at async handleMessage (node:internal/modules/esm/worker:199:18) {
+[2026-06-09T01:23:39.017Z] code: 'ERR_MODULE_NOT_FOUND',
+[2026-06-09T01:23:39.017Z] url: 'file:///home/ubuntu/sgh-crm-portal/server/whatsappSse'
+[2026-06-09T01:23:39.017Z] }
+[2026-06-09T01:23:39.017Z] Node.js v22.13.0
+[2026-06-09T01:23:43.072Z] 1:23:43 AM [tsx] unlink in ./server/routers/camps.ts Rerunning...
+[2026-06-09T01:23:43.072Z] c
+[2026-06-09T01:23:44.012Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-06-09T01:23:44.334Z] Server running on http://localhost:3000/
+[2026-06-09T01:24:54.657Z] 1:24:54 AM [tsx] Previous process hasn't exited yet. Force killing...
+[2026-06-09T01:24:54.698Z] ELIFECYCLE  Command failed.
+[2026-06-09T01:24:54.751Z] Dev server exited with code -1
+[2026-06-09T01:24:55.826Z] Starting dev server with command: pnpm run dev
+[2026-06-09T01:24:56.217Z] > sgh-crm-portal@1.0.0 dev /home/ubuntu/sgh-crm-portal
+[2026-06-09T01:24:56.217Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-06-09T01:24:57.119Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-06-09T01:24:57.357Z] Server running on http://localhost:3000/
+[2026-06-09T01:24:58.226Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
