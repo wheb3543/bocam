@@ -19,7 +19,7 @@ export default function DetailedStatsCards() {
   const { data: offerLeads } = trpc.offerLeads.list.useQuery();
   const { data: campRegsPaged } = trpc.campRegistrations.listPaginated.useQuery({
     page: 1,
-    limit: 2000,
+    limit: 500,
   });
   const campRegistrations = campRegsPaged?.data ?? [];
 

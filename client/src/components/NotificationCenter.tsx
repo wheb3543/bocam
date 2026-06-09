@@ -20,7 +20,7 @@ export default function NotificationCenter() {
   const { data: offerLeads } = trpc.offerLeads.list.useQuery();
   const { data: campRegsPaged } = trpc.campRegistrations.listPaginated.useQuery({
     page: 1,
-    limit: 150,
+    limit: 50,
   });
   const campRegistrations = campRegsPaged?.data ?? [];
 

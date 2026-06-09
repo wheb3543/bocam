@@ -71,7 +71,7 @@ export default function SourceAnalytics() {
   const { data: offerLeads } = trpc.offerLeads.list.useQuery();
   const { data: campRegsPaged } = trpc.campRegistrations.listPaginated.useQuery({
     page: 1,
-    limit: 3000,
+    limit: 500,
   });
   const campRegistrations = campRegsPaged?.data ?? [];
 

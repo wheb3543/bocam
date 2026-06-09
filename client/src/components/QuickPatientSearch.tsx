@@ -316,7 +316,7 @@ export default function QuickPatientSearch() {
   const { data: offerLeads } = trpc.offerLeads.list.useQuery();
   const { data: campRegsPaged } = trpc.campRegistrations.listPaginated.useQuery({
     page: 1,
-    limit: 800,
+    limit: 200,
   });
   const campRegistrations = campRegsPaged?.data ?? [];
 
