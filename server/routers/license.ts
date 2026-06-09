@@ -28,7 +28,7 @@ export const licenseRouter = router({
    * Get license information (public)
    * Returns current license status and hardware ID
    */
-  getInfo: protectedProcedure.query((): LicenseInfo => {
+  getInfo: publicProcedure.query((): LicenseInfo => {
     try {
       return validateLicense();
     } catch (error) {
@@ -49,7 +49,7 @@ export const licenseRouter = router({
    * Get hardware ID (public)
    * Returns the hardware ID for license generation
    */
-  getHardwareId: protectedProcedure.query(() => {
+  getHardwareId: publicProcedure.query(() => {
     try {
       const hardwareId = getHardwareId();
       return {
@@ -69,7 +69,7 @@ export const licenseRouter = router({
    * Check if a feature is enabled (public)
    * Checks if a specific feature is available in the current license
    */
-  checkFeature: protectedProcedure
+  checkFeature: publicProcedure
     .input(z.object({ feature: z.string() }))
     .query(({ input }) => {
       try {
@@ -93,7 +93,7 @@ export const licenseRouter = router({
    * Get all enabled features (public)
    * Returns list of all features available in the current license
    */
-  getFeatures: protectedProcedure.query(() => {
+  getFeatures: publicProcedure.query(() => {
     try {
       const features = getEnabledFeatures();
       return {
