@@ -41,6 +41,8 @@ import {
   Terminal,
   Gauge,
   Database,
+  ShoppingCart,
+  Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
