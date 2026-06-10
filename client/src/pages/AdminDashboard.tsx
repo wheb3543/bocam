@@ -6,8 +6,17 @@ import QuickPatientSearch from "@/components/QuickPatientSearch";
 import DetailedStatsCards from "@/components/DetailedStatsCards";
 const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLicense } from "@/hooks/useLicense";
+import FeatureLockedPage from "@/pages/FeatureLockedPage";
 
 export default function AdminDashboard() {
+  const { hasFeature, isLicenseValid } = useLicense();
+
+  // Check if analytics feature is enabled
+  if (!hasFeature('analytics') || !isLicenseValid) {
+    return <FeatureLockedPage feature="analytics" />;
+  }
+
   return (
     <DashboardLayout
       pageTitle="لوحة التحكم الإدارية"

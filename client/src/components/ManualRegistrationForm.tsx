@@ -21,13 +21,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Phone as PhoneIcon, Printer } from "lucide-react";
+import { Loader2, Plus, Phone as PhoneIcon, Printer, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { printReceipt } from "./PrintReceipt";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useLicense } from "@/hooks/useLicense";
 
 export default function ManualRegistrationForm() {
   const { user } = useAuth();
+  const { hasFeature, isLicenseValid } = useLicense();
   const generateAppointmentReceiptMutation = trpc.appointments.generateReceiptNumber.useMutation();
   const generateOfferLeadReceiptMutation = trpc.offerLeads.generateReceiptNumber.useMutation();
   const generateCampRegistrationReceiptMutation = trpc.campRegistrations.generateReceiptNumber.useMutation();
@@ -455,9 +457,9 @@ export default function ManualRegistrationForm() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="lead">عميل عام</SelectItem>
-                  <SelectItem value="appointment">موعد طبيب</SelectItem>
-                  <SelectItem value="offer">حجز عرض</SelectItem>
-                  <SelectItem value="camp">تسجيل مخيم</SelectItem>
+                  {hasFeature('appointments') && <SelectItem value="appointment">موعد طبيب</SelectItem>}
+                  {hasFeature('offers') && <SelectItem value="offer">حجز عرض</SelectItem>}
+                  {hasFeature('camps') && <SelectItem value="camp">تسجيل مخيم</SelectItem>}
                 </SelectContent>
               </Select>
             </div>

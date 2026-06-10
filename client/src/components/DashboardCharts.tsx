@@ -8,6 +8,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   Area, AreaChart,
 } from "recharts";
+import { useLicense } from "@/hooks/useLicense";
 
 type Period = "7d" | "30d" | "90d" | "12m";
 
@@ -449,7 +450,21 @@ function SummaryCards({ period }: { period: Period }) {
  * DashboardCharts - المكون الرئيسي للوحة الإحصائيات الرسومية
  */
 export default function DashboardCharts() {
+  const { hasFeature, isLicenseValid } = useLicense();
   const [period, setPeriod] = useState<Period>("30d");
+
+  // Check if analytics feature is enabled
+  if (!hasFeature('analytics') || !isLicenseValid) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <Activity className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
+          <p className="text-lg font-semibold text-muted-foreground mb-2">ميزة التحليلات غير مفعلة</p>
+          <p className="text-sm text-muted-foreground">هذه الميزة تتطلب ترخيص يحتوي على ميزة التحليلات</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6" dir="rtl">
