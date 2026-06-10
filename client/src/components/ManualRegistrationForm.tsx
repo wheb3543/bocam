@@ -118,6 +118,11 @@ export default function ManualRegistrationForm() {
   const createLeadMutation = trpc.leads.submit.useMutation({
     onSuccess: () => {
       toast.success("تم إضافة العميل بنجاح");
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
       if (shouldPrint) {
         printReceipt({
           fullName,
@@ -141,6 +146,11 @@ export default function ManualRegistrationForm() {
   const createAppointmentMutation = trpc.appointments.submit.useMutation({
     onSuccess: async (data) => {
       toast.success("تم إضافة الموعد بنجاح");
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
       if (shouldPrint && data?.insertId) {
         try {
           const result = await generateAppointmentReceiptMutation.mutateAsync({ id: data.insertId });
@@ -177,6 +187,11 @@ export default function ManualRegistrationForm() {
   const createOfferLeadMutation = trpc.offerLeads.submit.useMutation({
     onSuccess: async (data) => {
       toast.success("تم إضافة حجز العرض بنجاح");
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
       if (shouldPrint && data?.id) {
         try {
           const result = await generateOfferLeadReceiptMutation.mutateAsync({ id: data.id });
@@ -213,6 +228,11 @@ export default function ManualRegistrationForm() {
   const createCampRegistrationMutation = trpc.campRegistrations.submit.useMutation({
     onSuccess: async (data) => {
       toast.success("تم إضافة تسجيل المخيم بنجاح");
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
       if (shouldPrint && data?.id) {
         try {
           const result = await generateCampRegistrationReceiptMutation.mutateAsync({ id: data.id });

@@ -311,22 +311,63 @@ export default function QuickPatientSearch() {
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const { data: leads, isLoading: leadsLoading, error: leadsError } = trpc.leads.unifiedList.useQuery();
-  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery();
-  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery();
-  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery({
-    page: 1,
-    limit: 200,
-  });
+  const { data: leads, isLoading: leadsLoading, error: leadsError } = trpc.leads.unifiedList.useQuery(
+    undefined,
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery(
+    undefined,
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery(
+    undefined,
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery(
+    { page: 1, limit: 200 },
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
   const campRegistrations = campRegsPaged?.data ?? [];
 
   const isLoading = leadsLoading || appointmentsLoading || offerLeadsLoading || campLoading;
   const hasError = leadsError || appointmentsError || offerLeadsError || campError;
 
-  const updateLeadMutation = trpc.leads.updateStatus.useMutation();
-  const updateAppointmentMutation = trpc.appointments.updateStatus.useMutation();
-  const updateOfferLeadMutation = trpc.offerLeads.updateStatus.useMutation();
-  const updateCampMutation = trpc.campRegistrations.updateStatus.useMutation();
+  const updateLeadMutation = trpc.leads.updateStatus.useMutation({
+    onSuccess: () => {
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
+    },
+  });
+  const updateAppointmentMutation = trpc.appointments.updateStatus.useMutation({
+    onSuccess: () => {
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
+    },
+  });
+  const updateOfferLeadMutation = trpc.offerLeads.updateStatus.useMutation({
+    onSuccess: () => {
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
+    },
+  });
+  const updateCampMutation = trpc.campRegistrations.updateStatus.useMutation({
+    onSuccess: () => {
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
+    },
+  });
 
   // Search when query length >= 3 - show ALL matching results
   useEffect(() => {

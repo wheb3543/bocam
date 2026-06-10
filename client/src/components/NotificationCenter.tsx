@@ -16,12 +16,18 @@ export default function NotificationCenter() {
   });
 
   // Fetch all pending bookings
-  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery();
-  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery();
-  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery({
-    page: 1,
-    limit: 50,
-  });
+  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery(
+    undefined,
+    { refetchInterval: 30000 } // Auto-refresh every 30 seconds
+  );
+  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery(
+    undefined,
+    { refetchInterval: 30000 } // Auto-refresh every 30 seconds
+  );
+  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery(
+    { page: 1, limit: 50 },
+    { refetchInterval: 30000 } // Auto-refresh every 30 seconds
+  );
   const campRegistrations = campRegsPaged?.data ?? [];
 
   const isLoading = appointmentsLoading || offerLeadsLoading || campLoading;

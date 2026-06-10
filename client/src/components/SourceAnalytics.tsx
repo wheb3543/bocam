@@ -66,13 +66,22 @@ const sourceDisplayMap: Record<string, { name: string; color: string; lightColor
 };
 
 export default function SourceAnalytics() {
-  const { data: leads, isLoading: leadsLoading, error: leadsError } = trpc.leads.unifiedList.useQuery();
-  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery();
-  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery();
-  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery({
-    page: 1,
-    limit: 500,
-  });
+  const { data: leads, isLoading: leadsLoading, error: leadsError } = trpc.leads.unifiedList.useQuery(
+    undefined,
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery(
+    undefined,
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery(
+    undefined,
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery(
+    { page: 1, limit: 500 },
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
   const campRegistrations = campRegsPaged?.data ?? [];
 
   const isLoading = leadsLoading || appointmentsLoading || offerLeadsLoading || campLoading;
