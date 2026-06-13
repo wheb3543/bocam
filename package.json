@@ -4,8 +4,10 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "predev": "node scripts/check-env.mjs",
     "dev": "cross-env NODE_ENV=development tsx watch server/_core/index.ts",
     "build": "pnpm vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "prestart": "node scripts/check-env.mjs",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
@@ -156,7 +158,12 @@
       "react-dom": "^19.1.1"
     },
     "onlyBuiltDependencies": [
-      "bcrypt"
+      "@tailwindcss/oxide",
+      "bcrypt",
+      "core-js",
+      "esbuild",
+      "msgpackr-extract",
+      "puppeteer"
     ]
   },
   "overrides": {

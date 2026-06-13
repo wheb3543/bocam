@@ -14,7 +14,7 @@ export default function AdminDashboard() {
 
   // Check if analytics feature is enabled
   if (!hasFeature('analytics') || !isLicenseValid) {
-    return <FeatureLockedPage feature="analytics" />;
+    return <FeatureLockedPage featureName="analytics" />;
   }
 
   return (
