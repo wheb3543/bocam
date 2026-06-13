@@ -122,7 +122,7 @@ export default function TopNavbar({ pageTitle, pageDescription }: TopNavbarProps
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer text-right text-sm"
-                onClick={() => setLocation('/dashboard/settings')}
+                onClick={() => setLocation('/admin/settings')}
               >
                 <Settings className="ml-2 h-4 w-4" />
                 <span>الإعدادات</span>

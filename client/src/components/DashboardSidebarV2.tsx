@@ -84,7 +84,7 @@ const allNavItems: NavItem[] = [
   { id: "analytics", title: "التحليلات", href: "/dashboard/analytics", icon: BarChart3 },
   { id: "bi", title: "ذكاء الأعمال (BI)", href: "/dashboard/bi", icon: TrendingUp },
   { id: "camp-stats", title: "إحصائيات المخيمات", href: "/dashboard/camp-stats", icon: BarChart3 },
-  { id: "tracking-settings", title: "إعدادات التتبع", href: "/dashboard/tracking-settings", icon: SettingsIcon },
+  { id: "tracking-settings", title: "إعدادات التتبع", href: "/admin/tracking-settings", icon: SettingsIcon },
   { id: "whatsapp", title: "الرسائل والمحادثات", href: "/dashboard/whatsapp", icon: MessageCircle },
   { id: "whatsapp-dashboard", title: "لوحة تحكم واتساب", href: "/dashboard/whatsapp/whatsapp-dashboard", icon: BarChart3 },
   { id: "whatsapp-templates", title: "قوالب الرسائل", href: "/dashboard/whatsapp/templates", icon: FileText },
@@ -100,7 +100,7 @@ const allNavItems: NavItem[] = [
   { id: "whatsapp-subscriptions", title: "الاشتراكات", href: "/dashboard/whatsapp/subscriptions", icon: Users },
   { id: "whatsapp-webhook-inspector", title: "فاحص الأحداث", href: "/dashboard/whatsapp/webhook-inspector", icon: Terminal },
   { id: "messages", title: "الرسائل", href: "/dashboard/messages", icon: MessageSquare },
-  { id: "message-settings", title: "إعدادات الرسائل", href: "/dashboard/message-settings", icon: SettingsIcon },
+  { id: "message-settings", title: "إعدادات الرسائل", href: "/admin/message-settings", icon: SettingsIcon },
   { id: "management", title: "الإدارة", href: "/dashboard/management", icon: SettingsIcon },
   { id: "content", title: "المحتوى", href: "/dashboard/content", icon: FileEdit },
   { id: "publishing", title: "النشر", href: "/dashboard/publishing", icon: Send },
@@ -113,7 +113,7 @@ const allNavItems: NavItem[] = [
   { id: "projects", title: "المشاريع", href: "/dashboard/projects", icon: FolderKanban },
   { id: "review-approval", title: "المراجعة والاعتماد", href: "/dashboard/review-approval", icon: CheckSquare },
   { id: "pwa-stats", title: "إحصائيات PWA", href: "/dashboard/pwa-stats", icon: PieChart },
-  { id: "settings", title: "الإعدادات", href: "/dashboard/settings", icon: SettingsIcon },
+  { id: "settings", title: "الإعدادات", href: "/admin/settings", icon: SettingsIcon },
 ];
 
 // المجموعات لعرضها في لوحة كل الأدوات
@@ -164,7 +164,7 @@ const allToolsGroups: NavGroup[] = [
       { id: "whatsapp-referrals", title: "إحالات واتساب", href: "/dashboard/whatsapp/referrals", icon: Megaphone },
       { id: "whatsapp-lab-results", title: "نتائج المختبر", href: "/dashboard/whatsapp/lab-results", icon: FileText },
       { id: "messages", title: "الرسائل", href: "/dashboard/messages", icon: MessageSquare },
-      { id: "message-settings", title: "إعدادات الرسائل", href: "/dashboard/message-settings", icon: SettingsIcon },
+      { id: "message-settings", title: "إعدادات الرسائل", href: "/admin/message-settings", icon: SettingsIcon },
     ],
   },
   {
@@ -186,7 +186,7 @@ const allToolsGroups: NavGroup[] = [
       { id: "bi", title: "ذكاء الأعمال (BI)", href: "/dashboard/bi", icon: TrendingUp },
       { id: "camp-stats", title: "إحصائيات المخيمات", href: "/dashboard/camp-stats", icon: BarChart3 },
       { id: "pwa-stats", title: "إحصائيات PWA", href: "/dashboard/pwa-stats", icon: PieChart },
-      { id: "tracking-settings", title: "إعدادات التتبع", href: "/dashboard/tracking-settings", icon: SettingsIcon },
+      { id: "tracking-settings", title: "إعدادات التتبع", href: "/admin/tracking-settings", icon: SettingsIcon },
     ],
   },
   {
@@ -198,11 +198,11 @@ const allToolsGroups: NavGroup[] = [
       { id: "campaigns", title: "الحملات والمشاريع", href: "/dashboard/campaigns", icon: Target },
       { id: "projects", title: "المشاريع", href: "/dashboard/projects", icon: FolderKanban },
       { id: "review-approval", title: "المراجعة والاعتماد", href: "/dashboard/review-approval", icon: CheckSquare },
-      { id: "settings", title: "الإعدادات", href: "/dashboard/settings", icon: SettingsIcon },
+      { id: "settings", title: "الإعدادات", href: "/admin/settings", icon: SettingsIcon },
       { id: "updates", title: "إدارة التحديثات", href: "/dashboard/updates", icon: Activity },
       { id: "system-status", title: "حالة النظام", href: "/dashboard/system-status", icon: Gauge },
       { id: "backups", title: "النسخ الاحتياطي", href: "/dashboard/backups", icon: Database },
-      { id: "advanced-settings", title: "إعدادات متقدمة", href: "/dashboard/advanced-settings", icon: MoreHorizontal },
+      { id: "advanced-settings", title: "إعدادات متقدمة", href: "/admin/advanced-settings", icon: MoreHorizontal },
       { id: "departments-specialties", title: "الأقسام والتخصصات", href: "/dashboard/departments-specialties", icon: LayoutDashboard },
     ],
   },
@@ -529,11 +529,11 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
         <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
           <TooltipTrigger asChild>
             <button
-              onClick={() => handleNavClick("/dashboard/settings")}
+              onClick={() => handleNavClick("/admin/settings")}
               className={cn(
                 "w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200",
                 shouldShowText ? "px-3" : "px-0 justify-center",
-                isItemActive("/dashboard/settings")
+                isItemActive("/admin/settings")
                   ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
                   : "text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800"
               )}

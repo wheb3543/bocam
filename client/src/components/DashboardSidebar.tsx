@@ -255,7 +255,7 @@ const allToolsGroups: NavGroup[] = [
       { id: "whatsapp-products", title: "منتجات واتساب", href: "/dashboard/whatsapp/products", icon: Package, feature: "whatsapp" },
       { id: "whatsapp-referrals", title: "إحالات واتساب", href: "/dashboard/whatsapp/referrals", icon: Megaphone, feature: "whatsapp" },
       { id: "messages", title: "الرسائل", href: "/dashboard/messages", icon: MessageSquare },
-      { id: "message-settings", title: "إعدادات الرسائل", href: "/dashboard/message-settings", icon: SettingsIcon },
+      { id: "message-settings", title: "إعدادات الرسائل", href: "/admin/message-settings", icon: SettingsIcon },
     ],
   },
   {
@@ -287,12 +287,12 @@ const allToolsGroups: NavGroup[] = [
       { id: "campaigns", title: "الحملات والمشاريع", href: "/dashboard/campaigns", icon: Target },
       { id: "projects", title: "المشاريع", href: "/dashboard/projects", icon: FolderKanban },
       { id: "review-approval", title: "المراجعة والاعتماد", href: "/dashboard/review-approval", icon: CheckSquare },
-      { id: "tracking-settings", title: "إعدادات التتبع", href: "/dashboard/tracking-settings", icon: SettingsIcon },
-      { id: "settings", title: "الإعدادات", href: "/dashboard/settings", icon: SettingsIcon },
+      { id: "tracking-settings", title: "إعدادات التتبع", href: "/admin/tracking-settings", icon: SettingsIcon },
+      { id: "settings", title: "الإعدادات", href: "/admin/settings", icon: SettingsIcon },
       { id: "updates", title: "إدارة التحديثات", href: "/dashboard/updates", icon: RotateCw },
       { id: "system-status", title: "حالة النظام", href: "/dashboard/system-status", icon: Gauge },
       { id: "backups", title: "النسخ الاحتياطي", href: "/dashboard/backups", icon: Database },
-      { id: "advanced-settings", title: "إعدادات متقدمة", href: "/dashboard/advanced-settings", icon: MoreHorizontal },
+      { id: "advanced-settings", title: "إعدادات متقدمة", href: "/admin/advanced-settings", icon: MoreHorizontal },
       { id: "departments-specialties", title: "الأقسام والتخصصات", href: "/dashboard/departments-specialties", icon: LayoutDashboard },
     ],
   },
@@ -779,10 +779,10 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
             <button
-              onClick={() => handleNavClick("/dashboard/settings")}
+              onClick={() => handleNavClick("/admin/settings")}
               className={cn(
                 "w-full flex flex-col items-center gap-0 py-1.5 px-0.5 rounded-md transition-all duration-150",
-                isItemActive("/dashboard/settings")
+                isItemActive("/admin/settings")
                   ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground dark:text-muted-foreground dark:hover:bg-gray-800 dark:hover:text-gray-300"
               )}

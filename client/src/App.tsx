@@ -29,7 +29,7 @@ const OfferDetailPage = lazy(() => import("./pages/OfferDetailPage"));
 const CampDetailPage = lazy(() => import("./pages/CampDetailPage"));
 const VisitingDoctors = lazy(() => import("./pages/VisitingDoctors"));
 const OfflinePage = lazy(() => import("./pages/OfflinePage"));
-const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const SettingsPage = lazy(() => import("./pages/admin/SettingsPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const ManagementPage = lazy(() => import("./pages/ManagementPage"));
 const ContentManagementPage = lazy(() => import("./pages/ContentManagementPage"));
@@ -90,18 +90,18 @@ const PatientResultDetailsPage = lazy(() => import("./pages/PatientResultDetails
 const PatientResultsAdminPage = lazy(() => import("./pages/PatientResultsAdminPage"));
 const PatientProfilePage = lazy(() => import("./pages/PatientProfilePage"));
 const PatientPortalLayout = lazy(() => import("./components/patient/PatientPortalLayout"));
-const MessageSettingsPage = lazy(() => import("./pages/MessageSettingsPage"));
+const MessageSettingsPage = lazy(() => import("./pages/admin/MessageSettingsPage"));
 const PWAStatsPage = lazy(() => import("./pages/PWAStatsPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const BIPage = lazy(() => import("./pages/BIPage"));
-const TrackingSettingsPage = lazy(() => import("./pages/TrackingSettingsPage"));
+const TrackingSettingsPage = lazy(() => import("./pages/admin/TrackingSettingsPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const FeatureLockedPage = lazy(() => import("./pages/FeatureLockedPage"));
 const ActivationPage = lazy(() => import("./pages/ActivationPage"));
 const UpdateManagementPage = lazy(() => import("./pages/UpdateManagementPage"));
 const SystemStatusPage = lazy(() => import("./pages/SystemStatusPage"));
 const BackupManagementPage = lazy(() => import("./pages/BackupManagementPage"));
-const AdvancedSettingsPage = lazy(() => import("./pages/AdvancedSettingsPage"));
+const AdvancedSettingsPage = lazy(() => import("./pages/admin/AdvancedSettingsPage"));
 import ProtectedRoute from "./components/ProtectedRoute";
 
 
@@ -279,7 +279,7 @@ function Router() {
               </ProtectedRoute>
             </Route>
             <Route path={"/dashboard/messages"} component={MessagesPage} />
-            <Route path={"/dashboard/message-settings"} component={MessageSettingsPage} />
+            <Route path={"/admin/message-settings"} component={MessageSettingsPage} />
             <Route path={"/dashboard/reports"}>
               <ProtectedRoute feature="reports">
                 <ReportsPageNew />
@@ -292,7 +292,7 @@ function Router() {
               </ProtectedRoute>
             </Route>
             <Route path={"/dashboard/bi"} component={BIPage} />
-            <Route path={"/dashboard/tracking-settings"} component={TrackingSettingsPage} />
+            <Route path={"/admin/tracking-settings"} component={TrackingSettingsPage} />
             <Route path={"/dashboard/camp-stats"}>
               <ProtectedRoute feature="camps">
                 <CampStatsPage />
@@ -325,11 +325,11 @@ function Router() {
             <Route path={"/dashboard/projects"} component={CampaignsPage} />
             <Route path={"/dashboard/review-approval"} component={ReviewApprovalPage} />
             <Route path={"/dashboard/pwa-stats"} component={PWAStatsPage} />
-            <Route path={"/dashboard/settings"} component={SettingsPage} />
+            <Route path={"/admin/settings"} component={SettingsPage} />
             <Route path={"/dashboard/updates"} component={UpdateManagementPage} />
             <Route path={"/dashboard/system-status"} component={SystemStatusPage} />
             <Route path={"/dashboard/backups"} component={BackupManagementPage} />
-            <Route path={"/dashboard/advanced-settings"} component={AdvancedSettingsPage} />
+            <Route path={"/admin/advanced-settings"} component={AdvancedSettingsPage} />
           </Switch>
         </DashboardShell>
       </Route>
@@ -367,7 +367,7 @@ function Router() {
         </PatientPortalLayout>
       </Route>
       <Route path={"/offline"} component={OfflinePage} />
-      <Route path={"/settings"} component={SettingsPage} />
+      <Route path={"/admin/settings"} component={SettingsPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

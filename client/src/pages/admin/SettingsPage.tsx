@@ -9,7 +9,7 @@ export default function SettingsPage() {
         title="الإعدادات"
         description="إدارة إعدادات النظام"
         icon={Settings}
-        currentPath="/dashboard/settings"
+        currentPath="/admin/settings"
         features={[
           "إدارة الملف الشخصي",
           "إعدادات النظام العامة",
