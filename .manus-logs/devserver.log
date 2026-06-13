@@ -537,3 +537,25 @@
 [2026-06-09T01:24:57.119Z] [OAuth] Initialized with baseURL: https://api.manus.im
 [2026-06-09T01:24:57.357Z] Server running on http://localhost:3000/
 [2026-06-09T01:24:58.226Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-06-13T00:48:52.236Z] 12:48:52 AM [tsx] unlink in ./shared/config.ts Rerunning...
+[2026-06-13T00:48:52.237Z] c
+[2026-06-13T00:48:52.370Z] node:internal/modules/run_main:122
+[2026-06-13T00:48:52.370Z] triggerUncaughtException(
+[2026-06-13T00:48:52.370Z] ^
+[2026-06-13T00:48:52.371Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/sgh-crm-portal/server/whatsappSse' imported from /home/ubuntu/sgh-crm-portal/server/_core/index.ts
+[2026-06-13T00:48:52.371Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-06-13T00:48:52.371Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-06-13T00:48:52.371Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-06-13T00:48:52.371Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-06-13T00:48:52.371Z] at resolveBase (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1781311732295:2:3744)
+[2026-06-13T00:48:52.371Z] at async resolveDirectory (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1781311732295:2:4237)
+[2026-06-13T00:48:52.371Z] at async resolve (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/esm/index.mjs?1781311732295:2:5355)
+[2026-06-13T00:48:52.371Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-06-13T00:48:52.371Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24)
+[2026-06-13T00:48:52.371Z] at async handleMessage (node:internal/modules/esm/worker:199:18) {
+[2026-06-13T00:48:52.371Z] code: 'ERR_MODULE_NOT_FOUND',
+[2026-06-13T00:48:52.371Z] url: 'file:///home/ubuntu/sgh-crm-portal/server/whatsappSse'
+[2026-06-13T00:48:52.371Z] }
+[2026-06-13T00:48:52.371Z] Node.js v22.13.0
+[2026-06-13T00:48:55.072Z] 12:48:55 AM [tsx] change in ./vite.config.ts Rerunning...
+[2026-06-13T00:48:55.072Z] c

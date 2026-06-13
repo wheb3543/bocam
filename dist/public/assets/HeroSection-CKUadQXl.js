@@ -1,0 +1,34 @@
+import{e}from"./vendor-react-Dpzgr5t3.js";import{N as l}from"./Navbar-CBb6IAlX.js";import{F as u}from"./Footer-8Yd0JrBW.js";import{S as p}from"./SEO-DChaP_ty.js";import{I as x}from"./main-BBM8urqX.js";function y({children:n,title:o,description:a,keywords:t,image:s="/sgh-logo-full.png",showInstallPWA:r=!0,showBackToTop:i=!0,className:c=""}){return e.jsxDEV("div",{"data-loc":"client/src/components/PageLayout.tsx:37",className:`min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 relative overflow-hidden ${c}`,dir:"rtl",children:[e.jsxDEV(p,{"data-loc":"client/src/components/PageLayout.tsx:39",title:o,description:a,image:s,keywords:t},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/PageLayout.tsx",lineNumber:39,columnNumber:7},this),e.jsxDEV("a",{"data-loc":"client/src/components/PageLayout.tsx:47",href:"#main-content",className:"sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-green-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold",children:"تخطى إلى المحتوى الرئيسي"},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/PageLayout.tsx",lineNumber:47,columnNumber:7},this),e.jsxDEV(l,{"data-loc":"client/src/components/PageLayout.tsx:55"},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/PageLayout.tsx",lineNumber:55,columnNumber:7},this),e.jsxDEV("main",{"data-loc":"client/src/components/PageLayout.tsx:58",id:"main-content",className:"flex-1",children:n},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/PageLayout.tsx",lineNumber:58,columnNumber:7},this),r&&e.jsxDEV(x,{"data-loc":"client/src/components/PageLayout.tsx:63"},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/PageLayout.tsx",lineNumber:63,columnNumber:26},this),e.jsxDEV(u,{"data-loc":"client/src/components/PageLayout.tsx:66"},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/PageLayout.tsx",lineNumber:66,columnNumber:7},this)]},void 0,!0,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/PageLayout.tsx",lineNumber:37,columnNumber:5},this)}function v({title:n,subtitle:o,description:a,badge:t,backgroundGradient:s="from-green-600 via-green-700 to-blue-600",textColor:r="text-white",minHeight:i="min-h-[700px]",children:c}){return e.jsxDEV("section",{"data-loc":"client/src/components/HeroSection.tsx:36",className:`py-12 sm:py-16 md:py-24 bg-gradient-to-br ${s} ${r} overflow-hidden relative ${i}`,children:[e.jsxDEV("div",{"data-loc":"client/src/components/HeroSection.tsx:40",className:"absolute inset-0 pointer-events-none overflow-hidden",children:[...Array(8)].map((d,m)=>e.jsxDEV("div",{"data-loc":"client/src/components/HeroSection.tsx:42",className:"absolute rounded-full animate-particle",style:{width:Math.random()*8+4+"px",height:Math.random()*8+4+"px",left:Math.random()*100+"%",top:Math.random()*100+"%",background:m%2===0?"rgba(34, 197, 94, 0.3)":"rgba(59, 130, 246, 0.3)",animation:`particle ${Math.random()*20+20}s linear infinite`,animationDelay:Math.random()*5+"s"}},m,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:42,columnNumber:11},this))},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:40,columnNumber:7},this),e.jsxDEV("div",{"data-loc":"client/src/components/HeroSection.tsx:58",className:"container mx-auto px-4 sm:px-6 text-center relative z-10",children:[t&&e.jsxDEV("div",{"data-loc":"client/src/components/HeroSection.tsx:60",className:"inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 animate-card-appear",children:[e.jsxDEV(t.icon,{"data-loc":"client/src/components/HeroSection.tsx:61",className:"w-5 h-5"},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:61,columnNumber:13},this),e.jsxDEV("span",{"data-loc":"client/src/components/HeroSection.tsx:62",className:"text-sm font-medium",children:t.text},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:62,columnNumber:13},this)]},void 0,!0,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:60,columnNumber:11},this),e.jsxDEV("h1",{"data-loc":"client/src/components/HeroSection.tsx:66",className:"text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-text-shimmer bg-clip-text text-transparent bg-[length:200%_auto] bg-gradient-to-r from-white via-green-100 to-white",children:n},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:66,columnNumber:9},this),o&&e.jsxDEV("p",{"data-loc":"client/src/components/HeroSection.tsx:71",className:"text-base sm:text-xl md:text-3xl mb-2 sm:mb-3 text-green-100 font-semibold",children:o},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:71,columnNumber:11},this),e.jsxDEV("p",{"data-loc":"client/src/components/HeroSection.tsx:76",className:"text-sm sm:text-base md:text-lg mb-6 sm:mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto px-2 text-white/95 bg-black/20 rounded-lg p-4",children:a},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:76,columnNumber:9},this),c]},void 0,!0,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:58,columnNumber:7},this),e.jsxDEV("style",{"data-loc":"client/src/components/HeroSection.tsx:84",children:`
+        @keyframes particle {
+          0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+          10% { opacity: 0.5; }
+          90% { opacity: 0.5; }
+          100% { transform: translateY(-100vh) translateX(50px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes textShimmer {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes cardAppear {
+          0% { opacity: 0; transform: translateY(15px) scale(0.97); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .animate-particle {
+          animation: particle linear infinite;
+          will-change: transform, opacity;
+        }
+
+        .animate-text-shimmer {
+          animation: textShimmer 3s ease-in-out infinite;
+          will-change: background-position;
+        }
+
+        .animate-card-appear {
+          animation: cardAppear 0.6s ease-out;
+          will-change: opacity, transform;
+        }
+      `},void 0,!1,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:84,columnNumber:7},this)]},void 0,!0,{fileName:"/home/ubuntu/sgh-crm-portal/client/src/components/HeroSection.tsx",lineNumber:36,columnNumber:5},this)}export{v as H,y as P};
