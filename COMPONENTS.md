@@ -34,7 +34,7 @@
 - `CampRegistrationsManagement` - إدارة تسجيلات المخيمات
 - `LeadsManagementPage` - إدارة العملاء المحتملين
 
-**المسار**: `client/src/components/DataTableWrapper.tsx`
+**المسار**: `client/src/components/table/DataTableWrapper.tsx`
 
 ---
 
@@ -52,7 +52,7 @@
 - `DataTableWrapper` - يُستخدم داخلياً
 - جميع صفحات الإدارة التي تستخدم DataTableWrapper
 
-**المسار**: `client/src/components/DataTableToolbar.tsx`
+**المسار**: `client/src/components/table/DataTableToolbar.tsx`
 
 ---
 
@@ -92,7 +92,7 @@
 - `CampRegistrationsManagement`
 - `LeadsManagementPage`
 
-**المسار**: `client/src/components/ColumnVisibility.tsx`
+**المسار**: `client/src/components/table/ColumnVisibility.tsx`
 
 ---
 
@@ -126,7 +126,7 @@
 - `CampRegistrationsManagement`
 - جميع الجداول التي تستخدم useTableFeatures
 
-**المسار**: `client/src/components/ResizableTable.tsx`
+**المسار**: `client/src/components/table/ResizableTable.tsx`
 
 ---
 
@@ -143,7 +143,7 @@
 - `DataTableWrapper` - يُستخدم داخلياً
 - جميع صفحات الإدارة
 
-**المسار**: `client/src/components/Pagination.tsx`
+**المسار**: `client/src/components/table/Pagination.tsx`
 
 ---
 
@@ -174,7 +174,7 @@
 - `DataTableWrapper`
 - جميع الجداول أثناء التحميل
 
-**المسار**: `client/src/components/TableSkeleton.tsx`
+**المسار**: `client/src/components/table/TableSkeleton.tsx`
 
 ---
 
@@ -212,7 +212,7 @@
 - `CampsListPage.tsx` - صفحة المخيمات
 - `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
 
-**المسار**: `client/src/components/HeroSection.tsx`
+**المسار**: `client/src/components/layout/HeroSection.tsx`
 
 ---
 
@@ -234,7 +234,7 @@
 - `CampsListPage.tsx` - صفحة المخيمات
 - `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
 
-**المسار**: `client/src/components/PageLayout.tsx`
+**المسار**: `client/src/components/layout/PageLayout.tsx`
 
 ---
 
@@ -255,7 +255,7 @@
 - `CampsListPage.tsx` - بطاقات المخيمات
 - `PrivacyPolicyPage.tsx` - بطاقات المحتوى
 
-**المسار**: `client/src/components/AnimatedCard.tsx`
+**المسار**: `client/src/components/layout/AnimatedCard.tsx`
 
 ---
 
@@ -273,7 +273,7 @@
 - `CampsListPage.tsx` - فصل الأقسام
 - `PrivacyPolicyPage.tsx` - فصل الأقسام
 
-**المسار**: `client/src/components/SectionDivider.tsx`
+**المسار**: `client/src/components/layout/SectionDivider.tsx`
 
 ---
 
@@ -293,7 +293,7 @@
 - `CampsListPage.tsx` - صفحة المخيمات
 - `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
 
-**المسار**: `client/src/components/BackToTopButton.tsx`
+**المسار**: `client/src/components/layout/BackToTopButton.tsx`
 
 ---
 
@@ -310,7 +310,7 @@
 **أماكن التطبيق**:
 - (قيد التطبيق) جميع الصفحات التي تحتوي أنيميشن
 
-**المسار**: `client/src/components/AnimationToggle.tsx`
+**المسار**: `client/src/components/layout/AnimationToggle.tsx`
 
 ---
 
@@ -329,7 +329,7 @@
 - `CampsListPage.tsx` - صفحة المخيمات
 - `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
 
-**المسار**: `client/src/components/ReadingProgressBar.tsx`
+**المسار**: `client/src/components/layout/ReadingProgressBar.tsx`
 
 ---
 
@@ -349,7 +349,7 @@
 - `CampsListPage.tsx` - الأقسام المختلفة
 - `PrivacyPolicyPage.tsx` - المحتوى الرئيسي
 
-**المسار**: `client/src/components/ScrollReveal.tsx`
+**المسار**: `client/src/components/layout/ScrollReveal.tsx`
 
 ---
 
@@ -366,7 +366,7 @@
 **أماكن التطبيق**:
 - (قيد التطبيق) Hero Sections في الصفحات العامة
 
-**المسار**: `client/src/components/AnimatedBackgroundParticles.tsx`
+**المسار**: `client/src/components/layout/AnimatedBackgroundParticles.tsx`
 
 ---
 
@@ -382,7 +382,7 @@
 **أماكن التطبيق**:
 - (قيد التطبيق) صفحات الإحصائيات
 
-**المسار**: `client/src/components/AnimatedStatsCounter.tsx`
+**المسار**: `client/src/components/layout/AnimatedStatsCounter.tsx`
 
 ---
 
@@ -398,7 +398,7 @@
 **أماكن التطبيق**:
 - (قيد التطبيق) العناوين الرئيسية في الصفحات العامة
 
-**المسار**: `client/src/components/TextShimmer.tsx`
+**المسار**: `client/src/components/layout/TextShimmer.tsx`
 
 ---
 
@@ -415,7 +415,7 @@
 **أماكن التطبيق**:
 - (قيد التطبيق) Hero Sections و CTA Sections
 
-**المسار**: `client/src/components/AnimatedRibbonEffect.tsx`
+**المسار**: `client/src/components/layout/AnimatedRibbonEffect.tsx`
 
 ---
 
@@ -444,7 +444,7 @@
 2. `OfferLeadsTable` - جدول حجوزات العروض
 3. `OfferLeadsCards` - بطاقات الجوال
 
-**المسار**: `client/src/components/OfferLeadsManagement.tsx`
+**المسار**: `client/src/components/offer/OfferLeadsManagement.tsx`
 **المكونات الفرعية**: `client/src/components/offers/`
 
 ---
@@ -456,7 +456,7 @@
 1. `CampRegistrationCard` - بطاقات الجوال
 2. مكونات مشتركة: `FilterPresets`, `SavedFilters`, `ColumnVisibility`, `Pagination`, إلخ.
 
-**المسار**: `client/src/components/CampRegistrationsManagement.tsx`
+**المسار**: `client/src/components/camp/CampRegistrationsManagement.tsx`
 
 ---
 
@@ -493,7 +493,7 @@
 - بطاقات إحصائيات (إجمالي، نشطة، غير نشطة)
 - فلترة وبحث
 
-**المسار**: `client/src/components/OffersManagement.tsx`
+**المسار**: `client/src/components/offer/OffersManagement.tsx`
 
 ---
 
@@ -505,7 +505,7 @@
 - بطاقات إحصائيات (إجمالي، نشطة، غير نشطة)
 - فلترة وبحث
 
-**المسار**: `client/src/components/CampsManagement.tsx`
+**المسار**: `client/src/components/camp/CampsManagement.tsx`
 
 ---
 
@@ -523,7 +523,7 @@
 **أماكن التطبيق**:
 - جميع صفحات لوحة التحكم
 
-**المسار**: `client/src/components/DashboardLayout.tsx`
+**المسار**: `client/src/components/layout/DashboardLayout.tsx`
 
 ---
 
@@ -543,7 +543,7 @@
 - `Camps`
 - جميع الصفحات العامة
 
-**المسار**: `client/src/components/Navbar.tsx`
+**المسار**: `client/src/components/layout/Navbar.tsx`
 
 ---
 
@@ -558,7 +558,7 @@
 **أماكن التطبيق**:
 - جميع الصفحات العامة
 
-**المسار**: `client/src/components/Footer.tsx`
+**المسار**: `client/src/components/layout/Footer.tsx`
 
 ---
 
@@ -594,7 +594,7 @@
 **أماكن التطبيق**:
 - `LeadsManagementPage` (عرض الجوال)
 
-**المسار**: `client/src/components/LeadCard.tsx`
+**المسار**: `client/src/components/lead/LeadCard.tsx`
 
 ---
 
@@ -610,7 +610,7 @@
 **أماكن التطبيق**:
 - `AppointmentsManagementPage` (عرض الجوال)
 
-**المسار**: `client/src/components/AppointmentCard.tsx`
+**المسار**: `client/src/components/booking/AppointmentCard.tsx`
 
 ---
 
@@ -626,7 +626,7 @@
 **أماكن التطبيق**:
 - `OfferLeadsManagement` (عرض الجوال)
 
-**المسار**: `client/src/components/OfferLeadCard.tsx`
+**المسار**: `client/src/components/offer/OfferLeadCard.tsx`
 
 ---
 
@@ -642,7 +642,7 @@
 **أماكن التطبيق**:
 - `CampRegistrationsManagement` (عرض الجوال)
 
-**المسار**: `client/src/components/CampRegistrationCard.tsx`
+**المسار**: `client/src/components/camp/CampRegistrationCard.tsx`
 
 ---
 
@@ -658,7 +658,7 @@
 **أماكن التطبيق**:
 - `LeadsManagementPage`
 
-**المسار**: `client/src/components/LeadStatsCards.tsx`
+**المسار**: `client/src/components/lead/LeadStatsCards.tsx`
 
 ---
 
@@ -729,7 +729,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/ManualRegistrationForm.tsx`
+**المسار**: `client/src/components/form/ManualRegistrationForm.tsx`
 
 ---
 
@@ -745,7 +745,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout` header
 
-**المسار**: `client/src/components/GlobalSearch.tsx`
+**المسار**: `client/src/components/layout/GlobalSearch.tsx`
 
 ---
 
@@ -760,7 +760,7 @@
 **أماكن التطبيق**:
 - `ManualRegistrationForm`
 
-**المسار**: `client/src/components/QuickPatientSearch.tsx`
+**المسار**: `client/src/components/dashboard/QuickPatientSearch.tsx`
 
 ---
 
@@ -778,7 +778,7 @@
 - `OffersManagement`
 - `CampsManagement`
 
-**المسار**: `client/src/components/ImageUpload.tsx`
+**المسار**: `client/src/components/form/ImageUpload.tsx`
 
 ---
 
@@ -793,7 +793,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout` header
 
-**المسار**: `client/src/components/NotificationCenter.tsx`
+**المسار**: `client/src/components/notification/NotificationCenter.tsx`
 
 ---
 
@@ -808,7 +808,7 @@
 **أماكن التطبيق**:
 - `App.tsx` (لوحة التحكم فقط)
 
-**المسار**: `client/src/components/PWAManager.tsx`
+**المسار**: `client/src/components/layout/PWAManager.tsx`
 
 ---
 
@@ -839,7 +839,7 @@
 - `TopNavbar` (لوحة التحكم) - `appType="admin"`
 - `DashboardSidebarV2` (شريط جانبي) - `appType="admin"`
 
-**المسار**: `client/src/components/InstallPWAButton.tsx`
+**المسار**: `client/src/components/layout/InstallPWAButton.tsx`
 
 ---
 
@@ -853,7 +853,7 @@
 **أماكن التطبيق**:
 - `App.tsx`
 
-**المسار**: `client/src/components/OfflineIndicator.tsx`
+**المسار**: `client/src/components/layout/OfflineIndicator.tsx`
 
 ---
 
@@ -867,7 +867,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout`
 
-**المسار**: `client/src/components/PendingRequestsNotification.tsx`
+**المسار**: `client/src/components/notification/PendingRequestsNotification.tsx`
 
 ---
 
@@ -881,7 +881,7 @@
 **أماكن التطبيق**:
 - `App.tsx`
 
-**المسار**: `client/src/components/MetaPixel.tsx`
+**المسار**: `client/src/components/layout/MetaPixel.tsx`
 
 ---
 
@@ -896,7 +896,7 @@
 **أماكن التطبيق**:
 - جميع صفحات الإدارة
 
-**المسار**: `client/src/components/PrintReceipt.tsx`
+**المسار**: `client/src/components/booking/PrintReceipt.tsx`
 
 ---
 
@@ -910,7 +910,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/SourceAnalytics.tsx`
+**المسار**: `client/src/components/dashboard/SourceAnalytics.tsx`
 
 ---
 
@@ -925,7 +925,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/RecentActivity.tsx`
+**المسار**: `client/src/components/dashboard/RecentActivity.tsx`
 
 ---
 
@@ -940,7 +940,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/TasksSection.tsx`
+**المسار**: `client/src/components/layout/TasksSection.tsx`
 
 ---
 
@@ -954,7 +954,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout` sidebar
 
-**المسار**: `client/src/components/TaskCount.tsx`
+**المسار**: `client/src/components/layout/TaskCount.tsx`
 
 ---
 
@@ -969,7 +969,7 @@
 **أماكن التطبيق**:
 - `DoctorsManagement` (procedures)
 
-**المسار**: `client/src/components/MultiSelect.tsx`
+**المسار**: `client/src/components/form/MultiSelect.tsx`
 
 ---
 
@@ -984,7 +984,7 @@
 **أماكن التطبيق**:
 - جميع الحوارات
 
-**المسار**: `client/src/components/ResponsiveDialog.tsx`
+**المسار**: `client/src/components/layout/ResponsiveDialog.tsx`
 
 ---
 
@@ -999,7 +999,7 @@
 **أماكن التطبيق**:
 - جميع الحوارات
 
-**المسار**: `client/src/components/ManusDialog.tsx`
+**المسار**: `client/src/components/layout/ManusDialog.tsx`
 
 ---
 
@@ -1014,7 +1014,7 @@
 **أماكن التطبيق**:
 - `App.tsx` (يغلف التطبيق بالكامل)
 
-**المسار**: `client/src/components/ErrorBoundary.tsx`
+**المسار**: `client/src/components/layout/ErrorBoundary.tsx`
 
 ---
 
@@ -1029,7 +1029,7 @@
 **أماكن التطبيق**:
 - الصفحات قيد التطوير
 
-**المسار**: `client/src/components/UnderDevelopmentPage.tsx`
+**المسار**: `client/src/components/layout/UnderDevelopmentPage.tsx`
 
 ---
 
