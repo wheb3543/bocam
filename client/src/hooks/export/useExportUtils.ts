@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { toast } from 'sonner';
-import { exportData, printTable, type ExportMetadata } from '@/lib/advancedExport';
+import { exportData, printTable, type ExportMetadata } from "@/lib/export/advancedExport";
 import { useAuth } from '@/_core/hooks/useAuth';
 
 /**

@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useMemo } from "react";
 import { useLocation } from "wouter";
 

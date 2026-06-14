@@ -242,8 +242,18 @@ sgh-crm-portal/
 │       │   ├── ui/            # مكونات واجهة المستخدم (shadcn/ui)
 │       │   └── ...            # مكونات أخرى
 │       ├── hooks/             # الخطافات المخصصة
+│       │   ├── table/         # هوكات الجداول (useTableFeatures, useFilterUtils, usePagination)
+│       │   ├── form/          # هوكات النماذج (useFormValidation, useImageUpload, usePhoneFormat, useAbandonedFormTracking)
+│       │   ├── ui/            # هوكات واجهة المستخدم (useMobile, useConfirmDialog, useSidebarState, useComposition)
+│       │   ├── data/          # هوكات البيانات (useDebounce, usePersistFn, useSlugGenerator, useStatusLabels, usePatientStorage, useRecentlyUsed)
+│       │   ├── integrations/   # هوكات التكامل (useSSE, useWhatsAppSSE, usePWAInstall, useLicense, useUpdateChecker, useNotificationSound)
+│       │   └── export/        # هوكات التصدير (useExportUtils, useFormatDate)
 │       ├── contexts/          # سياقات React
 │       ├── lib/               # الأدوات والإعدادات
+│       │   ├── export/        # أدوات التصدير (advancedExport, exportToExcel, exportUtils)
+│       │   ├── tracking/      # أدوات التتبع (tracking)
+│       │   ├── api/           # إعدادات API (trpc)
+│       │   └── utils.ts       # أدوات عامة
 │       └── _core/             # المكونات الأساسية
 ├── server/                     # تطبيق الخادم
 │   ├── _core/                 # الإعداد الأساسي (OAuth, tRPC)

@@ -6,7 +6,7 @@
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

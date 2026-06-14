@@ -20,7 +20,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { getColumnWidth, getDefaultTemplates, type ColumnConfig, type ColumnTemplate } from "@/components/table/ColumnVisibility";
 import type { SortDirection } from "@/components/table/ResizableTable";
 

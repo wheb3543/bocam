@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Loader2, CheckCircle2, Phone, Mail, MapPin, Calendar, Clock, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";

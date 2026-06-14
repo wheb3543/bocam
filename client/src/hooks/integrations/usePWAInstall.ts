@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { trpc } from '@/lib/trpc';
+import { trpc } from "@/lib/api/trpc";
 
 export type PWAAppType = 'public' | 'admin';
 

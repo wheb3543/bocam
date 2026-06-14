@@ -19,7 +19,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { usePWAInstall, type PWAAppType } from "@/hooks/integrations/usePWAInstall";
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 // ===== Helper: Detect App Type from URL =====
 function detectAppType(pathname: string): PWAAppType {

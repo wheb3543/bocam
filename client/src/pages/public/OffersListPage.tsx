@@ -2,7 +2,7 @@ import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import Navbar from "@/components/layout/Navbar";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

@@ -136,7 +136,7 @@ export default function FeatureLockedPage({ featureName: propFeatureName }: Feat
     // التحقق من الميزة
     const checkFeature = async () => {
       try {
-        const { trpc } = await import('@/lib/trpc');
+        const { trpc } = await import('@/lib/api/trpc');
         const result = trpc.license.checkFeature.useQuery({ feature: featureName });
         
         // إذا كانت الميزة مفعلة، أعد التوجيه للصفحة الرئيسية

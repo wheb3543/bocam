@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { toast } from "sonner";
 
 const SOUND_ENABLED_KEY = "sgh-notification-sound-enabled";

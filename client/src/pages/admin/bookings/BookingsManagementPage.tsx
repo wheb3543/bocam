@@ -1,6 +1,6 @@
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState, useMemo, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import OfferLeadsManagement from "@/components/offer/OfferLeadsManagement";
 import CampRegistrationsManagement from "@/components/camp/CampRegistrationsManagement";

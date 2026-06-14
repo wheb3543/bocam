@@ -1,7 +1,7 @@
 import { memo, useCallback, useState, useMemo } from "react";
 import { processPhoneInput } from "@/hooks/form/usePhoneFormat";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

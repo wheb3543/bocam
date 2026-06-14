@@ -1,4 +1,4 @@
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 

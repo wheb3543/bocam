@@ -45,7 +45,7 @@ import {
   Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSidebarState } from "@/hooks/ui/useSidebarState";
 import { useRecentlyUsed } from "@/hooks/data/useRecentlyUsed";

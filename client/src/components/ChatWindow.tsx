@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { CheckCheck, Clock, XCircle, ChevronDown, Image, FileText, Music, Video, MapPin, Users, MessageSquare, User, MoreVertical, Reply, Trash2, Forward, Download, Paperclip, Calendar, Plus, Minus, Moon, Sun, MessageCircle, ShoppingCart, Search, Megaphone, Mic, MicOff, CheckSquare, Square, Eye, Copy, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

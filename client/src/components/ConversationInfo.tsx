@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, Calendar, MessageSquare, Clock, MoreVertical, Loader2, AlertCircle, MessageCircle, ChevronDown, ChevronUp, Link2, Bell, BellOff, DollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCompanyName } from "@/const";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import {
   DropdownMenu,
   DropdownMenuContent,

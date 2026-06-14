@@ -1,7 +1,7 @@
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getCompanyName } from "@/const";
 import { Button } from "@/components/ui/button";

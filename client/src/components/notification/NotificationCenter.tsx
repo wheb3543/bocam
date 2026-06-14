@@ -1,6 +1,6 @@
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, Users, Calendar, TrendingUp, UserCheck, AlertCircle, Loader2, CheckCircle } from "lucide-react";

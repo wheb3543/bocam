@@ -4,8 +4,8 @@
  * يُستخدم في صفحات الحجز الثلاث: الأطباء، العروض، المخيمات
  */
 import { useEffect, useRef, useCallback } from "react";
-import { trpc } from "@/lib/trpc";
-import { getCompleteTrackingData } from "@/lib/tracking";
+import { trpc } from "@/lib/api/trpc";
+import { getCompleteTrackingData } from "@/lib/tracking/tracking";
 
 type FormType = "appointment" | "offer" | "camp" | "general";
 

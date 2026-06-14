@@ -1,5 +1,5 @@
 import { Facebook, Instagram, Search, MessageCircle, Send, Twitter, Linkedin, Music, Youtube, Globe, Phone, Mail, User } from "lucide-react";
-import { getSourceDisplayName } from "@/lib/tracking";
+import { getSourceDisplayName } from "@/lib/tracking/tracking";
 
 interface SourceBadgeProps {
   source: string;

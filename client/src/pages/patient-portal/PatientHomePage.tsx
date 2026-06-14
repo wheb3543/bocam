@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { processPhoneInput, validateYemeniPhone } from "@/hooks/form/usePhoneFormat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

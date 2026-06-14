@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useFilterUtils } from "@/hooks/table/useFilterUtils";
 import { Button } from "@/components/ui/button";
 import ActionButtons from "@/components/ActionButtons";

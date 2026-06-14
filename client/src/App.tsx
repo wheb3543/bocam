@@ -1,13 +1,13 @@
 import { Toaster } from "@/components/ui/sonner";
 import { useEffect, lazy, Suspense, useState } from "react";
-import { initializeTracking } from "./lib/tracking";
+import { initializeTracking } from "./lib/tracking/tracking";
 import { TooltipProvider } from "@/components/ui/tooltip";
 const NotFound = lazy(() => import("@/pages/NotFound"));
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import DashboardShell from "@/components/layout/DashboardShell";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { UpdateStatusBadge } from "@/components/update/UpdateStatusBadge";
 import { UpdateProgressModal } from "@/components/update/UpdateProgressModal";
 import { MandatoryUpdateModal } from "@/components/update/MandatoryUpdateModal";

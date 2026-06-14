@@ -4,7 +4,7 @@
  */
 
 import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, ArrowRight } from "lucide-react";
 

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe, Phone, Edit, TrendingUp, Facebook, Instagram, Send, AlertCircle, Loader2 } from "lucide-react";
 import { LucideIcon } from "lucide-react";

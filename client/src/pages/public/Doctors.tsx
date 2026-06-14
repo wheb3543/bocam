@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Loader2, Search, Stethoscope, Calendar, User } from "lucide-react";
 import { APP_LOGO, getCompanyName } from "@/const";
 import SEO from "@/components/SEO";

@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, FileText } from "lucide-react";

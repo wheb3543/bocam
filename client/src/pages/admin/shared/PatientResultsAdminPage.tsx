@@ -1,6 +1,6 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { processPhoneInput, validateYemeniPhone } from "@/hooks/form/usePhoneFormat";
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { Button } from "@/components/ui/button";

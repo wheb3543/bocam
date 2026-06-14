@@ -21,7 +21,7 @@ import {
   Copy,
 } from "lucide-react";
 import { toast } from "sonner";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { type ColumnConfig } from "@/components/table/ColumnVisibility";
 import { ColumnVisibility } from "@/components/table/ColumnVisibility";
 import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";

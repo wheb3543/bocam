@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useRoute, Link, useLocation } from "wouter";
 import Navbar from "@/components/layout/Navbar";
 import { ArrowRight, Calendar, Phone, Award, Loader2, CheckCircle, Star, Users, Clock, CheckCircle2, TrendingUp, Stethoscope, Globe, CreditCard, MessageSquare } from "lucide-react";
-import { getCompleteTrackingData } from "@/lib/tracking";
+import { getCompleteTrackingData } from "@/lib/tracking/tracking";
 import { trackViewContent } from "@/components/MetaPixel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { toast } from "sonner";
 import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 import { usePatientStorage } from "@/hooks/data/usePatientStorage";

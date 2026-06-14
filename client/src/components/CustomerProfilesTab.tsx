@@ -10,7 +10,7 @@
 
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState, useMemo, useCallback } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

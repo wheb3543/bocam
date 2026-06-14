@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { unifiedStatusLabels as statusLabels } from "@/hooks/data/useStatusLabels";
 import AppointmentCard from "@/components/booking/AppointmentCard";

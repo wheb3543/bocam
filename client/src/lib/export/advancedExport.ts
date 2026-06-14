@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { trpc } from './trpc';
+import { trpc } from '../api/trpc';
 import { APP_LOGO, COMPANY_PHONE, COMPANY_EMAIL, COMPANY_ARABIC_NAME, getCompanySlogan } from "@/const";
 
 /**

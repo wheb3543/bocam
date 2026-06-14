@@ -1,6 +1,6 @@
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AppointmentStatsCards from "@/components/booking/AppointmentStatsCards";
 import AppointmentCard from "@/components/booking/AppointmentCard";

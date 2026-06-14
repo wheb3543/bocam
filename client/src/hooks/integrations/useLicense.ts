@@ -13,7 +13,7 @@
  */
 
 import { useMemo } from 'react';
-import { trpc } from '@/lib/trpc';
+import { trpc } from "@/lib/api/trpc";
 
 /**
  * معلومات الترخيص

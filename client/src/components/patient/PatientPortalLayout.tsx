@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, Home, Calendar, Gift, FileText, User, Plus } from "lucide-react";
 

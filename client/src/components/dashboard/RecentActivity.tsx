@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, Users, Calendar, TrendingUp, UserCheck, Clock } from "lucide-react";

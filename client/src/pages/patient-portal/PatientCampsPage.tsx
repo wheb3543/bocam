@@ -1,4 +1,4 @@
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { Loader2, Tent } from "lucide-react";
 import CampCard from "@/components/patient/CampCard";

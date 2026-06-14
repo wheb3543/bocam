@@ -52,7 +52,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useNotificationSound } from "@/hooks/integrations/useNotificationSound";
 import { useLicense } from "@/hooks/integrations/useLicense";
 import { useTheme } from "@/contexts/ThemeContext";

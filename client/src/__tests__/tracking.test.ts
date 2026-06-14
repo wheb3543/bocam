@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getRegistrationSource, getTrackingData, initializeTracking, saveTrackingData, getSavedTrackingData, getSourceDisplayName, getCompleteTrackingData } from '@/lib/tracking';
+import { getRegistrationSource, getTrackingData, initializeTracking, saveTrackingData, getSavedTrackingData, getSourceDisplayName, getCompleteTrackingData } from "@/lib/tracking/tracking";
 
 describe('UTM Tracking System', () => {
   // Store original location

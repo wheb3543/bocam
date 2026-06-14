@@ -7,14 +7,14 @@ import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useEffect, useState } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import Navbar from "@/components/layout/Navbar";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Phone, Mail, Calendar, CheckCircle2, Loader2, Tag, Clock, Sparkles, Stethoscope, Shield, HeartPulse, MessageSquare } from "lucide-react";
-import { getCompleteTrackingData } from "@/lib/tracking";
+import { getCompleteTrackingData } from "@/lib/tracking/tracking";
 import { trackViewContent, trackMetaLead, updatePixelUserData } from "@/components/MetaPixel";
 import { toast } from "sonner";
 

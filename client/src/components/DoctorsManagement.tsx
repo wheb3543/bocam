@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { useConfirmDialog } from "@/hooks/ui/useConfirmDialog";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

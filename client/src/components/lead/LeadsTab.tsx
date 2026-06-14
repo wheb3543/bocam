@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { trpc } from "@/lib/api/trpc";
 import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { leadStatusLabels as statusLabels, leadStatusColors as statusColors } from "@/hooks/data/useStatusLabels";
 import LeadCard from "@/components/lead/LeadCard";
@@ -33,7 +33,7 @@ import {
   Download,
 } from "lucide-react";
 import { toast } from "sonner";
-import { exportToExcel, formatLeadsForExport } from "@/lib/exportToExcel";
+import { exportToExcel, formatLeadsForExport } from "@/lib/export/exportToExcel";
 import { SOURCE_OPTIONS, SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
 import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 
