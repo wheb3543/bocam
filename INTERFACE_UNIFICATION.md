@@ -8,13 +8,13 @@
 ## ✅ حالة التنفيذ (مايو 2026)
 
 ### المكونات المشتركة المنشأة (7 مكونات):
-1. ✅ **HeroSection Component** - `/client/src/components/HeroSection.tsx`
-2. ✅ **PageLayout Component** - `/client/src/components/PageLayout.tsx`
-3. ✅ **AnimatedCard Component** - `/client/src/components/AnimatedCard.tsx`
-4. ✅ **SectionDivider Component** - `/client/src/components/SectionDivider.tsx`
-5. ✅ **BackToTopButton Component** - `/client/src/components/BackToTopButton.tsx`
-6. ✅ **AnimationToggle Component** - `/client/src/components/AnimationToggle.tsx`
-7. ✅ **ReadingProgressBar Component** - `/client/src/components/ReadingProgressBar.tsx`
+1. ✅ **HeroSection Component** - `/client/src/components/layout/HeroSection.tsx`
+2. ✅ **PageLayout Component** - `/client/src/components/layout/PageLayout.tsx`
+3. ✅ **AnimatedCard Component** - `/client/src/components/layout/AnimatedCard.tsx`
+4. ✅ **SectionDivider Component** - `/client/src/components/layout/SectionDivider.tsx`
+5. ✅ **BackToTopButton Component** - `/client/src/components/layout/BackToTopButton.tsx`
+6. ✅ **AnimationToggle Component** - `/client/src/components/layout/AnimationToggle.tsx`
+7. ✅ **ReadingProgressBar Component** - `/client/src/components/layout/ReadingProgressBar.tsx`
 
 ### الصفحات المحدثة (7 صفحات):
 1. ✅ **NotFound.tsx** - استخدام PageLayout و HeroSection
