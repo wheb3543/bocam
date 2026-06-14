@@ -394,8 +394,8 @@ export const APP_LOGO = COMPANY_LOGO;
 **الملفات المتوقع تحديثها:**
 - `client/src/const.ts`
 - `client/src/App.tsx`
-- `client/src/components/DashboardShell.tsx`
-- `client/src/components/Footer.tsx`
+- `client/src/components/layout/DashboardShell.tsx`
+- `client/src/components/layout/Footer.tsx`
 - جميع الصفحات التي تعرض اسم المستشفى
 - `server/_core/env.ts`
 - جميع الخدمات التي تستخدم إعدادات API
@@ -977,7 +977,7 @@ export function useFeature() {
    - أزرار للتواصل مع الدعم (هاتف/إيميل)
    - إعادة توجيه تلقائية إذا تم تفعيل الميزة
 
-4. **ProtectedRoute Component** (`client/src/components/ProtectedRoute.tsx`):
+4. **ProtectedRoute Component** (`client/src/components/layout/ProtectedRoute.tsx`):
    - حماية الصفحات على مستوى Routing
    - إعادة توجيه تلقائية لصفحة FeatureLockedPage
    - دعم مسارات إعادة التوجيه المخصصة
@@ -991,7 +991,7 @@ export function useFeature() {
   * Offer leads - محمية بـ ProtectedRoute
   * إضافة مسار FeatureLockedPage
 
-- `client/src/components/DashboardSidebar.tsx`: إخفاء العناصر غير المفعلة
+- `client/src/components/layout/DashboardSidebar.tsx`: إخفاء العناصر غير المفعلة
   * تصفية allNavItems بناءً على الميزات
   * تصفية allToolsGroups بناءً على الميزات
   * إضافة خاصية feature للعناصر
@@ -1009,12 +1009,12 @@ export function useFeature() {
 **الملفات المُضافة:**
 - `client/src/hooks/useLicense.ts` (197 lines)
 - `client/src/components/FeatureGate.tsx` (256 lines)
-- `client/src/components/ProtectedRoute.tsx` (91 lines)
+- `client/src/components/layout/ProtectedRoute.tsx` (91 lines)
 - `client/src/pages/FeatureLockedPage.tsx` (301 lines)
 
 **الملفات المُعدلة:**
 - `client/src/App.tsx` - إضافة ProtectedRoute وحماية المسارات
-- `client/src/components/DashboardSidebar.tsx` - تصفية العناصر بناءً على الميزات
+- `client/src/components/layout/DashboardSidebar.tsx` - تصفية العناصر بناءً على الميزات
 - `server/_core/featureMiddleware.ts` - إصلاح TypeScript errors
 
 #### 3.2 تطبيق Feature Flags في الصفحات
@@ -1964,10 +1964,10 @@ echo "Please contact Ideaye to get your license key"
 - **المخرجات:**
   - `client/src/hooks/useLicense.ts` (197 lines) - Hook للترخيص
   - `client/src/components/FeatureGate.tsx` (256 lines) - حماية المكونات
-  - `client/src/components/ProtectedRoute.tsx` (91 lines) - حماية الطرق
+  - `client/src/components/layout/ProtectedRoute.tsx` (91 lines) - حماية الطرق
   - `client/src/pages/FeatureLockedPage.tsx` (301 lines) - صفحة القفل
   - تحديث `client/src/App.tsx` لإضافة ProtectedRoute
-  - تحديث `client/src/components/DashboardSidebar.tsx` لتصفية القائمة
+  - تحديث `client/src/components/layout/DashboardSidebar.tsx` لتصفية القائمة
 
 #### المرحلة 4: Silent Heartbeat System ✅
 - **المدة المخططة:** 1-2 أسابيع

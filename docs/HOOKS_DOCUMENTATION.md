@@ -347,7 +347,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/components/ImageUpload.tsx` |
+| **المسار** | `client/src/components/form/ImageUpload.tsx` |
 | **النوع** | مكون رفع صور (Reusable Image Upload Component) |
 | **الوصف** | مكون قابل لإعادة الاستخدام لرفع الصور مع Drag & Drop ومعاينة فورية |
 

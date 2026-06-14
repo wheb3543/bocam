@@ -130,7 +130,7 @@ const FeatureProtectedRoute = ({ component: Component, feature, ...props }) => {
 
 **استخدام Feature Flags:**
 ```typescript
-// client/src/components/DashboardSidebar.tsx
+// client/src/components/layout/DashboardSidebar.tsx
 import { useFeature } from '@/hooks/useFeature';
 
 export const DashboardSidebar = () => {
