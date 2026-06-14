@@ -98,7 +98,7 @@ const allNavItems: NavItem[] = [
   {
     id: "home",
     title: "الرئيسية",
-    href: "/dashboard",
+    href: "/admin",
     icon: Home,
   },
   {
@@ -483,7 +483,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
     const newExpanded: Record<string, boolean> = {};
     filteredToolsGroups.forEach(group => {
       const hasActive = group.items.some(item => {
-        if (item.href === "/dashboard") return currentPath === "/dashboard";
+        if (item.href === "/admin") return currentPath === "/admin";
         return currentPath === item.href || currentPath.startsWith(item.href + "/");
       });
       if (hasActive || group.defaultOpen) {
@@ -547,8 +547,8 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
   }, []);
 
   const isItemActive = useCallback((href: string) => {
-    if (href === "/dashboard") {
-      return currentPath === "/dashboard";
+    if (href === "/admin") {
+      return currentPath === "/admin";
     }
     return currentPath === href || currentPath.startsWith(href + "/");
   }, [currentPath]);
@@ -1058,14 +1058,14 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
     <div className="lg:hidden fixed bottom-0 right-0 left-0 z-40 bg-white dark:bg-card dark:bg-gray-900 border-t border-border dark:border-gray-700 safe-bottom">
       <div className="flex items-center justify-around px-1 py-1.5">
         <button
-          onClick={() => handleNavClick("/dashboard")}
+          onClick={() => handleNavClick("/admin")}
           className={cn(
             "flex flex-col items-center gap-0.5 px-2 py-1 rounded-md text-[10px] transition-colors min-w-[56px]",
-            currentPath === "/dashboard" ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground dark:text-muted-foreground"
+            currentPath === "/admin" ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground dark:text-muted-foreground"
           )}
         >
-          <Home className={cn("h-5 w-5", currentPath === "/dashboard" && "stroke-[2.5]")} />
-          <span className={currentPath === "/dashboard" ? "font-bold" : "font-medium"}>الرئيسية</span>
+          <Home className={cn("h-5 w-5", currentPath === "/admin" && "stroke-[2.5]")} />
+          <span className={currentPath === "/admin" ? "font-bold" : "font-medium"}>الرئيسية</span>
         </button>
         <button
           onClick={() => handleNavClick("/admin/bookings/leads")}
@@ -1167,15 +1167,15 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
           <nav className="py-1 px-3">
             {/* Dashboard Home */}
             <button
-              onClick={() => handleNavClick("/dashboard")}
+              onClick={() => handleNavClick("/admin")}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 mb-1",
-                currentPath === "/dashboard"
+                currentPath === "/admin"
                   ? "bg-blue-50 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400"
                   : "text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800"
               )}
             >
-              <Home className={cn("h-5 w-5 flex-shrink-0", currentPath === "/dashboard" ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground dark:text-muted-foreground")} />
+              <Home className={cn("h-5 w-5 flex-shrink-0", currentPath === "/admin" ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground dark:text-muted-foreground")} />
               <span>الرئيسية</span>
             </button>
 

@@ -71,7 +71,7 @@ export interface NavGroup {
 
 // جميع العناصر المتاحة
 const allNavItems: NavItem[] = [
-  { id: "home", title: "الرئيسية", href: "/dashboard", icon: Home },
+  { id: "home", title: "الرئيسية", href: "/admin", icon: Home },
   { id: "profile", title: "الملف الشخصي", href: "/admin/profile", icon: User },
   { id: "leads", title: "العملاء المحتملين", href: "/admin/bookings/leads", icon: UserCheck, hasDot: true },
   { id: "appointments", title: "مواعيد الأطباء", href: "/admin/bookings/appointments", icon: Calendar },
@@ -335,8 +335,8 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
 
   // التحقق من أن العنصر نشط
   const isItemActive = useCallback((href: string) => {
-    if (href === "/dashboard") {
-      return currentPath === "/dashboard" || currentPath === "/admin/";
+    if (href === "/admin") {
+      return currentPath === "/admin" || currentPath === "/admin/";
     }
     return currentPath.startsWith(href);
   }, [currentPath]);
@@ -595,7 +595,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
   
   // أهم 5 أقسام للشريط السفلي
   const bottomNavItems: NavItem[] = useMemo(() => [
-    { id: "home", title: "الرئيسية", href: "/dashboard", icon: Home },
+    { id: "home", title: "الرئيسية", href: "/admin", icon: Home },
     { id: "leads", title: "العملاء", href: "/admin/bookings/leads", icon: UserCheck, hasDot: true },
     { id: "appointments", title: "المواعيد", href: "/admin/bookings/appointments", icon: Calendar },
     { id: "reports", title: "التقارير", href: "/admin/reports/reports", icon: FileText },

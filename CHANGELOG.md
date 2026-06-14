@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `settings/` - الإعدادات
     - `shared/` - الصفحات المشتركة
   - `patient-portal/` - بوابة المريض
-- تحديث جميع المسارات من `/dashboard/` إلى `/admin/` للصفحات الإدارية
+- تحديث جميع المسارات من `/admin/` إلى `/admin/` للصفحات الإدارية
 - تحديث جميع المراجع في المكونات (DashboardSidebar, DashboardSidebarV2, TopNavbar)
 - تحديث جميع المراجع في الصفحات نفسها
 - تحديث ملفات التوثيق (README.md) لتعكس الهيكل الجديد

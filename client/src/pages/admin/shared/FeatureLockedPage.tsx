@@ -274,7 +274,7 @@ export default function FeatureLockedPage({ featureName: propFeatureName }: Feat
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => setLocation('/dashboard')}
+                onClick={() => setLocation('/admin')}
               >
                 <Home className="ml-2 h-4 w-4" />
                 لوحة التحكم

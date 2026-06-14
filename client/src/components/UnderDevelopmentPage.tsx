@@ -56,7 +56,7 @@ export default function UnderDevelopmentPage({
               
               <Button 
                 size="lg"
-                onClick={() => setLocation("/dashboard")}
+                onClick={() => setLocation("/admin")}
                 className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
               >
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />

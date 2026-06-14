@@ -323,7 +323,7 @@ function Router() {
 
 
       <Route path={"/patient-portal/login"} component={PatientPortalLogin} />
-      <Route path={"/patient-portal/dashboard"} component={PatientDashboard} />
+      <Route path={"/patient-portal/admin"} component={PatientDashboard} />
 
       {/* Patient Portal PWA Routes with Layout */}
       <Route path="/patient-portal">

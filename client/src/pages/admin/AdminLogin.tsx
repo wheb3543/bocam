@@ -23,14 +23,14 @@ export default function AdminLogin() {
 
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      navigate("/admin");
     }
   }, [user, navigate]);
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: (data) => {
       toast.success(`مرحباً ${data.user.name || data.user.username}! تم تسجيل الدخول بنجاح`);
-      navigate("/dashboard");
+      navigate("/admin");
     },
     onError: (err) => {
       toast.error(err.message || "فشل تسجيل الدخول");

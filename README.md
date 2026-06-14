@@ -291,7 +291,7 @@ sgh-crm-portal/
   - `/admin/reports/camp-stats` - إحصائيات المخيمات
   - `/admin/reports/pwa-stats` - إحصائيات PWA
 - `/admin/whatsapp` - إدارة WhatsApp
-  - `/admin/whatsapp/dashboard` - لوحة تحكم WhatsApp
+  - `/admin/whatsapp/admin` - لوحة تحكم WhatsApp
   - `/admin/whatsapp/conversations` - المحادثات
   - `/admin/whatsapp/templates` - قوالب الرسائل
   - `/admin/whatsapp/broadcast` - البث الجماعي
@@ -746,7 +746,7 @@ sgh-crm-portal/
   - `/admin/reports/camp-stats` - Camp statistics
   - `/admin/reports/pwa-stats` - PWA statistics
 - `/admin/whatsapp` - WhatsApp management
-  - `/admin/whatsapp/dashboard` - WhatsApp dashboard
+  - `/admin/whatsapp/admin` - WhatsApp dashboard
   - `/admin/whatsapp/conversations` - Conversations
   - `/admin/whatsapp/templates` - Message templates
   - `/admin/whatsapp/broadcast` - Broadcast messaging

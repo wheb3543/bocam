@@ -36,7 +36,7 @@ const COOKIE_PREFS_KEY = "sgh_cookie_preferences";
 
 // ─── مسارات الداشبورد المُستثناة من التتبع ────────────────────────────────────
 // هذه الصفحات يزورها الموظفون فقط وليس الجمهور العام
-const DASHBOARD_PREFIX = "/dashboard";
+const DASHBOARD_PREFIX = "/admin";
 
 /** تحقق مما إذا كان المسار الحالي صفحة داشبورد (موظفين فقط) */
 function isDashboardPath(path: string): boolean {

@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils';
 
 // ===== Helper: Detect App Type from URL =====
 function detectAppType(pathname: string): PWAAppType {
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/admin') || pathname.startsWith('/admin')) {
     return 'admin';
   }
   return 'public';

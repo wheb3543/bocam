@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
  * Hook مشترك لإدارة حالة الشريط الجانبي (expanded/collapsed)
  * 
  * السلوك الديناميكي (Meta Business Suite Style):
- * - في الصفحة الرئيسية (/dashboard): الشريط مفتوح بالكامل (expanded)
+ * - في الصفحة الرئيسية (/admin): الشريط مفتوح بالكامل (expanded)
  * - في باقي الصفحات: الشريط مطوي (collapsed)
  * - عند hover: يتمدد مؤقتاً ليظهر النصوص
  * 
@@ -18,7 +18,7 @@ export function useSidebarState() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // تحديد ما إذا كنا في الصفحة الرئيسية
-  const isHomePage = location === "/dashboard" || location === "/admin/";
+  const isHomePage = location === "/admin" || location === "/admin/";
 
   // تحديث حالة الشريط بناءً على الصفحة الحالية
   useEffect(() => {

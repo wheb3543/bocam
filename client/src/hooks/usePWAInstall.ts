@@ -43,7 +43,7 @@ const INSTALL_COUNT_KEY = (appType: PWAAppType) => `sgh-pwa-install-count-${appT
 /**
  * إلغاء تسجيل Service Worker العام (scope: /) في صفحات الإدارة
  * CRITICAL: SW العام (scope: /) يغطي /admin/ و/admin/ ويمنع beforeinstallprompt لتطبيق الإدارة
- * الحل: إلغاء أي SW ليس sw-admin.js (أي لا يحتوي على /admin أو /dashboard في نطاقه)
+ * الحل: إلغاء أي SW ليس sw-admin.js (أي لا يحتوي على /admin أو /admin في نطاقه)
  */
 async function unregisterPublicSWInAdminPages(): Promise<void> {
   if (!('serviceWorker' in navigator)) return;
@@ -51,9 +51,9 @@ async function unregisterPublicSWInAdminPages(): Promise<void> {
     const registrations = await navigator.serviceWorker.getRegistrations();
     for (const registration of registrations) {
       const scope = registration.scope;
-      // إلغاء أي SW ليس خاصاً بالإدارة (لا يحتوي على /admin أو /dashboard في نطاقه)
+      // إلغاء أي SW ليس خاصاً بالإدارة (لا يحتوي على /admin أو /admin في نطاقه)
       // هذا يشمل SW العام (scope: /) وأي SW آخر قد يتعارض
-      const isAdminSW = scope.includes('/admin') || scope.includes('/dashboard');
+      const isAdminSW = scope.includes('/admin') || scope.includes('/admin');
       if (!isAdminSW) {
         console.log('[PWA-admin] FORCE unregistering conflicting SW at scope:', scope);
         await registration.unregister();
@@ -107,7 +107,7 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
 
     if (supported && !isStandalone) {
       const currentPath = window.location.pathname;
-      const isAdminPath = currentPath.startsWith('/dashboard') || currentPath.startsWith('/admin');
+      const isAdminPath = currentPath.startsWith('/admin') || currentPath.startsWith('/admin');
 
       if (appType === 'admin' && isAdminPath) {
         // CRITICAL: إلغاء تسجيل SW العام أولاً لتحرير النطاق

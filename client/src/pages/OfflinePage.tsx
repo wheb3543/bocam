@@ -136,7 +136,7 @@ export default function OfflinePage() {
               {isOnline ? 'تحديث الصفحة' : 'إعادة المحاولة'}
             </Button>
             {isOnline && (
-              <Button onClick={() => window.location.href = '/dashboard'} variant="outline" size="lg">
+              <Button onClick={() => window.location.href = '/admin'} variant="outline" size="lg">
                 <Calendar className="h-5 w-5 mr-2" />
                 العودة للوحة التحكم
               </Button>

@@ -415,7 +415,7 @@ test('user registration flow', async ({ page }) => {
   await page.fill('[name="password"]', 'securePassword');
   await page.click('button[type="submit"]');
 
-  await expect(page).toHaveURL('/dashboard');
+  await expect(page).toHaveURL('/admin');
 });
 ```
 
