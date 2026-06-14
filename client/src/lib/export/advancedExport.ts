@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { trpc } from '../api/trpc';
+import { trpcClient } from '../api/trpc';
 import { APP_LOGO, COMPANY_PHONE, COMPANY_EMAIL, COMPANY_ARABIC_NAME, getCompanySlogan } from "@/const";
 
 /**
@@ -141,7 +141,7 @@ async function exportToPDF(options: ExportOptions): Promise<void> {
         )
       : undefined;
 
-    const client = trpc.useUtils().client;
+    const client = trpcClient;
     const result = await client.export.generatePDF.mutate({
       metadata: { ...metadata, filters },
       columns,
