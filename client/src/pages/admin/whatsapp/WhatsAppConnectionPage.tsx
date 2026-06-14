@@ -140,7 +140,7 @@ function WhatsAppConnectionContent() {
                   <RefreshCw className="h-4 w-4" />
                   تحديث الحالة
                 </Button>
-                <Link href="/dashboard/whatsapp">
+                <Link href="/admin/whatsapp">
                   <Button className="gap-2 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-xs sm:text-sm h-9 sm:h-10">
                     <MessageCircle className="h-4 w-4" />
                     فتح المحادثات

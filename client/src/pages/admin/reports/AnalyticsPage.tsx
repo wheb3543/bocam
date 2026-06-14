@@ -9,7 +9,7 @@ export default function AnalyticsPage() {
         title="التحليلات"
         description="تحليلات مفصلة عن أداء المنصة"
         icon={BarChart3}
-        currentPath="/dashboard/analytics"
+        currentPath="/admin/reports/analytics"
         features={[
           "تحليلات الحجوزات والمواعيد",
           "تحليلات العملاء الجدد",

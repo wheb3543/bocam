@@ -9,7 +9,7 @@ export default function MessagesPage() {
         title="الرسائل"
         description="إدارة رسائل المنصة"
         icon={MessageSquare}
-        currentPath="/dashboard/messages"
+        currentPath="/admin/communications/messages"
         features={[
           "إرسال رسائل جماعية",
           "قوالب الرسائل المخصصة",

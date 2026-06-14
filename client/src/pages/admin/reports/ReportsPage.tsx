@@ -9,7 +9,7 @@ export default function ReportsPage() {
         title="التقارير"
         description="تقارير مفصلة عن أداء المنصة"
         icon={FileText}
-        currentPath="/dashboard/reports"
+        currentPath="/admin/reports/reports"
         features={[
           "تقارير الحجوزات والمواعيد",
           "تقارير العملاء الجدد",

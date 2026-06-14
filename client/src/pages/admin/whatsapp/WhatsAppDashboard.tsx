@@ -273,22 +273,22 @@ function WhatsAppDashboardContent() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Link href="/dashboard/whatsapp">
+          <Link href="/admin/whatsapp">
             <Button variant="outline" className="w-full justify-start">
               عرض الرسائل المرسلة
             </Button>
           </Link>
-          <Link href="/dashboard/whatsapp">
+          <Link href="/admin/whatsapp">
             <Button variant="outline" className="w-full justify-start">
               عرض الرسائل الواردة
             </Button>
           </Link>
-          <Link href="/dashboard/whatsapp/analytics">
+          <Link href="/admin/whatsapp/analytics">
             <Button variant="outline" className="w-full justify-start">
               إحصائيات الرسائل
             </Button>
           </Link>
-          <Link href="/dashboard/whatsapp/templates">
+          <Link href="/admin/whatsapp/templates">
             <Button variant="outline" className="w-full justify-start">
               إدارة القوالب
             </Button>

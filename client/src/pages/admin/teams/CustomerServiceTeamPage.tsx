@@ -9,7 +9,7 @@ export default function CustomerServiceTeamPage() {
         title="فريق خدمة العملاء"
         description="إدارة فريق خدمة العملاء"
         icon={Headphones}
-        currentPath="/dashboard/teams/customer-service"
+        currentPath="/admin/teams/customer-service"
         features={[
           "إدارة طلبات العملاء",
           "تتبع التذاكر والدعم",

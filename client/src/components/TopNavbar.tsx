@@ -115,7 +115,7 @@ export default function TopNavbar({ pageTitle, pageDescription }: TopNavbarProps
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="cursor-pointer text-right text-sm"
-                onClick={() => setLocation('/dashboard/profile')}
+                onClick={() => setLocation('/admin/profile')}
               >
                 <User className="ml-2 h-4 w-4" />
                 <span>الملف الشخصي</span>

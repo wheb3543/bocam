@@ -9,7 +9,7 @@ export default function PublishingPage() {
         title="النشر"
         description="إدارة نشر المحتوى"
         icon={Send}
-        currentPath="/dashboard/publishing"
+        currentPath="/admin/content/publishing"
         features={[
           "نشر المحتوى على المنصات الاجتماعية",
           "جدولة المنشورات",

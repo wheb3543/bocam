@@ -9,7 +9,7 @@ export default function ContentManagementPage() {
         title="المحتوى"
         description="إدارة محتوى المنصة"
         icon={FileText}
-        currentPath="/dashboard/content"
+        currentPath="/admin/content/content"
         features={[
           "إدارة العروض والخصومات",
           "إدارة المخيمات والفعاليات",

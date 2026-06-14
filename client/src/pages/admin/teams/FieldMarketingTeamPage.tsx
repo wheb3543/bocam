@@ -9,7 +9,7 @@ export default function FieldMarketingTeamPage() {
         title="فريق التسويق الميداني"
         description="إدارة فريق التسويق الميداني"
         icon={MapPin}
-        currentPath="/dashboard/teams/field-marketing"
+        currentPath="/admin/teams/field-marketing"
         features={[
           "إدارة مهام التسويق الميداني",
           "تتبع الزيارات الميدانية",

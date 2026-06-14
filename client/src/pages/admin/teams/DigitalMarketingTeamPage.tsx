@@ -9,7 +9,7 @@ export default function DigitalMarketingTeamPage() {
         title="فريق التسويق الرقمي"
         description="إدارة فريق التسويق الرقمي"
         icon={Users}
-        currentPath="/dashboard/teams/digital-marketing"
+        currentPath="/admin/teams/digital-marketing"
         features={[
           "إدارة مهام التسويق الرقمي",
           "تتبع الحملات الإعلانية",

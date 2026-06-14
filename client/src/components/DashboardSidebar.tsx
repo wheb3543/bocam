@@ -104,84 +104,84 @@ const allNavItems: NavItem[] = [
   {
     id: "leads",
     title: "العملاء المحتملين",
-    href: "/dashboard/bookings/leads",
+    href: "/admin/bookings/leads",
     icon: UserCheck,
     hasDot: true,
   },
   {
     id: "appointments",
     title: "مواعيد الأطباء",
-    href: "/dashboard/bookings/appointments",
+    href: "/admin/bookings/appointments",
     icon: Calendar,
   },
   {
     id: "offer-leads",
     title: "عروض العملاء",
-    href: "/dashboard/bookings/offer-leads",
+    href: "/admin/bookings/offer-leads",
     icon: Gift,
     feature: "offers",
   },
   {
     id: "camp-registrations",
     title: "تسجيلات المخيمات",
-    href: "/dashboard/bookings/camp-registrations",
+    href: "/admin/bookings/camp-registrations",
     icon: Tent,
     feature: "camps",
   },
   {
     id: "customers",
     title: "ملفات العملاء",
-    href: "/dashboard/bookings/customers",
+    href: "/admin/bookings/customers",
     icon: Contact,
   },
   {
     id: "tasks",
     title: "المهام",
-    href: "/dashboard/bookings/tasks",
+    href: "/admin/bookings/tasks",
     icon: CheckSquare,
   },
   {
     id: "reports",
     title: "التقارير",
-    href: "/dashboard/reports",
+    href: "/admin/reports/reports",
     icon: BarChart3,
     feature: "reports",
   },
   {
     id: "whatsapp",
     title: "واتساب",
-    href: "/dashboard/whatsapp",
+    href: "/admin/whatsapp",
     icon: MessageCircle,
     feature: "whatsapp",
   },
   {
     id: "management",
     title: "الإدارة",
-    href: "/dashboard/management",
+    href: "/admin/management",
     icon: SettingsIcon,
   },
   {
     id: "content",
     title: "المحتوى",
-    href: "/dashboard/content",
+    href: "/admin/content/content",
     icon: FileEdit,
   },
   {
     id: "publishing",
     title: "النشر",
-    href: "/dashboard/publishing",
+    href: "/admin/content/publishing",
     icon: Send,
   },
   {
     id: "messages",
     title: "الرسائل",
-    href: "/dashboard/messages",
+    href: "/admin/communications/messages",
     icon: MessageSquare,
   },
   {
     id: "analytics",
     title: "التحليلات",
-    href: "/dashboard/analytics",
+    href: "/admin/reports/analytics",
     icon: BarChart3,
     feature: "reports",
   },
@@ -217,44 +217,44 @@ const allToolsGroups: NavGroup[] = [
     icon: ClipboardList,
     defaultOpen: true,
     items: [
-      { id: "bookings", title: "الحجوزات", href: "/dashboard/bookings", icon: FolderKanban },
-      { id: "leads", title: "العملاء المحتملين", href: "/dashboard/bookings/leads", icon: UserCheck },
-      { id: "appointments", title: "مواعيد الأطباء", href: "/dashboard/bookings/appointments", icon: Calendar },
-      { id: "offer-leads", title: "عروض العملاء", href: "/dashboard/bookings/offer-leads", icon: Gift, feature: "offers" },
-      { id: "camp-registrations", title: "تسجيلات المخيمات", href: "/dashboard/bookings/camp-registrations", icon: Tent, feature: "camps" },
-      { id: "customers", title: "ملفات العملاء", href: "/dashboard/bookings/customers", icon: Contact },
-      { id: "patient-results", title: "نتائج بوابة المريض", href: "/dashboard/bookings/patient-results", icon: FileText, feature: "patient_portal" },
-      { id: "tasks", title: "المهام", href: "/dashboard/bookings/tasks", icon: CheckSquare },
-      { id: "camp-stats", title: "إحصائيات المخيمات", href: "/dashboard/camp-stats", icon: Database, feature: "camps" },
+      { id: "bookings", title: "الحجوزات", href: "/admin/bookings", icon: FolderKanban },
+      { id: "leads", title: "العملاء المحتملين", href: "/admin/bookings/leads", icon: UserCheck },
+      { id: "appointments", title: "مواعيد الأطباء", href: "/admin/bookings/appointments", icon: Calendar },
+      { id: "offer-leads", title: "عروض العملاء", href: "/admin/bookings/offer-leads", icon: Gift, feature: "offers" },
+      { id: "camp-registrations", title: "تسجيلات المخيمات", href: "/admin/bookings/camp-registrations", icon: Tent, feature: "camps" },
+      { id: "customers", title: "ملفات العملاء", href: "/admin/bookings/customers", icon: Contact },
+      { id: "patient-results", title: "نتائج بوابة المريض", href: "/admin/bookings/patient-results", icon: FileText, feature: "patient_portal" },
+      { id: "tasks", title: "المهام", href: "/admin/bookings/tasks", icon: CheckSquare },
+      { id: "camp-stats", title: "إحصائيات المخيمات", href: "/admin/reports/camp-stats", icon: Database, feature: "camps" },
     ],
   },
   {
     label: "إدارة المحتوى",
     icon: FileEdit,
     items: [
-      { id: "management", title: "الإدارة", href: "/dashboard/management", icon: SettingsIcon },
-      { id: "content", title: "المحتوى", href: "/dashboard/content", icon: FileEdit },
-      { id: "publishing", title: "النشر", href: "/dashboard/publishing", icon: Send },
+      { id: "management", title: "الإدارة", href: "/admin/management", icon: SettingsIcon },
+      { id: "content", title: "المحتوى", href: "/admin/content/content", icon: FileEdit },
+      { id: "publishing", title: "النشر", href: "/admin/content/publishing", icon: Send },
     ],
   },
   {
     label: "التواصل",
     icon: MessageCircle,
     items: [
-      { id: "whatsapp", title: "واتساب", href: "/dashboard/whatsapp", icon: MessageCircle, feature: "whatsapp" },
-      { id: "whatsapp-templates", title: "قوالب واتساب", href: "/dashboard/whatsapp/templates", icon: FileText, feature: "whatsapp" },
-      { id: "whatsapp-connection", title: "اتصال واتساب", href: "/dashboard/whatsapp/connection", icon: Cloud, feature: "whatsapp" },
-      { id: "whatsapp-auto-reply", title: "الردود التلقائية", href: "/dashboard/whatsapp/auto-reply", icon: SettingsIcon, feature: "whatsapp" },
-      { id: "whatsapp-analytics", title: "تحليلات واتساب", href: "/dashboard/whatsapp/analytics", icon: TrendingUp, feature: "whatsapp" },
-      { id: "whatsapp-broadcast", title: "بث واتساب", href: "/dashboard/whatsapp/broadcast", icon: Radio, feature: "whatsapp" },
-      { id: "whatsapp-compliance", title: "الامتثال والأمان", href: "/dashboard/whatsapp/compliance", icon: Shield, feature: "whatsapp" },
-      { id: "whatsapp-appointments", title: "سجل الإشعارات", href: "/dashboard/whatsapp/appointments", icon: Smartphone, feature: "whatsapp" },
-      { id: "whatsapp-integration", title: "تكامل واتساب", href: "/dashboard/whatsapp/integration", icon: Cloud, feature: "whatsapp" },
-      { id: "whatsapp-costs", title: "تكاليف واتساب", href: "/dashboard/whatsapp/costs", icon: TrendingUp, feature: "whatsapp" },
-      { id: "whatsapp-orders", title: "طلبات واتساب", href: "/dashboard/whatsapp/orders", icon: ShoppingCart, feature: "whatsapp" },
-      { id: "whatsapp-products", title: "منتجات واتساب", href: "/dashboard/whatsapp/products", icon: Package, feature: "whatsapp" },
-      { id: "whatsapp-referrals", title: "إحالات واتساب", href: "/dashboard/whatsapp/referrals", icon: Megaphone, feature: "whatsapp" },
-      { id: "messages", title: "الرسائل", href: "/dashboard/messages", icon: MessageSquare },
+      { id: "whatsapp", title: "واتساب", href: "/admin/whatsapp", icon: MessageCircle, feature: "whatsapp" },
+      { id: "whatsapp-templates", title: "قوالب واتساب", href: "/admin/whatsapp/templates", icon: FileText, feature: "whatsapp" },
+      { id: "whatsapp-connection", title: "اتصال واتساب", href: "/admin/whatsapp/connection", icon: Cloud, feature: "whatsapp" },
+      { id: "whatsapp-auto-reply", title: "الردود التلقائية", href: "/admin/whatsapp/auto-reply", icon: SettingsIcon, feature: "whatsapp" },
+      { id: "whatsapp-analytics", title: "تحليلات واتساب", href: "/admin/whatsapp/analytics", icon: TrendingUp, feature: "whatsapp" },
+      { id: "whatsapp-broadcast", title: "بث واتساب", href: "/admin/whatsapp/broadcast", icon: Radio, feature: "whatsapp" },
+      { id: "whatsapp-compliance", title: "الامتثال والأمان", href: "/admin/whatsapp/compliance", icon: Shield, feature: "whatsapp" },
+      { id: "whatsapp-appointments", title: "سجل الإشعارات", href: "/admin/whatsapp/appointments", icon: Smartphone, feature: "whatsapp" },
+      { id: "whatsapp-integration", title: "تكامل واتساب", href: "/admin/whatsapp/integration", icon: Cloud, feature: "whatsapp" },
+      { id: "whatsapp-costs", title: "تكاليف واتساب", href: "/admin/whatsapp/costs", icon: TrendingUp, feature: "whatsapp" },
+      { id: "whatsapp-orders", title: "طلبات واتساب", href: "/admin/whatsapp/orders", icon: ShoppingCart, feature: "whatsapp" },
+      { id: "whatsapp-products", title: "منتجات واتساب", href: "/admin/whatsapp/products", icon: Package, feature: "whatsapp" },
+      { id: "whatsapp-referrals", title: "إحالات واتساب", href: "/admin/whatsapp/referrals", icon: Megaphone, feature: "whatsapp" },
+      { id: "messages", title: "الرسائل", href: "/admin/communications/messages", icon: MessageSquare },
       { id: "message-settings", title: "إعدادات الرسائل", href: "/admin/message-settings", icon: SettingsIcon },
     ],
   },
@@ -262,38 +262,38 @@ const allToolsGroups: NavGroup[] = [
     label: "الفرق",
     icon: Users,
     items: [
-      { id: "digital-marketing", title: "التسويق الرقمي", href: "/dashboard/teams/digital-marketing", icon: Megaphone },
-      { id: "media", title: "وحدة الإعلام", href: "/dashboard/teams/media", icon: Video },
-      { id: "field-marketing", title: "التسويق الميداني", href: "/dashboard/teams/field-marketing", icon: MapPin },
-      { id: "customer-service", title: "خدمة العملاء", href: "/dashboard/teams/customer-service", icon: Headphones },
+      { id: "digital-marketing", title: "التسويق الرقمي", href: "/admin/teams/digital-marketing", icon: Megaphone },
+      { id: "media", title: "وحدة الإعلام", href: "/admin/teams/media", icon: Video },
+      { id: "field-marketing", title: "التسويق الميداني", href: "/admin/teams/field-marketing", icon: MapPin },
+      { id: "customer-service", title: "خدمة العملاء", href: "/admin/teams/customer-service", icon: Headphones },
     ],
   },
   {
     label: "التقارير والتحليلات",
     icon: BarChart3,
     items: [
-      { id: "reports", title: "التقارير", href: "/dashboard/reports", icon: FileText, feature: "reports" },
-      { id: "analytics", title: "التحليلات", href: "/dashboard/analytics", icon: BarChart3, feature: "reports" },
-      { id: "bi", title: "تحليلات الأعمال", href: "/dashboard/bi", icon: PieChart },
-      { id: "pwa-stats", title: "إحصائيات PWA", href: "/dashboard/pwa-stats", icon: Gauge },
+      { id: "reports", title: "التقارير", href: "/admin/reports/reports", icon: FileText, feature: "reports" },
+      { id: "analytics", title: "التحليلات", href: "/admin/reports/analytics", icon: BarChart3, feature: "reports" },
+      { id: "bi", title: "تحليلات الأعمال", href: "/admin/reports/bi", icon: PieChart },
+      { id: "pwa-stats", title: "إحصائيات PWA", href: "/admin/reports/pwa-stats", icon: Gauge },
     ],
   },
   {
     label: "الإدارة العامة",
     icon: SettingsIcon,
     items: [
-      { id: "profile", title: "الملف الشخصي", href: "/dashboard/profile", icon: User },
-      { id: "users", title: "المستخدمين", href: "/dashboard/users", icon: Users },
-      { id: "campaigns", title: "الحملات والمشاريع", href: "/dashboard/campaigns", icon: Target },
-      { id: "projects", title: "المشاريع", href: "/dashboard/projects", icon: FolderKanban },
-      { id: "review-approval", title: "المراجعة والاعتماد", href: "/dashboard/review-approval", icon: CheckSquare },
+      { id: "profile", title: "الملف الشخصي", href: "/admin/profile", icon: User },
+      { id: "users", title: "المستخدمين", href: "/admin/users/users", icon: Users },
+      { id: "campaigns", title: "الحملات والمشاريع", href: "/admin/campaigns/campaigns", icon: Target },
+      { id: "projects", title: "المشاريع", href: "/admin/campaigns/projects", icon: FolderKanban },
+      { id: "review-approval", title: "المراجعة والاعتماد", href: "/admin/campaigns/review-approval", icon: CheckSquare },
       { id: "tracking-settings", title: "إعدادات التتبع", href: "/admin/tracking-settings", icon: SettingsIcon },
       { id: "settings", title: "الإعدادات", href: "/admin/settings", icon: SettingsIcon },
-      { id: "updates", title: "إدارة التحديثات", href: "/dashboard/updates", icon: RotateCw },
-      { id: "system-status", title: "حالة النظام", href: "/dashboard/system-status", icon: Gauge },
-      { id: "backups", title: "النسخ الاحتياطي", href: "/dashboard/backups", icon: Database },
+      { id: "updates", title: "إدارة التحديثات", href: "/admin/system/updates", icon: RotateCw },
+      { id: "system-status", title: "حالة النظام", href: "/admin/system/status", icon: Gauge },
+      { id: "backups", title: "النسخ الاحتياطي", href: "/admin/system/backups", icon: Database },
       { id: "advanced-settings", title: "إعدادات متقدمة", href: "/admin/advanced-settings", icon: MoreHorizontal },
-      { id: "departments-specialties", title: "الأقسام والتخصصات", href: "/dashboard/departments-specialties", icon: LayoutDashboard },
+      { id: "departments-specialties", title: "الأقسام والتخصصات", href: "/admin/departments-specialties", icon: LayoutDashboard },
     ],
   },
 ];
@@ -1017,7 +1017,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
         {/* Bottom Actions */}
         <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-2 flex items-center gap-3">
           <button
-            onClick={() => handleNavClick("/dashboard/settings")}
+            onClick={() => handleNavClick("/admin/settings")}
             className="flex items-center gap-2 py-1.5 text-sm text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-gray-300 transition-colors"
           >
             <Search className="h-4 w-4" />
@@ -1034,7 +1034,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
             <span>{soundEnabled ? "التنبيه" : "صامت"}</span>
           </button>
           <button
-            onClick={() => handleNavClick("/dashboard/settings")}
+            onClick={() => handleNavClick("/admin/settings")}
             className="flex items-center gap-2 py-1.5 text-sm text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-gray-300 transition-colors"
           >
             <SettingsIcon className="h-4 w-4" />
@@ -1068,7 +1068,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
           <span className={currentPath === "/dashboard" ? "font-bold" : "font-medium"}>الرئيسية</span>
         </button>
         <button
-          onClick={() => handleNavClick("/dashboard/bookings/leads")}
+          onClick={() => handleNavClick("/admin/bookings/leads")}
           className={cn(
             "flex flex-col items-center gap-0.5 px-2 py-1 rounded-md text-[10px] transition-colors min-w-[56px]",
             currentPath.includes("/bookings") ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground dark:text-muted-foreground"
@@ -1081,7 +1081,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
           <span className={currentPath.includes("/bookings") ? "font-bold" : "font-medium"}>الحجوزات</span>
         </button>
         <button
-          onClick={() => handleNavClick("/dashboard/reports")}
+          onClick={() => handleNavClick("/admin/reports/reports")}
           className={cn(
             "flex flex-col items-center gap-0.5 px-2 py-1 rounded-md text-[10px] transition-colors min-w-[56px]",
             currentPath.includes("/reports") || currentPath.includes("/analytics") ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground dark:text-muted-foreground"
@@ -1269,7 +1269,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
             <span>{theme === 'dark' ? 'مضيء' : 'مظلم'}</span>
           </button>
           <button
-            onClick={() => handleNavClick("/dashboard/settings")}
+            onClick={() => handleNavClick("/admin/settings")}
             className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm text-muted-foreground dark:text-muted-foreground hover:bg-muted/50 dark:hover:bg-gray-800 hover:text-foreground dark:hover:text-gray-300 transition-colors"
           >
             <SettingsIcon className="h-4 w-4" />

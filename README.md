@@ -214,6 +214,20 @@ sgh-crm-portal/
 │   ├── public/                # الملفات الثابتة
 │   └── src/
 │       ├── pages/             # مكونات الصفحات (50+ صفحة)
+│       │   ├── public/        # الصفحات العامة (الصفحة الرئيسية، الأطباء، العروض، المخيمات)
+│       │   ├── admin/         # الصفحات الإدارية (لوحة التحكم، الحجوزات، التقارير، WhatsApp)
+│       │   │   ├── bookings/  # إدارة الحجوزات والمواعيد
+│       │   │   ├── whatsapp/  # إدارة WhatsApp
+│       │   │   ├── campaigns/ # إدارة الحملات والمشاريع
+│       │   │   ├── reports/   # التقارير والتحليلات
+│       │   │   ├── communications/ # إدارة المراسلات
+│       │   │   ├── teams/     # إدارة الفرق
+│       │   │   ├── content/   # إدارة المحتوى
+│       │   │   ├── users/     # إدارة المستخدمين
+│       │   │   ├── system/    # إدارة النظام
+│       │   │   ├── settings/  # الإعدادات
+│       │   │   └── shared/    # الصفحات المشتركة
+│       │   └── patient-portal/ # بوابة المريض
 │       ├── components/        # المكونات القابلة لإعادة الاستخدام
 │       ├── hooks/             # الخطافات المخصصة
 │       ├── contexts/          # سياقات React
@@ -262,16 +276,20 @@ sgh-crm-portal/
 
 #### الصفحات الإدارية (تتطلب صلاحيات)
 - `/admin` - لوحة التحكم الرئيسية
-- `/admin/customers` - إدارة العملاء
-- `/admin/appointments` - إدارة المواعيد
-- `/admin/leads` - إدارة العملاء المحتملين
-- `/admin/offers` - إدارة العروض
-- `/admin/camps` - إدارة المخيمات
-- `/admin/campaigns` - إدارة الحملات
-- `/admin/tasks` - إدارة المهام
-- `/admin/users` - إدارة المستخدمين
-- `/admin/teams` - إدارة الفرق
+- `/admin/bookings` - إدارة الحجوزات
+  - `/admin/bookings/leads` - إدارة العملاء المحتملين
+  - `/admin/bookings/appointments` - إدارة المواعيد
+  - `/admin/bookings/offer-leads` - إدارة عروض العملاء
+  - `/admin/bookings/camp-registrations` - إدارة تسجيلات المخيمات
+  - `/admin/bookings/customers` - إدارة ملفات العملاء
+  - `/admin/bookings/patient-results` - إدارة نتائج بوابة المريض
+  - `/admin/bookings/tasks` - إدارة المهام
 - `/admin/reports` - التقارير والتحليلات
+  - `/admin/reports/reports` - التقارير العامة
+  - `/admin/reports/analytics` - التحليلات
+  - `/admin/reports/bi` - تحليلات الأعمال (BI)
+  - `/admin/reports/camp-stats` - إحصائيات المخيمات
+  - `/admin/reports/pwa-stats` - إحصائيات PWA
 - `/admin/whatsapp` - إدارة WhatsApp
   - `/admin/whatsapp/dashboard` - لوحة تحكم WhatsApp
   - `/admin/whatsapp/conversations` - المحادثات
@@ -281,9 +299,29 @@ sgh-crm-portal/
   - `/admin/whatsapp/analytics` - التحليلات
   - `/admin/whatsapp/compliance` - الامتثال
   - `/admin/whatsapp/account-health` - صحة الحساب
-- `/admin/message-settings` - إعدادات الرسائل
-- `/admin/tracking` - إعدادات التتبع
-- `/admin/pwa-stats` - إحصائيات PWA
+- `/admin/campaigns` - إدارة الحملات والمشاريع
+  - `/admin/campaigns/campaigns` - إدارة الحملات
+  - `/admin/campaigns/projects` - إدارة المشاريع
+  - `/admin/campaigns/review-approval` - المراجعة والاعتماد
+- `/admin/communications` - إدارة المراسلات
+  - `/admin/communications/messages` - إدارة الرسائل
+  - `/admin/communications/message-settings` - إعدادات الرسائل
+- `/admin/teams` - إدارة الفرق
+  - `/admin/teams/digital-marketing` - فريق التسويق الرقمي
+  - `/admin/teams/media` - وحدة الإعلام
+  - `/admin/teams/field-marketing` - التسويق الميداني
+  - `/admin/teams/customer-service` - خدمة العملاء
+- `/admin/content` - إدارة المحتوى
+  - `/admin/content/content` - إدارة المحتوى
+  - `/admin/content/publishing` - إدارة النشر
+- `/admin/users` - إدارة المستخدمين
+  - `/admin/users/users` - إدارة المستخدمين
+- `/admin/system` - إدارة النظام
+  - `/admin/system/updates` - إدارة التحديثات
+  - `/admin/system/status` - حالة النظام
+  - `/admin/system/backups` - النسخ الاحتياطي
+- `/admin/settings` - الإعدادات
+- `/admin/profile` - الملف الشخصي
 
 ### 🔐 نظام الصلاحيات
 
@@ -631,6 +669,20 @@ sgh-crm-portal/
 │   ├── public/                # Static assets
 │   └── src/
 │       ├── pages/             # Page components (50+ pages)
+│       │   ├── public/        # Public pages (Home, Doctors, Offers, Camps)
+│       │   ├── admin/         # Admin pages (Dashboard, Bookings, Reports, WhatsApp)
+│       │   │   ├── bookings/  # Bookings and appointments management
+│       │   │   ├── whatsapp/  # WhatsApp management
+│       │   │   ├── campaigns/ # Campaigns and projects management
+│       │   │   ├── reports/   # Reports and analytics
+│       │   │   ├── communications/ # Communications management
+│       │   │   ├── teams/     # Teams management
+│       │   │   ├── content/   # Content management
+│       │   │   ├── users/     # Users management
+│       │   │   ├── system/    # System management
+│       │   │   ├── settings/  # Settings
+│       │   │   └── shared/    # Shared pages
+│       │   └── patient-portal/ # Patient portal
 │       ├── components/        # Reusable components
 │       ├── hooks/             # Custom hooks
 │       ├── contexts/          # React contexts
@@ -679,22 +731,52 @@ sgh-crm-portal/
 
 #### Admin Pages (Permission required)
 - `/admin` - Main dashboard
-- `/admin/customers` - Customer management
-- `/admin/appointments` - Appointment management
-- `/admin/leads` - Lead management
-- `/admin/offers` - Offer management
-- `/admin/camps` - Camp management
-- `/admin/campaigns` - Campaign management
-- `/admin/tasks` - Task management
-- `/admin/users` - User management
-- `/admin/teams` - Team management
+- `/admin/bookings` - Bookings management
+  - `/admin/bookings/leads` - Lead management
+  - `/admin/bookings/appointments` - Appointment management
+  - `/admin/bookings/offer-leads` - Offer leads management
+  - `/admin/bookings/camp-registrations` - Camp registrations management
+  - `/admin/bookings/customers` - Customer records management
+  - `/admin/bookings/patient-results` - Patient portal results management
+  - `/admin/bookings/tasks` - Task management
 - `/admin/reports` - Reports and analytics
+  - `/admin/reports/reports` - General reports
+  - `/admin/reports/analytics` - Analytics
+  - `/admin/reports/bi` - Business Intelligence (BI)
+  - `/admin/reports/camp-stats` - Camp statistics
+  - `/admin/reports/pwa-stats` - PWA statistics
 - `/admin/whatsapp` - WhatsApp management
   - `/admin/whatsapp/dashboard` - WhatsApp dashboard
   - `/admin/whatsapp/conversations` - Conversations
   - `/admin/whatsapp/templates` - Message templates
   - `/admin/whatsapp/broadcast` - Broadcast messaging
   - `/admin/whatsapp/auto-reply` - Auto-replies
+  - `/admin/whatsapp/analytics` - Analytics
+  - `/admin/whatsapp/compliance` - Compliance
+  - `/admin/whatsapp/account-health` - Account health
+- `/admin/campaigns` - Campaigns and projects management
+  - `/admin/campaigns/campaigns` - Campaign management
+  - `/admin/campaigns/projects` - Project management
+  - `/admin/campaigns/review-approval` - Review and approval
+- `/admin/communications` - Communications management
+  - `/admin/communications/messages` - Messages management
+  - `/admin/communications/message-settings` - Message settings
+- `/admin/teams` - Teams management
+  - `/admin/teams/digital-marketing` - Digital marketing team
+  - `/admin/teams/media` - Media unit
+  - `/admin/teams/field-marketing` - Field marketing
+  - `/admin/teams/customer-service` - Customer service
+- `/admin/content` - Content management
+  - `/admin/content/content` - Content management
+  - `/admin/content/publishing` - Publishing management
+- `/admin/users` - Users management
+  - `/admin/users/users` - Users management
+- `/admin/system` - System management
+  - `/admin/system/updates` - Updates management
+  - `/admin/system/status` - System status
+  - `/admin/system/backups` - Backups
+- `/admin/settings` - Settings
+- `/admin/profile` - Profile
   - `/admin/whatsapp/analytics` - Analytics
   - `/admin/whatsapp/compliance` - Compliance
   - `/admin/whatsapp/account-health` - Account health

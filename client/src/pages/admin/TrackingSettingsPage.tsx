@@ -228,7 +228,7 @@ export default function TrackingSettingsPage() {
             <Alert className="mt-4">
               <Info className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                <strong>ملاحظة:</strong> إحصائيات الأحداث التفصيلية متاحة في <a href="/dashboard/bi" className="text-blue-600 hover:underline">صفحة تحليلات الأعمال (BI)</a> و <a href="https://www.facebook.com/events_manager2" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Meta Events Manager</a>.
+                <strong>ملاحظة:</strong> إحصائيات الأحداث التفصيلية متاحة في <a href="/admin/reports/bi" className="text-blue-600 hover:underline">صفحة تحليلات الأعمال (BI)</a> و <a href="https://www.facebook.com/events_manager2" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Meta Events Manager</a>.
               </AlertDescription>
             </Alert>
           </CardContent>

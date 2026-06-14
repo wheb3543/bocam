@@ -117,12 +117,12 @@ export default function BookingsManagementPage() {
       if (type === 'appointment') setActiveTab('appointments');
       else if (type === 'offer') setActiveTab('offerLeads');
       else if (type === 'camp') setActiveTab('campRegistrations');
-      window.history.replaceState({}, '', '/dashboard/bookings');
+      window.history.replaceState({}, '', '/admin/bookings');
     } else if (tab) {
       if (tab === 'appointments' || tab === 'offerLeads' || tab === 'campRegistrations' || tab === 'leads') {
         setActiveTab(tab as any);
       }
-      window.history.replaceState({}, '', '/dashboard/bookings');
+      window.history.replaceState({}, '', '/admin/bookings');
     }
   }, [location]);
 
@@ -216,7 +216,7 @@ export default function BookingsManagementPage() {
           />
           <div className="flex gap-2">
             <Button
-              onClick={() => setLocation('/dashboard/camp-stats')}
+              onClick={() => setLocation('/admin/reports/camp-stats')}
               variant="outline"
               className="gap-2"
               size="sm"

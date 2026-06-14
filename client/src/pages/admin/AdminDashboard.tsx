@@ -7,7 +7,7 @@ import DetailedStatsCards from "@/components/DetailedStatsCards";
 const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
 import DashboardLayout from "@/components/DashboardLayout";
 import { useLicense } from "@/hooks/useLicense";
-import FeatureLockedPage from "@/pages/FeatureLockedPage";
+import FeatureLockedPage from "@/pages/admin/shared/FeatureLockedPage";
 
 export default function AdminDashboard() {
   const { hasFeature, isLicenseValid } = useLicense();

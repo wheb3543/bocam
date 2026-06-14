@@ -1433,19 +1433,19 @@ function WhatsAppContent() {
                 <RefreshCw className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span className="hidden lg:inline">تحديث</span>
               </Button>
-              <Link href="/dashboard/whatsapp/connection">
+              <Link href="/admin/whatsapp/connection">
                 <Button variant="outline" size="sm" className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden sm:flex" aria-label="إعدادات الاتصال" title="إعدادات الاتصال">
                   <Smartphone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   <span className="hidden lg:inline">الاتصال</span>
                 </Button>
               </Link>
-              <Link href="/dashboard/whatsapp/templates">
+              <Link href="/admin/whatsapp/templates">
                 <Button variant="outline" size="sm" className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden md:flex" aria-label="إدارة القوالب" title="إدارة القوالب">
                   <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   <span className="hidden lg:inline">القوالب</span>
                 </Button>
               </Link>
-              <Link href="/dashboard/whatsapp/analytics">
+              <Link href="/admin/whatsapp/analytics">
                 <Button variant="outline" size="sm" className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden md:flex" aria-label="التحليلات والإحصائيات" title="التحليلات والإحصائيات">
                   <BarChart2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   <span className="hidden lg:inline">التحليلات</span>
