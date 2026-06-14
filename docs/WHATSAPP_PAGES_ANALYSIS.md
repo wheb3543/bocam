@@ -7,16 +7,16 @@
 
 ## 📋 فهرس المحتويات
 
-1. [الصفحة 1: `/dashboard/whatsapp` (WhatsAppPage.tsx)](#الصفحة-1-dashboardwhatsapp)
-2. [الصفحة 2: `/dashboard/whatsapp/templates` (WhatsAppTemplatesPage.tsx)](#الصفحة-2-dashboardwhatsapptemplates)
-3. [الصفحة 3: `/dashboard/message-settings` (MessageSettingsPage.tsx)](#الصفحة-3-dashboardmessage-settings)
+1. [الصفحة 1: `/admin/whatsapp` (WhatsAppPage.tsx)](#الصفحة-1-dashboardwhatsapp)
+2. [الصفحة 2: `/admin/whatsapp/templates` (WhatsAppTemplatesPage.tsx)](#الصفحة-2-dashboardwhatsapptemplates)
+3. [الصفحة 3: `/admin/message-settings` (MessageSettingsPage.tsx)](#الصفحة-3-dashboardmessage-settings)
 4. [الخدمات المرتبطة](#الخدمات-المرتبطة)
 5. [فرص التحسين](#فرص-التحسين)
 6. [التوصيات](#التوصيات)
 
 ---
 
-## الصفحة 1: `/dashboard/whatsapp`
+## الصفحة 1: `/admin/whatsapp`
 
 ### 📌 الملف
 - **المسار:** `/client/src/pages/WhatsAppPage.tsx`
@@ -115,7 +115,7 @@
 
 ---
 
-## الصفحة 2: `/dashboard/whatsapp/templates`
+## الصفحة 2: `/admin/whatsapp/templates`
 
 ### 📌 الملف
 - **المسار:** `/client/src/pages/WhatsAppTemplatesPage.tsx`
@@ -207,7 +207,7 @@
 
 ---
 
-## الصفحة 3: `/dashboard/message-settings`
+## الصفحة 3: `/admin/message-settings`
 
 ### 📌 الملف
 - **المسار:** `/client/src/pages/MessageSettingsPage.tsx`

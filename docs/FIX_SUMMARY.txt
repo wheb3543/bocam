@@ -58,7 +58,7 @@ npm run dev
 # 3. التحقق من النتائج
 # - تحقق من السجلات: [WhatsApp Webhook] ✅ Message processed
 # - تحقق من قاعدة البيانات: جدول whatsapp_messages
-# - تحقق من الواجهة: http://localhost:3000/dashboard/whatsapp
+# - تحقق من الواجهة: http://localhost:3000/admin/whatsapp
 ```
 
 ---

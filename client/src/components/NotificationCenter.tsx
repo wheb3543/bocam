@@ -75,7 +75,7 @@ export default function NotificationCenter() {
 
   const handleItemClick = (type: string) => {
     // Navigate to bookings management page with the appropriate tab
-    setLocation(`/dashboard/bookings?tab=${type}`);
+    setLocation(`/admin/bookings?tab=${type}`);
   };
 
   const sections = [

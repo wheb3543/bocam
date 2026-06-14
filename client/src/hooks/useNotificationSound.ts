@@ -159,7 +159,7 @@ export function useNotificationSound() {
         action: {
           label: "عرض",
           onClick: () => {
-            window.location.href = "/dashboard/whatsapp";
+            window.location.href = "/admin/whatsapp";
           },
         },
         icon: "💬",

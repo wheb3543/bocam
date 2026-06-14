@@ -192,7 +192,7 @@ https://sghsanaa.net
 
 ### 5. إدارة المستخدمين (UsersManagementPage)
 
-**المسار:** `/dashboard/users`
+**المسار:** `/admin/users`
 
 إدارة حسابات المستخدمين والموظفين:
 
@@ -202,7 +202,7 @@ https://sghsanaa.net
 
 ### 6. إدارة المحتوى (ContentManagementPage)
 
-**المسار:** `/dashboard/content`
+**المسار:** `/admin/content`
 
 إدارة محتوى الموقع:
 
@@ -212,7 +212,7 @@ https://sghsanaa.net
 
 ### 7. النشر والمراجعة (PublishingPage)
 
-**المسار:** `/dashboard/publishing`
+**المسار:** `/admin/publishing`
 
 إدارة عملية النشر:
 
@@ -222,7 +222,7 @@ https://sghsanaa.net
 
 ### 8. التقارير (ReportsPage)
 
-**المسار:** `/dashboard/reports`
+**المسار:** `/admin/reports`
 
 عرض تقارير شاملة:
 
@@ -232,7 +232,7 @@ https://sghsanaa.net
 
 ### 9. التحليلات (AnalyticsPage)
 
-**المسار:** `/dashboard/analytics`
+**المسار:** `/admin/analytics`
 
 تحليل متقدم للبيانات:
 
@@ -242,7 +242,7 @@ https://sghsanaa.net
 
 ### 10. إدارة الرسائل (MessagesPage)
 
-**المسار:** `/dashboard/messages`
+**المسار:** `/admin/messages`
 
 إدارة الرسائل والتواصل:
 
@@ -252,7 +252,7 @@ https://sghsanaa.net
 
 ### 11. إدارة WhatsApp (WhatsAppPage)
 
-**المسار:** `/dashboard/whatsapp`
+**المسار:** `/admin/whatsapp`
 
 إدارة التواصل عبر WhatsApp:
 
@@ -266,7 +266,7 @@ https://sghsanaa.net
 
 ### 1. إدارة الحملات والمشاريع
 
-**المسار:** `/dashboard/projects`
+**المسار:** `/admin/projects`
 
 إدارة شاملة للحملات والمشاريع:
 
@@ -277,7 +277,7 @@ https://sghsanaa.net
 
 ### 2. فريق التسويق الرقمي
 
-**المسار:** `/dashboard/teams/digital-marketing`
+**المسار:** `/admin/teams/digital-marketing`
 
 إدارة مهام فريق التسويق الرقمي:
 
@@ -289,7 +289,7 @@ https://sghsanaa.net
 
 ### 3. فريق وحدة الإعلام
 
-**المسار:** `/dashboard/teams/media`
+**المسار:** `/admin/teams/media`
 
 إدارة مهام فريق وحدة الإعلام:
 
@@ -300,13 +300,13 @@ https://sghsanaa.net
 
 ### 4. فريق التسويق الميداني
 
-**المسار:** `/dashboard/teams/field-marketing`
+**المسار:** `/admin/teams/field-marketing`
 
 إدارة مهام فريق التسويق الميداني.
 
 ### 5. فريق خدمة العملاء
 
-**المسار:** `/dashboard/teams/customer-service`
+**المسار:** `/admin/teams/customer-service`
 
 إدارة مهام فريق خدمة العملاء.
 
@@ -371,7 +371,7 @@ https://sghsanaa.net
 ### س: كيف أقوم بإنشاء مهمة جديدة للفريق؟
 
 **ج:** اتبع الخطوات التالية:
-1. انتقل إلى صفحة الفريق المطلوب (مثل `/dashboard/teams/digital-marketing`)
+1. انتقل إلى صفحة الفريق المطلوب (مثل `/admin/teams/digital-marketing`)
 2. انقر على زر "مهمة جديدة"
 3. أكمل نموذج المهمة
 4. حدد الفريق والأولوية والموعد النهائي
@@ -380,7 +380,7 @@ https://sghsanaa.net
 ### س: كيف أقوم بتصدير التقارير؟
 
 **ج:** اتبع الخطوات التالية:
-1. انتقل إلى صفحة التقارير (`/dashboard/reports`)
+1. انتقل إلى صفحة التقارير (`/admin/reports`)
 2. اختر نوع التقرير المطلوب
 3. انقر على زر "تصدير"
 4. اختر صيغة التصدير (Excel أو PDF)

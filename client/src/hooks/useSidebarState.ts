@@ -18,7 +18,7 @@ export function useSidebarState() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // تحديد ما إذا كنا في الصفحة الرئيسية
-  const isHomePage = location === "/dashboard" || location === "/dashboard/";
+  const isHomePage = location === "/dashboard" || location === "/admin/";
 
   // تحديث حالة الشريط بناءً على الصفحة الحالية
   useEffect(() => {

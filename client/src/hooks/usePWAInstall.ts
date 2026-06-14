@@ -3,9 +3,9 @@
  *
  * الإصلاحات الجوهرية:
  * 1. فصل تام بين تطبيقي الإدارة والواجهة العامة:
- *    - في صفحات /dashboard/* و /admin/*:
+ *    - في صفحات /admin/* و /admin/*:
  *      * يُلغي تسجيل sw.js العام (scope: /) إذا كان مسجلاً
- *      * يُسجّل sw-admin.js فقط (scope: /dashboard/)
+ *      * يُسجّل sw-admin.js فقط (scope: /admin/)
  *    - في الصفحات العامة:
  *      * يُسجّل sw.js فقط (scope: /)
  *      * لا يتدخل في sw-admin.js
@@ -42,7 +42,7 @@ const INSTALL_COUNT_KEY = (appType: PWAAppType) => `sgh-pwa-install-count-${appT
 
 /**
  * إلغاء تسجيل Service Worker العام (scope: /) في صفحات الإدارة
- * CRITICAL: SW العام (scope: /) يغطي /admin/ و/dashboard/ ويمنع beforeinstallprompt لتطبيق الإدارة
+ * CRITICAL: SW العام (scope: /) يغطي /admin/ و/admin/ ويمنع beforeinstallprompt لتطبيق الإدارة
  * الحل: إلغاء أي SW ليس sw-admin.js (أي لا يحتوي على /admin أو /dashboard في نطاقه)
  */
 async function unregisterPublicSWInAdminPages(): Promise<void> {
@@ -119,10 +119,10 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
               console.log('[PWA-admin] SW registered at scope:', registration.scope);
             })
             .catch((error) => {
-              // Fallback to /dashboard/ scope for backward compatibility
-              console.warn('[PWA-admin] SW registration at /admin/ failed, trying /dashboard/:', error);
+              // Fallback to /admin/ scope for backward compatibility
+              console.warn('[PWA-admin] SW registration at /admin/ failed, trying /admin/:', error);
               navigator.serviceWorker
-                .register('/dashboard/sw-admin.js', { scope: '/dashboard/' })
+                .register('/admin/sw-admin.js', { scope: '/admin/' })
                 .then((reg) => console.log('[PWA-admin] SW registered at fallback scope:', reg.scope))
                 .catch((err) => console.warn('[PWA-admin] SW registration failed completely:', err));
             });

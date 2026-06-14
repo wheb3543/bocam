@@ -112,7 +112,7 @@ ORDER BY createdAt DESC LIMIT 5;
 
 ## 📋 الخطوة 5: تحقق من الواجهة الأمامية
 
-1. افتح المتصفح: `http://localhost:3000/dashboard/whatsapp`
+1. افتح المتصفح: `http://localhost:3000/admin/whatsapp`
 2. يجب أن ترى محادثة جديدة من "أحمد الحرازي"
 3. انقر عليها وتحقق من ظهور الرسالة
 

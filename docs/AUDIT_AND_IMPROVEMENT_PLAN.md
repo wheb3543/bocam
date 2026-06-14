@@ -66,7 +66,7 @@
 
 **عدم وجود ربط بين التسجيلات والحملات/المشاريع:** هذه مشكلة بنيوية كبيرة حيث أن جداول `offerLeads` و `campRegistrations` لا تحتوي على حقل `campaignId` لربطها بالحملات. فقط جدولا `leads` و `appointments` يحتويان على `campaignId`. كذلك جداول `offers` و `camps` و `doctors` لا تحتوي على حقل `campaignId`. هذا يعني أنه لا يمكن تتبع أداء الحملات عبر جميع أنواع التسجيلات.
 
-**صفحة المشاريع فارغة (Under Development):** صفحة `ProjectsManagementPage` تعرض فقط رسالة "قيد التطوير" رغم وجود صفحة `CampaignsPage` كاملة. الرابط `/dashboard/projects` يشير إلى `CampaignsPage` في App.tsx لكن الشريط الجانبي يشير إلى `ProjectsManagementPage` مما يسبب تضارباً.
+**صفحة المشاريع فارغة (Under Development):** صفحة `ProjectsManagementPage` تعرض فقط رسالة "قيد التطوير" رغم وجود صفحة `CampaignsPage` كاملة. الرابط `/admin/projects` يشير إلى `CampaignsPage` في App.tsx لكن الشريط الجانبي يشير إلى `ProjectsManagementPage` مما يسبب تضارباً.
 
 **عدم وجود API لرفع الملفات:** رغم وجود `storagePut` في السيرفر، لا يوجد endpoint HTTP لرفع الملفات من الواجهة الأمامية. هذا يمنع تنفيذ Image Upload.
 
@@ -141,7 +141,7 @@
 | 2 | تطبيق useFilterUtils في صفحات الإدارة | استخدام الهوك الموحد بدلاً من البحث البسيط |
 | 3 | إضافة Caching Strategy | `staleTime` و `cacheTime` في الاستعلامات |
 | 4 | تحسين Optimistic Updates | في عمليات التعديل والحذف |
-| 5 | إصلاح تضارب المسارات | توحيد `/dashboard/projects` و `/dashboard/campaigns` |
+| 5 | إصلاح تضارب المسارات | توحيد `/admin/projects` و `/admin/campaigns` |
 
 ---
 

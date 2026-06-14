@@ -326,7 +326,7 @@ const checkFeature = (feature: string) => {
 };
 
 // استخدام في التوجيه
-<Route path="/dashboard/whatsapp">
+<Route path="/admin/whatsapp">
   {checkFeature('whatsapp') ? (
     <DashboardShell>
       <WhatsAppPage />

@@ -25,7 +25,7 @@ export async function setupVite(app: Express, server: Server) {
     const url = req.originalUrl;
 
     try {
-      // Use admin HTML template for /dashboard/* routes
+      // Use admin HTML template for /admin/* routes
       // This ensures manifest-admin.json is loaded directly in <head> without JS
       // which is required for correct PWA scope isolation
       const isAdminRoute = url.startsWith('/dashboard') || url.startsWith('/admin');
@@ -97,14 +97,14 @@ export function serveStatic(app: Express) {
   });
 
   // Dashboard SW fallback (backward compat)
-  app.get('/dashboard/sw-admin.js', (req, res) => {
+  app.get('/admin/sw-admin.js', (req, res) => {
     const swFile = path.resolve(distPath, 'admin', 'sw-admin.js');
     if (!fs.existsSync(swFile)) {
       return res.status(404).send('Service Worker not found');
     }
     res.set({
       'Content-Type': 'application/javascript; charset=utf-8',
-      'Service-Worker-Allowed': '/dashboard/',
+      'Service-Worker-Allowed': '/admin/',
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',

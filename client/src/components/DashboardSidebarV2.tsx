@@ -336,7 +336,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
   // التحقق من أن العنصر نشط
   const isItemActive = useCallback((href: string) => {
     if (href === "/dashboard") {
-      return currentPath === "/dashboard" || currentPath === "/dashboard/";
+      return currentPath === "/dashboard" || currentPath === "/admin/";
     }
     return currentPath.startsWith(href);
   }, [currentPath]);

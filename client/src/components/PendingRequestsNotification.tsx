@@ -43,7 +43,7 @@ export default function PendingRequestsNotification() {
   const handleRequestClick = (request: any) => {
     // Navigate to bookings management page
     // The page will need to handle highlighting the selected request
-    setLocation(`/dashboard/bookings?id=${request.id}&type=${request.type}`);
+    setLocation(`/admin/bookings?id=${request.id}&type=${request.type}`);
   };
   
   return (
@@ -99,7 +99,7 @@ export default function PendingRequestsNotification() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="cursor-pointer justify-center text-sm text-primary"
-                  onClick={() => setLocation('/dashboard/bookings')}
+                  onClick={() => setLocation('/admin/bookings')}
                 >
                   عرض جميع الطلبات ({totalPending})
                 </DropdownMenuItem>

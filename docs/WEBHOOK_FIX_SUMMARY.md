@@ -184,7 +184,7 @@ SELECT * FROM whatsapp_conversations ORDER BY createdAt DESC LIMIT 5;
 ```
 
 ### 5. التحقق من الواجهة الأمامية:
-- اذهب إلى `/dashboard/whatsapp`
+- اذهب إلى `/admin/whatsapp`
 - يجب أن تظهر محادثات جديدة
 - يجب أن تظهر الرسائل الجديدة في الوقت الفعلي
 
@@ -242,7 +242,7 @@ SELECT * FROM whatsapp_conversations ORDER BY createdAt DESC LIMIT 5;
    - تحقق من جداول: whatsapp_conversations, whatsapp_messages
 
 4. ✅ **اختبر الواجهة الأمامية:**
-   - اذهب إلى `/dashboard/whatsapp`
+   - اذهب إلى `/admin/whatsapp`
    - أرسل رسالة تجريبية من WhatsApp
 
 5. ✅ **راقب SSE في Browser Console:**
