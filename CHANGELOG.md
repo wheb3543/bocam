@@ -12,6 +12,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-06-14
+
+### Changed | التغييرات
+
+#### 🧩 إعادة هيكلة المكونات | Components Refactoring
+- إعادة تنظيم مكونات المشروع في مجلدات فرعية حسب الوظيفة:
+  - `layout/` - مكونات التخطيط (DashboardLayout, DashboardSidebar, Navbar, Footer, PageLayout, DashboardShell, ProtectedRoute, TopNavbar, DashboardSidebarV2)
+  - `dashboard/` - مكونات لوحة التحكم (DashboardCharts, DetailedStatsCards, QuickPatientSearch, SourceAnalytics, RecentActivity)
+  - `booking/` - مكونات الحجز (AppointmentCard, AppointmentFilters, AppointmentStatsCards, AppointmentTableDesktop, AppointmentsTab, PrintReceipt)
+  - `lead/` - مكونات العملاء المحتملين (LeadCard, LeadStatsCards, LeadsTab)
+  - `offer/` - مكونات العروض (OfferLeadCard, OfferLeadsManagement, OffersManagement)
+  - `camp/` - مكونات المخيمات (CampRegistrationCard, CampRegistrationsManagement, CampsManagement)
+  - `whatsapp/` - مكونات واتساب (WhatsAppStatusBadge)
+  - `table/` - مكونات الجداول (DataTableToolbar, DataTableWrapper, ResizableTable, Pagination, ColumnVisibility, TableSkeleton)
+  - `form/` - مكونات النماذج (ImageUpload, MultiSelect, DateRangePicker, ManualRegistrationForm)
+  - `notification/` - مكونات الإشعارات (NotificationCenter, PendingRequestsNotification, CommentCount)
+- تحديث جميع الاستيرادات في الملفات المتأثرة (119 ملف)
+- تحديث التوثيق (README.md و docs/COMPONENTS.md)
+- فحص TypeScript للتأكد من عدم وجود أخطاء (تم التحقق بنجاح)
+- تحسين قابلية الصيانة والتوسع في المشروع
+
+---
+
 ## [1.1.0] - 2025-06-14
 
 ### Changed | التغييرات
