@@ -126,7 +126,7 @@
 - `CampRegistrationsManagement`
 - جميع الجداول التي تستخدم useTableFeatures
 
-**المسار**: `client/src/components/ResizableTable.tsx`
+**المسار**: `client/src/components/table/ResizableTable.tsx`
 
 ---
 
@@ -174,7 +174,7 @@
 - `DataTableWrapper`
 - جميع الجداول أثناء التحميل
 
-**المسار**: `client/src/components/TableSkeleton.tsx`
+**المسار**: `client/src/components/table/TableSkeleton.tsx`
 
 ---
 
@@ -219,7 +219,7 @@
 2. `OfferLeadsTable` - جدول حجوزات العروض
 3. `OfferLeadsCards` - بطاقات الجوال
 
-**المسار**: `client/src/components/OfferLeadsManagement.tsx`
+**المسار**: `client/src/components/offer/OfferLeadsManagement.tsx`
 **المكونات الفرعية**: `client/src/components/offers/`
 
 ---
@@ -231,7 +231,7 @@
 1. `CampRegistrationCard` - بطاقات الجوال
 2. مكونات مشتركة: `FilterPresets`, `SavedFilters`, `ColumnVisibility`, `Pagination`, إلخ.
 
-**المسار**: `client/src/components/CampRegistrationsManagement.tsx`
+**المسار**: `client/src/components/camp/CampRegistrationsManagement.tsx`
 
 ---
 
@@ -268,7 +268,7 @@
 - بطاقات إحصائيات (إجمالي، نشطة، غير نشطة)
 - فلترة وبحث
 
-**المسار**: `client/src/components/OffersManagement.tsx`
+**المسار**: `client/src/components/offer/OffersManagement.tsx`
 
 ---
 
@@ -280,7 +280,7 @@
 - بطاقات إحصائيات (إجمالي، نشطة، غير نشطة)
 - فلترة وبحث
 
-**المسار**: `client/src/components/CampsManagement.tsx`
+**المسار**: `client/src/components/camp/CampsManagement.tsx`
 
 ---
 
@@ -318,7 +318,7 @@
 - `Camps`
 - جميع الصفحات العامة
 
-**المسار**: `client/src/components/Navbar.tsx`
+**المسار**: `client/src/components/layout/Navbar.tsx`
 
 ---
 
@@ -333,7 +333,7 @@
 **أماكن التطبيق**:
 - جميع الصفحات العامة
 
-**المسار**: `client/src/components/Footer.tsx`
+**المسار**: `client/src/components/layout/Footer.tsx`
 
 ---
 
@@ -369,7 +369,7 @@
 **أماكن التطبيق**:
 - `LeadsManagementPage` (عرض الجوال)
 
-**المسار**: `client/src/components/LeadCard.tsx`
+**المسار**: `client/src/components/lead/LeadCard.tsx`
 
 ---
 
@@ -385,7 +385,7 @@
 **أماكن التطبيق**:
 - `AppointmentsManagementPage` (عرض الجوال)
 
-**المسار**: `client/src/components/AppointmentCard.tsx`
+**المسار**: `client/src/components/booking/AppointmentCard.tsx`
 
 ---
 
@@ -401,7 +401,7 @@
 **أماكن التطبيق**:
 - `OfferLeadsManagement` (عرض الجوال)
 
-**المسار**: `client/src/components/OfferLeadCard.tsx`
+**المسار**: `client/src/components/offer/OfferLeadCard.tsx`
 
 ---
 
@@ -417,7 +417,7 @@
 **أماكن التطبيق**:
 - `CampRegistrationsManagement` (عرض الجوال)
 
-**المسار**: `client/src/components/CampRegistrationCard.tsx`
+**المسار**: `client/src/components/camp/CampRegistrationCard.tsx`
 
 ---
 
@@ -433,7 +433,7 @@
 **أماكن التطبيق**:
 - `LeadsManagementPage`
 
-**المسار**: `client/src/components/LeadStatsCards.tsx`
+**المسار**: `client/src/components/lead/LeadStatsCards.tsx`
 
 ---
 
@@ -535,7 +535,7 @@
 **أماكن التطبيق**:
 - `ManualRegistrationForm`
 
-**المسار**: `client/src/components/QuickPatientSearch.tsx`
+**المسار**: `client/src/components/dashboard/QuickPatientSearch.tsx`
 
 ---
 
@@ -553,7 +553,7 @@
 - `OffersManagement`
 - `CampsManagement`
 
-**المسار**: `client/src/components/ImageUpload.tsx`
+**المسار**: `client/src/components/form/ImageUpload.tsx`
 
 ---
 
@@ -642,7 +642,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout`
 
-**المسار**: `client/src/components/PendingRequestsNotification.tsx`
+**المسار**: `client/src/components/notification/PendingRequestsNotification.tsx`
 
 ---
 
@@ -671,7 +671,7 @@
 **أماكن التطبيق**:
 - جميع صفحات الإدارة
 
-**المسار**: `client/src/components/PrintReceipt.tsx`
+**المسار**: `client/src/components/booking/PrintReceipt.tsx`
 
 ---
 
@@ -685,7 +685,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/SourceAnalytics.tsx`
+**المسار**: `client/src/components/dashboard/SourceAnalytics.tsx`
 
 ---
 
@@ -700,7 +700,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/RecentActivity.tsx`
+**المسار**: `client/src/components/dashboard/RecentActivity.tsx`
 
 ---
 
@@ -744,7 +744,7 @@
 **أماكن التطبيق**:
 - `DoctorsManagement` (procedures)
 
-**المسار**: `client/src/components/MultiSelect.tsx`
+**المسار**: `client/src/components/form/MultiSelect.tsx`
 
 ---
 
