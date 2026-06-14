@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
-import CampRegistrationsManagement from "@/components/CampRegistrationsManagement";
-import { DateRangePicker } from "@/components/DateRangePicker";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import CampRegistrationsManagement from "@/components/camp/CampRegistrationsManagement";
+import { DateRangePicker } from "@/components/form/DateRangePicker";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Users, CheckCircle2, Clock, XCircle, PieChart as PieChartIcon } from "lucide-react";

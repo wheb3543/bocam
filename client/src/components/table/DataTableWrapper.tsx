@@ -13,12 +13,12 @@
  */
 import { ReactNode } from "react";
 import { Filter } from "lucide-react";
-import Pagination, { type PageSizeValue } from "@/components/Pagination";
-import DataTableToolbar from "@/components/DataTableToolbar";
-import TableSkeleton from "@/components/TableSkeleton";
+import Pagination, { type PageSizeValue } from "@/components/table/Pagination";
+import DataTableToolbar from "@/components/table/DataTableToolbar";
+import TableSkeleton from "@/components/table/TableSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { Users, type LucideIcon } from "lucide-react";
-import type { ColumnConfig, ColumnTemplate } from "@/components/ColumnVisibility";
+import type { ColumnConfig, ColumnTemplate } from "@/components/table/ColumnVisibility";
 
 interface DataTableWrapperProps {
   /** محتوى الجدول (children) */

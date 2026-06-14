@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
-import LeadStatsCards from "@/components/LeadStatsCards";
-import Pagination from "@/components/Pagination";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import LeadStatsCards from "@/components/lead/LeadStatsCards";
+import Pagination from "@/components/table/Pagination";
 import { toast } from "sonner";
 import { exportToExcel, formatLeadsForExport } from "@/lib/exportToExcel";
 import { useFilterUtils, type DateFilterPreset } from "@/hooks/useFilterUtils";

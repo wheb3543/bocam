@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { WifiOff, RefreshCw, Calendar, Users, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 interface CachedAppointment {
   id: number;

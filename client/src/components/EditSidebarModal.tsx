@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X, GripVertical } from "lucide-react";
 import { useState, useEffect } from "react";
-import type { NavItem, NavGroup } from "./DashboardSidebarV2";
+import type { NavItem, NavGroup } from "@/components/layout/DashboardSidebarV2";
 import { cn } from "@/lib/utils";
 
 interface EditSidebarModalProps {

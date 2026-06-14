@@ -13,7 +13,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Download, Printer, X } from "lucide-react";
-import { ColumnVisibility, type ColumnConfig, type ColumnTemplate } from "@/components/ColumnVisibility";
+import { ColumnVisibility, type ColumnConfig, type ColumnTemplate } from "@/components/table/ColumnVisibility";
 import SavedFilters from "@/components/SavedFilters";
 
 type ExportFormat = 'excel' | 'csv' | 'pdf';

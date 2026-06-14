@@ -43,13 +43,13 @@ import {
   Copy,
 } from "lucide-react";
 import { toast } from "sonner";
-import { type ColumnConfig } from "@/components/ColumnVisibility";
-import { ColumnVisibility } from "@/components/ColumnVisibility";
-import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/ResizableTable";
+import { type ColumnConfig } from "@/components/table/ColumnVisibility";
+import { ColumnVisibility } from "@/components/table/ColumnVisibility";
+import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
 import { useTableFeatures } from "@/hooks/useTableFeatures";
 import EmptyState from "@/components/EmptyState";
 import { useSlugGenerator } from "@/hooks/useSlugGenerator";
-import ImageUpload from "@/components/ImageUpload";
+import ImageUpload from "@/components/form/ImageUpload";
 
 // === تعريف أعمدة جدول الأطباء ===
 const doctorColumns: ColumnConfig[] = [

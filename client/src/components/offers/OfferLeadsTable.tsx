@@ -6,10 +6,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/ResizableTable";
-import { getColumnWidth, type ColumnConfig } from "@/components/ColumnVisibility";
+import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
+import { getColumnWidth, type ColumnConfig } from "@/components/table/ColumnVisibility";
 import ActionButtons from "@/components/ActionButtons";
-import CommentCount from "@/components/CommentCount";
+import CommentCount from "@/components/notification/CommentCount";
 import TaskCount from "@/components/TaskCount";
 import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
@@ -19,8 +19,8 @@ interface OfferLeadsTableProps {
   columns: ColumnConfig[];
   visibleColumns: Record<string, boolean>;
   columnOrder: string[];
-  columnWidths: ReturnType<typeof import("@/components/ResizableTable").useColumnWidths>;
-  frozenColumns: ReturnType<typeof import("@/components/ResizableTable").useFrozenColumns>;
+  columnWidths: ReturnType<typeof import("@/components/table/ResizableTable").useColumnWidths>;
+  frozenColumns: ReturnType<typeof import("@/components/table/ResizableTable").useFrozenColumns>;
   selectedIds: number[];
   onSelectedIdsChange: (ids: number[]) => void;
   onEdit: (lead: any) => void;

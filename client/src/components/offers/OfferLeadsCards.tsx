@@ -1,4 +1,4 @@
-import OfferLeadCard from "@/components/OfferLeadCard";
+import OfferLeadCard from "@/components/offer/OfferLeadCard";
 
 interface OfferLeadsCardsProps {
   leads: any[];

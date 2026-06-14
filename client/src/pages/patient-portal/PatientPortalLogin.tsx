@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Phone, KeyRound, UserPlus, ArrowRight, Heart, Shield, FileText, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/layout/PageLayout";
 import HeroSection from "@/components/HeroSection";
 import AnimatedCard from "@/components/AnimatedCard";
 

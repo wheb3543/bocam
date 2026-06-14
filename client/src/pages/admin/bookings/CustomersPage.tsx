@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import CustomerProfilesTab from "@/components/CustomerProfilesTab";
 
 export default function CustomersPage() {

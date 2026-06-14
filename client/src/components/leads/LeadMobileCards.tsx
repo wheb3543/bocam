@@ -1,5 +1,5 @@
 import { Users, Loader2 } from "lucide-react";
-import LeadCard from "@/components/LeadCard";
+import LeadCard from "@/components/lead/LeadCard";
 import EmptyState from "@/components/EmptyState";
 
 interface LeadMobileCardsProps {

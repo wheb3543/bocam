@@ -4,9 +4,9 @@ import { useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
-import OffersManagement from "@/components/OffersManagement";
-import CampsManagement from "@/components/CampsManagement";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import OffersManagement from "@/components/offer/OffersManagement";
+import CampsManagement from "@/components/camp/CampsManagement";
 import DoctorsManagement from "@/components/DoctorsManagement";
 
 export default function ManagementPage() {

@@ -5,7 +5,7 @@
  */
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
 import { Search, Stethoscope, Calendar, Award, Loader2, Users, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

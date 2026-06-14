@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Construction } from "lucide-react";
-import DashboardLayout from "./DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 interface UnderDevelopmentPageProps {
   title: string;

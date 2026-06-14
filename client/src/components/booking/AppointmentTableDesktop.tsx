@@ -1,13 +1,13 @@
 import { useFormatDate } from "@/hooks/useFormatDate";
 import { unifiedStatusLabels as statusLabels, unifiedStatusOptions, formatStatusTime } from "@/hooks/useStatusLabels";
-import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/ResizableTable";
-import { getColumnWidth, type ColumnConfig } from "@/components/ColumnVisibility";
-import TableSkeleton from "@/components/TableSkeleton";
+import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
+import { getColumnWidth, type ColumnConfig } from "@/components/table/ColumnVisibility";
+import TableSkeleton from "@/components/table/TableSkeleton";
 import EmptyState from "@/components/EmptyState";
 import InlineStatusEditor from "@/components/InlineStatusEditor";
-import CommentCount from "@/components/CommentCount";
+import CommentCount from "@/components/notification/CommentCount";
 import TaskCount from "@/components/TaskCount";
-import { printReceipt } from "@/components/PrintReceipt";
+import { printReceipt } from "@/components/booking/PrintReceipt";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {

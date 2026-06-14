@@ -8,7 +8,7 @@
  * - إعادة تعيين الصفحة عند تغيير الفلاتر
  */
 import { useState, useMemo, useCallback } from "react";
-import type { PageSizeValue } from "@/components/Pagination";
+import type { PageSizeValue } from "@/components/table/Pagination";
 
 interface UsePaginationOptions {
   /** حجم الصفحة الافتراضي */

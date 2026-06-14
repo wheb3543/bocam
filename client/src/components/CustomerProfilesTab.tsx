@@ -41,13 +41,13 @@ import {
   TableRow,
   TableHeader,
 } from "@/components/ui/table";
-import Pagination, { type PageSizeValue } from "@/components/Pagination";
-import TableSkeleton from "@/components/TableSkeleton";
+import Pagination, { type PageSizeValue } from "@/components/table/Pagination";
+import TableSkeleton from "@/components/table/TableSkeleton";
 import ActionButtons from "@/components/ActionButtons";
 import EmptyState from "@/components/EmptyState";
 import SavedFilters from "@/components/SavedFilters";
-import { ColumnVisibility, getColumnWidth, type ColumnConfig } from "@/components/ColumnVisibility";
-import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/ResizableTable";
+import { ColumnVisibility, getColumnWidth, type ColumnConfig } from "@/components/table/ColumnVisibility";
+import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
 import { useTableFeatures } from "@/hooks/useTableFeatures";
 import { useFilterUtils } from "@/hooks/useFilterUtils";
 import { useExportUtils } from "@/hooks/useExportUtils";

@@ -21,8 +21,8 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { getColumnWidth, getDefaultTemplates, type ColumnConfig, type ColumnTemplate } from "@/components/ColumnVisibility";
-import type { SortDirection } from "@/components/ResizableTable";
+import { getColumnWidth, getDefaultTemplates, type ColumnConfig, type ColumnTemplate } from "@/components/table/ColumnVisibility";
+import type { SortDirection } from "@/components/table/ResizableTable";
 
 /** Sort state for a column */
 export interface SortState {
@@ -62,10 +62,10 @@ export interface UseTableFeaturesReturn {
   isColumnSortable: (columnKey: string) => boolean;
   
   // === Column Widths ===
-  columnWidths: ReturnType<typeof import("@/components/ResizableTable").useColumnWidths>;
+  columnWidths: ReturnType<typeof import("@/components/table/ResizableTable").useColumnWidths>;
   
   // === Frozen Columns ===
-  frozenColumns: ReturnType<typeof import("@/components/ResizableTable").useFrozenColumns>;
+  frozenColumns: ReturnType<typeof import("@/components/table/ResizableTable").useFrozenColumns>;
   
   // === Templates ===
   allTemplates: ColumnTemplate[];

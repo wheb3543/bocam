@@ -49,9 +49,9 @@ import { trpc } from "@/lib/trpc";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import { useRecentlyUsed } from "@/hooks/useRecentlyUsed";
-import AllToolsDrawer from "./AllToolsDrawer";
-import EditSidebarModal from "./EditSidebarModal";
-import InstallPWAButton from "./InstallPWAButton";
+import AllToolsDrawer from "@/components/AllToolsDrawer";
+import EditSidebarModal from "@/components/EditSidebarModal";
+import InstallPWAButton from "@/components/InstallPWAButton";
 import useSSE from "@/hooks/useSSE";
 
 export interface NavItem {

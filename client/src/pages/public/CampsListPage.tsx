@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Heart, Calendar, ArrowLeft, Clock, CheckCircle2, Users } from "lucide-react";
 import InstallPWAButton from "@/components/InstallPWAButton";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/layout/PageLayout";
 import HeroSection from "@/components/HeroSection";
 import AnimatedCard from "@/components/AnimatedCard";
 import SectionDivider from "@/components/SectionDivider";

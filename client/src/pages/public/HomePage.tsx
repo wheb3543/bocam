@@ -7,8 +7,8 @@
 import { Heart, Stethoscope, Calendar, TrendingUp, ArrowLeft, Users, Clock, Award, Shield, Activity, Sparkles, ArrowUp, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import SEO from "@/components/SEO";
 import InstallPWAButton from "@/components/InstallPWAButton";
 import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, COMPANY_NAME, getCompanySlogan } from "@/const";

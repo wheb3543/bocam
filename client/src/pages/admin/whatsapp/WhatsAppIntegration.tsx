@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, CheckCircle, AlertCircle, Send, MessageSquare, RefreshCw, Copy, Check, Search, Ban, TrendingUp, Clock } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/useWhatsAppSSE";
 
 export default function WhatsAppIntegration() {

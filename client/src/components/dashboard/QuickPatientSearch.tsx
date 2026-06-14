@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Phone, MessageCircle, Edit, X, Calendar, Mail, User, MapPin, Printer, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { printReceipt } from "./PrintReceipt";
+import { printReceipt } from "@/components/booking/PrintReceipt";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { usePhoneFormat } from "@/hooks/usePhoneFormat";
 

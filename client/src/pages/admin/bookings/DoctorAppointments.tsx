@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { trackMetaLead, trackMetaCompleteRegistration, updatePixelUserData } from "@/components/MetaPixel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

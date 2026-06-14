@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import MultiSelect from "@/components/MultiSelect";
+import MultiSelect from "@/components/form/MultiSelect";
 import { Search, RotateCcw } from "lucide-react";
 import {
   Select,

@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import UnderDevelopmentPage from "@/components/UnderDevelopmentPage";
 import { Settings } from "lucide-react";
 

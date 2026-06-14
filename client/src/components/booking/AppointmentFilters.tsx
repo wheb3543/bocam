@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import MultiSelect from "@/components/MultiSelect";
+import MultiSelect from "@/components/form/MultiSelect";
 import SavedFilters from "@/components/SavedFilters";
-import { ColumnVisibility, type ColumnConfig } from "@/components/ColumnVisibility";
+import { ColumnVisibility, type ColumnConfig } from "@/components/table/ColumnVisibility";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

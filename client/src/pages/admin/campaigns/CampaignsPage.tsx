@@ -53,7 +53,7 @@ import {
   XCircle,
   RefreshCw,
 } from "lucide-react";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { Link } from "wouter";

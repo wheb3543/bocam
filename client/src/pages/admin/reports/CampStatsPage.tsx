@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, TrendingUp, Users, Calendar, Activity, PieChart as PieChartIcon, ArrowRight, RefreshCw, Download, Calendar as CalendarIcon, Clock, Printer } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, ScatterChart, Scatter, ZAxis } from "recharts";
 import { useLocation } from "wouter";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { getCompanySlogan } from "@/const";

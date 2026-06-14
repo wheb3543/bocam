@@ -229,6 +229,18 @@ sgh-crm-portal/
 │       │   │   └── shared/    # الصفحات المشتركة
 │       │   └── patient-portal/ # بوابة المريض
 │       ├── components/        # المكونات القابلة لإعادة الاستخدام
+│       │   ├── layout/        # مكونات التخطيط (DashboardLayout, DashboardSidebar, Navbar, Footer, PageLayout, DashboardShell, ProtectedRoute)
+│       │   ├── dashboard/     # مكونات لوحة التحكم (DashboardCharts, DetailedStatsCards, QuickPatientSearch, SourceAnalytics, RecentActivity)
+│       │   ├── booking/       # مكونات الحجز (AppointmentCard, AppointmentFilters, AppointmentStatsCards, AppointmentTableDesktop, AppointmentsTab, PrintReceipt)
+│       │   ├── lead/          # مكونات العملاء المحتملين (LeadCard, LeadStatsCards, LeadsTab)
+│       │   ├── offer/         # مكونات العروض (OfferLeadCard, OfferLeadsManagement, OffersManagement)
+│       │   ├── camp/          # مكونات المخيمات (CampRegistrationCard, CampRegistrationsManagement, CampsManagement)
+│       │   ├── whatsapp/      # مكونات واتساب (WhatsAppStatusBadge)
+│       │   ├── table/         # مكونات الجداول (DataTableToolbar, DataTableWrapper, ResizableTable, Pagination, ColumnVisibility, TableSkeleton)
+│       │   ├── form/          # مكونات النماذج (ImageUpload, MultiSelect, DateRangePicker, ManualRegistrationForm)
+│       │   ├── notification/  # مكونات الإشعارات (NotificationCenter, PendingRequestsNotification, CommentCount)
+│       │   ├── ui/            # مكونات واجهة المستخدم (shadcn/ui)
+│       │   └── ...            # مكونات أخرى
 │       ├── hooks/             # الخطافات المخصصة
 │       ├── contexts/          # سياقات React
 │       ├── lib/               # الأدوات والإعدادات

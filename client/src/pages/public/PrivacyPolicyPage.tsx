@@ -9,12 +9,12 @@
  */
 
 import { useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { getCompanyName, getAppTitle } from "@/const";
 import { Shield, Phone, Mail, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/layout/PageLayout";
 import HeroSection from "@/components/HeroSection";
 import AnimatedCard from "@/components/AnimatedCard";
 import SectionDivider from "@/components/SectionDivider";

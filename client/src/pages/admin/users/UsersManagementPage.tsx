@@ -49,11 +49,11 @@ import {
   Filter,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import DashboardLayout from "@/components/DashboardLayout";
-import RecentActivity from "@/components/RecentActivity";
-import { type ColumnConfig } from "@/components/ColumnVisibility";
-import { ColumnVisibility } from "@/components/ColumnVisibility";
-import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/ResizableTable";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import RecentActivity from "@/components/dashboard/RecentActivity";
+import { type ColumnConfig } from "@/components/table/ColumnVisibility";
+import { ColumnVisibility } from "@/components/table/ColumnVisibility";
+import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
 import { useTableFeatures } from "@/hooks/useTableFeatures";
 import { usePhoneFormat } from "@/hooks/usePhoneFormat";
 

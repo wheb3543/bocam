@@ -6,7 +6,7 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import DashboardShell from "./components/DashboardShell";
+import DashboardShell from "@/components/layout/DashboardShell";
 import { trpc } from "@/lib/trpc";
 import { UpdateStatusBadge } from "@/components/update/UpdateStatusBadge";
 import { UpdateProgressModal } from "@/components/update/UpdateProgressModal";
@@ -102,7 +102,7 @@ const UpdateManagementPage = lazy(() => import("./pages/admin/system/UpdateManag
 const SystemStatusPage = lazy(() => import("./pages/admin/system/SystemStatusPage"));
 const BackupManagementPage = lazy(() => import("./pages/admin/system/BackupManagementPage"));
 const AdvancedSettingsPage = lazy(() => import("./pages/admin/AdvancedSettingsPage"));
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
 
 function Router() {

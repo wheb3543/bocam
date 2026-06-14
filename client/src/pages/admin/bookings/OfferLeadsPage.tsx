@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
-import OfferLeadsManagement from "@/components/OfferLeadsManagement";
-import { DateRangePicker } from "@/components/DateRangePicker";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import OfferLeadsManagement from "@/components/offer/OfferLeadsManagement";
+import { DateRangePicker } from "@/components/form/DateRangePicker";
 
 export default function OfferLeadsPage() {
   const [dateRange, setDateRange] = useState(() => {

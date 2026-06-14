@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { Loader2, Gift, Calendar, Phone, Mail, User, CheckCircle } from "lucide-react";
 import { getRegistrationSource } from "@/lib/tracking";
 import { APP_LOGO, APP_TITLE } from "@/const";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/layout/PageLayout";
 import HeroSection from "@/components/HeroSection";
 import AnimatedCard from "@/components/AnimatedCard";
 import SectionDivider from "@/components/SectionDivider";

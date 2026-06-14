@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { processPhoneInput, validateYemeniPhone } from "@/hooks/usePhoneFormat";
 import { useFormatDate } from "@/hooks/useFormatDate";

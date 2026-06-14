@@ -1,11 +1,11 @@
 import { lazy, Suspense } from "react";
-import ManualRegistrationForm from "@/components/ManualRegistrationForm";
-import NotificationCenter from "@/components/NotificationCenter";
-import SourceAnalytics from "@/components/SourceAnalytics";
-import QuickPatientSearch from "@/components/QuickPatientSearch";
-import DetailedStatsCards from "@/components/DetailedStatsCards";
-const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
-import DashboardLayout from "@/components/DashboardLayout";
+import ManualRegistrationForm from "@/components/form/ManualRegistrationForm";
+import NotificationCenter from "@/components/notification/NotificationCenter";
+import SourceAnalytics from "@/components/dashboard/SourceAnalytics";
+import QuickPatientSearch from "@/components/dashboard/QuickPatientSearch";
+import DetailedStatsCards from "@/components/dashboard/DetailedStatsCards";
+const DashboardCharts = lazy(() => import("@/components/dashboard/DashboardCharts"));
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useLicense } from "@/hooks/useLicense";
 import FeatureLockedPage from "@/pages/admin/shared/FeatureLockedPage";
 

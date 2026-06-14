@@ -19,8 +19,8 @@ import {
   AlertCircle, CheckCircle2, Settings, Home, FlaskConical, ScanLine, Pencil, Save, X
 } from "lucide-react";
 import { toast } from "sonner";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { usePhoneFormat } from "@/hooks/usePhoneFormat";
 
 export default function PatientDashboard() {

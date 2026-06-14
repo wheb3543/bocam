@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { Loader2, Search, Stethoscope, Calendar, User } from "lucide-react";
 import { APP_LOGO, getCompanyName } from "@/const";
 import SEO from "@/components/SEO";
 import InstallPWAButton from "@/components/InstallPWAButton";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/layout/PageLayout";
 import HeroSection from "@/components/HeroSection";
 import AnimatedCard from "@/components/AnimatedCard";
 import SectionDivider from "@/components/SectionDivider";

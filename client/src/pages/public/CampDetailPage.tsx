@@ -6,7 +6,7 @@
 import { useFormatDate } from "@/hooks/useFormatDate";
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useLocation, Link } from "wouter";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
 import { getCompanyName } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";

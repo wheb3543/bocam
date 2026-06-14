@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Plus, Phone as PhoneIcon, Printer, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { printReceipt } from "./PrintReceipt";
+import { printReceipt } from "@/components/booking/PrintReceipt";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLicense } from "@/hooks/useLicense";
 

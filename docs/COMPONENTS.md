@@ -34,7 +34,7 @@
 - `CampRegistrationsManagement` - إدارة تسجيلات المخيمات
 - `LeadsManagementPage` - إدارة العملاء المحتملين
 
-**المسار**: `client/src/components/DataTableWrapper.tsx`
+**المسار**: `client/src/components/table/DataTableWrapper.tsx`
 
 ---
 
@@ -52,7 +52,7 @@
 - `DataTableWrapper` - يُستخدم داخلياً
 - جميع صفحات الإدارة التي تستخدم DataTableWrapper
 
-**المسار**: `client/src/components/DataTableToolbar.tsx`
+**المسار**: `client/src/components/table/DataTableToolbar.tsx`
 
 ---
 
@@ -92,7 +92,7 @@
 - `CampRegistrationsManagement`
 - `LeadsManagementPage`
 
-**المسار**: `client/src/components/ColumnVisibility.tsx`
+**المسار**: `client/src/components/table/ColumnVisibility.tsx`
 
 ---
 
@@ -143,7 +143,7 @@
 - `DataTableWrapper` - يُستخدم داخلياً
 - جميع صفحات الإدارة
 
-**المسار**: `client/src/components/Pagination.tsx`
+**المسار**: `client/src/components/table/Pagination.tsx`
 
 ---
 
@@ -298,7 +298,7 @@
 **أماكن التطبيق**:
 - جميع صفحات لوحة التحكم
 
-**المسار**: `client/src/components/DashboardLayout.tsx`
+**المسار**: `client/src/components/layout/DashboardLayout.tsx`
 
 ---
 
@@ -504,7 +504,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/ManualRegistrationForm.tsx`
+**المسار**: `client/src/components/form/ManualRegistrationForm.tsx`
 
 ---
 
@@ -568,7 +568,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout` header
 
-**المسار**: `client/src/components/NotificationCenter.tsx`
+**المسار**: `client/src/components/notification/NotificationCenter.tsx`
 
 ---
 
