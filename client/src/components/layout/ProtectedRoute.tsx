@@ -12,7 +12,7 @@
 
 import { ReactNode, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useLicense } from '@/hooks/useLicense';
+import { useLicense } from "@/hooks/integrations/useLicense";
 
 interface ProtectedRouteProps {
   /** اسم الميزة المطلوبة */

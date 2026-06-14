@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, RefreshCw, Cloud, Phone, Shield, MessageCircle, Zap, Info } from "lucide-react";
 import { Link } from "wouter";
-import { useWhatsAppSSE, AccountUpdateEvent, BusinessAccountUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, AccountUpdateEvent, BusinessAccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 import { toast } from "sonner";
 
 export default function WhatsAppConnectionPage() {

@@ -18,7 +18,7 @@ import { MessageCircle, RefreshCw, CheckCheck, Clock, XCircle, Send } from "luci
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
-import { useWhatsAppSSE } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE } from "@/hooks/integrations/useWhatsAppSSE";
 
 type EntityType = "appointment" | "camp_registration" | "offer_lead";
 

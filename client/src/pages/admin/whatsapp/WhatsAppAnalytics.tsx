@@ -25,7 +25,7 @@ import {
   Bar,
 } from "recharts";
 import { MessageCircle, TrendingUp, Download, Calendar, Users, Clock, CheckCircle, XCircle, RefreshCw, DollarSign, ShoppingCart, Megaphone, Smile } from "lucide-react";
-import { useWhatsAppSSE, ConversationCostUpdateEvent, TemplateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, ConversationCostUpdateEvent, TemplateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 import { toast } from "sonner";
 
 export default function WhatsAppAnalytics() {

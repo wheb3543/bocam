@@ -5,7 +5,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { processPhoneInput, validateYemeniPhone } from "@/hooks/usePhoneFormat";
+import { processPhoneInput, validateYemeniPhone } from "@/hooks/form/usePhoneFormat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

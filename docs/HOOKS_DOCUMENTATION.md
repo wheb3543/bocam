@@ -44,7 +44,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useTableFeatures.ts` |
+| **المسار** | `client/src/hooks/table/useTableFeatures.ts` |
 | **النوع** | هوك إدارة الجداول (Unified Table Management Hook) |
 | **الوصف** | نظام موحد لإدارة جميع ميزات الجداول: إخفاء/إظهار الأعمدة، ترتيب الأعمدة، أحجام الأعمدة، تجميد الأعمدة، القوالب، والترتيب (Sort) |
 
@@ -77,7 +77,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useFilterUtils.ts` |
+| **المسار** | `client/src/hooks/table/useFilterUtils.ts` |
 | **النوع** | هوك تصفية البيانات (Unified Filter Hook) |
 | **الوصف** | يوفر نظاماً موحداً لتصفية البيانات يشمل: البحث النصي (مع debounce)، تصفية الحالة، تصفية المصدر، تصفية التصنيف، تصفية التاريخ، وعدد الفلاتر النشطة |
 
@@ -112,7 +112,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useExportUtils.ts` |
+| **المسار** | `client/src/hooks/export/useExportUtils.ts` |
 | **النوع** | هوك تصدير البيانات (Export & Print Hook) |
 | **الوصف** | يوفر دوال لتصدير البيانات إلى Excel وطباعتها كـ PDF، مع دعم الأعمدة المرئية والفلاتر النشطة |
 
@@ -139,7 +139,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useDebounce.ts` |
+| **المسار** | `client/src/hooks/data/useDebounce.ts` |
 | **النوع** | هوك تأخير القيمة (Debounce Hook) |
 | **الوصف** | يؤخر تحديث القيمة حتى انتهاء فترة التأخير المحددة. مفيد لحقول البحث لتقليل عدد استدعاءات API |
 
@@ -157,7 +157,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useComposition.ts` |
+| **المسار** | `client/src/hooks/ui/useComposition.ts` |
 | **النوع** | هوك إدارة الإدخال المركب (Composition Input Hook) |
 | **الوصف** | يتعامل مع أحداث الإدخال المركب (Composition Events) في حقول النص، خاصة للغات التي تستخدم IME مثل العربية والصينية |
 
@@ -177,7 +177,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/usePersistFn.ts` |
+| **المسار** | `client/src/hooks/data/usePersistFn.ts` |
 | **النوع** | هوك تثبيت الدالة (Persistent Function Hook) |
 | **الوصف** | بديل لـ `useCallback` يحافظ على مرجع ثابت للدالة دون الحاجة لتحديد التبعيات |
 
@@ -195,7 +195,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useMobile.tsx` |
+| **المسار** | `client/src/hooks/ui/useMobile.tsx` |
 | **النوع** | هوك كشف الجهاز (Mobile Detection Hook) |
 | **الوصف** | يكتشف ما إذا كان العرض الحالي للشاشة أقل من 768px (نقطة توقف الهاتف) |
 
@@ -214,7 +214,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useNotificationSound.ts` |
+| **المسار** | `client/src/hooks/integrations/useNotificationSound.ts` |
 | **النوع** | هوك إشعارات صوتية (Notification Sound Hook) |
 | **الوصف** | يراقب الرسائل الجديدة في واتساب ويشغل صوت إشعار عند وصول رسالة جديدة |
 
@@ -234,7 +234,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useSlugGenerator.ts` |
+| **المسار** | `client/src/hooks/data/useSlugGenerator.ts` |
 | **النوع** | هوك توليد الروابط (Slug Auto-Generation Hook) |
 | **الوصف** | يولّد slug تلقائياً من العنوان العربي/الإنجليزي مع دعم التعديل اليدوي وحالة التعديل |
 
@@ -260,7 +260,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useImageUpload.ts` |
+| **المسار** | `client/src/hooks/form/useImageUpload.ts` |
 | **النوع** | هوك رفع الصور (Image Upload Hook) |
 | **الوصف** | يدير عملية رفع الصور إلى الخادم مع التحقق من النوع والحجم ومعاينة الصورة |
 
@@ -283,7 +283,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useFormValidation.ts` |
+| **المسار** | `client/src/hooks/form/useFormValidation.ts` |
 | **النوع** | هوك التحقق من النماذج (Form Validation Hook) |
 | **الوصف** | يوفر نظام تحقق بسيط من صحة حقول النماذج مع رسائل خطأ عربية |
 
@@ -304,7 +304,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useConfirmDialog.ts` |
+| **المسار** | `client/src/hooks/ui/useConfirmDialog.ts` |
 | **النوع** | هوك حوار التأكيد (Confirm Dialog Hook) |
 | **الوصف** | يدير حالة حوار التأكيد (مثل حذف عنصر) مع دعم العنوان والرسالة والإجراء |
 
@@ -326,7 +326,7 @@
 
 | الحقل | القيمة |
 |-------|--------|
-| **المسار** | `client/src/hooks/useStatusLabels.ts` |
+| **المسار** | `client/src/hooks/data/useStatusLabels.ts` |
 | **النوع** | هوك تسميات الحالات (Status Labels Hook) |
 | **الوصف** | يوحد تسميات وألوان الحالات عبر جميع صفحات الإدارة |
 
@@ -385,23 +385,269 @@
 
 ---
 
-## ملخص الهوكات والتبعيات
+## 15. useFormatDate (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/export/useFormatDate.ts` |
+| **النوع** | هوك تنسيق التاريخ (Date Formatting Hook) |
+| **الوصف** | يوفر دوال لتنسيق التواريخ بالعربية والإنجليزية |
+
+**المحتوى الرئيسي:**
+- `formatDate(date)` - تنسيق التاريخ
+- `formatDateRange(from, to)` - تنسيق نطاق التاريخ
+- يدعم التواريخ العربية والإنجليزية
+
+**أماكن الاستخدام:**
+- يُستخدم مع `useExportUtils` لتنسيق التواريخ في التصدير
+
+---
+
+## 16. usePagination (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/table/usePagination.ts` |
+| **النوع** | هوك تقسيم البيانات (Pagination Hook) |
+| **الوصف** | يدير تقسيم البيانات إلى صفحات مع دعم تغيير حجم الصفحة |
+
+**المحتوى الرئيسي:**
+- `currentPage` / `setCurrentPage` - الصفحة الحالية
+- `pageSize` / `setPageSize` - حجم الصفحة
+- `totalPages` - إجمالي الصفحات
+- `paginatedData` - البيانات المقسمة
+- `goToPage()` - الانتقال إلى صفحة محددة
+- `nextPage()` / `prevPage()` - الصفحة التالية/السابقة
+
+**أماكن الاستخدام:**
+- متاح للاستخدام في جميع الجداول الكبيرة
+
+---
+
+## 17. usePhoneFormat (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/form/usePhoneFormat.ts` |
+| **النوع** | هوك تنسيق رقم الهاتف (Phone Formatting Hook) |
+| **الوصف** | يوفر دوال لتنسيق والتحقق من أرقام الهواتف اليمنية |
+
+**المحتوى الرئيسي:**
+- `formatPhone(phone)` - تنسيق رقم الهاتف
+- `validatePhone(phone)` - التحقق من صحة رقم الهاتف
+- يدعم الأرقام اليمنية (967+)
+
+**أماكن الاستخدام:**
+- يُستخدم في نماذج إدخال أرقام الهواتف
+
+---
+
+## 18. usePatientStorage (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/data/usePatientStorage.ts` |
+| **النوع** | هوك تخزين بيانات المريض (Patient Storage Hook) |
+| **الوصف** | يدير تخزين بيانات المريض في localStorage |
+
+**المحتوى الرئيسي:**
+- `patientData` - بيانات المريض
+- `savePatientData(data)` - حفظ بيانات المريض
+- `clearPatientData()` - مسح بيانات المريض
+
+**أماكن الاستخدام:**
+- يُستخدم في بوابة المريض
+
+---
+
+## 19. useRecentlyUsed (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/data/useRecentlyUsed.ts` |
+| **النوع** | هوك العناصر المستخدمة مؤخراً (Recently Used Hook) |
+| **الوصف** | يدير قائمة العناصر المستخدمة مؤخراً مع الحد الأقصى |
+
+**المحتوى الرئيسي:**
+- `recentItems` - العناصر المستخدمة مؤخراً
+- `addItem(item)` - إضافة عنصر
+- `removeItem(id)` - إزالة عنصر
+- `clearItems()` - مسح القائمة
+
+**أماكن الاستخدام:**
+- متاح للاستخدام في القوائم السريعة
+
+---
+
+## 20. useSidebarState (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/ui/useSidebarState.ts` |
+| **النوع** | هوك حالة الشريط الجانبي (Sidebar State Hook) |
+| **الوصف** | يدير حالة الشريط الجانبي (مفتوح/مغلق) |
+
+**المحتوى الرئيسي:**
+- `isOpen` - هل الشريط مفتوح
+- `toggle()` - تبديل الحالة
+- `open()` / `close()` - فتح/إغلاق
+- يحفظ الحالة في localStorage
+
+**أماكن الاستخدام:**
+- يُستخدم في DashboardLayout
+
+---
+
+## 21. useSSE (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/integrations/useSSE.ts` |
+| **النوع** | هوك Server-Sent Events (SSE Hook) |
+| **الوصف** | يدير اتصال SSE لاستقبال التحديثات من الخادم |
+
+**المحتوى الرئيسي:**
+- `connected` - حالة الاتصال
+- `lastMessage` - آخر رسالة مستلمة
+- `connect()` - الاتصال
+- `disconnect()` - قطع الاتصال
+
+**أماكن الاستخدام:**
+- يُستخدم لاستقبال التحديثات الفورية
+
+---
+
+## 22. useWhatsAppSSE (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/integrations/useWhatsAppSSE.ts` |
+| **النوع** | هوك SSE لواتساب (WhatsApp SSE Hook) |
+| **الوصف** | يدير اتصال SSE لاستقبال تحديثات واتساب الفورية |
+
+**المحتوى الرئيسي:**
+- `connected` - حالة الاتصال
+- `messages` - الرسائل المستلمة
+- `connect()` - الاتصال
+- `disconnect()` - قطع الاتصال
+
+**أماكن الاستخدام:**
+- يُستخدم في صفحة واتساب
+
+---
+
+## 23. usePWAInstall (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/integrations/usePWAInstall.ts` |
+| **النوع** | هوك تثبيت PWA (PWA Install Hook) |
+| **الوصف** | يدير تثبيت التطبيق كـ PWA |
+
+**المحتوى الرئيسي:**
+- `canInstall` - هل يمكن التثبيت
+- `install()` - تثبيت التطبيق
+- `dismiss()` - إخفاء زر التثبيت
+
+**أماكن الاستخدام:**
+- يُستخدم لعرض زر تثبيت PWA
+
+---
+
+## 24. useLicense (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/integrations/useLicense.ts` |
+| **النوع** | هوك الترخيص (License Hook) |
+| **الوصف** | يدير التحقق من ترخيص التطبيق |
+
+**المحتوى الرئيسي:**
+- `license` - بيانات الترخيص
+- `isValid` - هل الترخيص صالح
+- `checkLicense()` - التحقق من الترخيص
+
+**أماكن الاستخدام:**
+- يُستخدم للتحقق من الترخيص عند بدء التطبيق
+
+---
+
+## 25. useUpdateChecker (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/integrations/useUpdateChecker.ts` |
+| **النوع** | هوك التحقق من التحديثات (Update Checker Hook) |
+| **الوصف** | يتحقق من وجود تحديثات للتطبيق |
+
+**المحتوى الرئيسي:**
+- `updateAvailable` - هل يوجد تحديث
+- `checkForUpdates()` - التحقق من التحديثات
+
+**أماكن الاستخدام:**
+- يُستخدم للتحقق من التحديثات تلقائياً
+
+---
+
+## 26. useAbandonedFormTracking (جديد)
+
+| الحقل | القيمة |
+|-------|--------|
+| **المسار** | `client/src/hooks/form/useAbandonedFormTracking.ts` |
+| **النوع** | هوك تتبع النماذج المتروكة (Abandoned Form Tracking Hook) |
+| **الوصف** | يتعقب النماذج التي بدأها المستخدم ولم يكملها |
+
+**المحتوى الرئيسي:**
+- `trackFormStart()` - بدء تتبع النموذج
+- `trackFormComplete()` - إكمال النموذج
+- `saveFormData()` - حفظ بيانات النموذج
+
+**أماكن الاستخدام:**
+- يُستخدم في نماذج التسجيل والحجز
+
+---
+
+## ملخص الهوكات والتبعيات (محدث)
 
 ```
 useAuth ─────────────────────── (مستقل - يعتمد على trpc)
+
+# Table Hooks
 useTableFeatures ────────────── (مستقل - يعتمد على trpc + localStorage)
 useFilterUtils ──────────────── يعتمد على → useDebounce
-useExportUtils ──────────────── (مستقل)
-useDebounce ─────────────────── (مستقل)
-useComposition ──────────────── يعتمد على → usePersistFn
-usePersistFn ────────────────── (مستقل)
+usePagination ───────────────── (مستقل)
+
+# Form Hooks
+useFormValidation ───────────── (مستقل)
+useImageUpload ──────────────── (مستقل)
+usePhoneFormat ─────────────── (مستقل)
+useAbandonedFormTracking ────── (مستقل)
+
+# UI Hooks
 useMobile (useIsMobile) ─────── (مستقل)
+useConfirmDialog ────────────── (مستقل)
+useSidebarState ─────────────── (مستقل)
+useComposition ──────────────── يعتمد على → usePersistFn
+
+# Data Hooks
+useDebounce ─────────────────── (مستقل)
+usePersistFn ────────────────── (مستقل)
+useSlugGenerator ────────────── (مستقل)
+useStatusLabels ─────────────── (مستقل)
+usePatientStorage ───────────── (مستقل)
+useRecentlyUsed ─────────────── (مستقل)
+
+# Integration Hooks
+useSSE ─────────────────────── (مستقل)
+useWhatsAppSSE ──────────────── (مستقل)
+usePWAInstall ───────────────── (مستقل)
+useLicense ──────────────────── (مستقل)
+useUpdateChecker ────────────── (مستقل)
 useNotificationSound ────────── (مستقل - يعتمد على trpc)
-useSlugGenerator ────────────── (مستقل) ← جديد
-useImageUpload ──────────────── (مستقل) ← جديد
-useFormValidation ───────────── (مستقل) ← جديد
-useConfirmDialog ────────────── (مستقل) ← جديد
-useStatusLabels ─────────────── (مستقل) ← جديد
+
+# Export Hooks
+useExportUtils ──────────────── (مستقل)
+useFormatDate ───────────────── (مستقل)
 ```
 
 ---

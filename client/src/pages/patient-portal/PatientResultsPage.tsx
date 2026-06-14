@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, FileText } from "lucide-react";
 import ResultCard from "@/components/patient/ResultCard";

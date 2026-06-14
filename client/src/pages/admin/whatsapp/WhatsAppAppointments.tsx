@@ -28,7 +28,7 @@ import {
   Play,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 
 const entityTypeLabels: Record<string, string> = {
   appointment: "موعد طبي",

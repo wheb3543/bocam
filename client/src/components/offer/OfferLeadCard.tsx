@@ -1,10 +1,10 @@
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Phone, MessageCircle, Edit, Printer, Tag, User, Mail } from "lucide-react";
 import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 
 interface OfferLead {
   id: number;

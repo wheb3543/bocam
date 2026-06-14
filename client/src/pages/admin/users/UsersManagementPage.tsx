@@ -1,6 +1,6 @@
-import { useFormatDate, formatDateUtil } from "@/hooks/useFormatDate";
+import { useFormatDate, formatDateUtil } from "@/hooks/export/useFormatDate";
 import { useState, useMemo } from "react";
-import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import { useConfirmDialog } from "@/hooks/ui/useConfirmDialog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -54,8 +54,8 @@ import RecentActivity from "@/components/dashboard/RecentActivity";
 import { type ColumnConfig } from "@/components/table/ColumnVisibility";
 import { ColumnVisibility } from "@/components/table/ColumnVisibility";
 import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
-import { useTableFeatures } from "@/hooks/useTableFeatures";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { useTableFeatures } from "@/hooks/table/useTableFeatures";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 
 const roleLabels: Record<string, string> = {
   admin: "مسؤول",

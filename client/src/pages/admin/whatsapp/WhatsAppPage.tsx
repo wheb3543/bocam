@@ -1,5 +1,5 @@
 import { memo, useCallback, useState, useMemo } from "react";
-import { processPhoneInput } from "@/hooks/usePhoneFormat";
+import { processPhoneInput } from "@/hooks/form/usePhoneFormat";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -30,8 +30,8 @@ import {
 } from "lucide-react";
 import ChatWindow from "@/components/ChatWindow";
 import ConversationInfo from "@/components/ConversationInfo";
-import useSSE from "@/hooks/useSSE";
-import { useWhatsAppSSE, AccountUpdateEvent, ConversationCostUpdateEvent, ContactsReceivedEvent, OrderReceivedEvent, ReferralReceivedEvent, ReactionReceivedEvent, TransactionStatusUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import useSSE from "@/hooks/integrations/useSSE";
+import { useWhatsAppSSE, AccountUpdateEvent, ConversationCostUpdateEvent, ContactsReceivedEvent, OrderReceivedEvent, ReferralReceivedEvent, ReactionReceivedEvent, TransactionStatusUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 import { toast } from "sonner";
 import { formatDistanceToNow, format } from "date-fns";
 import { ar } from "date-fns/locale";

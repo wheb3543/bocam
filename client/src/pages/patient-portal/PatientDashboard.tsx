@@ -3,7 +3,7 @@
  * 
  * يعرض حجوزات المريض ومواعيده ونتائجه وتقاريره
  */
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -21,7 +21,7 @@ import {
 import { toast } from "sonner";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 
 export default function PatientDashboard() {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();

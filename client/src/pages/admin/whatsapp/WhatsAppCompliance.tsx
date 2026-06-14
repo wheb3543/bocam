@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { processPhoneInput } from "@/hooks/usePhoneFormat";
-import { useWhatsAppSSE, AccountUpdateEvent, BusinessProfileUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { processPhoneInput } from "@/hooks/form/usePhoneFormat";
+import { useWhatsAppSSE, AccountUpdateEvent, BusinessProfileUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 import { toast } from "sonner";
 import {
   BarChart,

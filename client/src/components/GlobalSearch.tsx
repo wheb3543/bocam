@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, X, Users, Calendar, TrendingUp, UserCheck, Phone, Mail } from "lucide-react";
 import { useLocation } from "wouter";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 
 interface GlobalSearchProps {
   onClose?: () => void;

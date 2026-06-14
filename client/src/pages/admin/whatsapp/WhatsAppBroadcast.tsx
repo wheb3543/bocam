@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
-import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 
 export default function WhatsAppBroadcast() {
   const [broadcastMessage, setBroadcastMessage] = useState("");

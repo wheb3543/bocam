@@ -1,5 +1,5 @@
-import { useFormatDate } from "@/hooks/useFormatDate";
-import { unifiedStatusLabels as statusLabels, unifiedStatusOptions, formatStatusTime } from "@/hooks/useStatusLabels";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
+import { unifiedStatusLabels as statusLabels, unifiedStatusOptions, formatStatusTime } from "@/hooks/data/useStatusLabels";
 import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
 import { getColumnWidth, type ColumnConfig } from "@/components/table/ColumnVisibility";
 import TableSkeleton from "@/components/table/TableSkeleton";
@@ -29,7 +29,7 @@ import {
   CalendarOff,
 } from "lucide-react";
 import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 
 interface AppointmentTableDesktopProps {
   appointments: any[];

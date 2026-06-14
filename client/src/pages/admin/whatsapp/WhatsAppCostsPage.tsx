@@ -12,7 +12,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Download, Calendar, TrendingUp, DollarSign, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { useWhatsAppSSE, ConversationCostUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, ConversationCostUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 import { toast } from "sonner";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];

@@ -11,7 +11,7 @@ import {
   campaignTypeLabels,
   campRegistrationStatusLabels,
   campRegistrationStatusColors,
-} from "@/hooks/useStatusLabels";
+} from "@/hooks/data/useStatusLabels";
 
 describe("useStatusLabels hook", () => {
   describe("lead type", () => {

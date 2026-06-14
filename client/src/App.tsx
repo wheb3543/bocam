@@ -12,7 +12,7 @@ import { UpdateStatusBadge } from "@/components/update/UpdateStatusBadge";
 import { UpdateProgressModal } from "@/components/update/UpdateProgressModal";
 import { MandatoryUpdateModal } from "@/components/update/MandatoryUpdateModal";
 import { OptionalUpdateBanner } from "@/components/update/OptionalUpdateBanner";
-import { useUpdateChecker } from "@/hooks/useUpdateChecker";
+import { useUpdateChecker } from "@/hooks/integrations/useUpdateChecker";
 // Lazy load pages for better performance
 const Home = lazy(() => import("./pages/Home"));
 const HomePage = lazy(() => import("./pages/public/HomePage"));

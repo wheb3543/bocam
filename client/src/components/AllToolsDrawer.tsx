@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLocation } from "wouter";
 import { Clock, X, Search } from "lucide-react";
-import { useRecentlyUsed } from "@/hooks/useRecentlyUsed";
+import { useRecentlyUsed } from "@/hooks/data/useRecentlyUsed";
 import type { NavItem, NavGroup } from "@/components/layout/DashboardSidebarV2";
 import { cn } from "@/lib/utils";
 import { useState } from "react";

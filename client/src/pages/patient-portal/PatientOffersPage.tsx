@@ -1,5 +1,5 @@
 import { trpc } from "@/lib/trpc";
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { Loader2, Gift } from "lucide-react";
 import OfferCard from "@/components/patient/OfferCard";
 import { Link } from "wouter";

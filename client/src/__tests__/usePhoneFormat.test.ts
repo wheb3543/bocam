@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { usePhoneFormat, formatPhoneDisplayUtil, formatPhoneUtil } from "@/hooks/usePhoneFormat";
+import { usePhoneFormat, formatPhoneDisplayUtil, formatPhoneUtil } from "@/hooks/form/usePhoneFormat";
 
 describe("usePhoneFormat hook", () => {
   const { result } = renderHook(() => usePhoneFormat());

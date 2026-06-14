@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import useSSE from "@/hooks/useSSE";
+import useSSE from "@/hooks/integrations/useSSE";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 

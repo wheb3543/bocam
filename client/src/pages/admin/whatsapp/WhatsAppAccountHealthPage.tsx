@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Shield, CheckCircle, AlertCircle, RefreshCw, Bell, BellRing, Zap, Clock, DollarSign } from "lucide-react";
 import { toast } from "sonner";
-import { useWhatsAppSSE, AccountReviewUpdateEvent, AccountUpdateEvent, BusinessProfileUpdateEvent, BusinessAccountUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, AccountReviewUpdateEvent, AccountUpdateEvent, BusinessProfileUpdateEvent, BusinessAccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 
 export default function WhatsAppAccountHealthPage() {
   const [activeTab, setActiveTab] = useState("alerts");

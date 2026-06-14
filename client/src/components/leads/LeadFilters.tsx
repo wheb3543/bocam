@@ -12,7 +12,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SOURCE_OPTIONS } from "@shared/sources";
-import type { DateFilterPreset } from "@/hooks/useFilterUtils";
+import type { DateFilterPreset } from "@/hooks/table/useFilterUtils";
 
 const STATUS_OPTIONS = [
   { value: 'new', label: 'جديد' },

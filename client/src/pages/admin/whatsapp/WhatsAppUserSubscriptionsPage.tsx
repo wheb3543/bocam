@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Users, CheckCircle, XCircle, RefreshCw, Search, UserCheck, UserX, Activity } from "lucide-react";
 import { toast } from "sonner";
-import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 
 export default function WhatsAppUserSubscriptionsPage() {
   const [activeTab, setActiveTab] = useState("all");

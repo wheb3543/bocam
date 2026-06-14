@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Smartphone, RefreshCw, TrendingUp, TrendingDown, Minus, Activity, Zap, AlertTriangle, DollarSign } from "lucide-react";
 import { toast } from "sonner";
-import { useWhatsAppSSE, PhoneQualityUpdateEvent, ConversationCostUpdateEvent, AccountUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, PhoneQualityUpdateEvent, ConversationCostUpdateEvent, AccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 
 export default function WhatsAppPhoneQualityPage() {
   const [phoneFilter, setPhoneFilter] = useState("");

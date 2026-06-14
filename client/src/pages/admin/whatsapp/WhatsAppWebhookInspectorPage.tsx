@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useWhatsAppSSE, TemplateDisabledEvent, TemplateEnabledEvent, TemplateNameUpdateEvent, TemplateCategoryUpdateEvent, TemplateLanguageUpdateEvent, TemplateEvent, AccountReviewUpdateEvent, AccountUpdateEvent, BusinessProfileUpdateEvent, BusinessAccountUpdateEvent, MessagingProductUpdateEvent, ConversationCostUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, TemplateDisabledEvent, TemplateEnabledEvent, TemplateNameUpdateEvent, TemplateCategoryUpdateEvent, TemplateLanguageUpdateEvent, TemplateEvent, AccountReviewUpdateEvent, AccountUpdateEvent, BusinessProfileUpdateEvent, BusinessAccountUpdateEvent, MessagingProductUpdateEvent, ConversationCostUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

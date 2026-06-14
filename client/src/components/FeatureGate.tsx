@@ -16,7 +16,7 @@
  */
 
 import { ReactNode } from 'react';
-import { useLicense } from '@/hooks/useLicense';
+import { useLicense } from "@/hooks/integrations/useLicense";
 import { Lock, Crown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

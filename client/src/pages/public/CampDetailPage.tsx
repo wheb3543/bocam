@@ -3,7 +3,7 @@
  * 
  * Individual camp page with details, gallery, and registration form
  */
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import Navbar from "@/components/layout/Navbar";
@@ -19,9 +19,9 @@ import { getCompleteTrackingData } from "@/lib/tracking";
 import { trackViewContent, trackMetaCompleteRegistration, updatePixelUserData } from "@/components/MetaPixel";
 import { toast } from "sonner";
 
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
-import { usePatientStorage } from "@/hooks/usePatientStorage";
-import { useAbandonedFormTracking } from "@/hooks/useAbandonedFormTracking";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+import { usePatientStorage } from "@/hooks/data/usePatientStorage";
+import { useAbandonedFormTracking } from "@/hooks/form/useAbandonedFormTracking";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 

@@ -25,8 +25,8 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
-import { processPhoneInput } from "@/hooks/usePhoneFormat";
-import { useWhatsAppSSE, TemplateDisabledEvent, TemplateEnabledEvent, TemplateNameUpdateEvent, TemplateCategoryUpdateEvent, TemplateLanguageUpdateEvent, TemplateEvent } from "@/hooks/useWhatsAppSSE";
+import { processPhoneInput } from "@/hooks/form/usePhoneFormat";
+import { useWhatsAppSSE, TemplateDisabledEvent, TemplateEnabledEvent, TemplateNameUpdateEvent, TemplateCategoryUpdateEvent, TemplateLanguageUpdateEvent, TemplateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Template {

@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, CheckCircle2, Clock, Send, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "wouter";
-import { useWhatsAppSSE, TemplateDisabledEvent, TemplateEnabledEvent, TemplateNameUpdateEvent, TemplateCategoryUpdateEvent, TemplateLanguageUpdateEvent, TemplateEvent, AccountReviewUpdateEvent, AccountUpdateEvent, BusinessProfileUpdateEvent, BusinessAccountUpdateEvent, MessagingProductUpdateEvent, ConversationCostUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, TemplateDisabledEvent, TemplateEnabledEvent, TemplateNameUpdateEvent, TemplateCategoryUpdateEvent, TemplateLanguageUpdateEvent, TemplateEvent, AccountReviewUpdateEvent, AccountUpdateEvent, BusinessProfileUpdateEvent, BusinessAccountUpdateEvent, MessagingProductUpdateEvent, ConversationCostUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 
 export default function WhatsAppDashboard() {
   return (

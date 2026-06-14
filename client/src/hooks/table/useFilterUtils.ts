@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { useDebounce } from './useDebounce';
+import { useDebounce } from '../data/useDebounce';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

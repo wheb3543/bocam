@@ -47,12 +47,12 @@ import {
 import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useSidebarState } from "@/hooks/useSidebarState";
-import { useRecentlyUsed } from "@/hooks/useRecentlyUsed";
+import { useSidebarState } from "@/hooks/ui/useSidebarState";
+import { useRecentlyUsed } from "@/hooks/data/useRecentlyUsed";
 import AllToolsDrawer from "@/components/AllToolsDrawer";
 import EditSidebarModal from "@/components/EditSidebarModal";
 import InstallPWAButton from "@/components/InstallPWAButton";
-import useSSE from "@/hooks/useSSE";
+import useSSE from "@/hooks/integrations/useSSE";
 
 export interface NavItem {
   title: string;

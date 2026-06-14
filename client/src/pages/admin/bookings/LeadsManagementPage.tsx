@@ -5,9 +5,9 @@ import LeadStatsCards from "@/components/lead/LeadStatsCards";
 import Pagination from "@/components/table/Pagination";
 import { toast } from "sonner";
 import { exportToExcel, formatLeadsForExport } from "@/lib/exportToExcel";
-import { useFilterUtils, type DateFilterPreset } from "@/hooks/useFilterUtils";
+import { useFilterUtils, type DateFilterPreset } from "@/hooks/table/useFilterUtils";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { usePagination } from "@/hooks/usePagination";
+import { usePagination } from "@/hooks/table/usePagination";
 import { LeadFilters, LeadTableDesktop, LeadStatusDialog, LeadMobileCards } from "@/components/leads";
 import FilterPresets from "@/components/FilterPresets";
 

@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useImageUpload } from "@/hooks/useImageUpload";
+import { useImageUpload } from "@/hooks/form/useImageUpload";
 import { cn } from "@/lib/utils";
 
 /**

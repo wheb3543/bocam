@@ -8,7 +8,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   Area, AreaChart,
 } from "recharts";
-import { useLicense } from "@/hooks/useLicense";
+import { useLicense } from "@/hooks/integrations/useLicense";
 
 type Period = "7d" | "30d" | "90d" | "12m";
 

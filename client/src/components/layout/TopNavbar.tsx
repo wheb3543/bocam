@@ -14,7 +14,7 @@ import { User, Settings, LogOut, Volume2, VolumeX, Moon, Sun } from "lucide-reac
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useNotificationSound } from "@/hooks/useNotificationSound";
+import { useNotificationSound } from "@/hooks/integrations/useNotificationSound";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TopNavbarProps {

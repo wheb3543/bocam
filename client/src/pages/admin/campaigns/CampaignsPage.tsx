@@ -1,4 +1,4 @@
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ import { ar } from "date-fns/locale";
 import { Link } from "wouter";
 import { Progress } from "@/components/ui/progress";
 import CampaignLinksManager from "@/components/CampaignLinksManager";
-import { useSlugGenerator } from "@/hooks/useSlugGenerator";
+import { useSlugGenerator } from "@/hooks/data/useSlugGenerator";
 
 // Helper functions
 const getCampaignTypeLabel = (type: string) => {

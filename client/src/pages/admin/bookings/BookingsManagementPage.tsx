@@ -1,4 +1,4 @@
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState, useMemo, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -48,11 +48,11 @@ import {
   CheckSquare,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useFilterUtils } from "@/hooks/useFilterUtils";
+import { useFilterUtils } from "@/hooks/table/useFilterUtils";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { SOURCE_LABELS } from "@shared/sources";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 
 export default function BookingsManagementPage() {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();

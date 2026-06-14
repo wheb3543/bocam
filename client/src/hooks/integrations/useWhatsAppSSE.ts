@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useRef } from "react";
-import useSSE from "@/hooks/useSSE";
+import useSSE from "@/hooks/integrations/useSSE";
 
 // ── أنواع الأحداث ──────────────────────────────────────────────────────────────
 

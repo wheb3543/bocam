@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
-import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import { useConfirmDialog } from "@/hooks/ui/useConfirmDialog";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,9 +46,9 @@ import { toast } from "sonner";
 import { type ColumnConfig } from "@/components/table/ColumnVisibility";
 import { ColumnVisibility } from "@/components/table/ColumnVisibility";
 import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
-import { useTableFeatures } from "@/hooks/useTableFeatures";
+import { useTableFeatures } from "@/hooks/table/useTableFeatures";
 import EmptyState from "@/components/EmptyState";
-import { useSlugGenerator } from "@/hooks/useSlugGenerator";
+import { useSlugGenerator } from "@/hooks/data/useSlugGenerator";
 import ImageUpload from "@/components/form/ImageUpload";
 
 // === تعريف أعمدة جدول الأطباء ===

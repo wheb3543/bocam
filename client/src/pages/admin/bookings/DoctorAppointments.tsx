@@ -17,7 +17,7 @@ import {
 import { trpc } from "@/lib/trpc";
 import { Loader2, CheckCircle2, Phone, Mail, MapPin, Calendar, Clock, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 import { getCompanySlogan, COMPANY_ARABIC_NAME } from "@/const";
 
 export default function DoctorAppointments() {

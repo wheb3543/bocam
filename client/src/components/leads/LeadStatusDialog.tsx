@@ -7,8 +7,8 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Phone, Mail, User, MessageSquare, Loader2 } from "lucide-react";
-import { useFormatDate } from "@/hooks/useFormatDate";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 import { SOURCE_LABELS } from "@shared/sources";
 
 const statusLabels: Record<string, string> = {

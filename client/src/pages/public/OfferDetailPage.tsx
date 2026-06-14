@@ -3,7 +3,7 @@
  * 
  * Individual offer page with details and registration form
  */
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useEffect, useState } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import Navbar from "@/components/layout/Navbar";
@@ -18,9 +18,9 @@ import { getCompleteTrackingData } from "@/lib/tracking";
 import { trackViewContent, trackMetaLead, updatePixelUserData } from "@/components/MetaPixel";
 import { toast } from "sonner";
 
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
-import { usePatientStorage } from "@/hooks/usePatientStorage";
-import { useAbandonedFormTracking } from "@/hooks/useAbandonedFormTracking";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+import { usePatientStorage } from "@/hooks/data/usePatientStorage";
+import { useAbandonedFormTracking } from "@/hooks/form/useAbandonedFormTracking";
 
 export default function OfferDetailPage() {
   const params = useParams();

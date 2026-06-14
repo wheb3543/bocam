@@ -6,7 +6,7 @@ import QuickPatientSearch from "@/components/dashboard/QuickPatientSearch";
 import DetailedStatsCards from "@/components/dashboard/DetailedStatsCards";
 const DashboardCharts = lazy(() => import("@/components/dashboard/DashboardCharts"));
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useLicense } from "@/hooks/useLicense";
+import { useLicense } from "@/hooks/integrations/useLicense";
 import FeatureLockedPage from "@/pages/admin/shared/FeatureLockedPage";
 
 export default function AdminDashboard() {

@@ -1,17 +1,17 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
-import { useFormatDate } from "@/hooks/useFormatDate";
-import { unifiedStatusLabels as statusLabels } from "@/hooks/useStatusLabels";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
+import { unifiedStatusLabels as statusLabels } from "@/hooks/data/useStatusLabels";
 import AppointmentCard from "@/components/booking/AppointmentCard";
 import AppointmentStatsCards from "@/components/booking/AppointmentStatsCards";
 import AppointmentFilters from "@/components/booking/AppointmentFilters";
 import AppointmentTableDesktop from "@/components/booking/AppointmentTableDesktop";
 import { type ColumnConfig } from "@/components/table/ColumnVisibility";
-import { useTableFeatures } from "@/hooks/useTableFeatures";
+import { useTableFeatures } from "@/hooks/table/useTableFeatures";
 import TableSkeleton from "@/components/table/TableSkeleton";
 import EmptyState from "@/components/EmptyState";
 import Pagination, { type PageSizeValue } from "@/components/table/Pagination";
-import { useExportUtils } from "@/hooks/useExportUtils";
+import { useExportUtils } from "@/hooks/export/useExportUtils";
 import { printReceipt } from "@/components/booking/PrintReceipt";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
 import BulkUpdateDialog from "@/components/BulkUpdateDialog";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 
 interface AppointmentsTabProps {
   appointmentFilter: any;

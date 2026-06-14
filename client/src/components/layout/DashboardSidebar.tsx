@@ -53,8 +53,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
-import { useNotificationSound } from "@/hooks/useNotificationSound";
-import { useLicense } from "@/hooks/useLicense";
+import { useNotificationSound } from "@/hooks/integrations/useNotificationSound";
+import { useLicense } from "@/hooks/integrations/useLicense";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { APP_TITLE, APP_LOGO, COMPANY_ARABIC_NAME } from "@/const";

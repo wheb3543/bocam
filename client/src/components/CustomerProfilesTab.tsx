@@ -8,7 +8,7 @@
  * - useExportUtils: للتصدير والطباعة
  */
 
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { useState, useMemo, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -48,9 +48,9 @@ import EmptyState from "@/components/EmptyState";
 import SavedFilters from "@/components/SavedFilters";
 import { ColumnVisibility, getColumnWidth, type ColumnConfig } from "@/components/table/ColumnVisibility";
 import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
-import { useTableFeatures } from "@/hooks/useTableFeatures";
-import { useFilterUtils } from "@/hooks/useFilterUtils";
-import { useExportUtils } from "@/hooks/useExportUtils";
+import { useTableFeatures } from "@/hooks/table/useTableFeatures";
+import { useFilterUtils } from "@/hooks/table/useFilterUtils";
+import { useExportUtils } from "@/hooks/export/useExportUtils";
 import {
   Users,
   Search,
@@ -67,7 +67,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
 
 const statusLabels: Record<string, string> = {
   new: "جديد",

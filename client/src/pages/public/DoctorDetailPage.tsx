@@ -18,9 +18,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { usePhoneFormat } from "@/hooks/usePhoneFormat";
-import { usePatientStorage } from "@/hooks/usePatientStorage";
-import { useAbandonedFormTracking } from "@/hooks/useAbandonedFormTracking";
+import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+import { usePatientStorage } from "@/hooks/data/usePatientStorage";
+import { useAbandonedFormTracking } from "@/hooks/form/useAbandonedFormTracking";
 
 export default function DoctorDetailPage() {
   const [, params] = useRoute("/doctors/:slug");

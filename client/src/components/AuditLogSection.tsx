@@ -3,7 +3,7 @@
  * يعرض تاريخ التغييرات على سجل محدد
  */
 
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, ArrowRight } from "lucide-react";

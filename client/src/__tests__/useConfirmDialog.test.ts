@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import { useConfirmDialog } from "@/hooks/ui/useConfirmDialog";
 
 describe("useConfirmDialog", () => {
   beforeEach(() => {

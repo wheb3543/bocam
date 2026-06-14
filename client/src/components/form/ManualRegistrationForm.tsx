@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { processPhoneInput, validateYemeniPhone } from "@/hooks/usePhoneFormat";
+import { processPhoneInput, validateYemeniPhone } from "@/hooks/form/usePhoneFormat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +25,7 @@ import { Loader2, Plus, Phone as PhoneIcon, Printer, AlertCircle } from "lucide-
 import { toast } from "sonner";
 import { printReceipt } from "@/components/booking/PrintReceipt";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useLicense } from "@/hooks/useLicense";
+import { useLicense } from "@/hooks/integrations/useLicense";
 
 export default function ManualRegistrationForm() {
   const { user } = useAuth();

@@ -11,7 +11,7 @@ import { Loader2, CheckCircle, AlertCircle, Send, MessageSquare, RefreshCw, Copy
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
 
 export default function WhatsAppIntegration() {
   const companyName = getCompanyName('ar');

@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Megaphone, Download, Filter, TrendingUp, ExternalLink, Users, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { useWhatsAppSSE, AccountUpdateEvent, ReferralReceivedEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, AccountUpdateEvent, ReferralReceivedEvent } from "@/hooks/integrations/useWhatsAppSSE";
 import { toast } from "sonner";
 
 export default function WhatsAppReferralsPage() {

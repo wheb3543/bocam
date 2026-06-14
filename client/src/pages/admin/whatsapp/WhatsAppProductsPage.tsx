@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Package, Download, Filter, Search, TrendingUp, DollarSign, Box } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { useWhatsAppSSE, AccountUpdateEvent, OrderReceivedEvent } from "@/hooks/useWhatsAppSSE";
+import { useWhatsAppSSE, AccountUpdateEvent, OrderReceivedEvent } from "@/hooks/integrations/useWhatsAppSSE";
 import { toast } from "sonner";
 
 export default function WhatsAppProductsPage() {

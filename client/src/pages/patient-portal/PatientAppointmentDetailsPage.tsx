@@ -1,6 +1,6 @@
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { useFormatDate } from "@/hooks/useFormatDate";
+import { useFormatDate } from "@/hooks/export/useFormatDate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Calendar, Stethoscope, Clock, Phone, FileText } from "lucide-react";
