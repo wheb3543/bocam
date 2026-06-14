@@ -141,7 +141,7 @@ export default function FeatureLockedPage({ featureName: propFeatureName }: Feat
         
         // إذا كانت الميزة مفعلة، أعد التوجيه للصفحة الرئيسية
         if (result.data?.enabled) {
-          setLocation('/dashboard');
+          setLocation('/admin');
         }
       } catch (error) {
         console.error('Error checking feature:', error);

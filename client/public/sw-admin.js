@@ -166,7 +166,7 @@ self.addEventListener('notificationclick', (event) => {
         .then((clientList) => {
           // Focus existing admin window if open
           for (const client of clientList) {
-            if ((client.url.includes('/admin') || client.url.includes('/dashboard')) && 'focus' in client) {
+            if ((client.url.includes('/admin') || client.url.includes('/admin')) && 'focus' in client) {
               client.navigate(targetUrl);
               return client.focus();
             }
@@ -213,7 +213,7 @@ async function syncAdminData() {
     // Notify all admin clients that sync is complete
     const clientList = await clients.matchAll({ type: 'window' });
     clientList.forEach(client => {
-      if (client.url.includes('/admin') || client.url.includes('/dashboard')) {
+      if (client.url.includes('/admin') || client.url.includes('/admin')) {
         client.postMessage({ type: 'SYNC_COMPLETE' });
       }
     });

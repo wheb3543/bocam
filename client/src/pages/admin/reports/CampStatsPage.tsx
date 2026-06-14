@@ -769,7 +769,7 @@ export default function CampStatsPage() {
             <div>
               <Button
                 variant="ghost"
-                onClick={() => setLocation('/dashboard')}
+                onClick={() => setLocation('/admin')}
                 className="mb-4 hover:bg-green-100"
               >
                 <ArrowRight className="w-4 h-4 ml-2" />
