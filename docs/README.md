@@ -90,7 +90,7 @@ docs/
 
 دروس توجيهية للمبتدئين للبدء مع النظام.
 
-### [دليل التثبيت](../INSTALLATION_GUIDE.md)
+### [دليل التثبيت](./INSTALLATION_GUIDE.md)
 تعلم كيفية تثبيت وتشغيل SGH CRM Portal على بيئة التطوير الخاصة بك.
 
 **ماذا ستتعلم:**
@@ -197,9 +197,9 @@ docs/
 |-------|-------|
 | [README.md](../README.md) | نظرة عامة على المشروع |
 | [CHANGELOG.md](../CHANGELOG.md) | سجل التغييرات |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | دليل المساهمة |
-| [SECURITY.md](../SECURITY.md) | سياسة الأمان |
-| [INSTALLATION_GUIDE.md](../INSTALLATION_GUIDE.md) | دليل التثبيت |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | دليل المساهمة |
+| [SECURITY.md](./SECURITY.md) | سياسة الأمان |
+| [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md) | دليل التثبيت |
 | [LICENSE](../LICENSE) | ترخيص MIT |
 
 ---
@@ -207,18 +207,18 @@ docs/
 ## 🔗 روابط سريعة
 
 ### للمطورين الجدد
-1. ابدأ بـ [دليل التثبيت](../INSTALLATION_GUIDE.md)
+1. ابدأ بـ [دليل التثبيت](./INSTALLATION_GUIDE.md)
 2. اقرأ [البنية المعمارية](../docs/ARCHITECTURE.md)
 3. استكشف [مخطط قاعدة البيانات](../docs/DATABASE_SCHEMA.md)
 
 ### للمسؤولين
 1. [دليل المستخدم](../userGuide.md)
-2. [سياسة الأمان](../SECURITY.md)
+2. [سياسة الأمان](./SECURITY.md)
 3. [دليل النشر](./DEPLOYMENT.md)
 
 ### للمساهمين
-1. [دليل المساهمة](../CONTRIBUTING.md)
-2. [معايير الكود](../CONTRIBUTING.md#معايير-الكود)
+1. [دليل المساهمة](./CONTRIBUTING.md)
+2. [معايير الكود](./CONTRIBUTING.md#معايير-الكود)
 3. [دليل الاختبار](./TESTING_GUIDE.md)
 
 ---
@@ -317,7 +317,7 @@ docs/
 
 Learning-oriented lessons for beginners.
 
-### [Installation Guide](../INSTALLATION_GUIDE.md)
+### [Installation Guide](./INSTALLATION_GUIDE.md)
 Learn how to install and run SGH CRM Portal in your development environment.
 
 **What you'll learn:**
@@ -424,9 +424,9 @@ These files are located in the project root:
 |------|-------------|
 | [README.md](../README.md) | Project overview |
 | [CHANGELOG.md](../CHANGELOG.md) | Changelog |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | Contributing guide |
-| [SECURITY.md](../SECURITY.md) | Security policy |
-| [INSTALLATION_GUIDE.md](../INSTALLATION_GUIDE.md) | Installation guide |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | Contributing guide |
+| [SECURITY.md](./SECURITY.md) | Security policy |
+| [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md) | Installation guide |
 | [LICENSE](../LICENSE) | MIT License |
 
 ---
@@ -434,18 +434,18 @@ These files are located in the project root:
 ## 🔗 Quick Links
 
 ### For New Developers
-1. Start with [Installation Guide](../INSTALLATION_GUIDE.md)
+1. Start with [Installation Guide](./INSTALLATION_GUIDE.md)
 2. Read [Architecture](../docs/ARCHITECTURE.md)
 3. Explore [Database Schema](../docs/DATABASE_SCHEMA.md)
 
 ### For Administrators
 1. [User Guide](../userGuide.md)
-2. [Security Policy](../SECURITY.md)
+2. [Security Policy](./SECURITY.md)
 3. [Deployment Guide](./DEPLOYMENT.md)
 
 ### For Contributors
-1. [Contributing Guide](../CONTRIBUTING.md)
-2. [Code Standards](../CONTRIBUTING.md#code-standards)
+1. [Contributing Guide](./CONTRIBUTING.md)
+2. [Code Standards](./CONTRIBUTING.md#code-standards)
 3. [Testing Guide](./TESTING_GUIDE.md)
 
 ---

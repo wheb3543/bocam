@@ -262,9 +262,34 @@ sgh-crm-portal/
 ├── drizzle/                    # مخطط قاعدة البيانات
 │   ├── schema.ts              # تعريف الجداول (40+ جدول)
 │   ├── relations.ts           # العلاقات بين الجداول
-│   └── meta/                  # ملفات الترحيل
+│   ├── meta/                  # ملفات الترحيل
+│   └── MIGRATIONS_GUIDE.md    # دليل الـ migrations
 ├── docs/                       # الوثائق
+│   ├── guides/                # أدلة المستخدم
+│   ├── architecture/          # البنية المعمارية
+│   ├── api/                   # توثيق API
+│   ├── performance/           # الأداء
+│   ├── analysis/              # التحليلات والتقارير
+│   ├── saas/                  # توثيق SaaS
+│   ├── whatsapp/              # توثيق واتساب
+│   ├── implementation/        # خطوات التنفيذ
+│   ├── archive/               # الأرشيف القديم
+│   ├── CODE_STYLE_GUIDELINES.md
+│   ├── COMPONENTS.md
+│   ├── CONTRIBUTING.md
+│   ├── CONTRIBUTING_GUIDELINES.md
+│   ├── DOCUMENTATION_POLICY.md
+│   ├── INSTALLATION_GUIDE.md
+│   ├── SECURITY.md
+│   └── ...
 ├── scripts/                    # سكريبتات المساعدة
+│   ├── create-admin-local.mjs
+│   ├── create-admin.mjs
+│   ├── seed-all-tables.mjs
+│   ├── seed-database.mjs
+│   ├── seed-doctors.mjs
+│   ├── finalize.sh
+│   └── ...
 └── public/                     # الأصول العامة
 ```
 
