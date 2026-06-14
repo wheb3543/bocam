@@ -12,25 +12,76 @@
 
 ### 🗂️ هيكل الوثائق
 
-تم تنظيم الوثائق وفقاً لإطار **Diátaxis** الذي يقسم الوثائق إلى أربع فئات رئيسية:
+تم تنظيم الوثائق في مجلدات فرعية حسب النوع:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         وثائق SGH CRM Portal                             │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  📖 دروس تعليمية          🎯 أدلة كيفية           📚 مراجع            │
-│  (Tutorials)              (How-to Guides)         (Reference)          │
-│  ──────────────────       ──────────────────      ──────────────────   │
-│  • دليل التثبيت           • إدارة الحملات         • API Reference     │
-│  • البداية السريعة        • إدارة المواعيد        • Database Schema   │
-│                           • إدارة المهام          • Architecture      │
-│                                                                         │
-│                       🧠 شروحات (Explanation)                          │
-│                       ──────────────────────                           │
-│                       • البنية المعمارية                                │
-│                       • مفاهيم النظام                                  │
-└─────────────────────────────────────────────────────────────────────────┘
+docs/
+├── guides/ (أدلة المستخدم)
+│   ├── USAGE_GUIDE.md
+│   ├── PATIENT_PORTAL_GUIDE.md
+│   ├── TESTING_GUIDE.md
+│   ├── TROUBLESHOOTING.md
+│   ├── userGuide.md
+│   ├── EXPORT_FEATURE_GUIDE.md
+│   └── QUICK_TEST.md
+├── architecture/ (البنية المعمارية)
+│   ├── ARCHITECTURE.md
+│   ├── DATABASE_SCHEMA.md
+│   └── CACHING.md
+├── api/ (توثيق API)
+│   ├── META_INTEGRATION_GUIDE.md
+│   ├── WEBHOOK_FIX_SUMMARY.md
+│   ├── WHATSAPP_INTEGRATION_GUIDE.md
+│   ├── WEBHOOK_DIAGNOSTICS.md
+│   └── CHANGELOG_WEBHOOK_FIX.md
+├── performance/ (الأداء)
+│   ├── PERFORMANCE_GUIDE.md
+│   └── PERFORMANCE_REPORT.md
+├── analysis/ (التحليلات والتقارير)
+│   ├── ./analysis/AUDIT_AND_IMPROVEMENT_PLAN.md
+│   ├── ./analysis/SYSTEM_REPORT.md
+│   ├── WHATSAPP_SERVICES_ANALYSIS_REPORT.md
+│   ├── ./analysis/IMPROVEMENT_ANALYSIS.md
+│   ├── PRESENTATION_SUMMARY.md
+│   ├── ANALYSIS_NOTES.md
+│   ├── AUDIT_RESULTS.md
+│   ├── table-audit-report.md
+│   └── pages-inventory.md
+├── saas/ (توثيق SaaS)
+│   ├── SAAS_CHANGES_EXPLANATION.md
+│   ├── SAAS_SERVICE_ISOLATION.md
+│   ├── SAAS_WORKFLOW_EXPLANATION.md
+│   └── SAAS_FIXED_VARIABLE_SERVICES.md
+├── whatsapp/ (توثيق واتساب)
+│   ├── ./whatsapp/WHATSAPP_NOTIFICATIONS_DOCUMENTATION.md
+│   ├── ./whatsapp/WHATSAPP_PAGES_ANALYSIS.md
+│   ├── WHATSAPP_TEMPLATES_REQUIRED.md
+│   ├── WHATSAPP_TODO.md
+│   ├── whatsapp-api-research-findings.md
+│   ├── whatsapp-business-api-setup-guide.md
+│   ├── whatsapp-fixes-technical-report.md
+│   ├── whatsapp-improvements-plan.md
+│   ├── whatsapp-marketing-messages-requirements.md
+│   ├── whatsapp-pages-to-review.md
+│   └── whatsapp-template-categories-analysis.md
+├── implementation/ (خطوات التنفيذ)
+│   ├── IMPLEMENTATION_PLAN.md
+│   ├── PHASE_ONE_IMPLEMENTATION.md
+│   ├── PHASE_ZERO_IMPLEMENTATION.md
+│   ├── PHASE_ZERO_SUMMARY.md
+│   └── PLAN.md
+├── archive/ (الأرشيف القديم)
+│   ├── FIX_SUMMARY.txt
+│   ├── IMPROVEMENTS_TODO.md
+│   ├── SPECIFICATIONS.md
+│   ├── TEMPLATE_TABLES_DOCUMENTATION.md
+│   ├── VISION_DOCUMENT.md
+│   ├── todo.md
+│   └── test-webhook.sh
+├── README.md
+├── COMPONENTS.md
+├── HOOKS_DOCUMENTATION.md
+└── CODE_OF_CONDUCT.md
 ```
 
 ---
@@ -128,7 +179,7 @@
 ### مفاهيم النظام
 - [نظام الصلاحيات](./PERMISSIONS.md) - فهم نظام الأدوار والصلاحيات
 - [تتبع التحويلات](./CONVERSION_TRACKING.md) - كيفية عمل تتبع التحويلات
-- [تكامل Meta](../META_INTEGRATION_GUIDE.md) - تكامل Meta Pixel و Conversion API
+- [تكامل Meta](./api/META_INTEGRATION_GUIDE.md) - تكامل Meta Pixel و Conversion API
 
 ### أفضل الممارسات
 - [أمن البيانات](./DATA_SECURITY.md) - حماية بيانات المرضى
@@ -188,24 +239,76 @@ This comprehensive guide covers all aspects of the SGH CRM Portal - an integrate
 
 ### 🗂️ Documentation Structure
 
-Documentation is organized following the **Diátaxis** framework, dividing documentation into four main categories:
+Documentation is organized in subdirectories by type:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         SGH CRM Portal Documentation                     │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  📖 Tutorials              🎯 How-to Guides        📚 References        │
-│  ──────────────────       ──────────────────      ──────────────────   │
-│  • Installation Guide     • Campaign Management   • API Reference     │
-│  • Quick Start            • Appointment Mgmt      • Database Schema   │
-│                           • Task Management       • Architecture      │
-│                                                                         │
-│                       🧠 Explanation                                   │
-│                       ──────────────────────                           │
-│                       • Architecture                                   │
-│                       • System Concepts                                │
-└─────────────────────────────────────────────────────────────────────────┘
+docs/
+├── guides/ (User Guides)
+│   ├── USAGE_GUIDE.md
+│   ├── PATIENT_PORTAL_GUIDE.md
+│   ├── TESTING_GUIDE.md
+│   ├── TROUBLESHOOTING.md
+│   ├── userGuide.md
+│   ├── EXPORT_FEATURE_GUIDE.md
+│   └── QUICK_TEST.md
+├── architecture/ (Architecture)
+│   ├── ARCHITECTURE.md
+│   ├── DATABASE_SCHEMA.md
+│   └── CACHING.md
+├── api/ (API Documentation)
+│   ├── META_INTEGRATION_GUIDE.md
+│   ├── WEBHOOK_FIX_SUMMARY.md
+│   ├── WHATSAPP_INTEGRATION_GUIDE.md
+│   ├── WEBHOOK_DIAGNOSTICS.md
+│   └── CHANGELOG_WEBHOOK_FIX.md
+├── performance/ (Performance)
+│   ├── PERFORMANCE_GUIDE.md
+│   └── PERFORMANCE_REPORT.md
+├── analysis/ (Analysis & Reports)
+│   ├── ./analysis/AUDIT_AND_IMPROVEMENT_PLAN.md
+│   ├── ./analysis/SYSTEM_REPORT.md
+│   ├── WHATSAPP_SERVICES_ANALYSIS_REPORT.md
+│   ├── ./analysis/IMPROVEMENT_ANALYSIS.md
+│   ├── PRESENTATION_SUMMARY.md
+│   ├── ANALYSIS_NOTES.md
+│   ├── AUDIT_RESULTS.md
+│   ├── table-audit-report.md
+│   └── pages-inventory.md
+├── saas/ (SaaS Documentation)
+│   ├── SAAS_CHANGES_EXPLANATION.md
+│   ├── SAAS_SERVICE_ISOLATION.md
+│   ├── SAAS_WORKFLOW_EXPLANATION.md
+│   └── SAAS_FIXED_VARIABLE_SERVICES.md
+├── whatsapp/ (WhatsApp Documentation)
+│   ├── ./whatsapp/WHATSAPP_NOTIFICATIONS_DOCUMENTATION.md
+│   ├── ./whatsapp/WHATSAPP_PAGES_ANALYSIS.md
+│   ├── WHATSAPP_TEMPLATES_REQUIRED.md
+│   ├── WHATSAPP_TODO.md
+│   ├── whatsapp-api-research-findings.md
+│   ├── whatsapp-business-api-setup-guide.md
+│   ├── whatsapp-fixes-technical-report.md
+│   ├── whatsapp-improvements-plan.md
+│   ├── whatsapp-marketing-messages-requirements.md
+│   ├── whatsapp-pages-to-review.md
+│   └── whatsapp-template-categories-analysis.md
+├── implementation/ (Implementation Plans)
+│   ├── IMPLEMENTATION_PLAN.md
+│   ├── PHASE_ONE_IMPLEMENTATION.md
+│   ├── PHASE_ZERO_IMPLEMENTATION.md
+│   ├── PHASE_ZERO_SUMMARY.md
+│   └── PLAN.md
+├── archive/ (Old Archive)
+│   ├── FIX_SUMMARY.txt
+│   ├── IMPROVEMENTS_TODO.md
+│   ├── SPECIFICATIONS.md
+│   ├── TEMPLATE_TABLES_DOCUMENTATION.md
+│   ├── VISION_DOCUMENT.md
+│   ├── todo.md
+│   └── test-webhook.sh
+├── README.md
+├── COMPONENTS.md
+├── HOOKS_DOCUMENTATION.md
+└── CODE_OF_CONDUCT.md
 ```
 
 ---
@@ -303,7 +406,7 @@ Deeper understanding of system concepts.
 ### System Concepts
 - [Permission System](./PERMISSIONS.md) - Understanding roles and permissions
 - [Conversion Tracking](./CONVERSION_TRACKING.md) - How conversion tracking works
-- [Meta Integration](../META_INTEGRATION_GUIDE.md) - Meta Pixel and Conversion API integration
+- [Meta Integration](./api/META_INTEGRATION_GUIDE.md) - Meta Pixel and Conversion API integration
 
 ### Best Practices
 - [Data Security](./DATA_SECURITY.md) - Protecting patient data
