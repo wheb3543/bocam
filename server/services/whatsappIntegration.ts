@@ -1,5 +1,5 @@
 import { eq, and } from "drizzle-orm";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import * as whatsappServiceModule from "./whatsappService";
 import * as whatsappTemplatesModule from "./whatsappTemplates";
 import * as whatsappSchedulerModule from "./whatsappScheduler";

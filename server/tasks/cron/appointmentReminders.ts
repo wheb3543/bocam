@@ -9,10 +9,10 @@
  * تعمل كل 30 دقيقة للتحقق من المواعيد القادمة
  */
 
-import { getDb } from "../db";
-import { appointments, whatsappNotifications } from "../../drizzle/schema";
+import { getDb } from "../../database/db";
+import { appointments, whatsappNotifications } from "../../../drizzle/schema";
 import { and, between, eq, isNull, sql } from "drizzle-orm";
-import { sendAppointmentReminder } from "../services/whatsappAppointments";
+import { sendAppointmentReminder } from "../../services/whatsappAppointments";
 
 const LOG_PREFIX = "[AppointmentReminders]";
 

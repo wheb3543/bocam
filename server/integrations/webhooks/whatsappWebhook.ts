@@ -14,12 +14,12 @@
 import crypto from "crypto";
 import { Request, Response } from "express";
 import { eq } from "drizzle-orm";
-import { ENV } from "../_core/env";
-import { getDb, getWhatsAppConversationByPhone, createWhatsAppConversation, createWhatsAppMessage, updateWhatsAppConversation, normalizePhoneNumber, createWhatsAppAccountAlert, createWhatsAppSecurityEvent, createWhatsAppPhoneQuality, createWhatsAppConversationQuality, createWhatsAppUserOptIn, updateWhatsAppUserOptIn, createWhatsAppTemplateQuality, logWebhookEvent } from "../db";
-import { whatsappTemplates, whatsappNotifications, whatsappMessages, appointments, offerLeads, campRegistrations, camps, offers, whatsappContacts, whatsappOrders, whatsappReferrals, whatsappReactions, whatsappTransactions, whatsappConversations, whatsappTemplateQuality } from "../../drizzle/schema";
-import { sendWhatsAppTextMessage } from "../whatsappCloudAPI";
-import { processIncomingMessage } from "../services/whatsappAutoReply";
-import { dispatchWhatsAppMessage } from "../services/whatsappMessageDispatcher";
+import { ENV } from "../../_core/env";
+import { getDb, getWhatsAppConversationByPhone, createWhatsAppConversation, createWhatsAppMessage, updateWhatsAppConversation, normalizePhoneNumber, createWhatsAppAccountAlert, createWhatsAppSecurityEvent, createWhatsAppPhoneQuality, createWhatsAppConversationQuality, createWhatsAppUserOptIn, updateWhatsAppUserOptIn, createWhatsAppTemplateQuality, logWebhookEvent } from "../../database/db";
+import { whatsappTemplates, whatsappNotifications, whatsappMessages, appointments, offerLeads, campRegistrations, camps, offers, whatsappContacts, whatsappOrders, whatsappReferrals, whatsappReactions, whatsappTransactions, whatsappConversations, whatsappTemplateQuality } from "../../../drizzle/schema";
+import { sendWhatsAppTextMessage } from "../../services/whatsappCloudAPI";
+import { processIncomingMessage } from "../../services/whatsappAutoReply";
+import { dispatchWhatsAppMessage } from "../../services/whatsappMessageDispatcher";
 
 // ─── Signature Verification ────────────────────────────────────────────────────
 
@@ -605,7 +605,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       await handleContacts(messageContacts, conversation.id, newMessageId, phoneNumber);
       // 🔔 Publish SSE event for contacts received
       try {
-        const { publish } = await import("../_core/pubsub");
+        const { publish } = await import("../../_core/pubsub");
         publish("global:whatsapp", "contacts_received", {
           conversationId: conversation.id,
           phoneNumber,
@@ -620,7 +620,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       await handleOrders(order, conversation.id, newMessageId, phoneNumber);
       // 🔔 Publish SSE event for order received
       try {
-        const { publish } = await import("../_core/pubsub");
+        const { publish } = await import("../../_core/pubsub");
         publish("global:whatsapp", "order_received", {
           conversationId: conversation.id,
           phoneNumber,
@@ -636,7 +636,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       await handleReferrals(referral, conversation.id, newMessageId, phoneNumber);
       // 🔔 Publish SSE event for referral received
       try {
-        const { publish } = await import("../_core/pubsub");
+        const { publish } = await import("../../_core/pubsub");
         publish("global:whatsapp", "referral_received", {
           conversationId: conversation.id,
           phoneNumber,
@@ -652,7 +652,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       await handleReactions(reaction, conversation.id, newMessageId, phoneNumber);
       // 🔔 Publish SSE event for reaction received
       try {
-        const { publish } = await import("../_core/pubsub");
+        const { publish } = await import("../../_core/pubsub");
         publish("global:whatsapp", "reaction_received", {
           conversationId: conversation.id,
           phoneNumber,
@@ -673,7 +673,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     });
 
     // 🔔 Publish SSE events for real-time updates
-    const { publish, channelForConversation, channelForUser } = await import("../_core/pubsub");
+    const { publish, channelForConversation, channelForUser } = await import("../../_core/pubsub");
     console.log(`[WhatsApp Webhook] 🔔 Publishing SSE event to conversation ${conversation.id}`);
     console.log(`[WhatsApp Webhook] 🔔 newMessageId = ${newMessageId}`);
     console.log(`[WhatsApp Webhook] 🔔 Message content: ${content}`);
@@ -805,7 +805,7 @@ async function handleMessageStatus(status: any) {
         console.log(`[WhatsApp Webhook] ✅ Updated conversation pricing for ${recipient_id}`);
         // 🔔 Publish SSE event for conversation cost update
         try {
-          const { publish } = await import("../_core/pubsub");
+          const { publish } = await import("../../_core/pubsub");
           publish("global:whatsapp", "conversation_cost_update", {
             phoneNumber: recipient_id,
             conversationId: conversationData.id,
@@ -824,7 +824,7 @@ async function handleMessageStatus(status: any) {
 
     // 🔔 Publish SSE event to global channel for message status updates
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "message_status_update", {
         messageId,
         whatsappMessageId: messageId,
@@ -884,7 +884,7 @@ async function handleTemplateStatusUpdate(update: any) {
 
     // 🔔 Publish SSE event to global channel
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "template_status_update", {
         templateId: String(message_template_id),
         templateName: message_template_name,
@@ -972,7 +972,7 @@ async function handleAccountAlert(alert: any) {
 
   // 🔔 Publish SSE event to global channel
   try {
-    const { publish } = await import("../_core/pubsub");
+    const { publish } = await import("../../_core/pubsub");
     publish("global:whatsapp", "account_alert", {
       alertType,
       severity: alertType === "ACCOUNT_BANNED" ? "critical" : alertType === "PHONE_NUMBER_QUALITY_UPDATED" ? "medium" : "low",
@@ -1119,7 +1119,7 @@ async function handleTemplateDisable(templateEvent: any) {
 
     // 🔔 Publish SSE event for template disable
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "template_disabled", {
         templateId: metaTemplateId,
         reason: templateEvent.reason || 'unknown',
@@ -1160,7 +1160,7 @@ async function handleTemplateEnable(templateEvent: any) {
 
     // 🔔 Publish SSE event for template enable
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "template_enabled", {
         templateId: metaTemplateId,
         timestamp: new Date().toISOString(),
@@ -1199,7 +1199,7 @@ async function handleTemplateNameUpdate(templateEvent: any) {
 
     // 🔔 Publish SSE event for template name update
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "template_name_update", {
         templateId: metaTemplateId,
         name: templateEvent.name || null,
@@ -1239,7 +1239,7 @@ async function handleTemplateCategoryUpdate(templateEvent: any) {
 
     // 🔔 Publish SSE event for template category update
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "template_category_update", {
         templateId: metaTemplateId,
         category: templateEvent.category || null,
@@ -1279,7 +1279,7 @@ async function handleTemplateLanguageUpdate(templateEvent: any) {
 
     // 🔔 Publish SSE event for template language update
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "template_language_update", {
         templateId: metaTemplateId,
         languageCode: templateEvent.language || null,
@@ -1335,7 +1335,7 @@ async function handleTemplateEvent(templateEvent: any) {
 
     // 🔔 Publish SSE event for template event
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "template_event", {
         templateId: metaTemplateId,
         eventType,
@@ -1368,7 +1368,7 @@ async function handleBusinessProfileUpdate(profileEvent: any) {
 
     // 🔔 Publish SSE event for business profile update
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "business_profile_update", {
         phoneNumber,
         eventType,
@@ -1398,7 +1398,7 @@ async function handleMessagingProductUpdate(productEvent: any) {
 
     // 🔔 Publish SSE event for messaging product update
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "messaging_product_update", {
         phoneNumber,
         eventType,
@@ -1431,7 +1431,7 @@ async function handleBusinessAccountUpdate(accountEvent: any) {
 
     // 🔔 Publish SSE event for business account update
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "business_account_update", {
         phoneNumber,
         eventType,
@@ -1476,7 +1476,7 @@ async function handleAccountUpdate(accountEvent: any) {
 
     // 🔔 Publish SSE event for account update
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "account_update", {
         phoneNumber,
         eventType,
@@ -1500,7 +1500,7 @@ async function handleAccountReviewUpdate(reviewEvent: any) {
 
     // 🔔 Publish SSE event for account review update
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "account_review_update", {
         phoneNumber: reviewEvent.phone_number,
         status: reviewEvent.status || 'unknown',
@@ -1563,7 +1563,7 @@ async function handleConversationUpdate(conversationEvent: any) {
 
     // 🔔 Publish SSE event for conversation cost update
     try {
-      const { publish } = await import("../_core/pubsub");
+      const { publish } = await import("../../_core/pubsub");
       publish("global:whatsapp", "conversation_cost_update", {
         phoneNumber,
         pricingData: pricingData || {},
@@ -1760,7 +1760,7 @@ export async function processWebhookEvent(body: any) {
               });
 
               // 🔔 Publish SSE event to global channel
-              const { publish } = await import("../_core/pubsub");
+              const { publish } = await import("../../_core/pubsub");
               publish("global:whatsapp", "phone_quality_update", {
                 phoneNumber: value.phone_number_id || "unknown",
                 displayPhoneNumber: value.display_phone_number || null,
@@ -1853,7 +1853,7 @@ export async function processWebhookEvent(body: any) {
                   await handleTransactionStatus(value, conversation.id, phoneNumber);
                   // 🔔 Publish SSE event for transaction status update
                   try {
-                    const { publish } = await import("../_core/pubsub");
+                    const { publish } = await import("../../_core/pubsub");
                     publish("global:whatsapp", "transaction_status_update", {
                       conversationId: conversation.id,
                       phoneNumber,

@@ -3,7 +3,7 @@
  * This file provides caching decorators and helpers for frequently accessed data
  */
 
-import { cacheManager } from "../redis";
+import { cacheManager } from "../services/redis";
 
 /**
  * Cache decorator for async functions

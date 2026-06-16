@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
-import * as db from "../db";
+import * as db from "../database/db";
 
 export const messageSettingsRouter = router({
   // Get all message settings

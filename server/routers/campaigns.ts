@@ -13,7 +13,7 @@ import {
   linkOffersToCampaign,
   linkCampsToCampaign,
   linkDoctorsToCampaign,
-} from "../db/campaigns";
+} from "../database/db/campaigns";
 
 // Validation schemas
 const campaignTypeSchema = z.enum(["digital", "field", "awareness", "mixed"]);

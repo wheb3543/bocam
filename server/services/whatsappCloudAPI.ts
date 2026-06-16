@@ -7,7 +7,7 @@
  *     استخدم: import { meta } from './MetaApiService';
  */
 
-import { meta } from "./MetaApiService";
+import { meta } from "../api/MetaApiService";
 
 // ─── Phone Formatting ──────────────────────────────────────────────────────────
 

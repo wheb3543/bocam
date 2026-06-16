@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { doctors } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
-import { serverCache, CacheKeys, CacheTTL } from "../cache";
+import { serverCache, CacheKeys, CacheTTL } from "../services/cache";
 
 export const doctorsRouter = router({
   // List all doctors (public) - cached

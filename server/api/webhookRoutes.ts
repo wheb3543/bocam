@@ -1,8 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { publish } from "./_core/pubsub";
-import { processWebhookEvent, verifyWebhookSignature, verifyWebhookToken } from "./webhooks/whatsappWebhook";
-import { ENV } from "./_core/env";
+import { publish } from "../_core/pubsub";
+import { processWebhookEvent, verifyWebhookSignature, verifyWebhookToken } from "../integrations/webhooks/whatsappWebhook";
+import { ENV } from "../_core/env";
 import multer from "multer";
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -163,7 +163,7 @@ export function createWebhookRouter(): Router {
 
       // تسجيل الحدث في قاعدة البيانات للتحليل
       try {
-        const { createWhatsAppWebhookEvent } = await import('./db');
+        const { createWhatsAppWebhookEvent } = await import('../database/db');
         const { entry } = body;
         if (entry && Array.isArray(entry)) {
           for (const item of entry) {

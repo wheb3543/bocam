@@ -6,13 +6,13 @@ import {
   getFollowUpTaskCount,
   updateFollowUpTaskStatus,
   deleteFollowUpTask,
-} from "../followUpTasks";
+} from "../tasks/followUpTasks";
 
 export const followUpTasksRouter = router({
   // Get all tasks
   getAll: protectedProcedure
     .query(async () => {
-      const db = await import("../db").then(m => m.getDb());
+      const db = await import("../database/db").then(m => m.getDb());
       if (!db) return [];
       const { followUpTasks } = await import("../../drizzle/schema");
       const { desc } = await import("drizzle-orm");

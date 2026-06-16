@@ -2,7 +2,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { users } from "../../drizzle/schema";
 import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
 

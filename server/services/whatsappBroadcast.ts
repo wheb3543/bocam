@@ -12,8 +12,8 @@
  * وفق: https://developers.facebook.com/documentation/business-messaging/whatsapp/message-types/template-messages
  */
 
-import { normalizePhoneNumber, getDb } from "../db";
-import { sendWhatsAppTextMessage } from "../whatsappCloudAPI";
+import { normalizePhoneNumber, getDb } from "../database/db";
+import { sendWhatsAppTextMessage } from "./whatsappCloudAPI";
 import { whatsappBroadcasts } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 

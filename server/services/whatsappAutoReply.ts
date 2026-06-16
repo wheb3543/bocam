@@ -11,9 +11,9 @@
  */
 
 import { eq, and, desc } from "drizzle-orm";
-import { getDb, normalizePhoneNumber, getWhatsAppConversationByPhone, createWhatsAppConversation, createWhatsAppMessage, updateWhatsAppConversation } from "../db";
+import { getDb, normalizePhoneNumber, getWhatsAppConversationByPhone, createWhatsAppConversation, createWhatsAppMessage, updateWhatsAppConversation } from "../database/db";
 import { whatsappAutoReplies, InsertWhatsAppAutoReply } from "../../drizzle/schema";
-import { sendWhatsAppTextMessage } from "../whatsappCloudAPI";
+import { sendWhatsAppTextMessage } from "./whatsappCloudAPI";
 
 export interface AutoReplyRule {
   id: number;

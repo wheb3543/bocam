@@ -9,9 +9,9 @@
  */
 
 import { eq, and } from "drizzle-orm";
-import { normalizePhoneNumber } from "../db";
-import { getDb } from "../db";
-import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from "../whatsappCloudAPI";
+import { normalizePhoneNumber } from "../database/db";
+import { getDb } from "../database/db";
+import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from "./whatsappCloudAPI";
 import { whatsappNotifications, whatsappBlockedNumbers } from "../../drizzle/schema";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";

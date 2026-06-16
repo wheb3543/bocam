@@ -2,13 +2,13 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { eq, desc, and, gte } from "drizzle-orm";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { offerLeads } from "../../drizzle/schema";
-import { sendNewOfferLeadTelegram } from "../telegram";
-import { serverCache, CacheKeys, CacheTTL } from "../cache";
+import { sendNewOfferLeadTelegram } from "../services/telegram";
+import { serverCache, CacheKeys, CacheTTL } from "../services/cache";
 import { createAuditLog } from "./auditLogs";
-import { sendOfferLeadEvent, sendStatusChangeEvent } from "../facebookCAPI";
-import { normalizePhoneNumber } from "../db";
+import { sendOfferLeadEvent, sendStatusChangeEvent } from "../api/facebookCAPI";
+import { normalizePhoneNumber } from "../database/db";
 // sendOfferLeadConfirmation moved to dispatchWhatsAppMessage flow
 import { dispatchWhatsAppMessage } from "../services/whatsappMessageDispatcher";
 
@@ -227,7 +227,7 @@ export const offerLeadsRouter = router({
         cacheKey,
         CacheTTL.PAGINATED,
         async () => {
-          const { getOfferLeadsPaginated } = await import('../db');
+          const { getOfferLeadsPaginated } = await import('../database/db');
           return getOfferLeadsPaginated(
             input.page,
             input.limit,

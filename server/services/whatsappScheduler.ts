@@ -1,5 +1,5 @@
 import { CronJob } from "cron";
-import { normalizePhoneNumber } from "../db";
+import { normalizePhoneNumber } from "../database/db";
 import { ENV } from "../_core/env";
 import { format, subHours } from "date-fns";
 import { ar } from "date-fns/locale";

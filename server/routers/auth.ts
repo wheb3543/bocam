@@ -3,10 +3,10 @@ import { TRPCError } from "@trpc/server";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { publicProcedure, adminProcedure, router } from "../_core/trpc";
-import { getUserByUsername, getUserByEmail, getUserById } from "../db";
+import { getUserByUsername, getUserByEmail, getUserById } from "../database/db";
 import { users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");

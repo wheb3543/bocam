@@ -16,8 +16,8 @@ import {
   getPatientCampRegistrations,
   getPatientResults,
   sanitizePatient,
-} from "../db/patients";
-import { meta } from "../MetaApiService";
+} from "../database/db/patients";
+import { meta } from "../api/MetaApiService";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");

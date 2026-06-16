@@ -7,7 +7,7 @@
  */
 
 import { CronJob } from 'cron';
-import { createBackup, BackupConfig, BackupType } from '../_core/backupManager';
+import { createBackup, BackupConfig, BackupType } from '../../_core/backupManager';
 
 /**
  * إعدادات النسخ الاحتياطي التلقائي

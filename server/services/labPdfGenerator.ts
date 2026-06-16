@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 import path from 'path';
-import { getHospitalDb } from '../db';
+import { getHospitalDb } from '../database/db';
 import { sql } from 'drizzle-orm';
 
 const AMIRI_REGULAR = path.join(process.cwd(), 'server', 'fonts', 'Amiri-Regular.ttf');

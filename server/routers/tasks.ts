@@ -16,7 +16,7 @@ import {
   deleteTaskAttachment,
   getTasksByUser,
   getOverdueTasks,
-} from "../db/tasks";
+} from "../database/db/tasks";
 
 export const tasksRouter = router({
   // Get all tasks with filters

@@ -18,7 +18,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { getDb } from '../db';
+import { getDb } from '../database/db';
 import { sql } from 'drizzle-orm';
 
 const execAsync = promisify(exec);

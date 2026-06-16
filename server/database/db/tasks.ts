@@ -1,6 +1,6 @@
 import { eq, desc, and, sql, like, or, isNull, gte, lte } from "drizzle-orm";
 import { getDb } from "../db";
-import { tasks, taskComments, taskAttachments, users, campaigns, type Task, type InsertTask, type TaskComment, type InsertTaskComment, type TaskAttachment, type InsertTaskAttachment } from "../../drizzle/schema";
+import { tasks, taskComments, taskAttachments, users, campaigns, type Task, type InsertTask, type TaskComment, type InsertTaskComment, type TaskAttachment, type InsertTaskAttachment } from "../../../drizzle/schema";
 
 // ============ TASKS ============
 

@@ -7,7 +7,7 @@ export const queueRouter = router({
    */
   getStats: protectedProcedure.query(async () => {
     try {
-      const { getQueueStats } = await import("../queues/whatsappQueue");
+      const { getQueueStats } = await import("../integrations/queues/whatsappQueue");
       const stats = await getQueueStats();
       return stats;
     } catch (error) {
@@ -35,7 +35,7 @@ export const queueRouter = router({
     )
     .query(async ({ input }) => {
       try {
-        const { getQueueStats } = await import("../queues/whatsappQueue");
+        const { getQueueStats } = await import("../integrations/queues/whatsappQueue");
         const stats = await getQueueStats();
         
         // If Redis is not available, return empty array
@@ -43,7 +43,7 @@ export const queueRouter = router({
           return [];
         }
         
-        const { whatsappQueue } = await import("../queues/whatsappQueue");
+        const { whatsappQueue } = await import("../integrations/queues/whatsappQueue");
         
         // Check if queue is initialized
         if (!whatsappQueue) {

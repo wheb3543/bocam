@@ -7,7 +7,7 @@ import {
   getPatientResults,
   sanitizePatient,
   updatePatientResultStatus,
-} from "../db/patients";
+} from "../database/db/patients";
 
 export const patientResultsRouter = router({
   listByPatientId: adminProcedure

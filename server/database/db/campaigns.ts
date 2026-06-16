@@ -1,5 +1,5 @@
 import { eq, desc, and, gte, lte, sql, or, like, inArray } from "drizzle-orm";
-import { campaigns, appointments, leads, offerLeads, campRegistrations, campaignOffers, campaignCamps, campaignDoctors, offers, camps, doctors } from "../../drizzle/schema";
+import { campaigns, appointments, leads, offerLeads, campRegistrations, campaignOffers, campaignCamps, campaignDoctors, offers, camps, doctors } from "../../../drizzle/schema";
 import { getDb } from "../db";
 
 /**

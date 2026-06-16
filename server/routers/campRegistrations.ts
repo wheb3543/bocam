@@ -2,13 +2,13 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { eq, desc, and, gte, sql, inArray } from "drizzle-orm";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { campRegistrations } from "../../drizzle/schema";
-import { sendNewCampRegistrationTelegram } from "../telegram";
-import { serverCache, CacheKeys, CacheTTL } from "../cache";
+import { sendNewCampRegistrationTelegram } from "../services/telegram";
+import { serverCache, CacheKeys, CacheTTL } from "../services/cache";
 import { createAuditLog } from "./auditLogs";
-import { sendCampRegistrationEvent, sendStatusChangeEvent } from "../facebookCAPI";
-import { normalizePhoneNumber } from "../db";
+import { sendCampRegistrationEvent, sendStatusChangeEvent } from "../api/facebookCAPI";
+import { normalizePhoneNumber } from "../database/db";
 // sendCampRegistrationConfirmation moved to dispatchWhatsAppMessage flow
 import { dispatchWhatsAppMessage } from "../services/whatsappMessageDispatcher";
 
@@ -365,7 +365,7 @@ export const campRegistrationsRouter = router({
         cacheKey,
         CacheTTL.PAGINATED,
         async () => {
-          const { getCampRegistrationsPaginated } = await import('../db');
+          const { getCampRegistrationsPaginated } = await import('../database/db');
           return getCampRegistrationsPaginated(
             input.page,
             input.limit,

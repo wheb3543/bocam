@@ -1,52 +1,52 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { getDb } from "./db";
-import { users } from "../drizzle/schema";
+import { getDb } from "../database/db";
+import { users } from "../../drizzle/schema";
 import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
-import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { getSessionCookieOptions } from "../_core/cookies";
+import { systemRouter } from "../_core/systemRouter";
+import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import { 
   getAllAccessRequests,
   getPendingAccessRequests,
   approveAccessRequest,
   rejectAccessRequest,
-} from "./db";
-import { notifyOwner } from "./_core/notification";
-import { offersRouter } from "./routers/offers";
-import { campsRouter } from "./routers/camps";
-import { offerLeadsRouter } from "./routers/offerLeads";
-import { campRegistrationsRouter } from "./routers/campRegistrations";
-import { doctorsRouter } from "./routers/doctors";
-import { usersRouter } from "./routers/users";
-import { reportsRouter } from "./routers/reports";
-import { campaignsRouter } from "./routers/campaigns";
-import { tasksRouter } from "./routers/tasks";
-import { whatsappRouter } from "./routers/whatsapp";
-import { whatsappTemplateTestRouter } from "./routers/whatsappTemplateTest";
-import { messageSettingsRouter } from "./routers/messageSettings";
-import { webhooksRouter } from "./routers/webhooks";
-import { commentsRouter } from "./routers/comments";
-import { followUpTasksRouter } from "./routers/followUpTasks";
-import { appointmentsRouter } from "./routers/appointments";
-import { leadsRouter } from "./routers/leads";
+} from "../database/db";
+import { notifyOwner } from "../_core/notification";
+import { offersRouter } from "./offers";
+import { campsRouter } from "./camps";
+import { offerLeadsRouter } from "./offerLeads";
+import { campRegistrationsRouter } from "./campRegistrations";
+import { doctorsRouter } from "./doctors";
+import { usersRouter } from "./users";
+import { reportsRouter } from "./reports";
+import { campaignsRouter } from "./campaigns";
+import { tasksRouter } from "./tasks";
+import { whatsappRouter } from "./whatsapp";
+import { whatsappTemplateTestRouter } from "./whatsappTemplateTest";
+import { messageSettingsRouter } from "./messageSettings";
+import { webhooksRouter } from "./webhooks";
+import { commentsRouter } from "./comments";
+import { followUpTasksRouter } from "./followUpTasks";
+import { appointmentsRouter } from "./appointments";
+import { leadsRouter } from "./leads";
 
 
-import { getCombinedSocialMediaStats } from "./metaGraphAPI";
-import { runDeactivationJobs } from "./cron/deactivateExpired";
-import { queueRouter } from "./routers/queue";
-import { customersRouter } from "./routers/customers";
-import { auditLogsRouter } from "./routers/auditLogs";
-import { savedFiltersRouter } from "./routers/savedFilters";
-import { chartsRouter } from "./routers/charts";
-import { trackingRouter } from "./routers/tracking";
-import { patientPortalRouter } from "./routers/patientPortal";
-import { patientResultsRouter } from "./routers/patientResults";
-import { pwaRouter } from "./routers/pwa";
-import { metaSyncRouter } from "./routers/metaSync";
-import { authRouter } from "./routers/auth";
-import { generatePDF, type ExportMetadata } from "./pdfService";
-import { licenseRouter } from "./routers/license";
+import { getCombinedSocialMediaStats } from "../api/metaGraphAPI";
+import { runDeactivationJobs } from "../tasks/cron/deactivateExpired";
+import { queueRouter } from "./queue";
+import { customersRouter } from "./customers";
+import { auditLogsRouter } from "./auditLogs";
+import { savedFiltersRouter } from "./savedFilters";
+import { chartsRouter } from "./charts";
+import { trackingRouter } from "./tracking";
+import { patientPortalRouter } from "./patientPortal";
+import { patientResultsRouter } from "./patientResults";
+import { pwaRouter } from "./pwa";
+import { metaSyncRouter } from "./metaSync";
+import { authRouter } from "./auth";
+import { generatePDF, type ExportMetadata } from "../services/pdfService";
+import { licenseRouter } from "./license";
 
 export const appRouter = router({
   campaigns: campaignsRouter,
@@ -69,7 +69,7 @@ export const appRouter = router({
     get: protectedProcedure
       .input(z.object({ key: z.string() }))
       .query(async ({ ctx, input }) => {
-        const { getUserPreference } = await import("./db");
+        const { getUserPreference } = await import("../database/db");
         const pref = await getUserPreference(ctx.user.id, input.key);
         return pref ? JSON.parse(pref.preferenceValue) : null;
       }),
@@ -80,7 +80,7 @@ export const appRouter = router({
         value: z.any(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { setUserPreference } = await import("./db");
+        const { setUserPreference } = await import("../database/db");
         await setUserPreference(
           ctx.user.id,
           input.key,
@@ -91,7 +91,7 @@ export const appRouter = router({
     
     getAll: protectedProcedure
       .query(async ({ ctx }) => {
-        const { getAllUserPreferences } = await import("./db");
+        const { getAllUserPreferences } = await import("../database/db");
         const prefs = await getAllUserPreferences(ctx.user.id);
         return prefs.reduce((acc, pref) => {
           acc[pref.preferenceKey] = JSON.parse(pref.preferenceValue);
@@ -105,7 +105,7 @@ export const appRouter = router({
     list: protectedProcedure
       .input(z.object({ tableKey: z.string() }))
       .query(async ({ input }) => {
-        const { getSharedTemplates } = await import("./db");
+        const { getSharedTemplates } = await import("../database/db");
         const templates = await getSharedTemplates(input.tableKey);
         return templates.map(t => ({
           ...t,
@@ -115,7 +115,7 @@ export const appRouter = router({
 
     listAll: protectedProcedure
       .query(async () => {
-        const { getAllSharedTemplates } = await import("./db");
+        const { getAllSharedTemplates } = await import("../database/db");
         const templates = await getAllSharedTemplates();
         return templates.map(t => ({
           ...t,
@@ -134,7 +134,7 @@ export const appRouter = router({
         if (ctx.user.role !== 'admin') {
           throw new Error('غير مصرح لك بإنشاء قوالب مشتركة');
         }
-        const { createSharedTemplate } = await import("./db");
+        const { createSharedTemplate } = await import("../database/db");
         await createSharedTemplate({
           name: input.name,
           tableKey: input.tableKey,
@@ -152,7 +152,7 @@ export const appRouter = router({
         if (ctx.user.role !== 'admin') {
           throw new Error('غير مصرح لك بحذف قوالب مشتركة');
         }
-        const { deleteSharedTemplate } = await import("./db");
+        const { deleteSharedTemplate } = await import("../database/db");
         await deleteSharedTemplate(input.id);
         return { success: true };
       }),
@@ -168,7 +168,7 @@ export const appRouter = router({
         if (ctx.user.role !== 'admin') {
           throw new Error('غير مصرح لك بتعديل قوالب مشتركة');
         }
-        const { updateSharedTemplate } = await import("./db");
+        const { updateSharedTemplate } = await import("../database/db");
         await updateSharedTemplate(input.id, {
           name: input.name,
           columns: input.columns ? JSON.stringify(input.columns) : undefined,
@@ -273,10 +273,10 @@ export const appRouter = router({
   // Sidebar badges - aggregated counts for sidebar icons
   sidebarBadges: protectedProcedure.query(async () => {
     try {
-      const { getLeadsStats } = await import("./db");
-      const { getTasksStats } = await import("./db/tasks");
-      const { getUnreadWhatsAppConversationsCount } = await import("./db");
-      const { getPendingAccessRequests } = await import("./db");
+      const { getLeadsStats } = await import("../database/db");
+      const { getTasksStats } = await import("../database/db/tasks");
+      const { getUnreadWhatsAppConversationsCount } = await import("../database/db");
+      const { getPendingAccessRequests } = await import("../database/db");
 
       // Fetch all stats in parallel
       const [leadsStats, tasksStats, whatsappUnread, pendingAccess] = await Promise.allSettled([

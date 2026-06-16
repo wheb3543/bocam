@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { subscribe, channelForConversation, channelForUser } from "./_core/pubsub";
+import { subscribe, channelForConversation, channelForUser } from "../_core/pubsub";
 
 const GLOBAL_CHANNEL = "global:whatsapp";
 

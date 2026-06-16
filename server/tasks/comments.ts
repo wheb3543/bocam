@@ -1,6 +1,6 @@
 import { eq, and, desc } from "drizzle-orm";
-import { comments, type InsertComment } from "../drizzle/schema";
-import { getDb } from "./db";
+import { comments, type InsertComment } from "../../drizzle/schema";
+import { getDb } from "../database/db";
 
 /**
  * Get comments for a specific entity

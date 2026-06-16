@@ -1,6 +1,6 @@
 import { eq, and, desc } from "drizzle-orm";
-import { getDb } from "./db";
-import { followUpTasks, InsertFollowUpTask } from "../drizzle/schema";
+import { getDb } from "../database/db";
+import { followUpTasks, InsertFollowUpTask } from "../../drizzle/schema";
 
 export async function createFollowUpTask(task: InsertFollowUpTask) {
   const db = await getDb();

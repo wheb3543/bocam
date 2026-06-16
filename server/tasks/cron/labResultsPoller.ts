@@ -1,12 +1,12 @@
-import { getDb, getHospitalDb } from '../db';
+import { getDb, getHospitalDb } from '../../database/db';
 import { sql } from 'drizzle-orm';
-import { generateLabResultPDF } from '../services/labPdfGenerator';
-import { uploadPdfFile } from '../services/fileUploadService';
-import { messageSettings, whatsappTemplates } from '../../drizzle/schema';
+import { generateLabResultPDF } from '../../services/labPdfGenerator';
+import { uploadPdfFile } from '../../services/fileUploadService';
+import { messageSettings, whatsappTemplates } from '../../../drizzle/schema';
 import { eq } from 'drizzle-orm';
-import { sendWhatsAppTemplateMessage, sendWhatsAppDocumentMessage } from '../whatsappCloudAPI';
-import { ensureConversationAndSaveMessage } from '../services/whatsappMessageDispatcher';
-import { normalizePhoneNumber } from '../db';
+import { sendWhatsAppTemplateMessage, sendWhatsAppDocumentMessage } from '../../services/whatsappCloudAPI';
+import { ensureConversationAndSaveMessage } from '../../services/whatsappMessageDispatcher';
+import { normalizePhoneNumber } from '../../database/db';
 
 const MAX_RETRIES = 3;
 

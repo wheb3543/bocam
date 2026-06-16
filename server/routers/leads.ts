@@ -15,11 +15,11 @@ import {
   getLeadsByCampaign,
   createCampaign,
   normalizePhoneNumber,
-} from "../db";
+} from "../database/db";
 import { notifyOwner } from "../_core/notification";
-import { sendNewLeadNotification } from "../email";
-import { sendNewLeadTelegram } from "../telegram";
-import { sendWelcomeMessage, sendBookingConfirmation, sendCustomMessage } from "../whatsapp";
+import { sendNewLeadNotification } from "../services/email";
+import { sendNewLeadTelegram } from "../services/telegram";
+import { sendWelcomeMessage, sendBookingConfirmation, sendCustomMessage } from "../services/whatsapp";
 
 export const leadsRouter = router({
   // Public endpoint for lead submission from landing page
@@ -130,7 +130,7 @@ export const leadsRouter = router({
 
   // Unified list from all sources
   unifiedList: protectedProcedure.query(async () => {
-    const { getAllUnifiedLeads } = await import('../db');
+    const { getAllUnifiedLeads } = await import('../database/db');
     return getAllUnifiedLeads();
   }),
 

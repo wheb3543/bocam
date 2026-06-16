@@ -259,13 +259,16 @@ sgh-crm-portal/
 │   ├── _core/                 # الإعداد الأساسي (OAuth, tRPC)
 │   ├── routers/               # tRPC routers (28+ router)
 │   ├── services/              # خدمات الأعمال
-│   │   ├── whatsapp/          # خدمات WhatsApp
-│   │   └── meta/              # خدمات Meta
-│   ├── db/                    # وظائف قاعدة البيانات
+│   ├── database/              # وظائف قاعدة البيانات
+│   │   └── db/                # وظائف قاعدة البيانات
 │   ├── config/                # ملفات الإعداد
-│   ├── cron/                  # المهام المجدولة
-│   ├── queues/                # طوابير BullMQ
-│   └── webhooks/              # معالجات webhooks
+│   ├── tasks/                 # المهام المجدولة
+│   │   └── cron/              # المهام المجدولة
+│   ├── integrations/          # التكاملات الخارجية
+│   │   ├── queues/            # طوابير BullMQ
+│   │   └── webhooks/          # معالجات webhooks
+│   ├── api/                   # واجهات برمجة التطبيقات
+│   └── assets/                # الأصول الثابتة
 ├── shared/                     # الكود المشترك
 │   ├── _core/                 # الأساسيات المشتركة
 │   └── const.ts               # الثوابت المشتركة

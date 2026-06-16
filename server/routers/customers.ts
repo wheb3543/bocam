@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
-import { getDb } from '../db';
+import { getDb } from '../database/db';
 import { eq, desc, like, or, sql, and } from 'drizzle-orm';
 import { appointments, leads, offerLeads, campRegistrations, doctors, offers, camps } from '../../drizzle/schema';
 

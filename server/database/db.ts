@@ -1,9 +1,9 @@
 import { eq, desc, and, like, or, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import crypto from "crypto";
-import { InsertUser, users, campaigns, leads, leadStatusHistory, settings, doctors, appointments, accessRequests, InsertCampaign, InsertLead, InsertLeadStatusHistory, InsertSetting, InsertAppointment, InsertAccessRequest, sharedColumnTemplates, InsertSharedColumnTemplate } from "../drizzle/schema";
-import { ENV } from './_core/env';
-import { publish, channelForConversation } from './_core/pubsub';
+import { InsertUser, users, campaigns, leads, leadStatusHistory, settings, doctors, appointments, accessRequests, InsertCampaign, InsertLead, InsertLeadStatusHistory, InsertSetting, InsertAppointment, InsertAccessRequest, sharedColumnTemplates, InsertSharedColumnTemplate } from "../../drizzle/schema";
+import { ENV } from '../_core/env';
+import { publish, channelForConversation } from '../_core/pubsub';
 
 /**
  * Normalize phone number to standard format (remove +, spaces, dashes)
@@ -686,7 +686,7 @@ export async function getAllUnifiedLeads() {
       .orderBy(desc(appointments.createdAt));
 
     // Get offer leads
-    const { offerLeads } = await import('../drizzle/schema');
+    const { offerLeads } = await import('../../drizzle/schema');
     const offerLeadsData = await db
       .select({
         id: offerLeads.id,
@@ -703,7 +703,7 @@ export async function getAllUnifiedLeads() {
       .orderBy(desc(offerLeads.createdAt));
 
     // Get camp registrations
-    const { campRegistrations } = await import('../drizzle/schema');
+    const { campRegistrations } = await import('../../drizzle/schema');
     const campRegistrationsData = await db
       .select({
         id: campRegistrations.id,
@@ -766,7 +766,7 @@ export async function getCustomerInfoByPhone(phone: string) {
   const db = await getDb();
   if (!db) return null;
   
-  const { leads, appointments, offerLeads, campRegistrations } = await import('../drizzle/schema');
+  const { leads, appointments, offerLeads, campRegistrations } = await import('../../drizzle/schema');
   const normalizedPhone = normalizePhoneNumber(phone);
   
   // Search in leads - compare normalized phone numbers
@@ -838,7 +838,7 @@ export async function getAllCustomerRecordsByPhone(phone: string) {
   const db = await getDb();
   if (!db) return { leads: [], appointments: [], offers: [], camps: [] };
   
-  const { leads, appointments, offerLeads, campRegistrations } = await import('../drizzle/schema');
+  const { leads, appointments, offerLeads, campRegistrations } = await import('../../drizzle/schema');
   const normalizedPhone = normalizePhoneNumber(phone);
   
   const [leadsList, appointmentsList, offersList, campsList] = await Promise.all([
@@ -860,7 +860,7 @@ export async function getAllWhatsAppConversations() {
   const db = await getDb();
   if (!db) return [];
   
-  const { whatsappConversations } = await import('../drizzle/schema');
+  const { whatsappConversations } = await import('../../drizzle/schema');
   return db.select().from(whatsappConversations).orderBy(desc(whatsappConversations.lastMessageAt));
 }
 
@@ -868,7 +868,7 @@ export async function getWhatsAppConversationById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
   
-  const { whatsappConversations } = await import('../drizzle/schema');
+  const { whatsappConversations } = await import('../../drizzle/schema');
   const result = await db.select().from(whatsappConversations).where(eq(whatsappConversations.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
@@ -877,7 +877,7 @@ export async function getWhatsAppConversationByPhone(phone: string) {
   const db = await getDb();
   if (!db) return undefined;
   
-  const { whatsappConversations } = await import('../drizzle/schema');
+  const { whatsappConversations } = await import('../../drizzle/schema');
   const normalizedPhone = normalizePhoneNumber(phone);
   
   // Use SQL query to directly filter by normalized phone number
@@ -896,7 +896,7 @@ export async function createWhatsAppConversation(conversation: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const { whatsappConversations } = await import('../drizzle/schema');
+  const { whatsappConversations } = await import('../../drizzle/schema');
   const result = await db.insert(whatsappConversations).values(conversation);
   return result;
 }
@@ -905,7 +905,7 @@ export async function updateWhatsAppConversation(id: number, conversation: any) 
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const { whatsappConversations } = await import('../drizzle/schema');
+  const { whatsappConversations } = await import('../../drizzle/schema');
   const result = await db.update(whatsappConversations).set(conversation).where(eq(whatsappConversations.id, id));
   try {
     publish(channelForConversation(id), 'conversation_updated', { id, ...conversation });
@@ -919,7 +919,7 @@ export async function getWhatsAppMessagesByConversation(conversationId: number) 
   const db = await getDb();
   if (!db) return [];
   
-  const { whatsappMessages } = await import('../drizzle/schema');
+  const { whatsappMessages } = await import('../../drizzle/schema');
   return db.select().from(whatsappMessages).where(eq(whatsappMessages.conversationId, conversationId)).orderBy(whatsappMessages.createdAt);
 }
 
@@ -927,7 +927,7 @@ export async function getLatestInboundWhatsAppMessage(conversationId: number) {
   const db = await getDb();
   if (!db) return undefined;
   
-  const { whatsappMessages } = await import('../drizzle/schema');
+  const { whatsappMessages } = await import('../../drizzle/schema');
   const result = await db
     .select()
     .from(whatsappMessages)
@@ -945,7 +945,7 @@ export async function getLatestInboundWhatsAppMessage(conversationId: number) {
 export async function getWhatsAppMessageByWhatsAppId(whatsappId: string) {
   const db = await getDb();
   if (!db) return undefined;
-  const { whatsappMessages } = await import('../drizzle/schema');
+  const { whatsappMessages } = await import('../../drizzle/schema');
   const result = await db.select().from(whatsappMessages).where(eq(whatsappMessages.whatsappMessageId, whatsappId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
@@ -954,7 +954,7 @@ export async function createWhatsAppMessage(message: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const { whatsappMessages } = await import('../drizzle/schema');
+  const { whatsappMessages } = await import('../../drizzle/schema');
   const result = await db.insert(whatsappMessages).values(message);
   // NOTE: SSE publishing for INBOUND messages is handled by webhookRoutes.ts
   // to avoid double-publishing. For OUTBOUND messages, publish here.
@@ -973,7 +973,7 @@ export async function updateWhatsAppMessage(id: number, message: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const { whatsappMessages } = await import('../drizzle/schema');
+  const { whatsappMessages } = await import('../../drizzle/schema');
   const result = await db.update(whatsappMessages).set(message).where(eq(whatsappMessages.id, id));
   try {
     // fetch the updated message to get conversationId
@@ -992,7 +992,7 @@ export async function getAllWhatsAppTemplates() {
   const db = await getDb();
   if (!db) return [];
   
-  const { whatsappTemplates } = await import('../drizzle/schema');
+  const { whatsappTemplates } = await import('../../drizzle/schema');
   return db.select().from(whatsappTemplates).where(eq(whatsappTemplates.isActive, 1)).orderBy(whatsappTemplates.name);
 }
 
@@ -1000,7 +1000,7 @@ export async function getWhatsAppTemplateById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
   
-  const { whatsappTemplates } = await import('../drizzle/schema');
+  const { whatsappTemplates } = await import('../../drizzle/schema');
   const result = await db.select().from(whatsappTemplates).where(eq(whatsappTemplates.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
@@ -1009,7 +1009,7 @@ export async function createWhatsAppTemplate(template: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const { whatsappTemplates } = await import('../drizzle/schema');
+  const { whatsappTemplates } = await import('../../drizzle/schema');
   const result = await db.insert(whatsappTemplates).values(template);
   return result;
 }
@@ -1018,7 +1018,7 @@ export async function updateWhatsAppTemplate(id: number, template: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const { whatsappTemplates } = await import('../drizzle/schema');
+  const { whatsappTemplates } = await import('../../drizzle/schema');
   return db.update(whatsappTemplates).set(template).where(eq(whatsappTemplates.id, id));
 }
 
@@ -1026,7 +1026,7 @@ export async function deleteWhatsAppTemplate(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const { whatsappTemplates } = await import('../drizzle/schema');
+  const { whatsappTemplates } = await import('../../drizzle/schema');
   return db.delete(whatsappTemplates).where(eq(whatsappTemplates.id, id));
 }
 
@@ -1036,7 +1036,7 @@ export async function createWhatsAppWebhookEvent(event: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { whatsappWebhookEvents } = await import('../../drizzle/schema');
   return db.insert(whatsappWebhookEvents).values(event);
 }
 
@@ -1044,7 +1044,7 @@ export async function createWhatsAppAccountAlert(alert: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const { whatsappAccountAlerts } = await import('../drizzle/schema');
+  const { whatsappAccountAlerts } = await import('../../drizzle/schema');
   return db.insert(whatsappAccountAlerts).values(alert);
 }
 
@@ -1052,7 +1052,7 @@ export async function createWhatsAppSecurityEvent(event: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const { whatsappSecurityEvents } = await import('../drizzle/schema');
+  const { whatsappSecurityEvents } = await import('../../drizzle/schema');
   return db.insert(whatsappSecurityEvents).values(event);
 }
 
@@ -1060,7 +1060,7 @@ export async function createWhatsAppPhoneQuality(quality: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const { whatsappPhoneQuality } = await import('../drizzle/schema');
+  const { whatsappPhoneQuality } = await import('../../drizzle/schema');
   return db.insert(whatsappPhoneQuality).values(quality);
 }
 
@@ -1068,7 +1068,7 @@ export async function createWhatsAppConversationQuality(quality: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const { whatsappConversationQuality } = await import('../drizzle/schema');
+  const { whatsappConversationQuality } = await import('../../drizzle/schema');
   return db.insert(whatsappConversationQuality).values(quality);
 }
 
@@ -1076,7 +1076,7 @@ export async function createWhatsAppUserOptIn(optIn: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const { whatsappUserOptIns } = await import('../drizzle/schema');
+  const { whatsappUserOptIns } = await import('../../drizzle/schema');
   return db.insert(whatsappUserOptIns).values(optIn);
 }
 
@@ -1084,7 +1084,7 @@ export async function updateWhatsAppUserOptIn(phone: string, updates: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const { whatsappUserOptIns } = await import('../drizzle/schema');
+  const { whatsappUserOptIns } = await import('../../drizzle/schema');
   return db.update(whatsappUserOptIns).set(updates).where(eq(whatsappUserOptIns.phoneNumber, phone));
 }
 
@@ -1092,7 +1092,7 @@ export async function createWhatsAppTemplateQuality(quality: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const { whatsappTemplateQuality } = await import('../drizzle/schema');
+  const { whatsappTemplateQuality } = await import('../../drizzle/schema');
   return db.insert(whatsappTemplateQuality).values(quality);
 }
 
@@ -1115,7 +1115,7 @@ export async function logWebhookEvent(event: {
     return;
   }
 
-  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { whatsappWebhookEvents } = await import('../../drizzle/schema');
 
   try {
     await db.insert(whatsappWebhookEvents).values({
@@ -1144,7 +1144,7 @@ export async function markWebhookEventAsProcessed(eventId: number, handlerExists
   const db = await getDb();
   if (!db) return;
 
-  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { whatsappWebhookEvents } = await import('../../drizzle/schema');
   const { eq } = await import('drizzle-orm');
 
   await db
@@ -1161,7 +1161,7 @@ export async function getWhatsAppTemplateByMetaName(metaName: string) {
   const db = await getDb();
   if (!db) return undefined;
   
-  const { whatsappTemplates } = await import('../drizzle/schema');
+  const { whatsappTemplates } = await import('../../drizzle/schema');
   const result = await db.select().from(whatsappTemplates)
     .where(eq(whatsappTemplates.metaName, metaName))
     .limit(1);
@@ -1172,7 +1172,7 @@ export async function searchWhatsAppConversations(searchTerm: string) {
   const db = await getDb();
   if (!db) return [];
 
-  const { whatsappConversations } = await import('../drizzle/schema');
+  const { whatsappConversations } = await import('../../drizzle/schema');
   return db.select().from(whatsappConversations).where(
     or(
       like(whatsappConversations.customerName, `%${searchTerm}%`),
@@ -1192,7 +1192,7 @@ export async function getWebhookEvents(filters: {
   const db = await getDb();
   if (!db) return [];
 
-  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { whatsappWebhookEvents } = await import('../../drizzle/schema');
   const { eq, and, desc } = await import('drizzle-orm');
 
   let query = db.select().from(whatsappWebhookEvents);
@@ -1221,7 +1221,7 @@ export async function getUnhandledWebhookEventsCount() {
   const db = await getDb();
   if (!db) return 0;
 
-  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { whatsappWebhookEvents } = await import('../../drizzle/schema');
   const { eq, and, sql } = await import('drizzle-orm');
 
   const result = await db
@@ -1241,7 +1241,7 @@ export async function getUniqueEventTypes() {
   const db = await getDb();
   if (!db) return [];
 
-  const { whatsappWebhookEvents } = await import('../drizzle/schema');
+  const { whatsappWebhookEvents } = await import('../../drizzle/schema');
   const { sql } = await import('drizzle-orm');
 
   const result = await db
@@ -1260,7 +1260,7 @@ export async function getUnreadWhatsAppConversationsCount() {
   const db = await getDb();
   if (!db) return 0;
   
-  const { whatsappConversations } = await import('../drizzle/schema');
+  const { whatsappConversations } = await import('../../drizzle/schema');
   const result = await db.select({
     count: sql<number>`count(*)`
   }).from(whatsappConversations).where(eq(whatsappConversations.unreadCount, 0));
@@ -1274,7 +1274,7 @@ export async function getAllMessageSettings() {
   const db = await getDb();
   if (!db) return [];
   
-  const { messageSettings } = await import('../drizzle/schema');
+  const { messageSettings } = await import('../../drizzle/schema');
   return db.select().from(messageSettings).orderBy(messageSettings.category, messageSettings.id);
 }
 
@@ -1282,7 +1282,7 @@ export async function getMessageSettingsByCategory(category: string) {
   const db = await getDb();
   if (!db) return [];
   
-  const { messageSettings } = await import('../drizzle/schema');
+  const { messageSettings } = await import('../../drizzle/schema');
   const { sql } = await import('drizzle-orm');
   return db.select().from(messageSettings).where(sql`${messageSettings.category} = ${category}`).orderBy(messageSettings.id);
 }
@@ -1291,7 +1291,7 @@ export async function getMessageSettingByType(messageType: string) {
   const db = await getDb();
   if (!db) return undefined;
   
-  const { messageSettings } = await import('../drizzle/schema');
+  const { messageSettings } = await import('../../drizzle/schema');
   const result = await db.select().from(messageSettings).where(eq(messageSettings.messageType, messageType)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
@@ -1300,7 +1300,7 @@ export async function updateMessageSetting(data: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const { messageSettings } = await import('../drizzle/schema');
+  const { messageSettings } = await import('../../drizzle/schema');
   const { id, ...updateData } = data;
   return db.update(messageSettings).set(updateData).where(eq(messageSettings.id, id));
 }
@@ -1309,7 +1309,7 @@ export async function toggleMessageSettingEnabled(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const { messageSettings } = await import('../drizzle/schema');
+  const { messageSettings } = await import('../../drizzle/schema');
   
   // Get current value
   const current = await db.select().from(messageSettings).where(eq(messageSettings.id, id)).limit(1);
@@ -1338,7 +1338,7 @@ export async function getOfferLeadsPaginated(
   const offset = isShowAll ? 0 : (page - 1) * limit;
   
   // Import offerLeads and offers
-  const { offerLeads, offers } = await import('../drizzle/schema');
+  const { offerLeads, offers } = await import('../../drizzle/schema');
   
   // Build WHERE conditions for search and filters
   const whereConditions = [];
@@ -1485,7 +1485,7 @@ export async function getCampRegistrationsPaginated(
   const offset = isShowAll ? 0 : (page - 1) * limit;
   
   // Import campRegistrations and camps
-  const { campRegistrations, camps } = await import('../drizzle/schema');
+  const { campRegistrations, camps } = await import('../../drizzle/schema');
   
   // Build WHERE conditions for search and filters
   const whereConditions = [];
@@ -1645,7 +1645,7 @@ export async function getUserPreference(userId: number, preferenceKey: string) {
     return undefined;
   }
 
-  const { userPreferences } = await import("../drizzle/schema");
+  const { userPreferences } = await import("../../drizzle/schema");
   const result = await db
     .select()
     .from(userPreferences)
@@ -1665,7 +1665,7 @@ export async function setUserPreference(userId: number, preferenceKey: string, p
     return;
   }
 
-  const { userPreferences } = await import("../drizzle/schema");
+  const { userPreferences } = await import("../../drizzle/schema");
   
   // Check if preference exists
   const existing = await getUserPreference(userId, preferenceKey);
@@ -1696,7 +1696,7 @@ export async function getAllUserPreferences(userId: number) {
     return [];
   }
 
-  const { userPreferences } = await import("../drizzle/schema");
+  const { userPreferences } = await import("../../drizzle/schema");
   return await db
     .select()
     .from(userPreferences)

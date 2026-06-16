@@ -1,21 +1,21 @@
 import { protectedProcedure, publicProcedure, router, adminProcedure, requireWhatsAppFeature } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
-import * as db from "../db";
-import { meta } from "../MetaApiService";
+import * as db from "../database/db";
+import { meta } from "../api/MetaApiService";
 import { z } from "zod";
 import {
   sendWhatsAppTextMessage,
   getWhatsAppAPIStatus,
   formatPhoneNumber,
   sendWhatsAppTypingIndicator
-} from "../whatsappCloudAPI";
+} from "../services/whatsappCloudAPI";
 import {
   sendTextMessage,
   sendWelcomeMessage,
   sendBookingConfirmation,
   verifyWhatsAppHealth,
 } from "../services/whatsappService";
-import { normalizePhoneNumber } from "../db";
+import { normalizePhoneNumber } from "../database/db";
 // whatsappBot removed — using sendWhatsAppTextMessage (Cloud API) directly
 
 // Logging helper for sensitive operations
@@ -488,7 +488,7 @@ export const whatsappRouter = router({
           // Send message based on type
           if (input.mediaId && messageType !== "text") {
             // Send media message using mediaId
-            const { sendWhatsAppImageMessage, sendWhatsAppVideoMessage, sendWhatsAppAudioMessage, sendWhatsAppDocumentMessage } = await import("../whatsappCloudAPI");
+            const { sendWhatsAppImageMessage, sendWhatsAppVideoMessage, sendWhatsAppAudioMessage, sendWhatsAppDocumentMessage } = await import("../services/whatsappCloudAPI");
 
             if (messageType === "image") {
               result = await sendWhatsAppImageMessage(conv.phoneNumber, input.mediaId, input.message);
@@ -552,7 +552,7 @@ export const whatsappRouter = router({
         logOperation("uploadMedia", ctx.user.id, { mimeType: input.mimeType });
 
         try {
-          const { uploadWhatsAppMedia } = await import("../whatsappCloudAPI");
+          const { uploadWhatsAppMedia } = await import("../services/whatsappCloudAPI");
 
           const buffer = Buffer.from(input.fileBuffer, "base64");
           const result = await uploadWhatsAppMedia(buffer, input.mimeType);
@@ -975,7 +975,7 @@ sendTypingIndicator: protectedProcedure
       // حفظ الرسالة في المحادثة إذا نجح الإرسال
       if (result.success && input.conversationId) {
         try {
-          const { createWhatsAppMessage, updateWhatsAppConversation } = await import("../db");
+          const { createWhatsAppMessage, updateWhatsAppConversation } = await import("../database/db");
           const content = input.templateContent || `[قالب: ${input.templateName}]`;
           // حفظ بيانات القالب الكاملة في metadata
           const metadata = JSON.stringify({
@@ -1009,7 +1009,7 @@ sendTypingIndicator: protectedProcedure
   getTemplates: protectedProcedure.query(async () => {
     // جلب القوالب من قاعدة البيانات المحلية (بعد المزامنة مع Meta)
     const { whatsappTemplates } = await import("../../drizzle/schema");
-    const dbConn = await import("../db").then(m => m.getDb());
+    const dbConn = await import("../database/db").then(m => m.getDb());
     if (!dbConn) return { success: true, templates: [] };
     const templates = await dbConn.select().from(whatsappTemplates).orderBy(whatsappTemplates.name);
     return { success: true, templates };
@@ -1541,7 +1541,7 @@ sendTypingIndicator: protectedProcedure
   // ── تشغيل مهام التذكير يدوياً (للاختبار أو التشغيل الفوري) ─────────────────
   runReminderJobs: protectedProcedure
     .mutation(async () => {
-      const { runAppointmentReminderJobs } = await import("../cron/appointmentReminders");
+      const { runAppointmentReminderJobs } = await import("../tasks/cron/appointmentReminders");
       const result = await runAppointmentReminderJobs();
       return result;
     }),

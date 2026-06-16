@@ -1,11 +1,11 @@
 import { router, protectedProcedure } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { eq } from "drizzle-orm";
 import { whatsappTemplates } from "../../drizzle/schema";
 import * as whatsappTemplatesModule from "../services/whatsappTemplates";
-import { normalizePhoneNumber } from "../db";
+import { normalizePhoneNumber } from "../database/db";
 
 /**
  * WhatsApp Template Testing Router

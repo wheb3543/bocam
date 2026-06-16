@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { appointments, offerLeads, campRegistrations, doctors, offers, camps } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { dispatchWhatsAppMessage } from "../services/whatsappMessageDispatcher";
-import { serverCache, CacheKeys } from "../cache";
+import { serverCache, CacheKeys } from "../services/cache";
 
 /**
  * WhatsApp Webhook Router

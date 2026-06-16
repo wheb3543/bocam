@@ -6,10 +6,10 @@
  * ✅ متوافق مع وثائق Meta الرسمية v23.0
  */
 
-import { normalizePhoneNumber } from "../db";
-import { sendWhatsAppTextMessage } from "../whatsappCloudAPI";
+import { normalizePhoneNumber } from "../database/db";
+import { sendWhatsAppTextMessage } from "./whatsappCloudAPI";
 import { ENV } from "../_core/env";
-import { meta } from "../MetaApiService";
+import { meta } from "../api/MetaApiService";
 import { COMPANY_SLOGAN_AR } from "@shared/config";
 
 /**

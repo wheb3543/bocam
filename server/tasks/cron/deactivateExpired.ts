@@ -3,8 +3,8 @@
  * يقوم بإلغاء تنشيط العروض والمخيمات المنتهية تلقائياً
  */
 import { eq, and, lte } from "drizzle-orm";
-import { getDb } from "../db";
-import { offers, camps } from "../../drizzle/schema";
+import { getDb } from "../../database/db";
+import { offers, camps } from "../../../drizzle/schema";
 
 /**
  * Deactivate expired offers

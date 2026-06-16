@@ -1,6 +1,6 @@
 import { eq, and, gt, desc } from "drizzle-orm";
 import { getDb, normalizePhoneNumber } from "../db";
-import { patients, patientOtps, patientResults, appointments, offerLeads, campRegistrations, type Patient } from "../../drizzle/schema";
+import { patients, patientOtps, patientResults, appointments, offerLeads, campRegistrations, type Patient } from "../../../drizzle/schema";
 import bcrypt from "bcrypt";
 
 export type SafePatient = Omit<Patient, "password">;

@@ -9,11 +9,11 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { publicProcedure, protectedProcedure, router, requireCampsFeature } from '../_core/trpc';
-import { getDb } from '../db';
+import { getDb } from '../database/db';
 import { camps, campRegistrations } from '../../drizzle/schema';
 import { eq, and, desc, gte, lte, sql } from 'drizzle-orm';
 import { generateSlug, isValidSlug } from '../../shared/_core/utils/slug';
-import { serverCache, CacheKeys, CacheTTL } from '../cache';
+import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
 
 /**
  * Validation schema for creating/updating camps

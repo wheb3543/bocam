@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { getDb } from '../db';
+import { getDb } from '../database/db';
 import { pwaInstalls } from '../../drizzle/schema';
 import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
 import { desc, eq, count, sql, asc, gte } from 'drizzle-orm';

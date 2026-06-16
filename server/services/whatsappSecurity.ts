@@ -10,7 +10,7 @@
 
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { whatsappBlockedNumbers } from "../../drizzle/schema";
 
 // ── التحقق من حظر الرقم ──────────────────────────────────────────────────────

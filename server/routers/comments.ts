@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { getCommentsByEntity, addComment, deleteComment, getCommentCount } from "../comments";
+import { getCommentsByEntity, addComment, deleteComment, getCommentCount } from "../tasks/comments";
 
 export const commentsRouter = router({
   /**

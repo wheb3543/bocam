@@ -123,11 +123,16 @@ server/
 │   │   ├── whatsappBroadcast.ts
 │   │   └── ...
 │   └── meta/           # خدمات Meta
-├── db/                 # وظائف قاعدة البيانات
+├── database/           # وظائف قاعدة البيانات
+│   └── db/             # وظائف قاعدة البيانات
 ├── config/             # ملفات الإعداد
-├── cron/               # المهام المجدولة
-├── queues/             # طوابير BullMQ
-└── webhooks/           # معالجات webhooks
+├── tasks/              # المهام المجدولة
+│   └── cron/           # المهام المجدولة
+├── integrations/        # التكاملات الخارجية
+│   ├── queues/         # طوابير BullMQ
+│   └── webhooks/       # معالجات webhooks
+├── api/                # واجهات برمجة التطبيقات
+└── assets/             # الأصول الثابتة
 ```
 
 ### 3. قاعدة البيانات (Database)

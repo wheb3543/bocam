@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import multer from "multer";
 import jwt from "jsonwebtoken";
-import { storagePut } from "./storage";
+import { storagePut } from "../services/storage";
 import crypto from "crypto";
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {

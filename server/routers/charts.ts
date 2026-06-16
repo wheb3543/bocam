@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../_core/trpc";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { leads, appointments, offerLeads, campRegistrations, whatsappConversations, whatsappMessages } from "../../drizzle/schema";
 import { sql, count, eq, gte, lte, and } from "drizzle-orm";
 

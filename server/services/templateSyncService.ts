@@ -3,8 +3,8 @@
  * خدمة مزامنة حالة القوالب مع Meta API
  */
 
-import { meta } from "../MetaApiService";
-import { getDb } from "../db";
+import { meta } from "../api/MetaApiService";
+import { getDb } from "../database/db";
 import { messageTemplates, whatsappTemplates } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { eq, and, gte } from "drizzle-orm";
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { appointments } from "../../drizzle/schema";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import {
@@ -13,14 +13,14 @@ import {
   bulkUpdateAppointmentStatus,
   createCampaign,
   normalizePhoneNumber,
-} from "../db";
+} from "../database/db";
 import { notifyOwner } from "../_core/notification";
-import { sendNewAppointmentEmail } from "../email";
-import { sendWelcomeMessage } from "../whatsapp";
-import { sendNewAppointmentTelegram } from "../telegram";
-import { serverCache, CacheKeys, CacheTTL } from "../cache";
+import { sendNewAppointmentEmail } from "../services/email";
+import { sendWelcomeMessage } from "../services/whatsapp";
+import { sendNewAppointmentTelegram } from "../services/telegram";
+import { serverCache, CacheKeys, CacheTTL } from "../services/cache";
 import { createAuditLog } from "./auditLogs";
-import { sendAppointmentLeadEvent, sendStatusChangeEvent } from "../facebookCAPI";
+import { sendAppointmentLeadEvent, sendStatusChangeEvent } from "../api/facebookCAPI";
 // sendAppointmentConfirmation moved to dispatchWhatsAppMessage flow
 import { dispatchWhatsAppMessage } from "../services/whatsappMessageDispatcher";
 
@@ -273,7 +273,7 @@ export const appointmentsRouter = router({
         cacheKey,
         CacheTTL.PAGINATED,
         async () => {
-          const { getAppointmentsPaginated } = await import('../db');
+          const { getAppointmentsPaginated } = await import('../database/db');
           return getAppointmentsPaginated(
             input.page,
             input.limit,
@@ -440,7 +440,7 @@ export const appointmentsRouter = router({
       const doctor = await getDoctorById(appt.doctorId);
 
       // Send automated arrival welcome message
-      const { sendPatientArrivalWelcome, formatTimeForMessage } = await import("../messaging");
+      const { sendPatientArrivalWelcome, formatTimeForMessage } = await import("../services/messaging");
       const result = await sendPatientArrivalWelcome({
         phone: appt.phone,
         name: appt.fullName,

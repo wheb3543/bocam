@@ -8,20 +8,20 @@ import path from "path";
 import fs from "fs";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
-import { createUploadRouter } from "../uploadRoute";
-import { createWebhookRouter } from "../webhookRoutes";
-import { createWhatsAppSseRouter } from "../whatsappSse";
-import { appRouter } from "../routers";
+import { createUploadRouter } from "../api/uploadRoute";
+import { createWebhookRouter } from "../api/webhookRoutes";
+import { createWhatsAppSseRouter } from "../integrations/whatsappSse";
+import { appRouter } from "../routers/routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { initializeLicense } from "./license";
 import { initializeHeartbeat } from "./heartbeat";
 import { initializeUpdateChecker, getUpdateStatus, startManualUpdate, startManualRollback } from "./updateChecker";
 import { logActivity, logUpdate, updateUpdateLog, logBackup, updateBackupLog, createNotification } from "./activityLogger";
-import { cacheManager } from "../redis";
+import { cacheManager } from "../services/redis";
 import { CacheKeys, CacheTTL, cachedQuery } from "./cacheHelper";
 import { createBackup, getBackupHistory, restoreBackup, deleteBackup, BackupConfig } from "./backupManager";
-import { startBackupCronJobs, runManualBackup } from "../cron/backupJob";
+import { startBackupCronJobs, runManualBackup } from "../tasks/cron/backupJob";
 // import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -527,7 +527,7 @@ async function startServer() {
     // initSimpleCronScheduler(); // Disabled: Auto-deactivation feature removed per user request
 
     // Initialize WhatsApp appointment reminders scheduler (every 30 minutes)
-    import("../cron/appointmentReminders").then(({ initAppointmentRemindersScheduler }) => {
+    import("../tasks/cron/appointmentReminders").then(({ initAppointmentRemindersScheduler }) => {
       try {
         initAppointmentRemindersScheduler();
       } catch (error) {

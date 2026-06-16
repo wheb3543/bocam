@@ -11,8 +11,8 @@
 
 import { eq } from "drizzle-orm";
 import { whatsappTemplates } from "../../drizzle/schema";
-import { getDb } from "../db";
-import { meta } from "../MetaApiService";
+import { getDb } from "../database/db";
+import { meta } from "../api/MetaApiService";
 
 interface MetaTemplate {
   id?: string;

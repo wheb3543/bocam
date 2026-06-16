@@ -1,4 +1,4 @@
-import { getDb } from "../db";
+import { getDb } from "../database/db";
 import { sql } from "drizzle-orm";
 
 interface ActivityLog {

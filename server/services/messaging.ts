@@ -1,4 +1,4 @@
-import { getMessageSettingByType } from "./db";
+import { getMessageSettingByType } from "../database/db";
 
 /**
  * Replace variables in message template
@@ -60,7 +60,7 @@ export async function sendBookingConfirmationInteractive(data: {
       camp: "CAMP",
     };
     
-    const { queueWhatsAppMessage } = await import("./queues/whatsappQueue");
+    const { queueWhatsAppMessage } = await import("../integrations/queues/whatsappQueue");
     
     const jobId = await queueWhatsAppMessage({
       to: data.phone,
@@ -239,7 +239,7 @@ export async function sendOfferBookingConfirmationInteractive(data: {
   if (isWhatsAppBusinessAPIConfigured()) {
     console.log("[Messaging] Adding offer booking confirmation to WhatsApp Queue");
     
-    const { queueWhatsAppMessage } = await import("./queues/whatsappQueue");
+    const { queueWhatsAppMessage } = await import("../integrations/queues/whatsappQueue");
     
     const jobId = await queueWhatsAppMessage({
       to: data.phone,
@@ -386,7 +386,7 @@ export async function sendCampRegistrationConfirmationInteractive(data: {
   if (isWhatsAppBusinessAPIConfigured()) {
     console.log("[Messaging] Adding camp registration confirmation to WhatsApp Queue");
     
-    const { queueWhatsAppMessage } = await import("./queues/whatsappQueue");
+    const { queueWhatsAppMessage } = await import("../integrations/queues/whatsappQueue");
     
     const jobId = await queueWhatsAppMessage({
       to: data.phone,

@@ -13,9 +13,9 @@
  */
 
 import { eq, and } from "drizzle-orm";
-import { getDb, getWhatsAppConversationByPhone, createWhatsAppConversation, createWhatsAppMessage, updateWhatsAppConversation, normalizePhoneNumber } from "../db";
+import { getDb, getWhatsAppConversationByPhone, createWhatsAppConversation, createWhatsAppMessage, updateWhatsAppConversation, normalizePhoneNumber } from "../database/db";
 import { messageSettings, whatsappTemplates, whatsappNotifications } from "../../drizzle/schema";
-import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from "../whatsappCloudAPI";
+import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from "./whatsappCloudAPI";
 
 export type EntityType = "appointment" | "camp_registration" | "offer_lead";
 export type TriggerEvent =

@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import { protectedProcedure, router } from '../_core/trpc';
-import { getDb } from '../db';
+import { getDb } from '../database/db';
 import { auditLogs } from '../../drizzle/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
 
