@@ -1,14 +1,17 @@
-import { useMemo } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { leadStatusLabels as statusLabels, leadStatusColors as statusColors } from "@/hooks/data/useStatusLabels";
-import LeadCard from "@/components/lead/LeadCard";
-import LeadStatsCards from "@/components/lead/LeadStatsCards";
-import MultiSelect from "@/components/form/MultiSelect";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useMemo } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import {
+  leadStatusLabels as statusLabels,
+  leadStatusColors as statusColors,
+} from '@/hooks/data/useStatusLabels';
+import LeadCard from '@/components/lead/LeadCard';
+import LeadStatsCards from '@/components/lead/LeadStatsCards';
+import MultiSelect from '@/components/form/MultiSelect';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -16,26 +19,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Users,
-  Search,
-  TrendingUp,
-  Phone,
-  Loader2,
-  Download,
-} from "lucide-react";
-import { toast } from "sonner";
-import { exportToExcel, formatLeadsForExport } from "@/lib/export/exportToExcel";
-import { SOURCE_OPTIONS, SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+} from '@/components/ui/select';
+import { Users, Search, TrendingUp, Phone, Loader2, Download } from 'lucide-react';
+import { toast } from 'sonner';
+import { exportToExcel, formatLeadsForExport } from '@/lib/export/exportToExcel';
+import { SOURCE_OPTIONS, SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 interface LeadsTabProps {
   leadsFilter: any;
@@ -47,7 +43,7 @@ interface LeadsTabProps {
 const sanitizeLead = (lead: any) => {
   if (!lead) return null;
   const sanitized = { ...lead };
-  Object.keys(sanitized).forEach(key => {
+  Object.keys(sanitized).forEach((key) => {
     const value = sanitized[key];
     if (value === undefined || value === null || (typeof value === 'number' && isNaN(value))) {
       delete sanitized[key];
@@ -73,9 +69,9 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
 
   const filteredLeads = useMemo(() => {
     if (!unifiedLeads) return [];
-    
+
     let filtered = unifiedLeads;
-    
+
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -85,20 +81,20 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
           (lead.email && lead.email.toLowerCase().includes(term))
       );
     }
-    
-    if (leadsDateFilter && leadsDateFilter !== "all") {
+
+    if (leadsDateFilter && leadsDateFilter !== 'all') {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
+
       filtered = filtered.filter((lead: any) => {
         const leadDate = new Date(lead.createdAt);
-        if (leadsDateFilter === "today") return leadDate >= today;
-        if (leadsDateFilter === "week") {
+        if (leadsDateFilter === 'today') return leadDate >= today;
+        if (leadsDateFilter === 'week') {
           const weekAgo = new Date(today);
           weekAgo.setDate(weekAgo.getDate() - 7);
           return leadDate >= weekAgo;
         }
-        if (leadsDateFilter === "month") {
+        if (leadsDateFilter === 'month') {
           const monthAgo = new Date(today);
           monthAgo.setMonth(monthAgo.getMonth() - 1);
           return leadDate >= monthAgo;
@@ -106,26 +102,26 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
         return true;
       });
     }
-    
+
     if (leadsStatusFilter && leadsStatusFilter.length > 0) {
       filtered = filtered.filter((lead: any) => leadsStatusFilter.includes(lead.status));
     }
-    
+
     if (leadsSourceFilter && leadsSourceFilter.length > 0) {
       filtered = filtered.filter((lead: any) => leadsSourceFilter.includes(lead.source));
     }
-    
+
     return filtered;
   }, [unifiedLeads, searchTerm, leadsDateFilter, leadsStatusFilter, leadsSourceFilter]);
 
   const handleExportLeads = () => {
     if (!filteredLeads || filteredLeads.length === 0) {
-      toast.error("لا توجد بيانات للتصدير");
+      toast.error('لا توجد بيانات للتصدير');
       return;
     }
     const formattedData = formatLeadsForExport(filteredLeads);
-    exportToExcel(formattedData, "تسجيلات_العملاء");
-    toast.success("تم تصدير البيانات بنجاح");
+    exportToExcel(formattedData, 'تسجيلات_العملاء');
+    toast.success('تم تصدير البيانات بنجاح');
   };
 
   return (
@@ -141,21 +137,37 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Button
-                variant={leadsStatusFilter.includes("new") && leadsStatusFilter.length === 1 ? "default" : "outline"}
+                variant={
+                  leadsStatusFilter.includes('new') && leadsStatusFilter.length === 1
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setLeadsStatusFilter(leadsStatusFilter.includes("new") && leadsStatusFilter.length === 1 ? [] : ["new"])}
+                onClick={() =>
+                  setLeadsStatusFilter(
+                    leadsStatusFilter.includes('new') && leadsStatusFilter.length === 1
+                      ? []
+                      : ['new']
+                  )
+                }
                 className="gap-2 h-9 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white border-0"
               >
                 <TrendingUp className="h-4 w-4" />
-                {leadsStatusFilter.includes("new") && leadsStatusFilter.length === 1 ? "عرض الكل" : "المعلقة فقط"}
-                {!(leadsStatusFilter.includes("new") && leadsStatusFilter.length === 1) && pendingCount > 0 && (
-                  <Badge variant="secondary" className="mr-1 bg-white dark:bg-card text-orange-600">
-                    {pendingCount}
-                  </Badge>
-                )}
+                {leadsStatusFilter.includes('new') && leadsStatusFilter.length === 1
+                  ? 'عرض الكل'
+                  : 'المعلقة فقط'}
+                {!(leadsStatusFilter.includes('new') && leadsStatusFilter.length === 1) &&
+                  pendingCount > 0 && (
+                    <Badge
+                      variant="secondary"
+                      className="mr-1 bg-white dark:bg-card text-orange-600"
+                    >
+                      {pendingCount}
+                    </Badge>
+                  )}
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
               <div className="relative sm:col-span-2 lg:col-span-1">
                 <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -197,12 +209,7 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                 placeholder="كل المصادر"
                 className="h-9"
               />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportLeads}
-                className="gap-2 h-9"
-              >
+              <Button variant="outline" size="sm" onClick={handleExportLeads} className="gap-2 h-9">
                 <Download className="h-4 w-4" />
                 <span className="hidden sm:inline">تصدير</span>
               </Button>
@@ -216,9 +223,7 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : filteredLeads.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                لا توجد تسجيلات
-              </div>
+              <div className="text-center py-8 text-muted-foreground">لا توجد تسجيلات</div>
             ) : (
               filteredLeads.map((lead: any) => (
                 <LeadCard
@@ -247,7 +252,9 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                   <TableHead>الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className={!leadsLoading && filteredLeads.length > 0 ? 'stagger-rows' : ''}>
+              <TableBody
+                className={!leadsLoading && filteredLeads.length > 0 ? 'stagger-rows' : ''}
+              >
                 {leadsLoading ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
@@ -262,7 +269,7 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                   </TableRow>
                 ) : (
                   filteredLeads.map((lead: any) => (
-                    <TableRow 
+                    <TableRow
                       key={`lead-${lead.id}`}
                       className={lead.status === 'pending' ? 'bg-red-50 hover:bg-red-100' : ''}
                     >
@@ -270,7 +277,10 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span className="font-mono">{formatPhoneDisplay(lead.phone)}</span>
-                          <a href={`tel:${formatPhoneDisplay(lead.phone)}`} className="text-primary hover:underline">
+                          <a
+                            href={`tel:${formatPhoneDisplay(lead.phone)}`}
+                            className="text-primary hover:underline"
+                          >
                             <Phone className="h-4 w-4" />
                           </a>
                         </div>
@@ -286,11 +296,13 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                       </TableCell>
                       <TableCell>
                         {lead.source ? (
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className="text-xs font-medium"
                             style={{
-                              backgroundColor: SOURCE_COLORS[lead.source] ? `${SOURCE_COLORS[lead.source]}15` : undefined,
+                              backgroundColor: SOURCE_COLORS[lead.source]
+                                ? `${SOURCE_COLORS[lead.source]}15`
+                                : undefined,
                               borderColor: SOURCE_COLORS[lead.source] || undefined,
                               color: SOURCE_COLORS[lead.source] || undefined,
                             }}
@@ -306,9 +318,7 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                           {statusLabels[lead.status as keyof typeof statusLabels]}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        {formatDate(lead.createdAt)}
-                      </TableCell>
+                      <TableCell>{formatDate(lead.createdAt)}</TableCell>
                       <TableCell>
                         <Button
                           variant="outline"

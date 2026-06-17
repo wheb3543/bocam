@@ -10,16 +10,16 @@
  * وفق: https://developers.facebook.com/documentation/business-messaging/whatsapp/message-types/template-messages
  */
 
-import { eq, notInArray } from "drizzle-orm";
-import { normalizePhoneNumber } from "../database/db";
-import { getDb } from "../database/db";
-import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from "./whatsappCloudAPI";
-import { meta } from "../api/MetaApiService";
-import { ENV } from "../_core/env";
-import { whatsappTemplates } from "../../drizzle/schema";
+import { eq, notInArray } from 'drizzle-orm';
+import { normalizePhoneNumber } from '../database/db';
+import { getDb } from '../database/db';
+import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from './whatsappCloudAPI';
+import { meta } from '../api/MetaApiService';
+import { ENV } from '../_core/env';
+import { whatsappTemplates } from '../../drizzle/schema';
 
 export interface TemplateParameter {
-  type: "text" | "image" | "document" | "video";
+  type: 'text' | 'image' | 'document' | 'video';
   value: string;
 }
 
@@ -36,32 +36,29 @@ export async function sendTemplateMessage(params: {
   try {
     const normalizedPhone = normalizePhoneNumber(params.phone);
     if (!normalizedPhone || normalizedPhone.length < 9) {
-      return { success: false, error: "Invalid phone number format" };
+      return { success: false, error: 'Invalid phone number format' };
     }
 
     // بناء components للقالب وفق بنية Meta الرسمية
     const components: any[] = [];
     if (params.parameters && params.parameters.length > 0) {
       components.push({
-        type: "body",
+        type: 'body',
         parameters: params.parameters.map((p) => ({
           type: p.type,
-          text: p.type === "text" ? p.value : undefined,
-          image: p.type === "image" ? { link: p.value } : undefined,
-          document: p.type === "document" ? { link: p.value } : undefined,
-          video: p.type === "video" ? { link: p.value } : undefined,
+          text: p.type === 'text' ? p.value : undefined,
+          image: p.type === 'image' ? { link: p.value } : undefined,
+          document: p.type === 'document' ? { link: p.value } : undefined,
+          video: p.type === 'video' ? { link: p.value } : undefined,
         })),
       });
     }
 
-    const result = await sendWhatsAppTemplateMessage(
-      normalizedPhone,
-      {
-        templateName: params.templateName,
-        languageCode: params.language || "ar",
-        components,
-      }
-    );
+    const result = await sendWhatsAppTemplateMessage(normalizedPhone, {
+      templateName: params.templateName,
+      languageCode: params.language || 'ar',
+      components,
+    });
 
     return {
       success: result.success,
@@ -69,10 +66,10 @@ export async function sendTemplateMessage(params: {
       error: result.error,
     };
   } catch (error) {
-    console.error("[WhatsApp Templates] Failed to send template:", error);
+    console.error('[WhatsApp Templates] Failed to send template:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -93,39 +90,42 @@ export async function syncTemplatesFromMeta(): Promise<{
     const wabaId = ENV.whatsappBusinessAccountId;
 
     if (!wabaId) {
-      return { success: false, error: "WHATSAPP_BUSINESS_ACCOUNT_ID not configured" };
+      return { success: false, error: 'WHATSAPP_BUSINESS_ACCOUNT_ID not configured' };
     }
 
     // جلب القوالب من Meta - الاستجابة تكون {data: {data: [...], paging: {...}}}
     const response = await meta.get(`${wabaId}/message_templates`, {
-      fields: "id,name,status,language,category,components,quality_score,rejected_reason",
-      limit: "250",
+      fields: 'id,name,status,language,category,components,quality_score,rejected_reason',
+      limit: '250',
     });
 
     if (!response.ok) {
-      console.error("[WhatsApp Templates] Meta API error:", response.error);
+      console.error('[WhatsApp Templates] Meta API error:', response.error);
       return {
         success: false,
-        error: response.error?.message || "Failed to fetch templates from Meta",
+        error: response.error?.message || 'Failed to fetch templates from Meta',
       };
     }
 
     // Meta تُرجع {data: [...]} والمصفوفة تكون response.data.data
     const templates: any[] = response.data?.data ?? [];
-    console.log(`[WhatsApp Templates] Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`);
+    console.log(
+      `[WhatsApp Templates] Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`
+    );
 
     if (templates.length === 0) {
       return {
         success: true,
         synced: 0,
         updated: 0,
-        message: "لم يتم العثور على قوالب في Meta. تأكد من صحة WHATSAPP_BUSINESS_ACCOUNT_ID وصلاحية META_ACCESS_TOKEN",
+        message:
+          'لم يتم العثور على قوالب في Meta. تأكد من صحة WHATSAPP_BUSINESS_ACCOUNT_ID وصلاحية META_ACCESS_TOKEN',
       };
     }
 
     const db = await getDb();
     if (!db) {
-      return { success: false, error: "لا يمكن الاتصال بقاعدة البيانات" };
+      return { success: false, error: 'لا يمكن الاتصال بقاعدة البيانات' };
     }
 
     let synced = 0;
@@ -135,7 +135,7 @@ export async function syncTemplatesFromMeta(): Promise<{
     for (const template of templates) {
       try {
         // استخراج محتوى الجسم والمتغيرات والأزرار
-        let content = "";
+        let content = '';
         let variables: string[] = [];
         let headerText: string | null = null;
         let footerText: string | null = null;
@@ -143,26 +143,26 @@ export async function syncTemplatesFromMeta(): Promise<{
 
         if (template.components) {
           for (const component of template.components) {
-            if (component.type === "HEADER" && component.text) {
+            if (component.type === 'HEADER' && component.text) {
               headerText = component.text;
-            } else if (component.type === "BODY" && component.text) {
+            } else if (component.type === 'BODY' && component.text) {
               content = component.text;
               const positional = component.text.match(/\{\{(\d+)\}\}/g) || [];
               const named = component.text.match(/\{\{([a-z_]+)\}\}/g) || [];
-              variables = [...positional, ...named].map((m: string) => m.replace(/[{}]/g, ""));
-            } else if (component.type === "FOOTER" && component.text) {
+              variables = [...positional, ...named].map((m: string) => m.replace(/[{}]/g, ''));
+            } else if (component.type === 'FOOTER' && component.text) {
               footerText = component.text;
-            } else if (component.type === "BUTTONS" && component.buttons) {
+            } else if (component.type === 'BUTTONS' && component.buttons) {
               buttons = component.buttons;
             }
           }
         }
 
         // تحديد الفئة - استخدام فئة Meta مباشرة
-        const validCategories = ["MARKETING", "UTILITY", "AUTHENTICATION"];
+        const validCategories = ['MARKETING', 'UTILITY', 'AUTHENTICATION'];
         const category = validCategories.includes(template.category?.toUpperCase())
-          ? (template.category.toUpperCase() as "MARKETING" | "UTILITY" | "AUTHENTICATION")
-          : "UTILITY";
+          ? (template.category.toUpperCase() as 'MARKETING' | 'UTILITY' | 'AUTHENTICATION')
+          : 'UTILITY';
 
         // التحقق من وجود القالب بالاسم
         const existing = await db
@@ -211,8 +211,8 @@ export async function syncTemplatesFromMeta(): Promise<{
           synced++;
         }
       } catch (err) {
-        const errMsg = `فشل معالجة القالب ${template.name}: ${err instanceof Error ? err.message : "خطأ غير معروف"}`;
-        console.error("[WhatsApp Templates]", errMsg);
+        const errMsg = `فشل معالجة القالب ${template.name}: ${err instanceof Error ? err.message : 'خطأ غير معروف'}`;
+        console.error('[WhatsApp Templates]', errMsg);
         errors.push(errMsg);
       }
     }
@@ -240,7 +240,7 @@ export async function syncTemplatesFromMeta(): Promise<{
           console.log(`[WhatsApp Templates] Deleted ${deleted} local templates not found in Meta`);
         }
       } catch (delErr) {
-        console.error("[WhatsApp Templates] Failed to delete stale templates:", delErr);
+        console.error('[WhatsApp Templates] Failed to delete stale templates:', delErr);
       }
     }
 
@@ -250,13 +250,13 @@ export async function syncTemplatesFromMeta(): Promise<{
       synced,
       updated,
       deleted,
-      message: `تمت مزامنة ${totalProcessed} قالب من Meta (جديد: ${synced}, محدّث: ${updated}, محذوف: ${deleted})${errors.length > 0 ? ` - ${errors.length} أخطاء` : ""}`,
+      message: `تمت مزامنة ${totalProcessed} قالب من Meta (جديد: ${synced}, محدّث: ${updated}, محذوف: ${deleted})${errors.length > 0 ? ` - ${errors.length} أخطاء` : ''}`,
     };
   } catch (error) {
-    console.error("[WhatsApp Templates] Failed to sync templates:", error);
+    console.error('[WhatsApp Templates] Failed to sync templates:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -275,16 +275,16 @@ export async function createTemplate(params: {
     const wabaId = ENV.whatsappBusinessAccountId;
 
     if (!wabaId) {
-      return { success: false, error: "WHATSAPP_BUSINESS_ACCOUNT_ID not configured" };
+      return { success: false, error: 'WHATSAPP_BUSINESS_ACCOUNT_ID not configured' };
     }
 
     const response: any = await meta.post(`/${wabaId}/message_templates`, {
       name: params.name,
-      language: params.language || "ar",
+      language: params.language || 'ar',
       category: params.category.toUpperCase(),
       components: [
         {
-          type: "BODY",
+          type: 'BODY',
           text: params.content,
         },
       ],
@@ -295,10 +295,10 @@ export async function createTemplate(params: {
       templateId: response.id || `template_${Date.now()}`,
     };
   } catch (error) {
-    console.error("[WhatsApp Templates] Failed to create template:", error);
+    console.error('[WhatsApp Templates] Failed to create template:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -317,7 +317,7 @@ export async function updateTemplate(
   try {
     const updateData: any = {};
     if (params.content) {
-      updateData.components = [{ type: "BODY", text: params.content }];
+      updateData.components = [{ type: 'BODY', text: params.content }];
     }
     if (params.category) {
       updateData.category = params.category.toUpperCase();
@@ -327,10 +327,10 @@ export async function updateTemplate(
 
     return { success: true };
   } catch (error) {
-    console.error("[WhatsApp Templates] Failed to update template:", error);
+    console.error('[WhatsApp Templates] Failed to update template:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -346,17 +346,17 @@ export async function deleteTemplate(
     const wabaId = ENV.whatsappBusinessAccountId;
 
     if (!wabaId) {
-      return { success: false, error: "WHATSAPP_BUSINESS_ACCOUNT_ID not configured" };
+      return { success: false, error: 'WHATSAPP_BUSINESS_ACCOUNT_ID not configured' };
     }
 
     await meta.delete(`/${wabaId}/message_templates?hsm_id=${templateId}`);
 
     return { success: true };
   } catch (error) {
-    console.error("[WhatsApp Templates] Failed to delete template:", error);
+    console.error('[WhatsApp Templates] Failed to delete template:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -373,7 +373,7 @@ export async function getAvailableTemplates(): Promise<{
     const wabaId = ENV.whatsappBusinessAccountId;
 
     if (!wabaId) {
-      return { success: false, error: "WHATSAPP_BUSINESS_ACCOUNT_ID not configured" };
+      return { success: false, error: 'WHATSAPP_BUSINESS_ACCOUNT_ID not configured' };
     }
 
     const response = await meta.get(
@@ -385,10 +385,10 @@ export async function getAvailableTemplates(): Promise<{
       templates: response.data || [],
     };
   } catch (error) {
-    console.error("[WhatsApp Templates] Failed to get templates:", error);
+    console.error('[WhatsApp Templates] Failed to get templates:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -405,7 +405,7 @@ export async function getTemplateStatus(templateName: string): Promise<{
     const wabaId = ENV.whatsappBusinessAccountId;
 
     if (!wabaId) {
-      return { success: false, error: "WHATSAPP_BUSINESS_ACCOUNT_ID not configured" };
+      return { success: false, error: 'WHATSAPP_BUSINESS_ACCOUNT_ID not configured' };
     }
 
     const response = await meta.get(
@@ -415,13 +415,13 @@ export async function getTemplateStatus(templateName: string): Promise<{
     const template = response.data?.[0];
     return {
       success: true,
-      status: template?.status || "UNKNOWN",
+      status: template?.status || 'UNKNOWN',
     };
   } catch (error) {
-    console.error("[WhatsApp Templates] Failed to get template status:", error);
+    console.error('[WhatsApp Templates] Failed to get template status:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -432,58 +432,58 @@ export async function getTemplateStatus(templateName: string): Promise<{
  */
 export async function sendMediaMessage(params: {
   phone: string;
-  mediaType: "image" | "video" | "document" | "audio";
+  mediaType: 'image' | 'video' | 'document' | 'audio';
   mediaUrl: string;
   caption?: string;
 }): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     const normalizedPhone = normalizePhoneNumber(params.phone);
     if (!normalizedPhone || normalizedPhone.length < 9) {
-      return { success: false, error: "Invalid phone number format" };
+      return { success: false, error: 'Invalid phone number format' };
     }
 
     const phoneNumberId = ENV.whatsappPhoneNumberId;
 
     if (!phoneNumberId) {
-      return { success: false, error: "WHATSAPP_PHONE_NUMBER_ID not configured" };
+      return { success: false, error: 'WHATSAPP_PHONE_NUMBER_ID not configured' };
     }
 
     // بناء payload وفق بنية Meta الرسمية للوسائط
     const mediaPayload: any = {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
       to: normalizedPhone,
       type: params.mediaType,
     };
 
     switch (params.mediaType) {
-      case "image":
+      case 'image':
         mediaPayload.image = { link: params.mediaUrl, caption: params.caption };
         break;
-      case "video":
+      case 'video':
         mediaPayload.video = { link: params.mediaUrl, caption: params.caption };
         break;
-      case "document":
+      case 'document':
         mediaPayload.document = { link: params.mediaUrl, caption: params.caption };
         break;
-      case "audio":
+      case 'audio':
         mediaPayload.audio = { link: params.mediaUrl };
         break;
       default:
-        return { success: false, error: "Unsupported media type" };
+        return { success: false, error: 'Unsupported media type' };
     }
 
     const response: any = await meta.post(`/${phoneNumberId}/messages`, mediaPayload);
 
     return {
       success: true,
-      messageId: response.messages?.[0]?.id || "media_sent",
+      messageId: response.messages?.[0]?.id || 'media_sent',
     };
   } catch (error) {
-    console.error("[WhatsApp Templates] Failed to send media message:", error);
+    console.error('[WhatsApp Templates] Failed to send media message:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }

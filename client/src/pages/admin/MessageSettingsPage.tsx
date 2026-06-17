@@ -1,39 +1,65 @@
-import { useState, useMemo } from "react";
-import { trpc } from "@/lib/api/trpc";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useMemo } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter,
-  DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
-  Loader2, MessageSquare, Settings, Save, Eye, Send, BarChart2,
-  Clock, CheckCircle2, XCircle, AlertCircle, RefreshCw,
-  Activity, History, Bell, Filter, Search, Calendar,
-  TrendingUp, Users, Zap, Shield,
-} from "lucide-react";
-import { toast } from "sonner";
-import { formatDistanceToNow, format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { processPhoneInput } from "@/hooks/form/usePhoneFormat";
+  Loader2,
+  MessageSquare,
+  Settings,
+  Save,
+  Eye,
+  Send,
+  BarChart2,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
+  Activity,
+  History,
+  Bell,
+  Filter,
+  Search,
+  Calendar,
+  TrendingUp,
+  Users,
+  Zap,
+  Shield,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { formatDistanceToNow, format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { processPhoneInput } from '@/hooks/form/usePhoneFormat';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const categoryLabels: Record<string, string> = {
-  patient_journey: "رحلة المريض",
-  executive_reports: "تقارير الإدارة",
-  task_management: "إدارة الفريق",
-  doctor_notifications: "إشعارات الأطباء",
+  patient_journey: 'رحلة المريض',
+  executive_reports: 'تقارير الإدارة',
+  task_management: 'إدارة الفريق',
+  doctor_notifications: 'إشعارات الأطباء',
 };
 
 const categoryIcons: Record<string, any> = {
@@ -44,20 +70,20 @@ const categoryIcons: Record<string, any> = {
 };
 
 const deliveryChannelLabels: Record<string, string> = {
-  whatsapp_api: "WhatsApp Business API",
-  whatsapp_integration: "WhatsApp Integration",
-  both: "كلاهما",
+  whatsapp_api: 'WhatsApp Business API',
+  whatsapp_integration: 'WhatsApp Integration',
+  both: 'كلاهما',
 };
 
 const triggerEventLabels: Record<string, string> = {
-  on_booking: "عند الحجز",
-  on_registration: "عند التسجيل",
-  on_confirmed: "عند التأكيد",
-  on_attended: "عند الحضور",
-  on_completed: "عند الاكتمال",
-  on_cancelled: "عند الإلغاء",
-  reminder_24h: "تذكير 24 ساعة",
-  reminder_1h: "تذكير ساعة",
+  on_booking: 'عند الحجز',
+  on_registration: 'عند التسجيل',
+  on_confirmed: 'عند التأكيد',
+  on_attended: 'عند الحضور',
+  on_completed: 'عند الاكتمال',
+  on_cancelled: 'عند الإلغاء',
+  reminder_24h: 'تذكير 24 ساعة',
+  reminder_1h: 'تذكير ساعة',
 };
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
@@ -70,85 +96,91 @@ export default function MessageSettingsPage() {
 }
 
 function MessageSettingsContent() {
-  const [activeTab, setActiveTab] = useState("settings");
-  const [selectedCategory, setSelectedCategory] = useState("patient_journey");
+  const [activeTab, setActiveTab] = useState('settings');
+  const [selectedCategory, setSelectedCategory] = useState('patient_journey');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
-  const [editedContent, setEditedContent] = useState("");
-  const [editedChannel, setEditedChannel] = useState("whatsapp_integration");
+  const [editedContent, setEditedContent] = useState('');
+  const [editedChannel, setEditedChannel] = useState('whatsapp_integration');
   const [editedTemplateId, setEditedTemplateId] = useState<number | null>(null);
   const [templatesLoading, setTemplatesLoading] = useState(false);
-  const [testPhone, setTestPhone] = useState("");
-  const [auditSearch, setAuditSearch] = useState("");
+  const [testPhone, setTestPhone] = useState('');
+  const [auditSearch, setAuditSearch] = useState('');
 
   // Queries
   const { data: allMessages, isLoading, refetch } = trpc.messageSettings.list.useQuery();
   const { data: metaTemplates } = trpc.whatsapp.getTemplates.useQuery(undefined, {
-    select: (data: any) => (data?.templates || []).filter((t: any) => t.metaStatus === 'APPROVED' && t.isActive === 1),
+    select: (data: any) =>
+      (data?.templates || []).filter((t: any) => t.metaStatus === 'APPROVED' && t.isActive === 1),
   });
   const { data: auditLogs, isLoading: auditLoading } = trpc.whatsapp.getAuditLogs.useQuery(
     { limit: 50 },
-    { enabled: activeTab === "audit" }
+    { enabled: activeTab === 'audit' }
   );
-  const { data: auditStats } = trpc.whatsapp.getAuditStats.useQuery(
-    undefined,
-    { enabled: activeTab === "stats" || activeTab === "audit" }
-  );
-  const { data: scheduledTasks } = trpc.whatsapp.getScheduledTasks.useQuery(
-    undefined,
-    { enabled: activeTab === "scheduler" }
-  );
+  const { data: auditStats } = trpc.whatsapp.getAuditStats.useQuery(undefined, {
+    enabled: activeTab === 'stats' || activeTab === 'audit',
+  });
+  const { data: scheduledTasks } = trpc.whatsapp.getScheduledTasks.useQuery(undefined, {
+    enabled: activeTab === 'scheduler',
+  });
 
   // Mutations
   const updateMutation = trpc.messageSettings.update.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث إعدادات الرسالة بنجاح");
+      toast.success('تم تحديث إعدادات الرسالة بنجاح');
       refetch();
       setEditDialogOpen(false);
     },
-    onError: () => toast.error("حدث خطأ أثناء التحديث"),
+    onError: () => toast.error('حدث خطأ أثناء التحديث'),
   });
 
   const toggleMutation = trpc.messageSettings.toggleEnabled.useMutation({
-    onSuccess: () => { toast.success("تم تحديث حالة الرسالة"); refetch(); },
-    onError: () => toast.error("حدث خطأ أثناء التحديث"),
+    onSuccess: () => {
+      toast.success('تم تحديث حالة الرسالة');
+      refetch();
+    },
+    onError: () => toast.error('حدث خطأ أثناء التحديث'),
   });
 
   const sendTemplateMutation = trpc.whatsapp.sendTemplate.useMutation({
     onSuccess: () => {
-      toast.success("✅ تم إرسال رسالة الاختبار بنجاح!");
+      toast.success('✅ تم إرسال رسالة الاختبار بنجاح!');
       setTestDialogOpen(false);
-      setTestPhone("");
+      setTestPhone('');
     },
     onError: (error: any) => toast.error(`فشل الإرسال: ${error?.message || 'خطأ'}`),
   });
 
   const stopTaskMutation = trpc.whatsapp.stopTask.useMutation({
-    onSuccess: () => toast.success("تم إيقاف المهمة"),
-    onError: () => toast.error("فشل إيقاف المهمة"),
+    onSuccess: () => toast.success('تم إيقاف المهمة'),
+    onError: () => toast.error('فشل إيقاف المهمة'),
   });
 
   const resumeTaskMutation = trpc.whatsapp.resumeTask.useMutation({
-    onSuccess: () => toast.success("تم استئناف المهمة"),
-    onError: () => toast.error("فشل استئناف المهمة"),
+    onSuccess: () => toast.success('تم استئناف المهمة'),
+    onError: () => toast.error('فشل استئناف المهمة'),
   });
 
   const syncTemplatesMutation = trpc.whatsapp.templates.syncStatus.useMutation({
     onSuccess: (result) => {
-      if (result.success && "messageTemplates" in result && "whatsappTemplates" in result) {
-        toast.success(`تم مزامنة ${result.messageTemplates.synced + result.whatsappTemplates.synced} قالب`);
+      if (result.success && 'messageTemplates' in result && 'whatsappTemplates' in result) {
+        toast.success(
+          `تم مزامنة ${result.messageTemplates.synced + result.whatsappTemplates.synced} قالب`
+        );
       } else {
-        toast.error("فشلت المزامنة");
+        toast.error('فشلت المزامنة');
       }
       refetch();
     },
-    onError: () => toast.error("فشلت المزامنة"),
+    onError: () => toast.error('فشلت المزامنة'),
   });
 
   // Handlers
-  const filteredMessages = Array.isArray(allMessages) ? allMessages.filter((msg: any) => msg.category === selectedCategory) : [];
+  const filteredMessages = Array.isArray(allMessages)
+    ? allMessages.filter((msg: any) => msg.category === selectedCategory)
+    : [];
 
   const handleEdit = (message: any) => {
     setSelectedMessage(message);
@@ -183,20 +215,23 @@ function MessageSettingsContent() {
   };
 
   const handleSendTest = () => {
-    if (!testPhone.trim()) { toast.error("يرجى إدخال رقم الهاتف"); return; }
+    if (!testPhone.trim()) {
+      toast.error('يرجى إدخال رقم الهاتف');
+      return;
+    }
     // Send a test using the message content as text
-    toast.info("جاري إرسال رسالة الاختبار...");
+    toast.info('جاري إرسال رسالة الاختبار...');
     setTestDialogOpen(false);
-    setTestPhone("");
+    setTestPhone('');
   };
 
   const renderMessageWithVariables = (content: string, variables: string) => {
     let rendered = content;
     try {
-      const vars = JSON.parse(variables || "[]");
+      const vars = JSON.parse(variables || '[]');
       vars.forEach((v: string) => {
         rendered = rendered.replace(
-          new RegExp(`\\{${v}\\}`, "g"),
+          new RegExp(`\\{${v}\\}`, 'g'),
           `<span class="text-purple-600 font-semibold bg-purple-50 px-1 rounded">{${v}}</span>`
         );
       });
@@ -220,10 +255,11 @@ function MessageSettingsContent() {
   const filteredAuditLogs = useMemo(() => {
     if (!auditLogsArray.length) return [];
     if (!auditSearch) return auditLogsArray;
-    return auditLogsArray.filter((log: any) =>
-      log.phone?.includes(auditSearch) ||
-      log.templateName?.toLowerCase().includes(auditSearch.toLowerCase()) ||
-      log.status?.toLowerCase().includes(auditSearch.toLowerCase())
+    return auditLogsArray.filter(
+      (log: any) =>
+        log.phone?.includes(auditSearch) ||
+        log.templateName?.toLowerCase().includes(auditSearch.toLowerCase()) ||
+        log.status?.toLowerCase().includes(auditSearch.toLowerCase())
     );
   }, [auditLogs, auditSearch]);
 
@@ -249,14 +285,16 @@ function MessageSettingsContent() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => syncTemplatesMutation.mutate()} 
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => syncTemplatesMutation.mutate()}
             disabled={syncTemplatesMutation.isPending}
             className="gap-1.5"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${syncTemplatesMutation.isPending ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${syncTemplatesMutation.isPending ? 'animate-spin' : ''}`}
+            />
             مزامنة القوالب
           </Button>
           <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
@@ -269,9 +307,27 @@ function MessageSettingsContent() {
       {/* Stats Overview */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "إجمالي الرسائل", value: stats.total, icon: MessageSquare, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-900/20" },
-          { label: "مفعّلة", value: stats.enabled, icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50 dark:bg-green-900/20" },
-          { label: "معطّلة", value: stats.disabled, icon: XCircle, color: "text-gray-500", bg: "bg-gray-50 dark:bg-gray-800/50" },
+          {
+            label: 'إجمالي الرسائل',
+            value: stats.total,
+            icon: MessageSquare,
+            color: 'text-blue-600',
+            bg: 'bg-blue-50 dark:bg-blue-900/20',
+          },
+          {
+            label: 'مفعّلة',
+            value: stats.enabled,
+            icon: CheckCircle2,
+            color: 'text-green-600',
+            bg: 'bg-green-50 dark:bg-green-900/20',
+          },
+          {
+            label: 'معطّلة',
+            value: stats.disabled,
+            icon: XCircle,
+            color: 'text-gray-500',
+            bg: 'bg-gray-50 dark:bg-gray-800/50',
+          },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className={`${bg} rounded-xl p-3 sm:p-4`}>
             <div className="flex items-center gap-2">
@@ -310,21 +366,33 @@ function MessageSettingsContent() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {Object.entries(categoryLabels).map(([key, label]) => {
               const Icon = categoryIcons[key] || MessageSquare;
-              const count = Array.isArray(allMessages) ? allMessages.filter((m: any) => m.category === key).length : 0;
-              const enabled = Array.isArray(allMessages) ? allMessages.filter((m: any) => m.category === key && m.isEnabled === 1).length : 0;
+              const count = Array.isArray(allMessages)
+                ? allMessages.filter((m: any) => m.category === key).length
+                : 0;
+              const enabled = Array.isArray(allMessages)
+                ? allMessages.filter((m: any) => m.category === key && m.isEnabled === 1).length
+                : 0;
               return (
                 <button
                   key={key}
                   onClick={() => setSelectedCategory(key)}
                   className={`p-3 rounded-xl text-right transition-all border ${
                     selectedCategory === key
-                      ? "bg-gradient-to-br from-purple-500 to-pink-500 text-white border-transparent shadow-md"
-                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-300"
+                      ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white border-transparent shadow-md'
+                      : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-300'
                   }`}
                 >
-                  <Icon className={`h-4 w-4 mb-1.5 ${selectedCategory === key ? "text-white" : "text-purple-500"}`} />
-                  <p className={`text-xs font-medium ${selectedCategory === key ? "text-white" : ""}`}>{label}</p>
-                  <p className={`text-[10px] mt-0.5 ${selectedCategory === key ? "text-white/80" : "text-muted-foreground"}`}>
+                  <Icon
+                    className={`h-4 w-4 mb-1.5 ${selectedCategory === key ? 'text-white' : 'text-purple-500'}`}
+                  />
+                  <p
+                    className={`text-xs font-medium ${selectedCategory === key ? 'text-white' : ''}`}
+                  >
+                    {label}
+                  </p>
+                  <p
+                    className={`text-[10px] mt-0.5 ${selectedCategory === key ? 'text-white/80' : 'text-muted-foreground'}`}
+                  >
                     {enabled}/{count} مفعّل
                   </p>
                 </button>
@@ -343,12 +411,19 @@ function MessageSettingsContent() {
               </Card>
             ) : (
               filteredMessages?.map((message: any) => (
-                <Card key={message.id} className={`transition-all ${message.isEnabled !== 1 ? "opacity-60" : ""}`}>
+                <Card
+                  key={message.id}
+                  className={`transition-all ${message.isEnabled !== 1 ? 'opacity-60' : ''}`}
+                >
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
-                        <CardTitle className="text-sm sm:text-base">{message.displayName}</CardTitle>
-                        <CardDescription className="text-xs mt-0.5">{message.description}</CardDescription>
+                        <CardTitle className="text-sm sm:text-base">
+                          {message.displayName}
+                        </CardTitle>
+                        <CardDescription className="text-xs mt-0.5">
+                          {message.description}
+                        </CardDescription>
                       </div>
                       <Switch
                         checked={message.isEnabled === 1}
@@ -362,23 +437,36 @@ function MessageSettingsContent() {
                     <div className="bg-muted/50 p-3 rounded-lg border">
                       <p className="text-xs whitespace-pre-wrap text-muted-foreground">
                         {message.messageContent.substring(0, 180)}
-                        {message.messageContent.length > 180 && "..."}
+                        {message.messageContent.length > 180 && '...'}
                       </p>
                     </div>
 
                     {/* Info Badges */}
                     <div className="flex flex-wrap gap-1.5">
                       <Badge variant="outline" className="text-[10px]">
-                        {deliveryChannelLabels[message.deliveryChannel as keyof typeof deliveryChannelLabels]}
+                        {
+                          deliveryChannelLabels[
+                            message.deliveryChannel as keyof typeof deliveryChannelLabels
+                          ]
+                        }
                       </Badge>
                       {message.triggerEvent && (
-                        <Badge variant="outline" className="text-[10px] text-blue-600 border-blue-300 bg-blue-50 dark:bg-blue-900/20">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] text-blue-600 border-blue-300 bg-blue-50 dark:bg-blue-900/20"
+                        >
                           ⚡ {triggerEventLabels[message.triggerEvent] || message.triggerEvent}
                         </Badge>
                       )}
                       {message.whatsappTemplateId && (
-                        <Badge variant="outline" className="text-[10px] text-green-600 border-green-300 bg-green-50 dark:bg-green-900/20">
-                          📝 {(metaTemplates as any[] || []).find((t: any) => t.id === message.whatsappTemplateId)?.name || `قالب #${message.whatsappTemplateId}`}
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] text-green-600 border-green-300 bg-green-50 dark:bg-green-900/20"
+                        >
+                          📝{' '}
+                          {((metaTemplates as any[]) || []).find(
+                            (t: any) => t.id === message.whatsappTemplateId
+                          )?.name || `قالب #${message.whatsappTemplateId}`}
                         </Badge>
                       )}
                       {message.availableVariables && (
@@ -387,16 +475,21 @@ function MessageSettingsContent() {
                         </Badge>
                       )}
                       <Badge
-                        variant={message.isEnabled === 1 ? "default" : "secondary"}
-                        className={`text-[10px] ${message.isEnabled === 1 ? "bg-green-500 hover:bg-green-600" : ""}`}
+                        variant={message.isEnabled === 1 ? 'default' : 'secondary'}
+                        className={`text-[10px] ${message.isEnabled === 1 ? 'bg-green-500 hover:bg-green-600' : ''}`}
                       >
-                        {message.isEnabled === 1 ? "مفعّل" : "معطّل"}
+                        {message.isEnabled === 1 ? 'مفعّل' : 'معطّل'}
                       </Badge>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex gap-2 flex-wrap">
-                      <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => handlePreview(message)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => handlePreview(message)}
+                      >
                         <Eye className="h-3 w-3" />
                         معاينة
                       </Button>
@@ -431,10 +524,34 @@ function MessageSettingsContent() {
             <>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label: "إجمالي المرسلة", value: (auditStats as any).total || 0, icon: Send, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-900/20" },
-                  { label: "ناجحة", value: (auditStats as any).sent || 0, icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50 dark:bg-green-900/20" },
-                  { label: "فاشلة", value: (auditStats as any).failed || 0, icon: XCircle, color: "text-red-600", bg: "bg-red-50 dark:bg-red-900/20" },
-                  { label: "معدل النجاح", value: `${(auditStats as any).successRate || 0}%`, icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-900/20" },
+                  {
+                    label: 'إجمالي المرسلة',
+                    value: (auditStats as any).total || 0,
+                    icon: Send,
+                    color: 'text-blue-600',
+                    bg: 'bg-blue-50 dark:bg-blue-900/20',
+                  },
+                  {
+                    label: 'ناجحة',
+                    value: (auditStats as any).sent || 0,
+                    icon: CheckCircle2,
+                    color: 'text-green-600',
+                    bg: 'bg-green-50 dark:bg-green-900/20',
+                  },
+                  {
+                    label: 'فاشلة',
+                    value: (auditStats as any).failed || 0,
+                    icon: XCircle,
+                    color: 'text-red-600',
+                    bg: 'bg-red-50 dark:bg-red-900/20',
+                  },
+                  {
+                    label: 'معدل النجاح',
+                    value: `${(auditStats as any).successRate || 0}%`,
+                    icon: TrendingUp,
+                    color: 'text-purple-600',
+                    bg: 'bg-purple-50 dark:bg-purple-900/20',
+                  },
                 ].map(({ label, value, icon: Icon, color, bg }) => (
                   <div key={label} className={`${bg} rounded-xl p-4`}>
                     <div className="flex items-center gap-2 mb-1">
@@ -454,20 +571,26 @@ function MessageSettingsContent() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {Object.entries((auditStats as any).byType).map(([type, count]: [string, any]) => (
-                        <div key={type} className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">{type}</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-24 bg-gray-200 rounded-full h-1.5">
-                              <div
-                                className="bg-purple-500 h-1.5 rounded-full"
-                                style={{ width: `${Math.min(100, (count / ((auditStats as any).total || 1)) * 100)}%` }}
-                              />
+                      {Object.entries((auditStats as any).byType).map(
+                        ([type, count]: [string, any]) => (
+                          <div key={type} className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">{type}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-24 bg-gray-200 rounded-full h-1.5">
+                                <div
+                                  className="bg-purple-500 h-1.5 rounded-full"
+                                  style={{
+                                    width: `${Math.min(100, (count / ((auditStats as any).total || 1)) * 100)}%`,
+                                  }}
+                                />
+                              </div>
+                              <Badge variant="secondary" className="text-[10px]">
+                                {count}
+                              </Badge>
                             </div>
-                            <Badge variant="secondary" className="text-[10px]">{count}</Badge>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -506,23 +629,40 @@ function MessageSettingsContent() {
                   key={log.id}
                   className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700"
                 >
-                  <div className={`p-1.5 rounded-full flex-shrink-0 ${
-                    log.status === "sent" ? "bg-green-100 text-green-600" :
-                    log.status === "failed" ? "bg-red-100 text-red-600" :
-                    "bg-gray-100 text-gray-600"
-                  }`}>
-                    {log.status === "sent" ? <CheckCircle2 className="h-3.5 w-3.5" /> :
-                     log.status === "failed" ? <XCircle className="h-3.5 w-3.5" /> :
-                     <Clock className="h-3.5 w-3.5" />}
+                  <div
+                    className={`p-1.5 rounded-full flex-shrink-0 ${
+                      log.status === 'sent'
+                        ? 'bg-green-100 text-green-600'
+                        : log.status === 'failed'
+                          ? 'bg-red-100 text-red-600'
+                          : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {log.status === 'sent' ? (
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    ) : log.status === 'failed' ? (
+                      <XCircle className="h-3.5 w-3.5" />
+                    ) : (
+                      <Clock className="h-3.5 w-3.5" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-medium truncate">{log.templateName || log.messageType || "رسالة"}</p>
+                      <p className="text-xs font-medium truncate">
+                        {log.templateName || log.messageType || 'رسالة'}
+                      </p>
                       <span className="text-[10px] text-muted-foreground flex-shrink-0">
-                        {log.createdAt ? formatDistanceToNow(new Date(log.createdAt), { locale: ar, addSuffix: true }) : ""}
+                        {log.createdAt
+                          ? formatDistanceToNow(new Date(log.createdAt), {
+                              locale: ar,
+                              addSuffix: true,
+                            })
+                          : ''}
                       </span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5" dir="ltr">{log.phone}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5" dir="ltr">
+                      {log.phone}
+                    </p>
                     {log.errorMessage && (
                       <p className="text-[10px] text-red-500 mt-0.5">{log.errorMessage}</p>
                     )}
@@ -530,12 +670,18 @@ function MessageSettingsContent() {
                   <Badge
                     variant="outline"
                     className={`text-[10px] flex-shrink-0 ${
-                      log.status === "sent" ? "border-green-200 text-green-700" :
-                      log.status === "failed" ? "border-red-200 text-red-700" :
-                      "border-gray-200 text-gray-600"
+                      log.status === 'sent'
+                        ? 'border-green-200 text-green-700'
+                        : log.status === 'failed'
+                          ? 'border-red-200 text-red-700'
+                          : 'border-gray-200 text-gray-600'
                     }`}
                   >
-                    {log.status === "sent" ? "مُرسلة" : log.status === "failed" ? "فاشلة" : log.status}
+                    {log.status === 'sent'
+                      ? 'مُرسلة'
+                      : log.status === 'failed'
+                        ? 'فاشلة'
+                        : log.status}
                   </Badge>
                 </div>
               ))}
@@ -571,27 +717,41 @@ function MessageSettingsContent() {
                           <Badge
                             variant="outline"
                             className={`text-[10px] ${
-                              task.status === "running" ? "border-green-200 text-green-700" :
-                              task.status === "stopped" ? "border-red-200 text-red-700" :
-                              "border-gray-200 text-gray-600"
+                              task.status === 'running'
+                                ? 'border-green-200 text-green-700'
+                                : task.status === 'stopped'
+                                  ? 'border-red-200 text-red-700'
+                                  : 'border-gray-200 text-gray-600'
                             }`}
                           >
-                            {task.status === "running" ? "يعمل" : task.status === "stopped" ? "موقوف" : task.status}
+                            {task.status === 'running'
+                              ? 'يعمل'
+                              : task.status === 'stopped'
+                                ? 'موقوف'
+                                : task.status}
                           </Badge>
                         </div>
                         {task.nextRun && (
                           <p className="text-[10px] text-muted-foreground">
-                            التشغيل التالي: {formatDistanceToNow(new Date(task.nextRun), { locale: ar, addSuffix: true })}
+                            التشغيل التالي:{' '}
+                            {formatDistanceToNow(new Date(task.nextRun), {
+                              locale: ar,
+                              addSuffix: true,
+                            })}
                           </p>
                         )}
                         {task.lastRun && (
                           <p className="text-[10px] text-muted-foreground">
-                            آخر تشغيل: {formatDistanceToNow(new Date(task.lastRun), { locale: ar, addSuffix: true })}
+                            آخر تشغيل:{' '}
+                            {formatDistanceToNow(new Date(task.lastRun), {
+                              locale: ar,
+                              addSuffix: true,
+                            })}
                           </p>
                         )}
                       </div>
                       <div className="flex gap-1.5">
-                        {task.status === "running" ? (
+                        {task.status === 'running' ? (
                           <Button
                             size="sm"
                             variant="outline"
@@ -657,33 +817,41 @@ function MessageSettingsContent() {
                 </Select>
               </div>
               {/* WhatsApp Template Selector - يظهر فقط عند اختيار WhatsApp Business API */}
-              {(editedChannel === "whatsapp_api" || editedChannel === "both") && (
+              {(editedChannel === 'whatsapp_api' || editedChannel === 'both') && (
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1.5">
                     <span>قالب WhatsApp Meta</span>
-                    <Badge variant="outline" className="text-[10px] text-green-600 border-green-300">مُعتمد من Meta</Badge>
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] text-green-600 border-green-300"
+                    >
+                      مُعتمد من Meta
+                    </Badge>
                   </Label>
                   <Select
-                    value={editedTemplateId ? String(editedTemplateId) : "none"}
-                    onValueChange={(v) => setEditedTemplateId(v === "none" ? null : Number(v))}
+                    value={editedTemplateId ? String(editedTemplateId) : 'none'}
+                    onValueChange={(v) => setEditedTemplateId(v === 'none' ? null : Number(v))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="اختر قالب Meta (اختياري)" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">بدون قالب (استخدام النص المباشر)</SelectItem>
-                      {(metaTemplates as any[] || []).map((t: any) => (
+                      {((metaTemplates as any[]) || []).map((t: any) => (
                         <SelectItem key={t.id} value={String(t.id)}>
                           <div className="flex items-center gap-2">
                             <span>{t.name}</span>
-                            <Badge variant="outline" className="text-[10px]">{t.category}</Badge>
+                            <Badge variant="outline" className="text-[10px]">
+                              {t.category}
+                            </Badge>
                           </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <p className="text-[10px] text-muted-foreground">
-                    عند اختيار قالب Meta، سيتم إرسال القالب المعتمد بدلاً من النص المباشر عبر WhatsApp Business API
+                    عند اختيار قالب Meta، سيتم إرسال القالب المعتمد بدلاً من النص المباشر عبر
+                    WhatsApp Business API
                   </p>
                 </div>
               )}
@@ -705,25 +873,31 @@ function MessageSettingsContent() {
                         key={v}
                         variant="secondary"
                         className="cursor-pointer text-xs"
-                        onClick={() => setEditedContent(prev => prev + `{${v}}`)}
+                        onClick={() => setEditedContent((prev) => prev + `{${v}}`)}
                       >
                         {`{${v}}`}
                       </Badge>
                     ))}
                   </div>
-                  <p className="text-[10px] text-muted-foreground">انقر على المتغير لإضافته إلى المحتوى</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    انقر على المتغير لإضافته إلى المحتوى
+                  </p>
                 </div>
               )}
               {editedContent && (
                 <div className="space-y-1.5">
                   <Label>معاينة</Label>
                   <div className="bg-[#e5ddd5] rounded-lg p-3">
-                    <div className="bg-white rounded-lg p-2.5 shadow-sm text-sm whitespace-pre-wrap">{editedContent}</div>
+                    <div className="bg-white rounded-lg p-2.5 shadow-sm text-sm whitespace-pre-wrap">
+                      {editedContent}
+                    </div>
                   </div>
                 </div>
               )}
               <div className="flex gap-2 justify-end pt-2">
-                <Button variant="outline" onClick={() => setEditDialogOpen(false)}>إلغاء</Button>
+                <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  إلغاء
+                </Button>
                 <Button
                   onClick={handleSave}
                   disabled={updateMutation.isPending}
@@ -767,12 +941,20 @@ function MessageSettingsContent() {
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-muted/50 rounded-lg p-2.5">
                   <p className="text-muted-foreground mb-0.5">القناة</p>
-                  <p className="font-medium">{deliveryChannelLabels[selectedMessage.deliveryChannel as keyof typeof deliveryChannelLabels]}</p>
+                  <p className="font-medium">
+                    {
+                      deliveryChannelLabels[
+                        selectedMessage.deliveryChannel as keyof typeof deliveryChannelLabels
+                      ]
+                    }
+                  </p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-2.5">
                   <p className="text-muted-foreground mb-0.5">الحالة</p>
-                  <p className={`font-medium ${selectedMessage.isEnabled === 1 ? "text-green-600" : "text-gray-500"}`}>
-                    {selectedMessage.isEnabled === 1 ? "مفعّل" : "معطّل"}
+                  <p
+                    className={`font-medium ${selectedMessage.isEnabled === 1 ? 'text-green-600' : 'text-gray-500'}`}
+                  >
+                    {selectedMessage.isEnabled === 1 ? 'مفعّل' : 'معطّل'}
                   </p>
                 </div>
               </div>
@@ -783,19 +965,30 @@ function MessageSettingsContent() {
               <Button
                 size="sm"
                 className="bg-green-600 hover:bg-green-700 gap-1.5"
-                onClick={() => { setPreviewDialogOpen(false); handleTest(selectedMessage); }}
+                onClick={() => {
+                  setPreviewDialogOpen(false);
+                  handleTest(selectedMessage);
+                }}
               >
                 <Send className="h-3.5 w-3.5" />
                 اختبار الإرسال
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => setPreviewDialogOpen(false)}>إغلاق</Button>
+            <Button variant="outline" size="sm" onClick={() => setPreviewDialogOpen(false)}>
+              إغلاق
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* ── Test Dialog ──────────────────────────────────────────────────── */}
-      <Dialog open={testDialogOpen} onOpenChange={(v) => { setTestDialogOpen(v); if (!v) setTestPhone(""); }}>
+      <Dialog
+        open={testDialogOpen}
+        onOpenChange={(v) => {
+          setTestDialogOpen(v);
+          if (!v) setTestPhone('');
+        }}
+      >
         <DialogContent className="sm:max-w-sm" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -822,7 +1015,9 @@ function MessageSettingsContent() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setTestDialogOpen(false)}>إلغاء</Button>
+            <Button variant="outline" onClick={() => setTestDialogOpen(false)}>
+              إلغاء
+            </Button>
             <Button
               onClick={handleSendTest}
               disabled={!testPhone.trim()}

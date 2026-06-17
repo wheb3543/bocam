@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,8 +6,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface ResponsiveDialogProps {
   open: boolean;
@@ -21,7 +21,7 @@ interface ResponsiveDialogProps {
 
 /**
  * ResponsiveDialog - Dialog wrapper that becomes full screen on mobile
- * 
+ *
  * Usage:
  * <ResponsiveDialog
  *   open={isOpen}
@@ -47,16 +47,16 @@ export default function ResponsiveDialog({
       <DialogContent
         className={cn(
           // Full screen on mobile
-          "max-h-screen overflow-y-auto",
-          "md:max-h-[90vh]",
+          'max-h-screen overflow-y-auto',
+          'md:max-h-[90vh]',
           // Full width on mobile, max-w on desktop
-          "w-full max-w-full",
-          "md:max-w-2xl",
+          'w-full max-w-full',
+          'md:max-w-2xl',
           // Remove rounded corners on mobile for full screen effect
-          "rounded-none md:rounded-lg",
+          'rounded-none md:rounded-lg',
           // Custom positioning for mobile
-          "fixed inset-0",
-          "md:relative md:inset-auto",
+          'fixed inset-0',
+          'md:relative md:inset-auto',
           className
         )}
       >
@@ -64,10 +64,8 @@ export default function ResponsiveDialog({
           <DialogTitle className="text-xl md:text-2xl">{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        
-        <div className="py-4 overflow-y-auto flex-1">
-          {children}
-        </div>
+
+        <div className="py-4 overflow-y-auto flex-1">{children}</div>
 
         {footer && (
           <DialogFooter className="flex-row gap-2 sm:flex-row sm:justify-end sm:space-x-2">

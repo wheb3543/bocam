@@ -1,11 +1,11 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useLocation } from "wouter";
-import { Clock, X, Search } from "lucide-react";
-import { useRecentlyUsed } from "@/hooks/data/useRecentlyUsed";
-import type { NavItem, NavGroup } from "@/components/layout/DashboardSidebarV2";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useLocation } from 'wouter';
+import { Clock, X, Search } from 'lucide-react';
+import { useRecentlyUsed } from '@/hooks/data/useRecentlyUsed';
+import type { NavItem, NavGroup } from '@/components/layout/DashboardSidebarV2';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface AllToolsDrawerProps {
   isOpen: boolean;
@@ -14,15 +14,15 @@ interface AllToolsDrawerProps {
   allNavItems: NavItem[];
 }
 
-export default function AllToolsDrawer({ 
-  isOpen, 
-  onClose, 
+export default function AllToolsDrawer({
+  isOpen,
+  onClose,
   allToolsGroups,
-  allNavItems 
+  allNavItems,
 }: AllToolsDrawerProps) {
   const [location, setLocation] = useLocation();
   const { recentlyUsed } = useRecentlyUsed();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleNavigate = (href: string) => {
     setLocation(href);
@@ -32,22 +32,24 @@ export default function AllToolsDrawer({
   // Get recently used items with full details (max 7)
   const recentItems = recentlyUsed
     .slice(0, 7)
-    .map(tool => allNavItems.find(item => item.id === tool.id))
+    .map((tool) => allNavItems.find((item) => item.id === tool.id))
     .filter(Boolean) as NavItem[];
 
   // Filter items based on search
   const filteredGroups = searchQuery.trim()
-    ? allToolsGroups.map(group => ({
-        ...group,
-        items: group.items.filter(item =>
-          item.title.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      })).filter(group => group.items.length > 0)
+    ? allToolsGroups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) =>
+            item.title.toLowerCase().includes(searchQuery.toLowerCase())
+          ),
+        }))
+        .filter((group) => group.items.length > 0)
     : allToolsGroups;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
+      <DialogContent
         className="max-w-[900px] h-[85vh] p-0 gap-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-gray-200 dark:border-gray-700"
         dir="rtl"
       >
@@ -62,9 +64,7 @@ export default function AllToolsDrawer({
           >
             <X className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </button>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            كل الأدوات
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">كل الأدوات</h2>
           <div className="w-9" />
         </div>
 
@@ -102,10 +102,10 @@ export default function AllToolsDrawer({
                         key={item.id}
                         onClick={() => handleNavigate(item.href)}
                         className={cn(
-                          "flex items-center gap-3 p-3 rounded-lg text-right transition-all",
+                          'flex items-center gap-3 p-3 rounded-lg text-right transition-all',
                           isActive
-                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                            : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                         )}
                       >
                         <Icon className="h-5 w-5 flex-shrink-0" />
@@ -140,10 +140,10 @@ export default function AllToolsDrawer({
                           key={item.id}
                           onClick={() => handleNavigate(item.href)}
                           className={cn(
-                            "flex items-center gap-3 p-3 rounded-lg text-right transition-all",
+                            'flex items-center gap-3 p-3 rounded-lg text-right transition-all',
                             isActive
-                              ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                              : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                           )}
                         >
                           <Icon className="h-5 w-5 flex-shrink-0" />
@@ -159,9 +159,7 @@ export default function AllToolsDrawer({
             {/* No Results */}
             {searchQuery && filteredGroups.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">
-                  لا توجد نتائج لـ "{searchQuery}"
-                </p>
+                <p className="text-gray-500 dark:text-gray-400">لا توجد نتائج لـ "{searchQuery}"</p>
               </div>
             )}
           </div>

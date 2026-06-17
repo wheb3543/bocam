@@ -8,7 +8,7 @@ services:
     container_name: bocam-crm
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
       - DATABASE_URL=${DATABASE_URL}
@@ -40,7 +40,13 @@ services:
     depends_on:
       - mysql
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/trpc/license.getInfo', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/api/trpc/license.getInfo', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -51,7 +57,7 @@ services:
     container_name: bocam-mysql
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - '3306:3306'
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -63,7 +69,8 @@ services:
     networks:
       - bocam-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test:
+        ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p${MYSQL_ROOT_PASSWORD}']
       interval: 10s
       timeout: 5s
       retries: 5

@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -16,67 +16,75 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Bookmark, Save, Trash2, ChevronDown, Star } from "lucide-react";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { Bookmark, Save, Trash2, ChevronDown, Star } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface SavedFiltersProps {
-  pageKey: "appointments" | "offerLeads" | "campRegistrations" | "customers";
+  pageKey: 'appointments' | 'offerLeads' | 'campRegistrations' | 'customers';
   currentFilters: Record<string, any>;
   onApplyFilter: (filters: Record<string, any>) => void;
 }
 
-export default function SavedFilters({ pageKey, currentFilters, onApplyFilter }: SavedFiltersProps) {
+export default function SavedFilters({
+  pageKey,
+  currentFilters,
+  onApplyFilter,
+}: SavedFiltersProps) {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-  const [filterName, setFilterName] = useState("");
+  const [filterName, setFilterName] = useState('');
 
   const { data: savedFilters, refetch } = trpc.savedFilters.list.useQuery({ pageType: pageKey });
   const utils = trpc.useUtils();
-  
+
   const createMutation = trpc.savedFilters.create.useMutation({
     onSuccess: () => {
-      toast.success("تم حفظ الفلتر بنجاح");
+      toast.success('تم حفظ الفلتر بنجاح');
       setSaveDialogOpen(false);
-      setFilterName("");
+      setFilterName('');
       refetch();
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء حفظ الفلتر");
+      toast.error('حدث خطأ أثناء حفظ الفلتر');
     },
   });
 
   const deleteMutation = trpc.savedFilters.delete.useMutation({
     onSuccess: () => {
-      toast.success("تم حذف الفلتر بنجاح");
+      toast.success('تم حذف الفلتر بنجاح');
       refetch();
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء حذف الفلتر");
+      toast.error('حدث خطأ أثناء حذف الفلتر');
     },
   });
 
   const updateMutation = trpc.savedFilters.update.useMutation({
     onSuccess: () => {
-      toast.success("تم تعيين الفلتر كافتراضي");
+      toast.success('تم تعيين الفلتر كافتراضي');
       refetch();
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء تعيين الفلتر الافتراضي");
+      toast.error('حدث خطأ أثناء تعيين الفلتر الافتراضي');
     },
   });
 
   const handleSave = () => {
     if (!filterName.trim()) return;
-    
+
     // Clean up filters - remove empty arrays and undefined values
     const cleanFilters: Record<string, any> = {};
     for (const [key, value] of Object.entries(currentFilters)) {
-      if (value !== undefined && value !== null && value !== "" && 
-          !(Array.isArray(value) && value.length === 0)) {
+      if (
+        value !== undefined &&
+        value !== null &&
+        value !== '' &&
+        !(Array.isArray(value) && value.length === 0)
+      ) {
         cleanFilters[key] = value;
       }
     }
-    
+
     createMutation.mutate({
       name: filterName.trim(),
       pageType: pageKey,
@@ -88,9 +96,9 @@ export default function SavedFilters({ pageKey, currentFilters, onApplyFilter }:
     try {
       const filters = JSON.parse(filterConfig);
       onApplyFilter(filters);
-      toast.success("تم تطبيق الفلتر");
+      toast.success('تم تطبيق الفلتر');
     } catch {
-      toast.error("خطأ في تحميل الفلتر");
+      toast.error('خطأ في تحميل الفلتر');
     }
   };
 
@@ -105,7 +113,12 @@ export default function SavedFilters({ pageKey, currentFilters, onApplyFilter }:
   };
 
   const hasActiveFilters = Object.values(currentFilters).some(
-    (v) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0) && v !== "all"
+    (v) =>
+      v !== undefined &&
+      v !== null &&
+      v !== '' &&
+      !(Array.isArray(v) && v.length === 0) &&
+      v !== 'all'
   );
 
   return (
@@ -128,7 +141,7 @@ export default function SavedFilters({ pageKey, currentFilters, onApplyFilter }:
               <DropdownMenuSeparator />
             </>
           )}
-          
+
           {savedFilters && savedFilters.length > 0 ? (
             savedFilters.map((filter: any) => (
               <DropdownMenuItem
@@ -174,9 +187,7 @@ export default function SavedFilters({ pageKey, currentFilters, onApplyFilter }:
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>حفظ الفلتر</DialogTitle>
-            <DialogDescription>
-              أدخل اسماً للفلتر الحالي لحفظه واستعادته لاحقاً
-            </DialogDescription>
+            <DialogDescription>أدخل اسماً للفلتر الحالي لحفظه واستعادته لاحقاً</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <Input
@@ -184,7 +195,7 @@ export default function SavedFilters({ pageKey, currentFilters, onApplyFilter }:
               value={filterName}
               onChange={(e) => setFilterName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSave();
+                if (e.key === 'Enter') handleSave();
               }}
             />
           </div>
@@ -193,7 +204,7 @@ export default function SavedFilters({ pageKey, currentFilters, onApplyFilter }:
               إلغاء
             </Button>
             <Button onClick={handleSave} disabled={!filterName.trim() || createMutation.isPending}>
-              {createMutation.isPending ? "جاري الحفظ..." : "حفظ"}
+              {createMutation.isPending ? 'جاري الحفظ...' : 'حفظ'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,10 +1,10 @@
 /**
  * TableSkeleton Component
- * 
+ *
  * Skeleton loading state for tables with customizable rows and columns
  */
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TableSkeletonProps {
   rows?: number;
@@ -17,10 +17,7 @@ export default function TableSkeleton({ rows = 5, columns = 5 }: TableSkeletonPr
       {/* Header skeleton */}
       <div className="flex gap-4 items-center pb-3 border-b mb-3">
         {Array.from({ length: columns }).map((_, colIndex) => (
-          <Skeleton
-            key={`header-${colIndex}`}
-            className="h-4 flex-1"
-          />
+          <Skeleton key={`header-${colIndex}`} className="h-4 flex-1" />
         ))}
       </div>
       {/* Row skeletons */}

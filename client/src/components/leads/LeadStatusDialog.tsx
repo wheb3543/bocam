@@ -1,30 +1,54 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
-import { Phone, Mail, User, MessageSquare, Loader2 } from "lucide-react";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
-import { SOURCE_LABELS } from "@shared/sources";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Phone, Mail, User, MessageSquare, Loader2 } from 'lucide-react';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import { SOURCE_LABELS } from '@shared/sources';
 
 const statusLabels: Record<string, string> = {
-  new: "جديد",
-  contacted: "تم التواصل",
-  booked: "تم الحجز",
-  not_interested: "غير مهتم",
-  no_answer: "لم يرد",
+  new: 'جديد',
+  contacted: 'تم التواصل',
+  booked: 'تم الحجز',
+  not_interested: 'غير مهتم',
+  no_answer: 'لم يرد',
 };
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string; border: string }> = {
-  new: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", border: "border-blue-200" },
-  contacted: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", border: "border-amber-200" },
-  booked: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
-  not_interested: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", border: "border-red-200" },
-  no_answer: { bg: "bg-muted/50 dark:bg-gray-800", text: "text-foreground dark:text-gray-300", dot: "bg-gray-500", border: "border-border dark:border-gray-700" },
+  new: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500', border: 'border-blue-200' },
+  contacted: {
+    bg: 'bg-amber-50',
+    text: 'text-amber-700',
+    dot: 'bg-amber-500',
+    border: 'border-amber-200',
+  },
+  booked: {
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-700',
+    dot: 'bg-emerald-500',
+    border: 'border-emerald-200',
+  },
+  not_interested: {
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    dot: 'bg-red-500',
+    border: 'border-red-200',
+  },
+  no_answer: {
+    bg: 'bg-muted/50 dark:bg-gray-800',
+    text: 'text-foreground dark:text-gray-300',
+    dot: 'bg-gray-500',
+    border: 'border-border dark:border-gray-700',
+  },
 };
 
 const STATUS_BUTTONS = [
@@ -52,14 +76,14 @@ export default function LeadStatusDialog({
 }: LeadStatusDialogProps) {
   const { formatDateTime } = useFormatDate();
   const { formatPhoneDisplay } = usePhoneFormat();
-  const [newStatus, setNewStatus] = useState("");
-  const [statusNotes, setStatusNotes] = useState("");
+  const [newStatus, setNewStatus] = useState('');
+  const [statusNotes, setStatusNotes] = useState('');
 
   // Reset state when lead changes
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      setNewStatus("");
-      setStatusNotes("");
+      setNewStatus('');
+      setStatusNotes('');
     } else if (lead) {
       setNewStatus(lead.status);
     }
@@ -67,20 +91,20 @@ export default function LeadStatusDialog({
   };
 
   // Sync status when lead changes
-  if (lead && newStatus === "" && open) {
+  if (lead && newStatus === '' && open) {
     setNewStatus(lead.status);
   }
 
   const handleSubmit = () => {
     if (!newStatus) return;
     onSubmit(newStatus, statusNotes);
-    setNewStatus("");
-    setStatusNotes("");
+    setNewStatus('');
+    setStatusNotes('');
   };
 
   const handleCancel = () => {
-    setNewStatus("");
-    setStatusNotes("");
+    setNewStatus('');
+    setStatusNotes('');
     onOpenChange(false);
   };
 
@@ -97,20 +121,30 @@ export default function LeadStatusDialog({
             <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`p-1.5 rounded-lg ${(statusConfig[lead.status] || statusConfig.new).bg}`}>
-                    <User className={`w-4 h-4 ${(statusConfig[lead.status] || statusConfig.new).text}`} />
+                  <div
+                    className={`p-1.5 rounded-lg ${(statusConfig[lead.status] || statusConfig.new).bg}`}
+                  >
+                    <User
+                      className={`w-4 h-4 ${(statusConfig[lead.status] || statusConfig.new).text}`}
+                    />
                   </div>
                   <p className="font-semibold text-sm">{lead.fullName}</p>
                 </div>
-                <Badge className={`${(statusConfig[lead.status] || statusConfig.new).bg} ${(statusConfig[lead.status] || statusConfig.new).text} border ${(statusConfig[lead.status] || statusConfig.new).border} text-[10px]`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${(statusConfig[lead.status] || statusConfig.new).dot} ml-1.5 inline-block`} />
+                <Badge
+                  className={`${(statusConfig[lead.status] || statusConfig.new).bg} ${(statusConfig[lead.status] || statusConfig.new).text} border ${(statusConfig[lead.status] || statusConfig.new).border} text-[10px]`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${(statusConfig[lead.status] || statusConfig.new).dot} ml-1.5 inline-block`}
+                  />
                   {statusLabels[lead.status] || lead.status}
                 </Badge>
               </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                 <div className="flex items-center gap-1.5">
                   <Phone className="w-3 h-3 text-muted-foreground" />
-                  <span dir="ltr" className="font-mono">{formatPhoneDisplay(lead.phone)}</span>
+                  <span dir="ltr" className="font-mono">
+                    {formatPhoneDisplay(lead.phone)}
+                  </span>
                 </div>
                 {lead.email && (
                   <div className="flex items-center gap-1.5">
@@ -120,11 +154,15 @@ export default function LeadStatusDialog({
                 )}
                 <div>
                   <span className="text-muted-foreground">النوع:</span>{' '}
-                  <span className="font-medium">{lead.type === 'general' ? 'عام' : lead.type === 'offer' ? 'عرض' : 'مخيم'}</span>
+                  <span className="font-medium">
+                    {lead.type === 'general' ? 'عام' : lead.type === 'offer' ? 'عرض' : 'مخيم'}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">المصدر:</span>{' '}
-                  <span className="font-medium">{lead.source ? SOURCE_LABELS[lead.source] || lead.source : '-'}</span>
+                  <span className="font-medium">
+                    {lead.source ? SOURCE_LABELS[lead.source] || lead.source : '-'}
+                  </span>
                 </div>
               </div>
               {lead.notes && (
@@ -151,7 +189,7 @@ export default function LeadStatusDialog({
                 variant="outline"
                 size="sm"
                 className="flex-1 h-9 text-xs gap-1.5"
-                onClick={() => window.location.href = `tel:${formatPhoneDisplay(lead.phone)}`}
+                onClick={() => (window.location.href = `tel:${formatPhoneDisplay(lead.phone)}`)}
               >
                 <Phone className="w-3.5 h-3.5" />
                 اتصال
@@ -161,8 +199,13 @@ export default function LeadStatusDialog({
                 size="sm"
                 className="flex-1 h-9 text-xs gap-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
                 onClick={() => {
-                  const msg = encodeURIComponent(`مرحباً ${lead.fullName}، نود التواصل معك بخصوص استفسارك.`);
-                  window.open(`https://wa.me/${lead.phone.replace(/^0+/, '')}?text=${msg}`, '_blank');
+                  const msg = encodeURIComponent(
+                    `مرحباً ${lead.fullName}، نود التواصل معك بخصوص استفسارك.`
+                  );
+                  window.open(
+                    `https://wa.me/${lead.phone.replace(/^0+/, '')}?text=${msg}`,
+                    '_blank'
+                  );
                 }}
               >
                 <MessageSquare className="w-3.5 h-3.5" />

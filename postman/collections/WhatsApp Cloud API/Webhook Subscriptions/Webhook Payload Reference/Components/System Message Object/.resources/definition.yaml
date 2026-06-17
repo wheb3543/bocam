@@ -10,7 +10,7 @@ description: |-
   |**`type`**       | Supported types are:<ul><li>**user_changed_number**: for a user changed number notification.</li><li>**user_identity_changed**: for user identity changed notification.</li></ul>|
   | **`user`**       | **Added to Webhooks for identity updates.**<br/>The new WhatsApp user ID of the customer.|
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 14000

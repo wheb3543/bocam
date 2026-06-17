@@ -24,7 +24,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       subject: params.subject,
       preview: params.html.substring(0, 100),
     });
-    
+
     return true;
   } catch (error) {
     console.error('[Email] Failed to send email:', error);
@@ -129,12 +129,16 @@ export function generateNewLeadEmail(lead: {
               <div class="info-label">رقم الهاتف:</div>
               <div class="info-value" dir="ltr">${lead.phone}</div>
             </div>
-            ${lead.email ? `
+            ${
+              lead.email
+                ? `
             <div class="info-row">
               <div class="info-label">البريد الإلكتروني:</div>
               <div class="info-value">${lead.email}</div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             <div class="info-row">
               <div class="info-label">تاريخ التسجيل:</div>
               <div class="info-value">${lead.createdAt.toLocaleString('ar-YE', {
@@ -145,18 +149,26 @@ export function generateNewLeadEmail(lead: {
                 minute: '2-digit',
               })}</div>
             </div>
-            ${lead.utmSource ? `
+            ${
+              lead.utmSource
+                ? `
             <div class="info-row">
               <div class="info-label">مصدر الحملة:</div>
               <div class="info-value">${lead.utmSource}</div>
             </div>
-            ` : ''}
-            ${lead.utmMedium ? `
+            `
+                : ''
+            }
+            ${
+              lead.utmMedium
+                ? `
             <div class="info-row">
               <div class="info-label">وسيلة الحملة:</div>
               <div class="info-value">${lead.utmMedium}</div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
           
           <p style="font-size: 14px; color: #666; margin-top: 20px;">
@@ -191,10 +203,10 @@ export async function sendNewLeadNotification(lead: {
   createdAt: Date;
 }): Promise<boolean> {
   const emailHtml = generateNewLeadEmail(lead);
-  
+
   // TODO: Replace with actual hospital email address
   const hospitalEmail = process.env.HOSPITAL_EMAIL || 'info@sgh-sanaa.com';
-  
+
   return sendEmail({
     to: hospitalEmail,
     subject: `تسجيل جديد: ${lead.fullName} - ${lead.campaignName}`,
@@ -219,7 +231,7 @@ export async function sendNewAppointmentEmail(params: {
   campaign: string;
 }): Promise<boolean> {
   const { appointment, campaign } = params;
-  
+
   const emailHtml = `
     <!DOCTYPE html>
     <html dir="rtl" lang="ar">
@@ -297,12 +309,16 @@ export async function sendNewAppointmentEmail(params: {
               <div class="info-label">رقم الهاتف:</div>
               <div class="info-value" dir="ltr">${appointment.phone}</div>
             </div>
-            ${appointment.email ? `
+            ${
+              appointment.email
+                ? `
             <div class="info-row">
               <div class="info-label">البريد الإلكتروني:</div>
               <div class="info-value">${appointment.email}</div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <h3 style="color: #00A3E0; margin-top: 20px;">معلومات الموعد:</h3>
             <div class="info-row">
@@ -313,24 +329,36 @@ export async function sendNewAppointmentEmail(params: {
               <div class="info-label">التخصص:</div>
               <div class="info-value">${appointment.doctorSpecialty}</div>
             </div>
-            ${appointment.preferredDate ? `
+            ${
+              appointment.preferredDate
+                ? `
             <div class="info-row">
               <div class="info-label">التاريخ المفضل:</div>
               <div class="info-value">${appointment.preferredDate}</div>
             </div>
-            ` : ''}
-            ${appointment.preferredTime ? `
+            `
+                : ''
+            }
+            ${
+              appointment.preferredTime
+                ? `
             <div class="info-row">
               <div class="info-label">الوقت المفضل:</div>
               <div class="info-value">${appointment.preferredTime}</div>
             </div>
-            ` : ''}
-            ${appointment.notes ? `
+            `
+                : ''
+            }
+            ${
+              appointment.notes
+                ? `
             <div class="info-row">
               <div class="info-label">ملاحظات:</div>
               <div class="info-value">${appointment.notes}</div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
           
           <p style="font-size: 14px; color: #666; margin-top: 20px;">
@@ -350,9 +378,9 @@ export async function sendNewAppointmentEmail(params: {
     </body>
     </html>
   `;
-  
+
   const hospitalEmail = process.env.HOSPITAL_EMAIL || 'info@sgh-sanaa.com';
-  
+
   return sendEmail({
     to: hospitalEmail,
     subject: `حجز موعد جديد: ${appointment.fullName} - ${appointment.doctorName}`,

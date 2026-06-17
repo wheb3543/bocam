@@ -1,26 +1,26 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { unifiedStatusLabels as statusLabels } from "@/hooks/data/useStatusLabels";
-import AppointmentCard from "@/components/booking/AppointmentCard";
-import AppointmentStatsCards from "@/components/booking/AppointmentStatsCards";
-import AppointmentFilters from "@/components/booking/AppointmentFilters";
-import AppointmentTableDesktop from "@/components/booking/AppointmentTableDesktop";
-import { type ColumnConfig } from "@/components/table/ColumnVisibility";
-import { useTableFeatures } from "@/hooks/table/useTableFeatures";
-import TableSkeleton from "@/components/table/TableSkeleton";
-import EmptyState from "@/components/EmptyState";
-import Pagination, { type PageSizeValue } from "@/components/table/Pagination";
-import { useExportUtils } from "@/hooks/export/useExportUtils";
-import { printReceipt } from "@/components/booking/PrintReceipt";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CalendarOff, CheckSquare } from "lucide-react";
-import { toast } from "sonner";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
-import BulkUpdateDialog from "@/components/BulkUpdateDialog";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { unifiedStatusLabels as statusLabels } from '@/hooks/data/useStatusLabels';
+import AppointmentCard from '@/components/booking/AppointmentCard';
+import AppointmentStatsCards from '@/components/booking/AppointmentStatsCards';
+import AppointmentFilters from '@/components/booking/AppointmentFilters';
+import AppointmentTableDesktop from '@/components/booking/AppointmentTableDesktop';
+import { type ColumnConfig } from '@/components/table/ColumnVisibility';
+import { useTableFeatures } from '@/hooks/table/useTableFeatures';
+import TableSkeleton from '@/components/table/TableSkeleton';
+import EmptyState from '@/components/EmptyState';
+import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
+import { useExportUtils } from '@/hooks/export/useExportUtils';
+import { printReceipt } from '@/components/booking/PrintReceipt';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { CalendarOff, CheckSquare } from 'lucide-react';
+import { toast } from 'sonner';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
+import BulkUpdateDialog from '@/components/BulkUpdateDialog';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 interface AppointmentsTabProps {
   appointmentFilter: any;
@@ -28,7 +28,11 @@ interface AppointmentsTabProps {
   onOpenAppointmentDialog: (appointment: any) => void;
 }
 
-export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAppointmentDialog }: AppointmentsTabProps) {
+export default function AppointmentsTab({
+  appointmentFilter,
+  dateRange,
+  onOpenAppointmentDialog,
+}: AppointmentsTabProps) {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
   const { formatDate } = useFormatDate();
   const { user } = useAuth();
@@ -36,7 +40,7 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
 
   // Pagination state
   const [appointmentPage, setAppointmentPage] = useState(1);
-  const [appointmentPageSize, setAppointmentPageSize] = useState<PageSizeValue>("100");
+  const [appointmentPageSize, setAppointmentPageSize] = useState<PageSizeValue>('100');
   const [selectedAppointmentIds, setSelectedAppointmentIds] = useState<number[]>([]);
   const [bulkUpdateDialogOpen, setBulkUpdateDialogOpen] = useState(false);
 
@@ -100,20 +104,36 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
   // Reset page when filters change
   useEffect(() => {
     setAppointmentPage(1);
-  }, [debouncedAppointmentSearch, dateRange.from, dateRange.to, appointmentStatusFilter, appointmentSourceFilter, selectedDoctor, dateFilter]);
+  }, [
+    debouncedAppointmentSearch,
+    dateRange.from,
+    dateRange.to,
+    appointmentStatusFilter,
+    appointmentSourceFilter,
+    selectedDoctor,
+    dateFilter,
+  ]);
 
-  const appointmentLimit = appointmentPageSize === "all" ? 100000 : parseInt(appointmentPageSize);
-  const { data: appointmentsData, isLoading: appointmentsLoading } = trpc.appointments.listPaginated.useQuery({
-    page: appointmentPageSize === "all" ? 1 : appointmentPage,
-    limit: appointmentLimit,
-    searchTerm: debouncedAppointmentSearch,
-    dateFrom: dateRange.from.toISOString(),
-    dateTo: dateRange.to.toISOString(),
-    dateFilter: dateFilter !== 'all' ? dateFilter as "today" | "week" | "month" : undefined,
-    doctorIds: selectedDoctor && selectedDoctor.length > 0 ? selectedDoctor.map(Number) : undefined,
-    sources: appointmentSourceFilter && appointmentSourceFilter.length > 0 ? appointmentSourceFilter : undefined,
-    statuses: appointmentStatusFilter && appointmentStatusFilter.length > 0 ? appointmentStatusFilter : undefined,
-  });
+  const appointmentLimit = appointmentPageSize === 'all' ? 100000 : parseInt(appointmentPageSize);
+  const { data: appointmentsData, isLoading: appointmentsLoading } =
+    trpc.appointments.listPaginated.useQuery({
+      page: appointmentPageSize === 'all' ? 1 : appointmentPage,
+      limit: appointmentLimit,
+      searchTerm: debouncedAppointmentSearch,
+      dateFrom: dateRange.from.toISOString(),
+      dateTo: dateRange.to.toISOString(),
+      dateFilter: dateFilter !== 'all' ? (dateFilter as 'today' | 'week' | 'month') : undefined,
+      doctorIds:
+        selectedDoctor && selectedDoctor.length > 0 ? selectedDoctor.map(Number) : undefined,
+      sources:
+        appointmentSourceFilter && appointmentSourceFilter.length > 0
+          ? appointmentSourceFilter
+          : undefined,
+      statuses:
+        appointmentStatusFilter && appointmentStatusFilter.length > 0
+          ? appointmentStatusFilter
+          : undefined,
+    });
   const appointments = appointmentsData?.data || [];
   const { data: doctors = [] } = trpc.doctors.list.useQuery();
 
@@ -123,7 +143,7 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
       const previousData = utils.appointments.listPaginated.getData();
       utils.appointments.listPaginated.setData(
         {
-          page: appointmentPageSize === "all" ? 1 : appointmentPage,
+          page: appointmentPageSize === 'all' ? 1 : appointmentPage,
           limit: appointmentLimit,
           searchTerm: debouncedAppointmentSearch,
           dateFrom: dateRange.from.toISOString(),
@@ -142,13 +162,13 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
       return { previousData };
     },
     onSuccess: () => {
-      toast.success("تم تحديث حالة الموعد بنجاح");
+      toast.success('تم تحديث حالة الموعد بنجاح');
     },
     onError: (_error, _variables, context) => {
       if (context?.previousData) {
         utils.appointments.listPaginated.setData(
           {
-            page: appointmentPageSize === "all" ? 1 : appointmentPage,
+            page: appointmentPageSize === 'all' ? 1 : appointmentPage,
             limit: appointmentLimit,
             searchTerm: debouncedAppointmentSearch,
             dateFrom: dateRange.from.toISOString(),
@@ -157,7 +177,7 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
           context.previousData
         );
       }
-      toast.error("حدث خطأ أثناء تحديث الحالة");
+      toast.error('حدث خطأ أثناء تحديث الحالة');
     },
     onSettled: () => {
       utils.appointments.listPaginated.invalidate();
@@ -172,7 +192,7 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
       setSelectedAppointmentIds([]);
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء تحديث الحالة");
+      toast.error('حدث خطأ أثناء تحديث الحالة');
     },
   });
 
@@ -181,39 +201,65 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
     let filtered = [...appointments];
     const sorted = appointmentTable.sortData(filtered, (item: any, key: string) => {
       switch (key) {
-        case 'date': return item.createdAt;
-        case 'name': return item.fullName || item.patientName || '';
-        case 'phone': return item.phone;
-        case 'email': return item.email;
-        case 'age': return item.age;
-        case 'doctor': return item.doctorName;
-        case 'specialty': return item.doctorSpecialty;
-        case 'procedure': return item.procedure;
-        case 'preferredDate': return item.preferredDate;
-        case 'preferredTime': return item.preferredTime;
-        case 'appointmentDate': return item.appointmentDate;
-        case 'status': return item.status;
-        case 'receiptNumber': return item.receiptNumber;
-        default: return item[key];
+        case 'date':
+          return item.createdAt;
+        case 'name':
+          return item.fullName || item.patientName || '';
+        case 'phone':
+          return item.phone;
+        case 'email':
+          return item.email;
+        case 'age':
+          return item.age;
+        case 'doctor':
+          return item.doctorName;
+        case 'specialty':
+          return item.doctorSpecialty;
+        case 'procedure':
+          return item.procedure;
+        case 'preferredDate':
+          return item.preferredDate;
+        case 'preferredTime':
+          return item.preferredTime;
+        case 'appointmentDate':
+          return item.appointmentDate;
+        case 'status':
+          return item.status;
+        case 'receiptNumber':
+          return item.receiptNumber;
+        default:
+          return item[key];
       }
     });
     if (!appointmentTable.sortState.direction) {
-      sorted.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      sorted.sort(
+        (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     }
     return sorted;
   }, [appointments, appointmentTable.sortState, appointmentTable.sortData]);
 
   const appointmentStats = useMemo(() => {
-    if (!appointments) return { total: 0, pending: 0, contacted: 0, no_answer: 0, confirmed: 0, attended: 0, completed: 0, cancelled: 0 };
+    if (!appointments)
+      return {
+        total: 0,
+        pending: 0,
+        contacted: 0,
+        no_answer: 0,
+        confirmed: 0,
+        attended: 0,
+        completed: 0,
+        cancelled: 0,
+      };
     return {
       total: appointments.length,
-      pending: appointments.filter((a: any) => a.status === "pending").length,
-      contacted: appointments.filter((a: any) => a.status === "contacted").length,
-      no_answer: appointments.filter((a: any) => a.status === "no_answer").length,
-      confirmed: appointments.filter((a: any) => a.status === "confirmed").length,
-      attended: appointments.filter((a: any) => a.status === "attended").length,
-      completed: appointments.filter((a: any) => a.status === "completed").length,
-      cancelled: appointments.filter((a: any) => a.status === "cancelled").length,
+      pending: appointments.filter((a: any) => a.status === 'pending').length,
+      contacted: appointments.filter((a: any) => a.status === 'contacted').length,
+      no_answer: appointments.filter((a: any) => a.status === 'no_answer').length,
+      confirmed: appointments.filter((a: any) => a.status === 'confirmed').length,
+      attended: appointments.filter((a: any) => a.status === 'attended').length,
+      completed: appointments.filter((a: any) => a.status === 'completed').length,
+      cancelled: appointments.filter((a: any) => a.status === 'cancelled').length,
     };
   }, [appointments]);
 
@@ -272,12 +318,34 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
   const getAppointmentExportOptions = useCallback(() => {
     const activeFilters = appointmentExport.buildActiveFilters([
       { label: 'البحث', value: debouncedAppointmentSearch || undefined },
-      { label: 'الحالة', value: appointmentStatusFilter.length > 0 ? appointmentStatusFilter.map((s: string) => statusLabels[s as keyof typeof statusLabels]).join(', ') : undefined },
-      { label: 'المصدر', value: appointmentSourceFilter.length > 0 ? appointmentSourceFilter.map((s: string) => SOURCE_LABELS[s] || s).join(', ') : undefined },
-      { label: 'الطبيب', value: selectedDoctor.length > 0 ? selectedDoctor.map((id: string) => {
-        const doctor = doctors.find((d: any) => d.id.toString() === id);
-        return doctor ? doctor.name : id;
-      }).join(', ') : undefined },
+      {
+        label: 'الحالة',
+        value:
+          appointmentStatusFilter.length > 0
+            ? appointmentStatusFilter
+                .map((s: string) => statusLabels[s as keyof typeof statusLabels])
+                .join(', ')
+            : undefined,
+      },
+      {
+        label: 'المصدر',
+        value:
+          appointmentSourceFilter.length > 0
+            ? appointmentSourceFilter.map((s: string) => SOURCE_LABELS[s] || s).join(', ')
+            : undefined,
+      },
+      {
+        label: 'الطبيب',
+        value:
+          selectedDoctor.length > 0
+            ? selectedDoctor
+                .map((id: string) => {
+                  const doctor = doctors.find((d: any) => d.id.toString() === id);
+                  return doctor ? doctor.name : id;
+                })
+                .join(', ')
+            : undefined,
+      },
     ]);
     return {
       data: filteredAppointments,
@@ -285,23 +353,39 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
       dateRangeStr: appointmentExport.formatDateRange(dateRange.from, dateRange.to),
       visibleColumns: appointmentTable.visibleColumns,
     };
-  }, [filteredAppointments, debouncedAppointmentSearch, appointmentStatusFilter, appointmentSourceFilter, selectedDoctor, doctors, dateRange, appointmentTable.visibleColumns, appointmentExport]);
+  }, [
+    filteredAppointments,
+    debouncedAppointmentSearch,
+    appointmentStatusFilter,
+    appointmentSourceFilter,
+    selectedDoctor,
+    doctors,
+    dateRange,
+    appointmentTable.visibleColumns,
+    appointmentExport,
+  ]);
 
-  const handleExportAppointments = useCallback(async (format: 'excel' | 'csv' | 'pdf') => {
-    await appointmentExport.handleExport(format, getAppointmentExportOptions());
-  }, [appointmentExport, getAppointmentExportOptions]);
+  const handleExportAppointments = useCallback(
+    async (format: 'excel' | 'csv' | 'pdf') => {
+      await appointmentExport.handleExport(format, getAppointmentExportOptions());
+    },
+    [appointmentExport, getAppointmentExportOptions]
+  );
 
   const handlePrintAppointments = useCallback(() => {
     appointmentExport.handlePrint(getAppointmentExportOptions());
   }, [appointmentExport, getAppointmentExportOptions]);
 
-  const handleUpdateStatus = useCallback(async (id: number, status: string) => {
-    await updateAppointmentStatusMutation.mutateAsync({
-      id,
-      status: status as any,
-      staffNotes: '',
-    });
-  }, [updateAppointmentStatusMutation]);
+  const handleUpdateStatus = useCallback(
+    async (id: number, status: string) => {
+      await updateAppointmentStatusMutation.mutateAsync({
+        id,
+        status: status as any,
+        staffNotes: '',
+      });
+    },
+    [updateAppointmentStatusMutation]
+  );
 
   return (
     <div className="space-y-4">
@@ -316,10 +400,7 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
             </div>
             <div className="flex gap-2">
               {selectedAppointmentIds.length > 0 && (
-                <Button
-                  variant="default"
-                  onClick={() => setBulkUpdateDialogOpen(true)}
-                >
+                <Button variant="default" onClick={() => setBulkUpdateDialogOpen(true)}>
                   <CheckSquare className="h-4 w-4 ml-2" />
                   تحديث الحالة ({selectedAppointmentIds.length})
                 </Button>
@@ -373,11 +454,14 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
               searchTerm: appointmentFilter.filters.searchTerm,
             }}
             onApplyFilter={(filters: any) => {
-              if (filters.statusFilter) appointmentFilter.filters.setStatusFilter(filters.statusFilter);
+              if (filters.statusFilter)
+                appointmentFilter.filters.setStatusFilter(filters.statusFilter);
               else appointmentFilter.filters.setStatusFilter([]);
-              if (filters.sourceFilter) appointmentFilter.filters.setSourceFilter(filters.sourceFilter);
+              if (filters.sourceFilter)
+                appointmentFilter.filters.setSourceFilter(filters.sourceFilter);
               else appointmentFilter.filters.setSourceFilter([]);
-              if (filters.categoryFilter) appointmentFilter.filters.setCategoryFilter(filters.categoryFilter);
+              if (filters.categoryFilter)
+                appointmentFilter.filters.setCategoryFilter(filters.categoryFilter);
               else appointmentFilter.filters.setCategoryFilter([]);
               if (filters.dateFilter) appointmentFilter.filters.setDateFilter(filters.dateFilter);
               else appointmentFilter.filters.setDateFilter('all');
@@ -406,14 +490,17 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
                   onViewDetails={(apt: any) => onOpenAppointmentDialog(apt)}
                   onPrint={() => {
                     const doctorName = appointment.doctorName || `طبيب #${appointment.doctorId}`;
-                    printReceipt({
-                      fullName: appointment.fullName,
-                      phone: appointment.phone,
-                      age: appointment.age ?? undefined,
-                      registrationDate: new Date(appointment.createdAt),
-                      type: "appointment",
-                      typeName: doctorName
-                    }, user?.name || "مستخدم");
+                    printReceipt(
+                      {
+                        fullName: appointment.fullName,
+                        phone: appointment.phone,
+                        age: appointment.age ?? undefined,
+                        registrationDate: new Date(appointment.createdAt),
+                        type: 'appointment',
+                        typeName: doctorName,
+                      },
+                      user?.name || 'مستخدم'
+                    );
                   }}
                 />
               ))
@@ -434,9 +521,9 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
             onSelectionChange={setSelectedAppointmentIds}
             onOpenDialog={onOpenAppointmentDialog}
             onUpdateStatus={handleUpdateStatus}
-            userName={user?.name || "مستخدم"}
+            userName={user?.name || 'مستخدم'}
           />
-          
+
           {/* Pagination */}
           <Pagination
             currentPage={appointmentPage}
@@ -463,16 +550,26 @@ export default function AppointmentsTab({ appointmentFilter, dateRange, onOpenAp
         onOpenChange={setBulkUpdateDialogOpen}
         selectedCount={selectedAppointmentIds.length}
         statusOptions={[
-          { value: "pending", label: "قيد الانتظار" },
-          { value: "contacted", label: "تم التواصل" },
-          { value: "no_answer", label: "لم يرد" },
-          { value: "confirmed", label: "مؤكد" },
-          { value: "attended", label: "حضر" },
-          { value: "completed", label: "مكتمل" },
-          { value: "cancelled", label: "ملغي" },
+          { value: 'pending', label: 'قيد الانتظار' },
+          { value: 'contacted', label: 'تم التواصل' },
+          { value: 'no_answer', label: 'لم يرد' },
+          { value: 'confirmed', label: 'مؤكد' },
+          { value: 'attended', label: 'حضر' },
+          { value: 'completed', label: 'مكتمل' },
+          { value: 'cancelled', label: 'ملغي' },
         ]}
         onConfirm={(newStatus) => {
-          bulkUpdateAppointmentsMutation.mutate({ ids: selectedAppointmentIds, status: newStatus as "pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled" });
+          bulkUpdateAppointmentsMutation.mutate({
+            ids: selectedAppointmentIds,
+            status: newStatus as
+              | 'pending'
+              | 'contacted'
+              | 'no_answer'
+              | 'confirmed'
+              | 'attended'
+              | 'completed'
+              | 'cancelled',
+          });
         }}
         isLoading={bulkUpdateAppointmentsMutation.isPending}
       />

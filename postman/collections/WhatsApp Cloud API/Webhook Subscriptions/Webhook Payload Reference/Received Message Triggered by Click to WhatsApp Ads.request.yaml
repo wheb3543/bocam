@@ -1,5 +1,5 @@
 $kind: http-request
-url: ""
+url: ''
 method: VIEW
 body:
   type: json

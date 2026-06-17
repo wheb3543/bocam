@@ -1,6 +1,12 @@
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { APP_LOGO, COMPANY_PHONE, COMPANY_ARABIC_NAME, COMPANY_NAME, getCompanySlogan } from "@/const";
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import {
+  APP_LOGO,
+  COMPANY_PHONE,
+  COMPANY_ARABIC_NAME,
+  COMPANY_NAME,
+  getCompanySlogan,
+} from '@/const';
 
 interface PrintReceiptProps {
   data: {
@@ -8,7 +14,7 @@ interface PrintReceiptProps {
     phone: string;
     age?: number;
     registrationDate: Date;
-    type: "appointment" | "camp" | "offer";
+    type: 'appointment' | 'camp' | 'offer';
     typeName: string; // اسم الطبيب أو المخيم أو العرض
     receiptNumber?: string; // الرقم التسلسلي للسند
   };
@@ -30,7 +36,7 @@ export interface PrintWithNumberData {
   phone: string;
   email?: string;
   age?: number;
-  type: "appointment" | "camp" | "offer";
+  type: 'appointment' | 'camp' | 'offer';
   details: {
     doctorName?: string;
     specialty?: string;
@@ -54,23 +60,23 @@ export function usePrintWithNumber() {
 }
 
 // دالة مساعدة للطباعة
-export function printReceipt(data: PrintReceiptProps["data"], userName: string) {
+export function printReceipt(data: PrintReceiptProps['data'], userName: string) {
   // إنشاء نافذة طباعة جديدة
-  const printWindow = window.open("", "_blank", "width=800,height=600");
-  
+  const printWindow = window.open('', '_blank', 'width=800,height=600');
+
   if (!printWindow) {
-    alert("تعذر فتح نافذة الطباعة. الرجاء السماح بالنوافذ المنبثقة.");
+    alert('تعذر فتح نافذة الطباعة. الرجاء السماح بالنوافذ المنبثقة.');
     return;
   }
 
   // إنشاء HTML للطباعة
   const printDate = new Date();
   // استخدام الرقم التسلسلي من data إن وجد
-  const displayNumber = data.receiptNumber || "قيد الإنشاء...";
+  const displayNumber = data.receiptNumber || 'قيد الإنشاء...';
   const typeLabels = {
-    appointment: "موعد طبيب",
-    camp: "تسجيل مخيم",
-    offer: "حجز عرض",
+    appointment: 'موعد طبيب',
+    camp: 'تسجيل مخيم',
+    offer: 'حجز عرض',
   };
 
   // إنشاء محتوى سند واحد
@@ -90,12 +96,16 @@ export function printReceipt(data: PrintReceiptProps["data"], userName: string) 
           <span>${data.fullName}</span>
         </div>
         
-        ${data.age ? `
+        ${
+          data.age
+            ? `
         <div class="row">
           <span class="label">العمر:</span>
           <span>${data.age} سنة</span>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
         
         <div class="row">
           <span class="label">رقم الهاتف:</span>
@@ -104,7 +114,7 @@ export function printReceipt(data: PrintReceiptProps["data"], userName: string) 
         
         <div class="row">
           <span class="label">تاريخ التسجيل:</span>
-          <span>${format(data.registrationDate, "dd/MM/yyyy", { locale: ar })}</span>
+          <span>${format(data.registrationDate, 'dd/MM/yyyy', { locale: ar })}</span>
         </div>
         
         <div class="row">
@@ -114,8 +124,11 @@ export function printReceipt(data: PrintReceiptProps["data"], userName: string) 
         
         <div class="row">
           <span class="label">${
-            data.type === "appointment" ? "اسم الطبيب:" :
-            data.type === "camp" ? "اسم المخيم:" : "اسم العرض:"
+            data.type === 'appointment'
+              ? 'اسم الطبيب:'
+              : data.type === 'camp'
+                ? 'اسم المخيم:'
+                : 'اسم العرض:'
           }</span>
           <span>${data.typeName}</span>
         </div>
@@ -125,7 +138,7 @@ export function printReceipt(data: PrintReceiptProps["data"], userName: string) 
         <div class="slogan">${getCompanySlogan()}</div>
         <div class="meta">
           <div>${userName}</div>
-          <div>${format(printDate, "dd/MM/yyyy HH:mm", { locale: ar })}</div>
+          <div>${format(printDate, 'dd/MM/yyyy HH:mm', { locale: ar })}</div>
         </div>
       </div>
     </div>

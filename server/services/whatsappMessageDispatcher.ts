@@ -12,20 +12,27 @@
  *   });
  */
 
-import { eq, and } from "drizzle-orm";
-import { getDb, getWhatsAppConversationByPhone, createWhatsAppConversation, createWhatsAppMessage, updateWhatsAppConversation, normalizePhoneNumber } from "../database/db";
-import { messageSettings, whatsappTemplates, whatsappNotifications } from "../../drizzle/schema";
-import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from "./whatsappCloudAPI";
+import { eq, and } from 'drizzle-orm';
+import {
+  getDb,
+  getWhatsAppConversationByPhone,
+  createWhatsAppConversation,
+  createWhatsAppMessage,
+  updateWhatsAppConversation,
+  normalizePhoneNumber,
+} from '../database/db';
+import { messageSettings, whatsappTemplates, whatsappNotifications } from '../../drizzle/schema';
+import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from './whatsappCloudAPI';
 
-export type EntityType = "appointment" | "camp_registration" | "offer_lead";
+export type EntityType = 'appointment' | 'camp_registration' | 'offer_lead';
 export type TriggerEvent =
-  | "on_create"
-  | "on_confirmed"
-  | "on_arrived"
-  | "on_completed"
-  | "on_cancelled"
-  | "on_reminder_24h"
-  | "on_reminder_1h";
+  | 'on_create'
+  | 'on_confirmed'
+  | 'on_arrived'
+  | 'on_completed'
+  | 'on_cancelled'
+  | 'on_reminder_24h'
+  | 'on_reminder_1h';
 
 export interface DispatchOptions {
   entityType: EntityType;
@@ -45,7 +52,7 @@ async function saveDispatchLog(params: {
   recipientName?: string;
   messageType: string;
   templateName?: string;
-  status: "sent" | "failed";
+  status: 'sent' | 'failed';
   messageId?: string;
   errorMessage?: string;
   sentBy?: number;
@@ -56,7 +63,7 @@ async function saveDispatchLog(params: {
     await db.insert(whatsappNotifications).values({
       entityType: params.entityType,
       entityId: params.entityId,
-      notificationType: "status_update",
+      notificationType: 'status_update',
       phone: params.phone,
       recipientName: params.recipientName,
       templateName: params.templateName || params.messageType,
@@ -66,10 +73,10 @@ async function saveDispatchLog(params: {
       errorMessage: params.errorMessage,
       sentBy: params.sentBy,
       isAutomatic: true,
-      sentAt: params.status === "sent" ? new Date() : undefined,
+      sentAt: params.status === 'sent' ? new Date() : undefined,
     });
   } catch (err) {
-    console.error("[WhatsApp Dispatcher] Failed to save log:", err);
+    console.error('[WhatsApp Dispatcher] Failed to save log:', err);
   }
 }
 
@@ -100,17 +107,26 @@ function validateVariables(template: string, vars: Record<string, string>): stri
  * بناء محتوى الرسالة للعرض في المحادثة بناءً على اسم القالب والمتغيرات
  * يُظهر نص القالب مع القيم الفعلية بدلاً من [قالب: X]
  */
-function buildTemplateDisplayContent(templateName: string, variables: Record<string, string>, fallbackContent: string): string {
+function buildTemplateDisplayContent(
+  templateName: string,
+  variables: Record<string, string>,
+  fallbackContent: string
+): string {
   // خريطة القوالب المعروفة مع نصوصها الفعلية
   const templateTexts: Record<string, string> = {
-    'appointment_confirmation': 'مرحباً {name}، تم استلام طلب حجزك في المستشفى السعودي الألماني - صنعاء.\n\nتفاصيل الحجز:\n📅 التاريخ والوقت: {date}\n👨‍⚕️ الطبيب: {doctor}\n🏥 الخدمة: {service}\n\nسيتم التواصل معك قريباً لتأكيد الموعد.',
-    'camp_reg_verification': 'مرحباً {name}، تم استلام طلب تسجيلك في {camp_name}.\n\nتفاصيل التسجيل:\n📅 التاريخ: {date}\n⏰ الوقت: {time}\n📍 الموقع: {location}\n\nيرجى تأكيد حضورك بالضغط على الزر أدناه.',
-    'camp_reg_confirmed': 'مرحباً {name}، تم تأكيد تسجيلك في {camp_name}.\n\n📅 التاريخ: {date}\n⏰ الوقت: {time}\n📍 الموقع: {location}\n\nنتطلع لرؤيتك!',
-    'camp_reg_cancelled': 'مرحباً {name}، تم إلغاء تسجيلك في {camp_name}. إذا كنت ترغب في إعادة التسجيل، يرجى التواصل معنا.',
-    'camp_patient_arrival': 'مرحباً {name}، نُرحب بك في {camp_name}. يرجى التوجه إلى مكتب الاستقبال.',
-    'camp_journey_completed': 'شكراً لك {name} على مشاركتك في {camp_name}. نتمنى لك دوام الصحة والعافية.',
+    appointment_confirmation:
+      'مرحباً {name}، تم استلام طلب حجزك في المستشفى السعودي الألماني - صنعاء.\n\nتفاصيل الحجز:\n📅 التاريخ والوقت: {date}\n👨‍⚕️ الطبيب: {doctor}\n🏥 الخدمة: {service}\n\nسيتم التواصل معك قريباً لتأكيد الموعد.',
+    camp_reg_verification:
+      'مرحباً {name}، تم استلام طلب تسجيلك في {camp_name}.\n\nتفاصيل التسجيل:\n📅 التاريخ: {date}\n⏰ الوقت: {time}\n📍 الموقع: {location}\n\nيرجى تأكيد حضورك بالضغط على الزر أدناه.',
+    camp_reg_confirmed:
+      'مرحباً {name}، تم تأكيد تسجيلك في {camp_name}.\n\n📅 التاريخ: {date}\n⏰ الوقت: {time}\n📍 الموقع: {location}\n\nنتطلع لرؤيتك!',
+    camp_reg_cancelled:
+      'مرحباً {name}، تم إلغاء تسجيلك في {camp_name}. إذا كنت ترغب في إعادة التسجيل، يرجى التواصل معنا.',
+    camp_patient_arrival: 'مرحباً {name}، نُرحب بك في {camp_name}. يرجى التوجه إلى مكتب الاستقبال.',
+    camp_journey_completed:
+      'شكراً لك {name} على مشاركتك في {camp_name}. نتمنى لك دوام الصحة والعافية.',
   };
-  
+
   const templateKey = templateName.replace(/ /g, '_').toLowerCase();
   const textTemplate = templateTexts[templateKey] || templateTexts[templateName] || fallbackContent;
   return interpolate(textTemplate, variables);
@@ -130,7 +146,7 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
   try {
     const db = await getDb();
     if (!db) {
-      return { success: false, error: "Database not available" };
+      return { success: false, error: 'Database not available' };
     }
 
     // 1. جلب إعداد الرسالة المناسب من DB
@@ -147,8 +163,13 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
       .limit(1);
 
     if (!setting) {
-      console.log(`[WhatsApp Dispatcher] No active setting found for ${entityType}:${triggerEvent}`);
-      return { success: false, error: `No active message setting for ${entityType}:${triggerEvent}` };
+      console.log(
+        `[WhatsApp Dispatcher] No active setting found for ${entityType}:${triggerEvent}`
+      );
+      return {
+        success: false,
+        error: `No active message setting for ${entityType}:${triggerEvent}`,
+      };
     }
 
     const channel = setting.deliveryChannel;
@@ -157,7 +178,9 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
     // التحقق من صحة المتغيرات المطلوبة في القالب
     const missingVars = validateVariables(setting.messageContent, variables);
     if (missingVars.length > 0) {
-      console.error(`[WhatsApp Dispatcher] Missing required variables for ${entityType}:${triggerEvent}: ${missingVars.join(', ')}`);
+      console.error(
+        `[WhatsApp Dispatcher] Missing required variables for ${entityType}:${triggerEvent}: ${missingVars.join(', ')}`
+      );
       // Log the failure but still send with placeholders (as fallback behavior)
       // Alternatively, could return { success: false, error: `Missing variables: ${missingVars.join(', ')}` };
     }
@@ -175,90 +198,107 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
         .limit(1);
 
       if (!template) {
-        console.error(`[WhatsApp Dispatcher] Template with ID ${setting.whatsappTemplateId} not found in database`);
+        console.error(
+          `[WhatsApp Dispatcher] Template with ID ${setting.whatsappTemplateId} not found in database`
+        );
       } else {
         // نُرسل القالب بغض النظر عن metaStatus (APPROVED أو PENDING) لأن Meta قد تقبله
         // بناء مكونات القالب مع دعم نوعين:
         // 1. متغيرات رقمية {{1}}, {{2}} → parameters بدون parameter_name
         // 2. متغيرات مسماة {{name}}, {{camp_name}} → parameters مع parameter_name (Named Parameters API)
-        const bodyParams: { type: "text"; text: string; parameter_name?: string }[] = [];
+        const bodyParams: { type: 'text'; text: string; parameter_name?: string }[] = [];
         try {
           const parsedVars = JSON.parse(template.variables || '[]') as string[];
-          const isNumeric = parsedVars.every(v => /^\d+$/.test(v));
+          const isNumeric = parsedVars.every((v) => /^\d+$/.test(v));
           if (isNumeric) {
             // متغيرات رقمية: نُرسل القيم بالترتيب بدون parameter_name
             const vals = Object.values(variables);
             for (const v of vals) {
-              bodyParams.push({ type: "text", text: String(v) });
+              bodyParams.push({ type: 'text', text: String(v) });
             }
           } else {
             // متغيرات مسماة: يجب إرسال parameter_name مع كل قيمة (Meta Named Parameters)
             for (const varName of parsedVars) {
-              bodyParams.push({ type: "text", text: String(variables[varName] ?? ''), parameter_name: varName });
+              bodyParams.push({
+                type: 'text',
+                text: String(variables[varName] ?? ''),
+                parameter_name: varName,
+              });
             }
           }
         } catch {
           const vals = Object.values(variables);
           for (const v of vals) {
-            bodyParams.push({ type: "text", text: String(v) });
+            bodyParams.push({ type: 'text', text: String(v) });
           }
         }
 
         const templateNameToSend = template.metaName || template.name;
-        console.log(`[WhatsApp Dispatcher] Sending template "${templateNameToSend}" (metaName: ${template.metaName}) to ${phone}`);
+        console.log(
+          `[WhatsApp Dispatcher] Sending template "${templateNameToSend}" (metaName: ${template.metaName}) to ${phone}`
+        );
 
         // بناء مكونات الأزرار (quick_reply) مع الـ payload الصحيح
         // Format: CONFIRM_{TYPE}_{ID} أو CANCEL_{TYPE}_{ID}
         const buttonComponents: Array<{
-          type: "button";
-          sub_type: "quick_reply";
+          type: 'button';
+          sub_type: 'quick_reply';
           index: number;
-          parameters: Array<{ type: "payload"; payload: string }>;
+          parameters: Array<{ type: 'payload'; payload: string }>;
         }> = [];
-        if (triggerEvent === "on_create" && entityId) {
+        if (triggerEvent === 'on_create' && entityId) {
           const typeMap: Record<EntityType, string> = {
-            appointment: "APPOINTMENT",
-            camp_registration: "CAMP",
-            offer_lead: "OFFER",
+            appointment: 'APPOINTMENT',
+            camp_registration: 'CAMP',
+            offer_lead: 'OFFER',
           };
           const bookingType = typeMap[entityType];
           try {
-            const parsedButtons = JSON.parse(template.buttons || '[]') as Array<{ type: string; text: string }>;
+            const parsedButtons = JSON.parse(template.buttons || '[]') as Array<{
+              type: string;
+              text: string;
+            }>;
             // تحديد index الأزرار بناءً على نص الزر
             parsedButtons.forEach((btn, idx) => {
               const text = btn.text || '';
               const isConfirm = text.includes('تأكيد') || text.toLowerCase().includes('confirm');
-              const isCancel = text.includes('إلغاء') || text.includes('الغاء') || text.toLowerCase().includes('cancel');
+              const isCancel =
+                text.includes('إلغاء') ||
+                text.includes('الغاء') ||
+                text.toLowerCase().includes('cancel');
               if (isConfirm) {
                 buttonComponents.push({
-                  type: "button",
-                  sub_type: "quick_reply",
+                  type: 'button',
+                  sub_type: 'quick_reply',
                   index: idx,
-                  parameters: [{ type: "payload", payload: `CONFIRM_${bookingType}_${entityId}` }],
+                  parameters: [{ type: 'payload', payload: `CONFIRM_${bookingType}_${entityId}` }],
                 });
               } else if (isCancel) {
                 buttonComponents.push({
-                  type: "button",
-                  sub_type: "quick_reply",
+                  type: 'button',
+                  sub_type: 'quick_reply',
                   index: idx,
-                  parameters: [{ type: "payload", payload: `CANCEL_${bookingType}_${entityId}` }],
+                  parameters: [{ type: 'payload', payload: `CANCEL_${bookingType}_${entityId}` }],
                 });
               }
             });
           } catch (e) {
-            console.warn(`[WhatsApp Dispatcher] Failed to parse buttons for template ${template.name}:`, e);
+            console.warn(
+              `[WhatsApp Dispatcher] Failed to parse buttons for template ${template.name}:`,
+              e
+            );
           }
         }
 
         const allComponents: any[] = [];
         if (bodyParams.length > 0) {
-          allComponents.push({ type: "body", parameters: bodyParams });
+          allComponents.push({ type: 'body', parameters: bodyParams });
         }
         allComponents.push(...buttonComponents);
 
         result = await sendWhatsAppTemplateMessage(phone, {
           templateName: templateNameToSend,
-          languageCode: (template.languageCode ?? "ar"),
+          languageCode: template.languageCode ?? 'ar',
           components: allComponents,
         });
 
@@ -270,13 +310,17 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
             recipientName: opts.recipientName,
             messageType,
             templateName: template.name,
-            status: "sent",
+            status: 'sent',
             messageId: result.messageId,
             sentBy: opts.sentBy,
           });
           // حفظ المحادثة والرسالة في قاعدة البيانات
           // بناء محتوى الرسالة من متغيرات القالب الفعلية لعرضها في المحادثة
-          const templateDisplayContent = buildTemplateDisplayContent(template.name, variables, setting.messageContent);
+          const templateDisplayContent = buildTemplateDisplayContent(
+            template.name,
+            variables,
+            setting.messageContent
+          );
           await ensureConversationAndSaveMessage({
             phone,
             customerName: opts.recipientName,
@@ -285,7 +329,7 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
             entityType,
             entityId,
           });
-          return { success: true, messageType, channel: "whatsapp_api" };
+          return { success: true, messageType, channel: 'whatsapp_api' };
         }
         // Fallback إلى نص عادي إذا فشل القالب
         console.error(`[WhatsApp Dispatcher] Template send failed for "${templateNameToSend}"`);
@@ -300,11 +344,11 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
     }
 
     // إرسال كنص عادي (whatsapp_integration أو fallback بعد فشل القالب)
-    if (channel === "whatsapp_integration" || channel === "both") {
+    if (channel === 'whatsapp_integration' || channel === 'both') {
       const content = interpolate(setting.messageContent, variables);
       result = await sendWhatsAppTextMessage(phone, content);
 
-      const status = result.success ? "sent" : "failed";
+      const status = result.success ? 'sent' : 'failed';
       await saveDispatchLog({
         entityType,
         entityId,
@@ -339,7 +383,7 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
       };
     }
 
-    return { success: false, error: "No valid channel configured" };
+    return { success: false, error: 'No valid channel configured' };
   } catch (error: any) {
     console.error(`[WhatsApp Dispatcher] Error dispatching ${entityType}:${triggerEvent}:`, error);
     return { success: false, error: error.message };
@@ -372,13 +416,13 @@ export async function ensureConversationAndSaveMessage(params: {
     const entityLinks: Record<string, any> = {};
     if (params.entityType && params.entityId) {
       switch (params.entityType) {
-        case "appointment":
+        case 'appointment':
           entityLinks.appointmentId = params.entityId;
           break;
-        case "camp_registration":
+        case 'camp_registration':
           entityLinks.campRegistrationId = params.entityId;
           break;
-        case "offer_lead":
+        case 'offer_lead':
           entityLinks.offerLeadId = params.entityId;
           break;
       }
@@ -417,16 +461,16 @@ export async function ensureConversationAndSaveMessage(params: {
     // 2. حفظ الرسالة في جدول whatsapp_messages
     await createWhatsAppMessage({
       conversationId: conversation.id,
-      direction: "outbound",
+      direction: 'outbound',
       content: params.messageContent,
-      messageType: params.mediaUrl ? "document" : "text", // استخدام document إذا كان هناك mediaUrl
-      status: "sent",
+      messageType: params.mediaUrl ? 'document' : 'text', // استخدام document إذا كان هناك mediaUrl
+      status: 'sent',
       whatsappMessageId: params.messageId || null,
       sentAt: new Date(),
       isAutomated: 1,
       mediaUrl: params.mediaUrl || null, // حفظ رابط الملف إذا كان موجوداً
     });
   } catch (err) {
-    console.error("[WhatsApp Dispatcher] Failed to ensure conversation/message:", err);
+    console.error('[WhatsApp Dispatcher] Failed to ensure conversation/message:', err);
   }
 }

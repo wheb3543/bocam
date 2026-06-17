@@ -1,9 +1,9 @@
-import { trpc } from "@/lib/api/trpc";
-import { Badge } from "@/components/ui/badge";
-import { CheckSquare } from "lucide-react";
+import { trpc } from '@/lib/api/trpc';
+import { Badge } from '@/components/ui/badge';
+import { CheckSquare } from 'lucide-react';
 
 interface TaskCountProps {
-  entityType: "appointment" | "lead" | "offerLead" | "campRegistration";
+  entityType: 'appointment' | 'lead' | 'offerLead' | 'campRegistration';
   entityId: number;
 }
 
@@ -23,8 +23,8 @@ export default function TaskCount({ entityType, entityId }: TaskCountProps) {
   }
 
   // Color based on count: 1-3 blue, 4+ orange
-  const variant = count >= 4 ? "destructive" : "default";
-  const colorClass = count >= 4 ? "bg-orange-500 hover:bg-orange-600" : "";
+  const variant = count >= 4 ? 'destructive' : 'default';
+  const colorClass = count >= 4 ? 'bg-orange-500 hover:bg-orange-600' : '';
 
   return (
     <Badge variant={variant} className={`gap-1 ${colorClass}`}>

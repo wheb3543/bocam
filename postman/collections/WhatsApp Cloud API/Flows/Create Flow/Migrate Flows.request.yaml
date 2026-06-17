@@ -12,6 +12,6 @@ body:
     - type: text
       key: source_flow_names
       value: '["appointment", "leadgen"]'
-      description: "[Optional] The names of the flows that will be copied from the source WABA. If not specified, all flows in the source WABA will be copied"
+      description: '[Optional] The names of the flows that will be copied from the source WABA. If not specified, all flows in the source WABA will be copied'
 examples: ./.resources/Migrate Flows.resources/examples
 order: 2000

@@ -11,7 +11,7 @@ description: |-
   | **`payment`**  <br>type: object | Contains the following field:  <br>  <br>`reference_id` string  <br>\- Unique reference ID for the order sent in order_details message. |
   | **`timestamp`**  <br>type: string | Timestamp for the webhook. |
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 2000

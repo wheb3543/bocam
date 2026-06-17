@@ -1,10 +1,10 @@
 /**
  * Application Configuration
- * 
+ *
  * Centralized configuration management for BOCAM application.
  * Reads all configuration from environment variables and provides
  * type-safe access throughout the application.
- * 
+ *
  * @module config
  * @description Provides centralized configuration management
  */
@@ -212,7 +212,9 @@ export const OWNER_NAME = process.env.OWNER_NAME || '';
 /**
  * JWT secret for token signing
  */
-export const JWT_SECRET = process.env.JWT_SECRET || 'SGH_CRM_SECURE_JWT_SECRET_KEY_FOR_PRODUCTION_2026_VERY_LONG_AND_SECURE_STRING_FOR_AUTHENTICATION_PURPOSES_EXTENDED_FOR_MAXIMUM_SECURITY';
+export const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  'SGH_CRM_SECURE_JWT_SECRET_KEY_FOR_PRODUCTION_2026_VERY_LONG_AND_SECURE_STRING_FOR_AUTHENTICATION_PURPOSES_EXTENDED_FOR_MAXIMUM_SECURITY';
 
 /**
  * Database Configuration
@@ -292,7 +294,8 @@ export const HOSPITAL_DB_PASSWORD = process.env.HOSPITAL_DB_PASSWORD || '';
 /**
  * File Upload Base URL (public URL for accessing uploaded files)
  */
-export const FILE_UPLOAD_BASE_URL = process.env.FILE_UPLOAD_BASE_URL || 'http://localhost:5173/lab-results';
+export const FILE_UPLOAD_BASE_URL =
+  process.env.FILE_UPLOAD_BASE_URL || 'http://localhost:5173/lab-results';
 
 /**
  * File Upload Path (local directory for storing uploaded files)
@@ -396,14 +399,14 @@ export const GOOGLE_ANALYTICS_ID = process.env.GOOGLE_ANALYTICS_ID || '';
 
 /**
  * Validates all required environment variables are set
- * 
+ *
  * @throws {Error} When required environment variables are missing
  * @returns {void}
- * 
+ *
  * @example
  * ```typescript
  * import { validateEnv } from '@shared/config';
- * 
+ *
  * validateEnv(); // Throws if required vars are missing
  * ```
  */
@@ -414,16 +417,16 @@ export function validateEnv(): void {
   }> = [
     {
       key: 'DATABASE_URL',
-      description: 'Database connection string'
+      description: 'Database connection string',
     },
     {
       key: 'OAUTH_SERVER_URL',
-      description: 'OAuth server URL'
+      description: 'OAuth server URL',
     },
     {
       key: 'VITE_APP_ID',
-      description: 'Application ID for OAuth'
-    }
+      description: 'Application ID for OAuth',
+    },
   ];
 
   const missing = required.filter(({ key }) => !process.env[key]);
@@ -437,30 +440,30 @@ export function validateEnv(): void {
   }
 
   // Validate JWT secret length and set fallback if needed
-  const jwtSecret = process.env.JWT_SECRET || "SGH_CRM_SECURE_JWT_SECRET_KEY_FOR_PRODUCTION_2026_VERY_LONG_AND_SECURE_STRING_FOR_AUTHENTICATION_PURPOSES_EXTENDED_FOR_MAXIMUM_SECURITY";
-  
+  const jwtSecret =
+    process.env.JWT_SECRET ||
+    'SGH_CRM_SECURE_JWT_SECRET_KEY_FOR_PRODUCTION_2026_VERY_LONG_AND_SECURE_STRING_FOR_AUTHENTICATION_PURPOSES_EXTENDED_FOR_MAXIMUM_SECURITY';
+
   // Set fallback JWT_SECRET if not provided
   if (!process.env.JWT_SECRET) {
     process.env.JWT_SECRET = jwtSecret;
   }
-  
+
   if (jwtSecret.length < 32) {
-    throw new Error(
-      'JWT_SECRET must be at least 32 characters long for security'
-    );
+    throw new Error('JWT_SECRET must be at least 32 characters long for security');
   }
 }
 
 /**
  * Gets display name based on language preference
- * 
+ *
  * @param language - Preferred language ('ar' for Arabic, otherwise English)
  * @returns Company display name
- * 
+ *
  * @example
  * ```typescript
  * import { getCompanyName } from '@shared/config';
- * 
+ *
  * getCompanyName('ar'); // Returns "المستشفى السعودي الألماني"
  * getCompanyName('en'); // Returns "Saudi German Hospital"
  * ```
@@ -471,14 +474,14 @@ export function getCompanyName(language: 'ar' | 'en' = 'ar'): string {
 
 /**
  * Gets app title based on language preference
- * 
+ *
  * @param language - Preferred language ('ar' for Arabic, otherwise English)
  * @returns App title
- * 
+ *
  * @example
  * ```typescript
  * import { getAppTitle } from '@shared/config';
- * 
+ *
  * getAppTitle('ar'); // Returns "المستشفى السعودي الألماني - صنعاء"
  * getAppTitle('en'); // Returns "Saudi German Hospital - Sana'a"
  * ```
@@ -491,14 +494,14 @@ export function getAppTitle(language: 'ar' | 'en' = 'ar'): string {
 
 /**
  * Checks if a social media URL is configured
- * 
+ *
  * @param platform - Social media platform ('facebook', 'instagram', 'twitter', 'linkedin')
  * @returns true if URL is configured and not empty
- * 
+ *
  * @example
  * ```typescript
  * import { hasSocialMedia } from '@shared/config';
- * 
+ *
  * if (hasSocialMedia('facebook')) {
  *   // Show Facebook link
  * }
@@ -511,7 +514,7 @@ export function hasSocialMedia(
     facebook: FACEBOOK_URL,
     instagram: INSTAGRAM_URL,
     twitter: TWITTER_URL,
-    linkedin: LINKEDIN_URL
+    linkedin: LINKEDIN_URL,
   };
 
   return Boolean(urls[platform]);
@@ -519,14 +522,14 @@ export function hasSocialMedia(
 
 /**
  * Gets social media URL for a platform
- * 
+ *
  * @param platform - Social media platform
  * @returns Social media URL or empty string if not configured
- * 
+ *
  * @example
  * ```typescript
  * import { getSocialMediaUrl } from '@shared/config';
- * 
+ *
  * const facebookUrl = getSocialMediaUrl('facebook');
  * ```
  */
@@ -537,7 +540,7 @@ export function getSocialMediaUrl(
     facebook: FACEBOOK_URL,
     instagram: INSTAGRAM_URL,
     twitter: TWITTER_URL,
-    linkedin: LINKEDIN_URL
+    linkedin: LINKEDIN_URL,
   };
 
   return urls[platform] || '';
@@ -545,13 +548,13 @@ export function getSocialMediaUrl(
 
 /**
  * Gets configured social media URLs
- * 
+ *
  * @returns Object with available social media URLs
- * 
+ *
  * @example
  * ```typescript
  * import { getSocialMediaUrls } from '@shared/config';
- * 
+ *
  * const socials = getSocialMediaUrls();
  * // { facebook: 'https://...', instagram: 'https://...', ... }
  * ```
@@ -564,26 +567,22 @@ export function getSocialMediaUrls(): Record<
     facebook: FACEBOOK_URL,
     instagram: INSTAGRAM_URL,
     twitter: TWITTER_URL,
-    linkedin: LINKEDIN_URL
+    linkedin: LINKEDIN_URL,
   };
 }
 
 /**
  * Validates if WhatsApp is properly configured
- * 
+ *
  * @returns true if WhatsApp has valid configuration
  */
 export function isWhatsAppConfigured(): boolean {
-  return Boolean(
-    WHATSAPP_ACCESS_TOKEN &&
-    WHATSAPP_PHONE_NUMBER_ID &&
-    WHATSAPP_BUSINESS_ACCOUNT_ID
-  );
+  return Boolean(WHATSAPP_ACCESS_TOKEN && WHATSAPP_PHONE_NUMBER_ID && WHATSAPP_BUSINESS_ACCOUNT_ID);
 }
 
 /**
  * Validates if email service is properly configured
- * 
+ *
  * @returns true if email service has valid configuration
  */
 export function isEmailConfigured(): boolean {
@@ -592,7 +591,7 @@ export function isEmailConfigured(): boolean {
 
 /**
  * Validates if SMS service is properly configured
- * 
+ *
  * @returns true if SMS service has valid configuration
  */
 export function isSMSConfigured(): boolean {
@@ -601,7 +600,7 @@ export function isSMSConfigured(): boolean {
 
 /**
  * Gets contact information for display
- * 
+ *
  * @returns Object with contact information
  */
 export function getContactInfo(): {
@@ -612,6 +611,6 @@ export function getContactInfo(): {
   return {
     phone: COMPANY_PHONE,
     email: COMPANY_EMAIL,
-    address: COMPANY_ADDRESS
+    address: COMPANY_ADDRESS,
   };
 }

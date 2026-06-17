@@ -1,18 +1,14 @@
-import { useState, useMemo } from "react";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
-import { useConfirmDialog } from "@/hooks/ui/useConfirmDialog";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import {
-  TableBody,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useState, useMemo } from 'react';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDialog } from '@/hooks/ui/useConfirmDialog';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { TableBody, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -20,14 +16,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Users,
   UserCheck,
@@ -41,56 +37,156 @@ import {
   Plane,
   Phone,
   Copy,
-} from "lucide-react";
-import { toast } from "sonner";
-import { type ColumnConfig } from "@/components/table/ColumnVisibility";
-import { ColumnVisibility } from "@/components/table/ColumnVisibility";
-import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
-import { useTableFeatures } from "@/hooks/table/useTableFeatures";
-import EmptyState from "@/components/EmptyState";
-import { useSlugGenerator } from "@/hooks/data/useSlugGenerator";
-import ImageUpload from "@/components/form/ImageUpload";
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { type ColumnConfig } from '@/components/table/ColumnVisibility';
+import { ColumnVisibility } from '@/components/table/ColumnVisibility';
+import {
+  ResizableTable,
+  ResizableHeaderCell,
+  FrozenTableCell,
+} from '@/components/table/ResizableTable';
+import { useTableFeatures } from '@/hooks/table/useTableFeatures';
+import EmptyState from '@/components/EmptyState';
+import { useSlugGenerator } from '@/hooks/data/useSlugGenerator';
+import ImageUpload from '@/components/form/ImageUpload';
 
 // === تعريف أعمدة جدول الأطباء ===
 const doctorColumns: ColumnConfig[] = [
-  { key: "name", label: "الاسم", defaultVisible: true, defaultWidth: 200, minWidth: 150, maxWidth: 400, sortType: 'string' },
-  { key: "slug", label: "الرابط", defaultVisible: false, defaultWidth: 160, minWidth: 100, maxWidth: 300, sortType: 'string' },
-  { key: "specialty", label: "التخصص", defaultVisible: true, defaultWidth: 180, minWidth: 120, maxWidth: 350, sortType: 'string' },
-  { key: "bio", label: "السيرة الذاتية", defaultVisible: false, defaultWidth: 200, minWidth: 120, maxWidth: 400, sortable: false },
-  { key: "image", label: "الصورة", defaultVisible: false, defaultWidth: 100, minWidth: 80, maxWidth: 200, sortable: false },
-  { key: "experience", label: "الخبرة", defaultVisible: true, defaultWidth: 100, minWidth: 70, maxWidth: 200, sortType: 'string' },
-  { key: "languages", label: "اللغات", defaultVisible: true, defaultWidth: 140, minWidth: 100, maxWidth: 300, sortType: 'string' },
-  { key: "consultationFee", label: "رسوم الاستشارة", defaultVisible: true, defaultWidth: 130, minWidth: 100, maxWidth: 250, sortType: 'number' },
-  { key: "isVisiting", label: "طبيب زائر", defaultVisible: false, defaultWidth: 100, minWidth: 80, maxWidth: 200, sortType: 'string' },
-  { key: "status", label: "الحالة", defaultVisible: true, defaultWidth: 100, minWidth: 80, maxWidth: 200, sortType: 'string' },
-  { key: "createdAt", label: "تاريخ الإضافة", defaultVisible: false, defaultWidth: 140, minWidth: 100, maxWidth: 250, sortType: 'date' },
-  { key: "actions", label: "الإجراءات", defaultVisible: true, defaultWidth: 180, minWidth: 140, maxWidth: 300, sortable: false },
+  {
+    key: 'name',
+    label: 'الاسم',
+    defaultVisible: true,
+    defaultWidth: 200,
+    minWidth: 150,
+    maxWidth: 400,
+    sortType: 'string',
+  },
+  {
+    key: 'slug',
+    label: 'الرابط',
+    defaultVisible: false,
+    defaultWidth: 160,
+    minWidth: 100,
+    maxWidth: 300,
+    sortType: 'string',
+  },
+  {
+    key: 'specialty',
+    label: 'التخصص',
+    defaultVisible: true,
+    defaultWidth: 180,
+    minWidth: 120,
+    maxWidth: 350,
+    sortType: 'string',
+  },
+  {
+    key: 'bio',
+    label: 'السيرة الذاتية',
+    defaultVisible: false,
+    defaultWidth: 200,
+    minWidth: 120,
+    maxWidth: 400,
+    sortable: false,
+  },
+  {
+    key: 'image',
+    label: 'الصورة',
+    defaultVisible: false,
+    defaultWidth: 100,
+    minWidth: 80,
+    maxWidth: 200,
+    sortable: false,
+  },
+  {
+    key: 'experience',
+    label: 'الخبرة',
+    defaultVisible: true,
+    defaultWidth: 100,
+    minWidth: 70,
+    maxWidth: 200,
+    sortType: 'string',
+  },
+  {
+    key: 'languages',
+    label: 'اللغات',
+    defaultVisible: true,
+    defaultWidth: 140,
+    minWidth: 100,
+    maxWidth: 300,
+    sortType: 'string',
+  },
+  {
+    key: 'consultationFee',
+    label: 'رسوم الاستشارة',
+    defaultVisible: true,
+    defaultWidth: 130,
+    minWidth: 100,
+    maxWidth: 250,
+    sortType: 'number',
+  },
+  {
+    key: 'isVisiting',
+    label: 'طبيب زائر',
+    defaultVisible: false,
+    defaultWidth: 100,
+    minWidth: 80,
+    maxWidth: 200,
+    sortType: 'string',
+  },
+  {
+    key: 'status',
+    label: 'الحالة',
+    defaultVisible: true,
+    defaultWidth: 100,
+    minWidth: 80,
+    maxWidth: 200,
+    sortType: 'string',
+  },
+  {
+    key: 'createdAt',
+    label: 'تاريخ الإضافة',
+    defaultVisible: false,
+    defaultWidth: 140,
+    minWidth: 100,
+    maxWidth: 250,
+    sortType: 'date',
+  },
+  {
+    key: 'actions',
+    label: 'الإجراءات',
+    defaultVisible: true,
+    defaultWidth: 180,
+    minWidth: 140,
+    maxWidth: 300,
+    sortable: false,
+  },
 ];
 
 export default function DoctorsManagement() {
   const { formatDate } = useFormatDate();
   const deleteConfirm = useConfirmDialog<any>();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<any>(null);
 
   const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    specialty: "",
-    image: "",
-    bio: "",
-    experience: "",
-    languages: "",
-    consultationFee: "",
-    procedures: "",
-    isVisiting: "no" as "yes" | "no",
-    available: "yes" as "yes" | "no",
+    name: '',
+    slug: '',
+    specialty: '',
+    image: '',
+    bio: '',
+    experience: '',
+    languages: '',
+    consultationFee: '',
+    procedures: '',
+    isVisiting: 'no' as 'yes' | 'no',
+    available: 'yes' as 'yes' | 'no',
   });
 
   // Slug auto-generation hook
   const { autoGenerateSlug, resetManualEdit } = useSlugGenerator(
-    (slug) => setFormData(prev => ({ ...prev, slug })),
+    (slug) => setFormData((prev) => ({ ...prev, slug })),
     { isEditing: !!editingDoctor }
   );
 
@@ -104,67 +200,75 @@ export default function DoctorsManagement() {
   const { data: doctors, isLoading, refetch } = trpc.doctors.list.useQuery();
 
   const doctorStats = useMemo(() => {
-    if (!doctors) return { total: 0, available: 0, unavailable: 0, visiting: 0, visitingAvailable: 0, visitingUnavailable: 0 };
-    const visiting = doctors.filter(d => d.isVisiting === 'yes');
+    if (!doctors)
+      return {
+        total: 0,
+        available: 0,
+        unavailable: 0,
+        visiting: 0,
+        visitingAvailable: 0,
+        visitingUnavailable: 0,
+      };
+    const visiting = doctors.filter((d) => d.isVisiting === 'yes');
     return {
       total: doctors.length,
-      available: doctors.filter(d => d.available === 'yes').length,
-      unavailable: doctors.filter(d => d.available === 'no').length,
+      available: doctors.filter((d) => d.available === 'yes').length,
+      unavailable: doctors.filter((d) => d.available === 'no').length,
       visiting: visiting.length,
-      visitingAvailable: visiting.filter(d => d.available === 'yes').length,
-      visitingUnavailable: visiting.filter(d => d.available === 'no').length,
+      visitingAvailable: visiting.filter((d) => d.available === 'yes').length,
+      visitingUnavailable: visiting.filter((d) => d.available === 'no').length,
     };
   }, [doctors]);
 
   const createMutation = trpc.doctors.create.useMutation({
     onSuccess: () => {
-      toast.success("تم إضافة الطبيب بنجاح");
+      toast.success('تم إضافة الطبيب بنجاح');
       refetch();
       setDialogOpen(false);
       resetForm();
     },
     onError: (error) => {
-      toast.error(error.message || "حدث خطأ أثناء إضافة الطبيب");
+      toast.error(error.message || 'حدث خطأ أثناء إضافة الطبيب');
     },
   });
 
   const updateMutation = trpc.doctors.update.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث بيانات الطبيب بنجاح");
+      toast.success('تم تحديث بيانات الطبيب بنجاح');
       refetch();
       setDialogOpen(false);
       resetForm();
     },
     onError: (error) => {
-      toast.error(error.message || "حدث خطأ أثناء تحديث البيانات");
+      toast.error(error.message || 'حدث خطأ أثناء تحديث البيانات');
     },
   });
 
   const deleteMutation = trpc.doctors.delete.useMutation({
     onSuccess: () => {
-      toast.success("تم حذف الطبيب بنجاح");
+      toast.success('تم حذف الطبيب بنجاح');
       refetch();
       deleteConfirm.closeConfirm();
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء حذف الطبيب");
+      toast.error('حدث خطأ أثناء حذف الطبيب');
     },
   });
 
   const toggleAvailabilityMutation = trpc.doctors.toggleAvailability.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث حالة التوفر بنجاح");
+      toast.success('تم تحديث حالة التوفر بنجاح');
       refetch();
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء تحديث الحالة");
+      toast.error('حدث خطأ أثناء تحديث الحالة');
     },
   });
 
   const filteredDoctors = useMemo(() => {
     if (!doctors) return [];
     let filtered = [...doctors];
-    
+
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -177,31 +281,39 @@ export default function DoctorsManagement() {
 
     return doctorTable.sortData(filtered, (item: any, key: string) => {
       switch (key) {
-        case 'name': return item.name;
-        case 'specialty': return item.specialty;
-        case 'experience': return item.experience;
-        case 'languages': return item.languages;
-        case 'consultationFee': return item.consultationFee;
-        case 'isVisiting': return item.isVisiting ? 'نعم' : 'لا';
-        case 'status': return item.status;
-        default: return item[key];
+        case 'name':
+          return item.name;
+        case 'specialty':
+          return item.specialty;
+        case 'experience':
+          return item.experience;
+        case 'languages':
+          return item.languages;
+        case 'consultationFee':
+          return item.consultationFee;
+        case 'isVisiting':
+          return item.isVisiting ? 'نعم' : 'لا';
+        case 'status':
+          return item.status;
+        default:
+          return item[key];
       }
     });
   }, [doctors, searchTerm, doctorTable.sortState, doctorTable.sortData]);
 
   const resetForm = () => {
     setFormData({
-      name: "",
-      slug: "",
-      specialty: "",
-      image: "",
-      bio: "",
-      experience: "",
-      languages: "",
-      consultationFee: "",
-      procedures: "",
-      isVisiting: "no",
-      available: "yes",
+      name: '',
+      slug: '',
+      specialty: '',
+      image: '',
+      bio: '',
+      experience: '',
+      languages: '',
+      consultationFee: '',
+      procedures: '',
+      isVisiting: 'no',
+      available: 'yes',
     });
     setEditingDoctor(null);
     resetManualEdit();
@@ -211,17 +323,17 @@ export default function DoctorsManagement() {
   const handleDuplicate = (doctor: any) => {
     setEditingDoctor(null);
     setFormData({
-      name: doctor.name + " (نسخة)",
-      slug: doctor.slug + "-copy",
-      specialty: doctor.specialty || "",
-      image: doctor.image || "",
-      bio: doctor.bio || "",
-      experience: doctor.experience || "",
-      languages: doctor.languages || "",
-      consultationFee: doctor.consultationFee || "",
-      procedures: doctor.procedures || "",
-      isVisiting: doctor.isVisiting || "no",
-      available: "yes",
+      name: doctor.name + ' (نسخة)',
+      slug: doctor.slug + '-copy',
+      specialty: doctor.specialty || '',
+      image: doctor.image || '',
+      bio: doctor.bio || '',
+      experience: doctor.experience || '',
+      languages: doctor.languages || '',
+      consultationFee: doctor.consultationFee || '',
+      procedures: doctor.procedures || '',
+      isVisiting: doctor.isVisiting || 'no',
+      available: 'yes',
     });
     setDialogOpen(true);
   };
@@ -230,17 +342,17 @@ export default function DoctorsManagement() {
     if (doctor) {
       setEditingDoctor(doctor);
       setFormData({
-        name: doctor.name || "",
-        slug: doctor.slug || "",
-        specialty: doctor.specialty || "",
-        image: doctor.image || "",
-        bio: doctor.bio || "",
-        experience: doctor.experience || "",
-        languages: doctor.languages || "",
-        consultationFee: doctor.consultationFee || "",
-        procedures: doctor.procedures || "",
-        isVisiting: doctor.isVisiting || "no",
-        available: doctor.available || "yes",
+        name: doctor.name || '',
+        slug: doctor.slug || '',
+        specialty: doctor.specialty || '',
+        image: doctor.image || '',
+        bio: doctor.bio || '',
+        experience: doctor.experience || '',
+        languages: doctor.languages || '',
+        consultationFee: doctor.consultationFee || '',
+        procedures: doctor.procedures || '',
+        isVisiting: doctor.isVisiting || 'no',
+        available: doctor.available || 'yes',
       });
     } else {
       resetForm();
@@ -250,7 +362,7 @@ export default function DoctorsManagement() {
 
   const handleSubmit = () => {
     if (!formData.name || !formData.slug || !formData.specialty) {
-      toast.error("الرجاء ملء جميع الحقول المطلوبة");
+      toast.error('الرجاء ملء جميع الحقول المطلوبة');
       return;
     }
 
@@ -264,10 +376,8 @@ export default function DoctorsManagement() {
     }
   };
 
-
-
   const handleToggleAvailability = (doctor: any) => {
-    const newAvailability = doctor.available === "yes" ? "no" : "yes";
+    const newAvailability = doctor.available === 'yes' ? 'no' : 'yes';
     toggleAvailabilityMutation.mutate({
       id: doctor.id,
       available: newAvailability,
@@ -282,7 +392,10 @@ export default function DoctorsManagement() {
         {/* Stats Skeleton */}
         <div className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-card dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 sm:p-4">
+            <div
+              key={i}
+              className="bg-white dark:bg-card dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 sm:p-4"
+            >
               <div className="flex items-center justify-between mb-3">
                 <div className="h-3 w-16 bg-muted rounded animate-pulse" />
                 <div className="h-8 w-8 bg-muted rounded-lg animate-pulse" />
@@ -314,37 +427,51 @@ export default function DoctorsManagement() {
         {/* إجمالي الأطباء */}
         <div className="bg-white dark:bg-card dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">إجمالي الأطباء</span>
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">
+              إجمالي الأطباء
+            </span>
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
               <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-foreground dark:text-gray-100">{doctorStats.total}</div>
+          <div className="text-lg sm:text-2xl font-bold text-foreground dark:text-gray-100">
+            {doctorStats.total}
+          </div>
           <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">جميع الأطباء</p>
         </div>
 
         {/* متاحون */}
         <div className="bg-white dark:bg-card dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">متاحون</span>
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">
+              متاحون
+            </span>
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
               <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-emerald-600">{doctorStats.available}</div>
+          <div className="text-lg sm:text-2xl font-bold text-emerald-600">
+            {doctorStats.available}
+          </div>
           <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">متاحون للحجز</p>
         </div>
 
         {/* غير متاحين */}
         <div className="bg-white dark:bg-card dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">غير متاحين</span>
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">
+              غير متاحين
+            </span>
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
               <UserX className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-red-500">{doctorStats.unavailable}</div>
-          <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">غير متاحين حالياً</p>
+          <div className="text-lg sm:text-2xl font-bold text-red-500">
+            {doctorStats.unavailable}
+          </div>
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
+            غير متاحين حالياً
+          </p>
         </div>
 
         {/* أطباء زائرون */}
@@ -355,32 +482,44 @@ export default function DoctorsManagement() {
               <Plane className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-purple-700">{doctorStats.visiting}</div>
+          <div className="text-lg sm:text-2xl font-bold text-purple-700">
+            {doctorStats.visiting}
+          </div>
           <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">إجمالي الزائرين</p>
         </div>
 
         {/* زائرون متاحون */}
         <div className="bg-white dark:bg-card dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">زائرون متاحون</span>
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">
+              زائرون متاحون
+            </span>
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
               <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-green-600">{doctorStats.visitingAvailable}</div>
+          <div className="text-lg sm:text-2xl font-bold text-green-600">
+            {doctorStats.visitingAvailable}
+          </div>
           <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">زائرون للحجز</p>
         </div>
 
         {/* زائرون غير متاحين */}
         <div className="bg-white dark:bg-card dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">زائرون غير متاحين</span>
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground dark:text-muted-foreground">
+              زائرون غير متاحين
+            </span>
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center">
               <UserX className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500" />
             </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-orange-500">{doctorStats.visitingUnavailable}</div>
-          <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">زائرون غير متاحين</p>
+          <div className="text-lg sm:text-2xl font-bold text-orange-500">
+            {doctorStats.visitingUnavailable}
+          </div>
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
+            زائرون غير متاحين
+          </p>
         </div>
       </div>
 
@@ -409,22 +548,28 @@ export default function DoctorsManagement() {
         {filteredDoctors.length === 0 ? (
           <EmptyState
             icon={Stethoscope}
-            title={searchTerm ? "لا توجد نتائج مطابقة" : "لا يوجد أطباء بعد"}
-            description={searchTerm ? "جرّب تغيير كلمات البحث" : "ابدأ بإضافة أول طبيب إلى النظام"}
-            action={!searchTerm ? { label: "إضافة طبيب جديد", onClick: () => handleOpenDialog() } : undefined}
+            title={searchTerm ? 'لا توجد نتائج مطابقة' : 'لا يوجد أطباء بعد'}
+            description={searchTerm ? 'جرّب تغيير كلمات البحث' : 'ابدأ بإضافة أول طبيب إلى النظام'}
+            action={
+              !searchTerm
+                ? { label: 'إضافة طبيب جديد', onClick: () => handleOpenDialog() }
+                : undefined
+            }
           />
         ) : (
           <ResizableTable {...doctorTable.resizableTableProps}>
             <TableHeader>
               <TableRow>
-                {doctorTable.visibleColumnOrder.map(colKey => {
-                  const col = doctorColumns.find(c => c.key === colKey);
+                {doctorTable.visibleColumnOrder.map((colKey) => {
+                  const col = doctorColumns.find((c) => c.key === colKey);
                   if (!col || !doctorTable.visibleColumns[colKey]) return null;
                   return (
                     <ResizableHeaderCell
                       key={colKey}
                       columnKey={colKey}
-                      width={doctorTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150}
+                      width={
+                        doctorTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150
+                      }
                       minWidth={col.minWidth || 80}
                       maxWidth={col.maxWidth || 500}
                       onResize={doctorTable.columnWidths.handleResize}
@@ -439,9 +584,9 @@ export default function DoctorsManagement() {
             <TableBody>
               {filteredDoctors.map((doctor: any) => (
                 <TableRow key={doctor.id} className="hover:bg-muted/50/50">
-                  {doctorTable.visibleColumnOrder.map(colKey => {
+                  {doctorTable.visibleColumnOrder.map((colKey) => {
                     if (!doctorTable.visibleColumns[colKey]) return null;
-                    
+
                     switch (colKey) {
                       case 'name':
                         return (
@@ -459,9 +604,13 @@ export default function DoctorsManagement() {
                                 </div>
                               )}
                               <div className="min-w-0">
-                                <span className="truncate block text-sm font-semibold">{doctor.name}</span>
-                                {doctor.isVisiting === "yes" && (
-                                  <span className="text-[10px] text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-full">زائر</span>
+                                <span className="truncate block text-sm font-semibold">
+                                  {doctor.name}
+                                </span>
+                                {doctor.isVisiting === 'yes' && (
+                                  <span className="text-[10px] text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-full">
+                                    زائر
+                                  </span>
                                 )}
                               </div>
                             </div>
@@ -470,73 +619,113 @@ export default function DoctorsManagement() {
                       case 'specialty':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <span className="truncate text-sm text-foreground">{doctor.specialty}</span>
+                            <span className="truncate text-sm text-foreground">
+                              {doctor.specialty}
+                            </span>
                           </FrozenTableCell>
                         );
                       case 'experience':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <span className="text-sm text-muted-foreground">{doctor.experience || "-"}</span>
+                            <span className="text-sm text-muted-foreground">
+                              {doctor.experience || '-'}
+                            </span>
                           </FrozenTableCell>
                         );
                       case 'languages':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <span className="text-sm text-muted-foreground">{doctor.languages || "-"}</span>
+                            <span className="text-sm text-muted-foreground">
+                              {doctor.languages || '-'}
+                            </span>
                           </FrozenTableCell>
                         );
                       case 'consultationFee':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <span className="text-sm font-medium text-foreground">{doctor.consultationFee || "-"}</span>
+                            <span className="text-sm font-medium text-foreground">
+                              {doctor.consultationFee || '-'}
+                            </span>
                           </FrozenTableCell>
                         );
                       case 'isVisiting':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <Badge variant="outline" className={doctor.isVisiting === "yes" 
-                              ? "bg-purple-50 text-purple-700 border-purple-200" 
-                              : "bg-muted/50 text-muted-foreground border-border"}>
-                              {doctor.isVisiting === "yes" ? "زائر" : "مقيم"}
+                            <Badge
+                              variant="outline"
+                              className={
+                                doctor.isVisiting === 'yes'
+                                  ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                  : 'bg-muted/50 text-muted-foreground border-border'
+                              }
+                            >
+                              {doctor.isVisiting === 'yes' ? 'زائر' : 'مقيم'}
                             </Badge>
                           </FrozenTableCell>
                         );
                       case 'slug':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <a href={`/doctors/${doctor.slug}`} target="_blank" className="text-blue-600 hover:underline text-sm truncate">
+                            <a
+                              href={`/doctors/${doctor.slug}`}
+                              target="_blank"
+                              className="text-blue-600 hover:underline text-sm truncate"
+                            >
                               {doctor.slug}
                             </a>
                           </FrozenTableCell>
                         );
                       case 'bio':
                         return (
-                          <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground">
-                            <span className="truncate block max-w-[200px]">{doctor.bio || '-'}</span>
+                          <FrozenTableCell
+                            key={colKey}
+                            columnKey={colKey}
+                            className="text-sm text-muted-foreground"
+                          >
+                            <span className="truncate block max-w-[200px]">
+                              {doctor.bio || '-'}
+                            </span>
                           </FrozenTableCell>
                         );
                       case 'image':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
                             {doctor.image ? (
-                              <img src={doctor.image} alt="" className="h-8 w-8 rounded-full object-cover" />
-                            ) : '-'}
+                              <img
+                                src={doctor.image}
+                                alt=""
+                                className="h-8 w-8 rounded-full object-cover"
+                              />
+                            ) : (
+                              '-'
+                            )}
                           </FrozenTableCell>
                         );
                       case 'status':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <Badge variant="outline" className={doctor.available === "yes" 
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                              : "bg-red-50 text-red-600 border-red-200"}>
-                              <span className={`inline-block w-1.5 h-1.5 rounded-full ml-1.5 ${doctor.available === "yes" ? "bg-emerald-500" : "bg-red-500"}`} />
-                              {doctor.available === "yes" ? "متاح" : "غير متاح"}
+                            <Badge
+                              variant="outline"
+                              className={
+                                doctor.available === 'yes'
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                  : 'bg-red-50 text-red-600 border-red-200'
+                              }
+                            >
+                              <span
+                                className={`inline-block w-1.5 h-1.5 rounded-full ml-1.5 ${doctor.available === 'yes' ? 'bg-emerald-500' : 'bg-red-500'}`}
+                              />
+                              {doctor.available === 'yes' ? 'متاح' : 'غير متاح'}
                             </Badge>
                           </FrozenTableCell>
                         );
                       case 'createdAt':
                         return (
-                          <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground">
+                          <FrozenTableCell
+                            key={colKey}
+                            columnKey={colKey}
+                            className="text-sm text-muted-foreground"
+                          >
                             {formatDate(doctor.createdAt)}
                           </FrozenTableCell>
                         );
@@ -550,7 +739,7 @@ export default function DoctorsManagement() {
                                 className="h-8 px-2 text-xs"
                                 onClick={() => handleToggleAvailability(doctor)}
                               >
-                                {doctor.available === "yes" ? (
+                                {doctor.available === 'yes' ? (
                                   <span className="text-red-500">تعطيل</span>
                                 ) : (
                                   <span className="text-emerald-600">تفعيل</span>
@@ -602,15 +791,21 @@ export default function DoctorsManagement() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${editingDoctor ? "bg-blue-50" : "bg-emerald-50"}`}>
-                {editingDoctor ? <Edit className="h-4 w-4 text-blue-600" /> : <Plus className="h-4 w-4 text-emerald-600" />}
+              <div
+                className={`h-8 w-8 rounded-lg flex items-center justify-center ${editingDoctor ? 'bg-blue-50' : 'bg-emerald-50'}`}
+              >
+                {editingDoctor ? (
+                  <Edit className="h-4 w-4 text-blue-600" />
+                ) : (
+                  <Plus className="h-4 w-4 text-emerald-600" />
+                )}
               </div>
-              {editingDoctor ? "تعديل بيانات الطبيب" : "إضافة طبيب جديد"}
+              {editingDoctor ? 'تعديل بيانات الطبيب' : 'إضافة طبيب جديد'}
             </DialogTitle>
             <DialogDescription>
               {editingDoctor
-                ? "قم بتعديل بيانات الطبيب في النموذج أدناه"
-                : "أدخل بيانات الطبيب الجديد في النموذج أدناه"}
+                ? 'قم بتعديل بيانات الطبيب في النموذج أدناه'
+                : 'أدخل بيانات الطبيب الجديد في النموذج أدناه'}
             </DialogDescription>
           </DialogHeader>
 
@@ -623,7 +818,12 @@ export default function DoctorsManagement() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="name">الاسم *</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="name"
+                >
+                  الاسم *
+                </Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -635,7 +835,12 @@ export default function DoctorsManagement() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="slug">الرابط (Slug) *</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="slug"
+                >
+                  الرابط (Slug) *
+                </Label>
                 <Input
                   id="slug"
                   value={formData.slug}
@@ -648,7 +853,12 @@ export default function DoctorsManagement() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="specialty">التخصص *</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="specialty"
+                >
+                  التخصص *
+                </Label>
                 <Input
                   id="specialty"
                   value={formData.specialty}
@@ -657,7 +867,12 @@ export default function DoctorsManagement() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="experience">سنوات الخبرة</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="experience"
+                >
+                  سنوات الخبرة
+                </Label>
                 <Input
                   id="experience"
                   value={formData.experience}
@@ -668,7 +883,9 @@ export default function DoctorsManagement() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground">صورة الطبيب</Label>
+              <Label className="text-right block text-xs font-medium text-muted-foreground">
+                صورة الطبيب
+              </Label>
               <ImageUpload
                 value={formData.image}
                 onChange={(url) => setFormData({ ...formData, image: url })}
@@ -678,7 +895,12 @@ export default function DoctorsManagement() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="bio">نبذة عن الطبيب</Label>
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="bio"
+              >
+                نبذة عن الطبيب
+              </Label>
               <Textarea
                 id="bio"
                 value={formData.bio}
@@ -696,7 +918,12 @@ export default function DoctorsManagement() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="languages">اللغات</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="languages"
+                >
+                  اللغات
+                </Label>
                 <Input
                   id="languages"
                   value={formData.languages}
@@ -705,7 +932,12 @@ export default function DoctorsManagement() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="consultationFee">رسوم الاستشارة</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="consultationFee"
+                >
+                  رسوم الاستشارة
+                </Label>
                 <Input
                   id="consultationFee"
                   value={formData.consultationFee}
@@ -716,7 +948,12 @@ export default function DoctorsManagement() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="procedures">الإجراءات المتاحة (فصل بفاصلة)</Label>
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="procedures"
+              >
+                الإجراءات المتاحة (فصل بفاصلة)
+              </Label>
               <Textarea
                 id="procedures"
                 value={formData.procedures}
@@ -731,10 +968,15 @@ export default function DoctorsManagement() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="isVisiting">طبيب زائر</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="isVisiting"
+                >
+                  طبيب زائر
+                </Label>
                 <Select
                   value={formData.isVisiting}
-                  onValueChange={(value: "yes" | "no") =>
+                  onValueChange={(value: 'yes' | 'no') =>
                     setFormData({ ...formData, isVisiting: value })
                   }
                 >
@@ -748,10 +990,15 @@ export default function DoctorsManagement() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="available">الحالة</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="available"
+                >
+                  الحالة
+                </Label>
                 <Select
                   value={formData.available}
-                  onValueChange={(value: "yes" | "no") =>
+                  onValueChange={(value: 'yes' | 'no') =>
                     setFormData({ ...formData, available: value })
                   }
                 >
@@ -781,9 +1028,9 @@ export default function DoctorsManagement() {
                   جاري الحفظ...
                 </>
               ) : editingDoctor ? (
-                "حفظ التعديلات"
+                'حفظ التعديلات'
               ) : (
-                "إضافة الطبيب"
+                'إضافة الطبيب'
               )}
             </Button>
           </DialogFooter>

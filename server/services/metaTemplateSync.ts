@@ -9,10 +9,10 @@
  * https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/overview
  */
 
-import { eq } from "drizzle-orm";
-import { whatsappTemplates } from "../../drizzle/schema";
-import { getDb } from "../database/db";
-import { meta } from "../api/MetaApiService";
+import { eq } from 'drizzle-orm';
+import { whatsappTemplates } from '../../drizzle/schema';
+import { getDb } from '../database/db';
+import { meta } from '../api/MetaApiService';
 
 interface MetaTemplate {
   id?: string;
@@ -64,7 +64,7 @@ export async function fetchTemplatesFromMeta(
     if (!wabaId) {
       return {
         success: false,
-        message: "لم يتم العثور على WABA ID. تأكد من تعيين WHATSAPP_BUSINESS_ACCOUNT_ID",
+        message: 'لم يتم العثور على WABA ID. تأكد من تعيين WHATSAPP_BUSINESS_ACCOUNT_ID',
       };
     }
 
@@ -78,11 +78,13 @@ export async function fetchTemplatesFromMeta(
     }
 
     const templates: MetaTemplate[] = result.templates || [];
-    console.log(`[MetaTemplateSync] Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`);
+    console.log(
+      `[MetaTemplateSync] Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`
+    );
 
     const db = await getDb();
     if (!db) {
-      return { success: false, message: "لا يمكن الاتصال بقاعدة البيانات" };
+      return { success: false, message: 'لا يمكن الاتصال بقاعدة البيانات' };
     }
 
     let synced = 0;
@@ -91,18 +93,18 @@ export async function fetchTemplatesFromMeta(
 
     for (const template of templates) {
       try {
-        let content = "";
+        let content = '';
         let variables: string[] = [];
 
         // استخراج محتوى الجسم والمتغيرات
         if (template.components) {
           for (const component of template.components) {
-            if (component.type === "BODY" && component.text) {
+            if (component.type === 'BODY' && component.text) {
               content = component.text;
               // دعم المتغيرات الموضعية {{1}} والمسماة {{name}}
               const positional = component.text.match(/\{\{(\d+)\}\}/g) || [];
               const named = component.text.match(/\{\{([a-z_]+)\}\}/g) || [];
-              variables = [...positional, ...named].map((m) => m.replace(/[{}]/g, ""));
+              variables = [...positional, ...named].map((m) => m.replace(/[{}]/g, ''));
             }
           }
         }
@@ -132,9 +134,11 @@ export async function fetchTemplatesFromMeta(
             metaStatus: template.status,
             metaCategory: template.category,
             languageCode: template.language,
-            category: (["MARKETING", "UTILITY", "AUTHENTICATION"].includes(template.category?.toUpperCase())
+            category: (['MARKETING', 'UTILITY', 'AUTHENTICATION'].includes(
+              template.category?.toUpperCase()
+            )
               ? template.category.toUpperCase()
-              : "UTILITY") as "MARKETING" | "UTILITY" | "AUTHENTICATION",
+              : 'UTILITY') as 'MARKETING' | 'UTILITY' | 'AUTHENTICATION',
             content,
             variables: JSON.stringify(variables),
             createdBy: 1,
@@ -147,7 +151,7 @@ export async function fetchTemplatesFromMeta(
       } catch (error) {
         failed++;
         errors.push(
-          `فشل معالجة القالب ${template.name}: ${error instanceof Error ? error.message : "خطأ غير معروف"}`
+          `فشل معالجة القالب ${template.name}: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`
         );
       }
     }
@@ -162,7 +166,7 @@ export async function fetchTemplatesFromMeta(
   } catch (error) {
     return {
       success: false,
-      message: `خطأ في جلب القوالب: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+      message: `خطأ في جلب القوالب: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
     };
   }
 }
@@ -177,8 +181,8 @@ export async function pushTemplateToMeta(
   _accessToken?: string,
   templateName?: string,
   content?: string,
-  category: string = "UTILITY",
-  language: string = "ar",
+  category: string = 'UTILITY',
+  language: string = 'ar',
   components?: any[]
 ): Promise<SyncResult> {
   try {
@@ -186,17 +190,17 @@ export async function pushTemplateToMeta(
     if (!wabaId) {
       return {
         success: false,
-        message: "لم يتم العثور على WABA ID",
+        message: 'لم يتم العثور على WABA ID',
       };
     }
 
     // بناء مكونات القالب وفق وثائق Meta
     const templateComponents = components || [
       {
-        type: "BODY",
-        text: content || "",
+        type: 'BODY',
+        text: content || '',
         example: {
-          body_text: [["مثال على القيمة"]],
+          body_text: [['مثال على القيمة']],
         },
       },
     ];
@@ -213,7 +217,7 @@ export async function pushTemplateToMeta(
     if (!res.ok) {
       return {
         success: false,
-        message: `فشل دفع القالب إلى Meta: ${res.error?.message || "خطأ غير معروف"} (كود: ${res.error?.code})`,
+        message: `فشل دفع القالب إلى Meta: ${res.error?.message || 'خطأ غير معروف'} (كود: ${res.error?.code})`,
       };
     }
 
@@ -225,7 +229,7 @@ export async function pushTemplateToMeta(
       await db
         .update(whatsappTemplates)
         .set({
-          metaStatus: "PENDING",
+          metaStatus: 'PENDING',
           metaTemplateId: metaTemplateId,
           updatedAt: new Date(),
         })
@@ -239,7 +243,7 @@ export async function pushTemplateToMeta(
   } catch (error) {
     return {
       success: false,
-      message: `خطأ في دفع القالب: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+      message: `خطأ في دفع القالب: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
     };
   }
 }
@@ -255,11 +259,11 @@ export async function checkTemplateStatus(
 ): Promise<{ success: boolean; status?: string; message: string }> {
   try {
     if (!templateId) {
-      return { success: false, message: "معرف القالب مطلوب" };
+      return { success: false, message: 'معرف القالب مطلوب' };
     }
 
     const res = await meta.get(templateId, {
-      fields: "name,status,category,quality_score",
+      fields: 'name,status,category,quality_score',
     });
 
     if (!res.ok) {
@@ -288,7 +292,7 @@ export async function checkTemplateStatus(
   } catch (error) {
     return {
       success: false,
-      message: `خطأ في التحقق من الحالة: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+      message: `خطأ في التحقق من الحالة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
     };
   }
 }
@@ -305,12 +309,10 @@ export async function deleteTemplateFromMeta(
   try {
     const wabaId = await getWabaId(phoneNumberId);
     if (!wabaId) {
-      return { success: false, message: "لم يتم العثور على WABA ID" };
+      return { success: false, message: 'لم يتم العثور على WABA ID' };
     }
 
-    const res = await meta.delete(
-      `${wabaId}/message_templates?name=${templateName}`
-    );
+    const res = await meta.delete(`${wabaId}/message_templates?name=${templateName}`);
 
     if (!res.ok) {
       return {
@@ -322,9 +324,7 @@ export async function deleteTemplateFromMeta(
     // حذف من قاعدة البيانات
     const db = await getDb();
     if (db && templateName) {
-      await db
-        .delete(whatsappTemplates)
-        .where(eq(whatsappTemplates.metaName, templateName));
+      await db.delete(whatsappTemplates).where(eq(whatsappTemplates.metaName, templateName));
     }
 
     return {
@@ -334,7 +334,7 @@ export async function deleteTemplateFromMeta(
   } catch (error) {
     return {
       success: false,
-      message: `خطأ في حذف القالب: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+      message: `خطأ في حذف القالب: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
     };
   }
 }
@@ -355,13 +355,13 @@ export async function syncTemplatesCompletely(
 
     const db = await getDb();
     if (!db) {
-      return { success: false, message: "لا يمكن الاتصال بقاعدة البيانات" };
+      return { success: false, message: 'لا يمكن الاتصال بقاعدة البيانات' };
     }
 
     const approvedTemplates = await db
       .select()
       .from(whatsappTemplates)
-      .where(eq(whatsappTemplates.metaStatus, "APPROVED"));
+      .where(eq(whatsappTemplates.metaStatus, 'APPROVED'));
 
     return {
       success: true,
@@ -372,7 +372,7 @@ export async function syncTemplatesCompletely(
   } catch (error) {
     return {
       success: false,
-      message: `خطأ في المزامنة الشاملة: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+      message: `خطأ في المزامنة الشاملة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
     };
   }
 }

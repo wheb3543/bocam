@@ -1,14 +1,14 @@
-import { Router, Request, Response } from "express";
-import { subscribe, channelForConversation, channelForUser } from "../_core/pubsub";
+import { Router, Request, Response } from 'express';
+import { subscribe, channelForConversation, channelForUser } from '../_core/pubsub';
 
-const GLOBAL_CHANNEL = "global:whatsapp";
+const GLOBAL_CHANNEL = 'global:whatsapp';
 
 /** Shared SSE headers — disables proxy/Nginx buffering for real-time delivery */
 const SSE_HEADERS = {
   'Content-Type': 'text/event-stream',
   'Cache-Control': 'no-cache, no-transform',
-  'Connection': 'keep-alive',
-  'X-Accel-Buffering': 'no',   // prevents Nginx from buffering the stream
+  Connection: 'keep-alive',
+  'X-Accel-Buffering': 'no', // prevents Nginx from buffering the stream
 };
 
 /** Write a named SSE event safely (guards against write-after-close) */
@@ -17,7 +17,9 @@ function safeSend(res: Response, event: string, data: unknown) {
     if (!res.writableEnded) {
       res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
     }
-  } catch (_) { /* ignore */ }
+  } catch (_) {
+    /* ignore */
+  }
 }
 
 export function createWhatsAppSseRouter(): Router {
@@ -38,7 +40,9 @@ export function createWhatsAppSseRouter(): Router {
 
     // Keep-alive comment every 15 s (shorter than most proxy 30 s idle timeouts)
     const keepAlive = setInterval(() => {
-      try { if (!res.writableEnded) res.write(': ping\n\n'); } catch (_) {}
+      try {
+        if (!res.writableEnded) res.write(': ping\n\n');
+      } catch (_) {}
     }, 15000);
 
     req.on('close', () => {
@@ -58,7 +62,9 @@ export function createWhatsAppSseRouter(): Router {
     const unsub = subscribe(GLOBAL_CHANNEL, send);
 
     const keepAlive = setInterval(() => {
-      try { if (!res.writableEnded) res.write(': ping\n\n'); } catch (_) {}
+      try {
+        if (!res.writableEnded) res.write(': ping\n\n');
+      } catch (_) {}
     }, 15000);
 
     req.on('close', () => {
@@ -78,7 +84,9 @@ export function createWhatsAppSseRouter(): Router {
     const unsub = subscribe(GLOBAL_CHANNEL, send);
 
     const keepAlive = setInterval(() => {
-      try { if (!res.writableEnded) res.write(': ping\n\n'); } catch (_) {}
+      try {
+        if (!res.writableEnded) res.write(': ping\n\n');
+      } catch (_) {}
     }, 15000);
 
     req.on('close', () => {
@@ -100,7 +108,9 @@ export function createWhatsAppSseRouter(): Router {
     const unsub = subscribe(channelForUser(userId), send);
 
     const keepAlive = setInterval(() => {
-      try { if (!res.writableEnded) res.write(': ping\n\n'); } catch (_) {}
+      try {
+        if (!res.writableEnded) res.write(': ping\n\n');
+      } catch (_) {}
     }, 15000);
 
     req.on('close', () => {

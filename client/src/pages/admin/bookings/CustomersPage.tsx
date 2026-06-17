@@ -1,5 +1,5 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import CustomerProfilesTab from "@/components/CustomerProfilesTab";
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import CustomerProfilesTab from '@/components/CustomerProfilesTab';
 
 export default function CustomersPage() {
   return (

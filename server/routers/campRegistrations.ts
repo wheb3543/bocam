@@ -1,16 +1,16 @@
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
-import { eq, desc, and, gte, sql, inArray } from "drizzle-orm";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../database/db";
-import { campRegistrations } from "../../drizzle/schema";
-import { sendNewCampRegistrationTelegram } from "../services/telegram";
-import { serverCache, CacheKeys, CacheTTL } from "../services/cache";
-import { createAuditLog } from "./auditLogs";
-import { sendCampRegistrationEvent, sendStatusChangeEvent } from "../api/facebookCAPI";
-import { normalizePhoneNumber } from "../database/db";
+import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import { eq, desc, and, gte, sql, inArray } from 'drizzle-orm';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { getDb } from '../database/db';
+import { campRegistrations } from '../../drizzle/schema';
+import { sendNewCampRegistrationTelegram } from '../services/telegram';
+import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
+import { createAuditLog } from './auditLogs';
+import { sendCampRegistrationEvent, sendStatusChangeEvent } from '../api/facebookCAPI';
+import { normalizePhoneNumber } from '../database/db';
 // sendCampRegistrationConfirmation moved to dispatchWhatsAppMessage flow
-import { dispatchWhatsAppMessage } from "../services/whatsappMessageDispatcher";
+import { dispatchWhatsAppMessage } from '../services/whatsappMessageDispatcher';
 
 export const campRegistrationsRouter = router({
   // Submit a new camp registration (public)
@@ -19,19 +19,32 @@ export const campRegistrationsRouter = router({
       z.object({
         campId: z.number(),
         fullName: z.string().min(1),
-        phone: z.string().min(9).regex(
-          /^(\+?967)?7\d{8}$|^07\d{8}$|^7\d{8}$/,
-          "رقم الهاتف يجب أن يبدأ بالرقم 7 ويتكون من 9 أرقام"
-        ),
+        phone: z
+          .string()
+          .min(9)
+          .regex(
+            /^(\+?967)?7\d{8}$|^07\d{8}$|^7\d{8}$/,
+            'رقم الهاتف يجب أن يبدأ بالرقم 7 ويتكون من 9 أرقام'
+          ),
         email: z.string().email().optional(),
         age: z.number().optional(),
-        gender: z.enum(["male", "female"]).optional(),
+        gender: z.enum(['male', 'female']).optional(),
         procedures: z.string().optional(), // JSON string of selected procedures
         medicalCondition: z.string().optional(),
         patientMessage: z.string().max(500).optional(),
         notes: z.string().optional(),
         source: z.string().optional(),
-        status: z.enum(["pending", "contacted", "no_answer", "confirmed", "attended", "completed", "cancelled"]).optional(), // Manual registration status
+        status: z
+          .enum([
+            'pending',
+            'contacted',
+            'no_answer',
+            'confirmed',
+            'attended',
+            'completed',
+            'cancelled',
+          ])
+          .optional(), // Manual registration status
         utmSource: z.string().optional(),
         utmMedium: z.string().optional(),
         utmCampaign: z.string().optional(),
@@ -42,13 +55,14 @@ export const campRegistrationsRouter = router({
         fbclid: z.string().optional(),
         gclid: z.string().optional(),
         preferredDate: z.string().optional(), // YYYY-MM-DD تاريخ الحضور المفضل
-        preferredTimeSlot: z.enum(["morning", "evening"]).optional(), // الوقت المفضل
+        preferredTimeSlot: z.enum(['morning', 'evening']).optional(), // الوقت المفضل
       })
     )
     .mutation(async ({ input, ctx }) => {
       const normalizedPhone = normalizePhoneNumber(input.phone);
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       // التحقق من عدم تكرار التسجيل بنفس الرقم ونفس المخيم خلال 3 أيام - معطل
       // const threeDaysAgo = new Date();
@@ -74,7 +88,7 @@ export const campRegistrationsRouter = router({
       // Build timestamp fields based on initial status
       const nowCamp = new Date();
       const campStatusTimestamps: Record<string, Date> = {};
-      const campInitialStatus = input.status || "pending";
+      const campInitialStatus = input.status || 'pending';
       if (campInitialStatus === 'contacted') campStatusTimestamps.contactedAt = nowCamp;
       else if (campInitialStatus === 'confirmed') campStatusTimestamps.confirmedAt = nowCamp;
       else if (campInitialStatus === 'attended') campStatusTimestamps.attendedAt = nowCamp;
@@ -82,13 +96,19 @@ export const campRegistrationsRouter = router({
       else if (campInitialStatus === 'cancelled') campStatusTimestamps.cancelledAt = nowCamp;
 
       // Auto-assign date/time if not provided by the user
-      let assignedDate: Date | undefined = input.preferredDate ? new Date(input.preferredDate) : undefined;
-      let assignedTimeSlot: "morning" | "evening" | undefined = input.preferredTimeSlot;
+      let assignedDate: Date | undefined = input.preferredDate
+        ? new Date(input.preferredDate)
+        : undefined;
+      let assignedTimeSlot: 'morning' | 'evening' | undefined = input.preferredTimeSlot;
 
       if (!assignedDate) {
         // Get camp to check dates and capacity
-        const { camps: campsTable } = await import("../../drizzle/schema");
-        const [campForDate] = await db.select().from(campsTable).where(eq(campsTable.id, input.campId)).limit(1);
+        const { camps: campsTable } = await import('../../drizzle/schema');
+        const [campForDate] = await db
+          .select()
+          .from(campsTable)
+          .where(eq(campsTable.id, input.campId))
+          .limit(1);
         if (campForDate && campForDate.startDate && campForDate.endDate) {
           const morningTime = (campForDate as any).morningTime as string | null;
           const eveningTime = (campForDate as any).eveningTime as string | null;
@@ -113,19 +133,27 @@ export const campRegistrationsRouter = router({
                   count: sql<number>`count(*)`,
                 })
                 .from(campRegistrations)
-                .where(and(
-                  eq(campRegistrations.campId, input.campId),
-                  sql`status IN ('confirmed', 'attended', 'completed')`,
-                  sql`preferredDate IS NOT NULL`
-                ))
-                .groupBy((campRegistrations as any).preferredDate, (campRegistrations as any).preferredTimeSlot);
+                .where(
+                  and(
+                    eq(campRegistrations.campId, input.campId),
+                    sql`status IN ('confirmed', 'attended', 'completed')`,
+                    sql`preferredDate IS NOT NULL`
+                  )
+                )
+                .groupBy(
+                  (campRegistrations as any).preferredDate,
+                  (campRegistrations as any).preferredTimeSlot
+                );
               const countMap: Record<string, { morning: number; evening: number }> = {};
               for (const row of confirmedRegs) {
-                const dk = row.preferredDate ? new Date(row.preferredDate).toISOString().split('T')[0] : null;
+                const dk = row.preferredDate
+                  ? new Date(row.preferredDate).toISOString().split('T')[0]
+                  : null;
                 if (!dk) continue;
                 if (!countMap[dk]) countMap[dk] = { morning: 0, evening: 0 };
                 if (row.preferredTimeSlot === 'morning') countMap[dk].morning += Number(row.count);
-                else if (row.preferredTimeSlot === 'evening') countMap[dk].evening += Number(row.count);
+                else if (row.preferredTimeSlot === 'evening')
+                  countMap[dk].evening += Number(row.count);
               }
               // Find first available day/slot
               for (const day of allDays) {
@@ -144,7 +172,7 @@ export const campRegistrationsRouter = router({
             } else {
               // No capacity limit - assign first day
               assignedDate = new Date(allDays[0]);
-              assignedTimeSlot = morningTime ? 'morning' : (eveningTime ? 'evening' : undefined);
+              assignedTimeSlot = morningTime ? 'morning' : eveningTime ? 'evening' : undefined;
             }
           }
         }
@@ -161,7 +189,7 @@ export const campRegistrationsRouter = router({
         medicalCondition: input.medicalCondition,
         patientMessage: input.patientMessage,
         notes: input.notes,
-        source: input.source || "website",
+        source: input.source || 'website',
         utmSource: input.utmSource,
         utmMedium: input.utmMedium,
         utmCampaign: input.utmCampaign,
@@ -178,7 +206,7 @@ export const campRegistrationsRouter = router({
       } as any);
 
       // Get camp details for notification
-      const { camps } = await import("../../drizzle/schema");
+      const { camps } = await import('../../drizzle/schema');
       const [camp] = await db.select().from(camps).where(eq(camps.id, input.campId)).limit(1);
 
       // Send Telegram notification
@@ -198,62 +226,73 @@ export const campRegistrationsRouter = router({
       if (camp) {
         const regId = Number(registration.insertId);
         // التسجيل اليدوي: source=admin أو حالة مختارة غير pending
-        const isManualRegistration = input.source === 'admin' || (input.status && input.status !== 'pending');
+        const isManualRegistration =
+          input.source === 'admin' || (input.status && input.status !== 'pending');
 
         if (!isManualRegistration || campInitialStatus === 'pending') {
           // ── تسجيل من الواجهة العامة أو تسجيل يدوي بحالة pending ──
           // أرسل رسالة on_create وحدّث الحالة إلى contacted بعد الإرسال
           // camp_reg_verification (150005) يقبل 5 متغيرات: name, camp_name, date, time, location
           dispatchWhatsAppMessage({
-            entityType: "camp_registration",
-            triggerEvent: "on_create",
+            entityType: 'camp_registration',
+            triggerEvent: 'on_create',
             phone: input.phone,
             recipientName: input.fullName,
             variables: {
               name: input.fullName,
               camp_name: camp.name,
               date: assignedDate
-                ? assignedDate.toLocaleDateString("ar-YE")
-                : (camp.startDate ? new Date(camp.startDate).toLocaleDateString("ar-YE") : "غير محدد"),
-              time: assignedTimeSlot === 'morning'
-                ? `صباحاً ${(camp as any).morningTime || ''}`.trim()
-                : assignedTimeSlot === 'evening'
-                ? `مساءً ${(camp as any).eveningTime || ''}`.trim()
-                : "غير محدد",
-              location: "صنعاء - الستين الشمالي - قبل جولة الجمنه",
+                ? assignedDate.toLocaleDateString('ar-YE')
+                : camp.startDate
+                  ? new Date(camp.startDate).toLocaleDateString('ar-YE')
+                  : 'غير محدد',
+              time:
+                assignedTimeSlot === 'morning'
+                  ? `صباحاً ${(camp as any).morningTime || ''}`.trim()
+                  : assignedTimeSlot === 'evening'
+                    ? `مساءً ${(camp as any).eveningTime || ''}`.trim()
+                    : 'غير محدد',
+              location: 'صنعاء - الستين الشمالي - قبل جولة الجمنه',
             },
             entityId: regId,
-          }).then(async (result) => {
-            if (result?.success) {
-              // تحديث الحالة إلى "تم التواصل" بعد إرسال رسالة التسجيل بنجاح
-              const dbInner = await getDb();
-              if (dbInner) {
-                await dbInner
-                  .update(campRegistrations)
-                  .set({ status: "contacted", contactedAt: new Date(), updatedAt: new Date() })
-                  .where(eq(campRegistrations.id, regId));
-                serverCache.invalidateByPrefix("paginated:campRegistrations:");
-                serverCache.invalidate("list:campRegistrations");
-                serverCache.invalidate(CacheKeys.campRegistrationStats());
-                console.log(`[CampReg] Auto-updated registration ${regId} to contacted after on_create send`);
+          })
+            .then(async (result) => {
+              if (result?.success) {
+                // تحديث الحالة إلى "تم التواصل" بعد إرسال رسالة التسجيل بنجاح
+                const dbInner = await getDb();
+                if (dbInner) {
+                  await dbInner
+                    .update(campRegistrations)
+                    .set({ status: 'contacted', contactedAt: new Date(), updatedAt: new Date() })
+                    .where(eq(campRegistrations.id, regId));
+                  serverCache.invalidateByPrefix('paginated:campRegistrations:');
+                  serverCache.invalidate('list:campRegistrations');
+                  serverCache.invalidate(CacheKeys.campRegistrationStats());
+                  console.log(
+                    `[CampReg] Auto-updated registration ${regId} to contacted after on_create send`
+                  );
+                }
               }
-            }
-          }).catch(error => {
-            console.error("[WhatsApp Dispatcher] Failed to send camp registration on_create:", error);
-          });
+            })
+            .catch((error) => {
+              console.error(
+                '[WhatsApp Dispatcher] Failed to send camp registration on_create:',
+                error
+              );
+            });
         } else {
           // ── تسجيل يدوي بحالة محددة (غير pending) ──
           // أرسل الرسالة المناسبة للحالة المختارة فقط، بدون تحديث الحالة تلقائياً
           const manualTriggerMap: Record<string, string> = {
-            "confirmed": "on_confirmed",
-            "attended": "on_arrived",
-            "completed": "on_completed",
-            "cancelled": "on_cancelled",
+            confirmed: 'on_confirmed',
+            attended: 'on_arrived',
+            completed: 'on_completed',
+            cancelled: 'on_cancelled',
           };
           const manualTrigger = manualTriggerMap[campInitialStatus];
           if (manualTrigger) {
             dispatchWhatsAppMessage({
-              entityType: "camp_registration",
+              entityType: 'camp_registration',
               triggerEvent: manualTrigger as any,
               phone: input.phone,
               recipientName: input.fullName,
@@ -261,22 +300,30 @@ export const campRegistrationsRouter = router({
                 name: input.fullName,
                 camp_name: camp.name,
                 date: assignedDate
-                  ? assignedDate.toLocaleDateString("ar-YE")
-                  : (camp.startDate ? new Date(camp.startDate).toLocaleDateString("ar-YE") : "غير محدد"),
-                time: assignedTimeSlot === 'morning'
-                  ? `صباحاً ${(camp as any).morningTime || ''}`
-                  : assignedTimeSlot === 'evening'
-                  ? `مساءً ${(camp as any).eveningTime || ''}`
-                  : "غير محدد",
-                location: "صنعاء - الستين الشمالي - قبل جولة الجمنه",
+                  ? assignedDate.toLocaleDateString('ar-YE')
+                  : camp.startDate
+                    ? new Date(camp.startDate).toLocaleDateString('ar-YE')
+                    : 'غير محدد',
+                time:
+                  assignedTimeSlot === 'morning'
+                    ? `صباحاً ${(camp as any).morningTime || ''}`
+                    : assignedTimeSlot === 'evening'
+                      ? `مساءً ${(camp as any).eveningTime || ''}`
+                      : 'غير محدد',
+                location: 'صنعاء - الستين الشمالي - قبل جولة الجمنه',
               },
               entityId: regId,
-            }).catch(error => {
-              console.error(`[WhatsApp Dispatcher] Failed to send camp registration ${manualTrigger}:`, error);
+            }).catch((error) => {
+              console.error(
+                `[WhatsApp Dispatcher] Failed to send camp registration ${manualTrigger}:`,
+                error
+              );
             });
           } else {
             // حالات contacted / no_answer / no_show لا ترسل رسالة تلقائية
-            console.log(`[CampReg] Manual registration ${regId} with status "${campInitialStatus}" - no auto message sent`);
+            console.log(
+              `[CampReg] Manual registration ${regId} with status "${campInitialStatus}" - no auto message sent`
+            );
           }
         }
       }
@@ -288,16 +335,16 @@ export const campRegistrationsRouter = router({
         phone: input.phone,
         email: input.email,
         clientIpAddress: ctx.req.ip || (ctx.req.socket as any)?.remoteAddress,
-        clientUserAgent: ctx.req.headers["user-agent"] as string,
-        fbc: ctx.req.cookies?.["_fbc"],
-        fbp: ctx.req.cookies?.["_fbp"],
+        clientUserAgent: ctx.req.headers['user-agent'] as string,
+        fbc: ctx.req.cookies?.['_fbc'],
+        fbp: ctx.req.cookies?.['_fbp'],
         eventSourceUrl: input.referrer,
         eventId: `camp_${registration?.insertId || Date.now()}`,
-      }).catch((err) => console.error("[CAPI] Camp registration error:", err));
+      }).catch((err) => console.error('[CAPI] Camp registration error:', err));
 
       // Invalidate camp registration caches after new submission
-      serverCache.invalidateByPrefix("paginated:campRegistrations:");
-      serverCache.invalidate("list:campRegistrations");
+      serverCache.invalidateByPrefix('paginated:campRegistrations:');
+      serverCache.invalidate('list:campRegistrations');
       serverCache.invalidate(CacheKeys.campRegistrationStats());
 
       return { success: true, id: registration.insertId };
@@ -305,43 +352,39 @@ export const campRegistrationsRouter = router({
 
   // List all camp registrations (protected)
   list: protectedProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      "list:campRegistrations",
-      CacheTTL.LIST,
-      async () => {
-        const db = await getDb();
-        if (!db) return [];
+    return serverCache.getOrCompute('list:campRegistrations', CacheTTL.LIST, async () => {
+      const db = await getDb();
+      if (!db) return [];
 
-        const { camps } = await import("../../drizzle/schema");
-        
-        const results = await db
-          .select({
-            id: campRegistrations.id,
-            campId: campRegistrations.campId,
-            campName: camps.name,
-            campSlug: camps.slug,
-            fullName: campRegistrations.fullName,
-            phone: campRegistrations.phone,
-            email: campRegistrations.email,
-            age: campRegistrations.age,
-            procedures: campRegistrations.procedures,
-            medicalCondition: campRegistrations.medicalCondition,
-            notes: campRegistrations.notes,
-            patientMessage: campRegistrations.patientMessage,
-            source: campRegistrations.source,
-            status: campRegistrations.status,
-            preferredDate: (campRegistrations as any).preferredDate,
-            preferredTimeSlot: (campRegistrations as any).preferredTimeSlot,
-            createdAt: campRegistrations.createdAt,
-            updatedAt: campRegistrations.updatedAt,
-          })
-          .from(campRegistrations)
-          .leftJoin(camps, eq(camps.id, campRegistrations.campId))
-          .orderBy(desc(campRegistrations.createdAt));
+      const { camps } = await import('../../drizzle/schema');
 
-        return results;
-      }
-    );
+      const results = await db
+        .select({
+          id: campRegistrations.id,
+          campId: campRegistrations.campId,
+          campName: camps.name,
+          campSlug: camps.slug,
+          fullName: campRegistrations.fullName,
+          phone: campRegistrations.phone,
+          email: campRegistrations.email,
+          age: campRegistrations.age,
+          procedures: campRegistrations.procedures,
+          medicalCondition: campRegistrations.medicalCondition,
+          notes: campRegistrations.notes,
+          patientMessage: campRegistrations.patientMessage,
+          source: campRegistrations.source,
+          status: campRegistrations.status,
+          preferredDate: (campRegistrations as any).preferredDate,
+          preferredTimeSlot: (campRegistrations as any).preferredTimeSlot,
+          createdAt: campRegistrations.createdAt,
+          updatedAt: campRegistrations.updatedAt,
+        })
+        .from(campRegistrations)
+        .leftJoin(camps, eq(camps.id, campRegistrations.campId))
+        .orderBy(desc(campRegistrations.createdAt));
+
+      return results;
+    });
   }),
 
   // List camp registrations with pagination (protected)
@@ -354,57 +397,49 @@ export const campRegistrationsRouter = router({
         campIds: z.array(z.number()).optional(),
         sources: z.array(z.string()).optional(),
         statuses: z.array(z.string()).optional(),
-        dateFilter: z.enum(["all", "today", "week", "month"]).optional(),
+        dateFilter: z.enum(['all', 'today', 'week', 'month']).optional(),
         dateFrom: z.string().optional(),
         dateTo: z.string().optional(),
       })
     )
     .query(async ({ input }) => {
       const cacheKey = CacheKeys.campRegistrationsPaginated(input);
-      return serverCache.getOrCompute(
-        cacheKey,
-        CacheTTL.PAGINATED,
-        async () => {
-          const { getCampRegistrationsPaginated } = await import('../database/db');
-          return getCampRegistrationsPaginated(
-            input.page,
-            input.limit,
-            input.searchTerm,
-            input.campIds,
-            input.sources,
-            input.statuses,
-            input.dateFilter,
-            input.dateFrom,
-            input.dateTo
-          );
-        }
-      );
+      return serverCache.getOrCompute(cacheKey, CacheTTL.PAGINATED, async () => {
+        const { getCampRegistrationsPaginated } = await import('../database/db');
+        return getCampRegistrationsPaginated(
+          input.page,
+          input.limit,
+          input.searchTerm,
+          input.campIds,
+          input.sources,
+          input.statuses,
+          input.dateFilter,
+          input.dateFrom,
+          input.dateTo
+        );
+      });
     }),
 
   // Get stats for camp registrations (protected)
   stats: protectedProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      CacheKeys.campRegistrationStats(),
-      CacheTTL.STATS,
-      async () => {
-        const db = await getDb();
-        if (!db) return { total: 0, pending: 0, confirmed: 0, attended: 0, cancelled: 0 };
+    return serverCache.getOrCompute(CacheKeys.campRegistrationStats(), CacheTTL.STATS, async () => {
+      const db = await getDb();
+      if (!db) return { total: 0, pending: 0, confirmed: 0, attended: 0, cancelled: 0 };
 
-        const all = await db.select().from(campRegistrations);
+      const all = await db.select().from(campRegistrations);
 
-        // "confirmed" matches dashboard funnel: confirmed + attended + completed
-        const confirmedPipeline = all.filter((r) =>
-          r.status === "confirmed" || r.status === "attended" || r.status === "completed"
-        ).length;
-        return {
-          total: all.length,
-          pending: all.filter((r) => r.status === "pending").length,
-          confirmed: confirmedPipeline,
-          attended: all.filter((r) => r.status === "attended").length,
-          cancelled: all.filter((r) => r.status === "cancelled").length,
-        };
-      }
-    );
+      // "confirmed" matches dashboard funnel: confirmed + attended + completed
+      const confirmedPipeline = all.filter(
+        (r) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
+      ).length;
+      return {
+        total: all.length,
+        pending: all.filter((r) => r.status === 'pending').length,
+        confirmed: confirmedPipeline,
+        attended: all.filter((r) => r.status === 'attended').length,
+        cancelled: all.filter((r) => r.status === 'cancelled').length,
+      };
+    });
   }),
 
   // Update camp registration status (protected)
@@ -412,21 +447,34 @@ export const campRegistrationsRouter = router({
     .input(
       z.object({
         id: z.number(),
-        status: z.enum(["pending", "contacted", "no_answer", "confirmed", "attended", "completed", "cancelled"]),
+        status: z.enum([
+          'pending',
+          'contacted',
+          'no_answer',
+          'confirmed',
+          'attended',
+          'completed',
+          'cancelled',
+        ]),
         notes: z.string().optional(),
         fullName: z.string().optional(),
         phone: z.string().optional(),
         attendanceDate: z.date().optional(),
         preferredDate: z.string().optional(), // YYYY-MM-DD
-        preferredTimeSlot: z.enum(["morning", "evening"]).optional(),
+        preferredTimeSlot: z.enum(['morning', 'evening']).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       // Get old status for audit log
-      const [old] = await db.select({ status: campRegistrations.status }).from(campRegistrations).where(eq(campRegistrations.id, input.id)).limit(1);
+      const [old] = await db
+        .select({ status: campRegistrations.status })
+        .from(campRegistrations)
+        .where(eq(campRegistrations.id, input.id))
+        .limit(1);
       const oldStatus = old?.status || '';
 
       const now = new Date();
@@ -447,13 +495,12 @@ export const campRegistrationsRouter = router({
       if (input.fullName) updateData.fullName = input.fullName;
       if (input.phone) updateData.phone = input.phone;
       if (input.attendanceDate) updateData.attendanceDate = input.attendanceDate;
-      if (input.preferredDate !== undefined) (updateData as any).preferredDate = input.preferredDate;
-      if (input.preferredTimeSlot !== undefined) (updateData as any).preferredTimeSlot = input.preferredTimeSlot;
+      if (input.preferredDate !== undefined)
+        (updateData as any).preferredDate = input.preferredDate;
+      if (input.preferredTimeSlot !== undefined)
+        (updateData as any).preferredTimeSlot = input.preferredTimeSlot;
 
-      await db
-        .update(campRegistrations)
-        .set(updateData)
-        .where(eq(campRegistrations.id, input.id));
+      await db.update(campRegistrations).set(updateData).where(eq(campRegistrations.id, input.id));
 
       // Create audit log
       await createAuditLog({
@@ -470,65 +517,78 @@ export const campRegistrationsRouter = router({
       // ── Send CAPI funnel event for status change (fire-and-forget) ────────────
       {
         const [regRow] = await db
-          .select({ fullName: campRegistrations.fullName, phone: campRegistrations.phone, email: campRegistrations.email })
+          .select({
+            fullName: campRegistrations.fullName,
+            phone: campRegistrations.phone,
+            email: campRegistrations.email,
+          })
           .from(campRegistrations)
           .where(eq(campRegistrations.id, input.id))
           .limit(1);
         if (regRow?.phone) {
           sendStatusChangeEvent({
             status: input.status,
-            fullName: regRow.fullName || "",
+            fullName: regRow.fullName || '',
             phone: regRow.phone,
             email: regRow.email || undefined,
-            serviceType: "camp",
+            serviceType: 'camp',
             bookingId: input.id,
-          }).catch((err) => console.error("[CAPI] Camp status change error:", err));
+          }).catch((err) => console.error('[CAPI] Camp status change error:', err));
         }
       }
 
       // ── WhatsApp Dispatcher: إرسال رسالة تلقائية بناءً على الحالة ──
       {
-        const [reg] = await db.select().from(campRegistrations).where(eq(campRegistrations.id, input.id)).limit(1);
+        const [reg] = await db
+          .select()
+          .from(campRegistrations)
+          .where(eq(campRegistrations.id, input.id))
+          .limit(1);
         if (reg?.phone) {
-          const { camps } = await import("../../drizzle/schema");
+          const { camps } = await import('../../drizzle/schema');
           const [camp] = await db.select().from(camps).where(eq(camps.id, reg.campId)).limit(1);
           const triggerMap: Record<string, string> = {
-            "confirmed": "on_confirmed",
-            "attended": "on_arrived",
-            "completed": "on_completed",
-            "cancelled": "on_cancelled",
+            confirmed: 'on_confirmed',
+            attended: 'on_arrived',
+            completed: 'on_completed',
+            cancelled: 'on_cancelled',
           };
           const triggerEvent = triggerMap[input.status];
           if (triggerEvent) {
             dispatchWhatsAppMessage({
-              entityType: "camp_registration",
+              entityType: 'camp_registration',
               triggerEvent: triggerEvent as any,
               phone: reg.phone,
               recipientName: reg.fullName || undefined,
               variables: {
-                name: reg.fullName || "المسجل",
-                camp_name: camp?.name || "المخيم",
+                name: reg.fullName || 'المسجل',
+                camp_name: camp?.name || 'المخيم',
                 date: (reg as any).preferredDate
-                  ? new Date((reg as any).preferredDate).toLocaleDateString("ar-YE")
-                  : (camp?.startDate ? new Date(camp.startDate).toLocaleDateString("ar-YE") : "غير محدد"),
-                time: (reg as any).preferredTimeSlot === 'morning'
-                  ? `صباحاً ${(camp as any)?.morningTime || ''}`
-                  : (reg as any).preferredTimeSlot === 'evening'
-                  ? `مساءً ${(camp as any)?.eveningTime || ''}`
-                  : "غير محدد",
-                location: "صنعاء - الستين الشمالي - قبل جولة الجمنه",
+                  ? new Date((reg as any).preferredDate).toLocaleDateString('ar-YE')
+                  : camp?.startDate
+                    ? new Date(camp.startDate).toLocaleDateString('ar-YE')
+                    : 'غير محدد',
+                time:
+                  (reg as any).preferredTimeSlot === 'morning'
+                    ? `صباحاً ${(camp as any)?.morningTime || ''}`
+                    : (reg as any).preferredTimeSlot === 'evening'
+                      ? `مساءً ${(camp as any)?.eveningTime || ''}`
+                      : 'غير محدد',
+                location: 'صنعاء - الستين الشمالي - قبل جولة الجمنه',
               },
               entityId: input.id,
               sentBy: ctx.user?.id,
-            }).catch(err => console.error("[WhatsApp Dispatcher] Camp status trigger error:", err));
+            }).catch((err) =>
+              console.error('[WhatsApp Dispatcher] Camp status trigger error:', err)
+            );
           }
           // ملاحظة: تم إزالة sendCampPatientArrivalWelcome القديمة - dispatchWhatsAppMessage يتولى الإرسال عبر إعدادات الرسائل
         }
       }
 
       // Invalidate camp registration caches after status update
-      serverCache.invalidateByPrefix("paginated:campRegistrations:");
-      serverCache.invalidate("list:campRegistrations");
+      serverCache.invalidateByPrefix('paginated:campRegistrations:');
+      serverCache.invalidate('list:campRegistrations');
       serverCache.invalidate(CacheKeys.campRegistrationStats());
 
       return { success: true };
@@ -539,13 +599,22 @@ export const campRegistrationsRouter = router({
     .input(
       z.object({
         ids: z.array(z.number()),
-        status: z.enum(["pending", "contacted", "no_answer", "confirmed", "attended", "completed", "cancelled"]),
+        status: z.enum([
+          'pending',
+          'contacted',
+          'no_answer',
+          'confirmed',
+          'attended',
+          'completed',
+          'cancelled',
+        ]),
         notes: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       const now = new Date();
       const updateData: any = {
@@ -563,10 +632,7 @@ export const campRegistrationsRouter = router({
 
       // Update all selected registrations
       for (const id of input.ids) {
-        await db
-          .update(campRegistrations)
-          .set(updateData)
-          .where(eq(campRegistrations.id, id));
+        await db.update(campRegistrations).set(updateData).where(eq(campRegistrations.id, id));
       }
 
       // Create audit logs for bulk update
@@ -584,91 +650,105 @@ export const campRegistrationsRouter = router({
 
       // CAPI + WhatsApp per row (same triggers as single updateStatus)
       {
-        const { camps } = await import("../../drizzle/schema");
-        const regs = await db.select().from(campRegistrations).where(inArray(campRegistrations.id, input.ids));
+        const { camps } = await import('../../drizzle/schema');
+        const regs = await db
+          .select()
+          .from(campRegistrations)
+          .where(inArray(campRegistrations.id, input.ids));
         const triggerMap: Record<string, string> = {
-          confirmed: "on_confirmed",
-          attended: "on_arrived",
-          completed: "on_completed",
-          cancelled: "on_cancelled",
+          confirmed: 'on_confirmed',
+          attended: 'on_arrived',
+          completed: 'on_completed',
+          cancelled: 'on_cancelled',
         };
         const triggerEvent = triggerMap[input.status];
         for (const reg of regs) {
           if (reg.phone) {
             sendStatusChangeEvent({
               status: input.status,
-              fullName: reg.fullName || "",
+              fullName: reg.fullName || '',
               phone: reg.phone,
               email: reg.email || undefined,
-              serviceType: "camp",
+              serviceType: 'camp',
               bookingId: reg.id,
-            }).catch((err) => console.error("[CAPI] Camp bulk status change error:", err));
+            }).catch((err) => console.error('[CAPI] Camp bulk status change error:', err));
           }
           if (reg.phone && triggerEvent) {
             const [camp] = await db.select().from(camps).where(eq(camps.id, reg.campId)).limit(1);
             dispatchWhatsAppMessage({
-              entityType: "camp_registration",
+              entityType: 'camp_registration',
               triggerEvent: triggerEvent as any,
               phone: reg.phone,
               recipientName: reg.fullName || undefined,
               variables: {
-                name: reg.fullName || "المسجل",
-                camp_name: camp?.name || "المخيم",
+                name: reg.fullName || 'المسجل',
+                camp_name: camp?.name || 'المخيم',
                 date: (reg as any).preferredDate
-                  ? new Date((reg as any).preferredDate).toLocaleDateString("ar-YE")
-                  : (camp?.startDate ? new Date(camp.startDate).toLocaleDateString("ar-YE") : "غير محدد"),
-                time: (reg as any).preferredTimeSlot === "morning"
-                  ? `صباحاً ${(camp as any)?.morningTime || ""}`
-                  : (reg as any).preferredTimeSlot === "evening"
-                    ? `مساءً ${(camp as any)?.eveningTime || ""}`
-                    : "غير محدد",
-                location: "صنعاء - الستين الشمالي - قبل جولة الجمنه",
+                  ? new Date((reg as any).preferredDate).toLocaleDateString('ar-YE')
+                  : camp?.startDate
+                    ? new Date(camp.startDate).toLocaleDateString('ar-YE')
+                    : 'غير محدد',
+                time:
+                  (reg as any).preferredTimeSlot === 'morning'
+                    ? `صباحاً ${(camp as any)?.morningTime || ''}`
+                    : (reg as any).preferredTimeSlot === 'evening'
+                      ? `مساءً ${(camp as any)?.eveningTime || ''}`
+                      : 'غير محدد',
+                location: 'صنعاء - الستين الشمالي - قبل جولة الجمنه',
               },
               entityId: reg.id,
               sentBy: ctx.user?.id,
-            }).catch((err) => console.error("[WhatsApp Dispatcher] Camp bulk status trigger error:", err));
+            }).catch((err) =>
+              console.error('[WhatsApp Dispatcher] Camp bulk status trigger error:', err)
+            );
           }
         }
       }
 
       // Invalidate camp registration caches after bulk update
-      serverCache.invalidateByPrefix("paginated:campRegistrations:");
-      serverCache.invalidate("list:campRegistrations");
+      serverCache.invalidateByPrefix('paginated:campRegistrations:');
+      serverCache.invalidate('list:campRegistrations');
       serverCache.invalidate(CacheKeys.campRegistrationStats());
 
       return { success: true, count: input.ids.length };
     }),
 
   // Delete camp registration (protected)
-  delete: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    const db = await getDb();
+    if (!db)
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
-      await db.delete(campRegistrations).where(eq(campRegistrations.id, input.id));
+    await db.delete(campRegistrations).where(eq(campRegistrations.id, input.id));
 
-      // Invalidate camp registration caches after deletion
-      serverCache.invalidateByPrefix("paginated:campRegistrations:");
-      serverCache.invalidate("list:campRegistrations");
-      serverCache.invalidate(CacheKeys.campRegistrationStats());
+    // Invalidate camp registration caches after deletion
+    serverCache.invalidateByPrefix('paginated:campRegistrations:');
+    serverCache.invalidate('list:campRegistrations');
+    serverCache.invalidate(CacheKeys.campRegistrationStats());
 
-      return { success: true };
-    }),
+    return { success: true };
+  }),
 
   // Generate and save receipt number
   generateReceiptNumber: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       // Check if receipt number already exists
-      const [registration] = await db.select().from(campRegistrations).where(eq(campRegistrations.id, input.id)).limit(1);
+      const [registration] = await db
+        .select()
+        .from(campRegistrations)
+        .where(eq(campRegistrations.id, input.id))
+        .limit(1);
       if (!registration) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "التسجيل غير موجود" });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'التسجيل غير موجود' });
       }
 
       // If already has receipt number, return it
@@ -678,37 +758,42 @@ export const campRegistrationsRouter = router({
 
       // Generate new receipt number
       const year = new Date().getFullYear();
-      
+
       // Get the count of camp registrations with receipt numbers this year
-      const { sql } = await import("drizzle-orm");
+      const { sql } = await import('drizzle-orm');
       const [result] = await db.execute(sql`
         SELECT COUNT(*) as count 
         FROM campRegistrations 
         WHERE receiptNumber LIKE CONCAT('SGH-', ${year}, '-%')
       `);
-      
+
       const count = (result as any).count || 0;
       const sequenceNumber = count + 1;
       const paddedNumber = String(sequenceNumber).padStart(3, '0');
       const receiptNumber = `SGH-${year}-${paddedNumber}`;
 
       // Save receipt number
-      await db.update(campRegistrations).set({ receiptNumber }).where(eq(campRegistrations.id, input.id));
+      await db
+        .update(campRegistrations)
+        .set({ receiptNumber })
+        .where(eq(campRegistrations.id, input.id));
 
       return { receiptNumber };
     }),
 
   // Schedule camp stats report (not implemented — UI hidden; keep procedure for API stability)
   scheduleReport: protectedProcedure
-    .input(z.object({
-      email: z.string().email(),
-      frequency: z.enum(["daily", "weekly", "monthly"]),
-      campId: z.number().optional(),
-    }))
+    .input(
+      z.object({
+        email: z.string().email(),
+        frequency: z.enum(['daily', 'weekly', 'monthly']),
+        campId: z.number().optional(),
+      })
+    )
     .mutation(async () => {
       throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "جدولة التقارير غير مفعّلة بعد. سيتم دعمها لاحقاً عند ربط البريد والجدولة.",
+        code: 'NOT_IMPLEMENTED',
+        message: 'جدولة التقارير غير مفعّلة بعد. سيتم دعمها لاحقاً عند ربط البريد والجدولة.',
       });
     }),
 });

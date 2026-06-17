@@ -1,10 +1,10 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Phone, MessageCircle, Edit, User, Eye, Printer, Tent, Mail } from "lucide-react";
-import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, Phone, MessageCircle, Edit, User, Eye, Printer, Tent, Mail } from 'lucide-react';
+import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 interface CampRegistration {
   id: number;
@@ -25,21 +25,83 @@ interface CampRegistrationCardProps {
   onPrint?: () => void;
 }
 
-const statusConfig: Record<string, { bg: string; text: string; dot: string; border: string; label: string }> = {
-  pending: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", border: "border-amber-200", label: "قيد الانتظار" },
-  new: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", border: "border-blue-200", label: "جديد" },
-  contacted: { bg: "bg-purple-50", text: "text-purple-700", dot: "bg-purple-500", border: "border-purple-200", label: "تم التواصل" },
-  no_answer: { bg: "bg-slate-50", text: "text-slate-700", dot: "bg-slate-500", border: "border-slate-200", label: "لم يرد" },
-  confirmed: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200", label: "مؤكد" },
-  attended: { bg: "bg-sky-50", text: "text-sky-800", dot: "bg-sky-500", border: "border-sky-200", label: "حضر" },
-  cancelled: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", border: "border-red-200", label: "ملغي" },
-  completed: { bg: "bg-teal-50", text: "text-teal-800", dot: "bg-teal-500", border: "border-teal-200", label: "مكتمل" },
+const statusConfig: Record<
+  string,
+  { bg: string; text: string; dot: string; border: string; label: string }
+> = {
+  pending: {
+    bg: 'bg-amber-50',
+    text: 'text-amber-700',
+    dot: 'bg-amber-500',
+    border: 'border-amber-200',
+    label: 'قيد الانتظار',
+  },
+  new: {
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    dot: 'bg-blue-500',
+    border: 'border-blue-200',
+    label: 'جديد',
+  },
+  contacted: {
+    bg: 'bg-purple-50',
+    text: 'text-purple-700',
+    dot: 'bg-purple-500',
+    border: 'border-purple-200',
+    label: 'تم التواصل',
+  },
+  no_answer: {
+    bg: 'bg-slate-50',
+    text: 'text-slate-700',
+    dot: 'bg-slate-500',
+    border: 'border-slate-200',
+    label: 'لم يرد',
+  },
+  confirmed: {
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-700',
+    dot: 'bg-emerald-500',
+    border: 'border-emerald-200',
+    label: 'مؤكد',
+  },
+  attended: {
+    bg: 'bg-sky-50',
+    text: 'text-sky-800',
+    dot: 'bg-sky-500',
+    border: 'border-sky-200',
+    label: 'حضر',
+  },
+  cancelled: {
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    dot: 'bg-red-500',
+    border: 'border-red-200',
+    label: 'ملغي',
+  },
+  completed: {
+    bg: 'bg-teal-50',
+    text: 'text-teal-800',
+    dot: 'bg-teal-500',
+    border: 'border-teal-200',
+    label: 'مكتمل',
+  },
 };
 
-export default function CampRegistrationCard({ registration, onEdit, onViewDetails, onPrint }: CampRegistrationCardProps) {
+export default function CampRegistrationCard({
+  registration,
+  onEdit,
+  onViewDetails,
+  onPrint,
+}: CampRegistrationCardProps) {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
   const { formatDate, formatDateTime } = useFormatDate();
-  const status = statusConfig[registration.status] || { bg: "bg-muted/50", text: "text-foreground", dot: "bg-gray-500", border: "border-border", label: registration.status };
+  const status = statusConfig[registration.status] || {
+    bg: 'bg-muted/50',
+    text: 'text-foreground',
+    dot: 'bg-gray-500',
+    border: 'border-border',
+    label: registration.status,
+  };
   const isUrgent = registration.status === 'pending' || registration.status === 'new';
 
   const handleCall = () => {
@@ -50,16 +112,21 @@ export default function CampRegistrationCard({ registration, onEdit, onViewDetai
     const message = encodeURIComponent(
       `مرحباً ${registration.fullName}، نود التواصل معك بخصوص تسجيلك في: ${registration.campName || 'المخيم'}`
     );
-    window.open(`https://wa.me/967${registration.phone.replace(/^0+/, '')}?text=${message}`, '_blank');
+    window.open(
+      `https://wa.me/967${registration.phone.replace(/^0+/, '')}?text=${message}`,
+      '_blank'
+    );
   };
 
   return (
-    <Card className={`group relative overflow-hidden hover:shadow-md transition-all duration-200 ${
-      isUrgent ? 'border-amber-200 bg-amber-50/30' : ''
-    }`}>
+    <Card
+      className={`group relative overflow-hidden hover:shadow-md transition-all duration-200 ${
+        isUrgent ? 'border-amber-200 bg-amber-50/30' : ''
+      }`}
+    >
       {/* Status indicator bar */}
       <div className={`absolute top-0 right-0 w-1 h-full ${status.dot} rounded-r-lg`} />
-      
+
       <CardContent className="p-4 pr-5">
         {/* Header: Name + Status */}
         <div className="flex items-start justify-between mb-3 gap-2">
@@ -68,12 +135,16 @@ export default function CampRegistrationCard({ registration, onEdit, onViewDetai
               <User className={`w-4 h-4 ${status.text}`} />
             </div>
             <div className="min-w-0">
-              <h3 className="font-semibold text-sm leading-tight truncate">{registration.fullName}</h3>
+              <h3 className="font-semibold text-sm leading-tight truncate">
+                {registration.fullName}
+              </h3>
               {(registration as any).source && (
                 <span
                   className="text-[10px] font-medium px-1.5 py-0.5 rounded-full inline-block mt-0.5"
                   style={{
-                    backgroundColor: SOURCE_COLORS[(registration as any).source] ? `${SOURCE_COLORS[(registration as any).source]}15` : '#f3f4f6',
+                    backgroundColor: SOURCE_COLORS[(registration as any).source]
+                      ? `${SOURCE_COLORS[(registration as any).source]}15`
+                      : '#f3f4f6',
                     color: SOURCE_COLORS[(registration as any).source] || '#6b7280',
                   }}
                 >
@@ -82,7 +153,9 @@ export default function CampRegistrationCard({ registration, onEdit, onViewDetai
               )}
             </div>
           </div>
-          <Badge className={`${status.bg} ${status.text} border ${status.border} text-[10px] px-2 py-0.5 flex-shrink-0`}>
+          <Badge
+            className={`${status.bg} ${status.text} border ${status.border} text-[10px] px-2 py-0.5 flex-shrink-0`}
+          >
             <span className={`w-1.5 h-1.5 rounded-full ${status.dot} ml-1.5 inline-block`} />
             {status.label}
           </Badge>
@@ -92,9 +165,11 @@ export default function CampRegistrationCard({ registration, onEdit, onViewDetai
         <div className="space-y-1.5 mb-3">
           <div className="flex items-center gap-2 text-sm">
             <Phone className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-            <span dir="ltr" className="font-mono text-xs">{formatPhoneDisplay(registration.phone)}</span>
+            <span dir="ltr" className="font-mono text-xs">
+              {formatPhoneDisplay(registration.phone)}
+            </span>
           </div>
-          
+
           {registration.email && (
             <div className="flex items-center gap-2 text-sm">
               <Mail className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
@@ -111,9 +186,7 @@ export default function CampRegistrationCard({ registration, onEdit, onViewDetai
 
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground pt-1 border-t border-dashed">
             <Calendar className="w-3 h-3" />
-            <span>
-              {formatDate(registration.createdAt)}
-            </span>
+            <span>{formatDate(registration.createdAt)}</span>
             {registration.age && (
               <>
                 <span className="mx-1">•</span>
@@ -125,12 +198,7 @@ export default function CampRegistrationCard({ registration, onEdit, onViewDetai
 
         {/* Actions */}
         <div className="grid grid-cols-3 gap-2 mb-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 text-xs gap-1"
-            onClick={handleCall}
-          >
+          <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={handleCall}>
             <Phone className="w-3.5 h-3.5" />
             اتصال
           </Button>
@@ -144,12 +212,7 @@ export default function CampRegistrationCard({ registration, onEdit, onViewDetai
             واتساب
           </Button>
           {onPrint ? (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 text-xs gap-1"
-              onClick={onPrint}
-            >
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={onPrint}>
               <Printer className="w-3.5 h-3.5" />
               طباعة
             </Button>
@@ -165,7 +228,7 @@ export default function CampRegistrationCard({ registration, onEdit, onViewDetai
             </Button>
           )}
         </div>
-        <div className={`grid gap-2 ${onPrint ? "grid-cols-2" : "grid-cols-1"}`}>
+        <div className={`grid gap-2 ${onPrint ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {onPrint && (
             <Button
               variant="outline"
@@ -177,12 +240,7 @@ export default function CampRegistrationCard({ registration, onEdit, onViewDetai
               تفاصيل
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 text-xs gap-1"
-            onClick={onEdit}
-          >
+          <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={onEdit}>
             <Edit className="w-3.5 h-3.5" />
             تحديث
           </Button>

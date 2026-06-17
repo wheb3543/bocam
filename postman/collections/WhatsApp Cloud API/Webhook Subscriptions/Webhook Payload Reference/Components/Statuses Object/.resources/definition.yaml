@@ -13,7 +13,7 @@ description: |-
   | **`pricing`**<br/>type: object       | **This object will be provided by default when [Conversation-Based Pricing](https://developers.facebook.com/docs/whatsapp/pricing/conversationpricing) launches in a future update.**<br/>| Object containing billing attributes, including **`pricing_model`**, **`billable`** flag, and **`category`**. See [pricing object](https://documenter.getpostman.com/view/13382743/UVC5FTHT#f72385a4-9ab5-40ec-bd1b-fd0adf0d37e3) for more information.
   | **`errors`**          | **Added to Webhook if status is set to `failed`**. <br/>An array of [error objects](#a89ecf92-9b51-409a-af27-2c3b9bc0fd7e) with information about a message’s delivery failure.|
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 15000

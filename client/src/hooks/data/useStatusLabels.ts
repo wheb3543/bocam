@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 /**
  * useStatusLabels - هوك لتوحيد تسميات وألوان الحالات عبر المنصة
@@ -7,23 +7,23 @@ import { useMemo } from "react";
 
 // === الحالات الموحدة لجميع أنواع الحجوزات ===
 export const unifiedStatusLabels: Record<string, string> = {
-  pending: "قيد الانتظار",
-  contacted: "تم التواصل",
-  no_answer: "لم يرد",
-  confirmed: "مؤكد",
-  attended: "حضر",
-  completed: "مكتمل",
-  cancelled: "ملغي",
+  pending: 'قيد الانتظار',
+  contacted: 'تم التواصل',
+  no_answer: 'لم يرد',
+  confirmed: 'مؤكد',
+  attended: 'حضر',
+  completed: 'مكتمل',
+  cancelled: 'ملغي',
 };
 
 export const unifiedStatusColors: Record<string, string> = {
-  pending: "bg-blue-100 text-blue-800 border-blue-200",
-  contacted: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  no_answer: "bg-gray-100 text-gray-800 border-gray-200",
-  confirmed: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  attended: "bg-teal-100 text-teal-800 border-teal-200",
-  completed: "bg-green-100 text-green-800 border-green-200",
-  cancelled: "bg-red-100 text-red-800 border-red-200",
+  pending: 'bg-blue-100 text-blue-800 border-blue-200',
+  contacted: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  no_answer: 'bg-gray-100 text-gray-800 border-gray-200',
+  confirmed: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  attended: 'bg-teal-100 text-teal-800 border-teal-200',
+  completed: 'bg-green-100 text-green-800 border-green-200',
+  cancelled: 'bg-red-100 text-red-800 border-red-200',
 };
 
 export const unifiedStatusOptions = [
@@ -56,26 +56,26 @@ export const leadStatusLabels: Record<string, string> = unifiedStatusLabels;
 export const leadStatusColors: Record<string, string> = unifiedStatusColors;
 
 export const campaignStatusLabels: Record<string, string> = {
-  draft: "مسودة",
-  active: "نشطة",
-  paused: "متوقفة",
-  completed: "مكتملة",
-  cancelled: "ملغاة",
+  draft: 'مسودة',
+  active: 'نشطة',
+  paused: 'متوقفة',
+  completed: 'مكتملة',
+  cancelled: 'ملغاة',
 };
 
 export const campaignStatusColors: Record<string, string> = {
-  draft: "bg-muted text-foreground",
-  active: "bg-green-100 text-green-800 border-green-200",
-  paused: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  completed: "bg-blue-100 text-blue-800 border-blue-200",
-  cancelled: "bg-red-100 text-red-800 border-red-200",
+  draft: 'bg-muted text-foreground',
+  active: 'bg-green-100 text-green-800 border-green-200',
+  paused: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  completed: 'bg-blue-100 text-blue-800 border-blue-200',
+  cancelled: 'bg-red-100 text-red-800 border-red-200',
 };
 
 export const campaignTypeLabels: Record<string, string> = {
-  digital: "رقمية",
-  field: "ميدانية",
-  awareness: "توعوية",
-  mixed: "مختلطة",
+  digital: 'رقمية',
+  field: 'ميدانية',
+  awareness: 'توعوية',
+  mixed: 'مختلطة',
 };
 
 export const appointmentStatusLabels: Record<string, string> = unifiedStatusLabels;
@@ -85,9 +85,18 @@ export const campRegistrationStatusLabels: Record<string, string> = unifiedStatu
 export const campRegistrationStatusColors: Record<string, string> = unifiedStatusColors;
 
 // === أنواع الحالات المدعومة ===
-type StatusType = "lead" | "offerLead" | "campaign" | "campaignType" | "appointment" | "campRegistration";
+type StatusType =
+  | 'lead'
+  | 'offerLead'
+  | 'campaign'
+  | 'campaignType'
+  | 'appointment'
+  | 'campRegistration';
 
-const statusMaps: Record<StatusType, { labels: Record<string, string>; colors: Record<string, string> }> = {
+const statusMaps: Record<
+  StatusType,
+  { labels: Record<string, string>; colors: Record<string, string> }
+> = {
   lead: { labels: unifiedStatusLabels, colors: unifiedStatusColors },
   offerLead: { labels: unifiedStatusLabels, colors: unifiedStatusColors },
   campaign: { labels: campaignStatusLabels, colors: campaignStatusColors },
@@ -105,11 +114,11 @@ export function useStatusLabels(type: StatusType) {
     };
 
     const getColor = (status: string): string => {
-      return colors[status] || "bg-muted text-foreground";
+      return colors[status] || 'bg-muted text-foreground';
     };
 
     const getBadgeClass = (status: string): string => {
-      return colors[status] || "bg-muted text-foreground";
+      return colors[status] || 'bg-muted text-foreground';
     };
 
     const getAllStatuses = (): { value: string; label: string }[] => {

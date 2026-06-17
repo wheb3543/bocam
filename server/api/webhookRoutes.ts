@@ -1,20 +1,41 @@
-import { Router, Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { publish } from "../_core/pubsub";
-import { processWebhookEvent, verifyWebhookSignature, verifyWebhookToken } from "../integrations/webhooks/whatsappWebhook";
-import { ENV } from "../_core/env";
-import multer from "multer";
+import { Router, Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { publish } from '../_core/pubsub';
+import {
+  processWebhookEvent,
+  verifyWebhookSignature,
+  verifyWebhookToken,
+} from '../integrations/webhooks/whatsappWebhook';
+import { ENV } from '../_core/env';
+import multer from 'multer';
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   const cookieHeader = req.headers.cookie;
-  if (!cookieHeader) { res.status(401).json({ error: "Authentication required" }); return; }
+  if (!cookieHeader) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
   const cookies: Record<string, string> = {};
-  cookieHeader.split(";").forEach(c => { const [n, v] = c.trim().split("="); if (n && v) cookies[n] = decodeURIComponent(v); });
-  const token = cookies["admin_session"];
-  if (!token) { res.status(401).json({ error: "Authentication required" }); return; }
+  cookieHeader.split(';').forEach((c) => {
+    const [n, v] = c.trim().split('=');
+    if (n && v) cookies[n] = decodeURIComponent(v);
+  });
+  const token = cookies['admin_session'];
+  if (!token) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
   const secret = process.env.JWT_SECRET;
-  if (!secret) { res.status(500).json({ error: "Server misconfiguration" }); return; }
-  try { jwt.verify(token, secret); next(); } catch { res.status(401).json({ error: "Invalid or expired session" }); }
+  if (!secret) {
+    res.status(500).json({ error: 'Server misconfiguration' });
+    return;
+  }
+  try {
+    jwt.verify(token, secret);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid or expired session' });
+  }
 }
 
 /**
@@ -26,11 +47,13 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
 const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
 if (!VERIFY_TOKEN) {
-  console.warn("[Webhook] WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests");
+  console.warn(
+    '[Webhook] WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests'
+  );
 }
 
 // Global channel for all users to receive new message notifications
-const GLOBAL_CHANNEL = "global:whatsapp";
+const GLOBAL_CHANNEL = 'global:whatsapp';
 
 // Configure multer for file uploads (in-memory storage)
 const upload = multer({
@@ -40,7 +63,6 @@ const upload = multer({
   },
 });
 
-
 export function createWebhookRouter(): Router {
   const router = Router();
 
@@ -48,7 +70,7 @@ export function createWebhookRouter(): Router {
    * GET /api/webhooks/whatsapp
    * Meta verification endpoint - returns hub.challenge on success
    */
-  router.get("/api/webhooks/whatsapp", (req: Request, res: Response) => {
+  router.get('/api/webhooks/whatsapp', (req: Request, res: Response) => {
     verifyWebhookToken(req, res);
   });
 
@@ -56,22 +78,22 @@ export function createWebhookRouter(): Router {
    * GET /api/whatsapp/media/:mediaId
    * Proxy endpoint to download media from WhatsApp Media API
    */
-  router.get("/api/whatsapp/media/:mediaId", requireAuth, async (req: Request, res: Response) => {
+  router.get('/api/whatsapp/media/:mediaId', requireAuth, async (req: Request, res: Response) => {
     try {
       const { mediaId } = req.params;
       const accessToken = ENV.metaAccessToken;
 
       if (!accessToken) {
-        res.status(500).json({ error: "metaAccessToken not configured" });
+        res.status(500).json({ error: 'metaAccessToken not configured' });
         return;
       }
 
       const mediaResponse = await fetch(`https://graph.facebook.com/v25.0/${mediaId}`, {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       if (!mediaResponse.ok) {
-        res.status(404).json({ error: "Media not found" });
+        res.status(404).json({ error: 'Media not found' });
         return;
       }
 
@@ -80,11 +102,11 @@ export function createWebhookRouter(): Router {
 
       // Download the actual media file
       const fileResponse = await fetch(mediaUrl, {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       if (!fileResponse.ok) {
-        res.status(404).json({ error: "Failed to download media" });
+        res.status(404).json({ error: 'Failed to download media' });
         return;
       }
 
@@ -96,10 +118,9 @@ export function createWebhookRouter(): Router {
       // Stream the file
       const buffer = await fileResponse.arrayBuffer();
       res.send(Buffer.from(buffer));
-
     } catch (error) {
-      console.error("[WhatsApp Media Proxy] Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      console.error('[WhatsApp Media Proxy] Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
@@ -107,41 +128,46 @@ export function createWebhookRouter(): Router {
    * POST /api/whatsapp/upload
    * Upload media file and return base64 data URL
    */
-  router.post("/api/whatsapp/upload", requireAuth, upload.single("file"), async (req: Request, res: Response) => {
-    try {
-      if (!req.file) {
-        res.status(400).json({ error: "No file uploaded" });
-        return;
+  router.post(
+    '/api/whatsapp/upload',
+    requireAuth,
+    upload.single('file'),
+    async (req: Request, res: Response) => {
+      try {
+        if (!req.file) {
+          res.status(400).json({ error: 'No file uploaded' });
+          return;
+        }
+
+        const file = req.file;
+        const mimeType = file.mimetype;
+        const base64 = file.buffer.toString('base64');
+        const dataUrl = `data:${mimeType};base64,${base64}`;
+
+        res.json({
+          success: true,
+          dataUrl,
+          mimeType,
+          filename: file.originalname,
+          size: file.size,
+        });
+      } catch (error) {
+        console.error('[WhatsApp Upload] Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
       }
-
-      const file = req.file;
-      const mimeType = file.mimetype;
-      const base64 = file.buffer.toString("base64");
-      const dataUrl = `data:${mimeType};base64,${base64}`;
-
-      res.json({
-        success: true,
-        dataUrl,
-        mimeType,
-        filename: file.originalname,
-        size: file.size,
-      });
-    } catch (error) {
-      console.error("[WhatsApp Upload] Error:", error);
-      res.status(500).json({ error: "Internal server error" });
     }
-  });
+  );
 
   /**
    * POST /api/webhooks/whatsapp
    * Receives incoming messages, button responses, and message statuses
    */
-  router.post("/api/webhooks/whatsapp", async (req: Request, res: Response) => {
+  router.post('/api/webhooks/whatsapp', async (req: Request, res: Response) => {
     try {
       // ✅ التحقق من التوقيع قبل معالجة أي حدث
       if (!verifyWebhookSignature(req)) {
-        console.error("[WhatsApp Webhook] ❌ Invalid signature — request rejected");
-        res.status(403).json({ error: "Invalid signature" });
+        console.error('[WhatsApp Webhook] ❌ Invalid signature — request rejected');
+        res.status(403).json({ error: 'Invalid signature' });
         return;
       }
 
@@ -150,16 +176,16 @@ export function createWebhookRouter(): Router {
 
       const body = req.body;
       if (!body) {
-        console.error("[Webhook] Empty payload received");
+        console.error('[Webhook] Empty payload received');
         return;
       }
 
-      if (body.object !== "whatsapp_business_account") {
-        console.log("[Webhook] Ignoring non-WhatsApp webhook");
+      if (body.object !== 'whatsapp_business_account') {
+        console.log('[Webhook] Ignoring non-WhatsApp webhook');
         return;
       }
 
-      console.log("[Webhook] Received webhook event for object:", body.object);
+      console.log('[Webhook] Received webhook event for object:', body.object);
 
       // تسجيل الحدث في قاعدة البيانات للتحليل
       try {
@@ -181,7 +207,7 @@ export function createWebhookRouter(): Router {
                   console.log(`[Webhook Logger] Logging event: ${field}, phone: ${phoneNumber}`);
                   const result = await createWhatsAppWebhookEvent({
                     eventType: field,
-                    subType: value.statuses ? 'status' : (value.messages ? 'message' : undefined),
+                    subType: value.statuses ? 'status' : value.messages ? 'message' : undefined,
                     phoneNumber,
                     rawPayload: JSON.stringify(value),
                   });
@@ -189,9 +215,9 @@ export function createWebhookRouter(): Router {
 
                   // 🔔 Publish SSE event to global channel for webhook events
                   try {
-                    publish(GLOBAL_CHANNEL, "webhook_event", {
+                    publish(GLOBAL_CHANNEL, 'webhook_event', {
                       eventType: field,
-                      subType: value.statuses ? 'status' : (value.messages ? 'message' : undefined),
+                      subType: value.statuses ? 'status' : value.messages ? 'message' : undefined,
                       phoneNumber,
                       rawPayload: JSON.stringify(value),
                       handlerExists: true,
@@ -199,7 +225,7 @@ export function createWebhookRouter(): Router {
                       timestamp: new Date().toISOString(),
                     });
                   } catch (error) {
-                    console.error("[Webhook] Error publishing webhook event SSE:", error);
+                    console.error('[Webhook] Error publishing webhook event SSE:', error);
                   }
                 }
               }
@@ -207,18 +233,17 @@ export function createWebhookRouter(): Router {
           }
         }
       } catch (error) {
-        console.error("[Webhook] Error logging webhook event:", error);
+        console.error('[Webhook] Error logging webhook event:', error);
       }
 
       // معالجة الحدث باستخدام المعالج المتقدم من whatsappWebhook.ts
       await processWebhookEvent(body);
-
     } catch (error) {
-      console.error("[Webhook] Error processing webhook:", error);
+      console.error('[Webhook] Error processing webhook:', error);
       // Don't throw - we already sent 200 to Meta
       // Log detailed error information for debugging
       if (error instanceof Error) {
-        console.error("[Webhook] Error details:", {
+        console.error('[Webhook] Error details:', {
           message: error.message,
           stack: error.stack,
         });

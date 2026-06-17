@@ -21,7 +21,7 @@ headers:
   - key: Content-Type
     value: image/jpeg
   - key: file_offset
-    value: "0"
+    value: '0'
     description: Specifies the offset to start the upload. The offset value should always be `0`.
   - key: Authorization
     value: OAuth {{User-Access-Token}}

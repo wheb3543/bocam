@@ -1,6 +1,6 @@
 /**
  * fix-categories-sql.mjs
- * 
+ *
  * تحديث فئات القوالب بطريقة صحيحة:
  * 1. تغيير العمود إلى VARCHAR مؤقتاً
  * 2. تحديث القيم القديمة إلى الجديدة
@@ -21,17 +21,17 @@ if (!DATABASE_URL) {
 
 async function fixCategories() {
   const connection = await mysql.createConnection(DATABASE_URL);
-  
+
   try {
     console.log('🔄 بدء إصلاح فئات القوالب...\n');
-    
+
     // الخطوة 1: تغيير العمود إلى VARCHAR مؤقتاً
     console.log('1️⃣ تغيير العمود إلى VARCHAR...');
     await connection.execute(
       `ALTER TABLE whatsapp_templates MODIFY COLUMN category VARCHAR(50) NOT NULL DEFAULT 'UTILITY'`
     );
     console.log('   ✅ تم تغيير العمود إلى VARCHAR');
-    
+
     // الخطوة 2: تحديث القيم القديمة
     console.log('\n2️⃣ تحديث القيم القديمة...');
     const mappings = [
@@ -42,7 +42,7 @@ async function fixCategories() {
       { old: 'cancellation', new: 'UTILITY' },
       { old: 'custom', new: 'UTILITY' },
     ];
-    
+
     let totalUpdated = 0;
     for (const mapping of mappings) {
       const [result] = await connection.execute(
@@ -55,13 +55,13 @@ async function fixCategories() {
       }
     }
     console.log(`   📊 إجمالي المحدّث: ${totalUpdated} سجل`);
-    
+
     // الخطوة 3: التحقق من عدم وجود قيم غير صالحة
     const [invalidRows] = await connection.execute(
       `SELECT id, name, category FROM whatsapp_templates 
        WHERE category NOT IN ('MARKETING', 'UTILITY', 'AUTHENTICATION')`
     );
-    
+
     if (invalidRows.length > 0) {
       console.log('\n⚠️ سجلات بقيم غير صالحة - سيتم تحويلها إلى UTILITY:');
       for (const row of invalidRows) {
@@ -73,26 +73,25 @@ async function fixCategories() {
       );
       console.log('   ✅ تم تحويل جميع القيم غير الصالحة إلى UTILITY');
     }
-    
+
     // الخطوة 4: تغيير العمود إلى ENUM الجديد
     console.log('\n3️⃣ تغيير العمود إلى ENUM الجديد...');
     await connection.execute(
       `ALTER TABLE whatsapp_templates MODIFY COLUMN category ENUM('MARKETING','UTILITY','AUTHENTICATION') NOT NULL DEFAULT 'UTILITY'`
     );
     console.log('   ✅ تم تغيير العمود إلى ENUM الجديد');
-    
+
     // التحقق النهائي
     const [finalData] = await connection.execute(
       `SELECT category, COUNT(*) as count FROM whatsapp_templates GROUP BY category`
     );
     console.log('\n📊 الفئات النهائية:');
-    finalData.forEach(row => {
+    finalData.forEach((row) => {
       console.log(`   ${row.category}: ${row.count} قالب`);
     });
-    
+
     console.log('\n✅ اكتمل الإصلاح بنجاح!');
     console.log('💡 الآن يمكن تشغيل: pnpm db:push');
-    
   } catch (error) {
     console.error('❌ خطأ:', error.message);
     console.error(error);

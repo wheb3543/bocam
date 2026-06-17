@@ -1,24 +1,37 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trackMetaLead, trackMetaCompleteRegistration, updatePixelUserData } from "@/components/MetaPixel";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import {
+  trackMetaLead,
+  trackMetaCompleteRegistration,
+  updatePixelUserData,
+} from '@/components/MetaPixel';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { trpc } from "@/lib/api/trpc";
-import { Loader2, CheckCircle2, Phone, Mail, MapPin, Calendar, Clock, Stethoscope } from "lucide-react";
-import { toast } from "sonner";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
-import { getCompanySlogan, COMPANY_ARABIC_NAME } from "@/const";
+} from '@/components/ui/select';
+import { trpc } from '@/lib/api/trpc';
+import {
+  Loader2,
+  CheckCircle2,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  Clock,
+  Stethoscope,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import { getCompanySlogan, COMPANY_ARABIC_NAME } from '@/const';
 
 export default function DoctorAppointments() {
   return (
@@ -29,45 +42,57 @@ export default function DoctorAppointments() {
 }
 
 function DoctorAppointmentsContent() {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink, validateYemeniPhone, processPhoneInput } = usePhoneFormat();
+  const {
+    formatPhoneDisplay,
+    getWhatsAppLink,
+    getCallLink,
+    validateYemeniPhone,
+    processPhoneInput,
+  } = usePhoneFormat();
   const [, setLocation] = useLocation();
-  const [phoneError, setPhoneError] = useState("");
+  const [phoneError, setPhoneError] = useState('');
   const [formData, setFormData] = useState({
-    fullName: "",
-    phone: "",
-    email: "",
-    doctorId: "",
-    preferredDate: "",
-    preferredTime: "",
-    notes: "",
+    fullName: '',
+    phone: '',
+    email: '',
+    doctorId: '',
+    preferredDate: '',
+    preferredTime: '',
+    notes: '',
   });
 
   // Get UTM parameters from URL
   const urlParams = new URLSearchParams(window.location.search);
-  const utmSource = urlParams.get("utm_source") || "";
-  const utmMedium = urlParams.get("utm_medium") || "";
-  const utmCampaign = urlParams.get("utm_campaign") || "";
-  const utmContent = urlParams.get("utm_content") || "";
+  const utmSource = urlParams.get('utm_source') || '';
+  const utmMedium = urlParams.get('utm_medium') || '';
+  const utmCampaign = urlParams.get('utm_campaign') || '';
+  const utmContent = urlParams.get('utm_content') || '';
 
   // eventId موحّد لتجنب تكرار الحدث بين Pixel وCAPI (Deduplication)
-  const [apptEventId] = useState(() => `appt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+  const [apptEventId] = useState(
+    () => `appt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+  );
   // Fetch doctors list
   const { data: doctors, isLoading: doctorsLoading } = trpc.doctors.list.useQuery();
 
   const submitAppointment = trpc.appointments.submit.useMutation({
     onSuccess: () => {
       // Track Meta Conversion
-      trackMetaCompleteRegistration({ content_name: 'Doctor Appointment', content_category: 'Healthcare', eventId: apptEventId });
+      trackMetaCompleteRegistration({
+        content_name: 'Doctor Appointment',
+        content_category: 'Healthcare',
+        eventId: apptEventId,
+      });
 
-      toast.success("تم حجز الموعد بنجاح!");
-      setLocation("/thank-you");
+      toast.success('تم حجز الموعد بنجاح!');
+      setLocation('/thank-you');
     },
     onError: (error: any) => {
       const msg = error?.message;
-      if (msg && (msg.includes("تكرار") || msg.includes("حجز"))) {
+      if (msg && (msg.includes('تكرار') || msg.includes('حجز'))) {
         toast.error(msg);
       } else {
-        toast.error("حدث خطأ أثناء حجز الموعد. يرجى المحاولة مرة أخرى.");
+        toast.error('حدث خطأ أثناء حجز الموعد. يرجى المحاولة مرة أخرى.');
       }
       console.error(error);
     },
@@ -77,28 +102,34 @@ function DoctorAppointmentsContent() {
     e.preventDefault();
 
     if (!formData.fullName || !formData.phone || !formData.doctorId) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+      toast.error('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
 
     // التحقق من رقم الهاتف اليمني
     const phoneValidation = validateYemeniPhone(formData.phone);
     if (!phoneValidation.valid) {
-      setPhoneError(phoneValidation.message || "رقم الهاتف غير صحيح");
-      toast.error(phoneValidation.message || "رقم الهاتف غير صحيح");
+      setPhoneError(phoneValidation.message || 'رقم الهاتف غير صحيح');
+      toast.error(phoneValidation.message || 'رقم الهاتف غير صحيح');
       return;
     }
-    setPhoneError("");
+    setPhoneError('');
 
     // Advanced Matching: تحديث بيانات المستخدم في Pixel لرفع EMQ
-    updatePixelUserData({ phone: formData.phone, email: formData.email || undefined }).catch(() => {});
+    updatePixelUserData({ phone: formData.phone, email: formData.email || undefined }).catch(
+      () => {}
+    );
     // Track Meta Lead
-    trackMetaLead({ content_name: 'Doctor Appointment', content_category: 'Healthcare', eventId: apptEventId });
+    trackMetaLead({
+      content_name: 'Doctor Appointment',
+      content_category: 'Healthcare',
+      eventId: apptEventId,
+    });
 
     submitAppointment.mutate({
       ...formData,
       doctorId: parseInt(formData.doctorId),
-      campaignSlug: "doctor-appointments",
+      campaignSlug: 'doctor-appointments',
       utmSource,
       utmMedium,
       utmCampaign,
@@ -115,9 +146,9 @@ function DoctorAppointmentsContent() {
         <header className="bg-white dark:bg-card shadow-sm sticky top-0 z-50">
           <div className="container py-4">
             <div className="flex items-center justify-between">
-              <img 
-                src="/assets/new-logo.png" 
-                alt="المستشفى السعودي الألماني" 
+              <img
+                src="/assets/new-logo.png"
+                alt="المستشفى السعودي الألماني"
                 className="h-16 md:h-20"
               />
               <div className="text-left">
@@ -153,8 +184,10 @@ function DoctorAppointmentsContent() {
         {/* Doctors Grid */}
         <section className="py-12 bg-white dark:bg-card">
           <div className="container">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-12">أطباؤنا المتميزون</h2>
-            
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-12">
+              أطباؤنا المتميزون
+            </h2>
+
             {doctorsLoading ? (
               <div className="flex justify-center items-center py-20">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -162,25 +195,29 @@ function DoctorAppointmentsContent() {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                 {doctors?.map((doctor: any) => (
-                  <Card 
-                    key={doctor.id} 
+                  <Card
+                    key={doctor.id}
                     className={`cursor-pointer transition-all hover:shadow-lg ${
-                      formData.doctorId === doctor.id.toString() 
-                        ? 'ring-2 ring-primary shadow-lg' 
+                      formData.doctorId === doctor.id.toString()
+                        ? 'ring-2 ring-primary shadow-lg'
                         : ''
                     }`}
                     onClick={() => setFormData({ ...formData, doctorId: doctor.id.toString() })}
                   >
                     <CardContent className="p-4">
                       <div className="aspect-square rounded-lg overflow-hidden mb-3">
-                        <img 
-                          src={doctor.image || '/assets/new-logo.png'} 
+                        <img
+                          src={doctor.image || '/assets/new-logo.png'}
                           alt={doctor.name}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h3 className="font-bold text-xs sm:text-sm mb-1 text-center line-clamp-2">{doctor.name}</h3>
-                      <p className="text-xs text-muted-foreground text-center line-clamp-1">{doctor.specialty}</p>
+                      <h3 className="font-bold text-xs sm:text-sm mb-1 text-center line-clamp-2">
+                        {doctor.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground text-center line-clamp-1">
+                        {doctor.specialty}
+                      </p>
                     </CardContent>
                   </Card>
                 ))}
@@ -195,7 +232,9 @@ function DoctorAppointmentsContent() {
             <div className="max-w-2xl mx-auto">
               <Card className="shadow-xl">
                 <CardHeader className="text-center">
-                  <CardTitle className="text-xl sm:text-2xl md:text-3xl">نموذج حجز الموعد</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl md:text-3xl">
+                    نموذج حجز الموعد
+                  </CardTitle>
                   <CardDescription className="text-sm sm:text-base">
                     املأ البيانات التالية وسنتواصل معك لتأكيد الموعد
                   </CardDescription>
@@ -205,14 +244,16 @@ function DoctorAppointmentsContent() {
                     {/* Selected Doctor Display */}
                     {selectedDoctor && (
                       <div className="bg-primary/5 p-4 rounded-lg flex items-center gap-4">
-                        <img 
-                          src={selectedDoctor.image || '/assets/new-logo.png'} 
+                        <img
+                          src={selectedDoctor.image || '/assets/new-logo.png'}
                           alt={selectedDoctor.name}
                           className="w-16 h-16 rounded-full object-cover"
                         />
                         <div>
                           <p className="font-bold">{selectedDoctor.name}</p>
-                          <p className="text-sm text-muted-foreground">{selectedDoctor.specialty}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {selectedDoctor.specialty}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -220,8 +261,8 @@ function DoctorAppointmentsContent() {
                     {/* Doctor Selection */}
                     <div className="space-y-2">
                       <Label htmlFor="doctor">اختر الطبيب *</Label>
-                      <Select 
-                        value={formData.doctorId} 
+                      <Select
+                        value={formData.doctorId}
                         onValueChange={(value) => setFormData({ ...formData, doctorId: value })}
                         required
                       >
@@ -264,13 +305,13 @@ function DoctorAppointmentsContent() {
                           setFormData({ ...formData, phone: processed });
                           if (phoneError) {
                             const v = validateYemeniPhone(processed);
-                            setPhoneError(v.valid ? "" : (v.message || ""));
+                            setPhoneError(v.valid ? '' : v.message || '');
                           }
                         }}
                         onBlur={() => {
                           if (formData.phone) {
                             const v = validateYemeniPhone(formData.phone);
-                            setPhoneError(v.valid ? "" : (v.message || ""));
+                            setPhoneError(v.valid ? '' : v.message || '');
                           }
                         }}
                         required
@@ -278,9 +319,7 @@ function DoctorAppointmentsContent() {
                         inputMode="numeric"
                         className={phoneError ? 'border-red-500 focus-visible:ring-red-500' : ''}
                       />
-                      {phoneError && (
-                        <p className="text-red-500 text-xs mt-1">{phoneError}</p>
-                      )}
+                      {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
                     </div>
 
                     {/* Email */}
@@ -302,16 +341,20 @@ function DoctorAppointmentsContent() {
                         id="preferredDate"
                         type="date"
                         value={formData.preferredDate}
-                        onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, preferredDate: e.target.value })
+                        }
                       />
                     </div>
 
                     {/* Preferred Time */}
                     <div className="space-y-2">
                       <Label htmlFor="preferredTime">الوقت المفضل</Label>
-                      <Select 
-                        value={formData.preferredTime} 
-                        onValueChange={(value) => setFormData({ ...formData, preferredTime: value })}
+                      <Select
+                        value={formData.preferredTime}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, preferredTime: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="اختر الوقت المناسب" />
@@ -337,8 +380,8 @@ function DoctorAppointmentsContent() {
                     </div>
 
                     {/* Submit Button */}
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="w-full h-12 text-lg"
                       disabled={submitAppointment.isPending}
                     >
@@ -397,15 +440,13 @@ function DoctorAppointmentsContent() {
         {/* Footer */}
         <footer className="bg-primary text-white py-8">
           <div className="container text-center">
-            <img 
-              src="/assets/logo-white.png" 
-              alt="المستشفى السعودي الألماني" 
+            <img
+              src="/assets/logo-white.png"
+              alt="المستشفى السعودي الألماني"
               className="h-16 mx-auto mb-4"
             />
             <p className="text-lg font-semibold mb-2">{getCompanySlogan()}</p>
-            <p className="text-sm opacity-90">
-              © 2025 {COMPANY_ARABIC_NAME}. جميع الحقوق محفوظة.
-            </p>
+            <p className="text-sm opacity-90">© 2025 {COMPANY_ARABIC_NAME}. جميع الحقوق محفوظة.</p>
           </div>
         </footer>
       </div>

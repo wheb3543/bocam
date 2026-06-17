@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 interface FlashUpdateProps {
   children: ReactNode;
@@ -21,7 +21,7 @@ interface FlashUpdateProps {
 export default function FlashUpdate({
   children,
   watchValue,
-  flashColor = "bg-blue-50/80",
+  flashColor = 'bg-blue-50/80',
   duration = 1200,
   className,
   borderFlash = false,
@@ -49,28 +49,23 @@ export default function FlashUpdate({
   }, [watchValue, duration]);
 
   return (
-    <div
-      className={cn(
-        "relative transition-all duration-500",
-        className
-      )}
-    >
+    <div className={cn('relative transition-all duration-500', className)}>
       {/* Flash overlay */}
       <div
         className={cn(
-          "absolute inset-0 rounded-lg pointer-events-none transition-opacity duration-500",
+          'absolute inset-0 rounded-lg pointer-events-none transition-opacity duration-500',
           flashColor,
-          isFlashing ? "opacity-100" : "opacity-0"
+          isFlashing ? 'opacity-100' : 'opacity-0'
         )}
       />
       {/* Border flash */}
       {borderFlash && (
         <div
           className={cn(
-            "absolute inset-0 rounded-lg pointer-events-none border-2 transition-all duration-500",
+            'absolute inset-0 rounded-lg pointer-events-none border-2 transition-all duration-500',
             isFlashing
-              ? "border-primary/40 shadow-[0_0_12px_rgba(0,163,224,0.15)]"
-              : "border-transparent shadow-none"
+              ? 'border-primary/40 shadow-[0_0_12px_rgba(0,163,224,0.15)]'
+              : 'border-transparent shadow-none'
           )}
         />
       )}

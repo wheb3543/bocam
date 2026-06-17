@@ -1,8 +1,8 @@
-import { useCallback } from "react";
+import { useCallback } from 'react';
 
 /**
  * usePhoneFormat - هوك لتوحيد تنسيق وعرض أرقام الهواتف
- * 
+ *
  * الاستخدام:
  * const { formatPhone, formatPhoneDisplay, getWhatsAppLink, validateYemeniPhone, convertArabicToEnglish } = usePhoneFormat();
  */
@@ -22,7 +22,7 @@ export function convertArabicToEnglish(input: string): string {
  */
 function cleanPhone(phone: string): string {
   const converted = convertArabicToEnglish(phone);
-  return converted.replace(/[^\d+]/g, "");
+  return converted.replace(/[^\d+]/g, '');
 }
 
 /**
@@ -33,18 +33,18 @@ function extractLocalDigits(phone: string): string | null {
   const cleaned = cleanPhone(phone);
 
   // +9677XXXXXXXX أو 9677XXXXXXXX
-  if (cleaned.startsWith("9677") && cleaned.length === 13) {
+  if (cleaned.startsWith('9677') && cleaned.length === 13) {
     return cleaned.slice(3); // 7XXXXXXXX
   }
-  if (cleaned.startsWith("+9677") && cleaned.length === 14) {
+  if (cleaned.startsWith('+9677') && cleaned.length === 14) {
     return cleaned.slice(4);
   }
   // 009677XXXXXXXX
-  if (cleaned.startsWith("009677") && cleaned.length === 15) {
+  if (cleaned.startsWith('009677') && cleaned.length === 15) {
     return cleaned.slice(5);
   }
   // 07XXXXXXXX
-  if (cleaned.startsWith("0") && cleaned.length === 10) {
+  if (cleaned.startsWith('0') && cleaned.length === 10) {
     return cleaned.slice(1);
   }
   // 7XXXXXXXX (9 digits starting with 7)
@@ -61,8 +61,8 @@ function extractLocalDigits(phone: string): string | null {
  * - يجب أن يكون 9 أرقام (بعد إزالة مفتاح الدولة)
  */
 export function validateYemeniPhone(phone: string): { valid: boolean; message?: string } {
-  if (!phone || phone.trim() === "") {
-    return { valid: false, message: "رقم الهاتف مطلوب" };
+  if (!phone || phone.trim() === '') {
+    return { valid: false, message: 'رقم الهاتف مطلوب' };
   }
 
   const local = extractLocalDigits(phone);
@@ -70,14 +70,14 @@ export function validateYemeniPhone(phone: string): { valid: boolean; message?: 
   if (!local) {
     return {
       valid: false,
-      message: "رقم الهاتف غير صحيح - يجب أن يكون 9 أرقام",
+      message: 'رقم الهاتف غير صحيح - يجب أن يكون 9 أرقام',
     };
   }
 
-  if (!local.startsWith("7")) {
+  if (!local.startsWith('7')) {
     return {
       valid: false,
-      message: "رقم الهاتف اليمني يجب أن يبدأ بالرقم 7",
+      message: 'رقم الهاتف اليمني يجب أن يبدأ بالرقم 7',
     };
   }
 
@@ -89,15 +89,15 @@ export function validateYemeniPhone(phone: string): { valid: boolean; message?: 
  */
 function formatForDisplay(phone: string): string {
   const local = extractLocalDigits(phone);
-  if (local && local.startsWith("7") && local.length === 9) {
+  if (local && local.startsWith('7') && local.length === 9) {
     return `+967 ${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}`;
   }
   // محاولة إضافة + إذا كان الرقم يبدأ بـ 967 أو +967
   let cleaned = cleanPhone(phone);
-  if (cleaned.startsWith("967") && cleaned.length === 12) {
+  if (cleaned.startsWith('967') && cleaned.length === 12) {
     return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6, 9)} ${cleaned.slice(9)}`;
   }
-  if (cleaned.startsWith("+967") && cleaned.length === 13) {
+  if (cleaned.startsWith('+967') && cleaned.length === 13) {
     return `+${cleaned.slice(1, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(7, 10)} ${cleaned.slice(10)}`;
   }
   // إرجاع الرقم كما هو (بعد تحويل العربية)
@@ -110,16 +110,16 @@ function formatForDisplay(phone: string): string {
 function formatForSend(phone: string): string {
   const local = extractLocalDigits(phone);
   if (local) {
-    return "967" + local;
+    return '967' + local;
   }
   // fallback: تنظيف وإزالة + و 00
   let cleaned = cleanPhone(phone);
   // إزالة + من البداية
-  if (cleaned.startsWith("+")) {
+  if (cleaned.startsWith('+')) {
     cleaned = cleaned.slice(1);
   }
   // إزالة 00 من البداية
-  if (cleaned.startsWith("00")) {
+  if (cleaned.startsWith('00')) {
     cleaned = cleaned.slice(2);
   }
   return cleaned;
@@ -135,10 +135,10 @@ export function processPhoneInput(raw: string): string {
   // تحويل الأرقام العربية أولاً
   let value = convertArabicToEnglish(raw);
   // السماح فقط بالأرقام و + في البداية
-  value = value.replace(/[^\d+]/g, "");
+  value = value.replace(/[^\d+]/g, '');
   // + مسموح فقط في البداية
-  if (value.indexOf("+") > 0) {
-    value = value.replace(/\+/g, "");
+  if (value.indexOf('+') > 0) {
+    value = value.replace(/\+/g, '');
   }
   // تقييد الطول إلى 15 رقم كحد أقصى
   if (value.length > 15) {
@@ -150,26 +150,26 @@ export function processPhoneInput(raw: string): string {
 export function usePhoneFormat() {
   /** تنسيق للعرض: +967 7XX XXX XXX */
   const formatPhoneDisplay = useCallback((phone: string | null | undefined): string => {
-    if (!phone) return "-";
+    if (!phone) return '-';
     return formatForDisplay(phone);
   }, []);
 
   /** تنسيق للإرسال: 9677XXXXXXXX */
   const formatPhone = useCallback((phone: string | null | undefined): string => {
-    if (!phone) return "";
+    if (!phone) return '';
     return formatForSend(phone);
   }, []);
 
   /** رابط واتساب */
   const getWhatsAppLink = useCallback((phone: string | null | undefined): string => {
-    if (!phone) return "#";
+    if (!phone) return '#';
     const formatted = formatForSend(phone);
     return `https://wa.me/${formatted}`;
   }, []);
 
   /** رابط اتصال */
   const getCallLink = useCallback((phone: string | null | undefined): string => {
-    if (!phone) return "#";
+    if (!phone) return '#';
     const formatted = formatForSend(phone);
     return `tel:+${formatted}`;
   }, []);

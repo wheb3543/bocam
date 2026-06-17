@@ -9,8 +9,8 @@ response:
   statusText: OK
   headers:
     Content-Type: image/jpeg
-    media_file: ""
+    media_file: ''
   body:
     type: text
-    content: ""
+    content: ''
 order: 1000

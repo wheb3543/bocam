@@ -1,4 +1,4 @@
-import OfferLeadCard from "@/components/offer/OfferLeadCard";
+import OfferLeadCard from '@/components/offer/OfferLeadCard';
 
 interface OfferLeadsCardsProps {
   leads: any[];
@@ -6,11 +6,7 @@ interface OfferLeadsCardsProps {
   onPrint: (lead: any) => Promise<void>;
 }
 
-export default function OfferLeadsCards({
-  leads,
-  onEdit,
-  onPrint,
-}: OfferLeadsCardsProps) {
+export default function OfferLeadsCards({ leads, onEdit, onPrint }: OfferLeadsCardsProps) {
   return (
     <>
       {leads.map((lead: any) => (

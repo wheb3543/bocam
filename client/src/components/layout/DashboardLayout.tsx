@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import TopNavbar from "./TopNavbar";
+import { useEffect } from 'react';
+import TopNavbar from './TopNavbar';
 
 export default function DashboardLayout({
   children,
@@ -28,11 +28,9 @@ export default function DashboardLayout({
     <>
       {/* Top Navbar with Notifications + Theme + User */}
       <TopNavbar pageTitle={pageTitle} pageDescription={pageDescription} />
-      
+
       {/* Page Content */}
-      <main className="flex-1 overflow-x-hidden">
-        {children}
-      </main>
+      <main className="flex-1 overflow-x-hidden">{children}</main>
     </>
   );
 }

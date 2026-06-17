@@ -1,9 +1,9 @@
-import { trpc } from "@/lib/api/trpc";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { Loader2, Gift } from "lucide-react";
-import OfferCard from "@/components/patient/OfferCard";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
+import { trpc } from '@/lib/api/trpc';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { Loader2, Gift } from 'lucide-react';
+import OfferCard from '@/components/patient/OfferCard';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
 
 export default function PatientOffersPage() {
   const { formatDate } = useFormatDate();
@@ -22,7 +22,9 @@ export default function PatientOffersPage() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">حجوزات العروض الخاصة بك</p>
         <Link href="/patient-portal/camps">
-          <Button size="sm" variant="outline">المخيمات</Button>
+          <Button size="sm" variant="outline">
+            المخيمات
+          </Button>
         </Link>
       </div>
       {!offers?.length ? (

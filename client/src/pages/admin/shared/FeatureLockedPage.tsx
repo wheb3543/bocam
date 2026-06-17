@@ -1,9 +1,9 @@
 /**
  * FeatureLockedPage - صفحة مخصصة للميزات غير المفعلة
- * 
+ *
  * تُعرض عندما يحاول المستخدم الدخول لصفحة ميزة غير مفعلة في رخصته
  * تصميم جذاب يخبره أن الميزة غير مفعلة ويرشده للتواصل مع الدعم
- * 
+ *
  * @example
  * // في الـ routing:
  * <Route path="/admin/whatsapp" component={WhatsAppDashboard} />
@@ -15,7 +15,7 @@ import { useLocation, useParams } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock, Crown, Sparkles, ArrowRight, Phone, Mail, Home, ShieldCheck } from 'lucide-react';
-import { useLicense } from "@/hooks/integrations/useLicense";
+import { useLicense } from '@/hooks/integrations/useLicense';
 import { APP_TITLE, COMPANY_PHONE } from '@/const';
 
 interface FeatureLockedPageProps {
@@ -117,7 +117,9 @@ const FEATURE_INFO: Record<string, { name: string; description: string; benefits
   },
 };
 
-export default function FeatureLockedPage({ featureName: propFeatureName }: FeatureLockedPageProps) {
+export default function FeatureLockedPage({
+  featureName: propFeatureName,
+}: FeatureLockedPageProps) {
   const [, setLocation] = useLocation();
   const params = useParams();
   const featureName = propFeatureName || params.feature;
@@ -138,7 +140,7 @@ export default function FeatureLockedPage({ featureName: propFeatureName }: Feat
       try {
         const { trpc } = await import('@/lib/api/trpc');
         const result = trpc.license.checkFeature.useQuery({ feature: featureName });
-        
+
         // إذا كانت الميزة مفعلة، أعد التوجيه للصفحة الرئيسية
         if (result.data?.enabled) {
           setLocation('/admin');
@@ -166,13 +168,13 @@ export default function FeatureLockedPage({ featureName: propFeatureName }: Feat
     const subject = encodeURIComponent(`طلب تفعيل ميزة ${displayName} - ${APP_TITLE}`);
     const body = encodeURIComponent(
       `السلام عليكم،\n\n` +
-      `أرغب في طلب تفعيل ميزة "${displayName}" في نظام ${APP_TITLE}.\n\n` +
-      `معلومات الترخيص:\n` +
-      `- Hardware ID: ${licenseInfo?.hardwareId || 'غير متوفر'}\n` +
-      `- تاريخ الانتهاء: ${licenseInfo?.expiryDate ? new Date(licenseInfo.expiryDate * 1000).toLocaleDateString('ar-SA') : 'غير متوفر'}\n` +
-      `- الأيام المتبقية: ${daysRemaining || 0}\n\n` +
-      `أرجو منكم تزويدي بالإجراءات اللازمة لتفعيل هذه الميزة.\n\n` +
-      `شكراً جزيلاً.`
+        `أرغب في طلب تفعيل ميزة "${displayName}" في نظام ${APP_TITLE}.\n\n` +
+        `معلومات الترخيص:\n` +
+        `- Hardware ID: ${licenseInfo?.hardwareId || 'غير متوفر'}\n` +
+        `- تاريخ الانتهاء: ${licenseInfo?.expiryDate ? new Date(licenseInfo.expiryDate * 1000).toLocaleDateString('ar-SA') : 'غير متوفر'}\n` +
+        `- الأيام المتبقية: ${daysRemaining || 0}\n\n` +
+        `أرجو منكم تزويدي بالإجراءات اللازمة لتفعيل هذه الميزة.\n\n` +
+        `شكراً جزيلاً.`
     );
     window.location.href = `mailto:support@example.com?subject=${subject}&body=${body}`;
   };
@@ -213,10 +215,13 @@ export default function FeatureLockedPage({ featureName: propFeatureName }: Feat
                 </span>
               </div>
               <div className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
-                <p>الأيام المتبقية: <span className="font-bold">{daysRemaining} يوم</span></p>
+                <p>
+                  الأيام المتبقية: <span className="font-bold">{daysRemaining} يوم</span>
+                </p>
                 {licenseInfo.features.length > 0 && (
                   <p>
-                    الميزات المفعلة: <span className="font-bold">{licenseInfo.features.join('، ')}</span>
+                    الميزات المفعلة:{' '}
+                    <span className="font-bold">{licenseInfo.features.join('، ')}</span>
                   </p>
                 )}
               </div>
@@ -271,11 +276,7 @@ export default function FeatureLockedPage({ featureName: propFeatureName }: Feat
                 اتصل بالدعم
               </Button>
 
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => setLocation('/admin')}
-              >
+              <Button size="lg" variant="outline" onClick={() => setLocation('/admin')}>
                 <Home className="ml-2 h-4 w-4" />
                 لوحة التحكم
               </Button>

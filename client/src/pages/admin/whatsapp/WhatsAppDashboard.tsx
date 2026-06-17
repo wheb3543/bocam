@@ -3,29 +3,46 @@
  * لوحة تحكم WhatsApp - عرض الإحصائيات والحالة
  */
 
-import { useEffect, useState, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, CheckCircle2, Clock, Send, Zap } from "lucide-react";
-import { toast } from "sonner";
-import { Link } from "wouter";
-import { useWhatsAppSSE, TemplateDisabledEvent, TemplateEnabledEvent, TemplateNameUpdateEvent, TemplateCategoryUpdateEvent, TemplateLanguageUpdateEvent, TemplateEvent, AccountReviewUpdateEvent, AccountUpdateEvent, BusinessProfileUpdateEvent, BusinessAccountUpdateEvent, MessagingProductUpdateEvent, ConversationCostUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
+import { useEffect, useState, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { AlertCircle, CheckCircle2, Clock, Send, Zap } from 'lucide-react';
+import { toast } from 'sonner';
+import { Link } from 'wouter';
+import {
+  useWhatsAppSSE,
+  TemplateDisabledEvent,
+  TemplateEnabledEvent,
+  TemplateNameUpdateEvent,
+  TemplateCategoryUpdateEvent,
+  TemplateLanguageUpdateEvent,
+  TemplateEvent,
+  AccountReviewUpdateEvent,
+  AccountUpdateEvent,
+  BusinessProfileUpdateEvent,
+  BusinessAccountUpdateEvent,
+  MessagingProductUpdateEvent,
+  ConversationCostUpdateEvent,
+} from '@/hooks/integrations/useWhatsAppSSE';
 
 export default function WhatsAppDashboard() {
   return (
-    <DashboardLayout pageTitle="الرسائل والمحادثات" pageDescription="إدارة الرسائل والمحادثات عبر واتساب">
+    <DashboardLayout
+      pageTitle="الرسائل والمحادثات"
+      pageDescription="إدارة الرسائل والمحادثات عبر واتساب"
+    >
       <WhatsAppDashboardContent />
     </DashboardLayout>
   );
 }
 
 function WhatsAppDashboardContent() {
-  const [testPhone, setTestPhone] = useState("");
-  const [testMessage, setTestMessage] = useState("");
+  const [testPhone, setTestPhone] = useState('');
+  const [testMessage, setTestMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   // Queries
@@ -81,7 +98,7 @@ function WhatsAppDashboardContent() {
 
   const handleSendTest = async () => {
     if (!testPhone || !testMessage) {
-      toast.error("يرجى إدخال رقم الهاتف والرسالة");
+      toast.error('يرجى إدخال رقم الهاتف والرسالة');
       return;
     }
 
@@ -90,17 +107,17 @@ function WhatsAppDashboardContent() {
       const result = await sendTextMutation.mutateAsync({
         phone: testPhone,
         message: testMessage,
-        priority: "high",
+        priority: 'high',
       });
 
       if (result.success) {
-        toast.success("تم إرسال الرسالة بنجاح!");
-        setTestMessage("");
+        toast.success('تم إرسال الرسالة بنجاح!');
+        setTestMessage('');
       } else {
-        toast.error(result.error || "فشل إرسال الرسالة");
+        toast.error(result.error || 'فشل إرسال الرسالة');
       }
     } catch (error) {
-      toast.error("حدث خطأ أثناء إرسال الرسالة");
+      toast.error('حدث خطأ أثناء إرسال الرسالة');
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +125,7 @@ function WhatsAppDashboardContent() {
 
   const handleTestConnection = async () => {
     if (!testPhone) {
-      toast.error("يرجى إدخال رقم الهاتف");
+      toast.error('يرجى إدخال رقم الهاتف');
       return;
     }
 
@@ -119,12 +136,12 @@ function WhatsAppDashboardContent() {
       });
 
       if (result.success) {
-        toast.success(result.message || "تم اختبار الاتصال بنجاح!");
+        toast.success(result.message || 'تم اختبار الاتصال بنجاح!');
       } else {
-        toast.error(result.error || "فشل اختبار الاتصال");
+        toast.error(result.error || 'فشل اختبار الاتصال');
       }
     } catch (error) {
-      toast.error("حدث خطأ أثناء اختبار الاتصال");
+      toast.error('حدث خطأ أثناء اختبار الاتصال');
     } finally {
       setIsLoading(false);
     }
@@ -251,14 +268,14 @@ function WhatsAppDashboardContent() {
               disabled={isLoading || !testPhone || !testMessage}
               className="flex-1"
             >
-              {isLoading ? "جاري الإرسال..." : "إرسال الرسالة"}
+              {isLoading ? 'جاري الإرسال...' : 'إرسال الرسالة'}
             </Button>
             <Button
               onClick={handleTestConnection}
               disabled={isLoading || !testPhone}
               variant="outline"
             >
-              {isLoading ? "جاري الاختبار..." : "اختبار الاتصال"}
+              {isLoading ? 'جاري الاختبار...' : 'اختبار الاتصال'}
             </Button>
           </div>
         </CardContent>

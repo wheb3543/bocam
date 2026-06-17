@@ -8,7 +8,7 @@ description: |-
   | **`origin`**<br/>type: object | Describes where the conversation originated from. See [origin object](#efa78bee-682f-4620-9d97-14ecb3cee0ef) for more information.|
   | **`expiration_timestamp`**<br/>type: [UNIX timestamp](https://en.wikipedia.org/wiki/Unix_time?fbclid=IwAR3joUPmHY6qMICZD4EeLhuRgSR7F28eKavnrVnru3QFMhtgOcCJ3V-QjbQ)    |  The timestamp when the current ongoing conversation expires. This field is not present in all Webhook types. |
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 1000

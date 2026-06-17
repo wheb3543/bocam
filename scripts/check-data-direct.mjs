@@ -1,7 +1,14 @@
-import mysql from "mysql2/promise";
+import mysql from 'mysql2/promise';
 
-if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_NAME) {
-  console.error('❌ Missing required DB_HOST, DB_USER, DB_PASSWORD, or DB_NAME environment variables.');
+if (
+  !process.env.DB_HOST ||
+  !process.env.DB_USER ||
+  !process.env.DB_PASSWORD ||
+  !process.env.DB_NAME
+) {
+  console.error(
+    '❌ Missing required DB_HOST, DB_USER, DB_PASSWORD, or DB_NAME environment variables.'
+  );
   process.exit(1);
 }
 
@@ -14,7 +21,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  ssl: { rejectUnauthorized: true }
+  ssl: { rejectUnauthorized: true },
 });
 
 async function checkData() {
@@ -35,7 +42,7 @@ async function checkData() {
       DESCRIBE whatsapp_messages
     `);
     console.log(JSON.stringify(columns, null, 2));
-    
+
     // Check specifically for sentAt column
     const [sentAtCheck] = await connection.query(`
       SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE 
@@ -51,7 +58,7 @@ async function checkData() {
     } else {
       console.log('❌ حقل sentAt غير موجود');
     }
-    
+
     console.log('\n=== آخر 10 رسائل ===');
     const [messages] = await connection.query(`
       SELECT id, conversationId, direction, content, messageType, status, whatsappMessageId, createdAt, metadata
@@ -60,7 +67,7 @@ async function checkData() {
       LIMIT 10
     `);
     console.log(JSON.stringify(messages, null, 2));
-    
+
     console.log('\n=== عدد الرسائل لكل محادثة في آخر 100 محادثة ===');
     const [messageCounts] = await connection.query(`
       SELECT conversationId, COUNT(*) as count
@@ -70,7 +77,7 @@ async function checkData() {
       ORDER BY count DESC
     `);
     console.log(JSON.stringify(messageCounts, null, 2));
-    
+
     console.log('\n=== المحادثات التي لديها رسائل ===');
     const [conversationsWithMessages] = await connection.query(`
       SELECT c.id, c.phoneNumber, c.lastMessage, c.lastMessageAt, c.createdAt,
@@ -90,7 +97,7 @@ async function checkData() {
       ORDER BY c.lastMessageAt DESC
       LIMIT 100
     `);
-    const emptyOnes = emptyConversations.filter(c => c.messageCount === 0);
+    const emptyOnes = emptyConversations.filter((c) => c.messageCount === 0);
     console.log(`عدد المحادثات بدون رسائل: ${emptyOnes.length}`);
     if (emptyOnes.length > 0) {
       console.log(JSON.stringify(emptyOnes, null, 2));
@@ -106,7 +113,6 @@ async function checkData() {
       LIMIT 20
     `);
     console.log(JSON.stringify(duplicateCheck, null, 2));
-
   } finally {
     await connection.release();
     await pool.end();

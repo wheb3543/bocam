@@ -16,10 +16,10 @@ export function DashboardLayoutSkeleton() {
 
         {/* Menu items */}
         <div className="flex-1 p-2 space-y-4">
-          {[1, 2, 3, 4].map(group => (
+          {[1, 2, 3, 4].map((group) => (
             <div key={group} className="space-y-1">
               <Skeleton className="h-3 w-16 mx-2.5 mb-1" />
-              {[1, 2, 3].map(item => (
+              {[1, 2, 3].map((item) => (
                 <Skeleton key={item} className="h-9 w-full rounded-md" />
               ))}
             </div>
@@ -49,7 +49,7 @@ export function DashboardLayoutSkeleton() {
         {/* Content blocks */}
         <div className="flex-1 p-4 md:p-6 space-y-4">
           <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-            {[1, 2, 3, 4].map(i => (
+            {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-24 rounded-lg" />
             ))}
           </div>
@@ -60,7 +60,7 @@ export function DashboardLayoutSkeleton() {
       {/* Mobile bottom nav skeleton */}
       <div className="lg:hidden fixed bottom-0 right-0 left-0 bg-card border-t border-border/50 px-1 py-1.5">
         <div className="flex items-center justify-around">
-          {[1, 2, 3, 4].map(i => (
+          {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex flex-col items-center gap-0.5">
               <Skeleton className="h-5 w-5 rounded" />
               <Skeleton className="h-2 w-8" />

@@ -1,30 +1,52 @@
 /**
  * DoctorDetailPage - صفحة تفاصيل الطبيب
- * 
+ *
  * Individual doctor page with profile and appointment booking
  */
-import { useState, useEffect } from "react";
-import { useRoute, Link, useLocation } from "wouter";
-import Navbar from "@/components/layout/Navbar";
-import { ArrowRight, Calendar, Phone, Award, Loader2, CheckCircle, Star, Users, Clock, CheckCircle2, TrendingUp, Stethoscope, Globe, CreditCard, MessageSquare } from "lucide-react";
-import { getCompleteTrackingData } from "@/lib/tracking/tracking";
-import { trackViewContent } from "@/components/MetaPixel";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from 'react';
+import { useRoute, Link, useLocation } from 'wouter';
+import Navbar from '@/components/layout/Navbar';
+import {
+  ArrowRight,
+  Calendar,
+  Phone,
+  Award,
+  Loader2,
+  CheckCircle,
+  Star,
+  Users,
+  Clock,
+  CheckCircle2,
+  TrendingUp,
+  Stethoscope,
+  Globe,
+  CreditCard,
+  MessageSquare,
+} from 'lucide-react';
+import { getCompleteTrackingData } from '@/lib/tracking/tracking';
+import { trackViewContent } from '@/components/MetaPixel';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
-import { trpc } from "@/lib/api/trpc";
-import { toast } from "sonner";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
-import { usePatientStorage } from "@/hooks/data/usePatientStorage";
-import { useAbandonedFormTracking } from "@/hooks/form/useAbandonedFormTracking";
+import { trpc } from '@/lib/api/trpc';
+import { toast } from 'sonner';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import { usePatientStorage } from '@/hooks/data/usePatientStorage';
+import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking';
 
 export default function DoctorDetailPage() {
-  const [, params] = useRoute("/doctors/:slug");
-  const slug = params?.slug || "";
+  const [, params] = useRoute('/doctors/:slug');
+  const slug = params?.slug || '';
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -35,13 +57,19 @@ export default function DoctorDetailPage() {
 }
 
 function DoctorDetailContent({ slug }: { slug: string }) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink, validateYemeniPhone, processPhoneInput } = usePhoneFormat();
+  const {
+    formatPhoneDisplay,
+    getWhatsAppLink,
+    getCallLink,
+    validateYemeniPhone,
+    processPhoneInput,
+  } = usePhoneFormat();
   const { getSavedPatientInfo, savePatientInfo } = usePatientStorage();
-  const [phoneError, setPhoneError] = useState<string>("");
+  const [phoneError, setPhoneError] = useState<string>('');
 
   const { data: doctor, isLoading } = trpc.doctors.getBySlug.useQuery(
     { slug },
-    { enabled: !!slug && slug !== ":slug" }
+    { enabled: !!slug && slug !== ':slug' }
   );
   const submitAppointment = trpc.appointments.submit.useMutation();
 
@@ -49,26 +77,26 @@ function DoctorDetailContent({ slug }: { slug: string }) {
   useEffect(() => {
     if (doctor) {
       trackViewContent({
-        content_name: doctor.name || "Doctor",
-        content_category: doctor.specialty || "Healthcare",
+        content_name: doctor.name || 'Doctor',
+        content_category: doctor.specialty || 'Healthcare',
         content_ids: [String(doctor.id)],
-        content_type: "doctor",
+        content_type: 'doctor',
       });
     }
   }, [doctor?.id]);
 
   const savedInfo = getSavedPatientInfo();
   const [formData, setFormData] = useState({
-    fullName: savedInfo?.fullName || "",
-    phone: savedInfo?.phone || "",
-    email: "",
-    age: "",
-    gender: (savedInfo?.gender || "") as "male" | "female" | "",
-    procedure: "",
-    preferredDate: "",
-    preferredTime: "",
-    additionalNotes: "",
-    patientMessage: "",
+    fullName: savedInfo?.fullName || '',
+    phone: savedInfo?.phone || '',
+    email: '',
+    age: '',
+    gender: (savedInfo?.gender || '') as 'male' | 'female' | '',
+    procedure: '',
+    preferredDate: '',
+    preferredTime: '',
+    additionalNotes: '',
+    patientMessage: '',
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -76,7 +104,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
   // تتبع النماذج المهجورة (الفرص الضائعة)
   useAbandonedFormTracking({
-    formType: "appointment",
+    formType: 'appointment',
     relatedId: doctor?.id,
     relatedName: doctor?.name,
     getFormData: () => ({ name: formData.fullName, phone: formData.phone }),
@@ -84,30 +112,33 @@ function DoctorDetailContent({ slug }: { slug: string }) {
   });
 
   // Parse procedures from doctor data (comma-separated string)
-  const availableProcedures = doctor?.procedures 
-    ? doctor.procedures.split(',').map(p => p.trim()).filter(Boolean)
+  const availableProcedures = doctor?.procedures
+    ? doctor.procedures
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean)
     : [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!doctor) {
-      toast.error("لم يتم العثور على بيانات الطبيب");
+      toast.error('لم يتم العثور على بيانات الطبيب');
       return;
     }
 
     // التحقق من رقم الهاتف اليمني
     const phoneValidation = validateYemeniPhone(formData.phone);
     if (!phoneValidation.valid) {
-      setPhoneError(phoneValidation.message || "رقم الهاتف غير صحيح");
-      toast.error(phoneValidation.message || "رقم الهاتف غير صحيح");
+      setPhoneError(phoneValidation.message || 'رقم الهاتف غير صحيح');
+      toast.error(phoneValidation.message || 'رقم الهاتف غير صحيح');
       return;
     }
-    setPhoneError("");
+    setPhoneError('');
 
     try {
       const trackingData = getCompleteTrackingData();
-      
+
       // حفظ بيانات المريض في localStorage بعد الإرسال الناجح
       savePatientInfo({
         fullName: formData.fullName,
@@ -121,7 +152,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
         phone: formData.phone,
         email: formData.email || undefined,
         age: formData.age ? parseInt(formData.age) : undefined,
-        gender: formData.gender as "male" | "female" | undefined || undefined,
+        gender: (formData.gender as 'male' | 'female' | undefined) || undefined,
         procedure: formData.procedure || undefined,
         preferredDate: formData.preferredDate,
         preferredTime: formData.preferredTime || undefined,
@@ -141,8 +172,8 @@ function DoctorDetailContent({ slug }: { slug: string }) {
       });
 
       setSubmitted(true);
-      toast.success("تم إرسال طلب الحجز بنجاح! سنتواصل معك قريباً");
-      
+      toast.success('تم إرسال طلب الحجز بنجاح! سنتواصل معك قريباً');
+
       const params = new URLSearchParams({
         type: 'appointment',
         name: formData.fullName,
@@ -152,29 +183,29 @@ function DoctorDetailContent({ slug }: { slug: string }) {
         ...(formData.preferredDate && { date: formData.preferredDate }),
         ...(formData.preferredTime && { time: formData.preferredTime }),
       });
-      
+
       setTimeout(() => {
         setLocation(`/thank-you?${params.toString()}`);
       }, 1500);
     } catch (error: unknown) {
       const msg = (error as { message?: string })?.message;
-      if (msg && msg.includes("تكرار")) {
+      if (msg && msg.includes('تكرار')) {
         toast.error(msg);
-      } else if (msg && msg.includes("حجز")) {
+      } else if (msg && msg.includes('حجز')) {
         toast.error(msg);
       } else {
-        toast.error("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى");
+        toast.error('حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى');
       }
     }
   };
 
-  const seoTitle = doctor 
+  const seoTitle = doctor
     ? `${doctor.name} - ${doctor.specialty} | المستشفى السعودي الألماني`
-    : "الأطباء | المستشفى السعودي الألماني";
-  
+    : 'الأطباء | المستشفى السعودي الألماني';
+
   const seoDescription = doctor
     ? `احجز موعدك مع ${doctor.name}، ${doctor.specialty} في المستشفى السعودي الألماني. ${doctor.bio || 'خدمات طبية متميزة ورعاية شاملة'}. اتصل الآن: 8000018`
-    : "احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني";
+    : 'احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني';
 
   // Loading Skeleton
   if (isLoading) {
@@ -206,7 +237,9 @@ function DoctorDetailContent({ slug }: { slug: string }) {
         </div>
         <div className="container mx-auto px-3 sm:px-4 pb-6 sm:pb-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
-            {[1,2,3,4].map(i => <Skeleton key={i} className="h-20 sm:h-28 rounded-xl" />)}
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-20 sm:h-28 rounded-xl" />
+            ))}
           </div>
         </div>
       </div>
@@ -224,7 +257,8 @@ function DoctorDetailContent({ slug }: { slug: string }) {
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-3">لم يتم العثور على الطبيب</h2>
             <p className="text-muted-foreground mb-6 text-sm">
-              عذراً، لم نتمكن من العثور على الطبيب المطلوب. قد يكون الرابط غير صحيح أو تم إزالة الصفحة.
+              عذراً، لم نتمكن من العثور على الطبيب المطلوب. قد يكون الرابط غير صحيح أو تم إزالة
+              الصفحة.
             </p>
             <Link href="/doctors">
               <Button className="bg-green-600 hover:bg-green-700 gap-2">
@@ -240,16 +274,21 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-6" dir="rtl">
-
       {/* Breadcrumb Navigation */}
       <div className="bg-white dark:bg-card border-b">
         <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-green-600 transition-colors">الرئيسية</Link>
+            <Link href="/" className="hover:text-green-600 transition-colors">
+              الرئيسية
+            </Link>
             <span>/</span>
-            <Link href="/doctors" className="hover:text-green-600 transition-colors">الأطباء</Link>
+            <Link href="/doctors" className="hover:text-green-600 transition-colors">
+              الأطباء
+            </Link>
             <span>/</span>
-            <span className="text-foreground font-medium truncate max-w-[150px] sm:max-w-[200px]">{doctor.name}</span>
+            <span className="text-foreground font-medium truncate max-w-[150px] sm:max-w-[200px]">
+              {doctor.name}
+            </span>
           </div>
         </div>
       </div>
@@ -268,7 +307,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                   <div className="relative">
                     <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-48 md:h-48 rounded-2xl overflow-hidden border-2 border-gray-100 shadow-md">
                       <img
-                        src={doctor.image || "/images/default-doctor.jpg"}
+                        src={doctor.image || '/images/default-doctor.jpg'}
                         alt={doctor.name}
                         className="w-full h-full object-cover"
                       />
@@ -283,16 +322,22 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                 <div className="md:col-span-2 space-y-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded-full font-medium">طبيب معتمد</span>
+                      <span className="text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded-full font-medium">
+                        طبيب معتمد
+                      </span>
                     </div>
                     <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground mb-1">
                       {doctor.name}
                     </h1>
-                    <p className="text-sm sm:text-base md:text-lg text-green-600 font-medium">{doctor.specialty}</p>
+                    <p className="text-sm sm:text-base md:text-lg text-green-600 font-medium">
+                      {doctor.specialty}
+                    </p>
                   </div>
 
                   {doctor.bio && (
-                    <p className="text-muted-foreground leading-relaxed text-xs sm:text-sm md:text-base">{doctor.bio}</p>
+                    <p className="text-muted-foreground leading-relaxed text-xs sm:text-sm md:text-base">
+                      {doctor.bio}
+                    </p>
                   )}
 
                   {/* Info Grid */}
@@ -304,7 +349,9 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">الخبرة</p>
-                          <p className="font-semibold text-foreground text-sm">{doctor.experience}</p>
+                          <p className="font-semibold text-foreground text-sm">
+                            {doctor.experience}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -316,7 +363,9 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">اللغات</p>
-                          <p className="font-semibold text-foreground text-sm">{doctor.languages}</p>
+                          <p className="font-semibold text-foreground text-sm">
+                            {doctor.languages}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -327,7 +376,10 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">للحجز والاستفسار</p>
-                        <a href="tel:8000018" className="font-semibold text-foreground hover:text-green-600 text-sm">
+                        <a
+                          href="tel:8000018"
+                          className="font-semibold text-foreground hover:text-green-600 text-sm"
+                        >
                           8000018
                         </a>
                       </div>
@@ -340,7 +392,9 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">رسوم الكشف</p>
-                          <p className="font-semibold text-foreground text-sm">{doctor.consultationFee} ريال</p>
+                          <p className="font-semibold text-foreground text-sm">
+                            {doctor.consultationFee} ريال
+                          </p>
                         </div>
                       </div>
                     )}
@@ -360,8 +414,16 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                         اتصل الآن
                       </Button>
                     </a>
-                    <a href={`https://wa.me/9678000018?text=${encodeURIComponent(`مرحباً، أود حجز موعد مع ${doctor.name}`)}`} target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" variant="outline" className="gap-1.5 text-sm border-border text-green-600">
+                    <a
+                      href={`https://wa.me/9678000018?text=${encodeURIComponent(`مرحباً، أود حجز موعد مع ${doctor.name}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 text-sm border-border text-green-600"
+                      >
                         <MessageSquare className="h-3.5 w-3.5" />
                         واتساب
                       </Button>
@@ -382,28 +444,36 @@ function DoctorDetailContent({ slug }: { slug: string }) {
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-50 rounded-lg flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
                 <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">200+</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
+                200+
+              </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">مريض سعيد</div>
             </div>
             <div className="bg-white dark:bg-card p-3 sm:p-4 md:p-5 rounded-xl text-center shadow-sm">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 rounded-lg flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">98%</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
+                98%
+              </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">نسبة النجاح</div>
             </div>
             <div className="bg-white dark:bg-card p-3 sm:p-4 md:p-5 rounded-xl text-center shadow-sm">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-50 rounded-lg flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
                 <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 fill-yellow-500" />
               </div>
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">4.9</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
+                4.9
+              </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">تقييم المرضى</div>
             </div>
             <div className="bg-white dark:bg-card p-3 sm:p-4 md:p-5 rounded-xl text-center shadow-sm">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-50 rounded-lg flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
                 <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
               </div>
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">24/7</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-0.5">
+                24/7
+              </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">خدمة متاحة</div>
             </div>
           </div>
@@ -419,10 +489,18 @@ function DoctorDetailContent({ slug }: { slug: string }) {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4">
               {[
-                { title: "خبرة واسعة", desc: "سنوات من الخبرة في مجال التخصص", color: "green" },
-                { title: "أحدث التقنيات", desc: "استخدام أحدث الأجهزة والتقنيات الطبية", color: "blue" },
-                { title: "رعاية شخصية", desc: "اهتمام خاص بكل حالة على حدة", color: "purple" },
-                { title: "متابعة مستمرة", desc: "متابعة دقيقة بعد العلاج لضمان أفضل النتائج", color: "orange" },
+                { title: 'خبرة واسعة', desc: 'سنوات من الخبرة في مجال التخصص', color: 'green' },
+                {
+                  title: 'أحدث التقنيات',
+                  desc: 'استخدام أحدث الأجهزة والتقنيات الطبية',
+                  color: 'blue',
+                },
+                { title: 'رعاية شخصية', desc: 'اهتمام خاص بكل حالة على حدة', color: 'purple' },
+                {
+                  title: 'متابعة مستمرة',
+                  desc: 'متابعة دقيقة بعد العلاج لضمان أفضل النتائج',
+                  color: 'orange',
+                },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3 p-3 md:p-4 rounded-xl bg-muted/50">
                   <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -445,7 +523,9 @@ function DoctorDetailContent({ slug }: { slug: string }) {
             <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-2.5 sm:p-3 md:p-4 rounded-xl text-center">
               <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                 <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
-                <span className="font-bold text-xs sm:text-sm md:text-base">المواعيد محدودة - احجز موعدك الآن</span>
+                <span className="font-bold text-xs sm:text-sm md:text-base">
+                  المواعيد محدودة - احجز موعدك الآن
+                </span>
               </div>
             </div>
           </div>
@@ -472,11 +552,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                   <p className="text-sm text-muted-foreground mb-6">
                     سنتواصل معك قريباً لتأكيد موعدك مع {doctor.name}
                   </p>
-                  <Button
-                    onClick={() => setSubmitted(false)}
-                    variant="outline"
-                    className="text-sm"
-                  >
+                  <Button onClick={() => setSubmitted(false)} variant="outline" className="text-sm">
                     حجز موعد آخر
                   </Button>
                 </div>
@@ -516,13 +592,13 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                           setFormData({ ...formData, phone: processed });
                           if (phoneError) {
                             const v = validateYemeniPhone(processed);
-                            setPhoneError(v.valid ? "" : (v.message || ""));
+                            setPhoneError(v.valid ? '' : v.message || '');
                           }
                         }}
                         onBlur={() => {
                           if (formData.phone) {
                             const v = validateYemeniPhone(formData.phone);
-                            setPhoneError(v.valid ? "" : (v.message || ""));
+                            setPhoneError(v.valid ? '' : v.message || '');
                           }
                         }}
                         required
@@ -531,9 +607,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                         dir="ltr"
                         inputMode="numeric"
                       />
-                      {phoneError && (
-                        <p className="text-red-500 text-xs mt-1">{phoneError}</p>
-                      )}
+                      {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
                     </div>
                     <div>
                       <Label htmlFor="age" className="text-sm font-medium text-foreground">
@@ -564,22 +638,22 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                     <div className="grid grid-cols-2 gap-3 mt-1.5">
                       <button
                         type="button"
-                        onClick={() => setFormData({ ...formData, gender: "male" })}
+                        onClick={() => setFormData({ ...formData, gender: 'male' })}
                         className={`h-11 rounded-lg border-2 text-sm font-medium transition-all ${
-                          formData.gender === "male"
-                            ? "border-green-600 bg-green-50 text-green-700"
-                            : "border-border bg-background text-foreground hover:border-green-400"
+                          formData.gender === 'male'
+                            ? 'border-green-600 bg-green-50 text-green-700'
+                            : 'border-border bg-background text-foreground hover:border-green-400'
                         }`}
                       >
                         ذكر
                       </button>
                       <button
                         type="button"
-                        onClick={() => setFormData({ ...formData, gender: "female" })}
+                        onClick={() => setFormData({ ...formData, gender: 'female' })}
                         className={`h-11 rounded-lg border-2 text-sm font-medium transition-all ${
-                          formData.gender === "female"
-                            ? "border-green-600 bg-green-50 text-green-700"
-                            : "border-border bg-background text-foreground hover:border-green-400"
+                          formData.gender === 'female'
+                            ? 'border-green-600 bg-green-50 text-green-700'
+                            : 'border-border bg-background text-foreground hover:border-green-400'
                         }`}
                       >
                         أنثى
@@ -621,7 +695,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                       value={formData.preferredDate}
                       onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
                       required
-                      min={new Date().toISOString().split("T")[0]}
+                      min={new Date().toISOString().split('T')[0]}
                       className="mt-1.5 h-11"
                     />
                   </div>
@@ -641,7 +715,9 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                       rows={3}
                       className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
                     />
-                    <p className="text-xs text-muted-foreground mt-1 text-left" dir="ltr">{formData.patientMessage.length}/500</p>
+                    <p className="text-xs text-muted-foreground mt-1 text-left" dir="ltr">
+                      {formData.patientMessage.length}/500
+                    </p>
                   </div>
 
                   <Button
@@ -679,7 +755,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                   </div>
 
                   <p className="text-xs text-muted-foreground text-center pt-1">
-                    أو اتصل بنا مباشرة على{" "}
+                    أو اتصل بنا مباشرة على{' '}
                     <a href="tel:8000018" className="text-green-600 font-semibold hover:underline">
                       8000018
                     </a>

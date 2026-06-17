@@ -1,84 +1,113 @@
-import { useMemo } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Globe, Phone, Edit, TrendingUp, Facebook, Instagram, Send, AlertCircle, Loader2 } from "lucide-react";
-import { LucideIcon } from "lucide-react";
+import { useMemo } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Globe,
+  Phone,
+  Edit,
+  TrendingUp,
+  Facebook,
+  Instagram,
+  Send,
+  AlertCircle,
+  Loader2,
+} from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
 // Map sources to display info
-const sourceDisplayMap: Record<string, { name: string; color: string; lightColor: string; textColor: string; icon: LucideIcon }> = {
+const sourceDisplayMap: Record<
+  string,
+  { name: string; color: string; lightColor: string; textColor: string; icon: LucideIcon }
+> = {
   facebook: {
-    name: "فيسبوك",
-    color: "bg-[#1877F2]",
-    lightColor: "bg-blue-100",
-    textColor: "text-[#1877F2]",
+    name: 'فيسبوك',
+    color: 'bg-[#1877F2]',
+    lightColor: 'bg-blue-100',
+    textColor: 'text-[#1877F2]',
     icon: Facebook,
   },
   instagram: {
-    name: "إنستغرام",
-    color: "bg-[#E4405F]",
-    lightColor: "bg-pink-100",
-    textColor: "text-[#E4405F]",
+    name: 'إنستغرام',
+    color: 'bg-[#E4405F]',
+    lightColor: 'bg-pink-100',
+    textColor: 'text-[#E4405F]',
     icon: Instagram,
   },
   telegram: {
-    name: "تيليجرام",
-    color: "bg-[#0088CC]",
-    lightColor: "bg-cyan-100",
-    textColor: "text-[#0088CC]",
+    name: 'تيليجرام',
+    color: 'bg-[#0088CC]',
+    lightColor: 'bg-cyan-100',
+    textColor: 'text-[#0088CC]',
     icon: Send,
   },
   manual: {
-    name: "يدوي",
-    color: "bg-purple-500",
-    lightColor: "bg-purple-100",
-    textColor: "text-purple-600",
+    name: 'يدوي',
+    color: 'bg-purple-500',
+    lightColor: 'bg-purple-100',
+    textColor: 'text-purple-600',
     icon: Edit,
   },
   direct: {
-    name: "مباشر",
-    color: "bg-gray-500",
-    lightColor: "bg-muted",
-    textColor: "text-muted-foreground",
+    name: 'مباشر',
+    color: 'bg-gray-500',
+    lightColor: 'bg-muted',
+    textColor: 'text-muted-foreground',
     icon: Globe,
   },
   // للتوافق مع التسجيلات القديمة
   website: {
-    name: "الموقع الإلكتروني",
-    color: "bg-blue-500",
-    lightColor: "bg-blue-100",
-    textColor: "text-blue-600",
+    name: 'الموقع الإلكتروني',
+    color: 'bg-blue-500',
+    lightColor: 'bg-blue-100',
+    textColor: 'text-blue-600',
     icon: Globe,
   },
   web: {
-    name: "الموقع الإلكتروني",
-    color: "bg-blue-500",
-    lightColor: "bg-blue-100",
-    textColor: "text-blue-600",
+    name: 'الموقع الإلكتروني',
+    color: 'bg-blue-500',
+    lightColor: 'bg-blue-100',
+    textColor: 'text-blue-600',
     icon: Globe,
   },
   phone: {
-    name: "الهاتف",
-    color: "bg-green-500",
-    lightColor: "bg-green-100",
-    textColor: "text-green-600",
+    name: 'الهاتف',
+    color: 'bg-green-500',
+    lightColor: 'bg-green-100',
+    textColor: 'text-green-600',
     icon: Phone,
   },
 };
 
 export default function SourceAnalytics() {
-  const { data: leads, isLoading: leadsLoading, error: leadsError } = trpc.leads.unifiedList.useQuery(
+  const {
+    data: leads,
+    isLoading: leadsLoading,
+    error: leadsError,
+  } = trpc.leads.unifiedList.useQuery(
     undefined,
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
-  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery(
+  const {
+    data: appointments,
+    isLoading: appointmentsLoading,
+    error: appointmentsError,
+  } = trpc.appointments.list.useQuery(
     undefined,
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
-  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery(
+  const {
+    data: offerLeads,
+    isLoading: offerLeadsLoading,
+    error: offerLeadsError,
+  } = trpc.offerLeads.list.useQuery(
     undefined,
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
-  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery(
+  const {
+    data: campRegsPaged,
+    isLoading: campLoading,
+    error: campError,
+  } = trpc.campRegistrations.listPaginated.useQuery(
     { page: 1, limit: 500 },
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
@@ -102,7 +131,7 @@ export default function SourceAnalytics() {
     // Count by source
     const sourceCountsMap = new Map<string, number>();
     allBookings.forEach((b: any) => {
-      const source = b.source || "direct";
+      const source = b.source || 'direct';
       sourceCountsMap.set(source, (sourceCountsMap.get(source) || 0) + 1);
     });
 
@@ -111,12 +140,12 @@ export default function SourceAnalytics() {
       .map(([source, count]) => {
         const displayInfo = sourceDisplayMap[source] || {
           name: source,
-          color: "bg-gray-500",
-          lightColor: "bg-muted",
-          textColor: "text-muted-foreground",
+          color: 'bg-gray-500',
+          lightColor: 'bg-muted',
+          textColor: 'text-muted-foreground',
           icon: Globe,
         };
-        
+
         return {
           source,
           count,
@@ -165,13 +194,17 @@ export default function SourceAnalytics() {
             <TrendingUp className="h-5 w-5 text-destructive" />
             <CardTitle className="text-destructive">فشل تحميل البيانات</CardTitle>
           </div>
-          <CardDescription className="text-destructive/70">حدث خطأ أثناء تحميل البيانات</CardDescription>
+          <CardDescription className="text-destructive/70">
+            حدث خطأ أثناء تحميل البيانات
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-12">
           <div className="text-center">
             <AlertCircle className="h-12 w-12 mx-auto mb-3 text-destructive" />
             <p className="text-sm font-semibold text-destructive mb-2">فشل تحميل تحليل المصادر</p>
-            <p className="text-xs text-muted-foreground mb-4">حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</p>
+            <p className="text-xs text-muted-foreground mb-4">
+              حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
@@ -225,22 +258,20 @@ export default function SourceAnalytics() {
                 <div key={stat.source}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <div className={`w-8 h-8 ${stat.lightColor} rounded-full flex items-center justify-center`}>
+                      <div
+                        className={`w-8 h-8 ${stat.lightColor} rounded-full flex items-center justify-center`}
+                      >
                         <Icon className={`h-4 w-4 ${stat.textColor}`} />
                       </div>
                       <span className="font-medium">{stat.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`font-bold ${stat.textColor}`}>
-                        {stat.percentage}%
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        ({stat.count})
-                      </span>
+                      <span className={`font-bold ${stat.textColor}`}>{stat.percentage}%</span>
+                      <span className="text-sm text-muted-foreground">({stat.count})</span>
                     </div>
                   </div>
                   <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className={`h-full ${stat.color} transition-all duration-500`}
                       style={{ width: `${stat.percentage}%` }}
                     />
@@ -254,15 +285,18 @@ export default function SourceAnalytics() {
           <div className="pt-4 border-t">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium">إجمالي الحجوزات</span>
-              <span className="text-lg sm:text-2xl font-bold text-primary">{sourceStats.total}</span>
+              <span className="text-lg sm:text-2xl font-bold text-primary">
+                {sourceStats.total}
+              </span>
             </div>
-            
+
             {/* Insights */}
             {topSource && (
               <div className={`${topSource.lightColor} p-3 rounded-lg`}>
                 <p className="text-sm">
-                  <span className="font-semibold">{topSource.name}</span> هو المصدر الأكثر فعالية بنسبة{" "}
-                  <span className="font-bold">{topSource.percentage}%</span> من إجمالي الحجوزات.
+                  <span className="font-semibold">{topSource.name}</span> هو المصدر الأكثر فعالية
+                  بنسبة <span className="font-bold">{topSource.percentage}%</span> من إجمالي
+                  الحجوزات.
                 </p>
               </div>
             )}

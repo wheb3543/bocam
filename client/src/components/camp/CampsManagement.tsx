@@ -1,14 +1,21 @@
-import { useState, useMemo } from "react";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
-import { useConfirmDialog } from "@/hooks/ui/useConfirmDialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { TableBody, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from 'react';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDialog } from '@/hooks/ui/useConfirmDialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { TableBody, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import {
   Loader2,
   Search,
@@ -19,28 +26,104 @@ import {
   CheckCircle2,
   XCircle,
   Copy,
-} from "lucide-react";
-import { toast } from "sonner";
-import { trpc } from "@/lib/api/trpc";
-import { type ColumnConfig } from "@/components/table/ColumnVisibility";
-import { ColumnVisibility } from "@/components/table/ColumnVisibility";
-import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
-import { useTableFeatures } from "@/hooks/table/useTableFeatures";
-import EmptyState from "@/components/EmptyState";
-import { useSlugGenerator } from "@/hooks/data/useSlugGenerator";
-import ImageUpload from "@/components/form/ImageUpload";
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { trpc } from '@/lib/api/trpc';
+import { type ColumnConfig } from '@/components/table/ColumnVisibility';
+import { ColumnVisibility } from '@/components/table/ColumnVisibility';
+import {
+  ResizableTable,
+  ResizableHeaderCell,
+  FrozenTableCell,
+} from '@/components/table/ResizableTable';
+import { useTableFeatures } from '@/hooks/table/useTableFeatures';
+import EmptyState from '@/components/EmptyState';
+import { useSlugGenerator } from '@/hooks/data/useSlugGenerator';
+import ImageUpload from '@/components/form/ImageUpload';
 
 // === تعريف أعمدة جدول المخيمات ===
 const campColumns: ColumnConfig[] = [
-  { key: "name", label: "الاسم", defaultVisible: true, defaultWidth: 220, minWidth: 150, maxWidth: 400, sortType: 'string' },
-  { key: "slug", label: "الرابط", defaultVisible: true, defaultWidth: 160, minWidth: 100, maxWidth: 300, sortType: 'string' },
-  { key: "description", label: "الوصف", defaultVisible: false, defaultWidth: 200, minWidth: 120, maxWidth: 400, sortable: false },
-  { key: "imageUrl", label: "الصورة", defaultVisible: false, defaultWidth: 100, minWidth: 80, maxWidth: 200, sortable: false },
-  { key: "status", label: "الحالة", defaultVisible: true, defaultWidth: 100, minWidth: 80, maxWidth: 200, sortType: 'string' },
-  { key: "startDate", label: "تاريخ البداية", defaultVisible: true, defaultWidth: 140, minWidth: 100, maxWidth: 250, sortType: 'date' },
-  { key: "endDate", label: "تاريخ النهاية", defaultVisible: true, defaultWidth: 140, minWidth: 100, maxWidth: 250, sortType: 'date' },
-  { key: "createdAt", label: "تاريخ الإنشاء", defaultVisible: false, defaultWidth: 140, minWidth: 100, maxWidth: 250, sortType: 'date' },
-  { key: "actions", label: "الإجراءات", defaultVisible: true, defaultWidth: 180, minWidth: 140, maxWidth: 300, sortable: false },
+  {
+    key: 'name',
+    label: 'الاسم',
+    defaultVisible: true,
+    defaultWidth: 220,
+    minWidth: 150,
+    maxWidth: 400,
+    sortType: 'string',
+  },
+  {
+    key: 'slug',
+    label: 'الرابط',
+    defaultVisible: true,
+    defaultWidth: 160,
+    minWidth: 100,
+    maxWidth: 300,
+    sortType: 'string',
+  },
+  {
+    key: 'description',
+    label: 'الوصف',
+    defaultVisible: false,
+    defaultWidth: 200,
+    minWidth: 120,
+    maxWidth: 400,
+    sortable: false,
+  },
+  {
+    key: 'imageUrl',
+    label: 'الصورة',
+    defaultVisible: false,
+    defaultWidth: 100,
+    minWidth: 80,
+    maxWidth: 200,
+    sortable: false,
+  },
+  {
+    key: 'status',
+    label: 'الحالة',
+    defaultVisible: true,
+    defaultWidth: 100,
+    minWidth: 80,
+    maxWidth: 200,
+    sortType: 'string',
+  },
+  {
+    key: 'startDate',
+    label: 'تاريخ البداية',
+    defaultVisible: true,
+    defaultWidth: 140,
+    minWidth: 100,
+    maxWidth: 250,
+    sortType: 'date',
+  },
+  {
+    key: 'endDate',
+    label: 'تاريخ النهاية',
+    defaultVisible: true,
+    defaultWidth: 140,
+    minWidth: 100,
+    maxWidth: 250,
+    sortType: 'date',
+  },
+  {
+    key: 'createdAt',
+    label: 'تاريخ الإنشاء',
+    defaultVisible: false,
+    defaultWidth: 140,
+    minWidth: 100,
+    maxWidth: 250,
+    sortType: 'date',
+  },
+  {
+    key: 'actions',
+    label: 'الإجراءات',
+    defaultVisible: true,
+    defaultWidth: 180,
+    minWidth: 140,
+    maxWidth: 300,
+    sortable: false,
+  },
 ];
 
 export default function CampsManagement() {
@@ -48,27 +131,27 @@ export default function CampsManagement() {
   const deleteConfirm = useConfirmDialog<any>();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCamp, setEditingCamp] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    description: "",
-    imageUrl: "",
+    name: '',
+    slug: '',
+    description: '',
+    imageUrl: '',
     isActive: true,
-    startDate: "",
-    endDate: "",
-    freeOffers: "",
-    discountedOffers: "",
-    availableProcedures: "",
-    galleryImages: "",
-    morningTime: "",
-    eveningTime: "",
-    dailyCapacity: "",
+    startDate: '',
+    endDate: '',
+    freeOffers: '',
+    discountedOffers: '',
+    availableProcedures: '',
+    galleryImages: '',
+    morningTime: '',
+    eveningTime: '',
+    dailyCapacity: '',
   });
 
   // Slug auto-generation hook
   const { autoGenerateSlug, resetManualEdit } = useSlugGenerator(
-    (slug) => setFormData(prev => ({ ...prev, slug })),
+    (slug) => setFormData((prev) => ({ ...prev, slug })),
     { isEditing: !!editingCamp }
   );
 
@@ -80,62 +163,62 @@ export default function CampsManagement() {
   });
 
   const { data: camps, isLoading, refetch } = trpc.camps.getAllAdmin.useQuery();
-  
+
   const createMutation = trpc.camps.create.useMutation({
     onSuccess: () => {
-      toast.success("تم إنشاء المخيم بنجاح");
+      toast.success('تم إنشاء المخيم بنجاح');
       refetch();
       setShowAddDialog(false);
       resetForm();
     },
     onError: (error: any) => {
-      const msg = error?.message || "حدث خطأ أثناء إنشاء المخيم";
+      const msg = error?.message || 'حدث خطأ أثناء إنشاء المخيم';
       toast.error(msg);
     },
   });
 
   const updateMutation = trpc.camps.update.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث المخيم بنجاح");
+      toast.success('تم تحديث المخيم بنجاح');
       refetch();
       setEditingCamp(null);
       setShowAddDialog(false);
       resetForm();
     },
     onError: (error: any) => {
-      const msg = error?.message || "حدث خطأ أثناء تحديث المخيم";
+      const msg = error?.message || 'حدث خطأ أثناء تحديث المخيم';
       toast.error(msg);
     },
   });
 
   const deleteMutation = trpc.camps.delete.useMutation({
     onSuccess: () => {
-      toast.success("تم حذف المخيم بنجاح");
+      toast.success('تم حذف المخيم بنجاح');
       refetch();
       deleteConfirm.closeConfirm();
     },
     onError: (error: any) => {
-      const msg = error?.message || "حدث خطأ أثناء حذف المخيم";
+      const msg = error?.message || 'حدث خطأ أثناء حذف المخيم';
       toast.error(msg);
     },
   });
 
   const resetForm = () => {
     setFormData({
-      name: "",
-      slug: "",
-      description: "",
-      imageUrl: "",
+      name: '',
+      slug: '',
+      description: '',
+      imageUrl: '',
       isActive: true,
-      startDate: "",
-      endDate: "",
-      freeOffers: "",
-      discountedOffers: "",
-      availableProcedures: "",
-      galleryImages: "",
-      morningTime: "",
-      eveningTime: "",
-      dailyCapacity: "",
+      startDate: '',
+      endDate: '',
+      freeOffers: '',
+      discountedOffers: '',
+      availableProcedures: '',
+      galleryImages: '',
+      morningTime: '',
+      eveningTime: '',
+      dailyCapacity: '',
     });
     setEditingCamp(null);
     resetManualEdit();
@@ -145,20 +228,20 @@ export default function CampsManagement() {
   const handleDuplicate = (camp: any) => {
     setEditingCamp(null);
     setFormData({
-      name: camp.name + " (نسخة)",
-      slug: camp.slug + "-copy",
-      description: camp.description || "",
-      imageUrl: camp.imageUrl || "",
+      name: camp.name + ' (نسخة)',
+      slug: camp.slug + '-copy',
+      description: camp.description || '',
+      imageUrl: camp.imageUrl || '',
       isActive: false,
-      startDate: camp.startDate ? new Date(camp.startDate).toISOString().split('T')[0] : "",
-      endDate: camp.endDate ? new Date(camp.endDate).toISOString().split('T')[0] : "",
-      freeOffers: camp.freeOffers || "",
-      discountedOffers: camp.discountedOffers || "",
-      availableProcedures: camp.availableProcedures || "",
-      galleryImages: camp.galleryImages || "",
-      morningTime: (camp as any).morningTime || "",
-      eveningTime: (camp as any).eveningTime || "",
-      dailyCapacity: (camp as any).dailyCapacity ? String((camp as any).dailyCapacity) : "",
+      startDate: camp.startDate ? new Date(camp.startDate).toISOString().split('T')[0] : '',
+      endDate: camp.endDate ? new Date(camp.endDate).toISOString().split('T')[0] : '',
+      freeOffers: camp.freeOffers || '',
+      discountedOffers: camp.discountedOffers || '',
+      availableProcedures: camp.availableProcedures || '',
+      galleryImages: camp.galleryImages || '',
+      morningTime: (camp as any).morningTime || '',
+      eveningTime: (camp as any).eveningTime || '',
+      dailyCapacity: (camp as any).dailyCapacity ? String((camp as any).dailyCapacity) : '',
     });
     setShowAddDialog(true);
   };
@@ -187,18 +270,18 @@ export default function CampsManagement() {
     setFormData({
       name: camp.name,
       slug: camp.slug,
-      description: camp.description || "",
-      imageUrl: camp.imageUrl || "",
+      description: camp.description || '',
+      imageUrl: camp.imageUrl || '',
       isActive: camp.isActive,
-      startDate: camp.startDate ? new Date(camp.startDate).toISOString().split('T')[0] : "",
-      endDate: camp.endDate ? new Date(camp.endDate).toISOString().split('T')[0] : "",
-      freeOffers: camp.freeOffers || "",
-      discountedOffers: camp.discountedOffers || "",
-      availableProcedures: camp.availableProcedures || "",
-      galleryImages: camp.galleryImages || "",
-      morningTime: (camp as any).morningTime || "",
-      eveningTime: (camp as any).eveningTime || "",
-      dailyCapacity: (camp as any).dailyCapacity ? String((camp as any).dailyCapacity) : "",
+      startDate: camp.startDate ? new Date(camp.startDate).toISOString().split('T')[0] : '',
+      endDate: camp.endDate ? new Date(camp.endDate).toISOString().split('T')[0] : '',
+      freeOffers: camp.freeOffers || '',
+      discountedOffers: camp.discountedOffers || '',
+      availableProcedures: camp.availableProcedures || '',
+      galleryImages: camp.galleryImages || '',
+      morningTime: (camp as any).morningTime || '',
+      eveningTime: (camp as any).eveningTime || '',
+      dailyCapacity: (camp as any).dailyCapacity ? String((camp as any).dailyCapacity) : '',
     });
     setShowAddDialog(true);
   };
@@ -206,32 +289,36 @@ export default function CampsManagement() {
   const filteredCamps = useMemo(() => {
     if (!camps) return [];
     let filtered = [...camps];
-    
+
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (c: any) =>
-          c.name.toLowerCase().includes(term) ||
-          c.slug.toLowerCase().includes(term)
+        (c: any) => c.name.toLowerCase().includes(term) || c.slug.toLowerCase().includes(term)
       );
     }
 
     return campTable.sortData(filtered, (item: any, key: string) => {
       switch (key) {
-        case 'name': return item.name;
-        case 'slug': return item.slug;
-        case 'status': return item.status;
-        case 'startDate': return item.startDate;
-        case 'endDate': return item.endDate;
-        default: return item[key];
+        case 'name':
+          return item.name;
+        case 'slug':
+          return item.slug;
+        case 'status':
+          return item.status;
+        case 'startDate':
+          return item.startDate;
+        case 'endDate':
+          return item.endDate;
+        default:
+          return item[key];
       }
     });
   }, [camps, searchTerm, campTable.sortState, campTable.sortData]);
 
   // Calculate stats
   const totalCamps = camps?.length || 0;
-  const activeCamps = camps?.filter(c => c.isActive === true).length || 0;
-  const inactiveCamps = camps?.filter(c => c.isActive === false).length || 0;
+  const activeCamps = camps?.filter((c) => c.isActive === true).length || 0;
+  const inactiveCamps = camps?.filter((c) => c.isActive === false).length || 0;
 
   if (isLoading) {
     return (
@@ -315,7 +402,13 @@ export default function CampsManagement() {
           </div>
           <ColumnVisibility {...campTable.columnVisibilityProps} />
         </div>
-        <Button onClick={() => { resetForm(); setShowAddDialog(true); }} className="w-full sm:w-auto">
+        <Button
+          onClick={() => {
+            resetForm();
+            setShowAddDialog(true);
+          }}
+          className="w-full sm:w-auto"
+        >
           <Plus className="h-4 w-4 ml-2" />
           إضافة مخيم جديد
         </Button>
@@ -326,16 +419,28 @@ export default function CampsManagement() {
         {filteredCamps.length === 0 ? (
           <EmptyState
             icon={Tent}
-            title={searchTerm ? "لا توجد نتائج مطابقة" : "لا توجد مخيمات بعد"}
-            description={searchTerm ? "جرّب تغيير كلمات البحث" : "ابدأ بإضافة أول مخيم طبي إلى النظام"}
-            action={!searchTerm ? { label: "إضافة مخيم جديد", onClick: () => { resetForm(); setShowAddDialog(true); } } : undefined}
+            title={searchTerm ? 'لا توجد نتائج مطابقة' : 'لا توجد مخيمات بعد'}
+            description={
+              searchTerm ? 'جرّب تغيير كلمات البحث' : 'ابدأ بإضافة أول مخيم طبي إلى النظام'
+            }
+            action={
+              !searchTerm
+                ? {
+                    label: 'إضافة مخيم جديد',
+                    onClick: () => {
+                      resetForm();
+                      setShowAddDialog(true);
+                    },
+                  }
+                : undefined
+            }
           />
         ) : (
           <ResizableTable {...campTable.resizableTableProps}>
             <TableHeader>
               <TableRow>
-                {campTable.visibleColumnOrder.map(colKey => {
-                  const col = campColumns.find(c => c.key === colKey);
+                {campTable.visibleColumnOrder.map((colKey) => {
+                  const col = campColumns.find((c) => c.key === colKey);
                   if (!col || !campTable.visibleColumns[colKey]) return null;
                   return (
                     <ResizableHeaderCell
@@ -356,9 +461,9 @@ export default function CampsManagement() {
             <TableBody>
               {filteredCamps.map((camp: any) => (
                 <TableRow key={camp.id} className="hover:bg-muted/50/50">
-                  {campTable.visibleColumnOrder.map(colKey => {
+                  {campTable.visibleColumnOrder.map((colKey) => {
                     if (!campTable.visibleColumns[colKey]) return null;
-                    
+
                     switch (colKey) {
                       case 'name':
                         return (
@@ -382,7 +487,11 @@ export default function CampsManagement() {
                       case 'slug':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <a href={`/camps/${camp.slug}`} target="_blank" className="text-blue-600 hover:underline text-sm truncate">
+                            <a
+                              href={`/camps/${camp.slug}`}
+                              target="_blank"
+                              className="text-blue-600 hover:underline text-sm truncate"
+                            >
                               {camp.slug}
                             </a>
                           </FrozenTableCell>
@@ -390,43 +499,74 @@ export default function CampsManagement() {
                       case 'status':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <Badge variant="outline" className={camp.isActive 
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                              : "bg-muted/50 text-muted-foreground border-border"}>
-                              <span className={`inline-block w-1.5 h-1.5 rounded-full ml-1.5 ${camp.isActive ? "bg-emerald-500" : "bg-gray-400"}`} />
-                              {camp.isActive ? "نشط" : "غير نشط"}
+                            <Badge
+                              variant="outline"
+                              className={
+                                camp.isActive
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                  : 'bg-muted/50 text-muted-foreground border-border'
+                              }
+                            >
+                              <span
+                                className={`inline-block w-1.5 h-1.5 rounded-full ml-1.5 ${camp.isActive ? 'bg-emerald-500' : 'bg-gray-400'}`}
+                              />
+                              {camp.isActive ? 'نشط' : 'غير نشط'}
                             </Badge>
                           </FrozenTableCell>
                         );
                       case 'startDate':
                         return (
-                          <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground">
+                          <FrozenTableCell
+                            key={colKey}
+                            columnKey={colKey}
+                            className="text-sm text-muted-foreground"
+                          >
                             {formatDate(camp.startDate)}
                           </FrozenTableCell>
                         );
                       case 'endDate':
                         return (
-                          <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground">
+                          <FrozenTableCell
+                            key={colKey}
+                            columnKey={colKey}
+                            className="text-sm text-muted-foreground"
+                          >
                             {formatDate(camp.endDate)}
                           </FrozenTableCell>
                         );
                       case 'description':
                         return (
-                          <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground">
-                            <span className="truncate block max-w-[200px]">{camp.description || '-'}</span>
+                          <FrozenTableCell
+                            key={colKey}
+                            columnKey={colKey}
+                            className="text-sm text-muted-foreground"
+                          >
+                            <span className="truncate block max-w-[200px]">
+                              {camp.description || '-'}
+                            </span>
                           </FrozenTableCell>
                         );
                       case 'imageUrl':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
                             {camp.imageUrl ? (
-                              <img src={camp.imageUrl} alt="" className="h-8 w-8 rounded object-cover" />
-                            ) : '-'}
+                              <img
+                                src={camp.imageUrl}
+                                alt=""
+                                className="h-8 w-8 rounded object-cover"
+                              />
+                            ) : (
+                              '-'
+                            )}
                           </FrozenTableCell>
                         );
                       case 'createdAt':
                         return (
-                          <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground">
+                          <FrozenTableCell
+                            key={colKey}
+                            columnKey={colKey}
+                            className="text-sm text-muted-foreground"
+                          >
                             {formatDate(camp.createdAt)}
                           </FrozenTableCell>
                         );
@@ -452,7 +592,7 @@ export default function CampsManagement() {
                               >
                                 <Copy className="h-3.5 w-3.5 text-blue-400" />
                               </Button>
-                              <Button 
+                              <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8"
@@ -480,13 +620,19 @@ export default function CampsManagement() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${editingCamp ? "bg-blue-50" : "bg-emerald-50"}`}>
-                {editingCamp ? <Edit className="h-4 w-4 text-blue-600" /> : <Plus className="h-4 w-4 text-emerald-600" />}
+              <div
+                className={`h-8 w-8 rounded-lg flex items-center justify-center ${editingCamp ? 'bg-blue-50' : 'bg-emerald-50'}`}
+              >
+                {editingCamp ? (
+                  <Edit className="h-4 w-4 text-blue-600" />
+                ) : (
+                  <Plus className="h-4 w-4 text-emerald-600" />
+                )}
               </div>
-              {editingCamp ? "تعديل المخيم" : "إضافة مخيم جديد"}
+              {editingCamp ? 'تعديل المخيم' : 'إضافة مخيم جديد'}
             </DialogTitle>
             <DialogDescription>
-              {editingCamp ? "قم بتعديل بيانات المخيم" : "أدخل بيانات المخيم الجديد"}
+              {editingCamp ? 'قم بتعديل بيانات المخيم' : 'أدخل بيانات المخيم الجديد'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 py-4">
@@ -498,7 +644,12 @@ export default function CampsManagement() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="name">اسم المخيم *</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="name"
+                >
+                  اسم المخيم *
+                </Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -510,7 +661,12 @@ export default function CampsManagement() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="slug">الرابط (slug) *</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="slug"
+                >
+                  الرابط (slug) *
+                </Label>
                 <Input
                   id="slug"
                   value={formData.slug}
@@ -522,7 +678,12 @@ export default function CampsManagement() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="description">الوصف</Label>
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="description"
+              >
+                الوصف
+              </Label>
               <Textarea
                 id="description"
                 value={formData.description}
@@ -533,7 +694,9 @@ export default function CampsManagement() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground">صورة المخيم</Label>
+              <Label className="text-right block text-xs font-medium text-muted-foreground">
+                صورة المخيم
+              </Label>
               <ImageUpload
                 value={formData.imageUrl}
                 onChange={(url) => setFormData({ ...formData, imageUrl: url })}
@@ -549,7 +712,12 @@ export default function CampsManagement() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="freeOffers">العروض المجانية</Label>
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="freeOffers"
+              >
+                العروض المجانية
+              </Label>
               <Textarea
                 id="freeOffers"
                 value={formData.freeOffers}
@@ -560,7 +728,12 @@ export default function CampsManagement() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="discountedOffers">العروض المخفضة</Label>
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="discountedOffers"
+              >
+                العروض المخفضة
+              </Label>
               <Textarea
                 id="discountedOffers"
                 value={formData.discountedOffers}
@@ -571,7 +744,12 @@ export default function CampsManagement() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="availableProcedures">الإجراءات المتاحة</Label>
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="availableProcedures"
+              >
+                الإجراءات المتاحة
+              </Label>
               <Textarea
                 id="availableProcedures"
                 value={formData.availableProcedures}
@@ -582,7 +760,12 @@ export default function CampsManagement() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="galleryImages">روابط الصور الإضافية</Label>
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="galleryImages"
+              >
+                روابط الصور الإضافية
+              </Label>
               <Textarea
                 id="galleryImages"
                 value={formData.galleryImages}
@@ -601,7 +784,12 @@ export default function CampsManagement() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="startDate">تاريخ البداية</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="startDate"
+                >
+                  تاريخ البداية
+                </Label>
                 <Input
                   id="startDate"
                   type="date"
@@ -610,7 +798,12 @@ export default function CampsManagement() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="endDate">تاريخ النهاية</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="endDate"
+                >
+                  تاريخ النهاية
+                </Label>
                 <Input
                   id="endDate"
                   type="date"
@@ -622,12 +815,19 @@ export default function CampsManagement() {
 
             {/* أوقات الحضور والطاقة الاستيعابية */}
             <div className="space-y-1 mb-4 mt-6">
-              <h4 className="text-sm font-semibold text-foreground">أوقات الحضور والطاقة الاستيعابية</h4>
+              <h4 className="text-sm font-semibold text-foreground">
+                أوقات الحضور والطاقة الاستيعابية
+              </h4>
               <div className="h-px bg-muted" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="morningTime">وقت الجلسة الصباحية</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="morningTime"
+                >
+                  وقت الجلسة الصباحية
+                </Label>
                 <Input
                   id="morningTime"
                   type="time"
@@ -637,7 +837,12 @@ export default function CampsManagement() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="eveningTime">وقت الجلسة المسائية</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="eveningTime"
+                >
+                  وقت الجلسة المسائية
+                </Label>
                 <Input
                   id="eveningTime"
                   type="time"
@@ -647,7 +852,12 @@ export default function CampsManagement() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-right block text-xs font-medium text-muted-foreground" htmlFor="dailyCapacity">الطاقة الاستيعابية اليومية (لكل وقت)</Label>
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="dailyCapacity"
+                >
+                  الطاقة الاستيعابية اليومية (لكل وقت)
+                </Label>
                 <Input
                   id="dailyCapacity"
                   type="number"
@@ -667,23 +877,40 @@ export default function CampsManagement() {
                 onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                 className="rounded"
               />
-              <Label htmlFor="isActive" className="text-sm text-foreground">المخيم نشط</Label>
+              <Label htmlFor="isActive" className="text-sm text-foreground">
+                المخيم نشط
+              </Label>
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => { setShowAddDialog(false); resetForm(); }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowAddDialog(false);
+                resetForm();
+              }}
+            >
               إلغاء
             </Button>
-            <Button 
+            <Button
               onClick={handleSubmit}
-              disabled={!formData.name || !formData.slug || createMutation.isPending || updateMutation.isPending}
+              disabled={
+                !formData.name ||
+                !formData.slug ||
+                createMutation.isPending ||
+                updateMutation.isPending
+              }
             >
-              {(createMutation.isPending || updateMutation.isPending) ? (
+              {createMutation.isPending || updateMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 ml-2 animate-spin" />
                   جاري الحفظ...
                 </>
-              ) : editingCamp ? "حفظ التعديلات" : "إضافة المخيم"}
+              ) : editingCamp ? (
+                'حفظ التعديلات'
+              ) : (
+                'إضافة المخيم'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

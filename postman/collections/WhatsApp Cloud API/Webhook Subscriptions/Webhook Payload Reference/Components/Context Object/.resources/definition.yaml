@@ -8,7 +8,7 @@ description: |-
   | **`id`**                | **Optional**<br/>The message ID for the sent message for an inbound reply. |
   | **`referred_product`** | **Required for Product Enquiry Messages**.<br/><br/>Specifies the product the user is requesting information about. For more information, see [Receive Response From Customers](https://developers.facebook.com/docs/whatsapp/on-premises/guides/commerce-guides/receive-responses-from-customers).<br/><br/>The **`referred_product`** object contains the following fields:<ul><li>**`catalog_id`**: Unique identifier of the Meta catalog linked to the WhatsApp Business Account.</li><li>**`product_retailer_id`**: Unique identifier of the product in a catalog.</li></ul> |
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 9000

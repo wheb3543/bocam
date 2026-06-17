@@ -1,9 +1,9 @@
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
-import { eq, and, gte } from "drizzle-orm";
-import { getDb } from "../database/db";
-import { appointments } from "../../drizzle/schema";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
+import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import { eq, and, gte } from 'drizzle-orm';
+import { getDb } from '../database/db';
+import { appointments } from '../../drizzle/schema';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
 import {
   getCampaignBySlug,
   getDoctorById,
@@ -13,47 +13,62 @@ import {
   bulkUpdateAppointmentStatus,
   createCampaign,
   normalizePhoneNumber,
-} from "../database/db";
-import { notifyOwner } from "../_core/notification";
-import { sendNewAppointmentEmail } from "../services/email";
-import { sendWelcomeMessage } from "../services/whatsapp";
-import { sendNewAppointmentTelegram } from "../services/telegram";
-import { serverCache, CacheKeys, CacheTTL } from "../services/cache";
-import { createAuditLog } from "./auditLogs";
-import { sendAppointmentLeadEvent, sendStatusChangeEvent } from "../api/facebookCAPI";
+} from '../database/db';
+import { notifyOwner } from '../_core/notification';
+import { sendNewAppointmentEmail } from '../services/email';
+import { sendWelcomeMessage } from '../services/whatsapp';
+import { sendNewAppointmentTelegram } from '../services/telegram';
+import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
+import { createAuditLog } from './auditLogs';
+import { sendAppointmentLeadEvent, sendStatusChangeEvent } from '../api/facebookCAPI';
 // sendAppointmentConfirmation moved to dispatchWhatsAppMessage flow
-import { dispatchWhatsAppMessage } from "../services/whatsappMessageDispatcher";
+import { dispatchWhatsAppMessage } from '../services/whatsappMessageDispatcher';
 
 export const appointmentsRouter = router({
   submit: publicProcedure
-    .input(z.object({
-      fullName: z.string().min(1),
-      phone: z.string().min(9).regex(
-        /^(\+?967)?7\d{8}$|^07\d{8}$|^7\d{8}$/,
-        "رقم الهاتف يجب أن يبدأ بالرقم 7 ويتكون من 9 أرقام"
-      ),
-      email: z.string().optional(),
-      doctorId: z.number(),
-      age: z.number().optional(),
-      gender: z.enum(["male", "female"]).optional(),
-      procedure: z.string().optional(),
-      preferredDate: z.string().optional(),
-      preferredTime: z.string().optional(),
-      additionalNotes: z.string().optional(),
-      patientMessage: z.string().max(500).optional(),
-      campaignSlug: z.string(),
-      source: z.string().optional(),
-      status: z.enum(["pending", "contacted", "no_answer", "confirmed", "attended", "completed", "cancelled"]).optional(),
-      utmSource: z.string().optional(),
-      utmMedium: z.string().optional(),
-      utmCampaign: z.string().optional(),
-      utmTerm: z.string().optional(),
-      utmContent: z.string().optional(),
-      utmPlacement: z.string().optional(),
-      referrer: z.string().optional(),
-      fbclid: z.string().optional(),
-      gclid: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        fullName: z.string().min(1),
+        phone: z
+          .string()
+          .min(9)
+          .regex(
+            /^(\+?967)?7\d{8}$|^07\d{8}$|^7\d{8}$/,
+            'رقم الهاتف يجب أن يبدأ بالرقم 7 ويتكون من 9 أرقام'
+          ),
+        email: z.string().optional(),
+        doctorId: z.number(),
+        age: z.number().optional(),
+        gender: z.enum(['male', 'female']).optional(),
+        procedure: z.string().optional(),
+        preferredDate: z.string().optional(),
+        preferredTime: z.string().optional(),
+        additionalNotes: z.string().optional(),
+        patientMessage: z.string().max(500).optional(),
+        campaignSlug: z.string(),
+        source: z.string().optional(),
+        status: z
+          .enum([
+            'pending',
+            'contacted',
+            'no_answer',
+            'confirmed',
+            'attended',
+            'completed',
+            'cancelled',
+          ])
+          .optional(),
+        utmSource: z.string().optional(),
+        utmMedium: z.string().optional(),
+        utmCampaign: z.string().optional(),
+        utmTerm: z.string().optional(),
+        utmContent: z.string().optional(),
+        utmPlacement: z.string().optional(),
+        referrer: z.string().optional(),
+        fbclid: z.string().optional(),
+        gclid: z.string().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       // التحقق من عدم تكرار الحجز بنفس الرقم ونفس الطبيب خلال 3 أيام - معطل
       // const normalizedPhone = normalizePhoneNumber(input.phone);
@@ -96,18 +111,18 @@ export const appointmentsRouter = router({
         });
         campaign = await getCampaignBySlug(input.campaignSlug);
       }
-      
+
       if (!campaign) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "فشل في إنشاء أو استرجاع الحملة",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'فشل في إنشاء أو استرجاع الحملة',
         });
       }
 
       // Build timestamp fields based on initial status
       const now = new Date();
       const statusTimestamps: Record<string, Date> = {};
-      const initialStatus = input.status || "pending";
+      const initialStatus = input.status || 'pending';
       if (initialStatus === 'contacted') statusTimestamps.contactedAt = now;
       else if (initialStatus === 'confirmed') statusTimestamps.confirmedAt = now;
       else if (initialStatus === 'attended') statusTimestamps.attendedAt = now;
@@ -129,7 +144,7 @@ export const appointmentsRouter = router({
         additionalNotes: input.additionalNotes,
         patientMessage: input.patientMessage,
         status: initialStatus,
-        source: input.source || "direct",
+        source: input.source || 'direct',
         utmSource: input.utmSource,
         utmMedium: input.utmMedium,
         utmCampaign: input.utmCampaign,
@@ -147,8 +162,8 @@ export const appointmentsRouter = router({
       await sendNewAppointmentEmail({
         appointment: {
           ...input,
-          doctorName: doctor?.name || "غير محدد",
-          doctorSpecialty: doctor?.specialty || "",
+          doctorName: doctor?.name || 'غير محدد',
+          doctorSpecialty: doctor?.specialty || '',
         },
         campaign: campaign.name,
       });
@@ -165,14 +180,14 @@ export const appointmentsRouter = router({
 
       // Notify owner
       const ownerNotifyParts = [
-        `تم حجز موعد جديد من ${input.fullName} مع ${doctor?.name || "غير محدد"}`,
+        `تم حجز موعد جديد من ${input.fullName} مع ${doctor?.name || 'غير محدد'}`,
         `الهاتف: ${input.phone}`,
       ];
       if (input.procedure) ownerNotifyParts.push(`الإجراء: ${input.procedure}`);
       if (input.patientMessage) ownerNotifyParts.push(`رسالة المريض: ${input.patientMessage}`);
       await notifyOwner({
-        title: "حجز موعد جديد",
-        content: ownerNotifyParts.join(" | "),
+        title: 'حجز موعد جديد',
+        content: ownerNotifyParts.join(' | '),
       });
 
       // Send Telegram notification
@@ -180,7 +195,7 @@ export const appointmentsRouter = router({
         fullName: input.fullName,
         phone: input.phone,
         email: input.email,
-        doctorName: doctor?.name || "غير محدد",
+        doctorName: doctor?.name || 'غير محدد',
         preferredDate: input.preferredDate,
         preferredTime: input.preferredTime,
         procedure: input.procedure,
@@ -192,8 +207,8 @@ export const appointmentsRouter = router({
       if (result) {
         const apptId = result.insertId;
         dispatchWhatsAppMessage({
-          entityType: "appointment",
-          triggerEvent: "on_create",
+          entityType: 'appointment',
+          triggerEvent: 'on_create',
           phone: input.phone,
           recipientName: input.fullName,
           variables: {
@@ -201,28 +216,32 @@ export const appointmentsRouter = router({
             // دمج date و time في متغير واحد ليتوافق مع القالب المعتمد (4 متغيرات فقط)
             date: input.preferredDate
               ? `${input.preferredDate}${input.preferredTime ? ' الساعة ' + input.preferredTime : ''}`.trim()
-              : "غير محدد",
-            doctor: doctor?.name || "غير محدد",
-            service: input.procedure || "فحص عام",
+              : 'غير محدد',
+            doctor: doctor?.name || 'غير محدد',
+            service: input.procedure || 'فحص عام',
           },
           entityId: apptId,
-        }).then(async (res) => {
-          if (res?.success) {
-            const dbInner = await getDb();
-            if (dbInner) {
-              await dbInner
-                .update(appointments)
-                .set({ status: "contacted", contactedAt: new Date(), updatedAt: new Date() })
-                .where(eq(appointments.id, apptId));
-              serverCache.invalidateByPrefix("paginated:appointments:");
-              serverCache.invalidate("list:appointments");
-              serverCache.invalidate(CacheKeys.appointmentStats());
-              console.log(`[Appointment] Auto-updated ${apptId} to contacted after on_create send`);
+        })
+          .then(async (res) => {
+            if (res?.success) {
+              const dbInner = await getDb();
+              if (dbInner) {
+                await dbInner
+                  .update(appointments)
+                  .set({ status: 'contacted', contactedAt: new Date(), updatedAt: new Date() })
+                  .where(eq(appointments.id, apptId));
+                serverCache.invalidateByPrefix('paginated:appointments:');
+                serverCache.invalidate('list:appointments');
+                serverCache.invalidate(CacheKeys.appointmentStats());
+                console.log(
+                  `[Appointment] Auto-updated ${apptId} to contacted after on_create send`
+                );
+              }
             }
-          }
-        }).catch(error => {
-          console.error("[WhatsApp Dispatcher] Failed to send appointment on_create:", error);
-        });
+          })
+          .catch((error) => {
+            console.error('[WhatsApp Dispatcher] Failed to send appointment on_create:', error);
+          });
       }
 
       // Send Facebook Conversions API event (fire-and-forget)
@@ -232,75 +251,75 @@ export const appointmentsRouter = router({
         phone: input.phone,
         email: input.email,
         clientIpAddress: ctx.req.ip || (ctx.req.socket as any)?.remoteAddress,
-        clientUserAgent: ctx.req.headers["user-agent"] as string,
-        fbc: ctx.req.cookies?.["_fbc"],
-        fbp: ctx.req.cookies?.["_fbp"],
+        clientUserAgent: ctx.req.headers['user-agent'] as string,
+        fbc: ctx.req.cookies?.['_fbc'],
+        fbp: ctx.req.cookies?.['_fbp'],
         eventSourceUrl: input.referrer,
         eventId: `appt_${result?.insertId || Date.now()}`,
-      }).catch((err) => console.error("[CAPI] Appointment lead error:", err));
+      }).catch((err) => console.error('[CAPI] Appointment lead error:', err));
 
       // Invalidate appointment caches after new submission
-      serverCache.invalidateByPrefix("paginated:appointments:");
-      serverCache.invalidate("list:appointments");
+      serverCache.invalidateByPrefix('paginated:appointments:');
+      serverCache.invalidate('list:appointments');
       serverCache.invalidate(CacheKeys.appointmentStats());
 
       return result;
     }),
 
   list: protectedProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      "list:appointments",
-      CacheTTL.LIST,
-      () => getAllAppointments()
-    );
+    return serverCache.getOrCompute('list:appointments', CacheTTL.LIST, () => getAllAppointments());
   }),
 
   listPaginated: protectedProcedure
-    .input(z.object({
-      page: z.number().min(1).default(1),
-      limit: z.number().min(1).max(100000).default(20),
-      searchTerm: z.string().optional(),
-      doctorIds: z.array(z.number()).optional(),
-      sources: z.array(z.string()).optional(),
-      statuses: z.array(z.string()).optional(),
-      dateFilter: z.enum(["all", "today", "week", "month"]).optional(),
-      dateFrom: z.string().optional(),
-      dateTo: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100000).default(20),
+        searchTerm: z.string().optional(),
+        doctorIds: z.array(z.number()).optional(),
+        sources: z.array(z.string()).optional(),
+        statuses: z.array(z.string()).optional(),
+        dateFilter: z.enum(['all', 'today', 'week', 'month']).optional(),
+        dateFrom: z.string().optional(),
+        dateTo: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const cacheKey = CacheKeys.appointmentsPaginated(input);
-      return serverCache.getOrCompute(
-        cacheKey,
-        CacheTTL.PAGINATED,
-        async () => {
-          const { getAppointmentsPaginated } = await import('../database/db');
-          return getAppointmentsPaginated(
-            input.page,
-            input.limit,
-            input.searchTerm,
-            input.doctorIds,
-            input.sources,
-            input.statuses,
-            input.dateFilter,
-            input.dateFrom,
-            input.dateTo
-          );
-        }
-      );
+      return serverCache.getOrCompute(cacheKey, CacheTTL.PAGINATED, async () => {
+        const { getAppointmentsPaginated } = await import('../database/db');
+        return getAppointmentsPaginated(
+          input.page,
+          input.limit,
+          input.searchTerm,
+          input.doctorIds,
+          input.sources,
+          input.statuses,
+          input.dateFilter,
+          input.dateFrom,
+          input.dateTo
+        );
+      });
     }),
 
   updateStatus: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      status: z.string(),
-      staffNotes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+        status: z.string(),
+        staffNotes: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       // Get old status for audit log
       const dbForAudit = await getDb();
       let oldStatus = '';
       if (dbForAudit) {
-        const [old] = await dbForAudit.select({ status: appointments.status }).from(appointments).where(eq(appointments.id, input.id)).limit(1);
+        const [old] = await dbForAudit
+          .select({ status: appointments.status })
+          .from(appointments)
+          .where(eq(appointments.id, input.id))
+          .limit(1);
         oldStatus = old?.status || '';
       }
 
@@ -317,10 +336,10 @@ export const appointmentsRouter = router({
         userName: ctx.user?.name,
         notes: input.staffNotes,
       });
-      
+
       // Invalidate appointment caches after status update
-      serverCache.invalidateByPrefix("paginated:appointments:");
-      serverCache.invalidate("list:appointments");
+      serverCache.invalidateByPrefix('paginated:appointments:');
+      serverCache.invalidate('list:appointments');
       serverCache.invalidate(CacheKeys.appointmentStats());
 
       // ── Send CAPI funnel event for status change (fire-and-forget) ────────────
@@ -330,19 +349,23 @@ export const appointmentsRouter = router({
         const dbForCapi = await getDb();
         if (dbForCapi) {
           const [apptRow] = await dbForCapi
-            .select({ fullName: appointments.fullName, phone: appointments.phone, email: appointments.email })
+            .select({
+              fullName: appointments.fullName,
+              phone: appointments.phone,
+              email: appointments.email,
+            })
             .from(appointments)
             .where(eq(appointments.id, input.id))
             .limit(1);
           if (apptRow?.phone) {
             sendStatusChangeEvent({
               status: input.status,
-              fullName: apptRow.fullName || "",
+              fullName: apptRow.fullName || '',
               phone: apptRow.phone,
               email: apptRow.email || undefined,
-              serviceType: "appointment",
+              serviceType: 'appointment',
               bookingId: input.id,
-            }).catch((err) => console.error("[CAPI] Status change error:", err));
+            }).catch((err) => console.error('[CAPI] Status change error:', err));
           }
         }
       }
@@ -351,55 +374,64 @@ export const appointmentsRouter = router({
       {
         const db = await getDb();
         if (db) {
-          const [appt] = await db.select().from(appointments).where(eq(appointments.id, input.id)).limit(1);
+          const [appt] = await db
+            .select()
+            .from(appointments)
+            .where(eq(appointments.id, input.id))
+            .limit(1);
           if (appt?.phone) {
             const doctor = await getDoctorById(appt.doctorId || 0);
             const triggerMap: Record<string, string> = {
-              "confirmed": "on_confirmed",
-              "مؤكد": "on_confirmed",
-              "attended": "on_arrived",
-              "حضر": "on_arrived",
-              "completed": "on_completed",
-              "مكتمل": "on_completed",
-              "cancelled": "on_cancelled",
-              "ملغي": "on_cancelled",
+              confirmed: 'on_confirmed',
+              مؤكد: 'on_confirmed',
+              attended: 'on_arrived',
+              حضر: 'on_arrived',
+              completed: 'on_completed',
+              مكتمل: 'on_completed',
+              cancelled: 'on_cancelled',
+              ملغي: 'on_cancelled',
             };
             const triggerEvent = triggerMap[input.status];
             if (triggerEvent) {
               dispatchWhatsAppMessage({
-                entityType: "appointment",
+                entityType: 'appointment',
                 triggerEvent: triggerEvent as any,
                 phone: appt.phone,
                 recipientName: appt.fullName || undefined,
                 variables: {
-                  name: appt.fullName || "المريض",
-                  doctor: doctor?.name || "غير محدد",
-                  date: appt.preferredDate || "غير محدد",
-                  time: appt.preferredTime || "غير محدد",
-                  service: appt.procedure || "فحص عام",
+                  name: appt.fullName || 'المريض',
+                  doctor: doctor?.name || 'غير محدد',
+                  date: appt.preferredDate || 'غير محدد',
+                  time: appt.preferredTime || 'غير محدد',
+                  service: appt.procedure || 'فحص عام',
                 },
                 entityId: input.id,
                 sentBy: ctx.user?.id,
-              }).catch(err => console.error("[WhatsApp Dispatcher] Appointment status trigger error:", err));
+              }).catch((err) =>
+                console.error('[WhatsApp Dispatcher] Appointment status trigger error:', err)
+              );
             }
             // ملاحظة: تم إزالة sendPatientArrivalWelcome القديمة - dispatchWhatsAppMessage يتولى الإرسال عبر إعدادات الرسائل
           }
         }
       }
-      
+
       return { success: true };
     }),
 
   updateAppointment: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      appointmentDate: z.string().optional(),
-      status: z.string().optional(),
-      staffNotes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+        appointmentDate: z.string().optional(),
+        status: z.string().optional(),
+        staffNotes: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       const updateData: any = {};
       if (input.appointmentDate) {
@@ -415,37 +447,48 @@ export const appointmentsRouter = router({
       await db.update(appointments).set(updateData).where(eq(appointments.id, input.id));
 
       // Invalidate appointment caches after update
-      serverCache.invalidateByPrefix("paginated:appointments:");
-      serverCache.invalidate("list:appointments");
+      serverCache.invalidateByPrefix('paginated:appointments:');
+      serverCache.invalidate('list:appointments');
 
       return { success: true };
     }),
 
   // Send patient arrival welcome message
   sendArrivalWelcome: protectedProcedure
-    .input(z.object({
-      appointmentId: z.number(),
-    }))
+    .input(
+      z.object({
+        appointmentId: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       // Get appointment details
-      const appointment = await db.select().from(appointments).where(eq(appointments.id, input.appointmentId)).limit(1);
+      const appointment = await db
+        .select()
+        .from(appointments)
+        .where(eq(appointments.id, input.appointmentId))
+        .limit(1);
       if (appointment.length === 0) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "الحجز غير موجود" });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'الحجز غير موجود' });
       }
 
       const appt = appointment[0];
       const doctor = await getDoctorById(appt.doctorId);
 
       // Send automated arrival welcome message
-      const { sendPatientArrivalWelcome, formatTimeForMessage } = await import("../services/messaging");
+      const { sendPatientArrivalWelcome, formatTimeForMessage } = await import(
+        '../services/messaging'
+      );
       const result = await sendPatientArrivalWelcome({
         phone: appt.phone,
         name: appt.fullName,
-        doctor: doctor?.name || "غير محدد",
-        time: appt.appointmentDate ? formatTimeForMessage(new Date(appt.appointmentDate)) : "غير محدد",
+        doctor: doctor?.name || 'غير محدد',
+        time: appt.appointmentDate
+          ? formatTimeForMessage(new Date(appt.appointmentDate))
+          : 'غير محدد',
       });
 
       return result;
@@ -453,11 +496,21 @@ export const appointmentsRouter = router({
 
   // Bulk update appointment statuses
   bulkUpdateStatus: protectedProcedure
-    .input(z.object({
-      ids: z.array(z.number()),
-      status: z.enum(["pending", "contacted", "no_answer", "confirmed", "attended", "completed", "cancelled"]),
-      staffNotes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        ids: z.array(z.number()),
+        status: z.enum([
+          'pending',
+          'contacted',
+          'no_answer',
+          'confirmed',
+          'attended',
+          'completed',
+          'cancelled',
+        ]),
+        staffNotes: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const result = await bulkUpdateAppointmentStatus(input.ids, input.status, input.staffNotes);
 
@@ -475,8 +528,8 @@ export const appointmentsRouter = router({
       }
 
       // Invalidate appointment caches after bulk update
-      serverCache.invalidateByPrefix("paginated:appointments:");
-      serverCache.invalidate("list:appointments");
+      serverCache.invalidateByPrefix('paginated:appointments:');
+      serverCache.invalidate('list:appointments');
       serverCache.invalidate(CacheKeys.appointmentStats());
 
       return result;
@@ -484,17 +537,24 @@ export const appointmentsRouter = router({
 
   // Generate and save receipt number
   generateReceiptNumber: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       // Check if receipt number already exists
-      const [appointment] = await db.select().from(appointments).where(eq(appointments.id, input.id)).limit(1);
+      const [appointment] = await db
+        .select()
+        .from(appointments)
+        .where(eq(appointments.id, input.id))
+        .limit(1);
       if (!appointment) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "الحجز غير موجود" });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'الحجز غير موجود' });
       }
 
       // If already has receipt number, return it
@@ -504,36 +564,35 @@ export const appointmentsRouter = router({
 
       // Generate new receipt number
       const year = new Date().getFullYear();
-      
+
       // Get the count of appointments with receipt numbers this year
-      const { sql } = await import("drizzle-orm");
+      const { sql } = await import('drizzle-orm');
       const [result] = await db.execute(sql`
         SELECT COUNT(*) as count 
         FROM appointments 
         WHERE receiptNumber LIKE CONCAT('SGH-', ${year}, '-%')
       `);
-      
+
       const count = (result as any).count || 0;
       const sequenceNumber = count + 1;
       const paddedNumber = String(sequenceNumber).padStart(3, '0');
       const receiptNumber = `SGH-${year}-${paddedNumber}`;
 
       // Save receipt number
-       await db.update(appointments).set({ receiptNumber }).where(eq(appointments.id, input.id));
+      await db.update(appointments).set({ receiptNumber }).where(eq(appointments.id, input.id));
       return { receiptNumber };
     }),
 
   // Delete appointment (protected)
-  delete: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      await db.delete(appointments).where(eq(appointments.id, input.id));
-      // Invalidate appointment caches after deletion
-      serverCache.invalidateByPrefix("paginated:appointments:");
-      serverCache.invalidate("list:appointments");
-      serverCache.invalidate(CacheKeys.appointmentStats());
-      return { success: true };
-    }),
+  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    const db = await getDb();
+    if (!db)
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+    await db.delete(appointments).where(eq(appointments.id, input.id));
+    // Invalidate appointment caches after deletion
+    serverCache.invalidateByPrefix('paginated:appointments:');
+    serverCache.invalidate('list:appointments');
+    serverCache.invalidate(CacheKeys.appointmentStats());
+    return { success: true };
+  }),
 });

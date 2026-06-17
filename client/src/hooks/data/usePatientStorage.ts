@@ -3,12 +3,12 @@
  * يحفظ الاسم ورقم الهاتف والجنس بعد أول حجز ناجح ويملأها تلقائياً في الزيارات التالية
  */
 
-const STORAGE_KEY = "sgh_patient_info";
+const STORAGE_KEY = 'sgh_patient_info';
 
 export interface PatientInfo {
   fullName: string;
   phone: string;
-  gender?: "male" | "female" | "";
+  gender?: 'male' | 'female' | '';
 }
 
 export function usePatientStorage() {
@@ -34,9 +34,9 @@ export function usePatientStorage() {
   function savePatientInfo(info: PatientInfo): void {
     try {
       const toSave: PatientInfo = {
-        fullName: info.fullName || "",
-        phone: info.phone || "",
-        gender: info.gender || "",
+        fullName: info.fullName || '',
+        phone: info.phone || '',
+        gender: info.gender || '',
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     } catch {

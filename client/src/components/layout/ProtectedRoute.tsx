@@ -1,9 +1,9 @@
 /**
  * ProtectedRoute - مكون لحماية الصفحات بناءً على الميزات المفعلة
- * 
+ *
  * يتحقق من أن الميزة المطلوبة مفعلة في الترخيص
  * إذا لم تكن مفعلة، يحول المستخدم إلى صفحة FeatureLockedPage
- * 
+ *
  * @example
  * <ProtectedRoute feature="whatsapp">
  *   <WhatsAppDashboard />
@@ -12,7 +12,7 @@
 
 import { ReactNode, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useLicense } from "@/hooks/integrations/useLicense";
+import { useLicense } from '@/hooks/integrations/useLicense';
 
 interface ProtectedRouteProps {
   /** اسم الميزة المطلوبة */
@@ -23,11 +23,7 @@ interface ProtectedRouteProps {
   fallbackPath?: string;
 }
 
-export default function ProtectedRoute({
-  feature,
-  children,
-  fallbackPath,
-}: ProtectedRouteProps) {
+export default function ProtectedRoute({ feature, children, fallbackPath }: ProtectedRouteProps) {
   const [, setLocation] = useLocation();
   const { hasFeature, isLoading } = useLicense();
 

@@ -1,6 +1,6 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import UnderDevelopmentPage from "@/components/UnderDevelopmentPage";
-import { Headphones } from "lucide-react";
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
+import { Headphones } from 'lucide-react';
 
 export default function CustomerServiceTeamPage() {
   return (
@@ -11,12 +11,12 @@ export default function CustomerServiceTeamPage() {
         icon={Headphones}
         currentPath="/admin/teams/customer-service"
         features={[
-          "إدارة طلبات العملاء",
-          "تتبع التذاكر والدعم",
-          "إدارة قاعدة المعرفة",
-          "تحليلات رضا العملاء",
-          "إدارة الردود التلقائية",
-          "تقارير الأداء",
+          'إدارة طلبات العملاء',
+          'تتبع التذاكر والدعم',
+          'إدارة قاعدة المعرفة',
+          'تحليلات رضا العملاء',
+          'إدارة الردود التلقائية',
+          'تقارير الأداء',
         ]}
       />
     </DashboardLayout>

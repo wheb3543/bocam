@@ -1,6 +1,6 @@
 $kind: http-request
 description: It’s possible to receive an unknown message callback notification. The following is an example of a message you received from a customer that is not supported.
-url: ""
+url: ''
 method: VIEW
 body:
   type: json

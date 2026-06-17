@@ -1,12 +1,12 @@
 /**
  * HeroSection Component - قسم رئيسي موحد
- * 
+ *
  * A unified hero section component for all public pages
  * Consistent styling, animations, and accessibility
  */
 
-import { ReactNode } from "react";
-import { LucideIcon } from "lucide-react";
+import { ReactNode } from 'react';
+import { LucideIcon } from 'lucide-react';
 
 interface HeroSectionProps {
   title: string;
@@ -27,9 +27,9 @@ export default function HeroSection({
   subtitle,
   description,
   badge,
-  backgroundGradient = "from-green-600 via-green-700 to-blue-600",
-  textColor = "text-white",
-  minHeight = "min-h-[700px]",
+  backgroundGradient = 'from-green-600 via-green-700 to-blue-600',
+  textColor = 'text-white',
+  minHeight = 'min-h-[700px]',
   children,
 }: HeroSectionProps) {
   return (

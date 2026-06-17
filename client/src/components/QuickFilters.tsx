@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface QuickFilter {
   label: string;
@@ -16,7 +16,7 @@ interface QuickFiltersProps {
 
 /**
  * QuickFilters Component
- * 
+ *
  * مكون فلاتر سريعة لتصفية البيانات حسب الحالة
  * يعرض أزرار فلترة سريعة مع عدد العناصر لكل حالة
  */
@@ -28,7 +28,7 @@ export default function QuickFilters({ filters, activeFilter, onFilterChange }: 
         return (
           <Button
             key={filter.value}
-            variant={isActive ? "default" : "outline"}
+            variant={isActive ? 'default' : 'outline'}
             size="sm"
             onClick={() => onFilterChange(filter.value)}
             className={`
@@ -38,8 +38,8 @@ export default function QuickFilters({ filters, activeFilter, onFilterChange }: 
           >
             {filter.label}
             {filter.count !== undefined && (
-              <Badge 
-                variant={isActive ? "secondary" : "outline"} 
+              <Badge
+                variant={isActive ? 'secondary' : 'outline'}
                 className="mr-2 h-5 min-w-[20px] rounded-full px-1.5"
               >
                 {filter.count}

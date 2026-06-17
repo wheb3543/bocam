@@ -1,20 +1,25 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { trpc } from "@/lib/api/trpc";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import LeadStatsCards from "@/components/lead/LeadStatsCards";
-import Pagination from "@/components/table/Pagination";
-import { toast } from "sonner";
-import { exportToExcel, formatLeadsForExport } from "@/lib/export/exportToExcel";
-import { useFilterUtils, type DateFilterPreset } from "@/hooks/table/useFilterUtils";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { usePagination } from "@/hooks/table/usePagination";
-import { LeadFilters, LeadTableDesktop, LeadStatusDialog, LeadMobileCards } from "@/components/leads";
-import FilterPresets from "@/components/FilterPresets";
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import LeadStatsCards from '@/components/lead/LeadStatsCards';
+import Pagination from '@/components/table/Pagination';
+import { toast } from 'sonner';
+import { exportToExcel, formatLeadsForExport } from '@/lib/export/exportToExcel';
+import { useFilterUtils, type DateFilterPreset } from '@/hooks/table/useFilterUtils';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { usePagination } from '@/hooks/table/usePagination';
+import {
+  LeadFilters,
+  LeadTableDesktop,
+  LeadStatusDialog,
+  LeadMobileCards,
+} from '@/components/leads';
+import FilterPresets from '@/components/FilterPresets';
 
 const sanitizeLead = (lead: any) => {
   if (!lead) return null;
   const sanitized = { ...lead };
-  Object.keys(sanitized).forEach(key => {
+  Object.keys(sanitized).forEach((key) => {
     const value = sanitized[key];
     if (value === undefined || value === null || (typeof value === 'number' && isNaN(value))) {
       delete sanitized[key];
@@ -45,24 +50,24 @@ export default function LeadsManagementPage() {
   // Quick presets for FilterPresets component
   const quickPresets = [
     {
-      id: "today-new",
-      name: "عملاء اليوم - جدد",
-      filters: { dateFilter: "today" as DateFilterPreset, status: "new" },
+      id: 'today-new',
+      name: 'عملاء اليوم - جدد',
+      filters: { dateFilter: 'today' as DateFilterPreset, status: 'new' },
     },
     {
-      id: "week-contacted",
-      name: "عملاء الأسبوع - تم الاتصال",
-      filters: { dateFilter: "week" as DateFilterPreset, status: "contacted" },
+      id: 'week-contacted',
+      name: 'عملاء الأسبوع - تم الاتصال',
+      filters: { dateFilter: 'week' as DateFilterPreset, status: 'contacted' },
     },
     {
-      id: "month-converted",
-      name: "عملاء الشهر - محولين",
-      filters: { dateFilter: "month" as DateFilterPreset, status: "converted" },
+      id: 'month-converted',
+      name: 'عملاء الشهر - محولين',
+      filters: { dateFilter: 'month' as DateFilterPreset, status: 'converted' },
     },
     {
-      id: "all-qualified",
-      name: "جميع العملاء - مؤهلين",
-      filters: { dateFilter: "all" as DateFilterPreset, status: "qualified" },
+      id: 'all-qualified',
+      name: 'جميع العملاء - مؤهلين',
+      filters: { dateFilter: 'all' as DateFilterPreset, status: 'qualified' },
     },
   ];
 
@@ -80,18 +85,22 @@ export default function LeadsManagementPage() {
     searchTerm,
   };
 
-  const { data: unifiedLeads, isLoading: leadsLoading, refetch: refetchLeads } = trpc.leads.list.useQuery();
+  const {
+    data: unifiedLeads,
+    isLoading: leadsLoading,
+    refetch: refetchLeads,
+  } = trpc.leads.list.useQuery();
   const { data: stats } = trpc.leads.stats.useQuery();
 
   const updateStatusMutation = trpc.leads.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث حالة العميل بنجاح");
+      toast.success('تم تحديث حالة العميل بنجاح');
       refetchLeads();
       setStatusDialogOpen(false);
       setSelectedLead(null);
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء تحديث الحالة");
+      toast.error('حدث خطأ أثناء تحديث الحالة');
     },
   });
 
@@ -109,18 +118,18 @@ export default function LeadsManagementPage() {
       );
     }
 
-    if (leadsDateFilter && leadsDateFilter !== "all") {
+    if (leadsDateFilter && leadsDateFilter !== 'all') {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       filtered = filtered.filter((lead: any) => {
         const leadDate = new Date(lead.createdAt);
-        if (leadsDateFilter === "today") return leadDate >= today;
-        if (leadsDateFilter === "week") {
+        if (leadsDateFilter === 'today') return leadDate >= today;
+        if (leadsDateFilter === 'week') {
           const weekAgo = new Date(today);
           weekAgo.setDate(weekAgo.getDate() - 7);
           return leadDate >= weekAgo;
         }
-        if (leadsDateFilter === "month") {
+        if (leadsDateFilter === 'month') {
           const monthAgo = new Date(today);
           monthAgo.setMonth(monthAgo.getMonth() - 1);
           return leadDate >= monthAgo;
@@ -148,37 +157,48 @@ export default function LeadsManagementPage() {
     pagination.resetPage();
   }, [searchTerm, leadsDateFilter, leadsStatusFilter, leadsSourceFilter]);
 
-  const hasActiveFilters = !!(searchTerm || (leadsDateFilter && leadsDateFilter !== "all") || leadsStatusFilter.length > 0 || leadsSourceFilter.length > 0);
+  const hasActiveFilters = !!(
+    searchTerm ||
+    (leadsDateFilter && leadsDateFilter !== 'all') ||
+    leadsStatusFilter.length > 0 ||
+    leadsSourceFilter.length > 0
+  );
 
   const clearAllFilters = useCallback(() => {
-    setSearchTerm("");
-    setLeadsDateFilter("all");
+    setSearchTerm('');
+    setLeadsDateFilter('all');
     setLeadsStatusFilter([]);
     setLeadsSourceFilter([]);
   }, [setSearchTerm, setLeadsDateFilter, setLeadsStatusFilter, setLeadsSourceFilter]);
 
-  const handleStatusUpdate = useCallback((status: string, notes: string) => {
-    if (!selectedLead || !status) return;
-    updateStatusMutation.mutate({
-      id: selectedLead.id,
-      status: status as "new" | "contacted" | "booked" | "not_interested" | "no_answer",
-      notes,
-    });
-  }, [selectedLead, updateStatusMutation]);
+  const handleStatusUpdate = useCallback(
+    (status: string, notes: string) => {
+      if (!selectedLead || !status) return;
+      updateStatusMutation.mutate({
+        id: selectedLead.id,
+        status: status as 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer',
+        notes,
+      });
+    },
+    [selectedLead, updateStatusMutation]
+  );
 
-  const handleExport = useCallback((format: 'excel' | 'csv' | 'pdf') => {
-    if (!filteredLeads || filteredLeads.length === 0) {
-      toast.error("لا توجد بيانات للتصدير");
-      return;
-    }
-    const formattedData = formatLeadsForExport(filteredLeads);
-    exportToExcel(formattedData, "تسجيلات_العملاء");
-    toast.success("تم تصدير البيانات بنجاح");
-  }, [filteredLeads]);
+  const handleExport = useCallback(
+    (format: 'excel' | 'csv' | 'pdf') => {
+      if (!filteredLeads || filteredLeads.length === 0) {
+        toast.error('لا توجد بيانات للتصدير');
+        return;
+      }
+      const formattedData = formatLeadsForExport(filteredLeads);
+      exportToExcel(formattedData, 'تسجيلات_العملاء');
+      toast.success('تم تصدير البيانات بنجاح');
+    },
+    [filteredLeads]
+  );
 
   const handlePrint = useCallback(() => {
     if (!filteredLeads || filteredLeads.length === 0) {
-      toast.error("لا توجد بيانات للطباعة");
+      toast.error('لا توجد بيانات للطباعة');
       return;
     }
     window.print();
@@ -193,29 +213,40 @@ export default function LeadsManagementPage() {
     window.open(`https://wa.me/${lead.phone.replace(/\D/g, '')}`, '_blank');
   }, []);
 
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
-  }, [setSearchTerm]);
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+    },
+    [setSearchTerm]
+  );
 
-  const handleDateFilterChange = useCallback((value: DateFilterPreset) => {
-    setLeadsDateFilter(value);
-  }, [setLeadsDateFilter]);
+  const handleDateFilterChange = useCallback(
+    (value: DateFilterPreset) => {
+      setLeadsDateFilter(value);
+    },
+    [setLeadsDateFilter]
+  );
 
-  const handleStatusFilterChange = useCallback((value: string[]) => {
-    setLeadsStatusFilter(value);
-  }, [setLeadsStatusFilter]);
+  const handleStatusFilterChange = useCallback(
+    (value: string[]) => {
+      setLeadsStatusFilter(value);
+    },
+    [setLeadsStatusFilter]
+  );
 
-  const handleSourceFilterChange = useCallback((value: string[]) => {
-    setLeadsSourceFilter(value);
-  }, [setLeadsSourceFilter]);
+  const handleSourceFilterChange = useCallback(
+    (value: string[]) => {
+      setLeadsSourceFilter(value);
+    },
+    [setLeadsSourceFilter]
+  );
 
-  const pendingCount = Array.isArray(unifiedLeads) ? unifiedLeads.filter((l: any) => l.status === 'new').length : 0;
+  const pendingCount = Array.isArray(unifiedLeads)
+    ? unifiedLeads.filter((l: any) => l.status === 'new').length
+    : 0;
 
   return (
-    <DashboardLayout
-      pageTitle="تسجيلات العملاء"
-      pageDescription="إدارة ومتابعة تسجيلات العملاء"
-    >
+    <DashboardLayout pageTitle="تسجيلات العملاء" pageDescription="إدارة ومتابعة تسجيلات العملاء">
       <div className="space-y-4 sm:space-y-5 px-3 sm:px-4 md:px-6 py-3 sm:py-4" dir="rtl">
         {/* Stats Cards */}
         <LeadStatsCards stats={stats} />
@@ -226,7 +257,7 @@ export default function LeadsManagementPage() {
           currentFilters={currentFilters}
           onApplyFilters={handleApplyPreset}
           quickPresets={quickPresets}
-          isAdmin={user?.role === "admin"}
+          isAdmin={user?.role === 'admin'}
         />
 
         {/* Filters Section */}
@@ -268,9 +299,7 @@ export default function LeadsManagementPage() {
         />
 
         {/* Pagination (Desktop + Mobile) */}
-        {filteredLeads.length > 0 && (
-          <Pagination {...pagination.paginationProps} />
-        )}
+        {filteredLeads.length > 0 && <Pagination {...pagination.paginationProps} />}
 
         {/* Update Lead Status Dialog */}
         <LeadStatusDialog

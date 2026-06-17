@@ -1,6 +1,6 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import UnderDevelopmentPage from "@/components/UnderDevelopmentPage";
-import { FileText } from "lucide-react";
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
+import { FileText } from 'lucide-react';
 
 export default function ContentManagementPage() {
   return (
@@ -11,12 +11,12 @@ export default function ContentManagementPage() {
         icon={FileText}
         currentPath="/admin/content/content"
         features={[
-          "إدارة العروض والخصومات",
-          "إدارة المخيمات والفعاليات",
-          "إدارة ملفات الأطباء",
-          "إدارة الصور والوسائط",
-          "جدولة النشر",
-          "مراجعة المواد قبل النشر",
+          'إدارة العروض والخصومات',
+          'إدارة المخيمات والفعاليات',
+          'إدارة ملفات الأطباء',
+          'إدارة الصور والوسائط',
+          'جدولة النشر',
+          'مراجعة المواد قبل النشر',
         ]}
       />
     </DashboardLayout>

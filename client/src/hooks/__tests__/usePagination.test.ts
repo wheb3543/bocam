@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { usePagination } from '../usePagination';
+import { usePagination } from '../table/usePagination';
 
 describe('usePagination', () => {
   const testData = Array.from({ length: 250 }, (_, i) => ({ id: i + 1, name: `Item ${i + 1}` }));

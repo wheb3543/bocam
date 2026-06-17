@@ -1,58 +1,45 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { useState, useMemo, useEffect } from "react";
-import { trpc } from "@/lib/api/trpc";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import OfferLeadsManagement from "@/components/offer/OfferLeadsManagement";
-import CampRegistrationsManagement from "@/components/camp/CampRegistrationsManagement";
-import CustomerProfilesTab from "@/components/CustomerProfilesTab";
-import ManualRegistrationForm from "@/components/form/ManualRegistrationForm";
-import LeadsTab from "@/components/lead/LeadsTab";
-import AppointmentsTab from "@/components/booking/AppointmentsTab";
-import TasksSection from "@/components/TasksSection";
-import CommentsSection from "@/components/CommentsSection";
-import AuditLogSection from "@/components/AuditLogSection";
-import { DateRangePicker } from "@/components/form/DateRangePicker";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState, useMemo, useEffect } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import OfferLeadsManagement from '@/components/offer/OfferLeadsManagement';
+import CampRegistrationsManagement from '@/components/camp/CampRegistrationsManagement';
+import CustomerProfilesTab from '@/components/CustomerProfilesTab';
+import ManualRegistrationForm from '@/components/form/ManualRegistrationForm';
+import LeadsTab from '@/components/lead/LeadsTab';
+import AppointmentsTab from '@/components/booking/AppointmentsTab';
+import TasksSection from '@/components/TasksSection';
+import CommentsSection from '@/components/CommentsSection';
+import AuditLogSection from '@/components/AuditLogSection';
+import { DateRangePicker } from '@/components/form/DateRangePicker';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Users,
-  UserCheck,
-  Calendar,
-  TrendingUp,
-  Plus,
-  BarChart3,
-  CheckSquare,
-} from "lucide-react";
-import { toast } from "sonner";
-import { useFilterUtils } from "@/hooks/table/useFilterUtils";
-import { useLocation } from "wouter";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { SOURCE_LABELS } from "@shared/sources";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Users, UserCheck, Calendar, TrendingUp, Plus, BarChart3, CheckSquare } from 'lucide-react';
+import { toast } from 'sonner';
+import { useFilterUtils } from '@/hooks/table/useFilterUtils';
+import { useLocation } from 'wouter';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { SOURCE_LABELS } from '@shared/sources';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 export default function BookingsManagementPage() {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
@@ -60,20 +47,22 @@ export default function BookingsManagementPage() {
   const { user } = useAuth();
   const utils = trpc.useUtils();
   const [location, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<"leads" | "appointments" | "offerLeads" | "campRegistrations" | "tasks" | "customers">("leads");
+  const [activeTab, setActiveTab] = useState<
+    'leads' | 'appointments' | 'offerLeads' | 'campRegistrations' | 'tasks' | 'customers'
+  >('leads');
 
   // === Lead Status Dialog State ===
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState("");
-  const [statusNotes, setStatusNotes] = useState("");
+  const [newStatus, setNewStatus] = useState('');
+  const [statusNotes, setStatusNotes] = useState('');
 
   // === Appointment Status Dialog State ===
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [appointmentStatusDialogOpen, setAppointmentStatusDialogOpen] = useState(false);
-  const [newAppointmentStatus, setNewAppointmentStatus] = useState("");
-  const [appointmentStatusNotes, setAppointmentStatusNotes] = useState("");
-  const [appointmentDate, setAppointmentDate] = useState("");
+  const [newAppointmentStatus, setNewAppointmentStatus] = useState('');
+  const [appointmentStatusNotes, setAppointmentStatusNotes] = useState('');
+  const [appointmentDate, setAppointmentDate] = useState('');
 
   // === Manual Registration Dialog ===
   const [manualRegistrationOpen, setManualRegistrationOpen] = useState(false);
@@ -119,7 +108,12 @@ export default function BookingsManagementPage() {
       else if (type === 'camp') setActiveTab('campRegistrations');
       window.history.replaceState({}, '', '/admin/bookings');
     } else if (tab) {
-      if (tab === 'appointments' || tab === 'offerLeads' || tab === 'campRegistrations' || tab === 'leads') {
+      if (
+        tab === 'appointments' ||
+        tab === 'offerLeads' ||
+        tab === 'campRegistrations' ||
+        tab === 'leads'
+      ) {
         setActiveTab(tab as any);
       }
       window.history.replaceState({}, '', '/admin/bookings');
@@ -127,46 +121,59 @@ export default function BookingsManagementPage() {
   }, [location]);
 
   const pendingCounts = useMemo(() => {
-    const leadsPending = Array.isArray(unifiedLeads) ? unifiedLeads.filter(l => l.status === 'new').length : 0;
+    const leadsPending = Array.isArray(unifiedLeads)
+      ? unifiedLeads.filter((l) => l.status === 'new').length
+      : 0;
     const appointmentsPending = appointmentsData?.total || 0;
-    const offerLeadsPending = Array.isArray(offerLeadsData) ? offerLeadsData.filter((o: any) => o.status === 'pending').length : offerLeadsPendingCount;
-    const campRegistrationsPending = Array.isArray(campRegistrationsData) ? campRegistrationsData.filter((c: any) => c.status === 'pending').length : campRegistrationsPendingCount;
+    const offerLeadsPending = Array.isArray(offerLeadsData)
+      ? offerLeadsData.filter((o: any) => o.status === 'pending').length
+      : offerLeadsPendingCount;
+    const campRegistrationsPending = Array.isArray(campRegistrationsData)
+      ? campRegistrationsData.filter((c: any) => c.status === 'pending').length
+      : campRegistrationsPendingCount;
     return {
       leads: leadsPending,
       appointments: appointmentsPending,
       offerLeads: offerLeadsPending,
       campRegistrations: campRegistrationsPending,
     };
-  }, [unifiedLeads, appointmentsData, offerLeadsData, campRegistrationsData, offerLeadsPendingCount, campRegistrationsPendingCount]);
+  }, [
+    unifiedLeads,
+    appointmentsData,
+    offerLeadsData,
+    campRegistrationsData,
+    offerLeadsPendingCount,
+    campRegistrationsPendingCount,
+  ]);
 
   // === Lead Status Update ===
   const updateStatusMutation = trpc.leads.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث حالة العميل بنجاح");
+      toast.success('تم تحديث حالة العميل بنجاح');
       refetchLeads();
       setStatusDialogOpen(false);
       setSelectedLead(null);
-      setNewStatus("");
-      setStatusNotes("");
+      setNewStatus('');
+      setStatusNotes('');
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء تحديث الحالة");
+      toast.error('حدث خطأ أثناء تحديث الحالة');
     },
   });
 
   // === Appointment Status Update ===
   const updateAppointmentStatusMutation = trpc.appointments.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث حالة الموعد بنجاح");
+      toast.success('تم تحديث حالة الموعد بنجاح');
       utils.appointments.listPaginated.invalidate();
       setAppointmentStatusDialogOpen(false);
       setSelectedAppointment(null);
-      setNewAppointmentStatus("");
-      setAppointmentStatusNotes("");
-      setAppointmentDate("");
+      setNewAppointmentStatus('');
+      setAppointmentStatusNotes('');
+      setAppointmentDate('');
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء تحديث الحالة");
+      toast.error('حدث خطأ أثناء تحديث الحالة');
     },
   });
 
@@ -174,7 +181,7 @@ export default function BookingsManagementPage() {
     if (!selectedLead || !newStatus) return;
     updateStatusMutation.mutate({
       id: selectedLead.id,
-      status: newStatus as "new" | "contacted" | "booked" | "not_interested" | "no_answer",
+      status: newStatus as 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer',
       notes: statusNotes,
     });
   };
@@ -190,8 +197,8 @@ export default function BookingsManagementPage() {
 
   const openLeadStatusDialog = (lead: any) => {
     setSelectedLead(lead);
-    setNewStatus(lead.status || "new");
-    setStatusNotes("");
+    setNewStatus(lead.status || 'new');
+    setStatusNotes('');
     setStatusDialogOpen(true);
   };
 
@@ -207,13 +214,13 @@ export default function BookingsManagementPage() {
       pageTitle="إدارة الحجوزات"
       pageDescription="إدارة ومتابعة جميع الحجوزات والمواعيد"
     >
-      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6" dir="rtl">
+      <div
+        className="container mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6"
+        dir="rtl"
+      >
         {/* Quick Actions */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <DateRangePicker
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-          />
+          <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
           <div className="flex gap-2">
             <Button
               onClick={() => setLocation('/admin/reports/camp-stats')}
@@ -224,11 +231,7 @@ export default function BookingsManagementPage() {
               <BarChart3 className="h-4 w-4" />
               إحصائيات المخيمات
             </Button>
-            <Button
-              onClick={() => setManualRegistrationOpen(true)}
-              className="gap-2"
-              size="sm"
-            >
+            <Button onClick={() => setManualRegistrationOpen(true)} className="gap-2" size="sm">
               <Plus className="h-4 w-4" />
               تسجيل يدوي
             </Button>
@@ -238,63 +241,72 @@ export default function BookingsManagementPage() {
         {/* Tabs */}
         <div className="flex gap-2 overflow-x-auto pt-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
           <Button
-            variant={activeTab === "leads" ? "default" : "outline"}
-            onClick={() => setActiveTab("leads")}
+            variant={activeTab === 'leads' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('leads')}
             className="flex-shrink-0 gap-2 relative"
           >
             <Users className="h-4 w-4" />
             تسجيلات العملاء
             {pendingCounts.leads > 0 && (
-              <Badge variant="destructive" className="absolute -top-2 -left-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-bold rounded-full shadow-lg">
+              <Badge
+                variant="destructive"
+                className="absolute -top-2 -left-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-bold rounded-full shadow-lg"
+              >
                 {pendingCounts.leads}
               </Badge>
             )}
           </Button>
           <Button
-            variant={activeTab === "appointments" ? "default" : "outline"}
-            onClick={() => setActiveTab("appointments")}
+            variant={activeTab === 'appointments' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('appointments')}
             className="flex-shrink-0 gap-2 relative"
           >
             <Calendar className="h-4 w-4" />
             مواعيد الأطباء
           </Button>
           <Button
-            variant={activeTab === "offerLeads" ? "default" : "outline"}
-            onClick={() => setActiveTab("offerLeads")}
+            variant={activeTab === 'offerLeads' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('offerLeads')}
             className="flex-shrink-0 gap-2 relative"
           >
             <TrendingUp className="h-4 w-4" />
             حجوزات العروض
             {pendingCounts.offerLeads > 0 && (
-              <Badge variant="destructive" className="absolute -top-2 -left-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-bold rounded-full shadow-lg">
+              <Badge
+                variant="destructive"
+                className="absolute -top-2 -left-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-bold rounded-full shadow-lg"
+              >
                 {pendingCounts.offerLeads}
               </Badge>
             )}
           </Button>
           <Button
-            variant={activeTab === "campRegistrations" ? "default" : "outline"}
-            onClick={() => setActiveTab("campRegistrations")}
+            variant={activeTab === 'campRegistrations' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('campRegistrations')}
             className="flex-shrink-0 gap-2 relative"
           >
             <UserCheck className="h-4 w-4" />
             تسجيلات المخيمات
             {pendingCounts.campRegistrations > 0 && (
-              <Badge variant="destructive" className="absolute -top-2 -left-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-bold rounded-full shadow-lg">
+              <Badge
+                variant="destructive"
+                className="absolute -top-2 -left-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-bold rounded-full shadow-lg"
+              >
                 {pendingCounts.campRegistrations}
               </Badge>
             )}
           </Button>
           <Button
-            variant={activeTab === "customers" ? "default" : "outline"}
-            onClick={() => setActiveTab("customers")}
+            variant={activeTab === 'customers' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('customers')}
             className="flex-shrink-0 gap-2"
           >
             <Users className="h-4 w-4" />
             ملفات العملاء
           </Button>
           <Button
-            variant={activeTab === "tasks" ? "default" : "outline"}
-            onClick={() => setActiveTab("tasks")}
+            variant={activeTab === 'tasks' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('tasks')}
             className="flex-shrink-0 gap-2"
           >
             <CheckSquare className="h-4 w-4" />
@@ -303,7 +315,7 @@ export default function BookingsManagementPage() {
         </div>
 
         {/* Tab Content */}
-        {activeTab === "leads" && (
+        {activeTab === 'leads' && (
           <LeadsTab
             leadsFilter={leadsFilter}
             onOpenStatusDialog={openLeadStatusDialog}
@@ -311,7 +323,7 @@ export default function BookingsManagementPage() {
           />
         )}
 
-        {activeTab === "appointments" && (
+        {activeTab === 'appointments' && (
           <AppointmentsTab
             appointmentFilter={appointmentFilter}
             dateRange={dateRange}
@@ -319,14 +331,14 @@ export default function BookingsManagementPage() {
           />
         )}
 
-        {activeTab === "offerLeads" && (
+        {activeTab === 'offerLeads' && (
           <OfferLeadsManagement
             onPendingCountChange={setOfferLeadsPendingCount}
             dateRange={dateRange}
           />
         )}
 
-        {activeTab === "campRegistrations" && (
+        {activeTab === 'campRegistrations' && (
           <CampRegistrationsManagement
             onPendingCountChange={setCampRegistrationsPendingCount}
             dateRange={dateRange}
@@ -334,11 +346,9 @@ export default function BookingsManagementPage() {
           />
         )}
 
-        {activeTab === "customers" && (
-          <CustomerProfilesTab />
-        )}
+        {activeTab === 'customers' && <CustomerProfilesTab />}
 
-        {activeTab === "tasks" && (
+        {activeTab === 'tasks' && (
           <div className="space-y-4">
             <Card>
               <CardHeader>
@@ -346,15 +356,10 @@ export default function BookingsManagementPage() {
                   <CheckSquare className="h-5 w-5" />
                   جميع المهام
                 </CardTitle>
-                <CardDescription>
-                  عرض وإدارة جميع المهام من كل الأقسام
-                </CardDescription>
+                <CardDescription>عرض وإدارة جميع المهام من كل الأقسام</CardDescription>
               </CardHeader>
               <CardContent>
-                <TasksSection
-                  entityType="all"
-                  entityId={0}
-                />
+                <TasksSection entityType="all" entityId={0} />
               </CardContent>
             </Card>
           </div>
@@ -372,20 +377,36 @@ export default function BookingsManagementPage() {
             {selectedLead && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <p className="text-sm"><span className="font-medium">الاسم:</span> {selectedLead.fullName}</p>
-                  <p className="text-sm"><span className="font-medium">الهاتف:</span> {formatPhoneDisplay(selectedLead.phone)}</p>
+                  <p className="text-sm">
+                    <span className="font-medium">الاسم:</span> {selectedLead.fullName}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">الهاتف:</span>{' '}
+                    {formatPhoneDisplay(selectedLead.phone)}
+                  </p>
                   {selectedLead.email && (
-                    <p className="text-sm"><span className="font-medium">البريد:</span> {selectedLead.email}</p>
+                    <p className="text-sm">
+                      <span className="font-medium">البريد:</span> {selectedLead.email}
+                    </p>
                   )}
                   <p className="text-sm">
-                    <span className="font-medium">النوع:</span> {selectedLead.type === 'general' ? 'عام' : selectedLead.type === 'offer' ? 'عرض' : 'مخيم'}
+                    <span className="font-medium">النوع:</span>{' '}
+                    {selectedLead.type === 'general'
+                      ? 'عام'
+                      : selectedLead.type === 'offer'
+                        ? 'عرض'
+                        : 'مخيم'}
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">المصدر:</span>{' '}
-                    {selectedLead.source ? SOURCE_LABELS[selectedLead.source] || selectedLead.source : '-'}
+                    {selectedLead.source
+                      ? SOURCE_LABELS[selectedLead.source] || selectedLead.source
+                      : '-'}
                   </p>
                   {selectedLead.notes && (
-                    <p className="text-sm"><span className="font-medium">الملاحظات:</span> {selectedLead.notes}</p>
+                    <p className="text-sm">
+                      <span className="font-medium">الملاحظات:</span> {selectedLead.notes}
+                    </p>
                   )}
                   <p className="text-sm">
                     <span className="font-medium">تاريخ التسجيل:</span>{' '}
@@ -422,8 +443,8 @@ export default function BookingsManagementPage() {
                     onClick={() => {
                       setStatusDialogOpen(false);
                       setSelectedLead(null);
-                      setNewStatus("");
-                      setStatusNotes("");
+                      setNewStatus('');
+                      setStatusNotes('');
                     }}
                   >
                     إلغاء
@@ -450,37 +471,69 @@ export default function BookingsManagementPage() {
               <div className="flex-1 overflow-hidden flex flex-col">
                 <Tabs defaultValue="info" className="flex-1 overflow-hidden flex flex-col">
                   <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-                    <TabsTrigger value="info" className="text-xs sm:text-sm">معلومات الموعد</TabsTrigger>
-                    <TabsTrigger value="comments" className="text-xs sm:text-sm">التعليقات</TabsTrigger>
-                    <TabsTrigger value="tasks" className="text-xs sm:text-sm">المهام</TabsTrigger>
-                    <TabsTrigger value="history" className="text-xs sm:text-sm">سجل التغييرات</TabsTrigger>
+                    <TabsTrigger value="info" className="text-xs sm:text-sm">
+                      معلومات الموعد
+                    </TabsTrigger>
+                    <TabsTrigger value="comments" className="text-xs sm:text-sm">
+                      التعليقات
+                    </TabsTrigger>
+                    <TabsTrigger value="tasks" className="text-xs sm:text-sm">
+                      المهام
+                    </TabsTrigger>
+                    <TabsTrigger value="history" className="text-xs sm:text-sm">
+                      سجل التغييرات
+                    </TabsTrigger>
                   </TabsList>
 
                   <div className="flex-1 overflow-y-auto mt-4">
                     <TabsContent value="info" className="space-y-4 mt-0">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <p className="text-sm"><span className="font-medium">المريض:</span> {selectedAppointment.patientName}</p>
-                          <p className="text-sm"><span className="font-medium">الهاتف:</span> {formatPhoneDisplay(selectedAppointment.phone)}</p>
+                          <p className="text-sm">
+                            <span className="font-medium">المريض:</span>{' '}
+                            {selectedAppointment.patientName}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">الهاتف:</span>{' '}
+                            {formatPhoneDisplay(selectedAppointment.phone)}
+                          </p>
                           {selectedAppointment.email && (
-                            <p className="text-sm"><span className="font-medium">البريد:</span> {selectedAppointment.email}</p>
+                            <p className="text-sm">
+                              <span className="font-medium">البريد:</span>{' '}
+                              {selectedAppointment.email}
+                            </p>
                           )}
                         </div>
                         <div className="space-y-2">
-                          <p className="text-sm"><span className="font-medium">الطبيب:</span> {selectedAppointment.doctorName}</p>
-                          <p className="text-sm"><span className="font-medium">التخصص:</span> {selectedAppointment.doctorSpecialty}</p>
+                          <p className="text-sm">
+                            <span className="font-medium">الطبيب:</span>{' '}
+                            {selectedAppointment.doctorName}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">التخصص:</span>{' '}
+                            {selectedAppointment.doctorSpecialty}
+                          </p>
                           {selectedAppointment.procedure && (
-                            <p className="text-sm"><span className="font-medium">الإجراء:</span> {selectedAppointment.procedure}</p>
+                            <p className="text-sm">
+                              <span className="font-medium">الإجراء:</span>{' '}
+                              {selectedAppointment.procedure}
+                            </p>
                           )}
                         </div>
                       </div>
                       <div className="space-y-2">
                         <p className="text-sm">
                           <span className="font-medium">المصدر:</span>{' '}
-                          {(selectedAppointment as any).source ? SOURCE_LABELS[(selectedAppointment as any).source] || (selectedAppointment as any).source : '-'}
+                          {(selectedAppointment as any).source
+                            ? SOURCE_LABELS[(selectedAppointment as any).source] ||
+                              (selectedAppointment as any).source
+                            : '-'}
                         </p>
                         {selectedAppointment.patientNotes && (
-                          <p className="text-sm"><span className="font-medium">ملاحظات المريض:</span> {selectedAppointment.patientNotes}</p>
+                          <p className="text-sm">
+                            <span className="font-medium">ملاحظات المريض:</span>{' '}
+                            {selectedAppointment.patientNotes}
+                          </p>
                         )}
                         <p className="text-sm">
                           <span className="font-medium">تاريخ التسجيل:</span>{' '}
@@ -489,7 +542,10 @@ export default function BookingsManagementPage() {
                       </div>
                       <div className="space-y-2">
                         <Label>الحالة الجديدة</Label>
-                        <Select value={newAppointmentStatus} onValueChange={setNewAppointmentStatus}>
+                        <Select
+                          value={newAppointmentStatus}
+                          onValueChange={setNewAppointmentStatus}
+                        >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -505,7 +561,11 @@ export default function BookingsManagementPage() {
                         <Label>تاريخ الموعد</Label>
                         <Input
                           type="date"
-                          value={appointmentDate ? new Date(appointmentDate).toISOString().split('T')[0] : ''}
+                          value={
+                            appointmentDate
+                              ? new Date(appointmentDate).toISOString().split('T')[0]
+                              : ''
+                          }
                           onChange={(e) => setAppointmentDate(e.target.value)}
                         />
                       </div>
@@ -521,24 +581,15 @@ export default function BookingsManagementPage() {
                     </TabsContent>
 
                     <TabsContent value="comments" className="mt-0">
-                      <CommentsSection
-                        entityType="appointment"
-                        entityId={selectedAppointment.id}
-                      />
+                      <CommentsSection entityType="appointment" entityId={selectedAppointment.id} />
                     </TabsContent>
 
                     <TabsContent value="tasks" className="mt-0">
-                      <TasksSection
-                        entityType="appointment"
-                        entityId={selectedAppointment.id}
-                      />
+                      <TasksSection entityType="appointment" entityId={selectedAppointment.id} />
                     </TabsContent>
 
                     <TabsContent value="history" className="mt-0">
-                      <AuditLogSection
-                        entityType="appointment"
-                        entityId={selectedAppointment.id}
-                      />
+                      <AuditLogSection entityType="appointment" entityId={selectedAppointment.id} />
                     </TabsContent>
                   </div>
                 </Tabs>
@@ -549,9 +600,9 @@ export default function BookingsManagementPage() {
                     onClick={() => {
                       setAppointmentStatusDialogOpen(false);
                       setSelectedAppointment(null);
-                      setNewAppointmentStatus("");
-                      setAppointmentStatusNotes("");
-                      setAppointmentDate("");
+                      setNewAppointmentStatus('');
+                      setAppointmentStatusNotes('');
+                      setAppointmentDate('');
                     }}
                   >
                     إلغاء
@@ -570,9 +621,7 @@ export default function BookingsManagementPage() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>تسجيل يدوي</DialogTitle>
-              <DialogDescription>
-                قم بإضافة تسجيل جديد يدوياً
-              </DialogDescription>
+              <DialogDescription>قم بإضافة تسجيل جديد يدوياً</DialogDescription>
             </DialogHeader>
             <ManualRegistrationForm />
           </DialogContent>

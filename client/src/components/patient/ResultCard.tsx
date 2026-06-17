@@ -1,7 +1,7 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FlaskConical, ScanLine, ClipboardList, FileText, ChevronLeft } from "lucide-react";
-import { ReactNode } from "react";
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { FlaskConical, ScanLine, ClipboardList, FileText, ChevronLeft } from 'lucide-react';
+import { ReactNode } from 'react';
 
 type ResultCardProps = {
   result: any;
@@ -10,11 +10,16 @@ type ResultCardProps = {
   onOpenDetails?: () => void;
 };
 
-export default function ResultCard({ result, statusBadge, formatDate, onOpenDetails }: ResultCardProps) {
+export default function ResultCard({
+  result,
+  statusBadge,
+  formatDate,
+  onOpenDetails,
+}: ResultCardProps) {
   const icon =
-    result.resultType === "lab" ? (
+    result.resultType === 'lab' ? (
       <FlaskConical className="h-4 w-4 text-blue-500" />
-    ) : result.resultType === "radiology" ? (
+    ) : result.resultType === 'radiology' ? (
       <ScanLine className="h-4 w-4 text-purple-500" />
     ) : (
       <ClipboardList className="h-4 w-4 text-amber-500" />
@@ -28,8 +33,12 @@ export default function ResultCard({ result, statusBadge, formatDate, onOpenDeta
             <div className="mt-0.5">{icon}</div>
             <div className="min-w-0">
               <p className="text-sm font-semibold truncate">{result.title}</p>
-              {result.doctorName && <p className="text-xs text-muted-foreground mt-0.5">د. {result.doctorName}</p>}
-              <p className="text-xs text-muted-foreground mt-0.5">{formatDate(result.resultDate || result.createdAt)}</p>
+              {result.doctorName && (
+                <p className="text-xs text-muted-foreground mt-0.5">د. {result.doctorName}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {formatDate(result.resultDate || result.createdAt)}
+              </p>
             </div>
           </div>
           {statusBadge(result.status)}

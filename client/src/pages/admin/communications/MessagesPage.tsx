@@ -1,6 +1,6 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import UnderDevelopmentPage from "@/components/UnderDevelopmentPage";
-import { MessageSquare } from "lucide-react";
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
+import { MessageSquare } from 'lucide-react';
 
 export default function MessagesPage() {
   return (
@@ -11,12 +11,12 @@ export default function MessagesPage() {
         icon={MessageSquare}
         currentPath="/admin/communications/messages"
         features={[
-          "إرسال رسائل جماعية",
-          "قوالب الرسائل المخصصة",
-          "تتبع حالة الرسائل",
-          "إدارة قوائم المستلمين",
-          "جدولة الرسائل",
-          "إحصائيات الرسائل",
+          'إرسال رسائل جماعية',
+          'قوالب الرسائل المخصصة',
+          'تتبع حالة الرسائل',
+          'إدارة قوائم المستلمين',
+          'جدولة الرسائل',
+          'إحصائيات الرسائل',
         ]}
       />
     </DashboardLayout>

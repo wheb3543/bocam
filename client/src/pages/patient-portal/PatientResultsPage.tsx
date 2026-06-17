@@ -1,9 +1,9 @@
-import { useLocation } from "wouter";
-import { trpc } from "@/lib/api/trpc";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, FileText } from "lucide-react";
-import ResultCard from "@/components/patient/ResultCard";
+import { useLocation } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, FileText } from 'lucide-react';
+import ResultCard from '@/components/patient/ResultCard';
 
 export default function PatientResultsPage() {
   const [, navigate] = useLocation();
@@ -11,12 +11,12 @@ export default function PatientResultsPage() {
   const { data: results, isLoading } = trpc.patientPortal.myResults.useQuery();
 
   const statusBadge = (status: string) => {
-    const map: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
-      pending: { label: "قيد الانتظار", variant: "outline" },
-      ready: { label: "جاهز", variant: "default" },
-      delivered: { label: "تم التسليم", variant: "secondary" },
+    const map: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+      pending: { label: 'قيد الانتظار', variant: 'outline' },
+      ready: { label: 'جاهز', variant: 'default' },
+      delivered: { label: 'تم التسليم', variant: 'secondary' },
     };
-    const info = map[status] || { label: status, variant: "outline" as const };
+    const info = map[status] || { label: status, variant: 'outline' as const };
     return <Badge variant={info.variant}>{info.label}</Badge>;
   };
 

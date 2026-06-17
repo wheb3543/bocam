@@ -1,11 +1,11 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
-import { X, GripVertical } from "lucide-react";
-import { useState, useEffect } from "react";
-import type { NavItem, NavGroup } from "@/components/layout/DashboardSidebarV2";
-import { cn } from "@/lib/utils";
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
+import { X, GripVertical } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import type { NavItem, NavGroup } from '@/components/layout/DashboardSidebarV2';
+import { cn } from '@/lib/utils';
 
 interface EditSidebarModalProps {
   isOpen: boolean;
@@ -22,7 +22,7 @@ export default function EditSidebarModal({
   onClose,
   allToolsGroups,
   visibleItemIds,
-  onSave
+  onSave,
 }: EditSidebarModalProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>(visibleItemIds);
 
@@ -34,19 +34,19 @@ export default function EditSidebarModal({
   }, [isOpen, visibleItemIds]);
 
   // Get all items from all groups
-  const allItems = allToolsGroups.flatMap(group => group.items);
+  const allItems = allToolsGroups.flatMap((group) => group.items);
 
   // Get selected items in order
   const selectedItems = selectedIds
-    .map(id => allItems.find(item => item.id === id))
+    .map((id) => allItems.find((item) => item.id === id))
     .filter(Boolean) as NavItem[];
 
   // Toggle selection
   const toggleItem = (itemId: string) => {
-    if (itemId === "home") return; // Cannot remove home
+    if (itemId === 'home') return; // Cannot remove home
 
     if (selectedIds.includes(itemId)) {
-      setSelectedIds(selectedIds.filter(id => id !== itemId));
+      setSelectedIds(selectedIds.filter((id) => id !== itemId));
     } else {
       if (selectedIds.length < MAX_VISIBLE_ITEMS) {
         setSelectedIds([...selectedIds, itemId]);
@@ -56,16 +56,16 @@ export default function EditSidebarModal({
 
   // Remove item from selected
   const removeItem = (itemId: string) => {
-    if (itemId === "home") return;
-    setSelectedIds(selectedIds.filter(id => id !== itemId));
+    if (itemId === 'home') return;
+    setSelectedIds(selectedIds.filter((id) => id !== itemId));
   };
 
   // Move item up/down
-  const moveItem = (itemId: string, direction: "up" | "down") => {
+  const moveItem = (itemId: string, direction: 'up' | 'down') => {
     const index = selectedIds.indexOf(itemId);
     if (index === -1) return;
-    
-    const newIndex = direction === "up" ? index - 1 : index + 1;
+
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= selectedIds.length) return;
 
     const newIds = [...selectedIds];
@@ -105,10 +105,11 @@ export default function EditSidebarModal({
           <div className="w-9" />
         </div>
 
-
-
         {/* Two Column Layout */}
-        <div className="grid grid-cols-2 divide-x divide-gray-200 dark:divide-gray-700 divide-x-reverse" style={{ height: 'calc(100vh - 280px)', maxHeight: '500px' }}>
+        <div
+          className="grid grid-cols-2 divide-x divide-gray-200 dark:divide-gray-700 divide-x-reverse"
+          style={{ height: 'calc(100vh - 280px)', maxHeight: '500px' }}
+        >
           {/* Right Column - "التفاعل مع الجمهور" (Selected Items) */}
           <div className="flex flex-col h-full">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30">
@@ -120,7 +121,7 @@ export default function EditSidebarModal({
               <div className="space-y-2">
                 {selectedItems.map((item, index) => {
                   const Icon = item.icon;
-                  const isHome = item.id === "home";
+                  const isHome = item.id === 'home';
                   return (
                     <div
                       key={item.id}
@@ -130,14 +131,14 @@ export default function EditSidebarModal({
                       {!isHome && (
                         <div className="flex flex-col gap-0.5">
                           <button
-                            onClick={() => moveItem(item.id, "up")}
+                            onClick={() => moveItem(item.id, 'up')}
                             disabled={index === 0}
                             className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded disabled:opacity-30"
                           >
                             <GripVertical className="h-3 w-3 text-gray-400" />
                           </button>
                           <button
-                            onClick={() => moveItem(item.id, "down")}
+                            onClick={() => moveItem(item.id, 'down')}
                             disabled={index === selectedItems.length - 1}
                             className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded disabled:opacity-30"
                           >
@@ -201,35 +202,37 @@ export default function EditSidebarModal({
 
                       {/* Group Items */}
                       <div className="space-y-1">
-                        {group.items.filter(item => !selectedIds.includes(item.id)).map((item) => {
-                          const Icon = item.icon;
-                          const isHome = item.id === "home";
-                          const canSelect = selectedIds.length < MAX_VISIBLE_ITEMS;
+                        {group.items
+                          .filter((item) => !selectedIds.includes(item.id))
+                          .map((item) => {
+                            const Icon = item.icon;
+                            const isHome = item.id === 'home';
+                            const canSelect = selectedIds.length < MAX_VISIBLE_ITEMS;
 
-                          return (
-                            <button
-                              key={item.id}
-                              onClick={() => toggleItem(item.id)}
-                              disabled={isHome || !canSelect}
-                              className={cn(
-                                "w-full flex items-center gap-3 p-2.5 rounded-lg transition-all text-right",
-                                canSelect
-                                  ? "hover:bg-gray-100 dark:hover:bg-gray-800"
-                                  : "opacity-50 cursor-not-allowed"
-                              )}
-                            >
-                              <Checkbox
-                                checked={false}
+                            return (
+                              <button
+                                key={item.id}
+                                onClick={() => toggleItem(item.id)}
                                 disabled={isHome || !canSelect}
-                                className="flex-shrink-0"
-                              />
-                              <Icon className="h-4 w-4 text-gray-600 dark:text-gray-400 flex-shrink-0" />
-                              <span className="text-sm text-gray-900 dark:text-gray-100 truncate block flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                                {item.title}
-                              </span>
-                            </button>
-                          );
-                        })}
+                                className={cn(
+                                  'w-full flex items-center gap-3 p-2.5 rounded-lg transition-all text-right',
+                                  canSelect
+                                    ? 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                                    : 'opacity-50 cursor-not-allowed'
+                                )}
+                              >
+                                <Checkbox
+                                  checked={false}
+                                  disabled={isHome || !canSelect}
+                                  className="flex-shrink-0"
+                                />
+                                <Icon className="h-4 w-4 text-gray-600 dark:text-gray-400 flex-shrink-0" />
+                                <span className="text-sm text-gray-900 dark:text-gray-100 truncate block flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                                  {item.title}
+                                </span>
+                              </button>
+                            );
+                          })}
                       </div>
                     </div>
                   );
@@ -241,11 +244,7 @@ export default function EditSidebarModal({
 
         {/* Footer */}
         <div className="flex items-center justify-center gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-          <Button
-            onClick={handleCancel}
-            variant="outline"
-            className="min-w-[120px]"
-          >
+          <Button onClick={handleCancel} variant="outline" className="min-w-[120px]">
             إلغاء
           </Button>
           <Button

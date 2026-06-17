@@ -1,5 +1,5 @@
 $kind: http-request
-description: "To get a list of apps subscribed to Webhooks for a WABA, send a **GET** request to the **`subscribed_apps`** endpoint on the WABA:"
+description: 'To get a list of apps subscribed to Webhooks for a WABA, send a **GET** request to the **`subscribed_apps`** endpoint on the WABA:'
 url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/subscribed_apps
 method: GET
 headers:

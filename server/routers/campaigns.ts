@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { router, protectedProcedure } from "../_core/trpc";
+import { z } from 'zod';
+import { router, protectedProcedure } from '../_core/trpc';
 import {
   getCampaigns,
   getCampaignById,
@@ -13,15 +13,15 @@ import {
   linkOffersToCampaign,
   linkCampsToCampaign,
   linkDoctorsToCampaign,
-} from "../database/db/campaigns";
+} from '../database/db/campaigns';
 
 // Validation schemas
-const campaignTypeSchema = z.enum(["digital", "field", "awareness", "mixed"]);
-const campaignStatusSchema = z.enum(["draft", "active", "paused", "completed", "cancelled"]);
+const campaignTypeSchema = z.enum(['digital', 'field', 'awareness', 'mixed']);
+const campaignStatusSchema = z.enum(['draft', 'active', 'paused', 'completed', 'cancelled']);
 
 const createCampaignSchema = z.object({
-  name: z.string().min(1, "اسم الحملة مطلوب"),
-  slug: z.string().min(1, "الرابط المختصر مطلوب"),
+  name: z.string().min(1, 'اسم الحملة مطلوب'),
+  slug: z.string().min(1, 'الرابط المختصر مطلوب'),
   description: z.string().optional(),
   type: campaignTypeSchema,
   status: campaignStatusSchema.optional(),
@@ -57,51 +57,43 @@ export const campaignsRouter = router({
   // Get all campaigns with filters
   list: protectedProcedure
     .input(
-      z.object({
-        status: z.string().optional(),
-        type: z.string().optional(),
-        search: z.string().optional(),
-      }).optional()
+      z
+        .object({
+          status: z.string().optional(),
+          type: z.string().optional(),
+          search: z.string().optional(),
+        })
+        .optional()
     )
     .query(async ({ input }) => {
       return await getCampaigns(input);
     }),
 
   // Get campaign by ID
-  getById: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
-      return await getCampaignById(input.id);
-    }),
+  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+    return await getCampaignById(input.id);
+  }),
 
   // Get campaign by slug
-  getBySlug: protectedProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ input }) => {
-      return await getCampaignBySlug(input.slug);
-    }),
+  getBySlug: protectedProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
+    return await getCampaignBySlug(input.slug);
+  }),
 
   // Create campaign
-  create: protectedProcedure
-    .input(createCampaignSchema)
-    .mutation(async ({ input }) => {
-      return await createCampaign(input as any);
-    }),
+  create: protectedProcedure.input(createCampaignSchema).mutation(async ({ input }) => {
+    return await createCampaign(input as any);
+  }),
 
   // Update campaign
-  update: protectedProcedure
-    .input(updateCampaignSchema)
-    .mutation(async ({ input }) => {
-      const { id, ...data } = input;
-      return await updateCampaign(id, data as any);
-    }),
+  update: protectedProcedure.input(updateCampaignSchema).mutation(async ({ input }) => {
+    const { id, ...data } = input;
+    return await updateCampaign(id, data as any);
+  }),
 
   // Delete campaign
-  delete: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      return await deleteCampaign(input.id);
-    }),
+  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    return await deleteCampaign(input.id);
+  }),
 
   // Get campaign statistics
   getStats: protectedProcedure
@@ -111,10 +103,9 @@ export const campaignsRouter = router({
     }),
 
   // Get campaigns overview
-  getOverview: protectedProcedure
-    .query(async () => {
-      return await getCampaignsOverview();
-    }),
+  getOverview: protectedProcedure.query(async () => {
+    return await getCampaignsOverview();
+  }),
 
   // Get all campaign links (offers, camps, doctors)
   getLinks: protectedProcedure
@@ -125,30 +116,36 @@ export const campaignsRouter = router({
 
   // Link offers to campaign
   linkOffers: protectedProcedure
-    .input(z.object({
-      campaignId: z.number(),
-      offerIds: z.array(z.number()),
-    }))
+    .input(
+      z.object({
+        campaignId: z.number(),
+        offerIds: z.array(z.number()),
+      })
+    )
     .mutation(async ({ input }) => {
       return await linkOffersToCampaign(input.campaignId, input.offerIds);
     }),
 
   // Link camps to campaign
   linkCamps: protectedProcedure
-    .input(z.object({
-      campaignId: z.number(),
-      campIds: z.array(z.number()),
-    }))
+    .input(
+      z.object({
+        campaignId: z.number(),
+        campIds: z.array(z.number()),
+      })
+    )
     .mutation(async ({ input }) => {
       return await linkCampsToCampaign(input.campaignId, input.campIds);
     }),
 
   // Link doctors to campaign
   linkDoctors: protectedProcedure
-    .input(z.object({
-      campaignId: z.number(),
-      doctorIds: z.array(z.number()),
-    }))
+    .input(
+      z.object({
+        campaignId: z.number(),
+        doctorIds: z.array(z.number()),
+      })
+    )
     .mutation(async ({ input }) => {
       return await linkDoctorsToCampaign(input.campaignId, input.doctorIds);
     }),

@@ -36,10 +36,7 @@ export const exportToPDF = async (
   dateRange: { from: Date; to: Date }
 ) => {
   // Dynamic import - يُحمَّل فقط عند الضغط على زر التصدير
-  const [{ default: jsPDF }, _] = await Promise.all([
-    import('jspdf'),
-    import('jspdf-autotable'),
-  ]);
+  const [{ default: jsPDF }, _] = await Promise.all([import('jspdf'), import('jspdf-autotable')]);
 
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -86,7 +83,7 @@ export const exportToPDF = async (
   yPos += 8;
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  
+
   const statsData = [
     ['إجمالي الحجوزات', stats.totalBookings.toString()],
     ['العملاء الجدد', stats.newLeads.toString()],
@@ -119,7 +116,7 @@ export const exportToPDF = async (
 
   // جدول الحجوزات التفصيلية
   yPos = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 10 : yPos + 50;
-  
+
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('الحجوزات التفصيلية', 20, yPos);
@@ -227,10 +224,7 @@ export const exportToExcel = async (
   const statsWs = XLSX.utils.aoa_to_sheet(statsData);
 
   // تنسيق عرض الأعمدة
-  statsWs['!cols'] = [
-    { wch: 30 },
-    { wch: 25 },
-  ];
+  statsWs['!cols'] = [{ wch: 30 }, { wch: 25 }];
 
   // دمج خلايا العنوان
   if (!statsWs['!merges']) statsWs['!merges'] = [];
@@ -246,12 +240,12 @@ export const exportToExcel = async (
     'رقم الهاتف': booking.phone || '',
     'التخصص/الخدمة': booking.specialty || 'غير محدد',
     'نوع الحجز': getBookingTypeLabel(booking.type),
-    'الحالة': getStatusLabel(booking.status),
-    'المصدر': getSourceLabel(booking.source || 'direct'),
+    الحالة: getStatusLabel(booking.status),
+    المصدر: getSourceLabel(booking.source || 'direct'),
     'تاريخ الحجز': new Date(booking.createdAt).toLocaleDateString('ar-YE'),
-    'وقت الحجز': new Date(booking.createdAt).toLocaleTimeString('ar-YE', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    'وقت الحجز': new Date(booking.createdAt).toLocaleTimeString('ar-YE', {
+      hour: '2-digit',
+      minute: '2-digit',
     }),
   }));
 
@@ -259,15 +253,15 @@ export const exportToExcel = async (
 
   // تنسيق عرض الأعمدة
   bookingsWs['!cols'] = [
-    { wch: 5 },   // #
-    { wch: 25 },  // اسم المريض
-    { wch: 15 },  // رقم الهاتف
-    { wch: 20 },  // التخصص/الخدمة
-    { wch: 18 },  // نوع الحجز
-    { wch: 15 },  // الحالة
-    { wch: 15 },  // المصدر
-    { wch: 15 },  // تاريخ الحجز
-    { wch: 12 },  // وقت الحجز
+    { wch: 5 }, // #
+    { wch: 25 }, // اسم المريض
+    { wch: 15 }, // رقم الهاتف
+    { wch: 20 }, // التخصص/الخدمة
+    { wch: 18 }, // نوع الحجز
+    { wch: 15 }, // الحالة
+    { wch: 15 }, // المصدر
+    { wch: 15 }, // تاريخ الحجز
+    { wch: 12 }, // وقت الحجز
   ];
 
   // إضافة الورقة
@@ -283,19 +277,19 @@ export const exportToExcel = async (
  */
 function getStatusLabel(status: string): string {
   const statusMap: Record<string, string> = {
-    'pending': 'قيد الانتظار',
-    'confirmed': 'مؤكد',
-    'completed': 'مكتمل',
-    'cancelled': 'ملغي',
-    'attended': 'حضر',
-    'no_show': 'لم يحضر',
-    'new': 'جديد',
-    'contacted': 'تم التواصل',
-    'booked': 'تم الحجز',
-    'not_interested': 'غير مهتم',
-    'no_answer': 'لم يرد',
-    'active': 'نشط',
-    'inactive': 'غير نشط',
+    pending: 'قيد الانتظار',
+    confirmed: 'مؤكد',
+    completed: 'مكتمل',
+    cancelled: 'ملغي',
+    attended: 'حضر',
+    no_show: 'لم يحضر',
+    new: 'جديد',
+    contacted: 'تم التواصل',
+    booked: 'تم الحجز',
+    not_interested: 'غير مهتم',
+    no_answer: 'لم يرد',
+    active: 'نشط',
+    inactive: 'غير نشط',
   };
   return statusMap[status] || status;
 }
@@ -305,16 +299,16 @@ function getStatusLabel(status: string): string {
  */
 function getSourceLabel(source: string): string {
   const sourceMap: Record<string, string> = {
-    'website': 'الموقع الإلكتروني',
-    'facebook': 'فيسبوك',
-    'instagram': 'إنستغرام',
-    'whatsapp': 'واتساب',
-    'phone': 'اتصال هاتفي',
-    'direct': 'مباشر',
-    'referral': 'إحالة',
-    'campaign': 'حملة تسويقية',
-    'google': 'جوجل',
-    'other': 'أخرى',
+    website: 'الموقع الإلكتروني',
+    facebook: 'فيسبوك',
+    instagram: 'إنستغرام',
+    whatsapp: 'واتساب',
+    phone: 'اتصال هاتفي',
+    direct: 'مباشر',
+    referral: 'إحالة',
+    campaign: 'حملة تسويقية',
+    google: 'جوجل',
+    other: 'أخرى',
   };
   return sourceMap[source] || source;
 }
@@ -324,14 +318,14 @@ function getSourceLabel(source: string): string {
  */
 function getBookingTypeLabel(type?: string): string {
   if (!type) return 'غير محدد';
-  
+
   const typeMap: Record<string, string> = {
-    'appointment': 'موعد طبيب',
-    'offer': 'طلب عرض',
-    'camp': 'تسجيل مخيم',
-    'lead': 'عميل محتمل',
-    'consultation': 'استشارة',
-    'emergency': 'طوارئ',
+    appointment: 'موعد طبيب',
+    offer: 'طلب عرض',
+    camp: 'تسجيل مخيم',
+    lead: 'عميل محتمل',
+    consultation: 'استشارة',
+    emergency: 'طوارئ',
   };
   return typeMap[type] || type;
 }

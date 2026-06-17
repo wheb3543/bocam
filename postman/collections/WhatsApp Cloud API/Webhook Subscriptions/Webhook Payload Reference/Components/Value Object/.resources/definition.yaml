@@ -8,7 +8,7 @@ description: |-
   | **`statuses`**        | An array of [message status objects](#15305365-753b-400a-90ce-de069ee7f909). **Added to Webhooks for message status update**. |
   | **`errors`**          | An array of [message error objects](#a89ecf92-9b51-409a-af27-2c3b9bc0fd7e). |
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 4000

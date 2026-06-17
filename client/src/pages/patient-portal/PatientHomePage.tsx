@@ -1,15 +1,16 @@
-import { Link } from "wouter";
-import { trpc } from "@/lib/api/trpc";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Calendar, FileText, Gift, Phone, Plus, ArrowLeft } from "lucide-react";
-import AnimatedCard from "@/components/AnimatedCard";
+import { Link } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, Calendar, FileText, Gift, Phone, Plus, ArrowLeft } from 'lucide-react';
+import AnimatedCard from '@/components/AnimatedCard';
 
 export default function PatientHomePage() {
   const { formatDate } = useFormatDate();
   const { data: patient } = trpc.patientPortal.me.useQuery();
-  const { data: appointments, isLoading: appointmentsLoading } = trpc.patientPortal.myAppointments.useQuery();
+  const { data: appointments, isLoading: appointmentsLoading } =
+    trpc.patientPortal.myAppointments.useQuery();
   const { data: results, isLoading: resultsLoading } = trpc.patientPortal.myResults.useQuery();
   const { data: offers, isLoading: offersLoading } = trpc.patientPortal.myOfferBookings.useQuery();
 
@@ -25,8 +26,10 @@ export default function PatientHomePage() {
       >
         <CardContent className="p-5">
           <p className="text-xs text-muted-foreground">أهلاً بك</p>
-          <h2 className="text-lg font-bold mt-1">{patient?.fullName || "مستخدم بوابة المريض"}</h2>
-          <p className="text-sm text-muted-foreground mt-1">تابع مواعيدك ونتائجك وكل ما يخص رحلتك العلاجية.</p>
+          <h2 className="text-lg font-bold mt-1">{patient?.fullName || 'مستخدم بوابة المريض'}</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            تابع مواعيدك ونتائجك وكل ما يخص رحلتك العلاجية.
+          </p>
         </CardContent>
       </AnimatedCard>
 
@@ -42,7 +45,10 @@ export default function PatientHomePage() {
             {appointmentsLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-green-600" />
             ) : latestAppointment ? (
-              <p>{latestAppointment.fullName || "موعد طبي"} - {formatDate(latestAppointment.appointmentDate || latestAppointment.createdAt)}</p>
+              <p>
+                {latestAppointment.fullName || 'موعد طبي'} -{' '}
+                {formatDate(latestAppointment.appointmentDate || latestAppointment.createdAt)}
+              </p>
             ) : (
               <p className="text-muted-foreground">لا توجد مواعيد حالياً</p>
             )}
@@ -60,7 +66,10 @@ export default function PatientHomePage() {
             {resultsLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-green-600" />
             ) : latestResult ? (
-              <p>{latestResult.title} - {formatDate(latestResult.resultDate || latestResult.createdAt)}</p>
+              <p>
+                {latestResult.title} -{' '}
+                {formatDate(latestResult.resultDate || latestResult.createdAt)}
+              </p>
             ) : (
               <p className="text-muted-foreground">لا توجد نتائج جديدة</p>
             )}
@@ -78,7 +87,9 @@ export default function PatientHomePage() {
             {offersLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-green-600" />
             ) : latestOffer ? (
-              <p>{latestOffer.fullName || "حجز عرض"} - {formatDate(latestOffer.createdAt)}</p>
+              <p>
+                {latestOffer.fullName || 'حجز عرض'} - {formatDate(latestOffer.createdAt)}
+              </p>
             ) : (
               <p className="text-muted-foreground">لا توجد عروض محجوزة</p>
             )}

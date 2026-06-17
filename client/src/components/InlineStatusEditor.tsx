@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Check, X, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Check, X, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface StatusOption {
   value: string;
@@ -26,7 +26,7 @@ interface InlineStatusEditorProps {
 
 /**
  * InlineStatusEditor Component
- * 
+ *
  * مكون تعديل الحالة مباشرة من الجدول
  * يعرض Badge قابل للنقر يتحول إلى Select عند النقر
  */
@@ -51,11 +51,11 @@ export default function InlineStatusEditor({
     setIsSaving(true);
     try {
       await onSave(selectedStatus);
-      toast.success("تم تحديث الحالة بنجاح");
+      toast.success('تم تحديث الحالة بنجاح');
       setIsEditing(false);
     } catch (error) {
-      console.error("Error updating status:", error);
-      toast.error("فشل في تحديث الحالة");
+      console.error('Error updating status:', error);
+      toast.error('فشل في تحديث الحالة');
       setSelectedStatus(currentStatus); // Reset to original
     } finally {
       setIsSaving(false);

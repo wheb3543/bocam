@@ -6,14 +6,14 @@ request:
     Authorization: OAuth {{User-Access-Token}}
   queryParams:
     - key: file_length
-      value: "14502"
-      description: "**Required**<br/>Specifies the size of your file in bytes."
+      value: '14502'
+      description: '**Required**<br/>Specifies the size of your file in bytes.'
     - key: file_type
       value: image/jpeg
-      description: "**Required**<br/>Specifies the MIME type. Values are <ul><li>`image/jpeg`</li><li>`video/mp4`</li></ul>"
+      description: '**Required**<br/>Specifies the MIME type. Values are <ul><li>`image/jpeg`</li><li>`video/mp4`</li></ul>'
     - key: file_name
       value: myprofile.jpg
-      description: "**Optional**<br/>Specifies the file name you are using to create the session."
+      description: '**Optional**<br/>Specifies the file name you are using to create the session.'
 response:
   statusCode: 200
   statusText: OK

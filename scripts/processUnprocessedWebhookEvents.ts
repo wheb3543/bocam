@@ -1,10 +1,10 @@
-import { getWebhookEvents, markWebhookEventAsProcessed } from "../server/db";
-import { processWebhookEvent } from "../server/webhooks/whatsappWebhook";
+import { getWebhookEvents, markWebhookEventAsProcessed } from '../server/db';
+import { processWebhookEvent } from '../server/webhooks/whatsappWebhook';
 
 async function processUnprocessedWebhookEvents() {
   const events = await getWebhookEvents({ processed: false, limit: 100 });
   if (!events.length) {
-    console.log("لا توجد أحداث غير معالجة.");
+    console.log('لا توجد أحداث غير معالجة.');
     return;
   }
   for (const event of events) {
@@ -20,6 +20,6 @@ async function processUnprocessedWebhookEvents() {
 }
 
 processUnprocessedWebhookEvents().then(() => {
-  console.log("انتهت معالجة جميع الأحداث غير المعالجة.");
+  console.log('انتهت معالجة جميع الأحداث غير المعالجة.');
   process.exit(0);
 });

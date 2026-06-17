@@ -1,43 +1,78 @@
-import { useState, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Shield, CheckCircle, AlertCircle, RefreshCw, Bell, BellRing, Zap, Clock, DollarSign } from "lucide-react";
-import { toast } from "sonner";
-import { useWhatsAppSSE, AccountReviewUpdateEvent, AccountUpdateEvent, BusinessProfileUpdateEvent, BusinessAccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
+import { useState, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertTriangle,
+  Shield,
+  CheckCircle,
+  AlertCircle,
+  RefreshCw,
+  Bell,
+  BellRing,
+  Zap,
+  Clock,
+  DollarSign,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  useWhatsAppSSE,
+  AccountReviewUpdateEvent,
+  AccountUpdateEvent,
+  BusinessProfileUpdateEvent,
+  BusinessAccountUpdateEvent,
+} from '@/hooks/integrations/useWhatsAppSSE';
 
 export default function WhatsAppAccountHealthPage() {
-  const [activeTab, setActiveTab] = useState("alerts");
+  const [activeTab, setActiveTab] = useState('alerts');
   const [severityFilter, setSeverityFilter] = useState<string | null>(null);
 
   // حالة التنبيهات المباشرة عبر SSE
-  const [liveAlerts, setLiveAlerts] = useState<Array<{
-    alertType: string;
-    severity: string;
-    details?: any;
-    timestamp: string;
-  }>>([]);
+  const [liveAlerts, setLiveAlerts] = useState<
+    Array<{
+      alertType: string;
+      severity: string;
+      details?: any;
+      timestamp: string;
+    }>
+  >([]);
   const [hasNewCritical, setHasNewCritical] = useState(false);
 
-  const { data: alerts, isLoading: alertsLoading, refetch: refetchAlerts } = trpc.whatsapp.accountHealth.getAlerts.useQuery(
+  const {
+    data: alerts,
+    isLoading: alertsLoading,
+    refetch: refetchAlerts,
+  } = trpc.whatsapp.accountHealth.getAlerts.useQuery(
     { severity: severityFilter as any, resolved: false, limit: 50 },
     { refetchInterval: 120000 }
   );
 
-  const { data: securityEvents, isLoading: securityLoading, refetch: refetchSecurity } = trpc.whatsapp.accountHealth.getSecurityEvents.useQuery(
+  const {
+    data: securityEvents,
+    isLoading: securityLoading,
+    refetch: refetchSecurity,
+  } = trpc.whatsapp.accountHealth.getSecurityEvents.useQuery(
     { severity: severityFilter as any, limit: 50 },
     { refetchInterval: 120000 }
   );
 
-  const { data: accountWebhookEvents, isLoading: webhookLoading, refetch: refetchWebhook } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
-    { category: "account", limit: 50 },
+  const {
+    data: accountWebhookEvents,
+    isLoading: webhookLoading,
+    refetch: refetchWebhook,
+  } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
+    { category: 'account', limit: 50 },
     { refetchInterval: 120000 }
   );
 
-  const { data: securityWebhookEvents, isLoading: securityWebhookLoading, refetch: refetchSecurityWebhook } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
-    { category: "security", limit: 50 },
+  const {
+    data: securityWebhookEvents,
+    isLoading: securityWebhookLoading,
+    refetch: refetchSecurityWebhook,
+  } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
+    { category: 'security', limit: 50 },
     { refetchInterval: 120000 }
   );
 
@@ -51,98 +86,121 @@ export default function WhatsAppAccountHealthPage() {
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
-    onAccountReviewUpdate: useCallback((event: AccountReviewUpdateEvent) => {
-      toast.info(`تحديث مراجعة الحساب: ${event.status}`);
-      refetchAlerts();
-      refetchWebhook();
-    }, [refetchAlerts, refetchWebhook]),
-    onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
-      toast.info(`تحديث الحساب: ${event.eventType}`);
-      refetchAlerts();
-      refetchWebhook();
-    }, [refetchAlerts, refetchWebhook]),
-    onBusinessProfileUpdate: useCallback((event: BusinessProfileUpdateEvent) => {
-      toast.info(`تحديث الملف التجاري: ${event.eventType}`);
-      refetchAlerts();
-      refetchWebhook();
-    }, [refetchAlerts, refetchWebhook]),
-    onBusinessAccountUpdate: useCallback((event: BusinessAccountUpdateEvent) => {
-      toast.info(`تحديث حساب الأعمال: ${event.eventType}`);
-      refetchAlerts();
-      refetchWebhook();
-    }, [refetchAlerts, refetchWebhook]),
+    onAccountReviewUpdate: useCallback(
+      (event: AccountReviewUpdateEvent) => {
+        toast.info(`تحديث مراجعة الحساب: ${event.status}`);
+        refetchAlerts();
+        refetchWebhook();
+      },
+      [refetchAlerts, refetchWebhook]
+    ),
+    onAccountUpdate: useCallback(
+      (event: AccountUpdateEvent) => {
+        toast.info(`تحديث الحساب: ${event.eventType}`);
+        refetchAlerts();
+        refetchWebhook();
+      },
+      [refetchAlerts, refetchWebhook]
+    ),
+    onBusinessProfileUpdate: useCallback(
+      (event: BusinessProfileUpdateEvent) => {
+        toast.info(`تحديث الملف التجاري: ${event.eventType}`);
+        refetchAlerts();
+        refetchWebhook();
+      },
+      [refetchAlerts, refetchWebhook]
+    ),
+    onBusinessAccountUpdate: useCallback(
+      (event: BusinessAccountUpdateEvent) => {
+        toast.info(`تحديث حساب الأعمال: ${event.eventType}`);
+        refetchAlerts();
+        refetchWebhook();
+      },
+      [refetchAlerts, refetchWebhook]
+    ),
   });
 
   // حساب التنبيهات الذكية
-  const windowExpiredConversations = Array.isArray(conversations) ? conversations.filter((c: any) => {
-    if (!c.lastMessageAt) return false;
-    const hoursSinceLastMessage = (Date.now() - new Date(c.lastMessageAt).getTime()) / (1000 * 60 * 60);
-    return hoursSinceLastMessage > 24;
-  }) : [];
+  const windowExpiredConversations = Array.isArray(conversations)
+    ? conversations.filter((c: any) => {
+        if (!c.lastMessageAt) return false;
+        const hoursSinceLastMessage =
+          (Date.now() - new Date(c.lastMessageAt).getTime()) / (1000 * 60 * 60);
+        return hoursSinceLastMessage > 24;
+      })
+    : [];
 
-  const highCostConversations = Array.isArray(conversationCosts) ? conversationCosts.filter((c: any) => (c.conversationCost || 0) > 1.0) : [];
+  const highCostConversations = Array.isArray(conversationCosts)
+    ? conversationCosts.filter((c: any) => (c.conversationCost || 0) > 1.0)
+    : [];
 
-  const totalHighCost = highCostConversations.reduce((sum: number, c: any) => sum + (c.conversationCost || 0), 0);
+  const totalHighCost = highCostConversations.reduce(
+    (sum: number, c: any) => sum + (c.conversationCost || 0),
+    0
+  );
 
   const resolveAlertMutation = trpc.whatsapp.accountHealth.resolveAlert.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث حالة التنبيه");
+      toast.success('تم تحديث حالة التنبيه');
       refetchAlerts();
     },
     onError: () => {
-      toast.error("فشل تحديث حالة التنبيه");
+      toast.error('فشل تحديث حالة التنبيه');
     },
   });
 
   // ── SSE: تنبيهات فورية من الـ webhook ──────────────────────────────────────
   useWhatsAppSSE({
-    onAccountAlert: useCallback((event: any) => {
-      // إضافة التنبيه للقائمة المحلية فوراً
-      setLiveAlerts((prev) => [
-        {
-          alertType: event.alertType,
-          severity: event.severity,
-          details: event.details,
-          timestamp: event.timestamp,
-        },
-        ...prev.slice(0, 9), // نحتفظ بآخر 10 تنبيهات
-      ]);
+    onAccountAlert: useCallback(
+      (event: any) => {
+        // إضافة التنبيه للقائمة المحلية فوراً
+        setLiveAlerts((prev) => [
+          {
+            alertType: event.alertType,
+            severity: event.severity,
+            details: event.details,
+            timestamp: event.timestamp,
+          },
+          ...prev.slice(0, 9), // نحتفظ بآخر 10 تنبيهات
+        ]);
 
-      // تنبيه بصري للتنبيهات الحرجة
-      if (event.severity === "critical" || event.severity === "high") {
-        setHasNewCritical(true);
-      }
+        // تنبيه بصري للتنبيهات الحرجة
+        if (event.severity === 'critical' || event.severity === 'high') {
+          setHasNewCritical(true);
+        }
 
-      // تحديث البيانات من الـ DB
-      refetchAlerts();
-      refetchSecurity();
-    }, [refetchAlerts, refetchSecurity]),
+        // تحديث البيانات من الـ DB
+        refetchAlerts();
+        refetchSecurity();
+      },
+      [refetchAlerts, refetchSecurity]
+    ),
   });
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "critical":
-        return "bg-red-500 text-white";
-      case "high":
-        return "bg-orange-500 text-white";
-      case "medium":
-        return "bg-yellow-500 text-black";
-      case "low":
-        return "bg-blue-500 text-white";
+      case 'critical':
+        return 'bg-red-500 text-white';
+      case 'high':
+        return 'bg-orange-500 text-white';
+      case 'medium':
+        return 'bg-yellow-500 text-black';
+      case 'low':
+        return 'bg-blue-500 text-white';
       default:
-        return "bg-gray-500 text-white";
+        return 'bg-gray-500 text-white';
     }
   };
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case "critical":
+      case 'critical':
         return <AlertTriangle className="h-5 w-5 text-red-500" />;
-      case "high":
+      case 'high':
         return <AlertCircle className="h-5 w-5 text-orange-500" />;
-      case "medium":
+      case 'medium':
         return <AlertCircle className="h-5 w-5 text-yellow-500" />;
-      case "low":
+      case 'low':
         return <AlertCircle className="h-5 w-5 text-blue-500" />;
       default:
         return <AlertCircle className="h-5 w-5 text-gray-500" />;
@@ -158,7 +216,7 @@ export default function WhatsAppAccountHealthPage() {
     refetchSecurity();
     refetchWebhook();
     refetchSecurityWebhook();
-    toast.success("تم تحديث البيانات");
+    toast.success('تم تحديث البيانات');
   };
 
   return (
@@ -204,7 +262,9 @@ export default function WhatsAppAccountHealthPage() {
               <div>
                 <p className="text-sm text-gray-600">تنبيهات حرجة</p>
                 <p className="text-2xl font-bold text-red-600">
-                  {Array.isArray(alerts) ? alerts.filter((a: any) => a.severity === "critical" && !a.resolved).length : 0}
+                  {Array.isArray(alerts)
+                    ? alerts.filter((a: any) => a.severity === 'critical' && !a.resolved).length
+                    : 0}
                 </p>
               </div>
               <AlertTriangle className="h-8 w-8 text-red-500" />
@@ -218,7 +278,9 @@ export default function WhatsAppAccountHealthPage() {
               <div>
                 <p className="text-sm text-gray-600">تنبيهات عالية</p>
                 <p className="text-2xl font-bold text-orange-600">
-                  {Array.isArray(alerts) ? alerts.filter((a: any) => a.severity === "high" && !a.resolved).length : 0}
+                  {Array.isArray(alerts)
+                    ? alerts.filter((a: any) => a.severity === 'high' && !a.resolved).length
+                    : 0}
                 </p>
               </div>
               <AlertCircle className="h-8 w-8 text-orange-500" />
@@ -231,9 +293,7 @@ export default function WhatsAppAccountHealthPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">أحداث أمان</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {securityEvents?.length || 0}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{securityEvents?.length || 0}</p>
               </div>
               <Shield className="h-8 w-8 text-blue-500" />
             </div>
@@ -277,10 +337,10 @@ export default function WhatsAppAccountHealthPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">تكاليف مرتفعة</p>
-                <p className="text-2xl font-bold text-red-600">
-                  ${totalHighCost.toFixed(2)}
+                <p className="text-2xl font-bold text-red-600">${totalHighCost.toFixed(2)}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {highCostConversations.length} محادثة مكلفة
                 </p>
-                <p className="text-xs text-gray-500 mt-1">{highCostConversations.length} محادثة مكلفة</p>
               </div>
               <DollarSign className="h-8 w-8 text-red-500" />
             </div>
@@ -291,40 +351,40 @@ export default function WhatsAppAccountHealthPage() {
       {/* Filters */}
       <div className="flex gap-2 mb-4">
         <Button
-          variant={severityFilter === null ? "default" : "outline"}
+          variant={severityFilter === null ? 'default' : 'outline'}
           size="sm"
           onClick={() => setSeverityFilter(null)}
         >
           الكل
         </Button>
         <Button
-          variant={severityFilter === "critical" ? "default" : "outline"}
+          variant={severityFilter === 'critical' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => setSeverityFilter("critical")}
+          onClick={() => setSeverityFilter('critical')}
           className="bg-red-100 hover:bg-red-200 text-red-700"
         >
           حرجة
         </Button>
         <Button
-          variant={severityFilter === "high" ? "default" : "outline"}
+          variant={severityFilter === 'high' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => setSeverityFilter("high")}
+          onClick={() => setSeverityFilter('high')}
           className="bg-orange-100 hover:bg-orange-200 text-orange-700"
         >
           عالية
         </Button>
         <Button
-          variant={severityFilter === "medium" ? "default" : "outline"}
+          variant={severityFilter === 'medium' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => setSeverityFilter("medium")}
+          onClick={() => setSeverityFilter('medium')}
           className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700"
         >
           متوسطة
         </Button>
         <Button
-          variant={severityFilter === "low" ? "default" : "outline"}
+          variant={severityFilter === 'low' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => setSeverityFilter("low")}
+          onClick={() => setSeverityFilter('low')}
           className="bg-blue-100 hover:bg-blue-200 text-blue-700"
         >
           منخفضة
@@ -352,7 +412,9 @@ export default function WhatsAppAccountHealthPage() {
                 <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <Zap className="h-4 w-4 text-amber-600" />
-                    <span className="text-sm font-semibold text-amber-700">تنبيهات مباشرة ({liveAlerts.length})</span>
+                    <span className="text-sm font-semibold text-amber-700">
+                      تنبيهات مباشرة ({liveAlerts.length})
+                    </span>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -364,15 +426,23 @@ export default function WhatsAppAccountHealthPage() {
                   </div>
                   <div className="space-y-2">
                     {liveAlerts.map((alert, i) => (
-                      <div key={i} className={`flex items-center gap-2 text-sm p-2 rounded ${
-                        alert.severity === 'critical' ? 'bg-red-100 text-red-800' :
-                        alert.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                        alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
+                      <div
+                        key={i}
+                        className={`flex items-center gap-2 text-sm p-2 rounded ${
+                          alert.severity === 'critical'
+                            ? 'bg-red-100 text-red-800'
+                            : alert.severity === 'high'
+                              ? 'bg-orange-100 text-orange-800'
+                              : alert.severity === 'medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
                         {getSeverityIcon(alert.severity)}
                         <span className="font-medium">{alert.alertType}</span>
-                        <Badge className={`text-xs ${getSeverityColor(alert.severity)}`}>{alert.severity}</Badge>
+                        <Badge className={`text-xs ${getSeverityColor(alert.severity)}`}>
+                          {alert.severity}
+                        </Badge>
                         <span className="text-xs opacity-70 mr-auto">
                           {new Date(alert.timestamp).toLocaleTimeString('ar-SA')}
                         </span>
@@ -388,7 +458,7 @@ export default function WhatsAppAccountHealthPage() {
                   {alerts.map((alert: any) => (
                     <div
                       key={alert.id}
-                      className={`p-4 border rounded-lg ${alert.resolved ? "bg-gray-50 opacity-60" : "bg-white"}`}
+                      className={`p-4 border rounded-lg ${alert.resolved ? 'bg-gray-50 opacity-60' : 'bg-white'}`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3">
@@ -406,10 +476,12 @@ export default function WhatsAppAccountHealthPage() {
                               )}
                             </div>
                             <p className="text-sm text-gray-600 mt-1">
-                              {alert.details ? JSON.parse(alert.details).message || alert.details : ""}
+                              {alert.details
+                                ? JSON.parse(alert.details).message || alert.details
+                                : ''}
                             </p>
                             <p className="text-xs text-gray-400 mt-2">
-                              {new Date(alert.createdAt).toLocaleString("ar-SA")}
+                              {new Date(alert.createdAt).toLocaleString('ar-SA')}
                             </p>
                           </div>
                         </div>
@@ -453,14 +525,25 @@ export default function WhatsAppAccountHealthPage() {
                 {windowExpiredConversations.length > 0 ? (
                   <div className="space-y-3">
                     {windowExpiredConversations.slice(0, 5).map((conv: any) => (
-                      <div key={conv.id} className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg">
+                      <div
+                        key={conv.id}
+                        className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg"
+                      >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-semibold text-sm">{conv.customerName || 'عميل جديد'}</p>
-                            <p className="text-xs text-gray-600" dir="ltr">{conv.phoneNumber}</p>
+                            <p className="font-semibold text-sm">
+                              {conv.customerName || 'عميل جديد'}
+                            </p>
+                            <p className="text-xs text-gray-600" dir="ltr">
+                              {conv.phoneNumber}
+                            </p>
                           </div>
                           <Badge className="bg-amber-100 text-amber-800">
-                            {Math.floor((Date.now() - new Date(conv.lastMessageAt).getTime()) / (1000 * 60 * 60))} ساعة
+                            {Math.floor(
+                              (Date.now() - new Date(conv.lastMessageAt).getTime()) /
+                                (1000 * 60 * 60)
+                            )}{' '}
+                            ساعة
                           </Badge>
                         </div>
                       </div>
@@ -493,11 +576,16 @@ export default function WhatsAppAccountHealthPage() {
                 {highCostConversations.length > 0 ? (
                   <div className="space-y-3">
                     {highCostConversations.slice(0, 5).map((conv: any) => (
-                      <div key={conv.id} className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-lg">
+                      <div
+                        key={conv.id}
+                        className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-lg"
+                      >
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-semibold text-sm">{conv.phoneNumber}</p>
-                            <p className="text-xs text-gray-600">{conv.pricingModel || 'غير محدد'}</p>
+                            <p className="text-xs text-gray-600">
+                              {conv.pricingModel || 'غير محدد'}
+                            </p>
                           </div>
                           <Badge className="bg-red-100 text-red-800">
                             ${(conv.conversationCost || 0).toFixed(2)}
@@ -545,15 +633,15 @@ export default function WhatsAppAccountHealthPage() {
                             </Badge>
                           </div>
                           {event.phoneNumber && (
-                            <p className="text-sm text-gray-600 mt-1">
-                              الرقم: {event.phoneNumber}
-                            </p>
+                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber}</p>
                           )}
                           <p className="text-sm text-gray-600 mt-1">
-                            {event.details ? JSON.parse(event.details).message || event.details : ""}
+                            {event.details
+                              ? JSON.parse(event.details).message || event.details
+                              : ''}
                           </p>
                           <p className="text-xs text-gray-400 mt-2">
-                            {new Date(event.createdAt).toLocaleString("ar-SA")}
+                            {new Date(event.createdAt).toLocaleString('ar-SA')}
                           </p>
                         </div>
                       </div>
@@ -593,11 +681,13 @@ export default function WhatsAppAccountHealthPage() {
                             <div>
                               <h4 className="font-semibold text-sm">{event.eventType}</h4>
                               {event.subType && (
-                                <Badge variant="outline" className="text-xs mt-1">{event.subType}</Badge>
+                                <Badge variant="outline" className="text-xs mt-1">
+                                  {event.subType}
+                                </Badge>
                               )}
                             </div>
                             <span className="text-xs text-gray-500">
-                              {new Date(event.createdAt).toLocaleString("ar-SA")}
+                              {new Date(event.createdAt).toLocaleString('ar-SA')}
                             </span>
                           </div>
                         </div>
@@ -620,11 +710,13 @@ export default function WhatsAppAccountHealthPage() {
                             <div>
                               <h4 className="font-semibold text-sm">{event.eventType}</h4>
                               {event.subType && (
-                                <Badge variant="outline" className="text-xs mt-1">{event.subType}</Badge>
+                                <Badge variant="outline" className="text-xs mt-1">
+                                  {event.subType}
+                                </Badge>
                               )}
                             </div>
                             <span className="text-xs text-gray-500">
-                              {new Date(event.createdAt).toLocaleString("ar-SA")}
+                              {new Date(event.createdAt).toLocaleString('ar-SA')}
                             </span>
                           </div>
                         </div>

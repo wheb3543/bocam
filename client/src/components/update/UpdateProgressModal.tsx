@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, Download, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, Download, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
 interface UpdateStatus {
   lastCheck: number;
@@ -48,7 +48,7 @@ export function UpdateProgressModal({ open, onOpenChange }: UpdateProgressModalP
       const data = await response.json();
       if (data.success) {
         setStatus(data.data);
-        
+
         // Close modal if update is completed
         if (data.data.updateStatus === 'completed') {
           setTimeout(() => {
@@ -124,9 +124,7 @@ export function UpdateProgressModal({ open, onOpenChange }: UpdateProgressModalP
           <div className="flex flex-col items-center gap-4">
             {getStatusIcon()}
             <DialogTitle className="text-xl">{getStatusText()}</DialogTitle>
-            <DialogDescription className="text-center">
-              {getStatusDescription()}
-            </DialogDescription>
+            <DialogDescription className="text-center">{getStatusDescription()}</DialogDescription>
           </div>
         </DialogHeader>
 
@@ -143,9 +141,7 @@ export function UpdateProgressModal({ open, onOpenChange }: UpdateProgressModalP
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-destructive">
-                {status.updateError}
-              </div>
+              <div className="text-sm text-destructive">{status.updateError}</div>
             </div>
           </div>
         )}

@@ -1,15 +1,15 @@
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import MultiSelect from "@/components/form/MultiSelect";
-import { Search, RotateCcw } from "lucide-react";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import MultiSelect from '@/components/form/MultiSelect';
+import { Search, RotateCcw } from 'lucide-react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { SOURCE_OPTIONS } from "@shared/sources";
+} from '@/components/ui/select';
+import { SOURCE_OPTIONS } from '@shared/sources';
 
 interface OfferLeadsFiltersProps {
   searchTerm: string;
@@ -56,7 +56,10 @@ export default function OfferLeadsFilters({
           />
         </div>
         <MultiSelect
-          options={uniqueOffers.map((offer) => ({ value: offer.id.toString(), label: offer.title }))}
+          options={uniqueOffers.map((offer) => ({
+            value: offer.id.toString(),
+            label: offer.title,
+          }))}
           selected={selectedOffer}
           onChange={onOfferChange}
           placeholder="جميع العروض"

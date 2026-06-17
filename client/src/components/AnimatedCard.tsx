@@ -1,11 +1,11 @@
 /**
  * AnimatedCard Component - بطاقة متحركة موحدة
- * 
+ *
  * A unified animated card component with consistent styling and animations
  */
 
-import { ReactNode } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ReactNode } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface AnimatedCardProps {
   children: ReactNode;
@@ -23,11 +23,11 @@ export default function AnimatedCard({
   children,
   title,
   description,
-  className = "",
+  className = '',
   delay = 0,
   hoverEffect = true,
-  borderColor = "border-gray-200 dark:border-gray-700",
-  bgColor = "bg-white/95 dark:bg-gray-800/95",
+  borderColor = 'border-gray-200 dark:border-gray-700',
+  bgColor = 'bg-white/95 dark:bg-gray-800/95',
   onClick,
 }: AnimatedCardProps) {
   return (

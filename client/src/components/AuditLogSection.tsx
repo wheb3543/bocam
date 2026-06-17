@@ -3,44 +3,44 @@
  * يعرض تاريخ التغييرات على سجل محدد
  */
 
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { trpc } from "@/lib/api/trpc";
-import { Badge } from "@/components/ui/badge";
-import { Clock, User, ArrowRight } from "lucide-react";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { trpc } from '@/lib/api/trpc';
+import { Badge } from '@/components/ui/badge';
+import { Clock, User, ArrowRight } from 'lucide-react';
 
 const statusLabels: Record<string, string> = {
-  new: "جديد",
-  contacted: "تم التواصل",
-  booked: "تم الحجز",
-  not_interested: "غير مهتم",
-  no_answer: "لم يرد",
-  pending: "قيد الانتظار",
-  confirmed: "مؤكد",
-  completed: "مكتمل",
-  cancelled: "ملغي",
-  attended: "حضر",
+  new: 'جديد',
+  contacted: 'تم التواصل',
+  booked: 'تم الحجز',
+  not_interested: 'غير مهتم',
+  no_answer: 'لم يرد',
+  pending: 'قيد الانتظار',
+  confirmed: 'مؤكد',
+  completed: 'مكتمل',
+  cancelled: 'ملغي',
+  attended: 'حضر',
 };
 
 const actionLabels: Record<string, string> = {
-  status_change: "تغيير الحالة",
-  bulk_status_change: "تغيير جماعي للحالة",
-  create: "إنشاء",
-  update: "تحديث",
-  delete: "حذف",
+  status_change: 'تغيير الحالة',
+  bulk_status_change: 'تغيير جماعي للحالة',
+  create: 'إنشاء',
+  update: 'تحديث',
+  delete: 'حذف',
 };
 
 function formatDateTime(date: string | Date | null | undefined) {
-  if (!date) return "-";
+  if (!date) return '-';
   try {
-    return new Date(date).toLocaleString("ar-EG", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    return new Date(date).toLocaleString('ar-EG', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   } catch {
-    return "-";
+    return '-';
   }
 }
 
@@ -75,17 +75,19 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
 
   return (
     <div className="space-y-3">
-      <h4 className="text-sm font-medium text-muted-foreground mb-2">سجل التغييرات ({logs.length})</h4>
+      <h4 className="text-sm font-medium text-muted-foreground mb-2">
+        سجل التغييرات ({logs.length})
+      </h4>
       <div className="relative">
         {/* Timeline line */}
         <div className="absolute right-3 top-0 bottom-0 w-0.5 bg-border" />
-        
+
         <div className="space-y-4">
           {logs.map((log: any) => (
             <div key={log.id} className="relative flex gap-3 pr-8">
               {/* Timeline dot */}
               <div className="absolute right-1.5 top-1 w-3 h-3 rounded-full bg-primary border-2 border-background" />
-              
+
               <div className="flex-1 bg-muted/30 rounded-lg p-3 text-sm">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2">
@@ -104,7 +106,7 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
                     {formatDateTime(log.createdAt)}
                   </span>
                 </div>
-                
+
                 {/* Status change visualization */}
                 {(log.action === 'status_change' || log.action === 'bulk_status_change') && (
                   <div className="flex items-center gap-2 mt-1">
@@ -119,10 +121,8 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
                     </Badge>
                   </div>
                 )}
-                
-                {log.notes && (
-                  <p className="text-xs text-muted-foreground mt-1">{log.notes}</p>
-                )}
+
+                {log.notes && <p className="text-xs text-muted-foreground mt-1">{log.notes}</p>}
               </div>
             </div>
           ))}

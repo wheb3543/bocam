@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import Redis from 'ioredis';
 
 /**
  * Redis connection for BullMQ queues and caching
@@ -10,8 +10,8 @@ let cacheClient: Redis | null = null;
 
 export function getRedisConnection(): Redis {
   if (!redisClient) {
-    const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-    
+    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+
     redisClient = new Redis(redisUrl, {
       maxRetriesPerRequest: null, // Required for BullMQ
       enableReadyCheck: false,
@@ -21,12 +21,12 @@ export function getRedisConnection(): Redis {
       },
     });
 
-    redisClient.on("error", (err) => {
-      console.error("[Redis] Connection error:", err);
+    redisClient.on('error', (err) => {
+      console.error('[Redis] Connection error:', err);
     });
 
-    redisClient.on("connect", () => {
-      console.log("[Redis] Connected successfully");
+    redisClient.on('connect', () => {
+      console.log('[Redis] Connected successfully');
     });
   }
 
@@ -38,8 +38,8 @@ export function getRedisConnection(): Redis {
  */
 export function getCacheClient(): Redis {
   if (!cacheClient) {
-    const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-    
+    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+
     cacheClient = new Redis(redisUrl, {
       retryStrategy: (times) => {
         const delay = Math.min(times * 50, 2000);
@@ -47,12 +47,12 @@ export function getCacheClient(): Redis {
       },
     });
 
-    cacheClient.on("error", (err) => {
-      console.error("[Redis Cache] Connection error:", err);
+    cacheClient.on('error', (err) => {
+      console.error('[Redis Cache] Connection error:', err);
     });
 
-    cacheClient.on("connect", () => {
-      console.log("[Redis Cache] Connected successfully");
+    cacheClient.on('connect', () => {
+      console.log('[Redis Cache] Connected successfully');
     });
   }
 
@@ -63,13 +63,13 @@ export async function closeRedisConnection(): Promise<void> {
   if (redisClient) {
     await redisClient.quit();
     redisClient = null;
-    console.log("[Redis] Connection closed");
+    console.log('[Redis] Connection closed');
   }
-  
+
   if (cacheClient) {
     await cacheClient.quit();
     cacheClient = null;
-    console.log("[Redis Cache] Connection closed");
+    console.log('[Redis Cache] Connection closed');
   }
 }
 
@@ -92,7 +92,7 @@ export class CacheManager {
       if (!value) return null;
       return JSON.parse(value) as T;
     } catch (error) {
-      console.error("[Cache] Get error:", error);
+      console.error('[Cache] Get error:', error);
       return null;
     }
   }
@@ -109,7 +109,7 @@ export class CacheManager {
         await this.client.set(key, serialized);
       }
     } catch (error) {
-      console.error("[Cache] Set error:", error);
+      console.error('[Cache] Set error:', error);
     }
   }
 
@@ -120,7 +120,7 @@ export class CacheManager {
     try {
       await this.client.del(key);
     } catch (error) {
-      console.error("[Cache] Delete error:", error);
+      console.error('[Cache] Delete error:', error);
     }
   }
 
@@ -134,7 +134,7 @@ export class CacheManager {
         await this.client.del(...keys);
       }
     } catch (error) {
-      console.error("[Cache] Delete pattern error:", error);
+      console.error('[Cache] Delete pattern error:', error);
     }
   }
 
@@ -146,7 +146,7 @@ export class CacheManager {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      console.error("[Cache] Exists error:", error);
+      console.error('[Cache] Exists error:', error);
       return false;
     }
   }
@@ -158,7 +158,7 @@ export class CacheManager {
     try {
       await this.client.expire(key, ttl);
     } catch (error) {
-      console.error("[Cache] Expire error:", error);
+      console.error('[Cache] Expire error:', error);
     }
   }
 
@@ -169,7 +169,7 @@ export class CacheManager {
     try {
       return await this.client.ttl(key);
     } catch (error) {
-      console.error("[Cache] TTL error:", error);
+      console.error('[Cache] TTL error:', error);
       return -1;
     }
   }
@@ -181,7 +181,7 @@ export class CacheManager {
     try {
       await this.client.flushdb();
     } catch (error) {
-      console.error("[Cache] Flush error:", error);
+      console.error('[Cache] Flush error:', error);
     }
   }
 }

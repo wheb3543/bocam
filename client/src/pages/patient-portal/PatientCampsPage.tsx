@@ -1,9 +1,9 @@
-import { trpc } from "@/lib/api/trpc";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { Loader2, Tent } from "lucide-react";
-import CampCard from "@/components/patient/CampCard";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
+import { trpc } from '@/lib/api/trpc';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { Loader2, Tent } from 'lucide-react';
+import CampCard from '@/components/patient/CampCard';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
 
 export default function PatientCampsPage() {
   const { formatDate } = useFormatDate();
@@ -22,7 +22,9 @@ export default function PatientCampsPage() {
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">تسجيلات المخيمات الخاصة بك</p>
         <Link href="/patient-portal/offers">
-          <Button size="sm" variant="outline">العروض</Button>
+          <Button size="sm" variant="outline">
+            العروض
+          </Button>
         </Link>
       </div>
       {!camps?.length ? (

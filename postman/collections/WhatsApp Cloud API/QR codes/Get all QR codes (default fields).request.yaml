@@ -6,6 +6,6 @@ url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/message_qrdls
 method: GET
 body:
   type: json
-  content: ""
+  content: ''
 examples: ./.resources/Get all QR codes (default fields).resources/examples
 order: 2000

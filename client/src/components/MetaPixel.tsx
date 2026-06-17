@@ -15,8 +15,8 @@
  * يُضاف مرة واحدة في App.tsx ليعمل على جميع صفحات الموقع.
  */
 
-import { useEffect, useRef } from "react";
-import { useLocation } from "wouter";
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'wouter';
 
 declare global {
   interface Window {
@@ -28,15 +28,15 @@ declare global {
   }
 }
 
-const PIXEL_ID = (import.meta.env.VITE_META_PIXEL_ID as string | undefined) || "";
+const PIXEL_ID = (import.meta.env.VITE_META_PIXEL_ID as string | undefined) || '';
 
 // مفاتيح localStorage — يجب أن تتطابق مع CookieConsentBanner.tsx
-const COOKIE_CONSENT_KEY = "sgh_cookie_consent";
-const COOKIE_PREFS_KEY = "sgh_cookie_preferences";
+const COOKIE_CONSENT_KEY = 'sgh_cookie_consent';
+const COOKIE_PREFS_KEY = 'sgh_cookie_preferences';
 
 // ─── مسارات الداشبورد المُستثناة من التتبع ────────────────────────────────────
 // هذه الصفحات يزورها الموظفون فقط وليس الجمهور العام
-const DASHBOARD_PREFIX = "/admin";
+const DASHBOARD_PREFIX = '/admin';
 
 /** تحقق مما إذا كان المسار الحالي صفحة داشبورد (موظفين فقط) */
 function isDashboardPath(path: string): boolean {
@@ -46,7 +46,7 @@ function isDashboardPath(path: string): boolean {
 /** تحقق من موافقة المستخدم على الكوكيز التسويقية */
 function hasMarketingConsent(): boolean {
   try {
-    if (localStorage.getItem(COOKIE_CONSENT_KEY) !== "true") return false;
+    if (localStorage.getItem(COOKIE_CONSENT_KEY) !== 'true') return false;
     const prefs = localStorage.getItem(COOKIE_PREFS_KEY);
     if (!prefs) return false;
     const parsed = JSON.parse(prefs);
@@ -63,18 +63,18 @@ async function sha256(text: string): Promise<string> {
   const normalized = text.trim().toLowerCase();
   const encoder = new TextEncoder();
   const data = encoder.encode(normalized);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 /** تطبيع رقم الهاتف اليمني وتشفيره */
 async function hashPhone(phone: string): Promise<string> {
   // تطبيع: إزالة المسافات والشرطات، إضافة كود الدولة إذا لم يكن موجوداً
-  let normalized = phone.replace(/[\s\-()]/g, "");
-  if (normalized.startsWith("0")) normalized = "967" + normalized.slice(1);
-  else if (normalized.startsWith("7")) normalized = "967" + normalized;
-  else if (normalized.startsWith("+")) normalized = normalized.slice(1);
+  let normalized = phone.replace(/[\s\-()]/g, '');
+  if (normalized.startsWith('0')) normalized = '967' + normalized.slice(1);
+  else if (normalized.startsWith('7')) normalized = '967' + normalized;
+  else if (normalized.startsWith('+')) normalized = normalized.slice(1);
   return sha256(normalized);
 }
 
@@ -98,30 +98,30 @@ function loadPixelScript(pixelId: string): void {
     if (!f._fbq) f._fbq = n;
     n.push = n;
     n.loaded = true;
-    n.version = "2.0";
+    n.version = '2.0';
     n.queue = [];
     t = b.createElement(e);
     t.async = true;
     t.src = v;
     s = b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t, s);
-  })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+  })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
   // تهيئة Pixel في وضع Limited Data Use (LDU) افتراضياً
-  window.fbq("consent", "revoke");
-  window.fbq("init", pixelId);
-  window.fbq("track", "PageView");
+  window.fbq('consent', 'revoke');
+  window.fbq('init', pixelId);
+  window.fbq('track', 'PageView');
 
   // إذا وافق المستخدم مسبقاً، منح الإذن الكامل فوراً
   if (hasMarketingConsent()) {
-    window.fbq("consent", "grant");
+    window.fbq('consent', 'grant');
   }
 }
 
 /** منح إذن التتبع الكامل بعد موافقة المستخدم */
 function grantConsent(): void {
-  if (typeof window !== "undefined" && window.fbq) {
-    window.fbq("consent", "grant");
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('consent', 'grant');
   }
 }
 
@@ -137,7 +137,7 @@ export async function updatePixelUserData(data: {
   email?: string;
   externalId?: string | number;
 }): Promise<void> {
-  if (typeof window === "undefined" || !window.fbq || !PIXEL_ID) return;
+  if (typeof window === 'undefined' || !window.fbq || !PIXEL_ID) return;
   if (!hasMarketingConsent()) return;
 
   const userData: Record<string, string | string[]> = {};
@@ -156,7 +156,7 @@ export async function updatePixelUserData(data: {
 
   if (Object.keys(userData).length > 0) {
     // إعادة تهيئة Pixel مع بيانات المستخدم لتحسين المطابقة
-    window.fbq("init", PIXEL_ID, userData);
+    window.fbq('init', PIXEL_ID, userData);
   }
 }
 
@@ -164,8 +164,8 @@ export async function updatePixelUserData(data: {
 
 /** إرسال حدث PageView يدوياً */
 export function trackPageView(): void {
-  if (typeof window !== "undefined" && window.fbq) {
-    window.fbq("track", "PageView");
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'PageView');
   }
 }
 
@@ -181,13 +181,18 @@ export function trackViewContent(data: {
   content_type?: string;
   eventId?: string;
 }): void {
-  if (typeof window !== "undefined" && window.fbq && hasMarketingConsent()) {
+  if (typeof window !== 'undefined' && window.fbq && hasMarketingConsent()) {
     const { eventId, ...eventData } = data;
-    window.fbq("track", "ViewContent", {
-      content_category: "Healthcare",
-      content_type: "product",
-      ...eventData,
-    }, eventId ? { eventID: eventId } : undefined);
+    window.fbq(
+      'track',
+      'ViewContent',
+      {
+        content_category: 'Healthcare',
+        content_type: 'product',
+        ...eventData,
+      },
+      eventId ? { eventID: eventId } : undefined
+    );
   }
 }
 
@@ -201,12 +206,12 @@ export function trackMetaLead(data?: {
   content_category?: string;
   eventId?: string;
 }): void {
-  if (typeof window !== "undefined" && window.fbq && hasMarketingConsent()) {
+  if (typeof window !== 'undefined' && window.fbq && hasMarketingConsent()) {
     const { eventId, ...eventData } = data || {};
     window.fbq(
-      "track",
-      "Lead",
-      { content_category: "Healthcare", ...eventData },
+      'track',
+      'Lead',
+      { content_category: 'Healthcare', ...eventData },
       eventId ? { eventID: eventId } : undefined
     );
   }
@@ -217,9 +222,9 @@ export function trackMetaLead(data?: {
  * يُرسَل فقط عند موافقة المستخدم على الكوكيز التسويقية
  */
 export function trackMetaSchedule(data?: { content_name?: string; eventId?: string }): void {
-  if (typeof window !== "undefined" && window.fbq && hasMarketingConsent()) {
+  if (typeof window !== 'undefined' && window.fbq && hasMarketingConsent()) {
     const { eventId, ...eventData } = data || {};
-    window.fbq("track", "Schedule", eventData, eventId ? { eventID: eventId } : undefined);
+    window.fbq('track', 'Schedule', eventData, eventId ? { eventID: eventId } : undefined);
   }
 }
 
@@ -232,11 +237,11 @@ export function trackMetaCompleteRegistration(data?: {
   content_category?: string;
   eventId?: string;
 }): void {
-  if (typeof window !== "undefined" && window.fbq && hasMarketingConsent()) {
+  if (typeof window !== 'undefined' && window.fbq && hasMarketingConsent()) {
     const { eventId, ...eventData } = data || {};
     window.fbq(
-      "track",
-      "CompleteRegistration",
+      'track',
+      'CompleteRegistration',
       eventData,
       eventId ? { eventID: eventId } : undefined
     );
@@ -253,12 +258,12 @@ export function trackInitiateCheckout(data?: {
   content_category?: string;
   eventId?: string;
 }): void {
-  if (typeof window !== "undefined" && window.fbq && hasMarketingConsent()) {
+  if (typeof window !== 'undefined' && window.fbq && hasMarketingConsent()) {
     const { eventId, ...eventData } = data || {};
     window.fbq(
-      "track",
-      "InitiateCheckout",
-      { content_category: "Healthcare", ...eventData },
+      'track',
+      'InitiateCheckout',
+      { content_category: 'Healthcare', ...eventData },
       eventId ? { eventID: eventId } : undefined
     );
   }
@@ -273,13 +278,8 @@ export function trackMetaCustomEvent(
   data?: Record<string, unknown>,
   eventId?: string
 ): void {
-  if (typeof window !== "undefined" && window.fbq && hasMarketingConsent()) {
-    window.fbq(
-      "trackCustom",
-      eventName,
-      data,
-      eventId ? { eventID: eventId } : undefined
-    );
+  if (typeof window !== 'undefined' && window.fbq && hasMarketingConsent()) {
+    window.fbq('trackCustom', eventName, data, eventId ? { eventID: eventId } : undefined);
   }
 }
 
@@ -313,15 +313,15 @@ export default function MetaPixel() {
 
     // استمع لموافقة الكوكيز لمنح إذن التتبع الكامل
     const handleConsent = () => grantConsent();
-    window.addEventListener("cookieConsentUpdated", handleConsent);
-    return () => window.removeEventListener("cookieConsentUpdated", handleConsent);
+    window.addEventListener('cookieConsentUpdated', handleConsent);
+    return () => window.removeEventListener('cookieConsentUpdated', handleConsent);
   }, []);
 
   // إرسال PageView عند كل تنقل — مع استثناء صفحات الداشبورد
   useEffect(() => {
     if (!initialized.current || !window.fbq) return;
     if (isDashboardPath(location)) return;
-    window.fbq("track", "PageView");
+    window.fbq('track', 'PageView');
   }, [location]);
 
   return null;

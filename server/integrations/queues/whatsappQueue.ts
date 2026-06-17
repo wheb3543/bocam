@@ -1,6 +1,6 @@
-import { Queue, Worker, Job } from "bullmq";
-import { getRedisConnection } from "../../services/redis";
-import { sendWhatsAppTemplateMessage } from "../../services/whatsappCloudAPI";
+import { Queue, Worker, Job } from 'bullmq';
+import { getRedisConnection } from '../../services/redis';
+import { sendWhatsAppTemplateMessage } from '../../services/whatsappCloudAPI';
 
 // Check if Redis is available
 let isRedisAvailable = false;
@@ -8,21 +8,21 @@ let redisCheckPromise: Promise<boolean> | null = null;
 
 async function checkRedisConnection(): Promise<boolean> {
   if (redisCheckPromise) return redisCheckPromise;
-  
+
   redisCheckPromise = (async () => {
     try {
       const redis = getRedisConnection();
       await redis.ping();
       isRedisAvailable = true;
-      console.log("[WhatsApp Queue] Redis connection successful");
+      console.log('[WhatsApp Queue] Redis connection successful');
       return true;
     } catch (error) {
       isRedisAvailable = false;
-      console.warn("[WhatsApp Queue] Redis not available, will send messages directly");
+      console.warn('[WhatsApp Queue] Redis not available, will send messages directly');
       return false;
     }
   })();
-  
+
   return redisCheckPromise;
 }
 
@@ -32,22 +32,22 @@ async function checkRedisConnection(): Promise<boolean> {
  */
 
 export interface WhatsAppMessageJob {
-  type?: "text" | "template";
+  type?: 'text' | 'template';
   to?: string;
   phone?: string;
   message?: string;
   templateName?: string;
   language?: string;
   components?: Array<{
-    type: "header" | "body" | "footer" | "button";
-    parameters?: Array<{ type: "text" | "payload"; text?: string; payload?: string }>;
-    sub_type?: "quick_reply";
+    type: 'header' | 'body' | 'footer' | 'button';
+    parameters?: Array<{ type: 'text' | 'payload'; text?: string; payload?: string }>;
+    sub_type?: 'quick_reply';
     index?: number;
   }>;
-  category?: "marketing" | "utility" | "authentication";
+  category?: 'marketing' | 'utility' | 'authentication';
   metadata?: {
     bookingId?: number;
-    bookingType?: "appointment" | "offer" | "camp";
+    bookingType?: 'appointment' | 'offer' | 'camp';
     patientName?: string;
   };
   timestamp?: Date;
@@ -59,28 +59,28 @@ let whatsappWorker: Worker<WhatsAppMessageJob, any, string> | null = null;
 
 async function initializeQueue() {
   if (whatsappQueue) return whatsappQueue;
-  
+
   const redisAvailable = await checkRedisConnection();
   if (!redisAvailable) return null;
-  
-  whatsappQueue = new Queue<WhatsAppMessageJob>("whatsapp-messages", {
+
+  whatsappQueue = new Queue<WhatsAppMessageJob>('whatsapp-messages', {
     connection: getRedisConnection(),
-  defaultJobOptions: {
-    attempts: 3, // Retry up to 3 times
-    backoff: {
-      type: "exponential",
-      delay: 5000, // Start with 5 seconds
-    },
-    removeOnComplete: {
-      age: 24 * 3600, // Keep completed jobs for 24 hours
-      count: 1000, // Keep last 1000 completed jobs
-    },
-    removeOnFail: {
-      age: 7 * 24 * 3600, // Keep failed jobs for 7 days
-    },
+    defaultJobOptions: {
+      attempts: 3, // Retry up to 3 times
+      backoff: {
+        type: 'exponential',
+        delay: 5000, // Start with 5 seconds
+      },
+      removeOnComplete: {
+        age: 24 * 3600, // Keep completed jobs for 24 hours
+        count: 1000, // Keep last 1000 completed jobs
+      },
+      removeOnFail: {
+        age: 7 * 24 * 3600, // Keep failed jobs for 7 days
+      },
     },
   });
-  
+
   return whatsappQueue;
 }
 
@@ -89,47 +89,47 @@ export { whatsappQueue };
 // Create the worker (will be initialized only if Redis is available)
 async function initializeWorker() {
   if (whatsappWorker) return whatsappWorker;
-  
+
   const redisAvailable = await checkRedisConnection();
   if (!redisAvailable) return null;
-  
+
   whatsappWorker = new Worker<WhatsAppMessageJob, any, string>(
-  "whatsapp-messages",
-  async (job: Job<WhatsAppMessageJob>) => {
-    const { to, phone, templateName, language, components, category, metadata } = job.data;
-    const phoneNumber = to || phone || "";
+    'whatsapp-messages',
+    async (job: Job<WhatsAppMessageJob>) => {
+      const { to, phone, templateName, language, components, category, metadata } = job.data;
+      const phoneNumber = to || phone || '';
 
-    console.log(`[WhatsApp Queue] Processing job ${job.id} for ${phoneNumber}`);
+      console.log(`[WhatsApp Queue] Processing job ${job.id} for ${phoneNumber}`);
 
-    try {
-      const result = await sendWhatsAppTemplateMessage(
-        phoneNumber,
-        {
-          templateName: templateName || "",
-          languageCode: language || "ar",
-          components: components || [],
-        },
-        category ? { category } : undefined
-      );
+      try {
+        const result = await sendWhatsAppTemplateMessage(
+          phoneNumber,
+          {
+            templateName: templateName || '',
+            languageCode: language || 'ar',
+            components: components || [],
+          },
+          category ? { category } : undefined
+        );
 
-      console.log(`[WhatsApp Queue] Job ${job.id} completed successfully`);
-      
-      return {
-        success: true,
-        messageId: result.messageId,
-        metadata,
-      };
-    } catch (error) {
-      console.error(`[WhatsApp Queue] Job ${job.id} failed:`, error);
-      throw error; // Will trigger retry
-    }
-  },
+        console.log(`[WhatsApp Queue] Job ${job.id} completed successfully`);
+
+        return {
+          success: true,
+          messageId: result.messageId,
+          metadata,
+        };
+      } catch (error) {
+        console.error(`[WhatsApp Queue] Job ${job.id} failed:`, error);
+        throw error; // Will trigger retry
+      }
+    },
     {
       connection: getRedisConnection(),
       concurrency: 5, // Process up to 5 messages concurrently
     }
   );
-  
+
   return whatsappWorker;
 }
 
@@ -138,16 +138,16 @@ export { whatsappWorker };
 // Initialize worker and set up event listeners
 initializeWorker().then((worker) => {
   if (worker) {
-    worker.on("completed", (job) => {
+    worker.on('completed', (job) => {
       console.log(`[WhatsApp Queue] Job ${job.id} has been completed`);
     });
 
-    worker.on("failed", (job, err) => {
+    worker.on('failed', (job, err) => {
       console.error(`[WhatsApp Queue] Job ${job?.id} has failed with error:`, err.message);
     });
 
-    worker.on("error", (err) => {
-      console.error("[WhatsApp Queue] Worker error:", err);
+    worker.on('error', (err) => {
+      console.error('[WhatsApp Queue] Worker error:', err);
     });
   }
 });
@@ -157,35 +157,35 @@ initializeWorker().then((worker) => {
  */
 export async function queueWhatsAppMessage(data: WhatsAppMessageJob): Promise<string> {
   const queue = await initializeQueue();
-  
+
   if (!queue) {
     // Fallback: Send directly without queue
-    console.log("[WhatsApp Queue] Redis unavailable, sending message directly");
+    console.log('[WhatsApp Queue] Redis unavailable, sending message directly');
     try {
-      const phoneNumber = data.to || data.phone || "";
+      const phoneNumber = data.to || data.phone || '';
       const result = await sendWhatsAppTemplateMessage(
         phoneNumber,
         {
-          templateName: data.templateName || "",
-          languageCode: data.language || "ar",
+          templateName: data.templateName || '',
+          languageCode: data.language || 'ar',
           components: data.components || [],
         },
         data.category ? { category: data.category } : undefined
       );
-      console.log("[WhatsApp Queue] Message sent directly:", result.messageId);
-      return result.messageId || "direct-send";
+      console.log('[WhatsApp Queue] Message sent directly:', result.messageId);
+      return result.messageId || 'direct-send';
     } catch (error) {
-      console.error("[WhatsApp Queue] Direct send failed:", error);
+      console.error('[WhatsApp Queue] Direct send failed:', error);
       throw error;
     }
   }
-  
-  const job = await queue.add("send-message", data, {
-    priority: data.category === "authentication" ? 1 : data.category === "utility" ? 2 : 3,
+
+  const job = await queue.add('send-message', data, {
+    priority: data.category === 'authentication' ? 1 : data.category === 'utility' ? 2 : 3,
   });
-  
+
   console.log(`[WhatsApp Queue] Added job ${job.id} to queue`);
-  return (job.id?.toString()) || "";
+  return job.id?.toString() || '';
 }
 
 /**
@@ -193,7 +193,7 @@ export async function queueWhatsAppMessage(data: WhatsAppMessageJob): Promise<st
  */
 export async function getQueueStats() {
   const queue = await initializeQueue();
-  
+
   if (!queue) {
     return {
       waiting: 0,
@@ -205,7 +205,7 @@ export async function getQueueStats() {
       redisAvailable: false,
     };
   }
-  
+
   const [waiting, active, completed, failed, delayed] = await Promise.all([
     queue.getWaitingCount(),
     queue.getActiveCount(),
@@ -231,7 +231,7 @@ export async function getQueueStats() {
 export async function retryFailedJobs(): Promise<number> {
   const queue = await initializeQueue();
   if (!queue) return 0;
-  
+
   const failedJobs = await queue.getFailed();
   let retried = 0;
 
@@ -250,8 +250,8 @@ export async function retryFailedJobs(): Promise<number> {
 export async function cleanOldJobs(): Promise<void> {
   const queue = await initializeQueue();
   if (!queue) return;
-  
-  await queue.clean(24 * 3600 * 1000, 1000, "completed"); // Clean completed jobs older than 24h
-  await queue.clean(7 * 24 * 3600 * 1000, 0, "failed"); // Clean failed jobs older than 7 days
-  console.log("[WhatsApp Queue] Old jobs cleaned");
+
+  await queue.clean(24 * 3600 * 1000, 1000, 'completed'); // Clean completed jobs older than 24h
+  await queue.clean(7 * 24 * 3600 * 1000, 0, 'failed'); // Clean failed jobs older than 7 days
+  console.log('[WhatsApp Queue] Old jobs cleaned');
 }

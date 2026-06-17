@@ -13,8 +13,8 @@ response:
     Vary: Origin
     cross-origin-resource-policy: cross-origin
     x-app-usage: '{"call_count":0,"total_cputime":0,"total_time":0}'
-    x-fb-rlafr: "0"
-    Access-Control-Allow-Origin: "*"
+    x-fb-rlafr: '0'
+    Access-Control-Allow-Origin: '*'
     facebook-api-version: v16.0
     Strict-Transport-Security: max-age=15552000; preload
     Pragma: no-cache
@@ -22,12 +22,12 @@ response:
     Expires: Sat, 01 Jan 2000 00:00:00 GMT
     x-fb-request-id: ASXeY7n8KxE4s2WPsejsx5T
     x-fb-trace-id: BpUU8ro+Qyc
-    x-fb-rev: "1007266633"
+    x-fb-rev: '1007266633'
     X-FB-Debug: sXZ8RdzMc/GncoPer8191i4EFUEuQglfsee5vTMgumeA8DW0ab23QsdikhTpEoo+1UXoQXkvr7fOAv5/EC6nIA==
     Date: Fri, 07 Apr 2023 04:40:39 GMT
     Alt-Svc: h3=":443"; ma=86400
     Connection: keep-alive
-    Content-Length: "65"
+    Content-Length: '65'
   body:
     type: json
     content: |-

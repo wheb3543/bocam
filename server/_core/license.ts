@@ -1,17 +1,17 @@
 /**
  * License Management System
- * 
+ *
  * Local cryptographic license validation system that works offline.
  * Uses Hardware-ID binding with RSA-2048 digital signatures.
  * Acts as a Kill Switch - terminates server if license is invalid.
- * 
+ *
  * Security Features:
  * - Hardware-ID based licensing (MAC Address)
  * - RSA-2048 digital signature verification
  * - Offline validation (no internet required)
  * - Kill Switch on invalid license
  * - Feature flag support
- * 
+ *
  * @module license
  */
 
@@ -24,11 +24,11 @@ import os from 'os';
  * License payload interface
  */
 interface LicensePayload {
-  hid: string;           // Hardware ID
-  exp: number;           // Expiry timestamp
-  feat: string[];        // Enabled features
-  iat: number;           // Issued at timestamp
-  ver: string;           // License version
+  hid: string; // Hardware ID
+  exp: number; // Expiry timestamp
+  feat: string[]; // Enabled features
+  iat: number; // Issued at timestamp
+  ver: string; // License version
 }
 
 /**
@@ -58,23 +58,23 @@ interface LicenseFile {
 
 /**
  * Get Hardware ID (MAC Address)
- * 
+ *
  * Reads the MAC address of the first non-internal network interface.
  * This serves as a unique hardware identifier for license binding.
- * 
+ *
  * @returns Hardware ID (MAC Address in uppercase without colons)
  * @throws Error if no valid network interface is found
  */
 export function getHardwareId(): string {
   try {
     const networkInterfaces = os.networkInterfaces();
-    
+
     // Iterate through all network interfaces
     for (const interfaceName of Object.keys(networkInterfaces)) {
       const interfaces = networkInterfaces[interfaceName];
-      
+
       if (!interfaces) continue;
-      
+
       // Find first non-internal IPv4 interface
       for (const iface of interfaces) {
         if (
@@ -89,13 +89,13 @@ export function getHardwareId(): string {
         }
       }
     }
-    
+
     // Fallback: use first available MAC address
     for (const interfaceName of Object.keys(networkInterfaces)) {
       const interfaces = networkInterfaces[interfaceName];
-      
+
       if (!interfaces) continue;
-      
+
       for (const iface of interfaces) {
         if (iface.mac && iface.mac !== '00:00:00:00:00:00') {
           const hardwareId = iface.mac.replace(/:/g, '').toUpperCase();
@@ -104,20 +104,22 @@ export function getHardwareId(): string {
         }
       }
     }
-    
+
     throw new Error('No valid network interface found for Hardware ID generation');
   } catch (error) {
     console.error('❌ Error getting Hardware ID:', error);
-    throw new Error(`Failed to get Hardware ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to get Hardware ID: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
 /**
  * Get license file path
- * 
+ *
  * Returns the path to the license.json file.
  * First checks current directory, then checks root directory.
- * 
+ *
  * @returns Path to license.json file
  */
 function getLicenseFilePath(): string {
@@ -126,22 +128,22 @@ function getLicenseFilePath(): string {
   if (fs.existsSync(currentDirLicense)) {
     return currentDirLicense;
   }
-  
+
   // Check root directory
   const rootDirLicense = path.join(process.cwd(), '..', 'license.json');
   if (fs.existsSync(rootDirLicense)) {
     return rootDirLicense;
   }
-  
+
   // Return default path in current directory
   return currentDirLicense;
 }
 
 /**
  * Check if license file exists
- * 
+ *
  * Checks if the license.json file exists.
- * 
+ *
  * @param licensePath - Path to license file
  * @returns True if license file exists, false otherwise
  */
@@ -156,9 +158,9 @@ export function licenseFileExists(licensePath?: string): boolean {
 
 /**
  * Load license file
- * 
+ *
  * Reads and parses the license.json file.
- * 
+ *
  * @param licensePath - Path to license file
  * @returns License file object
  * @throws Error if license file is not found or invalid
@@ -168,28 +170,35 @@ function loadLicenseFile(licensePath: string): LicenseFile {
     if (!fs.existsSync(licensePath)) {
       throw new Error(`License file not found: ${licensePath}`);
     }
-    
+
     const licenseContent = fs.readFileSync(licensePath, 'utf-8');
     const licenseFile: LicenseFile = JSON.parse(licenseContent);
-    
+
     // Validate license file structure
-    if (!licenseFile.key || !licenseFile.hardwareId || !licenseFile.expiryDate || !licenseFile.features) {
+    if (
+      !licenseFile.key ||
+      !licenseFile.hardwareId ||
+      !licenseFile.expiryDate ||
+      !licenseFile.features
+    ) {
       throw new Error('Invalid license file structure');
     }
-    
+
     return licenseFile;
   } catch (error) {
     console.error('❌ Error loading license file:', error);
-    throw new Error(`Failed to load license file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to load license file: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
 /**
  * Get public key for verification
- * 
+ *
  * Returns the public key used for digital signature verification.
  * The public key is embedded in the application (secure).
- * 
+ *
  * @returns Public key in PEM format
  * @throws Error if public key is not found
  */
@@ -199,25 +208,25 @@ function getPublicKey(): string {
   if (fs.existsSync(publicKeyPath)) {
     return fs.readFileSync(publicKeyPath, 'utf-8');
   }
-  
+
   // Fallback to root directory
   const rootPublicKeyPath = path.join(process.cwd(), '..', 'license-keys', 'public-key.pem');
   if (fs.existsSync(rootPublicKeyPath)) {
     return fs.readFileSync(rootPublicKeyPath, 'utf-8');
   }
-  
+
   // Try loading from default location as last resort
   const defaultPath = path.join(process.cwd(), 'public-key.pem');
   if (fs.existsSync(defaultPath)) {
     return fs.readFileSync(defaultPath, 'utf-8');
   }
-  
+
   throw new Error(`Public key not found. Please place the public key at ${publicKeyPath}`);
-}/**
+} /**
  * Verify digital signature
- * 
+ *
  * Verifies the RSA-2048 digital signature of the license.
- * 
+ *
  * @param licenseKey - Base64 encoded license key
  * @returns Verification result
  */
@@ -226,17 +235,17 @@ function verifySignature(licenseKey: string): { valid: boolean; payload: License
     // Decode license key
     const licenseBuffer = Buffer.from(licenseKey, 'base64');
     const licenseObject = JSON.parse(licenseBuffer.toString('utf-8'));
-    
+
     if (!licenseObject.payload || !licenseObject.signature) {
       return { valid: false, payload: null };
     }
-    
+
     const payload: LicensePayload = licenseObject.payload;
     const signature = Buffer.from(licenseObject.signature, 'base64');
-    
+
     // Get public key
     const publicKey = getPublicKey();
-    
+
     // Verify signature
     const payloadString = JSON.stringify(payload);
     const isValid = crypto.verify(
@@ -249,7 +258,7 @@ function verifySignature(licenseKey: string): { valid: boolean; payload: License
       },
       signature
     );
-    
+
     return { valid: isValid, payload };
   } catch (error) {
     console.error('❌ Error verifying signature:', error);
@@ -259,38 +268,38 @@ function verifySignature(licenseKey: string): { valid: boolean; payload: License
 
 /**
  * Validate license
- * 
+ *
  * Comprehensive license validation including:
  * - Digital signature verification
  * - Hardware ID matching
  * - Expiry date check
  * - Feature flag validation
- * 
+ *
  * Acts as a Kill Switch - terminates server if license is invalid.
- * 
+ *
  * @returns License information
  * @throws Error and terminates process if license is invalid
  */
 export function validateLicense(): LicenseInfo {
   console.log('🔐 License Validation Starting...');
   console.log('');
-  
+
   try {
     // Get license file path
     const licensePath = getLicenseFilePath();
     console.log(`📄 License file path: ${licensePath}`);
-    
+
     // Load license file
     const licenseFile = loadLicenseFile(licensePath);
     console.log(`✅ License file loaded successfully`);
-    
+
     // Get current hardware ID
     const currentHardwareId = getHardwareId();
-    
+
     // Verify signature
     console.log(`🔍 Verifying digital signature...`);
     const { valid, payload } = verifySignature(licenseFile.key);
-    
+
     // TEMPORARY: Disable Kill Switch for deployment until central server is ready
     // Return invalid license info instead of crashing server
     if (!valid || !payload) {
@@ -306,19 +315,19 @@ export function validateLicense(): LicenseInfo {
         expiryDate: 0,
         features: [],
         issuedAt: 0,
-        version: "1.0",
+        version: '1.0',
         isValid: false,
         validationMessage: 'Invalid digital signature',
       };
     }
-    
+
     console.log(`✅ Digital signature verified`);
-    
+
     // Validate hardware ID
     console.log(`🔍 Validating Hardware ID...`);
     console.log(`   - License Hardware ID: ${payload.hid}`);
     console.log(`   - Current Hardware ID: ${currentHardwareId}`);
-    
+
     // TEMPORARY: Disable Kill Switch for deployment until central server is ready
     // Return invalid license info instead of crashing server
     if (payload.hid !== currentHardwareId) {
@@ -341,20 +350,20 @@ export function validateLicense(): LicenseInfo {
         expiryDate: 0,
         features: [],
         issuedAt: 0,
-        version: "1.0",
+        version: '1.0',
         isValid: false,
         validationMessage: 'Hardware ID mismatch',
       };
     }
-    
+
     console.log(`✅ Hardware ID matched`);
-    
+
     // Validate expiry date
     console.log(`🔍 Validating expiry date...`);
     const currentTime = Math.floor(Date.now() / 1000);
     console.log(`   - License expiry: ${new Date(payload.exp * 1000).toISOString()}`);
     console.log(`   - Current time: ${new Date(currentTime * 1000).toISOString()}`);
-    
+
     // TEMPORARY: Disable Kill Switch for deployment until central server is ready
     // Return invalid license info instead of crashing server
     if (payload.exp < currentTime) {
@@ -381,17 +390,17 @@ export function validateLicense(): LicenseInfo {
         validationMessage: 'License has expired',
       };
     }
-    
+
     console.log(`✅ License is valid (not expired)`);
-    
+
     // Calculate days until expiry
     const daysUntilExpiry = Math.floor((payload.exp - currentTime) / (24 * 60 * 60));
     console.log(`⏰ License valid for: ${daysUntilExpiry} days`);
-    
+
     // Validate features
     console.log(`🔍 Validating features...`);
     console.log(`   - Enabled features: ${payload.feat.join(', ')}`);
-    
+
     // TEMPORARY: Disable Kill Switch for deployment until central server is ready
     // Return invalid license info instead of crashing server
     if (!payload.feat || payload.feat.length === 0) {
@@ -412,14 +421,14 @@ export function validateLicense(): LicenseInfo {
         validationMessage: 'No features enabled',
       };
     }
-    
+
     console.log(`✅ Features validated (${payload.feat.length} features enabled)`);
-    
+
     console.log('');
     console.log('🎉 LICENSE VALIDATION SUCCESSFUL');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('');
-    
+
     // Return license info
     const licenseInfo: LicenseInfo = {
       hardwareId: payload.hid,
@@ -430,7 +439,7 @@ export function validateLicense(): LicenseInfo {
       isValid: true,
       validationMessage: 'License is valid',
     };
-    
+
     return licenseInfo;
   } catch (error) {
     // TEMPORARY: Disable Kill Switch for deployment until central server is ready
@@ -439,7 +448,7 @@ export function validateLicense(): LicenseInfo {
       // Re-throw process.exit errors
       throw error;
     }
-    
+
     console.error('❌ LICENSE VALIDATION FAILED:', error);
     console.error('');
     console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -454,7 +463,7 @@ export function validateLicense(): LicenseInfo {
       expiryDate: 0,
       features: [],
       issuedAt: 0,
-      version: "1.0",
+      version: '1.0',
       isValid: false,
       validationMessage: error instanceof Error ? error.message : 'Unknown error',
     };
@@ -463,9 +472,9 @@ export function validateLicense(): LicenseInfo {
 
 /**
  * Check if a feature is enabled
- * 
+ *
  * Checks if a specific feature is enabled in the current license.
- * 
+ *
  * @param feature - Feature name to check
  * @returns True if feature is enabled, false otherwise
  */
@@ -481,9 +490,9 @@ export function isFeatureEnabled(feature: string): boolean {
 
 /**
  * Get enabled features
- * 
+ *
  * Returns list of all enabled features from the current license.
- * 
+ *
  * @returns Array of enabled feature names
  */
 export function getEnabledFeatures(): string[] {
@@ -498,10 +507,10 @@ export function getEnabledFeatures(): string[] {
 
 /**
  * License middleware initialization
- * 
+ *
  * Initializes the license validation system.
  * This should be called during application startup.
- * 
+ *
  * @param allowMissing - If true, allows server to start even if license file is missing
  * @returns License information or null if license is missing and allowMissing is true
  */
@@ -509,7 +518,7 @@ export function initializeLicense(allowMissing: boolean = false): LicenseInfo | 
   try {
     console.log('🚀 Initializing License System...');
     console.log('');
-    
+
     // Check if license file exists
     const licensePath = getLicenseFilePath();
     if (!licenseFileExists(licensePath)) {
@@ -522,12 +531,12 @@ export function initializeLicense(allowMissing: boolean = false): LicenseInfo | 
         throw new Error(`License file not found: ${licensePath}`);
       }
     }
-    
+
     const licenseInfo = validateLicense();
-    
+
     console.log('✅ License System initialized successfully');
     console.log('');
-    
+
     return licenseInfo;
   } catch (error) {
     console.error('❌ Failed to initialize license system:', error);

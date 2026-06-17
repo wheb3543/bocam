@@ -2,20 +2,20 @@
  * Admin Login Page - Local Authentication
  * صفحة تسجيل دخول الموظفين - المصادقة المحلية
  */
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, User, Lock, Shield, ArrowRight, Heart, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Loader2, User, Lock, Shield, ArrowRight, Heart, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminLogin() {
   const [, navigate] = useLocation();
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
 
   // Check if already logged in
@@ -23,33 +23,33 @@ export default function AdminLogin() {
 
   useEffect(() => {
     if (user) {
-      navigate("/admin");
+      navigate('/admin');
     }
   }, [user, navigate]);
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: (data) => {
       toast.success(`مرحباً ${data.user.name || data.user.username}! تم تسجيل الدخول بنجاح`);
-      navigate("/admin");
+      navigate('/admin');
     },
     onError: (err) => {
-      toast.error(err.message || "فشل تسجيل الدخول");
+      toast.error(err.message || 'فشل تسجيل الدخول');
     },
   });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!identifier || identifier.length < 3) {
-      toast.error("يرجى إدخال اسم المستخدم أو البريد الإلكتروني");
+      toast.error('يرجى إدخال اسم المستخدم أو البريد الإلكتروني');
       return;
     }
-    
+
     if (!password || password.length < 1) {
-      toast.error("يرجى إدخال كلمة المرور");
+      toast.error('يرجى إدخال كلمة المرور');
       return;
     }
-    
+
     loginMutation.mutate({ identifier, password });
   };
 
@@ -62,7 +62,10 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 relative overflow-hidden" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 relative overflow-hidden"
+      dir="rtl"
+    >
       {/* Animated Background Particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(20)].map((_, i) => (
@@ -86,28 +89,32 @@ export default function AdminLogin() {
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Green Ribbon - from right */}
         <div className="absolute bottom-0 right-0 w-full h-full">
-          <div className="absolute bottom-0 right-0 w-32 h-96 bg-gradient-to-l from-green-600 to-green-400 opacity-30 animate-ribbon-green"
-               style={{
-                 animation: 'ribbonGreen 6s ease-in-out infinite',
-                 clipPath: 'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
-                 borderRadius: '50%',
-                 filter: 'blur(2px)',
-                 boxShadow: '0 0 30px rgba(34, 197, 94, 0.5)'
-               }}>
-          </div>
+          <div
+            className="absolute bottom-0 right-0 w-32 h-96 bg-gradient-to-l from-green-600 to-green-400 opacity-30 animate-ribbon-green"
+            style={{
+              animation: 'ribbonGreen 6s ease-in-out infinite',
+              clipPath:
+                'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
+              borderRadius: '50%',
+              filter: 'blur(2px)',
+              boxShadow: '0 0 30px rgba(34, 197, 94, 0.5)',
+            }}
+          ></div>
         </div>
         {/* Blue Ribbon - from right */}
         <div className="absolute bottom-0 right-0 w-full h-full">
-          <div className="absolute bottom-0 right-0 w-32 h-96 bg-gradient-to-l from-blue-600 to-blue-400 opacity-30 animate-ribbon-blue"
-               style={{
-                 animation: 'ribbonBlue 6s ease-in-out infinite',
-                 animationDelay: '0.5s',
-                 clipPath: 'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
-                 borderRadius: '50%',
-                 filter: 'blur(2px)',
-                 boxShadow: '0 0 30px rgba(59, 130, 246, 0.5)'
-               }}>
-          </div>
+          <div
+            className="absolute bottom-0 right-0 w-32 h-96 bg-gradient-to-l from-blue-600 to-blue-400 opacity-30 animate-ribbon-blue"
+            style={{
+              animation: 'ribbonBlue 6s ease-in-out infinite',
+              animationDelay: '0.5s',
+              clipPath:
+                'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
+              borderRadius: '50%',
+              filter: 'blur(2px)',
+              boxShadow: '0 0 30px rgba(59, 130, 246, 0.5)',
+            }}
+          ></div>
         </div>
         {/* Heart Icon at Center Top */}
         <div className="absolute top-20 left-1/2 -translate-x-1/2 animate-heart-pulse">
@@ -123,9 +130,9 @@ export default function AdminLogin() {
           {/* Header with Hospital Logo */}
           <div className="text-center mb-6 sm:mb-8">
             <div className="relative inline-block mb-4">
-              <img 
-                src="/sgh-logo-full.png" 
-                alt="شعار المستشفى" 
+              <img
+                src="/sgh-logo-full.png"
+                alt="شعار المستشفى"
                 className="h-16 sm:h-20 mx-auto animate-logo-float"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-400 opacity-0 blur-xl animate-logo-glow" />
@@ -169,7 +176,10 @@ export default function AdminLogin() {
                 <div>
                   <Label htmlFor="password" className="text-sm font-medium relative">
                     كلمة المرور
-                    <Sparkles className="absolute -left-5 top-1/2 -translate-y-1/2 h-3 w-3 text-blue-500 animate-sparkle" style={{ animationDelay: '0.5s' }} />
+                    <Sparkles
+                      className="absolute -left-5 top-1/2 -translate-y-1/2 h-3 w-3 text-blue-500 animate-sparkle"
+                      style={{ animationDelay: '0.5s' }}
+                    />
                   </Label>
                   <div className="relative">
                     <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors" />
@@ -193,7 +203,9 @@ export default function AdminLogin() {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="rounded border-gray-300 accent-green-600"
                   />
-                  <Label htmlFor="remember" className="text-sm">تذكرني في هذا المتصفح</Label>
+                  <Label htmlFor="remember" className="text-sm">
+                    تذكرني في هذا المتصفح
+                  </Label>
                 </div>
 
                 <Button
@@ -211,8 +223,11 @@ export default function AdminLogin() {
 
               <div className="pt-4 border-t">
                 <p className="text-xs text-muted-foreground text-center">
-                  يمكنك أيضاً تسجيل الدخول عبر{" "}
-                  <a href="/api/oauth/login" className="text-green-600 hover:text-green-700 hover:underline transition-colors">
+                  يمكنك أيضاً تسجيل الدخول عبر{' '}
+                  <a
+                    href="/api/oauth/login"
+                    className="text-green-600 hover:text-green-700 hover:underline transition-colors"
+                  >
                     OAuth
                   </a>
                 </p>
@@ -227,7 +242,10 @@ export default function AdminLogin() {
               <span className="text-xs sm:text-sm font-medium text-foreground">أمان عالي</span>
             </div>
             <div className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border border-blue-100 dark:border-gray-700 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300 hover:scale-105">
-              <User className="h-6 w-6 sm:h-7 sm:w-7 text-blue-600 dark:text-blue-400 mb-2 animate-icon-bounce" style={{ animationDelay: '0.2s' }} />
+              <User
+                className="h-6 w-6 sm:h-7 sm:w-7 text-blue-600 dark:text-blue-400 mb-2 animate-icon-bounce"
+                style={{ animationDelay: '0.2s' }}
+              />
               <span className="text-xs sm:text-sm font-medium text-foreground">وصول سريع</span>
             </div>
           </div>
@@ -240,9 +258,7 @@ export default function AdminLogin() {
             <p className="text-xs sm:text-sm text-muted-foreground">
               صنع بواسطة آيديا للاستشارات والحلول التسويقية والتقنية
             </p>
-            <p className="text-xs text-muted-foreground">
-              جميع الحقوق محفوظة ٢٠٢٦
-            </p>
+            <p className="text-xs text-muted-foreground">جميع الحقوق محفوظة ٢٠٢٦</p>
           </div>
         </div>
       </main>

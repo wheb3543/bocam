@@ -1,19 +1,19 @@
 /**
  * useLicense - Hook مركزي لإدارة بيانات الترخيص والميزات
- * 
+ *
  * يقرأ بيانات الترخيص والميزات المفعلة من tRPC API بشكل مركزي ومكشّف (Cached)
  * يوفر دوال مساعدة سهلة للتحقق من الميزات في أي مكان بالواجهة
- * 
+ *
  * @example
  * const { hasFeature, isLicenseValid, licenseInfo } = useLicense();
- * 
+ *
  * if (hasFeature('whatsapp')) {
  *   // عرض ميزة WhatsApp
  * }
  */
 
 import { useMemo } from 'react';
-import { trpc } from "@/lib/api/trpc";
+import { trpc } from '@/lib/api/trpc';
 
 /**
  * معلومات الترخيص
@@ -40,15 +40,12 @@ export interface UseLicenseOptions {
 
 /**
  * Hook مركزي لإدارة بيانات الترخيص والميزات
- * 
+ *
  * @param options - خيارات التكوين
  * @returns كائن يحتوي على دوال ومعلومات الترخيص
  */
 export function useLicense(options: UseLicenseOptions = {}) {
-  const {
-    refetchInterval = false,
-    enabled = true,
-  } = options;
+  const { refetchInterval = false, enabled = true } = options;
 
   // استعلام معلومات الترخيص (مع caching)
   const licenseQuery = trpc.license.getInfo.useQuery(undefined, {
@@ -103,7 +100,7 @@ export function useLicense(options: UseLicenseOptions = {}) {
       if (enabledFeatures.includes('*')) {
         return true;
       }
-      
+
       return enabledFeatures.includes(feature);
     };
   }, [enabledFeatures]);
@@ -115,10 +112,13 @@ export function useLicense(options: UseLicenseOptions = {}) {
    */
   const hasFeatures = useMemo(() => {
     return (features: string[]): Record<string, boolean> => {
-      return features.reduce((acc, feature) => {
-        acc[feature] = hasFeature(feature);
-        return acc;
-      }, {} as Record<string, boolean>);
+      return features.reduce(
+        (acc, feature) => {
+          acc[feature] = hasFeature(feature);
+          return acc;
+        },
+        {} as Record<string, boolean>
+      );
     };
   }, [hasFeature]);
 
@@ -167,21 +167,21 @@ export function useLicense(options: UseLicenseOptions = {}) {
     // معلومات الترخيص
     licenseInfo,
     enabledFeatures,
-    
+
     // دوال التحقق
     hasFeature,
     hasFeatures,
     getEnabledFeatures,
     isLicenseValid,
     isLicenseExpired,
-    
+
     // معلومات إضافية
     daysRemaining,
-    
+
     // حالة الاستعلام
     isLoading,
     error,
-    
+
     // دوال التحكم
     refetch,
   };

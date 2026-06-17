@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { cn } from '@/lib/utils';
 
 interface AnimatedCounterProps {
   value: number;
@@ -19,9 +19,9 @@ export default function AnimatedCounter({
   value,
   duration = 800,
   className,
-  locale = "ar-SA",
-  prefix = "",
-  suffix = "",
+  locale = 'ar-SA',
+  prefix = '',
+  suffix = '',
   onComplete,
 }: AnimatedCounterProps) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -67,9 +67,7 @@ export default function AnimatedCounter({
       const progress = Math.min(elapsed / duration, 1);
       const easedProgress = easeOutExpo(progress);
 
-      const currentValue = Math.round(
-        startValue + (endValue - startValue) * easedProgress
-      );
+      const currentValue = Math.round(startValue + (endValue - startValue) * easedProgress);
 
       setDisplayValue(currentValue);
 
@@ -103,8 +101,8 @@ export default function AnimatedCounter({
   return (
     <span
       className={cn(
-        "tabular-nums transition-colors duration-300",
-        isUpdating && "text-primary",
+        'tabular-nums transition-colors duration-300',
+        isUpdating && 'text-primary',
         className
       )}
     >

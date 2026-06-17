@@ -1,5 +1,5 @@
 $kind: http-request
-description: "Endpoint reference: [Business > Extended Credits](https://developers.facebook.com/docs/marketing-api/reference/business/extendedcredits/)"
+description: 'Endpoint reference: [Business > Extended Credits](https://developers.facebook.com/docs/marketing-api/reference/business/extendedcredits/)'
 url: https://graph.facebook.com/{{Version}}/{{Business-ID}}/owned_whatsapp_business_accounts
 method: GET
 examples: ./.resources/Get owned WABAs.resources/examples

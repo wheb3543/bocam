@@ -14,7 +14,9 @@ const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_NAME = process.env.DB_NAME;
 
 if (!DB_HOST || !DB_USER || !DB_PASSWORD || !DB_NAME) {
-  console.error('❌ Missing required DB_HOST, DB_USER, DB_PASSWORD, or DB_NAME environment variables.');
+  console.error(
+    '❌ Missing required DB_HOST, DB_USER, DB_PASSWORD, or DB_NAME environment variables.'
+  );
   process.exit(1);
 }
 
@@ -23,7 +25,7 @@ const TABLES_TO_BACKUP = [
   'whatsapp_conversations',
   'campRegistrations',
   'appointments',
-  'offerLeads'
+  'offerLeads',
 ];
 
 // Backup directory
@@ -31,7 +33,7 @@ const BACKUP_DIR = path.join(process.cwd(), 'backups');
 
 async function createBackup() {
   console.log('🔄 Starting database backup...');
-  
+
   // Ensure backup directory exists
   if (!fs.existsSync(BACKUP_DIR)) {
     fs.mkdirSync(BACKUP_DIR, { recursive: true });
@@ -50,19 +52,19 @@ async function createBackup() {
 
   try {
     await execAsync(command);
-    
+
     // Check if file was created and has content
     const stats = fs.statSync(backupFile);
     const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
-    
+
     console.log('✅ Backup completed successfully!');
     console.log(`📊 File size: ${fileSizeMB} MB`);
     console.log(`📍 Location: ${backupFile}`);
-    
+
     return backupFile;
   } catch (error) {
     console.error('❌ Backup failed:', error.message);
-    
+
     // Fallback: Use Node.js to export data if mysqldump is not available
     console.log('🔄 Attempting fallback backup using Node.js...');
     return await createFallbackBackup();
@@ -71,42 +73,42 @@ async function createBackup() {
 
 async function createFallbackBackup() {
   console.log('📦 Creating fallback backup using Node.js...');
-  
+
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
   const backupFile = path.join(BACKUP_DIR, `phone-tables-backup-fallback-${timestamp}.sql`);
-  
+
   const connection = await mysql.createConnection({
     host: DB_HOST,
     port: DB_PORT,
     user: DB_USER,
     password: DB_PASSWORD,
     database: DB_NAME,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
   });
 
   try {
     const sqlContent = [];
-    
+
     for (const table of TABLES_TO_BACKUP) {
       console.log(`📥 Exporting table: ${table}`);
-      
+
       // Get table structure
       const [structure] = await connection.query(`SHOW CREATE TABLE ${table}`);
       sqlContent.push(`-- Table structure for ${table}`);
       sqlContent.push(`DROP TABLE IF EXISTS \`${table}\`;`);
       sqlContent.push(structure[0]['Create Table'] + ';');
       sqlContent.push('');
-      
+
       // Get table data
       const [rows] = await connection.query(`SELECT * FROM ${table}`);
-      
+
       if (rows.length > 0) {
         sqlContent.push(`-- Data for ${table}`);
         sqlContent.push(`LOCK TABLES \`${table}\` WRITE;`);
-        
+
         for (const row of rows) {
           const columns = Object.keys(row);
-          const values = columns.map(col => {
+          const values = columns.map((col) => {
             const val = row[col];
             if (val === null) return 'NULL';
             if (typeof val === 'string') return `'${val.replace(/'/g, "\\'")}'`;
@@ -114,24 +116,26 @@ async function createFallbackBackup() {
             if (val instanceof Date) return `'${val.toISOString()}'`;
             return val;
           });
-          
-          sqlContent.push(`INSERT INTO \`${table}\` (\`${columns.join('`, `')}\`) VALUES (${values.join(', ')});`);
+
+          sqlContent.push(
+            `INSERT INTO \`${table}\` (\`${columns.join('`, `')}\`) VALUES (${values.join(', ')});`
+          );
         }
-        
+
         sqlContent.push(`UNLOCK TABLES;`);
         sqlContent.push('');
       }
     }
-    
+
     fs.writeFileSync(backupFile, sqlContent.join('\n'));
-    
+
     const stats = fs.statSync(backupFile);
     const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
-    
+
     console.log('✅ Fallback backup completed successfully!');
     console.log(`📊 File size: ${fileSizeMB} MB`);
     console.log(`📍 Location: ${backupFile}`);
-    
+
     await connection.end();
     return backupFile;
   } catch (error) {

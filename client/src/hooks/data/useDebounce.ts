@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
  * Custom hook for debouncing values
  * Delays updating the value until after the specified delay
  * Useful for search inputs to reduce API calls
- * 
+ *
  * @param value - The value to debounce
  * @param delay - Delay in milliseconds (default: 500ms)
  * @returns Debounced value

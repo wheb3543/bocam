@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Search, X, Users, Calendar, TrendingUp, UserCheck, Phone, Mail } from "lucide-react";
-import { useLocation } from "wouter";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+import { useState, useEffect, useRef } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Search, X, Users, Calendar, TrendingUp, UserCheck, Phone, Mail } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 interface GlobalSearchProps {
   onClose?: () => void;
@@ -14,7 +14,7 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ onClose }: GlobalSearchProps) {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [, setLocation] = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -32,39 +32,51 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
 
   // Search results
   const searchResults = {
-    leads: leads?.filter(l => 
-      searchQuery && (
-        l.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        l.phone.includes(searchQuery) ||
-        (l.email && l.email.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    ).slice(0, 3) || [],
-    appointments: appointments?.filter(a => 
-      searchQuery && (
-        a.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.phone.includes(searchQuery) ||
-        (a.email && a.email.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    ).slice(0, 3) || [],
-    offerLeads: offerLeads?.filter(o => 
-      searchQuery && (
-        o.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        o.phone.includes(searchQuery) ||
-        (o.email && o.email.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    ).slice(0, 3) || [],
-    campRegistrations: campRegistrations?.filter(c => 
-      searchQuery && (
-        c.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.phone.includes(searchQuery)
-      )
-    ).slice(0, 3) || [],
+    leads:
+      leads
+        ?.filter(
+          (l) =>
+            searchQuery &&
+            (l.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              l.phone.includes(searchQuery) ||
+              (l.email && l.email.toLowerCase().includes(searchQuery.toLowerCase())))
+        )
+        .slice(0, 3) || [],
+    appointments:
+      appointments
+        ?.filter(
+          (a) =>
+            searchQuery &&
+            (a.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              a.phone.includes(searchQuery) ||
+              (a.email && a.email.toLowerCase().includes(searchQuery.toLowerCase())))
+        )
+        .slice(0, 3) || [],
+    offerLeads:
+      offerLeads
+        ?.filter(
+          (o) =>
+            searchQuery &&
+            (o.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              o.phone.includes(searchQuery) ||
+              (o.email && o.email.toLowerCase().includes(searchQuery.toLowerCase())))
+        )
+        .slice(0, 3) || [],
+    campRegistrations:
+      campRegistrations
+        ?.filter(
+          (c) =>
+            searchQuery &&
+            (c.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              c.phone.includes(searchQuery))
+        )
+        .slice(0, 3) || [],
   };
 
-  const totalResults = 
-    searchResults.leads.length + 
-    searchResults.appointments.length + 
-    searchResults.offerLeads.length + 
+  const totalResults =
+    searchResults.leads.length +
+    searchResults.appointments.length +
+    searchResults.offerLeads.length +
     searchResults.campRegistrations.length;
 
   // Keyboard shortcut (Ctrl+K)
@@ -77,7 +89,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
       }
       if (e.key === 'Escape') {
         setIsOpen(false);
-        setSearchQuery("");
+        setSearchQuery('');
       }
     };
 
@@ -101,7 +113,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
 
   const handleClose = () => {
     setIsOpen(false);
-    setSearchQuery("");
+    setSearchQuery('');
     onClose?.();
   };
 
@@ -109,10 +121,10 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
     handleClose();
     // Navigate to bookings management with specific tab
     const tabMap: Record<string, string> = {
-      leads: "leads",
-      appointments: "appointments",
-      offerLeads: "offerLeads",
-      campRegistrations: "campRegistrations",
+      leads: 'leads',
+      appointments: 'appointments',
+      offerLeads: 'offerLeads',
+      campRegistrations: 'campRegistrations',
     };
     setLocation(`/bookings?tab=${tabMap[type]}`);
   };
@@ -167,7 +179,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                   variant="ghost"
                   size="icon"
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 h-6 w-6"
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => setSearchQuery('')}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -195,12 +207,14 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <Users className="h-4 w-4 text-blue-500" />
-                      <h3 className="font-semibold text-sm">تسجيلات العملاء ({searchResults.leads.length})</h3>
+                      <h3 className="font-semibold text-sm">
+                        تسجيلات العملاء ({searchResults.leads.length})
+                      </h3>
                     </div>
                     <div className="space-y-2">
                       {searchResults.leads.map((lead: any) => (
-                        <Card 
-                          key={lead.id} 
+                        <Card
+                          key={lead.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
                           onClick={() => handleResultClick('leads')}
                         >
@@ -210,12 +224,16 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                                 <p className="font-medium text-sm">{lead.fullName}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                   <Phone className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(lead.phone)}</span>
+                                  <span className="text-xs text-muted-foreground" dir="ltr">
+                                    {formatPhoneDisplay(lead.phone)}
+                                  </span>
                                 </div>
                                 {lead.email && (
                                   <div className="flex items-center gap-2 mt-1">
                                     <Mail className="h-3 w-3 text-muted-foreground" />
-                                    <span className="text-xs text-muted-foreground">{lead.email}</span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {lead.email}
+                                    </span>
                                   </div>
                                 )}
                               </div>
@@ -237,12 +255,14 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="h-4 w-4 text-green-500" />
-                      <h3 className="font-semibold text-sm">مواعيد الأطباء ({searchResults.appointments.length})</h3>
+                      <h3 className="font-semibold text-sm">
+                        مواعيد الأطباء ({searchResults.appointments.length})
+                      </h3>
                     </div>
                     <div className="space-y-2">
                       {searchResults.appointments.map((apt: any) => (
-                        <Card 
-                          key={apt.id} 
+                        <Card
+                          key={apt.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
                           onClick={() => handleResultClick('appointments')}
                         >
@@ -252,33 +272,47 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                                 <p className="font-medium text-sm">{apt.fullName}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                   <Phone className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(apt.phone)}</span>
+                                  <span className="text-xs text-muted-foreground" dir="ltr">
+                                    {formatPhoneDisplay(apt.phone)}
+                                  </span>
                                 </div>
                                 {apt.doctorName && (
-                                  <p className="text-xs text-muted-foreground mt-1">الطبيب: {apt.doctorName}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    الطبيب: {apt.doctorName}
+                                  </p>
                                 )}
                               </div>
-                              <Badge 
-                                variant="outline" 
+                              <Badge
+                                variant="outline"
                                 className={
-                                  apt.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
-                                  apt.status === 'contacted' ? 'bg-orange-50 text-orange-700' :
-                                  apt.status === 'no_answer' ? 'bg-gray-50 text-gray-700' :
-                                  apt.status === 'confirmed' ? 'bg-green-50 text-green-700' :
-                                  apt.status === 'attended' ? 'bg-teal-50 text-teal-700' :
-                                  apt.status === 'completed' ? 'bg-blue-50 text-blue-700' :
-                                  apt.status === 'cancelled' ? 'bg-red-50 text-red-700' : ''
+                                  apt.status === 'pending'
+                                    ? 'bg-yellow-50 text-yellow-700'
+                                    : apt.status === 'contacted'
+                                      ? 'bg-orange-50 text-orange-700'
+                                      : apt.status === 'no_answer'
+                                        ? 'bg-gray-50 text-gray-700'
+                                        : apt.status === 'confirmed'
+                                          ? 'bg-green-50 text-green-700'
+                                          : apt.status === 'attended'
+                                            ? 'bg-teal-50 text-teal-700'
+                                            : apt.status === 'completed'
+                                              ? 'bg-blue-50 text-blue-700'
+                                              : apt.status === 'cancelled'
+                                                ? 'bg-red-50 text-red-700'
+                                                : ''
                                 }
                               >
-                                {({
-                                  pending: 'قيد الانتظار',
-                                  contacted: 'تم التواصل',
-                                  no_answer: 'لم يرد',
-                                  confirmed: 'مؤكد',
-                                  attended: 'حضر',
-                                  completed: 'مكتمل',
-                                  cancelled: 'ملغي',
-                                } as Record<string, string>)[apt.status] || apt.status}
+                                {(
+                                  {
+                                    pending: 'قيد الانتظار',
+                                    contacted: 'تم التواصل',
+                                    no_answer: 'لم يرد',
+                                    confirmed: 'مؤكد',
+                                    attended: 'حضر',
+                                    completed: 'مكتمل',
+                                    cancelled: 'ملغي',
+                                  } as Record<string, string>
+                                )[apt.status] || apt.status}
                               </Badge>
                             </div>
                           </CardContent>
@@ -293,12 +327,14 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <TrendingUp className="h-4 w-4 text-purple-500" />
-                      <h3 className="font-semibold text-sm">حجوزات العروض ({searchResults.offerLeads.length})</h3>
+                      <h3 className="font-semibold text-sm">
+                        حجوزات العروض ({searchResults.offerLeads.length})
+                      </h3>
                     </div>
                     <div className="space-y-2">
                       {searchResults.offerLeads.map((offer: any) => (
-                        <Card 
-                          key={offer.id} 
+                        <Card
+                          key={offer.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
                           onClick={() => handleResultClick('offerLeads')}
                         >
@@ -308,10 +344,14 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                                 <p className="font-medium text-sm">{offer.fullName}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                   <Phone className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(offer.phone)}</span>
+                                  <span className="text-xs text-muted-foreground" dir="ltr">
+                                    {formatPhoneDisplay(offer.phone)}
+                                  </span>
                                 </div>
                                 {offer.offerTitle && (
-                                  <p className="text-xs text-muted-foreground mt-1">العرض: {offer.offerTitle}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    العرض: {offer.offerTitle}
+                                  </p>
                                 )}
                               </div>
                             </div>
@@ -327,12 +367,14 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <UserCheck className="h-4 w-4 text-teal-500" />
-                      <h3 className="font-semibold text-sm">تسجيلات المخيمات ({searchResults.campRegistrations.length})</h3>
+                      <h3 className="font-semibold text-sm">
+                        تسجيلات المخيمات ({searchResults.campRegistrations.length})
+                      </h3>
                     </div>
                     <div className="space-y-2">
                       {searchResults.campRegistrations.map((camp: any) => (
-                        <Card 
-                          key={camp.id} 
+                        <Card
+                          key={camp.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
                           onClick={() => handleResultClick('campRegistrations')}
                         >
@@ -342,10 +384,14 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                                 <p className="font-medium text-sm">{camp.fullName}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                   <Phone className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(camp.phone)}</span>
+                                  <span className="text-xs text-muted-foreground" dir="ltr">
+                                    {formatPhoneDisplay(camp.phone)}
+                                  </span>
                                 </div>
                                 {camp.campName && (
-                                  <p className="text-xs text-muted-foreground mt-1">المخيم: {camp.campName}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    المخيم: {camp.campName}
+                                  </p>
                                 )}
                               </div>
                             </div>

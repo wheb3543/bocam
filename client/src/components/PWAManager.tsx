@@ -12,14 +12,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import { Download, X, Smartphone, Share2, Plus, Bell, Zap, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { usePWAInstall, type PWAAppType } from "@/hooks/integrations/usePWAInstall";
-import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { usePWAInstall, type PWAAppType } from '@/hooks/integrations/usePWAInstall';
+import { cn } from '@/lib/utils';
 
 // ===== Helper: Detect App Type from URL =====
 function detectAppType(pathname: string): PWAAppType {
@@ -102,9 +97,7 @@ function PWAInstallSystem({ appType }: { appType: PWAAppType }) {
 
     // Admin: show button always (even before beforeinstallprompt fires)
     // Public: only show when canInstall=true
-    const shouldShow = isAdmin
-      ? isPWASupported || isIOS
-      : (canInstall || isIOS);
+    const shouldShow = isAdmin ? isPWASupported || isIOS : canInstall || isIOS;
 
     if (!shouldShow) return;
 
@@ -298,7 +291,9 @@ function PWAInstallBanner({
               className={cn(
                 'flex-[2] rounded-2xl py-3 text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg',
                 'bg-white',
-                isAdmin ? 'text-[#1a6faf] hover:bg-blue-50' : 'text-emerald-800 hover:bg-emerald-50',
+                isAdmin
+                  ? 'text-[#1a6faf] hover:bg-blue-50'
+                  : 'text-emerald-800 hover:bg-emerald-50',
                 isInstalling && 'opacity-70 cursor-not-allowed'
               )}
             >
@@ -334,11 +329,7 @@ function PWAFloatingButton({
 
   // إذا لم يكن canInstall=true في لوحة التحكم، نُظهر زراً مختلفاً
   // يشرح للمستخدم كيفية التثبيت يدوياً
-  const buttonLabel = isInstalling
-    ? 'جارٍ...'
-    : canInstall
-    ? 'تثبيت التطبيق'
-    : 'تثبيت التطبيق';
+  const buttonLabel = isInstalling ? 'جارٍ...' : canInstall ? 'تثبيت التطبيق' : 'تثبيت التطبيق';
 
   return (
     <div
@@ -417,7 +408,9 @@ function InstallGuideDialog({
             </p>
             <div className="space-y-4 py-2">
               <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">1</div>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                  1
+                </div>
                 <div>
                   <p className="text-sm font-medium">اضغط على زر المشاركة</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -426,7 +419,9 @@ function InstallGuideDialog({
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">2</div>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                  2
+                </div>
                 <div>
                   <p className="text-sm font-medium">اختر "إضافة إلى الشاشة الرئيسية"</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -435,10 +430,14 @@ function InstallGuideDialog({
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">3</div>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                  3
+                </div>
                 <div>
                   <p className="text-sm font-medium">اضغط "إضافة" للتأكيد</p>
-                  <p className="text-xs text-muted-foreground mt-1">سيظهر التطبيق على شاشتك الرئيسية</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    سيظهر التطبيق على شاشتك الرئيسية
+                  </p>
                 </div>
               </div>
             </div>
@@ -446,26 +445,35 @@ function InstallGuideDialog({
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              لتثبيت {isAdmin ? 'لوحة تحكم SGH' : 'تطبيق المستشفى'} على جهازك، استخدم زر التثبيت في شريط عنوان المتصفح
+              لتثبيت {isAdmin ? 'لوحة تحكم SGH' : 'تطبيق المستشفى'} على جهازك، استخدم زر التثبيت في
+              شريط عنوان المتصفح
             </p>
             <div className="space-y-3 py-2">
               <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">1</div>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                  1
+                </div>
                 <p className="text-sm">ابحث عن أيقونة التثبيت في شريط العنوان (Chrome/Edge)</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">2</div>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                  2
+                </div>
                 <p className="text-sm">اضغط عليها واختر "تثبيت"</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">3</div>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                  3
+                </div>
                 <p className="text-sm">سيظهر التطبيق على سطح المكتب أو الشاشة الرئيسية</p>
               </div>
             </div>
           </>
         )}
 
-        <Button onClick={onClose} className="w-full">فهمت</Button>
+        <Button onClick={onClose} className="w-full">
+          فهمت
+        </Button>
       </DialogContent>
     </Dialog>
   );

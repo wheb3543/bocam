@@ -10,6 +10,6 @@ queryParams:
     description: .format can be SVG or PNG
 body:
   type: json
-  content: ""
+  content: ''
 examples: ./.resources/Get all QR codes (specific fields).resources/examples
 order: 3000

@@ -1,15 +1,28 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { useState, useEffect, useRef } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Search, Phone, MessageCircle, Edit, X, Calendar, Mail, User, MapPin, Printer, AlertCircle, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { printReceipt } from "@/components/booking/PrintReceipt";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState, useEffect, useRef } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Search,
+  Phone,
+  MessageCircle,
+  Edit,
+  X,
+  Calendar,
+  Mail,
+  User,
+  MapPin,
+  Printer,
+  AlertCircle,
+  Loader2,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { printReceipt } from '@/components/booking/PrintReceipt';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 interface PatientCardProps {
   patient: any;
@@ -23,7 +36,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
   const [selectedStatus, setSelectedStatus] = useState(patient.status);
   const { user } = useAuth();
   const [isPrinting, setIsPrinting] = useState(false);
-  
+
   const generateAppointmentReceipt = trpc.appointments.generateReceiptNumber.useMutation();
   const generateOfferReceipt = trpc.offerLeads.generateReceiptNumber.useMutation();
   const generateCampReceipt = trpc.campRegistrations.generateReceiptNumber.useMutation();
@@ -32,7 +45,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
     if (patient.phone) {
       window.location.href = `tel:${formatPhoneDisplay(patient.phone)}`;
     } else {
-      toast.error("رقم الهاتف غير متوفر");
+      toast.error('رقم الهاتف غير متوفر');
     }
   };
 
@@ -41,14 +54,14 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
       const cleanPhone = patient.phone.replace(/\D/g, '');
       window.open(`https://wa.me/${cleanPhone}`, '_blank');
     } else {
-      toast.error("رقم الهاتف غير متوفر");
+      toast.error('رقم الهاتف غير متوفر');
     }
   };
 
   const handlePrint = async () => {
-    let type: "appointment" | "camp" | "offer" = "appointment";
+    let type: 'appointment' | 'camp' | 'offer' = 'appointment';
     let typeName = 'غير محدد';
-    
+
     if (patient.type === 'appointment') {
       type = 'appointment';
       typeName = patient.doctorName || 'غير محدد';
@@ -59,13 +72,13 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
       type = 'camp';
       typeName = patient.campName || 'غير محدد';
     }
-    
+
     try {
       setIsPrinting(true);
-      
+
       // Generate or retrieve receipt number
       let receiptNumber = 'غير متاح';
-      
+
       if (type === 'appointment') {
         const result = await generateAppointmentReceipt.mutateAsync({ id: patient.id });
         receiptNumber = result.receiptNumber;
@@ -76,17 +89,20 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
         const result = await generateCampReceipt.mutateAsync({ id: patient.id });
         receiptNumber = result.receiptNumber;
       }
-      
+
       // Print with receipt number
-      printReceipt({
-        fullName: patient.fullName,
-        age: patient.age,
-        phone: patient.phone,
-        registrationDate: patient.createdAt ? new Date(patient.createdAt) : new Date(),
-        type,
-        typeName,
-        receiptNumber,
-      }, user?.name || 'غير معروف');
+      printReceipt(
+        {
+          fullName: patient.fullName,
+          age: patient.age,
+          phone: patient.phone,
+          registrationDate: patient.createdAt ? new Date(patient.createdAt) : new Date(),
+          type,
+          typeName,
+          receiptNumber,
+        },
+        user?.name || 'غير معروف'
+      );
     } catch (error) {
       console.error('Failed to generate receipt number:', error);
       toast.error('فشل توليد رقم السند');
@@ -102,7 +118,10 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    const statusMap: Record<
+      string,
+      { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+    > = {
       new: { label: 'جديد', variant: 'default' },
       pending: { label: 'قيد الانتظار', variant: 'default' },
       contacted: { label: 'تم التواصل', variant: 'secondary' },
@@ -160,7 +179,9 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
             <Phone className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">رقم الهاتف</p>
-              <p className="font-medium text-sm break-all" dir="ltr">{patient.phone || 'غير متوفر'}</p>
+              <p className="font-medium text-sm break-all" dir="ltr">
+                {patient.phone || 'غير متوفر'}
+              </p>
             </div>
           </div>
 
@@ -267,16 +288,14 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="w-full p-2 border rounded-md text-sm"
           >
-            {getStatusOptions().map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
+            {getStatusOptions().map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
             ))}
           </select>
           {selectedStatus !== patient.status && (
-            <Button 
-              onClick={handleUpdateStatus} 
-              size="sm" 
-              className="w-full mt-2"
-            >
+            <Button onClick={handleUpdateStatus} size="sm" className="w-full mt-2">
               <Edit className="h-4 w-4 mr-2" />
               حفظ التحديث
             </Button>
@@ -285,15 +304,27 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-          <Button variant="outline" onClick={handleCall} className="w-full text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 px-1 sm:px-3">
+          <Button
+            variant="outline"
+            onClick={handleCall}
+            className="w-full text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 px-1 sm:px-3"
+          >
             <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 md:mr-2" />
             اتصال
           </Button>
-          <Button variant="outline" onClick={handleWhatsApp} className="w-full text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 px-1 sm:px-3">
+          <Button
+            variant="outline"
+            onClick={handleWhatsApp}
+            className="w-full text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 px-1 sm:px-3"
+          >
             <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 md:mr-2" />
             واتساب
           </Button>
-          <Button variant="outline" onClick={handlePrint} className="w-full text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 px-1 sm:px-3">
+          <Button
+            variant="outline"
+            onClick={handlePrint}
+            className="w-full text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 px-1 sm:px-3"
+          >
             <Printer className="h-4 w-4 mr-1 md:mr-2" />
             طباعة
           </Button>
@@ -306,24 +337,40 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
 export default function QuickPatientSearch() {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
   const { formatDate, formatDateTime } = useFormatDate();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const { data: leads, isLoading: leadsLoading, error: leadsError } = trpc.leads.unifiedList.useQuery(
+  const {
+    data: leads,
+    isLoading: leadsLoading,
+    error: leadsError,
+  } = trpc.leads.unifiedList.useQuery(
     undefined,
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
-  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery(
+  const {
+    data: appointments,
+    isLoading: appointmentsLoading,
+    error: appointmentsError,
+  } = trpc.appointments.list.useQuery(
     undefined,
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
-  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery(
+  const {
+    data: offerLeads,
+    isLoading: offerLeadsLoading,
+    error: offerLeadsError,
+  } = trpc.offerLeads.list.useQuery(
     undefined,
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
-  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery(
+  const {
+    data: campRegsPaged,
+    isLoading: campLoading,
+    error: campError,
+  } = trpc.campRegistrations.listPaginated.useQuery(
     { page: 1, limit: 200 },
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
@@ -373,14 +420,15 @@ export default function QuickPatientSearch() {
   useEffect(() => {
     if (searchQuery.length >= 3) {
       const allPatients = [
-        ...(appointments || []).map(a => ({ ...a, type: 'appointment' })),
-        ...(offerLeads || []).map(o => ({ ...o, type: 'offerLead' })),
-        ...(campRegistrations || []).map(c => ({ ...c, type: 'campRegistration' })),
+        ...(appointments || []).map((a) => ({ ...a, type: 'appointment' })),
+        ...(offerLeads || []).map((o) => ({ ...o, type: 'offerLead' })),
+        ...(campRegistrations || []).map((c) => ({ ...c, type: 'campRegistration' })),
       ];
 
-      const results = allPatients.filter(p => 
-        p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.phone?.includes(searchQuery)
+      const results = allPatients.filter(
+        (p) =>
+          p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.phone?.includes(searchQuery)
       );
 
       setSearchResults(results);
@@ -395,7 +443,7 @@ export default function QuickPatientSearch() {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setSelectedPatient(null);
-        setSearchQuery("");
+        setSearchQuery('');
         setSearchResults([]);
       }
     };
@@ -415,10 +463,10 @@ export default function QuickPatientSearch() {
       } else if (selectedPatient.type === 'campRegistration') {
         await updateCampMutation.mutateAsync({ id, status: status as any });
       }
-      toast.success("تم تحديث الحالة بنجاح");
+      toast.success('تم تحديث الحالة بنجاح');
       setSelectedPatient({ ...selectedPatient, status });
     } catch (error) {
-      toast.error("فشل تحديث الحالة");
+      toast.error('فشل تحديث الحالة');
     }
   };
 
@@ -434,7 +482,10 @@ export default function QuickPatientSearch() {
     <div ref={searchRef} className="relative w-full">
       {/* Search Input */}
       <div className="relative">
-        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" aria-hidden="true" />
+        <Search
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground"
+          aria-hidden="true"
+        />
         <Input
           type="text"
           placeholder="ابحث بالاسم أو رقم الهاتف (3 أحرف على الأقل)..."
@@ -449,7 +500,10 @@ export default function QuickPatientSearch() {
           أدخل 3 أحرف على الأقل للبحث عن مريض بالاسم أو رقم الهاتف
         </span>
         {isLoading && (
-          <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+          <Loader2
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground"
+            aria-hidden="true"
+          />
         )}
       </div>
 
@@ -460,7 +514,9 @@ export default function QuickPatientSearch() {
             <CardContent className="p-4 text-center">
               <AlertCircle className="h-8 w-8 mx-auto mb-2 text-destructive" />
               <p className="text-sm font-semibold text-destructive mb-1">فشل تحميل البيانات</p>
-              <p className="text-xs text-muted-foreground mb-3">حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.
+              </p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm"
@@ -491,7 +547,9 @@ export default function QuickPatientSearch() {
                       <p className="font-medium text-sm group-hover:text-primary transition-colors truncate">
                         {result.fullName}
                       </p>
-                      <p className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(result.phone)}</p>
+                      <p className="text-xs text-muted-foreground" dir="ltr">
+                        {formatPhoneDisplay(result.phone)}
+                      </p>
                     </div>
                     <Badge variant="outline" className="shrink-0 ml-2 text-xs">
                       {getTypeLabel(result.type)}
@@ -511,7 +569,7 @@ export default function QuickPatientSearch() {
             patient={selectedPatient}
             onClose={() => {
               setSelectedPatient(null);
-              setSearchQuery("");
+              setSearchQuery('');
               setSearchResults([]);
             }}
             onUpdateStatus={handleUpdateStatus}

@@ -1,22 +1,39 @@
-import { useState, useCallback } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Package, Download, Filter, Search, TrendingUp, DollarSign, Box } from "lucide-react";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { useWhatsAppSSE, AccountUpdateEvent, OrderReceivedEvent } from "@/hooks/integrations/useWhatsAppSSE";
-import { toast } from "sonner";
+import { useState, useCallback } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Package, Download, Filter, Search, TrendingUp, DollarSign, Box } from 'lucide-react';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import {
+  useWhatsAppSSE,
+  AccountUpdateEvent,
+  OrderReceivedEvent,
+} from '@/hooks/integrations/useWhatsAppSSE';
+import { toast } from 'sonner';
 
 export default function WhatsAppProductsPage() {
-  const [availability, setAvailability] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [availability, setAvailability] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
@@ -31,45 +48,80 @@ export default function WhatsAppProductsPage() {
   // Note: This would need a new API endpoint to fetch products from WhatsApp catalog
   // For now, we'll use placeholder data
   const products = [
-    { id: 1, name: "خدمة استشارة طبية", price: 150, availability: "available", catalogId: "CAT001", enquiries: 25 },
-    { id: 2, name: "فحص شامل", price: 300, availability: "available", catalogId: "CAT002", enquiries: 18 },
-    { id: 3, name: "حجز موعد", price: 50, availability: "out_of_stock", catalogId: "CAT003", enquiries: 42 },
-    { id: 4, name: "خدمة طوارئ", price: 500, availability: "available", catalogId: "CAT004", enquiries: 12 },
-    { id: 5, name: "فحص مخبري", price: 100, availability: "available", catalogId: "CAT005", enquiries: 33 },
+    {
+      id: 1,
+      name: 'خدمة استشارة طبية',
+      price: 150,
+      availability: 'available',
+      catalogId: 'CAT001',
+      enquiries: 25,
+    },
+    {
+      id: 2,
+      name: 'فحص شامل',
+      price: 300,
+      availability: 'available',
+      catalogId: 'CAT002',
+      enquiries: 18,
+    },
+    {
+      id: 3,
+      name: 'حجز موعد',
+      price: 50,
+      availability: 'out_of_stock',
+      catalogId: 'CAT003',
+      enquiries: 42,
+    },
+    {
+      id: 4,
+      name: 'خدمة طوارئ',
+      price: 500,
+      availability: 'available',
+      catalogId: 'CAT004',
+      enquiries: 12,
+    },
+    {
+      id: 5,
+      name: 'فحص مخبري',
+      price: 100,
+      availability: 'available',
+      catalogId: 'CAT005',
+      enquiries: 33,
+    },
   ];
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesAvailability = availability === "all" || p.availability === availability;
+    const matchesAvailability = availability === 'all' || p.availability === availability;
     return matchesSearch && matchesAvailability;
   });
 
   // Calculate stats
   const totalProducts = products.length;
-  const availableProducts = products.filter(p => p.availability === 'available').length;
+  const availableProducts = products.filter((p) => p.availability === 'available').length;
   const totalEnquiries = products.reduce((sum, p) => sum + p.enquiries, 0);
   const avgPrice = products.reduce((sum, p) => sum + p.price, 0) / products.length;
 
   const getAvailabilityBadge = (availability: string) => {
     const availabilityColors: Record<string, string> = {
-      'available': 'bg-green-100 text-green-800 border-green-200',
-      'out_of_stock': 'bg-red-100 text-red-800 border-red-200',
-      'limited': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      available: 'bg-green-100 text-green-800 border-green-200',
+      out_of_stock: 'bg-red-100 text-red-800 border-red-200',
+      limited: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     };
     return availabilityColors[availability] || 'bg-gray-100 text-gray-800';
   };
 
   const getAvailabilityLabel = (availability: string) => {
     const labels: Record<string, string> = {
-      'available': 'متاح',
-      'out_of_stock': 'غير متاح',
-      'limited': 'محدود',
+      available: 'متاح',
+      out_of_stock: 'غير متاح',
+      limited: 'محدود',
     };
     return labels[availability] || availability;
   };
 
   const handleExport = () => {
-    console.log("Exporting products data...");
+    console.log('Exporting products data...');
   };
 
   return (

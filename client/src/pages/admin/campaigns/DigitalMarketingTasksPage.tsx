@@ -1,31 +1,45 @@
-import { useFormatDate, formatDateUtil } from "@/hooks/export/useFormatDate";
-import { useState, useMemo } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  LayoutGrid, 
-  List, 
-  Calendar, 
-  Clock, 
-  User, 
-  CheckCircle2, 
-  Circle, 
-  AlertCircle, 
+import { useFormatDate, formatDateUtil } from '@/hooks/export/useFormatDate';
+import { useState, useMemo } from 'react';
+import { useAuth } from '@/_core/hooks/useAuth';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
+import {
+  Plus,
+  Search,
+  Filter,
+  LayoutGrid,
+  List,
+  Calendar,
+  Clock,
+  User,
+  CheckCircle2,
+  Circle,
+  AlertCircle,
   Loader2,
   MoreVertical,
   Edit,
@@ -44,15 +58,20 @@ import {
   FileText,
   Image as ImageIcon,
   File,
-} from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 // Types
-type TaskStatus = "todo" | "in_progress" | "review" | "completed" | "cancelled";
-type TaskPriority = "low" | "medium" | "high" | "urgent";
-type TaskCategory = "content" | "design" | "ads" | "seo" | "social_media" | "analytics" | "other";
+type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled';
+type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+type TaskCategory = 'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other';
 
 interface Task {
   id: number;
@@ -78,113 +97,113 @@ interface Task {
 // Helper functions
 const getStatusLabel = (status: TaskStatus) => {
   const labels: Record<TaskStatus, string> = {
-    todo: "قيد الانتظار",
-    in_progress: "قيد التنفيذ",
-    review: "مراجعة",
-    completed: "مكتمل",
-    cancelled: "ملغي",
+    todo: 'قيد الانتظار',
+    in_progress: 'قيد التنفيذ',
+    review: 'مراجعة',
+    completed: 'مكتمل',
+    cancelled: 'ملغي',
   };
   return labels[status] || status;
 };
 
 const getStatusColor = (status: TaskStatus) => {
   const colors: Record<TaskStatus, string> = {
-    todo: "bg-muted text-foreground border-border",
-    in_progress: "bg-blue-100 text-blue-800 border-blue-200",
-    review: "bg-yellow-100 text-yellow-800 border-yellow-200",
-    completed: "bg-green-100 text-green-800 border-green-200",
-    cancelled: "bg-red-100 text-red-800 border-red-200",
+    todo: 'bg-muted text-foreground border-border',
+    in_progress: 'bg-blue-100 text-blue-800 border-blue-200',
+    review: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    completed: 'bg-green-100 text-green-800 border-green-200',
+    cancelled: 'bg-red-100 text-red-800 border-red-200',
   };
-  return colors[status] || "bg-muted text-foreground";
+  return colors[status] || 'bg-muted text-foreground';
 };
 
 const getPriorityLabel = (priority: TaskPriority) => {
   const labels: Record<TaskPriority, string> = {
-    low: "منخفضة",
-    medium: "متوسطة",
-    high: "عالية",
-    urgent: "عاجلة",
+    low: 'منخفضة',
+    medium: 'متوسطة',
+    high: 'عالية',
+    urgent: 'عاجلة',
   };
   return labels[priority] || priority;
 };
 
 const getPriorityColor = (priority: TaskPriority) => {
   const colors: Record<TaskPriority, string> = {
-    low: "bg-muted text-muted-foreground",
-    medium: "bg-blue-100 text-blue-600",
-    high: "bg-orange-100 text-orange-600",
-    urgent: "bg-red-100 text-red-600",
+    low: 'bg-muted text-muted-foreground',
+    medium: 'bg-blue-100 text-blue-600',
+    high: 'bg-orange-100 text-orange-600',
+    urgent: 'bg-red-100 text-red-600',
   };
-  return colors[priority] || "bg-muted text-muted-foreground";
+  return colors[priority] || 'bg-muted text-muted-foreground';
 };
 
 const getCategoryLabel = (category: TaskCategory) => {
   const labels: Record<TaskCategory, string> = {
-    content: "محتوى",
-    design: "تصميم",
-    ads: "إعلانات",
-    seo: "SEO",
-    social_media: "سوشيال ميديا",
-    analytics: "تحليلات",
-    other: "أخرى",
+    content: 'محتوى',
+    design: 'تصميم',
+    ads: 'إعلانات',
+    seo: 'SEO',
+    social_media: 'سوشيال ميديا',
+    analytics: 'تحليلات',
+    other: 'أخرى',
   };
   return labels[category] || category;
 };
 
 const getCategoryColor = (category: TaskCategory) => {
   const colors: Record<TaskCategory, string> = {
-    content: "bg-purple-100 text-purple-600",
-    design: "bg-pink-100 text-pink-600",
-    ads: "bg-green-100 text-green-600",
-    seo: "bg-cyan-100 text-cyan-600",
-    social_media: "bg-indigo-100 text-indigo-600",
-    analytics: "bg-amber-100 text-amber-600",
-    other: "bg-muted text-muted-foreground",
+    content: 'bg-purple-100 text-purple-600',
+    design: 'bg-pink-100 text-pink-600',
+    ads: 'bg-green-100 text-green-600',
+    seo: 'bg-cyan-100 text-cyan-600',
+    social_media: 'bg-indigo-100 text-indigo-600',
+    analytics: 'bg-amber-100 text-amber-600',
+    other: 'bg-muted text-muted-foreground',
   };
-  return colors[category] || "bg-muted text-muted-foreground";
+  return colors[category] || 'bg-muted text-muted-foreground';
 };
 
 const formatDate = formatDateUtil;
 
 const isOverdue = (dueDate: Date | null, status: TaskStatus) => {
-  if (!dueDate || status === "completed" || status === "cancelled") return false;
+  if (!dueDate || status === 'completed' || status === 'cancelled') return false;
   return new Date(dueDate) < new Date();
 };
 
 // Kanban Column Component
-function KanbanColumn({ 
-  status, 
-  tasks, 
-  onTaskClick, 
-  onStatusChange 
-}: { 
-  status: TaskStatus; 
-  tasks: Task[]; 
+function KanbanColumn({
+  status,
+  tasks,
+  onTaskClick,
+  onStatusChange,
+}: {
+  status: TaskStatus;
+  tasks: Task[];
   onTaskClick: (task: Task) => void;
   onStatusChange: (taskId: number, newStatus: TaskStatus) => void;
 }) {
-  const columnTasks = tasks.filter(t => t.status === status);
-  
+  const columnTasks = tasks.filter((t) => t.status === status);
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.classList.add("bg-muted/50");
+    e.currentTarget.classList.add('bg-muted/50');
   };
-  
+
   const handleDragLeave = (e: React.DragEvent) => {
-    e.currentTarget.classList.remove("bg-muted/50");
+    e.currentTarget.classList.remove('bg-muted/50');
   };
-  
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.classList.remove("bg-muted/50");
-    const taskId = parseInt(e.dataTransfer.getData("taskId"));
+    e.currentTarget.classList.remove('bg-muted/50');
+    const taskId = parseInt(e.dataTransfer.getData('taskId'));
     if (taskId) {
       onStatusChange(taskId, status);
     }
   };
 
   return (
-    <div 
+    <div
       className="flex-1 min-w-[280px] max-w-[320px] bg-muted/30 rounded-lg p-3"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -198,20 +217,14 @@ function KanbanColumn({
           <span className="text-sm text-muted-foreground">({columnTasks.length})</span>
         </div>
       </div>
-      
+
       <ScrollArea className="h-[calc(100vh-320px)]">
         <div className="space-y-2 pe-2">
-          {columnTasks.map(task => (
-            <TaskCard 
-              key={task.id} 
-              task={task} 
-              onClick={() => onTaskClick(task)}
-            />
+          {columnTasks.map((task) => (
+            <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
           ))}
           {columnTasks.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              لا توجد مهام
-            </div>
+            <div className="text-center py-8 text-muted-foreground text-sm">لا توجد مهام</div>
           )}
         </div>
       </ScrollArea>
@@ -222,11 +235,11 @@ function KanbanColumn({
 // Task Card Component
 function TaskCard({ task, onClick }: { task: Task; onClick: () => void }) {
   const handleDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.setData("taskId", task.id.toString());
+    e.dataTransfer.setData('taskId', task.id.toString());
   };
 
   return (
-    <Card 
+    <Card
       className="cursor-pointer hover:shadow-md transition-shadow"
       draggable
       onDragStart={handleDragStart}
@@ -239,7 +252,7 @@ function TaskCard({ task, onClick }: { task: Task; onClick: () => void }) {
             <h4 className="font-medium text-sm line-clamp-2">{task.title}</h4>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap gap-1 mb-2">
           <Badge variant="secondary" className={`text-xs ${getPriorityColor(task.priority)}`}>
             {getPriorityLabel(task.priority)}
@@ -248,13 +261,11 @@ function TaskCard({ task, onClick }: { task: Task; onClick: () => void }) {
             {getCategoryLabel(task.category)}
           </Badge>
         </div>
-        
+
         {task.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-            {task.description}
-          </p>
+          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{task.description}</p>
         )}
-        
+
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             {task.assignedUser ? (
@@ -272,9 +283,11 @@ function TaskCard({ task, onClick }: { task: Task; onClick: () => void }) {
               <span className="text-muted-foreground">غير معيّن</span>
             )}
           </div>
-          
+
           {task.dueDate && (
-            <div className={`flex items-center gap-1 ${isOverdue(task.dueDate, task.status) ? 'text-red-500' : ''}`}>
+            <div
+              className={`flex items-center gap-1 ${isOverdue(task.dueDate, task.status) ? 'text-red-500' : ''}`}
+            >
               <Calendar className="h-3 w-3" />
               <span>{formatDate(task.dueDate)}</span>
             </div>
@@ -286,40 +299,40 @@ function TaskCard({ task, onClick }: { task: Task; onClick: () => void }) {
 }
 
 // Task Details Dialog
-function TaskDetailsDialog({ 
-  task, 
-  open, 
+function TaskDetailsDialog({
+  task,
+  open,
   onOpenChange,
   onUpdate,
   onDelete,
-}: { 
-  task: Task | null; 
-  open: boolean; 
+}: {
+  task: Task | null;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdate: () => void;
   onDelete: (id: number) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [newComment, setNewComment] = useState("");
-  
+  const [newComment, setNewComment] = useState('');
+
   const { data: comments, refetch: refetchComments } = trpc.tasks.getComments.useQuery(
     { taskId: task?.id || 0 },
     { enabled: !!task?.id && open }
   );
-  
+
   const { data: attachments, refetch: refetchAttachments } = trpc.tasks.getAttachments.useQuery(
     { taskId: task?.id || 0 },
     { enabled: !!task?.id && open }
   );
-  
+
   const addCommentMutation = trpc.tasks.addComment.useMutation({
     onSuccess: () => {
-      setNewComment("");
+      setNewComment('');
       refetchComments();
-      toast.success("تم إضافة التعليق");
+      toast.success('تم إضافة التعليق');
     },
   });
-  
+
   const handleAddComment = () => {
     if (!task || !newComment.trim()) return;
     addCommentMutation.mutate({ taskId: task.id, content: newComment });
@@ -335,9 +348,7 @@ function TaskDetailsDialog({
             <div className="flex-1">
               <DialogTitle className="text-xl">{task.title}</DialogTitle>
               <div className="flex flex-wrap gap-2 mt-2">
-                <Badge className={getStatusColor(task.status)}>
-                  {getStatusLabel(task.status)}
-                </Badge>
+                <Badge className={getStatusColor(task.status)}>{getStatusLabel(task.status)}</Badge>
                 <Badge className={getPriorityColor(task.priority)}>
                   {getPriorityLabel(task.priority)}
                 </Badge>
@@ -357,7 +368,7 @@ function TaskDetailsDialog({
                   <Edit className="h-4 w-4 me-2" />
                   تعديل
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="text-red-600"
                   onClick={() => {
                     onDelete(task.id);
@@ -371,43 +382,45 @@ function TaskDetailsDialog({
             </DropdownMenu>
           </div>
         </DialogHeader>
-        
+
         <ScrollArea className="flex-1 -mx-6 px-6">
           <div className="space-y-6 py-4">
             {/* Description */}
             <div>
               <h4 className="font-medium mb-2">الوصف</h4>
               <p className="text-muted-foreground text-sm whitespace-pre-wrap">
-                {task.description || "لا يوجد وصف"}
+                {task.description || 'لا يوجد وصف'}
               </p>
             </div>
-            
+
             {/* Details Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label className="text-muted-foreground">المعيّن إليه</Label>
                 <p className="font-medium">
-                  {task.assignedUser?.name || task.assignedUser?.username || "غير معيّن"}
+                  {task.assignedUser?.name || task.assignedUser?.username || 'غير معيّن'}
                 </p>
               </div>
               <div>
                 <Label className="text-muted-foreground">الحملة</Label>
-                <p className="font-medium">{task.campaign?.name || "غير مرتبط"}</p>
+                <p className="font-medium">{task.campaign?.name || 'غير مرتبط'}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">تاريخ التسليم</Label>
-                <p className={`font-medium ${isOverdue(task.dueDate, task.status) ? 'text-red-500' : ''}`}>
+                <p
+                  className={`font-medium ${isOverdue(task.dueDate, task.status) ? 'text-red-500' : ''}`}
+                >
                   {formatDate(task.dueDate)}
                 </p>
               </div>
               <div>
                 <Label className="text-muted-foreground">الساعات المقدرة</Label>
-                <p className="font-medium">{task.estimatedHours || "-"} ساعة</p>
+                <p className="font-medium">{task.estimatedHours || '-'} ساعة</p>
               </div>
             </div>
-            
+
             <Separator />
-            
+
             {/* Attachments */}
             <div>
               <div className="flex items-center justify-between mb-3">
@@ -438,23 +451,23 @@ function TaskDetailsDialog({
                 <p className="text-sm text-muted-foreground">لا توجد مرفقات</p>
               )}
             </div>
-            
+
             <Separator />
-            
+
             {/* Comments */}
             <div>
               <h4 className="font-medium flex items-center gap-2 mb-3">
                 <MessageSquare className="h-4 w-4" />
                 التعليقات ({comments?.length || 0})
               </h4>
-              
+
               <div className="space-y-3 mb-4">
                 {comments && comments.length > 0 ? (
                   comments.map((comment: any) => (
                     <div key={comment.id} className="flex gap-3">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="text-xs">
-                          {(comment.user?.name || comment.user?.username || "?").charAt(0)}
+                          {(comment.user?.name || comment.user?.username || '?').charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
@@ -466,9 +479,7 @@ function TaskDetailsDialog({
                             {formatDate(comment.createdAt)}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {comment.content}
-                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">{comment.content}</p>
                       </div>
                     </div>
                   ))
@@ -476,16 +487,16 @@ function TaskDetailsDialog({
                   <p className="text-sm text-muted-foreground">لا توجد تعليقات</p>
                 )}
               </div>
-              
+
               <div className="flex gap-2">
                 <Input
                   placeholder="أضف تعليقاً..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
                 />
-                <Button 
-                  size="icon" 
+                <Button
+                  size="icon"
                   onClick={handleAddComment}
                   disabled={!newComment.trim() || addCommentMutation.isPending}
                 >
@@ -523,15 +534,15 @@ function TaskFormDialog({
     dueDate: string;
     estimatedHours: string;
   }>({
-    title: task?.title || "",
-    description: task?.description || "",
-    priority: task?.priority || "medium",
-    status: task?.status || "todo",
-    category: task?.category || "other",
-    assignedTo: task?.assignedTo?.toString() || "",
-    campaignId: task?.campaignId?.toString() || "",
-    dueDate: task?.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "",
-    estimatedHours: task?.estimatedHours?.toString() || "",
+    title: task?.title || '',
+    description: task?.description || '',
+    priority: task?.priority || 'medium',
+    status: task?.status || 'todo',
+    category: task?.category || 'other',
+    assignedTo: task?.assignedTo?.toString() || '',
+    campaignId: task?.campaignId?.toString() || '',
+    dueDate: task?.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
+    estimatedHours: task?.estimatedHours?.toString() || '',
   });
 
   const { data: users } = trpc.users.getAll.useQuery();
@@ -539,37 +550,50 @@ function TaskFormDialog({
 
   const createMutation = trpc.tasks.create.useMutation({
     onSuccess: () => {
-      toast.success("تم إنشاء المهمة بنجاح");
+      toast.success('تم إنشاء المهمة بنجاح');
       onOpenChange(false);
       onSuccess();
     },
     onError: (error) => {
-      toast.error(error.message || "فشل إنشاء المهمة");
+      toast.error(error.message || 'فشل إنشاء المهمة');
     },
   });
 
   const updateMutation = trpc.tasks.update.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث المهمة بنجاح");
+      toast.success('تم تحديث المهمة بنجاح');
       onOpenChange(false);
       onSuccess();
     },
     onError: (error) => {
-      toast.error(error.message || "فشل تحديث المهمة");
+      toast.error(error.message || 'فشل تحديث المهمة');
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const data = {
       title: formData.title,
       description: formData.description || undefined,
-      priority: formData.priority as "low" | "medium" | "high" | "urgent",
-      status: formData.status as "todo" | "in_progress" | "review" | "completed" | "cancelled",
-      category: formData.category as "content" | "design" | "ads" | "seo" | "social_media" | "analytics" | "other",
-      assignedTo: formData.assignedTo && formData.assignedTo !== "none" ? parseInt(formData.assignedTo) : undefined,
-      campaignId: formData.campaignId && formData.campaignId !== "none" ? parseInt(formData.campaignId) : undefined,
+      priority: formData.priority as 'low' | 'medium' | 'high' | 'urgent',
+      status: formData.status as 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled',
+      category: formData.category as
+        | 'content'
+        | 'design'
+        | 'ads'
+        | 'seo'
+        | 'social_media'
+        | 'analytics'
+        | 'other',
+      assignedTo:
+        formData.assignedTo && formData.assignedTo !== 'none'
+          ? parseInt(formData.assignedTo)
+          : undefined,
+      campaignId:
+        formData.campaignId && formData.campaignId !== 'none'
+          ? parseInt(formData.campaignId)
+          : undefined,
       dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
       estimatedHours: formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
     };
@@ -585,9 +609,9 @@ function TaskFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{task ? "تعديل المهمة" : "إنشاء مهمة جديدة"}</DialogTitle>
+          <DialogTitle>{task ? 'تعديل المهمة' : 'إنشاء مهمة جديدة'}</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="title">عنوان المهمة *</Label>
@@ -598,7 +622,7 @@ function TaskFormDialog({
               required
             />
           </div>
-          
+
           <div>
             <Label htmlFor="description">الوصف</Label>
             <Textarea
@@ -608,13 +632,15 @@ function TaskFormDialog({
               rows={3}
             />
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>الأولوية</Label>
               <Select
                 value={formData.priority}
-                onValueChange={(value) => setFormData({ ...formData, priority: value as TaskPriority })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, priority: value as TaskPriority })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -627,7 +653,7 @@ function TaskFormDialog({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
               <Label>الحالة</Label>
               <Select
@@ -647,13 +673,15 @@ function TaskFormDialog({
               </Select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>التصنيف</Label>
               <Select
                 value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value as TaskCategory })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, category: value as TaskCategory })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -669,7 +697,7 @@ function TaskFormDialog({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
               <Label>المعيّن إليه</Label>
               <Select
@@ -690,7 +718,7 @@ function TaskFormDialog({
               </Select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>الحملة المرتبطة</Label>
@@ -711,7 +739,7 @@ function TaskFormDialog({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
               <Label>تاريخ التسليم</Label>
               <Input
@@ -721,7 +749,7 @@ function TaskFormDialog({
               />
             </div>
           </div>
-          
+
           <div>
             <Label>الساعات المقدرة</Label>
             <Input
@@ -732,19 +760,18 @@ function TaskFormDialog({
               placeholder="عدد الساعات"
             />
           </div>
-          
+
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline">إلغاء</Button>
+              <Button type="button" variant="outline">
+                إلغاء
+              </Button>
             </DialogClose>
-            <Button 
-              type="submit" 
-              disabled={createMutation.isPending || updateMutation.isPending}
-            >
+            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
               )}
-              {task ? "تحديث" : "إنشاء"}
+              {task ? 'تحديث' : 'إنشاء'}
             </Button>
           </DialogFooter>
         </form>
@@ -757,20 +784,24 @@ function TaskFormDialog({
 export default function DigitalMarketingTasksPage() {
   const { formatDate, formatDateTime } = useFormatDate();
   const { user } = useAuth();
-  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const { data: tasks, isLoading, refetch } = trpc.tasks.list.useQuery({
-    status: statusFilter !== "all" ? statusFilter : undefined,
-    priority: priorityFilter !== "all" ? priorityFilter : undefined,
-    category: categoryFilter !== "all" ? categoryFilter : undefined,
+  const {
+    data: tasks,
+    isLoading,
+    refetch,
+  } = trpc.tasks.list.useQuery({
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+    priority: priorityFilter !== 'all' ? priorityFilter : undefined,
+    category: categoryFilter !== 'all' ? categoryFilter : undefined,
     search: searchQuery || undefined,
   });
 
@@ -779,14 +810,14 @@ export default function DigitalMarketingTasksPage() {
   const updateStatusMutation = trpc.tasks.updateStatus.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("تم تحديث حالة المهمة");
+      toast.success('تم تحديث حالة المهمة');
     },
   });
 
   const deleteMutation = trpc.tasks.delete.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("تم حذف المهمة");
+      toast.success('تم حذف المهمة');
     },
   });
 
@@ -800,7 +831,7 @@ export default function DigitalMarketingTasksPage() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("هل أنت متأكد من حذف هذه المهمة؟")) {
+    if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
       deleteMutation.mutate({ id });
     }
   };
@@ -810,10 +841,13 @@ export default function DigitalMarketingTasksPage() {
     setIsFormOpen(true);
   };
 
-  const statuses: TaskStatus[] = ["todo", "in_progress", "review", "completed"];
+  const statuses: TaskStatus[] = ['todo', 'in_progress', 'review', 'completed'];
 
   return (
-    <DashboardLayout pageTitle="مهام التسويق الرقمي" pageDescription="إدارة مهام فريق التسويق الرقمي">
+    <DashboardLayout
+      pageTitle="مهام التسويق الرقمي"
+      pageDescription="إدارة مهام فريق التسويق الرقمي"
+    >
       <div className="space-y-4 md:space-y-6" dir="rtl">
         {/* Header */}
         <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center md:justify-between">
@@ -848,7 +882,7 @@ export default function DigitalMarketingTasksPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-3 md:p-4">
               <div className="flex items-center gap-2">
@@ -862,7 +896,7 @@ export default function DigitalMarketingTasksPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-3 md:p-4">
               <div className="flex items-center gap-2">
@@ -876,7 +910,7 @@ export default function DigitalMarketingTasksPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-3 md:p-4">
               <div className="flex items-center gap-2">
@@ -890,7 +924,7 @@ export default function DigitalMarketingTasksPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-3 md:p-4">
               <div className="flex items-center gap-2">
@@ -904,7 +938,7 @@ export default function DigitalMarketingTasksPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-3 md:p-4">
               <div className="flex items-center gap-2">
@@ -934,7 +968,7 @@ export default function DigitalMarketingTasksPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                
+
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-[120px] sm:w-[140px] text-sm">
                     <SelectValue placeholder="الحالة" />
@@ -948,7 +982,7 @@ export default function DigitalMarketingTasksPage() {
                     <SelectItem value="cancelled">ملغي</SelectItem>
                   </SelectContent>
                 </Select>
-                
+
                 <Select value={priorityFilter} onValueChange={setPriorityFilter}>
                   <SelectTrigger className="w-[120px] sm:w-[140px] text-sm">
                     <SelectValue placeholder="الأولوية" />
@@ -961,7 +995,7 @@ export default function DigitalMarketingTasksPage() {
                     <SelectItem value="urgent">عاجلة</SelectItem>
                   </SelectContent>
                 </Select>
-                
+
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-[120px] sm:w-[140px] text-sm">
                     <SelectValue placeholder="التصنيف" />
@@ -978,12 +1012,12 @@ export default function DigitalMarketingTasksPage() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="flex items-center gap-0.5 sm:gap-1 border rounded-lg p-0.5 sm:p-1">
                 <Button
-                  variant={viewMode === "kanban" ? "secondary" : "ghost"}
+                  variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode("kanban")}
+                  onClick={() => setViewMode('kanban')}
                   className="h-8 text-xs sm:text-sm"
                 >
                   <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1" />
@@ -991,9 +1025,9 @@ export default function DigitalMarketingTasksPage() {
                   <span className="sm:hidden">K</span>
                 </Button>
                 <Button
-                  variant={viewMode === "list" ? "secondary" : "ghost"}
+                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode("list")}
+                  onClick={() => setViewMode('list')}
                   className="h-8 text-xs sm:text-sm"
                 >
                   <List className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1" />
@@ -1010,9 +1044,9 @@ export default function DigitalMarketingTasksPage() {
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        ) : viewMode === "kanban" ? (
+        ) : viewMode === 'kanban' ? (
           <div className="flex gap-4 overflow-x-auto pb-4">
-            {statuses.map(status => (
+            {statuses.map((status) => (
               <KanbanColumn
                 key={status}
                 status={status}
@@ -1040,8 +1074,8 @@ export default function DigitalMarketingTasksPage() {
                   </thead>
                   <tbody>
                     {tasks?.map((task: Task) => (
-                      <tr 
-                        key={task.id} 
+                      <tr
+                        key={task.id}
                         className="border-t hover:bg-muted/30 cursor-pointer"
                         onClick={() => handleTaskClick(task)}
                       >
@@ -1087,7 +1121,9 @@ export default function DigitalMarketingTasksPage() {
                           )}
                         </td>
                         <td className="p-3">
-                          <span className={isOverdue(task.dueDate, task.status) ? 'text-red-500' : ''}>
+                          <span
+                            className={isOverdue(task.dueDate, task.status) ? 'text-red-500' : ''}
+                          >
                             {formatDate(task.dueDate)}
                           </span>
                         </td>
@@ -1099,15 +1135,17 @@ export default function DigitalMarketingTasksPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingTask(task);
-                                setIsFormOpen(true);
-                              }}>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingTask(task);
+                                  setIsFormOpen(true);
+                                }}
+                              >
                                 <Edit className="h-4 w-4 me-2" />
                                 تعديل
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 className="text-red-600"
                                 onClick={(e) => {
                                   e.stopPropagation();

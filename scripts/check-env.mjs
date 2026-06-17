@@ -3,17 +3,9 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-const requiredVars = [
-  'DATABASE_URL',
-  'OAUTH_SERVER_URL',
-  'VITE_APP_ID',
-];
+const requiredVars = ['DATABASE_URL', 'OAUTH_SERVER_URL', 'VITE_APP_ID'];
 
-const optionalVars = [
-  'JWT_SECRET',
-  'REDIS_URL',
-  'WHATSAPP_ACCESS_TOKEN',
-];
+const optionalVars = ['JWT_SECRET', 'REDIS_URL', 'WHATSAPP_ACCESS_TOKEN'];
 
 console.log('🔍 Checking environment variables...\n');
 
@@ -30,7 +22,7 @@ try {
 
 // Parse .env file
 const envVars = {};
-envContent.split('\n').forEach(line => {
+envContent.split('\n').forEach((line) => {
   const [key, ...valueParts] = line.split('=');
   if (key && !key.startsWith('#') && valueParts.length > 0) {
     envVars[key.trim()] = valueParts.join('=').trim();
@@ -41,7 +33,7 @@ envContent.split('\n').forEach(line => {
 const missing = [];
 const found = [];
 
-requiredVars.forEach(varName => {
+requiredVars.forEach((varName) => {
   if (envVars[varName]) {
     found.push(varName);
   } else {
@@ -51,13 +43,13 @@ requiredVars.forEach(varName => {
 
 if (found.length > 0) {
   console.log('✅ Required variables found:');
-  found.forEach(v => console.log(`   - ${v}`));
+  found.forEach((v) => console.log(`   - ${v}`));
   console.log('');
 }
 
 if (missing.length > 0) {
   console.error('❌ Missing required environment variables:');
-  missing.forEach(v => console.error(`   - ${v}`));
+  missing.forEach((v) => console.error(`   - ${v}`));
   console.log('\n💡 Please add these variables to your .env file');
   console.log('   You can copy them from .env.example\n');
   process.exit(1);
@@ -65,7 +57,7 @@ if (missing.length > 0) {
 
 // Check optional variables
 const missingOptional = [];
-optionalVars.forEach(varName => {
+optionalVars.forEach((varName) => {
   if (!envVars[varName]) {
     missingOptional.push(varName);
   }
@@ -73,7 +65,7 @@ optionalVars.forEach(varName => {
 
 if (missingOptional.length > 0) {
   console.log('⚠️  Optional variables not set (project will work without them):');
-  missingOptional.forEach(v => console.log(`   - ${v}`));
+  missingOptional.forEach((v) => console.log(`   - ${v}`));
   console.log('');
 }
 

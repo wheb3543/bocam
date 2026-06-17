@@ -24,7 +24,7 @@ description: |-
   | **`referral`**              |  **Added to Webhook if the message is coming from a user that clicked an ad that is `Click To WhatsApp`**.<br/>A [referral object](). This is how the referral object works:<ol><li>A user clicks on an ad with the Click to WhatsApp call-to-action.</li><li>User is redirected to WhatsApp and sends a message to the advertising business.</li><li>User sends a message to the business. Be aware that users may elect to remove their referral data.</li><li>The advertising business gets an inbound message notification including the **`referral`** object, which provides additional context on the ad that triggered the message. Knowing all this information, the business can appropriately reply to the user message.</li></ol>
   |
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 7000

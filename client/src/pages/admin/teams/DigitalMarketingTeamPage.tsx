@@ -1,6 +1,6 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import UnderDevelopmentPage from "@/components/UnderDevelopmentPage";
-import { Users } from "lucide-react";
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
+import { Users } from 'lucide-react';
 
 export default function DigitalMarketingTeamPage() {
   return (
@@ -11,12 +11,12 @@ export default function DigitalMarketingTeamPage() {
         icon={Users}
         currentPath="/admin/teams/digital-marketing"
         features={[
-          "إدارة مهام التسويق الرقمي",
-          "تتبع الحملات الإعلانية",
-          "إدارة حسابات التواصل الاجتماعي",
-          "تحليلات الأداء",
-          "جدولة المحتوى",
-          "إدارة الميزانيات",
+          'إدارة مهام التسويق الرقمي',
+          'تتبع الحملات الإعلانية',
+          'إدارة حسابات التواصل الاجتماعي',
+          'تحليلات الأداء',
+          'جدولة المحتوى',
+          'إدارة الميزانيات',
         ]}
       />
     </DashboardLayout>

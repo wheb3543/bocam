@@ -1,6 +1,6 @@
 $kind: http-request
 description: If the message being reacted to is more than 30 days old the reaction message webhook will not be delivered. Note that for reactions, the **`timestamp`** value indicates when the customer sent the reaction, not when the Webhook was generated.
-url: ""
+url: ''
 method: VIEW
 body:
   type: json

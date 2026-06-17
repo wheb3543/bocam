@@ -125,11 +125,7 @@
       "label": "واجهة سطح المكتب"
     }
   ],
-  "categories": [
-    "health",
-    "medical",
-    "lifestyle"
-  ],
+  "categories": ["health", "medical", "lifestyle"],
   "shortcuts": [
     {
       "name": "حجز موعد",

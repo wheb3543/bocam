@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { createAuditLog } from "./auditLogs";
+import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { createAuditLog } from './auditLogs';
 import {
   createLead,
   getCampaignBySlug,
@@ -15,33 +15,54 @@ import {
   getLeadsByCampaign,
   createCampaign,
   normalizePhoneNumber,
-} from "../database/db";
-import { notifyOwner } from "../_core/notification";
-import { sendNewLeadNotification } from "../services/email";
-import { sendNewLeadTelegram } from "../services/telegram";
-import { sendWelcomeMessage, sendBookingConfirmation, sendCustomMessage } from "../services/whatsapp";
+} from '../database/db';
+import { notifyOwner } from '../_core/notification';
+import { sendNewLeadNotification } from '../services/email';
+import { sendNewLeadTelegram } from '../services/telegram';
+import {
+  sendWelcomeMessage,
+  sendBookingConfirmation,
+  sendCustomMessage,
+} from '../services/whatsapp';
 
 export const leadsRouter = router({
   // Public endpoint for lead submission from landing page
   submit: publicProcedure
-    .input(z.object({
-      campaignSlug: z.string(),
-      fullName: z.string().min(1),
-      phone: z.string().min(1).regex(/^7[0-9]{8}$/, "رقم الهاتف اليمني يجب أن يبدأ بالرقم 7 ويتكون من 9 أرقام"),
-      email: z.string().email().optional(),
-      notes: z.string().optional(),
-      status: z.enum(["new", "contacted", "booked", "not_interested", "no_answer", "pending", "confirmed", "completed", "cancelled"]).optional(),
-      source: z.string().optional(),
-      utmSource: z.string().optional(),
-      utmMedium: z.string().optional(),
-      utmCampaign: z.string().optional(),
-      utmTerm: z.string().optional(),
-      utmContent: z.string().optional(),
-      utmPlacement: z.string().optional(),
-      referrer: z.string().optional(),
-      fbclid: z.string().optional(),
-      gclid: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        campaignSlug: z.string(),
+        fullName: z.string().min(1),
+        phone: z
+          .string()
+          .min(1)
+          .regex(/^7[0-9]{8}$/, 'رقم الهاتف اليمني يجب أن يبدأ بالرقم 7 ويتكون من 9 أرقام'),
+        email: z.string().email().optional(),
+        notes: z.string().optional(),
+        status: z
+          .enum([
+            'new',
+            'contacted',
+            'booked',
+            'not_interested',
+            'no_answer',
+            'pending',
+            'confirmed',
+            'completed',
+            'cancelled',
+          ])
+          .optional(),
+        source: z.string().optional(),
+        utmSource: z.string().optional(),
+        utmMedium: z.string().optional(),
+        utmCampaign: z.string().optional(),
+        utmTerm: z.string().optional(),
+        utmContent: z.string().optional(),
+        utmPlacement: z.string().optional(),
+        referrer: z.string().optional(),
+        fbclid: z.string().optional(),
+        gclid: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       // Get or create campaign by slug
       let campaign = await getCampaignBySlug(input.campaignSlug);
@@ -56,11 +77,11 @@ export const leadsRouter = router({
         });
         campaign = await getCampaignBySlug(input.campaignSlug);
       }
-      
+
       if (!campaign) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "فشل في إنشاء أو استرجاع الحملة",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'فشل في إنشاء أو استرجاع الحملة',
         });
       }
 
@@ -71,8 +92,8 @@ export const leadsRouter = router({
         phone: normalizePhoneNumber(input.phone),
         email: input.email,
         notes: input.notes,
-        status: input.status || "new",
-        source: input.source || "direct",
+        status: input.status || 'new',
+        source: input.source || 'direct',
         utmSource: input.utmSource,
         utmMedium: input.utmMedium,
         utmCampaign: input.utmCampaign,
@@ -84,11 +105,11 @@ export const leadsRouter = router({
 
       // Send notification to owner
       await notifyOwner({
-        title: "تسجيل جديد في المخيم الطبي الخيري",
+        title: 'تسجيل جديد في المخيم الطبي الخيري',
         content: `تم تسجيل عميل جديد:
 الاسم: ${input.fullName}
 الهاتف: ${input.phone}
-البريد: ${input.email || "غير متوفر"}`,
+البريد: ${input.email || 'غير متوفر'}`,
       });
 
       // Send Telegram notification
@@ -96,7 +117,7 @@ export const leadsRouter = router({
         fullName: input.fullName,
         phone: input.phone,
         email: input.email,
-        source: input.utmSource || "direct",
+        source: input.utmSource || 'direct',
       });
 
       // Send email notification
@@ -134,11 +155,9 @@ export const leadsRouter = router({
     return getAllUnifiedLeads();
   }),
 
-  getById: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
-      return getLeadById(input.id);
-    }),
+  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+    return getLeadById(input.id);
+  }),
 
   search: protectedProcedure
     .input(z.object({ searchTerm: z.string() }))
@@ -153,15 +172,17 @@ export const leadsRouter = router({
     }),
 
   updateStatus: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      status: z.enum(["new", "contacted", "booked", "not_interested", "no_answer"]),
-      notes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+        status: z.enum(['new', 'contacted', 'booked', 'not_interested', 'no_answer']),
+        notes: z.string().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       const lead = await getLeadById(input.id);
       if (!lead) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "العميل غير موجود" });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'العميل غير موجود' });
       }
 
       // Update lead status
@@ -202,18 +223,20 @@ export const leadsRouter = router({
   }),
 
   sendWhatsApp: protectedProcedure
-    .input(z.object({
-      leadId: z.number(),
-      message: z.string().min(1),
-    }))
+    .input(
+      z.object({
+        leadId: z.number(),
+        message: z.string().min(1),
+      })
+    )
     .mutation(async ({ input }) => {
       const lead = await getLeadById(input.leadId);
       if (!lead) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "العميل غير موجود" });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'العميل غير موجود' });
       }
 
       const success = await sendCustomMessage(lead.phone, input.message);
-      
+
       if (success) {
         await updateLead(input.leadId, {
           whatsappSent: true,
@@ -224,15 +247,17 @@ export const leadsRouter = router({
     }),
 
   sendBookingConfirmation: protectedProcedure
-    .input(z.object({
-      leadId: z.number(),
-      appointmentDate: z.string().optional(),
-      appointmentTime: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        leadId: z.number(),
+        appointmentDate: z.string().optional(),
+        appointmentTime: z.string().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
       const lead = await getLeadById(input.leadId);
       if (!lead) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "العميل غير موجود" });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'العميل غير موجود' });
       }
 
       const success = await sendBookingConfirmation({

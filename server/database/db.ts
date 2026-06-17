@@ -1,7 +1,25 @@
-import { eq, desc, and, like, or, sql, inArray } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
-import crypto from "crypto";
-import { InsertUser, users, campaigns, leads, leadStatusHistory, settings, doctors, appointments, accessRequests, InsertCampaign, InsertLead, InsertLeadStatusHistory, InsertSetting, InsertAppointment, InsertAccessRequest, sharedColumnTemplates, InsertSharedColumnTemplate } from "../../drizzle/schema";
+import { eq, desc, and, like, or, sql, inArray } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/mysql2';
+import crypto from 'crypto';
+import {
+  InsertUser,
+  users,
+  campaigns,
+  leads,
+  leadStatusHistory,
+  settings,
+  doctors,
+  appointments,
+  accessRequests,
+  InsertCampaign,
+  InsertLead,
+  InsertLeadStatusHistory,
+  InsertSetting,
+  InsertAppointment,
+  InsertAccessRequest,
+  sharedColumnTemplates,
+  InsertSharedColumnTemplate,
+} from '../../drizzle/schema';
 import { ENV } from '../_core/env';
 import { publish, channelForConversation } from '../_core/pubsub';
 
@@ -33,7 +51,7 @@ export async function getDb() {
     try {
       _db = drizzle(process.env.DATABASE_URL);
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.warn('[Database] Failed to connect:', error);
       _db = null;
     }
   }
@@ -47,7 +65,7 @@ export async function getHospitalDb() {
     try {
       _hospitalDb = drizzle(process.env.HOSPITAL_DB_URL);
     } catch (error) {
-      console.warn("[Hospital Database] Failed to connect:", error);
+      console.warn('[Hospital Database] Failed to connect:', error);
       _hospitalDb = null;
     }
   }
@@ -55,25 +73,32 @@ export async function getHospitalDb() {
 }
 
 // User management for OAuth
-export async function upsertUser(user: { openId?: string; name?: string; email?: string; loginMethod?: string; lastSignedIn?: Date }): Promise<void> {
+export async function upsertUser(user: {
+  openId?: string;
+  name?: string;
+  email?: string;
+  loginMethod?: string;
+  lastSignedIn?: Date;
+}): Promise<void> {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
+    console.warn('[Database] Cannot upsert user: database not available');
     return;
   }
 
   if (!user.openId) {
-    console.warn("[Database] Cannot upsert user: openId is required");
+    console.warn('[Database] Cannot upsert user: openId is required');
     return;
   }
 
   try {
     // Check if user exists
     const existing = await getUserByOpenId(user.openId);
-    
+
     if (existing) {
       // Update existing user
-      await db.update(users)
+      await db
+        .update(users)
         .set({
           name: user.name ?? existing.name,
           email: user.email ?? existing.email,
@@ -88,7 +113,7 @@ export async function upsertUser(user: { openId?: string; name?: string; email?:
       console.warn('[Database] User not found, cannot create via upsertUser:', user.email);
     }
   } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
+    console.error('[Database] Failed to upsert user:', error);
     throw error;
   }
 }
@@ -96,7 +121,7 @@ export async function upsertUser(user: { openId?: string; name?: string; email?:
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
@@ -104,7 +129,7 @@ export async function getUserByOpenId(openId: string) {
 export async function getUserByUsername(username: string) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
+    console.warn('[Database] Cannot get user: database not available');
     return undefined;
   }
 
@@ -116,7 +141,7 @@ export async function getUserByUsername(username: string) {
 export async function getUserById(id: number) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
+    console.warn('[Database] Cannot get user: database not available');
     return undefined;
   }
 
@@ -128,7 +153,7 @@ export async function getUserById(id: number) {
 export async function getUserByEmail(email: string) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
@@ -141,17 +166,19 @@ export async function isUserAllowed(email: string): Promise<boolean> {
 // Access request queries
 export async function createAccessRequest(request: InsertAccessRequest) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   // Check if request already exists
-  const existing = await db.select().from(accessRequests)
+  const existing = await db
+    .select()
+    .from(accessRequests)
     .where(eq(accessRequests.email, request.email!))
     .limit(1);
-  
+
   if (existing.length > 0) {
     return existing[0];
   }
-  
+
   const result = await db.insert(accessRequests).values(request);
   return { id: Number(result[0].insertId), ...request };
 }
@@ -165,28 +192,32 @@ export async function getAllAccessRequests() {
 export async function getPendingAccessRequests() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(accessRequests)
+  return db
+    .select()
+    .from(accessRequests)
     .where(eq(accessRequests.status, 'pending'))
     .orderBy(desc(accessRequests.requestedAt));
 }
 
 export async function approveAccessRequest(requestId: number, reviewerId: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   // Get request details
-  const request = await db.select().from(accessRequests)
+  const request = await db
+    .select()
+    .from(accessRequests)
     .where(eq(accessRequests.id, requestId))
     .limit(1);
-  
+
   if (request.length === 0) {
-    throw new Error("Request not found");
+    throw new Error('Request not found');
   }
-  
+
   if (!request[0].openId) {
-    throw new Error("Request missing openId");
+    throw new Error('Request missing openId');
   }
-  
+
   // Create user account with openId from OAuth
   // Generate a random password — user authenticates via OAuth, not this password
   const randomPassword = crypto.randomBytes(32).toString('hex');
@@ -199,26 +230,28 @@ export async function approveAccessRequest(requestId: number, reviewerId: number
     role: 'user',
     isActive: 'yes',
   });
-  
+
   // Update request status
-  await db.update(accessRequests)
-    .set({ 
-      status: 'approved', 
+  await db
+    .update(accessRequests)
+    .set({
+      status: 'approved',
       reviewedAt: new Date(),
-      reviewedBy: reviewerId 
+      reviewedBy: reviewerId,
     })
     .where(eq(accessRequests.id, requestId));
 }
 
 export async function rejectAccessRequest(requestId: number, reviewerId: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  await db.update(accessRequests)
-    .set({ 
-      status: 'rejected', 
+  if (!db) throw new Error('Database not available');
+
+  await db
+    .update(accessRequests)
+    .set({
+      status: 'rejected',
       reviewedAt: new Date(),
-      reviewedBy: reviewerId 
+      reviewedBy: reviewerId,
     })
     .where(eq(accessRequests.id, requestId));
 }
@@ -246,14 +279,14 @@ export async function getCampaignById(id: number) {
 
 export async function createCampaign(campaign: InsertCampaign) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
   const result = await db.insert(campaigns).values(campaign);
   return result;
 }
 
 export async function updateCampaign(id: number, campaign: Partial<InsertCampaign>) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
   return db.update(campaigns).set(campaign).where(eq(campaigns.id, id));
 }
 
@@ -267,13 +300,23 @@ export async function getAllLeads() {
 export async function getLeadsByStatus(status: string) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(leads).where(eq(leads.status, status as "new" | "contacted" | "booked" | "not_interested" | "no_answer")).orderBy(desc(leads.createdAt));
+  return db
+    .select()
+    .from(leads)
+    .where(
+      eq(leads.status, status as 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer')
+    )
+    .orderBy(desc(leads.createdAt));
 }
 
 export async function getLeadsByCampaign(campaignId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(leads).where(eq(leads.campaignId, campaignId)).orderBy(desc(leads.createdAt));
+  return db
+    .select()
+    .from(leads)
+    .where(eq(leads.campaignId, campaignId))
+    .orderBy(desc(leads.createdAt));
 }
 
 export async function getLeadById(id: number) {
@@ -285,39 +328,47 @@ export async function getLeadById(id: number) {
 
 export async function createLead(lead: InsertLead) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
   const result = await db.insert(leads).values(lead);
   return result;
 }
 
 export async function updateLead(id: number, lead: Partial<InsertLead>) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
   return db.update(leads).set(lead).where(eq(leads.id, id));
 }
 
 export async function searchLeads(searchTerm: string) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(leads).where(
-    or(
-      like(leads.fullName, `%${searchTerm}%`),
-      like(leads.phone, `%${searchTerm}%`),
-      like(leads.email, `%${searchTerm}%`)
+  return db
+    .select()
+    .from(leads)
+    .where(
+      or(
+        like(leads.fullName, `%${searchTerm}%`),
+        like(leads.phone, `%${searchTerm}%`),
+        like(leads.email, `%${searchTerm}%`)
+      )
     )
-  ).orderBy(desc(leads.createdAt));
+    .orderBy(desc(leads.createdAt));
 }
 
 // Lead status history queries
 export async function getLeadStatusHistory(leadId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(leadStatusHistory).where(eq(leadStatusHistory.leadId, leadId)).orderBy(desc(leadStatusHistory.createdAt));
+  return db
+    .select()
+    .from(leadStatusHistory)
+    .where(eq(leadStatusHistory.leadId, leadId))
+    .orderBy(desc(leadStatusHistory.createdAt));
 }
 
 export async function createLeadStatusHistory(history: InsertLeadStatusHistory) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
   return db.insert(leadStatusHistory).values(history);
 }
 
@@ -331,42 +382,50 @@ export async function getSetting(key: string) {
 
 export async function upsertSetting(setting: InsertSetting) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  return db.insert(settings).values(setting).onDuplicateKeyUpdate({
-    set: { value: setting.value, updatedAt: new Date() },
-  });
+  if (!db) throw new Error('Database not available');
+  return db
+    .insert(settings)
+    .values(setting)
+    .onDuplicateKeyUpdate({
+      set: { value: setting.value, updatedAt: new Date() },
+    });
 }
 
 // Statistics queries
 export async function getLeadsStats() {
   const db = await getDb();
   if (!db) return null;
-  
-  const result = await db.select({
-    total: sql<number>`count(*)`,
-    new: sql<number>`sum(case when status = 'new' then 1 else 0 end)`,
-    contacted: sql<number>`sum(case when status = 'contacted' then 1 else 0 end)`,
-    booked: sql<number>`sum(case when status = 'booked' then 1 else 0 end)`,
-    notInterested: sql<number>`sum(case when status = 'not_interested' then 1 else 0 end)`,
-    noAnswer: sql<number>`sum(case when status = 'no_answer' then 1 else 0 end)`,
-  }).from(leads);
-  
+
+  const result = await db
+    .select({
+      total: sql<number>`count(*)`,
+      new: sql<number>`sum(case when status = 'new' then 1 else 0 end)`,
+      contacted: sql<number>`sum(case when status = 'contacted' then 1 else 0 end)`,
+      booked: sql<number>`sum(case when status = 'booked' then 1 else 0 end)`,
+      notInterested: sql<number>`sum(case when status = 'not_interested' then 1 else 0 end)`,
+      noAnswer: sql<number>`sum(case when status = 'no_answer' then 1 else 0 end)`,
+    })
+    .from(leads);
+
   return result[0];
 }
 
 export async function getCampaignStats(campaignId: number) {
   const db = await getDb();
   if (!db) return null;
-  
-  const result = await db.select({
-    total: sql<number>`count(*)`,
-    new: sql<number>`sum(case when status = 'new' then 1 else 0 end)`,
-    contacted: sql<number>`sum(case when status = 'contacted' then 1 else 0 end)`,
-    booked: sql<number>`sum(case when status = 'booked' then 1 else 0 end)`,
-    notInterested: sql<number>`sum(case when status = 'not_interested' then 1 else 0 end)`,
-    noAnswer: sql<number>`sum(case when status = 'no_answer' then 1 else 0 end)`,
-  }).from(leads).where(eq(leads.campaignId, campaignId));
-  
+
+  const result = await db
+    .select({
+      total: sql<number>`count(*)`,
+      new: sql<number>`sum(case when status = 'new' then 1 else 0 end)`,
+      contacted: sql<number>`sum(case when status = 'contacted' then 1 else 0 end)`,
+      booked: sql<number>`sum(case when status = 'booked' then 1 else 0 end)`,
+      notInterested: sql<number>`sum(case when status = 'not_interested' then 1 else 0 end)`,
+      noAnswer: sql<number>`sum(case when status = 'no_answer' then 1 else 0 end)`,
+    })
+    .from(leads)
+    .where(eq(leads.campaignId, campaignId));
+
   return result[0];
 }
 
@@ -374,15 +433,15 @@ export async function getCampaignStats(campaignId: number) {
 export async function getAllDoctors() {
   const db = await getDb();
   if (!db) return [];
-  
-  const result = await db.select().from(doctors).where(eq(doctors.available, "yes"));
+
+  const result = await db.select().from(doctors).where(eq(doctors.available, 'yes'));
   return result;
 }
 
 export async function getDoctorById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const result = await db.select().from(doctors).where(eq(doctors.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
@@ -391,7 +450,7 @@ export async function getDoctorById(id: number) {
 export async function createAppointment(appointment: InsertAppointment) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot create appointment: database not available");
+    console.warn('[Database] Cannot create appointment: database not available');
     return null;
   }
 
@@ -399,7 +458,7 @@ export async function createAppointment(appointment: InsertAppointment) {
     const result = await db.insert(appointments).values(appointment);
     return { success: true, insertId: Number(result[0].insertId) };
   } catch (error) {
-    console.error("[Database] Failed to create appointment:", error);
+    console.error('[Database] Failed to create appointment:', error);
     throw error;
   }
 }
@@ -407,7 +466,7 @@ export async function createAppointment(appointment: InsertAppointment) {
 export async function getAllAppointments() {
   const db = await getDb();
   if (!db) return [];
-  
+
   const result = await db
     .select({
       id: appointments.id,
@@ -450,7 +509,7 @@ export async function getAllAppointments() {
     })
     .from(appointments)
     .leftJoin(doctors, eq(appointments.doctorId, doctors.id));
-  
+
   return result;
 }
 
@@ -461,17 +520,17 @@ export async function getAppointmentsPaginated(
   doctorIds?: number[],
   sources?: string[],
   statuses?: string[],
-  dateFilter?: "all" | "today" | "week" | "month",
+  dateFilter?: 'all' | 'today' | 'week' | 'month',
   dateFrom?: string,
   dateTo?: string
 ) {
   const db = await getDb();
   if (!db) return { data: [], total: 0, page, limit, totalPages: 0 };
-  
+
   // Support limit=-1 for "all" records
   const isShowAll = limit === -1;
   const offset = isShowAll ? 0 : (page - 1) * limit;
-  
+
   // Build WHERE conditions for search and filters
   const whereConditions = [];
   if (searchTerm && searchTerm.trim()) {
@@ -484,22 +543,35 @@ export async function getAppointmentsPaginated(
       )
     );
   }
-  
+
   // Filter by doctor (multi-select)
   if (doctorIds && doctorIds.length > 0) {
     whereConditions.push(inArray(appointments.doctorId, doctorIds));
   }
-  
+
   // Filter by source (multi-select)
   if (sources && sources.length > 0) {
     whereConditions.push(inArray(appointments.source, sources));
   }
-  
+
   // Filter by status (multi-select)
   if (statuses && statuses.length > 0) {
-    whereConditions.push(inArray(appointments.status, statuses as ("pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled")[]));
+    whereConditions.push(
+      inArray(
+        appointments.status,
+        statuses as (
+          | 'pending'
+          | 'contacted'
+          | 'no_answer'
+          | 'confirmed'
+          | 'attended'
+          | 'completed'
+          | 'cancelled'
+        )[]
+      )
+    );
   }
-  
+
   // Filter by date range (custom dateFrom/dateTo takes priority)
   if (dateFrom && dateTo) {
     const from = new Date(dateFrom);
@@ -512,26 +584,26 @@ export async function getAppointmentsPaginated(
         sql`${appointments.createdAt} <= ${to.toISOString()}`
       )
     );
-  } else if (dateFilter && dateFilter !== "all") {
+  } else if (dateFilter && dateFilter !== 'all') {
     // Fallback to old dateFilter logic
     const now = new Date();
     let startDate: Date;
-    
-    if (dateFilter === "today") {
+
+    if (dateFilter === 'today') {
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    } else if (dateFilter === "week") {
+    } else if (dateFilter === 'week') {
       startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    } else if (dateFilter === "month") {
+    } else if (dateFilter === 'month') {
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
-    
+
     if (startDate!) {
       whereConditions.push(sql`${appointments.createdAt} >= ${startDate.toISOString()}`);
     }
   }
-  
+
   const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
-  
+
   // Get total count with search filter
   const countQuery = db.select({ count: sql<number>`count(*)` }).from(appointments);
   if (whereClause) {
@@ -539,7 +611,7 @@ export async function getAppointmentsPaginated(
   }
   const [countResult] = await countQuery;
   const total = Number(countResult?.count || 0);
-  
+
   // Get paginated data with search filter
   const dataQuery = db
     .select({
@@ -583,18 +655,18 @@ export async function getAppointmentsPaginated(
     })
     .from(appointments)
     .leftJoin(doctors, eq(appointments.doctorId, doctors.id));
-  
+
   if (whereClause) {
     dataQuery.where(whereClause);
   }
-  
+
   let result;
   if (isShowAll) {
     result = await dataQuery;
   } else {
     result = await dataQuery.limit(limit).offset(offset);
   }
-  
+
   return {
     data: result,
     total,
@@ -607,13 +679,37 @@ export async function getAppointmentsPaginated(
 export async function updateAppointmentStatus(id: number, status: string, staffNotes?: string) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot update appointment: database not available");
+    console.warn('[Database] Cannot update appointment: database not available');
     return;
   }
 
   try {
     const now = new Date();
-    const updateData: { status: "pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled"; staffNotes?: string; contactedAt?: Date; confirmedAt?: Date; attendedAt?: Date; completedAt?: Date; cancelledAt?: Date } = { status: status as "pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled" };
+    const updateData: {
+      status:
+        | 'pending'
+        | 'contacted'
+        | 'no_answer'
+        | 'confirmed'
+        | 'attended'
+        | 'completed'
+        | 'cancelled';
+      staffNotes?: string;
+      contactedAt?: Date;
+      confirmedAt?: Date;
+      attendedAt?: Date;
+      completedAt?: Date;
+      cancelledAt?: Date;
+    } = {
+      status: status as
+        | 'pending'
+        | 'contacted'
+        | 'no_answer'
+        | 'confirmed'
+        | 'attended'
+        | 'completed'
+        | 'cancelled',
+    };
     if (staffNotes !== undefined) updateData.staffNotes = staffNotes;
     // حفظ وقت كل حالة
     if (status === 'contacted') updateData.contactedAt = now;
@@ -623,21 +719,49 @@ export async function updateAppointmentStatus(id: number, status: string, staffN
     else if (status === 'cancelled') updateData.cancelledAt = now;
     await db.update(appointments).set(updateData).where(eq(appointments.id, id));
   } catch (error) {
-    console.error("[Database] Failed to update appointment:", error);
+    console.error('[Database] Failed to update appointment:', error);
     throw error;
   }
 }
 
-export async function bulkUpdateAppointmentStatus(ids: number[], status: string, staffNotes?: string) {
+export async function bulkUpdateAppointmentStatus(
+  ids: number[],
+  status: string,
+  staffNotes?: string
+) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot bulk update appointments: database not available");
+    console.warn('[Database] Cannot bulk update appointments: database not available');
     return { success: false, count: 0 };
   }
 
   try {
     const now = new Date();
-    const updateData: { status: "pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled"; staffNotes?: string; contactedAt?: Date; confirmedAt?: Date; attendedAt?: Date; completedAt?: Date; cancelledAt?: Date } = { status: status as "pending" | "contacted" | "no_answer" | "confirmed" | "attended" | "completed" | "cancelled" };
+    const updateData: {
+      status:
+        | 'pending'
+        | 'contacted'
+        | 'no_answer'
+        | 'confirmed'
+        | 'attended'
+        | 'completed'
+        | 'cancelled';
+      staffNotes?: string;
+      contactedAt?: Date;
+      confirmedAt?: Date;
+      attendedAt?: Date;
+      completedAt?: Date;
+      cancelledAt?: Date;
+    } = {
+      status: status as
+        | 'pending'
+        | 'contacted'
+        | 'no_answer'
+        | 'confirmed'
+        | 'attended'
+        | 'completed'
+        | 'cancelled',
+    };
     if (staffNotes !== undefined) updateData.staffNotes = staffNotes;
     // حفظ وقت كل حالة
     if (status === 'contacted') updateData.contactedAt = now;
@@ -645,15 +769,15 @@ export async function bulkUpdateAppointmentStatus(ids: number[], status: string,
     else if (status === 'attended') updateData.attendedAt = now;
     else if (status === 'completed') updateData.completedAt = now;
     else if (status === 'cancelled') updateData.cancelledAt = now;
-    
+
     // Update all selected appointments
     for (const id of ids) {
       await db.update(appointments).set(updateData).where(eq(appointments.id, id));
     }
-    
+
     return { success: true, count: ids.length };
   } catch (error) {
-    console.error("[Database] Failed to bulk update appointments:", error);
+    console.error('[Database] Failed to bulk update appointments:', error);
     throw error;
   }
 }
@@ -723,13 +847,13 @@ export async function getAllUnifiedLeads() {
 
     // Combine all leads with type indicator
     const unifiedLeads = [
-      ...appointmentsData.map((a: typeof appointmentsData[0]) => ({
+      ...appointmentsData.map((a: (typeof appointmentsData)[0]) => ({
         ...a,
         type: 'appointment' as const,
         typeLabel: 'موعد طبيب',
         relatedId: a.doctorId,
       })),
-      ...offerLeadsData.map((o: typeof offerLeadsData[0]) => ({
+      ...offerLeadsData.map((o: (typeof offerLeadsData)[0]) => ({
         ...o,
         type: 'offer' as const,
         typeLabel: 'حجز عرض',
@@ -738,7 +862,7 @@ export async function getAllUnifiedLeads() {
         utmMedium: '',
         utmCampaign: '',
       })),
-      ...campRegistrationsData.map((c: typeof campRegistrationsData[0]) => ({
+      ...campRegistrationsData.map((c: (typeof campRegistrationsData)[0]) => ({
         ...c,
         type: 'camp' as const,
         typeLabel: 'تسجيل مخيم',
@@ -765,13 +889,15 @@ export async function getAllUnifiedLeads() {
 export async function getCustomerInfoByPhone(phone: string) {
   const db = await getDb();
   if (!db) return null;
-  
-  const { leads, appointments, offerLeads, campRegistrations } = await import('../../drizzle/schema');
+
+  const { leads, appointments, offerLeads, campRegistrations } = await import(
+    '../../drizzle/schema'
+  );
   const normalizedPhone = normalizePhoneNumber(phone);
-  
+
   // Search in leads - compare normalized phone numbers
   const leadResult = await db.select().from(leads).limit(1000);
-  const matchedLead = leadResult.find(l => normalizePhoneNumber(l.phone) === normalizedPhone);
+  const matchedLead = leadResult.find((l) => normalizePhoneNumber(l.phone) === normalizedPhone);
   if (matchedLead) {
     return {
       type: 'lead',
@@ -784,10 +910,12 @@ export async function getCustomerInfoByPhone(phone: string) {
       createdAt: matchedLead.createdAt,
     };
   }
-  
+
   // Search in appointments
   const appointmentResult = await db.select().from(appointments).limit(1000);
-  const matchedAppointment = appointmentResult.find(a => normalizePhoneNumber(a.phone) === normalizedPhone);
+  const matchedAppointment = appointmentResult.find(
+    (a) => normalizePhoneNumber(a.phone) === normalizedPhone
+  );
   if (matchedAppointment) {
     return {
       type: 'appointment',
@@ -799,10 +927,10 @@ export async function getCustomerInfoByPhone(phone: string) {
       createdAt: matchedAppointment.createdAt,
     };
   }
-  
+
   // Search in offer leads
   const offerResult = await db.select().from(offerLeads).limit(1000);
-  const matchedOffer = offerResult.find(o => normalizePhoneNumber(o.phone) === normalizedPhone);
+  const matchedOffer = offerResult.find((o) => normalizePhoneNumber(o.phone) === normalizedPhone);
   if (matchedOffer) {
     return {
       type: 'offer',
@@ -814,10 +942,10 @@ export async function getCustomerInfoByPhone(phone: string) {
       createdAt: matchedOffer.createdAt,
     };
   }
-  
+
   // Search in camp registrations
   const campResult = await db.select().from(campRegistrations).limit(1000);
-  const matchedCamp = campResult.find(c => normalizePhoneNumber(c.phone) === normalizedPhone);
+  const matchedCamp = campResult.find((c) => normalizePhoneNumber(c.phone) === normalizedPhone);
   if (matchedCamp) {
     return {
       type: 'camp',
@@ -829,7 +957,7 @@ export async function getCustomerInfoByPhone(phone: string) {
       createdAt: matchedCamp.createdAt,
     };
   }
-  
+
   return null;
 }
 
@@ -837,17 +965,51 @@ export async function getCustomerInfoByPhone(phone: string) {
 export async function getAllCustomerRecordsByPhone(phone: string) {
   const db = await getDb();
   if (!db) return { leads: [], appointments: [], offers: [], camps: [] };
-  
-  const { leads, appointments, offerLeads, campRegistrations } = await import('../../drizzle/schema');
+
+  const { leads, appointments, offerLeads, campRegistrations } = await import(
+    '../../drizzle/schema'
+  );
   const normalizedPhone = normalizePhoneNumber(phone);
-  
+
   const [leadsList, appointmentsList, offersList, campsList] = await Promise.all([
-    db.select().from(leads).limit(1000).then(items => items.filter(l => normalizePhoneNumber(l.phone) === normalizedPhone).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
-    db.select().from(appointments).limit(1000).then(items => items.filter(a => normalizePhoneNumber(a.phone) === normalizedPhone).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
-    db.select().from(offerLeads).limit(1000).then(items => items.filter(o => normalizePhoneNumber(o.phone) === normalizedPhone).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
-    db.select().from(campRegistrations).limit(1000).then(items => items.filter(c => normalizePhoneNumber(c.phone) === normalizedPhone).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
+    db
+      .select()
+      .from(leads)
+      .limit(1000)
+      .then((items) =>
+        items
+          .filter((l) => normalizePhoneNumber(l.phone) === normalizedPhone)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      ),
+    db
+      .select()
+      .from(appointments)
+      .limit(1000)
+      .then((items) =>
+        items
+          .filter((a) => normalizePhoneNumber(a.phone) === normalizedPhone)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      ),
+    db
+      .select()
+      .from(offerLeads)
+      .limit(1000)
+      .then((items) =>
+        items
+          .filter((o) => normalizePhoneNumber(o.phone) === normalizedPhone)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      ),
+    db
+      .select()
+      .from(campRegistrations)
+      .limit(1000)
+      .then((items) =>
+        items
+          .filter((c) => normalizePhoneNumber(c.phone) === normalizedPhone)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      ),
   ]);
-  
+
   return {
     leads: leadsList,
     appointments: appointmentsList,
@@ -859,7 +1021,7 @@ export async function getAllCustomerRecordsByPhone(phone: string) {
 export async function getAllWhatsAppConversations() {
   const db = await getDb();
   if (!db) return [];
-  
+
   const { whatsappConversations } = await import('../../drizzle/schema');
   return db.select().from(whatsappConversations).orderBy(desc(whatsappConversations.lastMessageAt));
 }
@@ -867,19 +1029,23 @@ export async function getAllWhatsAppConversations() {
 export async function getWhatsAppConversationById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const { whatsappConversations } = await import('../../drizzle/schema');
-  const result = await db.select().from(whatsappConversations).where(eq(whatsappConversations.id, id)).limit(1);
+  const result = await db
+    .select()
+    .from(whatsappConversations)
+    .where(eq(whatsappConversations.id, id))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
 export async function getWhatsAppConversationByPhone(phone: string) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const { whatsappConversations } = await import('../../drizzle/schema');
   const normalizedPhone = normalizePhoneNumber(phone);
-  
+
   // Use SQL query to directly filter by normalized phone number
   // This is much more efficient than fetching all conversations
   // Remove common phone number formatting characters: +, spaces, -, (, )
@@ -894,8 +1060,8 @@ export async function getWhatsAppConversationByPhone(phone: string) {
 }
 export async function createWhatsAppConversation(conversation: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const { whatsappConversations } = await import('../../drizzle/schema');
   const result = await db.insert(whatsappConversations).values(conversation);
   return result;
@@ -903,10 +1069,13 @@ export async function createWhatsAppConversation(conversation: any) {
 
 export async function updateWhatsAppConversation(id: number, conversation: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const { whatsappConversations } = await import('../../drizzle/schema');
-  const result = await db.update(whatsappConversations).set(conversation).where(eq(whatsappConversations.id, id));
+  const result = await db
+    .update(whatsappConversations)
+    .set(conversation)
+    .where(eq(whatsappConversations.id, id));
   try {
     publish(channelForConversation(id), 'conversation_updated', { id, ...conversation });
   } catch (err) {
@@ -918,15 +1087,19 @@ export async function updateWhatsAppConversation(id: number, conversation: any) 
 export async function getWhatsAppMessagesByConversation(conversationId: number) {
   const db = await getDb();
   if (!db) return [];
-  
+
   const { whatsappMessages } = await import('../../drizzle/schema');
-  return db.select().from(whatsappMessages).where(eq(whatsappMessages.conversationId, conversationId)).orderBy(whatsappMessages.createdAt);
+  return db
+    .select()
+    .from(whatsappMessages)
+    .where(eq(whatsappMessages.conversationId, conversationId))
+    .orderBy(whatsappMessages.createdAt);
 }
 
 export async function getLatestInboundWhatsAppMessage(conversationId: number) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const { whatsappMessages } = await import('../../drizzle/schema');
   const result = await db
     .select()
@@ -946,14 +1119,18 @@ export async function getWhatsAppMessageByWhatsAppId(whatsappId: string) {
   const db = await getDb();
   if (!db) return undefined;
   const { whatsappMessages } = await import('../../drizzle/schema');
-  const result = await db.select().from(whatsappMessages).where(eq(whatsappMessages.whatsappMessageId, whatsappId)).limit(1);
+  const result = await db
+    .select()
+    .from(whatsappMessages)
+    .where(eq(whatsappMessages.whatsappMessageId, whatsappId))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
 export async function createWhatsAppMessage(message: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const { whatsappMessages } = await import('../../drizzle/schema');
   const result = await db.insert(whatsappMessages).values(message);
   // NOTE: SSE publishing for INBOUND messages is handled by webhookRoutes.ts
@@ -961,7 +1138,10 @@ export async function createWhatsAppMessage(message: any) {
   try {
     const convId = message.conversationId;
     if (convId && message.direction === 'outbound') {
-      publish(channelForConversation(convId), 'message_created', { ...message, id: (result as any)?.[0]?.insertId || null });
+      publish(channelForConversation(convId), 'message_created', {
+        ...message,
+        id: (result as any)?.[0]?.insertId || null,
+      });
     }
   } catch (err) {
     console.warn('[db] failed to publish whatsapp message event', err);
@@ -971,16 +1151,24 @@ export async function createWhatsAppMessage(message: any) {
 
 export async function updateWhatsAppMessage(id: number, message: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const { whatsappMessages } = await import('../../drizzle/schema');
   const result = await db.update(whatsappMessages).set(message).where(eq(whatsappMessages.id, id));
   try {
     // fetch the updated message to get conversationId
-    const updated = await db.select().from(whatsappMessages).where(eq(whatsappMessages.id, id)).limit(1);
+    const updated = await db
+      .select()
+      .from(whatsappMessages)
+      .where(eq(whatsappMessages.id, id))
+      .limit(1);
     const msg = updated.length > 0 ? updated[0] : null;
     if (msg) {
-      publish(channelForConversation(msg.conversationId), 'message_updated', { id, ...message, conversationId: msg.conversationId });
+      publish(channelForConversation(msg.conversationId), 'message_updated', {
+        id,
+        ...message,
+        conversationId: msg.conversationId,
+      });
     }
   } catch (err) {
     console.warn('[db] failed to publish whatsapp message update event', err);
@@ -991,24 +1179,32 @@ export async function updateWhatsAppMessage(id: number, message: any) {
 export async function getAllWhatsAppTemplates() {
   const db = await getDb();
   if (!db) return [];
-  
+
   const { whatsappTemplates } = await import('../../drizzle/schema');
-  return db.select().from(whatsappTemplates).where(eq(whatsappTemplates.isActive, 1)).orderBy(whatsappTemplates.name);
+  return db
+    .select()
+    .from(whatsappTemplates)
+    .where(eq(whatsappTemplates.isActive, 1))
+    .orderBy(whatsappTemplates.name);
 }
 
 export async function getWhatsAppTemplateById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const { whatsappTemplates } = await import('../../drizzle/schema');
-  const result = await db.select().from(whatsappTemplates).where(eq(whatsappTemplates.id, id)).limit(1);
+  const result = await db
+    .select()
+    .from(whatsappTemplates)
+    .where(eq(whatsappTemplates.id, id))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
 export async function createWhatsAppTemplate(template: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const { whatsappTemplates } = await import('../../drizzle/schema');
   const result = await db.insert(whatsappTemplates).values(template);
   return result;
@@ -1016,15 +1212,15 @@ export async function createWhatsAppTemplate(template: any) {
 
 export async function updateWhatsAppTemplate(id: number, template: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const { whatsappTemplates } = await import('../../drizzle/schema');
   return db.update(whatsappTemplates).set(template).where(eq(whatsappTemplates.id, id));
 }
 
 export async function deleteWhatsAppTemplate(id: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const { whatsappTemplates } = await import('../../drizzle/schema');
   return db.delete(whatsappTemplates).where(eq(whatsappTemplates.id, id));
@@ -1034,7 +1230,7 @@ export async function deleteWhatsAppTemplate(id: number) {
 
 export async function createWhatsAppWebhookEvent(event: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const { whatsappWebhookEvents } = await import('../../drizzle/schema');
   return db.insert(whatsappWebhookEvents).values(event);
@@ -1042,7 +1238,7 @@ export async function createWhatsAppWebhookEvent(event: any) {
 
 export async function createWhatsAppAccountAlert(alert: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const { whatsappAccountAlerts } = await import('../../drizzle/schema');
   return db.insert(whatsappAccountAlerts).values(alert);
@@ -1050,7 +1246,7 @@ export async function createWhatsAppAccountAlert(alert: any) {
 
 export async function createWhatsAppSecurityEvent(event: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const { whatsappSecurityEvents } = await import('../../drizzle/schema');
   return db.insert(whatsappSecurityEvents).values(event);
@@ -1058,7 +1254,7 @@ export async function createWhatsAppSecurityEvent(event: any) {
 
 export async function createWhatsAppPhoneQuality(quality: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const { whatsappPhoneQuality } = await import('../../drizzle/schema');
   return db.insert(whatsappPhoneQuality).values(quality);
@@ -1066,7 +1262,7 @@ export async function createWhatsAppPhoneQuality(quality: any) {
 
 export async function createWhatsAppConversationQuality(quality: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const { whatsappConversationQuality } = await import('../../drizzle/schema');
   return db.insert(whatsappConversationQuality).values(quality);
@@ -1074,7 +1270,7 @@ export async function createWhatsAppConversationQuality(quality: any) {
 
 export async function createWhatsAppUserOptIn(optIn: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const { whatsappUserOptIns } = await import('../../drizzle/schema');
   return db.insert(whatsappUserOptIns).values(optIn);
@@ -1082,15 +1278,18 @@ export async function createWhatsAppUserOptIn(optIn: any) {
 
 export async function updateWhatsAppUserOptIn(phone: string, updates: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const { whatsappUserOptIns } = await import('../../drizzle/schema');
-  return db.update(whatsappUserOptIns).set(updates).where(eq(whatsappUserOptIns.phoneNumber, phone));
+  return db
+    .update(whatsappUserOptIns)
+    .set(updates)
+    .where(eq(whatsappUserOptIns.phoneNumber, phone));
 }
 
 export async function createWhatsAppTemplateQuality(quality: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
+  if (!db) throw new Error('Database not available');
 
   const { whatsappTemplateQuality } = await import('../../drizzle/schema');
   return db.insert(whatsappTemplateQuality).values(quality);
@@ -1111,7 +1310,7 @@ export async function logWebhookEvent(event: {
 }) {
   const db = await getDb();
   if (!db) {
-    console.error("[Webhook Logger] Database not available");
+    console.error('[Webhook Logger] Database not available');
     return;
   }
 
@@ -1130,10 +1329,12 @@ export async function logWebhookEvent(event: {
 
     // إذا كان الحدث جديداً (لا يوجد معالج له)، نسجل تحذير
     if (!event.handlerExists) {
-      console.warn(`[Webhook Logger] ⚠️ New unhandled event type detected: ${event.eventType}${event.subType ? `/${event.subType}` : ''}`);
+      console.warn(
+        `[Webhook Logger] ⚠️ New unhandled event type detected: ${event.eventType}${event.subType ? `/${event.subType}` : ''}`
+      );
     }
   } catch (error) {
-    console.error("[Webhook Logger] Error logging webhook event:", error);
+    console.error('[Webhook Logger] Error logging webhook event:', error);
   }
 }
 
@@ -1160,9 +1361,11 @@ export async function markWebhookEventAsProcessed(eventId: number, handlerExists
 export async function getWhatsAppTemplateByMetaName(metaName: string) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const { whatsappTemplates } = await import('../../drizzle/schema');
-  const result = await db.select().from(whatsappTemplates)
+  const result = await db
+    .select()
+    .from(whatsappTemplates)
     .where(eq(whatsappTemplates.metaName, metaName))
     .limit(1);
   return result.length > 0 ? result[0] : undefined;
@@ -1173,22 +1376,28 @@ export async function searchWhatsAppConversations(searchTerm: string) {
   if (!db) return [];
 
   const { whatsappConversations } = await import('../../drizzle/schema');
-  return db.select().from(whatsappConversations).where(
-    or(
-      like(whatsappConversations.customerName, `%${searchTerm}%`),
-      like(whatsappConversations.phoneNumber, `%${searchTerm}%`)
+  return db
+    .select()
+    .from(whatsappConversations)
+    .where(
+      or(
+        like(whatsappConversations.customerName, `%${searchTerm}%`),
+        like(whatsappConversations.phoneNumber, `%${searchTerm}%`)
+      )
     )
-  ).orderBy(desc(whatsappConversations.lastMessageAt));
+    .orderBy(desc(whatsappConversations.lastMessageAt));
 }
 
 // ==================== Webhook Events Functions ====================
 
-export async function getWebhookEvents(filters: {
-  eventType?: string;
-  processed?: boolean;
-  handlerExists?: boolean;
-  limit?: number;
-} = {}) {
+export async function getWebhookEvents(
+  filters: {
+    eventType?: string;
+    processed?: boolean;
+    handlerExists?: boolean;
+    limit?: number;
+  } = {}
+) {
   const db = await getDb();
   if (!db) return [];
 
@@ -1208,9 +1417,7 @@ export async function getWebhookEvents(filters: {
     conditions.push(eq(whatsappWebhookEvents.handlerExists, filters.handlerExists));
   }
 
-  const finalQuery = conditions.length > 0
-    ? query.where(and(...conditions))
-    : query;
+  const finalQuery = conditions.length > 0 ? query.where(and(...conditions)) : query;
 
   return await finalQuery
     .orderBy(desc(whatsappWebhookEvents.createdAt))
@@ -1259,12 +1466,15 @@ export async function getUniqueEventTypes() {
 export async function getUnreadWhatsAppConversationsCount() {
   const db = await getDb();
   if (!db) return 0;
-  
+
   const { whatsappConversations } = await import('../../drizzle/schema');
-  const result = await db.select({
-    count: sql<number>`count(*)`
-  }).from(whatsappConversations).where(eq(whatsappConversations.unreadCount, 0));
-  
+  const result = await db
+    .select({
+      count: sql<number>`count(*)`,
+    })
+    .from(whatsappConversations)
+    .where(eq(whatsappConversations.unreadCount, 0));
+
   return result[0]?.count || 0;
 }
 
@@ -1273,7 +1483,7 @@ export async function getUnreadWhatsAppConversationsCount() {
 export async function getAllMessageSettings() {
   const db = await getDb();
   if (!db) return [];
-  
+
   const { messageSettings } = await import('../../drizzle/schema');
   return db.select().from(messageSettings).orderBy(messageSettings.category, messageSettings.id);
 }
@@ -1281,25 +1491,33 @@ export async function getAllMessageSettings() {
 export async function getMessageSettingsByCategory(category: string) {
   const db = await getDb();
   if (!db) return [];
-  
+
   const { messageSettings } = await import('../../drizzle/schema');
   const { sql } = await import('drizzle-orm');
-  return db.select().from(messageSettings).where(sql`${messageSettings.category} = ${category}`).orderBy(messageSettings.id);
+  return db
+    .select()
+    .from(messageSettings)
+    .where(sql`${messageSettings.category} = ${category}`)
+    .orderBy(messageSettings.id);
 }
 
 export async function getMessageSettingByType(messageType: string) {
   const db = await getDb();
   if (!db) return undefined;
-  
+
   const { messageSettings } = await import('../../drizzle/schema');
-  const result = await db.select().from(messageSettings).where(eq(messageSettings.messageType, messageType)).limit(1);
+  const result = await db
+    .select()
+    .from(messageSettings)
+    .where(eq(messageSettings.messageType, messageType))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
 export async function updateMessageSetting(data: any) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const { messageSettings } = await import('../../drizzle/schema');
   const { id, ...updateData } = data;
   return db.update(messageSettings).set(updateData).where(eq(messageSettings.id, id));
@@ -1307,14 +1525,18 @@ export async function updateMessageSetting(data: any) {
 
 export async function toggleMessageSettingEnabled(id: number) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
+  if (!db) throw new Error('Database not available');
+
   const { messageSettings } = await import('../../drizzle/schema');
-  
+
   // Get current value
-  const current = await db.select().from(messageSettings).where(eq(messageSettings.id, id)).limit(1);
-  if (current.length === 0) throw new Error("Message setting not found");
-  
+  const current = await db
+    .select()
+    .from(messageSettings)
+    .where(eq(messageSettings.id, id))
+    .limit(1);
+  if (current.length === 0) throw new Error('Message setting not found');
+
   const newValue = current[0].isEnabled === 1 ? 0 : 1;
   return db.update(messageSettings).set({ isEnabled: newValue }).where(eq(messageSettings.id, id));
 }
@@ -1326,20 +1548,20 @@ export async function getOfferLeadsPaginated(
   offerIds?: number[],
   sources?: string[],
   statuses?: string[],
-  dateFilter?: "all" | "today" | "week" | "month",
+  dateFilter?: 'all' | 'today' | 'week' | 'month',
   dateFrom?: string,
   dateTo?: string
 ) {
   const db = await getDb();
   if (!db) return { data: [], total: 0, page, limit, totalPages: 0 };
-  
+
   // Support limit=-1 for "all" records
   const isShowAll = limit === -1;
   const offset = isShowAll ? 0 : (page - 1) * limit;
-  
+
   // Import offerLeads and offers
   const { offerLeads, offers } = await import('../../drizzle/schema');
-  
+
   // Build WHERE conditions for search and filters
   const whereConditions = [];
   if (searchTerm && searchTerm.trim()) {
@@ -1352,22 +1574,22 @@ export async function getOfferLeadsPaginated(
       )
     );
   }
-  
+
   // Filter by offer (multi-select)
   if (offerIds && offerIds.length > 0) {
     whereConditions.push(inArray(offerLeads.offerId, offerIds));
   }
-  
+
   // Filter by source (multi-select)
   if (sources && sources.length > 0) {
     whereConditions.push(inArray(offerLeads.source, sources));
   }
-  
+
   // Filter by status (multi-select)
   if (statuses && statuses.length > 0) {
     whereConditions.push(inArray(offerLeads.status, statuses as any));
   }
-  
+
   // Filter by date range (custom dateFrom/dateTo takes priority)
   if (dateFrom && dateTo) {
     const from = new Date(dateFrom);
@@ -1380,26 +1602,26 @@ export async function getOfferLeadsPaginated(
         sql`${offerLeads.createdAt} <= ${to.toISOString()}`
       )
     );
-  } else if (dateFilter && dateFilter !== "all") {
+  } else if (dateFilter && dateFilter !== 'all') {
     // Fallback to old dateFilter logic
     const now = new Date();
     let startDate: Date;
-    
-    if (dateFilter === "today") {
+
+    if (dateFilter === 'today') {
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    } else if (dateFilter === "week") {
+    } else if (dateFilter === 'week') {
       startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    } else if (dateFilter === "month") {
+    } else if (dateFilter === 'month') {
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
-    
+
     if (startDate!) {
       whereConditions.push(sql`${offerLeads.createdAt} >= ${startDate.toISOString()}`);
     }
   }
-  
+
   const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
-  
+
   // Get total count with search filter
   const countQuery = db.select({ count: sql<number>`count(*)` }).from(offerLeads);
   if (whereClause) {
@@ -1407,7 +1629,7 @@ export async function getOfferLeadsPaginated(
   }
   const [countResult] = await countQuery;
   const total = Number(countResult?.count || 0);
-  
+
   // Get paginated data with offer details and search filter
   const dataQuery = db
     .select({
@@ -1442,21 +1664,18 @@ export async function getOfferLeadsPaginated(
     })
     .from(offerLeads)
     .leftJoin(offers, eq(offerLeads.offerId, offers.id));
-  
+
   if (whereClause) {
     dataQuery.where(whereClause);
   }
-  
+
   let result;
   if (isShowAll) {
     result = await dataQuery.orderBy(desc(offerLeads.createdAt));
   } else {
-    result = await dataQuery
-      .orderBy(desc(offerLeads.createdAt))
-      .limit(limit)
-      .offset(offset);
+    result = await dataQuery.orderBy(desc(offerLeads.createdAt)).limit(limit).offset(offset);
   }
-  
+
   return {
     data: result,
     total,
@@ -1473,20 +1692,20 @@ export async function getCampRegistrationsPaginated(
   campIds?: number[],
   sources?: string[],
   statuses?: string[],
-  dateFilter?: "all" | "today" | "week" | "month",
+  dateFilter?: 'all' | 'today' | 'week' | 'month',
   dateFrom?: string,
   dateTo?: string
 ) {
   const db = await getDb();
   if (!db) return { data: [], total: 0, page, limit, totalPages: 0 };
-  
+
   // Support limit=-1 for "all" records
   const isShowAll = limit === -1;
   const offset = isShowAll ? 0 : (page - 1) * limit;
-  
+
   // Import campRegistrations and camps
   const { campRegistrations, camps } = await import('../../drizzle/schema');
-  
+
   // Build WHERE conditions for search and filters
   const whereConditions = [];
   if (searchTerm && searchTerm.trim()) {
@@ -1499,22 +1718,22 @@ export async function getCampRegistrationsPaginated(
       )
     );
   }
-  
+
   // Filter by camp (multi-select)
   if (campIds && campIds.length > 0) {
     whereConditions.push(inArray(campRegistrations.campId, campIds));
   }
-  
+
   // Filter by source (multi-select)
   if (sources && sources.length > 0) {
     whereConditions.push(inArray(campRegistrations.source, sources));
   }
-  
+
   // Filter by status (multi-select)
   if (statuses && statuses.length > 0) {
     whereConditions.push(inArray(campRegistrations.status, statuses as any));
   }
-  
+
   // Date filtering: dateFrom/dateTo and dateFilter combine with AND when both are set
   // (so quick presets like "today" still narrow rows inside the parent date range).
   const dateParts: any[] = [];
@@ -1529,17 +1748,17 @@ export async function getCampRegistrationsPaginated(
       )
     );
   }
-  if (dateFilter && dateFilter !== "all") {
+  if (dateFilter && dateFilter !== 'all') {
     const now = new Date();
     let startDate: Date;
     let endDate: Date | undefined;
-    if (dateFilter === "today") {
+    if (dateFilter === 'today') {
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    } else if (dateFilter === "week") {
+    } else if (dateFilter === 'week') {
       startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    } else if (dateFilter === "month") {
+    } else if (dateFilter === 'month') {
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
     } else {
@@ -1559,9 +1778,9 @@ export async function getCampRegistrationsPaginated(
   if (dateParts.length > 0) {
     whereConditions.push(dateParts.length === 1 ? dateParts[0]! : and(...dateParts));
   }
-  
+
   const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
-  
+
   // Get total count with search filter
   const countQuery = db.select({ count: sql<number>`count(*)` }).from(campRegistrations);
   if (whereClause) {
@@ -1569,7 +1788,7 @@ export async function getCampRegistrationsPaginated(
   }
   const [countResult] = await countQuery;
   const total = Number(countResult?.count || 0);
-  
+
   // Get paginated data with camp details and search filter
   const dataQuery = db
     .select({
@@ -1613,21 +1832,18 @@ export async function getCampRegistrationsPaginated(
     })
     .from(campRegistrations)
     .leftJoin(camps, eq(campRegistrations.campId, camps.id));
-  
+
   if (whereClause) {
     dataQuery.where(whereClause);
   }
-  
+
   let result;
   if (isShowAll) {
     result = await dataQuery.orderBy(desc(campRegistrations.createdAt));
   } else {
-    result = await dataQuery
-      .orderBy(desc(campRegistrations.createdAt))
-      .limit(limit)
-      .offset(offset);
+    result = await dataQuery.orderBy(desc(campRegistrations.createdAt)).limit(limit).offset(offset);
   }
-  
+
   return {
     data: result,
     total,
@@ -1641,44 +1857,46 @@ export async function getCampRegistrationsPaginated(
 export async function getUserPreference(userId: number, preferenceKey: string) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get user preference: database not available");
+    console.warn('[Database] Cannot get user preference: database not available');
     return undefined;
   }
 
-  const { userPreferences } = await import("../../drizzle/schema");
+  const { userPreferences } = await import('../../drizzle/schema');
   const result = await db
     .select()
     .from(userPreferences)
-    .where(and(
-      eq(userPreferences.userId, userId),
-      eq(userPreferences.preferenceKey, preferenceKey)
-    ))
+    .where(
+      and(eq(userPreferences.userId, userId), eq(userPreferences.preferenceKey, preferenceKey))
+    )
     .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function setUserPreference(userId: number, preferenceKey: string, preferenceValue: string) {
+export async function setUserPreference(
+  userId: number,
+  preferenceKey: string,
+  preferenceValue: string
+) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot set user preference: database not available");
+    console.warn('[Database] Cannot set user preference: database not available');
     return;
   }
 
-  const { userPreferences } = await import("../../drizzle/schema");
-  
+  const { userPreferences } = await import('../../drizzle/schema');
+
   // Check if preference exists
   const existing = await getUserPreference(userId, preferenceKey);
-  
+
   if (existing) {
     // Update existing preference
     await db
       .update(userPreferences)
       .set({ preferenceValue, updatedAt: new Date() })
-      .where(and(
-        eq(userPreferences.userId, userId),
-        eq(userPreferences.preferenceKey, preferenceKey)
-      ));
+      .where(
+        and(eq(userPreferences.userId, userId), eq(userPreferences.preferenceKey, preferenceKey))
+      );
   } else {
     // Insert new preference
     await db.insert(userPreferences).values({
@@ -1692,15 +1910,12 @@ export async function setUserPreference(userId: number, preferenceKey: string, p
 export async function getAllUserPreferences(userId: number) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get user preferences: database not available");
+    console.warn('[Database] Cannot get user preferences: database not available');
     return [];
   }
 
-  const { userPreferences } = await import("../../drizzle/schema");
-  return await db
-    .select()
-    .from(userPreferences)
-    .where(eq(userPreferences.userId, userId));
+  const { userPreferences } = await import('../../drizzle/schema');
+  return await db.select().from(userPreferences).where(eq(userPreferences.userId, userId));
 }
 
 // === Shared Column Templates ===
@@ -1708,7 +1923,7 @@ export async function getAllUserPreferences(userId: number) {
 export async function getSharedTemplates(tableKey: string) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get shared templates: database not available");
+    console.warn('[Database] Cannot get shared templates: database not available');
     return [];
   }
 
@@ -1722,7 +1937,7 @@ export async function getSharedTemplates(tableKey: string) {
 export async function getAllSharedTemplates() {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get all shared templates: database not available");
+    console.warn('[Database] Cannot get all shared templates: database not available');
     return [];
   }
 
@@ -1741,7 +1956,7 @@ export async function createSharedTemplate(data: {
 }) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot create shared template: database not available");
+    console.warn('[Database] Cannot create shared template: database not available');
     return null;
   }
 
@@ -1759,7 +1974,7 @@ export async function createSharedTemplate(data: {
 export async function deleteSharedTemplate(id: number) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot delete shared template: database not available");
+    console.warn('[Database] Cannot delete shared template: database not available');
     return;
   }
 
@@ -1769,7 +1984,7 @@ export async function deleteSharedTemplate(id: number) {
 export async function updateSharedTemplate(id: number, data: { name?: string; columns?: string }) {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot update shared template: database not available");
+    console.warn('[Database] Cannot update shared template: database not available');
     return;
   }
 

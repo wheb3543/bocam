@@ -4,7 +4,10 @@ import { generateLabResultPDF } from '../../services/labPdfGenerator';
 import { uploadPdfFile } from '../../services/fileUploadService';
 import { messageSettings, whatsappTemplates } from '../../../drizzle/schema';
 import { eq } from 'drizzle-orm';
-import { sendWhatsAppTemplateMessage, sendWhatsAppDocumentMessage } from '../../services/whatsappCloudAPI';
+import {
+  sendWhatsAppTemplateMessage,
+  sendWhatsAppDocumentMessage,
+} from '../../services/whatsappCloudAPI';
 import { ensureConversationAndSaveMessage } from '../../services/whatsappMessageDispatcher';
 import { normalizePhoneNumber } from '../../database/db';
 
@@ -69,7 +72,9 @@ export async function pollLabResults() {
       // Validation قبل المعالجة
       const validation = validateLabOrder(order as any);
       if (!validation.valid) {
-        console.error(`[Lab Results Poller] Invalid order ${(order as any).ORDER_ID}: ${validation.error}`);
+        console.error(
+          `[Lab Results Poller] Invalid order ${(order as any).ORDER_ID}: ${validation.error}`
+        );
         await hospitalDb.execute(
           sql`UPDATE lab_orders SET status = 'failed', error_message = ${validation.error} WHERE ORDER_ID = ${(order as any).ORDER_ID}`
         );
@@ -90,10 +95,14 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
     await hospitalDb.execute(
       sql`UPDATE lab_orders SET status = 'processing' WHERE ORDER_ID = ${order.ORDER_ID}`
     );
-    console.log(`[Lab Results Poller] Processing order ${order.ORDER_ID} for patient ${order.PATIENT_NAME}`);
+    console.log(
+      `[Lab Results Poller] Processing order ${order.ORDER_ID} for patient ${order.PATIENT_NAME}`
+    );
 
     const pdfBuffer = await generateLabResultPDF(order.ORDER_ID);
-    console.log(`[Lab Results Poller] PDF generated for order ${order.ORDER_ID} (${pdfBuffer.length} bytes)`);
+    console.log(
+      `[Lab Results Poller] PDF generated for order ${order.ORDER_ID} (${pdfBuffer.length} bytes)`
+    );
 
     // رفع PDF إلى سيرفر الملفات والحصول على URL عام
     const filename = `lab-result-${order.ORDER_ID}-${Date.now()}.pdf`;
@@ -141,10 +150,10 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
 
       // إضافة header component للملف (PDF) - الطريقة الرسمية من WhatsApp API
       components.push({
-        type: "header",
+        type: 'header',
         parameters: [
           {
-            type: "document",
+            type: 'document',
             document: {
               link: pdfUrl,
               filename: `نتيجة ${order.MAIN_TEST_NAME}.pdf`,
@@ -154,47 +163,61 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
       });
 
       // إضافة body component للمتغيرات النصية
-      const bodyParams: { type: "text"; text: string; parameter_name?: string }[] = [];
+      const bodyParams: { type: 'text'; text: string; parameter_name?: string }[] = [];
       try {
         const parsedVars = JSON.parse(template.variables || '[]') as string[];
-        const isNumeric = parsedVars.every(v => /^\d+$/.test(v));
+        const isNumeric = parsedVars.every((v) => /^\d+$/.test(v));
         if (isNumeric) {
           const vals = Object.values(variables);
           for (const v of vals) {
-            bodyParams.push({ type: "text", text: String(v) });
+            bodyParams.push({ type: 'text', text: String(v) });
           }
         } else {
           for (const varName of parsedVars) {
-            bodyParams.push({ type: "text", text: String((variables as any)[varName] ?? ''), parameter_name: varName });
+            bodyParams.push({
+              type: 'text',
+              text: String((variables as any)[varName] ?? ''),
+              parameter_name: varName,
+            });
           }
         }
       } catch {
         const vals = Object.values(variables);
         for (const v of vals) {
-          bodyParams.push({ type: "text", text: String(v) });
+          bodyParams.push({ type: 'text', text: String(v) });
         }
       }
 
       if (bodyParams.length > 0) {
-        components.push({ type: "body", parameters: bodyParams });
+        components.push({ type: 'body', parameters: bodyParams });
       }
 
       const templateNameToSend = template.metaName || template.name;
-      console.log(`[Lab Results Poller] Sending template "${templateNameToSend}" to ${normalizedPhone}`);
+      console.log(
+        `[Lab Results Poller] Sending template "${templateNameToSend}" to ${normalizedPhone}`
+      );
       const templateResult = await sendWhatsAppTemplateMessage(normalizedPhone, {
         templateName: templateNameToSend,
-        languageCode: template.languageCode ?? "ar",
+        languageCode: template.languageCode ?? 'ar',
         components,
       });
 
       if (!templateResult.success) {
-        console.error(`[Lab Results Poller] Template send failed for order ${order.ORDER_ID}: ${templateResult.error}`);
+        console.error(
+          `[Lab Results Poller] Template send failed for order ${order.ORDER_ID}: ${templateResult.error}`
+        );
         // Fallback: إرسال الملف كرسالة منفصلة إذا فشل القالب
         console.log(`[Lab Results Poller] Attempting fallback: sending document separately`);
-        const docResult = await sendWhatsAppDocumentMessage(normalizedPhone, pdfUrl, `نتيجة ${order.MAIN_TEST_NAME}.pdf`);
+        const docResult = await sendWhatsAppDocumentMessage(
+          normalizedPhone,
+          pdfUrl,
+          `نتيجة ${order.MAIN_TEST_NAME}.pdf`
+        );
 
         if (!docResult.success) {
-          throw new Error(`Template and document both failed. Template error: ${templateResult.error}, Document error: ${docResult.error}`);
+          throw new Error(
+            `Template and document both failed. Template error: ${templateResult.error}, Document error: ${docResult.error}`
+          );
         }
 
         // حفظ رسالة الملف فقط في حالة الفallback
@@ -213,7 +236,9 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
         );
 
         const duration = Date.now() - startTime;
-        console.log(`[Lab Results Poller] Order ${order.ORDER_ID} sent via fallback (document only) in ${duration}ms`);
+        console.log(
+          `[Lab Results Poller] Order ${order.ORDER_ID} sent via fallback (document only) in ${duration}ms`
+        );
         return;
       }
 
@@ -233,14 +258,19 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
       );
 
       const duration = Date.now() - startTime;
-      console.log(`[Lab Results Poller] Order ${order.ORDER_ID} sent successfully in ${duration}ms`);
+      console.log(
+        `[Lab Results Poller] Order ${order.ORDER_ID} sent successfully in ${duration}ms`
+      );
     } else {
       throw new Error('No WhatsApp template linked to message setting');
     }
   } catch (error) {
     const duration = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`[Lab Results Poller] Error processing order ${order.ORDER_ID} after ${duration}ms:`, errorMessage);
+    console.error(
+      `[Lab Results Poller] Error processing order ${order.ORDER_ID} after ${duration}ms:`,
+      errorMessage
+    );
 
     const newRetryCount = order.retry_count + 1;
 
@@ -248,12 +278,16 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
       await hospitalDb.execute(
         sql`UPDATE lab_orders SET status = 'failed', retry_count = ${newRetryCount}, error_message = ${errorMessage} WHERE ORDER_ID = ${order.ORDER_ID}`
       );
-      console.error(`[Lab Results Poller] Order ${order.ORDER_ID} marked as failed after ${newRetryCount} retries`);
+      console.error(
+        `[Lab Results Poller] Order ${order.ORDER_ID} marked as failed after ${newRetryCount} retries`
+      );
     } else {
       await hospitalDb.execute(
         sql`UPDATE lab_orders SET status = 'pending', retry_count = ${newRetryCount}, error_message = ${errorMessage} WHERE ORDER_ID = ${order.ORDER_ID}`
       );
-      console.log(`[Lab Results Poller] Order ${order.ORDER_ID} will retry (${newRetryCount}/${MAX_RETRIES})`);
+      console.log(
+        `[Lab Results Poller] Order ${order.ORDER_ID} will retry (${newRetryCount}/${MAX_RETRIES})`
+      );
     }
   }
 }

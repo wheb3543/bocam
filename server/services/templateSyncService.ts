@@ -3,10 +3,10 @@
  * خدمة مزامنة حالة القوالب مع Meta API
  */
 
-import { meta } from "../api/MetaApiService";
-import { getDb } from "../database/db";
-import { messageTemplates, whatsappTemplates } from "../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { meta } from '../api/MetaApiService';
+import { getDb } from '../database/db';
+import { messageTemplates, whatsappTemplates } from '../../drizzle/schema';
+import { eq } from 'drizzle-orm';
 
 /**
  * مزامنة حالة قوالب messageTemplates مع Meta
@@ -22,7 +22,7 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
   try {
     const db = await getDb();
     if (!db) {
-      throw new Error("Database not available");
+      throw new Error('Database not available');
     }
 
     // الحصول على WABA ID من Phone Number ID
@@ -41,9 +41,7 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
     console.log(`[Template Sync] Fetched ${metaTemplates.length} templates from Meta`);
 
     // إنشاء خريطة للقوالب من Meta
-    const metaTemplateMap = new Map(
-      metaTemplates.map((t: any) => [t.name, t])
-    );
+    const metaTemplateMap = new Map(metaTemplates.map((t: any) => [t.name, t]));
 
     // جلب القوالب من قاعدة البيانات
     const dbTemplates = await db.select().from(messageTemplates);
@@ -61,28 +59,32 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
 
       // تحديث الحالة إذا تغيرت
       if (metaTemplate.status !== dbTemplate.status) {
-        console.log(`[Template Sync] Updating status of "${dbTemplate.templateName}" from ${dbTemplate.status} to ${metaTemplate.status}`);
-        
-        await db.update(messageTemplates)
+        console.log(
+          `[Template Sync] Updating status of "${dbTemplate.templateName}" from ${dbTemplate.status} to ${metaTemplate.status}`
+        );
+
+        await db
+          .update(messageTemplates)
           .set({
             status: metaTemplate.status,
             metaTemplateId: metaTemplate.id,
             updatedAt: new Date(),
           })
           .where(eq(messageTemplates.id, dbTemplate.id));
-        
+
         synced++;
       }
 
       // تحديث معرف القالب من Meta إذا لم يكن موجوداً
       if (!dbTemplate.metaTemplateId && metaTemplate.id) {
-        await db.update(messageTemplates)
+        await db
+          .update(messageTemplates)
           .set({
             metaTemplateId: metaTemplate.id,
             updatedAt: new Date(),
           })
           .where(eq(messageTemplates.id, dbTemplate.id));
-        
+
         synced++;
       }
     }
@@ -90,7 +92,7 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
     console.log(`[Template Sync] Synced ${synced} templates`);
     return { success: true, synced, errors };
   } catch (error: any) {
-    console.error("[Template Sync] Failed:", error);
+    console.error('[Template Sync] Failed:', error);
     return { success: false, synced, errors: [error.message] };
   }
 }
@@ -109,7 +111,7 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
   try {
     const db = await getDb();
     if (!db) {
-      throw new Error("Database not available");
+      throw new Error('Database not available');
     }
 
     // الحصول على WABA ID من Phone Number ID
@@ -128,9 +130,7 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
     console.log(`[Template Sync] Fetched ${metaTemplates.length} templates from Meta`);
 
     // إنشاء خريطة للقوالب من Meta
-    const metaTemplateMap = new Map(
-      metaTemplates.map((t: any) => [t.name, t])
-    );
+    const metaTemplateMap = new Map(metaTemplates.map((t: any) => [t.name, t]));
 
     // جلب القوالب من قاعدة البيانات
     const dbTemplates = await db.select().from(whatsappTemplates);
@@ -149,28 +149,32 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
 
       // تحديث الحالة إذا تغيرت
       if (metaTemplate.status !== dbTemplate.metaStatus) {
-        console.log(`[Template Sync] Updating status of "${metaName}" from ${dbTemplate.metaStatus} to ${metaTemplate.status}`);
-        
-        await db.update(whatsappTemplates)
+        console.log(
+          `[Template Sync] Updating status of "${metaName}" from ${dbTemplate.metaStatus} to ${metaTemplate.status}`
+        );
+
+        await db
+          .update(whatsappTemplates)
           .set({
             metaStatus: metaTemplate.status,
             metaTemplateId: metaTemplate.id,
             updatedAt: new Date(),
           })
           .where(eq(whatsappTemplates.id, dbTemplate.id));
-        
+
         synced++;
       }
 
       // تحديث معرف القالب من Meta إذا لم يكن موجوداً
       if (!dbTemplate.metaTemplateId && metaTemplate.id) {
-        await db.update(whatsappTemplates)
+        await db
+          .update(whatsappTemplates)
           .set({
             metaTemplateId: metaTemplate.id,
             updatedAt: new Date(),
           })
           .where(eq(whatsappTemplates.id, dbTemplate.id));
-        
+
         synced++;
       }
     }
@@ -178,7 +182,7 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
     console.log(`[Template Sync] Synced ${synced} templates`);
     return { success: true, synced, errors };
   } catch (error: any) {
-    console.error("[Template Sync] Failed:", error);
+    console.error('[Template Sync] Failed:', error);
     return { success: false, synced, errors: [error.message] };
   }
 }
@@ -191,7 +195,7 @@ export async function syncAllTemplates(phoneNumberId: string): Promise<{
   messageTemplates: { synced: number; errors: string[] };
   whatsappTemplates: { synced: number; errors: string[] };
 }> {
-  console.log("[Template Sync] Starting full template sync...");
+  console.log('[Template Sync] Starting full template sync...');
 
   const messageResult = await syncMessageTemplatesStatus(phoneNumberId);
   const whatsappResult = await syncWhatsAppTemplatesStatus(phoneNumberId);

@@ -1,8 +1,8 @@
-import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Construction } from "lucide-react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight, Construction } from 'lucide-react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 interface UnderDevelopmentPageProps {
   title: string;
@@ -22,10 +22,7 @@ export default function UnderDevelopmentPage({
   const [, setLocation] = useLocation();
 
   return (
-    <DashboardLayout
-      pageTitle={title}
-      pageDescription={description}
-    >
+    <DashboardLayout pageTitle={title} pageDescription={description}>
       <main className="container py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-6">
         <div className="max-w-2xl mx-auto">
           <Card className="border-2 border-dashed">
@@ -36,14 +33,18 @@ export default function UnderDevelopmentPage({
                   <Construction className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-orange-500 absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2" />
                 </div>
               </div>
-              <CardTitle className="text-xl sm:text-2xl md:text-3xl mb-2">صفحة {title} قيد التطوير</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl md:text-3xl mb-2">
+                صفحة {title} قيد التطوير
+              </CardTitle>
               <CardDescription className="text-sm sm:text-base md:text-lg">
                 نعمل حالياً على تطوير صفحة {title} لتوفير تجربة أفضل لك
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center px-4 sm:px-6">
               <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 sm:p-6 mb-6">
-                <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2 text-sm sm:text-base">الميزات القادمة:</h3>
+                <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2 text-sm sm:text-base">
+                  الميزات القادمة:
+                </h3>
                 <ul className="text-right text-blue-800 dark:text-blue-400 space-y-2 text-sm">
                   {features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-2">
@@ -53,10 +54,10 @@ export default function UnderDevelopmentPage({
                   ))}
                 </ul>
               </div>
-              
-              <Button 
+
+              <Button
                 size="lg"
-                onClick={() => setLocation("/admin")}
+                onClick={() => setLocation('/admin')}
                 className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
               >
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />

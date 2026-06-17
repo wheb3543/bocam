@@ -1,5 +1,5 @@
 $kind: http-request
-description: "Endpoint reference: [Business](https://developers.facebook.com/docs/marketing-api/reference/business/)"
+description: 'Endpoint reference: [Business](https://developers.facebook.com/docs/marketing-api/reference/business/)'
 url: https://graph.facebook.com/{{Version}}/{{Business-ID}}?fields=id,name,timezone_id
 method: GET
 queryParams:

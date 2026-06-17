@@ -19,21 +19,22 @@ const PRECACHE_URLS = [
 self.addEventListener('install', (event) => {
   console.log('[SW-Admin] Installing admin service worker...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches
+      .open(CACHE_NAME)
       .then((cache) => {
         console.log('[SW-Admin] Precaching admin app shell');
         // Try to cache each URL individually to avoid failing on missing files
         return Promise.allSettled(
-          PRECACHE_URLS.map(url =>
+          PRECACHE_URLS.map((url) =>
             // Use no-cors for cross-origin resources if needed
             fetch(url, { mode: 'same-origin' })
-              .then(response => {
+              .then((response) => {
                 if (!response.ok && response.type !== 'opaque') {
                   throw new Error(`HTTP ${response.status} for ${url}`);
                 }
                 return cache.put(url, response);
               })
-              .catch(err => {
+              .catch((err) => {
                 console.warn('[SW-Admin] Could not cache:', url, err.message);
               })
           )
@@ -48,17 +49,23 @@ self.addEventListener('activate', (event) => {
   console.log('[SW-Admin] Activating admin service worker...');
   const currentCaches = [CACHE_NAME, RUNTIME_CACHE];
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      // Only delete caches that belong to admin (sgh-admin-*)
-      return cacheNames.filter((cacheName) =>
-        cacheName.startsWith('sgh-admin-') && !currentCaches.includes(cacheName)
-      );
-    }).then((cachesToDelete) => {
-      return Promise.all(cachesToDelete.map((cacheToDelete) => {
-        console.log('[SW-Admin] Deleting old cache:', cacheToDelete);
-        return caches.delete(cacheToDelete);
-      }));
-    }).then(() => self.clients.claim())
+    caches
+      .keys()
+      .then((cacheNames) => {
+        // Only delete caches that belong to admin (sgh-admin-*)
+        return cacheNames.filter(
+          (cacheName) => cacheName.startsWith('sgh-admin-') && !currentCaches.includes(cacheName)
+        );
+      })
+      .then((cachesToDelete) => {
+        return Promise.all(
+          cachesToDelete.map((cacheToDelete) => {
+            console.log('[SW-Admin] Deleting old cache:', cacheToDelete);
+            return caches.delete(cacheToDelete);
+          })
+        );
+      })
+      .then(() => self.clients.claim())
   );
 });
 
@@ -74,7 +81,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request).catch(() => {
         return new Response(JSON.stringify({ error: 'Offline - Admin' }), {
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         });
       })
     );
@@ -93,11 +100,10 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          return caches.match(event.request)
-            .then((cachedResponse) => {
-              if (cachedResponse) return cachedResponse;
-              return caches.match('/admin');
-            });
+          return caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) return cachedResponse;
+            return caches.match('/admin');
+          });
         })
     );
     return;
@@ -105,20 +111,19 @@ self.addEventListener('fetch', (event) => {
 
   // Cache-first for static assets
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        if (cachedResponse) return cachedResponse;
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          const responseClone = response.clone();
-          caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+      return fetch(event.request).then((response) => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
+        }
+        const responseClone = response.clone();
+        caches.open(RUNTIME_CACHE).then((cache) => {
+          cache.put(event.request, responseClone);
         });
-      })
+        return response;
+      });
+    })
   );
 });
 
@@ -145,13 +150,11 @@ self.addEventListener('push', (event) => {
     data: { url: data.url || '/admin' },
     actions: [
       { action: 'open', title: 'فتح', icon: '/icon-admin-72x72.png' },
-      { action: 'close', title: 'إغلاق' }
-    ]
+      { action: 'close', title: 'إغلاق' },
+    ],
   };
 
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'لوحة تحكم SGH', options)
-  );
+  event.waitUntil(self.registration.showNotification(data.title || 'لوحة تحكم SGH', options));
 });
 
 // ===== Notification Click =====
@@ -162,18 +165,20 @@ self.addEventListener('notificationclick', (event) => {
   if (event.action === 'open' || !event.action) {
     const targetUrl = event.notification.data?.url || '/admin';
     event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true })
-        .then((clientList) => {
-          // Focus existing admin window if open
-          for (const client of clientList) {
-            if ((client.url.includes('/admin') || client.url.includes('/admin')) && 'focus' in client) {
-              client.navigate(targetUrl);
-              return client.focus();
-            }
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        // Focus existing admin window if open
+        for (const client of clientList) {
+          if (
+            (client.url.includes('/admin') || client.url.includes('/admin')) &&
+            'focus' in client
+          ) {
+            client.navigate(targetUrl);
+            return client.focus();
           }
-          // Open new window
-          return clients.openWindow(targetUrl);
-        })
+        }
+        // Open new window
+        return clients.openWindow(targetUrl);
+      })
     );
   }
 });
@@ -191,11 +196,14 @@ self.addEventListener('message', (event) => {
   }
 
   if (event.data?.type === 'CLEAR_CACHE') {
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k.startsWith('sgh-admin-')).map(k => caches.delete(k)))
-    ).then(() => {
-      event.ports[0]?.postMessage({ success: true });
-    });
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((k) => k.startsWith('sgh-admin-')).map((k) => caches.delete(k)))
+      )
+      .then(() => {
+        event.ports[0]?.postMessage({ success: true });
+      });
   }
 });
 
@@ -212,7 +220,7 @@ async function syncAdminData() {
     console.log('[SW-Admin] Syncing admin data...');
     // Notify all admin clients that sync is complete
     const clientList = await clients.matchAll({ type: 'window' });
-    clientList.forEach(client => {
+    clientList.forEach((client) => {
       if (client.url.includes('/admin') || client.url.includes('/admin')) {
         client.postMessage({ type: 'SYNC_COMPLETE' });
       }

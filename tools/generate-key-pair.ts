@@ -1,13 +1,13 @@
 #!/usr/bin/env tsx
 /**
  * Generate License Key Pair Tool
- * 
+ *
  * Generates RSA-2048 public/private key pair for license signing and verification.
  * This tool creates the cryptographic foundation for the licensing system.
- * 
+ *
  * Usage:
  *   pnpm license:generate-keys
- * 
+ *
  * Security Notes:
  * - Keep the private key secure and NEVER commit it to version control
  * - The private key should be stored on a secure, offline system
@@ -95,13 +95,13 @@ function generateKeyPair(options: KeyPairGenerationOptions = {}): {
   // Add to .gitignore if not already present
   const gitignorePath = path.join(__dirname, '..', '.gitignore');
   let gitignoreContent = '';
-  
+
   if (fs.existsSync(gitignorePath)) {
     gitignoreContent = fs.readFileSync(gitignorePath, 'utf-8');
   }
 
   const licenseKeysEntry = '# License keys - keep private key secure\nlicense-keys/\n';
-  
+
   if (!gitignoreContent.includes('license-keys/')) {
     gitignoreContent += '\n' + licenseKeysEntry;
     fs.writeFileSync(gitignorePath, gitignoreContent);
@@ -113,7 +113,9 @@ function generateKeyPair(options: KeyPairGenerationOptions = {}): {
   console.log('📋 Next Steps:');
   console.log('   1. Use the private key to generate license keys');
   console.log('   2. Embed the public key in the application for verification');
-  console.log('   3. Test license generation: pnpm license:generate <hardwareId> <expiry> <features>');
+  console.log(
+    '   3. Test license generation: pnpm license:generate <hardwareId> <expiry> <features>'
+  );
   console.log('');
 
   return {
@@ -128,10 +130,10 @@ function generateKeyPair(options: KeyPairGenerationOptions = {}): {
 function main() {
   try {
     const args = process.argv.slice(2);
-    
+
     // Parse command line arguments
     const options: KeyPairGenerationOptions = {};
-    
+
     for (let i = 0; i < args.length; i++) {
       switch (args[i]) {
         case '--modulus':

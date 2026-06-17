@@ -129,9 +129,7 @@
       "compositePrimaryKeys": {
         "appointments_id": {
           "name": "appointments_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -242,17 +240,13 @@
       "compositePrimaryKeys": {
         "campaigns_id": {
           "name": "campaigns_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "campaigns_slug_unique": {
           "name": "campaigns_slug_unique",
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "checkConstraint": {}
@@ -326,9 +320,7 @@
       "compositePrimaryKeys": {
         "doctors_id": {
           "name": "doctors_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -393,9 +385,7 @@
       "compositePrimaryKeys": {
         "leadStatusHistory_id": {
           "name": "leadStatusHistory_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -536,9 +526,7 @@
       "compositePrimaryKeys": {
         "leads_id": {
           "name": "leads_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -590,17 +578,13 @@
       "compositePrimaryKeys": {
         "settings_id": {
           "name": "settings_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "settings_key_unique": {
           "name": "settings_key_unique",
-          "columns": [
-            "key"
-          ]
+          "columns": ["key"]
         }
       },
       "checkConstraint": {}
@@ -682,17 +666,13 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_openId_unique": {
           "name": "users_openId_unique",
-          "columns": [
-            "openId"
-          ]
+          "columns": ["openId"]
         }
       },
       "checkConstraint": {}

@@ -3,12 +3,18 @@
  * لوحة تحكم تحليلات WhatsApp
  */
 
-import { useState, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   LineChart,
   Line,
@@ -23,41 +29,71 @@ import {
   Cell,
   BarChart,
   Bar,
-} from "recharts";
-import { MessageCircle, TrendingUp, Download, Calendar, Users, Clock, CheckCircle, XCircle, RefreshCw, DollarSign, ShoppingCart, Megaphone, Smile } from "lucide-react";
-import { useWhatsAppSSE, ConversationCostUpdateEvent, TemplateEvent } from "@/hooks/integrations/useWhatsAppSSE";
-import { toast } from "sonner";
+} from 'recharts';
+import {
+  MessageCircle,
+  TrendingUp,
+  Download,
+  Calendar,
+  Users,
+  Clock,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  DollarSign,
+  ShoppingCart,
+  Megaphone,
+  Smile,
+} from 'lucide-react';
+import {
+  useWhatsAppSSE,
+  ConversationCostUpdateEvent,
+  TemplateEvent,
+} from '@/hooks/integrations/useWhatsAppSSE';
+import { toast } from 'sonner';
 
 export default function WhatsAppAnalytics() {
-  const [dateRange, setDateRange] = useState<"7d" | "30d" | "90d">("7d");
+  const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d'>('7d');
 
   // Queries
   const broadcastStatsQuery = trpc.whatsapp.getBroadcastStats.useQuery();
   const autoReplyRulesQuery = trpc.whatsapp.getAutoReplyRules.useQuery();
   const messageStatsQuery = trpc.whatsapp.getMessageStats.useQuery();
   const conversationCostsQuery = trpc.whatsapp.getConversationCosts.useQuery({
-    startDate: dateRange === "7d" ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
-            dateRange === "30d" ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
-            new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    startDate:
+      dateRange === '7d'
+        ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        : dateRange === '30d'
+          ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0],
   });
   const templatePerformanceQuery = trpc.whatsapp.getTemplatePerformance.useQuery({
-    startDate: dateRange === "7d" ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
-            dateRange === "30d" ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
-            new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    startDate:
+      dateRange === '7d'
+        ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        : dateRange === '30d'
+          ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0],
   });
 
   // SSE: تحديث فوري عند وصول أحداث التكلفة والقوالب الجديدة
   useWhatsAppSSE({
-    onConversationCostUpdate: useCallback((event: ConversationCostUpdateEvent) => {
-      toast.info(`تحديث تكلفة المحادثة: ${event.phoneNumber}`);
-      conversationCostsQuery.refetch();
-    }, [conversationCostsQuery]),
-    onTemplateEvent: useCallback((event: TemplateEvent) => {
-      toast.info(`حدث قالب: ${event.eventType}`);
-      templatePerformanceQuery.refetch();
-    }, [templatePerformanceQuery]),
+    onConversationCostUpdate: useCallback(
+      (event: ConversationCostUpdateEvent) => {
+        toast.info(`تحديث تكلفة المحادثة: ${event.phoneNumber}`);
+        conversationCostsQuery.refetch();
+      },
+      [conversationCostsQuery]
+    ),
+    onTemplateEvent: useCallback(
+      (event: TemplateEvent) => {
+        toast.info(`حدث قالب: ${event.eventType}`);
+        templatePerformanceQuery.refetch();
+      },
+      [templatePerformanceQuery]
+    ),
   });
 
   // Use real data from API, fallback to empty arrays if loading/error
@@ -66,7 +102,7 @@ export default function WhatsAppAnalytics() {
   const conversationCosts = conversationCostsQuery.data || [];
   const templatePerformance = templatePerformanceQuery.data || [];
 
-  const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"];
+  const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 
   const handleExport = () => {
     const data = {
@@ -75,12 +111,12 @@ export default function WhatsAppAnalytics() {
       messageStats: messageStatsQuery.data,
       exportedAt: new Date().toISOString(),
     };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
-    a.download = `whatsapp-analytics-${new Date().toISOString().split("T")[0]}.json`;
+    a.download = `whatsapp-analytics-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -114,8 +150,15 @@ export default function WhatsAppAnalytics() {
                 <SelectItem value="90d">آخر 90 يوم</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={messageStatsQuery.isLoading}>
-              <RefreshCw className={`h-4 w-4 ${messageStatsQuery.isLoading ? "animate-spin" : ""}`} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={messageStatsQuery.isLoading}
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${messageStatsQuery.isLoading ? 'animate-spin' : ''}`}
+              />
             </Button>
             <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="h-4 w-4 ml-2" />
@@ -187,7 +230,9 @@ export default function WhatsAppAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{autoReplyRulesQuery.data?.rules?.length || 0}</div>
+              <div className="text-2xl font-bold">
+                {autoReplyRulesQuery.data?.rules?.length || 0}
+              </div>
               <p className="text-xs text-muted-foreground">قاعدة نشطة</p>
             </CardContent>
           </Card>
@@ -248,7 +293,10 @@ export default function WhatsAppAnalytics() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${conversationCosts.reduce((sum: number, c: any) => sum + (c.conversationCost || 0), 0).toFixed(2)}
+                $
+                {conversationCosts
+                  .reduce((sum: number, c: any) => sum + (c.conversationCost || 0), 0)
+                  .toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground">تكلفة المحادثات</p>
             </CardContent>
@@ -362,12 +410,14 @@ export default function WhatsAppAnalytics() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={[
-                { name: "8-12", messages: 45, response: 2.1 },
-                { name: "12-16", messages: 82, response: 2.8 },
-                { name: "16-20", messages: 65, response: 2.5 },
-                { name: "20-24", messages: 30, response: 3.2 },
-              ]}>
+              <BarChart
+                data={[
+                  { name: '8-12', messages: 45, response: 2.1 },
+                  { name: '12-16', messages: 82, response: 2.8 },
+                  { name: '16-20', messages: 65, response: 2.5 },
+                  { name: '20-24', messages: 30, response: 3.2 },
+                ]}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -392,10 +442,12 @@ export default function WhatsAppAnalytics() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={conversationCosts.map((c: any) => ({
-                  date: new Date(c.createdAt).toLocaleDateString('ar-SA'),
-                  cost: c.conversationCost || 0,
-                }))}>
+                <LineChart
+                  data={conversationCosts.map((c: any) => ({
+                    date: new Date(c.createdAt).toLocaleDateString('ar-SA'),
+                    cost: c.conversationCost || 0,
+                  }))}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
@@ -420,11 +472,11 @@ export default function WhatsAppAnalytics() {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: "ملصقات", value: 15 },
-                      { name: "ردود عاطفية", value: 45 },
-                      { name: "طلبات", value: 12 },
-                      { name: "استفسارات منتجات", value: 8 },
-                      { name: "إحالات", value: 20 },
+                      { name: 'ملصقات', value: 15 },
+                      { name: 'ردود عاطفية', value: 45 },
+                      { name: 'طلبات', value: 12 },
+                      { name: 'استفسارات منتجات', value: 8 },
+                      { name: 'إحالات', value: 20 },
                     ]}
                     cx="50%"
                     cy="50%"
@@ -434,7 +486,7 @@ export default function WhatsAppAnalytics() {
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"].map((color, index) => (
+                    {['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'].map((color, index) => (
                       <Cell key={`cell-${index}`} fill={color} />
                     ))}
                   </Pie>
@@ -467,18 +519,23 @@ export default function WhatsAppAnalytics() {
                   </tr>
                 </thead>
                 <tbody>
-                  {templatePerformance.length > 0 ? templatePerformance.map((t: any) => (
-                    <tr key={t.templateId} className="border-b">
-                      <td className="p-2">{t.templateName}</td>
-                      <td className="p-2">{t.sentCount || 0}</td>
-                      <td className="p-2">{t.deliveredCount || 0}</td>
-                      <td className="p-2">{t.readCount || 0}</td>
-                      <td className="p-2">{t.failedCount || 0}</td>
-                      <td className="p-2">
-                        {t.sentCount > 0 ? ((t.deliveredCount / t.sentCount) * 100).toFixed(1) : 0}%
-                      </td>
-                    </tr>
-                  )) : (
+                  {templatePerformance.length > 0 ? (
+                    templatePerformance.map((t: any) => (
+                      <tr key={t.templateId} className="border-b">
+                        <td className="p-2">{t.templateName}</td>
+                        <td className="p-2">{t.sentCount || 0}</td>
+                        <td className="p-2">{t.deliveredCount || 0}</td>
+                        <td className="p-2">{t.readCount || 0}</td>
+                        <td className="p-2">{t.failedCount || 0}</td>
+                        <td className="p-2">
+                          {t.sentCount > 0
+                            ? ((t.deliveredCount / t.sentCount) * 100).toFixed(1)
+                            : 0}
+                          %
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
                       <td colSpan={6} className="p-4 text-center text-muted-foreground">
                         لا توجد بيانات أداء القوالب

@@ -1,21 +1,18 @@
 /**
  * BackToTopButton Component - زر العودة للأعلى موحد
- * 
+ *
  * A unified back to top button with smooth scrolling
  */
 
-import { useState, useEffect } from "react";
-import { ArrowUp } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { ArrowUp } from 'lucide-react';
 
 interface BackToTopButtonProps {
   threshold?: number;
   className?: string;
 }
 
-export default function BackToTopButton({ 
-  threshold = 300, 
-  className = "" 
-}: BackToTopButtonProps) {
+export default function BackToTopButton({ threshold = 300, className = '' }: BackToTopButtonProps) {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {

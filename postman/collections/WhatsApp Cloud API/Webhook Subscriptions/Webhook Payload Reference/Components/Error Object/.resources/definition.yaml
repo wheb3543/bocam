@@ -5,7 +5,7 @@ description: |-
   | **`code`**            | The error code. |
   | **`title`**           | The error title.|
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 16000

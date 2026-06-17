@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,16 +6,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+} from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
 
 interface BulkUpdateDialogProps {
   open: boolean;
@@ -34,7 +34,7 @@ export default function BulkUpdateDialog({
   onConfirm,
   isLoading = false,
 }: BulkUpdateDialogProps) {
-  const [newStatus, setNewStatus] = useState("");
+  const [newStatus, setNewStatus] = useState('');
 
   const handleConfirm = () => {
     if (newStatus) {
@@ -66,17 +66,10 @@ export default function BulkUpdateDialog({
           </Select>
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
             إلغاء
           </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={!newStatus || isLoading}
-          >
+          <Button onClick={handleConfirm} disabled={!newStatus || isLoading}>
             {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
             تحديث
           </Button>

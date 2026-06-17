@@ -1,24 +1,33 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { trpc } from "@/lib/api/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { getCompanyName } from "@/const";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Heart, Calendar, ArrowLeft, Clock, CheckCircle2, Users } from "lucide-react";
-import InstallPWAButton from "@/components/InstallPWAButton";
-import PageLayout from "@/components/layout/PageLayout";
-import HeroSection from "@/components/HeroSection";
-import AnimatedCard from "@/components/AnimatedCard";
-import SectionDivider from "@/components/SectionDivider";
-import ReadingProgressBar from "@/components/ReadingProgressBar";
-import BackToTopButton from "@/components/BackToTopButton";
-import ScrollReveal from "@/components/ScrollReveal";
-import TextShimmer from "@/components/TextShimmer";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { getCompanyName } from '@/const';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import {
+  Loader2,
+  Search,
+  Heart,
+  Calendar,
+  ArrowLeft,
+  Clock,
+  CheckCircle2,
+  Users,
+} from 'lucide-react';
+import InstallPWAButton from '@/components/InstallPWAButton';
+import PageLayout from '@/components/layout/PageLayout';
+import HeroSection from '@/components/HeroSection';
+import AnimatedCard from '@/components/AnimatedCard';
+import SectionDivider from '@/components/SectionDivider';
+import ReadingProgressBar from '@/components/ReadingProgressBar';
+import BackToTopButton from '@/components/BackToTopButton';
+import ScrollReveal from '@/components/ScrollReveal';
+import TextShimmer from '@/components/TextShimmer';
 
 export default function CampsListPage() {
   const companyName = getCompanyName('ar');
@@ -37,23 +46,29 @@ function CampsListContent() {
   const companyName = getCompanyName('ar');
   const { formatDate, formatDateTime } = useFormatDate();
   const [, setLocation] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { user } = useAuth();
   const { data: camps, isLoading } = trpc.camps.getAll.useQuery();
   // استعلام محمي - يعمل فقط للمستخدمين المسجلين لتجنب خطأ UNAUTHORIZED
-  const { data: registrations } = trpc.campRegistrations.list.useQuery(undefined, { enabled: !!user });
+  const { data: registrations } = trpc.campRegistrations.list.useQuery(undefined, {
+    enabled: !!user,
+  });
 
   // Separate active and expired camps based on endDate
   const now = new Date();
-  const activeCamps = Array.isArray(camps) ? camps.filter((camp: any) => {
-    if (!camp.endDate) return true;
-    return new Date(camp.endDate) >= now;
-  }) : [];
-  const expiredCamps = Array.isArray(camps) ? camps.filter((camp: any) => {
-    if (!camp.endDate) return false;
-    return new Date(camp.endDate) < now;
-  }) : [];
+  const activeCamps = Array.isArray(camps)
+    ? camps.filter((camp: any) => {
+        if (!camp.endDate) return true;
+        return new Date(camp.endDate) >= now;
+      })
+    : [];
+  const expiredCamps = Array.isArray(camps)
+    ? camps.filter((camp: any) => {
+        if (!camp.endDate) return false;
+        return new Date(camp.endDate) < now;
+      })
+    : [];
 
   const filteredActiveCamps = activeCamps.filter((camp: any) =>
     camp.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -65,16 +80,30 @@ function CampsListContent() {
 
   // Calculate registration stats for each camp
   const getCampStats = (campId: number) => {
-    const campRegistrations = Array.isArray(registrations) ? registrations.filter((r: any) => r.campId === campId) : [];
+    const campRegistrations = Array.isArray(registrations)
+      ? registrations.filter((r: any) => r.campId === campId)
+      : [];
     const total = campRegistrations.length;
-    const confirmed = campRegistrations.filter((r: any) => r.status === "confirmed" || r.status === "attended" || r.status === "completed").length;
-    const attended = campRegistrations.filter((r: any) => r.status === "attended" || r.status === "completed").length;
+    const confirmed = campRegistrations.filter(
+      (r: any) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
+    ).length;
+    const attended = campRegistrations.filter(
+      (r: any) => r.status === 'attended' || r.status === 'completed'
+    ).length;
     return { total, confirmed, attended };
   };
 
-  const CampCard = ({ camp, isExpired = false, index = 0 }: { camp: any; isExpired?: boolean; index?: number }) => {
+  const CampCard = ({
+    camp,
+    isExpired = false,
+    index = 0,
+  }: {
+    camp: any;
+    isExpired?: boolean;
+    index?: number;
+  }) => {
     const stats = getCampStats(camp.id);
-    
+
     return (
       <AnimatedCard
         key={camp.id}
@@ -93,7 +122,9 @@ function CampsListContent() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
-                <div className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}>
+                <div
+                  className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}
+                >
                   {isExpired ? (
                     <>
                       <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -108,13 +139,17 @@ function CampsListContent() {
                 </div>
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5 md:p-6">
-                <h3 className="text-base sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-2">{camp.name}</h3>
+                <h3 className="text-base sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-2">
+                  {camp.name}
+                </h3>
               </div>
             </div>
           ) : (
             <div className="relative h-44 sm:h-56 md:h-64 bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
               <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
-                <div className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}>
+                <div
+                  className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}
+                >
                   {isExpired ? (
                     <>
                       <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -130,7 +165,9 @@ function CampsListContent() {
               </div>
               <Heart className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 text-white/30 fill-white/30" />
               <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5 md:p-6">
-                <h3 className="text-base sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-2">{camp.name}</h3>
+                <h3 className="text-base sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-2">
+                  {camp.name}
+                </h3>
               </div>
             </div>
           )}
@@ -150,13 +187,19 @@ function CampsListContent() {
                   {stats.total} تسجيل
                 </Badge>
                 {stats.confirmed > 0 && (
-                  <Badge variant="outline" className="flex items-center gap-1 border-green-500 text-green-600">
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 border-green-500 text-green-600"
+                  >
                     <CheckCircle2 className="h-3 w-3" />
                     {stats.confirmed} مؤكد
                   </Badge>
                 )}
                 {stats.attended > 0 && (
-                  <Badge variant="outline" className="flex items-center gap-1 border-blue-500 text-blue-600">
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 border-blue-500 text-blue-600"
+                  >
                     <Clock className="h-3 w-3" />
                     {stats.attended} حضر
                   </Badge>
@@ -175,7 +218,7 @@ function CampsListContent() {
               </div>
             )}
 
-            <Button 
+            <Button
               className={`w-full text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11 ${isExpired ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700'}`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -199,7 +242,7 @@ function CampsListContent() {
       <HeroSection
         title="المخيمات الطبية الخيرية"
         description="مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين"
-        badge={{ text: "مخيمات خيرية", icon: Heart }}
+        badge={{ text: 'مخيمات خيرية', icon: Heart }}
         backgroundGradient="from-red-600 via-red-700 to-orange-600"
       />
 
@@ -213,9 +256,9 @@ function CampsListContent() {
               </h2>
               <p className="text-xs sm:text-sm md:text-base lg:text-lg text-foreground leading-relaxed text-right px-1">
                 يأتي تنظيم المخيمات الطبية الخيرية ضمن مبادرات {companyName}
-                في إطار المسؤولية المجتمعية، حيث نسعى لتقديم خدمات طبية عالية الجودة
-                للمحتاجين والمستحقين بأسعار رمزية أو مجاناً. يشرف على المخيمات نخبة من
-                أفضل الأطباء والجراحين المتخصصين، مع توفير أحدث الأجهزة والتقنيات الطبية.
+                في إطار المسؤولية المجتمعية، حيث نسعى لتقديم خدمات طبية عالية الجودة للمحتاجين
+                والمستحقين بأسعار رمزية أو مجاناً. يشرف على المخيمات نخبة من أفضل الأطباء والجراحين
+                المتخصصين، مع توفير أحدث الأجهزة والتقنيات الطبية.
               </p>
             </div>
           </div>
@@ -253,11 +296,17 @@ function CampsListContent() {
             ) : (
               <Tabs defaultValue="active" className="w-full" dir="rtl">
                 <TabsList className="grid w-full max-w-sm sm:max-w-md mx-auto grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
-                  <TabsTrigger value="active" className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm">
+                  <TabsTrigger
+                    value="active"
+                    className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm"
+                  >
                     <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>الجارية ({filteredActiveCamps?.length || 0})</span>
                   </TabsTrigger>
-                  <TabsTrigger value="expired" className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm">
+                  <TabsTrigger
+                    value="expired"
+                    className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm"
+                  >
                     <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>المنتهية ({filteredExpiredCamps?.length || 0})</span>
                   </TabsTrigger>
@@ -275,37 +324,37 @@ function CampsListContent() {
                       <Heart className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-gray-300 mb-3 sm:mb-4" />
                       <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">
                         لا توجد مخيمات جارية حالياً
-                    </h3>
-                    <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                      تابعنا للحصول على آخر التحديثات عن المخيمات القادمة
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
+                      </h3>
+                      <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+                        تابعنا للحصول على آخر التحديثات عن المخيمات القادمة
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
 
-              <TabsContent value="expired">
-                {filteredExpiredCamps && filteredExpiredCamps.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-                    {filteredExpiredCamps.map((camp: any, index: number) => (
-                      <CampCard key={camp.id} camp={camp} isExpired={true} index={index} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-10 sm:py-16">
-                    <CheckCircle2 className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-gray-300 mb-3 sm:mb-4" />
-                    <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">
-                      لا توجد مخيمات منتهية
-                    </h3>
-                    <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                      سيتم عرض المخيمات المنتهية هنا
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          )}
-        </div>
-      </section>
+                <TabsContent value="expired">
+                  {filteredExpiredCamps && filteredExpiredCamps.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                      {filteredExpiredCamps.map((camp: any, index: number) => (
+                        <CampCard key={camp.id} camp={camp} isExpired={true} index={index} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 sm:py-16">
+                      <CheckCircle2 className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-gray-300 mb-3 sm:mb-4" />
+                      <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">
+                        لا توجد مخيمات منتهية
+                      </h3>
+                      <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+                        سيتم عرض المخيمات المنتهية هنا
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            )}
+          </div>
+        </section>
       </ScrollReveal>
 
       <BackToTopButton threshold={300} />

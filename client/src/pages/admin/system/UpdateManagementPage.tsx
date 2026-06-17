@@ -1,19 +1,19 @@
-import { useEffect, useState } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Download, 
-  RefreshCw, 
-  CheckCircle, 
-  XCircle, 
+import { useEffect, useState } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import {
+  Download,
+  RefreshCw,
+  CheckCircle,
+  XCircle,
   AlertTriangle,
   History,
-  Info
-} from "lucide-react";
+  Info,
+} from 'lucide-react';
 
 interface UpdateStatus {
   lastCheck: number;
@@ -49,10 +49,10 @@ export default function UpdateManagementPage() {
       const data = await response.json();
       if (data.success) {
         setStatus(data.data);
-        
+
         // Update installing state
         setIsInstalling(data.data.updateInProgress);
-        
+
         // Reload if update completed
         if (data.data.updateStatus === 'completed') {
           setTimeout(() => {
@@ -74,7 +74,7 @@ export default function UpdateManagementPage() {
         method: 'POST',
       });
       const data = await response.json();
-      
+
       if (data.success) {
         // Update will start, modal will show progress
         fetchUpdateStatus();
@@ -92,14 +92,14 @@ export default function UpdateManagementPage() {
     if (!confirm('هل أنت متأكد من أنك تريد التراجع عن التحديث؟ سيتم استعادة النسخة السابقة.')) {
       return;
     }
-    
+
     try {
       setIsRollingBack(true);
       const response = await fetch('/api/update/rollback', {
         method: 'POST',
       });
       const data = await response.json();
-      
+
       if (data.success) {
         fetchUpdateStatus();
       } else {
@@ -114,7 +114,7 @@ export default function UpdateManagementPage() {
 
   const getStatusBadge = () => {
     if (!status) return null;
-    
+
     if (status.updateInProgress) {
       return (
         <Badge variant="destructive" className="gap-2">
@@ -127,7 +127,7 @@ export default function UpdateManagementPage() {
         </Badge>
       );
     }
-    
+
     if (status.pendingUpdate) {
       if (status.pendingUpdate.mandatory) {
         return (
@@ -145,7 +145,7 @@ export default function UpdateManagementPage() {
         );
       }
     }
-    
+
     return (
       <Badge variant="default" className="gap-2 bg-green-600">
         <CheckCircle className="h-3 w-3" />
@@ -167,7 +167,9 @@ export default function UpdateManagementPage() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>حالة التحديث</CardTitle>
-                <CardDescription>آخر فحص: {status?.lastCheck ? formatDate(status.lastCheck) : 'غير معروف'}</CardDescription>
+                <CardDescription>
+                  آخر فحص: {status?.lastCheck ? formatDate(status.lastCheck) : 'غير معروف'}
+                </CardDescription>
               </div>
               <div className="flex items-center gap-2">
                 {getStatusBadge()}
@@ -235,18 +237,14 @@ export default function UpdateManagementPage() {
                   <Button
                     onClick={handleInstall}
                     disabled={isInstalling}
-                    className={status.pendingUpdate.mandatory ? "flex-1" : ""}
+                    className={status.pendingUpdate.mandatory ? 'flex-1' : ''}
                   >
                     <Download className="h-4 w-4 mr-2" />
                     {status.pendingUpdate.mandatory ? 'تثبيت التحديث الإجباري' : 'تثبيت التحديث'}
                   </Button>
 
                   {!status.pendingUpdate.mandatory && status.backupPath && (
-                    <Button
-                      variant="outline"
-                      onClick={handleRollback}
-                      disabled={isRollingBack}
-                    >
+                    <Button variant="outline" onClick={handleRollback} disabled={isRollingBack}>
                       <History className="h-4 w-4 mr-2" />
                       التراجع
                     </Button>
@@ -297,7 +295,8 @@ export default function UpdateManagementPage() {
                 التحديثات الاختيارية
               </h4>
               <p className="text-sm text-muted-foreground">
-                التحديثات الاختيارية يمكن تثبيتها في أي وقت. سيتم إنشاء نسخة احتياطية تلقائياً قبل التثبيت.
+                التحديثات الاختيارية يمكن تثبيتها في أي وقت. سيتم إنشاء نسخة احتياطية تلقائياً قبل
+                التثبيت.
               </p>
             </div>
 

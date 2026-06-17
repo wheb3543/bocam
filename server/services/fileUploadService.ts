@@ -34,7 +34,9 @@ export async function uploadPdfFile(buffer: Buffer, filename: string): Promise<s
     return publicUrl;
   } catch (error) {
     console.error('[File Upload] Error uploading file:', error);
-    throw new Error(`Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
@@ -51,6 +53,8 @@ export async function deletePdfFile(filename: string): Promise<void> {
     }
   } catch (error) {
     console.error('[File Upload] Error deleting file:', error);
-    throw new Error(`Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }

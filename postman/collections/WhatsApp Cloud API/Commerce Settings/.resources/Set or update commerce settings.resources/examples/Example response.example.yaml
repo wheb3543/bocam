@@ -3,8 +3,8 @@ request:
   url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/whatsapp_commerce_settings?is_cart_enabled=false&is_catalog_visible=false
   method: POST
   queryParams:
-    is_cart_enabled: "false"
-    is_catalog_visible: "false"
+    is_cart_enabled: 'false'
+    is_catalog_visible: 'false'
 response:
   statusCode: 200
   statusText: OK
@@ -13,8 +13,8 @@ response:
     Vary: Origin
     cross-origin-resource-policy: cross-origin
     x-app-usage: '{"call_count":0,"total_cputime":0,"total_time":0}'
-    x-fb-rlafr: "0"
-    Access-Control-Allow-Origin: "*"
+    x-fb-rlafr: '0'
+    Access-Control-Allow-Origin: '*'
     facebook-api-version: v16.0
     Strict-Transport-Security: max-age=15552000; preload
     Pragma: no-cache
@@ -22,12 +22,12 @@ response:
     Expires: Sat, 01 Jan 2000 00:00:00 GMT
     x-fb-request-id: AB0EvD-U5WkosUqnPBMwXhB
     x-fb-trace-id: A5pEgwxfemZ
-    x-fb-rev: "1007268877"
+    x-fb-rev: '1007268877'
     X-FB-Debug: 03bVIwTYJnh6qJe3sqWWNGapvvRoU/yKE+3nC45djcuaeV41y+6Z4SgWhK/SRB+WUUBEKWInR4hxFzHnKZ1+7Q==
     Date: Fri, 07 Apr 2023 20:01:14 GMT
     Alt-Svc: h3=":443"; ma=86400
     Connection: keep-alive
-    Content-Length: "16"
+    Content-Length: '16'
   body:
     type: json
     content: |-

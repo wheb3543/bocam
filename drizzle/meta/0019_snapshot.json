@@ -85,9 +85,7 @@
       "compositePrimaryKeys": {
         "accessRequests_id": {
           "name": "accessRequests_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -281,9 +279,7 @@
       "compositePrimaryKeys": {
         "appointments_id": {
           "name": "appointments_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -463,9 +459,7 @@
       "compositePrimaryKeys": {
         "campRegistrations_id": {
           "name": "campRegistrations_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -663,17 +657,13 @@
       "compositePrimaryKeys": {
         "campaigns_id": {
           "name": "campaigns_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "campaigns_slug_unique": {
           "name": "campaigns_slug_unique",
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "checkConstraint": {}
@@ -789,17 +779,13 @@
       "compositePrimaryKeys": {
         "camps_id": {
           "name": "camps_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "camps_slug_unique": {
           "name": "camps_slug_unique",
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "checkConstraint": {}
@@ -916,17 +902,13 @@
       "compositePrimaryKeys": {
         "doctors_id": {
           "name": "doctors_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "doctors_slug_unique": {
           "name": "doctors_slug_unique",
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "checkConstraint": {}
@@ -990,9 +972,7 @@
       "compositePrimaryKeys": {
         "leadStatusHistory_id": {
           "name": "leadStatusHistory_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1133,9 +1113,7 @@
       "compositePrimaryKeys": {
         "leads_id": {
           "name": "leads_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1280,9 +1258,7 @@
       "compositePrimaryKeys": {
         "offerLeads_id": {
           "name": "offerLeads_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1371,17 +1347,13 @@
       "compositePrimaryKeys": {
         "offers_id": {
           "name": "offers_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "offers_slug_unique": {
           "name": "offers_slug_unique",
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "checkConstraint": {}
@@ -1477,17 +1449,13 @@
       "compositePrimaryKeys": {
         "projects_id": {
           "name": "projects_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "projects_slug_unique": {
           "name": "projects_slug_unique",
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "checkConstraint": {}
@@ -1538,17 +1506,13 @@
       "compositePrimaryKeys": {
         "settings_id": {
           "name": "settings_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "settings_key_unique": {
           "name": "settings_key_unique",
-          "columns": [
-            "key"
-          ]
+          "columns": ["key"]
         }
       },
       "checkConstraint": {}
@@ -1627,9 +1591,7 @@
       "compositePrimaryKeys": {
         "task_attachments_id": {
           "name": "task_attachments_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1689,9 +1651,7 @@
       "compositePrimaryKeys": {
         "task_comments_id": {
           "name": "task_comments_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1778,9 +1738,7 @@
       "compositePrimaryKeys": {
         "taskDeliverables_id": {
           "name": "taskDeliverables_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1927,9 +1885,7 @@
       "compositePrimaryKeys": {
         "tasks_id": {
           "name": "tasks_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1981,9 +1937,7 @@
       "compositePrimaryKeys": {
         "teamMembers_id": {
           "name": "teamMembers_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -2058,17 +2012,13 @@
       "compositePrimaryKeys": {
         "teams_id": {
           "name": "teams_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "teams_slug_unique": {
           "name": "teams_slug_unique",
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "checkConstraint": {}
@@ -2171,17 +2121,13 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_username_unique": {
           "name": "users_username_unique",
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "checkConstraint": {}

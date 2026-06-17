@@ -2,10 +2,10 @@
 
 /**
  * Migration Script: Update WhatsApp Conversation Names
- * 
+ *
  * هذا السكريبت يقوم بتحديث أسماء المحادثات القديمة التي تحمل اسم "عميل جديد" أو null
  * بأسماء العملاء الصحيحة من ملفات العملاء (leads, appointments, offers, camps)
- * 
+ *
  * الاستخدام: node scripts/updateConversationNames.mjs
  */
 
@@ -18,18 +18,18 @@ dotenv.config();
 // Helper function to normalize phone numbers
 function normalizePhoneNumber(phone) {
   if (!phone) return '';
-  
+
   // Remove all non-digit characters
   let cleaned = phone.replace(/\D/g, '');
-  
+
   // Remove leading zeros
   cleaned = cleaned.replace(/^0+/, '');
-  
+
   // If it starts with 1 (US code), remove it
   if (cleaned.startsWith('1')) {
     cleaned = cleaned.substring(1);
   }
-  
+
   return cleaned;
 }
 
@@ -39,7 +39,7 @@ function parseDatabaseUrl() {
   if (!dbUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
-  
+
   try {
     const url = new URL(dbUrl);
     return {
@@ -85,7 +85,7 @@ async function getCustomerInfo(connection, normalizedPhone) {
       'SELECT id, fullName, phone, email, status, source, createdAt FROM leads WHERE phone LIKE ? LIMIT 1',
       [`%${normalizedPhone}%`]
     );
-    
+
     if (leads.length > 0) {
       const lead = leads[0];
       return {
@@ -105,7 +105,7 @@ async function getCustomerInfo(connection, normalizedPhone) {
       'SELECT id, fullName, phone, email, status, createdAt FROM appointments WHERE phone LIKE ? LIMIT 1',
       [`%${normalizedPhone}%`]
     );
-    
+
     if (appointments.length > 0) {
       const appointment = appointments[0];
       return {
@@ -124,7 +124,7 @@ async function getCustomerInfo(connection, normalizedPhone) {
       'SELECT id, fullName, phone, email, status, createdAt FROM offerLeads WHERE phone LIKE ? LIMIT 1',
       [`%${normalizedPhone}%`]
     );
-    
+
     if (offerLeads.length > 0) {
       const offer = offerLeads[0];
       return {
@@ -143,7 +143,7 @@ async function getCustomerInfo(connection, normalizedPhone) {
       'SELECT id, fullName, phone, email, status, createdAt FROM campRegistrations WHERE phone LIKE ? LIMIT 1',
       [`%${normalizedPhone}%`]
     );
-    
+
     if (campRegistrations.length > 0) {
       const camp = campRegistrations[0];
       return {
@@ -167,7 +167,7 @@ async function getCustomerInfo(connection, normalizedPhone) {
 // Main migration function
 async function migrateConversationNames() {
   const connection = await getConnection();
-  
+
   try {
     console.log('🔄 جاري بدء تحديث أسماء المحادثات...\n');
 
@@ -188,9 +188,11 @@ async function migrateConversationNames() {
     for (const conversation of conversations) {
       try {
         const normalizedPhone = normalizePhoneNumber(conversation.phoneNumber);
-        
+
         if (!normalizedPhone) {
-          console.log(`⚠️  محادثة #${conversation.id}: رقم هاتف غير صحيح - ${conversation.phoneNumber}`);
+          console.log(
+            `⚠️  محادثة #${conversation.id}: رقم هاتف غير صحيح - ${conversation.phoneNumber}`
+          );
           errors++;
           continue;
         }
@@ -203,11 +205,15 @@ async function migrateConversationNames() {
             'UPDATE whatsapp_conversations SET customerName = ?, updatedAt = NOW() WHERE id = ?',
             [customerInfo.name, conversation.id]
           );
-          
-          console.log(`✅ محادثة #${conversation.id}: تم التحديث من "${conversation.customerName || 'null'}" إلى "${customerInfo.name}" (${customerInfo.type})`);
+
+          console.log(
+            `✅ محادثة #${conversation.id}: تم التحديث من "${conversation.customerName || 'null'}" إلى "${customerInfo.name}" (${customerInfo.type})`
+          );
           updated++;
         } else {
-          console.log(`⚠️  محادثة #${conversation.id}: لم يتم العثور على عميل برقم ${conversation.phoneNumber}`);
+          console.log(
+            `⚠️  محادثة #${conversation.id}: لم يتم العثور على عميل برقم ${conversation.phoneNumber}`
+          );
           notFound++;
         }
       } catch (error) {
@@ -230,7 +236,6 @@ async function migrateConversationNames() {
     } else {
       console.log('⚠️  لم يتم تحديث أي محادثات');
     }
-
   } catch (error) {
     console.error('❌ خطأ في تنفيذ السكريبت:', error.message);
     process.exit(1);
@@ -240,7 +245,7 @@ async function migrateConversationNames() {
 }
 
 // Run the migration
-migrateConversationNames().catch(error => {
+migrateConversationNames().catch((error) => {
   console.error('❌ خطأ غير متوقع:', error);
   process.exit(1);
 });

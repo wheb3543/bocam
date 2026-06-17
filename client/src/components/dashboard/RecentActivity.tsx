@@ -1,10 +1,10 @@
-import { useMemo } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Activity, Users, Calendar, TrendingUp, UserCheck, Clock } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { ar } from "date-fns/locale";
+import { useMemo } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Activity, Users, Calendar, TrendingUp, UserCheck, Clock } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 export default function RecentActivity() {
   const { data: leads } = trpc.leads.unifiedList.useQuery();
@@ -19,10 +19,38 @@ export default function RecentActivity() {
   // Combine and sort all activities
   const recentActivities = useMemo(() => {
     const allActivities = [
-      ...(leads || []).map(l => ({ ...l, type: 'lead', icon: Users, color: 'text-blue-500', bgColor: 'bg-blue-100', label: 'تسجيل عميل' })),
-      ...(appointments || []).map(a => ({ ...a, type: 'appointment', icon: Calendar, color: 'text-green-500', bgColor: 'bg-green-100', label: 'موعد طبيب' })),
-      ...(offerLeads || []).map(o => ({ ...o, type: 'offerLead', icon: TrendingUp, color: 'text-purple-500', bgColor: 'bg-purple-100', label: 'حجز عرض' })),
-      ...(campRegistrations || []).map(c => ({ ...c, type: 'campRegistration', icon: UserCheck, color: 'text-teal-500', bgColor: 'bg-teal-100', label: 'تسجيل مخيم' })),
+      ...(leads || []).map((l) => ({
+        ...l,
+        type: 'lead',
+        icon: Users,
+        color: 'text-blue-500',
+        bgColor: 'bg-blue-100',
+        label: 'تسجيل عميل',
+      })),
+      ...(appointments || []).map((a) => ({
+        ...a,
+        type: 'appointment',
+        icon: Calendar,
+        color: 'text-green-500',
+        bgColor: 'bg-green-100',
+        label: 'موعد طبيب',
+      })),
+      ...(offerLeads || []).map((o) => ({
+        ...o,
+        type: 'offerLead',
+        icon: TrendingUp,
+        color: 'text-purple-500',
+        bgColor: 'bg-purple-100',
+        label: 'حجز عرض',
+      })),
+      ...(campRegistrations || []).map((c) => ({
+        ...c,
+        type: 'campRegistration',
+        icon: UserCheck,
+        color: 'text-teal-500',
+        bgColor: 'bg-teal-100',
+        label: 'تسجيل مخيم',
+      })),
     ];
 
     return allActivities
@@ -39,7 +67,10 @@ export default function RecentActivity() {
   };
 
   const getStatusBadge = (activity: any) => {
-    const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    const statusMap: Record<
+      string,
+      { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+    > = {
       new: { label: 'جديد', variant: 'default' },
       pending: { label: 'قيد الانتظار', variant: 'default' },
       contacted: { label: 'تم التواصل', variant: 'secondary' },
@@ -52,8 +83,15 @@ export default function RecentActivity() {
       no_answer: { label: 'لم يرد', variant: 'outline' },
     };
 
-    const status = statusMap[activity.status] || { label: activity.status, variant: 'outline' as const };
-    return <Badge variant={status.variant} className="text-xs">{status.label}</Badge>;
+    const status = statusMap[activity.status] || {
+      label: activity.status,
+      variant: 'outline' as const,
+    };
+    return (
+      <Badge variant={status.variant} className="text-xs">
+        {status.label}
+      </Badge>
+    );
   };
 
   return (
@@ -76,11 +114,13 @@ export default function RecentActivity() {
             {recentActivities.map((activity: any, index: number) => {
               const Icon = activity.icon;
               return (
-                <div 
+                <div
                   key={`${activity.type}-${activity.id}`}
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border"
                 >
-                  <div className={`mt-1 w-10 h-10 ${activity.bgColor} rounded-full flex items-center justify-center flex-shrink-0`}>
+                  <div
+                    className={`mt-1 w-10 h-10 ${activity.bgColor} rounded-full flex items-center justify-center flex-shrink-0`}
+                  >
                     <Icon className={`h-5 w-5 ${activity.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">

@@ -1,6 +1,6 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import UnderDevelopmentPage from "@/components/UnderDevelopmentPage";
-import { Send } from "lucide-react";
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
+import { Send } from 'lucide-react';
 
 export default function PublishingPage() {
   return (
@@ -11,12 +11,12 @@ export default function PublishingPage() {
         icon={Send}
         currentPath="/admin/content/publishing"
         features={[
-          "نشر المحتوى على المنصات الاجتماعية",
-          "جدولة المنشورات",
-          "إدارة الحملات التسويقية",
-          "تتبع أداء المنشورات",
-          "إدارة قوالب النشر",
-          "تحليلات التفاعل",
+          'نشر المحتوى على المنصات الاجتماعية',
+          'جدولة المنشورات',
+          'إدارة الحملات التسويقية',
+          'تتبع أداء المنشورات',
+          'إدارة قوالب النشر',
+          'تحليلات التفاعل',
         ]}
       />
     </DashboardLayout>

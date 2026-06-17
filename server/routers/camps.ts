@@ -1,7 +1,7 @@
 /**
  * Camps Router
  * جهاز التوجيه الخاص بالمخيمات الطبية
- * 
+ *
  * Handles all tRPC procedures related to medical camps management
  * يتعامل مع جميع إجراءات tRPC المتعلقة بإدارة المخيمات الطبية
  */
@@ -20,7 +20,7 @@ import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
  * مخطط التحقق من صحة البيانات لإنشاء/تحديث المخيمات
  */
 const campInputSchema = z.object({
-  name: z.string().min(1, "اسم المخيم مطلوب"),
+  name: z.string().min(1, 'اسم المخيم مطلوب'),
   slug: z.string().optional(),
   description: z.string().optional(),
   imageUrl: z.string().url().optional().or(z.literal('')), // Allow empty string
@@ -43,22 +43,18 @@ export const campsRouter = router({
    * الحصول على جميع المخيمات (عام)
    */
   getAll: publicProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      "camps:active",
-      CacheTTL.LONG,
-      async () => {
-        const db = await getDb();
-        if (!db) return [];
-        
-        const result = await db
-          .select()
-          .from(camps)
-          .where(eq(camps.isActive, true))
-          .orderBy(desc(camps.createdAt));
-        
-        return result;
-      }
-    );
+    return serverCache.getOrCompute('camps:active', CacheTTL.LONG, async () => {
+      const db = await getDb();
+      if (!db) return [];
+
+      const result = await db
+        .select()
+        .from(camps)
+        .where(eq(camps.isActive, true))
+        .orderBy(desc(camps.createdAt));
+
+      return result;
+    });
   }),
 
   /**
@@ -66,63 +62,45 @@ export const campsRouter = router({
    * الحصول على جميع المخيمات للإدارة (يشمل غير النشطة)
    */
   getAllAdmin: publicProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      CacheKeys.campsList(),
-      CacheTTL.LONG,
-      async () => {
-        const db = await getDb();
-        if (!db) return [];
-        
-        const result = await db
-          .select()
-          .from(camps)
-          .orderBy(desc(camps.createdAt));
-        
-        return result;
-      }
-    );
+    return serverCache.getOrCompute(CacheKeys.campsList(), CacheTTL.LONG, async () => {
+      const db = await getDb();
+      if (!db) return [];
+
+      const result = await db.select().from(camps).orderBy(desc(camps.createdAt));
+
+      return result;
+    });
   }),
 
   /**
    * Get camp by ID
    * الحصول على مخيم بواسطة المعرف
    */
-  getById: publicProcedure
-    .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) return null;
-      
-      const result = await db
-        .select()
-        .from(camps)
-        .where(eq(camps.id, input.id))
-        .limit(1);
-      
-      return result[0] || null;
-    }),
+  getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+    const db = await getDb();
+    if (!db) return null;
+
+    const result = await db.select().from(camps).where(eq(camps.id, input.id)).limit(1);
+
+    return result[0] || null;
+  }),
 
   /**
    * Get camp by slug
    * الحصول على مخيم بواسطة الرابط
    */
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) return null;
-      
-      const result = await db
-        .select()
-        .from(camps)
-        .where(and(
-          eq(camps.slug, input.slug),
-          eq(camps.isActive, true)
-        ))
-        .limit(1);
-      
-      return result[0] || null;
-    }),
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
+    const db = await getDb();
+    if (!db) return null;
+
+    const result = await db
+      .select()
+      .from(camps)
+      .where(and(eq(camps.slug, input.slug), eq(camps.isActive, true)))
+      .limit(1);
+
+    return result[0] || null;
+  }),
 
   /**
    * Get available dates for a camp with remaining capacity per day/slot
@@ -135,7 +113,11 @@ export const campsRouter = router({
       if (!db) return { dates: [], morningTime: null, eveningTime: null, dailyCapacity: null };
 
       // Get camp info
-      const [camp] = await db.select().from(camps).where(and(eq(camps.slug, input.slug), eq(camps.isActive, true))).limit(1);
+      const [camp] = await db
+        .select()
+        .from(camps)
+        .where(and(eq(camps.slug, input.slug), eq(camps.isActive, true)))
+        .limit(1);
       if (!camp || !camp.startDate || !camp.endDate) {
         return { dates: [], morningTime: null, eveningTime: null, dailyCapacity: null };
       }
@@ -162,7 +144,7 @@ export const campsRouter = router({
       if (!dailyCapacity || allDays.length === 0) {
         // No capacity limit - all days available
         return {
-          dates: allDays.map(date => ({
+          dates: allDays.map((date) => ({
             date,
             morningAvailable: !!morningTime,
             eveningAvailable: !!eveningTime,
@@ -198,25 +180,30 @@ export const campsRouter = router({
       // Build a map: date -> { morning: count, evening: count }
       const countMap: Record<string, { morning: number; evening: number }> = {};
       for (const row of confirmedRegs) {
-        const dateKey = row.preferredDate ? new Date(row.preferredDate).toISOString().split('T')[0] : null;
+        const dateKey = row.preferredDate
+          ? new Date(row.preferredDate).toISOString().split('T')[0]
+          : null;
         if (!dateKey) continue;
         if (!countMap[dateKey]) countMap[dateKey] = { morning: 0, evening: 0 };
         if (row.preferredTimeSlot === 'morning') countMap[dateKey].morning += Number(row.count);
-        else if (row.preferredTimeSlot === 'evening') countMap[dateKey].evening += Number(row.count);
+        else if (row.preferredTimeSlot === 'evening')
+          countMap[dateKey].evening += Number(row.count);
       }
 
-      const dates = allDays.map(date => {
-        const counts = countMap[date] || { morning: 0, evening: 0 };
-        const morningRemaining = morningTime ? Math.max(0, dailyCapacity - counts.morning) : null;
-        const eveningRemaining = eveningTime ? Math.max(0, dailyCapacity - counts.evening) : null;
-        return {
-          date,
-          morningAvailable: morningTime ? morningRemaining! > 0 : false,
-          eveningAvailable: eveningTime ? eveningRemaining! > 0 : false,
-          morningRemaining,
-          eveningRemaining,
-        };
-      }).filter(d => d.morningAvailable || d.eveningAvailable || (!morningTime && !eveningTime));
+      const dates = allDays
+        .map((date) => {
+          const counts = countMap[date] || { morning: 0, evening: 0 };
+          const morningRemaining = morningTime ? Math.max(0, dailyCapacity - counts.morning) : null;
+          const eveningRemaining = eveningTime ? Math.max(0, dailyCapacity - counts.evening) : null;
+          return {
+            date,
+            morningAvailable: morningTime ? morningRemaining! > 0 : false,
+            eveningAvailable: eveningTime ? eveningRemaining! > 0 : false,
+            morningRemaining,
+            eveningRemaining,
+          };
+        })
+        .filter((d) => d.morningAvailable || d.eveningAvailable || (!morningTime && !eveningTime));
 
       return { dates, morningTime, eveningTime, dailyCapacity };
     }),
@@ -230,33 +217,34 @@ export const campsRouter = router({
     .input(campInputSchema)
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+
       // Generate slug if not provided (normalize to lowercase)
-      let slug = (input.slug && input.slug.trim())
-        ? input.slug.trim().toLowerCase().replace(/\s+/g, '-')
-        : generateSlug(input.name);
-      
+      let slug =
+        input.slug && input.slug.trim()
+          ? input.slug.trim().toLowerCase().replace(/\s+/g, '-')
+          : generateSlug(input.name);
+
       // Clean up slug if invalid
       if (!isValidSlug(slug)) {
-        const cleaned = slug.replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        const cleaned = slug
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
         slug = cleaned.length > 0 ? cleaned : generateSlug(input.name);
       }
-      
+
       // Check for duplicate slug, add suffix if needed
-      const existing = await db
-        .select()
-        .from(camps)
-        .where(eq(camps.slug, slug))
-        .limit(1);
-      
+      const existing = await db.select().from(camps).where(eq(camps.slug, slug)).limit(1);
+
       if (existing.length > 0) {
         slug = `${slug}-${Date.now()}`;
       }
 
       // Normalize imageUrl: treat empty string as undefined
       const imageUrl = input.imageUrl && input.imageUrl.trim() !== '' ? input.imageUrl : undefined;
-      
+
       await db.insert(camps).values({
         name: input.name,
         slug,
@@ -273,10 +261,10 @@ export const campsRouter = router({
         eveningTime: input.eveningTime,
         dailyCapacity: input.dailyCapacity,
       } as any);
-      
+
       // Invalidate camps cache
       serverCache.invalidate(CacheKeys.campsList());
-      serverCache.invalidate("camps:active");
+      serverCache.invalidate('camps:active');
 
       return { success: true, slug };
     }),
@@ -287,14 +275,17 @@ export const campsRouter = router({
    */
   update: protectedProcedure
     .use(requireCampsFeature())
-    .input(z.object({
-      id: z.number(),
-      ...campInputSchema.shape,
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+        ...campInputSchema.shape,
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+
       const { id, ...data } = input;
 
       // Use provided slug (convert to lowercase) or keep existing from DB
@@ -311,27 +302,26 @@ export const campsRouter = router({
       // Only validate if slug doesn't look valid (allow existing slugs)
       if (slug && !isValidSlug(slug)) {
         // Try to clean it up instead of replacing entirely
-        const cleaned = slug.replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        const cleaned = slug
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
         if (cleaned.length > 0) {
           slug = cleaned;
         }
         // If still invalid, keep the original (don't overwrite with broken value)
       }
-      
+
       // Check for duplicate slug (exclude current camp)
-      const existing = await db
-        .select()
-        .from(camps)
-        .where(eq(camps.slug, slug))
-        .limit(1);
-      
+      const existing = await db.select().from(camps).where(eq(camps.slug, slug)).limit(1);
+
       if (existing.length > 0 && existing[0].id !== id) {
-        throw new TRPCError({ code: "CONFLICT", message: "هذا الرابط مستخدم بالفعل" });
+        throw new TRPCError({ code: 'CONFLICT', message: 'هذا الرابط مستخدم بالفعل' });
       }
 
       // Normalize imageUrl: treat empty string as undefined
       const imageUrl = data.imageUrl && data.imageUrl.trim() !== '' ? data.imageUrl : undefined;
-      
+
       await db
         .update(camps)
         .set({
@@ -351,10 +341,10 @@ export const campsRouter = router({
           dailyCapacity: data.dailyCapacity,
         } as any)
         .where(eq(camps.id, id));
-      
+
       // Invalidate camps cache
       serverCache.invalidate(CacheKeys.campsList());
-      serverCache.invalidate("camps:active");
+      serverCache.invalidate('camps:active');
 
       return { success: true };
     }),
@@ -367,13 +357,14 @@ export const campsRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+
       await db.delete(camps).where(eq(camps.id, input.id));
-      
+
       // Invalidate camps cache
       serverCache.invalidate(CacheKeys.campsList());
-      serverCache.invalidate("camps:active");
+      serverCache.invalidate('camps:active');
 
       return { success: true };
     }),
@@ -387,28 +378,22 @@ export const campsRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+
       // Get current status
-      const current = await db
-        .select()
-        .from(camps)
-        .where(eq(camps.id, input.id))
-        .limit(1);
-      
+      const current = await db.select().from(camps).where(eq(camps.id, input.id)).limit(1);
+
       if (current.length === 0) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "المخيم غير موجود" });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'المخيم غير موجود' });
       }
-      
+
       // Toggle status
-      await db
-        .update(camps)
-        .set({ isActive: !current[0].isActive })
-        .where(eq(camps.id, input.id));
-      
+      await db.update(camps).set({ isActive: !current[0].isActive }).where(eq(camps.id, input.id));
+
       // Invalidate camps cache
       serverCache.invalidate(CacheKeys.campsList());
-      serverCache.invalidate("camps:active");
+      serverCache.invalidate('camps:active');
 
       return { success: true, isActive: !current[0].isActive };
     }),

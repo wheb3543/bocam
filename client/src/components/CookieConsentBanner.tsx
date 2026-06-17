@@ -1,30 +1,30 @@
 /**
  * Cookie Consent Banner - شريط موافقة ملفات تعريف الارتباط
- * 
+ *
  * Compliant with:
  * - Meta/WhatsApp Business API requirements
  * - GDPR principles
  * - SGH Group privacy standards
- * 
+ *
  * Cookie categories:
  * - Essential: Always enabled (session, security)
  * - Analytical: Traffic measurement and site improvement
  * - Marketing: Ads, Meta Pixel, retargeting
  */
 
-import { useState, useEffect } from "react";
-import { Shield, ChevronDown, ChevronUp, X, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { useState, useEffect } from 'react';
+import { Shield, ChevronDown, ChevronUp, X, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'wouter';
 
 export interface CookiePreferences {
-  essential: boolean;   // Always true
-  analytical: boolean;  // Google Analytics, etc.
-  marketing: boolean;   // Meta Pixel, WhatsApp tracking
+  essential: boolean; // Always true
+  analytical: boolean; // Google Analytics, etc.
+  marketing: boolean; // Meta Pixel, WhatsApp tracking
 }
 
-const COOKIE_CONSENT_KEY = "sgh_cookie_consent";
-const COOKIE_PREFS_KEY = "sgh_cookie_preferences";
+const COOKIE_CONSENT_KEY = 'sgh_cookie_consent';
+const COOKIE_PREFS_KEY = 'sgh_cookie_preferences';
 
 export function getCookiePreferences(): CookiePreferences {
   try {
@@ -37,14 +37,14 @@ export function getCookiePreferences(): CookiePreferences {
 }
 
 export function hasConsentBeenGiven(): boolean {
-  return localStorage.getItem(COOKIE_CONSENT_KEY) === "true";
+  return localStorage.getItem(COOKIE_CONSENT_KEY) === 'true';
 }
 
 export function saveCookiePreferences(prefs: CookiePreferences): void {
   localStorage.setItem(COOKIE_PREFS_KEY, JSON.stringify({ ...prefs, essential: true }));
-  localStorage.setItem(COOKIE_CONSENT_KEY, "true");
+  localStorage.setItem(COOKIE_CONSENT_KEY, 'true');
   // Dispatch event so other components can react
-  window.dispatchEvent(new CustomEvent("cookieConsentUpdated", { detail: prefs }));
+  window.dispatchEvent(new CustomEvent('cookieConsentUpdated', { detail: prefs }));
 }
 
 export default function CookieConsentBanner() {
@@ -78,7 +78,11 @@ export default function CookieConsentBanner() {
   };
 
   const handleRejectAll = () => {
-    const minimalPrefs: CookiePreferences = { essential: true, analytical: false, marketing: false };
+    const minimalPrefs: CookiePreferences = {
+      essential: true,
+      analytical: false,
+      marketing: false,
+    };
     saveCookiePreferences(minimalPrefs);
     setVisible(false);
   };
@@ -111,9 +115,12 @@ export default function CookieConsentBanner() {
         {/* Body */}
         <div className="px-4 sm:px-5 py-3 sm:py-4">
           <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-            نستخدم ملفات تعريف الارتباط لتحسين تجربتك وقياس أداء خدماتنا. اختر ما تسمح به، أو اقبل الكل للحصول على أفضل تجربة.{" "}
+            نستخدم ملفات تعريف الارتباط لتحسين تجربتك وقياس أداء خدماتنا. اختر ما تسمح به، أو اقبل
+            الكل للحصول على أفضل تجربة.{' '}
             <Link href="/privacy-policy">
-              <span className="text-green-700 underline cursor-pointer hover:text-green-800">سياسة الخصوصية</span>
+              <span className="text-green-700 underline cursor-pointer hover:text-green-800">
+                سياسة الخصوصية
+              </span>
             </Link>
           </p>
 
@@ -122,8 +129,12 @@ export default function CookieConsentBanner() {
             onClick={() => setExpanded(!expanded)}
             className="flex items-center gap-1 text-xs text-green-700 mt-2 hover:text-green-800 transition-colors"
           >
-            {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            <span>{expanded ? "إخفاء التفاصيل" : "إدارة التفضيلات"}</span>
+            {expanded ? (
+              <ChevronUp className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5" />
+            )}
+            <span>{expanded ? 'إخفاء التفاصيل' : 'إدارة التفضيلات'}</span>
           </button>
 
           {/* Detailed settings */}
@@ -133,7 +144,9 @@ export default function CookieConsentBanner() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <p className="text-xs font-semibold text-gray-800">الأساسية (مطلوبة دائماً)</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">تشغيل الموقع، الجلسات، الأمان. لا يمكن تعطيلها.</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    تشغيل الموقع، الجلسات، الأمان. لا يمكن تعطيلها.
+                  </p>
                 </div>
                 <div className="flex items-center justify-center w-10 h-5 bg-green-600 rounded-full shrink-0 mt-0.5">
                   <Check className="w-3 h-3 text-white" />
@@ -144,19 +157,21 @@ export default function CookieConsentBanner() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <p className="text-xs font-semibold text-gray-800">التحليلية</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">قياس حركة المرور وتحسين الموقع (Google Analytics).</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    قياس حركة المرور وتحسين الموقع (Google Analytics).
+                  </p>
                 </div>
                 <button
-                  onClick={() => setPrefs(p => ({ ...p, analytical: !p.analytical }))}
+                  onClick={() => setPrefs((p) => ({ ...p, analytical: !p.analytical }))}
                   className={`relative w-10 h-5 rounded-full transition-colors shrink-0 mt-0.5 ${
-                    prefs.analytical ? "bg-green-500" : "bg-gray-300"
+                    prefs.analytical ? 'bg-green-500' : 'bg-gray-300'
                   }`}
                   role="switch"
                   aria-checked={prefs.analytical}
                 >
                   <span
                     className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${
-                      prefs.analytical ? "right-0.5" : "left-0.5"
+                      prefs.analytical ? 'right-0.5' : 'left-0.5'
                     }`}
                   />
                 </button>
@@ -166,19 +181,21 @@ export default function CookieConsentBanner() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <p className="text-xs font-semibold text-gray-800">التسويقية</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">الإعلانات وإعادة الاستهداف (Meta Pixel، واتساب).</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    الإعلانات وإعادة الاستهداف (Meta Pixel، واتساب).
+                  </p>
                 </div>
                 <button
-                  onClick={() => setPrefs(p => ({ ...p, marketing: !p.marketing }))}
+                  onClick={() => setPrefs((p) => ({ ...p, marketing: !p.marketing }))}
                   className={`relative w-10 h-5 rounded-full transition-colors shrink-0 mt-0.5 ${
-                    prefs.marketing ? "bg-green-500" : "bg-gray-300"
+                    prefs.marketing ? 'bg-green-500' : 'bg-gray-300'
                   }`}
                   role="switch"
                   aria-checked={prefs.marketing}
                 >
                   <span
                     className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${
-                      prefs.marketing ? "right-0.5" : "left-0.5"
+                      prefs.marketing ? 'right-0.5' : 'left-0.5'
                     }`}
                   />
                 </button>

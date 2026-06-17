@@ -23,7 +23,7 @@ description: |-
   |**`video`** | **Required when `type` is set to `video`**.<br/> A [media object](#77f64012-481d-45d8-855f-e1620c6b2a5e) containing a video.  |
   |**`template`** | **Required when type is set to `template`**.<br/> A [template object](#fb5ad9b7-7991-443a-a1b5-97fdc5731673).  |
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 1000

@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { AlertTriangle, Download, RefreshCw, CheckCircle } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Download, RefreshCw, CheckCircle } from 'lucide-react';
 
 interface UpdateStatus {
   lastCheck: number;
@@ -48,12 +48,12 @@ export function MandatoryUpdateModal({ open, onOpenChange }: MandatoryUpdateModa
       const data = await response.json();
       if (data.success) {
         setStatus(data.data);
-        
+
         // If update is in progress, show progress
         if (data.data.updateInProgress) {
           setIsInstalling(true);
         }
-        
+
         // If update is completed, reload
         if (data.data.updateStatus === 'completed') {
           setTimeout(() => {
@@ -73,7 +73,7 @@ export function MandatoryUpdateModal({ open, onOpenChange }: MandatoryUpdateModa
         method: 'POST',
       });
       const data = await response.json();
-      
+
       if (data.success) {
         // Update will start, modal will show progress
         fetchUpdateStatus();
@@ -128,9 +128,7 @@ export function MandatoryUpdateModal({ open, onOpenChange }: MandatoryUpdateModa
           <div className="flex flex-col items-center gap-4">
             {getIcon()}
             <DialogTitle className="text-2xl">{getTitle()}</DialogTitle>
-            <DialogDescription className="text-center">
-              {getDescription()}
-            </DialogDescription>
+            <DialogDescription className="text-center">{getDescription()}</DialogDescription>
           </div>
         </DialogHeader>
 

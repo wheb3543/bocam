@@ -61,12 +61,48 @@ async function seedDatabase() {
     // 3. Create Campaigns
     console.log('📢 إنشاء الحملات التسويقية...');
     const campaigns = [
-      ['حملة شهر رمضان', 'ramadan-campaign', 'حملة خاصة بشهر رمضان المبارك', 'digital', 'active', 50000, 45000, 'YER'],
-      ['حملة العناية بالبشرة', 'skincare-campaign', 'عروض خاصة للعناية بالبشرة', 'digital', 'active', 30000, 25000, 'YER'],
-      ['حملة الأسنان', 'dental-campaign', 'عروض زراعة وتجميل الأسنان', 'field', 'active', 40000, 35000, 'YER'],
+      [
+        'حملة شهر رمضان',
+        'ramadan-campaign',
+        'حملة خاصة بشهر رمضان المبارك',
+        'digital',
+        'active',
+        50000,
+        45000,
+        'YER',
+      ],
+      [
+        'حملة العناية بالبشرة',
+        'skincare-campaign',
+        'عروض خاصة للعناية بالبشرة',
+        'digital',
+        'active',
+        30000,
+        25000,
+        'YER',
+      ],
+      [
+        'حملة الأسنان',
+        'dental-campaign',
+        'عروض زراعة وتجميل الأسنان',
+        'field',
+        'active',
+        40000,
+        35000,
+        'YER',
+      ],
     ];
 
-    for (const [name, slug, description, type, status, plannedBudget, actualBudget, currency] of campaigns) {
+    for (const [
+      name,
+      slug,
+      description,
+      type,
+      status,
+      plannedBudget,
+      actualBudget,
+      currency,
+    ] of campaigns) {
       await connection.execute(
         `INSERT INTO campaigns (name, slug, description, type, status, plannedBudget, actualBudget, currency, startDate, endDate, isActive) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), true) 
@@ -78,13 +114,58 @@ async function seedDatabase() {
     // 4. Create Doctors
     console.log('👨‍⚕️ إنشاء الأطباء...');
     const doctors = [
-      ['د. أحمد العلي', 'dr-ahmed-alali', 'جراحة عامة', '10 سنوات', 'العربية, الإنجليزية', '5000', 'yes', 'yes'],
-      ['د. سارة المحمدي', 'dr-sara-almahmadi', 'جلدية وتجميل', '8 سنوات', 'العربية, الإنجليزية', '6000', 'yes', 'yes'],
-      ['د. خالد الصالحي', 'dr-khaled-alsalihi', 'أسنان', '12 سنة', 'العربية, الإنجليزية', '4000', 'yes', 'yes'],
-      ['د. فاطمة القحطاني', 'dr-fatima-alqahtani', 'عيون', '6 سنوات', 'العربية, الإنجليزية', '5500', 'yes', 'yes'],
+      [
+        'د. أحمد العلي',
+        'dr-ahmed-alali',
+        'جراحة عامة',
+        '10 سنوات',
+        'العربية, الإنجليزية',
+        '5000',
+        'yes',
+        'yes',
+      ],
+      [
+        'د. سارة المحمدي',
+        'dr-sara-almahmadi',
+        'جلدية وتجميل',
+        '8 سنوات',
+        'العربية, الإنجليزية',
+        '6000',
+        'yes',
+        'yes',
+      ],
+      [
+        'د. خالد الصالحي',
+        'dr-khaled-alsalihi',
+        'أسنان',
+        '12 سنة',
+        'العربية, الإنجليزية',
+        '4000',
+        'yes',
+        'yes',
+      ],
+      [
+        'د. فاطمة القحطاني',
+        'dr-fatima-alqahtani',
+        'عيون',
+        '6 سنوات',
+        'العربية, الإنجليزية',
+        '5500',
+        'yes',
+        'yes',
+      ],
     ];
 
-    for (const [name, slug, specialty, experience, languages, consultationFee, isVisiting, available] of doctors) {
+    for (const [
+      name,
+      slug,
+      specialty,
+      experience,
+      languages,
+      consultationFee,
+      isVisiting,
+      available,
+    ] of doctors) {
       await connection.execute(
         `INSERT INTO doctors (name, slug, specialty, experience, languages, consultationFee, isVisiting, available) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
@@ -131,17 +212,90 @@ async function seedDatabase() {
     // 7. Create Appointments
     console.log('📅 إنشاء المواعيد...');
     const appointments = [
-      [1, 1, 'محمد أحمد', '777123456', 'mohammed@email.com', 30, 'male', 'جراحة عامة', '2025-06-01', '10:00', 'confirmed'],
-      [2, 2, 'فاطمة محمد', '777345678', 'fatima@email.com', 28, 'female', 'تجميل البشرة', '2025-06-02', '14:00', 'pending'],
-      [3, 3, 'سارة علي', '777456789', 'sara@email.com', 25, 'female', 'زراعة أسنان', '2025-06-03', '09:00', 'contacted'],
-      [1, 4, 'علي حسن', '777234567', 'ali@email.com', 35, 'male', 'جراحة عامة', '2025-06-04', '11:00', 'attended'],
+      [
+        1,
+        1,
+        'محمد أحمد',
+        '777123456',
+        'mohammed@email.com',
+        30,
+        'male',
+        'جراحة عامة',
+        '2025-06-01',
+        '10:00',
+        'confirmed',
+      ],
+      [
+        2,
+        2,
+        'فاطمة محمد',
+        '777345678',
+        'fatima@email.com',
+        28,
+        'female',
+        'تجميل البشرة',
+        '2025-06-02',
+        '14:00',
+        'pending',
+      ],
+      [
+        3,
+        3,
+        'سارة علي',
+        '777456789',
+        'sara@email.com',
+        25,
+        'female',
+        'زراعة أسنان',
+        '2025-06-03',
+        '09:00',
+        'contacted',
+      ],
+      [
+        1,
+        4,
+        'علي حسن',
+        '777234567',
+        'ali@email.com',
+        35,
+        'male',
+        'جراحة عامة',
+        '2025-06-04',
+        '11:00',
+        'attended',
+      ],
     ];
 
-    for (const [campaignId, doctorId, fullName, phone, email, age, gender, procedure, preferredDate, preferredTime, status] of appointments) {
+    for (const [
+      campaignId,
+      doctorId,
+      fullName,
+      phone,
+      email,
+      age,
+      gender,
+      procedure,
+      preferredDate,
+      preferredTime,
+      status,
+    ] of appointments) {
       await connection.execute(
         `INSERT INTO appointments (campaignId, doctorId, fullName, phone, email, age, gender, \`procedure\`, preferredDate, preferredTime, status, source) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [campaignId, doctorId, fullName, phone, email, age, gender, procedure, preferredDate, preferredTime, status, 'web']
+        [
+          campaignId,
+          doctorId,
+          fullName,
+          phone,
+          email,
+          age,
+          gender,
+          procedure,
+          preferredDate,
+          preferredTime,
+          status,
+          'web',
+        ]
       );
     }
 
@@ -173,7 +327,6 @@ async function seedDatabase() {
     console.log('  - sara / password123');
     console.log('  - khalid / password123');
     console.log('  - fatima / password123');
-
   } catch (error) {
     console.error('❌ خطأ:', error.message);
     throw error;

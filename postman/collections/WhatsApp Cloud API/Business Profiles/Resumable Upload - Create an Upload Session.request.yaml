@@ -21,12 +21,12 @@ headers:
 queryParams:
   - key: file_length
     value: <YOUR_FILE_LENGTH>
-    description: "**Required**<br/>Specifies the size of your file in bytes."
+    description: '**Required**<br/>Specifies the size of your file in bytes.'
   - key: file_type
     value: image/jpeg
-    description: "**Required**<br/>Specifies the MIME type. Values are <ul><li>`image/jpeg`</li><li>`image/png`</li><li>`video/mp4`</li></ul>"
+    description: '**Required**<br/>Specifies the MIME type. Values are <ul><li>`image/jpeg`</li><li>`image/png`</li><li>`video/mp4`</li></ul>'
   - key: file_name
     value: myprofile.jpg
-    description: "**Optional**<br/>Specifies the file name you are using to create the session."
+    description: '**Optional**<br/>Specifies the file name you are using to create the session.'
 examples: ./.resources/Resumable Upload - Create an Upload Session.resources/examples
 order: 1000

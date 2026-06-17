@@ -1,10 +1,20 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { CheckCircle2, Phone, Home, Calendar, User, Mail, Stethoscope, Gift, Tent } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Link, useLocation } from "wouter";
-import { useEffect, useState } from "react";
-import { getCompanySlogan, COMPANY_ARABIC_NAME } from "@/const";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import {
+  CheckCircle2,
+  Phone,
+  Home,
+  Calendar,
+  User,
+  Mail,
+  Stethoscope,
+  Gift,
+  Tent,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Link, useLocation } from 'wouter';
+import { useEffect, useState } from 'react';
+import { getCompanySlogan, COMPANY_ARABIC_NAME } from '@/const';
 
 export default function ThankYou() {
   const { formatDate, formatDateTime } = useFormatDate();
@@ -40,17 +50,18 @@ export default function ThankYou() {
   }, [location]);
 
   const getTypeInfo = () => {
-    if (!bookingInfo) return { title: "شكراً لتسجيلك!", icon: CheckCircle2, color: "text-secondary" };
-    
+    if (!bookingInfo)
+      return { title: 'شكراً لتسجيلك!', icon: CheckCircle2, color: 'text-secondary' };
+
     switch (bookingInfo.type) {
       case 'appointment':
-        return { title: "تم حجز موعدك بنجاح!", icon: Stethoscope, color: "text-blue-600" };
+        return { title: 'تم حجز موعدك بنجاح!', icon: Stethoscope, color: 'text-blue-600' };
       case 'offer':
-        return { title: "تم تسجيل طلب العرض بنجاح!", icon: Gift, color: "text-purple-600" };
+        return { title: 'تم تسجيل طلب العرض بنجاح!', icon: Gift, color: 'text-purple-600' };
       case 'camp':
-        return { title: "تم التسجيل في المخيم بنجاح!", icon: Tent, color: "text-green-600" };
+        return { title: 'تم التسجيل في المخيم بنجاح!', icon: Tent, color: 'text-green-600' };
       default:
-        return { title: "شكراً لتسجيلك!", icon: CheckCircle2, color: "text-secondary" };
+        return { title: 'شكراً لتسجيلك!', icon: CheckCircle2, color: 'text-secondary' };
     }
   };
 
@@ -58,11 +69,18 @@ export default function ThankYou() {
   const IconComponent = typeInfo.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 flex items-center justify-center p-3 sm:p-4" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-b from-white to-blue-50 flex items-center justify-center p-3 sm:p-4"
+      dir="rtl"
+    >
       <Card className="max-w-2xl w-full shadow-2xl border-2 border-primary/20">
         <CardContent className="pt-6 sm:pt-8 md:pt-12 pb-4 sm:pb-6 md:pb-8 px-3 sm:px-6 text-center">
-          <div className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 md:mb-6`}>
-            <IconComponent className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 ${typeInfo.color}`} />
+          <div
+            className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 md:mb-6`}
+          >
+            <IconComponent
+              className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 ${typeInfo.color}`}
+            />
           </div>
 
           <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-3 md:mb-4">
@@ -70,13 +88,16 @@ export default function ThankYou() {
           </h1>
 
           <p className="text-xs sm:text-sm md:text-lg text-muted-foreground mb-4 sm:mb-6 md:mb-8 max-w-lg mx-auto">
-            تم استلام طلبك بنجاح. سيتواصل معك فريقنا الطبي خلال 24 ساعة لتأكيد موعدك وتقديم المساعدة اللازمة.
+            تم استلام طلبك بنجاح. سيتواصل معك فريقنا الطبي خلال 24 ساعة لتأكيد موعدك وتقديم المساعدة
+            اللازمة.
           </p>
 
           {/* Booking Details */}
           {bookingInfo && (
             <div className="bg-white dark:bg-card rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8 border border-border">
-              <h3 className="font-bold text-sm sm:text-base md:text-lg mb-2 sm:mb-3 md:mb-4 text-right">تفاصيل الحجز</h3>
+              <h3 className="font-bold text-sm sm:text-base md:text-lg mb-2 sm:mb-3 md:mb-4 text-right">
+                تفاصيل الحجز
+              </h3>
               <div className="space-y-2 sm:space-y-3 text-right">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <User className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
@@ -87,14 +108,18 @@ export default function ThankYou() {
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">الهاتف:</span>
-                    <span className="font-medium" dir="ltr">{bookingInfo.phone}</span>
+                    <span className="font-medium" dir="ltr">
+                      {bookingInfo.phone}
+                    </span>
                   </div>
                 )}
                 {bookingInfo.email && (
                   <div className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">البريد:</span>
-                    <span className="font-medium" dir="ltr">{bookingInfo.email}</span>
+                    <span className="font-medium" dir="ltr">
+                      {bookingInfo.email}
+                    </span>
                   </div>
                 )}
                 {bookingInfo.doctor && (
@@ -139,12 +164,16 @@ export default function ThankYou() {
               <span className="text-xs sm:text-sm text-muted-foreground">للاستفسارات العاجلة</span>
             </div>
             <p className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">8000018</p>
-            <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1 sm:mt-2">الرقم المجاني - متاح على مدار الساعة</p>
+            <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1 sm:mt-2">
+              الرقم المجاني - متاح على مدار الساعة
+            </p>
           </div>
 
           <div className="space-y-3 sm:space-y-4">
             <div className="bg-white dark:bg-card rounded-lg p-3 sm:p-4 border border-border">
-              <h3 className="font-bold text-sm sm:text-base md:text-lg mb-1.5 sm:mb-2">ما التالي؟</h3>
+              <h3 className="font-bold text-sm sm:text-base md:text-lg mb-1.5 sm:mb-2">
+                ما التالي؟
+              </h3>
               <ul className="text-right space-y-2 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <span className="text-primary font-bold">1.</span>
@@ -172,9 +201,9 @@ export default function ThankYou() {
           </div>
 
           <div className="mt-4 sm:mt-6 md:mt-8 pt-4 sm:pt-6 border-t border-border">
-            <img 
-              src="/assets/new-logo.png" 
-              alt="المستشفى السعودي الألماني" 
+            <img
+              src="/assets/new-logo.png"
+              alt="المستشفى السعودي الألماني"
               className="h-10 sm:h-12 md:h-16 mx-auto mb-2 sm:mb-3"
             />
             <p className="text-sm text-muted-foreground">

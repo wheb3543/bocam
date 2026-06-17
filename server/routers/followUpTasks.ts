@@ -1,29 +1,28 @@
-import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { z } from 'zod';
+import { protectedProcedure, router } from '../_core/trpc';
 import {
   createFollowUpTask,
   getFollowUpTasksByEntity,
   getFollowUpTaskCount,
   updateFollowUpTaskStatus,
   deleteFollowUpTask,
-} from "../tasks/followUpTasks";
+} from '../tasks/followUpTasks';
 
 export const followUpTasksRouter = router({
   // Get all tasks
-  getAll: protectedProcedure
-    .query(async () => {
-      const db = await import("../database/db").then(m => m.getDb());
-      if (!db) return [];
-      const { followUpTasks } = await import("../../drizzle/schema");
-      const { desc } = await import("drizzle-orm");
-      return await db.select().from(followUpTasks).orderBy(desc(followUpTasks.createdAt));
-    }),
+  getAll: protectedProcedure.query(async () => {
+    const db = await import('../database/db').then((m) => m.getDb());
+    if (!db) return [];
+    const { followUpTasks } = await import('../../drizzle/schema');
+    const { desc } = await import('drizzle-orm');
+    return await db.select().from(followUpTasks).orderBy(desc(followUpTasks.createdAt));
+  }),
 
   // Get tasks for a specific entity
   getByEntity: protectedProcedure
     .input(
       z.object({
-        entityType: z.enum(["appointment", "lead", "offerLead", "campRegistration"]),
+        entityType: z.enum(['appointment', 'lead', 'offerLead', 'campRegistration']),
         entityId: z.number(),
       })
     )
@@ -35,7 +34,7 @@ export const followUpTasksRouter = router({
   getCount: protectedProcedure
     .input(
       z.object({
-        entityType: z.enum(["appointment", "lead", "offerLead", "campRegistration"]),
+        entityType: z.enum(['appointment', 'lead', 'offerLead', 'campRegistration']),
         entityId: z.number(),
       })
     )
@@ -47,11 +46,11 @@ export const followUpTasksRouter = router({
   create: protectedProcedure
     .input(
       z.object({
-        entityType: z.enum(["appointment", "lead", "offerLead", "campRegistration"]),
+        entityType: z.enum(['appointment', 'lead', 'offerLead', 'campRegistration']),
         entityId: z.number(),
         title: z.string().min(1),
         description: z.string().optional(),
-        priority: z.enum(["low", "medium", "high"]).default("medium"),
+        priority: z.enum(['low', 'medium', 'high']).default('medium'),
         dueDate: z.string().optional(), // ISO date string
         assignedToId: z.number().optional(),
         assignedToName: z.string().optional(),
@@ -69,9 +68,9 @@ export const followUpTasksRouter = router({
         assignedToName: input.assignedToName,
         createdById: ctx.user.id,
         createdByName: ctx.user.name || ctx.user.username,
-        status: "pending",
+        status: 'pending',
       });
-      
+
       return { success: true };
     }),
 
@@ -80,7 +79,7 @@ export const followUpTasksRouter = router({
     .input(
       z.object({
         id: z.number(),
-        status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
+        status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -90,15 +89,13 @@ export const followUpTasksRouter = router({
         ctx.user.id,
         ctx.user.name || ctx.user.username
       );
-      
+
       return { success: true };
     }),
 
   // Delete a task
-  delete: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      await deleteFollowUpTask(input.id);
-      return { success: true };
-    }),
+  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    await deleteFollowUpTask(input.id);
+    return { success: true };
+  }),
 });

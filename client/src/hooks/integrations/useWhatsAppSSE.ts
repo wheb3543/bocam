@@ -3,14 +3,14 @@
  * يستمع لجميع أحداث الـ webhook في الوقت الفعلي
  */
 
-import { useCallback, useRef } from "react";
-import useSSE from "@/hooks/integrations/useSSE";
+import { useCallback, useRef } from 'react';
+import useSSE from '@/hooks/integrations/useSSE';
 
 // ── أنواع الأحداث ──────────────────────────────────────────────────────────────
 
 export interface AccountAlertEvent {
   alertType: string;
-  severity: "critical" | "high" | "medium" | "low";
+  severity: 'critical' | 'high' | 'medium' | 'low';
   details?: any;
   timestamp: string;
 }
@@ -18,7 +18,7 @@ export interface AccountAlertEvent {
 export interface PhoneQualityUpdateEvent {
   phoneNumber: string;
   displayPhoneNumber?: string;
-  currentRating: "green" | "yellow" | "red" | "gray";
+  currentRating: 'green' | 'yellow' | 'red' | 'gray';
   previousRating?: string;
   timestamp: string;
 }
@@ -26,7 +26,14 @@ export interface PhoneQualityUpdateEvent {
 export interface TemplateStatusUpdateEvent {
   templateId: string;
   templateName: string;
-  status: "APPROVED" | "REJECTED" | "DISABLED" | "PAUSED" | "REINSTATED" | "FLAGGED" | "PENDING_DELETION";
+  status:
+    | 'APPROVED'
+    | 'REJECTED'
+    | 'DISABLED'
+    | 'PAUSED'
+    | 'REINSTATED'
+    | 'FLAGGED'
+    | 'PENDING_DELETION';
   reason?: string;
   timestamp: string;
 }
@@ -46,7 +53,7 @@ export interface MessageStatusUpdateEvent {
   messageId: string;
   whatsappMessageId?: string;
   conversationId?: number;
-  status: "sent" | "delivered" | "read" | "failed";
+  status: 'sent' | 'delivered' | 'read' | 'failed';
   deliveredAt?: string;
   readAt?: string;
   errorCode?: number;
@@ -316,7 +323,7 @@ export function useWhatsAppSSE({
   // ── معالج الأحداث العامة (global channel) ─────────────────────────────────
   const handleGlobalEvent = useCallback((e: MessageEvent) => {
     try {
-      const eventName = (e as any).type || "message";
+      const eventName = (e as any).type || 'message';
       let payload: any;
       try {
         payload = JSON.parse(e.data);
@@ -325,95 +332,95 @@ export function useWhatsAppSSE({
       }
 
       switch (eventName) {
-        case "account_alert":
+        case 'account_alert':
           onAccountAlertRef.current?.(payload as AccountAlertEvent);
           break;
 
-        case "phone_quality_update":
+        case 'phone_quality_update':
           onPhoneQualityRef.current?.(payload as PhoneQualityUpdateEvent);
           break;
 
-        case "template_status_update":
+        case 'template_status_update':
           onTemplateStatusRef.current?.(payload as TemplateStatusUpdateEvent);
           break;
 
-        case "webhook_event":
+        case 'webhook_event':
           onWebhookEventRef.current?.(payload as WebhookEventPayload);
           break;
 
-        case "message_status_update":
+        case 'message_status_update':
           onMessageStatusRef.current?.(payload as MessageStatusUpdateEvent);
           break;
 
-        case "typing":
+        case 'typing':
           onTypingRef.current?.(payload as TypingEvent);
           break;
 
-        case "conversation_cost_update":
+        case 'conversation_cost_update':
           onConversationCostUpdateRef.current?.(payload as ConversationCostUpdateEvent);
           break;
 
-        case "template_disabled":
+        case 'template_disabled':
           onTemplateDisabledRef.current?.(payload as TemplateDisabledEvent);
           break;
 
-        case "template_enabled":
+        case 'template_enabled':
           onTemplateEnabledRef.current?.(payload as TemplateEnabledEvent);
           break;
 
-        case "account_review_update":
+        case 'account_review_update':
           onAccountReviewUpdateRef.current?.(payload as AccountReviewUpdateEvent);
           break;
 
-        case "template_name_update":
+        case 'template_name_update':
           onTemplateNameUpdateRef.current?.(payload as TemplateNameUpdateEvent);
           break;
 
-        case "template_category_update":
+        case 'template_category_update':
           onTemplateCategoryUpdateRef.current?.(payload as TemplateCategoryUpdateEvent);
           break;
 
-        case "template_language_update":
+        case 'template_language_update':
           onTemplateLanguageUpdateRef.current?.(payload as TemplateLanguageUpdateEvent);
           break;
 
-        case "template_event":
+        case 'template_event':
           onTemplateEventRef.current?.(payload as TemplateEvent);
           break;
 
-        case "account_update":
+        case 'account_update':
           onAccountUpdateRef.current?.(payload as AccountUpdateEvent);
           break;
 
-        case "business_profile_update":
+        case 'business_profile_update':
           onBusinessProfileUpdateRef.current?.(payload as BusinessProfileUpdateEvent);
           break;
 
-        case "business_account_update":
+        case 'business_account_update':
           onBusinessAccountUpdateRef.current?.(payload as BusinessAccountUpdateEvent);
           break;
 
-        case "messaging_product_update":
+        case 'messaging_product_update':
           onMessagingProductUpdateRef.current?.(payload as MessagingProductUpdateEvent);
           break;
 
-        case "contacts_received":
+        case 'contacts_received':
           onContactsReceivedRef.current?.(payload as ContactsReceivedEvent);
           break;
 
-        case "order_received":
+        case 'order_received':
           onOrderReceivedRef.current?.(payload as OrderReceivedEvent);
           break;
 
-        case "referral_received":
+        case 'referral_received':
           onReferralReceivedRef.current?.(payload as ReferralReceivedEvent);
           break;
 
-        case "reaction_received":
+        case 'reaction_received':
           onReactionReceivedRef.current?.(payload as ReactionReceivedEvent);
           break;
 
-        case "transaction_status_update":
+        case 'transaction_status_update':
           onTransactionStatusUpdateRef.current?.(payload as TransactionStatusUpdateEvent);
           break;
 
@@ -426,7 +433,7 @@ export function useWhatsAppSSE({
   // ── معالج أحداث المحادثة (conversation channel) ───────────────────────────
   const handleConversationEvent = useCallback((e: MessageEvent) => {
     try {
-      const eventName = (e as any).type || "message";
+      const eventName = (e as any).type || 'message';
       let payload: any;
       try {
         payload = JSON.parse(e.data);
@@ -435,7 +442,7 @@ export function useWhatsAppSSE({
       }
 
       switch (eventName) {
-        case "message_updated":
+        case 'message_updated':
           // تحديث حالة رسالة (delivered/read/failed)
           if (payload?.status) {
             onMessageStatusRef.current?.({
@@ -452,7 +459,7 @@ export function useWhatsAppSSE({
           }
           break;
 
-        case "typing":
+        case 'typing':
           onTypingRef.current?.(payload as TypingEvent);
           break;
 
@@ -463,13 +470,10 @@ export function useWhatsAppSSE({
   }, []);
 
   // ── الاشتراك في القناة العامة ──────────────────────────────────────────────
-  useSSE("/api/whatsapp/stream/global", handleGlobalEvent);
+  useSSE('/api/whatsapp/stream/global', handleGlobalEvent);
 
   // ── الاشتراك في قناة المحادثة (إن وُجدت) ─────────────────────────────────
-  useSSE(
-    conversationId ? `/api/whatsapp/stream/${conversationId}` : null,
-    handleConversationEvent
-  );
+  useSSE(conversationId ? `/api/whatsapp/stream/${conversationId}` : null, handleConversationEvent);
 }
 
 export default useWhatsAppSSE;

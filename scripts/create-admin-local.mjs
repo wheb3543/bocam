@@ -35,11 +35,11 @@ async function createAdmin() {
     },
   });
   const db = drizzle(connection);
-  
+
   try {
     // Check if admin already exists
     const existingUsers = await db.select().from(users).where(eq(users.username, 'admin')).limit(1);
-    
+
     if (existingUsers.length > 0) {
       console.log('⚠️ المستخدم admin موجود بالفعل');
       console.log('بيانات المستخدم:');
@@ -50,11 +50,11 @@ async function createAdmin() {
       console.log('  - الحالة:', existingUsers[0].isActive);
       return;
     }
-    
+
     // Hash password
     console.log('🔐 جاري تشفير كلمة المرور...');
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    
+
     // Insert admin user
     console.log('📝 جاري إنشاء مستخدم المدير...');
     await db.insert(users).values({
@@ -66,7 +66,7 @@ async function createAdmin() {
       isActive: 'yes',
       loginMethod: 'manual',
     });
-    
+
     console.log('✅ تم إنشاء مستخدم المدير بنجاح!');
     console.log('📋 بيانات الدخول:');
     console.log('  - اسم المستخدم: admin');

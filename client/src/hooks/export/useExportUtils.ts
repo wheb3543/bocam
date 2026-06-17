@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { toast } from 'sonner';
-import { exportData, printTable, type ExportMetadata } from "@/lib/export/advancedExport";
+import { exportData, printTable, type ExportMetadata } from '@/lib/export/advancedExport';
 import { useAuth } from '@/_core/hooks/useAuth';
 
 /**
@@ -53,7 +53,7 @@ export interface ExportCallOptions {
 
 /**
  * useExportUtils - Hook مشترك لتوحيد وظائف التصدير والطباعة
- * 
+ *
  * يوفر دوال handleExport و handlePrint جاهزة للاستخدام
  * مع تحضير تلقائي لـ metadata والأعمدة المرئية
  */
@@ -63,153 +63,163 @@ export function useExportUtils<T>(config: ExportConfig<T>) {
   /**
    * بناء metadata مشتركة
    */
-  const buildMetadata = useCallback((
-    data: any[],
-    activeFilters?: Record<string, string>,
-    dateRangeStr?: string,
-  ): ExportMetadata => {
-    return {
-      tableName: config.tableName,
-      dateRange: dateRangeStr,
-      filters: activeFilters && Object.keys(activeFilters).length > 0 ? activeFilters : undefined,
-      totalRecords: data.length,
-      exportedRecords: data.length,
-      exportDate: new Date().toLocaleString('ar-SA'),
-      exportedBy: user?.name || 'مستخدم',
-    };
-  }, [config.tableName, user?.name]);
+  const buildMetadata = useCallback(
+    (
+      data: any[],
+      activeFilters?: Record<string, string>,
+      dateRangeStr?: string
+    ): ExportMetadata => {
+      return {
+        tableName: config.tableName,
+        dateRange: dateRangeStr,
+        filters: activeFilters && Object.keys(activeFilters).length > 0 ? activeFilters : undefined,
+        totalRecords: data.length,
+        exportedRecords: data.length,
+        exportDate: new Date().toLocaleString('ar-SA'),
+        exportedBy: user?.name || 'مستخدم',
+      };
+    },
+    [config.tableName, user?.name]
+  );
 
   /**
    * تحضير الأعمدة المرئية من visibleColumns map
    */
-  const getVisibleColumns = useCallback((
-    columnDefs: ExportColumnDef[],
-    visibleColumns?: Record<string, boolean>,
-  ): ExportColumnDef[] => {
-    if (!visibleColumns) return columnDefs;
+  const getVisibleColumns = useCallback(
+    (
+      columnDefs: ExportColumnDef[],
+      visibleColumns?: Record<string, boolean>
+    ): ExportColumnDef[] => {
+      if (!visibleColumns) return columnDefs;
 
-    return Object.entries(visibleColumns)
-      .filter(([_, visible]) => visible)
-      .map(([key]) => {
-        const col = columnDefs.find(c => c.key === key);
-        return col || { key, label: key };
-      })
-      .filter(Boolean);
-  }, []);
+      return Object.entries(visibleColumns)
+        .filter(([_, visible]) => visible)
+        .map(([key]) => {
+          const col = columnDefs.find((c) => c.key === key);
+          return col || { key, label: key };
+        })
+        .filter(Boolean);
+    },
+    []
+  );
 
   /**
    * تصدير البيانات (Excel / CSV / PDF)
    */
-  const handleExport = useCallback(async (
-    format: 'excel' | 'csv' | 'pdf',
-    options: ExportCallOptions,
-  ) => {
-    const { data, activeFilters, dateRangeStr, visibleColumns } = options;
+  const handleExport = useCallback(
+    async (format: 'excel' | 'csv' | 'pdf', options: ExportCallOptions) => {
+      const { data, activeFilters, dateRangeStr, visibleColumns } = options;
 
-    if (!data || data.length === 0) {
-      toast.error("لا توجد بيانات للتصدير");
-      return;
-    }
-
-    try {
-      const metadata = buildMetadata(data, activeFilters, dateRangeStr);
-      const dataToExport = data.map(item => config.mapToExportRow(item as T));
-
-      // تحضير الأعمدة المرئية
-      let visibleCols: ExportColumnDef[];
-      if (visibleColumns) {
-        visibleCols = Object.entries(visibleColumns)
-          .filter(([_, visible]) => visible)
-          .map(([key]) => {
-            const col = config.exportColumns.find(c => c.key === key);
-            return col || { key, label: key };
-          });
-      } else {
-        visibleCols = config.exportColumns;
+      if (!data || data.length === 0) {
+        toast.error('لا توجد بيانات للتصدير');
+        return;
       }
 
-      const filename = `${config.filenamePrefix}_${Date.now()}.${format === 'excel' ? 'xlsx' : format}`;
+      try {
+        const metadata = buildMetadata(data, activeFilters, dateRangeStr);
+        const dataToExport = data.map((item) => config.mapToExportRow(item as T));
 
-      await exportData({
-        format,
-        metadata,
-        columns: visibleCols,
-        data: dataToExport,
-        filename,
-      });
+        // تحضير الأعمدة المرئية
+        let visibleCols: ExportColumnDef[];
+        if (visibleColumns) {
+          visibleCols = Object.entries(visibleColumns)
+            .filter(([_, visible]) => visible)
+            .map(([key]) => {
+              const col = config.exportColumns.find((c) => c.key === key);
+              return col || { key, label: key };
+            });
+        } else {
+          visibleCols = config.exportColumns;
+        }
 
-      toast.success(`تم تصدير البيانات بنجاح بتنسيق ${format.toUpperCase()}`);
-    } catch (error) {
-      console.error('Export error:', error);
-      toast.error('حدث خطأ أثناء التصدير');
-    }
-  }, [buildMetadata, config]);
+        const filename = `${config.filenamePrefix}_${Date.now()}.${format === 'excel' ? 'xlsx' : format}`;
+
+        await exportData({
+          format,
+          metadata,
+          columns: visibleCols,
+          data: dataToExport,
+          filename,
+        });
+
+        toast.success(`تم تصدير البيانات بنجاح بتنسيق ${format.toUpperCase()}`);
+      } catch (error) {
+        console.error('Export error:', error);
+        toast.error('حدث خطأ أثناء التصدير');
+      }
+    },
+    [buildMetadata, config]
+  );
 
   /**
    * طباعة البيانات
    */
-  const handlePrint = useCallback((options: ExportCallOptions) => {
-    const { data, activeFilters, dateRangeStr, visibleColumns } = options;
+  const handlePrint = useCallback(
+    (options: ExportCallOptions) => {
+      const { data, activeFilters, dateRangeStr, visibleColumns } = options;
 
-    if (!data || data.length === 0) {
-      toast.error("لا توجد بيانات للطباعة");
-      return;
-    }
-
-    try {
-      const metadata = buildMetadata(data, activeFilters, dateRangeStr);
-
-      // استخدام mapToPrintRow إن وجدت، وإلا mapToExportRow
-      const mapFn = config.mapToPrintRow || config.mapToExportRow;
-      const dataToExport = data.map(item => mapFn(item as T));
-
-      // استخدام printColumns إن وجدت، وإلا exportColumns
-      const allColumns = config.printColumns || config.exportColumns;
-
-      // تحضير الأعمدة المرئية
-      let visibleCols: ExportColumnDef[];
-      if (visibleColumns) {
-        visibleCols = Object.entries(visibleColumns)
-          .filter(([_, visible]) => visible)
-          .map(([key]) => {
-            const col = allColumns.find(c => c.key === key);
-            return col || { key, label: key };
-          });
-      } else {
-        visibleCols = allColumns;
+      if (!data || data.length === 0) {
+        toast.error('لا توجد بيانات للطباعة');
+        return;
       }
 
-      printTable({
-        format: 'pdf',
-        metadata,
-        columns: visibleCols,
-        data: dataToExport,
-      });
-    } catch (error) {
-      console.error('Print error:', error);
-      toast.error('حدث خطأ أثناء الطباعة');
-    }
-  }, [buildMetadata, config]);
+      try {
+        const metadata = buildMetadata(data, activeFilters, dateRangeStr);
+
+        // استخدام mapToPrintRow إن وجدت، وإلا mapToExportRow
+        const mapFn = config.mapToPrintRow || config.mapToExportRow;
+        const dataToExport = data.map((item) => mapFn(item as T));
+
+        // استخدام printColumns إن وجدت، وإلا exportColumns
+        const allColumns = config.printColumns || config.exportColumns;
+
+        // تحضير الأعمدة المرئية
+        let visibleCols: ExportColumnDef[];
+        if (visibleColumns) {
+          visibleCols = Object.entries(visibleColumns)
+            .filter(([_, visible]) => visible)
+            .map(([key]) => {
+              const col = allColumns.find((c) => c.key === key);
+              return col || { key, label: key };
+            });
+        } else {
+          visibleCols = allColumns;
+        }
+
+        printTable({
+          format: 'pdf',
+          metadata,
+          columns: visibleCols,
+          data: dataToExport,
+        });
+      } catch (error) {
+        console.error('Print error:', error);
+        toast.error('حدث خطأ أثناء الطباعة');
+      }
+    },
+    [buildMetadata, config]
+  );
 
   /**
    * دالة مساعدة لبناء الفلاتر النشطة
    * تقبل مصفوفة من الفلاتر وتعيد Record<string, string>
    */
-  const buildActiveFilters = useCallback((
-    filters: Array<{ label: string; value: string | string[] | undefined | null }>
-  ): Record<string, string> => {
-    const result: Record<string, string> = {};
-    for (const filter of filters) {
-      if (!filter.value) continue;
-      const val = Array.isArray(filter.value) 
-        ? filter.value.join(', ') 
-        : filter.value;
-      if (val) {
-        result[filter.label] = val;
+  const buildActiveFilters = useCallback(
+    (
+      filters: Array<{ label: string; value: string | string[] | undefined | null }>
+    ): Record<string, string> => {
+      const result: Record<string, string> = {};
+      for (const filter of filters) {
+        if (!filter.value) continue;
+        const val = Array.isArray(filter.value) ? filter.value.join(', ') : filter.value;
+        if (val) {
+          result[filter.label] = val;
+        }
       }
-    }
-    return result;
-  }, []);
+      return result;
+    },
+    []
+  );
 
   /**
    * دالة مساعدة لتحضير نطاق التاريخ كنص

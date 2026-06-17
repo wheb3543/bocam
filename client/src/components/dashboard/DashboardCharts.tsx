@@ -1,65 +1,101 @@
-import { useState, useMemo } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, TrendingUp, TrendingDown, Minus, BarChart3, PieChart as PieChartIcon, Activity, MessageSquare } from "lucide-react";
+import { useState, useMemo } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  Area, AreaChart,
-} from "recharts";
-import { useLicense } from "@/hooks/integrations/useLicense";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Loader2,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  BarChart3,
+  PieChart as PieChartIcon,
+  Activity,
+  MessageSquare,
+} from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+} from 'recharts';
+import { useLicense } from '@/hooks/integrations/useLicense';
 
-type Period = "7d" | "30d" | "90d" | "12m";
+type Period = '7d' | '30d' | '90d' | '12m';
 
 const periodLabels: Record<Period, string> = {
-  "7d": "آخر 7 أيام",
-  "30d": "آخر 30 يوم",
-  "90d": "آخر 3 أشهر",
-  "12m": "آخر 12 شهر",
+  '7d': 'آخر 7 أيام',
+  '30d': 'آخر 30 يوم',
+  '90d': 'آخر 3 أشهر',
+  '12m': 'آخر 12 شهر',
 };
 
 // Color palette that works in both light and dark modes
 const COLORS = {
-  leads: "#3b82f6",        // blue
-  appointments: "#10b981", // emerald
-  offerLeads: "#f59e0b",   // amber
-  campRegs: "#8b5cf6",     // violet
-  inbound: "#06b6d4",      // cyan
-  outbound: "#f43f5e",     // rose
+  leads: '#3b82f6', // blue
+  appointments: '#10b981', // emerald
+  offerLeads: '#f59e0b', // amber
+  campRegs: '#8b5cf6', // violet
+  inbound: '#06b6d4', // cyan
+  outbound: '#f43f5e', // rose
 };
 
 const STATUS_COLORS: Record<string, string> = {
   // الحالات الموحدة السبع
-  pending: "#f59e0b",
-  contacted: "#f97316",
-  no_answer: "#6b7280",
-  confirmed: "#10b981",
-  attended: "#3b82f6",
-  completed: "#059669",
-  cancelled: "#ef4444",
+  pending: '#f59e0b',
+  contacted: '#f97316',
+  no_answer: '#6b7280',
+  confirmed: '#10b981',
+  attended: '#3b82f6',
+  completed: '#059669',
+  cancelled: '#ef4444',
   // حالات العملاء المحتملين (للتوافق مع البيانات القديمة)
-  new: "#3b82f6",
-  booked: "#10b981",
-  not_interested: "#ef4444",
+  new: '#3b82f6',
+  booked: '#10b981',
+  not_interested: '#ef4444',
 };
 
 const STATUS_LABELS: Record<string, string> = {
   // الحالات الموحدة السبع
-  pending: "قيد الانتظار",
-  contacted: "تم التواصل",
-  no_answer: "لم يرد",
-  confirmed: "مؤكد",
-  attended: "حضر",
-  completed: "مكتمل",
-  cancelled: "ملغي",
+  pending: 'قيد الانتظار',
+  contacted: 'تم التواصل',
+  no_answer: 'لم يرد',
+  confirmed: 'مؤكد',
+  attended: 'حضر',
+  completed: 'مكتمل',
+  cancelled: 'ملغي',
   // حالات العملاء المحتملين (للتوافق مع البيانات القديمة)
-  new: "جديد",
-  booked: "تم الحجز",
-  not_interested: "غير مهتم",
+  new: 'جديد',
+  booked: 'تم الحجز',
+  not_interested: 'غير مهتم',
 };
 
-const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f43f5e", "#6b7280"];
+const PIE_COLORS = [
+  '#3b82f6',
+  '#10b981',
+  '#f59e0b',
+  '#ef4444',
+  '#8b5cf6',
+  '#06b6d4',
+  '#f43f5e',
+  '#6b7280',
+];
 
 function ChartSkeleton() {
   return (
@@ -73,8 +109,7 @@ function ChangeIndicator({ change }: { change: number }) {
   if (change > 0) {
     return (
       <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-        <TrendingUp className="h-3 w-3" />
-        +{change}%
+        <TrendingUp className="h-3 w-3" />+{change}%
       </span>
     );
   }
@@ -98,12 +133,17 @@ function ChangeIndicator({ change }: { change: number }) {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-popover text-popover-foreground border border-border rounded-lg shadow-lg p-3 text-sm" dir="rtl">
+    <div
+      className="bg-popover text-popover-foreground border border-border rounded-lg shadow-lg p-3 text-sm"
+      dir="rtl"
+    >
       <p className="font-medium mb-1.5 text-xs text-muted-foreground">{label}</p>
       {payload.map((entry: any, i: number) => (
         <div key={i} className="flex items-center gap-2 py-0.5">
           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-          <span className="text-foreground">{entry.name}: <strong>{entry.value}</strong></span>
+          <span className="text-foreground">
+            {entry.name}: <strong>{entry.value}</strong>
+          </span>
         </div>
       ))}
     </div>
@@ -114,10 +154,15 @@ function CustomPieTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const entry = payload[0];
   return (
-    <div className="bg-popover text-popover-foreground border border-border rounded-lg shadow-lg p-3 text-sm" dir="rtl">
+    <div
+      className="bg-popover text-popover-foreground border border-border rounded-lg shadow-lg p-3 text-sm"
+      dir="rtl"
+    >
       <div className="flex items-center gap-2">
         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.payload.fill }} />
-        <span>{entry.name}: <strong>{entry.value}</strong></span>
+        <span>
+          {entry.name}: <strong>{entry.value}</strong>
+        </span>
       </div>
     </div>
   );
@@ -133,15 +178,20 @@ function RegistrationsTrendChart({ period }: { period: Period }) {
     if (!data) return [];
     return data.labels.map((label, i) => ({
       date: label,
-      "العملاء": data.datasets.leads[i],
-      "المواعيد": data.datasets.appointments[i],
-      "حجوزات العروض": data.datasets.offerLeads[i],
-      "تسجيلات المخيمات": data.datasets.campRegistrations[i],
+      العملاء: data.datasets.leads[i],
+      المواعيد: data.datasets.appointments[i],
+      'حجوزات العروض': data.datasets.offerLeads[i],
+      'تسجيلات المخيمات': data.datasets.campRegistrations[i],
     }));
   }, [data]);
 
   if (isLoading) return <ChartSkeleton />;
-  if (!chartData.length) return <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">لا توجد بيانات</div>;
+  if (!chartData.length)
+    return (
+      <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
+        لا توجد بيانات
+      </div>
+    );
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -168,11 +218,35 @@ function RegistrationsTrendChart({ period }: { period: Period }) {
         <XAxis dataKey="date" tick={{ fontSize: 11 }} className="text-muted-foreground" />
         <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" allowDecimals={false} />
         <Tooltip content={<CustomTooltip />} />
-        <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
-        <Area type="monotone" dataKey="العملاء" stroke={COLORS.leads} fill="url(#colorLeads)" strokeWidth={2} />
-        <Area type="monotone" dataKey="المواعيد" stroke={COLORS.appointments} fill="url(#colorAppointments)" strokeWidth={2} />
-        <Area type="monotone" dataKey="حجوزات العروض" stroke={COLORS.offerLeads} fill="url(#colorOfferLeads)" strokeWidth={2} />
-        <Area type="monotone" dataKey="تسجيلات المخيمات" stroke={COLORS.campRegs} fill="url(#colorCampRegs)" strokeWidth={2} />
+        <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
+        <Area
+          type="monotone"
+          dataKey="العملاء"
+          stroke={COLORS.leads}
+          fill="url(#colorLeads)"
+          strokeWidth={2}
+        />
+        <Area
+          type="monotone"
+          dataKey="المواعيد"
+          stroke={COLORS.appointments}
+          fill="url(#colorAppointments)"
+          strokeWidth={2}
+        />
+        <Area
+          type="monotone"
+          dataKey="حجوزات العروض"
+          stroke={COLORS.offerLeads}
+          fill="url(#colorOfferLeads)"
+          strokeWidth={2}
+        />
+        <Area
+          type="monotone"
+          dataKey="تسجيلات المخيمات"
+          stroke={COLORS.campRegs}
+          fill="url(#colorCampRegs)"
+          strokeWidth={2}
+        />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -186,15 +260,20 @@ function LeadStatusPieChart() {
 
   const chartData = useMemo(() => {
     if (!data) return [];
-    return data.map(d => ({
+    return data.map((d) => ({
       name: STATUS_LABELS[d.status] || d.status,
       value: d.total,
-      fill: STATUS_COLORS[d.status] || "#6b7280",
+      fill: STATUS_COLORS[d.status] || '#6b7280',
     }));
   }, [data]);
 
   if (isLoading) return <ChartSkeleton />;
-  if (!chartData.length) return <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">لا توجد بيانات</div>;
+  if (!chartData.length)
+    return (
+      <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
+        لا توجد بيانات
+      </div>
+    );
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -209,7 +288,7 @@ function LeadStatusPieChart() {
           dataKey="value"
           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
           labelLine={{ strokeWidth: 1 }}
-          style={{ fontSize: "11px" }}
+          style={{ fontSize: '11px' }}
         >
           {chartData.map((entry, index) => (
             <Cell key={index} fill={entry.fill} />
@@ -229,15 +308,20 @@ function AppointmentStatusPieChart() {
 
   const chartData = useMemo(() => {
     if (!data) return [];
-    return data.map(d => ({
+    return data.map((d) => ({
       name: STATUS_LABELS[d.status] || d.status,
       value: d.total,
-      fill: STATUS_COLORS[d.status] || "#6b7280",
+      fill: STATUS_COLORS[d.status] || '#6b7280',
     }));
   }, [data]);
 
   if (isLoading) return <ChartSkeleton />;
-  if (!chartData.length) return <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">لا توجد بيانات</div>;
+  if (!chartData.length)
+    return (
+      <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
+        لا توجد بيانات
+      </div>
+    );
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -252,7 +336,7 @@ function AppointmentStatusPieChart() {
           dataKey="value"
           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
           labelLine={{ strokeWidth: 1 }}
-          style={{ fontSize: "11px" }}
+          style={{ fontSize: '11px' }}
         >
           {chartData.map((entry, index) => (
             <Cell key={index} fill={entry.fill} />
@@ -273,19 +357,22 @@ function SourceBarChart() {
   const chartData = useMemo(() => {
     if (!data) return [];
     // Merge all sources
-    const sourceMap = new Map<string, { leads: number; appointments: number; offerLeads: number }>();
-    
-    data.leads.forEach(s => {
+    const sourceMap = new Map<
+      string,
+      { leads: number; appointments: number; offerLeads: number }
+    >();
+
+    data.leads.forEach((s) => {
       const existing = sourceMap.get(s.source_name) || { leads: 0, appointments: 0, offerLeads: 0 };
       existing.leads = s.total;
       sourceMap.set(s.source_name, existing);
     });
-    data.appointments.forEach(s => {
+    data.appointments.forEach((s) => {
       const existing = sourceMap.get(s.source_name) || { leads: 0, appointments: 0, offerLeads: 0 };
       existing.appointments = s.total;
       sourceMap.set(s.source_name, existing);
     });
-    data.offerLeads.forEach(s => {
+    data.offerLeads.forEach((s) => {
       const existing = sourceMap.get(s.source_name) || { leads: 0, appointments: 0, offerLeads: 0 };
       existing.offerLeads = s.total;
       sourceMap.set(s.source_name, existing);
@@ -293,26 +380,44 @@ function SourceBarChart() {
 
     return Array.from(sourceMap.entries())
       .map(([name, counts]) => ({
-        source: name.length > 15 ? name.slice(0, 15) + "..." : name,
-        "العملاء": counts.leads,
-        "المواعيد": counts.appointments,
-        "حجوزات العروض": counts.offerLeads,
+        source: name.length > 15 ? name.slice(0, 15) + '...' : name,
+        العملاء: counts.leads,
+        المواعيد: counts.appointments,
+        'حجوزات العروض': counts.offerLeads,
       }))
-      .sort((a, b) => (b["العملاء"] + b["المواعيد"] + b["حجوزات العروض"]) - (a["العملاء"] + a["المواعيد"] + a["حجوزات العروض"]))
+      .sort(
+        (a, b) =>
+          b['العملاء'] +
+          b['المواعيد'] +
+          b['حجوزات العروض'] -
+          (a['العملاء'] + a['المواعيد'] + a['حجوزات العروض'])
+      )
       .slice(0, 8);
   }, [data]);
 
   if (isLoading) return <ChartSkeleton />;
-  if (!chartData.length) return <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">لا توجد بيانات</div>;
+  if (!chartData.length)
+    return (
+      <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
+        لا توجد بيانات
+      </div>
+    );
 
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-        <XAxis dataKey="source" tick={{ fontSize: 10 }} className="text-muted-foreground" angle={-15} textAnchor="end" height={50} />
+        <XAxis
+          dataKey="source"
+          tick={{ fontSize: 10 }}
+          className="text-muted-foreground"
+          angle={-15}
+          textAnchor="end"
+          height={50}
+        />
         <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" allowDecimals={false} />
         <Tooltip content={<CustomTooltip />} />
-        <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
+        <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
         <Bar dataKey="العملاء" fill={COLORS.leads} radius={[4, 4, 0, 0]} />
         <Bar dataKey="المواعيد" fill={COLORS.appointments} radius={[4, 4, 0, 0]} />
         <Bar dataKey="حجوزات العروض" fill={COLORS.offerLeads} radius={[4, 4, 0, 0]} />
@@ -330,32 +435,47 @@ function OffersAndCampsChart() {
   const chartData = useMemo(() => {
     if (!data) return { offers: [] as any[], camps: [] as any[] };
     return {
-      offers: data.offers.map(o => ({
-        name: o.name.length > 20 ? o.name.slice(0, 20) + "..." : o.name,
-        "إجمالي": o.total,
-        "محول": o.converted,
+      offers: data.offers.map((o) => ({
+        name: o.name.length > 20 ? o.name.slice(0, 20) + '...' : o.name,
+        إجمالي: o.total,
+        محول: o.converted,
       })),
-      camps: data.camps.map(c => ({
-        name: c.name.length > 20 ? c.name.slice(0, 20) + "..." : c.name,
-        "إجمالي": c.total,
-        "محول": c.converted,
+      camps: data.camps.map((c) => ({
+        name: c.name.length > 20 ? c.name.slice(0, 20) + '...' : c.name,
+        إجمالي: c.total,
+        محول: c.converted,
       })),
     };
   }, [data]);
 
   if (isLoading) return <ChartSkeleton />;
 
-  const combined = [...chartData.offers.map(o => ({ ...o, type: "عرض" })), ...chartData.camps.map(c => ({ ...c, type: "مخيم" }))];
-  if (!combined.length) return <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">لا توجد بيانات</div>;
+  const combined = [
+    ...chartData.offers.map((o) => ({ ...o, type: 'عرض' })),
+    ...chartData.camps.map((c) => ({ ...c, type: 'مخيم' })),
+  ];
+  if (!combined.length)
+    return (
+      <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
+        لا توجد بيانات
+      </div>
+    );
 
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={combined} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-        <XAxis dataKey="name" tick={{ fontSize: 9 }} className="text-muted-foreground" angle={-20} textAnchor="end" height={60} />
+        <XAxis
+          dataKey="name"
+          tick={{ fontSize: 9 }}
+          className="text-muted-foreground"
+          angle={-20}
+          textAnchor="end"
+          height={60}
+        />
         <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" allowDecimals={false} />
         <Tooltip content={<CustomTooltip />} />
-        <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
+        <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
         <Bar dataKey="إجمالي" fill={COLORS.leads} radius={[4, 4, 0, 0]} />
         <Bar dataKey="محول" fill={COLORS.appointments} radius={[4, 4, 0, 0]} />
       </BarChart>
@@ -373,13 +493,18 @@ function WhatsAppTrendChart({ period }: { period: Period }) {
     if (!data) return [];
     return data.labels.map((label, i) => ({
       date: label,
-      "واردة": data.datasets.inbound[i],
-      "صادرة": data.datasets.outbound[i],
+      واردة: data.datasets.inbound[i],
+      صادرة: data.datasets.outbound[i],
     }));
   }, [data]);
 
   if (isLoading) return <ChartSkeleton />;
-  if (!chartData.length) return <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">لا توجد بيانات</div>;
+  if (!chartData.length)
+    return (
+      <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
+        لا توجد بيانات
+      </div>
+    );
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -388,9 +513,21 @@ function WhatsAppTrendChart({ period }: { period: Period }) {
         <XAxis dataKey="date" tick={{ fontSize: 11 }} className="text-muted-foreground" />
         <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" allowDecimals={false} />
         <Tooltip content={<CustomTooltip />} />
-        <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
-        <Line type="monotone" dataKey="واردة" stroke={COLORS.inbound} strokeWidth={2} dot={{ r: 3 }} />
-        <Line type="monotone" dataKey="صادرة" stroke={COLORS.outbound} strokeWidth={2} dot={{ r: 3 }} />
+        <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
+        <Line
+          type="monotone"
+          dataKey="واردة"
+          stroke={COLORS.inbound}
+          strokeWidth={2}
+          dot={{ r: 3 }}
+        />
+        <Line
+          type="monotone"
+          dataKey="صادرة"
+          stroke={COLORS.outbound}
+          strokeWidth={2}
+          dot={{ r: 3 }}
+        />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -421,11 +558,15 @@ function SummaryCards({ period }: { period: Period }) {
   if (!data) return null;
 
   const items = [
-    { label: "الإجمالي", ...data.total, color: "text-foreground" },
-    { label: "العملاء", ...data.leads, color: "text-blue-600 dark:text-blue-400" },
-    { label: "المواعيد", ...data.appointments, color: "text-emerald-600 dark:text-emerald-400" },
-    { label: "حجوزات العروض", ...data.offerLeads, color: "text-amber-600 dark:text-amber-400" },
-    { label: "تسجيلات المخيمات", ...data.campRegistrations, color: "text-violet-600 dark:text-violet-400" },
+    { label: 'الإجمالي', ...data.total, color: 'text-foreground' },
+    { label: 'العملاء', ...data.leads, color: 'text-blue-600 dark:text-blue-400' },
+    { label: 'المواعيد', ...data.appointments, color: 'text-emerald-600 dark:text-emerald-400' },
+    { label: 'حجوزات العروض', ...data.offerLeads, color: 'text-amber-600 dark:text-amber-400' },
+    {
+      label: 'تسجيلات المخيمات',
+      ...data.campRegistrations,
+      color: 'text-violet-600 dark:text-violet-400',
+    },
   ];
 
   return (
@@ -451,7 +592,7 @@ function SummaryCards({ period }: { period: Period }) {
  */
 export default function DashboardCharts() {
   const { hasFeature, isLicenseValid } = useLicense();
-  const [period, setPeriod] = useState<Period>("30d");
+  const [period, setPeriod] = useState<Period>('30d');
 
   // Check if analytics feature is enabled
   if (!hasFeature('analytics') || !isLicenseValid) {
@@ -459,8 +600,12 @@ export default function DashboardCharts() {
       <Card>
         <CardContent className="p-12 text-center">
           <Activity className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
-          <p className="text-lg font-semibold text-muted-foreground mb-2">ميزة التحليلات غير مفعلة</p>
-          <p className="text-sm text-muted-foreground">هذه الميزة تتطلب ترخيص يحتوي على ميزة التحليلات</p>
+          <p className="text-lg font-semibold text-muted-foreground mb-2">
+            ميزة التحليلات غير مفعلة
+          </p>
+          <p className="text-sm text-muted-foreground">
+            هذه الميزة تتطلب ترخيص يحتوي على ميزة التحليلات
+          </p>
         </CardContent>
       </Card>
     );
@@ -472,7 +617,9 @@ export default function DashboardCharts() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-primary" />
-          <h2 className="text-base sm:text-lg font-bold text-foreground">لوحة الإحصائيات الرسومية</h2>
+          <h2 className="text-base sm:text-lg font-bold text-foreground">
+            لوحة الإحصائيات الرسومية
+          </h2>
         </div>
         <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
           <SelectTrigger className="w-[160px] h-8 text-xs sm:text-sm">
@@ -480,7 +627,9 @@ export default function DashboardCharts() {
           </SelectTrigger>
           <SelectContent>
             {Object.entries(periodLabels).map(([key, label]) => (
-              <SelectItem key={key} value={key}>{label}</SelectItem>
+              <SelectItem key={key} value={key}>
+                {label}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>

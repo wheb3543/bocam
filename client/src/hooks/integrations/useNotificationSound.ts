@@ -1,8 +1,8 @@
-import { useEffect, useRef, useCallback, useState } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { toast } from "sonner";
+import { useEffect, useRef, useCallback, useState } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { toast } from 'sonner';
 
-const SOUND_ENABLED_KEY = "sgh-notification-sound-enabled";
+const SOUND_ENABLED_KEY = 'sgh-notification-sound-enabled';
 const POLLING_INTERVAL = 15_000; // 15 seconds for faster detection
 
 /**
@@ -12,14 +12,14 @@ const POLLING_INTERVAL = 15_000; // 15 seconds for faster detection
 function playNotificationSound() {
   try {
     const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    
+
     // First tone (lower)
     const osc1 = audioCtx.createOscillator();
     const gain1 = audioCtx.createGain();
     osc1.connect(gain1);
     gain1.connect(audioCtx.destination);
     osc1.frequency.value = 587.33; // D5
-    osc1.type = "sine";
+    osc1.type = 'sine';
     gain1.gain.setValueAtTime(0, audioCtx.currentTime);
     gain1.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
     gain1.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.25);
@@ -32,7 +32,7 @@ function playNotificationSound() {
     osc2.connect(gain2);
     gain2.connect(audioCtx.destination);
     osc2.frequency.value = 880; // A5
-    osc2.type = "sine";
+    osc2.type = 'sine';
     gain2.gain.setValueAtTime(0, audioCtx.currentTime + 0.15);
     gain2.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.2);
     gain2.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
@@ -45,7 +45,7 @@ function playNotificationSound() {
     osc3.connect(gain3);
     gain3.connect(audioCtx.destination);
     osc3.frequency.value = 1174.66; // D6
-    osc3.type = "sine";
+    osc3.type = 'sine';
     gain3.gain.setValueAtTime(0, audioCtx.currentTime + 0.3);
     gain3.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.35);
     gain3.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.7);
@@ -54,10 +54,10 @@ function playNotificationSound() {
 
     // Close audio context after sound finishes
     setTimeout(() => audioCtx.close(), 1000);
-    
+
     return true;
   } catch (error) {
-    console.warn("[NotificationSound] Failed to play sound:", error);
+    console.warn('[NotificationSound] Failed to play sound:', error);
     return false;
   }
 }
@@ -70,7 +70,7 @@ export function useNotificationSound() {
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
     try {
       const stored = localStorage.getItem(SOUND_ENABLED_KEY);
-      return stored !== null ? stored === "true" : true; // enabled by default
+      return stored !== null ? stored === 'true' : true; // enabled by default
     } catch {
       return true;
     }
@@ -85,15 +85,15 @@ export function useNotificationSound() {
     const handleInteraction = () => {
       hasUserInteractedRef.current = true;
     };
-    
-    window.addEventListener("click", handleInteraction, { once: true });
-    window.addEventListener("keydown", handleInteraction, { once: true });
-    window.addEventListener("touchstart", handleInteraction, { once: true });
-    
+
+    window.addEventListener('click', handleInteraction, { once: true });
+    window.addEventListener('keydown', handleInteraction, { once: true });
+    window.addEventListener('touchstart', handleInteraction, { once: true });
+
     return () => {
-      window.removeEventListener("click", handleInteraction);
-      window.removeEventListener("keydown", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
     };
   }, []);
 
@@ -115,12 +115,12 @@ export function useNotificationSound() {
       if (newValue) {
         // Play a test sound when enabling
         playNotificationSound();
-        toast.success("تم تفعيل صوت التنبيه", {
-          description: "سيتم تنبيهك عند وصول رسالة واتساب جديدة",
+        toast.success('تم تفعيل صوت التنبيه', {
+          description: 'سيتم تنبيهك عند وصول رسالة واتساب جديدة',
           duration: 3000,
         });
       } else {
-        toast.info("تم إيقاف صوت التنبيه", {
+        toast.info('تم إيقاف صوت التنبيه', {
           duration: 3000,
         });
       }
@@ -146,23 +146,24 @@ export function useNotificationSound() {
     // New messages detected (count increased)
     if (currentWhatsappCount > prevCount && soundEnabled && hasUserInteractedRef.current) {
       const newMessages = currentWhatsappCount - prevCount;
-      
+
       // Play notification sound
       playNotificationSound();
 
       // Show toast notification
-      toast("رسالة واتساب جديدة", {
-        description: newMessages === 1
-          ? "لديك رسالة واتساب جديدة غير مقروءة"
-          : `لديك ${newMessages} رسائل واتساب جديدة غير مقروءة`,
+      toast('رسالة واتساب جديدة', {
+        description:
+          newMessages === 1
+            ? 'لديك رسالة واتساب جديدة غير مقروءة'
+            : `لديك ${newMessages} رسائل واتساب جديدة غير مقروءة`,
         duration: 5000,
         action: {
-          label: "عرض",
+          label: 'عرض',
           onClick: () => {
-            window.location.href = "/admin/whatsapp";
+            window.location.href = '/admin/whatsapp';
           },
         },
-        icon: "💬",
+        icon: '💬',
       });
     }
 

@@ -1,19 +1,46 @@
-import { useState, useCallback } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
-import { Download, Calendar, TrendingUp, DollarSign, Filter } from "lucide-react";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { useWhatsAppSSE, ConversationCostUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
-import { toast } from "sonner";
+import { useState, useCallback } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+} from 'recharts';
+import { Download, Calendar, TrendingUp, DollarSign, Filter } from 'lucide-react';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { useWhatsAppSSE, ConversationCostUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
+import { toast } from 'sonner';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
@@ -24,36 +51,45 @@ export default function WhatsAppCostsPage() {
     return date.toISOString().split('T')[0];
   });
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [pricingCategory, setPricingCategory] = useState<string>("all");
+  const [pricingCategory, setPricingCategory] = useState<string>('all');
 
-  const { data: conversationCosts, isLoading, refetch } = trpc.whatsapp.getConversationCosts.useQuery({
+  const {
+    data: conversationCosts,
+    isLoading,
+    refetch,
+  } = trpc.whatsapp.getConversationCosts.useQuery({
     startDate,
     endDate,
   });
 
   // SSE: تحديث فوري عند وصول أحداث التكلفة الجديدة
   useWhatsAppSSE({
-    onConversationCostUpdate: useCallback((event: ConversationCostUpdateEvent) => {
-      toast.info(`تحديث تكلفة المحادثة: ${event.phoneNumber}`);
-      refetch();
-    }, [refetch]),
+    onConversationCostUpdate: useCallback(
+      (event: ConversationCostUpdateEvent) => {
+        toast.info(`تحديث تكلفة المحادثة: ${event.phoneNumber}`);
+        refetch();
+      },
+      [refetch]
+    ),
   });
 
   // Process data for charts
-  const costData = conversationCosts?.map((conv: any) => ({
-    date: format(new Date(conv.createdAt), 'dd/MM', { locale: ar }),
-    conversationCost: conv.conversationCost || 0,
-    billable: conv.billable ? 1 : 0,
-    pricingCategory: conv.pricingCategory || 'غير محدد',
-  })) || [];
+  const costData =
+    conversationCosts?.map((conv: any) => ({
+      date: format(new Date(conv.createdAt), 'dd/MM', { locale: ar }),
+      conversationCost: conv.conversationCost || 0,
+      billable: conv.billable ? 1 : 0,
+      pricingCategory: conv.pricingCategory || 'غير محدد',
+    })) || [];
 
   // Group by pricing category
-  const categoryData = conversationCosts?.reduce((acc: any, conv: any) => {
-    const category = conv.pricingCategory || 'غير محدد';
-    if (!acc[category]) acc[category] = 0;
-    acc[category] += conv.conversationCost || 0;
-    return acc;
-  }, {}) || {};
+  const categoryData =
+    conversationCosts?.reduce((acc: any, conv: any) => {
+      const category = conv.pricingCategory || 'غير محدد';
+      if (!acc[category]) acc[category] = 0;
+      acc[category] += conv.conversationCost || 0;
+      return acc;
+    }, {}) || {};
 
   const pieData = Object.entries(categoryData).map(([name, value]) => ({
     name,
@@ -61,13 +97,17 @@ export default function WhatsAppCostsPage() {
   }));
 
   // Calculate totals
-  const totalCost = Array.isArray(conversationCosts) ? conversationCosts.reduce((sum: number, conv: any) => sum + (conv.conversationCost || 0), 0) : 0;
-  const billableCount = Array.isArray(conversationCosts) ? conversationCosts.filter((conv: any) => conv.billable).length : 0;
+  const totalCost = Array.isArray(conversationCosts)
+    ? conversationCosts.reduce((sum: number, conv: any) => sum + (conv.conversationCost || 0), 0)
+    : 0;
+  const billableCount = Array.isArray(conversationCosts)
+    ? conversationCosts.filter((conv: any) => conv.billable).length
+    : 0;
   const totalCount = Array.isArray(conversationCosts) ? conversationCosts.length : 0;
 
   const handleExport = () => {
     // Export functionality placeholder
-    console.log("Exporting costs data...");
+    console.log('Exporting costs data...');
   };
 
   return (
@@ -96,19 +136,11 @@ export default function WhatsAppCostsPage() {
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>من تاريخ</Label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>إلى تاريخ</Label>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>فئة التسعير</Label>
@@ -136,9 +168,7 @@ export default function WhatsAppCostsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">${totalCost.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground">
-                {totalCount} محادثة
-              </p>
+              <p className="text-xs text-muted-foreground">{totalCount} محادثة</p>
             </CardContent>
           </Card>
           <Card>
@@ -148,9 +178,7 @@ export default function WhatsAppCostsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{billableCount}</div>
-              <p className="text-xs text-muted-foreground">
-                من أصل {totalCount} محادثة
-              </p>
+              <p className="text-xs text-muted-foreground">من أصل {totalCount} محادثة</p>
             </CardContent>
           </Card>
           <Card>
@@ -162,9 +190,7 @@ export default function WhatsAppCostsPage() {
               <div className="text-2xl font-bold">
                 ${totalCount > 0 ? (totalCost / totalCount).toFixed(2) : '0.00'}
               </div>
-              <p className="text-xs text-muted-foreground">
-                لكل محادثة
-              </p>
+              <p className="text-xs text-muted-foreground">لكل محادثة</p>
             </CardContent>
           </Card>
         </div>
@@ -184,8 +210,18 @@ export default function WhatsAppCostsPage() {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="conversationCost" stroke="#8884d8" name="تكاليف المحادثات" />
-                  <Line type="monotone" dataKey="billable" stroke="#82ca9d" name="المحادثات القابلة للفوترة" />
+                  <Line
+                    type="monotone"
+                    dataKey="conversationCost"
+                    stroke="#8884d8"
+                    name="تكاليف المحادثات"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="billable"
+                    stroke="#82ca9d"
+                    name="المحادثات القابلة للفوترة"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>

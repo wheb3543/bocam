@@ -1,27 +1,27 @@
 /**
  * Facebook Conversions API (CAPI) Helper
- * 
+ *
  * يُرسل أحداث التحويل إلى Meta من الـ backend لتحسين دقة الإحصائيات
  * وتجاوز قيود Ad Blockers وحماية الخصوصية على المتصفح.
- * 
+ *
  * متغيرات البيئة المطلوبة:
  * - META_PIXEL_ID: معرّف Pixel
  * - META_CAPI_ACCESS_TOKEN: توكن الوصول لـ Conversions API
- * 
+ *
  * المرجع: https://developers.facebook.com/docs/marketing-api/conversions-api
  */
 
-import crypto from "crypto";
+import crypto from 'crypto';
 
-const PIXEL_ID = process.env.META_PIXEL_ID ?? "";
-const ACCESS_TOKEN = process.env.META_CAPI_ACCESS_TOKEN ?? "";
+const PIXEL_ID = process.env.META_PIXEL_ID ?? '';
+const ACCESS_TOKEN = process.env.META_CAPI_ACCESS_TOKEN ?? '';
 const CAPI_URL = `https://graph.facebook.com/v25.0/${PIXEL_ID}/events`;
 
 /**
  * تشفير البيانات الحساسة بـ SHA-256 كما تتطلب Meta
  */
 function hashData(value: string): string {
-  return crypto.createHash("sha256").update(value.trim().toLowerCase()).digest("hex");
+  return crypto.createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
 }
 
 /**
@@ -29,13 +29,13 @@ function hashData(value: string): string {
  */
 function hashPhone(phone: string): string {
   // تطبيع رقم الهاتف: إزالة + والمسافات والشرطات
-  const normalized = phone.replace(/[\s\-\(\)\+]/g, "");
-  return crypto.createHash("sha256").update(normalized).digest("hex");
+  const normalized = phone.replace(/[\s\-\(\)\+]/g, '');
+  return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
 export interface MetaEventData {
   /** اسم الحدث: Lead, Schedule, CompleteRegistration, PageView */
-  eventName: "Lead" | "Schedule" | "CompleteRegistration" | "PageView" | "ViewContent";
+  eventName: 'Lead' | 'Schedule' | 'CompleteRegistration' | 'PageView' | 'ViewContent';
   /** الوقت بالثواني (Unix timestamp) */
   eventTime?: number;
   /** رابط الصفحة التي حدث فيها الحدث */
@@ -79,8 +79,8 @@ export interface MetaCapiResponse {
  */
 export async function sendMetaConversionEvent(event: MetaEventData): Promise<MetaCapiResponse> {
   if (!PIXEL_ID || !ACCESS_TOKEN) {
-    console.warn("[Meta CAPI] META_PIXEL_ID أو META_CAPI_ACCESS_TOKEN غير محدد - تم تخطي الإرسال");
-    return { success: false, error: "Meta CAPI not configured" };
+    console.warn('[Meta CAPI] META_PIXEL_ID أو META_CAPI_ACCESS_TOKEN غير محدد - تم تخطي الإرسال');
+    return { success: false, error: 'Meta CAPI not configured' };
   }
 
   const eventTime = event.eventTime ?? Math.floor(Date.now() / 1000);
@@ -104,7 +104,7 @@ export async function sendMetaConversionEvent(event: MetaEventData): Promise<Met
         event_time: eventTime,
         event_id: eventId,
         event_source_url: event.eventSourceUrl,
-        action_source: "website",
+        action_source: 'website',
         user_data: userData,
         custom_data: event.customData ?? {},
       },
@@ -113,24 +113,24 @@ export async function sendMetaConversionEvent(event: MetaEventData): Promise<Met
 
   try {
     const response = await fetch(`${CAPI_URL}?access_token=${ACCESS_TOKEN}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("[Meta CAPI] خطأ في الإرسال:", errorText);
+      console.error('[Meta CAPI] خطأ في الإرسال:', errorText);
       return { success: false, error: errorText };
     }
 
-    const result = await response.json() as { events_received?: number };
+    const result = (await response.json()) as { events_received?: number };
     return {
       success: true,
       eventsReceived: result.events_received,
     };
   } catch (error) {
-    console.error("[Meta CAPI] خطأ في الاتصال:", error);
+    console.error('[Meta CAPI] خطأ في الاتصال:', error);
     return { success: false, error: String(error) };
   }
 }
@@ -150,7 +150,7 @@ export async function sendLeadEvent(data: {
   fbc?: string;
 }): Promise<MetaCapiResponse> {
   return sendMetaConversionEvent({
-    eventName: "Lead",
+    eventName: 'Lead',
     eventSourceUrl: data.sourceUrl,
     userData: {
       phone: data.phone,
@@ -161,9 +161,9 @@ export async function sendLeadEvent(data: {
       fbc: data.fbc,
     },
     customData: {
-      content_name: data.contentName ?? "Medical Booking",
-      content_category: data.contentCategory ?? "Healthcare",
-      currency: "YER",
+      content_name: data.contentName ?? 'Medical Booking',
+      content_category: data.contentCategory ?? 'Healthcare',
+      currency: 'YER',
     },
   });
 }
@@ -183,7 +183,7 @@ export async function sendCompleteRegistrationEvent(data: {
   fbc?: string;
 }): Promise<MetaCapiResponse> {
   return sendMetaConversionEvent({
-    eventName: "CompleteRegistration",
+    eventName: 'CompleteRegistration',
     eventSourceUrl: data.sourceUrl,
     userData: {
       phone: data.phone,
@@ -194,9 +194,9 @@ export async function sendCompleteRegistrationEvent(data: {
       fbc: data.fbc,
     },
     customData: {
-      content_name: data.contentName ?? "Medical Registration",
-      content_category: data.contentCategory ?? "Healthcare",
-      status: "completed",
+      content_name: data.contentName ?? 'Medical Registration',
+      content_category: data.contentCategory ?? 'Healthcare',
+      status: 'completed',
     },
   });
 }
@@ -215,7 +215,7 @@ export async function sendScheduleEvent(data: {
   fbc?: string;
 }): Promise<MetaCapiResponse> {
   return sendMetaConversionEvent({
-    eventName: "Schedule",
+    eventName: 'Schedule',
     eventSourceUrl: data.sourceUrl,
     userData: {
       phone: data.phone,
@@ -226,8 +226,8 @@ export async function sendScheduleEvent(data: {
       fbc: data.fbc,
     },
     customData: {
-      content_name: data.doctorName ?? "Doctor Appointment",
-      content_category: "Healthcare",
+      content_name: data.doctorName ?? 'Doctor Appointment',
+      content_category: 'Healthcare',
     },
   });
 }

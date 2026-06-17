@@ -8,24 +8,31 @@
  * ✅ يتحقق من الأرقام المحظورة قبل الإرسال
  */
 
-import { eq, and } from "drizzle-orm";
-import { normalizePhoneNumber } from "../database/db";
-import { getDb } from "../database/db";
-import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from "./whatsappCloudAPI";
-import { whatsappNotifications, whatsappBlockedNumbers } from "../../drizzle/schema";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
+import { eq, and } from 'drizzle-orm';
+import { normalizePhoneNumber } from '../database/db';
+import { getDb } from '../database/db';
+import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from './whatsappCloudAPI';
+import { whatsappNotifications, whatsappBlockedNumbers } from '../../drizzle/schema';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 // ── Helper: حفظ سجل الإشعار في قاعدة البيانات ──────────────────────────────
 async function saveNotification(params: {
-  entityType: "appointment" | "camp_registration" | "offer_lead";
+  entityType: 'appointment' | 'camp_registration' | 'offer_lead';
   entityId: number;
-  notificationType: "booking_confirmation" | "reminder_24h" | "reminder_1h" | "post_visit_followup" | "cancellation" | "status_update" | "custom";
+  notificationType:
+    | 'booking_confirmation'
+    | 'reminder_24h'
+    | 'reminder_1h'
+    | 'post_visit_followup'
+    | 'cancellation'
+    | 'status_update'
+    | 'custom';
   phone: string;
   recipientName?: string;
   templateName?: string;
   messageContent?: string;
-  status: "pending" | "sent" | "delivered" | "read" | "failed";
+  status: 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
   metaMessageId?: string;
   errorMessage?: string;
   sentBy?: number;
@@ -47,11 +54,11 @@ async function saveNotification(params: {
       errorMessage: params.errorMessage,
       sentBy: params.sentBy,
       isAutomatic: params.isAutomatic !== false,
-      sentAt: params.status === "sent" ? new Date() : undefined,
+      sentAt: params.status === 'sent' ? new Date() : undefined,
     });
     return (result as any).insertId ?? null;
   } catch (err) {
-    console.error("[WhatsApp Appointments] Failed to save notification:", err);
+    console.error('[WhatsApp Appointments] Failed to save notification:', err);
     return null;
   }
 }
@@ -85,62 +92,69 @@ export async function sendAppointmentConfirmation(params: {
   try {
     const normalizedPhone = normalizePhoneNumber(params.phone);
     if (!normalizedPhone || normalizedPhone.length < 9) {
-      return { success: false, error: "رقم الهاتف غير صحيح" };
+      return { success: false, error: 'رقم الهاتف غير صحيح' };
     }
 
     if (await isPhoneBlocked(normalizedPhone)) {
-      return { success: false, error: "الرقم محظور من استقبال الرسائل" };
+      return { success: false, error: 'الرقم محظور من استقبال الرسائل' };
     }
 
-    const appointmentDate = format(params.appointmentTime, "EEEE d MMMM yyyy", { locale: ar });
-    const appointmentTimeStr = format(params.appointmentTime, "HH:mm");
+    const appointmentDate = format(params.appointmentTime, 'EEEE d MMMM yyyy', { locale: ar });
+    const appointmentTimeStr = format(params.appointmentTime, 'HH:mm');
 
     // محاولة إرسال قالب Meta الرسمي appointment_confirmation أولاً
     let result = await sendWhatsAppTemplateMessage(normalizedPhone, {
-      templateName: "appointment_confirmation",
-      languageCode: "ar",
+      templateName: 'appointment_confirmation',
+      languageCode: 'ar',
       components: [
         {
-          type: "body",
+          type: 'body',
           parameters: [
-            { type: "text", text: params.patientName },
-            { type: "text", text: params.doctorName },
-            { type: "text", text: params.department },
-            { type: "text", text: appointmentDate },
-            { type: "text", text: appointmentTimeStr },
+            { type: 'text', text: params.patientName },
+            { type: 'text', text: params.doctorName },
+            { type: 'text', text: params.department },
+            { type: 'text', text: appointmentDate },
+            { type: 'text', text: appointmentTimeStr },
           ],
         },
       ],
     });
 
-    let usedTemplate = "appointment_confirmation";
+    let usedTemplate = 'appointment_confirmation';
 
     // Fallback: إذا فشل إرسال القالب نرسل رسالة نصية عادية
     if (!result.success) {
-      console.warn(`[WhatsApp Appointments] Template appointment_confirmation failed (${result.error}), falling back to text message`);
+      console.warn(
+        `[WhatsApp Appointments] Template appointment_confirmation failed (${result.error}), falling back to text message`
+      );
       const message = `مرحباً ${params.patientName} 👋\n\n✅ تم تأكيد موعدك في المستشفى السعودي الألماني\n\n📋 تفاصيل الموعد:\n👨‍⚕️ الطبيب: ${params.doctorName}\n🏥 القسم: ${params.department}\n📅 التاريخ: ${appointmentDate}\n⏰ الوقت: ${appointmentTimeStr}\n\n⚠️ يرجى الحضور قبل 15 دقيقة من الموعد\n\n📞 للاستفسار: 8000018`;
       result = await sendWhatsAppTextMessage(normalizedPhone, message);
-      usedTemplate = "text_fallback";
+      usedTemplate = 'text_fallback';
     }
 
     const notificationId = await saveNotification({
-      entityType: "appointment",
+      entityType: 'appointment',
       entityId: params.appointmentId,
-      notificationType: "booking_confirmation",
+      notificationType: 'booking_confirmation',
       phone: normalizedPhone,
       recipientName: params.patientName,
       templateName: usedTemplate,
       messageContent: `appointment_confirmation | ${params.doctorName} | ${appointmentDate} ${appointmentTimeStr}`,
-      status: result.success ? "sent" : "failed",
+      status: result.success ? 'sent' : 'failed',
       metaMessageId: result.messageId,
       errorMessage: result.error,
       sentBy: params.sentBy,
     });
 
-    return { success: result.success, messageId: result.messageId, notificationId: notificationId ?? undefined, error: result.error };
+    return {
+      success: result.success,
+      messageId: result.messageId,
+      notificationId: notificationId ?? undefined,
+      error: result.error,
+    };
   } catch (error) {
-    console.error("[WhatsApp Appointments] Failed to send confirmation:", error);
-    return { success: false, error: error instanceof Error ? error.message : "خطأ غير معروف" };
+    console.error('[WhatsApp Appointments] Failed to send confirmation:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
 
@@ -157,62 +171,74 @@ export async function sendAppointmentReminder(params: {
   try {
     const normalizedPhone = normalizePhoneNumber(params.phone);
     if (!normalizedPhone || normalizedPhone.length < 9) {
-      return { success: false, error: "رقم الهاتف غير صحيح" };
+      return { success: false, error: 'رقم الهاتف غير صحيح' };
     }
 
     if (await isPhoneBlocked(normalizedPhone)) {
-      return { success: false, error: "الرقم محظور من استقبال الرسائل" };
+      return { success: false, error: 'الرقم محظور من استقبال الرسائل' };
     }
 
-    const appointmentTimeStr2 = format(params.appointmentTime, "HH:mm");
-    const reminderText = params.hoursUntil === 24 ? "غداً" : params.hoursUntil === 1 ? "خلال ساعة" : `خلال ${params.hoursUntil} ساعات`;
-    const notifType = params.hoursUntil >= 24 ? "reminder_24h" : "reminder_1h";
+    const appointmentTimeStr2 = format(params.appointmentTime, 'HH:mm');
+    const reminderText =
+      params.hoursUntil === 24
+        ? 'غداً'
+        : params.hoursUntil === 1
+          ? 'خلال ساعة'
+          : `خلال ${params.hoursUntil} ساعات`;
+    const notifType = params.hoursUntil >= 24 ? 'reminder_24h' : 'reminder_1h';
 
     // محاولة إرسال قالب Meta الرسمي appointment_reminder أولاً
     let result = await sendWhatsAppTemplateMessage(normalizedPhone, {
-      templateName: "appointment_reminder",
-      languageCode: "ar",
+      templateName: 'appointment_reminder',
+      languageCode: 'ar',
       components: [
         {
-          type: "body",
+          type: 'body',
           parameters: [
-            { type: "text", text: params.patientName },
-            { type: "text", text: params.doctorName },
-            { type: "text", text: reminderText },
-            { type: "text", text: appointmentTimeStr2 },
+            { type: 'text', text: params.patientName },
+            { type: 'text', text: params.doctorName },
+            { type: 'text', text: reminderText },
+            { type: 'text', text: appointmentTimeStr2 },
           ],
         },
       ],
     });
 
-    let usedTemplate2 = "appointment_reminder";
+    let usedTemplate2 = 'appointment_reminder';
 
     // Fallback: إذا فشل إرسال القالب نرسل رسالة نصية عادية
     if (!result.success) {
-      console.warn(`[WhatsApp Appointments] Template appointment_reminder failed (${result.error}), falling back to text message`);
+      console.warn(
+        `[WhatsApp Appointments] Template appointment_reminder failed (${result.error}), falling back to text message`
+      );
       const fallbackMsg = `⏰ تذكير بموعدك\n\n${params.patientName}، موعدك مع د. ${params.doctorName} ${reminderText}\n🕐 الوقت: ${appointmentTimeStr2}\n\nيرجى الحضور قبل 15 دقيقة\n📞 للإلغاء أو التعديل: 8000018`;
       result = await sendWhatsAppTextMessage(normalizedPhone, fallbackMsg);
-      usedTemplate2 = "text_fallback";
+      usedTemplate2 = 'text_fallback';
     }
 
     const notificationId = await saveNotification({
-      entityType: "appointment",
+      entityType: 'appointment',
       entityId: params.appointmentId,
       notificationType: notifType,
       phone: normalizedPhone,
       recipientName: params.patientName,
       templateName: usedTemplate2,
       messageContent: `appointment_reminder | ${params.doctorName} | ${reminderText} | ${appointmentTimeStr2}`,
-      status: result.success ? "sent" : "failed",
+      status: result.success ? 'sent' : 'failed',
       metaMessageId: result.messageId,
       errorMessage: result.error,
       sentBy: params.sentBy,
     });
 
-    return { success: result.success, messageId: result.messageId, notificationId: notificationId ?? undefined, error: result.error };
+    return {
+      success: result.success,
+      messageId: result.messageId,
+      notificationId: notificationId ?? undefined,
+      error: result.error,
+    };
   } catch (error) {
-    console.error("[WhatsApp Appointments] Failed to send reminder:", error);
-    return { success: false, error: error instanceof Error ? error.message : "خطأ غير معروف" };
+    console.error('[WhatsApp Appointments] Failed to send reminder:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
 
@@ -228,11 +254,11 @@ export async function sendAppointmentFollowup(params: {
   try {
     const normalizedPhone = normalizePhoneNumber(params.phone);
     if (!normalizedPhone || normalizedPhone.length < 9) {
-      return { success: false, error: "رقم الهاتف غير صحيح" };
+      return { success: false, error: 'رقم الهاتف غير صحيح' };
     }
 
     if (await isPhoneBlocked(normalizedPhone)) {
-      return { success: false, error: "الرقم محظور من استقبال الرسائل" };
+      return { success: false, error: 'الرقم محظور من استقبال الرسائل' };
     }
 
     const message = `شكراً لزيارتك ${params.patientName} 🙏
@@ -248,22 +274,27 @@ export async function sendAppointmentFollowup(params: {
     const result = await sendWhatsAppTextMessage(normalizedPhone, message);
 
     const notificationId = await saveNotification({
-      entityType: "appointment",
+      entityType: 'appointment',
       entityId: params.appointmentId,
-      notificationType: "post_visit_followup",
+      notificationType: 'post_visit_followup',
       phone: normalizedPhone,
       recipientName: params.patientName,
       messageContent: message,
-      status: result.success ? "sent" : "failed",
+      status: result.success ? 'sent' : 'failed',
       metaMessageId: result.messageId,
       errorMessage: result.error,
       sentBy: params.sentBy,
     });
 
-    return { success: result.success, messageId: result.messageId, notificationId: notificationId ?? undefined, error: result.error };
+    return {
+      success: result.success,
+      messageId: result.messageId,
+      notificationId: notificationId ?? undefined,
+      error: result.error,
+    };
   } catch (error) {
-    console.error("[WhatsApp Appointments] Failed to send followup:", error);
-    return { success: false, error: error instanceof Error ? error.message : "خطأ غير معروف" };
+    console.error('[WhatsApp Appointments] Failed to send followup:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
 
@@ -280,14 +311,16 @@ export async function sendCampRegistrationConfirmation(params: {
   try {
     const normalizedPhone = normalizePhoneNumber(params.phone);
     if (!normalizedPhone || normalizedPhone.length < 9) {
-      return { success: false, error: "رقم الهاتف غير صحيح" };
+      return { success: false, error: 'رقم الهاتف غير صحيح' };
     }
 
     if (await isPhoneBlocked(normalizedPhone)) {
-      return { success: false, error: "الرقم محظور من استقبال الرسائل" };
+      return { success: false, error: 'الرقم محظور من استقبال الرسائل' };
     }
 
-    const dateStr = params.campDate ? format(params.campDate, "EEEE d MMMM yyyy", { locale: ar }) : "سيتم الإعلان عنه لاحقاً";
+    const dateStr = params.campDate
+      ? format(params.campDate, 'EEEE d MMMM yyyy', { locale: ar })
+      : 'سيتم الإعلان عنه لاحقاً';
 
     const message = `مرحباً ${params.patientName} 👋
 
@@ -296,7 +329,7 @@ export async function sendCampRegistrationConfirmation(params: {
 🏕️ *تفاصيل المخيم:*
 📌 المخيم: ${params.campName}
 📅 التاريخ: ${dateStr}
-${params.campLocation ? `📍 الموقع: ${params.campLocation}` : ""}
+${params.campLocation ? `📍 الموقع: ${params.campLocation}` : ''}
 
 سيتم التواصل معك قريباً لتأكيد التفاصيل.
 
@@ -305,22 +338,27 @@ ${params.campLocation ? `📍 الموقع: ${params.campLocation}` : ""}
     const result = await sendWhatsAppTextMessage(normalizedPhone, message);
 
     const notificationId = await saveNotification({
-      entityType: "camp_registration",
+      entityType: 'camp_registration',
       entityId: params.registrationId,
-      notificationType: "booking_confirmation",
+      notificationType: 'booking_confirmation',
       phone: normalizedPhone,
       recipientName: params.patientName,
       messageContent: message,
-      status: result.success ? "sent" : "failed",
+      status: result.success ? 'sent' : 'failed',
       metaMessageId: result.messageId,
       errorMessage: result.error,
       sentBy: params.sentBy,
     });
 
-    return { success: result.success, messageId: result.messageId, notificationId: notificationId ?? undefined, error: result.error };
+    return {
+      success: result.success,
+      messageId: result.messageId,
+      notificationId: notificationId ?? undefined,
+      error: result.error,
+    };
   } catch (error) {
-    console.error("[WhatsApp Appointments] Failed to send camp confirmation:", error);
-    return { success: false, error: error instanceof Error ? error.message : "خطأ غير معروف" };
+    console.error('[WhatsApp Appointments] Failed to send camp confirmation:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
 
@@ -337,16 +375,16 @@ export async function sendOfferLeadConfirmation(params: {
   try {
     const normalizedPhone = normalizePhoneNumber(params.phone);
     if (!normalizedPhone || normalizedPhone.length < 9) {
-      return { success: false, error: "رقم الهاتف غير صحيح" };
+      return { success: false, error: 'رقم الهاتف غير صحيح' };
     }
 
     if (await isPhoneBlocked(normalizedPhone)) {
-      return { success: false, error: "الرقم محظور من استقبال الرسائل" };
+      return { success: false, error: 'الرقم محظور من استقبال الرسائل' };
     }
 
     const priceInfo = params.offerPrice
-      ? `💰 السعر: ${params.offerPrice.toLocaleString()} ريال${params.offerDiscount ? ` (خصم ${params.offerDiscount}%)` : ""}`
-      : "";
+      ? `💰 السعر: ${params.offerPrice.toLocaleString()} ريال${params.offerDiscount ? ` (خصم ${params.offerDiscount}%)` : ''}`
+      : '';
 
     const message = `مرحباً ${params.patientName} 👋
 
@@ -364,33 +402,38 @@ ${priceInfo}
     const result = await sendWhatsAppTextMessage(normalizedPhone, message);
 
     const notificationId = await saveNotification({
-      entityType: "offer_lead",
+      entityType: 'offer_lead',
       entityId: params.offerLeadId,
-      notificationType: "booking_confirmation",
+      notificationType: 'booking_confirmation',
       phone: normalizedPhone,
       recipientName: params.patientName,
       messageContent: message,
-      status: result.success ? "sent" : "failed",
+      status: result.success ? 'sent' : 'failed',
       metaMessageId: result.messageId,
       errorMessage: result.error,
       sentBy: params.sentBy,
     });
 
-    return { success: result.success, messageId: result.messageId, notificationId: notificationId ?? undefined, error: result.error };
+    return {
+      success: result.success,
+      messageId: result.messageId,
+      notificationId: notificationId ?? undefined,
+      error: result.error,
+    };
   } catch (error) {
-    console.error("[WhatsApp Appointments] Failed to send offer confirmation:", error);
-    return { success: false, error: error instanceof Error ? error.message : "خطأ غير معروف" };
+    console.error('[WhatsApp Appointments] Failed to send offer confirmation:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
 
 // ── جلب إشعارات سجل معين ─────────────────────────────────────────────────────
 export async function getEntityNotifications(params: {
-  entityType: "appointment" | "camp_registration" | "offer_lead";
+  entityType: 'appointment' | 'camp_registration' | 'offer_lead';
   entityId: number;
 }): Promise<{ success: boolean; notifications?: any[]; error?: string }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: "قاعدة البيانات غير متاحة" };
+    if (!db) return { success: false, error: 'قاعدة البيانات غير متاحة' };
 
     const notifications = await db
       .select()
@@ -405,8 +448,8 @@ export async function getEntityNotifications(params: {
 
     return { success: true, notifications };
   } catch (error) {
-    console.error("[WhatsApp Appointments] Failed to get notifications:", error);
-    return { success: false, error: error instanceof Error ? error.message : "خطأ غير معروف" };
+    console.error('[WhatsApp Appointments] Failed to get notifications:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
 
@@ -425,15 +468,17 @@ export async function getNotificationStats(): Promise<{
 }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: "قاعدة البيانات غير متاحة" };
+    if (!db) return { success: false, error: 'قاعدة البيانات غير متاحة' };
 
     const all = await db.select().from(whatsappNotifications);
 
     const stats = {
       total: all.length,
-      sent: all.filter(n => n.status === "sent" || n.status === "delivered" || n.status === "read").length,
-      failed: all.filter(n => n.status === "failed").length,
-      pending: all.filter(n => n.status === "pending").length,
+      sent: all.filter(
+        (n) => n.status === 'sent' || n.status === 'delivered' || n.status === 'read'
+      ).length,
+      failed: all.filter((n) => n.status === 'failed').length,
+      pending: all.filter((n) => n.status === 'pending').length,
       byType: {} as Record<string, number>,
       byEntity: {} as Record<string, number>,
     };
@@ -445,8 +490,8 @@ export async function getNotificationStats(): Promise<{
 
     return { success: true, stats };
   } catch (error) {
-    console.error("[WhatsApp Appointments] Failed to get stats:", error);
-    return { success: false, error: error instanceof Error ? error.message : "خطأ غير معروف" };
+    console.error('[WhatsApp Appointments] Failed to get stats:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
 
@@ -456,19 +501,19 @@ export async function checkAndSendReminders() {
 }
 
 export async function getAppointmentNotificationStatus(appointmentId: number) {
-  return getEntityNotifications({ entityType: "appointment", entityId: appointmentId });
+  return getEntityNotifications({ entityType: 'appointment', entityId: appointmentId });
 }
 
 // ── جلب سجلات الإشعارات مع فلترة ودعم pagination ─────────────────────────────
 export async function getNotificationLogs(params: {
-  entityType?: "appointment" | "camp_registration" | "offer_lead";
-  status?: "pending" | "sent" | "delivered" | "read" | "failed";
+  entityType?: 'appointment' | 'camp_registration' | 'offer_lead';
+  status?: 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
   limit?: number;
   offset?: number;
 }): Promise<{ success: boolean; logs?: any[]; total?: number; error?: string }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: "قاعدة البيانات غير متاحة" };
+    if (!db) return { success: false, error: 'قاعدة البيانات غير متاحة' };
 
     const limit = params.limit ?? 50;
     const offset = params.offset ?? 0;
@@ -495,7 +540,7 @@ export async function getNotificationLogs(params: {
 
     return { success: true, logs, total: allLogs.length };
   } catch (error) {
-    console.error("[WhatsApp Appointments] Failed to get notification logs:", error);
-    return { success: false, error: error instanceof Error ? error.message : "خطأ غير معروف" };
+    console.error('[WhatsApp Appointments] Failed to get notification logs:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }

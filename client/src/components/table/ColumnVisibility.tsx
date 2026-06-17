@@ -1,21 +1,29 @@
-import { useState, useMemo } from "react";
-import { Settings, Save, Trash2, BookTemplate, ChevronDown, Check, Plus, Globe, User, GripVertical, Snowflake } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useState, useMemo } from 'react';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+  Settings,
+  Save,
+  Trash2,
+  BookTemplate,
+  ChevronDown,
+  Check,
+  Plus,
+  Globe,
+  User,
+  GripVertical,
+  Snowflake,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -23,9 +31,9 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 import {
   DndContext,
   closestCenter,
@@ -34,15 +42,15 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-} from "@dnd-kit/core";
+} from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 export interface ColumnConfig {
   key: string;
@@ -116,7 +124,10 @@ export const COLUMN_WIDTH_PRESETS: Record<string, { width: number; min: number; 
 };
 
 /** Get width config for a column key */
-export function getColumnWidth(key: string, config?: ColumnConfig): { width: number; min: number; max: number } {
+export function getColumnWidth(
+  key: string,
+  config?: ColumnConfig
+): { width: number; min: number; max: number } {
   if (config?.defaultWidth) {
     return {
       width: config.defaultWidth,
@@ -151,7 +162,13 @@ interface ColumnVisibilityProps {
   templates?: ColumnTemplate[];
   activeTemplateId?: string | null;
   onApplyTemplate?: (template: ColumnTemplate) => void;
-  onSaveTemplate?: (name: string, columns: Record<string, boolean>, columnOrder: string[], columnWidths?: Record<string, number>, frozenColumns?: string[]) => void;
+  onSaveTemplate?: (
+    name: string,
+    columns: Record<string, boolean>,
+    columnOrder: string[],
+    columnWidths?: Record<string, number>,
+    frozenColumns?: string[]
+  ) => void;
   onDeleteTemplate?: (templateId: string) => void;
   tableKey?: string;
   // Column widths support
@@ -162,59 +179,99 @@ interface ColumnVisibilityProps {
   // Shared template support (admin only)
   isAdmin?: boolean;
   sharedTemplates?: ColumnTemplate[];
-  onSaveSharedTemplate?: (name: string, columns: Record<string, boolean>, columnOrder: string[], columnWidths?: Record<string, number>, frozenColumns?: string[]) => void;
+  onSaveSharedTemplate?: (
+    name: string,
+    columns: Record<string, boolean>,
+    columnOrder: string[],
+    columnWidths?: Record<string, number>,
+    frozenColumns?: string[]
+  ) => void;
   onDeleteSharedTemplate?: (dbId: number) => void;
 }
 
 // Built-in default templates generator
 export function getDefaultTemplates(columns: ColumnConfig[], tableKey: string): ColumnTemplate[] {
-  const defaultOrder = columns.map(c => c.key);
+  const defaultOrder = columns.map((c) => c.key);
 
   // Basic template - only essential columns
   const basicColumns: Record<string, boolean> = {};
   const essentialKeys = ['ticketNumber', 'fullName', 'phone', 'status', 'createdAt', 'actions'];
-  columns.forEach(col => {
+  columns.forEach((col) => {
     basicColumns[col.key] = essentialKeys.includes(col.key);
   });
 
   // Marketing template - includes UTM and source data
   const marketingColumns: Record<string, boolean> = {};
-  const marketingKeys = ['ticketNumber', 'fullName', 'phone', 'source', 'status', 'createdAt',
-    'utmSource', 'utmMedium', 'utmCampaign', 'utmTerm', 'utmContent', 'utmPlacement',
-    'referrer', 'fbclid', 'gclid', 'actions'];
-  columns.forEach(col => {
+  const marketingKeys = [
+    'ticketNumber',
+    'fullName',
+    'phone',
+    'source',
+    'status',
+    'createdAt',
+    'utmSource',
+    'utmMedium',
+    'utmCampaign',
+    'utmTerm',
+    'utmContent',
+    'utmPlacement',
+    'referrer',
+    'fbclid',
+    'gclid',
+    'actions',
+  ];
+  columns.forEach((col) => {
     marketingColumns[col.key] = marketingKeys.includes(col.key);
   });
 
   // Full template - all columns visible
   const fullColumns: Record<string, boolean> = {};
-  columns.forEach(col => {
+  columns.forEach((col) => {
     fullColumns[col.key] = true;
   });
 
   return [
-    { id: `${tableKey}_default_basic`, name: 'عرض أساسي', columns: basicColumns, columnOrder: defaultOrder, isDefault: true },
-    { id: `${tableKey}_default_marketing`, name: 'عرض تسويقي', columns: marketingColumns, columnOrder: defaultOrder, isDefault: true },
-    { id: `${tableKey}_default_full`, name: 'عرض كامل', columns: fullColumns, columnOrder: defaultOrder, isDefault: true },
+    {
+      id: `${tableKey}_default_basic`,
+      name: 'عرض أساسي',
+      columns: basicColumns,
+      columnOrder: defaultOrder,
+      isDefault: true,
+    },
+    {
+      id: `${tableKey}_default_marketing`,
+      name: 'عرض تسويقي',
+      columns: marketingColumns,
+      columnOrder: defaultOrder,
+      isDefault: true,
+    },
+    {
+      id: `${tableKey}_default_full`,
+      name: 'عرض كامل',
+      columns: fullColumns,
+      columnOrder: defaultOrder,
+      isDefault: true,
+    },
   ];
 }
 
 // Sortable column item component
-function SortableColumnItem({ column, isVisible, onVisibilityChange, isFrozen, onToggleFrozen }: {
+function SortableColumnItem({
+  column,
+  isVisible,
+  onVisibilityChange,
+  isFrozen,
+  onToggleFrozen,
+}: {
   column: ColumnConfig;
   isVisible: boolean;
   onVisibilityChange: (key: string, visible: boolean) => void;
   isFrozen?: boolean;
   onToggleFrozen?: (key: string) => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: column.key });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: column.key,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -240,9 +297,7 @@ function SortableColumnItem({ column, isVisible, onVisibilityChange, isFrozen, o
       <Checkbox
         id={`column-${column.key}`}
         checked={isVisible}
-        onCheckedChange={(checked) =>
-          onVisibilityChange(column.key, checked as boolean)
-        }
+        onCheckedChange={(checked) => onVisibilityChange(column.key, checked as boolean)}
       />
       <Label
         htmlFor={`column-${column.key}`}
@@ -257,8 +312,8 @@ function SortableColumnItem({ column, isVisible, onVisibilityChange, isFrozen, o
             onToggleFrozen(column.key);
           }}
           className={`p-0.5 rounded transition-colors ${
-            isFrozen 
-              ? 'text-blue-600 bg-blue-100 hover:bg-blue-200' 
+            isFrozen
+              ? 'text-blue-600 bg-blue-100 hover:bg-blue-200'
               : 'text-muted-foreground/40 hover:text-muted-foreground hover:bg-accent'
           }`}
           title={isFrozen ? 'إلغاء تجميد العمود' : 'تجميد العمود'}
@@ -342,7 +397,13 @@ export function ColumnVisibility({
       return;
     }
     if (onSaveTemplate) {
-      onSaveTemplate(newTemplateName.trim(), { ...visibleColumns }, [...columnOrder], columnWidths ? { ...columnWidths } : undefined, frozenColumns.length > 0 ? [...frozenColumns] : undefined);
+      onSaveTemplate(
+        newTemplateName.trim(),
+        { ...visibleColumns },
+        [...columnOrder],
+        columnWidths ? { ...columnWidths } : undefined,
+        frozenColumns.length > 0 ? [...frozenColumns] : undefined
+      );
       setNewTemplateName('');
       setSaveDialogOpen(false);
       toast.success(`تم حفظ القالب "${newTemplateName.trim()}" بنجاح`);
@@ -355,10 +416,18 @@ export function ColumnVisibility({
       return;
     }
     if (onSaveSharedTemplate) {
-      onSaveSharedTemplate(newSharedTemplateName.trim(), { ...visibleColumns }, [...columnOrder], columnWidths ? { ...columnWidths } : undefined, frozenColumns.length > 0 ? [...frozenColumns] : undefined);
+      onSaveSharedTemplate(
+        newSharedTemplateName.trim(),
+        { ...visibleColumns },
+        [...columnOrder],
+        columnWidths ? { ...columnWidths } : undefined,
+        frozenColumns.length > 0 ? [...frozenColumns] : undefined
+      );
       setNewSharedTemplateName('');
       setSaveSharedDialogOpen(false);
-      toast.success(`تم حفظ القالب المشترك "${newSharedTemplateName.trim()}" بنجاح - سيظهر لجميع المستخدمين`);
+      toast.success(
+        `تم حفظ القالب المشترك "${newSharedTemplateName.trim()}" بنجاح - سيظهر لجميع المستخدمين`
+      );
     }
   };
 
@@ -378,11 +447,11 @@ export function ColumnVisibility({
     }
   };
 
-  const activeTemplate = [...templates, ...sharedTemplates].find(t => t.id === activeTemplateId);
+  const activeTemplate = [...templates, ...sharedTemplates].find((t) => t.id === activeTemplateId);
 
   // Combine all templates for the dropdown
-  const defaultTemplates = templates.filter(t => t.isDefault);
-  const customTemplates = templates.filter(t => !t.isDefault);
+  const defaultTemplates = templates.filter((t) => t.isDefault);
+  const customTemplates = templates.filter((t) => !t.isDefault);
 
   return (
     <>
@@ -511,10 +580,7 @@ export function ColumnVisibility({
 
               <DropdownMenuSeparator />
               {/* Save personal template */}
-              <DropdownMenuItem
-                onClick={() => setSaveDialogOpen(true)}
-                className="text-primary"
-              >
+              <DropdownMenuItem onClick={() => setSaveDialogOpen(true)} className="text-primary">
                 <Plus className="h-4 w-4 ml-2" />
                 حفظ كقالب شخصي
               </DropdownMenuItem>
@@ -572,7 +638,8 @@ export function ColumnVisibility({
                 </div>
               </div>
               <p className="text-[11px] text-muted-foreground -mt-1">
-                اسحب <GripVertical className="h-3 w-3 inline" /> لإعادة الترتيب • انقر <Snowflake className="h-3 w-3 inline text-blue-500" /> للتجميد
+                اسحب <GripVertical className="h-3 w-3 inline" /> لإعادة الترتيب • انقر{' '}
+                <Snowflake className="h-3 w-3 inline text-blue-500" /> للتجميد
               </p>
               <div className="max-h-[350px] overflow-y-auto -mx-1 px-1">
                 <DndContext
@@ -581,7 +648,7 @@ export function ColumnVisibility({
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={orderedColumns.map(c => c.key)}
+                    items={orderedColumns.map((c) => c.key)}
                     strategy={verticalListSortingStrategy}
                   >
                     {orderedColumns.map((column) => (
@@ -686,8 +753,8 @@ export function ColumnVisibility({
             <Button variant="outline" onClick={() => setSaveSharedDialogOpen(false)}>
               إلغاء
             </Button>
-            <Button 
-              onClick={handleSaveSharedTemplate} 
+            <Button
+              onClick={handleSaveSharedTemplate}
               disabled={!newSharedTemplateName.trim()}
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -723,7 +790,10 @@ export function ColumnVisibility({
       </Dialog>
 
       {/* Delete Shared Template Confirmation Dialog */}
-      <Dialog open={deleteSharedConfirmId !== null} onOpenChange={() => setDeleteSharedConfirmId(null)}>
+      <Dialog
+        open={deleteSharedConfirmId !== null}
+        onOpenChange={() => setDeleteSharedConfirmId(null)}
+      >
         <DialogContent className="sm:max-w-[350px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -731,7 +801,8 @@ export function ColumnVisibility({
               حذف القالب المشترك
             </DialogTitle>
             <DialogDescription>
-              هل أنت متأكد من حذف هذا القالب المشترك؟ سيتم إزالته من جميع المستخدمين. لا يمكن التراجع عن هذا الإجراء.
+              هل أنت متأكد من حذف هذا القالب المشترك؟ سيتم إزالته من جميع المستخدمين. لا يمكن
+              التراجع عن هذا الإجراء.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
@@ -740,7 +811,9 @@ export function ColumnVisibility({
             </Button>
             <Button
               variant="destructive"
-              onClick={() => deleteSharedConfirmId !== null && handleDeleteSharedTemplate(deleteSharedConfirmId)}
+              onClick={() =>
+                deleteSharedConfirmId !== null && handleDeleteSharedTemplate(deleteSharedConfirmId)
+              }
             >
               <Trash2 className="h-4 w-4 ml-2" />
               حذف للجميع

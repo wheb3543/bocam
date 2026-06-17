@@ -10,7 +10,7 @@ response:
     Content-Type: application/json; charset=UTF-8
     Vary: Origin
     x-business-use-case-usage: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
-    Access-Control-Allow-Origin: "*"
+    Access-Control-Allow-Origin: '*'
     facebook-api-version: v17.0
     Strict-Transport-Security: max-age=15552000; preload
     Pragma: no-cache
@@ -18,12 +18,12 @@ response:
     Expires: Sat, 01 Jan 2000 00:00:00 GMT
     x-fb-request-id: AI30jPlFHq76adVh0j6NI6M
     x-fb-trace-id: Ckwb7R007I8
-    x-fb-rev: "1007849776"
+    x-fb-rev: '1007849776'
     X-FB-Debug: xwYqFVM/CgvMFBdr72b1SoodwzNgzEfQ9SDpiIPeb3wE0n/sie2xgK6jFXjwpEQROxdgbLqDvJdWTH20Xbwu4Q==
     Date: Mon, 17 Jul 2023 17:31:52 GMT
     Alt-Svc: h3=":443"; ma=86400
     Connection: keep-alive
-    Content-Length: "145"
+    Content-Length: '145'
   body:
     type: json
     content: |-

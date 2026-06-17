@@ -1,6 +1,6 @@
 $kind: http-request
-name: "Status: Message Sent - Business Reply to User"
-url: ""
+name: 'Status: Message Sent - Business Reply to User'
+url: ''
 method: VIEW
 body:
   type: json

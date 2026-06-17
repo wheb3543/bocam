@@ -1,19 +1,19 @@
 /**
  * InstallPWAButton Component
- * 
+ *
  * مكون زر تثبيت PWA الموحد - يعمل مع كلا التطبيقين (عام + إدارة)
- * 
+ *
  * الميزات:
  * - يظهر فقط عندما يكون التثبيت متاحاً (beforeinstallprompt)
  * - يدعم iOS بعرض تعليمات يدوية
  * - يتتبع عمليات التثبيت في قاعدة البيانات
  * - لا يزعج المستخدم (يختفي بعد الرفض لمدة 7 أيام)
  * - يدعم وضع compact (للهيدر) ووضع sidebar (للشريط الجانبي) ووضع banner (بانر كامل)
- * 
+ *
  * الاستخدام:
  * <InstallPWAButton appType="public" variant="banner" />
  * <InstallPWAButton appType="admin" variant="compact" />
- * 
+ *
  * أماكن الاستخدام:
  * - Navbar (الواجهة العامة) - variant="compact"
  * - TopNavbar (لوحة التحكم) - variant="compact"
@@ -30,8 +30,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { usePWAInstall, type PWAAppType } from "@/hooks/integrations/usePWAInstall";
-import { cn } from "@/lib/utils";
+import { usePWAInstall, type PWAAppType } from '@/hooks/integrations/usePWAInstall';
+import { cn } from '@/lib/utils';
 
 interface InstallPWAButtonProps {
   appType?: PWAAppType;
@@ -45,14 +45,8 @@ export default function InstallPWAButton({
   variant = 'banner',
   className,
 }: InstallPWAButtonProps) {
-  const {
-    canInstall,
-    isInstalled,
-    isIOS,
-    isInstalling,
-    installApp,
-    dismissPrompt,
-  } = usePWAInstall(appType);
+  const { canInstall, isInstalled, isIOS, isInstalling, installApp, dismissPrompt } =
+    usePWAInstall(appType);
 
   const [showIOSGuide, setShowIOSGuide] = useState(false);
 
@@ -87,11 +81,13 @@ export default function InstallPWAButton({
           )}
         >
           <Download className="h-4 w-4 shrink-0" />
-          <span className="truncate">
-            {isInstalling ? 'جارٍ التثبيت...' : 'تثبيت التطبيق'}
-          </span>
+          <span className="truncate">{isInstalling ? 'جارٍ التثبيت...' : 'تثبيت التطبيق'}</span>
         </button>
-        <IOSInstallGuide open={showIOSGuide} onClose={() => setShowIOSGuide(false)} appName={appName} />
+        <IOSInstallGuide
+          open={showIOSGuide}
+          onClose={() => setShowIOSGuide(false)}
+          appName={appName}
+        />
       </>
     );
   }
@@ -114,7 +110,11 @@ export default function InstallPWAButton({
           <Download className="h-4 w-4" />
           <span className="hidden sm:inline">{isInstalling ? 'جارٍ...' : 'تثبيت'}</span>
         </Button>
-        <IOSInstallGuide open={showIOSGuide} onClose={() => setShowIOSGuide(false)} appName={appName} />
+        <IOSInstallGuide
+          open={showIOSGuide}
+          onClose={() => setShowIOSGuide(false)}
+          appName={appName}
+        />
       </>
     );
   }
@@ -149,7 +149,11 @@ export default function InstallPWAButton({
           </button>
         </div>
       </div>
-      <IOSInstallGuide open={showIOSGuide} onClose={() => setShowIOSGuide(false)} appName={appName} />
+      <IOSInstallGuide
+        open={showIOSGuide}
+        onClose={() => setShowIOSGuide(false)}
+        appName={appName}
+      />
     </>
   );
 }
@@ -179,7 +183,9 @@ function IOSInstallGuide({
 
         <div className="space-y-4 py-2">
           <div className="flex items-start gap-3">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">1</div>
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+              1
+            </div>
             <div>
               <p className="text-sm font-medium">اضغط على زر المشاركة</p>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -188,7 +194,9 @@ function IOSInstallGuide({
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">2</div>
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+              2
+            </div>
             <div>
               <p className="text-sm font-medium">اختر "إضافة إلى الشاشة الرئيسية"</p>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -197,7 +205,9 @@ function IOSInstallGuide({
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">3</div>
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+              3
+            </div>
             <div>
               <p className="text-sm font-medium">اضغط "إضافة" للتأكيد</p>
               <p className="text-xs text-muted-foreground mt-1">سيظهر التطبيق على شاشتك الرئيسية</p>
@@ -205,7 +215,9 @@ function IOSInstallGuide({
           </div>
         </div>
 
-        <Button onClick={onClose} className="w-full">فهمت</Button>
+        <Button onClick={onClose} className="w-full">
+          فهمت
+        </Button>
       </DialogContent>
     </Dialog>
   );

@@ -3,18 +3,18 @@
  * صفحة قواعد الرد التلقائي
  */
 
-import { useState, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Settings } from "lucide-react";
-import { toast } from "sonner";
-import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
+import { useState, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Settings } from 'lucide-react';
+import { toast } from 'sonner';
+import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
 
 export default function WhatsAppAutoReply() {
-  const [autoReplyTrigger, setAutoReplyTrigger] = useState("");
-  const [autoReplyResponse, setAutoReplyResponse] = useState("");
+  const [autoReplyTrigger, setAutoReplyTrigger] = useState('');
+  const [autoReplyResponse, setAutoReplyResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   // Queries
@@ -32,15 +32,15 @@ export default function WhatsAppAutoReply() {
   const deleteAutoReplyMutation = trpc.whatsapp.deleteAutoReplyRule.useMutation();
   const toggleAutoReplyMutation = trpc.whatsapp.toggleAutoReplyRule.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث قاعدة الرد التلقائي");
+      toast.success('تم تحديث قاعدة الرد التلقائي');
       autoReplyRulesQuery.refetch();
     },
-    onError: () => toast.error("فشل تحديث قاعدة الرد التلقائي"),
+    onError: () => toast.error('فشل تحديث قاعدة الرد التلقائي'),
   });
 
   const handleAddAutoReply = async () => {
     if (!autoReplyTrigger || !autoReplyResponse) {
-      toast.error("يرجى إدخال المحفز والرد");
+      toast.error('يرجى إدخال المحفز والرد');
       return;
     }
 
@@ -48,21 +48,21 @@ export default function WhatsAppAutoReply() {
     try {
       const result = await addAutoReplyMutation.mutateAsync({
         name: autoReplyTrigger,
-        triggerType: "keyword" as const,
+        triggerType: 'keyword' as const,
         triggerValue: autoReplyTrigger,
         replyMessage: autoReplyResponse,
       });
 
       if (result.success) {
-        toast.success("تم إضافة قاعدة الرد التلقائي");
-        setAutoReplyTrigger("");
-        setAutoReplyResponse("");
+        toast.success('تم إضافة قاعدة الرد التلقائي');
+        setAutoReplyTrigger('');
+        setAutoReplyResponse('');
         autoReplyRulesQuery.refetch();
       } else {
-        toast.error(result.error || "فشل إضافة القاعدة");
+        toast.error(result.error || 'فشل إضافة القاعدة');
       }
     } catch (error) {
-      toast.error("حدث خطأ أثناء إضافة القاعدة");
+      toast.error('حدث خطأ أثناء إضافة القاعدة');
     } finally {
       setIsLoading(false);
     }
@@ -72,11 +72,11 @@ export default function WhatsAppAutoReply() {
     try {
       const result = await deleteAutoReplyMutation.mutateAsync({ ruleId });
       if (result.success) {
-        toast.success("تم حذف القاعدة");
+        toast.success('تم حذف القاعدة');
         autoReplyRulesQuery.refetch();
       }
     } catch (error) {
-      toast.error("فشل حذف القاعدة");
+      toast.error('فشل حذف القاعدة');
     }
   };
 
@@ -132,7 +132,7 @@ export default function WhatsAppAutoReply() {
           </div>
 
           <Button onClick={handleAddAutoReply} disabled={isLoading} className="w-full">
-            {isLoading ? "جاري الإضافة..." : "إضافة قاعدة"}
+            {isLoading ? 'جاري الإضافة...' : 'إضافة قاعدة'}
           </Button>
         </CardContent>
       </Card>
@@ -156,15 +156,17 @@ export default function WhatsAppAutoReply() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
-                      variant={rule.isActive ? "default" : "outline"}
+                      variant={rule.isActive ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => toggleAutoReplyMutation.mutate({
-                        ruleId: rule.id,
-                        enabled: !rule.isActive
-                      })}
+                      onClick={() =>
+                        toggleAutoReplyMutation.mutate({
+                          ruleId: rule.id,
+                          enabled: !rule.isActive,
+                        })
+                      }
                       disabled={toggleAutoReplyMutation.isPending}
                     >
-                      {rule.isActive ? "تعطيل" : "تفعيل"}
+                      {rule.isActive ? 'تعطيل' : 'تفعيل'}
                     </Button>
                     <Button
                       variant="destructive"

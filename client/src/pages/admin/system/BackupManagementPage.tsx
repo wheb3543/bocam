@@ -1,14 +1,21 @@
-import { useEffect, useState } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  Database, 
-  HardDrive, 
-  Clock, 
+import { useEffect, useState } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Database,
+  HardDrive,
+  Clock,
   CheckCircle,
   XCircle,
   AlertTriangle,
@@ -16,8 +23,8 @@ import {
   Download,
   Trash2,
   Calendar,
-  Cloud
-} from "lucide-react";
+  Cloud,
+} from 'lucide-react';
 
 interface BackupStatus {
   lastBackup: number;
@@ -91,7 +98,7 @@ export default function BackupManagementPage() {
         body: JSON.stringify({ type: 'manual' }),
       });
       const data = await response.json();
-      
+
       if (data.success) {
         alert('تم بدء النسخة الاحتياطية بنجاح');
         fetchBackupStatus();
@@ -107,7 +114,11 @@ export default function BackupManagementPage() {
   };
 
   const handleRestoreBackup = async (backupId: string) => {
-    if (!confirm('هل أنت متأكد من أنك تريد استعادة هذه النسخة الاحتياطية؟ سيتم استعادة النظام إلى الحالة عند هذه النسخة.')) {
+    if (
+      !confirm(
+        'هل أنت متأكد من أنك تريد استعادة هذه النسخة الاحتياطية؟ سيتم استعادة النظام إلى الحالة عند هذه النسخة.'
+      )
+    ) {
       return;
     }
 
@@ -120,7 +131,7 @@ export default function BackupManagementPage() {
         body: JSON.stringify({ backupId }),
       });
       const data = await response.json();
-      
+
       if (data.success) {
         alert('تم استعادة النسخة الاحتياطية بنجاح. سيتم إعادة تشغيل النظام.');
         setTimeout(() => {
@@ -135,7 +146,11 @@ export default function BackupManagementPage() {
   };
 
   const handleDeleteBackup = async (backupId: string) => {
-    if (!confirm('هل أنت متأكد من أنك تريد حذف هذه النسخة الاحتياطية؟ لا يمكن التراجع عن هذا الإجراء.')) {
+    if (
+      !confirm(
+        'هل أنت متأكد من أنك تريد حذف هذه النسخة الاحتياطية؟ لا يمكن التراجع عن هذا الإجراء.'
+      )
+    ) {
       return;
     }
 
@@ -144,7 +159,7 @@ export default function BackupManagementPage() {
         method: 'DELETE',
       });
       const data = await response.json();
-      
+
       if (data.success) {
         alert('تم حذف النسخة الاحتياطية بنجاح');
         fetchBackupStatus();
@@ -166,7 +181,7 @@ export default function BackupManagementPage() {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
   const getStatusBadge = (status: string) => {
@@ -210,7 +225,10 @@ export default function BackupManagementPage() {
 
   if (isLoading) {
     return (
-      <DashboardLayout pageTitle="إدارة النسخ الاحتياطية" pageDescription="إدارة النسخ الاحتياطية للنظام">
+      <DashboardLayout
+        pageTitle="إدارة النسخ الاحتياطية"
+        pageDescription="إدارة النسخ الاحتياطية للنظام"
+      >
         <div className="flex items-center justify-center min-h-[400px]">
           <RefreshCw className="h-8 w-8 animate-spin" />
         </div>
@@ -219,7 +237,10 @@ export default function BackupManagementPage() {
   }
 
   return (
-    <DashboardLayout pageTitle="إدارة النسخ الاحتياطية" pageDescription="إدارة النسخ الاحتياطية للنظام">
+    <DashboardLayout
+      pageTitle="إدارة النسخ الاحتياطية"
+      pageDescription="إدارة النسخ الاحتياطية للنظام"
+    >
       <div className="space-y-6">
         {/* Backup Status Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -235,7 +256,8 @@ export default function BackupManagementPage() {
                 {status?.lastBackup ? formatDate(status.lastBackup) : 'غير متوفر'}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                الحجم: {status?.lastBackupSize ? formatBytes(status.lastBackupSize * 1024 * 1024) : '0'}
+                الحجم:{' '}
+                {status?.lastBackupSize ? formatBytes(status.lastBackupSize * 1024 * 1024) : '0'}
               </p>
             </CardContent>
           </Card>
@@ -251,9 +273,7 @@ export default function BackupManagementPage() {
               <div className="text-2xl font-bold">
                 {status?.nextBackup ? formatDate(status.nextBackup) : 'غير محدد'}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                مجدول تلقائياً
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">مجدول تلقائياً</p>
             </CardContent>
           </Card>
 
@@ -265,9 +285,7 @@ export default function BackupManagementPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {status?.totalBackups || 0}
-              </div>
+              <div className="text-2xl font-bold">{status?.totalBackups || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 الاحتفاظ: {status?.retentionDays || 0} يوم
               </p>
@@ -353,7 +371,9 @@ export default function BackupManagementPage() {
                 <Clock className="h-5 w-5" />
                 <div>
                   <p className="font-semibold">سياسة الاحتفاظ</p>
-                  <p className="text-sm text-muted-foreground">احتفاظ بالنسخ لمدة {status?.retentionDays || 0} يوم</p>
+                  <p className="text-sm text-muted-foreground">
+                    احتفاظ بالنسخ لمدة {status?.retentionDays || 0} يوم
+                  </p>
                 </div>
               </div>
               <Badge variant="outline">{status?.retentionDays || 0} يوم</Badge>
@@ -399,16 +419,16 @@ export default function BackupManagementPage() {
                     <TableCell>{getLocationBadge(backup.location)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleRestoreBackup(backup.id)}
                           disabled={backup.status !== 'completed'}
                         >
                           <Download className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteBackup(backup.id)}
                           disabled={backup.status === 'in_progress'}
@@ -430,7 +450,8 @@ export default function BackupManagementPage() {
             <div>
               <p className="font-semibold text-blue-900 dark:text-blue-100">معلومات مهمة</p>
               <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                النسخ الاحتياطية التلقائية تعمل يومياً الساعة 2:00 ص. يتم الاحتفاظ بالنسخ لمدة 30 يوم ثم يتم حذفها تلقائياً.
+                النسخ الاحتياطية التلقائية تعمل يومياً الساعة 2:00 ص. يتم الاحتفاظ بالنسخ لمدة 30
+                يوم ثم يتم حذفها تلقائياً.
               </p>
             </div>
           </div>

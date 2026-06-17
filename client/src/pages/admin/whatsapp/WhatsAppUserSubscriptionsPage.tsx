@@ -1,20 +1,33 @@
-import { useState, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Users, CheckCircle, XCircle, RefreshCw, Search, UserCheck, UserX, Activity } from "lucide-react";
-import { toast } from "sonner";
-import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
+import { useState, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import {
+  Users,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  Search,
+  UserCheck,
+  UserX,
+  Activity,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
 
 export default function WhatsAppUserSubscriptionsPage() {
-  const [activeTab, setActiveTab] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [optInType, setOptInType] = useState<"general" | "marketing">("general");
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [optInType, setOptInType] = useState<'general' | 'marketing'>('general');
 
-  const { data: subscriptions, isLoading, refetch } = trpc.whatsapp.userSubscriptions.getAll.useQuery(
+  const {
+    data: subscriptions,
+    isLoading,
+    refetch,
+  } = trpc.whatsapp.userSubscriptions.getAll.useQuery(
     { optInType, limit: 100 },
     { refetchInterval: 30000 }
   );
@@ -24,29 +37,36 @@ export default function WhatsAppUserSubscriptionsPage() {
     { refetchInterval: 30000 }
   );
 
-  const { data: subscriptionWebhookEvents, isLoading: webhookLoading, refetch: refetchWebhook } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
-    { category: "subscriptions", limit: 50 },
+  const {
+    data: subscriptionWebhookEvents,
+    isLoading: webhookLoading,
+    refetch: refetchWebhook,
+  } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
+    { category: 'subscriptions', limit: 50 },
     { refetchInterval: 30000 }
   );
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
-    onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
-      toast.info(`تحديث الحساب: ${event.eventType}`);
-      refetch();
-      refetchStats();
-      refetchWebhook();
-    }, [refetch, refetchStats, refetchWebhook]),
+    onAccountUpdate: useCallback(
+      (event: AccountUpdateEvent) => {
+        toast.info(`تحديث الحساب: ${event.eventType}`);
+        refetch();
+        refetchStats();
+        refetchWebhook();
+      },
+      [refetch, refetchStats, refetchWebhook]
+    ),
   });
 
   const updateStatusMutation = trpc.whatsapp.userSubscriptions.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث حالة الاشتراك");
+      toast.success('تم تحديث حالة الاشتراك');
       refetch();
       refetchStats();
     },
     onError: () => {
-      toast.error("فشل تحديث حالة الاشتراك");
+      toast.error('فشل تحديث حالة الاشتراك');
     },
   });
 
@@ -54,33 +74,39 @@ export default function WhatsAppUserSubscriptionsPage() {
     refetch();
     refetchStats();
     refetchWebhook();
-    toast.success("تم تحديث البيانات");
+    toast.success('تم تحديث البيانات');
   };
 
-  const handleUpdateStatus = (phone: string, status: "opted_in" | "opted_out") => {
+  const handleUpdateStatus = (phone: string, status: 'opted_in' | 'opted_out') => {
     updateStatusMutation.mutate({
       phoneNumber: phone,
       status,
       optInType,
-      source: "manual",
+      source: 'manual',
     });
   };
 
-  const filteredSubscriptions = Array.isArray(subscriptions) ? subscriptions.filter((sub: any) => {
-    const matchesSearch = sub.phoneNumber.includes(searchTerm) ||
-                         (sub.details && JSON.parse(sub.details).name?.includes(searchTerm));
-    const matchesTab = activeTab === "all" ||
-                      (activeTab === "opted_in" && sub.status === "opted_in") ||
-                      (activeTab === "opted_out" && sub.status === "opted_out");
-    return matchesSearch && matchesTab;
-  }) : [];
+  const filteredSubscriptions = Array.isArray(subscriptions)
+    ? subscriptions.filter((sub: any) => {
+        const matchesSearch =
+          sub.phoneNumber.includes(searchTerm) ||
+          (sub.details && JSON.parse(sub.details).name?.includes(searchTerm));
+        const matchesTab =
+          activeTab === 'all' ||
+          (activeTab === 'opted_in' && sub.status === 'opted_in') ||
+          (activeTab === 'opted_out' && sub.status === 'opted_out');
+        return matchesSearch && matchesTab;
+      })
+    : [];
 
   return (
     <div className="container mx-auto py-6 px-4" dir="rtl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">اشتراكات المستخدمين</h1>
-          <p className="text-gray-600 mt-1">إدارة اشتراكات المستخدمين في WhatsApp (Opt-in/Opt-out)</p>
+          <p className="text-gray-600 mt-1">
+            إدارة اشتراكات المستخدمين في WhatsApp (Opt-in/Opt-out)
+          </p>
         </div>
         <Button onClick={handleRefresh} variant="outline" className="gap-2">
           <RefreshCw className="h-4 w-4" />
@@ -95,9 +121,7 @@ export default function WhatsAppUserSubscriptionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">مشتركين عام</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {stats?.general.optedIn || 0}
-                </p>
+                <p className="text-2xl font-bold text-green-600">{stats?.general.optedIn || 0}</p>
               </div>
               <UserCheck className="h-8 w-8 text-green-500" />
             </div>
@@ -109,9 +133,7 @@ export default function WhatsAppUserSubscriptionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">غير مشتركين عام</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {stats?.general.optedOut || 0}
-                </p>
+                <p className="text-2xl font-bold text-red-600">{stats?.general.optedOut || 0}</p>
               </div>
               <UserX className="h-8 w-8 text-red-500" />
             </div>
@@ -123,9 +145,7 @@ export default function WhatsAppUserSubscriptionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">مشتركين تسويقي</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {stats?.marketing.optedIn || 0}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{stats?.marketing.optedIn || 0}</p>
               </div>
               <Users className="h-8 w-8 text-blue-500" />
             </div>
@@ -160,14 +180,14 @@ export default function WhatsAppUserSubscriptionsPage() {
         </div>
         <div className="flex gap-2">
           <Button
-            variant={optInType === "general" ? "default" : "outline"}
-            onClick={() => setOptInType("general")}
+            variant={optInType === 'general' ? 'default' : 'outline'}
+            onClick={() => setOptInType('general')}
           >
             عام
           </Button>
           <Button
-            variant={optInType === "marketing" ? "default" : "outline"}
-            onClick={() => setOptInType("marketing")}
+            variant={optInType === 'marketing' ? 'default' : 'outline'}
+            onClick={() => setOptInType('marketing')}
           >
             تسويقي
           </Button>
@@ -188,7 +208,7 @@ export default function WhatsAppUserSubscriptionsPage() {
             <CardHeader>
               <CardTitle>قائمة الاشتراكات</CardTitle>
               <CardDescription>
-                {optInType === "general" ? "اشتراكات عامة" : "اشتراكات تسويقية"}
+                {optInType === 'general' ? 'اشتراكات عامة' : 'اشتراكات تسويقية'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -211,7 +231,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                         <tr key={sub.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4 font-mono">{sub.phoneNumber}</td>
                           <td className="py-3 px-4">
-                            {sub.status === "opted_in" ? (
+                            {sub.status === 'opted_in' ? (
                               <Badge className="bg-green-500 text-white gap-1">
                                 <CheckCircle className="h-3 w-3" />
                                 مشترك
@@ -225,15 +245,15 @@ export default function WhatsAppUserSubscriptionsPage() {
                           </td>
                           <td className="py-3 px-4">{sub.source}</td>
                           <td className="py-3 px-4">
-                            {new Date(sub.updatedAt).toLocaleString("ar-SA")}
+                            {new Date(sub.updatedAt).toLocaleString('ar-SA')}
                           </td>
                           <td className="py-3 px-4">
-                            {sub.status === "opted_in" ? (
+                            {sub.status === 'opted_in' ? (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 className="text-red-600 hover:bg-red-50"
-                                onClick={() => handleUpdateStatus(sub.phoneNumber, "opted_out")}
+                                onClick={() => handleUpdateStatus(sub.phoneNumber, 'opted_out')}
                                 disabled={updateStatusMutation.isPending}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
@@ -244,7 +264,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                                 size="sm"
                                 variant="outline"
                                 className="text-green-600 hover:bg-green-50"
-                                onClick={() => handleUpdateStatus(sub.phoneNumber, "opted_in")}
+                                onClick={() => handleUpdateStatus(sub.phoneNumber, 'opted_in')}
                                 disabled={updateStatusMutation.isPending}
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
@@ -287,21 +307,17 @@ export default function WhatsAppUserSubscriptionsPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-semibold">{event.eventType}</h4>
-                            {event.subType && (
-                              <Badge variant="outline">{event.subType}</Badge>
-                            )}
+                            {event.subType && <Badge variant="outline">{event.subType}</Badge>}
                           </div>
                           {event.phoneNumber && (
-                            <p className="text-sm text-gray-600 mt-1">
-                              الرقم: {event.phoneNumber}
-                            </p>
+                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber}</p>
                           )}
                           <p className="text-xs text-gray-500 mt-2">
-                            {new Date(event.createdAt).toLocaleString("ar-SA")}
+                            {new Date(event.createdAt).toLocaleString('ar-SA')}
                           </p>
                         </div>
-                        <Badge className={event.handlerExists ? "bg-green-500" : "bg-red-500"}>
-                          {event.handlerExists ? "معالج" : "غير معالج"}
+                        <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>
+                          {event.handlerExists ? 'معالج' : 'غير معالج'}
                         </Badge>
                       </div>
                     </div>

@@ -1,6 +1,6 @@
 $kind: http-request
 description: When your customer clicks on a quick reply button in an [interactive message template](#eed16be1-5e49-4a48-8710-398820b4b5dd), a response is sent. Below is an example of the callback format.
-url: ""
+url: ''
 method: VIEW
 body:
   type: json

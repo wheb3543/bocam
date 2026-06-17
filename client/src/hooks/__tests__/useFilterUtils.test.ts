@@ -6,7 +6,7 @@ import {
   applyDatePreset,
   applyDefaultSort,
   DATE_FILTER_OPTIONS,
-} from '../useFilterUtils';
+} from '../table/useFilterUtils';
 
 // Mock useDebounce to return value immediately for testing
 vi.mock('../useDebounce', () => ({

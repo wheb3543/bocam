@@ -1,72 +1,109 @@
-import { useState, useCallback } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Download, Filter, Package, TrendingUp, Clock } from "lucide-react";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { useWhatsAppSSE, AccountUpdateEvent, OrderReceivedEvent, TransactionStatusUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
-import { toast } from "sonner";
+import { useState, useCallback } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingCart, Download, Filter, Package, TrendingUp, Clock } from 'lucide-react';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import {
+  useWhatsAppSSE,
+  AccountUpdateEvent,
+  OrderReceivedEvent,
+  TransactionStatusUpdateEvent,
+} from '@/hooks/integrations/useWhatsAppSSE';
+import { toast } from 'sonner';
 
 export default function WhatsAppOrdersPage() {
-  const [status, setStatus] = useState<string>("all");
+  const [status, setStatus] = useState<string>('all');
   const [limit, setLimit] = useState(50);
 
-  const { data: orders, isLoading, refetch } = trpc.whatsapp.getOrders.useQuery({
-    status: status === "all" ? undefined : status,
+  const {
+    data: orders,
+    isLoading,
+    refetch,
+  } = trpc.whatsapp.getOrders.useQuery({
+    status: status === 'all' ? undefined : status,
     limit,
   });
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
-    onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
-      toast.info(`تحديث الحساب: ${event.eventType}`);
-      refetch();
-    }, [refetch]),
-    onOrderReceived: useCallback((event: OrderReceivedEvent) => {
-      toast.info(`استلام طلب جديد`);
-      refetch();
-    }, [refetch]),
-    onTransactionStatusUpdate: useCallback((event: TransactionStatusUpdateEvent) => {
-      toast.info(`تحديث حالة المعاملة`);
-      refetch();
-    }, [refetch]),
+    onAccountUpdate: useCallback(
+      (event: AccountUpdateEvent) => {
+        toast.info(`تحديث الحساب: ${event.eventType}`);
+        refetch();
+      },
+      [refetch]
+    ),
+    onOrderReceived: useCallback(
+      (event: OrderReceivedEvent) => {
+        toast.info(`استلام طلب جديد`);
+        refetch();
+      },
+      [refetch]
+    ),
+    onTransactionStatusUpdate: useCallback(
+      (event: TransactionStatusUpdateEvent) => {
+        toast.info(`تحديث حالة المعاملة`);
+        refetch();
+      },
+      [refetch]
+    ),
   });
 
   // Calculate stats
   const totalOrders = Array.isArray(orders) ? orders.length : 0;
-  const pendingOrders = Array.isArray(orders) ? orders.filter((o: any) => o.status === 'pending').length : 0;
-  const confirmedOrders = Array.isArray(orders) ? orders.filter((o: any) => o.status === 'confirmed').length : 0;
-  const completedOrders = Array.isArray(orders) ? orders.filter((o: any) => o.status === 'completed').length : 0;
+  const pendingOrders = Array.isArray(orders)
+    ? orders.filter((o: any) => o.status === 'pending').length
+    : 0;
+  const confirmedOrders = Array.isArray(orders)
+    ? orders.filter((o: any) => o.status === 'confirmed').length
+    : 0;
+  const completedOrders = Array.isArray(orders)
+    ? orders.filter((o: any) => o.status === 'completed').length
+    : 0;
 
   const getStatusBadge = (status: string) => {
     const statusColors: Record<string, string> = {
-      'pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'confirmed': 'bg-blue-100 text-blue-800 border-blue-200',
-      'completed': 'bg-green-100 text-green-800 border-green-200',
-      'cancelled': 'bg-red-100 text-red-800 border-red-200',
+      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      confirmed: 'bg-blue-100 text-blue-800 border-blue-200',
+      completed: 'bg-green-100 text-green-800 border-green-200',
+      cancelled: 'bg-red-100 text-red-800 border-red-200',
     };
     return statusColors[status] || 'bg-gray-100 text-gray-800';
   };
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      'pending': 'قيد الانتظار',
-      'confirmed': 'مؤكد',
-      'completed': 'مكتمل',
-      'cancelled': 'ملغي',
+      pending: 'قيد الانتظار',
+      confirmed: 'مؤكد',
+      completed: 'مكتمل',
+      cancelled: 'ملغي',
     };
     return labels[status] || status;
   };
 
   const handleExport = () => {
-    console.log("Exporting orders data...");
+    console.log('Exporting orders data...');
   };
 
   return (
@@ -201,20 +238,32 @@ export default function WhatsAppOrdersPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {order.metadata ? (() => {
-                          try {
-                            const meta = JSON.parse(order.metadata);
-                            return (
-                              <div className="text-sm">
-                                <div className="font-medium">{meta.text || 'بدون وصف'}</div>
-                                {meta.productId && <div className="text-xs text-muted-foreground">منتج: {meta.productId}</div>}
-                                {meta.quantity && <div className="text-xs text-muted-foreground">الكمية: {meta.quantity}</div>}
-                              </div>
-                            );
-                          } catch {
-                            return <span className="text-sm">{order.content || 'بدون تفاصيل'}</span>;
-                          }
-                        })() : (
+                        {order.metadata ? (
+                          (() => {
+                            try {
+                              const meta = JSON.parse(order.metadata);
+                              return (
+                                <div className="text-sm">
+                                  <div className="font-medium">{meta.text || 'بدون وصف'}</div>
+                                  {meta.productId && (
+                                    <div className="text-xs text-muted-foreground">
+                                      منتج: {meta.productId}
+                                    </div>
+                                  )}
+                                  {meta.quantity && (
+                                    <div className="text-xs text-muted-foreground">
+                                      الكمية: {meta.quantity}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            } catch {
+                              return (
+                                <span className="text-sm">{order.content || 'بدون تفاصيل'}</span>
+                              );
+                            }
+                          })()
+                        ) : (
                           <span className="text-sm">{order.content || 'بدون تفاصيل'}</span>
                         )}
                       </TableCell>

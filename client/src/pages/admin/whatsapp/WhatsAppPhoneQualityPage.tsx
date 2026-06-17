@@ -1,16 +1,31 @@
-import { useState, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Smartphone, RefreshCw, TrendingUp, TrendingDown, Minus, Activity, Zap, AlertTriangle, DollarSign } from "lucide-react";
-import { toast } from "sonner";
-import { useWhatsAppSSE, PhoneQualityUpdateEvent, ConversationCostUpdateEvent, AccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
+import { useState, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Smartphone,
+  RefreshCw,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Activity,
+  Zap,
+  AlertTriangle,
+  DollarSign,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  useWhatsAppSSE,
+  PhoneQualityUpdateEvent,
+  ConversationCostUpdateEvent,
+  AccountUpdateEvent,
+} from '@/hooks/integrations/useWhatsAppSSE';
 
 export default function WhatsAppPhoneQualityPage() {
-  const [phoneFilter, setPhoneFilter] = useState("");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [phoneFilter, setPhoneFilter] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
 
   // حالة الجودة المباشرة عبر SSE
   const [liveQuality, setLiveQuality] = useState<{
@@ -20,22 +35,35 @@ export default function WhatsAppPhoneQualityPage() {
     timestamp: string;
   } | null>(null);
 
-  const { data: currentQuality, isLoading: currentLoading, refetch: refetchCurrent } = trpc.whatsapp.phoneQuality.getCurrent.useQuery(
-    undefined,
-    { refetchInterval: 300000 }
-  );
+  const {
+    data: currentQuality,
+    isLoading: currentLoading,
+    refetch: refetchCurrent,
+  } = trpc.whatsapp.phoneQuality.getCurrent.useQuery(undefined, { refetchInterval: 300000 });
 
-  const { data: qualityHistory, isLoading: historyLoading, refetch: refetchHistory } = trpc.whatsapp.phoneQuality.getHistory.useQuery(
+  const {
+    data: qualityHistory,
+    isLoading: historyLoading,
+    refetch: refetchHistory,
+  } = trpc.whatsapp.phoneQuality.getHistory.useQuery(
     { phoneNumber: phoneFilter || undefined, limit: 100 },
     { refetchInterval: 300000 }
   );
 
-  const { data: qualityWebhookEvents, isLoading: webhookLoading, refetch: refetchWebhook } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
-    { category: "quality", limit: 50 },
+  const {
+    data: qualityWebhookEvents,
+    isLoading: webhookLoading,
+    refetch: refetchWebhook,
+  } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
+    { category: 'quality', limit: 50 },
     { refetchInterval: 300000 }
   );
 
-  const { data: conversationQualityQuery, isLoading: conversationLoading, refetch: refetchConversation } = trpc.whatsapp.conversationQuality.getHistory.useQuery(
+  const {
+    data: conversationQualityQuery,
+    isLoading: conversationLoading,
+    refetch: refetchConversation,
+  } = trpc.whatsapp.conversationQuality.getHistory.useQuery(
     { phoneNumber: phoneFilter || undefined, limit: 100 },
     { refetchInterval: 300000 }
   );
@@ -50,59 +78,68 @@ export default function WhatsAppPhoneQualityPage() {
     refetchHistory();
     refetchWebhook();
     refetchConversation();
-    toast.success("تم تحديث البيانات");
+    toast.success('تم تحديث البيانات');
   };
 
   // ── SSE: تحديث فوري لجودة الهاتف ──────────────────────────────────────────
   useWhatsAppSSE({
-    onPhoneQualityUpdate: useCallback((event: PhoneQualityUpdateEvent) => {
-      setLiveQuality({
-        currentRating: event.currentRating,
-        previousRating: event.previousRating,
-        phoneNumber: event.phoneNumber,
-        timestamp: event.timestamp,
-      });
-      // تحديث البيانات من الـ DB
-      refetchCurrent();
-      refetchHistory();
-      refetchWebhook();
-    }, [refetchCurrent, refetchHistory, refetchWebhook]),
-    onConversationCostUpdate: useCallback((event: ConversationCostUpdateEvent) => {
-      toast.info(`تحديث تكلفة المحادثة: ${event.phoneNumber}`);
-      refetchConversation();
-    }, [refetchConversation]),
-    onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
-      toast.info(`تحديث الحساب: ${event.eventType}`);
-      refetchCurrent();
-      refetchHistory();
-    }, [refetchCurrent, refetchHistory]),
+    onPhoneQualityUpdate: useCallback(
+      (event: PhoneQualityUpdateEvent) => {
+        setLiveQuality({
+          currentRating: event.currentRating,
+          previousRating: event.previousRating,
+          phoneNumber: event.phoneNumber,
+          timestamp: event.timestamp,
+        });
+        // تحديث البيانات من الـ DB
+        refetchCurrent();
+        refetchHistory();
+        refetchWebhook();
+      },
+      [refetchCurrent, refetchHistory, refetchWebhook]
+    ),
+    onConversationCostUpdate: useCallback(
+      (event: ConversationCostUpdateEvent) => {
+        toast.info(`تحديث تكلفة المحادثة: ${event.phoneNumber}`);
+        refetchConversation();
+      },
+      [refetchConversation]
+    ),
+    onAccountUpdate: useCallback(
+      (event: AccountUpdateEvent) => {
+        toast.info(`تحديث الحساب: ${event.eventType}`);
+        refetchCurrent();
+        refetchHistory();
+      },
+      [refetchCurrent, refetchHistory]
+    ),
   });
 
   const getRatingColor = (rating: string) => {
     switch (rating) {
-      case "green":
-        return "bg-green-500 text-white";
-      case "yellow":
-        return "bg-yellow-500 text-black";
-      case "red":
-        return "bg-red-500 text-white";
-      case "gray":
-        return "bg-gray-500 text-white";
+      case 'green':
+        return 'bg-green-500 text-white';
+      case 'yellow':
+        return 'bg-yellow-500 text-black';
+      case 'red':
+        return 'bg-red-500 text-white';
+      case 'gray':
+        return 'bg-gray-500 text-white';
       default:
-        return "bg-gray-300 text-black";
+        return 'bg-gray-300 text-black';
     }
   };
 
   const getRatingText = (rating: string) => {
     switch (rating) {
-      case "green":
-        return "ممتاز";
-      case "yellow":
-        return "جيد";
-      case "red":
-        return "ضعيف";
-      case "gray":
-        return "غير معروف";
+      case 'green':
+        return 'ممتاز';
+      case 'yellow':
+        return 'جيد';
+      case 'red':
+        return 'ضعيف';
+      case 'gray':
+        return 'غير معروف';
       default:
         return rating;
     }
@@ -129,18 +166,38 @@ export default function WhatsAppPhoneQualityPage() {
 
   // مؤشر الجودة البصري (gauge)
   const QualityGauge = ({ rating, score }: { rating: string; score?: number | null }) => {
-    const percentage = score ?? (rating === 'green' ? 85 : rating === 'yellow' ? 55 : rating === 'red' ? 25 : 0);
-    const color = rating === 'green' ? '#22c55e' : rating === 'yellow' ? '#eab308' : rating === 'red' ? '#ef4444' : '#9ca3af';
-    const bgColor = rating === 'green' ? 'bg-green-50' : rating === 'yellow' ? 'bg-yellow-50' : rating === 'red' ? 'bg-red-50' : 'bg-gray-50';
+    const percentage =
+      score ?? (rating === 'green' ? 85 : rating === 'yellow' ? 55 : rating === 'red' ? 25 : 0);
+    const color =
+      rating === 'green'
+        ? '#22c55e'
+        : rating === 'yellow'
+          ? '#eab308'
+          : rating === 'red'
+            ? '#ef4444'
+            : '#9ca3af';
+    const bgColor =
+      rating === 'green'
+        ? 'bg-green-50'
+        : rating === 'yellow'
+          ? 'bg-yellow-50'
+          : rating === 'red'
+            ? 'bg-red-50'
+            : 'bg-gray-50';
 
     return (
-      <div className={`relative flex flex-col items-center justify-center p-6 rounded-2xl ${bgColor} border-2`} style={{ borderColor: color }}>
+      <div
+        className={`relative flex flex-col items-center justify-center p-6 rounded-2xl ${bgColor} border-2`}
+        style={{ borderColor: color }}
+      >
         {/* Circular gauge */}
         <div className="relative w-32 h-32">
           <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
             {/* Background arc */}
             <circle
-              cx="60" cy="60" r="50"
+              cx="60"
+              cy="60"
+              r="50"
               fill="none"
               stroke="#e5e7eb"
               strokeWidth="12"
@@ -149,7 +206,9 @@ export default function WhatsAppPhoneQualityPage() {
             />
             {/* Progress arc */}
             <circle
-              cx="60" cy="60" r="50"
+              cx="60"
+              cy="60"
+              r="50"
               fill="none"
               stroke={color}
               strokeWidth="12"
@@ -160,12 +219,16 @@ export default function WhatsAppPhoneQualityPage() {
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold" style={{ color }}>{percentage}</span>
+            <span className="text-2xl font-bold" style={{ color }}>
+              {percentage}
+            </span>
             <span className="text-xs text-gray-500">/100</span>
           </div>
         </div>
         <div className="mt-3 text-center">
-          <span className="text-lg font-bold" style={{ color }}>{getRatingText(rating)}</span>
+          <span className="text-lg font-bold" style={{ color }}>
+            {getRatingText(rating)}
+          </span>
         </div>
       </div>
     );
@@ -191,9 +254,7 @@ export default function WhatsAppPhoneQualityPage() {
             <Smartphone className="h-6 w-6" />
             الجودة الحالية
           </CardTitle>
-          <CardDescription>
-            {currentQuality?.phoneNumber || "غير متوفر"}
-          </CardDescription>
+          <CardDescription>{currentQuality?.phoneNumber || 'غير متوفر'}</CardDescription>
         </CardHeader>
         <CardContent>
           {currentLoading ? (
@@ -215,19 +276,28 @@ export default function WhatsAppPhoneQualityPage() {
                 <div>
                   <p className="text-sm text-gray-500">التقييم</p>
                   <div className="flex items-center gap-2">
-                    <Badge className={getRatingColor(liveQuality?.currentRating || currentQuality.qualityRating)}>
+                    <Badge
+                      className={getRatingColor(
+                        liveQuality?.currentRating || currentQuality.qualityRating
+                      )}
+                    >
                       {getRatingText(liveQuality?.currentRating || currentQuality.qualityRating)}
                     </Badge>
-                    {liveQuality && liveQuality.previousRating && liveQuality.previousRating !== liveQuality.currentRating && (
-                      <span className="text-xs text-gray-500">
-                        (كان: {getRatingText(liveQuality.previousRating)})
-                      </span>
-                    )}
+                    {liveQuality &&
+                      liveQuality.previousRating &&
+                      liveQuality.previousRating !== liveQuality.currentRating && (
+                        <span className="text-xs text-gray-500">
+                          (كان: {getRatingText(liveQuality.previousRating)})
+                        </span>
+                      )}
                     {trend && (
                       <div className="flex items-center gap-1">
                         {trend.icon}
-                        <span className={`text-sm ${trend.change >= 0 ? "text-green-600" : "text-red-600"}`}>
-                          {trend.change > 0 ? "+" : ""}{trend.change}
+                        <span
+                          className={`text-sm ${trend.change >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        >
+                          {trend.change > 0 ? '+' : ''}
+                          {trend.change}
                         </span>
                       </div>
                     )}
@@ -236,7 +306,9 @@ export default function WhatsAppPhoneQualityPage() {
                 {liveQuality && (
                   <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-lg w-fit">
                     <Zap className="h-3 w-3" />
-                    <span>تحديث مباشر — {new Date(liveQuality.timestamp).toLocaleTimeString('ar-SA')}</span>
+                    <span>
+                      تحديث مباشر — {new Date(liveQuality.timestamp).toLocaleTimeString('ar-SA')}
+                    </span>
                   </div>
                 )}
               </div>
@@ -258,7 +330,10 @@ export default function WhatsAppPhoneQualityPage() {
               <div>
                 <p className="text-sm text-gray-600">إجمالي التكلفة</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  ${conversationCosts?.reduce((sum: number, c: any) => sum + (c.conversationCost || 0), 0).toFixed(2) || '0.00'}
+                  $
+                  {conversationCosts
+                    ?.reduce((sum: number, c: any) => sum + (c.conversationCost || 0), 0)
+                    .toFixed(2) || '0.00'}
                 </p>
               </div>
               <DollarSign className="h-8 w-8 text-blue-500" />
@@ -272,8 +347,14 @@ export default function WhatsAppPhoneQualityPage() {
               <div>
                 <p className="text-sm text-gray-600">متوسط التكلفة</p>
                 <p className="text-2xl font-bold text-green-600">
-                  ${conversationCosts && conversationCosts.length > 0
-                    ? (conversationCosts.reduce((sum: number, c: any) => sum + (c.conversationCost || 0), 0) / conversationCosts.length).toFixed(2)
+                  $
+                  {conversationCosts && conversationCosts.length > 0
+                    ? (
+                        conversationCosts.reduce(
+                          (sum: number, c: any) => sum + (c.conversationCost || 0),
+                          0
+                        ) / conversationCosts.length
+                      ).toFixed(2)
                     : '0.00'}
                 </p>
               </div>
@@ -288,9 +369,13 @@ export default function WhatsAppPhoneQualityPage() {
               <div>
                 <p className="text-sm text-gray-600">التكلفة حسب الجودة</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  {currentQuality?.qualityRating === 'green' ? 'منخفضة' :
-                   currentQuality?.qualityRating === 'yellow' ? 'متوسطة' :
-                   currentQuality?.qualityRating === 'red' ? 'مرتفعة' : 'غير معروف'}
+                  {currentQuality?.qualityRating === 'green'
+                    ? 'منخفضة'
+                    : currentQuality?.qualityRating === 'yellow'
+                      ? 'متوسطة'
+                      : currentQuality?.qualityRating === 'red'
+                        ? 'مرتفعة'
+                        : 'غير معروف'}
                 </p>
               </div>
               <Activity className="h-8 w-8 text-purple-500" />
@@ -334,7 +419,7 @@ export default function WhatsAppPhoneQualityPage() {
                       {qualityHistory.map((record: any, index: number) => (
                         <tr key={record.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4">
-                            {new Date(record.createdAt).toLocaleString("ar-SA")}
+                            {new Date(record.createdAt).toLocaleString('ar-SA')}
                           </td>
                           <td className="py-3 px-4">{record.phoneNumber}</td>
                           <td className="py-3 px-4">
@@ -342,7 +427,7 @@ export default function WhatsAppPhoneQualityPage() {
                               {getRatingText(record.qualityRating)}
                             </Badge>
                           </td>
-                          <td className="py-3 px-4">{record.qualityScore || "N/A"}</td>
+                          <td className="py-3 px-4">{record.qualityScore || 'N/A'}</td>
                           <td className="py-3 px-4">
                             {record.details && (
                               <details>
@@ -393,7 +478,9 @@ export default function WhatsAppPhoneQualityPage() {
                     {conversationCosts && conversationCosts.length > 0 ? (
                       conversationCosts.map((conv: any) => (
                         <tr key={conv.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4" dir="ltr">{conv.phoneNumber}</td>
+                          <td className="py-3 px-4" dir="ltr">
+                            {conv.phoneNumber}
+                          </td>
                           <td className="py-3 px-4">{conv.pricingModel || 'غير محدد'}</td>
                           <td className="py-3 px-4">
                             <Badge variant="outline">{conv.pricingCategory || 'غير محدد'}</Badge>
@@ -407,7 +494,7 @@ export default function WhatsAppPhoneQualityPage() {
                             ${(conv.conversationCost || 0).toFixed(2)}
                           </td>
                           <td className="py-3 px-4">
-                            {new Date(conv.createdAt).toLocaleString("ar-SA")}
+                            {new Date(conv.createdAt).toLocaleString('ar-SA')}
                           </td>
                         </tr>
                       ))
@@ -445,21 +532,17 @@ export default function WhatsAppPhoneQualityPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-semibold">{event.eventType}</h4>
-                            {event.subType && (
-                              <Badge variant="outline">{event.subType}</Badge>
-                            )}
+                            {event.subType && <Badge variant="outline">{event.subType}</Badge>}
                           </div>
                           {event.phoneNumber && (
-                            <p className="text-sm text-gray-600 mt-1">
-                              الرقم: {event.phoneNumber}
-                            </p>
+                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber}</p>
                           )}
                           <p className="text-xs text-gray-500 mt-2">
-                            {new Date(event.createdAt).toLocaleString("ar-SA")}
+                            {new Date(event.createdAt).toLocaleString('ar-SA')}
                           </p>
                         </div>
-                        <Badge className={event.handlerExists ? "bg-green-500" : "bg-red-500"}>
-                          {event.handlerExists ? "معالج" : "غير معالج"}
+                        <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>
+                          {event.handlerExists ? 'معالج' : 'غير معالج'}
                         </Badge>
                       </div>
                     </div>
@@ -498,9 +581,11 @@ export default function WhatsAppPhoneQualityPage() {
                     <tbody>
                       {conversationQualityQuery.map((record: any) => (
                         <tr key={record.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4">{new Date(record.createdAt).toLocaleString("ar-SA")}</td>
+                          <td className="py-3 px-4">
+                            {new Date(record.createdAt).toLocaleString('ar-SA')}
+                          </td>
                           <td className="py-3 px-4">{record.phoneNumber}</td>
-                          <td className="py-3 px-4">{record.qualityScore || "N/A"}</td>
+                          <td className="py-3 px-4">{record.qualityScore || 'N/A'}</td>
                           <td className="py-3 px-4">
                             {record.details && (
                               <details>

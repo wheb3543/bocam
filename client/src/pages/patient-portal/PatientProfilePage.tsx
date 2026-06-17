@@ -1,51 +1,62 @@
-import { useState, useEffect } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, User, LogOut, Pencil, Save, X, Phone, Mail, MapPin, Calendar } from "lucide-react";
-import { toast } from "sonner";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+import { useState, useEffect } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Loader2,
+  User,
+  LogOut,
+  Pencil,
+  Save,
+  X,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 export default function PatientProfilePage() {
   const { formatPhoneDisplay } = usePhoneFormat();
   const utils = trpc.useUtils();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
-    fullName: "",
-    age: "",
-    address: "",
-    email: "",
+    fullName: '',
+    age: '',
+    address: '',
+    email: '',
   });
 
   const { data: patient, isLoading } = trpc.patientPortal.me.useQuery();
 
   const logoutMutation = trpc.patientPortal.logout.useMutation({
     onSuccess: () => {
-      toast.success("تم تسجيل الخروج");
-      window.location.href = "/patient-portal/login";
+      toast.success('تم تسجيل الخروج');
+      window.location.href = '/patient-portal/login';
     },
   });
 
   const updateProfileMutation = trpc.patientPortal.updateProfile.useMutation({
     onSuccess: async () => {
-      toast.success("تم تحديث بياناتك بنجاح");
+      toast.success('تم تحديث بياناتك بنجاح');
       setIsEditing(false);
       await utils.patientPortal.me.invalidate();
     },
     onError: (err) => {
-      toast.error(err.message || "تعذر تحديث البيانات");
+      toast.error(err.message || 'تعذر تحديث البيانات');
     },
   });
 
   useEffect(() => {
     if (patient) {
       setForm({
-        fullName: patient.fullName || "",
-        age: patient.age ? String(patient.age) : "",
-        address: patient.address || "",
-        email: patient.email || "",
+        fullName: patient.fullName || '',
+        age: patient.age ? String(patient.age) : '',
+        address: patient.address || '',
+        email: patient.email || '',
       });
     }
   }, [patient]);
@@ -63,7 +74,7 @@ export default function PatientProfilePage() {
   const handleSave = () => {
     const fullName = form.fullName.trim();
     if (fullName.length < 3) {
-      toast.error("الاسم الكامل يجب أن يكون 3 أحرف على الأقل");
+      toast.error('الاسم الكامل يجب أن يكون 3 أحرف على الأقل');
       return;
     }
 
@@ -71,7 +82,7 @@ export default function PatientProfilePage() {
     if (form.age.trim()) {
       const ageNum = Number(form.age);
       if (!Number.isInteger(ageNum) || ageNum < 1 || ageNum > 150) {
-        toast.error("العمر يجب أن يكون رقماً صحيحاً بين 1 و 150");
+        toast.error('العمر يجب أن يكون رقماً صحيحاً بين 1 و 150');
         return;
       }
       parsedAge = ageNum;
@@ -87,10 +98,10 @@ export default function PatientProfilePage() {
 
   const handleCancel = () => {
     setForm({
-      fullName: patient.fullName || "",
-      age: patient.age ? String(patient.age) : "",
-      address: patient.address || "",
-      email: patient.email || "",
+      fullName: patient.fullName || '',
+      age: patient.age ? String(patient.age) : '',
+      address: patient.address || '',
+      email: patient.email || '',
     });
     setIsEditing(false);
   };
@@ -105,11 +116,7 @@ export default function PatientProfilePage() {
               بيانات الحساب
             </CardTitle>
             {!isEditing ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsEditing(true)}
-              >
+              <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
                 <Pencil className="h-3.5 w-3.5 ml-1" />
                 تعديل
               </Button>
@@ -159,34 +166,38 @@ export default function PatientProfilePage() {
               </div>
               <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                 <p className="text-xs text-muted-foreground">الجنس</p>
-                <p className="text-sm font-medium mt-0.5">{patient.gender === "male" ? "ذكر" : "أنثى"}</p>
+                <p className="text-sm font-medium mt-0.5">
+                  {patient.gender === 'male' ? 'ذكر' : 'أنثى'}
+                </p>
               </div>
               <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                 <p className="text-xs text-muted-foreground">العمر</p>
                 <p className="text-sm font-medium mt-0.5 flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {patient.age || "—"}
+                  {patient.age || '—'}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 sm:col-span-2">
                 <p className="text-xs text-muted-foreground">العنوان</p>
                 <p className="text-sm font-medium mt-0.5 flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  {patient.address || "—"}
+                  {patient.address || '—'}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 sm:col-span-2">
                 <p className="text-xs text-muted-foreground">البريد الإلكتروني</p>
                 <p className="text-sm font-medium mt-0.5 flex items-center gap-1" dir="ltr">
                   <Mail className="h-3 w-3" />
-                  {patient.email || "—"}
+                  {patient.email || '—'}
                 </p>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="fullName" className="text-sm">الاسم الكامل</Label>
+                <Label htmlFor="fullName" className="text-sm">
+                  الاسم الكامل
+                </Label>
                 <Input
                   id="fullName"
                   value={form.fullName}
@@ -195,7 +206,9 @@ export default function PatientProfilePage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="age" className="text-sm">العمر</Label>
+                <Label htmlFor="age" className="text-sm">
+                  العمر
+                </Label>
                 <Input
                   id="age"
                   type="number"
@@ -207,7 +220,9 @@ export default function PatientProfilePage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-sm">البريد الإلكتروني</Label>
+                <Label htmlFor="email" className="text-sm">
+                  البريد الإلكتروني
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -218,7 +233,9 @@ export default function PatientProfilePage() {
                 />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="address" className="text-sm">العنوان</Label>
+                <Label htmlFor="address" className="text-sm">
+                  العنوان
+                </Label>
                 <Input
                   id="address"
                   value={form.address}

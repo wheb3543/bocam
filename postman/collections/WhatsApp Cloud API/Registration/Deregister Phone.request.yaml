@@ -18,6 +18,6 @@ headers:
   Content-Type: application/json
 body:
   type: text
-  content: ""
+  content: ''
 examples: ./.resources/Deregister Phone.resources/examples
 order: 2000

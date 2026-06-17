@@ -48,20 +48,22 @@ export const auditLogsRouter = router({
    * جلب سجل التغييرات لكيان محدد
    */
   getByEntity: protectedProcedure
-    .input(z.object({
-      entityType: z.string(),
-      entityId: z.number(),
-    }))
+    .input(
+      z.object({
+        entityType: z.string(),
+        entityId: z.number(),
+      })
+    )
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) return [];
 
-      return db.select()
+      return db
+        .select()
         .from(auditLogs)
-        .where(and(
-          eq(auditLogs.entityType, input.entityType),
-          eq(auditLogs.entityId, input.entityId),
-        ))
+        .where(
+          and(eq(auditLogs.entityType, input.entityType), eq(auditLogs.entityId, input.entityId))
+        )
         .orderBy(desc(auditLogs.createdAt));
     }),
 
@@ -70,13 +72,15 @@ export const auditLogsRouter = router({
    * جلب سجل التغييرات مع pagination وفلاتر
    */
   listPaginated: protectedProcedure
-    .input(z.object({
-      page: z.number().min(1).default(1),
-      limit: z.number().min(1).max(500).default(50),
-      entityType: z.string().optional(),
-      action: z.string().optional(),
-      userId: z.number().optional(),
-    }))
+    .input(
+      z.object({
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(500).default(50),
+        entityType: z.string().optional(),
+        action: z.string().optional(),
+        userId: z.number().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) return { logs: [], total: 0 };
@@ -92,13 +96,15 @@ export const auditLogsRouter = router({
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
       const [logs, countResult] = await Promise.all([
-        db.select()
+        db
+          .select()
           .from(auditLogs)
           .where(whereClause)
           .orderBy(desc(auditLogs.createdAt))
           .limit(limit)
           .offset(offset),
-        db.select({ count: sql<number>`COUNT(*)` })
+        db
+          .select({ count: sql<number>`COUNT(*)` })
           .from(auditLogs)
           .where(whereClause),
       ]);

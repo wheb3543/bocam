@@ -6,10 +6,10 @@
  *     لا يُسمح باستخدام process.env.META_ACCESS_TOKEN مباشرة هنا.
  */
 
-import { meta } from "./MetaApiService";
+import { meta } from './MetaApiService';
 
-const INSTAGRAM_BUSINESS_ACCOUNT_ID = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || "";
-const FACEBOOK_PAGE_ID = process.env.FACEBOOK_PAGE_ID || "";
+const INSTAGRAM_BUSINESS_ACCOUNT_ID = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || '';
+const FACEBOOK_PAGE_ID = process.env.FACEBOOK_PAGE_ID || '';
 
 interface InstagramInsights {
   followers_count: number;
@@ -35,7 +35,7 @@ interface FacebookPageInsights {
  */
 export async function getInstagramInsights(): Promise<InstagramInsights | null> {
   if (!meta.accessToken || !INSTAGRAM_BUSINESS_ACCOUNT_ID) {
-    console.warn("[Meta API] Instagram credentials not configured");
+    console.warn('[Meta API] Instagram credentials not configured');
     return null;
   }
 
@@ -43,7 +43,7 @@ export async function getInstagramInsights(): Promise<InstagramInsights | null> 
     // Get account info via MetaApiService
     const accountRes = await meta.getInstagramProfile(INSTAGRAM_BUSINESS_ACCOUNT_ID);
     if (!accountRes.ok) {
-      console.error("[Meta API] Instagram account error:", accountRes.error);
+      console.error('[Meta API] Instagram account error:', accountRes.error);
       return null;
     }
     const accountData = accountRes.data;
@@ -51,7 +51,7 @@ export async function getInstagramInsights(): Promise<InstagramInsights | null> 
     // Get insights (last 28 days) via MetaApiService
     const insightsRes = await meta.getInstagramInsights(INSTAGRAM_BUSINESS_ACCOUNT_ID);
     if (!insightsRes.ok) {
-      console.error("[Meta API] Instagram insights error:", insightsRes.error);
+      console.error('[Meta API] Instagram insights error:', insightsRes.error);
       return {
         followers_count: accountData?.followers_count || 0,
         follows_count: accountData?.follows_count || 0,
@@ -75,9 +75,7 @@ export async function getInstagramInsights(): Promise<InstagramInsights | null> 
 
     const totalEngagement = insights.reach || 0;
     const engagement =
-      accountData?.followers_count > 0
-        ? (totalEngagement / accountData.followers_count) * 100
-        : 0;
+      accountData?.followers_count > 0 ? (totalEngagement / accountData.followers_count) * 100 : 0;
 
     return {
       followers_count: accountData?.followers_count || 0,
@@ -89,7 +87,7 @@ export async function getInstagramInsights(): Promise<InstagramInsights | null> 
       engagement: Math.round(engagement * 10) / 10,
     };
   } catch (error) {
-    console.error("[Meta API] Instagram error:", error);
+    console.error('[Meta API] Instagram error:', error);
     return null;
   }
 }
@@ -99,7 +97,7 @@ export async function getInstagramInsights(): Promise<InstagramInsights | null> 
  */
 export async function getFacebookPageInsights(): Promise<FacebookPageInsights | null> {
   if (!meta.accessToken || !FACEBOOK_PAGE_ID) {
-    console.warn("[Meta API] Facebook credentials not configured");
+    console.warn('[Meta API] Facebook credentials not configured');
     return null;
   }
 
@@ -107,7 +105,7 @@ export async function getFacebookPageInsights(): Promise<FacebookPageInsights | 
     // Get page info via MetaApiService
     const pageRes = await meta.getFacebookPage(FACEBOOK_PAGE_ID);
     if (!pageRes.ok) {
-      console.error("[Meta API] Facebook page error:", pageRes.error);
+      console.error('[Meta API] Facebook page error:', pageRes.error);
       return null;
     }
     const pageData = pageRes.data;
@@ -115,7 +113,7 @@ export async function getFacebookPageInsights(): Promise<FacebookPageInsights | 
     // Get insights (last 28 days) via MetaApiService
     const insightsRes = await meta.getFacebookPageInsights(FACEBOOK_PAGE_ID);
     if (!insightsRes.ok) {
-      console.error("[Meta API] Facebook insights error:", insightsRes.error);
+      console.error('[Meta API] Facebook insights error:', insightsRes.error);
       return {
         fan_count: pageData?.fan_count || 0,
         page_views_total: 0,
@@ -145,7 +143,7 @@ export async function getFacebookPageInsights(): Promise<FacebookPageInsights | 
       page_impressions_organic: insights.page_impressions_organic || 0,
     };
   } catch (error) {
-    console.error("[Meta API] Facebook error:", error);
+    console.error('[Meta API] Facebook error:', error);
     return null;
   }
 }

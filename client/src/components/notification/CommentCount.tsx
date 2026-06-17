@@ -1,9 +1,9 @@
-import { trpc } from "@/lib/api/trpc";
-import { MessageSquare } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { trpc } from '@/lib/api/trpc';
+import { MessageSquare } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface CommentCountProps {
-  entityType: "appointment" | "lead" | "offerLead" | "campRegistration";
+  entityType: 'appointment' | 'lead' | 'offerLead' | 'campRegistration';
   entityId: number;
 }
 

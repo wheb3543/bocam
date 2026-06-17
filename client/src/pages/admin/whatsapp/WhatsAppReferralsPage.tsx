@@ -1,66 +1,106 @@
-import { useState, useCallback } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Megaphone, Download, Filter, TrendingUp, ExternalLink, Users, BarChart3 } from "lucide-react";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { useWhatsAppSSE, AccountUpdateEvent, ReferralReceivedEvent } from "@/hooks/integrations/useWhatsAppSSE";
-import { toast } from "sonner";
+import { useState, useCallback } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import {
+  Megaphone,
+  Download,
+  Filter,
+  TrendingUp,
+  ExternalLink,
+  Users,
+  BarChart3,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import {
+  useWhatsAppSSE,
+  AccountUpdateEvent,
+  ReferralReceivedEvent,
+} from '@/hooks/integrations/useWhatsAppSSE';
+import { toast } from 'sonner';
 
 export default function WhatsAppReferralsPage() {
-  const [sourceType, setSourceType] = useState<string>("all");
+  const [sourceType, setSourceType] = useState<string>('all');
   const [limit, setLimit] = useState(50);
 
-  const { data: referrals, isLoading, refetch } = trpc.whatsapp.getReferrals.useQuery({
-    sourceType: sourceType === "all" ? undefined : sourceType,
+  const {
+    data: referrals,
+    isLoading,
+    refetch,
+  } = trpc.whatsapp.getReferrals.useQuery({
+    sourceType: sourceType === 'all' ? undefined : sourceType,
     limit,
   });
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
-    onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
-      toast.info(`تحديث الحساب: ${event.eventType}`);
-      refetch();
-    }, [refetch]),
-    onReferralReceived: useCallback((event: ReferralReceivedEvent) => {
-      toast.info(`استلام إحالة جديدة`);
-      refetch();
-    }, [refetch]),
+    onAccountUpdate: useCallback(
+      (event: AccountUpdateEvent) => {
+        toast.info(`تحديث الحساب: ${event.eventType}`);
+        refetch();
+      },
+      [refetch]
+    ),
+    onReferralReceived: useCallback(
+      (event: ReferralReceivedEvent) => {
+        toast.info(`استلام إحالة جديدة`);
+        refetch();
+      },
+      [refetch]
+    ),
   });
 
   // Calculate stats
   const totalReferrals = Array.isArray(referrals) ? referrals.length : 0;
-  const adReferrals = Array.isArray(referrals) ? referrals.filter((r: any) => r.sourceType === 'ad').length : 0;
-  const organicReferrals = Array.isArray(referrals) ? referrals.filter((r: any) => r.sourceType === 'organic').length : 0;
-  const conversionRate = totalReferrals > 0 ? ((adReferrals / totalReferrals) * 100).toFixed(1) : '0';
+  const adReferrals = Array.isArray(referrals)
+    ? referrals.filter((r: any) => r.sourceType === 'ad').length
+    : 0;
+  const organicReferrals = Array.isArray(referrals)
+    ? referrals.filter((r: any) => r.sourceType === 'organic').length
+    : 0;
+  const conversionRate =
+    totalReferrals > 0 ? ((adReferrals / totalReferrals) * 100).toFixed(1) : '0';
 
   const getSourceTypeBadge = (sourceType: string) => {
     const sourceColors: Record<string, string> = {
-      'ad': 'bg-blue-100 text-blue-800 border-blue-200',
-      'organic': 'bg-green-100 text-green-800 border-green-200',
-      'referral': 'bg-purple-100 text-purple-800 border-purple-200',
+      ad: 'bg-blue-100 text-blue-800 border-blue-200',
+      organic: 'bg-green-100 text-green-800 border-green-200',
+      referral: 'bg-purple-100 text-purple-800 border-purple-200',
     };
     return sourceColors[sourceType] || 'bg-gray-100 text-gray-800';
   };
 
   const getSourceTypeLabel = (sourceType: string) => {
     const labels: Record<string, string> = {
-      'ad': 'إعلان',
-      'organic': 'عضوي',
-      'referral': 'إحالة',
+      ad: 'إعلان',
+      organic: 'عضوي',
+      referral: 'إحالة',
     };
     return labels[sourceType] || sourceType;
   };
 
   const handleExport = () => {
-    console.log("Exporting referrals data...");
+    console.log('Exporting referrals data...');
   };
 
   return (
@@ -70,7 +110,9 @@ export default function WhatsAppReferralsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">إحالات WhatsApp</h1>
-            <p className="text-muted-foreground">عرض وتحليل الإحالات من الإعلانات والمصادر الأخرى</p>
+            <p className="text-muted-foreground">
+              عرض وتحليل الإحالات من الإعلانات والمصادر الأخرى
+            </p>
           </div>
           <Button onClick={handleExport} className="gap-2">
             <Download className="h-4 w-4" />
@@ -195,43 +237,55 @@ export default function WhatsAppReferralsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {referral.metadata ? (() => {
-                          try {
-                            const meta = JSON.parse(referral.metadata);
-                            return (
-                              <div className="text-sm">
-                                <div className="font-medium">{meta.headline || 'بدون عنوان'}</div>
-                                {meta.sourceType && <div className="text-xs text-muted-foreground">{meta.sourceType}</div>}
-                              </div>
-                            );
-                          } catch {
-                            return <span className="text-sm">{referral.content || 'بدون تفاصيل'}</span>;
-                          }
-                        })() : (
+                        {referral.metadata ? (
+                          (() => {
+                            try {
+                              const meta = JSON.parse(referral.metadata);
+                              return (
+                                <div className="text-sm">
+                                  <div className="font-medium">{meta.headline || 'بدون عنوان'}</div>
+                                  {meta.sourceType && (
+                                    <div className="text-xs text-muted-foreground">
+                                      {meta.sourceType}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            } catch {
+                              return (
+                                <span className="text-sm">{referral.content || 'بدون تفاصيل'}</span>
+                              );
+                            }
+                          })()
+                        ) : (
                           <span className="text-sm">{referral.content || 'بدون تفاصيل'}</span>
                         )}
                       </TableCell>
                       <TableCell>
-                        {referral.metadata ? (() => {
-                          try {
-                            const meta = JSON.parse(referral.metadata);
-                            return meta.sourceUrl ? (
-                              <a
-                                href={meta.sourceUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-blue-600 hover:underline"
-                              >
-                                <ExternalLink className="h-3 w-3" />
-                                <span className="text-xs">عرض الرابط</span>
-                              </a>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">غير متوفر</span>
-                            );
-                          } catch {
-                            return <span className="text-xs text-muted-foreground">غير متوفر</span>;
-                          }
-                        })() : (
+                        {referral.metadata ? (
+                          (() => {
+                            try {
+                              const meta = JSON.parse(referral.metadata);
+                              return meta.sourceUrl ? (
+                                <a
+                                  href={meta.sourceUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-blue-600 hover:underline"
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                  <span className="text-xs">عرض الرابط</span>
+                                </a>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">غير متوفر</span>
+                              );
+                            } catch {
+                              return (
+                                <span className="text-xs text-muted-foreground">غير متوفر</span>
+                              );
+                            }
+                          })()
+                        ) : (
                           <span className="text-xs text-muted-foreground">غير متوفر</span>
                         )}
                       </TableCell>

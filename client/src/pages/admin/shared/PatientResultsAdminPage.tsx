@@ -1,51 +1,62 @@
-import { useState } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trpc } from "@/lib/api/trpc";
-import { processPhoneInput, validateYemeniPhone } from "@/hooks/form/usePhoneFormat";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { trpc } from '@/lib/api/trpc';
+import { processPhoneInput, validateYemeniPhone } from '@/hooks/form/usePhoneFormat';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import {
-  Loader2, Search, Plus, FileText, FlaskConical, ScanLine, ClipboardList, ExternalLink,
-} from "lucide-react";
-import { toast } from "sonner";
+  Loader2,
+  Search,
+  Plus,
+  FileText,
+  FlaskConical,
+  ScanLine,
+  ClipboardList,
+  ExternalLink,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-type ResultType = "lab" | "radiology" | "report";
-type ResultStatus = "pending" | "ready" | "delivered";
+type ResultType = 'lab' | 'radiology' | 'report';
+type ResultStatus = 'pending' | 'ready' | 'delivered';
 
 const RESULT_TYPE_LABELS: Record<ResultType, string> = {
-  lab: "تحليل",
-  radiology: "أشعة",
-  report: "تقرير",
+  lab: 'تحليل',
+  radiology: 'أشعة',
+  report: 'تقرير',
 };
 
 const STATUS_LABELS: Record<ResultStatus, string> = {
-  pending: "قيد الانتظار",
-  ready: "جاهز",
-  delivered: "تم التسليم",
+  pending: 'قيد الانتظار',
+  ready: 'جاهز',
+  delivered: 'تم التسليم',
 };
 
 export default function PatientResultsAdminPage() {
   const { formatDate } = useFormatDate();
   const utils = trpc.useUtils();
-  const [phone, setPhone] = useState("");
-  const [searchPhone, setSearchPhone] = useState("");
+  const [phone, setPhone] = useState('');
+  const [searchPhone, setSearchPhone] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    resultType: "lab" as ResultType,
-    title: "",
-    description: "",
-    fileUrl: "",
-    doctorName: "",
-    resultDate: "",
-    status: "pending" as ResultStatus,
+    resultType: 'lab' as ResultType,
+    title: '',
+    description: '',
+    fileUrl: '',
+    doctorName: '',
+    resultDate: '',
+    status: 'pending' as ResultStatus,
   });
 
   const { data, isLoading } = trpc.patientResults.listByPhone.useQuery(
@@ -55,34 +66,34 @@ export default function PatientResultsAdminPage() {
 
   const createMutation = trpc.patientResults.create.useMutation({
     onSuccess: async () => {
-      toast.success("تمت إضافة النتيجة بنجاح");
+      toast.success('تمت إضافة النتيجة بنجاح');
       setShowForm(false);
       setForm({
-        resultType: "lab",
-        title: "",
-        description: "",
-        fileUrl: "",
-        doctorName: "",
-        resultDate: "",
-        status: "pending",
+        resultType: 'lab',
+        title: '',
+        description: '',
+        fileUrl: '',
+        doctorName: '',
+        resultDate: '',
+        status: 'pending',
       });
       await utils.patientResults.listByPhone.invalidate({ phone: searchPhone });
     },
-    onError: (err) => toast.error(err.message || "تعذر إضافة النتيجة"),
+    onError: (err) => toast.error(err.message || 'تعذر إضافة النتيجة'),
   });
 
   const updateStatusMutation = trpc.patientResults.updateStatus.useMutation({
     onSuccess: async () => {
-      toast.success("تم تحديث الحالة");
+      toast.success('تم تحديث الحالة');
       await utils.patientResults.listByPhone.invalidate({ phone: searchPhone });
     },
-    onError: (err) => toast.error(err.message || "تعذر تحديث الحالة"),
+    onError: (err) => toast.error(err.message || 'تعذر تحديث الحالة'),
   });
 
   const handleSearch = () => {
     const validation = validateYemeniPhone(phone);
     if (!validation.valid) {
-      toast.error(validation.message || "رقم الهاتف غير صحيح");
+      toast.error(validation.message || 'رقم الهاتف غير صحيح');
       return;
     }
     setSearchPhone(phone);
@@ -90,11 +101,11 @@ export default function PatientResultsAdminPage() {
 
   const handleCreate = () => {
     if (!searchPhone) {
-      toast.error("ابحث عن المريض أولاً");
+      toast.error('ابحث عن المريض أولاً');
       return;
     }
     if (!form.title.trim()) {
-      toast.error("عنوان النتيجة مطلوب");
+      toast.error('عنوان النتيجة مطلوب');
       return;
     }
 
@@ -111,8 +122,8 @@ export default function PatientResultsAdminPage() {
   };
 
   const resultIcon = (type: ResultType) => {
-    if (type === "lab") return <FlaskConical className="h-4 w-4 text-blue-500" />;
-    if (type === "radiology") return <ScanLine className="h-4 w-4 text-purple-500" />;
+    if (type === 'lab') return <FlaskConical className="h-4 w-4 text-blue-500" />;
+    if (type === 'radiology') return <ScanLine className="h-4 w-4 text-purple-500" />;
     return <ClipboardList className="h-4 w-4 text-amber-500" />;
   };
 
@@ -137,8 +148,16 @@ export default function PatientResultsAdminPage() {
               dir="ltr"
               className="sm:max-w-xs"
             />
-            <Button onClick={handleSearch} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 ml-1" />}
+            <Button
+              onClick={handleSearch}
+              disabled={isLoading}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="h-4 w-4 ml-1" />
+              )}
               بحث
             </Button>
             {data?.patient && (
@@ -159,7 +178,9 @@ export default function PatientResultsAdminPage() {
               </div>
               <div>
                 <p className="text-muted-foreground text-xs">الهاتف</p>
-                <p className="font-medium" dir="ltr">{data.patient.phone}</p>
+                <p className="font-medium" dir="ltr">
+                  {data.patient.phone}
+                </p>
               </div>
               <div>
                 <p className="text-muted-foreground text-xs">عدد النتائج</p>
@@ -177,8 +198,13 @@ export default function PatientResultsAdminPage() {
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>نوع النتيجة</Label>
-                <Select value={form.resultType} onValueChange={(v) => setForm({ ...form, resultType: v as ResultType })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.resultType}
+                  onValueChange={(v) => setForm({ ...form, resultType: v as ResultType })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="lab">تحليل</SelectItem>
                     <SelectItem value="radiology">أشعة</SelectItem>
@@ -188,8 +214,13 @@ export default function PatientResultsAdminPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>الحالة</Label>
-                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as ResultStatus })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.status}
+                  onValueChange={(v) => setForm({ ...form, status: v as ResultStatus })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pending">قيد الانتظار</SelectItem>
                     <SelectItem value="ready">جاهز</SelectItem>
@@ -199,29 +230,56 @@ export default function PatientResultsAdminPage() {
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>العنوان *</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="مثال: تحليل CBC" />
+                <Input
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="مثال: تحليل CBC"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>اسم الطبيب</Label>
-                <Input value={form.doctorName} onChange={(e) => setForm({ ...form, doctorName: e.target.value })} />
+                <Input
+                  value={form.doctorName}
+                  onChange={(e) => setForm({ ...form, doctorName: e.target.value })}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>تاريخ النتيجة</Label>
-                <Input type="date" value={form.resultDate} onChange={(e) => setForm({ ...form, resultDate: e.target.value })} dir="ltr" />
+                <Input
+                  type="date"
+                  value={form.resultDate}
+                  onChange={(e) => setForm({ ...form, resultDate: e.target.value })}
+                  dir="ltr"
+                />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>رابط الملف (PDF)</Label>
-                <Input value={form.fileUrl} onChange={(e) => setForm({ ...form, fileUrl: e.target.value })} placeholder="https://..." dir="ltr" />
+                <Input
+                  value={form.fileUrl}
+                  onChange={(e) => setForm({ ...form, fileUrl: e.target.value })}
+                  placeholder="https://..."
+                  dir="ltr"
+                />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>الوصف</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  rows={3}
+                />
               </div>
               <div className="sm:col-span-2 flex gap-2">
-                <Button onClick={handleCreate} disabled={createMutation.isPending} className="bg-green-600 hover:bg-green-700">
-                  {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "حفظ"}
+                <Button
+                  onClick={handleCreate}
+                  disabled={createMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'حفظ'}
                 </Button>
-                <Button variant="outline" onClick={() => setShowForm(false)}>إلغاء</Button>
+                <Button variant="outline" onClick={() => setShowForm(false)}>
+                  إلغاء
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -245,11 +303,14 @@ export default function PatientResultsAdminPage() {
                       <div className="min-w-0">
                         <p className="font-medium truncate">{result.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {RESULT_TYPE_LABELS[result.resultType as ResultType]} · {formatDate(result.resultDate || result.createdAt)}
+                          {RESULT_TYPE_LABELS[result.resultType as ResultType]} ·{' '}
+                          {formatDate(result.resultDate || result.createdAt)}
                         </p>
                       </div>
                     </div>
-                    <Badge variant="outline">{STATUS_LABELS[result.status as ResultStatus] || result.status}</Badge>
+                    <Badge variant="outline">
+                      {STATUS_LABELS[result.status as ResultStatus] || result.status}
+                    </Badge>
                   </div>
 
                   {result.description && (
@@ -259,7 +320,12 @@ export default function PatientResultsAdminPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <Select
                       value={result.status}
-                      onValueChange={(v) => updateStatusMutation.mutate({ resultId: result.id, status: v as ResultStatus })}
+                      onValueChange={(v) =>
+                        updateStatusMutation.mutate({
+                          resultId: result.id,
+                          status: v as ResultStatus,
+                        })
+                      }
                     >
                       <SelectTrigger className="w-[160px] h-8">
                         <SelectValue />
@@ -271,7 +337,12 @@ export default function PatientResultsAdminPage() {
                       </SelectContent>
                     </Select>
                     {result.fileUrl && (
-                      <a href={result.fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-green-600 inline-flex items-center gap-1">
+                      <a
+                        href={result.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-green-600 inline-flex items-center gap-1"
+                      >
                         <ExternalLink className="h-3.5 w-3.5" />
                         فتح الملف
                       </a>

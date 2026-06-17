@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { trpc } from "@/lib/api/trpc";
+import { trpc } from '@/lib/api/trpc';
 
 export type PWAAppType = 'public' | 'admin';
 
@@ -123,8 +123,12 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
               console.warn('[PWA-admin] SW registration at /admin/ failed, trying /admin/:', error);
               navigator.serviceWorker
                 .register('/admin/sw-admin.js', { scope: '/admin/' })
-                .then((reg) => console.log('[PWA-admin] SW registered at fallback scope:', reg.scope))
-                .catch((err) => console.warn('[PWA-admin] SW registration failed completely:', err));
+                .then((reg) =>
+                  console.log('[PWA-admin] SW registered at fallback scope:', reg.scope)
+                )
+                .catch((err) =>
+                  console.warn('[PWA-admin] SW registration failed completely:', err)
+                );
             });
         });
       } else if (appType === 'public' && !isAdminPath) {

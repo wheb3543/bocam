@@ -47,7 +47,7 @@ description: |-
   | **`failed`** | Message failed to send. | Red error triangle |
   | **`deleted`** | Message deleted by the user. | Message is replaced in WhatsApp mobile with the note `"This message was deleted"`. |
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 1000

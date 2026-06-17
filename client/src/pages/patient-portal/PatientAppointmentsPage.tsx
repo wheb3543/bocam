@@ -1,30 +1,33 @@
-import { useMemo, useState } from "react";
-import { useLocation } from "wouter";
-import { trpc } from "@/lib/api/trpc";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Calendar } from "lucide-react";
-import AppointmentCard from "@/components/patient/AppointmentCard";
+import { useMemo, useState } from 'react';
+import { useLocation } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Calendar } from 'lucide-react';
+import AppointmentCard from '@/components/patient/AppointmentCard';
 
-type AppointmentFilter = "upcoming" | "past";
+type AppointmentFilter = 'upcoming' | 'past';
 
 export default function PatientAppointmentsPage() {
   const [, navigate] = useLocation();
   const { formatDate } = useFormatDate();
-  const [filter, setFilter] = useState<AppointmentFilter>("upcoming");
+  const [filter, setFilter] = useState<AppointmentFilter>('upcoming');
   const { data: appointments, isLoading } = trpc.patientPortal.myAppointments.useQuery();
 
   const statusBadge = (status: string) => {
-    const map: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      new: { label: "جديد", variant: "default" },
-      confirmed: { label: "مؤكد", variant: "default" },
-      completed: { label: "مكتمل", variant: "secondary" },
-      cancelled: { label: "ملغي", variant: "destructive" },
-      pending: { label: "قيد الانتظار", variant: "outline" },
-      contacted: { label: "تم التواصل", variant: "secondary" },
+    const map: Record<
+      string,
+      { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+    > = {
+      new: { label: 'جديد', variant: 'default' },
+      confirmed: { label: 'مؤكد', variant: 'default' },
+      completed: { label: 'مكتمل', variant: 'secondary' },
+      cancelled: { label: 'ملغي', variant: 'destructive' },
+      pending: { label: 'قيد الانتظار', variant: 'outline' },
+      contacted: { label: 'تم التواصل', variant: 'secondary' },
     };
-    const info = map[status] || { label: status, variant: "outline" as const };
+    const info = map[status] || { label: status, variant: 'outline' as const };
     return <Badge variant={info.variant}>{info.label}</Badge>;
   };
 
@@ -33,11 +36,19 @@ export default function PatientAppointmentsPage() {
     const all = appointments || [];
     const upcoming = all
       .filter((apt: any) => new Date(apt.appointmentDate || apt.createdAt) >= now)
-      .sort((a: any, b: any) => new Date(a.appointmentDate || a.createdAt).getTime() - new Date(b.appointmentDate || b.createdAt).getTime());
+      .sort(
+        (a: any, b: any) =>
+          new Date(a.appointmentDate || a.createdAt).getTime() -
+          new Date(b.appointmentDate || b.createdAt).getTime()
+      );
     const past = all
       .filter((apt: any) => new Date(apt.appointmentDate || apt.createdAt) < now)
-      .sort((a: any, b: any) => new Date(b.appointmentDate || b.createdAt).getTime() - new Date(a.appointmentDate || a.createdAt).getTime());
-    return filter === "upcoming" ? upcoming : past;
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.appointmentDate || b.createdAt).getTime() -
+          new Date(a.appointmentDate || a.createdAt).getTime()
+      );
+    return filter === 'upcoming' ? upcoming : past;
   }, [appointments, filter]);
 
   if (isLoading) {
@@ -53,17 +64,17 @@ export default function PatientAppointmentsPage() {
       <div className="flex items-center gap-2">
         <Button
           size="sm"
-          variant={filter === "upcoming" ? "default" : "outline"}
-          className={filter === "upcoming" ? "bg-green-600 hover:bg-green-700" : ""}
-          onClick={() => setFilter("upcoming")}
+          variant={filter === 'upcoming' ? 'default' : 'outline'}
+          className={filter === 'upcoming' ? 'bg-green-600 hover:bg-green-700' : ''}
+          onClick={() => setFilter('upcoming')}
         >
           القادمة
         </Button>
         <Button
           size="sm"
-          variant={filter === "past" ? "default" : "outline"}
-          className={filter === "past" ? "bg-green-600 hover:bg-green-700" : ""}
-          onClick={() => setFilter("past")}
+          variant={filter === 'past' ? 'default' : 'outline'}
+          className={filter === 'past' ? 'bg-green-600 hover:bg-green-700' : ''}
+          onClick={() => setFilter('past')}
         >
           السابقة
         </Button>

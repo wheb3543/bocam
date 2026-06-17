@@ -1,7 +1,7 @@
 $kind: http-request
-name: "Status: Message Failed"
-description: "The following notification shows a Webhook with failed status:"
-url: ""
+name: 'Status: Message Failed'
+description: 'The following notification shows a Webhook with failed status:'
+url: ''
 method: VIEW
 body:
   type: json

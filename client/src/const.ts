@@ -1,4 +1,4 @@
-import { 
+import {
   COMPANY_NAME,
   COMPANY_LOGO,
   COMPANY_ARABIC_NAME,
@@ -15,11 +15,11 @@ import {
   getContactInfo,
   getSocialMediaUrl,
   getSocialMediaUrls,
-  getCompanySlogan
-} from "./config";
+  getCompanySlogan,
+} from './config';
 
 // Constants that should remain shared (copied from shared/const.ts)
-export const COOKIE_NAME = "app_session_id";
+export const COOKIE_NAME = 'app_session_id';
 export const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;
 export const AXIOS_TIMEOUT_MS = 30_000;
 export const UNAUTHED_ERR_MSG = 'Please login (10001)';
@@ -40,7 +40,7 @@ export {
   FACEBOOK_URL,
   INSTAGRAM_URL,
   TWITTER_URL,
-  LINKEDIN_URL
+  LINKEDIN_URL,
 };
 
 // Re-export helper functions
@@ -50,7 +50,7 @@ export {
   getContactInfo,
   getSocialMediaUrl,
   getSocialMediaUrls,
-  getCompanySlogan
+  getCompanySlogan,
 };
 
 // Generate login URL at runtime so redirect URI reflects the current origin.
@@ -61,15 +61,15 @@ export const getLoginUrl = () => {
   const state = btoa(redirectUri);
 
   const url = new URL(`${oauthPortalUrl}/oauth/app-auth`);
-  url.searchParams.set("appId", appId);
-  url.searchParams.set("redirectUri", redirectUri);
-  url.searchParams.set("state", state);
-  url.searchParams.set("type", "signIn");
+  url.searchParams.set('appId', appId);
+  url.searchParams.set('redirectUri', redirectUri);
+  url.searchParams.set('state', state);
+  url.searchParams.set('type', 'signIn');
 
   return url.toString();
 };
 
 // Local authentication login URL
 export const getLocalLoginUrl = () => {
-  return "/admin-login";
+  return '/admin-login';
 };

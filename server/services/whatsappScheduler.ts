@@ -1,8 +1,8 @@
-import { CronJob } from "cron";
-import { normalizePhoneNumber } from "../database/db";
-import { ENV } from "../_core/env";
-import { format, subHours } from "date-fns";
-import { ar } from "date-fns/locale";
+import { CronJob } from 'cron';
+import { normalizePhoneNumber } from '../database/db';
+import { ENV } from '../_core/env';
+import { format, subHours } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 interface ScheduledTask {
   id: string;
@@ -25,37 +25,37 @@ export async function initializeScheduler(): Promise<{
   error?: string;
 }> {
   try {
-    console.log("[WhatsApp Scheduler] Initializing scheduler...");
+    console.log('[WhatsApp Scheduler] Initializing scheduler...');
 
     // Task 1: Send 24-hour appointment reminders (every day at 10 AM)
     await scheduleTask({
-      id: "appointment_reminder_24h",
-      name: "تذكيرات الحجوزات (24 ساعة)",
-      cronExpression: "0 10 * * *", // 10 AM every day
+      id: 'appointment_reminder_24h',
+      name: 'تذكيرات الحجوزات (24 ساعة)',
+      cronExpression: '0 10 * * *', // 10 AM every day
       handler: sendAppointmentReminders24h,
     });
 
     // Task 2: Send 1-hour appointment reminders (every hour)
     await scheduleTask({
-      id: "appointment_reminder_1h",
-      name: "تذكيرات الحجوزات (1 ساعة)",
-      cronExpression: "0 * * * *", // Every hour
+      id: 'appointment_reminder_1h',
+      name: 'تذكيرات الحجوزات (1 ساعة)',
+      cronExpression: '0 * * * *', // Every hour
       handler: sendAppointmentReminders1h,
     });
 
     // Task 3: Clean up old audit logs (every day at 2 AM)
     await scheduleTask({
-      id: "cleanup_audit_logs",
-      name: "تنظيف سجلات العمليات",
-      cronExpression: "0 2 * * *", // 2 AM every day
+      id: 'cleanup_audit_logs',
+      name: 'تنظيف سجلات العمليات',
+      cronExpression: '0 2 * * *', // 2 AM every day
       handler: cleanupOldAuditLogs,
     });
 
     // Task 4: Health check (every 5 minutes)
     await scheduleTask({
-      id: "health_check",
-      name: "فحص صحة النظام",
-      cronExpression: "*/5 * * * *", // Every 5 minutes
+      id: 'health_check',
+      name: 'فحص صحة النظام',
+      cronExpression: '*/5 * * * *', // Every 5 minutes
       handler: performHealthCheck,
     });
 
@@ -66,10 +66,10 @@ export async function initializeScheduler(): Promise<{
       tasksInitialized: scheduledTasks.size,
     };
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Failed to initialize scheduler:", error);
+    console.error('[WhatsApp Scheduler] Failed to initialize scheduler:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -85,7 +85,7 @@ export async function scheduleTask(params: {
 }): Promise<{ success: boolean; error?: string }> {
   try {
     if (scheduledTasks.has(params.id)) {
-      return { success: false, error: "Task already exists" };
+      return { success: false, error: 'Task already exists' };
     }
 
     const job = new CronJob(params.cronExpression, async () => {
@@ -103,9 +103,7 @@ export async function scheduleTask(params: {
           task.nextRun = nextDate ? nextDate.toJSDate() : new Date();
         }
 
-        console.log(
-          `[WhatsApp Scheduler] Task completed: ${params.name} (${duration}ms)`
-        );
+        console.log(`[WhatsApp Scheduler] Task completed: ${params.name} (${duration}ms)`);
       } catch (error) {
         console.error(`[WhatsApp Scheduler] Task failed: ${params.name}`, error);
       }
@@ -128,10 +126,10 @@ export async function scheduleTask(params: {
 
     return { success: true };
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Failed to schedule task:", error);
+    console.error('[WhatsApp Scheduler] Failed to schedule task:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -155,10 +153,10 @@ export async function getScheduledTasks(): Promise<{
       tasks,
     };
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Failed to get tasks:", error);
+    console.error('[WhatsApp Scheduler] Failed to get tasks:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -173,7 +171,7 @@ export async function stopTask(taskId: string): Promise<{
   try {
     const task = scheduledTasks.get(taskId);
     if (!task) {
-      return { success: false, error: "Task not found" };
+      return { success: false, error: 'Task not found' };
     }
 
     if (task.job) {
@@ -185,10 +183,10 @@ export async function stopTask(taskId: string): Promise<{
 
     return { success: true };
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Failed to stop task:", error);
+    console.error('[WhatsApp Scheduler] Failed to stop task:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -203,7 +201,7 @@ export async function resumeTask(taskId: string): Promise<{
   try {
     const task = scheduledTasks.get(taskId);
     if (!task) {
-      return { success: false, error: "Task not found" };
+      return { success: false, error: 'Task not found' };
     }
 
     if (task.job) {
@@ -215,10 +213,10 @@ export async function resumeTask(taskId: string): Promise<{
 
     return { success: true };
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Failed to resume task:", error);
+    console.error('[WhatsApp Scheduler] Failed to resume task:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -227,55 +225,55 @@ export async function resumeTask(taskId: string): Promise<{
 
 async function sendAppointmentReminders24h(): Promise<void> {
   try {
-    console.log("[WhatsApp Scheduler] Sending 24-hour appointment reminders...");
+    console.log('[WhatsApp Scheduler] Sending 24-hour appointment reminders...');
 
     // This would query appointments from database where appointmentTime is within 24-25 hours
     // For now, just log
-    console.log("[WhatsApp Scheduler] 24-hour reminders sent");
+    console.log('[WhatsApp Scheduler] 24-hour reminders sent');
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Failed to send 24-hour reminders:", error);
+    console.error('[WhatsApp Scheduler] Failed to send 24-hour reminders:', error);
   }
 }
 
 async function sendAppointmentReminders1h(): Promise<void> {
   try {
-    console.log("[WhatsApp Scheduler] Sending 1-hour appointment reminders...");
+    console.log('[WhatsApp Scheduler] Sending 1-hour appointment reminders...');
 
     // This would query appointments from database where appointmentTime is within 1-2 hours
     // For now, just log
-    console.log("[WhatsApp Scheduler] 1-hour reminders sent");
+    console.log('[WhatsApp Scheduler] 1-hour reminders sent');
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Failed to send 1-hour reminders:", error);
+    console.error('[WhatsApp Scheduler] Failed to send 1-hour reminders:', error);
   }
 }
 
 async function cleanupOldAuditLogs(): Promise<void> {
   try {
-    console.log("[WhatsApp Scheduler] Cleaning up old audit logs...");
+    console.log('[WhatsApp Scheduler] Cleaning up old audit logs...');
 
-    const { clearOldLogs } = await import("./whatsappAuditLog");
+    const { clearOldLogs } = await import('./whatsappAuditLog');
     const result = await clearOldLogs(30); // Delete logs older than 30 days
 
     if (result.success) {
-      console.log(
-        `[WhatsApp Scheduler] Cleaned up ${result.deletedCount} old logs`
-      );
+      console.log(`[WhatsApp Scheduler] Cleaned up ${result.deletedCount} old logs`);
     }
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Failed to cleanup audit logs:", error);
+    console.error('[WhatsApp Scheduler] Failed to cleanup audit logs:', error);
   }
 }
 
 async function performHealthCheck(): Promise<void> {
   try {
     if (!ENV.whatsappPhoneNumberId || !ENV.metaAccessToken) {
-      console.warn("[WhatsApp Scheduler] WhatsApp Cloud API not configured (missing WHATSAPP_PHONE_NUMBER_ID or META_ACCESS_TOKEN)");
+      console.warn(
+        '[WhatsApp Scheduler] WhatsApp Cloud API not configured (missing WHATSAPP_PHONE_NUMBER_ID or META_ACCESS_TOKEN)'
+      );
       return;
     }
 
-    console.log("[WhatsApp Scheduler] Health check passed — Cloud API configured");
+    console.log('[WhatsApp Scheduler] Health check passed — Cloud API configured');
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Health check failed:", error);
+    console.error('[WhatsApp Scheduler] Health check failed:', error);
   }
 }
 
@@ -287,7 +285,7 @@ export async function shutdownScheduler(): Promise<{
   error?: string;
 }> {
   try {
-    console.log("[WhatsApp Scheduler] Shutting down scheduler...");
+    console.log('[WhatsApp Scheduler] Shutting down scheduler...');
 
     const tasks = Array.from(scheduledTasks.values());
     for (const task of tasks) {
@@ -296,14 +294,14 @@ export async function shutdownScheduler(): Promise<{
       }
     }
 
-    console.log("[WhatsApp Scheduler] Scheduler shutdown complete");
+    console.log('[WhatsApp Scheduler] Scheduler shutdown complete');
 
     return { success: true };
   } catch (error) {
-    console.error("[WhatsApp Scheduler] Failed to shutdown scheduler:", error);
+    console.error('[WhatsApp Scheduler] Failed to shutdown scheduler:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }

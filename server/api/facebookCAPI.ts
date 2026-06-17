@@ -23,15 +23,15 @@
  * Docs: https://developers.facebook.com/docs/marketing-api/conversions-api
  */
 
-import crypto from "crypto";
-import { meta } from "./MetaApiService";
+import crypto from 'crypto';
+import { meta } from './MetaApiService';
 
 /**
  * ⚠️  التوكن يأتي من MetaApiService.accessToken حصراً.
  *     لا تستخدم process.env.META_ACCESS_TOKEN مباشرة في هذا الملف.
  */
-const META_PIXEL_ID = process.env.META_PIXEL_ID || "";
-const META_TEST_EVENT_CODE = process.env.META_TEST_EVENT_CODE || "";
+const META_PIXEL_ID = process.env.META_PIXEL_ID || '';
+const META_TEST_EVENT_CODE = process.env.META_TEST_EVENT_CODE || '';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -41,11 +41,8 @@ const META_TEST_EVENT_CODE = process.env.META_TEST_EVENT_CODE || "";
  * Returns empty string if value is falsy.
  */
 function hashValue(value: string | undefined | null): string {
-  if (!value) return "";
-  return crypto
-    .createHash("sha256")
-    .update(value.trim().toLowerCase())
-    .digest("hex");
+  if (!value) return '';
+  return crypto.createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
 }
 
 /**
@@ -53,9 +50,9 @@ function hashValue(value: string | undefined | null): string {
  * Accepts: 7XXXXXXXX, 07XXXXXXXX, +9677XXXXXXXX, 9677XXXXXXXX
  */
 function normalizePhone(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.startsWith("967") && digits.length === 12) return `+${digits}`;
-  if (digits.startsWith("0") && digits.length === 10) return `+967${digits.slice(1)}`;
+  const digits = phone.replace(/\D/g, '');
+  if (digits.startsWith('967') && digits.length === 12) return `+${digits}`;
+  if (digits.startsWith('0') && digits.length === 10) return `+967${digits.slice(1)}`;
   if (digits.length === 9) return `+967${digits}`;
   return `+${digits}`;
 }
@@ -94,29 +91,29 @@ export interface CAPIUserData {
  * Custom funnel: WORKING | QUALIFIED | CONVERTED | No_Answer | Canceled_Booking
  */
 export type CAPIEventName =
-  | "Lead"
-  | "CompleteRegistration"
-  | "Schedule"
-  | "Purchase"
-  | "WORKING"
-  | "QUALIFIED"
-  | "CONVERTED"
-  | "No_Answer"
-  | "Canceled_Booking";
+  | 'Lead'
+  | 'CompleteRegistration'
+  | 'Schedule'
+  | 'Purchase'
+  | 'WORKING'
+  | 'QUALIFIED'
+  | 'CONVERTED'
+  | 'No_Answer'
+  | 'Canceled_Booking';
 
 /** Standard Meta event names (use fbq("track", ...)) */
 const STANDARD_META_EVENTS = new Set([
-  "Lead",
-  "CompleteRegistration",
-  "Schedule",
-  "Purchase",
-  "PageView",
-  "ViewContent",
-  "InitiateCheckout",
-  "AddToCart",
-  "Search",
-  "Contact",
-  "FindLocation",
+  'Lead',
+  'CompleteRegistration',
+  'Schedule',
+  'Purchase',
+  'PageView',
+  'ViewContent',
+  'InitiateCheckout',
+  'AddToCart',
+  'Search',
+  'Contact',
+  'FindLocation',
 ]);
 
 export interface CAPIEventOptions {
@@ -162,7 +159,7 @@ export interface CAPIEventOptions {
  */
 export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
   if (!meta.accessToken || !META_PIXEL_ID) {
-    console.warn("[CAPI] Skipping – META_ACCESS_TOKEN or META_PIXEL_ID not configured");
+    console.warn('[CAPI] Skipping – META_ACCESS_TOKEN or META_PIXEL_ID not configured');
     return;
   }
 
@@ -227,8 +224,8 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
   // Include lead_event_source as required by Meta for CRM events
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const builtCustomData: Record<string, any> = {
-    lead_event_source: "SGH CRM Portal",
-    event_source: "crm",
+    lead_event_source: 'SGH CRM Portal',
+    event_source: 'crm',
   };
 
   if (customData) {
@@ -249,7 +246,7 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
     event_name: eventName,
     event_time: eventTime,
     // action_source must be "website" for web-based events
-    action_source: "website",
+    action_source: 'website',
     user_data: hashedUserData,
     custom_data: builtCustomData,
   };
@@ -275,15 +272,15 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
     );
 
     if (!capiRes.success) {
-      console.error("[CAPI] API error:", capiRes.error);
+      console.error('[CAPI] API error:', capiRes.error);
     } else {
       console.log(
-        `[CAPI] ${isStandardEvent ? "Standard" : "Custom"} event "${eventName}" sent successfully.`
+        `[CAPI] ${isStandardEvent ? 'Standard' : 'Custom'} event "${eventName}" sent successfully.`
       );
     }
   } catch (error) {
     // Never let CAPI errors break the booking flow
-    console.error("[CAPI] Network error:", error);
+    console.error('[CAPI] Network error:', error);
   }
 }
 
@@ -303,14 +300,22 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
  */
 function mapStatusToEvent(status: string): CAPIEventName | null {
   switch (status) {
-    case "contacted":   return "WORKING";
-    case "no_answer":   return "No_Answer";
-    case "confirmed":   return "QUALIFIED";
-    case "attended":    return "Purchase";
-    case "completed":   return "CONVERTED";
-    case "cancelled":   return "Canceled_Booking";
-    case "pending":     return null; // Lead already sent at creation
-    default:            return null;
+    case 'contacted':
+      return 'WORKING';
+    case 'no_answer':
+      return 'No_Answer';
+    case 'confirmed':
+      return 'QUALIFIED';
+    case 'attended':
+      return 'Purchase';
+    case 'completed':
+      return 'CONVERTED';
+    case 'cancelled':
+      return 'Canceled_Booking';
+    case 'pending':
+      return null; // Lead already sent at creation
+    default:
+      return null;
   }
 }
 
@@ -326,7 +331,7 @@ export interface CAPIStatusChangeParams {
   /** Patient email (optional) */
   email?: string;
   /** Service type: appointment | offer | camp */
-  serviceType: "appointment" | "offer" | "camp";
+  serviceType: 'appointment' | 'offer' | 'camp';
   /** Unique booking ID for deduplication */
   bookingId: number | string;
 }
@@ -343,9 +348,9 @@ export async function sendStatusChangeEvent(params: CAPIStatusChangeParams): Pro
   if (!eventName) return false; // لا حدث لهذه الحالة
 
   const serviceLabels: Record<string, string> = {
-    appointment: "حجز موعد طبيب",
-    offer: "طلب عرض طبي",
-    camp: "تسجيل مخيم طبي",
+    appointment: 'حجز موعد طبيب',
+    offer: 'طلب عرض طبي',
+    camp: 'تسجيل مخيم طبي',
   };
 
   const eventId = `${params.serviceType}_${params.bookingId}_${params.status}`;
@@ -359,7 +364,7 @@ export async function sendStatusChangeEvent(params: CAPIStatusChangeParams): Pro
       email: params.email,
     },
     customData: {
-      contentName: serviceLabels[params.serviceType] || "خدمة طبية",
+      contentName: serviceLabels[params.serviceType] || 'خدمة طبية',
       contentCategory: params.serviceType,
       status: params.status,
     },
@@ -386,7 +391,7 @@ export async function sendAppointmentLeadEvent(params: {
   eventId?: string;
 }): Promise<void> {
   return sendCAPIEvent({
-    eventName: "Lead",
+    eventName: 'Lead',
     eventId: params.eventId,
     eventSourceUrl: params.eventSourceUrl,
     userData: {
@@ -400,9 +405,9 @@ export async function sendAppointmentLeadEvent(params: {
     },
     customData: {
       // اسم عام فقط — لا تشخيصات أو إجراءات طبية حساسة
-      contentName: "حجز موعد طبيب",
-      contentCategory: "appointment",
-      status: "new",
+      contentName: 'حجز موعد طبيب',
+      contentCategory: 'appointment',
+      status: 'new',
     },
   });
 }
@@ -423,7 +428,7 @@ export async function sendOfferLeadEvent(params: {
   eventId?: string;
 }): Promise<void> {
   return sendCAPIEvent({
-    eventName: "Lead",
+    eventName: 'Lead',
     eventId: params.eventId,
     eventSourceUrl: params.eventSourceUrl,
     userData: {
@@ -437,9 +442,9 @@ export async function sendOfferLeadEvent(params: {
     },
     customData: {
       // اسم عام فقط — لا تفاصيل طبية حساسة
-      contentName: "طلب عرض طبي",
-      contentCategory: "offer",
-      status: "new",
+      contentName: 'طلب عرض طبي',
+      contentCategory: 'offer',
+      status: 'new',
     },
   });
 }
@@ -460,7 +465,7 @@ export async function sendCampRegistrationEvent(params: {
   eventId?: string;
 }): Promise<void> {
   return sendCAPIEvent({
-    eventName: "CompleteRegistration",
+    eventName: 'CompleteRegistration',
     eventId: params.eventId,
     eventSourceUrl: params.eventSourceUrl,
     userData: {
@@ -474,9 +479,9 @@ export async function sendCampRegistrationEvent(params: {
     },
     customData: {
       // اسم عام فقط — لا تخصصات طبية حساسة
-      contentName: "تسجيل مخيم طبي",
-      contentCategory: "camp",
-      status: "registered",
+      contentName: 'تسجيل مخيم طبي',
+      contentCategory: 'camp',
+      status: 'registered',
     },
   });
 }

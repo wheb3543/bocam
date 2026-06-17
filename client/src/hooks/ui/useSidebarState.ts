@@ -1,14 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'wouter';
 
 /**
  * Hook مشترك لإدارة حالة الشريط الجانبي (expanded/collapsed)
- * 
+ *
  * السلوك الديناميكي (Meta Business Suite Style):
  * - في الصفحة الرئيسية (/admin): الشريط مفتوح بالكامل (expanded)
  * - في باقي الصفحات: الشريط مطوي (collapsed)
  * - عند hover: يتمدد مؤقتاً ليظهر النصوص
- * 
+ *
  * @returns {object} - حالة الشريط ودوال التحكم
  */
 export function useSidebarState() {
@@ -18,7 +18,7 @@ export function useSidebarState() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // تحديد ما إذا كنا في الصفحة الرئيسية
-  const isHomePage = location === "/admin" || location === "/admin/";
+  const isHomePage = location === '/admin' || location === '/admin/';
 
   // تحديث حالة الشريط بناءً على الصفحة الحالية
   useEffect(() => {
@@ -38,7 +38,7 @@ export function useSidebarState() {
   }, []);
 
   const toggleMobile = useCallback(() => {
-    setIsMobileOpen(prev => !prev);
+    setIsMobileOpen((prev) => !prev);
   }, []);
 
   const closeMobile = useCallback(() => {

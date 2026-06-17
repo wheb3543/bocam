@@ -1,5 +1,5 @@
 $kind: http-request
-description: "- Endpoint reference: [Business > Extendedcredits](https://developers.facebook.com/docs/marketing-api/reference/extended-credit/)"
+description: '- Endpoint reference: [Business > Extendedcredits](https://developers.facebook.com/docs/marketing-api/reference/extended-credit/)'
 url: https://graph.facebook.com/{{Version}}/{{Business-ID}}/extendedcredits
 method: GET
 examples: ./.resources/Get credit lines.resources/examples

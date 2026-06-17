@@ -1,7 +1,7 @@
 /**
  * In-memory cache system for server-side query caching.
  * Reduces database load for frequently accessed data like stats, doctors list, etc.
- * 
+ *
  * Features:
  * - TTL-based expiration (configurable per cache key)
  * - Automatic stale data cleanup
@@ -138,16 +138,16 @@ export const serverCache = new ServerCache();
 
 export const CacheKeys = {
   // Stats caches (TTL: 30 seconds - frequently updated)
-  appointmentStats: () => "stats:appointments",
-  offerLeadStats: () => "stats:offerLeads",
-  campRegistrationStats: () => "stats:campRegistrations",
-  leadStats: () => "stats:leads",
+  appointmentStats: () => 'stats:appointments',
+  offerLeadStats: () => 'stats:offerLeads',
+  campRegistrationStats: () => 'stats:campRegistrations',
+  leadStats: () => 'stats:leads',
 
   // List caches (TTL: 60 seconds - less frequently changed)
-  doctorsList: () => "list:doctors",
-  offersList: () => "list:offers",
-  campsList: () => "list:camps",
-  campaignsList: () => "list:campaigns",
+  doctorsList: () => 'list:doctors',
+  offersList: () => 'list:offers',
+  campsList: () => 'list:camps',
+  campaignsList: () => 'list:campaigns',
 
   // Paginated query caches (TTL: 15 seconds - user-specific queries)
   appointmentsPaginated: (params: Record<string, any>) =>
@@ -161,9 +161,9 @@ export const CacheKeys = {
 // ─── Cache TTL Constants (in seconds) ───────────────────────────────────────
 
 export const CacheTTL = {
-  STATS: 60,           // Stats refresh every 60 seconds
-  LIST: 120,           // Reference lists refresh every 2 minutes
-  PAGINATED: 30,       // Paginated queries refresh every 30 seconds
-  SHORT: 15,           // Short-lived cache for rapidly changing data
-  LONG: 300,           // Long-lived cache for rarely changing data (doctors, camps, offers)
+  STATS: 60, // Stats refresh every 60 seconds
+  LIST: 120, // Reference lists refresh every 2 minutes
+  PAGINATED: 30, // Paginated queries refresh every 30 seconds
+  SHORT: 15, // Short-lived cache for rapidly changing data
+  LONG: 300, // Long-lived cache for rarely changing data (doctors, camps, offers)
 };

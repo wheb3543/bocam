@@ -1,23 +1,35 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Phone, Mail, Calendar, MessageSquare, Clock, MoreVertical, Loader2, AlertCircle, MessageCircle, ChevronDown, ChevronUp, Link2, Bell, BellOff, DollarSign } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getCompanyName } from "@/const";
-import { trpc } from "@/lib/api/trpc";
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Phone,
+  Mail,
+  Calendar,
+  MessageSquare,
+  Clock,
+  MoreVertical,
+  Loader2,
+  AlertCircle,
+  MessageCircle,
+  ChevronDown,
+  ChevronUp,
+  Link2,
+  Bell,
+  BellOff,
+  DollarSign,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { getCompanyName } from '@/const';
+import { trpc } from '@/lib/api/trpc';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from '@/components/ui/dropdown-menu';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Dialog,
   DialogContent,
@@ -26,17 +38,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { toast } from 'sonner';
 
 interface ConversationInfoProps {
   conversation: {
@@ -61,8 +73,20 @@ interface ConversationInfoProps {
   onMarkAsImportant?: () => void;
   onArchive?: () => void;
   onConversationUpdate?: () => void;
-  onSendReminder?: (appointmentId: number, phone: string, patientName: string, doctorName: string, appointmentTime: Date) => void;
-  onSendFollowup?: (appointmentId: number, phone: string, patientName: string, doctorName: string, department: string) => void;
+  onSendReminder?: (
+    appointmentId: number,
+    phone: string,
+    patientName: string,
+    doctorName: string,
+    appointmentTime: Date
+  ) => void;
+  onSendFollowup?: (
+    appointmentId: number,
+    phone: string,
+    patientName: string,
+    doctorName: string,
+    department: string
+  ) => void;
   entityWhatsAppStatus?: any;
   isSendingReminder?: boolean;
   isSendingFollowup?: boolean;
@@ -108,25 +132,29 @@ export default function ConversationInfo({
   const [statsOpen, setStatsOpen] = useState(true);
   // Edit states
   const [editingName, setEditingName] = useState(false);
-  const [editedName, setEditedName] = useState(conversation.customerName || "");
+  const [editedName, setEditedName] = useState(conversation.customerName || '');
   const [editingNotes, setEditingNotes] = useState(false);
-  const [editedNotes, setEditedNotes] = useState(conversation.notes || "");
+  const [editedNotes, setEditedNotes] = useState(conversation.notes || '');
 
   // Link entity dialog state
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
-  const [linkEntityType, setLinkEntityType] = useState<"lead" | "appointment" | "offer" | "camp">("lead");
+  const [linkEntityType, setLinkEntityType] = useState<'lead' | 'appointment' | 'offer' | 'camp'>(
+    'lead'
+  );
   const [linkEntityId, setLinkEntityId] = useState<number | null>(null);
-  const [linkEntitySearch, setLinkEntitySearch] = useState("");
+  const [linkEntitySearch, setLinkEntitySearch] = useState('');
 
-  const { data: infoData, isLoading: infoLoading } = trpc.whatsapp.conversations.getCustomerInfo.useQuery(
-    { phone: conversation.phoneNumber },
-    { enabled: !!conversation.phoneNumber }
-  );
+  const { data: infoData, isLoading: infoLoading } =
+    trpc.whatsapp.conversations.getCustomerInfo.useQuery(
+      { phone: conversation.phoneNumber },
+      { enabled: !!conversation.phoneNumber }
+    );
 
-  const { data: recordsData, isLoading: recordsLoading } = trpc.whatsapp.conversations.getCustomerRecords.useQuery(
-    { phone: conversation.phoneNumber },
-    { enabled: !!conversation.phoneNumber }
-  );
+  const { data: recordsData, isLoading: recordsLoading } =
+    trpc.whatsapp.conversations.getCustomerRecords.useQuery(
+      { phone: conversation.phoneNumber },
+      { enabled: !!conversation.phoneNumber }
+    );
 
   const { data: conversationStats } = trpc.whatsapp.conversations.getStats.useQuery(
     { conversationId: conversation.id },
@@ -135,45 +163,45 @@ export default function ConversationInfo({
 
   const updateNameMutation = trpc.whatsapp.conversations.updateName.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث اسم العميل");
+      toast.success('تم تحديث اسم العميل');
       setEditingName(false);
       onConversationUpdate?.();
     },
-    onError: () => toast.error("فشل تحديث الاسم"),
+    onError: () => toast.error('فشل تحديث الاسم'),
   });
 
   const updateNotesMutation = trpc.whatsapp.conversations.updateNotes.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث الملاحظات");
+      toast.success('تم تحديث الملاحظات');
       setEditingNotes(false);
       onConversationUpdate?.();
     },
-    onError: () => toast.error("فشل تحديث الملاحظات"),
+    onError: () => toast.error('فشل تحديث الملاحظات'),
   });
 
   const handleLinkEntity = () => {
     if (!linkEntityId) {
-      toast.error("يرجى اختيار كيان للربط");
+      toast.error('يرجى اختيار كيان للربط');
       return;
     }
 
     const updateData: any = {};
-    if (linkEntityType === "lead") updateData.leadId = linkEntityId;
-    else if (linkEntityType === "appointment") updateData.appointmentId = linkEntityId;
-    else if (linkEntityType === "offer") updateData.offerLeadId = linkEntityId;
-    else if (linkEntityType === "camp") updateData.campRegistrationId = linkEntityId;
+    if (linkEntityType === 'lead') updateData.leadId = linkEntityId;
+    else if (linkEntityType === 'appointment') updateData.appointmentId = linkEntityId;
+    else if (linkEntityType === 'offer') updateData.offerLeadId = linkEntityId;
+    else if (linkEntityType === 'camp') updateData.campRegistrationId = linkEntityId;
 
     updateNameMutation.mutate(
       { conversationId: conversation.id, ...updateData },
       {
         onSuccess: () => {
-          toast.success("تم ربط المحادثة بالكيان");
+          toast.success('تم ربط المحادثة بالكيان');
           setLinkDialogOpen(false);
           setLinkEntityId(null);
-          setLinkEntitySearch("");
+          setLinkEntitySearch('');
           onConversationUpdate?.();
         },
-        onError: () => toast.error("فشل ربط المحادثة"),
+        onError: () => toast.error('فشل ربط المحادثة'),
       }
     );
   };
@@ -198,7 +226,7 @@ export default function ConversationInfo({
 
   const handleCopyPhone = () => {
     navigator.clipboard.writeText(conversation.phoneNumber);
-    toast.success("تم نسخ رقم الهاتف");
+    toast.success('تم نسخ رقم الهاتف');
   };
 
   const handleCall = () => {
@@ -213,7 +241,7 @@ export default function ConversationInfo({
 
   const handleEmail = (email?: string) => {
     if (!email) {
-      toast.error("لا يوجد بريد إلكتروني");
+      toast.error('لا يوجد بريد إلكتروني');
       return;
     }
     window.location.href = `mailto:${email}`;
@@ -221,7 +249,7 @@ export default function ConversationInfo({
 
   const handleSaveName = () => {
     if (!editedName.trim()) {
-      toast.error("الاسم لا يمكن أن يكون فارغاً");
+      toast.error('الاسم لا يمكن أن يكون فارغاً');
       return;
     }
     updateNameMutation.mutate({
@@ -231,7 +259,7 @@ export default function ConversationInfo({
   };
 
   const handleCancelEditName = () => {
-    setEditedName(conversation.customerName || "");
+    setEditedName(conversation.customerName || '');
     setEditingName(false);
   };
 
@@ -243,40 +271,40 @@ export default function ConversationInfo({
   };
 
   const handleCancelEditNotes = () => {
-    setEditedNotes(conversation.notes || "");
+    setEditedNotes(conversation.notes || '');
     setEditingNotes(false);
   };
 
   const getStatusBadgeColor = (status: string) => {
     const statusColors: Record<string, string> = {
-      'new': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-      'contacted': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-      'booked': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-      'confirmed': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-      'completed': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-      'cancelled': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-      'not_interested': 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
-      'pending': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+      new: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      contacted: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+      booked: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      confirmed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      completed: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+      not_interested: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
+      pending: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
     };
     return statusColors[status] || 'bg-gray-100 text-gray-800';
   };
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      'lead': 'عميل محتمل',
-      'appointment': 'موعد طبي',
-      'offer': 'عرض طبي',
-      'camp': 'تسجيل مخيم',
+      lead: 'عميل محتمل',
+      appointment: 'موعد طبي',
+      offer: 'عرض طبي',
+      camp: 'تسجيل مخيم',
     };
     return labels[type] || type;
   };
 
   const getRecordIcon = (type: string) => {
     const icons: Record<string, string> = {
-      'appointment': '📅',
-      'lead': '👤',
-      'offer': '🏥',
-      'camp': '🏕️',
+      appointment: '📅',
+      lead: '👤',
+      offer: '🏥',
+      camp: '🏕️',
     };
     return icons[type] || '📋';
   };
@@ -299,16 +327,26 @@ export default function ConversationInfo({
                 <Button size="sm" variant="ghost" onClick={handleSaveName} className="h-6 w-6 p-0">
                   <span className="text-green-600">✓</span>
                 </Button>
-                <Button size="sm" variant="ghost" onClick={handleCancelEditName} className="h-6 w-6 p-0">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCancelEditName}
+                  className="h-6 w-6 p-0"
+                >
                   <span className="text-red-600">✕</span>
                 </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-sm sm:text-base text-foreground truncate">
-                  {conversation.customerName || "عميل جديد"}
+                  {conversation.customerName || 'عميل جديد'}
                 </h3>
-                <Button size="sm" variant="ghost" onClick={() => setEditingName(true)} className="h-5 w-5 p-0 opacity-50 hover:opacity-100">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditingName(true)}
+                  className="h-5 w-5 p-0 opacity-50 hover:opacity-100"
+                >
                   <span className="text-xs">✏️</span>
                 </Button>
               </div>
@@ -322,11 +360,7 @@ export default function ConversationInfo({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 flex-shrink-0"
-              >
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 flex-shrink-0">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -359,12 +393,7 @@ export default function ConversationInfo({
 
       {/* Quick Action Buttons */}
       <div className="grid grid-cols-2 gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-8 text-xs"
-          onClick={handleCall}
-        >
+        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={handleCall}>
           <Phone className="h-3.5 w-3.5 ml-1" />
           <span className="hidden sm:inline">اتصال</span>
           <span className="sm:hidden">☎️</span>
@@ -381,7 +410,6 @@ export default function ConversationInfo({
         </Button>
       </div>
 
-
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2">
         <Card className="p-2.5 sm:p-3">
@@ -389,9 +417,7 @@ export default function ConversationInfo({
             <MessageSquare className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
             <div className="min-w-0">
               <p className="text-[10px] sm:text-xs text-muted-foreground">الرسائل</p>
-              <p className="font-bold text-sm sm:text-base text-foreground">
-                {messageCount}
-              </p>
+              <p className="font-bold text-sm sm:text-base text-foreground">{messageCount}</p>
             </div>
           </div>
         </Card>
@@ -403,11 +429,11 @@ export default function ConversationInfo({
               <p className="text-[10px] sm:text-xs text-muted-foreground">آخر رسالة</p>
               <p className="font-bold text-sm sm:text-base text-foreground">
                 {conversation.lastMessageAt
-                  ? new Date(conversation.lastMessageAt).toLocaleDateString("ar-EG", {
-                      month: "short",
-                      day: "numeric",
+                  ? new Date(conversation.lastMessageAt).toLocaleDateString('ar-EG', {
+                      month: 'short',
+                      day: 'numeric',
                     })
-                  : "—"}
+                  : '—'}
               </p>
             </div>
           </div>
@@ -434,7 +460,9 @@ export default function ConversationInfo({
           <Card className="p-3 sm:p-4 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
             <CollapsibleTrigger asChild>
               <div className="flex items-center justify-between cursor-pointer">
-                <p className="text-xs font-semibold text-muted-foreground">معلومات العميل الأساسية</p>
+                <p className="text-xs font-semibold text-muted-foreground">
+                  معلومات العميل الأساسية
+                </p>
                 {customerInfoOpen ? (
                   <ChevronUp className="h-4 w-4 text-muted-foreground" />
                 ) : (
@@ -499,26 +527,37 @@ export default function ConversationInfo({
                 </div>
                 <div className="space-y-1.5">
                   {customerRecords.appointments.slice(0, 3).map((apt) => (
-                    <div key={apt.id} className="text-xs p-2 bg-blue-50 dark:bg-blue-900/20 rounded flex items-center justify-between">
+                    <div
+                      key={apt.id}
+                      className="text-xs p-2 bg-blue-50 dark:bg-blue-900/20 rounded flex items-center justify-between"
+                    >
                       <span className="truncate flex-1">{apt.fullName}</span>
                       <div className="flex items-center gap-1">
-                        <Badge variant="outline" className="text-[10px] flex-shrink-0">{apt.status}</Badge>
+                        <Badge variant="outline" className="text-[10px] flex-shrink-0">
+                          {apt.status}
+                        </Badge>
                         {onSendReminder && apt.appointmentTime && (
                           <Button
                             size="sm"
                             variant="ghost"
                             className="h-6 w-6 p-0"
-                            onClick={() => onSendReminder(
-                              apt.id,
-                              conversation.phoneNumber,
-                              apt.fullName || conversation.customerName || "",
-                              apt.doctorName || "",
-                              new Date(apt.appointmentTime)
-                            )}
+                            onClick={() =>
+                              onSendReminder(
+                                apt.id,
+                                conversation.phoneNumber,
+                                apt.fullName || conversation.customerName || '',
+                                apt.doctorName || '',
+                                new Date(apt.appointmentTime)
+                              )
+                            }
                             title="إرسال تذكير"
                             disabled={isSendingReminder}
                           >
-                            {isSendingReminder ? <Loader2 className="h-3 w-3 text-blue-600 animate-spin" /> : <Bell className="h-3 w-3 text-blue-600" />}
+                            {isSendingReminder ? (
+                              <Loader2 className="h-3 w-3 text-blue-600 animate-spin" />
+                            ) : (
+                              <Bell className="h-3 w-3 text-blue-600" />
+                            )}
                           </Button>
                         )}
                         {onSendFollowup && (
@@ -526,17 +565,23 @@ export default function ConversationInfo({
                             size="sm"
                             variant="ghost"
                             className="h-6 w-6 p-0"
-                            onClick={() => onSendFollowup(
-                              apt.id,
-                              conversation.phoneNumber,
-                              apt.fullName || conversation.customerName || "",
-                              apt.doctorName || "",
-                              apt.department || ""
-                            )}
+                            onClick={() =>
+                              onSendFollowup(
+                                apt.id,
+                                conversation.phoneNumber,
+                                apt.fullName || conversation.customerName || '',
+                                apt.doctorName || '',
+                                apt.department || ''
+                              )
+                            }
                             title="إرسال متابعة"
                             disabled={isSendingFollowup}
                           >
-                            {isSendingFollowup ? <Loader2 className="h-3 w-3 text-green-600 animate-spin" /> : <MessageSquare className="h-3 w-3 text-green-600" />}
+                            {isSendingFollowup ? (
+                              <Loader2 className="h-3 w-3 text-green-600 animate-spin" />
+                            ) : (
+                              <MessageSquare className="h-3 w-3 text-green-600" />
+                            )}
                           </Button>
                         )}
                       </div>
@@ -551,80 +596,95 @@ export default function ConversationInfo({
               </Card>
             )}
 
-          {/* Leads Card */}
-          {customerRecords.leads.length > 0 && (
-            <Card className="p-3 sm:p-4 border-l-4 border-l-yellow-500">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">👤</span>
-                <p className="text-xs font-semibold text-foreground">
-                  العملاء المحتملين ({customerRecords.leads.length})
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                {customerRecords.leads.slice(0, 2).map((lead) => (
-                  <div key={lead.id} className="text-xs p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded flex items-center justify-between">
-                    <span className="truncate flex-1">{lead.fullName}</span>
-                    <Badge variant="outline" className="text-[10px] ml-2 flex-shrink-0">{lead.status}</Badge>
-                  </div>
-                ))}
-                {customerRecords.leads.length > 2 && (
-                  <p className="text-xs text-muted-foreground text-center py-1">
-                    +{customerRecords.leads.length - 2} عملاء آخرين
+            {/* Leads Card */}
+            {customerRecords.leads.length > 0 && (
+              <Card className="p-3 sm:p-4 border-l-4 border-l-yellow-500">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">👤</span>
+                  <p className="text-xs font-semibold text-foreground">
+                    العملاء المحتملين ({customerRecords.leads.length})
                   </p>
-                )}
-              </div>
-            </Card>
-          )}
+                </div>
+                <div className="space-y-1.5">
+                  {customerRecords.leads.slice(0, 2).map((lead) => (
+                    <div
+                      key={lead.id}
+                      className="text-xs p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded flex items-center justify-between"
+                    >
+                      <span className="truncate flex-1">{lead.fullName}</span>
+                      <Badge variant="outline" className="text-[10px] ml-2 flex-shrink-0">
+                        {lead.status}
+                      </Badge>
+                    </div>
+                  ))}
+                  {customerRecords.leads.length > 2 && (
+                    <p className="text-xs text-muted-foreground text-center py-1">
+                      +{customerRecords.leads.length - 2} عملاء آخرين
+                    </p>
+                  )}
+                </div>
+              </Card>
+            )}
 
-          {/* Offers Card */}
-          {customerRecords.offers.length > 0 && (
-            <Card className="p-3 sm:p-4 border-l-4 border-l-green-500">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">🏥</span>
-                <p className="text-xs font-semibold text-foreground">
-                  العروض الطبية ({customerRecords.offers.length})
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                {customerRecords.offers.slice(0, 2).map((offer) => (
-                  <div key={offer.id} className="text-xs p-2 bg-green-50 dark:bg-green-900/20 rounded flex items-center justify-between">
-                    <span className="truncate flex-1">{offer.fullName}</span>
-                    <Badge variant="outline" className="text-[10px] ml-2 flex-shrink-0">{offer.status}</Badge>
-                  </div>
-                ))}
-                {customerRecords.offers.length > 2 && (
-                  <p className="text-xs text-muted-foreground text-center py-1">
-                    +{customerRecords.offers.length - 2} عروض أخرى
+            {/* Offers Card */}
+            {customerRecords.offers.length > 0 && (
+              <Card className="p-3 sm:p-4 border-l-4 border-l-green-500">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">🏥</span>
+                  <p className="text-xs font-semibold text-foreground">
+                    العروض الطبية ({customerRecords.offers.length})
                   </p>
-                )}
-              </div>
-            </Card>
-          )}
+                </div>
+                <div className="space-y-1.5">
+                  {customerRecords.offers.slice(0, 2).map((offer) => (
+                    <div
+                      key={offer.id}
+                      className="text-xs p-2 bg-green-50 dark:bg-green-900/20 rounded flex items-center justify-between"
+                    >
+                      <span className="truncate flex-1">{offer.fullName}</span>
+                      <Badge variant="outline" className="text-[10px] ml-2 flex-shrink-0">
+                        {offer.status}
+                      </Badge>
+                    </div>
+                  ))}
+                  {customerRecords.offers.length > 2 && (
+                    <p className="text-xs text-muted-foreground text-center py-1">
+                      +{customerRecords.offers.length - 2} عروض أخرى
+                    </p>
+                  )}
+                </div>
+              </Card>
+            )}
 
-          {/* Camps Card */}
-          {customerRecords.camps.length > 0 && (
-            <Card className="p-3 sm:p-4 border-l-4 border-l-purple-500">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">🏕️</span>
-                <p className="text-xs font-semibold text-foreground">
-                  تسجيلات المخيمات ({customerRecords.camps.length})
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                {customerRecords.camps.slice(0, 2).map((camp) => (
-                  <div key={camp.id} className="text-xs p-2 bg-purple-50 dark:bg-purple-900/20 rounded flex items-center justify-between">
-                    <span className="truncate flex-1">{camp.fullName}</span>
-                    <Badge variant="outline" className="text-[10px] ml-2 flex-shrink-0">{camp.status}</Badge>
-                  </div>
-                ))}
-                {customerRecords.camps.length > 2 && (
-                  <p className="text-xs text-muted-foreground text-center py-1">
-                    +{customerRecords.camps.length - 2} تسجيلات أخرى
+            {/* Camps Card */}
+            {customerRecords.camps.length > 0 && (
+              <Card className="p-3 sm:p-4 border-l-4 border-l-purple-500">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">🏕️</span>
+                  <p className="text-xs font-semibold text-foreground">
+                    تسجيلات المخيمات ({customerRecords.camps.length})
                   </p>
-                )}
-              </div>
-            </Card>
-          )}
+                </div>
+                <div className="space-y-1.5">
+                  {customerRecords.camps.slice(0, 2).map((camp) => (
+                    <div
+                      key={camp.id}
+                      className="text-xs p-2 bg-purple-50 dark:bg-purple-900/20 rounded flex items-center justify-between"
+                    >
+                      <span className="truncate flex-1">{camp.fullName}</span>
+                      <Badge variant="outline" className="text-[10px] ml-2 flex-shrink-0">
+                        {camp.status}
+                      </Badge>
+                    </div>
+                  ))}
+                  {customerRecords.camps.length > 2 && (
+                    <p className="text-xs text-muted-foreground text-center py-1">
+                      +{customerRecords.camps.length - 2} تسجيلات أخرى
+                    </p>
+                  )}
+                </div>
+              </Card>
+            )}
           </CollapsibleContent>
         </Collapsible>
       )}
@@ -653,23 +713,40 @@ export default function ConversationInfo({
                   dir="rtl"
                 />
                 <div className="flex gap-2 justify-end">
-                  <Button size="sm" variant="outline" onClick={handleCancelEditNotes} className="h-7 text-xs">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCancelEditNotes}
+                    className="h-7 text-xs"
+                  >
                     إلغاء
                   </Button>
-                  <Button size="sm" onClick={handleSaveNotes} disabled={updateNotesMutation.isPending} className="h-7 text-xs">
-                    {updateNotesMutation.isPending ? "جاري الحفظ..." : "حفظ"}
+                  <Button
+                    size="sm"
+                    onClick={handleSaveNotes}
+                    disabled={updateNotesMutation.isPending}
+                    className="h-7 text-xs"
+                  >
+                    {updateNotesMutation.isPending ? 'جاري الحفظ...' : 'حفظ'}
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="space-y-2">
                 {conversation.notes ? (
-                  <p className="text-xs text-foreground whitespace-pre-wrap">{conversation.notes}</p>
+                  <p className="text-xs text-foreground whitespace-pre-wrap">
+                    {conversation.notes}
+                  </p>
                 ) : (
                   <p className="text-xs text-muted-foreground italic">لا توجد ملاحظات</p>
                 )}
-                <Button size="sm" variant="ghost" onClick={() => setEditingNotes(true)} className="h-6 text-xs w-full">
-                  {conversation.notes ? "تعديل الملاحظات" : "إضافة ملاحظات"}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditingNotes(true)}
+                  className="h-6 text-xs w-full"
+                >
+                  {conversation.notes ? 'تعديل الملاحظات' : 'إضافة ملاحظات'}
                 </Button>
               </div>
             )}
@@ -695,25 +772,35 @@ export default function ConversationInfo({
               <div className="grid grid-cols-2 gap-2">
                 <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
                   <p className="text-[10px] text-muted-foreground">إجمالي الرسائل</p>
-                  <p className="font-bold text-sm text-foreground">{conversationStats.totalMessages}</p>
+                  <p className="font-bold text-sm text-foreground">
+                    {conversationStats.totalMessages}
+                  </p>
                 </div>
                 <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
                   <p className="text-[10px] text-muted-foreground">مرسلة</p>
-                  <p className="font-bold text-sm text-green-600">{conversationStats.outboundMessages}</p>
+                  <p className="font-bold text-sm text-green-600">
+                    {conversationStats.outboundMessages}
+                  </p>
                 </div>
                 <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
                   <p className="text-[10px] text-muted-foreground">مستلمة</p>
-                  <p className="font-bold text-sm text-blue-600">{conversationStats.inboundMessages}</p>
+                  <p className="font-bold text-sm text-blue-600">
+                    {conversationStats.inboundMessages}
+                  </p>
                 </div>
                 <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
                   <p className="text-[10px] text-muted-foreground">قوالب</p>
-                  <p className="font-bold text-sm text-purple-600">{conversationStats.templateMessages}</p>
+                  <p className="font-bold text-sm text-purple-600">
+                    {conversationStats.templateMessages}
+                  </p>
                 </div>
               </div>
               {conversationStats.avgResponseTimeMinutes > 0 && (
                 <div className="mt-2 text-center p-2 bg-white dark:bg-gray-800 rounded">
                   <p className="text-[10px] text-muted-foreground">متوسط وقت الرد</p>
-                  <p className="font-bold text-sm text-foreground">{conversationStats.avgResponseTimeMinutes} دقيقة</p>
+                  <p className="font-bold text-sm text-foreground">
+                    {conversationStats.avgResponseTimeMinutes} دقيقة
+                  </p>
                 </div>
               )}
             </Card>
@@ -722,7 +809,10 @@ export default function ConversationInfo({
       )}
 
       {/* Pricing Information */}
-      {(conversation.pricingModel || conversation.billable !== null || conversation.pricingCategory || conversation.expirationTimestamp) && (
+      {(conversation.pricingModel ||
+        conversation.billable !== null ||
+        conversation.pricingCategory ||
+        conversation.expirationTimestamp) && (
         <Card className="p-3 sm:p-4 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/20">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="h-4 w-4 text-green-600" />
@@ -738,7 +828,9 @@ export default function ConversationInfo({
             {conversation.billable !== null && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">قابل للفوترة:</span>
-                <span className={`font-medium ${conversation.billable ? 'text-green-600' : 'text-red-600'}`}>
+                <span
+                  className={`font-medium ${conversation.billable ? 'text-green-600' : 'text-red-600'}`}
+                >
                   {conversation.billable === true || conversation.billable === 1 ? 'نعم' : 'لا'}
                 </span>
               </div>
@@ -753,7 +845,7 @@ export default function ConversationInfo({
               <div className="flex justify-between">
                 <span className="text-muted-foreground">تنتهي:</span>
                 <span className="font-medium">
-                  {new Date(conversation.expirationTimestamp).toLocaleString("ar-SA")}
+                  {new Date(conversation.expirationTimestamp).toLocaleString('ar-SA')}
                 </span>
               </div>
             )}
@@ -783,9 +875,13 @@ export default function ConversationInfo({
         )}
         {/* Entity WhatsApp Status */}
         {entityWhatsAppStatus && (
-          <Badge className={`w-full justify-start gap-1.5 px-2 py-1 text-xs ${
-            entityWhatsAppStatus.notificationsEnabled ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-800 border-gray-200'
-          }`}>
+          <Badge
+            className={`w-full justify-start gap-1.5 px-2 py-1 text-xs ${
+              entityWhatsAppStatus.notificationsEnabled
+                ? 'bg-green-100 text-green-800 border-green-200'
+                : 'bg-gray-100 text-gray-800 border-gray-200'
+            }`}
+          >
             {entityWhatsAppStatus.notificationsEnabled ? (
               <Bell className="h-3 w-3" />
             ) : (
@@ -803,14 +899,15 @@ export default function ConversationInfo({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>ربط المحادثة بكيان</DialogTitle>
-            <DialogDescription>
-              اختر نوع الكيان وحدد الكيان المراد ربطه
-            </DialogDescription>
+            <DialogDescription>اختر نوع الكيان وحدد الكيان المراد ربطه</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="entity-type">نوع الكيان</Label>
-              <Select value={linkEntityType} onValueChange={(value: any) => setLinkEntityType(value)}>
+              <Select
+                value={linkEntityType}
+                onValueChange={(value: any) => setLinkEntityType(value)}
+              >
                 <SelectTrigger id="entity-type">
                   <SelectValue placeholder="اختر نوع الكيان" />
                 </SelectTrigger>
@@ -839,9 +936,7 @@ export default function ConversationInfo({
             <Button variant="outline" onClick={() => setLinkDialogOpen(false)}>
               إلغاء
             </Button>
-            <Button onClick={handleLinkEntity}>
-              ربط
-            </Button>
+            <Button onClick={handleLinkEntity}>ربط</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

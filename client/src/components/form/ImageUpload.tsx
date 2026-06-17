@@ -1,13 +1,13 @@
-import { useState, useRef, useCallback } from "react";
-import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useImageUpload } from "@/hooks/form/useImageUpload";
-import { cn } from "@/lib/utils";
+import { useState, useRef, useCallback } from 'react';
+import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useImageUpload } from '@/hooks/form/useImageUpload';
+import { cn } from '@/lib/utils';
 
 /**
  * ImageUpload - مكون رفع الصور مع Drag & Drop ومعاينة
- * 
+ *
  * الاستخدام:
  * <ImageUpload
  *   value={formData.imageUrl}
@@ -41,17 +41,17 @@ interface ImageUploadProps {
 export default function ImageUpload({
   value,
   onChange,
-  folder = "uploads",
+  folder = 'uploads',
   maxSize = 5 * 1024 * 1024,
-  placeholder = "اسحب الصورة هنا أو اضغط للاختيار",
+  placeholder = 'اسحب الصورة هنا أو اضغط للاختيار',
   disabled = false,
   showUrlInput = true,
-  previewHeight = "h-48",
+  previewHeight = 'h-48',
   className,
 }: ImageUploadProps) {
   const [dragActive, setDragActive] = useState(false);
   const [showManualUrl, setShowManualUrl] = useState(false);
-  const [manualUrl, setManualUrl] = useState("");
+  const [manualUrl, setManualUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { uploading, uploadImage } = useImageUpload({
@@ -60,28 +60,37 @@ export default function ImageUpload({
     onSuccess: (url) => onChange(url),
   });
 
-  const handleFile = useCallback(async (file: File) => {
-    if (disabled || uploading) return;
-    await uploadImage(file);
-  }, [disabled, uploading, uploadImage]);
+  const handleFile = useCallback(
+    async (file: File) => {
+      if (disabled || uploading) return;
+      await uploadImage(file);
+    },
+    [disabled, uploading, uploadImage]
+  );
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  }, [handleFile]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(false);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!disabled && !uploading) {
-      setDragActive(true);
-    }
-  }, [disabled, uploading]);
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    },
+    [handleFile]
+  );
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!disabled && !uploading) {
+        setDragActive(true);
+      }
+    },
+    [disabled, uploading]
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -89,45 +98,45 @@ export default function ImageUpload({
     setDragActive(false);
   }, []);
 
-  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
-    }
-    // Reset input value to allow re-selecting same file
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }, [handleFile]);
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFile(e.target.files[0]);
+      }
+      // Reset input value to allow re-selecting same file
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    },
+    [handleFile]
+  );
 
   const handleManualUrlSubmit = useCallback(() => {
     if (manualUrl.trim()) {
       onChange(manualUrl.trim());
-      setManualUrl("");
+      setManualUrl('');
       setShowManualUrl(false);
     }
   }, [manualUrl, onChange]);
 
   const handleRemove = useCallback(() => {
-    onChange("");
+    onChange('');
   }, [onChange]);
 
   const maxSizeMB = (maxSize / (1024 * 1024)).toFixed(0);
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn('space-y-3', className)}>
       {value ? (
         /* معاينة الصورة */
         <div className="relative group">
           <img
             src={value}
             alt="معاينة"
-            className={cn(
-              "w-full object-cover rounded-lg border border-border",
-              previewHeight
-            )}
+            className={cn('w-full object-cover rounded-lg border border-border', previewHeight)}
             onError={(e) => {
-              (e.target as HTMLImageElement).src = "";
-              (e.target as HTMLImageElement).alt = "فشل تحميل الصورة";
+              (e.target as HTMLImageElement).src = '';
+              (e.target as HTMLImageElement).alt = 'فشل تحميل الصورة';
             }}
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
@@ -138,7 +147,11 @@ export default function ImageUpload({
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled || uploading}
             >
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
               <span className="mr-1">تغيير</span>
             </Button>
             <Button
@@ -165,11 +178,11 @@ export default function ImageUpload({
         /* منطقة الرفع */
         <div
           className={cn(
-            "border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer",
+            'border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer',
             dragActive
-              ? "border-primary bg-primary/5 scale-[1.01]"
-              : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30",
-            (disabled || uploading) && "opacity-50 cursor-not-allowed"
+              ? 'border-primary bg-primary/5 scale-[1.01]'
+              : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30',
+            (disabled || uploading) && 'opacity-50 cursor-not-allowed'
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -184,7 +197,7 @@ export default function ImageUpload({
             className="hidden"
             disabled={disabled || uploading}
           />
-          
+
           <div className="flex flex-col items-center gap-2">
             {uploading ? (
               <>
@@ -217,12 +230,25 @@ export default function ImageUpload({
                 placeholder="https://example.com/image.jpg"
                 dir="ltr"
                 className="flex-1"
-                onKeyDown={(e) => e.key === "Enter" && handleManualUrlSubmit()}
+                onKeyDown={(e) => e.key === 'Enter' && handleManualUrlSubmit()}
               />
-              <Button type="button" size="sm" onClick={handleManualUrlSubmit} disabled={!manualUrl.trim()}>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleManualUrlSubmit}
+                disabled={!manualUrl.trim()}
+              >
                 تطبيق
               </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => { setShowManualUrl(false); setManualUrl(""); }}>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setShowManualUrl(false);
+                  setManualUrl('');
+                }}
+              >
                 إلغاء
               </Button>
             </div>

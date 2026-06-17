@@ -2,9 +2,9 @@
  * OfflineIndicator - مؤشر الاتصال بالإنترنت
  * Shows online/offline status with smooth transitions
  */
-import { useEffect, useState } from "react";
-import { WifiOff, Wifi } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from 'react';
+import { WifiOff, Wifi } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function OfflineIndicator() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -14,7 +14,7 @@ export default function OfflineIndicator() {
     const handleOnline = () => {
       setIsOnline(true);
       setShowIndicator(true);
-      
+
       // Hide indicator after 3 seconds when back online
       setTimeout(() => {
         setShowIndicator(false);
@@ -43,16 +43,14 @@ export default function OfflineIndicator() {
   return (
     <div
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
-        showIndicator ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out',
+        showIndicator ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
       )}
     >
       <div
         className={cn(
-          "px-4 py-2 text-center text-sm font-medium text-white shadow-lg",
-          isOnline
-            ? "bg-green-600"
-            : "bg-red-600"
+          'px-4 py-2 text-center text-sm font-medium text-white shadow-lg',
+          isOnline ? 'bg-green-600' : 'bg-red-600'
         )}
         dir="rtl"
       >

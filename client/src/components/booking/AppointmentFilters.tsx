@@ -1,29 +1,24 @@
-import { useCallback } from "react";
-import MultiSelect from "@/components/form/MultiSelect";
-import SavedFilters from "@/components/SavedFilters";
-import { ColumnVisibility, type ColumnConfig } from "@/components/table/ColumnVisibility";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useCallback } from 'react';
+import MultiSelect from '@/components/form/MultiSelect';
+import SavedFilters from '@/components/SavedFilters';
+import { ColumnVisibility, type ColumnConfig } from '@/components/table/ColumnVisibility';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Search,
-  Download,
-  Printer,
-  RotateCcw,
-} from "lucide-react";
-import { SOURCE_OPTIONS } from "@shared/sources";
+} from '@/components/ui/dropdown-menu';
+import { Search, Download, Printer, RotateCcw } from 'lucide-react';
+import { SOURCE_OPTIONS } from '@shared/sources';
 
 interface AppointmentFiltersProps {
   // Search
@@ -56,7 +51,13 @@ interface AppointmentFiltersProps {
   allTemplates: any[];
   activeTemplateId: string | null;
   onApplyTemplate: (template: any) => void;
-  onSaveTemplate: (name: string, columns: Record<string, boolean>, columnOrder: string[], columnWidths?: Record<string, number>, frozenColumns?: string[]) => void;
+  onSaveTemplate: (
+    name: string,
+    columns: Record<string, boolean>,
+    columnOrder: string[],
+    columnWidths?: Record<string, number>,
+    frozenColumns?: string[]
+  ) => void;
   onDeleteTemplate: (templateId: string) => void;
   // Column widths & frozen
   columnWidths: Record<string, number>;
@@ -65,7 +66,13 @@ interface AppointmentFiltersProps {
   // Admin
   isAdmin: boolean;
   sharedTemplates: any[];
-  onSaveSharedTemplate: (name: string, columns: Record<string, boolean>, columnOrder: string[], columnWidths?: Record<string, number>, frozenColumns?: string[]) => void;
+  onSaveSharedTemplate: (
+    name: string,
+    columns: Record<string, boolean>,
+    columnOrder: string[],
+    columnWidths?: Record<string, number>,
+    frozenColumns?: string[]
+  ) => void;
   onDeleteSharedTemplate: (dbId: number) => void;
   // Saved filters
   currentFilters: any;
@@ -164,12 +171,7 @@ export default function AppointmentFilters({
           placeholder="كل المصادر"
           className="h-9"
         />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onPrint}
-          className="gap-2 h-9"
-        >
+        <Button variant="outline" size="sm" onClick={onPrint} className="gap-2 h-9">
           <Printer className="h-4 w-4" />
           <span className="hidden sm:inline">طباعة</span>
         </Button>

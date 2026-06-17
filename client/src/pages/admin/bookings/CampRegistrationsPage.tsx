@@ -1,11 +1,23 @@
-import { useState, useMemo } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import CampRegistrationsManagement from "@/components/camp/CampRegistrationsManagement";
-import { DateRangePicker } from "@/components/form/DateRangePicker";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { trpc } from "@/lib/api/trpc";
-import { Users, CheckCircle2, Clock, XCircle, PieChart as PieChartIcon } from "lucide-react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { useState, useMemo } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import CampRegistrationsManagement from '@/components/camp/CampRegistrationsManagement';
+import { DateRangePicker } from '@/components/form/DateRangePicker';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { trpc } from '@/lib/api/trpc';
+import { Users, CheckCircle2, Clock, XCircle, PieChart as PieChartIcon } from 'lucide-react';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 
 function inDateRange(createdAt: unknown, from: Date, to: Date): boolean {
   if (!createdAt) return false;
@@ -33,12 +45,12 @@ export default function CampRegistrationsPage() {
     const list = rangeRegistrations;
     return {
       total: list.length,
-      pending: list.filter((r: any) => r.status === "pending").length,
+      pending: list.filter((r: any) => r.status === 'pending').length,
       confirmed: list.filter(
-        (r: any) => r.status === "confirmed" || r.status === "attended" || r.status === "completed"
+        (r: any) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
       ).length,
-      attended: list.filter((r: any) => r.status === "attended" || r.status === "completed").length,
-      cancelled: list.filter((r: any) => r.status === "cancelled").length,
+      attended: list.filter((r: any) => r.status === 'attended' || r.status === 'completed').length,
+      cancelled: list.filter((r: any) => r.status === 'cancelled').length,
     };
   }, [rangeRegistrations]);
 
@@ -47,23 +59,23 @@ export default function CampRegistrationsPage() {
     if (!rangeRegistrations.length) return [];
 
     const statusCounts = {
-      pending: rangeRegistrations.filter((r: any) => r.status === "pending").length,
-      contacted: rangeRegistrations.filter((r: any) => r.status === "contacted").length,
-      no_answer: rangeRegistrations.filter((r: any) => r.status === "no_answer").length,
-      confirmed: rangeRegistrations.filter((r: any) => r.status === "confirmed").length,
-      attended: rangeRegistrations.filter((r: any) => r.status === "attended").length,
-      completed: rangeRegistrations.filter((r: any) => r.status === "completed").length,
-      cancelled: rangeRegistrations.filter((r: any) => r.status === "cancelled").length,
+      pending: rangeRegistrations.filter((r: any) => r.status === 'pending').length,
+      contacted: rangeRegistrations.filter((r: any) => r.status === 'contacted').length,
+      no_answer: rangeRegistrations.filter((r: any) => r.status === 'no_answer').length,
+      confirmed: rangeRegistrations.filter((r: any) => r.status === 'confirmed').length,
+      attended: rangeRegistrations.filter((r: any) => r.status === 'attended').length,
+      completed: rangeRegistrations.filter((r: any) => r.status === 'completed').length,
+      cancelled: rangeRegistrations.filter((r: any) => r.status === 'cancelled').length,
     };
 
     return [
-      { name: "قيد الانتظار", value: statusCounts.pending, color: "#F59E0B" },
-      { name: "تم التواصل", value: statusCounts.contacted, color: "#8B5CF6" },
-      { name: "لا رد", value: statusCounts.no_answer, color: "#6B7280" },
-      { name: "مؤكد", value: statusCounts.confirmed, color: "#10B981" },
-      { name: "حضر", value: statusCounts.attended, color: "#3B82F6" },
-      { name: "مكتمل", value: statusCounts.completed, color: "#EC4899" },
-      { name: "ملغي", value: statusCounts.cancelled, color: "#EF4444" },
+      { name: 'قيد الانتظار', value: statusCounts.pending, color: '#F59E0B' },
+      { name: 'تم التواصل', value: statusCounts.contacted, color: '#8B5CF6' },
+      { name: 'لا رد', value: statusCounts.no_answer, color: '#6B7280' },
+      { name: 'مؤكد', value: statusCounts.confirmed, color: '#10B981' },
+      { name: 'حضر', value: statusCounts.attended, color: '#3B82F6' },
+      { name: 'مكتمل', value: statusCounts.completed, color: '#EC4899' },
+      { name: 'ملغي', value: statusCounts.cancelled, color: '#EF4444' },
     ].filter((item) => item.value > 0);
   }, [rangeRegistrations]);
 
@@ -74,7 +86,10 @@ export default function CampRegistrationsPage() {
     const dateMap = new Map<string, number>();
     rangeRegistrations.forEach((r: any) => {
       if (r.createdAt) {
-        const date = new Date(r.createdAt).toLocaleDateString("ar-SA", { month: "short", day: "numeric" });
+        const date = new Date(r.createdAt).toLocaleDateString('ar-SA', {
+          month: 'short',
+          day: 'numeric',
+        });
         dateMap.set(date, (dateMap.get(date) || 0) + 1);
       }
     });
@@ -194,14 +209,23 @@ export default function CampRegistrationsPage() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={dailyRegistrations}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="date" tick={{ fill: "#6B7280" }} />
-                    <YAxis tick={{ fill: "#6B7280" }} />
+                    <XAxis dataKey="date" tick={{ fill: '#6B7280' }} />
+                    <YAxis tick={{ fill: '#6B7280' }} />
                     <Tooltip
-                      contentStyle={{ backgroundColor: "#1F2937", border: "none", borderRadius: "8px" }}
-                      itemStyle={{ color: "#F3F4F6" }}
+                      contentStyle={{
+                        backgroundColor: '#1F2937',
+                        border: 'none',
+                        borderRadius: '8px',
+                      }}
+                      itemStyle={{ color: '#F3F4F6' }}
                     />
                     <Legend />
-                    <Bar dataKey="count" fill="#3B82F6" name="عدد التسجيلات" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="count"
+                      fill="#3B82F6"
+                      name="عدد التسجيلات"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

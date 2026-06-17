@@ -1,35 +1,28 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { unifiedStatusLabels as statusLabels, unifiedStatusOptions, formatStatusTime } from "@/hooks/data/useStatusLabels";
-import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
-import { getColumnWidth, type ColumnConfig } from "@/components/table/ColumnVisibility";
-import TableSkeleton from "@/components/table/TableSkeleton";
-import EmptyState from "@/components/EmptyState";
-import InlineStatusEditor from "@/components/InlineStatusEditor";
-import CommentCount from "@/components/notification/CommentCount";
-import TaskCount from "@/components/TaskCount";
-import { printReceipt } from "@/components/booking/PrintReceipt";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
 import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  unifiedStatusLabels as statusLabels,
+  unifiedStatusOptions,
+  formatStatusTime,
+} from '@/hooks/data/useStatusLabels';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Phone,
-  Settings,
-  Printer,
-  CalendarOff,
-} from "lucide-react";
-import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+  ResizableTable,
+  ResizableHeaderCell,
+  FrozenTableCell,
+} from '@/components/table/ResizableTable';
+import { getColumnWidth, type ColumnConfig } from '@/components/table/ColumnVisibility';
+import TableSkeleton from '@/components/table/TableSkeleton';
+import EmptyState from '@/components/EmptyState';
+import InlineStatusEditor from '@/components/InlineStatusEditor';
+import CommentCount from '@/components/notification/CommentCount';
+import TaskCount from '@/components/TaskCount';
+import { printReceipt } from '@/components/booking/PrintReceipt';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Phone, Settings, Printer, CalendarOff } from 'lucide-react';
+import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 interface AppointmentTableDesktopProps {
   appointments: any[];
@@ -68,7 +61,7 @@ export default function AppointmentTableDesktop({
 }: AppointmentTableDesktopProps) {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
   const { formatDate } = useFormatDate();
-  const visibleColumnKeys = columnOrder.filter(key => visibleColumns[key]);
+  const visibleColumnKeys = columnOrder.filter((key) => visibleColumns[key]);
 
   return (
     <div className="table-responsive">
@@ -79,15 +72,24 @@ export default function AppointmentTableDesktop({
       >
         <TableHeader>
           <TableRow>
-            {visibleColumnKeys.map(colKey => {
-              const col = columns.find(c => c.key === colKey);
+            {visibleColumnKeys.map((colKey) => {
+              const col = columns.find((c) => c.key === colKey);
               if (!col) return null;
               if (colKey === 'checkbox') {
                 return (
-                  <ResizableHeaderCell key={colKey} columnKey={colKey} width={40} minWidth={40} maxWidth={40} onResize={() => {}}>
+                  <ResizableHeaderCell
+                    key={colKey}
+                    columnKey={colKey}
+                    width={40}
+                    minWidth={40}
+                    maxWidth={40}
+                    onResize={() => {}}
+                  >
                     <input
                       type="checkbox"
-                      checked={selectedIds.length === appointments.length && appointments.length > 0}
+                      checked={
+                        selectedIds.length === appointments.length && appointments.length > 0
+                      }
                       onChange={(e) => {
                         if (e.target.checked) {
                           onSelectionChange(appointments.map((a: any) => a.id));
@@ -136,12 +138,12 @@ export default function AppointmentTableDesktop({
             </TableRow>
           ) : (
             appointments.map((appointment: any) => (
-              <TableRow 
+              <TableRow
                 key={`appointment-${appointment.id}`}
                 className={appointment.status === 'pending' ? 'bg-red-50 hover:bg-red-100' : ''}
               >
-                {visibleColumnKeys.map(colKey => {
-                  switch(colKey) {
+                {visibleColumnKeys.map((colKey) => {
+                  switch (colKey) {
                     case 'checkbox':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
@@ -152,7 +154,9 @@ export default function AppointmentTableDesktop({
                               if (e.target.checked) {
                                 onSelectionChange([...selectedIds, appointment.id]);
                               } else {
-                                onSelectionChange(selectedIds.filter((id: number) => id !== appointment.id));
+                                onSelectionChange(
+                                  selectedIds.filter((id: number) => id !== appointment.id)
+                                );
                               }
                             }}
                             className="rounded border-border"
@@ -160,57 +164,137 @@ export default function AppointmentTableDesktop({
                         </FrozenTableCell>
                       );
                     case 'receiptNumber':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm text-muted-foreground font-mono">{appointment.receiptNumber || "-"}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          className="text-sm text-muted-foreground font-mono"
+                        >
+                          {appointment.receiptNumber || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'date':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>{formatDate(appointment.createdAt)}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          {formatDate(appointment.createdAt)}
+                        </FrozenTableCell>
+                      );
                     case 'name':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
-                          <span className="font-medium">{appointment.fullName || appointment.patientName}</span>
+                          <span className="font-medium">
+                            {appointment.fullName || appointment.patientName}
+                          </span>
                         </FrozenTableCell>
                       );
                     case 'phone':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono">{formatPhoneDisplay(appointment.phone)}</span>
-                            <a href={`tel:${formatPhoneDisplay(appointment.phone)}`} className="text-primary hover:underline">
+                            <span className="font-mono">
+                              {formatPhoneDisplay(appointment.phone)}
+                            </span>
+                            <a
+                              href={`tel:${formatPhoneDisplay(appointment.phone)}`}
+                              className="text-primary hover:underline"
+                            >
                               <Phone className="h-3.5 w-3.5" />
                             </a>
                           </div>
                         </FrozenTableCell>
                       );
                     case 'email':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>{appointment.email || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          {appointment.email || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'age':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>{appointment.age || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          {appointment.age || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'doctor':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>{appointment.doctorName || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          {appointment.doctorName || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'specialty':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>{appointment.doctorSpecialty || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          {appointment.doctorSpecialty || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'procedure':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>{appointment.procedure || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          {appointment.procedure || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'preferredDate':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>{formatDate(appointment.preferredDate)}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          {formatDate(appointment.preferredDate)}
+                        </FrozenTableCell>
+                      );
                     case 'preferredTime':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>{appointment.preferredTime || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          {appointment.preferredTime || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'appointmentDate':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>{formatDate(appointment.appointmentDate)}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          {formatDate(appointment.appointmentDate)}
+                        </FrozenTableCell>
+                      );
                     case 'notes':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} wrap title={appointment.notes}>{appointment.notes || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          wrap
+                          title={appointment.notes}
+                        >
+                          {appointment.notes || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'additionalNotes':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} wrap title={appointment.additionalNotes}>{appointment.additionalNotes || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          wrap
+                          title={appointment.additionalNotes}
+                        >
+                          {appointment.additionalNotes || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'staffNotes':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} wrap title={appointment.staffNotes}>{appointment.staffNotes || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          wrap
+                          title={appointment.staffNotes}
+                        >
+                          {appointment.staffNotes || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'source':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
                           {appointment.source ? (
-                            <Badge 
-                              variant="outline" 
+                            <Badge
+                              variant="outline"
                               className="text-xs font-medium"
                               style={{
-                                backgroundColor: SOURCE_COLORS[appointment.source] ? `${SOURCE_COLORS[appointment.source]}15` : undefined,
+                                backgroundColor: SOURCE_COLORS[appointment.source]
+                                  ? `${SOURCE_COLORS[appointment.source]}15`
+                                  : undefined,
                                 borderColor: SOURCE_COLORS[appointment.source] || undefined,
                                 color: SOURCE_COLORS[appointment.source] || undefined,
                               }}
@@ -235,15 +319,55 @@ export default function AppointmentTableDesktop({
                         </FrozenTableCell>
                       );
                     case 'contactedAt':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs text-muted-foreground">{formatStatusTime(appointment.contactedAt)}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          className="text-xs text-muted-foreground"
+                        >
+                          {formatStatusTime(appointment.contactedAt)}
+                        </FrozenTableCell>
+                      );
                     case 'confirmedAt':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs text-muted-foreground">{formatStatusTime(appointment.confirmedAt)}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          className="text-xs text-muted-foreground"
+                        >
+                          {formatStatusTime(appointment.confirmedAt)}
+                        </FrozenTableCell>
+                      );
                     case 'attendedAt':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs text-muted-foreground">{formatStatusTime(appointment.attendedAt)}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          className="text-xs text-muted-foreground"
+                        >
+                          {formatStatusTime(appointment.attendedAt)}
+                        </FrozenTableCell>
+                      );
                     case 'completedAt':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs text-muted-foreground">{formatStatusTime(appointment.completedAt)}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          className="text-xs text-muted-foreground"
+                        >
+                          {formatStatusTime(appointment.completedAt)}
+                        </FrozenTableCell>
+                      );
                     case 'cancelledAt':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs text-muted-foreground">{formatStatusTime(appointment.cancelledAt)}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          className="text-xs text-muted-foreground"
+                        >
+                          {formatStatusTime(appointment.cancelledAt)}
+                        </FrozenTableCell>
+                      );
                     case 'utmSource':
                     case 'utmMedium':
                     case 'utmCampaign':
@@ -251,14 +375,34 @@ export default function AppointmentTableDesktop({
                     case 'utmContent':
                     case 'utmPlacement':
                     case 'referrer':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">{appointment[colKey] || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
+                          {appointment[colKey] || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'fbclid':
                     case 'gclid':
-                      return <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs font-mono">{appointment[colKey] || '-'}</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell
+                          key={colKey}
+                          columnKey={colKey}
+                          className="text-xs font-mono"
+                        >
+                          {appointment[colKey] || '-'}
+                        </FrozenTableCell>
+                      );
                     case 'comments':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}><CommentCount entityType="appointment" entityId={appointment.id} /></FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          <CommentCount entityType="appointment" entityId={appointment.id} />
+                        </FrozenTableCell>
+                      );
                     case 'tasks':
-                      return <FrozenTableCell key={colKey} columnKey={colKey}><TaskCount entityType="appointment" entityId={appointment.id} /></FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          <TaskCount entityType="appointment" entityId={appointment.id} />
+                        </FrozenTableCell>
+                      );
                     case 'actions':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
@@ -273,7 +417,9 @@ export default function AppointmentTableDesktop({
                                   <Settings className="h-4 w-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent><p>تحديث الحالة</p></TooltipContent>
+                              <TooltipContent>
+                                <p>تحديث الحالة</p>
+                              </TooltipContent>
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -282,27 +428,39 @@ export default function AppointmentTableDesktop({
                                   size="sm"
                                   className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                   onClick={() => {
-                                    const doctorName = appointment.doctorName || `طبيب #${appointment.doctorId}`;
-                                    printReceipt({
-                                      fullName: appointment.fullName || appointment.patientName,
-                                      phone: appointment.phone,
-                                      age: appointment.age ?? undefined,
-                                      registrationDate: new Date(appointment.createdAt || appointment.appointmentDate),
-                                      type: "appointment",
-                                      typeName: doctorName
-                                    }, userName);
+                                    const doctorName =
+                                      appointment.doctorName || `طبيب #${appointment.doctorId}`;
+                                    printReceipt(
+                                      {
+                                        fullName: appointment.fullName || appointment.patientName,
+                                        phone: appointment.phone,
+                                        age: appointment.age ?? undefined,
+                                        registrationDate: new Date(
+                                          appointment.createdAt || appointment.appointmentDate
+                                        ),
+                                        type: 'appointment',
+                                        typeName: doctorName,
+                                      },
+                                      userName
+                                    );
                                   }}
                                 >
                                   <Printer className="h-4 w-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent><p>طباعة السند</p></TooltipContent>
+                              <TooltipContent>
+                                <p>طباعة السند</p>
+                              </TooltipContent>
                             </Tooltip>
                           </div>
                         </FrozenTableCell>
                       );
                     default:
-                      return <FrozenTableCell key={colKey} columnKey={colKey}>-</FrozenTableCell>;
+                      return (
+                        <FrozenTableCell key={colKey} columnKey={colKey}>
+                          -
+                        </FrozenTableCell>
+                      );
                   }
                 })}
               </TableRow>

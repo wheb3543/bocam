@@ -29,16 +29,18 @@ function typeFromExpected(e) {
 
 const lines = [];
 lines.push('-- ALTER suggestions generated from schema-compare report');
-lines.push('-- Review carefully before applying to production. These statements add missing columns as NULLABLE where safe and only comment on type/null mismatches for manual review.');
+lines.push(
+  '-- Review carefully before applying to production. These statements add missing columns as NULLABLE where safe and only comment on type/null mismatches for manual review.'
+);
 lines.push('SET foreign_key_checks = 0;');
-lines.push('USE `'+db+'`;');
+lines.push('USE `' + db + '`;');
 
 for (const table of Object.keys(report.tables)) {
   const t = report.tables[table];
   if (t.missingCols && t.missingCols.length) {
     for (const c of t.missingCols) {
       // try to find expected type in diffs or leave as text
-      const candidate = (t.diffs || []).find(d => d.column === c);
+      const candidate = (t.diffs || []).find((d) => d.column === c);
       const expected = candidate ? candidate.expected : null;
       const sqlType = expected ? typeFromExpected(expected) : 'text';
       lines.push(`-- Add missing column ${table}.${c}`);
@@ -49,15 +51,21 @@ for (const table of Object.keys(report.tables)) {
     for (const d of t.diffs) {
       // only produce comments for diffs; don't auto-change types
       lines.push(`-- Column difference detected for ${table}.${d.column}`);
-      lines.push(`-- expected: ${d.expected.expectedType} ${d.expected.notNull ? 'NOT NULL' : 'NULL'}; actual: ${d.actual.columnType} ${d.actual.isNullable === 'NO' ? 'NOT NULL' : 'NULL'}`);
+      lines.push(
+        `-- expected: ${d.expected.expectedType} ${d.expected.notNull ? 'NOT NULL' : 'NULL'}; actual: ${d.actual.columnType} ${d.actual.isNullable === 'NO' ? 'NOT NULL' : 'NULL'}`
+      );
       // propose a MODIFY line commented out for manual review
-      const propType = typeFromExpected(d.expected).replace(/\s+NULL$/,'');
-      lines.push(`-- Suggested (review before applying): ALTER TABLE \`${table}\` MODIFY COLUMN \`${d.column}\` ${propType} ${d.expected.notNull ? 'NOT NULL' : 'NULL'};`);
+      const propType = typeFromExpected(d.expected).replace(/\s+NULL$/, '');
+      lines.push(
+        `-- Suggested (review before applying): ALTER TABLE \`${table}\` MODIFY COLUMN \`${d.column}\` ${propType} ${d.expected.notNull ? 'NOT NULL' : 'NULL'};`
+      );
     }
   }
   if (t.extraCols && t.extraCols.length) {
     for (const c of t.extraCols) {
-      lines.push(`-- Extra column in DB not present in schema.ts: ${table}.${c} — consider if this should be removed or added to schema.ts`);
+      lines.push(
+        `-- Extra column in DB not present in schema.ts: ${table}.${c} — consider if this should be removed or added to schema.ts`
+      );
     }
   }
 }
@@ -65,6 +73,9 @@ for (const table of Object.keys(report.tables)) {
 lines.push('SET foreign_key_checks = 1;');
 
 const out = lines.join('\n');
-const outPath = path.join('backups', 'alter-suggestions-' + path.basename(reportPath).replace(/[^0-9A-Za-z_.-]/g,'_') + '.sql');
+const outPath = path.join(
+  'backups',
+  'alter-suggestions-' + path.basename(reportPath).replace(/[^0-9A-Za-z_.-]/g, '_') + '.sql'
+);
 fs.writeFileSync(outPath, out, 'utf8');
 console.log('Wrote', outPath);

@@ -1,7 +1,7 @@
 $kind: http-request
-name: "Status: Transaction Status - Order Details Message"
-description: "The following notification is received when a business sends a message which opens a service [conversation](https://developers.facebook.com/docs/whatsapp/pricing#conversations):"
-url: ""
+name: 'Status: Transaction Status - Order Details Message'
+description: 'The following notification is received when a business sends a message which opens a service [conversation](https://developers.facebook.com/docs/whatsapp/pricing#conversations):'
+url: ''
 method: VIEW
 body:
   type: json

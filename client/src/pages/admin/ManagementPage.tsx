@@ -1,23 +1,23 @@
-import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { useLocation } from "wouter";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import { trpc } from "@/lib/api/trpc";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import OffersManagement from "@/components/offer/OffersManagement";
-import CampsManagement from "@/components/camp/CampsManagement";
-import DoctorsManagement from "@/components/DoctorsManagement";
+import { useState } from 'react';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { useLocation } from 'wouter';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
+import { trpc } from '@/lib/api/trpc';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import OffersManagement from '@/components/offer/OffersManagement';
+import CampsManagement from '@/components/camp/CampsManagement';
+import DoctorsManagement from '@/components/DoctorsManagement';
 
 export default function ManagementPage() {
   const { user, loading, error } = useAuth();
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState("offers");
-  
+  const [activeTab, setActiveTab] = useState('offers');
+
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
-      toast.success("تم تسجيل الخروج بنجاح");
-      setLocation("/");
+      toast.success('تم تسجيل الخروج بنجاح');
+      setLocation('/');
     },
   });
 
@@ -32,16 +32,13 @@ export default function ManagementPage() {
     );
   }
 
-  if (error || !user || user.role !== "admin") {
-    setLocation("/unauthorized");
+  if (error || !user || user.role !== 'admin') {
+    setLocation('/unauthorized');
     return null;
   }
 
   return (
-    <DashboardLayout
-      pageTitle="الإدارة"
-      pageDescription="إدارة العروض والمخيمات والأطباء"
-    >
+    <DashboardLayout pageTitle="الإدارة" pageDescription="إدارة العروض والمخيمات والأطباء">
       {/* Main Content */}
       <main className="flex-1 container py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -50,15 +47,15 @@ export default function ManagementPage() {
             <TabsTrigger value="camps">إدارة المخيمات</TabsTrigger>
             <TabsTrigger value="doctors">إدارة الأطباء</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="offers" className="space-y-6">
             <OffersManagement />
           </TabsContent>
-          
+
           <TabsContent value="camps" className="space-y-6">
             <CampsManagement />
           </TabsContent>
-          
+
           <TabsContent value="doctors" className="space-y-6">
             <DoctorsManagement />
           </TabsContent>

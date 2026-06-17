@@ -5,7 +5,7 @@ description: |-
   | **`value`**        | A [value object](#54a8a703-18c8-47af-9aaf-a560afd9aa7b). Contains details of the changes related to the specified field. |
   | **`field`**        | Contains the type of notification you are getting on that Webhook. Currently, the only option for this API is `“messages”`. |
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 2000

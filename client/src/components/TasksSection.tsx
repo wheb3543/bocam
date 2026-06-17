@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { useState } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -13,36 +13,38 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { CheckCircle2, Circle, Clock, Plus, Trash2, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { ar } from "date-fns/locale";
+} from '@/components/ui/select';
+import { CheckCircle2, Circle, Clock, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 interface TasksSectionProps {
-  entityType: "appointment" | "lead" | "offerLead" | "campRegistration" | "all";
+  entityType: 'appointment' | 'lead' | 'offerLead' | 'campRegistration' | 'all';
   entityId?: number;
 }
 
 export default function TasksSection({ entityType, entityId }: TasksSectionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
-  const [dueDate, setDueDate] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [dueDate, setDueDate] = useState('');
   const [assignedToId, setAssignedToId] = useState<number | undefined>();
 
   // Filter states
-  const [filterAssignedTo, setFilterAssignedTo] = useState<number | "all" | "unassigned">("all");
-  const [filterPriority, setFilterPriority] = useState<"all" | "low" | "medium" | "high">("all");
-  const [filterDueDate, setFilterDueDate] = useState<"all" | "overdue" | "today" | "this_week" | "future">("all");
+  const [filterAssignedTo, setFilterAssignedTo] = useState<number | 'all' | 'unassigned'>('all');
+  const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>('all');
+  const [filterDueDate, setFilterDueDate] = useState<
+    'all' | 'overdue' | 'today' | 'this_week' | 'future'
+  >('all');
 
   const utils = trpc.useUtils();
 
@@ -51,80 +53,80 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
 
   // Fetch tasks
   const { data: tasks = [], isLoading } = trpc.followUpTasks.getByEntity.useQuery(
-    entityType === "all" 
-      ? { entityType: "appointment", entityId: 0 } // Dummy query, will be replaced with getAll
+    entityType === 'all'
+      ? { entityType: 'appointment', entityId: 0 } // Dummy query, will be replaced with getAll
       : { entityType, entityId: entityId! },
-    { enabled: entityType !== "all" }
+    { enabled: entityType !== 'all' }
   );
 
   // Fetch all tasks when entityType is "all"
   const { data: allTasks = [] } = trpc.followUpTasks.getAll.useQuery(undefined, {
-    enabled: entityType === "all"
+    enabled: entityType === 'all',
   });
 
-  const displayTasks = entityType === "all" ? allTasks : tasks;
+  const displayTasks = entityType === 'all' ? allTasks : tasks;
 
   // Create task mutation
   const createTaskMutation = trpc.followUpTasks.create.useMutation({
     onSuccess: () => {
-      if (entityType !== "all") {
+      if (entityType !== 'all') {
         utils.followUpTasks.getByEntity.invalidate({ entityType, entityId: entityId! });
         utils.followUpTasks.getCount.invalidate({ entityType, entityId: entityId! });
       }
       utils.followUpTasks.getAll.invalidate();
-      toast.success("تم إنشاء المهمة بنجاح");
+      toast.success('تم إنشاء المهمة بنجاح');
       setIsDialogOpen(false);
-      setTitle("");
-      setDescription("");
-      setPriority("medium");
-      setDueDate("");
+      setTitle('');
+      setDescription('');
+      setPriority('medium');
+      setDueDate('');
       setAssignedToId(undefined);
     },
     onError: (error) => {
-      toast.error("فشل إنشاء المهمة: " + error.message);
+      toast.error('فشل إنشاء المهمة: ' + error.message);
     },
   });
 
   // Update status mutation
   const updateStatusMutation = trpc.followUpTasks.updateStatus.useMutation({
     onSuccess: () => {
-      if (entityType !== "all") {
+      if (entityType !== 'all') {
         utils.followUpTasks.getByEntity.invalidate({ entityType, entityId: entityId! });
         utils.followUpTasks.getCount.invalidate({ entityType, entityId: entityId! });
       }
       utils.followUpTasks.getAll.invalidate();
-      toast.success("تم تحديث حالة المهمة");
+      toast.success('تم تحديث حالة المهمة');
     },
     onError: (error) => {
-      toast.error("فشل تحديث الحالة: " + error.message);
+      toast.error('فشل تحديث الحالة: ' + error.message);
     },
   });
 
   // Delete task mutation
   const deleteTaskMutation = trpc.followUpTasks.delete.useMutation({
     onSuccess: () => {
-      if (entityType !== "all") {
+      if (entityType !== 'all') {
         utils.followUpTasks.getByEntity.invalidate({ entityType, entityId: entityId! });
         utils.followUpTasks.getCount.invalidate({ entityType, entityId: entityId! });
       }
       utils.followUpTasks.getAll.invalidate();
-      toast.success("تم حذف المهمة");
+      toast.success('تم حذف المهمة');
     },
     onError: (error) => {
-      toast.error("فشل حذف المهمة: " + error.message);
+      toast.error('فشل حذف المهمة: ' + error.message);
     },
   });
 
   const handleCreateTask = () => {
     if (!title.trim()) {
-      toast.error("يرجى إدخال عنوان المهمة");
+      toast.error('يرجى إدخال عنوان المهمة');
       return;
     }
 
-    const assignedUser = users.find(u => u.id === assignedToId);
+    const assignedUser = users.find((u) => u.id === assignedToId);
 
-    if (entityType === "all") {
-      toast.error("لا يمكن إضافة مهمة من قسم جميع المهام. يرجى فتح السجل المحدد لإضافة مهمة.");
+    if (entityType === 'all') {
+      toast.error('لا يمكن إضافة مهمة من قسم جميع المهام. يرجى فتح السجل المحدد لإضافة مهمة.');
       return;
     }
 
@@ -136,17 +138,17 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
       priority,
       dueDate: dueDate || undefined,
       assignedToId,
-      assignedToName: assignedUser ? (assignedUser.name || assignedUser.username) : undefined,
+      assignedToName: assignedUser ? assignedUser.name || assignedUser.username : undefined,
     });
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "completed":
+      case 'completed':
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case "in_progress":
+      case 'in_progress':
         return <Clock className="h-4 w-4 text-blue-500" />;
-      case "cancelled":
+      case 'cancelled':
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
         return <Circle className="h-4 w-4 text-muted-foreground" />;
@@ -155,14 +157,14 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "pending":
-        return "قيد الانتظار";
-      case "in_progress":
-        return "قيد التنفيذ";
-      case "completed":
-        return "مكتملة";
-      case "cancelled":
-        return "ملغية";
+      case 'pending':
+        return 'قيد الانتظار';
+      case 'in_progress':
+        return 'قيد التنفيذ';
+      case 'completed':
+        return 'مكتملة';
+      case 'cancelled':
+        return 'ملغية';
       default:
         return status;
     }
@@ -170,25 +172,25 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "high":
-        return "bg-red-500";
-      case "medium":
-        return "bg-yellow-500";
-      case "low":
-        return "bg-green-500";
+      case 'high':
+        return 'bg-red-500';
+      case 'medium':
+        return 'bg-yellow-500';
+      case 'low':
+        return 'bg-green-500';
       default:
-        return "bg-gray-500";
+        return 'bg-gray-500';
     }
   };
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case "high":
-        return "عالية";
-      case "medium":
-        return "متوسطة";
-      case "low":
-        return "منخفضة";
+      case 'high':
+        return 'عالية';
+      case 'medium':
+        return 'متوسطة';
+      case 'low':
+        return 'منخفضة';
       default:
         return priority;
     }
@@ -205,16 +207,17 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
   // Filter tasks
   const filteredTasks = displayTasks.filter((task) => {
     // Filter by assigned user
-    if (filterAssignedTo !== "all") {
-      if (filterAssignedTo === "unassigned" && task.assignedToId !== null) return false;
-      if (typeof filterAssignedTo === "number" && task.assignedToId !== filterAssignedTo) return false;
+    if (filterAssignedTo !== 'all') {
+      if (filterAssignedTo === 'unassigned' && task.assignedToId !== null) return false;
+      if (typeof filterAssignedTo === 'number' && task.assignedToId !== filterAssignedTo)
+        return false;
     }
 
     // Filter by priority
-    if (filterPriority !== "all" && task.priority !== filterPriority) return false;
+    if (filterPriority !== 'all' && task.priority !== filterPriority) return false;
 
     // Filter by due date
-    if (filterDueDate !== "all" && task.dueDate) {
+    if (filterDueDate !== 'all' && task.dueDate) {
       const now = new Date();
       const due = new Date(task.dueDate);
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -223,21 +226,22 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
       const weekFromNow = new Date(today);
       weekFromNow.setDate(weekFromNow.getDate() + 7);
 
-      if (filterDueDate === "overdue" && due >= today) return false;
-      if (filterDueDate === "today" && (due < today || due >= tomorrow)) return false;
-      if (filterDueDate === "this_week" && (due < today || due > weekFromNow)) return false;
-      if (filterDueDate === "future" && due <= weekFromNow) return false;
+      if (filterDueDate === 'overdue' && due >= today) return false;
+      if (filterDueDate === 'today' && (due < today || due >= tomorrow)) return false;
+      if (filterDueDate === 'this_week' && (due < today || due > weekFromNow)) return false;
+      if (filterDueDate === 'future' && due <= weekFromNow) return false;
     }
 
     return true;
   });
 
-  const hasActiveFilters = filterAssignedTo !== "all" || filterPriority !== "all" || filterDueDate !== "all";
+  const hasActiveFilters =
+    filterAssignedTo !== 'all' || filterPriority !== 'all' || filterDueDate !== 'all';
 
   const clearFilters = () => {
-    setFilterAssignedTo("all");
-    setFilterPriority("all");
-    setFilterDueDate("all");
+    setFilterAssignedTo('all');
+    setFilterPriority('all');
+    setFilterDueDate('all');
   };
 
   return (
@@ -254,9 +258,7 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>إنشاء مهمة متابعة جديدة</DialogTitle>
-              <DialogDescription>
-                أضف مهمة جديدة لمتابعة هذا السجل
-              </DialogDescription>
+              <DialogDescription>أضف مهمة جديدة لمتابعة هذا السجل</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -301,7 +303,10 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">تعيين لـ</label>
-                <Select value={assignedToId?.toString()} onValueChange={(value) => setAssignedToId(value ? parseInt(value) : undefined)}>
+                <Select
+                  value={assignedToId?.toString()}
+                  onValueChange={(value) => setAssignedToId(value ? parseInt(value) : undefined)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="اختر مستخدم (اختياري)" />
                   </SelectTrigger>
@@ -321,7 +326,7 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
                 إلغاء
               </Button>
               <Button onClick={handleCreateTask} disabled={createTaskMutation.isPending}>
-                {createTaskMutation.isPending ? "جاري الإنشاء..." : "إنشاء المهمة"}
+                {createTaskMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء المهمة'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -332,7 +337,14 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 bg-muted/30 rounded-lg">
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">المستخدم المعين</label>
-          <Select value={filterAssignedTo.toString()} onValueChange={(value) => setFilterAssignedTo(value === "all" ? "all" : value === "unassigned" ? "unassigned" : parseInt(value))}>
+          <Select
+            value={filterAssignedTo.toString()}
+            onValueChange={(value) =>
+              setFilterAssignedTo(
+                value === 'all' ? 'all' : value === 'unassigned' ? 'unassigned' : parseInt(value)
+              )
+            }
+          >
             <SelectTrigger className="h-9">
               <SelectValue />
             </SelectTrigger>
@@ -428,7 +440,9 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="text-xs">
-                      <div className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)} ml-1`} />
+                      <div
+                        className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)} ml-1`}
+                      />
                       {getPriorityLabel(task.priority)}
                     </Badge>
                     <Select

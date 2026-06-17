@@ -1,33 +1,55 @@
-import { useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCompanyName } from "@/const";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, CheckCircle, AlertCircle, Send, MessageSquare, RefreshCw, Copy, Check, Search, Ban, TrendingUp, Clock } from "lucide-react";
-import { trpc } from "@/lib/api/trpc";
-import { toast } from "sonner";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useWhatsAppSSE, AccountUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
+import { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getCompanyName } from '@/const';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  Send,
+  MessageSquare,
+  RefreshCw,
+  Copy,
+  Check,
+  Search,
+  Ban,
+  TrendingUp,
+  Clock,
+} from 'lucide-react';
+import { trpc } from '@/lib/api/trpc';
+import { toast } from 'sonner';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
 
 export default function WhatsAppIntegration() {
   const companyName = getCompanyName('ar');
-  const [phone, setPhone] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [templateName, setTemplateName] = useState("sgh_welcome_greeting_ar");
+  const [phone, setPhone] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [templateName, setTemplateName] = useState('sgh_welcome_greeting_ar');
   const [parameters, setParameters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const [sentMessages, setSentMessages] = useState<any[]>([]);
 
   // Queries
-  const { data: templates, isLoading: templatesLoading, refetch: refetchTemplates } =
-    trpc.whatsappTemplateTest.listApprovedTemplates.useQuery();
+  const {
+    data: templates,
+    isLoading: templatesLoading,
+    refetch: refetchTemplates,
+  } = trpc.whatsappTemplateTest.listApprovedTemplates.useQuery();
   const { data: templateDetails, isLoading: detailsLoading } =
     trpc.whatsappTemplateTest.getTemplateDetails.useQuery(
       { templateName },
@@ -49,7 +71,7 @@ export default function WhatsAppIntegration() {
 
   const handleSendWelcome = async () => {
     if (!phone || !fullName) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+      toast.error('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
 
@@ -57,7 +79,7 @@ export default function WhatsAppIntegration() {
     const blockedPhones = securityStats?.stats?.blockedPhones || 0;
     if (blockedPhones > 0) {
       // This is a simple check - in real implementation, we'd check specific phone
-      toast.warning("⚠️ يرجى التحقق من أن الرقم غير محظور");
+      toast.warning('⚠️ يرجى التحقق من أن الرقم غير محظور');
     }
 
     setIsLoading(true);
@@ -68,23 +90,26 @@ export default function WhatsAppIntegration() {
       });
 
       if (result.success) {
-        toast.success("✅ تم إرسال رسالة الترحيب بنجاح!");
+        toast.success('✅ تم إرسال رسالة الترحيب بنجاح!');
         // Add to sent messages history
-        setSentMessages(prev => [...prev, {
-          type: "welcome",
-          phone,
-          recipient: fullName,
-          template: "sgh_welcome_greeting_ar",
-          status: "sent",
-          sentAt: new Date().toISOString(),
-        }]);
-        setPhone("");
-        setFullName("");
+        setSentMessages((prev) => [
+          ...prev,
+          {
+            type: 'welcome',
+            phone,
+            recipient: fullName,
+            template: 'sgh_welcome_greeting_ar',
+            status: 'sent',
+            sentAt: new Date().toISOString(),
+          },
+        ]);
+        setPhone('');
+        setFullName('');
       } else {
         toast.error(`❌ ${result.error}`);
       }
     } catch (error) {
-      toast.error("حدث خطأ في الإرسال");
+      toast.error('حدث خطأ في الإرسال');
     } finally {
       setIsLoading(false);
     }
@@ -92,14 +117,14 @@ export default function WhatsAppIntegration() {
 
   const handleSendTemplate = async () => {
     if (!phone) {
-      toast.error("يرجى إدخال رقم الهاتف");
+      toast.error('يرجى إدخال رقم الهاتف');
       return;
     }
 
     // Check if phone is blocked
     const blockedPhones = securityStats?.stats?.blockedPhones || 0;
     if (blockedPhones > 0) {
-      toast.warning("⚠️ يرجى التحقق من أن الرقم غير محظور");
+      toast.warning('⚠️ يرجى التحقق من أن الرقم غير محظور');
     }
 
     const expectedParams = templateDetails?.template?.variables?.length || 0;
@@ -119,23 +144,26 @@ export default function WhatsAppIntegration() {
       });
 
       if (result.success) {
-        toast.success("✅ تم إرسال الرسالة بنجاح!");
+        toast.success('✅ تم إرسال الرسالة بنجاح!');
         // Add to sent messages history
-        setSentMessages(prev => [...prev, {
-          type: "template",
-          phone,
-          template: templateName,
-          parameters,
-          status: "sent",
-          sentAt: new Date().toISOString(),
-        }]);
-        setPhone("");
+        setSentMessages((prev) => [
+          ...prev,
+          {
+            type: 'template',
+            phone,
+            template: templateName,
+            parameters,
+            status: 'sent',
+            sentAt: new Date().toISOString(),
+          },
+        ]);
+        setPhone('');
         setParameters([]);
       } else {
         toast.error(`❌ ${result.error}`);
       }
     } catch (error) {
-      toast.error("حدث خطأ في الإرسال");
+      toast.error('حدث خطأ في الإرسال');
     } finally {
       setIsLoading(false);
     }
@@ -144,25 +172,28 @@ export default function WhatsAppIntegration() {
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
-    toast.success("تم النسخ!");
+    toast.success('تم النسخ!');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
   // Filter templates
-  const filteredTemplates = Array.isArray(templates?.templates) ? templates.templates.filter((tmpl: any) => {
-    const matchesSearch = searchQuery === "" ||
-      tmpl.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tmpl.metaName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = filterCategory === "all" || tmpl.category === filterCategory;
-    return matchesSearch && matchesCategory;
-  }) : [];
+  const filteredTemplates = Array.isArray(templates?.templates)
+    ? templates.templates.filter((tmpl: any) => {
+        const matchesSearch =
+          searchQuery === '' ||
+          tmpl.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          tmpl.metaName.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = filterCategory === 'all' || tmpl.category === filterCategory;
+        return matchesSearch && matchesCategory;
+      })
+    : [];
 
   // Get unique categories
   const categories = Array.from(new Set(templates?.templates?.map((t: any) => t.category) || []));
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
-    return d.toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" });
+    return d.toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short' });
   };
 
   return (
@@ -182,9 +213,7 @@ export default function WhatsAppIntegration() {
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                   تكامل WhatsApp Cloud API
                 </h1>
-                <p className="text-sm text-gray-600 mt-1">
-                  إرسال رسائل معتمدة من Meta إلى عملائك
-                </p>
+                <p className="text-sm text-gray-600 mt-1">إرسال رسائل معتمدة من Meta إلى عملائك</p>
               </div>
             </div>
             <Button
@@ -269,29 +298,19 @@ export default function WhatsAppIntegration() {
                 </CardHeader>
                 <CardContent>
                   <div className="bg-white p-4 rounded-lg border border-green-200 text-sm text-gray-700 leading-relaxed space-y-3">
-                    <div className="font-semibold text-green-700">
-                      {fullName || "اسم العميل"}
-                    </div>
+                    <div className="font-semibold text-green-700">{fullName || 'اسم العميل'}</div>
                     <div className="text-gray-600">
                       <p>مرحباً بك عزيزي العميل،</p>
-                      <p className="mt-2">
-                        أهلاً وسهلاً في {companyName}. 👋
-                      </p>
-                      <p className="mt-2">
-                        نحن هنا لتقديم أفضل الخدمات الطبية لك ولعائلتك.
-                      </p>
+                      <p className="mt-2">أهلاً وسهلاً في {companyName}. 👋</p>
+                      <p className="mt-2">نحن هنا لتقديم أفضل الخدمات الطبية لك ولعائلتك.</p>
                       <p className="mt-3 font-semibold">خدماتنا:</p>
                       <ul className="mt-2 space-y-1 list-disc list-inside">
                         <li>مواعيد طبية مع أفضل الأطباء</li>
                         <li>مخيمات صحية متخصصة</li>
                         <li>عروض خاصة وحزم علاجية</li>
                       </ul>
-                      <p className="mt-3">
-                        شكراً لاختيارك {companyName}
-                      </p>
-                      <p className="mt-2 text-xs text-gray-500">
-                        #نرعاكم_كأهالينا
-                      </p>
+                      <p className="mt-3">شكراً لاختيارك {companyName}</p>
+                      <p className="mt-2 text-xs text-gray-500">#نرعاكم_كأهالينا</p>
                     </div>
                   </div>
                 </CardContent>
@@ -380,7 +399,9 @@ export default function WhatsAppIntegration() {
                   <SelectContent>
                     <SelectItem value="all">الكل</SelectItem>
                     {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -392,7 +413,7 @@ export default function WhatsAppIntegration() {
                   <CardTitle>قائمة القوالب المعتمدة</CardTitle>
                   <CardDescription>
                     {templatesLoading
-                      ? "جاري التحميل..."
+                      ? 'جاري التحميل...'
                       : `${filteredTemplates.length} قالب معتمد من Meta`}
                   </CardDescription>
                 </CardHeader>
@@ -407,16 +428,12 @@ export default function WhatsAppIntegration() {
                         <div
                           key={tmpl.id}
                           className="p-3 border border-gray-200 rounded-lg hover:border-green-400 hover:bg-green-50 cursor-pointer transition"
-                          onClick={() => setTemplateName(tmpl.metaName || "")}
+                          onClick={() => setTemplateName(tmpl.metaName || '')}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1">
-                              <p className="font-medium text-gray-900 text-sm">
-                                {tmpl.name}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {tmpl.metaName}
-                              </p>
+                              <p className="font-medium text-gray-900 text-sm">{tmpl.name}</p>
+                              <p className="text-xs text-gray-500 mt-1">{tmpl.metaName}</p>
                               <Badge variant="outline" className="mt-2 text-xs">
                                 {tmpl.category}
                               </Badge>
@@ -431,9 +448,7 @@ export default function WhatsAppIntegration() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 text-center py-4">
-                      لا توجد قوالب معتمدة
-                    </p>
+                    <p className="text-gray-500 text-center py-4">لا توجد قوالب معتمدة</p>
                   )}
                 </CardContent>
               </Card>
@@ -448,9 +463,7 @@ export default function WhatsAppIntegration() {
                   <CardContent className="space-y-6">
                     {/* Template Content */}
                     <div>
-                      <p className="text-sm font-semibold text-gray-700 mb-2">
-                        محتوى الرسالة:
-                      </p>
+                      <p className="text-sm font-semibold text-gray-700 mb-2">محتوى الرسالة:</p>
                       <div className="bg-white p-4 rounded border border-blue-200 text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto">
                         {templateDetails.template.content}
                       </div>
@@ -473,7 +486,7 @@ export default function WhatsAppIntegration() {
                                   <Input
                                     type="text"
                                     placeholder={`أدخل قيمة ${variable}`}
-                                    value={parameters[index] || ""}
+                                    value={parameters[index] || ''}
                                     onChange={(e) => {
                                       const newParams = [...parameters];
                                       newParams[index] = e.target.value;
@@ -547,15 +560,21 @@ export default function WhatsAppIntegration() {
                 ) : (
                   <div className="space-y-3">
                     {sentMessages.map((msg, index) => (
-                      <div key={index} className="p-4 border rounded-lg hover:bg-muted/30 transition-colors">
+                      <div
+                        key={index}
+                        className="p-4 border rounded-lg hover:bg-muted/30 transition-colors"
+                      >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-medium text-sm">{msg.phone}</span>
                               <Badge variant="outline" className="text-xs">
-                                {msg.type === "welcome" ? "ترحيب" : "قالب"}
+                                {msg.type === 'welcome' ? 'ترحيب' : 'قالب'}
                               </Badge>
-                              <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
+                              <Badge
+                                variant="outline"
+                                className="text-xs bg-green-50 text-green-700"
+                              >
                                 {msg.status}
                               </Badge>
                             </div>
@@ -587,7 +606,7 @@ export default function WhatsAppIntegration() {
         {/* Meta Documentation Link */}
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-900">
-            📚 لمزيد من المعلومات، اطلع على{" "}
+            📚 لمزيد من المعلومات، اطلع على{' '}
             <a
               href="https://developers.facebook.com/documentation/business-messaging/whatsapp/about-the-platform"
               target="_blank"

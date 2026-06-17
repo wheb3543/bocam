@@ -1,167 +1,276 @@
-import { useState, useCallback } from "react";
-import { useWhatsAppSSE, TemplateDisabledEvent, TemplateEnabledEvent, TemplateNameUpdateEvent, TemplateCategoryUpdateEvent, TemplateLanguageUpdateEvent, TemplateEvent, AccountReviewUpdateEvent, AccountUpdateEvent, BusinessProfileUpdateEvent, BusinessAccountUpdateEvent, MessagingProductUpdateEvent, ConversationCostUpdateEvent } from "@/hooks/integrations/useWhatsAppSSE";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { AlertTriangle, CheckCircle, RefreshCw, Search, Eye, Code, AlertCircle, Terminal, MessageSquare, FileText, Shield, TrendingUp, Users, BarChart3, Zap } from "lucide-react";
-import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useCallback } from 'react';
+import {
+  useWhatsAppSSE,
+  TemplateDisabledEvent,
+  TemplateEnabledEvent,
+  TemplateNameUpdateEvent,
+  TemplateCategoryUpdateEvent,
+  TemplateLanguageUpdateEvent,
+  TemplateEvent,
+  AccountReviewUpdateEvent,
+  AccountUpdateEvent,
+  BusinessProfileUpdateEvent,
+  BusinessAccountUpdateEvent,
+  MessagingProductUpdateEvent,
+  ConversationCostUpdateEvent,
+} from '@/hooks/integrations/useWhatsAppSSE';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import {
+  AlertTriangle,
+  CheckCircle,
+  RefreshCw,
+  Search,
+  Eye,
+  Code,
+  AlertCircle,
+  Terminal,
+  MessageSquare,
+  FileText,
+  Shield,
+  TrendingUp,
+  Users,
+  BarChart3,
+  Zap,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function WhatsAppWebhookInspectorPage() {
-  const [activeTab, setActiveTab] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedEvent, setSelectedEvent] = useState<{ id: number; eventType: string; subType?: string; phoneNumber?: string; createdAt: string; rawPayload: string; processed: boolean; handlerExists: boolean } | null>(null);
-  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState<{
+    id: number;
+    eventType: string;
+    subType?: string;
+    phoneNumber?: string;
+    createdAt: string;
+    rawPayload: string;
+    processed: boolean;
+    handlerExists: boolean;
+  } | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [liveEventCount, setLiveEventCount] = useState(0);
   const [lastLiveEvent, setLastLiveEvent] = useState<string | null>(null);
 
-  const { data: events, isLoading, refetch } = trpc.whatsapp.webhookEvents.getAll.useQuery(
+  const {
+    data: events,
+    isLoading,
+    refetch,
+  } = trpc.whatsapp.webhookEvents.getAll.useQuery(
     {
-      processed: activeTab === "unhandled" ? false : undefined,
-      handlerExists: activeTab === "unhandled" ? false : undefined,
+      processed: activeTab === 'unhandled' ? false : undefined,
+      handlerExists: activeTab === 'unhandled' ? false : undefined,
       limit: 100,
     },
     { refetchInterval: 60000 }
   );
 
-  const { data: categoryEvents, isLoading: isLoadingCategory, refetch: refetchCategory } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
-    { category: selectedCategory as "messages" | "templates" | "template_status" | "account" | "security" | "quality" | "subscriptions", limit: 100 },
-    { enabled: selectedCategory !== "all", refetchInterval: 60000 }
+  const {
+    data: categoryEvents,
+    isLoading: isLoadingCategory,
+    refetch: refetchCategory,
+  } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
+    {
+      category: selectedCategory as
+        | 'messages'
+        | 'templates'
+        | 'template_status'
+        | 'account'
+        | 'security'
+        | 'quality'
+        | 'subscriptions',
+      limit: 100,
+    },
+    { enabled: selectedCategory !== 'all', refetchInterval: 60000 }
   );
 
-  const { data: statsByType, isLoading: isLoadingStats } = trpc.whatsapp.webhookEvents.getStatsByType.useQuery(
-    undefined,
-    { refetchInterval: 120000 }
-  );
+  const { data: statsByType, isLoading: isLoadingStats } =
+    trpc.whatsapp.webhookEvents.getStatsByType.useQuery(undefined, { refetchInterval: 120000 });
 
-  const { data: unhandledCount, refetch: refetchCount } = trpc.whatsapp.webhookEvents.getUnhandledCount.useQuery(
-    undefined,
-    { refetchInterval: 60000 }
-  );
+  const { data: unhandledCount, refetch: refetchCount } =
+    trpc.whatsapp.webhookEvents.getUnhandledCount.useQuery(undefined, { refetchInterval: 60000 });
 
-  const { data: eventTypes, refetch: refetchTypes } = trpc.whatsapp.webhookEvents.getEventTypes.useQuery(
-    undefined,
-    { refetchInterval: 120000 }
-  );
+  const { data: eventTypes, refetch: refetchTypes } =
+    trpc.whatsapp.webhookEvents.getEventTypes.useQuery(undefined, { refetchInterval: 120000 });
 
-  const { data: templateEventsQuery, isLoading: isLoadingTemplate } = trpc.whatsapp.webhookEvents.getTemplateEvents.useQuery(
-    { templateId: selectedTemplateId || undefined, limit: 100 },
-    { enabled: !!selectedTemplateId, refetchInterval: 60000 }
-  );
+  const { data: templateEventsQuery, isLoading: isLoadingTemplate } =
+    trpc.whatsapp.webhookEvents.getTemplateEvents.useQuery(
+      { templateId: selectedTemplateId || undefined, limit: 100 },
+      { enabled: !!selectedTemplateId, refetchInterval: 60000 }
+    );
 
   const markAsProcessedMutation = trpc.whatsapp.webhookEvents.markAsProcessed.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث حالة الحدث");
+      toast.success('تم تحديث حالة الحدث');
       refetch();
       refetchCount();
     },
     onError: () => {
-      toast.error("فشل تحديث الحالة");
+      toast.error('فشل تحديث الحالة');
     },
   });
 
   // ── SSE: تحديث فوري عند وصول أحداث جديدة ──────────────────────────────────
   useWhatsAppSSE({
-    onWebhookEvent: useCallback((event: any) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(event.eventType);
-      // تحديث القائمة تلقائياً
-      refetch();
-      refetchCount();
-      refetchTypes();
-    }, [refetch, refetchCount, refetchTypes]),
-    onTemplateStatusUpdate: useCallback((event: any) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`template_status: ${event.status}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onAccountAlert: useCallback((event: any) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`account_alert: ${event.alertType}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
+    onWebhookEvent: useCallback(
+      (event: any) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(event.eventType);
+        // تحديث القائمة تلقائياً
+        refetch();
+        refetchCount();
+        refetchTypes();
+      },
+      [refetch, refetchCount, refetchTypes]
+    ),
+    onTemplateStatusUpdate: useCallback(
+      (event: any) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`template_status: ${event.status}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onAccountAlert: useCallback(
+      (event: any) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`account_alert: ${event.alertType}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
     // أحداث القوالب الجديدة
-    onTemplateDisabled: useCallback((event: TemplateDisabledEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`template_disabled: ${event.templateId}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onTemplateEnabled: useCallback((event: TemplateEnabledEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`template_enabled: ${event.templateId}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onTemplateNameUpdate: useCallback((event: TemplateNameUpdateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`template_name_update: ${event.templateId}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onTemplateCategoryUpdate: useCallback((event: TemplateCategoryUpdateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`template_category_update: ${event.templateId}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onTemplateLanguageUpdate: useCallback((event: TemplateLanguageUpdateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`template_language_update: ${event.templateId}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onTemplateEvent: useCallback((event: TemplateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`template_event: ${event.eventType}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
+    onTemplateDisabled: useCallback(
+      (event: TemplateDisabledEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`template_disabled: ${event.templateId}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onTemplateEnabled: useCallback(
+      (event: TemplateEnabledEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`template_enabled: ${event.templateId}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onTemplateNameUpdate: useCallback(
+      (event: TemplateNameUpdateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`template_name_update: ${event.templateId}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onTemplateCategoryUpdate: useCallback(
+      (event: TemplateCategoryUpdateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`template_category_update: ${event.templateId}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onTemplateLanguageUpdate: useCallback(
+      (event: TemplateLanguageUpdateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`template_language_update: ${event.templateId}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onTemplateEvent: useCallback(
+      (event: TemplateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`template_event: ${event.eventType}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
     // أحداث الحساب الجديدة
-    onAccountReviewUpdate: useCallback((event: AccountReviewUpdateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`account_review_update: ${event.status}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`account_update: ${event.eventType}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onBusinessProfileUpdate: useCallback((event: BusinessProfileUpdateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`business_profile_update: ${event.eventType}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onBusinessAccountUpdate: useCallback((event: BusinessAccountUpdateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`business_account_update: ${event.eventType}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
+    onAccountReviewUpdate: useCallback(
+      (event: AccountReviewUpdateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`account_review_update: ${event.status}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onAccountUpdate: useCallback(
+      (event: AccountUpdateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`account_update: ${event.eventType}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onBusinessProfileUpdate: useCallback(
+      (event: BusinessProfileUpdateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`business_profile_update: ${event.eventType}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onBusinessAccountUpdate: useCallback(
+      (event: BusinessAccountUpdateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`business_account_update: ${event.eventType}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
     // أحداث أخرى
-    onMessagingProductUpdate: useCallback((event: MessagingProductUpdateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`messaging_product_update: ${event.eventType}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
-    onConversationCostUpdate: useCallback((event: ConversationCostUpdateEvent) => {
-      setLiveEventCount((prev) => prev + 1);
-      setLastLiveEvent(`conversation_cost_update: ${event.phoneNumber}`);
-      refetch();
-      refetchCount();
-    }, [refetch, refetchCount]),
+    onMessagingProductUpdate: useCallback(
+      (event: MessagingProductUpdateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`messaging_product_update: ${event.eventType}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
+    onConversationCostUpdate: useCallback(
+      (event: ConversationCostUpdateEvent) => {
+        setLiveEventCount((prev) => prev + 1);
+        setLastLiveEvent(`conversation_cost_update: ${event.phoneNumber}`);
+        refetch();
+        refetchCount();
+      },
+      [refetch, refetchCount]
+    ),
   });
 
   const handleRefresh = () => {
@@ -169,40 +278,52 @@ export default function WhatsAppWebhookInspectorPage() {
     refetchCategory();
     refetchCount();
     refetchTypes();
-    toast.success("تم تحديث البيانات");
+    toast.success('تم تحديث البيانات');
   };
 
-  const displayEvents = selectedCategory === "templates" && selectedTemplateId 
-    ? templateEventsQuery 
-    : (selectedCategory !== "all" ? categoryEvents : events);
-  const displayLoading = selectedCategory === "templates" && selectedTemplateId 
-    ? isLoadingTemplate 
-    : (selectedCategory !== "all" ? isLoadingCategory : isLoading);
+  const displayEvents =
+    selectedCategory === 'templates' && selectedTemplateId
+      ? templateEventsQuery
+      : selectedCategory !== 'all'
+        ? categoryEvents
+        : events;
+  const displayLoading =
+    selectedCategory === 'templates' && selectedTemplateId
+      ? isLoadingTemplate
+      : selectedCategory !== 'all'
+        ? isLoadingCategory
+        : isLoading;
 
   const handleMarkAsProcessed = (eventId: number, hasHandler: boolean = false) => {
     markAsProcessedMutation.mutate({ id: eventId, handlerExists: hasHandler });
   };
 
-  const filteredEvents = Array.isArray(displayEvents) ? displayEvents.filter((event: any) => {
-    const matchesSearch =
-      event.eventType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (event.rawPayload && event.rawPayload.includes(searchTerm));
-    return matchesSearch;
-  }) : [];
+  const filteredEvents = Array.isArray(displayEvents)
+    ? displayEvents.filter((event: any) => {
+        const matchesSearch =
+          event.eventType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (event.rawPayload && event.rawPayload.includes(searchTerm));
+        return matchesSearch;
+      })
+    : [];
 
   const categories = [
-    { value: "all", label: "جميع الفئات", icon: BarChart3 },
-    { value: "messages", label: "الرسائل", icon: MessageSquare },
-    { value: "templates", label: "القوالب", icon: FileText },
-    { value: "template_status", label: "حالة القوالب", icon: FileText },
-    { value: "account", label: "الحساب", icon: Shield },
-    { value: "security", label: "الأمان", icon: AlertTriangle },
-    { value: "quality", label: "الجودة", icon: TrendingUp },
-    { value: "subscriptions", label: "الاشتراكات", icon: Users },
+    { value: 'all', label: 'جميع الفئات', icon: BarChart3 },
+    { value: 'messages', label: 'الرسائل', icon: MessageSquare },
+    { value: 'templates', label: 'القوالب', icon: FileText },
+    { value: 'template_status', label: 'حالة القوالب', icon: FileText },
+    { value: 'account', label: 'الحساب', icon: Shield },
+    { value: 'security', label: 'الأمان', icon: AlertTriangle },
+    { value: 'quality', label: 'الجودة', icon: TrendingUp },
+    { value: 'subscriptions', label: 'الاشتراكات', icon: Users },
   ];
 
-  const totalEvents = Array.isArray(statsByType) ? statsByType.reduce((sum, stat) => sum + (stat.count || 0), 0) : 0;
-  const processedEvents = Array.isArray(displayEvents) ? displayEvents.filter((e: any) => e.processed).length : 0;
+  const totalEvents = Array.isArray(statsByType)
+    ? statsByType.reduce((sum, stat) => sum + (stat.count || 0), 0)
+    : 0;
+  const processedEvents = Array.isArray(displayEvents)
+    ? displayEvents.filter((e: any) => e.processed).length
+    : 0;
 
   return (
     <div className="container mx-auto py-6 px-4" dir="rtl">
@@ -225,9 +346,7 @@ export default function WhatsAppWebhookInspectorPage() {
             </Badge>
           )}
           {lastLiveEvent && (
-            <span className="text-xs text-green-600 font-medium">
-              آخر حدث: {lastLiveEvent}
-            </span>
+            <span className="text-xs text-green-600 font-medium">آخر حدث: {lastLiveEvent}</span>
           )}
           <Button onClick={handleRefresh} variant="outline" className="gap-2">
             <RefreshCw className="h-4 w-4" />
@@ -279,9 +398,7 @@ export default function WhatsAppWebhookInspectorPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">تم معالجتها</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {processedEvents}
-                </p>
+                <p className="text-2xl font-bold text-green-600">{processedEvents}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
@@ -301,7 +418,7 @@ export default function WhatsAppWebhookInspectorPage() {
               return (
                 <Button
                   key={cat.value}
-                  variant={selectedCategory === cat.value ? "default" : "outline"}
+                  variant={selectedCategory === cat.value ? 'default' : 'outline'}
                   onClick={() => setSelectedCategory(cat.value)}
                   className="gap-2"
                 >
@@ -311,7 +428,7 @@ export default function WhatsAppWebhookInspectorPage() {
               );
             })}
           </div>
-          {selectedCategory === "templates" && (
+          {selectedCategory === 'templates' && (
             <div className="mt-4">
               <Input
                 placeholder="فلتر حسب معرف القالب"
@@ -419,9 +536,7 @@ export default function WhatsAppWebhookInspectorPage() {
           <Card>
             <CardHeader>
               <CardTitle>سجل الأحداث</CardTitle>
-              <CardDescription>
-                الأحداث الواردة من Meta (محفوظة تلقائياً)
-              </CardDescription>
+              <CardDescription>الأحداث الواردة من Meta (محفوظة تلقائياً)</CardDescription>
             </CardHeader>
             <CardContent>
               {displayLoading ? (
@@ -432,16 +547,14 @@ export default function WhatsAppWebhookInspectorPage() {
                     <div
                       key={event.id}
                       className={`p-4 border rounded-lg ${
-                        !event.handlerExists ? "bg-red-50 border-red-200" : "bg-white"
+                        !event.handlerExists ? 'bg-red-50 border-red-200' : 'bg-white'
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-semibold text-lg">{event.eventType}</h4>
-                            {event.subType && (
-                              <Badge variant="outline">{event.subType}</Badge>
-                            )}
+                            {event.subType && <Badge variant="outline">{event.subType}</Badge>}
                             {!event.handlerExists && (
                               <Badge className="bg-red-500 text-white gap-1">
                                 <AlertTriangle className="h-3 w-3" />
@@ -458,13 +571,12 @@ export default function WhatsAppWebhookInspectorPage() {
 
                           <div className="mt-2 text-sm text-gray-600">
                             <p>
-                              <span className="font-semibold">التاريخ:</span>{" "}
-                              {new Date(event.createdAt).toLocaleString("ar-SA")}
+                              <span className="font-semibold">التاريخ:</span>{' '}
+                              {new Date(event.createdAt).toLocaleString('ar-SA')}
                             </p>
                             {event.phoneNumber && (
                               <p>
-                                <span className="font-semibold">الرقم:</span>{" "}
-                                {event.phoneNumber}
+                                <span className="font-semibold">الرقم:</span> {event.phoneNumber}
                               </p>
                             )}
                           </div>
@@ -478,7 +590,11 @@ export default function WhatsAppWebhookInspectorPage() {
                         <div className="flex flex-col gap-2 mr-4">
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button size="sm" variant="outline" onClick={() => setSelectedEvent(event)}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedEvent(event)}
+                              >
                                 <Eye className="h-4 w-4 mr-1" />
                                 عرض
                               </Button>
@@ -495,15 +611,15 @@ export default function WhatsAppWebhookInspectorPage() {
                                   </div>
                                   <div>
                                     <p className="text-sm font-semibold">النوع الفرعي:</p>
-                                    <p>{event.subType || "-"}</p>
+                                    <p>{event.subType || '-'}</p>
                                   </div>
                                   <div>
                                     <p className="text-sm font-semibold">رقم الهاتف:</p>
-                                    <p>{event.phoneNumber || "-"}</p>
+                                    <p>{event.phoneNumber || '-'}</p>
                                   </div>
                                   <div>
                                     <p className="text-sm font-semibold">التاريخ:</p>
-                                    <p>{new Date(event.createdAt).toLocaleString("ar-SA")}</p>
+                                    <p>{new Date(event.createdAt).toLocaleString('ar-SA')}</p>
                                   </div>
                                 </div>
 

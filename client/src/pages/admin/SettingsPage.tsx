@@ -1,6 +1,6 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import UnderDevelopmentPage from "@/components/UnderDevelopmentPage";
-import { Settings } from "lucide-react";
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
+import { Settings } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
@@ -11,12 +11,12 @@ export default function SettingsPage() {
         icon={Settings}
         currentPath="/admin/settings"
         features={[
-          "إدارة الملف الشخصي",
-          "إعدادات النظام العامة",
-          "إدارة التكاملات",
-          "إعدادات الإشعارات",
-          "إدارة الصلاحيات",
-          "إعدادات الأمان",
+          'إدارة الملف الشخصي',
+          'إعدادات النظام العامة',
+          'إدارة التكاملات',
+          'إعدادات الإشعارات',
+          'إدارة الصلاحيات',
+          'إعدادات الأمان',
         ]}
       />
     </DashboardLayout>

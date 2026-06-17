@@ -1,6 +1,6 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import UnderDevelopmentPage from "@/components/UnderDevelopmentPage";
-import { FileText } from "lucide-react";
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
+import { FileText } from 'lucide-react';
 
 export default function ReportsPage() {
   return (
@@ -11,11 +11,11 @@ export default function ReportsPage() {
         icon={FileText}
         currentPath="/admin/reports/reports"
         features={[
-          "تقارير الحجوزات والمواعيد",
-          "تقارير العملاء الجدد",
-          "تقارير معدلات التحويل",
-          "تقارير الإيرادات والأرباح",
-          "تصدير التقارير بصيغة PDF و Excel",
+          'تقارير الحجوزات والمواعيد',
+          'تقارير العملاء الجدد',
+          'تقارير معدلات التحويل',
+          'تقارير الإيرادات والأرباح',
+          'تصدير التقارير بصيغة PDF و Excel',
         ]}
       />
     </DashboardLayout>

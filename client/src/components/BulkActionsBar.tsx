@@ -1,6 +1,6 @@
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface BulkActionsBarProps {
   selectedCount: number;
@@ -8,16 +8,12 @@ interface BulkActionsBarProps {
   actions: {
     label: string;
     onClick: () => void;
-    variant?: "default" | "outline" | "destructive";
+    variant?: 'default' | 'outline' | 'destructive';
     icon?: React.ReactNode;
   }[];
 }
 
-export default function BulkActionsBar({
-  selectedCount,
-  onClear,
-  actions,
-}: BulkActionsBarProps) {
+export default function BulkActionsBar({ selectedCount, onClear, actions }: BulkActionsBarProps) {
   if (selectedCount === 0) return null;
 
   return (
@@ -28,7 +24,7 @@ export default function BulkActionsBar({
             {selectedCount}
           </Badge>
           <span className="text-sm font-medium">
-            {selectedCount === 1 ? "عنصر محدد" : "عناصر محددة"}
+            {selectedCount === 1 ? 'عنصر محدد' : 'عناصر محددة'}
           </span>
         </div>
 
@@ -38,7 +34,7 @@ export default function BulkActionsBar({
           {actions.map((action, index) => (
             <Button
               key={index}
-              variant={action.variant || "secondary"}
+              variant={action.variant || 'secondary'}
               size="sm"
               onClick={action.onClick}
               className="gap-2"

@@ -19,19 +19,19 @@ route:
         severity: critical
       receiver: 'critical-receiver'
       continue: false
-    
+
     # Warning alerts
     - match:
         severity: warning
       receiver: 'warning-receiver'
       continue: false
-    
+
     # Database alerts
     - match:
         service: mysql
       receiver: 'database-receiver'
       continue: true
-    
+
     # Application alerts
     - match:
         service: bocam-app
@@ -130,7 +130,7 @@ inhibit_rules:
     target_match:
       severity: 'warning'
     equal: ['alertname', 'service']
-    
+
   # Inhibit database alerts if the entire service is down
   - source_match:
       alertname: 'ServiceDown'

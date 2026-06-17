@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
-import { getCommentsByEntity, addComment, deleteComment, getCommentCount } from "../tasks/comments";
+import { z } from 'zod';
+import { protectedProcedure, router } from '../_core/trpc';
+import { getCommentsByEntity, addComment, deleteComment, getCommentCount } from '../tasks/comments';
 
 export const commentsRouter = router({
   /**
@@ -9,7 +9,7 @@ export const commentsRouter = router({
   getByEntity: protectedProcedure
     .input(
       z.object({
-        entityType: z.enum(["appointment", "lead", "offerLead", "campRegistration"]),
+        entityType: z.enum(['appointment', 'lead', 'offerLead', 'campRegistration']),
         entityId: z.number(),
       })
     )
@@ -23,9 +23,9 @@ export const commentsRouter = router({
   add: protectedProcedure
     .input(
       z.object({
-        entityType: z.enum(["appointment", "lead", "offerLead", "campRegistration"]),
+        entityType: z.enum(['appointment', 'lead', 'offerLead', 'campRegistration']),
         entityId: z.number(),
-        content: z.string().min(1, "التعليق لا يمكن أن يكون فارغاً"),
+        content: z.string().min(1, 'التعليق لا يمكن أن يكون فارغاً'),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -34,7 +34,7 @@ export const commentsRouter = router({
         entityId: input.entityId,
         content: input.content,
         userId: ctx.user.id,
-        userName: ctx.user.name || ctx.user.username || "مستخدم",
+        userName: ctx.user.name || ctx.user.username || 'مستخدم',
       };
 
       return await addComment(comment);
@@ -46,7 +46,7 @@ export const commentsRouter = router({
   delete: protectedProcedure
     .input(z.object({ commentId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      const isAdmin = ctx.user.role === "admin";
+      const isAdmin = ctx.user.role === 'admin';
       return await deleteComment(input.commentId, ctx.user.id, isAdmin);
     }),
 
@@ -56,7 +56,7 @@ export const commentsRouter = router({
   getCount: protectedProcedure
     .input(
       z.object({
-        entityType: z.enum(["appointment", "lead", "offerLead", "campRegistration"]),
+        entityType: z.enum(['appointment', 'lead', 'offerLead', 'campRegistration']),
         entityId: z.number(),
       })
     )

@@ -58,8 +58,8 @@ import {
   MOCK_LOG_LEVEL,
   REDIS_URL,
   GOOGLE_ANALYTICS_ID,
-  validateEnv
-} from "@shared/config";
+  validateEnv,
+} from '@shared/config';
 
 // Initialize environment validation
 // Call this once at application startup
@@ -74,13 +74,13 @@ export const ENV = {
   companyPhone: COMPANY_PHONE,
   companyEmail: COMPANY_EMAIL,
   companyAddress: COMPANY_ADDRESS,
-  
+
   // Social Media
   facebookUrl: FACEBOOK_URL,
   instagramUrl: INSTAGRAM_URL,
   twitterUrl: TWITTER_URL,
   linkedinUrl: LINKEDIN_URL,
-  
+
   // Meta (Facebook / Instagram / WhatsApp)
   /**
    * التوكن الموحد لجميع خدمات Meta.
@@ -91,24 +91,24 @@ export const ENV = {
   metaAccessToken: META_ACCESS_TOKEN,
   whatsappPhoneNumberId: WHATSAPP_PHONE_NUMBER_ID,
   whatsappBusinessAccountId: WHATSAPP_BUSINESS_ACCOUNT_ID,
-  instagramBusinessAccountId: process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID ?? "",
-  facebookPageId: process.env.FACEBOOK_PAGE_ID ?? "",
+  instagramBusinessAccountId: process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID ?? '',
+  facebookPageId: process.env.FACEBOOK_PAGE_ID ?? '',
   metaPixelId: META_PIXEL_ID,
   metaTestEventCode: META_TEST_EVENT_CODE,
   webhookVerifyToken: WHATSAPP_WEBHOOK_VERIFY_TOKEN,
-  
+
   // Email Service
   emailService: EMAIL_SERVICE,
   emailApiKey: EMAIL_API_KEY,
   emailFrom: EMAIL_FROM,
   emailFromName: EMAIL_FROM_NAME,
-  
+
   // SMS Service
   smsService: SMS_SERVICE,
   smsApiKey: SMS_API_KEY,
   smsApiSecret: SMS_API_SECRET,
   smsPhoneNumber: SMS_PHONE_NUMBER,
-  
+
   // Database Configuration
   databaseUrl: DATABASE_URL,
   dbHost: DB_HOST,
@@ -130,18 +130,18 @@ export const ENV = {
   fileUploadPath: FILE_UPLOAD_PATH,
 
   // OAuth Configuration
-  appId: process.env.META_APP_ID ?? process.env.VITE_APP_ID ?? "",
+  appId: process.env.META_APP_ID ?? process.env.VITE_APP_ID ?? '',
   cookieSecret: JWT_SECRET,
   oAuthServerUrl: OAUTH_SERVER_URL,
   ownerOpenId: OWNER_OPEN_ID,
   ownerName: OWNER_NAME,
-  
+
   // Environment
   isProduction: IS_PRODUCTION,
   isDevelopment: IS_DEVELOPMENT,
-  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
-  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
-  
+  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? '',
+  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? '',
+
   // Mocking Mode
   mockMode: MOCK_MODE,
   mockWhatsApp: MOCK_WHATSAPP,
@@ -150,8 +150,8 @@ export const ENV = {
   mockMetaPixel: MOCK_META_PIXEL,
   mockLogging: MOCK_LOGGING,
   mockLogLevel: MOCK_LOG_LEVEL,
-  
+
   // Additional Services
   redisUrl: REDIS_URL,
-  googleAnalyticsId: GOOGLE_ANALYTICS_ID
+  googleAnalyticsId: GOOGLE_ANALYTICS_ID,
 };

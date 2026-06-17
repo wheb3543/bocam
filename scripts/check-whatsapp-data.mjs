@@ -35,7 +35,7 @@ if (!DATABASE_URL) {
     ORDER BY c.lastMessageAt DESC
     LIMIT 100
   `);
-  const emptyOnes = emptyConversations.filter(c => c.messageCount === 0);
+  const emptyOnes = emptyConversations.filter((c) => c.messageCount === 0);
   console.log(`عدد المحادثات بدون رسائل: ${emptyOnes.length}`);
   if (emptyOnes.length > 0) {
     console.log(JSON.stringify(emptyOnes, null, 2));

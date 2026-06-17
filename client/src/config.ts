@@ -155,7 +155,9 @@ export function getContactInfo(): {
 /**
  * Get social media URL by platform
  */
-export function getSocialMediaUrl(platform: 'facebook' | 'instagram' | 'twitter' | 'linkedin'): string {
+export function getSocialMediaUrl(
+  platform: 'facebook' | 'instagram' | 'twitter' | 'linkedin'
+): string {
   const urls = {
     facebook: FACEBOOK_URL,
     instagram: INSTAGRAM_URL,

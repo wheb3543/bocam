@@ -1,14 +1,14 @@
 /**
  * FeatureGate - مكون مغلف لحماية عناصر UI بناءً على الميزات المفعلة
- * 
+ *
  * إذا كانت الميزة مفعلة، يعرض العناصر بداخله (Children)
  * إذا لم تكن مفعلة، يعرض رسالة قفل أنيقة أو زر "طلب التفعيل"
- * 
+ *
  * @example
  * <FeatureGate feature="whatsapp">
  *   <WhatsAppDashboard />
  * </FeatureGate>
- * 
+ *
  * @example
  * <FeatureGate feature="reports" fallback={<CustomFallback />}>
  *   <ReportsPage />
@@ -16,11 +16,11 @@
  */
 
 import { ReactNode } from 'react';
-import { useLicense } from "@/hooks/integrations/useLicense";
+import { useLicense } from '@/hooks/integrations/useLicense';
 import { Lock, Crown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 /**
  * خيارات FeatureGate
@@ -91,7 +91,8 @@ function LockedFeatureCard({
         </div>
         <CardTitle className="text-xl mb-2">ميزة {featureName} غير مفعلة</CardTitle>
         <CardDescription className="text-base">
-          {description || `هذه الميزة غير مدرجة في باقتك الحالية. يرجى التواصل مع الدعم لترقية الترخيص.`}
+          {description ||
+            `هذه الميزة غير مدرجة في باقتك الحالية. يرجى التواصل مع الدعم لترقية الترخيص.`}
         </CardDescription>
       </CardHeader>
       {showUpgradeButton && (
@@ -120,11 +121,7 @@ function LockedFeatureCard({
 /**
  * المكون البسيط للميزة المغلقة (نمط Minimal)
  */
-function LockedFeatureMinimal({
-  feature,
-}: {
-  feature: string;
-}) {
+function LockedFeatureMinimal({ feature }: { feature: string }) {
   return (
     <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-lg border border-muted-foreground/20">
       <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -225,11 +222,7 @@ export default function FeatureGate({
     case 'card':
     default:
       return (
-        <LockedFeatureCard
-          {...commonProps}
-          title={lockedTitle}
-          description={lockedDescription}
-        />
+        <LockedFeatureCard {...commonProps} title={lockedTitle} description={lockedDescription} />
       );
   }
 }

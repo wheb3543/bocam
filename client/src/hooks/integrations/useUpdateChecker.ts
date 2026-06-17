@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from 'react';
 
 interface UpdateStatus {
   lastCheck: number;
@@ -26,7 +26,7 @@ export function useUpdateChecker() {
       setError(null);
       const response = await fetch('/api/update/status');
       const data = await response.json();
-      
+
       if (data.success) {
         setStatus(data.data);
       } else {
@@ -45,7 +45,7 @@ export function useUpdateChecker() {
         method: 'POST',
       });
       const data = await response.json();
-      
+
       if (data.success) {
         await fetchUpdateStatus();
         return true;
@@ -63,7 +63,7 @@ export function useUpdateChecker() {
         method: 'POST',
       });
       const data = await response.json();
-      
+
       if (data.success) {
         await fetchUpdateStatus();
         return true;

@@ -1,7 +1,7 @@
 /**
  * Offers Router
  * جهاز التوجيه الخاص بالعروض
- * 
+ *
  * Handles all tRPC procedures related to medical offers management
  * يتعامل مع جميع إجراءات tRPC المتعلقة بإدارة العروض الطبية
  */
@@ -35,28 +35,28 @@ export const offersRouter = router({
    * الحصول على جميع العروض النشطة
    */
   getAll: publicProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      CacheKeys.offersList(),
-      CacheTTL.LONG,
-      async () => {
-        try {
-          const dbInstance = await getDb();
-          if (!dbInstance) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
-          
-          const allOffers = await dbInstance
-            .select()
-            .from(offers)
-            .where(eq(offers.isActive, true))
-            .orderBy(offers.createdAt);
+    return serverCache.getOrCompute(CacheKeys.offersList(), CacheTTL.LONG, async () => {
+      try {
+        const dbInstance = await getDb();
+        if (!dbInstance)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
-          return allOffers;
-        } catch (error) {
-          console.error('Error fetching offers:', error);
-          if (error instanceof TRPCError) throw error;
-          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'فشل في جلب العروض' });
-        }
+        const allOffers = await dbInstance
+          .select()
+          .from(offers)
+          .where(eq(offers.isActive, true))
+          .orderBy(offers.createdAt);
+
+        return allOffers;
+      } catch (error) {
+        console.error('Error fetching offers:', error);
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'فشل في جلب العروض' });
       }
-    );
+    });
   }),
 
   /**
@@ -66,17 +66,18 @@ export const offersRouter = router({
   getAllAdmin: protectedProcedure.query(async ({ ctx }) => {
     // Verify user is admin
     if (ctx.user?.role !== 'admin') {
-      throw new TRPCError({ code: 'FORBIDDEN', message: 'غير مصرح: فقط المسؤولين يمكنهم عرض جميع العروض' });
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'غير مصرح: فقط المسؤولين يمكنهم عرض جميع العروض',
+      });
     }
 
     try {
       const dbInstance = await getDb();
-      if (!dbInstance) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
-      
-      const allOffers = await dbInstance
-        .select()
-        .from(offers)
-        .orderBy(offers.createdAt);
+      if (!dbInstance)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+
+      const allOffers = await dbInstance.select().from(offers).orderBy(offers.createdAt);
 
       return allOffers;
     } catch (error) {
@@ -90,30 +91,29 @@ export const offersRouter = router({
    * Get a specific offer by slug
    * الحصول على عرض معين حسب الرابط
    */
-  getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ input }) => {
-      try {
-        const dbInstance = await getDb();
-        if (!dbInstance) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
-        
-        const offer = await dbInstance
-          .select()
-          .from(offers)
-          .where(and(eq(offers.slug, input.slug), eq(offers.isActive, true)))
-          .limit(1);
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
+    try {
+      const dbInstance = await getDb();
+      if (!dbInstance)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
-        if (offer.length === 0) {
-          throw new TRPCError({ code: 'NOT_FOUND', message: 'العرض غير موجود' });
-        }
+      const offer = await dbInstance
+        .select()
+        .from(offers)
+        .where(and(eq(offers.slug, input.slug), eq(offers.isActive, true)))
+        .limit(1);
 
-        return offer[0];
-      } catch (error) {
-        console.error('Error fetching offer:', error);
-        if (error instanceof TRPCError) throw error;
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'فشل في جلب العرض' });
+      if (offer.length === 0) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'العرض غير موجود' });
       }
-    }),
+
+      return offer[0];
+    } catch (error) {
+      console.error('Error fetching offer:', error);
+      if (error instanceof TRPCError) throw error;
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'فشل في جلب العرض' });
+    }
+  }),
 
   /**
    * Create a new offer (admin only)
@@ -125,17 +125,31 @@ export const offersRouter = router({
     .mutation(async ({ input, ctx }) => {
       // Verify user is admin
       if (ctx.user?.role !== 'admin') {
-        throw new TRPCError({ code: 'FORBIDDEN', message: 'غير مصرح: فقط المسؤولين يمكنهم إنشاء عروض' });
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'غير مصرح: فقط المسؤولين يمكنهم إنشاء عروض',
+        });
       }
 
       try {
         const dbInstance = await getDb();
-        if (!dbInstance) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
-        
+        if (!dbInstance)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+
         // Use provided slug (normalize to lowercase) or generate from title
-        let slug = (input.slug && input.slug.trim())
-          ? input.slug.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '')
-          : generateSlug(input.title);
+        let slug =
+          input.slug && input.slug.trim()
+            ? input.slug
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-]/g, '')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '')
+            : generateSlug(input.title);
 
         // Fallback if slug is empty after normalization
         if (!slug || slug.length === 0) {
@@ -155,7 +169,8 @@ export const offersRouter = router({
         }
 
         // Normalize imageUrl: treat empty string as undefined
-        const imageUrl = input.imageUrl && input.imageUrl.trim() !== '' ? input.imageUrl : undefined;
+        const imageUrl =
+          input.imageUrl && input.imageUrl.trim() !== '' ? input.imageUrl : undefined;
 
         // Create the offer
         const newOffer = await dbInstance.insert(offers).values({
@@ -175,7 +190,10 @@ export const offersRouter = router({
       } catch (error) {
         console.error('Error creating offer:', error);
         if (error instanceof TRPCError) throw error;
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error instanceof Error ? error.message : 'فشل في إنشاء العرض' });
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'فشل في إنشاء العرض',
+        });
       }
     }),
 
@@ -194,20 +212,37 @@ export const offersRouter = router({
     .mutation(async ({ input, ctx }) => {
       // Verify user is admin
       if (ctx.user?.role !== 'admin') {
-        throw new TRPCError({ code: 'FORBIDDEN', message: 'غير مصرح: فقط المسؤولين يمكنهم تحديث العروض' });
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'غير مصرح: فقط المسؤولين يمكنهم تحديث العروض',
+        });
       }
 
       try {
         const dbInstance = await getDb();
-        if (!dbInstance) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
-        
+        if (!dbInstance)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+
         // Use provided slug (normalize to lowercase) or keep existing from DB
         let slug: string;
         if (input.slug && input.slug.trim()) {
-          slug = input.slug.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+          slug = input.slug
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
         } else {
           // Fallback: get current slug from DB to avoid overwriting with empty
-          const currentOffer = await dbInstance.select().from(offers).where(eq(offers.id, input.id)).limit(1);
+          const currentOffer = await dbInstance
+            .select()
+            .from(offers)
+            .where(eq(offers.id, input.id))
+            .limit(1);
           slug = currentOffer[0]?.slug || generateSlug(input.title);
         }
 
@@ -217,7 +252,8 @@ export const offersRouter = router({
         }
 
         // Normalize imageUrl: treat empty string as undefined
-        const imageUrl = input.imageUrl && input.imageUrl.trim() !== '' ? input.imageUrl : undefined;
+        const imageUrl =
+          input.imageUrl && input.imageUrl.trim() !== '' ? input.imageUrl : undefined;
 
         // Update the offer
         await dbInstance
@@ -240,7 +276,10 @@ export const offersRouter = router({
       } catch (error) {
         console.error('Error updating offer:', error);
         if (error instanceof TRPCError) throw error;
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error instanceof Error ? error.message : 'فشل في تحديث العرض' });
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'فشل في تحديث العرض',
+        });
       }
     }),
 
@@ -254,17 +293,21 @@ export const offersRouter = router({
     .mutation(async ({ input, ctx }) => {
       // Verify user is admin
       if (ctx.user?.role !== 'admin') {
-        throw new TRPCError({ code: 'FORBIDDEN', message: 'غير مصرح: فقط المسؤولين يمكنهم إلغاء تفعيل العروض' });
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'غير مصرح: فقط المسؤولين يمكنهم إلغاء تفعيل العروض',
+        });
       }
 
       try {
         const dbInstance = await getDb();
-        if (!dbInstance) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
-        
-        await dbInstance
-          .update(offers)
-          .set({ isActive: false })
-          .where(eq(offers.id, input.id));
+        if (!dbInstance)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+
+        await dbInstance.update(offers).set({ isActive: false }).where(eq(offers.id, input.id));
 
         // Invalidate offers cache
         serverCache.invalidate(CacheKeys.offersList());
@@ -287,13 +330,20 @@ export const offersRouter = router({
     .mutation(async ({ input, ctx }) => {
       // Verify user is admin
       if (ctx.user?.role !== 'admin') {
-        throw new TRPCError({ code: 'FORBIDDEN', message: 'غير مصرح: فقط المسؤولين يمكنهم حذف العروض' });
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'غير مصرح: فقط المسؤولين يمكنهم حذف العروض',
+        });
       }
 
       try {
         const dbInstance = await getDb();
-        if (!dbInstance) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
-        
+        if (!dbInstance)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+
         await dbInstance.delete(offers).where(eq(offers.id, input.id));
 
         // Invalidate offers cache

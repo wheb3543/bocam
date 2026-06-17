@@ -3,13 +3,13 @@
  * Sends notifications to the admin via Telegram
  */
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 
 interface TelegramMessage {
   title: string;
   content: string;
-  type?: "lead" | "appointment" | "offer" | "camp";
+  type?: 'lead' | 'appointment' | 'offer' | 'camp';
 }
 
 /**
@@ -17,7 +17,7 @@ interface TelegramMessage {
  */
 export async function sendTelegramNotification(params: TelegramMessage): Promise<boolean> {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.warn("[Telegram] Bot token or chat ID not configured");
+    console.warn('[Telegram] Bot token or chat ID not configured');
     return false;
   }
 
@@ -25,31 +25,28 @@ export async function sendTelegramNotification(params: TelegramMessage): Promise
     const emoji = getEmojiForType(params.type);
     const message = `${emoji} *${params.title}*\n\n${params.content}`;
 
-    const response = await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: "Markdown",
-        }),
-      }
-    );
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: 'Markdown',
+      }),
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("[Telegram] Failed to send message:", errorData);
+      console.error('[Telegram] Failed to send message:', errorData);
       return false;
     }
 
-    console.log("[Telegram] Message sent successfully");
+    console.log('[Telegram] Message sent successfully');
     return true;
   } catch (error) {
-    console.error("[Telegram] Error sending message:", error);
+    console.error('[Telegram] Error sending message:', error);
     return false;
   }
 }
@@ -59,16 +56,16 @@ export async function sendTelegramNotification(params: TelegramMessage): Promise
  */
 function getEmojiForType(type?: string): string {
   switch (type) {
-    case "lead":
-      return "👤";
-    case "appointment":
-      return "📅";
-    case "offer":
-      return "🎁";
-    case "camp":
-      return "⛺";
+    case 'lead':
+      return '👤';
+    case 'appointment':
+      return '📅';
+    case 'offer':
+      return '🎁';
+    case 'camp':
+      return '⛺';
     default:
-      return "🔔";
+      return '🔔';
   }
 }
 
@@ -82,9 +79,9 @@ export async function sendNewLeadTelegram(params: {
   source?: string;
 }): Promise<boolean> {
   return sendTelegramNotification({
-    title: "عميل جديد",
-    content: `الاسم: ${params.fullName}\nالهاتف: ${params.phone}\nالبريد: ${params.email || "غير متوفر"}\nالمصدر: ${params.source || "غير محدد"}`,
-    type: "lead",
+    title: 'عميل جديد',
+    content: `الاسم: ${params.fullName}\nالهاتف: ${params.phone}\nالبريد: ${params.email || 'غير متوفر'}\nالمصدر: ${params.source || 'غير محدد'}`,
+    type: 'lead',
   });
 }
 
@@ -104,10 +101,10 @@ export async function sendNewAppointmentTelegram(params: {
   const lines = [
     `الاسم: ${params.fullName}`,
     `الهاتف: ${params.phone}`,
-    `البريد: ${params.email || "غير متوفر"}`,
+    `البريد: ${params.email || 'غير متوفر'}`,
     `الطبيب: ${params.doctorName}`,
-    `التاريخ: ${params.preferredDate || "غير محدد"}`,
-    `الوقت: ${params.preferredTime || "غير محدد"}`,
+    `التاريخ: ${params.preferredDate || 'غير محدد'}`,
+    `الوقت: ${params.preferredTime || 'غير محدد'}`,
   ];
   if (params.procedure) {
     lines.push(`الإجراء المطلوب: ${params.procedure}`);
@@ -116,9 +113,9 @@ export async function sendNewAppointmentTelegram(params: {
     lines.push(`رسالة المريض: ${params.patientMessage}`);
   }
   return sendTelegramNotification({
-    title: "موعد جديد",
-    content: lines.join("\n"),
-    type: "appointment",
+    title: 'موعد جديد',
+    content: lines.join('\n'),
+    type: 'appointment',
   });
 }
 
@@ -136,7 +133,7 @@ export async function sendNewOfferLeadTelegram(params: {
   const lines = [
     `الاسم: ${params.fullName}`,
     `الهاتف: ${params.phone}`,
-    `البريد: ${params.email || "غير متوفر"}`,
+    `البريد: ${params.email || 'غير متوفر'}`,
     `العرض: ${params.offerTitle}`,
   ];
   if (params.age) {
@@ -146,9 +143,9 @@ export async function sendNewOfferLeadTelegram(params: {
     lines.push(`رسالة المريض: ${params.patientMessage}`);
   }
   return sendTelegramNotification({
-    title: "حجز عرض جديد",
-    content: lines.join("\n"),
-    type: "offer",
+    title: 'حجز عرض جديد',
+    content: lines.join('\n'),
+    type: 'offer',
   });
 }
 
@@ -167,15 +164,15 @@ export async function sendNewCampRegistrationTelegram(params: {
   const lines = [
     `الاسم: ${params.fullName}`,
     `الهاتف: ${params.phone}`,
-    `البريد: ${params.email || "غير متوفر"}`,
+    `البريد: ${params.email || 'غير متوفر'}`,
     `المخيم: ${params.campTitle}`,
-    `العمر: ${params.age || "غير محدد"}`,
+    `العمر: ${params.age || 'غير محدد'}`,
   ];
   if (params.procedures) {
     try {
       const parsed = JSON.parse(params.procedures);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        lines.push(`الإجراءات المطلوبة: ${parsed.join("، ")}`);
+        lines.push(`الإجراءات المطلوبة: ${parsed.join('، ')}`);
       }
     } catch {
       lines.push(`الإجراءات المطلوبة: ${params.procedures}`);
@@ -185,8 +182,8 @@ export async function sendNewCampRegistrationTelegram(params: {
     lines.push(`رسالة المريض: ${params.patientMessage}`);
   }
   return sendTelegramNotification({
-    title: "تسجيل مخيم جديد",
-    content: lines.join("\n"),
-    type: "camp",
+    title: 'تسجيل مخيم جديد',
+    content: lines.join('\n'),
+    type: 'camp',
   });
 }

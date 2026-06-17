@@ -1,11 +1,11 @@
-import { router, protectedProcedure } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { getDb } from "../database/db";
-import { eq } from "drizzle-orm";
-import { whatsappTemplates } from "../../drizzle/schema";
-import * as whatsappTemplatesModule from "../services/whatsappTemplates";
-import { normalizePhoneNumber } from "../database/db";
+import { router, protectedProcedure } from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
+import { getDb } from '../database/db';
+import { eq } from 'drizzle-orm';
+import { whatsappTemplates } from '../../drizzle/schema';
+import * as whatsappTemplatesModule from '../services/whatsappTemplates';
+import { normalizePhoneNumber } from '../database/db';
 
 /**
  * WhatsApp Template Testing Router
@@ -26,7 +26,11 @@ export const whatsappTemplateTestRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await getDb();
-        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!db)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
         // تطبيع رقم الهاتف
         const normalizedPhone = normalizePhoneNumber(input.phone);
@@ -35,21 +39,19 @@ export const whatsappTemplateTestRouter = router({
         const template = await db
           .select()
           .from(whatsappTemplates)
-          .where(
-            eq(whatsappTemplates.metaName, "sgh_welcome_greeting_ar")
-          )
+          .where(eq(whatsappTemplates.metaName, 'sgh_welcome_greeting_ar'))
           .limit(1);
 
         if (!template || template.length === 0) {
           return {
             success: false,
-            error: "قالب الترحيب غير موجود أو غير معتمد من Meta",
+            error: 'قالب الترحيب غير موجود أو غير معتمد من Meta',
           };
         }
 
         const tmpl = template[0];
 
-        if (tmpl.metaStatus !== "APPROVED") {
+        if (tmpl.metaStatus !== 'APPROVED') {
           return {
             success: false,
             error: `حالة القالب: ${tmpl.metaStatus}. يجب أن تكون APPROVED`,
@@ -59,11 +61,11 @@ export const whatsappTemplateTestRouter = router({
         // إرسال الرسالة عبر القالب
         const result = await whatsappTemplatesModule.sendTemplateMessage({
           phone: normalizedPhone,
-          templateName: tmpl.metaName || "sgh_welcome_greeting_ar",
-          language: "ar",
+          templateName: tmpl.metaName || 'sgh_welcome_greeting_ar',
+          language: 'ar',
           parameters: [
             {
-              type: "text" as const,
+              type: 'text' as const,
               value: input.fullName,
             },
           ],
@@ -72,13 +74,13 @@ export const whatsappTemplateTestRouter = router({
         if (!result.success) {
           return {
             success: false,
-            error: result.error || "فشل إرسال الرسالة",
+            error: result.error || 'فشل إرسال الرسالة',
           };
         }
 
         return {
           success: true,
-          message: "تم إرسال رسالة الترحيب بنجاح ✅",
+          message: 'تم إرسال رسالة الترحيب بنجاح ✅',
           details: {
             phone: normalizedPhone,
             templateName: tmpl.metaName,
@@ -87,10 +89,10 @@ export const whatsappTemplateTestRouter = router({
           },
         };
       } catch (error) {
-        console.error("[WhatsApp Template Test] Error:", error);
+        console.error('[WhatsApp Template Test] Error:', error);
         return {
           success: false,
-          error: error instanceof Error ? error.message : "خطأ غير معروف",
+          error: error instanceof Error ? error.message : 'خطأ غير معروف',
         };
       }
     }),
@@ -101,12 +103,13 @@ export const whatsappTemplateTestRouter = router({
   listApprovedTemplates: protectedProcedure.query(async () => {
     try {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       const templates = await db
         .select()
         .from(whatsappTemplates)
-        .where(eq(whatsappTemplates.metaStatus, "APPROVED"));
+        .where(eq(whatsappTemplates.metaStatus, 'APPROVED'));
 
       return {
         success: true,
@@ -123,10 +126,10 @@ export const whatsappTemplateTestRouter = router({
         })),
       };
     } catch (error) {
-      console.error("[WhatsApp Template Test] Error listing templates:", error);
+      console.error('[WhatsApp Template Test] Error listing templates:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "خطأ غير معروف",
+        error: error instanceof Error ? error.message : 'خطأ غير معروف',
       };
     }
   }),
@@ -145,7 +148,11 @@ export const whatsappTemplateTestRouter = router({
     .mutation(async ({ input }) => {
       try {
         const db = await getDb();
-        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!db)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
         // تطبيع رقم الهاتف
         const normalizedPhone = normalizePhoneNumber(input.phone);
@@ -160,13 +167,13 @@ export const whatsappTemplateTestRouter = router({
         if (!template || template.length === 0) {
           return {
             success: false,
-            error: "القالب غير موجود",
+            error: 'القالب غير موجود',
           };
         }
 
         const tmpl = template[0];
 
-        if (tmpl.metaStatus !== "APPROVED") {
+        if (tmpl.metaStatus !== 'APPROVED') {
           return {
             success: false,
             error: `حالة القالب: ${tmpl.metaStatus}. يجب أن تكون APPROVED`,
@@ -189,9 +196,9 @@ export const whatsappTemplateTestRouter = router({
         const result = await whatsappTemplatesModule.sendTemplateMessage({
           phone: normalizedPhone,
           templateName: tmpl.metaName || input.templateName,
-          language: "ar",
+          language: 'ar',
           parameters: providedParams.map((value) => ({
-            type: "text" as const,
+            type: 'text' as const,
             value,
           })),
         });
@@ -199,13 +206,13 @@ export const whatsappTemplateTestRouter = router({
         if (!result.success) {
           return {
             success: false,
-            error: result.error || "فشل إرسال الرسالة",
+            error: result.error || 'فشل إرسال الرسالة',
           };
         }
 
         return {
           success: true,
-          message: "تم إرسال الرسالة بنجاح ✅",
+          message: 'تم إرسال الرسالة بنجاح ✅',
           details: {
             phone: normalizedPhone,
             templateName: tmpl.metaName,
@@ -214,10 +221,10 @@ export const whatsappTemplateTestRouter = router({
           },
         };
       } catch (error) {
-        console.error("[WhatsApp Template Test] Error sending template:", error);
+        console.error('[WhatsApp Template Test] Error sending template:', error);
         return {
           success: false,
-          error: error instanceof Error ? error.message : "خطأ غير معروف",
+          error: error instanceof Error ? error.message : 'خطأ غير معروف',
         };
       }
     }),
@@ -230,7 +237,11 @@ export const whatsappTemplateTestRouter = router({
     .query(async ({ input }) => {
       try {
         const db = await getDb();
-        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!db)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
         const template = await db
           .select()
@@ -241,7 +252,7 @@ export const whatsappTemplateTestRouter = router({
         if (!template || template.length === 0) {
           return {
             success: false,
-            error: "القالب غير موجود",
+            error: 'القالب غير موجود',
           };
         }
 
@@ -266,10 +277,10 @@ export const whatsappTemplateTestRouter = router({
           },
         };
       } catch (error) {
-        console.error("[WhatsApp Template Test] Error getting template:", error);
+        console.error('[WhatsApp Template Test] Error getting template:', error);
         return {
           success: false,
-          error: error instanceof Error ? error.message : "خطأ غير معروف",
+          error: error instanceof Error ? error.message : 'خطأ غير معروف',
         };
       }
     }),

@@ -23,7 +23,7 @@ vi.mock('@/_core/hooks/useAuth', () => ({
   useAuth: () => ({ user: { name: 'Test User' } }),
 }));
 
-import { useExportUtils, type ExportConfig } from '../useExportUtils';
+import { useExportUtils, type ExportConfig } from '../export/useExportUtils';
 
 const sampleConfig: ExportConfig<{ id: number; name: string; status: string }> = {
   tableName: 'اختبار الجدول',

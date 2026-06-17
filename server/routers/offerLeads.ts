@@ -1,16 +1,16 @@
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
-import { eq, desc, and, gte } from "drizzle-orm";
-import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../database/db";
-import { offerLeads } from "../../drizzle/schema";
-import { sendNewOfferLeadTelegram } from "../services/telegram";
-import { serverCache, CacheKeys, CacheTTL } from "../services/cache";
-import { createAuditLog } from "./auditLogs";
-import { sendOfferLeadEvent, sendStatusChangeEvent } from "../api/facebookCAPI";
-import { normalizePhoneNumber } from "../database/db";
+import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import { eq, desc, and, gte } from 'drizzle-orm';
+import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { getDb } from '../database/db';
+import { offerLeads } from '../../drizzle/schema';
+import { sendNewOfferLeadTelegram } from '../services/telegram';
+import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
+import { createAuditLog } from './auditLogs';
+import { sendOfferLeadEvent, sendStatusChangeEvent } from '../api/facebookCAPI';
+import { normalizePhoneNumber } from '../database/db';
 // sendOfferLeadConfirmation moved to dispatchWhatsAppMessage flow
-import { dispatchWhatsAppMessage } from "../services/whatsappMessageDispatcher";
+import { dispatchWhatsAppMessage } from '../services/whatsappMessageDispatcher';
 
 export const offerLeadsRouter = router({
   // Submit a new offer lead (public)
@@ -19,17 +19,30 @@ export const offerLeadsRouter = router({
       z.object({
         offerId: z.number(),
         fullName: z.string().min(1),
-        phone: z.string().min(9).regex(
-          /^(\+?967)?7\d{8}$|^07\d{8}$|^7\d{8}$/,
-          "رقم الهاتف يجب أن يبدأ بالرقم 7 ويتكون من 9 أرقام"
-        ),
+        phone: z
+          .string()
+          .min(9)
+          .regex(
+            /^(\+?967)?7\d{8}$|^07\d{8}$|^7\d{8}$/,
+            'رقم الهاتف يجب أن يبدأ بالرقم 7 ويتكون من 9 أرقام'
+          ),
         email: z.string().email().optional(),
         age: z.number().int().min(1).max(120).optional(),
-        gender: z.enum(["male", "female"]),
+        gender: z.enum(['male', 'female']),
         patientMessage: z.string().max(500).optional(),
         notes: z.string().optional(),
         source: z.string().optional(),
-        status: z.enum(["pending", "contacted", "no_answer", "confirmed", "attended", "completed", "cancelled"]).optional(), // Manual registration status
+        status: z
+          .enum([
+            'pending',
+            'contacted',
+            'no_answer',
+            'confirmed',
+            'attended',
+            'completed',
+            'cancelled',
+          ])
+          .optional(), // Manual registration status
         utmSource: z.string().optional(),
         utmMedium: z.string().optional(),
         utmCampaign: z.string().optional(),
@@ -44,7 +57,8 @@ export const offerLeadsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const normalizedPhone = normalizePhoneNumber(input.phone);
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       // التحقق من عدم تكرار الطلب بنفس الرقم ونفس العرض خلال 3 أيام - معطل
       // const threeDaysAgo = new Date();
@@ -70,7 +84,7 @@ export const offerLeadsRouter = router({
       // Build timestamp fields based on initial status
       const nowOffer = new Date();
       const offerStatusTimestamps: Record<string, Date> = {};
-      const offerInitialStatus = input.status || "pending";
+      const offerInitialStatus = input.status || 'pending';
       if (offerInitialStatus === 'contacted') offerStatusTimestamps.contactedAt = nowOffer;
       else if (offerInitialStatus === 'confirmed') offerStatusTimestamps.confirmedAt = nowOffer;
       else if (offerInitialStatus === 'attended') offerStatusTimestamps.attendedAt = nowOffer;
@@ -86,7 +100,7 @@ export const offerLeadsRouter = router({
         gender: input.gender,
         patientMessage: input.patientMessage,
         notes: input.notes,
-        source: input.source || "website",
+        source: input.source || 'website',
         utmSource: input.utmSource,
         utmMedium: input.utmMedium,
         utmCampaign: input.utmCampaign,
@@ -101,7 +115,7 @@ export const offerLeadsRouter = router({
       });
 
       // Get offer details for notification
-      const { offers } = await import("../../drizzle/schema");
+      const { offers } = await import('../../drizzle/schema');
       const [offer] = await db.select().from(offers).where(eq(offers.id, input.offerId)).limit(1);
 
       // Send Telegram notification
@@ -121,33 +135,37 @@ export const offerLeadsRouter = router({
       if (offer) {
         const leadId = Number(lead.insertId);
         dispatchWhatsAppMessage({
-          entityType: "offer_lead",
-          triggerEvent: "on_create",
+          entityType: 'offer_lead',
+          triggerEvent: 'on_create',
           phone: input.phone,
           recipientName: input.fullName,
           variables: {
             name: input.fullName,
             service: offer.title,
-            date: offer.startDate ? new Date(offer.startDate).toLocaleDateString("ar-YE") : "غير محدد",
+            date: offer.startDate
+              ? new Date(offer.startDate).toLocaleDateString('ar-YE')
+              : 'غير محدد',
           },
           entityId: leadId,
-        }).then(async (res) => {
-          if (res?.success) {
-            const dbInner = await getDb();
-            if (dbInner) {
-              await dbInner
-                .update(offerLeads)
-                .set({ status: "contacted", contactedAt: new Date(), updatedAt: new Date() })
-                .where(eq(offerLeads.id, leadId));
-              serverCache.invalidateByPrefix("paginated:offerLeads:");
-              serverCache.invalidate("list:offerLeads");
-              serverCache.invalidate(CacheKeys.offerLeadStats());
-              console.log(`[OfferLead] Auto-updated ${leadId} to contacted after on_create send`);
+        })
+          .then(async (res) => {
+            if (res?.success) {
+              const dbInner = await getDb();
+              if (dbInner) {
+                await dbInner
+                  .update(offerLeads)
+                  .set({ status: 'contacted', contactedAt: new Date(), updatedAt: new Date() })
+                  .where(eq(offerLeads.id, leadId));
+                serverCache.invalidateByPrefix('paginated:offerLeads:');
+                serverCache.invalidate('list:offerLeads');
+                serverCache.invalidate(CacheKeys.offerLeadStats());
+                console.log(`[OfferLead] Auto-updated ${leadId} to contacted after on_create send`);
+              }
             }
-          }
-        }).catch(error => {
-          console.error("[WhatsApp Dispatcher] Failed to send offer lead on_create:", error);
-        });
+          })
+          .catch((error) => {
+            console.error('[WhatsApp Dispatcher] Failed to send offer lead on_create:', error);
+          });
       }
 
       // Send Facebook Conversions API event (fire-and-forget)
@@ -157,16 +175,16 @@ export const offerLeadsRouter = router({
         phone: input.phone,
         email: input.email,
         clientIpAddress: ctx.req.ip || (ctx.req.socket as any)?.remoteAddress,
-        clientUserAgent: ctx.req.headers["user-agent"] as string,
-        fbc: ctx.req.cookies?.["_fbc"],
-        fbp: ctx.req.cookies?.["_fbp"],
+        clientUserAgent: ctx.req.headers['user-agent'] as string,
+        fbc: ctx.req.cookies?.['_fbc'],
+        fbp: ctx.req.cookies?.['_fbp'],
         eventSourceUrl: input.referrer,
         eventId: `offer_${lead?.insertId || Date.now()}`,
-      }).catch((err) => console.error("[CAPI] Offer lead error:", err));
+      }).catch((err) => console.error('[CAPI] Offer lead error:', err));
 
       // Invalidate offer leads caches after new submission
-      serverCache.invalidateByPrefix("paginated:offerLeads:");
-      serverCache.invalidate("list:offerLeads");
+      serverCache.invalidateByPrefix('paginated:offerLeads:');
+      serverCache.invalidate('list:offerLeads');
       serverCache.invalidate(CacheKeys.offerLeadStats());
 
       return { success: true, id: lead.insertId };
@@ -174,36 +192,32 @@ export const offerLeadsRouter = router({
 
   // List all offer leads (protected)
   list: protectedProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      "list:offerLeads",
-      CacheTTL.LIST,
-      async () => {
-        const db = await getDb();
-        if (!db) return [];
+    return serverCache.getOrCompute('list:offerLeads', CacheTTL.LIST, async () => {
+      const db = await getDb();
+      if (!db) return [];
 
-        const { offers } = await import("../../drizzle/schema");
-        
-        const results = await db
-          .select({
-            id: offerLeads.id,
-            offerId: offerLeads.offerId,
-            offerTitle: offers.title,
-            fullName: offerLeads.fullName,
-            phone: offerLeads.phone,
-            email: offerLeads.email,
-            notes: offerLeads.notes,
-            source: offerLeads.source,
-            status: offerLeads.status,
-            createdAt: offerLeads.createdAt,
-            updatedAt: offerLeads.updatedAt,
-          })
-          .from(offerLeads)
-          .leftJoin(offers, eq(offers.id, offerLeads.offerId))
-          .orderBy(desc(offerLeads.createdAt));
+      const { offers } = await import('../../drizzle/schema');
 
-        return results;
-      }
-    );
+      const results = await db
+        .select({
+          id: offerLeads.id,
+          offerId: offerLeads.offerId,
+          offerTitle: offers.title,
+          fullName: offerLeads.fullName,
+          phone: offerLeads.phone,
+          email: offerLeads.email,
+          notes: offerLeads.notes,
+          source: offerLeads.source,
+          status: offerLeads.status,
+          createdAt: offerLeads.createdAt,
+          updatedAt: offerLeads.updatedAt,
+        })
+        .from(offerLeads)
+        .leftJoin(offers, eq(offers.id, offerLeads.offerId))
+        .orderBy(desc(offerLeads.createdAt));
+
+      return results;
+    });
   }),
 
   // List offer leads with pagination (protected)
@@ -216,56 +230,58 @@ export const offerLeadsRouter = router({
         offerIds: z.array(z.number()).optional(),
         sources: z.array(z.string()).optional(),
         statuses: z.array(z.string()).optional(),
-        dateFilter: z.enum(["all", "today", "week", "month"]).optional(),
+        dateFilter: z.enum(['all', 'today', 'week', 'month']).optional(),
         dateFrom: z.string().optional(),
         dateTo: z.string().optional(),
       })
     )
     .query(async ({ input }) => {
       const cacheKey = CacheKeys.offerLeadsPaginated(input);
-      return serverCache.getOrCompute(
-        cacheKey,
-        CacheTTL.PAGINATED,
-        async () => {
-          const { getOfferLeadsPaginated } = await import('../database/db');
-          return getOfferLeadsPaginated(
-            input.page,
-            input.limit,
-            input.searchTerm,
-            input.offerIds,
-            input.sources,
-            input.statuses,
-            input.dateFilter,
-            input.dateFrom,
-            input.dateTo
-          );
-        }
-      );
+      return serverCache.getOrCompute(cacheKey, CacheTTL.PAGINATED, async () => {
+        const { getOfferLeadsPaginated } = await import('../database/db');
+        return getOfferLeadsPaginated(
+          input.page,
+          input.limit,
+          input.searchTerm,
+          input.offerIds,
+          input.sources,
+          input.statuses,
+          input.dateFilter,
+          input.dateFrom,
+          input.dateTo
+        );
+      });
     }),
 
   // Get stats for offer leads (protected)
   stats: protectedProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      CacheKeys.offerLeadStats(),
-      CacheTTL.STATS,
-      async () => {
-        const db = await getDb();
-        if (!db) return { total: 0, pending: 0, contacted: 0, no_answer: 0, confirmed: 0, attended: 0, completed: 0, cancelled: 0 };
-
-        const all = await db.select().from(offerLeads);
-
+    return serverCache.getOrCompute(CacheKeys.offerLeadStats(), CacheTTL.STATS, async () => {
+      const db = await getDb();
+      if (!db)
         return {
-          total: all.length,
-          pending: all.filter((l) => l.status === "pending").length,
-          contacted: all.filter((l) => l.status === "contacted").length,
-          no_answer: all.filter((l) => l.status === "no_answer").length,
-          confirmed: all.filter((l) => l.status === "confirmed").length,
-          attended: all.filter((l) => l.status === "attended").length,
-          completed: all.filter((l) => l.status === "completed").length,
-          cancelled: all.filter((l) => l.status === "cancelled").length,
+          total: 0,
+          pending: 0,
+          contacted: 0,
+          no_answer: 0,
+          confirmed: 0,
+          attended: 0,
+          completed: 0,
+          cancelled: 0,
         };
-      }
-    );
+
+      const all = await db.select().from(offerLeads);
+
+      return {
+        total: all.length,
+        pending: all.filter((l) => l.status === 'pending').length,
+        contacted: all.filter((l) => l.status === 'contacted').length,
+        no_answer: all.filter((l) => l.status === 'no_answer').length,
+        confirmed: all.filter((l) => l.status === 'confirmed').length,
+        attended: all.filter((l) => l.status === 'attended').length,
+        completed: all.filter((l) => l.status === 'completed').length,
+        cancelled: all.filter((l) => l.status === 'cancelled').length,
+      };
+    });
   }),
 
   // Update offer lead status (protected)
@@ -273,16 +289,29 @@ export const offerLeadsRouter = router({
     .input(
       z.object({
         id: z.number(),
-        status: z.enum(["pending", "contacted", "no_answer", "confirmed", "attended", "completed", "cancelled"]),
+        status: z.enum([
+          'pending',
+          'contacted',
+          'no_answer',
+          'confirmed',
+          'attended',
+          'completed',
+          'cancelled',
+        ]),
         notes: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       // Get old status for audit log
-      const [old] = await db.select({ status: offerLeads.status }).from(offerLeads).where(eq(offerLeads.id, input.id)).limit(1);
+      const [old] = await db
+        .select({ status: offerLeads.status })
+        .from(offerLeads)
+        .where(eq(offerLeads.id, input.id))
+        .limit(1);
       const oldStatus = old?.status || '';
 
       // حفظ وقت كل حالة
@@ -319,56 +348,70 @@ export const offerLeadsRouter = router({
       // ── Send CAPI funnel event for status change (fire-and-forget) ────────────
       {
         const [leadRow] = await db
-          .select({ fullName: offerLeads.fullName, phone: offerLeads.phone, email: offerLeads.email })
+          .select({
+            fullName: offerLeads.fullName,
+            phone: offerLeads.phone,
+            email: offerLeads.email,
+          })
           .from(offerLeads)
           .where(eq(offerLeads.id, input.id))
           .limit(1);
         if (leadRow?.phone) {
           sendStatusChangeEvent({
             status: input.status,
-            fullName: leadRow.fullName || "",
+            fullName: leadRow.fullName || '',
             phone: leadRow.phone,
             email: leadRow.email || undefined,
-            serviceType: "offer",
+            serviceType: 'offer',
             bookingId: input.id,
-          }).catch((err) => console.error("[CAPI] Offer status change error:", err));
+          }).catch((err) => console.error('[CAPI] Offer status change error:', err));
         }
       }
 
       // ── WhatsApp Dispatcher: إرسال رسالة تلقائية بناءً على الحالة ──
       {
-        const [lead] = await db.select().from(offerLeads).where(eq(offerLeads.id, input.id)).limit(1);
+        const [lead] = await db
+          .select()
+          .from(offerLeads)
+          .where(eq(offerLeads.id, input.id))
+          .limit(1);
         if (lead?.phone) {
-          const { offers } = await import("../../drizzle/schema");
-          const [offer] = await db.select().from(offers).where(eq(offers.id, lead.offerId)).limit(1);
+          const { offers } = await import('../../drizzle/schema');
+          const [offer] = await db
+            .select()
+            .from(offers)
+            .where(eq(offers.id, lead.offerId))
+            .limit(1);
           const triggerMap: Record<string, string> = {
-            "confirmed": "on_confirmed",
-            "attended": "on_arrived",
-            "completed": "on_completed",
-            "cancelled": "on_cancelled",
+            confirmed: 'on_confirmed',
+            attended: 'on_arrived',
+            completed: 'on_completed',
+            cancelled: 'on_cancelled',
           };
           const triggerEvent = triggerMap[input.status];
           if (triggerEvent) {
             dispatchWhatsAppMessage({
-              entityType: "offer_lead",
+              entityType: 'offer_lead',
               triggerEvent: triggerEvent as any,
               phone: lead.phone,
               recipientName: lead.fullName || undefined,
               variables: {
-                name: lead.fullName || "العميل",
-                service: offer?.title || "العرض",
+                name: lead.fullName || 'العميل',
+                service: offer?.title || 'العرض',
               },
               entityId: input.id,
               sentBy: ctx.user?.id,
-            }).catch(err => console.error("[WhatsApp Dispatcher] Offer status trigger error:", err));
+            }).catch((err) =>
+              console.error('[WhatsApp Dispatcher] Offer status trigger error:', err)
+            );
           }
           // ملاحظة: تم إزالة sendOfferPatientArrivalWelcome القديمة - dispatchWhatsAppMessage يتولى الإرسال عبر إعدادات الرسائل
         }
       }
 
       // Invalidate offer leads caches after status update
-      serverCache.invalidateByPrefix("paginated:offerLeads:");
-      serverCache.invalidate("list:offerLeads");
+      serverCache.invalidateByPrefix('paginated:offerLeads:');
+      serverCache.invalidate('list:offerLeads');
       serverCache.invalidate(CacheKeys.offerLeadStats());
 
       return { success: true };
@@ -379,13 +422,22 @@ export const offerLeadsRouter = router({
     .input(
       z.object({
         ids: z.array(z.number()),
-        status: z.enum(["pending", "contacted", "no_answer", "confirmed", "attended", "completed", "cancelled"]),
+        status: z.enum([
+          'pending',
+          'contacted',
+          'no_answer',
+          'confirmed',
+          'attended',
+          'completed',
+          'cancelled',
+        ]),
         notes: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       // حفظ وقت كل حالة
       const now = new Date();
@@ -423,43 +475,45 @@ export const offerLeadsRouter = router({
       }
 
       // Invalidate offer leads caches after bulk update
-      serverCache.invalidateByPrefix("paginated:offerLeads:");
-      serverCache.invalidate("list:offerLeads");
+      serverCache.invalidateByPrefix('paginated:offerLeads:');
+      serverCache.invalidate('list:offerLeads');
       serverCache.invalidate(CacheKeys.offerLeadStats());
 
       return { success: true, count: input.ids.length };
     }),
 
   // Delete offer lead (protected)
-  delete: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    const db = await getDb();
+    if (!db)
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
-      await db.delete(offerLeads).where(eq(offerLeads.id, input.id));
+    await db.delete(offerLeads).where(eq(offerLeads.id, input.id));
 
-      // Invalidate offer leads caches after deletion
-      serverCache.invalidateByPrefix("paginated:offerLeads:");
-      serverCache.invalidate("list:offerLeads");
-      serverCache.invalidate(CacheKeys.offerLeadStats());
+    // Invalidate offer leads caches after deletion
+    serverCache.invalidateByPrefix('paginated:offerLeads:');
+    serverCache.invalidate('list:offerLeads');
+    serverCache.invalidate(CacheKeys.offerLeadStats());
 
-      return { success: true };
-    }),
+    return { success: true };
+  }),
 
   // Generate and save receipt number
   generateReceiptNumber: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!db)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       // Check if receipt number already exists
       const [lead] = await db.select().from(offerLeads).where(eq(offerLeads.id, input.id)).limit(1);
       if (!lead) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "الحجز غير موجود" });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'الحجز غير موجود' });
       }
 
       // If already has receipt number, return it
@@ -469,15 +523,15 @@ export const offerLeadsRouter = router({
 
       // Generate new receipt number
       const year = new Date().getFullYear();
-      
+
       // Get the count of offer leads with receipt numbers this year
-      const { sql } = await import("drizzle-orm");
+      const { sql } = await import('drizzle-orm');
       const [result] = await db.execute(sql`
         SELECT COUNT(*) as count 
         FROM offerLeads 
         WHERE receiptNumber LIKE CONCAT('SGH-', ${year}, '-%')
       `);
-      
+
       const count = (result as any).count || 0;
       const sequenceNumber = count + 1;
       const paddedNumber = String(sequenceNumber).padStart(3, '0');

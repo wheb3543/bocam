@@ -2,13 +2,13 @@
  * Seed script for message_settings table
  * يضيف/يحدث جميع الرسائل التلقائية مع triggerEvent وentityType
  */
-import mysql from "mysql2/promise";
-import dotenv from "dotenv";
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
 dotenv.config();
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
-  console.error("❌ DATABASE_URL not set");
+  console.error('❌ DATABASE_URL not set');
   process.exit(1);
 }
 
@@ -20,13 +20,13 @@ const messages = [
   // مواعيد الأطباء (appointment)
   // ══════════════════════════════════════════════════════════════════════════════
   {
-    messageType: "appointment_confirmation",
-    displayName: "تأكيد الحجز التفاعلي - مواعيد الأطباء",
-    category: "patient_journey",
-    entityType: "appointment",
-    triggerEvent: "on_create",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "date", "time", "doctor", "service"]),
+    messageType: 'appointment_confirmation',
+    displayName: 'تأكيد الحجز التفاعلي - مواعيد الأطباء',
+    category: 'patient_journey',
+    entityType: 'appointment',
+    triggerEvent: 'on_create',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'date', 'time', 'doctor', 'service']),
     messageContent: `مرحباً {name}،
 
 شكراً لحجزك موعد في المستشفى السعودي الألماني - صنعاء.
@@ -37,16 +37,16 @@ const messages = [
 🏥 الخدمة: {service}
 
 يرجى تأكيد حجزك:`,
-    description: "تُرسل تلقائياً عند إنشاء حجز جديد لموعد طبيب",
+    description: 'تُرسل تلقائياً عند إنشاء حجز جديد لموعد طبيب',
   },
   {
-    messageType: "appointment_confirmed",
-    displayName: "تأكيد نجاح الحجز - مواعيد الأطباء",
-    category: "patient_journey",
-    entityType: "appointment",
-    triggerEvent: "on_confirmed",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "date", "time", "doctor", "service"]),
+    messageType: 'appointment_confirmed',
+    displayName: 'تأكيد نجاح الحجز - مواعيد الأطباء',
+    category: 'patient_journey',
+    entityType: 'appointment',
+    triggerEvent: 'on_confirmed',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'date', 'time', 'doctor', 'service']),
     messageContent: `عزيزي {name}،
 
 ✅ تم تأكيد حجزك بنجاح في المستشفى السعودي الألماني - صنعاء.
@@ -57,16 +57,16 @@ const messages = [
 🏥 الخدمة: {service}
 
 نتطلع لرؤيتك. يرجى الحضور قبل 15 دقيقة من موعدك.`,
-    description: "تُرسل تلقائياً عند تحديث حالة الموعد إلى مؤكد",
+    description: 'تُرسل تلقائياً عند تحديث حالة الموعد إلى مؤكد',
   },
   {
-    messageType: "appointment_arrived",
-    displayName: "ترحيب عند الحضور - مواعيد الأطباء",
-    category: "patient_journey",
-    entityType: "appointment",
-    triggerEvent: "on_arrived",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "doctor", "service"]),
+    messageType: 'appointment_arrived',
+    displayName: 'ترحيب عند الحضور - مواعيد الأطباء',
+    category: 'patient_journey',
+    entityType: 'appointment',
+    triggerEvent: 'on_arrived',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'doctor', 'service']),
     messageContent: `أهلاً وسهلاً {name}! 👋
 
 يسعدنا استقبالك في المستشفى السعودي الألماني - صنعاء.
@@ -75,16 +75,16 @@ const messages = [
 🏥 الخدمة: {service}
 
 يرجى التوجه إلى مكتب الاستقبال. نتمنى لك الشفاء العاجل.`,
-    description: "تُرسل تلقائياً عند تحديث حالة الموعد إلى حضر",
+    description: 'تُرسل تلقائياً عند تحديث حالة الموعد إلى حضر',
   },
   {
-    messageType: "appointment_completed",
-    displayName: "طلب تقييم التجربة - مواعيد الأطباء",
-    category: "patient_journey",
-    entityType: "appointment",
-    triggerEvent: "on_completed",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "doctor", "service"]),
+    messageType: 'appointment_completed',
+    displayName: 'طلب تقييم التجربة - مواعيد الأطباء',
+    category: 'patient_journey',
+    entityType: 'appointment',
+    triggerEvent: 'on_completed',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'doctor', 'service']),
     messageContent: `عزيزي {name}،
 
 نأمل أن تكون زيارتك للمستشفى السعودي الألماني - صنعاء قد كانت مريحة ومفيدة.
@@ -94,16 +94,16 @@ const messages = [
 🏥 الخدمة: {service}
 
 شكراً لثقتك بنا. نتمنى لك دوام الصحة والعافية.`,
-    description: "تُرسل تلقائياً عند تحديث حالة الموعد إلى مكتمل",
+    description: 'تُرسل تلقائياً عند تحديث حالة الموعد إلى مكتمل',
   },
   {
-    messageType: "appointment_cancelled",
-    displayName: "إلغاء الحجز - مواعيد الأطباء",
-    category: "patient_journey",
-    entityType: "appointment",
-    triggerEvent: "on_cancelled",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "date", "time", "doctor"]),
+    messageType: 'appointment_cancelled',
+    displayName: 'إلغاء الحجز - مواعيد الأطباء',
+    category: 'patient_journey',
+    entityType: 'appointment',
+    triggerEvent: 'on_cancelled',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'date', 'time', 'doctor']),
     messageContent: `عزيزي {name}،
 
 نُعلمك بأنه تم إلغاء موعدك في المستشفى السعودي الألماني - صنعاء.
@@ -114,16 +114,16 @@ const messages = [
 
 يمكنك حجز موعد جديد عبر موقعنا أو الاتصال بنا على: 8000018
 نعتذر عن أي إزعاج.`,
-    description: "تُرسل تلقائياً عند تحديث حالة الموعد إلى ملغي",
+    description: 'تُرسل تلقائياً عند تحديث حالة الموعد إلى ملغي',
   },
   {
-    messageType: "appointment_reminder_24h",
-    displayName: "تذكير 24 ساعة - مواعيد الأطباء",
-    category: "patient_journey",
-    entityType: "appointment",
-    triggerEvent: "on_reminder_24h",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "date", "time", "doctor", "service"]),
+    messageType: 'appointment_reminder_24h',
+    displayName: 'تذكير 24 ساعة - مواعيد الأطباء',
+    category: 'patient_journey',
+    entityType: 'appointment',
+    triggerEvent: 'on_reminder_24h',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'date', 'time', 'doctor', 'service']),
     messageContent: `تذكير: عزيزي {name}،
 
 🔔 لديك موعد غداً في المستشفى السعودي الألماني - صنعاء.
@@ -134,16 +134,16 @@ const messages = [
 🏥 الخدمة: {service}
 
 يرجى الحضور قبل 15 دقيقة من موعدك.`,
-    description: "تُرسل تلقائياً قبل 24 ساعة من الموعد",
+    description: 'تُرسل تلقائياً قبل 24 ساعة من الموعد',
   },
   {
-    messageType: "appointment_reminder_1h",
-    displayName: "تذكير ساعة - مواعيد الأطباء",
-    category: "patient_journey",
-    entityType: "appointment",
-    triggerEvent: "on_reminder_1h",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "time", "doctor"]),
+    messageType: 'appointment_reminder_1h',
+    displayName: 'تذكير ساعة - مواعيد الأطباء',
+    category: 'patient_journey',
+    entityType: 'appointment',
+    triggerEvent: 'on_reminder_1h',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'time', 'doctor']),
     messageContent: `تذكير: عزيزي {name}،
 
 ⏰ موعدك بعد ساعة واحدة!
@@ -152,20 +152,20 @@ const messages = [
 👨‍⚕️ الطبيب: {doctor}
 
 يرجى التوجه الآن للمستشفى السعودي الألماني - صنعاء.`,
-    description: "تُرسل تلقائياً قبل ساعة من الموعد",
+    description: 'تُرسل تلقائياً قبل ساعة من الموعد',
   },
 
   // ══════════════════════════════════════════════════════════════════════════════
   // تسجيلات المخيمات (camp_registration)
   // ══════════════════════════════════════════════════════════════════════════════
   {
-    messageType: "camp_registration_confirmation",
-    displayName: "تأكيد التسجيل في المخيم التفاعلي",
-    category: "patient_journey",
-    entityType: "camp_registration",
-    triggerEvent: "on_create",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "campName", "date", "location"]),
+    messageType: 'camp_registration_confirmation',
+    displayName: 'تأكيد التسجيل في المخيم التفاعلي',
+    category: 'patient_journey',
+    entityType: 'camp_registration',
+    triggerEvent: 'on_create',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'campName', 'date', 'location']),
     messageContent: `مرحباً {name}،
 
 شكراً لتسجيلك في المخيم الطبي التفاعلي للمستشفى السعودي الألماني - صنعاء.
@@ -175,16 +175,16 @@ const messages = [
 📍 الموقع: {location}
 
 سيتم التواصل معك قريباً لتأكيد التسجيل.`,
-    description: "تُرسل تلقائياً عند التسجيل في مخيم جديد",
+    description: 'تُرسل تلقائياً عند التسجيل في مخيم جديد',
   },
   {
-    messageType: "camp_registration_confirmed",
-    displayName: "تأكيد نجاح التسجيل في المخيم",
-    category: "patient_journey",
-    entityType: "camp_registration",
-    triggerEvent: "on_confirmed",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "campName", "date", "location"]),
+    messageType: 'camp_registration_confirmed',
+    displayName: 'تأكيد نجاح التسجيل في المخيم',
+    category: 'patient_journey',
+    entityType: 'camp_registration',
+    triggerEvent: 'on_confirmed',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'campName', 'date', 'location']),
     messageContent: `عزيزي {name}،
 
 ✅ تم تأكيد تسجيلك في المخيم الطبي بنجاح!
@@ -194,31 +194,31 @@ const messages = [
 📍 الموقع: {location}
 
 يرجى الحضور في الوقت المحدد. نتطلع لرؤيتك!`,
-    description: "تُرسل تلقائياً عند تحديث حالة التسجيل إلى مؤكد",
+    description: 'تُرسل تلقائياً عند تحديث حالة التسجيل إلى مؤكد',
   },
   {
-    messageType: "camp_registration_arrived",
-    displayName: "ترحيب عند الحضور - المخيمات",
-    category: "patient_journey",
-    entityType: "camp_registration",
-    triggerEvent: "on_arrived",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "campName"]),
+    messageType: 'camp_registration_arrived',
+    displayName: 'ترحيب عند الحضور - المخيمات',
+    category: 'patient_journey',
+    entityType: 'camp_registration',
+    triggerEvent: 'on_arrived',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'campName']),
     messageContent: `أهلاً وسهلاً {name}! 👋
 
 يسعدنا استقبالك في مخيم {campName} للمستشفى السعودي الألماني - صنعاء.
 
 يرجى التوجه إلى نقطة التسجيل للحصول على بطاقتك. نتمنى لك تجربة مفيدة!`,
-    description: "تُرسل تلقائياً عند تحديث حالة التسجيل إلى حضر",
+    description: 'تُرسل تلقائياً عند تحديث حالة التسجيل إلى حضر',
   },
   {
-    messageType: "camp_registration_completed",
-    displayName: "طلب تقييم التجربة - المخيمات",
-    category: "patient_journey",
-    entityType: "camp_registration",
-    triggerEvent: "on_completed",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "campName"]),
+    messageType: 'camp_registration_completed',
+    displayName: 'طلب تقييم التجربة - المخيمات',
+    category: 'patient_journey',
+    entityType: 'camp_registration',
+    triggerEvent: 'on_completed',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'campName']),
     messageContent: `عزيزي {name}،
 
 نشكرك على مشاركتك في مخيم {campName} للمستشفى السعودي الألماني - صنعاء.
@@ -226,16 +226,16 @@ const messages = [
 ⭐ رأيك يهمنا! كيف كانت تجربتك في المخيم؟
 
 شكراً لثقتك بنا. نتمنى لك دوام الصحة والعافية.`,
-    description: "تُرسل تلقائياً عند تحديث حالة التسجيل إلى مكتمل",
+    description: 'تُرسل تلقائياً عند تحديث حالة التسجيل إلى مكتمل',
   },
   {
-    messageType: "camp_registration_cancelled",
-    displayName: "إلغاء التسجيل في المخيم",
-    category: "patient_journey",
-    entityType: "camp_registration",
-    triggerEvent: "on_cancelled",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "campName", "date"]),
+    messageType: 'camp_registration_cancelled',
+    displayName: 'إلغاء التسجيل في المخيم',
+    category: 'patient_journey',
+    entityType: 'camp_registration',
+    triggerEvent: 'on_cancelled',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'campName', 'date']),
     messageContent: `عزيزي {name}،
 
 نُعلمك بأنه تم إلغاء تسجيلك في مخيم {campName}.
@@ -244,20 +244,20 @@ const messages = [
 
 يمكنك التسجيل في مخيماتنا القادمة عبر موقعنا أو الاتصال بنا على: 8000018
 نعتذر عن أي إزعاج.`,
-    description: "تُرسل تلقائياً عند تحديث حالة التسجيل إلى ملغي",
+    description: 'تُرسل تلقائياً عند تحديث حالة التسجيل إلى ملغي',
   },
 
   // ══════════════════════════════════════════════════════════════════════════════
   // حجوزات العروض (offer_lead)
   // ══════════════════════════════════════════════════════════════════════════════
   {
-    messageType: "offer_lead_confirmation",
-    displayName: "تأكيد حجز العرض التفاعلي",
-    category: "patient_journey",
-    entityType: "offer_lead",
-    triggerEvent: "on_create",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "offerName", "price"]),
+    messageType: 'offer_lead_confirmation',
+    displayName: 'تأكيد حجز العرض التفاعلي',
+    category: 'patient_journey',
+    entityType: 'offer_lead',
+    triggerEvent: 'on_create',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'offerName', 'price']),
     messageContent: `مرحباً {name}،
 
 شكراً لحجزك عرض {offerName} في المستشفى السعودي الألماني - صنعاء.
@@ -265,16 +265,16 @@ const messages = [
 💰 السعر: {price}
 
 سيتم التواصل معك قريباً لتأكيد الحجز وتحديد الموعد المناسب.`,
-    description: "تُرسل تلقائياً عند حجز عرض جديد",
+    description: 'تُرسل تلقائياً عند حجز عرض جديد',
   },
   {
-    messageType: "offer_lead_confirmed",
-    displayName: "تأكيد نجاح حجز العرض",
-    category: "patient_journey",
-    entityType: "offer_lead",
-    triggerEvent: "on_confirmed",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "offerName", "price"]),
+    messageType: 'offer_lead_confirmed',
+    displayName: 'تأكيد نجاح حجز العرض',
+    category: 'patient_journey',
+    entityType: 'offer_lead',
+    triggerEvent: 'on_confirmed',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'offerName', 'price']),
     messageContent: `عزيزي {name}،
 
 ✅ تم تأكيد حجزك لعرض {offerName} بنجاح!
@@ -282,31 +282,31 @@ const messages = [
 💰 السعر: {price}
 
 سيتم التواصل معك لتحديد موعد الخدمة. نتطلع لخدمتك!`,
-    description: "تُرسل تلقائياً عند تحديث حالة الحجز إلى مؤكد",
+    description: 'تُرسل تلقائياً عند تحديث حالة الحجز إلى مؤكد',
   },
   {
-    messageType: "offer_lead_arrived",
-    displayName: "ترحيب عند الحضور - العروض",
-    category: "patient_journey",
-    entityType: "offer_lead",
-    triggerEvent: "on_arrived",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "offerName"]),
+    messageType: 'offer_lead_arrived',
+    displayName: 'ترحيب عند الحضور - العروض',
+    category: 'patient_journey',
+    entityType: 'offer_lead',
+    triggerEvent: 'on_arrived',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'offerName']),
     messageContent: `أهلاً وسهلاً {name}! 👋
 
 يسعدنا استقبالك للاستفادة من عرض {offerName} في المستشفى السعودي الألماني - صنعاء.
 
 يرجى التوجه إلى مكتب الاستقبال. نتمنى لك تجربة رائعة!`,
-    description: "تُرسل تلقائياً عند تحديث حالة الحجز إلى حضر",
+    description: 'تُرسل تلقائياً عند تحديث حالة الحجز إلى حضر',
   },
   {
-    messageType: "offer_lead_completed",
-    displayName: "طلب تقييم التجربة - العروض",
-    category: "patient_journey",
-    entityType: "offer_lead",
-    triggerEvent: "on_completed",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "offerName"]),
+    messageType: 'offer_lead_completed',
+    displayName: 'طلب تقييم التجربة - العروض',
+    category: 'patient_journey',
+    entityType: 'offer_lead',
+    triggerEvent: 'on_completed',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'offerName']),
     messageContent: `عزيزي {name}،
 
 نشكرك على استفادتك من عرض {offerName} في المستشفى السعودي الألماني - صنعاء.
@@ -314,23 +314,23 @@ const messages = [
 ⭐ رأيك يهمنا! كيف كانت تجربتك؟
 
 شكراً لثقتك بنا. نتمنى لك دوام الصحة والعافية.`,
-    description: "تُرسل تلقائياً عند تحديث حالة الحجز إلى مكتمل",
+    description: 'تُرسل تلقائياً عند تحديث حالة الحجز إلى مكتمل',
   },
   {
-    messageType: "offer_lead_cancelled",
-    displayName: "إلغاء حجز العرض",
-    category: "patient_journey",
-    entityType: "offer_lead",
-    triggerEvent: "on_cancelled",
-    deliveryChannel: "whatsapp_api",
-    availableVariables: JSON.stringify(["name", "offerName"]),
+    messageType: 'offer_lead_cancelled',
+    displayName: 'إلغاء حجز العرض',
+    category: 'patient_journey',
+    entityType: 'offer_lead',
+    triggerEvent: 'on_cancelled',
+    deliveryChannel: 'whatsapp_api',
+    availableVariables: JSON.stringify(['name', 'offerName']),
     messageContent: `عزيزي {name}،
 
 نُعلمك بأنه تم إلغاء حجزك لعرض {offerName}.
 
 يمكنك الاطلاع على عروضنا الأخرى عبر موقعنا أو الاتصال بنا على: 8000018
 نعتذر عن أي إزعاج.`,
-    description: "تُرسل تلقائياً عند تحديث حالة الحجز إلى ملغي",
+    description: 'تُرسل تلقائياً عند تحديث حالة الحجز إلى ملغي',
   },
 ];
 
@@ -344,7 +344,7 @@ for (const msg of messages) {
   try {
     // Check if exists
     const [existing] = await connection.execute(
-      "SELECT id FROM message_settings WHERE messageType = ?",
+      'SELECT id FROM message_settings WHERE messageType = ?',
       [msg.messageType]
     );
 

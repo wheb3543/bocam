@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Download, X, Info } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Download, X, Info } from 'lucide-react';
 
 interface UpdateStatus {
   lastCheck: number;
@@ -40,9 +40,13 @@ export function OptionalUpdateBanner({ onInstall, onDismiss }: OptionalUpdateBan
       const data = await response.json();
       if (data.success) {
         setStatus(data.data);
-        
+
         // Show banner if there's a non-mandatory pending update
-        if (data.data.pendingUpdate && !data.data.pendingUpdate.mandatory && !data.data.updateInProgress) {
+        if (
+          data.data.pendingUpdate &&
+          !data.data.pendingUpdate.mandatory &&
+          !data.data.updateInProgress
+        ) {
           setIsVisible(true);
         }
       }
@@ -58,7 +62,7 @@ export function OptionalUpdateBanner({ onInstall, onDismiss }: OptionalUpdateBan
         method: 'POST',
       });
       const data = await response.json();
-      
+
       if (data.success) {
         if (onInstall) onInstall();
         setIsVisible(false);
@@ -95,11 +99,13 @@ export function OptionalUpdateBanner({ onInstall, onDismiss }: OptionalUpdateBan
               </p>
               <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
                 {status.pendingUpdate.releaseNotes?.substring(0, 100)}
-                {status.pendingUpdate.releaseNotes && status.pendingUpdate.releaseNotes.length > 100 && '...'}
+                {status.pendingUpdate.releaseNotes &&
+                  status.pendingUpdate.releaseNotes.length > 100 &&
+                  '...'}
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button
               onClick={handleInstall}
@@ -119,7 +125,7 @@ export function OptionalUpdateBanner({ onInstall, onDismiss }: OptionalUpdateBan
                 </>
               )}
             </Button>
-            
+
             <Button
               onClick={handleDismiss}
               variant="ghost"

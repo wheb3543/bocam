@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
-type Direction = "up" | "down" | "left" | "right" | "none";
+type Direction = 'up' | 'down' | 'left' | 'right' | 'none';
 
 interface FadeInProps {
   children: ReactNode;
@@ -21,14 +21,14 @@ interface FadeInProps {
  */
 export default function FadeIn({
   children,
-  direction = "up",
+  direction = 'up',
   delay = 0,
   duration = 500,
   distance = 20,
   className,
   once = true,
   threshold = 0.1,
-  as: Component = "div",
+  as: Component = 'div',
 }: FadeInProps) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -59,18 +59,18 @@ export default function FadeIn({
   }, [once, threshold]);
 
   const getTransform = (): string => {
-    if (isVisible) return "translate3d(0, 0, 0)";
+    if (isVisible) return 'translate3d(0, 0, 0)';
     switch (direction) {
-      case "up":
+      case 'up':
         return `translate3d(0, ${distance}px, 0)`;
-      case "down":
+      case 'down':
         return `translate3d(0, -${distance}px, 0)`;
-      case "left":
+      case 'left':
         return `translate3d(${distance}px, 0, 0)`;
-      case "right":
+      case 'right':
         return `translate3d(-${distance}px, 0, 0)`;
-      case "none":
-        return "translate3d(0, 0, 0)";
+      case 'none':
+        return 'translate3d(0, 0, 0)';
     }
   };
 
@@ -84,7 +84,7 @@ export default function FadeIn({
         opacity: isVisible ? 1 : 0,
         transform: getTransform(),
         transition: `opacity ${duration}ms ease-out ${delay}ms, transform ${duration}ms ease-out ${delay}ms`,
-        willChange: "opacity, transform",
+        willChange: 'opacity, transform',
       }}
     >
       {children}
@@ -108,7 +108,7 @@ interface StaggeredListProps {
 export function StaggeredList({
   children,
   staggerDelay = 80,
-  direction = "up",
+  direction = 'up',
   duration = 400,
   distance = 15,
   className,

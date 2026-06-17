@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle, Download, RefreshCw } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { AlertCircle, CheckCircle, Download, RefreshCw } from 'lucide-react';
 
 interface UpdateStatus {
   lastCheck: number;

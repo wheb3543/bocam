@@ -23,7 +23,7 @@ response:
     - key: x-business-use-case-usage
       value: '{"102290129340398":[{"type":"whatsapp_business_management","call_count":1,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}'
     - key: Access-Control-Allow-Origin
-      value: "*"
+      value: '*'
     - key: facebook-api-version
       value: v17.0
     - key: Strict-Transport-Security
@@ -39,7 +39,7 @@ response:
     - key: x-fb-trace-id
       value: Es9NJJI/zlf
     - key: x-fb-rev
-      value: "1007848995"
+      value: '1007848995'
     - key: X-FB-Debug
       value: 9AMjB0CoJKzCX5kSQf4RODPU2InGnibVJeqo4go1GBn6JToViVnC1f8+dpozejxHbzXcaO1Mx1r/tW7GWNAKAg==
     - key: Date
@@ -49,7 +49,7 @@ response:
     - key: Connection
       value: keep-alive
     - key: Content-Length
-      value: "1062"
+      value: '1062'
   body:
     type: json
     content: |-

@@ -1,23 +1,37 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { useState, useMemo } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { trpc } from "@/lib/api/trpc";
-import { toast } from "sonner";
-import { 
-  Plus, 
-  Search, 
-  LayoutGrid, 
-  List, 
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState, useMemo } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { trpc } from '@/lib/api/trpc';
+import { toast } from 'sonner';
+import {
+  Plus,
+  Search,
+  LayoutGrid,
+  List,
   Calendar,
   Clock,
   User,
@@ -39,9 +53,14 @@ import {
   FileVideo,
   Clapperboard,
   RefreshCw,
-  GripVertical
-} from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+  GripVertical,
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // أنواع المهام - متوافقة مع schema قاعدة البيانات
 type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled';
@@ -76,12 +95,40 @@ const mediaCategories: { value: TaskCategory; label: string; icon: React.ReactNo
   { value: 'other', label: 'أخرى', icon: <Clapperboard className="w-4 h-4" /> },
 ];
 
-const statusConfig: Record<TaskStatus, { label: string; color: string; bgColor: string; icon: React.ReactNode }> = {
-  todo: { label: 'قيد الانتظار', color: 'text-muted-foreground', bgColor: 'bg-muted', icon: <Circle className="w-4 h-4" /> },
-  in_progress: { label: 'قيد التنفيذ', color: 'text-blue-600', bgColor: 'bg-blue-100', icon: <Timer className="w-4 h-4" /> },
-  review: { label: 'مراجعة', color: 'text-orange-600', bgColor: 'bg-orange-100', icon: <AlertCircle className="w-4 h-4" /> },
-  completed: { label: 'مكتمل', color: 'text-green-600', bgColor: 'bg-green-100', icon: <CheckCircle2 className="w-4 h-4" /> },
-  cancelled: { label: 'ملغي', color: 'text-red-600', bgColor: 'bg-red-100', icon: <AlertCircle className="w-4 h-4" /> },
+const statusConfig: Record<
+  TaskStatus,
+  { label: string; color: string; bgColor: string; icon: React.ReactNode }
+> = {
+  todo: {
+    label: 'قيد الانتظار',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted',
+    icon: <Circle className="w-4 h-4" />,
+  },
+  in_progress: {
+    label: 'قيد التنفيذ',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
+    icon: <Timer className="w-4 h-4" />,
+  },
+  review: {
+    label: 'مراجعة',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
+    icon: <AlertCircle className="w-4 h-4" />,
+  },
+  completed: {
+    label: 'مكتمل',
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
+    icon: <CheckCircle2 className="w-4 h-4" />,
+  },
+  cancelled: {
+    label: 'ملغي',
+    color: 'text-red-600',
+    bgColor: 'bg-red-100',
+    icon: <AlertCircle className="w-4 h-4" />,
+  },
 };
 
 const priorityConfig: Record<TaskPriority, { label: string; color: string; bgColor: string }> = {
@@ -92,7 +139,9 @@ const priorityConfig: Record<TaskPriority, { label: string; color: string; bgCol
 };
 
 const getCategoryInfo = (category: TaskCategory) => {
-  return mediaCategories.find(c => c.value === category) || mediaCategories[mediaCategories.length - 1];
+  return (
+    mediaCategories.find((c) => c.value === category) || mediaCategories[mediaCategories.length - 1]
+  );
 };
 
 export default function MediaTeamPage() {
@@ -126,7 +175,11 @@ export default function MediaTeamPage() {
   });
 
   // جلب المهام - فلترة حسب tags = 'media' لعرض مهام فريق الإعلام فقط
-  const { data: tasksData, isLoading: tasksLoading, refetch: refetchTasks } = trpc.tasks.list.useQuery({
+  const {
+    data: tasksData,
+    isLoading: tasksLoading,
+    refetch: refetchTasks,
+  } = trpc.tasks.list.useQuery({
     status: statusFilter !== 'all' ? statusFilter : undefined,
     priority: priorityFilter !== 'all' ? priorityFilter : undefined,
     category: categoryFilter !== 'all' ? categoryFilter : undefined,
@@ -193,7 +246,7 @@ export default function MediaTeamPage() {
     const allTasks = tasksData || [];
     return allTasks.filter((t: any) => t.tags === 'media');
   }, [tasksData]);
-  
+
   const users = usersData || [];
   const campaigns = campaignsData || [];
 
@@ -205,7 +258,9 @@ export default function MediaTeamPage() {
       inProgress: tasks.filter((t: any) => t.status === 'in_progress').length,
       review: tasks.filter((t: any) => t.status === 'review').length,
       completed: tasks.filter((t: any) => t.status === 'completed').length,
-      overdue: tasks.filter((t: any) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed').length,
+      overdue: tasks.filter(
+        (t: any) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed'
+      ).length,
     };
   }, [tasks]);
 
@@ -241,7 +296,11 @@ export default function MediaTeamPage() {
       toast.error('يجب أن يكون عنوان المهمة 3 أحرف على الأقل');
       return;
     }
-    if (formData.description && formData.description.trim().length > 0 && formData.description.trim().length < 3) {
+    if (
+      formData.description &&
+      formData.description.trim().length > 0 &&
+      formData.description.trim().length < 3
+    ) {
       toast.error('يجب أن يكون وصف المهمة 3 أحرف على الأقل أو فارغاً');
       return;
     }
@@ -268,7 +327,11 @@ export default function MediaTeamPage() {
       toast.error('يجب أن يكون عنوان المهمة 3 أحرف على الأقل');
       return;
     }
-    if (formData.description && formData.description.trim().length > 0 && formData.description.trim().length < 3) {
+    if (
+      formData.description &&
+      formData.description.trim().length > 0 &&
+      formData.description.trim().length < 3
+    ) {
       toast.error('يجب أن يكون وصف المهمة 3 أحرف على الأقل أو فارغاً');
       return;
     }
@@ -296,7 +359,11 @@ export default function MediaTeamPage() {
       category: task.category,
       assignedToId: task.assignedTo?.toString() || 'none',
       campaignId: task.campaignId?.toString() || 'none',
-      dueDate: task.dueDate ? (typeof task.dueDate === 'string' ? task.dueDate.split('T')[0] : new Date(task.dueDate).toISOString().split('T')[0]) : '',
+      dueDate: task.dueDate
+        ? typeof task.dueDate === 'string'
+          ? task.dueDate.split('T')[0]
+          : new Date(task.dueDate).toISOString().split('T')[0]
+        : '',
     });
     setIsEditDialogOpen(true);
   };
@@ -314,10 +381,11 @@ export default function MediaTeamPage() {
   // Task Card Component
   const TaskCard = ({ task }: { task: Task }) => {
     const categoryInfo = getCategoryInfo(task.category);
-    const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+    const isOverdue =
+      task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
     return (
-      <Card 
+      <Card
         className={`cursor-pointer hover:shadow-md transition-shadow ${isOverdue ? 'border-red-300 bg-red-50' : ''}`}
         draggable
         onDragStart={(e) => {
@@ -329,7 +397,9 @@ export default function MediaTeamPage() {
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
               <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
-              <Badge className={`${priorityConfig[task.priority].bgColor} ${priorityConfig[task.priority].color} text-xs`}>
+              <Badge
+                className={`${priorityConfig[task.priority].bgColor} ${priorityConfig[task.priority].color} text-xs`}
+              >
                 {priorityConfig[task.priority].label}
               </Badge>
             </div>
@@ -344,7 +414,7 @@ export default function MediaTeamPage() {
                   <Edit className="ml-2 h-4 w-4" />
                   تعديل
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleDeleteTask(task.id)}
                   className="text-red-600"
                 >
@@ -356,7 +426,7 @@ export default function MediaTeamPage() {
           </div>
 
           <h4 className="font-medium text-sm mb-2 line-clamp-2">{task.title}</h4>
-          
+
           {task.description && (
             <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
           )}
@@ -395,7 +465,7 @@ export default function MediaTeamPage() {
   // Kanban Column Component
   const KanbanColumn = ({ status, tasks }: { status: TaskStatus; tasks: Task[] }) => {
     const config = statusConfig[status];
-    
+
     return (
       <div className="flex-shrink-0 w-[280px] sm:w-[300px]">
         <div className={`rounded-t-lg p-3 ${config.bgColor}`}>
@@ -415,9 +485,7 @@ export default function MediaTeamPage() {
               <TaskCard key={task.id} task={task} />
             ))}
             {tasks.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground text-sm">
-                لا توجد مهام
-              </div>
+              <div className="text-center py-8 text-muted-foreground text-sm">لا توجد مهام</div>
             )}
           </div>
         </ScrollArea>
@@ -496,7 +564,7 @@ export default function MediaTeamPage() {
               <SelectValue placeholder="اختر التصنيف" />
             </SelectTrigger>
             <SelectContent>
-              {mediaCategories.map(cat => (
+              {mediaCategories.map((cat) => (
                 <SelectItem key={cat.value} value={cat.value}>
                   <span className="flex items-center gap-2">
                     {cat.icon}
@@ -563,9 +631,7 @@ export default function MediaTeamPage() {
   );
 
   return (
-    <DashboardLayout
-      pageTitle="فريق وحدة الإعلام"
-      pageDescription="إدارة مهام الإنتاج الإعلامي">
+    <DashboardLayout pageTitle="فريق وحدة الإعلام" pageDescription="إدارة مهام الإنتاج الإعلامي">
       <div className="container py-4 md:py-6 lg:py-8" dir="rtl">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 mb-4 md:mb-6">
@@ -578,7 +644,12 @@ export default function MediaTeamPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => refetchTasks()} className="h-9 w-9">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetchTasks()}
+              className="h-9 w-9"
+            >
               <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -592,9 +663,7 @@ export default function MediaTeamPage() {
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>إنشاء مهمة جديدة</DialogTitle>
-                  <DialogDescription>
-                    أضف مهمة جديدة لفريق وحدة الإعلام
-                  </DialogDescription>
+                  <DialogDescription>أضف مهمة جديدة لفريق وحدة الإعلام</DialogDescription>
                 </DialogHeader>
                 <TaskForm />
                 <DialogFooter>
@@ -614,37 +683,49 @@ export default function MediaTeamPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-4 md:mb-6">
           <Card>
             <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">{stats.total}</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
+                {stats.total}
+              </div>
               <div className="text-xs sm:text-sm text-muted-foreground">إجمالي المهام</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-muted-foreground">{stats.pending}</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-muted-foreground">
+                {stats.pending}
+              </div>
               <div className="text-xs sm:text-sm text-muted-foreground">قيد الانتظار</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600">{stats.inProgress}</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600">
+                {stats.inProgress}
+              </div>
               <div className="text-xs sm:text-sm text-muted-foreground">قيد التنفيذ</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-orange-600">{stats.review}</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-orange-600">
+                {stats.review}
+              </div>
               <div className="text-xs sm:text-sm text-muted-foreground">مراجعة</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">{stats.completed}</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">
+                {stats.completed}
+              </div>
               <div className="text-xs sm:text-sm text-muted-foreground">مكتمل</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-red-600">{stats.overdue}</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-red-600">
+                {stats.overdue}
+              </div>
               <div className="text-xs sm:text-sm text-muted-foreground">متأخر</div>
             </CardContent>
           </Card>
@@ -692,7 +773,7 @@ export default function MediaTeamPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">جميع التصنيفات</SelectItem>
-                {mediaCategories.map(cat => (
+                {mediaCategories.map((cat) => (
                   <SelectItem key={cat.value} value={cat.value}>
                     <span className="flex items-center gap-2">
                       {cat.icon}
@@ -728,7 +809,7 @@ export default function MediaTeamPage() {
           </div>
         ) : viewMode === 'kanban' ? (
           <div className="flex gap-4 overflow-x-auto pb-4">
-            {(['todo', 'in_progress', 'review', 'completed'] as const).map(status => (
+            {(['todo', 'in_progress', 'review', 'completed'] as const).map((status) => (
               <div
                 key={status}
                 onDragOver={(e) => e.preventDefault()}
@@ -764,13 +845,21 @@ export default function MediaTeamPage() {
                   <tbody>
                     {tasks.map((task: any) => {
                       const categoryInfo = getCategoryInfo(task.category as TaskCategory);
-                      const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+                      const isOverdue =
+                        task.dueDate &&
+                        new Date(task.dueDate) < new Date() &&
+                        task.status !== 'completed';
                       return (
-                        <tr key={task.id} className={`border-b hover:bg-muted/30 ${isOverdue ? 'bg-red-50' : ''}`}>
+                        <tr
+                          key={task.id}
+                          className={`border-b hover:bg-muted/30 ${isOverdue ? 'bg-red-50' : ''}`}
+                        >
                           <td className="p-4">
                             <div className="font-medium">{task.title}</div>
                             {task.description && (
-                              <div className="text-sm text-muted-foreground line-clamp-1">{task.description}</div>
+                              <div className="text-sm text-muted-foreground line-clamp-1">
+                                {task.description}
+                              </div>
                             )}
                           </td>
                           <td className="p-4">
@@ -780,31 +869,44 @@ export default function MediaTeamPage() {
                             </span>
                           </td>
                           <td className="p-4">
-                            <Badge className={`${statusConfig[task.status as TaskStatus].bgColor} ${statusConfig[task.status as TaskStatus].color}`}>
+                            <Badge
+                              className={`${statusConfig[task.status as TaskStatus].bgColor} ${statusConfig[task.status as TaskStatus].color}`}
+                            >
                               {statusConfig[task.status as TaskStatus].label}
                             </Badge>
                           </td>
                           <td className="p-4">
-                            <Badge className={`${priorityConfig[task.priority as TaskPriority].bgColor} ${priorityConfig[task.priority as TaskPriority].color}`}>
+                            <Badge
+                              className={`${priorityConfig[task.priority as TaskPriority].bgColor} ${priorityConfig[task.priority as TaskPriority].color}`}
+                            >
                               {priorityConfig[task.priority as TaskPriority].label}
                             </Badge>
                           </td>
-                          <td className="p-4">
-                            {task.assignedUser?.name || '-'}
-                          </td>
+                          <td className="p-4">{task.assignedUser?.name || '-'}</td>
                           <td className="p-4">
                             {task.dueDate ? (
                               <span className={isOverdue ? 'text-red-600' : ''}>
                                 {formatDate(task.dueDate)}
                               </span>
-                            ) : '-'}
+                            ) : (
+                              '-'
+                            )}
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => openEditDialog(task)}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openEditDialog(task)}
+                              >
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleDeleteTask(task.id)} className="text-red-600">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteTask(task.id)}
+                                className="text-red-600"
+                              >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -831,9 +933,7 @@ export default function MediaTeamPage() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>تعديل المهمة</DialogTitle>
-              <DialogDescription>
-                تعديل بيانات المهمة
-              </DialogDescription>
+              <DialogDescription>تعديل بيانات المهمة</DialogDescription>
             </DialogHeader>
             <TaskForm />
             <DialogFooter>

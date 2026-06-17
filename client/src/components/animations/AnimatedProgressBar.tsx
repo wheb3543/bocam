@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface AnimatedProgressBarProps {
   value: number; // 0-100
@@ -9,7 +9,7 @@ interface AnimatedProgressBarProps {
   delay?: number; // ms
   duration?: number; // ms
   showLabel?: boolean;
-  labelPosition?: "inside" | "outside";
+  labelPosition?: 'inside' | 'outside';
 }
 
 /**
@@ -19,11 +19,11 @@ export default function AnimatedProgressBar({
   value,
   className,
   barClassName,
-  height = "h-2",
+  height = 'h-2',
   delay = 200,
   duration = 800,
   showLabel = false,
-  labelPosition = "outside",
+  labelPosition = 'outside',
 }: AnimatedProgressBarProps) {
   const [width, setWidth] = useState(0);
 
@@ -36,24 +36,24 @@ export default function AnimatedProgressBar({
   }, [value, delay]);
 
   return (
-    <div className={cn("w-full", className)}>
-      {showLabel && labelPosition === "outside" && (
+    <div className={cn('w-full', className)}>
+      {showLabel && labelPosition === 'outside' && (
         <div className="flex justify-between items-center mb-1">
           <span className="text-xs text-muted-foreground">{Math.round(width)}%</span>
         </div>
       )}
-      <div className={cn("w-full bg-muted rounded-full overflow-hidden", height)}>
+      <div className={cn('w-full bg-muted rounded-full overflow-hidden', height)}>
         <div
           className={cn(
-            "h-full rounded-full transition-all ease-out relative",
-            barClassName || "bg-primary",
+            'h-full rounded-full transition-all ease-out relative',
+            barClassName || 'bg-primary'
           )}
           style={{
             width: `${width}%`,
             transitionDuration: `${duration}ms`,
           }}
         >
-          {showLabel && labelPosition === "inside" && width > 15 && (
+          {showLabel && labelPosition === 'inside' && width > 15 && (
             <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">
               {Math.round(width)}%
             </span>

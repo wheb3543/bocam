@@ -1,29 +1,54 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { Users, Loader2, Phone, MessageSquare } from "lucide-react";
-import EmptyState from "@/components/EmptyState";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
-import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
-import ActionButtons from "@/components/ActionButtons";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Users, Loader2, Phone, MessageSquare } from 'lucide-react';
+import EmptyState from '@/components/EmptyState';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
+import ActionButtons from '@/components/ActionButtons';
 
 const statusLabels: Record<string, string> = {
-  new: "جديد",
-  contacted: "تم التواصل",
-  booked: "تم الحجز",
-  not_interested: "غير مهتم",
-  no_answer: "لم يرد",
+  new: 'جديد',
+  contacted: 'تم التواصل',
+  booked: 'تم الحجز',
+  not_interested: 'غير مهتم',
+  no_answer: 'لم يرد',
 };
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string; border: string }> = {
-  new: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", border: "border-blue-200" },
-  contacted: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", border: "border-amber-200" },
-  booked: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
-  not_interested: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", border: "border-red-200" },
-  no_answer: { bg: "bg-muted/50 dark:bg-gray-800", text: "text-foreground dark:text-gray-300", dot: "bg-gray-500", border: "border-border dark:border-gray-700" },
+  new: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500', border: 'border-blue-200' },
+  contacted: {
+    bg: 'bg-amber-50',
+    text: 'text-amber-700',
+    dot: 'bg-amber-500',
+    border: 'border-amber-200',
+  },
+  booked: {
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-700',
+    dot: 'bg-emerald-500',
+    border: 'border-emerald-200',
+  },
+  not_interested: {
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    dot: 'bg-red-500',
+    border: 'border-red-200',
+  },
+  no_answer: {
+    bg: 'bg-muted/50 dark:bg-gray-800',
+    text: 'text-foreground dark:text-gray-300',
+    dot: 'bg-gray-500',
+    border: 'border-border dark:border-gray-700',
+  },
 };
 
 interface LeadTableDesktopProps {
@@ -72,8 +97,16 @@ export default function LeadTableDesktop({
                   <EmptyState
                     icon={Users}
                     title="لا توجد تسجيلات"
-                    description={hasActiveFilters ? "لا توجد نتائج مطابقة للفلاتر المحددة." : "لم يتم تسجيل أي عملاء بعد."}
-                    action={hasActiveFilters ? { label: "مسح الفلاتر", onClick: onClearFilters } : undefined}
+                    description={
+                      hasActiveFilters
+                        ? 'لا توجد نتائج مطابقة للفلاتر المحددة.'
+                        : 'لم يتم تسجيل أي عملاء بعد.'
+                    }
+                    action={
+                      hasActiveFilters
+                        ? { label: 'مسح الفلاتر', onClick: onClearFilters }
+                        : undefined
+                    }
                     compact
                   />
                 </TableCell>
@@ -90,16 +123,17 @@ export default function LeadTableDesktop({
                     <TableCell>
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-xs">{formatPhoneDisplay(lead.phone)}</span>
-                        <ActionButtons
-                          phoneNumber={lead.phone}
-                          size="icon"
-                          variant="ghost"
-                        />
+                        <ActionButtons phoneNumber={lead.phone} size="icon" variant="ghost" />
                       </div>
                     </TableCell>
                     <TableCell>
                       {lead.email ? (
-                        <a href={`mailto:${lead.email}`} className="text-xs text-primary hover:underline">{lead.email}</a>
+                        <a
+                          href={`mailto:${lead.email}`}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          {lead.email}
+                        </a>
                       ) : (
                         <span className="text-muted-foreground text-xs">-</span>
                       )}
@@ -110,7 +144,9 @@ export default function LeadTableDesktop({
                           variant="outline"
                           className="text-[10px] font-medium"
                           style={{
-                            backgroundColor: SOURCE_COLORS[lead.source] ? `${SOURCE_COLORS[lead.source]}15` : undefined,
+                            backgroundColor: SOURCE_COLORS[lead.source]
+                              ? `${SOURCE_COLORS[lead.source]}15`
+                              : undefined,
                             borderColor: SOURCE_COLORS[lead.source] || undefined,
                             color: SOURCE_COLORS[lead.source] || undefined,
                           }}

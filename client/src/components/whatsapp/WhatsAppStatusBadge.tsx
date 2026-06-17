@@ -5,22 +5,18 @@
  * يستخدم SSE للتحديث الفوري بدلاً من polling
  */
 
-import { useState, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { MessageCircle, RefreshCw, CheckCheck, Clock, XCircle, Send } from "lucide-react";
-import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { ar } from "date-fns/locale";
-import { useWhatsAppSSE } from "@/hooks/integrations/useWhatsAppSSE";
+import { useState, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { MessageCircle, RefreshCw, CheckCheck, Clock, XCircle, Send } from 'lucide-react';
+import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { useWhatsAppSSE } from '@/hooks/integrations/useWhatsAppSSE';
 
-type EntityType = "appointment" | "camp_registration" | "offer_lead";
+type EntityType = 'appointment' | 'camp_registration' | 'offer_lead';
 
 interface WhatsAppStatusBadgeProps {
   entityType: EntityType;
@@ -30,33 +26,33 @@ interface WhatsAppStatusBadgeProps {
   /** إظهار زر إعادة الإرسال */
   showResend?: boolean;
   /** حجم الشارة */
-  size?: "sm" | "default";
+  size?: 'sm' | 'default';
 }
 
 const statusConfig = {
   sent: {
-    label: "أُرسل",
-    color: "bg-blue-100 text-blue-700 border-blue-200",
+    label: 'أُرسل',
+    color: 'bg-blue-100 text-blue-700 border-blue-200',
     icon: Send,
   },
   delivered: {
-    label: "تم التسليم",
-    color: "bg-green-100 text-green-700 border-green-200",
+    label: 'تم التسليم',
+    color: 'bg-green-100 text-green-700 border-green-200',
     icon: CheckCheck,
   },
   read: {
-    label: "تمت القراءة",
-    color: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    label: 'تمت القراءة',
+    color: 'bg-emerald-100 text-emerald-700 border-emerald-200',
     icon: CheckCheck,
   },
   pending: {
-    label: "في الانتظار",
-    color: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    label: 'في الانتظار',
+    color: 'bg-yellow-100 text-yellow-700 border-yellow-200',
     icon: Clock,
   },
   failed: {
-    label: "فشل الإرسال",
-    color: "bg-red-100 text-red-700 border-red-200",
+    label: 'فشل الإرسال',
+    color: 'bg-red-100 text-red-700 border-red-200',
     icon: XCircle,
   },
 };
@@ -75,7 +71,7 @@ export function WhatsAppStatusBadge({
   entityId,
   phoneNumber,
   showResend = true,
-  size = "sm",
+  size = 'sm',
 }: WhatsAppStatusBadgeProps) {
   const [isResending, setIsResending] = useState(false);
   // حالة محلية للتحديث الفوري عبر SSE
@@ -95,11 +91,11 @@ export function WhatsAppStatusBadge({
   const handleMessageStatusUpdate = useCallback(
     (event: { status: string; errorCode?: number; errorTitle?: string }) => {
       // نحدّث فقط إذا كانت الحالة الجديدة أعلى رتبة من الحالية
-      const currentStatus = liveStatus || data?.status || "pending";
+      const currentStatus = liveStatus || data?.status || 'pending';
       const currentRank = statusRank[currentStatus] ?? 0;
       const newRank = statusRank[event.status] ?? 0;
 
-      if (event.status === "failed" || newRank > currentRank) {
+      if (event.status === 'failed' || newRank > currentRank) {
         setLiveStatus(event.status);
         // تحديث الـ cache في الخلفية
         utils.whatsapp.getEntityWhatsAppStatus.invalidate({ entityType, entityId });
@@ -115,8 +111,8 @@ export function WhatsAppStatusBadge({
   const resendMutation = trpc.whatsapp.resendNotification.useMutation({
     onSuccess: (result) => {
       if (result.success) {
-        toast.success("✅ تم إعادة إرسال رسالة WhatsApp بنجاح");
-        setLiveStatus("sent");
+        toast.success('✅ تم إعادة إرسال رسالة WhatsApp بنجاح');
+        setLiveStatus('sent');
         utils.whatsapp.getEntityWhatsAppStatus.invalidate({ entityType, entityId });
       } else {
         toast.error(`❌ فشل الإرسال: ${result.error}`);
@@ -157,9 +153,9 @@ export function WhatsAppStatusBadge({
           <TooltipTrigger asChild>
             <Badge
               variant="outline"
-              className={`flex items-center gap-1 cursor-default border ${config.color} ${size === "sm" ? "text-xs px-1.5 py-0.5" : "text-sm px-2 py-1"} ${isLive ? "ring-1 ring-offset-1 ring-current" : ""}`}
+              className={`flex items-center gap-1 cursor-default border ${config.color} ${size === 'sm' ? 'text-xs px-1.5 py-0.5' : 'text-sm px-2 py-1'} ${isLive ? 'ring-1 ring-offset-1 ring-current' : ''}`}
             >
-              <Icon className={size === "sm" ? "w-3 h-3" : "w-3.5 h-3.5"} />
+              <Icon className={size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
               <span>WhatsApp: {config.label}</span>
               {isLive && (
                 <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse ml-0.5" />
@@ -169,17 +165,17 @@ export function WhatsAppStatusBadge({
           <TooltipContent side="top" className="text-xs">
             {data.sentAt
               ? `أُرسل ${formatDistanceToNow(new Date(data.sentAt), { addSuffix: true, locale: ar })}`
-              : "تم الإرسال"}
+              : 'تم الإرسال'}
             {data.count > 1 && ` · ${data.count} رسائل`}
-            {isLive && " · تحديث مباشر ⚡"}
+            {isLive && ' · تحديث مباشر ⚡'}
           </TooltipContent>
         </Tooltip>
       ) : (
         <Badge
           variant="outline"
-          className={`flex items-center gap-1 border border-gray-200 text-gray-500 bg-gray-50 ${size === "sm" ? "text-xs px-1.5 py-0.5" : "text-sm px-2 py-1"}`}
+          className={`flex items-center gap-1 border border-gray-200 text-gray-500 bg-gray-50 ${size === 'sm' ? 'text-xs px-1.5 py-0.5' : 'text-sm px-2 py-1'}`}
         >
-          <MessageCircle className={size === "sm" ? "w-3 h-3" : "w-3.5 h-3.5"} />
+          <MessageCircle className={size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
           <span>لم يُرسل WhatsApp</span>
         </Badge>
       )}
@@ -202,7 +198,7 @@ export function WhatsAppStatusBadge({
             </Button>
           </TooltipTrigger>
           <TooltipContent side="top" className="text-xs">
-            {data?.hasSent ? "إعادة إرسال WhatsApp" : "إرسال WhatsApp"}
+            {data?.hasSent ? 'إعادة إرسال WhatsApp' : 'إرسال WhatsApp'}
           </TooltipContent>
         </Tooltip>
       )}

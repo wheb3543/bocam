@@ -1,13 +1,13 @@
-import { useRoute } from "wouter";
-import { trpc } from "@/lib/api/trpc";
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, FileText, FlaskConical, ScanLine, ClipboardList } from "lucide-react";
+import { useRoute } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, FileText, FlaskConical, ScanLine, ClipboardList } from 'lucide-react';
 
 export default function PatientResultDetailsPage() {
   const { formatDate } = useFormatDate();
-  const [, params] = useRoute("/patient-portal/results/:id");
+  const [, params] = useRoute('/patient-portal/results/:id');
   const resultId = Number(params?.id);
   const { data: results, isLoading } = trpc.patientPortal.myResults.useQuery();
   const result = results?.find((item: any) => item.id === resultId);
@@ -32,9 +32,9 @@ export default function PatientResultDetailsPage() {
     <Card className="rounded-2xl shadow-sm">
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          {result.resultType === "lab" && <FlaskConical className="h-4 w-4 text-blue-500" />}
-          {result.resultType === "radiology" && <ScanLine className="h-4 w-4 text-purple-500" />}
-          {result.resultType === "report" && <ClipboardList className="h-4 w-4 text-amber-500" />}
+          {result.resultType === 'lab' && <FlaskConical className="h-4 w-4 text-blue-500" />}
+          {result.resultType === 'radiology' && <ScanLine className="h-4 w-4 text-purple-500" />}
+          {result.resultType === 'report' && <ClipboardList className="h-4 w-4 text-amber-500" />}
           {result.title}
         </CardTitle>
       </CardHeader>
@@ -60,7 +60,12 @@ export default function PatientResultDetailsPage() {
           </div>
         )}
         {result.fileUrl && (
-          <a href={result.fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-green-600">
+          <a
+            href={result.fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center text-green-600"
+          >
             <FileText className="h-4 w-4 ml-1" />
             فتح الملف المرفق
           </a>

@@ -1,6 +1,12 @@
 import { toast } from 'sonner';
 import { trpcClient } from '../api/trpc';
-import { APP_LOGO, COMPANY_PHONE, COMPANY_EMAIL, COMPANY_ARABIC_NAME, getCompanySlogan } from "@/const";
+import {
+  APP_LOGO,
+  COMPANY_PHONE,
+  COMPANY_EMAIL,
+  COMPANY_ARABIC_NAME,
+  getCompanySlogan,
+} from '@/const';
 
 /**
  * معلومات التصدير (Metadata)
@@ -57,18 +63,18 @@ async function exportToExcel(options: ExportOptions): Promise<void> {
 
   // بناء العنوان
   let titleParts: string[] = [`تسجيلات ${metadata.tableName}`];
-  
+
   if (metadata.dateRange) {
     titleParts.push(`خلال الفترة من ${metadata.dateRange}`);
   }
-  
+
   if (metadata.filters && Object.keys(metadata.filters).length > 0) {
     const filtersText = Object.entries(metadata.filters)
       .map(([key, value]) => `${key}: ${value}`)
       .join(' - ');
     titleParts.push(filtersText);
   }
-  
+
   wsData.push([titleParts.join(' - ')]);
   wsData.push([]);
 
@@ -106,10 +112,13 @@ function exportToCSV(options: ExportOptions): void {
 
   // إضافة البيانات
   data.forEach((row) => {
-    csvContent += columns.map((col) => {
-      const value = row[col.key] || '';
-      return `"${value.toString().replace(/"/g, '""')}"`;
-    }).join(',') + '\n';
+    csvContent +=
+      columns
+        .map((col) => {
+          const value = row[col.key] || '';
+          return `"${value.toString().replace(/"/g, '""')}"`;
+        })
+        .join(',') + '\n';
   });
 
   // تنزيل الملف
@@ -136,9 +145,7 @@ async function exportToPDF(options: ExportOptions): Promise<void> {
 
   try {
     const filters: Record<string, string> | undefined = metadata.filters
-      ? Object.fromEntries(
-          Object.entries(metadata.filters).map(([k, v]) => [k, String(v)])
-        )
+      ? Object.fromEntries(Object.entries(metadata.filters).map(([k, v]) => [k, String(v)]))
       : undefined;
 
     const client = trpcClient;
@@ -289,12 +296,16 @@ export function printTable(options: ExportOptions): void {
       </div>
       <table>
         <thead>
-          <tr>${columns.map(col => `<th>${col.label}</th>`).join('')}</tr>
+          <tr>${columns.map((col) => `<th>${col.label}</th>`).join('')}</tr>
         </thead>
         <tbody>
-          ${data.map(row => `
-            <tr>${columns.map(col => `<td>${row[col.key] || ''}</td>`).join('')}</tr>
-          `).join('')}
+          ${data
+            .map(
+              (row) => `
+            <tr>${columns.map((col) => `<td>${row[col.key] || ''}</td>`).join('')}</tr>
+          `
+            )
+            .join('')}
         </tbody>
       </table>
       <div class="page-footer">

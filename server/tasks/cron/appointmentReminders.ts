@@ -9,12 +9,12 @@
  * تعمل كل 30 دقيقة للتحقق من المواعيد القادمة
  */
 
-import { getDb } from "../../database/db";
-import { appointments, whatsappNotifications } from "../../../drizzle/schema";
-import { and, between, eq, isNull, sql } from "drizzle-orm";
-import { sendAppointmentReminder } from "../../services/whatsappAppointments";
+import { getDb } from '../../database/db';
+import { appointments, whatsappNotifications } from '../../../drizzle/schema';
+import { and, between, eq, isNull, sql } from 'drizzle-orm';
+import { sendAppointmentReminder } from '../../services/whatsappAppointments';
 
-const LOG_PREFIX = "[AppointmentReminders]";
+const LOG_PREFIX = '[AppointmentReminders]';
 
 /**
  * جلب المواعيد التي تحتاج إلى تذكير خلال نافذة زمنية محددة
@@ -22,7 +22,7 @@ const LOG_PREFIX = "[AppointmentReminders]";
 async function getAppointmentsNeedingReminder(
   windowStart: Date,
   windowEnd: Date,
-  notifType: "reminder_24h" | "reminder_1h"
+  notifType: 'reminder_24h' | 'reminder_1h'
 ) {
   const db = await getDb();
   if (!db) {
@@ -52,7 +52,7 @@ async function getAppointmentsNeedingReminder(
       .from(whatsappNotifications)
       .where(
         and(
-          eq(whatsappNotifications.entityType, "appointment"),
+          eq(whatsappNotifications.entityType, 'appointment'),
           eq(whatsappNotifications.notificationType, notifType),
           sql`${whatsappNotifications.entityId} IN (${sql.join(
             appointmentIds.map((id) => sql`${id}`),
@@ -75,7 +75,7 @@ async function getAppointmentsNeedingReminder(
 async function sendReminderWithRetry(
   appt: any,
   hoursUntil: number,
-  notifType: "reminder_24h" | "reminder_1h",
+  notifType: 'reminder_24h' | 'reminder_1h',
   maxRetries: number = 3
 ): Promise<{ success: boolean; error?: string }> {
   const baseDelay = 1000; // 1 second base delay
@@ -86,8 +86,8 @@ async function sendReminderWithRetry(
       const result = await sendAppointmentReminder({
         appointmentId: appt.id,
         phone: appt.phone,
-        patientName: appt.fullName || "المريض",
-        doctorName: "",
+        patientName: appt.fullName || 'المريض',
+        doctorName: '',
         appointmentTime:
           appt.appointmentDate instanceof Date
             ? appt.appointmentDate
@@ -105,7 +105,7 @@ async function sendReminderWithRetry(
         console.warn(
           `${LOG_PREFIX} ${notifType} reminder failed for appointment #${appt.id} (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${delay}ms...`
         );
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
         return { success: false, error: result.error };
       }
@@ -116,14 +116,14 @@ async function sendReminderWithRetry(
           `${LOG_PREFIX} Error sending ${notifType} reminder for appointment #${appt.id} (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${delay}ms...`,
           err
         );
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
-        return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+        return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
       }
     }
   }
 
-  return { success: false, error: "Max retries exceeded" };
+  return { success: false, error: 'Max retries exceeded' };
 }
 
 /**
@@ -135,11 +135,7 @@ async function send24HourReminders() {
   const windowStart = new Date(now.getTime() + 23.5 * 60 * 60 * 1000);
   const windowEnd = new Date(now.getTime() + 24.5 * 60 * 60 * 1000);
 
-  const toRemind = await getAppointmentsNeedingReminder(
-    windowStart,
-    windowEnd,
-    "reminder_24h"
-  );
+  const toRemind = await getAppointmentsNeedingReminder(windowStart, windowEnd, 'reminder_24h');
 
   if (toRemind.length === 0) {
     console.log(`${LOG_PREFIX} No 24h reminders needed`);
@@ -157,7 +153,7 @@ async function send24HourReminders() {
       continue;
     }
 
-    const result = await sendReminderWithRetry(appt, 24, "reminder_24h");
+    const result = await sendReminderWithRetry(appt, 24, 'reminder_24h');
 
     if (result.success) {
       sent++;
@@ -182,11 +178,7 @@ async function send1HourReminders() {
   const windowStart = new Date(now.getTime() + 45 * 60 * 1000);
   const windowEnd = new Date(now.getTime() + 75 * 60 * 1000);
 
-  const toRemind = await getAppointmentsNeedingReminder(
-    windowStart,
-    windowEnd,
-    "reminder_1h"
-  );
+  const toRemind = await getAppointmentsNeedingReminder(windowStart, windowEnd, 'reminder_1h');
 
   if (toRemind.length === 0) {
     console.log(`${LOG_PREFIX} No 1h reminders needed`);
@@ -204,7 +196,7 @@ async function send1HourReminders() {
       continue;
     }
 
-    const result = await sendReminderWithRetry(appt, 1, "reminder_1h");
+    const result = await sendReminderWithRetry(appt, 1, 'reminder_1h');
 
     if (result.success) {
       sent++;
@@ -227,10 +219,7 @@ export async function runAppointmentReminderJobs() {
   console.log(`${LOG_PREFIX} Running appointment reminder jobs...`);
 
   try {
-    const [result24h, result1h] = await Promise.all([
-      send24HourReminders(),
-      send1HourReminders(),
-    ]);
+    const [result24h, result1h] = await Promise.all([send24HourReminders(), send1HourReminders()]);
 
     console.log(
       `${LOG_PREFIX} Done. 24h: ${result24h.sent} sent, ${result24h.failed} failed. 1h: ${result1h.sent} sent, ${result1h.failed} failed.`
@@ -253,9 +242,7 @@ export async function runAppointmentReminderJobs() {
 export function initAppointmentRemindersScheduler() {
   const INTERVAL_MS = 30 * 60 * 1000; // 30 دقيقة
 
-  console.log(
-    `${LOG_PREFIX} Initializing appointment reminders scheduler (every 30 minutes)...`
-  );
+  console.log(`${LOG_PREFIX} Initializing appointment reminders scheduler (every 30 minutes)...`);
 
   // تشغيل فوري عند بدء التشغيل (بعد 10 ثوانٍ للسماح للسيرفر بالاستقرار)
   setTimeout(() => {

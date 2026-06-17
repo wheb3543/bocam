@@ -1,21 +1,35 @@
-import { useState } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
-  FileText, Search, RefreshCw, CheckCircle, XCircle, Clock,
-  AlertCircle, Download, Filter, Calendar, User, Phone,
-} from "lucide-react";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { toast } from "sonner";
+  FileText,
+  Search,
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+  Clock,
+  AlertCircle,
+  Download,
+  Filter,
+  Calendar,
+  User,
+  Phone,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 interface LabOrder {
   ORDER_ID: number;
@@ -31,12 +45,12 @@ interface LabOrder {
   processed_at?: string;
 }
 
-type StatusFilter = "all" | "pending" | "processing" | "sent" | "failed";
+type StatusFilter = 'all' | 'pending' | 'processing' | 'sent' | 'failed';
 
 export default function WhatsAppLabResultsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
 
   // Mock data - في الإنتاج، سيتم استبدال هذا بـ tRPC query
   const [labOrders, setLabOrders] = useState<LabOrder[]>([]);
@@ -53,37 +67,54 @@ export default function WhatsAppLabResultsPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "pending":
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300"><Clock className="h-3 w-3 mr-1" /> قيد الانتظار</Badge>;
-      case "processing":
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300"><RefreshCw className="h-3 w-3 mr-1 animate-spin" /> جاري المعالجة</Badge>;
-      case "sent":
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300"><CheckCircle className="h-3 w-3 mr-1" /> تم الإرسال</Badge>;
-      case "failed":
-        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300"><XCircle className="h-3 w-3 mr-1" /> فشل</Badge>;
+      case 'pending':
+        return (
+          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+            <Clock className="h-3 w-3 mr-1" /> قيد الانتظار
+          </Badge>
+        );
+      case 'processing':
+        return (
+          <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+            <RefreshCw className="h-3 w-3 mr-1 animate-spin" /> جاري المعالجة
+          </Badge>
+        );
+      case 'sent':
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+            <CheckCircle className="h-3 w-3 mr-1" /> تم الإرسال
+          </Badge>
+        );
+      case 'failed':
+        return (
+          <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
+            <XCircle className="h-3 w-3 mr-1" /> فشل
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const filteredOrders = labOrders?.filter((order: LabOrder) => {
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        order.PATIENT_NAME.toLowerCase().includes(searchLower) ||
-        order.PHONE_NO.includes(searchQuery) ||
-        order.ORDER_ID.toString().includes(searchQuery)
-      );
-    }
-    return true;
-  }) || [];
+  const filteredOrders =
+    labOrders?.filter((order: LabOrder) => {
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          order.PATIENT_NAME.toLowerCase().includes(searchLower) ||
+          order.PHONE_NO.includes(searchQuery) ||
+          order.ORDER_ID.toString().includes(searchQuery)
+        );
+      }
+      return true;
+    }) || [];
 
   const stats = {
     total: filteredOrders.length,
-    pending: filteredOrders.filter((o: LabOrder) => o.status === "pending").length,
-    processing: filteredOrders.filter((o: LabOrder) => o.status === "processing").length,
-    sent: filteredOrders.filter((o: LabOrder) => o.status === "sent").length,
-    failed: filteredOrders.filter((o: LabOrder) => o.status === "failed").length,
+    pending: filteredOrders.filter((o: LabOrder) => o.status === 'pending').length,
+    processing: filteredOrders.filter((o: LabOrder) => o.status === 'processing').length,
+    sent: filteredOrders.filter((o: LabOrder) => o.status === 'sent').length,
+    failed: filteredOrders.filter((o: LabOrder) => o.status === 'failed').length,
   };
 
   return (
@@ -92,8 +123,12 @@ export default function WhatsAppLabResultsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">إدارة نتائج المختبر</h1>
-            <p className="text-sm text-muted-foreground">متابعة وإرسال نتائج فحوصات المختبر عبر واتساب</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
+              إدارة نتائج المختبر
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              متابعة وإرسال نتائج فحوصات المختبر عبر واتساب
+            </p>
           </div>
           <Button onClick={() => refetch()} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -104,11 +139,41 @@ export default function WhatsAppLabResultsPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4">
           {[
-            { label: "الكل", value: stats.total, icon: FileText, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/20" },
-            { label: "قيد الانتظار", value: stats.pending, icon: Clock, color: "text-yellow-600", bg: "bg-yellow-100 dark:bg-yellow-900/20" },
-            { label: "جاري المعالجة", value: stats.processing, icon: RefreshCw, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/20" },
-            { label: "تم الإرسال", value: stats.sent, icon: CheckCircle, color: "text-green-600", bg: "bg-green-100 dark:bg-green-900/20" },
-            { label: "فشل", value: stats.failed, icon: XCircle, color: "text-red-600", bg: "bg-red-100 dark:bg-red-900/20" },
+            {
+              label: 'الكل',
+              value: stats.total,
+              icon: FileText,
+              color: 'text-blue-600',
+              bg: 'bg-blue-100 dark:bg-blue-900/20',
+            },
+            {
+              label: 'قيد الانتظار',
+              value: stats.pending,
+              icon: Clock,
+              color: 'text-yellow-600',
+              bg: 'bg-yellow-100 dark:bg-yellow-900/20',
+            },
+            {
+              label: 'جاري المعالجة',
+              value: stats.processing,
+              icon: RefreshCw,
+              color: 'text-blue-600',
+              bg: 'bg-blue-100 dark:bg-blue-900/20',
+            },
+            {
+              label: 'تم الإرسال',
+              value: stats.sent,
+              icon: CheckCircle,
+              color: 'text-green-600',
+              bg: 'bg-green-100 dark:bg-green-900/20',
+            },
+            {
+              label: 'فشل',
+              value: stats.failed,
+              icon: XCircle,
+              color: 'text-red-600',
+              bg: 'bg-red-100 dark:bg-red-900/20',
+            },
           ].map(({ label, value, icon: Icon, color, bg }) => (
             <Card key={label} className={`${bg} border-0`}>
               <CardContent className="p-3 sm:p-4">
@@ -133,7 +198,10 @@ export default function WhatsAppLabResultsPage() {
                   className="pr-10"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+              <Select
+                value={statusFilter}
+                onValueChange={(v) => setStatusFilter(v as StatusFilter)}
+              >
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="الحالة" />
@@ -146,7 +214,10 @@ export default function WhatsAppLabResultsPage() {
                   <SelectItem value="failed">فشل</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={dateFilter} onValueChange={(v) => setDateFilter(v as "all" | "today" | "week" | "month")}>
+              <Select
+                value={dateFilter}
+                onValueChange={(v) => setDateFilter(v as 'all' | 'today' | 'week' | 'month')}
+              >
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <Calendar className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="التاريخ" />
@@ -167,7 +238,7 @@ export default function WhatsAppLabResultsPage() {
           <CardHeader>
             <CardTitle>طلبات المختبر</CardTitle>
             <CardDescription>
-              {isLoading ? "جاري التحميل..." : `عرض ${filteredOrders.length} طلب`}
+              {isLoading ? 'جاري التحميل...' : `عرض ${filteredOrders.length} طلب`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -189,10 +260,15 @@ export default function WhatsAppLabResultsPage() {
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                           <div className="flex-1 space-y-2">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <Badge variant="outline" className="font-mono">#{order.ORDER_ID}</Badge>
+                              <Badge variant="outline" className="font-mono">
+                                #{order.ORDER_ID}
+                              </Badge>
                               {getStatusBadge(order.status)}
                               {order.retry_count > 0 && (
-                                <Badge variant="outline" className="text-orange-600 border-orange-300">
+                                <Badge
+                                  variant="outline"
+                                  className="text-orange-600 border-orange-300"
+                                >
                                   إعادة المحاولة: {order.retry_count}
                                 </Badge>
                               )}
@@ -222,28 +298,36 @@ export default function WhatsAppLabResultsPage() {
                               </div>
                             )}
                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span>تاريخ النتيجة: {format(new Date(order.RESULT_DATE), "dd/MM/yyyy", { locale: ar })}</span>
+                              <span>
+                                تاريخ النتيجة:{' '}
+                                {format(new Date(order.RESULT_DATE), 'dd/MM/yyyy', { locale: ar })}
+                              </span>
                               {order.processed_at && (
-                                <span>تم المعالجة: {format(new Date(order.processed_at), "dd/MM/yyyy HH:mm", { locale: ar })}</span>
+                                <span>
+                                  تم المعالجة:{' '}
+                                  {format(new Date(order.processed_at), 'dd/MM/yyyy HH:mm', {
+                                    locale: ar,
+                                  })}
+                                </span>
                               )}
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            {order.status === "failed" && (
+                            {order.status === 'failed' && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => toast.info("إعادة المحاولة - ميزة قادمة")}
+                                onClick={() => toast.info('إعادة المحاولة - ميزة قادمة')}
                               >
                                 <RefreshCw className="h-4 w-4 mr-2" />
                                 إعادة المحاولة
                               </Button>
                             )}
-                            {order.status === "sent" && order.whatsapp_msg_id && (
+                            {order.status === 'sent' && order.whatsapp_msg_id && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => toast.info("عرض الرسالة - ميزة قادمة")}
+                                onClick={() => toast.info('عرض الرسالة - ميزة قادمة')}
                               >
                                 <Download className="h-4 w-4 mr-2" />
                                 عرض الرسالة

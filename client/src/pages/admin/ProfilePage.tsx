@@ -1,42 +1,42 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { trpc } from "@/lib/api/trpc";
-import { toast } from "sonner";
-import { Loader2, User, Mail, Shield, Calendar } from "lucide-react";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState } from 'react';
+import { useAuth } from '@/_core/hooks/useAuth';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { trpc } from '@/lib/api/trpc';
+import { toast } from 'sonner';
+import { Loader2, User, Mail, Shield, Calendar } from 'lucide-react';
 
 export default function ProfilePage() {
   const { formatDate, formatDateTime } = useFormatDate();
   const { user, loading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
 
   const updateProfileMutation = trpc.auth.updateProfile.useMutation({
     onSuccess: (updatedUser: any) => {
-      toast.success("تم تحديث الملف الشخصي بنجاح");
+      toast.success('تم تحديث الملف الشخصي بنجاح');
       setIsEditing(false);
       // Update local state
-      setName(updatedUser.name || "");
-      setEmail(updatedUser.email || "");
+      setName(updatedUser.name || '');
+      setEmail(updatedUser.email || '');
       // Reload page to update auth context
       window.location.reload();
     },
     onError: (error: any) => {
-      toast.error(error.message || "فشل تحديث الملف الشخصي");
+      toast.error(error.message || 'فشل تحديث الملف الشخصي');
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
-      toast.error("الاسم مطلوب");
+      toast.error('الاسم مطلوب');
       return;
     }
 
@@ -47,8 +47,8 @@ export default function ProfilePage() {
   };
 
   const handleCancel = () => {
-    setName(user?.name || "");
-    setEmail(user?.email || "");
+    setName(user?.name || '');
+    setEmail(user?.email || '');
     setIsEditing(false);
   };
 
@@ -101,11 +101,7 @@ export default function ProfilePage() {
                 <CardTitle>المعلومات الشخصية</CardTitle>
                 <CardDescription>معلومات حسابك وبياناتك الشخصية</CardDescription>
               </div>
-              {!isEditing && (
-                <Button onClick={() => setIsEditing(true)}>
-                  تعديل المعلومات
-                </Button>
-              )}
+              {!isEditing && <Button onClick={() => setIsEditing(true)}>تعديل المعلومات</Button>}
             </div>
           </CardHeader>
           <CardContent>
@@ -189,7 +185,9 @@ export default function ProfilePage() {
                   <Shield className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1">
                     <p className="text-sm text-muted-foreground">الدور</p>
-                    <p className="font-medium">{user.role === 'admin' ? 'مدير النظام' : 'مستخدم'}</p>
+                    <p className="font-medium">
+                      {user.role === 'admin' ? 'مدير النظام' : 'مستخدم'}
+                    </p>
                   </div>
                 </div>
 

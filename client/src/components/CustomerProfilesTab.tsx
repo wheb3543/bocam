@@ -1,56 +1,54 @@
 /**
  * CustomerProfilesTab - تبويب ملفات العملاء الموحد
  * يعرض قائمة بجميع العملاء الفريدين مع إمكانية عرض تفاصيل كل عميل
- * 
+ *
  * يستخدم:
  * - useTableFeatures: لإدارة الأعمدة (إخفاء/إظهار، ترتيب، تجميد، قوالب، أحجام، فرز)
  * - useFilterUtils: لإدارة الفلاتر (بحث، حالة، مصدر، تاريخ)
  * - useExportUtils: للتصدير والطباعة
  */
 
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { useState, useMemo, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState, useMemo, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
+import { Table, TableBody, TableRow, TableHeader } from '@/components/ui/table';
+import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
+import TableSkeleton from '@/components/table/TableSkeleton';
+import ActionButtons from '@/components/ActionButtons';
+import EmptyState from '@/components/EmptyState';
+import SavedFilters from '@/components/SavedFilters';
 import {
-  Table,
-  TableBody,
-  TableRow,
-  TableHeader,
-} from "@/components/ui/table";
-import Pagination, { type PageSizeValue } from "@/components/table/Pagination";
-import TableSkeleton from "@/components/table/TableSkeleton";
-import ActionButtons from "@/components/ActionButtons";
-import EmptyState from "@/components/EmptyState";
-import SavedFilters from "@/components/SavedFilters";
-import { ColumnVisibility, getColumnWidth, type ColumnConfig } from "@/components/table/ColumnVisibility";
-import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from "@/components/table/ResizableTable";
-import { useTableFeatures } from "@/hooks/table/useTableFeatures";
-import { useFilterUtils } from "@/hooks/table/useFilterUtils";
-import { useExportUtils } from "@/hooks/export/useExportUtils";
+  ColumnVisibility,
+  getColumnWidth,
+  type ColumnConfig,
+} from '@/components/table/ColumnVisibility';
+import {
+  ResizableTable,
+  ResizableHeaderCell,
+  FrozenTableCell,
+} from '@/components/table/ResizableTable';
+import { useTableFeatures } from '@/hooks/table/useTableFeatures';
+import { useFilterUtils } from '@/hooks/table/useFilterUtils';
+import { useExportUtils } from '@/hooks/export/useExportUtils';
 import {
   Users,
   Search,
@@ -65,63 +63,71 @@ import {
   Download,
   Printer,
   RotateCcw,
-} from "lucide-react";
-import { SOURCE_LABELS, SOURCE_COLORS } from "@shared/sources";
-import { usePhoneFormat } from "@/hooks/form/usePhoneFormat";
+} from 'lucide-react';
+import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 const statusLabels: Record<string, string> = {
-  new: "جديد",
-  contacted: "تم التواصل",
-  booked: "تم الحجز",
-  not_interested: "غير مهتم",
-  no_answer: "لم يرد",
-  pending: "قيد الانتظار",
-  confirmed: "مؤكد",
-  completed: "مكتمل",
-  cancelled: "ملغي",
-  attended: "حضر",
+  new: 'جديد',
+  contacted: 'تم التواصل',
+  booked: 'تم الحجز',
+  not_interested: 'غير مهتم',
+  no_answer: 'لم يرد',
+  pending: 'قيد الانتظار',
+  confirmed: 'مؤكد',
+  completed: 'مكتمل',
+  cancelled: 'ملغي',
+  attended: 'حضر',
 };
 
 const statusColors: Record<string, string> = {
-  new: "bg-blue-100 text-blue-800",
-  contacted: "bg-yellow-100 text-yellow-800",
-  booked: "bg-green-100 text-green-800",
-  not_interested: "bg-red-100 text-red-800",
-  no_answer: "bg-muted text-foreground",
-  pending: "bg-orange-100 text-orange-800",
-  confirmed: "bg-emerald-100 text-emerald-800",
-  completed: "bg-teal-100 text-teal-800",
-  cancelled: "bg-red-100 text-red-800",
-  attended: "bg-green-100 text-green-800",
+  new: 'bg-blue-100 text-blue-800',
+  contacted: 'bg-yellow-100 text-yellow-800',
+  booked: 'bg-green-100 text-green-800',
+  not_interested: 'bg-red-100 text-red-800',
+  no_answer: 'bg-muted text-foreground',
+  pending: 'bg-orange-100 text-orange-800',
+  confirmed: 'bg-emerald-100 text-emerald-800',
+  completed: 'bg-teal-100 text-teal-800',
+  cancelled: 'bg-red-100 text-red-800',
+  attended: 'bg-green-100 text-green-800',
 };
 
 function formatDate(date: string | Date | null | undefined) {
-  if (!date) return "-";
+  if (!date) return '-';
   try {
     return formatDate(date);
   } catch {
-    return "-";
+    return '-';
   }
 }
 
 function formatDateTime(date: string | Date | null | undefined) {
-  if (!date) return "-";
+  if (!date) return '-';
   try {
-    return new Date(date).toLocaleString("ar-EG", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    return new Date(date).toLocaleString('ar-EG', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   } catch {
-    return "-";
+    return '-';
   }
 }
 
 // === تعريف أعمدة جدول العملاء ===
 const customerColumns: ColumnConfig[] = [
-  { key: 'index', label: '#', defaultVisible: true, sortable: false, defaultWidth: 50, minWidth: 40, maxWidth: 80 },
+  {
+    key: 'index',
+    label: '#',
+    defaultVisible: true,
+    sortable: false,
+    defaultWidth: 50,
+    minWidth: 40,
+    maxWidth: 80,
+  },
   { key: 'name', label: 'الاسم', defaultVisible: true, sortType: 'string' },
   { key: 'phone', label: 'الهاتف', defaultVisible: true, sortType: 'string' },
   { key: 'email', label: 'البريد الإلكتروني', defaultVisible: true, sortType: 'string' },
@@ -136,7 +142,7 @@ export default function CustomerProfilesTab() {
   const { formatDate, formatDateTime } = useFormatDate();
   const { user } = useAuth();
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<PageSizeValue>("100");
+  const [pageSize, setPageSize] = useState<PageSizeValue>('100');
   const [selectedPhone, setSelectedPhone] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -178,24 +184,27 @@ export default function CustomerProfilesTab() {
     }),
   });
 
-  const limit = pageSize === "all" ? 100000 : parseInt(pageSize);
+  const limit = pageSize === 'all' ? 100000 : parseInt(pageSize);
 
   // Reset page when search changes
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
-    setPage(1);
-  }, [setSearchTerm]);
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+      setPage(1);
+    },
+    [setSearchTerm]
+  );
 
   // Fetch paginated customers
   const { data: customersData, isLoading } = trpc.customers.listPaginated.useQuery({
-    page: pageSize === "all" ? 1 : page,
+    page: pageSize === 'all' ? 1 : page,
     limit,
     searchTerm: debouncedSearch || undefined,
   });
 
   // Fetch customer details when selected
   const { data: customerProfile, isLoading: profileLoading } = trpc.customers.getByPhone.useQuery(
-    { phone: selectedPhone || "" },
+    { phone: selectedPhone || '' },
     { enabled: !!selectedPhone && detailsOpen }
   );
 
@@ -209,13 +218,20 @@ export default function CustomerProfilesTab() {
 
     const sorted = customerTable.sortData(customers, (item: any, key: string) => {
       switch (key) {
-        case 'name': return item.name || '';
-        case 'phone': return item.phone || '';
-        case 'email': return item.email || '';
-        case 'totalRecords': return Number(item.totalRecords) || 0;
-        case 'lastSeen': return item.lastSeen;
-        case 'firstSeen': return item.firstSeen;
-        default: return item[key];
+        case 'name':
+          return item.name || '';
+        case 'phone':
+          return item.phone || '';
+        case 'email':
+          return item.email || '';
+        case 'totalRecords':
+          return Number(item.totalRecords) || 0;
+        case 'lastSeen':
+          return item.lastSeen;
+        case 'firstSeen':
+          return item.firstSeen;
+        default:
+          return item[key];
       }
     });
 
@@ -243,9 +259,12 @@ export default function CustomerProfilesTab() {
     };
   }, [sortedCustomers, debouncedSearch, customerTable.visibleColumns, customerExport]);
 
-  const handleExport = useCallback(async (format: 'excel' | 'csv' | 'pdf') => {
-    await customerExport.handleExport(format, getExportOptions());
-  }, [customerExport, getExportOptions]);
+  const handleExport = useCallback(
+    async (format: 'excel' | 'csv' | 'pdf') => {
+      await customerExport.handleExport(format, getExportOptions());
+    },
+    [customerExport, getExportOptions]
+  );
 
   const handlePrint = useCallback(() => {
     customerExport.handlePrint(getExportOptions());
@@ -295,12 +314,7 @@ export default function CustomerProfilesTab() {
               {/* Action Buttons */}
               <div className="flex items-center gap-2 flex-shrink-0">
                 {/* Print Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePrint}
-                  className="gap-2 h-9"
-                >
+                <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2 h-9">
                   <Printer className="h-4 w-4" />
                   <span className="hidden sm:inline">طباعة</span>
                 </Button>
@@ -308,11 +322,7 @@ export default function CustomerProfilesTab() {
                 {/* Export Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-2 h-9"
-                    >
+                    <Button variant="outline" size="sm" className="gap-2 h-9">
                       <Download className="h-4 w-4" />
                       <span className="hidden sm:inline">تصدير</span>
                     </Button>
@@ -360,7 +370,8 @@ export default function CustomerProfilesTab() {
                     searchTerm: customerFilter.filters.searchTerm,
                   }}
                   onApplyFilter={(filters) => {
-                    if (filters.searchTerm) customerFilter.filters.setSearchTerm(filters.searchTerm);
+                    if (filters.searchTerm)
+                      customerFilter.filters.setSearchTerm(filters.searchTerm);
                     else customerFilter.filters.setSearchTerm('');
                   }}
                 />
@@ -400,14 +411,16 @@ export default function CustomerProfilesTab() {
               <ResizableTable
                 frozenColumns={customerTable.frozenColumns.frozenColumns}
                 columnWidths={customerTable.columnWidths.columnWidths}
-                visibleColumnOrder={customerTable.columnOrder.filter(key => customerTable.visibleColumns[key])}
+                visibleColumnOrder={customerTable.columnOrder.filter(
+                  (key) => customerTable.visibleColumns[key]
+                )}
               >
                 <TableHeader>
                   <TableRow>
                     {customerTable.columnOrder
-                      .filter(key => customerTable.visibleColumns[key])
-                      .map(colKey => {
-                        const col = customerColumns.find(c => c.key === colKey);
+                      .filter((key) => customerTable.visibleColumns[key])
+                      .map((colKey) => {
+                        const col = customerColumns.find((c) => c.key === colKey);
                         if (!col) return null;
                         const widthConfig = getColumnWidth(colKey, col);
                         return (
@@ -437,26 +450,36 @@ export default function CustomerProfilesTab() {
                       }}
                     >
                       {customerTable.columnOrder
-                        .filter(key => customerTable.visibleColumns[key])
-                        .map(colKey => {
+                        .filter((key) => customerTable.visibleColumns[key])
+                        .map((colKey) => {
                           switch (colKey) {
                             case 'index':
                               return (
-                                <FrozenTableCell key={colKey} columnKey={colKey} className="font-medium">
+                                <FrozenTableCell
+                                  key={colKey}
+                                  columnKey={colKey}
+                                  className="font-medium"
+                                >
                                   {(page - 1) * limit + index + 1}
                                 </FrozenTableCell>
                               );
                             case 'name':
                               return (
-                                <FrozenTableCell key={colKey} columnKey={colKey} className="font-medium">
-                                  {customer.name || "-"}
+                                <FrozenTableCell
+                                  key={colKey}
+                                  columnKey={colKey}
+                                  className="font-medium"
+                                >
+                                  {customer.name || '-'}
                                 </FrozenTableCell>
                               );
                             case 'phone':
                               return (
                                 <FrozenTableCell key={colKey} columnKey={colKey}>
                                   <div className="flex items-center gap-2">
-                                    <span dir="ltr" className="font-mono">{formatPhoneDisplay(customer.phone)}</span>
+                                    <span dir="ltr" className="font-mono">
+                                      {formatPhoneDisplay(customer.phone)}
+                                    </span>
                                     <span onClick={(e) => e.stopPropagation()}>
                                       <ActionButtons
                                         phoneNumber={formatPhoneDisplay(customer.phone)}
@@ -469,7 +492,7 @@ export default function CustomerProfilesTab() {
                             case 'email':
                               return (
                                 <FrozenTableCell key={colKey} columnKey={colKey}>
-                                  {customer.email || "-"}
+                                  {customer.email || '-'}
                                 </FrozenTableCell>
                               );
                             case 'totalRecords':
@@ -544,9 +567,7 @@ export default function CustomerProfilesTab() {
               <Users className="h-5 w-5" />
               ملف العميل
             </DialogTitle>
-            <DialogDescription>
-              عرض تاريخ تفاعلات العميل الكاملة عبر جميع الأقسام
-            </DialogDescription>
+            <DialogDescription>عرض تاريخ تفاعلات العميل الكاملة عبر جميع الأقسام</DialogDescription>
           </DialogHeader>
 
           {profileLoading ? (
@@ -564,7 +585,9 @@ export default function CustomerProfilesTab() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm" dir="ltr">{formatPhoneDisplay(customerProfile.phone)}</span>
+                    <span className="text-sm" dir="ltr">
+                      {formatPhoneDisplay(customerProfile.phone)}
+                    </span>
                   </div>
                   {customerProfile.email && (
                     <div className="flex items-center gap-2">
@@ -588,7 +611,10 @@ export default function CustomerProfilesTab() {
                   </span>
                 </div>
                 <div className="mt-2">
-                  <ActionButtons phoneNumber={formatPhoneDisplay(customerProfile.phone)} size="sm" />
+                  <ActionButtons
+                    phoneNumber={formatPhoneDisplay(customerProfile.phone)}
+                    size="sm"
+                  />
                 </div>
               </div>
 
@@ -598,22 +624,30 @@ export default function CustomerProfilesTab() {
                   <TabsTrigger value="appointments" className="gap-1 text-xs sm:text-sm">
                     <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">مواعيد</span>
-                    <Badge variant="secondary" className="text-xs">{customerProfile.appointments.length}</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {customerProfile.appointments.length}
+                    </Badge>
                   </TabsTrigger>
                   <TabsTrigger value="leads" className="gap-1 text-xs sm:text-sm">
                     <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">تسجيلات</span>
-                    <Badge variant="secondary" className="text-xs">{customerProfile.leads.length}</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {customerProfile.leads.length}
+                    </Badge>
                   </TabsTrigger>
                   <TabsTrigger value="offerLeads" className="gap-1 text-xs sm:text-sm">
                     <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">عروض</span>
-                    <Badge variant="secondary" className="text-xs">{customerProfile.offerLeads.length}</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {customerProfile.offerLeads.length}
+                    </Badge>
                   </TabsTrigger>
                   <TabsTrigger value="campRegistrations" className="gap-1 text-xs sm:text-sm">
                     <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">مخيمات</span>
-                    <Badge variant="secondary" className="text-xs">{customerProfile.campRegistrations.length}</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {customerProfile.campRegistrations.length}
+                    </Badge>
                   </TabsTrigger>
                 </TabsList>
 
@@ -628,13 +662,19 @@ export default function CustomerProfilesTab() {
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-1 flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-medium text-sm">{apt.doctorName || "طبيب غير محدد"}</span>
+                                <span className="font-medium text-sm">
+                                  {apt.doctorName || 'طبيب غير محدد'}
+                                </span>
                                 {apt.doctorSpecialty && (
-                                  <Badge variant="outline" className="text-xs">{apt.doctorSpecialty}</Badge>
+                                  <Badge variant="outline" className="text-xs">
+                                    {apt.doctorSpecialty}
+                                  </Badge>
                                 )}
                               </div>
                               {apt.procedure && (
-                                <p className="text-xs text-muted-foreground">الإجراء: {apt.procedure}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  الإجراء: {apt.procedure}
+                                </p>
                               )}
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                 <span>{formatDateTime(apt.createdAt)}</span>
@@ -648,7 +688,7 @@ export default function CustomerProfilesTab() {
                                 <p className="text-xs text-muted-foreground mt-1">{apt.notes}</p>
                               )}
                             </div>
-                            <Badge className={`text-xs ${statusColors[apt.status] || ""}`}>
+                            <Badge className={`text-xs ${statusColors[apt.status] || ''}`}>
                               {statusLabels[apt.status] || apt.status}
                             </Badge>
                           </div>
@@ -679,7 +719,7 @@ export default function CustomerProfilesTab() {
                                 <p className="text-xs text-muted-foreground mt-1">{lead.notes}</p>
                               )}
                             </div>
-                            <Badge className={`text-xs ${statusColors[lead.status] || ""}`}>
+                            <Badge className={`text-xs ${statusColors[lead.status] || ''}`}>
                               {statusLabels[lead.status] || lead.status}
                             </Badge>
                           </div>
@@ -698,7 +738,9 @@ export default function CustomerProfilesTab() {
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-1 flex-1">
                               <div className="flex items-center gap-2">
-                                <span className="font-medium text-sm">{ol.offerTitle || "عرض غير محدد"}</span>
+                                <span className="font-medium text-sm">
+                                  {ol.offerTitle || 'عرض غير محدد'}
+                                </span>
                               </div>
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                 <span>{formatDateTime(ol.createdAt)}</span>
@@ -712,7 +754,7 @@ export default function CustomerProfilesTab() {
                                 <p className="text-xs text-muted-foreground mt-1">{ol.notes}</p>
                               )}
                             </div>
-                            <Badge className={`text-xs ${statusColors[ol.status] || ""}`}>
+                            <Badge className={`text-xs ${statusColors[ol.status] || ''}`}>
                               {statusLabels[ol.status] || ol.status}
                             </Badge>
                           </div>
@@ -724,14 +766,18 @@ export default function CustomerProfilesTab() {
                   {/* Camp Registrations Tab */}
                   <TabsContent value="campRegistrations" className="mt-0 space-y-3">
                     {customerProfile.campRegistrations.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">لا توجد تسجيلات مخيمات</p>
+                      <p className="text-center text-muted-foreground py-8">
+                        لا توجد تسجيلات مخيمات
+                      </p>
                     ) : (
                       customerProfile.campRegistrations.map((cr: any) => (
                         <Card key={cr.id} className="p-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-1 flex-1">
                               <div className="flex items-center gap-2">
-                                <span className="font-medium text-sm">{cr.campName || "مخيم غير محدد"}</span>
+                                <span className="font-medium text-sm">
+                                  {cr.campName || 'مخيم غير محدد'}
+                                </span>
                               </div>
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                 <span>{formatDateTime(cr.createdAt)}</span>
@@ -745,7 +791,7 @@ export default function CustomerProfilesTab() {
                                 <p className="text-xs text-muted-foreground mt-1">{cr.notes}</p>
                               )}
                             </div>
-                            <Badge className={`text-xs ${statusColors[cr.status] || ""}`}>
+                            <Badge className={`text-xs ${statusColors[cr.status] || ''}`}>
                               {statusLabels[cr.status] || cr.status}
                             </Badge>
                           </div>
@@ -757,7 +803,9 @@ export default function CustomerProfilesTab() {
               </Tabs>
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">لم يتم العثور على بيانات العميل</p>
+            <p className="text-center text-muted-foreground py-8">
+              لم يتم العثور على بيانات العميل
+            </p>
           )}
         </DialogContent>
       </Dialog>

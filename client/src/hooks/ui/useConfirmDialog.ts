@@ -1,16 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 /**
  * useConfirmDialog - هوك لإدارة حوارات التأكيد (حذف، إلغاء، إلخ)
- * 
+ *
  * @returns { isOpen, item, openConfirm, closeConfirm, confirm }
- * 
+ *
  * الاستخدام:
  * const deleteConfirm = useConfirmDialog<Offer>();
- * 
+ *
  * // فتح حوار التأكيد:
  * <Button onClick={() => deleteConfirm.openConfirm(offer)}>حذف</Button>
- * 
+ *
  * // في الحوار:
  * <Dialog open={deleteConfirm.isOpen} onOpenChange={deleteConfirm.closeConfirm}>
  *   <DialogContent>
@@ -37,10 +37,13 @@ export function useConfirmDialog<T = any>() {
     setTimeout(() => setItem(null), 200);
   }, []);
 
-  const confirm = useCallback((action: () => void) => {
-    action();
-    closeConfirm();
-  }, [closeConfirm]);
+  const confirm = useCallback(
+    (action: () => void) => {
+      action();
+      closeConfirm();
+    },
+    [closeConfirm]
+  );
 
   return {
     isOpen,

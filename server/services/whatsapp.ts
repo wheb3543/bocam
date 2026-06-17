@@ -1,7 +1,7 @@
 /**
  * WhatsApp API integration
  * Sends WhatsApp messages to customers using WhatsApp Business Cloud API
- * 
+ *
  * This file provides backward-compatible functions used by other modules
  * (appointments, leads, etc.) while using the new Cloud API module internally.
  */
@@ -21,9 +21,11 @@ export async function sendWhatsAppMessage(params: WhatsAppMessage): Promise<bool
   try {
     const formattedPhone = formatPhoneNumber(params.to);
     const result = await sendWhatsAppTextMessage(formattedPhone, params.message);
-    
+
     if (result.success) {
-      console.log(`[WhatsApp] Message sent successfully to ${formattedPhone}. ID: ${result.messageId}`);
+      console.log(
+        `[WhatsApp] Message sent successfully to ${formattedPhone}. ID: ${result.messageId}`
+      );
       return true;
     } else {
       console.error(`[WhatsApp] Failed to send to ${formattedPhone}: ${result.error}`);
@@ -55,7 +57,7 @@ export async function sendWelcomeMessage(lead: {
 ${COMPANY_SLOGAN_AR} 💚`;
 
   const message = lead.welcomeMessage || defaultMessage;
-  
+
   return sendWhatsAppMessage({
     to: lead.phone,
     message,
@@ -75,10 +77,14 @@ export async function sendBookingConfirmation(lead: {
 
 تم تأكيد حجزك بنجاح! ✅
 
-${lead.appointmentDate && lead.appointmentTime ? `
+${
+  lead.appointmentDate && lead.appointmentTime
+    ? `
 📅 التاريخ: ${lead.appointmentDate}
 🕐 الوقت: ${lead.appointmentTime}
-` : ''}
+`
+    : ''
+}
 
 📍 الموقع: المستشفى السعودي الألماني - صنعاء
 شارع الستين الشمالي (بين جولة عمران وجولة الجمنة)

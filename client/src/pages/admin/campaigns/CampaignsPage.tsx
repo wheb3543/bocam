@@ -1,8 +1,8 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { useState } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -10,16 +10,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -27,11 +27,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { toast } from 'sonner';
 import {
   Plus,
   Search,
@@ -52,46 +52,46 @@ import {
   PauseCircle,
   XCircle,
   RefreshCw,
-} from "lucide-react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
-import { Link } from "wouter";
-import { Progress } from "@/components/ui/progress";
-import CampaignLinksManager from "@/components/CampaignLinksManager";
-import { useSlugGenerator } from "@/hooks/data/useSlugGenerator";
+} from 'lucide-react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { Link } from 'wouter';
+import { Progress } from '@/components/ui/progress';
+import CampaignLinksManager from '@/components/CampaignLinksManager';
+import { useSlugGenerator } from '@/hooks/data/useSlugGenerator';
 
 // Helper functions
 const getCampaignTypeLabel = (type: string) => {
   const labels: Record<string, string> = {
-    digital: "رقمية",
-    field: "ميدانية",
-    awareness: "توعوية",
-    mixed: "مختلطة",
+    digital: 'رقمية',
+    field: 'ميدانية',
+    awareness: 'توعوية',
+    mixed: 'مختلطة',
   };
   return labels[type] || type;
 };
 
 const getCampaignStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
-    draft: "مسودة",
-    active: "نشطة",
-    paused: "متوقفة",
-    completed: "مكتملة",
-    cancelled: "ملغاة",
+    draft: 'مسودة',
+    active: 'نشطة',
+    paused: 'متوقفة',
+    completed: 'مكتملة',
+    cancelled: 'ملغاة',
   };
   return labels[status] || status;
 };
 
 const getStatusColor = (status: string) => {
   const colors: Record<string, string> = {
-    draft: "bg-muted text-foreground",
-    active: "bg-green-100 text-green-800",
-    paused: "bg-yellow-100 text-yellow-800",
-    completed: "bg-blue-100 text-blue-800",
-    cancelled: "bg-red-100 text-red-800",
+    draft: 'bg-muted text-foreground',
+    active: 'bg-green-100 text-green-800',
+    paused: 'bg-yellow-100 text-yellow-800',
+    completed: 'bg-blue-100 text-blue-800',
+    cancelled: 'bg-red-100 text-red-800',
   };
-  return colors[status] || "bg-muted text-foreground";
+  return colors[status] || 'bg-muted text-foreground';
 };
 
 const getStatusIcon = (status: string) => {
@@ -106,20 +106,20 @@ const getStatusIcon = (status: string) => {
 };
 
 const platformOptions = [
-  { value: "facebook", label: "فيسبوك" },
-  { value: "instagram", label: "إنستغرام" },
-  { value: "google", label: "جوجل" },
-  { value: "twitter", label: "تويتر" },
-  { value: "tiktok", label: "تيك توك" },
-  { value: "snapchat", label: "سناب شات" },
-  { value: "youtube", label: "يوتيوب" },
-  { value: "linkedin", label: "لينكد إن" },
-  { value: "email", label: "بريد إلكتروني" },
-  { value: "sms", label: "رسائل SMS" },
-  { value: "whatsapp", label: "واتساب" },
-  { value: "outdoor", label: "إعلانات خارجية" },
-  { value: "tv", label: "تلفزيون" },
-  { value: "radio", label: "راديو" },
+  { value: 'facebook', label: 'فيسبوك' },
+  { value: 'instagram', label: 'إنستغرام' },
+  { value: 'google', label: 'جوجل' },
+  { value: 'twitter', label: 'تويتر' },
+  { value: 'tiktok', label: 'تيك توك' },
+  { value: 'snapchat', label: 'سناب شات' },
+  { value: 'youtube', label: 'يوتيوب' },
+  { value: 'linkedin', label: 'لينكد إن' },
+  { value: 'email', label: 'بريد إلكتروني' },
+  { value: 'sms', label: 'رسائل SMS' },
+  { value: 'whatsapp', label: 'واتساب' },
+  { value: 'outdoor', label: 'إعلانات خارجية' },
+  { value: 'tv', label: 'تلفزيون' },
+  { value: 'radio', label: 'راديو' },
 ];
 
 interface CampaignFormData {
@@ -142,29 +142,29 @@ interface CampaignFormData {
 }
 
 const initialFormData: CampaignFormData = {
-  name: "",
-  slug: "",
-  description: "",
-  type: "digital",
-  status: "draft",
-  plannedBudget: "",
-  actualBudget: "",
-  targetLeads: "",
-  targetBookings: "",
-  targetRevenue: "",
-  startDate: "",
-  endDate: "",
+  name: '',
+  slug: '',
+  description: '',
+  type: 'digital',
+  status: 'draft',
+  plannedBudget: '',
+  actualBudget: '',
+  targetLeads: '',
+  targetBookings: '',
+  targetRevenue: '',
+  startDate: '',
+  endDate: '',
   platforms: [],
-  teamMembers: "",
-  kpis: "",
-  notes: "",
+  teamMembers: '',
+  kpis: '',
+  notes: '',
 };
 
 export default function CampaignsPage() {
   const { formatDate, formatDateTime } = useFormatDate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -172,17 +172,25 @@ export default function CampaignsPage() {
   const [formData, setFormData] = useState<CampaignFormData>(initialFormData);
 
   // Queries
-  const { data: overview, isLoading: loadingOverview, refetch: refetchOverview } = trpc.campaigns.getOverview.useQuery();
-  const { data: campaigns, isLoading: loadingCampaigns, refetch } = trpc.campaigns.list.useQuery({
-    status: statusFilter !== "all" ? statusFilter : undefined,
-    type: typeFilter !== "all" ? typeFilter : undefined,
+  const {
+    data: overview,
+    isLoading: loadingOverview,
+    refetch: refetchOverview,
+  } = trpc.campaigns.getOverview.useQuery();
+  const {
+    data: campaigns,
+    isLoading: loadingCampaigns,
+    refetch,
+  } = trpc.campaigns.list.useQuery({
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+    type: typeFilter !== 'all' ? typeFilter : undefined,
     search: searchQuery || undefined,
   });
 
   // Mutations
   const createMutation = trpc.campaigns.create.useMutation({
     onSuccess: () => {
-      toast.success("تم إنشاء الحملة بنجاح");
+      toast.success('تم إنشاء الحملة بنجاح');
       setIsCreateDialogOpen(false);
       setFormData(initialFormData);
       refetch();
@@ -195,7 +203,7 @@ export default function CampaignsPage() {
 
   const updateMutation = trpc.campaigns.update.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث الحملة بنجاح");
+      toast.success('تم تحديث الحملة بنجاح');
       setIsEditDialogOpen(false);
       setSelectedCampaign(null);
       setFormData(initialFormData);
@@ -209,7 +217,7 @@ export default function CampaignsPage() {
 
   const deleteMutation = trpc.campaigns.delete.useMutation({
     onSuccess: () => {
-      toast.success("تم حذف الحملة بنجاح");
+      toast.success('تم حذف الحملة بنجاح');
       refetch();
       refetchOverview();
     },
@@ -220,7 +228,7 @@ export default function CampaignsPage() {
 
   const handleCreateCampaign = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     createMutation.mutate({
       name: formData.name,
       slug: formData.slug,
@@ -234,7 +242,7 @@ export default function CampaignsPage() {
       targetRevenue: formData.targetRevenue ? Number(formData.targetRevenue) : undefined,
       startDate: formData.startDate ? new Date(formData.startDate) : undefined,
       endDate: formData.endDate ? new Date(formData.endDate) : undefined,
-      platforms: formData.platforms.length > 0 ? formData.platforms.join(",") : undefined,
+      platforms: formData.platforms.length > 0 ? formData.platforms.join(',') : undefined,
       teamMembers: formData.teamMembers || undefined,
       kpis: formData.kpis || undefined,
       notes: formData.notes || undefined,
@@ -244,7 +252,7 @@ export default function CampaignsPage() {
   const handleEditCampaign = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCampaign) return;
-    
+
     updateMutation.mutate({
       id: selectedCampaign.id,
       name: formData.name,
@@ -258,7 +266,7 @@ export default function CampaignsPage() {
       targetRevenue: formData.targetRevenue ? Number(formData.targetRevenue) : undefined,
       startDate: formData.startDate ? new Date(formData.startDate) : undefined,
       endDate: formData.endDate ? new Date(formData.endDate) : undefined,
-      platforms: formData.platforms.length > 0 ? formData.platforms.join(",") : undefined,
+      platforms: formData.platforms.length > 0 ? formData.platforms.join(',') : undefined,
       teamMembers: formData.teamMembers || undefined,
       kpis: formData.kpis || undefined,
       notes: formData.notes || undefined,
@@ -266,7 +274,7 @@ export default function CampaignsPage() {
   };
 
   const handleDeleteCampaign = (id: number) => {
-    if (confirm("هل أنت متأكد من حذف هذه الحملة؟")) {
+    if (confirm('هل أنت متأكد من حذف هذه الحملة؟')) {
       deleteMutation.mutate({ id });
     }
   };
@@ -274,22 +282,22 @@ export default function CampaignsPage() {
   const openEditDialog = (campaign: any) => {
     setSelectedCampaign(campaign);
     setFormData({
-      name: campaign.name || "",
-      slug: campaign.slug || "",
-      description: campaign.description || "",
-      type: campaign.type || "digital",
-      status: campaign.status || "draft",
-      plannedBudget: campaign.plannedBudget?.toString() || "",
-      actualBudget: campaign.actualBudget?.toString() || "",
-      targetLeads: campaign.targetLeads?.toString() || "",
-      targetBookings: campaign.targetBookings?.toString() || "",
-      targetRevenue: campaign.targetRevenue?.toString() || "",
-      startDate: campaign.startDate ? format(new Date(campaign.startDate), "yyyy-MM-dd") : "",
-      endDate: campaign.endDate ? format(new Date(campaign.endDate), "yyyy-MM-dd") : "",
-      platforms: campaign.platforms ? campaign.platforms.split(",") : [],
-      teamMembers: campaign.teamMembers || "",
-      kpis: campaign.kpis || "",
-      notes: campaign.notes || "",
+      name: campaign.name || '',
+      slug: campaign.slug || '',
+      description: campaign.description || '',
+      type: campaign.type || 'digital',
+      status: campaign.status || 'draft',
+      plannedBudget: campaign.plannedBudget?.toString() || '',
+      actualBudget: campaign.actualBudget?.toString() || '',
+      targetLeads: campaign.targetLeads?.toString() || '',
+      targetBookings: campaign.targetBookings?.toString() || '',
+      targetRevenue: campaign.targetRevenue?.toString() || '',
+      startDate: campaign.startDate ? format(new Date(campaign.startDate), 'yyyy-MM-dd') : '',
+      endDate: campaign.endDate ? format(new Date(campaign.endDate), 'yyyy-MM-dd') : '',
+      platforms: campaign.platforms ? campaign.platforms.split(',') : [],
+      teamMembers: campaign.teamMembers || '',
+      kpis: campaign.kpis || '',
+      notes: campaign.notes || '',
     });
     setIsEditDialogOpen(true);
   };
@@ -301,16 +309,16 @@ export default function CampaignsPage() {
 
   // Slug auto-generation hook
   const { autoGenerateSlug: campaignAutoSlug } = useSlugGenerator(
-    (slug) => setFormData(prev => ({ ...prev, slug })),
+    (slug) => setFormData((prev) => ({ ...prev, slug })),
     { isEditing: isEditDialogOpen }
   );
 
   const handlePlatformToggle = (platform: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       platforms: prev.platforms.includes(platform)
-        ? prev.platforms.filter(p => p !== platform)
-        : [...prev.platforms, platform]
+        ? prev.platforms.filter((p) => p !== platform)
+        : [...prev.platforms, platform],
     }));
   };
 
@@ -340,7 +348,9 @@ export default function CampaignsPage() {
               {loadingOverview ? (
                 <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-blue-600" />
               ) : (
-                <div className="text-xl sm:text-2xl font-bold text-blue-800">{overview?.totalCampaigns || 0}</div>
+                <div className="text-xl sm:text-2xl font-bold text-blue-800">
+                  {overview?.totalCampaigns || 0}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -356,7 +366,9 @@ export default function CampaignsPage() {
               {loadingOverview ? (
                 <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-green-600" />
               ) : (
-                <div className="text-xl sm:text-2xl font-bold text-green-800">{overview?.activeCampaigns || 0}</div>
+                <div className="text-xl sm:text-2xl font-bold text-green-800">
+                  {overview?.activeCampaigns || 0}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -373,7 +385,9 @@ export default function CampaignsPage() {
                 <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-yellow-600" />
               ) : (
                 <div className="text-xl sm:text-2xl font-bold text-yellow-800">
-                  {Array.isArray(campaigns) ? campaigns.filter((c: any) => c.status === "paused").length : 0}
+                  {Array.isArray(campaigns)
+                    ? campaigns.filter((c: any) => c.status === 'paused').length
+                    : 0}
                 </div>
               )}
             </CardContent>
@@ -429,7 +443,9 @@ export default function CampaignsPage() {
                 <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-teal-600" />
               ) : (
                 <div className="text-base sm:text-lg font-bold text-teal-800">
-                  {campaigns?.reduce((sum: number, c: any) => sum + (c.targetLeads || 0), 0).toLocaleString() || 0}
+                  {campaigns
+                    ?.reduce((sum: number, c: any) => sum + (c.targetLeads || 0), 0)
+                    .toLocaleString() || 0}
                   <span className="text-xs mr-1">عميل</span>
                 </div>
               )}
@@ -449,10 +465,22 @@ export default function CampaignsPage() {
                 <CardDescription>إدارة جميع الحملات التسويقية والمشاريع</CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={() => { refetch(); refetchOverview(); }}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    refetch();
+                    refetchOverview();
+                  }}
+                >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
-                <Button onClick={() => { setFormData(initialFormData); setIsCreateDialogOpen(true); }}>
+                <Button
+                  onClick={() => {
+                    setFormData(initialFormData);
+                    setIsCreateDialogOpen(true);
+                  }}
+                >
                   <Plus className="ml-2 h-4 w-4" />
                   حملة جديدة
                 </Button>
@@ -511,9 +539,15 @@ export default function CampaignsPage() {
                       <TableHead className="text-right min-w-[150px]">الحملة</TableHead>
                       <TableHead className="text-right min-w-[80px]">النوع</TableHead>
                       <TableHead className="text-right min-w-[90px]">الحالة</TableHead>
-                      <TableHead className="text-right hidden md:table-cell min-w-[100px]">الميزانية</TableHead>
-                      <TableHead className="text-right hidden lg:table-cell min-w-[120px]">التقدم</TableHead>
-                      <TableHead className="text-right hidden md:table-cell min-w-[100px]">الفترة</TableHead>
+                      <TableHead className="text-right hidden md:table-cell min-w-[100px]">
+                        الميزانية
+                      </TableHead>
+                      <TableHead className="text-right hidden lg:table-cell min-w-[120px]">
+                        التقدم
+                      </TableHead>
+                      <TableHead className="text-right hidden md:table-cell min-w-[100px]">
+                        الفترة
+                      </TableHead>
                       <TableHead className="text-right min-w-[100px]">الإجراءات</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -524,7 +558,9 @@ export default function CampaignsPage() {
                           <div>
                             <div className="font-medium">{campaign.name}</div>
                             {campaign.description && (
-                              <div className="text-sm text-muted-foreground line-clamp-1">{campaign.description}</div>
+                              <div className="text-sm text-muted-foreground line-clamp-1">
+                                {campaign.description}
+                              </div>
                             )}
                           </div>
                         </TableCell>
@@ -532,7 +568,9 @@ export default function CampaignsPage() {
                           <Badge variant="outline">{getCampaignTypeLabel(campaign.type)}</Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge className={`${getStatusColor(campaign.status)} flex items-center gap-1 w-fit`}>
+                          <Badge
+                            className={`${getStatusColor(campaign.status)} flex items-center gap-1 w-fit`}
+                          >
                             {getStatusIcon(campaign.status)}
                             {getCampaignStatusLabel(campaign.status)}
                           </Badge>
@@ -540,14 +578,18 @@ export default function CampaignsPage() {
                         <TableCell className="hidden md:table-cell">
                           <div className="text-sm">
                             <div>مخطط: {campaign.plannedBudget?.toLocaleString() || 0}</div>
-                            <div className="text-muted-foreground">فعلي: {campaign.actualBudget?.toLocaleString() || 0}</div>
+                            <div className="text-muted-foreground">
+                              فعلي: {campaign.actualBudget?.toLocaleString() || 0}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="hidden lg:table-cell">
                           <div className="w-32">
                             <div className="flex justify-between text-xs mb-1">
                               <span>{calculateProgress(campaign)}%</span>
-                              <span>{campaign.actualLeads || 0}/{campaign.targetLeads || 0}</span>
+                              <span>
+                                {campaign.actualLeads || 0}/{campaign.targetLeads || 0}
+                              </span>
                             </div>
                             <Progress value={calculateProgress(campaign)} className="h-2" />
                           </div>
@@ -555,10 +597,12 @@ export default function CampaignsPage() {
                         <TableCell className="hidden md:table-cell">
                           <div className="text-sm">
                             {campaign.startDate && (
-                              <div>{format(new Date(campaign.startDate), "dd/MM/yyyy")}</div>
+                              <div>{format(new Date(campaign.startDate), 'dd/MM/yyyy')}</div>
                             )}
                             {campaign.endDate && (
-                              <div className="text-muted-foreground">إلى {format(new Date(campaign.endDate), "dd/MM/yyyy")}</div>
+                              <div className="text-muted-foreground">
+                                إلى {format(new Date(campaign.endDate), 'dd/MM/yyyy')}
+                              </div>
                             )}
                           </div>
                         </TableCell>
@@ -599,7 +643,12 @@ export default function CampaignsPage() {
               <div className="text-center py-12">
                 <Megaphone className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                 <p className="text-muted-foreground mb-4">لا توجد حملات</p>
-                <Button onClick={() => { setFormData(initialFormData); setIsCreateDialogOpen(true); }}>
+                <Button
+                  onClick={() => {
+                    setFormData(initialFormData);
+                    setIsCreateDialogOpen(true);
+                  }}
+                >
                   <Plus className="ml-2 h-4 w-4" />
                   إنشاء أول حملة
                 </Button>
@@ -609,19 +658,24 @@ export default function CampaignsPage() {
         </Card>
 
         {/* Create/Edit Dialog */}
-        <Dialog open={isCreateDialogOpen || isEditDialogOpen} onOpenChange={(open) => {
-          if (!open) {
-            setIsCreateDialogOpen(false);
-            setIsEditDialogOpen(false);
-            setSelectedCampaign(null);
-            setFormData(initialFormData);
-          }
-        }}>
+        <Dialog
+          open={isCreateDialogOpen || isEditDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setIsCreateDialogOpen(false);
+              setIsEditDialogOpen(false);
+              setSelectedCampaign(null);
+              setFormData(initialFormData);
+            }
+          }}
+        >
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{isEditDialogOpen ? "تعديل الحملة" : "إضافة حملة جديدة"}</DialogTitle>
+              <DialogTitle>{isEditDialogOpen ? 'تعديل الحملة' : 'إضافة حملة جديدة'}</DialogTitle>
               <DialogDescription>
-                {isEditDialogOpen ? "تحديث معلومات الحملة التسويقية" : "أدخل معلومات الحملة التسويقية الجديدة"}
+                {isEditDialogOpen
+                  ? 'تحديث معلومات الحملة التسويقية'
+                  : 'أدخل معلومات الحملة التسويقية الجديدة'}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={isEditDialogOpen ? handleEditCampaign : handleCreateCampaign}>
@@ -669,7 +723,10 @@ export default function CampaignsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label>النوع *</Label>
-                    <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+                    <Select
+                      value={formData.type}
+                      onValueChange={(value) => setFormData({ ...formData, type: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -683,7 +740,10 @@ export default function CampaignsPage() {
                   </div>
                   <div className="grid gap-2">
                     <Label>الحالة *</Label>
-                    <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value) => setFormData({ ...formData, status: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -782,8 +842,8 @@ export default function CampaignsPage() {
                         key={platform.value}
                         className={`flex items-center gap-2 px-3 py-1.5 rounded-full cursor-pointer transition-colors ${
                           formData.platforms.includes(platform.value)
-                            ? "bg-primary text-white"
-                            : "bg-white dark:bg-card border hover:bg-muted"
+                            ? 'bg-primary text-white'
+                            : 'bg-white dark:bg-card border hover:bg-muted'
                         }`}
                         onClick={() => handlePlatformToggle(platform.value)}
                       >
@@ -838,19 +898,26 @@ export default function CampaignsPage() {
                 )}
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => {
-                  setIsCreateDialogOpen(false);
-                  setIsEditDialogOpen(false);
-                  setSelectedCampaign(null);
-                  setFormData(initialFormData);
-                }}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsCreateDialogOpen(false);
+                    setIsEditDialogOpen(false);
+                    setSelectedCampaign(null);
+                    setFormData(initialFormData);
+                  }}
+                >
                   إلغاء
                 </Button>
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                <Button
+                  type="submit"
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                >
                   {(createMutation.isPending || updateMutation.isPending) && (
                     <Loader2 className="h-4 w-4 animate-spin ml-2" />
                   )}
-                  {isEditDialogOpen ? "حفظ التغييرات" : "إنشاء الحملة"}
+                  {isEditDialogOpen ? 'حفظ التغييرات' : 'إنشاء الحملة'}
                 </Button>
               </DialogFooter>
             </form>
@@ -890,7 +957,9 @@ export default function CampaignsPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>العملاء المستهدفين</span>
-                        <span>{selectedCampaign.actualLeads || 0} / {selectedCampaign.targetLeads || 0}</span>
+                        <span>
+                          {selectedCampaign.actualLeads || 0} / {selectedCampaign.targetLeads || 0}
+                        </span>
                       </div>
                       <Progress value={calculateProgress(selectedCampaign)} className="h-3" />
                     </div>
@@ -905,31 +974,39 @@ export default function CampaignsPage() {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-muted-foreground">الرابط</Label>
-                    <p className="font-medium text-primary" dir="ltr">{selectedCampaign.slug}</p>
+                    <p className="font-medium text-primary" dir="ltr">
+                      {selectedCampaign.slug}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-muted-foreground">تاريخ البدء</Label>
                     <p className="font-medium">
                       {selectedCampaign.startDate
-                        ? format(new Date(selectedCampaign.startDate), "dd MMMM yyyy", { locale: ar })
-                        : "-"}
+                        ? format(new Date(selectedCampaign.startDate), 'dd MMMM yyyy', {
+                            locale: ar,
+                          })
+                        : '-'}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-muted-foreground">تاريخ الانتهاء</Label>
                     <p className="font-medium">
                       {selectedCampaign.endDate
-                        ? format(new Date(selectedCampaign.endDate), "dd MMMM yyyy", { locale: ar })
-                        : "-"}
+                        ? format(new Date(selectedCampaign.endDate), 'dd MMMM yyyy', { locale: ar })
+                        : '-'}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-muted-foreground">الميزانية المخططة</Label>
-                    <p className="font-medium">{selectedCampaign.plannedBudget?.toLocaleString() || 0} ريال</p>
+                    <p className="font-medium">
+                      {selectedCampaign.plannedBudget?.toLocaleString() || 0} ريال
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-muted-foreground">الميزانية الفعلية</Label>
-                    <p className="font-medium">{selectedCampaign.actualBudget?.toLocaleString() || 0} ريال</p>
+                    <p className="font-medium">
+                      {selectedCampaign.actualBudget?.toLocaleString() || 0} ريال
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-muted-foreground">هدف الحجوزات</Label>
@@ -937,7 +1014,9 @@ export default function CampaignsPage() {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-muted-foreground">هدف الإيرادات</Label>
-                    <p className="font-medium">{selectedCampaign.targetRevenue?.toLocaleString() || 0} ريال</p>
+                    <p className="font-medium">
+                      {selectedCampaign.targetRevenue?.toLocaleString() || 0} ريال
+                    </p>
                   </div>
                 </div>
 
@@ -946,9 +1025,9 @@ export default function CampaignsPage() {
                   <div className="space-y-2">
                     <Label className="text-muted-foreground">المنصات</Label>
                     <div className="flex flex-wrap gap-2">
-                      {selectedCampaign.platforms.split(",").map((platform: string) => (
+                      {selectedCampaign.platforms.split(',').map((platform: string) => (
                         <Badge key={platform} variant="outline">
-                          {platformOptions.find(p => p.value === platform)?.label || platform}
+                          {platformOptions.find((p) => p.value === platform)?.label || platform}
                         </Badge>
                       ))}
                     </div>
@@ -991,14 +1070,22 @@ export default function CampaignsPage() {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button variant="outline" className="flex-1" onClick={() => {
-                    setIsViewDialogOpen(false);
-                    openEditDialog(selectedCampaign);
-                  }}>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setIsViewDialogOpen(false);
+                      openEditDialog(selectedCampaign);
+                    }}
+                  >
                     <Edit className="h-4 w-4 ml-2" />
                     تعديل
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => setIsViewDialogOpen(false)}>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setIsViewDialogOpen(false)}
+                  >
                     إغلاق
                   </Button>
                 </div>

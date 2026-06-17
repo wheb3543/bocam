@@ -1,10 +1,10 @@
-import { Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { useState } from "react";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
+import { Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 interface DateRangePickerProps {
   dateRange: { from: Date; to: Date };
@@ -37,7 +37,8 @@ export function DateRangePicker({ dateRange, onDateRangeChange }: DateRangePicke
         <Button variant="outline" className="gap-2">
           <Calendar className="h-4 w-4" />
           <span className="hidden sm:inline">
-            {format(dateRange.from, "dd MMM yyyy", { locale: ar })} - {format(dateRange.to, "dd MMM yyyy", { locale: ar })}
+            {format(dateRange.from, 'dd MMM yyyy', { locale: ar })} -{' '}
+            {format(dateRange.to, 'dd MMM yyyy', { locale: ar })}
           </span>
           <span className="sm:hidden">النطاق الزمني</span>
         </Button>
@@ -45,7 +46,7 @@ export function DateRangePicker({ dateRange, onDateRangeChange }: DateRangePicke
       <PopoverContent className="w-auto p-4" align="start">
         <div className="space-y-4" dir="rtl">
           <div className="text-sm font-medium">اختر النطاق الزمني</div>
-          
+
           {/* Quick Select Buttons */}
           <div className="flex flex-wrap gap-2">
             <Button
@@ -109,18 +110,14 @@ export function DateRangePicker({ dateRange, onDateRangeChange }: DateRangePicke
                   onSelect={setTempTo}
                   locale={ar}
                   className="rounded-md border"
-                  disabled={(date) => tempFrom ? date < tempFrom : false}
+                  disabled={(date) => (tempFrom ? date < tempFrom : false)}
                 />
               </div>
             </div>
           </div>
 
           {/* Apply Button */}
-          <Button
-            onClick={handleApply}
-            disabled={!tempFrom || !tempTo}
-            className="w-full"
-          >
+          <Button onClick={handleApply} disabled={!tempFrom || !tempTo} className="w-full">
             تطبيق
           </Button>
         </div>

@@ -1,11 +1,11 @@
 /**
  * AnimatedStatsCounter - عداد إحصائيات متحرك
- * 
+ *
  * مكون يضيف تأثير العد المتحرك للأرقام
  * يدعم إيقاف الحركات عبر AnimationToggle
  */
-import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface AnimatedStatsCounterProps {
   target: number;
@@ -46,9 +46,5 @@ export default function AnimatedStatsCounter({
     return () => clearInterval(timer);
   }, [target, duration, disabled]);
 
-  return (
-    <span className={cn("", className)}>
-      {current}
-    </span>
-  );
+  return <span className={cn('', className)}>{current}</span>;
 }

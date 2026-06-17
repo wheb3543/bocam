@@ -6,11 +6,11 @@
  * ✅ متوافق مع وثائق Meta الرسمية v23.0
  */
 
-import { normalizePhoneNumber } from "../database/db";
-import { sendWhatsAppTextMessage } from "./whatsappCloudAPI";
-import { ENV } from "../_core/env";
-import { meta } from "../api/MetaApiService";
-import { COMPANY_SLOGAN_AR } from "@shared/config";
+import { normalizePhoneNumber } from '../database/db';
+import { sendWhatsAppTextMessage } from './whatsappCloudAPI';
+import { ENV } from '../_core/env';
+import { meta } from '../api/MetaApiService';
+import { COMPANY_SLOGAN_AR } from '@shared/config';
 
 /**
  * Send a simple text message via Cloud API
@@ -18,14 +18,14 @@ import { COMPANY_SLOGAN_AR } from "@shared/config";
 export async function sendTextMessage(
   phone: string,
   message: string,
-  options?: { priority?: "high" | "normal" | "low" }
+  options?: { priority?: 'high' | 'normal' | 'low' }
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     const normalizedPhone = normalizePhoneNumber(phone);
     if (!normalizedPhone || normalizedPhone.length < 9) {
       return {
         success: false,
-        error: "Invalid phone number format",
+        error: 'Invalid phone number format',
       };
     }
 
@@ -37,10 +37,10 @@ export async function sendTextMessage(
       error: result.error,
     };
   } catch (error) {
-    console.error("[WhatsApp] Failed to send text message:", error);
+    console.error('[WhatsApp] Failed to send text message:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -63,7 +63,7 @@ export async function sendWelcomeMessage(params: {
 
 ${COMPANY_SLOGAN_AR} 💚`;
 
-  return sendTextMessage(params.phone, message, { priority: "high" });
+  return sendTextMessage(params.phone, message, { priority: 'high' });
 }
 
 /**
@@ -80,8 +80,8 @@ export async function sendBookingConfirmation(params: {
 
 تم تأكيد حجزك بنجاح! ✅
 
-${params.doctorName ? `👨‍⚕️ الطبيب: ${params.doctorName}` : ""}
-${params.appointmentDate && params.appointmentTime ? `📅 التاريخ: ${params.appointmentDate}\n🕐 الوقت: ${params.appointmentTime}` : ""}
+${params.doctorName ? `👨‍⚕️ الطبيب: ${params.doctorName}` : ''}
+${params.appointmentDate && params.appointmentTime ? `📅 التاريخ: ${params.appointmentDate}\n🕐 الوقت: ${params.appointmentTime}` : ''}
 
 📍 الموقع: المستشفى السعودي الألماني - صنعاء
 
@@ -91,7 +91,7 @@ ${params.appointmentDate && params.appointmentTime ? `📅 التاريخ: ${par
 
 ${COMPANY_SLOGAN_AR} 💚`;
 
-  return sendTextMessage(params.phone, message, { priority: "high" });
+  return sendTextMessage(params.phone, message, { priority: 'high' });
 }
 
 /**
@@ -100,7 +100,7 @@ ${COMPANY_SLOGAN_AR} 💚`;
 export async function sendCustomMessage(
   phone: string,
   message: string,
-  options?: { priority?: "high" | "normal" | "low" }
+  options?: { priority?: 'high' | 'normal' | 'low' }
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   return sendTextMessage(phone, message, options);
 }
@@ -132,7 +132,10 @@ export async function verifyWhatsAppHealth(): Promise<{
   const errors: string[] = [];
 
   const cloudApiReady = !!(ENV.whatsappPhoneNumberId && ENV.metaAccessToken);
-  if (!cloudApiReady) errors.push("WhatsApp Cloud API not configured (missing WHATSAPP_PHONE_NUMBER_ID or META_ACCESS_TOKEN)");
+  if (!cloudApiReady)
+    errors.push(
+      'WhatsApp Cloud API not configured (missing WHATSAPP_PHONE_NUMBER_ID or META_ACCESS_TOKEN)'
+    );
 
   const setup = {
     phoneNumberConfigured: !!ENV.whatsappPhoneNumberId,
@@ -174,7 +177,7 @@ export async function verifyWhatsAppHealth(): Promise<{
         : null;
 
       if (ENV.appId && setup.currentAppSubscribed === false) {
-        errors.push("Current Meta app is not subscribed to this WABA");
+        errors.push('Current Meta app is not subscribed to this WABA');
       }
     } else if (subscriptions.error) {
       errors.push(`WABA subscription health check failed: ${subscriptions.error}`);

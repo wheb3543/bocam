@@ -1,0 +1,103 @@
+import js from '@eslint/js';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsparser from '@typescript-eslint/parser';
+import react from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
+
+export default [
+  js.configs.recommended,
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      parser: tsparser,
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        window: 'readonly',
+        document: 'readonly',
+        navigator: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      react,
+      'react-hooks': reactHooks,
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
+      '@typescript-eslint/preserve-caught-error': 'off',
+      '@typescript-eslint/no-throw-literal': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+      'react/display-name': 'off',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'off',
+      'no-console': 'off',
+      'no-debugger': 'off',
+      'no-alert': 'off',
+      'no-prototype-builtins': 'off',
+      'no-empty': 'off',
+      'no-constant-condition': 'off',
+      'no-fallthrough': 'off',
+      'no-case-declarations': 'off',
+      'no-undef': 'off',
+      'no-redeclare': 'off',
+      'no-unused-vars': 'off',
+      'no-sequences': 'off',
+      'no-return-await': 'off',
+      'no-async-promise-executor': 'off',
+      'no-promise-executor-return': 'off',
+      'prefer-const': 'off',
+      'eqeqeq': 'off',
+      'curly': 'off',
+      'no-control-regex': 'off',
+      'no-useless-assignment': 'off',
+      'no-useless-catch': 'off',
+      'no-useless-escape': 'off',
+      'no-unused-eslint-disable-comments': 'off',
+      'no-throw-literal': 'off',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+  },
+  {
+    ignores: [
+      'dist/**',
+      'build/**',
+      'node_modules/**',
+      '*.config.js',
+      '*.config.ts',
+      '.eslintrc.js',
+      'eslint.config.js',
+      'postman/**',
+      'coverage/**',
+      '.next/**',
+      'out/**',
+      'scripts/**',
+      'tools/**',
+      'patches/**',
+      'license-files/**',
+      'deploy/**',
+    ],
+  },
+];

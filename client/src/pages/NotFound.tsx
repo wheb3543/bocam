@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, Home } from "lucide-react";
-import { useLocation } from "wouter";
-import PageLayout from "@/components/layout/PageLayout";
-import HeroSection from "@/components/HeroSection";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { AlertCircle, Home } from 'lucide-react';
+import { useLocation } from 'wouter';
+import PageLayout from '@/components/layout/PageLayout';
+import HeroSection from '@/components/HeroSection';
 
 export default function NotFound() {
   const [, setLocation] = useLocation();
 
   const handleGoHome = () => {
-    setLocation("/");
+    setLocation('/');
   };
 
   return (
@@ -22,7 +22,7 @@ export default function NotFound() {
         title="404"
         subtitle="صفحة غير موجودة"
         description="عذراً، الصفحة التي تبحث عنها غير موجودة. قد تم نقلها أو حذفها."
-        badge={{ text: "خطأ", icon: AlertCircle }}
+        badge={{ text: 'خطأ', icon: AlertCircle }}
         backgroundGradient="from-red-600 via-red-700 to-orange-600"
       >
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">

@@ -1,14 +1,14 @@
 /**
  * usePagination - Hook مشترك لإدارة حالة ترقيم الصفحات
- * 
+ *
  * يوفر:
  * - إدارة الصفحة الحالية وحجم الصفحة
  * - حساب عدد الصفحات الكلي
  * - تقطيع البيانات حسب الصفحة الحالية
  * - إعادة تعيين الصفحة عند تغيير الفلاتر
  */
-import { useState, useMemo, useCallback } from "react";
-import type { PageSizeValue } from "@/components/table/Pagination";
+import { useState, useMemo, useCallback } from 'react';
+import type { PageSizeValue } from '@/components/table/Pagination';
 
 interface UsePaginationOptions {
   /** حجم الصفحة الافتراضي */
@@ -50,16 +50,16 @@ export function usePagination<T>(
   data: T[],
   options: UsePaginationOptions = {}
 ): UsePaginationReturn<T> {
-  const { defaultPageSize = "100", defaultPage = 1 } = options;
+  const { defaultPageSize = '100', defaultPage = 1 } = options;
 
   const [currentPage, setCurrentPage] = useState(defaultPage);
   const [pageSize, setPageSizeState] = useState<PageSizeValue>(defaultPageSize);
 
-  const numericPageSize = pageSize === "all" ? data.length : parseInt(pageSize);
-  const totalPages = pageSize === "all" ? 1 : Math.max(1, Math.ceil(data.length / numericPageSize));
+  const numericPageSize = pageSize === 'all' ? data.length : parseInt(pageSize);
+  const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(data.length / numericPageSize));
 
   const paginatedData = useMemo(() => {
-    if (pageSize === "all") return data;
+    if (pageSize === 'all') return data;
     const start = (currentPage - 1) * numericPageSize;
     return data.slice(start, start + numericPageSize);
   }, [data, currentPage, numericPageSize, pageSize]);
@@ -73,15 +73,18 @@ export function usePagination<T>(
     setCurrentPage(1);
   }, []);
 
-  const paginationProps = useMemo(() => ({
-    currentPage,
-    totalPages,
-    onPageChange: setCurrentPage,
-    totalItems: data.length,
-    itemsPerPage: numericPageSize,
-    pageSize,
-    onPageSizeChange: setPageSize,
-  }), [currentPage, totalPages, data.length, numericPageSize, pageSize, setPageSize]);
+  const paginationProps = useMemo(
+    () => ({
+      currentPage,
+      totalPages,
+      onPageChange: setCurrentPage,
+      totalItems: data.length,
+      itemsPerPage: numericPageSize,
+      pageSize,
+      onPageSizeChange: setPageSize,
+    }),
+    [currentPage, totalPages, data.length, numericPageSize, pageSize, setPageSize]
+  );
 
   return {
     currentPage,

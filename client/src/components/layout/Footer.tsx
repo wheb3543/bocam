@@ -1,11 +1,11 @@
 /**
  * Footer Component - تذييل الصفحة
- * 
+ *
  * Unified footer for all public pages with improved responsive layout
  */
-import { Phone, MapPin, Clock } from "lucide-react";
-import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from "@/const";
-import { Link } from "wouter";
+import { Phone, MapPin, Clock } from 'lucide-react';
+import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from '@/const';
+import { Link } from 'wouter';
 
 export default function Footer() {
   return (
@@ -20,7 +20,9 @@ export default function Footer() {
               className="h-8 sm:h-10 w-auto mx-auto sm:mx-0 mb-2 sm:mb-3"
             />
             <p className="text-green-100 text-xs sm:text-sm font-medium">{APP_TITLE}</p>
-            <p className="text-green-300 text-[10px] sm:text-xs mt-1 sm:mt-1.5">{getCompanySlogan()}</p>
+            <p className="text-green-300 text-[10px] sm:text-xs mt-1 sm:mt-1.5">
+              {getCompanySlogan()}
+            </p>
             <p className="text-green-400/70 text-[10px] sm:text-xs mt-2 sm:mt-3 leading-relaxed max-w-xs mx-auto sm:mx-0">
               منصة الحجز الإلكترونية لـ {COMPANY_ARABIC_NAME}
             </p>
@@ -28,11 +30,15 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="text-center sm:text-right">
-            <h3 className="font-bold text-sm sm:text-base mb-3 sm:mb-4 text-green-100">روابط سريعة</h3>
+            <h3 className="font-bold text-sm sm:text-base mb-3 sm:mb-4 text-green-100">
+              روابط سريعة
+            </h3>
             <ul className="space-y-2 sm:space-y-2.5 text-green-200 text-xs sm:text-sm">
               <li>
                 <Link href="/">
-                  <span className="hover:text-white transition-colors cursor-pointer">الرئيسية</span>
+                  <span className="hover:text-white transition-colors cursor-pointer">
+                    الرئيسية
+                  </span>
                 </Link>
               </li>
               <li>
@@ -42,17 +48,23 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/visiting-doctors">
-                  <span className="hover:text-white transition-colors cursor-pointer">الأطباء الزائرين</span>
+                  <span className="hover:text-white transition-colors cursor-pointer">
+                    الأطباء الزائرين
+                  </span>
                 </Link>
               </li>
               <li>
                 <Link href="/offers">
-                  <span className="hover:text-white transition-colors cursor-pointer">العروض الطبية</span>
+                  <span className="hover:text-white transition-colors cursor-pointer">
+                    العروض الطبية
+                  </span>
                 </Link>
               </li>
               <li>
                 <Link href="/camps">
-                  <span className="hover:text-white transition-colors cursor-pointer">المخيمات الطبية</span>
+                  <span className="hover:text-white transition-colors cursor-pointer">
+                    المخيمات الطبية
+                  </span>
                 </Link>
               </li>
             </ul>
@@ -60,11 +72,16 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div className="text-center sm:text-right">
-            <h3 className="font-bold text-sm sm:text-base mb-3 sm:mb-4 text-green-100">تواصل معنا</h3>
+            <h3 className="font-bold text-sm sm:text-base mb-3 sm:mb-4 text-green-100">
+              تواصل معنا
+            </h3>
             <div className="space-y-2.5 sm:space-y-3 text-green-200 text-xs sm:text-sm">
               <div className="flex items-center gap-2 sm:gap-2.5 justify-center sm:justify-start">
                 <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 shrink-0" />
-                <a href={`tel:${COMPANY_PHONE}`} className="hover:text-white transition-colors font-medium">
+                <a
+                  href={`tel:${COMPANY_PHONE}`}
+                  className="hover:text-white transition-colors font-medium"
+                >
                   {COMPANY_PHONE}
                 </a>
               </div>
@@ -86,7 +103,9 @@ export default function Footer() {
           </p>
           <div className="mt-2 flex items-center justify-center gap-3">
             <Link href="/privacy-policy">
-              <span className="hover:text-green-200 transition-colors cursor-pointer">سياسة الخصوصية</span>
+              <span className="hover:text-green-200 transition-colors cursor-pointer">
+                سياسة الخصوصية
+              </span>
             </Link>
           </div>
         </div>

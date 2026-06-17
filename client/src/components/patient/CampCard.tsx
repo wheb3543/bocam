@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tent } from "lucide-react";
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tent } from 'lucide-react';
 
 type CampCardProps = {
   item: any;
@@ -13,12 +13,12 @@ export default function CampCard({ item, formatDate }: CampCardProps) {
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold truncate">{item.fullName || "تسجيل مخيم"}</p>
+            <p className="text-sm font-semibold truncate">{item.fullName || 'تسجيل مخيم'}</p>
             <p className="text-xs text-muted-foreground mt-1">{formatDate(item.createdAt)}</p>
           </div>
           <div className="flex items-center gap-2">
             <Tent className="h-4 w-4 text-purple-600" />
-            <Badge variant="outline">{item.status || "registered"}</Badge>
+            <Badge variant="outline">{item.status || 'registered'}</Badge>
           </div>
         </div>
       </CardContent>

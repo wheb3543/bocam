@@ -1,15 +1,15 @@
 /**
  * Backup Manager Module
- * 
+ *
  * نظام إدارة النسخ الاحتياطي التلقائي واليدوي
- * 
+ *
  * الميزات:
  * - النسخ الاحتياطي اليدوي والتلقائي
  * - تخزين النسخ محلياً وفي السحابة
  * - إدارة جداول النسخ الاحتياطي في قاعدة البيانات
  * - دعم AWS S3 و Cloudflare R2
  * - إدارة الاحتفاظ بالنسخ القديمة
- * 
+ *
  * @module backupManager
  */
 
@@ -140,18 +140,18 @@ function copyDirectory(source: string, destination: string): void {
  */
 async function createLocalBackup(backupName: string, config: BackupConfig): Promise<string> {
   console.log(`💾 Creating local backup: ${backupName}`);
-  
+
   ensureBackupDirectories();
-  
+
   const backupPath = path.join(BACKUP_DIR, backupName);
-  
+
   // حذف النسخة القديمة إذا وجدت
   if (fs.existsSync(backupPath)) {
     fs.rmSync(backupPath, { recursive: true, force: true });
   }
-  
+
   fs.mkdirSync(backupPath, { recursive: true });
-  
+
   // الملفات والمجلدات للنسخ الاحتياطي
   const itemsToBackup = [
     'package.json',
@@ -164,14 +164,14 @@ async function createLocalBackup(backupName: string, config: BackupConfig): Prom
     'shared',
     'uploads',
   ];
-  
+
   for (const item of itemsToBackup) {
     const sourcePath = path.join(process.cwd(), item);
     const destPath = path.join(backupPath, item);
-    
+
     if (fs.existsSync(sourcePath)) {
       console.log(`   Backing up: ${item}`);
-      
+
       if (fs.statSync(sourcePath).isDirectory()) {
         copyDirectory(sourcePath, destPath);
       } else {
@@ -179,7 +179,7 @@ async function createLocalBackup(backupName: string, config: BackupConfig): Prom
       }
     }
   }
-  
+
   // نسخ قاعدة البيانات
   try {
     console.log('   Backing up database...');
@@ -187,11 +187,13 @@ async function createLocalBackup(backupName: string, config: BackupConfig): Prom
   } catch (error) {
     console.warn('⚠️  Database backup failed:', error);
   }
-  
+
   // حساب حجم النسخة
   const backupSize = calculateSize(backupPath);
-  console.log(`✅ Local backup created: ${backupPath} (${(backupSize / 1024 / 1024).toFixed(2)} MB)`);
-  
+  console.log(
+    `✅ Local backup created: ${backupPath} (${(backupSize / 1024 / 1024).toFixed(2)} MB)`
+  );
+
   return backupPath;
 }
 
@@ -201,28 +203,28 @@ async function createLocalBackup(backupName: string, config: BackupConfig): Prom
 async function backupDatabase(backupPath: string): Promise<void> {
   const dbBackupPath = path.join(backupPath, 'database');
   fs.mkdirSync(dbBackupPath, { recursive: true });
-  
+
   // استخراج إعدادات قاعدة البيانات من البيئة
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
     console.warn('⚠️  DATABASE_URL not found, skipping database backup');
     return;
   }
-  
+
   try {
     // استخدام mysqldump للنسخ الاحتياطي
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const dbBackupFile = path.join(dbBackupPath, `database-${timestamp}.sql`);
-    
+
     // تحليل DATABASE_URL للحصول على إعدادات الاتصال
     const url = new URL(dbUrl);
     const dbHost = url.hostname;
     const dbPort = url.port || '3306';
     const dbUser = url.username;
     const dbName = url.pathname.slice(1);
-    
+
     const command = `mysqldump -h ${dbHost} -P ${dbPort} -u ${dbUser} -p${url.password} ${dbName} > ${dbBackupFile}`;
-    
+
     await execAsync(command);
     console.log(`✅ Database backup created: ${dbBackupFile}`);
   } catch (error) {
@@ -234,14 +236,18 @@ async function backupDatabase(backupPath: string): Promise<void> {
 /**
  * إنشاء نسخة احتياطية في السحابة
  */
-async function createCloudBackup(backupPath: string, backupName: string, config: BackupConfig): Promise<void> {
+async function createCloudBackup(
+  backupPath: string,
+  backupName: string,
+  config: BackupConfig
+): Promise<void> {
   console.log(`☁️  Creating cloud backup: ${backupName}`);
-  
+
   if (!config.cloudProvider) {
     console.warn('⚠️  No cloud provider specified, skipping cloud backup');
     return;
   }
-  
+
   if (config.cloudProvider === 'aws') {
     await uploadToS3(backupPath, backupName);
   } else if (config.cloudProvider === 'r2') {
@@ -255,7 +261,7 @@ async function createCloudBackup(backupPath: string, backupName: string, config:
 async function uploadToS3(backupPath: string, backupName: string): Promise<void> {
   try {
     const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
-    
+
     const s3Client = new S3Client({
       region: process.env.AWS_REGION || 'us-east-1',
       credentials: {
@@ -263,9 +269,9 @@ async function uploadToS3(backupPath: string, backupName: string): Promise<void>
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
       },
     });
-    
+
     const bucketName = process.env.AWS_S3_BUCKET || 'bocam-backups';
-    
+
     // رفع الملفات بشكل متكرر
     const uploadFile = async (filePath: string, key: string) => {
       const fileStream = fs.createReadStream(filePath);
@@ -274,18 +280,18 @@ async function uploadToS3(backupPath: string, backupName: string): Promise<void>
         Key: key,
         Body: fileStream,
       });
-      
+
       await s3Client.send(command);
       console.log(`   Uploaded: ${key}`);
     };
-    
+
     const uploadDirectory = async (dirPath: string, baseKey: string) => {
       const files = fs.readdirSync(dirPath);
-      
+
       for (const file of files) {
         const fullPath = path.join(dirPath, file);
         const key = path.join(baseKey, file);
-        
+
         if (fs.statSync(fullPath).isDirectory()) {
           await uploadDirectory(fullPath, key);
         } else {
@@ -293,7 +299,7 @@ async function uploadToS3(backupPath: string, backupName: string): Promise<void>
         }
       }
     };
-    
+
     await uploadDirectory(backupPath, backupName);
     console.log('✅ Cloud backup uploaded to S3');
   } catch (error) {
@@ -308,7 +314,7 @@ async function uploadToS3(backupPath: string, backupName: string): Promise<void>
 async function uploadToR2(backupPath: string, backupName: string): Promise<void> {
   try {
     const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
-    
+
     const r2Client = new S3Client({
       region: 'auto',
       endpoint: process.env.R2_ENDPOINT || 'https://<accountid>.r2.cloudflarestorage.com',
@@ -317,9 +323,9 @@ async function uploadToR2(backupPath: string, backupName: string): Promise<void>
         secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
       },
     });
-    
+
     const bucketName = process.env.R2_BUCKET_NAME || 'bocam-backups';
-    
+
     // رفع الملفات بشكل متكرر
     const uploadFile = async (filePath: string, key: string) => {
       const fileStream = fs.createReadStream(filePath);
@@ -328,18 +334,18 @@ async function uploadToR2(backupPath: string, backupName: string): Promise<void>
         Key: key,
         Body: fileStream,
       });
-      
+
       await r2Client.send(command);
       console.log(`   Uploaded: ${key}`);
     };
-    
+
     const uploadDirectory = async (dirPath: string, baseKey: string) => {
       const files = fs.readdirSync(dirPath);
-      
+
       for (const file of files) {
         const fullPath = path.join(dirPath, file);
         const key = path.join(baseKey, file);
-        
+
         if (fs.statSync(fullPath).isDirectory()) {
           await uploadDirectory(fullPath, key);
         } else {
@@ -347,7 +353,7 @@ async function uploadToR2(backupPath: string, backupName: string): Promise<void>
         }
       }
     };
-    
+
     await uploadDirectory(backupPath, backupName);
     console.log('✅ Cloud backup uploaded to R2');
   } catch (error) {
@@ -362,11 +368,11 @@ async function uploadToR2(backupPath: string, backupName: string): Promise<void>
 async function saveBackupToDatabase(backupInfo: BackupInfo): Promise<number> {
   try {
     const db = await getDb();
-    
+
     if (!db) {
       throw new Error('Database not available');
     }
-    
+
     const result = await db.execute(sql`
       INSERT INTO backup (
         backup_name,
@@ -390,7 +396,7 @@ async function saveBackupToDatabase(backupInfo: BackupInfo): Promise<number> {
         ${JSON.stringify(backupInfo.metadata || {})}
       )
     `);
-    
+
     console.log('✅ Backup info saved to database');
     const rows = result as any;
     return rows.insertId;
@@ -403,14 +409,18 @@ async function saveBackupToDatabase(backupInfo: BackupInfo): Promise<number> {
 /**
  * تحديث حالة النسخ الاحتياطي في قاعدة البيانات
  */
-async function updateBackupStatus(backupId: number, status: BackupStatus, errorMessage?: string): Promise<void> {
+async function updateBackupStatus(
+  backupId: number,
+  status: BackupStatus,
+  errorMessage?: string
+): Promise<void> {
   try {
     const db = await getDb();
-    
+
     if (!db) {
       throw new Error('Database not available');
     }
-    
+
     await db.execute(sql`
       UPDATE backup
       SET backup_status = ${status},
@@ -418,7 +428,7 @@ async function updateBackupStatus(backupId: number, status: BackupStatus, errorM
           completed_at = ${status === 'completed' ? new Date() : null}
       WHERE id = ${backupId}
     `);
-    
+
     console.log(`✅ Backup status updated: ${status}`);
   } catch (error) {
     console.error('❌ Failed to update backup status:', error);
@@ -432,17 +442,17 @@ async function updateBackupStatus(backupId: number, status: BackupStatus, errorM
 export async function getBackupHistory(limit: number = 50): Promise<BackupInfo[]> {
   try {
     const db = await getDb();
-    
+
     if (!db) {
       throw new Error('Database not available');
     }
-    
+
     const result = await db.execute(sql`
       SELECT * FROM backup
       ORDER BY created_at DESC
       LIMIT ${limit}
     `);
-    
+
     const rows = result as any;
     return rows as BackupInfo[];
   } catch (error) {
@@ -457,34 +467,34 @@ export async function getBackupHistory(limit: number = 50): Promise<BackupInfo[]
 async function cleanupOldBackups(retentionDays: number): Promise<void> {
   try {
     const db = await getDb();
-    
+
     if (!db) {
       console.warn('Database not available, skipping cleanup');
       return;
     }
-    
+
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-    
+
     // حذف من قاعدة البيانات
     await db.execute(sql`
       DELETE FROM backup
       WHERE created_at < ${cutoffDate}
       AND backup_status = 'completed'
     `);
-    
+
     // حذف الملفات المحلية
     const backups = fs.readdirSync(BACKUP_DIR);
     for (const backup of backups) {
       const backupPath = path.join(BACKUP_DIR, backup);
       const stats = fs.statSync(backupPath);
-      
+
       if (stats.mtime < cutoffDate) {
         fs.rmSync(backupPath, { recursive: true, force: true });
         console.log(`🗑️  Deleted old backup: ${backup}`);
       }
     }
-    
+
     console.log('✅ Old backups cleaned up');
   } catch (error) {
     console.error('❌ Failed to cleanup old backups:', error);
@@ -508,51 +518,51 @@ export async function createBackup(backupName: string, config: BackupConfig): Pr
       createdAt: new Date().toISOString(),
     },
   };
-  
+
   try {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('💾 STARTING BACKUP PROCESS');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    
+
     // حفظ معلومات النسخ الاحتياطي في قاعدة البيانات
     const backupId = await saveBackupToDatabase(backupInfo);
     backupInfo.id = backupId;
-    
+
     // إنشاء النسخة الاحتياطية المحلية
     const localPath = await createLocalBackup(backupName, config);
     backupInfo.backupPath = localPath;
     backupInfo.backupSize = calculateSize(localPath);
-    
+
     // إنشاء النسخة الاحتياطية في السحابة إذا لزم الأمر
     if (config.backupLocation === 'cloud' || config.backupLocation === 'both') {
       await createCloudBackup(localPath, backupName, config);
       backupInfo.cloudPath = `${config.cloudProvider}/${backupName}`;
     }
-    
+
     // تحديث الحالة إلى مكتمل
     backupInfo.backupStatus = 'completed';
     await updateBackupStatus(backupId, 'completed');
-    
+
     // تنظيف النسخ القديمة
     if (config.retentionDays) {
       await cleanupOldBackups(config.retentionDays);
     }
-    
+
     console.log('✅ BACKUP COMPLETED SUCCESSFULLY');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    
+
     return backupInfo;
   } catch (error) {
     console.error('❌ BACKUP FAILED:', error);
-    
+
     // تحديث الحالة إلى فاشل
     backupInfo.backupStatus = 'failed';
     backupInfo.errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
+
     if (backupInfo.id) {
       await updateBackupStatus(backupInfo.id, 'failed', backupInfo.errorMessage);
     }
-    
+
     throw error;
   }
 }
@@ -563,25 +573,25 @@ export async function createBackup(backupName: string, config: BackupConfig): Pr
 export async function restoreBackup(backupId: number): Promise<void> {
   try {
     const db = await getDb();
-    
+
     if (!db) {
       throw new Error('Database not available');
     }
-    
+
     // الحصول على معلومات النسخ الاحتياطي
     const result = await db.execute(sql`
       SELECT * FROM backup WHERE id = ${backupId}
     `);
-    
+
     const rows = result as any;
     const backup = rows[0] as BackupInfo;
-    
+
     if (!backup) {
       throw new Error('Backup not found');
     }
-    
+
     console.log(`🔄 Restoring backup: ${backup.backupName}`);
-    
+
     // استعادة الملفات
     if (fs.existsSync(backup.backupPath)) {
       const itemsToRestore = [
@@ -594,14 +604,14 @@ export async function restoreBackup(backupId: number): Promise<void> {
         'client',
         'shared',
       ];
-      
+
       for (const item of itemsToRestore) {
         const sourcePath = path.join(backup.backupPath, item);
         const destPath = path.join(process.cwd(), item);
-        
+
         if (fs.existsSync(sourcePath)) {
           console.log(`   Restoring: ${item}`);
-          
+
           if (fs.statSync(sourcePath).isDirectory()) {
             if (fs.existsSync(destPath)) {
               fs.rmSync(destPath, { recursive: true, force: true });
@@ -613,7 +623,7 @@ export async function restoreBackup(backupId: number): Promise<void> {
         }
       }
     }
-    
+
     console.log('✅ Backup restored successfully');
   } catch (error) {
     console.error('❌ Restore failed:', error);
@@ -627,41 +637,41 @@ export async function restoreBackup(backupId: number): Promise<void> {
 export async function deleteBackup(backupId: number): Promise<void> {
   try {
     const db = await getDb();
-    
+
     if (!db) {
       throw new Error('Database not available');
     }
-    
+
     // الحصول على معلومات النسخ الاحتياطي
     const result = await db.execute(sql`
       SELECT * FROM backup WHERE id = ${backupId}
     `);
-    
+
     const rows = result as any;
     const backup = rows[0] as BackupInfo;
-    
+
     if (!backup) {
       throw new Error('Backup not found');
     }
-    
+
     console.log(`🗑️  Deleting backup: ${backup.backupName}`);
-    
+
     // حذف الملف المحلي
     if (fs.existsSync(backup.backupPath)) {
       fs.rmSync(backup.backupPath, { recursive: true, force: true });
     }
-    
+
     // حذف من السحابة
     if (backup.cloudPath) {
       // TODO: إضافة حذف من السحابة
       console.log(`   Cloud deletion not implemented yet: ${backup.cloudPath}`);
     }
-    
+
     // حذف من قاعدة البيانات
     await db.execute(sql`
       DELETE FROM backup WHERE id = ${backupId}
     `);
-    
+
     console.log('✅ Backup deleted successfully');
   } catch (error) {
     console.error('❌ Delete failed:', error);

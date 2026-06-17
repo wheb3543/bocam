@@ -1,13 +1,13 @@
-import { lazy, Suspense } from "react";
-import ManualRegistrationForm from "@/components/form/ManualRegistrationForm";
-import NotificationCenter from "@/components/notification/NotificationCenter";
-import SourceAnalytics from "@/components/dashboard/SourceAnalytics";
-import QuickPatientSearch from "@/components/dashboard/QuickPatientSearch";
-import DetailedStatsCards from "@/components/dashboard/DetailedStatsCards";
-const DashboardCharts = lazy(() => import("@/components/dashboard/DashboardCharts"));
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useLicense } from "@/hooks/integrations/useLicense";
-import FeatureLockedPage from "@/pages/admin/shared/FeatureLockedPage";
+import { lazy, Suspense } from 'react';
+import ManualRegistrationForm from '@/components/form/ManualRegistrationForm';
+import NotificationCenter from '@/components/notification/NotificationCenter';
+import SourceAnalytics from '@/components/dashboard/SourceAnalytics';
+import QuickPatientSearch from '@/components/dashboard/QuickPatientSearch';
+import DetailedStatsCards from '@/components/dashboard/DetailedStatsCards';
+const DashboardCharts = lazy(() => import('@/components/dashboard/DashboardCharts'));
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useLicense } from '@/hooks/integrations/useLicense';
+import FeatureLockedPage from '@/pages/admin/shared/FeatureLockedPage';
 
 export default function AdminDashboard() {
   const { hasFeature, isLicenseValid } = useLicense();
@@ -48,11 +48,13 @@ export default function AdminDashboard() {
 
         {/* Charts Dashboard - lazy loaded to reduce initial bundle */}
         <div className="mb-6 sm:mb-8">
-          <Suspense fallback={
-            <div className="h-64 sm:h-80 rounded-xl bg-muted/30 animate-pulse flex items-center justify-center">
-              <span className="text-sm text-muted-foreground">جاري تحميل الرسوم البيانية...</span>
-            </div>
-          }>
+          <Suspense
+            fallback={
+              <div className="h-64 sm:h-80 rounded-xl bg-muted/30 animate-pulse flex items-center justify-center">
+                <span className="text-sm text-muted-foreground">جاري تحميل الرسوم البيانية...</span>
+              </div>
+            }
+          >
             <DashboardCharts />
           </Suspense>
         </div>

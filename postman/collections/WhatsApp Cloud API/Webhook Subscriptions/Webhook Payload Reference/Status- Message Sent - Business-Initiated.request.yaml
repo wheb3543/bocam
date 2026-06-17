@@ -1,7 +1,7 @@
 $kind: http-request
-name: "Status: Message Sent - Business-Initiated"
-description: "The following notification is received when a business sends a message as part of a [business-initiated conversation](https://developers.facebook.com/docs/whatsapp/pricing/conversationpricing#how-it-works):"
-url: ""
+name: 'Status: Message Sent - Business-Initiated'
+description: 'The following notification is received when a business sends a message as part of a [business-initiated conversation](https://developers.facebook.com/docs/whatsapp/pricing/conversationpricing#how-it-works):'
+url: ''
 method: VIEW
 body:
   type: json

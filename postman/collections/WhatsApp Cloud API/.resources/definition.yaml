@@ -71,5 +71,5 @@ auth:
     type: bearer
     name: bearer auth
     credentials:
-      password: "{{User-Access-Token}}"
-      token: "{{User-Access-Token}}"
+      password: '{{User-Access-Token}}'
+      token: '{{User-Access-Token}}'

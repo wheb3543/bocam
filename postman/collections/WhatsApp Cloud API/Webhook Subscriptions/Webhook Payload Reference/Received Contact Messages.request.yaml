@@ -1,6 +1,6 @@
 $kind: http-request
-description: "The following is an example of a contact message you received from a customer:"
-url: ""
+description: 'The following is an example of a contact message you received from a customer:'
+url: ''
 method: VIEW
 body:
   type: json

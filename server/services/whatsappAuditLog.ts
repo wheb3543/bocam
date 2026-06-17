@@ -1,11 +1,10 @@
-
 export interface AuditLogEntry {
   id: string;
   timestamp: Date;
-  type: "message_sent" | "message_received" | "error" | "status_change" | "rule_change";
+  type: 'message_sent' | 'message_received' | 'error' | 'status_change' | 'rule_change';
   phone: string;
   message?: string;
-  status: "success" | "failed" | "pending";
+  status: 'success' | 'failed' | 'pending';
   details?: Record<string, unknown>;
   userId?: string;
   error?: string;
@@ -17,7 +16,7 @@ export async function logMessageSent(params: {
   phone: string;
   message: string;
   messageId: string;
-  type: "text" | "template" | "media" | "broadcast";
+  type: 'text' | 'template' | 'media' | 'broadcast';
   userId?: string;
 }): Promise<{ success: boolean; logId?: string; error?: string }> {
   try {
@@ -25,10 +24,10 @@ export async function logMessageSent(params: {
     const entry: AuditLogEntry = {
       id: logId,
       timestamp: new Date(),
-      type: "message_sent",
+      type: 'message_sent',
       phone: params.phone,
       message: params.message.substring(0, 200),
-      status: "success",
+      status: 'success',
       details: {
         messageId: params.messageId,
         messageType: params.type,
@@ -45,10 +44,10 @@ export async function logMessageSent(params: {
       logId,
     };
   } catch (error) {
-    console.error("[WhatsApp AuditLog] Failed to log message:", error);
+    console.error('[WhatsApp AuditLog] Failed to log message:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -63,10 +62,10 @@ export async function logMessageReceived(params: {
     const entry: AuditLogEntry = {
       id: logId,
       timestamp: new Date(),
-      type: "message_received",
+      type: 'message_received',
       phone: params.phone,
       message: params.message.substring(0, 200),
-      status: "success",
+      status: 'success',
       details: {
         messageId: params.messageId,
       },
@@ -81,10 +80,10 @@ export async function logMessageReceived(params: {
       logId,
     };
   } catch (error) {
-    console.error("[WhatsApp AuditLog] Failed to log received message:", error);
+    console.error('[WhatsApp AuditLog] Failed to log received message:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -100,9 +99,9 @@ export async function logError(params: {
     const entry: AuditLogEntry = {
       id: logId,
       timestamp: new Date(),
-      type: "error",
-      phone: params.phone || "unknown",
-      status: "failed",
+      type: 'error',
+      phone: params.phone || 'unknown',
+      status: 'failed',
       error: params.error,
       details: {
         errorType: params.type,
@@ -119,10 +118,10 @@ export async function logError(params: {
       logId,
     };
   } catch (error) {
-    console.error("[WhatsApp AuditLog] Failed to log error:", error);
+    console.error('[WhatsApp AuditLog] Failed to log error:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -167,18 +166,15 @@ export async function getAuditLogs(params?: {
       total: filtered.length,
     };
   } catch (error) {
-    console.error("[WhatsApp AuditLog] Failed to get logs:", error);
+    console.error('[WhatsApp AuditLog] Failed to get logs:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
 
-export async function getAuditStats(params?: {
-  startDate?: Date;
-  endDate?: Date;
-}): Promise<{
+export async function getAuditStats(params?: { startDate?: Date; endDate?: Date }): Promise<{
   success: boolean;
   stats?: {
     totalMessages: number;
@@ -203,10 +199,10 @@ export async function getAuditStats(params?: {
 
     const stats = {
       totalMessages: filtered.length,
-      sentMessages: filtered.filter((log) => log.type === "message_sent").length,
-      receivedMessages: filtered.filter((log) => log.type === "message_received").length,
-      failedMessages: filtered.filter((log) => log.status === "failed").length,
-      errorCount: filtered.filter((log) => log.type === "error").length,
+      sentMessages: filtered.filter((log) => log.type === 'message_sent').length,
+      receivedMessages: filtered.filter((log) => log.type === 'message_received').length,
+      failedMessages: filtered.filter((log) => log.status === 'failed').length,
+      errorCount: filtered.filter((log) => log.type === 'error').length,
       uniquePhones: new Set(filtered.map((log) => log.phone)).size,
     };
 
@@ -215,10 +211,10 @@ export async function getAuditStats(params?: {
       stats,
     };
   } catch (error) {
-    console.error("[WhatsApp AuditLog] Failed to get stats:", error);
+    console.error('[WhatsApp AuditLog] Failed to get stats:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -247,30 +243,29 @@ export async function exportAuditLogs(params?: {
       filtered = filtered.filter((log) => log.timestamp <= params.endDate!);
     }
 
-    const headers = ["ID", "Timestamp", "Type", "Phone", "Status", "Message", "Error"];
+    const headers = ['ID', 'Timestamp', 'Type', 'Phone', 'Status', 'Message', 'Error'];
     const rows = filtered.map((log) => [
       log.id,
       log.timestamp.toISOString(),
       log.type,
       log.phone,
       log.status,
-      log.message || "",
-      log.error || "",
+      log.message || '',
+      log.error || '',
     ]);
 
     const csv =
-      [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(",")).join("\n") +
-      "\n";
+      [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n') + '\n';
 
     return {
       success: true,
       csv,
     };
   } catch (error) {
-    console.error("[WhatsApp AuditLog] Failed to export logs:", error);
+    console.error('[WhatsApp AuditLog] Failed to export logs:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -299,10 +294,10 @@ export async function clearOldLogs(daysOld: number = 30): Promise<{
       deletedCount,
     };
   } catch (error) {
-    console.error("[WhatsApp AuditLog] Failed to clear old logs:", error);
+    console.error('[WhatsApp AuditLog] Failed to clear old logs:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }

@@ -3,11 +3,11 @@
  * Hook مشترك لتتبع النماذج المهجورة (الفرص الضائعة)
  * يُستخدم في صفحات الحجز الثلاث: الأطباء، العروض، المخيمات
  */
-import { useEffect, useRef, useCallback } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { getCompleteTrackingData } from "@/lib/tracking/tracking";
+import { useEffect, useRef, useCallback } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { getCompleteTrackingData } from '@/lib/tracking/tracking';
 
-type FormType = "appointment" | "offer" | "camp" | "general";
+type FormType = 'appointment' | 'offer' | 'camp' | 'general';
 
 interface AbandonedFormOptions {
   formType: FormType;
@@ -60,22 +60,21 @@ export function useAbandonedFormTracking({
       source: tracking?.source,
       utmSource: tracking?.utmSource,
       utmCampaign: tracking?.utmCampaign,
-
     });
   }, [formType, relatedId, relatedName, getFormData, saveAbandonedMutation]);
 
   useEffect(() => {
     const handleBeforeUnload = () => saveAbandoned();
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") saveAbandoned();
+      if (document.visibilityState === 'hidden') saveAbandoned();
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       // عند إلغاء تحميل المكوّن (مثل إغلاق Dialog) نسجّل أيضاً
       saveAbandoned();
     };

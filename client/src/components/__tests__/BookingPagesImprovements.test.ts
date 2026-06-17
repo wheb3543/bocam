@@ -10,7 +10,7 @@ function readFile(filePath: string): string {
 }
 
 describe('LeadStatsCards Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'LeadStatsCards.tsx'));
+  const content = readFile(path.join(componentsDir, 'lead/LeadStatsCards.tsx'));
 
   it('should have professional stat card design with icons', () => {
     expect(content).toContain('lucide-react');
@@ -31,7 +31,7 @@ describe('LeadStatsCards Improvements', () => {
 });
 
 describe('AppointmentStatsCards Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'AppointmentStatsCards.tsx'));
+  const content = readFile(path.join(componentsDir, 'booking/AppointmentStatsCards.tsx'));
 
   it('should have professional stat card design', () => {
     expect(content).toContain('lucide-react');
@@ -47,7 +47,7 @@ describe('AppointmentStatsCards Improvements', () => {
 });
 
 describe('EmptyState Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'EmptyState.tsx'));
+  const content = readFile(path.join(componentsDir, 'ui/EmptyState.tsx'));
 
   it('should have a professional empty state design', () => {
     expect(content).toContain('EmptyState');
@@ -67,7 +67,7 @@ describe('EmptyState Improvements', () => {
 });
 
 describe('LeadCard Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'LeadCard.tsx'));
+  const content = readFile(path.join(componentsDir, 'lead/LeadCard.tsx'));
 
   it('should have status indicator with colored dot', () => {
     expect(content).toMatch(/rounded-full|dot/);
@@ -91,7 +91,7 @@ describe('LeadCard Improvements', () => {
 });
 
 describe('AppointmentCard Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'AppointmentCard.tsx'));
+  const content = readFile(path.join(componentsDir, 'booking/AppointmentCard.tsx'));
 
   it('should have status indicator', () => {
     expect(content).toContain('Badge');
@@ -108,7 +108,7 @@ describe('AppointmentCard Improvements', () => {
 });
 
 describe('OfferLeadCard Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'OfferLeadCard.tsx'));
+  const content = readFile(path.join(componentsDir, 'offer/OfferLeadCard.tsx'));
 
   it('should have status indicator', () => {
     expect(content).toContain('Badge');
@@ -125,7 +125,7 @@ describe('OfferLeadCard Improvements', () => {
 });
 
 describe('CampRegistrationCard Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'CampRegistrationCard.tsx'));
+  const content = readFile(path.join(componentsDir, 'camp/CampRegistrationCard.tsx'));
 
   it('should have status indicator', () => {
     expect(content).toContain('Badge');
@@ -142,7 +142,7 @@ describe('CampRegistrationCard Improvements', () => {
 });
 
 describe('Pagination Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'Pagination.tsx'));
+  const content = readFile(path.join(componentsDir, 'ui/Pagination.tsx'));
 
   it('should have page navigation buttons', () => {
     expect(content).toContain('ChevronLeft');
@@ -159,7 +159,7 @@ describe('Pagination Improvements', () => {
 });
 
 describe('TableSkeleton Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'TableSkeleton.tsx'));
+  const content = readFile(path.join(componentsDir, 'ui/TableSkeleton.tsx'));
 
   it('should have skeleton loading animation', () => {
     expect(content).toContain('Skeleton');
@@ -215,7 +215,7 @@ describe('AppointmentsManagementPage Improvements', () => {
 });
 
 describe('OfferLeadsManagement Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'OfferLeadsManagement.tsx'));
+  const content = readFile(path.join(componentsDir, 'offer/OfferLeadsManagement.tsx'));
 
   it('should have improved stats cards with icons', () => {
     expect(content).toMatch(/bg-(blue|emerald|amber|red|purple)-/);
@@ -227,7 +227,7 @@ describe('OfferLeadsManagement Improvements', () => {
 });
 
 describe('CampRegistrationsManagement Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'CampRegistrationsManagement.tsx'));
+  const content = readFile(path.join(componentsDir, 'camp/CampRegistrationsManagement.tsx'));
 
   it('should have improved stats cards with icons', () => {
     expect(content).toMatch(/bg-(blue|emerald|amber|red|purple|teal)-/);

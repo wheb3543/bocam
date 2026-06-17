@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { MessageSquare, Trash2, Send } from "lucide-react";
-import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { ar } from "date-fns/locale";
+import { useState } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
+import { MessageSquare, Trash2, Send } from 'lucide-react';
+import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 interface CommentsSectionProps {
-  entityType: "appointment" | "lead" | "offerLead" | "campRegistration";
+  entityType: 'appointment' | 'lead' | 'offerLead' | 'campRegistration';
   entityId: number;
 }
 
 export default function CommentsSection({ entityType, entityId }: CommentsSectionProps) {
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState('');
   const utils = trpc.useUtils();
 
   // Fetch comments
@@ -26,29 +26,29 @@ export default function CommentsSection({ entityType, entityId }: CommentsSectio
   // Add comment mutation
   const addCommentMutation = trpc.comments.add.useMutation({
     onSuccess: () => {
-      toast.success("تم إضافة التعليق بنجاح");
-      setNewComment("");
+      toast.success('تم إضافة التعليق بنجاح');
+      setNewComment('');
       utils.comments.getByEntity.invalidate({ entityType, entityId });
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء إضافة التعليق");
+      toast.error('حدث خطأ أثناء إضافة التعليق');
     },
   });
 
   // Delete comment mutation
   const deleteCommentMutation = trpc.comments.delete.useMutation({
     onSuccess: () => {
-      toast.success("تم حذف التعليق بنجاح");
+      toast.success('تم حذف التعليق بنجاح');
       utils.comments.getByEntity.invalidate({ entityType, entityId });
     },
     onError: (error) => {
-      toast.error(error.message || "حدث خطأ أثناء حذف التعليق");
+      toast.error(error.message || 'حدث خطأ أثناء حذف التعليق');
     },
   });
 
   const handleAddComment = () => {
     if (!newComment.trim()) {
-      toast.error("الرجاء إدخال نص التعليق");
+      toast.error('الرجاء إدخال نص التعليق');
       return;
     }
 
@@ -60,7 +60,7 @@ export default function CommentsSection({ entityType, entityId }: CommentsSectio
   };
 
   const handleDeleteComment = (commentId: number) => {
-    if (confirm("هل أنت متأكد من حذف هذا التعليق؟")) {
+    if (confirm('هل أنت متأكد من حذف هذا التعليق؟')) {
       deleteCommentMutation.mutate({ commentId });
     }
   };

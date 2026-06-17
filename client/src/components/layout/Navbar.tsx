@@ -1,14 +1,14 @@
 /**
  * Navbar Component - شريط التنقل العلوي
- * 
+ *
  * Unified navigation bar for all public pages with mobile hamburger menu
  * Enhanced responsive design for all screen sizes
  */
-import { useState, useEffect, useRef } from "react";
-import { Phone, Menu, X, ChevronLeft } from "lucide-react";
-import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from "@/const";
-import { Link } from "wouter";
-import InstallPWAButton from "@/components/InstallPWAButton";
+import { useState, useEffect, useRef } from 'react';
+import { Phone, Menu, X, ChevronLeft } from 'lucide-react';
+import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from '@/const';
+import { Link } from 'wouter';
+import InstallPWAButton from '@/components/InstallPWAButton';
 
 export default function Navbar() {
   const location = window.location.pathname;
@@ -16,11 +16,11 @@ export default function Navbar() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const navItems = [
-    { label: "الرئيسية", path: "/" },
-    { label: "الأطباء", path: "/doctors" },
-    { label: "الأطباء الزائرين", path: "/visiting-doctors" },
-    { label: "العروض", path: "/offers" },
-    { label: "المخيمات الطبية", path: "/camps" },
+    { label: 'الرئيسية', path: '/' },
+    { label: 'الأطباء', path: '/doctors' },
+    { label: 'الأطباء الزائرين', path: '/visiting-doctors' },
+    { label: 'العروض', path: '/offers' },
+    { label: 'المخيمات الطبية', path: '/camps' },
   ];
 
   // Close menu on route change
@@ -36,15 +36,15 @@ export default function Navbar() {
       }
     }
     if (mobileMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
       // Prevent body scroll when menu is open
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     }
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = "";
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = '';
     };
   }, [mobileMenuOpen]);
 
@@ -59,7 +59,11 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="القائمة"
             >
-              {mobileMenuOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
+              ) : (
+                <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
+              )}
             </button>
 
             {/* Logo and Title */}
@@ -67,8 +71,12 @@ export default function Navbar() {
               <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 hover:opacity-80 transition-opacity cursor-pointer">
                 <img src="/icon-72x72.png" alt={APP_TITLE} className="h-6 w-auto" />
                 <div className="hidden xs:block sm:block">
-                  <h1 className="text-[11px] sm:text-sm md:text-lg font-bold text-green-900 dark:text-green-400 leading-tight line-clamp-1">{APP_TITLE}</h1>
-                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground dark:text-muted-foreground">{getCompanySlogan()}</p>
+                  <h1 className="text-[11px] sm:text-sm md:text-lg font-bold text-green-900 dark:text-green-400 leading-tight line-clamp-1">
+                    {APP_TITLE}
+                  </h1>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground dark:text-muted-foreground">
+                    {getCompanySlogan()}
+                  </p>
                 </div>
               </div>
             </Link>
@@ -80,8 +88,8 @@ export default function Navbar() {
                   <span
                     className={`text-sm font-medium transition-colors hover:text-green-600 dark:hover:text-green-400 cursor-pointer whitespace-nowrap ${
                       location === item.path
-                        ? "text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400 pb-1"
-                        : "text-foreground dark:text-gray-300"
+                        ? 'text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400 pb-1'
+                        : 'text-foreground dark:text-gray-300'
                     }`}
                   >
                     {item.label}
@@ -123,7 +131,7 @@ export default function Navbar() {
       <div
         ref={menuRef}
         className={`md:hidden fixed top-0 right-0 z-[70] h-full w-[75vw] max-w-[300px] bg-white dark:bg-card dark:bg-gray-900 shadow-2xl transform transition-transform duration-300 ease-in-out ${
-          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Menu Header */}
@@ -134,7 +142,9 @@ export default function Navbar() {
               <h2 className="text-xs sm:text-sm font-bold text-green-900 dark:text-green-400 leading-tight">
                 {COMPANY_ARABIC_NAME}
               </h2>
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground dark:text-muted-foreground">نرعاكم كأهالينا</p>
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground dark:text-muted-foreground">
+                نرعاكم كأهالينا
+              </p>
             </div>
           </div>
           <button
@@ -153,8 +163,8 @@ export default function Navbar() {
               <div
                 className={`flex items-center justify-between px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg sm:rounded-xl mb-0.5 sm:mb-1 transition-colors cursor-pointer ${
                   location === item.path
-                    ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold"
-                    : "text-foreground dark:text-gray-300 hover:bg-muted/50 dark:hover:bg-gray-800"
+                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold'
+                    : 'text-foreground dark:text-gray-300 hover:bg-muted/50 dark:hover:bg-gray-800'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >

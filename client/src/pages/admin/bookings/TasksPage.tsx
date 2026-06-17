@@ -1,14 +1,11 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import TasksSection from "@/components/TasksSection";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckSquare } from "lucide-react";
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import TasksSection from '@/components/TasksSection';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckSquare } from 'lucide-react';
 
 export default function TasksPage() {
   return (
-    <DashboardLayout
-      pageTitle="المهام"
-      pageDescription="عرض وإدارة جميع المهام من كل الأقسام"
-    >
+    <DashboardLayout pageTitle="المهام" pageDescription="عرض وإدارة جميع المهام من كل الأقسام">
       <div className="container mx-auto py-6 space-y-6" dir="rtl">
         <Card>
           <CardHeader>
@@ -16,15 +13,10 @@ export default function TasksPage() {
               <CheckSquare className="h-5 w-5" />
               جميع المهام
             </CardTitle>
-            <CardDescription>
-              عرض وإدارة جميع المهام من كل الأقسام
-            </CardDescription>
+            <CardDescription>عرض وإدارة جميع المهام من كل الأقسام</CardDescription>
           </CardHeader>
           <CardContent>
-            <TasksSection 
-              entityType="all"
-              entityId={0}
-            />
+            <TasksSection entityType="all" entityId={0} />
           </CardContent>
         </Card>
       </div>

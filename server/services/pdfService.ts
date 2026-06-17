@@ -48,7 +48,7 @@ function formatDateTime(date: Date): string {
 function addHeader(doc: PDFKit.PDFDocument, metadata: ExportMetadata) {
   // شعار المستشفى (سيتم تحميله من الملف)
   const logoPath = '/home/ubuntu/sgh-crm-portal/client/public/sgh-logo-full.png';
-  
+
   try {
     // إضافة الشعار على اليمين
     doc.image(logoPath, doc.page.width - 200, 30, { width: 150 });
@@ -80,7 +80,7 @@ function addHeader(doc: PDFKit.PDFDocument, metadata: ExportMetadata) {
 
   // معلومات إضافية
   let yPos = 150;
-  
+
   if (metadata.dateRange) {
     doc
       .fontSize(10)
@@ -121,10 +121,7 @@ function addFooter(doc: PDFKit.PDFDocument, metadata: ExportMetadata) {
     .stroke();
 
   // وقت التصدير على اليسار
-  doc
-    .fontSize(9)
-    .font(AMIRI_REGULAR)
-    .text(metadata.exportDate, 50, footerY, { align: 'left' });
+  doc.fontSize(9).font(AMIRI_REGULAR).text(metadata.exportDate, 50, footerY, { align: 'left' });
 
   // شعار "نرعاكم كأهالينا" في المنتصف
   doc.text(COMPANY_SLOGAN_AR, 0, footerY, {
@@ -157,26 +154,19 @@ function addTable(
   let yPos = tableTop;
 
   // رسم رؤوس الأعمدة (معكوسة لـ RTL)
-  doc
-    .fontSize(10)
-    .font(AMIRI_BOLD)
-    .fillColor('#2D6A4F');
+  doc.fontSize(10).font(AMIRI_BOLD).fillColor('#2D6A4F');
 
   // عكس ترتيب الأعمدة لـ RTL
   const reversedColumns = [...columns].reverse();
 
   reversedColumns.forEach((col, index) => {
     const xPos = tableLeft + index * columnWidth;
-    doc
-      .rect(xPos, yPos, columnWidth, rowHeight)
-      .fillAndStroke('#E8F5E9', '#2D6A4F');
-    
-    doc
-      .fillColor('#000')
-      .text(col.label, xPos + 5, yPos + 7, {
-        width: columnWidth - 10,
-        align: 'center',
-      });
+    doc.rect(xPos, yPos, columnWidth, rowHeight).fillAndStroke('#E8F5E9', '#2D6A4F');
+
+    doc.fillColor('#000').text(col.label, xPos + 5, yPos + 7, {
+      width: columnWidth - 10,
+      align: 'center',
+    });
   });
 
   yPos += rowHeight;
@@ -197,17 +187,13 @@ function addTable(
       const xPos = tableLeft + colIndex * columnWidth;
       const cellValue = row[col.key]?.toString() || '-';
 
-      doc
-        .rect(xPos, yPos, columnWidth, rowHeight)
-        .fillAndStroke(fillColor, '#CCCCCC');
+      doc.rect(xPos, yPos, columnWidth, rowHeight).fillAndStroke(fillColor, '#CCCCCC');
 
-      doc
-        .fillColor('#000')
-        .text(cellValue, xPos + 5, yPos + 7, {
-          width: columnWidth - 10,
-          align: 'center',
-          ellipsis: true,
-        });
+      doc.fillColor('#000').text(cellValue, xPos + 5, yPos + 7, {
+        width: columnWidth - 10,
+        align: 'center',
+        ellipsis: true,
+      });
     });
 
     yPos += rowHeight;

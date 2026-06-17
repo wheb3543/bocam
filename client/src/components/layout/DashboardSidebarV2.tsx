@@ -1,12 +1,12 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  LayoutDashboard, 
-  Settings as SettingsIcon, 
-  Send, 
-  MessageSquare, 
-  FileText, 
+import { useAuth } from '@/_core/hooks/useAuth';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  LayoutDashboard,
+  Settings as SettingsIcon,
+  Send,
+  MessageSquare,
+  FileText,
   BarChart3,
   MessageCircle,
   FileEdit,
@@ -43,16 +43,16 @@ import {
   Database,
   ShoppingCart,
   Package,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { trpc } from "@/lib/api/trpc";
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useSidebarState } from "@/hooks/ui/useSidebarState";
-import { useRecentlyUsed } from "@/hooks/data/useRecentlyUsed";
-import AllToolsDrawer from "@/components/AllToolsDrawer";
-import EditSidebarModal from "@/components/EditSidebarModal";
-import InstallPWAButton from "@/components/InstallPWAButton";
-import useSSE from "@/hooks/integrations/useSSE";
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { trpc } from '@/lib/api/trpc';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useSidebarState } from '@/hooks/ui/useSidebarState';
+import { useRecentlyUsed } from '@/hooks/data/useRecentlyUsed';
+import AllToolsDrawer from '@/components/AllToolsDrawer';
+import EditSidebarModal from '@/components/EditSidebarModal';
+import InstallPWAButton from '@/components/InstallPWAButton';
+import useSSE from '@/hooks/integrations/useSSE';
 
 export interface NavItem {
   title: string;
@@ -71,139 +71,405 @@ export interface NavGroup {
 
 // جميع العناصر المتاحة
 const allNavItems: NavItem[] = [
-  { id: "home", title: "الرئيسية", href: "/admin", icon: Home },
-  { id: "profile", title: "الملف الشخصي", href: "/admin/profile", icon: User },
-  { id: "leads", title: "العملاء المحتملين", href: "/admin/bookings/leads", icon: UserCheck, hasDot: true },
-  { id: "appointments", title: "مواعيد الأطباء", href: "/admin/bookings/appointments", icon: Calendar },
-  { id: "offer-leads", title: "عروض العملاء", href: "/admin/bookings/offer-leads", icon: Gift },
-  { id: "camp-registrations", title: "تسجيلات المخيمات", href: "/admin/bookings/camp-registrations", icon: Tent },
-  { id: "customers", title: "ملفات العملاء", href: "/admin/bookings/customers", icon: Contact },
-  { id: "tasks", title: "المهام", href: "/admin/bookings/tasks", icon: CheckSquare },
-  { id: "bookings", title: "إدارة الحجوزات", href: "/admin/bookings", icon: ClipboardList },
-  { id: "reports", title: "التقارير", href: "/admin/reports/reports", icon: FileText },
-  { id: "analytics", title: "التحليلات", href: "/admin/reports/analytics", icon: BarChart3 },
-  { id: "bi", title: "ذكاء الأعمال (BI)", href: "/admin/reports/bi", icon: TrendingUp },
-  { id: "camp-stats", title: "إحصائيات المخيمات", href: "/admin/reports/camp-stats", icon: BarChart3 },
-  { id: "tracking-settings", title: "إعدادات التتبع", href: "/admin/tracking-settings", icon: SettingsIcon },
-  { id: "whatsapp", title: "الرسائل والمحادثات", href: "/admin/whatsapp", icon: MessageCircle },
-  { id: "whatsapp-dashboard", title: "لوحة تحكم واتساب", href: "/admin/whatsapp/whatsapp-dashboard", icon: BarChart3 },
-  { id: "whatsapp-templates", title: "قوالب الرسائل", href: "/admin/whatsapp/templates", icon: FileText },
-  { id: "whatsapp-analytics", title: "تحليلات واتساب", href: "/admin/whatsapp/analytics", icon: BarChart3 },
-  { id: "whatsapp-broadcast", title: "بث واتساب", href: "/admin/whatsapp/broadcast", icon: Radio },
-  { id: "whatsapp-auto-reply", title: "الرد التلقائي", href: "/admin/whatsapp/auto-reply", icon: MessageSquare },
-  { id: "whatsapp-compliance", title: "الأمان والامتثال", href: "/admin/whatsapp/compliance", icon: SettingsIcon },
-  { id: "whatsapp-appointments", title: "سجل الإشعارات", href: "/admin/whatsapp/appointments", icon: Calendar },
-  { id: "whatsapp-connection", title: "إعدادات الاتصال", href: "/admin/whatsapp/connection", icon: SettingsIcon },
-  { id: "whatsapp-integration", title: "التكامل", href: "/admin/whatsapp/integration", icon: Smartphone },
-  { id: "whatsapp-account-health", title: "صحة الحساب", href: "/admin/whatsapp/account-health", icon: Shield },
-  { id: "whatsapp-phone-quality", title: "جودة الرقم", href: "/admin/whatsapp/phone-quality", icon: Smartphone },
-  { id: "whatsapp-subscriptions", title: "الاشتراكات", href: "/admin/whatsapp/subscriptions", icon: Users },
-  { id: "whatsapp-webhook-inspector", title: "فاحص الأحداث", href: "/admin/whatsapp/webhook-inspector", icon: Terminal },
-  { id: "messages", title: "الرسائل", href: "/admin/communications/messages", icon: MessageSquare },
-  { id: "message-settings", title: "إعدادات الرسائل", href: "/admin/message-settings", icon: SettingsIcon },
-  { id: "management", title: "الإدارة", href: "/admin/management", icon: SettingsIcon },
-  { id: "content", title: "المحتوى", href: "/admin/content/content", icon: FileEdit },
-  { id: "publishing", title: "النشر", href: "/admin/content/publishing", icon: Send },
-  { id: "digital-marketing", title: "التسويق الرقمي", href: "/admin/teams/digital-marketing", icon: Megaphone },
-  { id: "media", title: "وحدة الإعلام", href: "/admin/teams/media", icon: Video },
-  { id: "field-marketing", title: "التسويق الميداني", href: "/admin/teams/field-marketing", icon: MapPin },
-  { id: "customer-service", title: "خدمة العملاء", href: "/admin/teams/customer-service", icon: Headphones },
-  { id: "users", title: "المستخدمين", href: "/admin/users/users", icon: Users },
-  { id: "campaigns", title: "الحملات والمشاريع", href: "/admin/campaigns/campaigns", icon: Target },
-  { id: "projects", title: "المشاريع", href: "/admin/campaigns/projects", icon: FolderKanban },
-  { id: "review-approval", title: "المراجعة والاعتماد", href: "/admin/campaigns/review-approval", icon: CheckSquare },
-  { id: "pwa-stats", title: "إحصائيات PWA", href: "/admin/reports/pwa-stats", icon: PieChart },
-  { id: "settings", title: "الإعدادات", href: "/admin/settings", icon: SettingsIcon },
+  { id: 'home', title: 'الرئيسية', href: '/admin', icon: Home },
+  { id: 'profile', title: 'الملف الشخصي', href: '/admin/profile', icon: User },
+  {
+    id: 'leads',
+    title: 'العملاء المحتملين',
+    href: '/admin/bookings/leads',
+    icon: UserCheck,
+    hasDot: true,
+  },
+  {
+    id: 'appointments',
+    title: 'مواعيد الأطباء',
+    href: '/admin/bookings/appointments',
+    icon: Calendar,
+  },
+  { id: 'offer-leads', title: 'عروض العملاء', href: '/admin/bookings/offer-leads', icon: Gift },
+  {
+    id: 'camp-registrations',
+    title: 'تسجيلات المخيمات',
+    href: '/admin/bookings/camp-registrations',
+    icon: Tent,
+  },
+  { id: 'customers', title: 'ملفات العملاء', href: '/admin/bookings/customers', icon: Contact },
+  { id: 'tasks', title: 'المهام', href: '/admin/bookings/tasks', icon: CheckSquare },
+  { id: 'bookings', title: 'إدارة الحجوزات', href: '/admin/bookings', icon: ClipboardList },
+  { id: 'reports', title: 'التقارير', href: '/admin/reports/reports', icon: FileText },
+  { id: 'analytics', title: 'التحليلات', href: '/admin/reports/analytics', icon: BarChart3 },
+  { id: 'bi', title: 'ذكاء الأعمال (BI)', href: '/admin/reports/bi', icon: TrendingUp },
+  {
+    id: 'camp-stats',
+    title: 'إحصائيات المخيمات',
+    href: '/admin/reports/camp-stats',
+    icon: BarChart3,
+  },
+  {
+    id: 'tracking-settings',
+    title: 'إعدادات التتبع',
+    href: '/admin/tracking-settings',
+    icon: SettingsIcon,
+  },
+  { id: 'whatsapp', title: 'الرسائل والمحادثات', href: '/admin/whatsapp', icon: MessageCircle },
+  {
+    id: 'whatsapp-dashboard',
+    title: 'لوحة تحكم واتساب',
+    href: '/admin/whatsapp/whatsapp-dashboard',
+    icon: BarChart3,
+  },
+  {
+    id: 'whatsapp-templates',
+    title: 'قوالب الرسائل',
+    href: '/admin/whatsapp/templates',
+    icon: FileText,
+  },
+  {
+    id: 'whatsapp-analytics',
+    title: 'تحليلات واتساب',
+    href: '/admin/whatsapp/analytics',
+    icon: BarChart3,
+  },
+  { id: 'whatsapp-broadcast', title: 'بث واتساب', href: '/admin/whatsapp/broadcast', icon: Radio },
+  {
+    id: 'whatsapp-auto-reply',
+    title: 'الرد التلقائي',
+    href: '/admin/whatsapp/auto-reply',
+    icon: MessageSquare,
+  },
+  {
+    id: 'whatsapp-compliance',
+    title: 'الأمان والامتثال',
+    href: '/admin/whatsapp/compliance',
+    icon: SettingsIcon,
+  },
+  {
+    id: 'whatsapp-appointments',
+    title: 'سجل الإشعارات',
+    href: '/admin/whatsapp/appointments',
+    icon: Calendar,
+  },
+  {
+    id: 'whatsapp-connection',
+    title: 'إعدادات الاتصال',
+    href: '/admin/whatsapp/connection',
+    icon: SettingsIcon,
+  },
+  {
+    id: 'whatsapp-integration',
+    title: 'التكامل',
+    href: '/admin/whatsapp/integration',
+    icon: Smartphone,
+  },
+  {
+    id: 'whatsapp-account-health',
+    title: 'صحة الحساب',
+    href: '/admin/whatsapp/account-health',
+    icon: Shield,
+  },
+  {
+    id: 'whatsapp-phone-quality',
+    title: 'جودة الرقم',
+    href: '/admin/whatsapp/phone-quality',
+    icon: Smartphone,
+  },
+  {
+    id: 'whatsapp-subscriptions',
+    title: 'الاشتراكات',
+    href: '/admin/whatsapp/subscriptions',
+    icon: Users,
+  },
+  {
+    id: 'whatsapp-webhook-inspector',
+    title: 'فاحص الأحداث',
+    href: '/admin/whatsapp/webhook-inspector',
+    icon: Terminal,
+  },
+  { id: 'messages', title: 'الرسائل', href: '/admin/communications/messages', icon: MessageSquare },
+  {
+    id: 'message-settings',
+    title: 'إعدادات الرسائل',
+    href: '/admin/message-settings',
+    icon: SettingsIcon,
+  },
+  { id: 'management', title: 'الإدارة', href: '/admin/management', icon: SettingsIcon },
+  { id: 'content', title: 'المحتوى', href: '/admin/content/content', icon: FileEdit },
+  { id: 'publishing', title: 'النشر', href: '/admin/content/publishing', icon: Send },
+  {
+    id: 'digital-marketing',
+    title: 'التسويق الرقمي',
+    href: '/admin/teams/digital-marketing',
+    icon: Megaphone,
+  },
+  { id: 'media', title: 'وحدة الإعلام', href: '/admin/teams/media', icon: Video },
+  {
+    id: 'field-marketing',
+    title: 'التسويق الميداني',
+    href: '/admin/teams/field-marketing',
+    icon: MapPin,
+  },
+  {
+    id: 'customer-service',
+    title: 'خدمة العملاء',
+    href: '/admin/teams/customer-service',
+    icon: Headphones,
+  },
+  { id: 'users', title: 'المستخدمين', href: '/admin/users/users', icon: Users },
+  { id: 'campaigns', title: 'الحملات والمشاريع', href: '/admin/campaigns/campaigns', icon: Target },
+  { id: 'projects', title: 'المشاريع', href: '/admin/campaigns/projects', icon: FolderKanban },
+  {
+    id: 'review-approval',
+    title: 'المراجعة والاعتماد',
+    href: '/admin/campaigns/review-approval',
+    icon: CheckSquare,
+  },
+  { id: 'pwa-stats', title: 'إحصائيات PWA', href: '/admin/reports/pwa-stats', icon: PieChart },
+  { id: 'settings', title: 'الإعدادات', href: '/admin/settings', icon: SettingsIcon },
 ];
 
 // المجموعات لعرضها في لوحة كل الأدوات
 const allToolsGroups: NavGroup[] = [
   {
-    label: "إدارة الحجوزات",
+    label: 'إدارة الحجوزات',
     icon: ClipboardList,
     items: [
-      { id: "bookings", title: "إدارة الحجوزات", href: "/admin/bookings", icon: ClipboardList },
-      { id: "leads", title: "العملاء المحتملين", href: "/admin/bookings/leads", icon: UserCheck },
-      { id: "appointments", title: "مواعيد الأطباء", href: "/admin/bookings/appointments", icon: Calendar },
-      { id: "offer-leads", title: "عروض العملاء", href: "/admin/bookings/offer-leads", icon: Gift },
-      { id: "camp-registrations", title: "تسجيلات المخيمات", href: "/admin/bookings/camp-registrations", icon: Tent },
-      { id: "customers", title: "ملفات العملاء", href: "/admin/bookings/customers", icon: Contact },
-      { id: "tasks", title: "المهام", href: "/admin/bookings/tasks", icon: CheckSquare },
+      { id: 'bookings', title: 'إدارة الحجوزات', href: '/admin/bookings', icon: ClipboardList },
+      { id: 'leads', title: 'العملاء المحتملين', href: '/admin/bookings/leads', icon: UserCheck },
+      {
+        id: 'appointments',
+        title: 'مواعيد الأطباء',
+        href: '/admin/bookings/appointments',
+        icon: Calendar,
+      },
+      { id: 'offer-leads', title: 'عروض العملاء', href: '/admin/bookings/offer-leads', icon: Gift },
+      {
+        id: 'camp-registrations',
+        title: 'تسجيلات المخيمات',
+        href: '/admin/bookings/camp-registrations',
+        icon: Tent,
+      },
+      { id: 'customers', title: 'ملفات العملاء', href: '/admin/bookings/customers', icon: Contact },
+      { id: 'tasks', title: 'المهام', href: '/admin/bookings/tasks', icon: CheckSquare },
     ],
   },
   {
-    label: "إدارة المحتوى",
+    label: 'إدارة المحتوى',
     icon: FileEdit,
     items: [
-      { id: "management", title: "الإدارة", href: "/admin/management", icon: SettingsIcon },
-      { id: "content", title: "المحتوى", href: "/admin/content/content", icon: FileEdit },
-      { id: "publishing", title: "النشر", href: "/admin/content/publishing", icon: Send },
+      { id: 'management', title: 'الإدارة', href: '/admin/management', icon: SettingsIcon },
+      { id: 'content', title: 'المحتوى', href: '/admin/content/content', icon: FileEdit },
+      { id: 'publishing', title: 'النشر', href: '/admin/content/publishing', icon: Send },
     ],
   },
   {
-    label: "التواصل",
+    label: 'التواصل',
     icon: MessageCircle,
     items: [
-      { id: "whatsapp", title: "الرسائل والمحادثات", href: "/admin/whatsapp", icon: MessageCircle },
-      { id: "whatsapp-dashboard", title: "لوحة تحكم واتساب", href: "/admin/whatsapp/whatsapp-dashboard", icon: BarChart3 },
-      { id: "whatsapp-templates", title: "قوالب الرسائل", href: "/admin/whatsapp/templates", icon: FileText },
-      { id: "whatsapp-analytics", title: "تحليلات واتساب", href: "/admin/whatsapp/analytics", icon: BarChart3 },
-      { id: "whatsapp-broadcast", title: "بث واتساب", href: "/admin/whatsapp/broadcast", icon: Radio },
-      { id: "whatsapp-auto-reply", title: "الرد التلقائي", href: "/admin/whatsapp/auto-reply", icon: MessageSquare },
-      { id: "whatsapp-compliance", title: "الأمان والامتثال", href: "/admin/whatsapp/compliance", icon: SettingsIcon },
-      { id: "whatsapp-appointments", title: "سجل الإشعارات", href: "/admin/whatsapp/appointments", icon: Calendar },
-      { id: "whatsapp-connection", title: "إعدادات الاتصال", href: "/admin/whatsapp/connection", icon: SettingsIcon },
-      { id: "whatsapp-integration", title: "التكامل", href: "/admin/whatsapp/integration", icon: Smartphone },
-      { id: "whatsapp-account-health", title: "صحة الحساب", href: "/admin/whatsapp/account-health", icon: Shield },
-      { id: "whatsapp-phone-quality", title: "جودة الرقم", href: "/admin/whatsapp/phone-quality", icon: Smartphone },
-      { id: "whatsapp-subscriptions", title: "الاشتراكات", href: "/admin/whatsapp/subscriptions", icon: Users },
-      { id: "whatsapp-webhook-inspector", title: "فاحص الأحداث", href: "/admin/whatsapp/webhook-inspector", icon: Terminal },
-      { id: "whatsapp-costs", title: "تكاليف واتساب", href: "/admin/whatsapp/costs", icon: TrendingUp },
-      { id: "whatsapp-orders", title: "طلبات واتساب", href: "/admin/whatsapp/orders", icon: ShoppingCart },
-      { id: "whatsapp-products", title: "منتجات واتساب", href: "/admin/whatsapp/products", icon: Package },
-      { id: "whatsapp-referrals", title: "إحالات واتساب", href: "/admin/whatsapp/referrals", icon: Megaphone },
-      { id: "whatsapp-lab-results", title: "نتائج المختبر", href: "/admin/whatsapp/lab-results", icon: FileText },
-      { id: "messages", title: "الرسائل", href: "/admin/communications/messages", icon: MessageSquare },
-      { id: "message-settings", title: "إعدادات الرسائل", href: "/admin/message-settings", icon: SettingsIcon },
+      { id: 'whatsapp', title: 'الرسائل والمحادثات', href: '/admin/whatsapp', icon: MessageCircle },
+      {
+        id: 'whatsapp-dashboard',
+        title: 'لوحة تحكم واتساب',
+        href: '/admin/whatsapp/whatsapp-dashboard',
+        icon: BarChart3,
+      },
+      {
+        id: 'whatsapp-templates',
+        title: 'قوالب الرسائل',
+        href: '/admin/whatsapp/templates',
+        icon: FileText,
+      },
+      {
+        id: 'whatsapp-analytics',
+        title: 'تحليلات واتساب',
+        href: '/admin/whatsapp/analytics',
+        icon: BarChart3,
+      },
+      {
+        id: 'whatsapp-broadcast',
+        title: 'بث واتساب',
+        href: '/admin/whatsapp/broadcast',
+        icon: Radio,
+      },
+      {
+        id: 'whatsapp-auto-reply',
+        title: 'الرد التلقائي',
+        href: '/admin/whatsapp/auto-reply',
+        icon: MessageSquare,
+      },
+      {
+        id: 'whatsapp-compliance',
+        title: 'الأمان والامتثال',
+        href: '/admin/whatsapp/compliance',
+        icon: SettingsIcon,
+      },
+      {
+        id: 'whatsapp-appointments',
+        title: 'سجل الإشعارات',
+        href: '/admin/whatsapp/appointments',
+        icon: Calendar,
+      },
+      {
+        id: 'whatsapp-connection',
+        title: 'إعدادات الاتصال',
+        href: '/admin/whatsapp/connection',
+        icon: SettingsIcon,
+      },
+      {
+        id: 'whatsapp-integration',
+        title: 'التكامل',
+        href: '/admin/whatsapp/integration',
+        icon: Smartphone,
+      },
+      {
+        id: 'whatsapp-account-health',
+        title: 'صحة الحساب',
+        href: '/admin/whatsapp/account-health',
+        icon: Shield,
+      },
+      {
+        id: 'whatsapp-phone-quality',
+        title: 'جودة الرقم',
+        href: '/admin/whatsapp/phone-quality',
+        icon: Smartphone,
+      },
+      {
+        id: 'whatsapp-subscriptions',
+        title: 'الاشتراكات',
+        href: '/admin/whatsapp/subscriptions',
+        icon: Users,
+      },
+      {
+        id: 'whatsapp-webhook-inspector',
+        title: 'فاحص الأحداث',
+        href: '/admin/whatsapp/webhook-inspector',
+        icon: Terminal,
+      },
+      {
+        id: 'whatsapp-costs',
+        title: 'تكاليف واتساب',
+        href: '/admin/whatsapp/costs',
+        icon: TrendingUp,
+      },
+      {
+        id: 'whatsapp-orders',
+        title: 'طلبات واتساب',
+        href: '/admin/whatsapp/orders',
+        icon: ShoppingCart,
+      },
+      {
+        id: 'whatsapp-products',
+        title: 'منتجات واتساب',
+        href: '/admin/whatsapp/products',
+        icon: Package,
+      },
+      {
+        id: 'whatsapp-referrals',
+        title: 'إحالات واتساب',
+        href: '/admin/whatsapp/referrals',
+        icon: Megaphone,
+      },
+      {
+        id: 'whatsapp-lab-results',
+        title: 'نتائج المختبر',
+        href: '/admin/whatsapp/lab-results',
+        icon: FileText,
+      },
+      {
+        id: 'messages',
+        title: 'الرسائل',
+        href: '/admin/communications/messages',
+        icon: MessageSquare,
+      },
+      {
+        id: 'message-settings',
+        title: 'إعدادات الرسائل',
+        href: '/admin/message-settings',
+        icon: SettingsIcon,
+      },
     ],
   },
   {
-    label: "الفرق",
+    label: 'الفرق',
     icon: Users,
     items: [
-      { id: "digital-marketing", title: "التسويق الرقمي", href: "/admin/teams/digital-marketing", icon: Megaphone },
-      { id: "media", title: "وحدة الإعلام", href: "/admin/teams/media", icon: Video },
-      { id: "field-marketing", title: "التسويق الميداني", href: "/admin/teams/field-marketing", icon: MapPin },
-      { id: "customer-service", title: "خدمة العملاء", href: "/admin/teams/customer-service", icon: Headphones },
+      {
+        id: 'digital-marketing',
+        title: 'التسويق الرقمي',
+        href: '/admin/teams/digital-marketing',
+        icon: Megaphone,
+      },
+      { id: 'media', title: 'وحدة الإعلام', href: '/admin/teams/media', icon: Video },
+      {
+        id: 'field-marketing',
+        title: 'التسويق الميداني',
+        href: '/admin/teams/field-marketing',
+        icon: MapPin,
+      },
+      {
+        id: 'customer-service',
+        title: 'خدمة العملاء',
+        href: '/admin/teams/customer-service',
+        icon: Headphones,
+      },
     ],
   },
   {
-    label: "التقارير والتحليلات",
+    label: 'التقارير والتحليلات',
     icon: BarChart3,
     items: [
-      { id: "reports", title: "التقارير", href: "/admin/reports/reports", icon: FileText },
-      { id: "analytics", title: "التحليلات", href: "/admin/reports/analytics", icon: BarChart3 },
-      { id: "bi", title: "ذكاء الأعمال (BI)", href: "/admin/reports/bi", icon: TrendingUp },
-      { id: "camp-stats", title: "إحصائيات المخيمات", href: "/admin/reports/camp-stats", icon: BarChart3 },
-      { id: "pwa-stats", title: "إحصائيات PWA", href: "/admin/reports/pwa-stats", icon: PieChart },
-      { id: "tracking-settings", title: "إعدادات التتبع", href: "/admin/tracking-settings", icon: SettingsIcon },
+      { id: 'reports', title: 'التقارير', href: '/admin/reports/reports', icon: FileText },
+      { id: 'analytics', title: 'التحليلات', href: '/admin/reports/analytics', icon: BarChart3 },
+      { id: 'bi', title: 'ذكاء الأعمال (BI)', href: '/admin/reports/bi', icon: TrendingUp },
+      {
+        id: 'camp-stats',
+        title: 'إحصائيات المخيمات',
+        href: '/admin/reports/camp-stats',
+        icon: BarChart3,
+      },
+      { id: 'pwa-stats', title: 'إحصائيات PWA', href: '/admin/reports/pwa-stats', icon: PieChart },
+      {
+        id: 'tracking-settings',
+        title: 'إعدادات التتبع',
+        href: '/admin/tracking-settings',
+        icon: SettingsIcon,
+      },
     ],
   },
   {
-    label: "الإدارة العامة",
+    label: 'الإدارة العامة',
     icon: SettingsIcon,
     items: [
-      { id: "profile", title: "الملف الشخصي", href: "/admin/profile", icon: User },
-      { id: "users", title: "المستخدمين", href: "/admin/users/users", icon: Users },
-      { id: "campaigns", title: "الحملات والمشاريع", href: "/admin/campaigns/campaigns", icon: Target },
-      { id: "projects", title: "المشاريع", href: "/admin/campaigns/projects", icon: FolderKanban },
-      { id: "review-approval", title: "المراجعة والاعتماد", href: "/admin/campaigns/review-approval", icon: CheckSquare },
-      { id: "settings", title: "الإعدادات", href: "/admin/settings", icon: SettingsIcon },
-      { id: "updates", title: "إدارة التحديثات", href: "/admin/system/updates", icon: Activity },
-      { id: "system-status", title: "حالة النظام", href: "/admin/system/status", icon: Gauge },
-      { id: "backups", title: "النسخ الاحتياطي", href: "/admin/system/backups", icon: Database },
-      { id: "advanced-settings", title: "إعدادات متقدمة", href: "/admin/advanced-settings", icon: MoreHorizontal },
-      { id: "departments-specialties", title: "الأقسام والتخصصات", href: "/admin/departments-specialties", icon: LayoutDashboard },
+      { id: 'profile', title: 'الملف الشخصي', href: '/admin/profile', icon: User },
+      { id: 'users', title: 'المستخدمين', href: '/admin/users/users', icon: Users },
+      {
+        id: 'campaigns',
+        title: 'الحملات والمشاريع',
+        href: '/admin/campaigns/campaigns',
+        icon: Target,
+      },
+      { id: 'projects', title: 'المشاريع', href: '/admin/campaigns/projects', icon: FolderKanban },
+      {
+        id: 'review-approval',
+        title: 'المراجعة والاعتماد',
+        href: '/admin/campaigns/review-approval',
+        icon: CheckSquare,
+      },
+      { id: 'settings', title: 'الإعدادات', href: '/admin/settings', icon: SettingsIcon },
+      { id: 'updates', title: 'إدارة التحديثات', href: '/admin/system/updates', icon: Activity },
+      { id: 'system-status', title: 'حالة النظام', href: '/admin/system/status', icon: Gauge },
+      { id: 'backups', title: 'النسخ الاحتياطي', href: '/admin/system/backups', icon: Database },
+      {
+        id: 'advanced-settings',
+        title: 'إعدادات متقدمة',
+        href: '/admin/advanced-settings',
+        icon: MoreHorizontal,
+      },
+      {
+        id: 'departments-specialties',
+        title: 'الأقسام والتخصصات',
+        href: '/admin/departments-specialties',
+        icon: LayoutDashboard,
+      },
     ],
   },
 ];
@@ -213,7 +479,7 @@ function SidebarBadge({ count }: { count: number }) {
   if (!count) return null;
   return (
     <span className="absolute -top-1 -left-1 h-4 w-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-      {count > 9 ? "9+" : count}
+      {count > 9 ? '9+' : count}
     </span>
   );
 }
@@ -229,11 +495,11 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
     toggleMobile,
     closeMobile,
   } = useSidebarState();
-  
+
   const { recentlyUsed, addRecentlyUsed } = useRecentlyUsed();
   const [allToolsOpen, setAllToolsOpen] = useState(false);
   const [editSidebarOpen, setEditSidebarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   // TODO: إضافة procedure للحصول على عدد الإشعارات
   // const { data: unreadCounts } = trpc.leads.getUnreadCounts.useQuery(undefined, {
@@ -245,7 +511,9 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
   const [whatsappUnreadCount, setWhatsappUnreadCount] = useState(0);
   const notificationSoundRef = useRef<AudioContext | null>(null);
   const currentPathRef = useRef(currentPath);
-  useEffect(() => { currentPathRef.current = currentPath; }, [currentPath]);
+  useEffect(() => {
+    currentPathRef.current = currentPath;
+  }, [currentPath]);
 
   // Fetch initial unread count
   const { data: initialUnreadData } = trpc.whatsapp.conversations.unreadCount.useQuery(undefined, {
@@ -272,24 +540,32 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
       gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       oscillator.start(ctx.currentTime);
       oscillator.stop(ctx.currentTime + 0.3);
-    } catch (_) { /* Audio not available */ }
+    } catch (_) {
+      /* Audio not available */
+    }
   }, []);
 
   // Global SSE listener for new inbound WhatsApp messages
-  useSSE('/api/whatsapp/stream/user/0', useCallback((e: MessageEvent) => {
-    try {
-      const eventName = (e as any).type || 'message';
-      if (eventName === 'new_inbound_message') {
-        const data = JSON.parse(e.data);
-        // Only show badge if user is not currently on WhatsApp page
-        const isOnWhatsApp = currentPathRef.current.includes('/admin/whatsapp');
-        if (!isOnWhatsApp) {
-          setWhatsappUnreadCount(prev => prev + 1);
-          playNotificationSound();
-        }
-      }
-    } catch (_) {}
-  }, [playNotificationSound]));
+  useSSE(
+    '/api/whatsapp/stream/user/0',
+    useCallback(
+      (e: MessageEvent) => {
+        try {
+          const eventName = (e as any).type || 'message';
+          if (eventName === 'new_inbound_message') {
+            const data = JSON.parse(e.data);
+            // Only show badge if user is not currently on WhatsApp page
+            const isOnWhatsApp = currentPathRef.current.includes('/admin/whatsapp');
+            if (!isOnWhatsApp) {
+              setWhatsappUnreadCount((prev) => prev + 1);
+              playNotificationSound();
+            }
+          }
+        } catch (_) {}
+      },
+      [playNotificationSound]
+    )
+  );
 
   // Reset badge when user navigates to WhatsApp
   useEffect(() => {
@@ -301,74 +577,94 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
   // تحديد العناصر المرئية في الشريط (أول 10 عناصر)
   const [visibleItemIds, setVisibleItemIds] = useState<string[]>(() => {
     try {
-      const stored = localStorage.getItem("sidebar_visible_items");
+      const stored = localStorage.getItem('sidebar_visible_items');
       if (stored) {
         const parsed = JSON.parse(stored);
         // التأكد من أن "home" موجود دائماً في البداية
-        if (!parsed.includes("home")) {
-          return ["home", ...parsed.slice(0, 9)];
+        if (!parsed.includes('home')) {
+          return ['home', ...parsed.slice(0, 9)];
         }
         return parsed.slice(0, 10);
       }
     } catch (error) {
-      console.error("[Sidebar] Error loading visible items:", error);
+      console.error('[Sidebar] Error loading visible items:', error);
     }
     // القيم الافتراضية
-    return ["home", "leads", "appointments", "offer-leads", "camp-registrations", "customers", "tasks", "reports", "whatsapp", "management"];
+    return [
+      'home',
+      'leads',
+      'appointments',
+      'offer-leads',
+      'camp-registrations',
+      'customers',
+      'tasks',
+      'reports',
+      'whatsapp',
+      'management',
+    ];
   });
 
   // حفظ العناصر المرئية في localStorage
   useEffect(() => {
     try {
-      localStorage.setItem("sidebar_visible_items", JSON.stringify(visibleItemIds));
+      localStorage.setItem('sidebar_visible_items', JSON.stringify(visibleItemIds));
     } catch (error) {
-      console.error("[Sidebar] Error saving visible items:", error);
+      console.error('[Sidebar] Error saving visible items:', error);
     }
   }, [visibleItemIds]);
 
   // الحصول على العناصر المرئية
   const primaryNavItems = useMemo(() => {
     return visibleItemIds
-      .map(id => allNavItems.find(item => item.id === id))
+      .map((id) => allNavItems.find((item) => item.id === id))
       .filter((item): item is NavItem => item !== undefined);
   }, [visibleItemIds]);
 
   // التحقق من أن العنصر نشط
-  const isItemActive = useCallback((href: string) => {
-    if (href === "/admin") {
-      return currentPath === "/admin" || currentPath === "/admin/";
-    }
-    return currentPath.startsWith(href);
-  }, [currentPath]);
+  const isItemActive = useCallback(
+    (href: string) => {
+      if (href === '/admin') {
+        return currentPath === '/admin' || currentPath === '/admin/';
+      }
+      return currentPath.startsWith(href);
+    },
+    [currentPath]
+  );
 
   // الحصول على عدد الإشعارات لعنصر معين
-  const getBadgeCount = useCallback((itemId: string) => {
-    switch (itemId) {
-      case "leads":
-        return unreadCounts?.leads || 0;
-      case "appointments":
-        return unreadCounts?.appointments || 0;
-      case "offer-leads":
-        return unreadCounts?.offerLeads || 0;
-      case "camp-registrations":
-        return unreadCounts?.campRegistrations || 0;
-      case "whatsapp":
-        return whatsappUnreadCount;
-      default:
-        return 0;
-    }
-  }, [unreadCounts, whatsappUnreadCount]);
+  const getBadgeCount = useCallback(
+    (itemId: string) => {
+      switch (itemId) {
+        case 'leads':
+          return unreadCounts?.leads || 0;
+        case 'appointments':
+          return unreadCounts?.appointments || 0;
+        case 'offer-leads':
+          return unreadCounts?.offerLeads || 0;
+        case 'camp-registrations':
+          return unreadCounts?.campRegistrations || 0;
+        case 'whatsapp':
+          return whatsappUnreadCount;
+        default:
+          return 0;
+      }
+    },
+    [unreadCounts, whatsappUnreadCount]
+  );
 
   // معالج النقر على عنصر التنقل
-  const handleNavClick = useCallback((href: string) => {
-    const item = allNavItems.find(i => i.href === href);
-    if (item) {
-      addRecentlyUsed({ id: item.id, title: item.title, href: item.href });
-    }
-    window.location.href = href;
-    closeMobile();
-    setAllToolsOpen(false);
-  }, [addRecentlyUsed, closeMobile]);
+  const handleNavClick = useCallback(
+    (href: string) => {
+      const item = allNavItems.find((i) => i.href === href);
+      if (item) {
+        addRecentlyUsed({ id: item.id, title: item.title, href: item.href });
+      }
+      window.location.href = href;
+      closeMobile();
+      setAllToolsOpen(false);
+    },
+    [addRecentlyUsed, closeMobile]
+  );
 
   // ============================================
   // الشريط الجانبي الديناميكي (Desktop) - Meta Business Suite Style
@@ -378,8 +674,8 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "hidden lg:flex flex-col h-screen sticky top-0 bg-white dark:bg-gray-900 border-l border-border dark:border-gray-700 z-30 transition-all duration-300 ease-in-out",
-        shouldShowText ? "w-64" : "w-[72px]"
+        'hidden lg:flex flex-col h-screen sticky top-0 bg-white dark:bg-gray-900 border-l border-border dark:border-gray-700 z-30 transition-all duration-300 ease-in-out',
+        shouldShowText ? 'w-64' : 'w-[72px]'
       )}
       dir="rtl"
     >
@@ -395,9 +691,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
             <h2 className="text-sm font-bold text-foreground dark:text-gray-100 truncate">
               المستشفى السعودي الألماني
             </h2>
-            <p className="text-xs text-muted-foreground dark:text-gray-400 truncate">
-              صنعاء
-            </p>
+            <p className="text-xs text-muted-foreground dark:text-gray-400 truncate">صنعاء</p>
           </div>
         )}
       </div>
@@ -416,29 +710,33 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
                   <button
                     onClick={() => handleNavClick(item.href)}
                     className={cn(
-                      "relative w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200",
-                      shouldShowText ? "px-3" : "px-0 justify-center",
+                      'relative w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                      shouldShowText ? 'px-3' : 'px-0 justify-center',
                       isActive
-                        ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                        : "text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800"
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                        : 'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
                     )}
                   >
                     <div className="relative flex-shrink-0">
-                      <Icon className={cn(
-                        "transition-all duration-200",
-                        shouldShowText ? "h-5 w-5" : "h-6 w-6",
-                        isActive && "stroke-[2.5]"
-                      )} />
+                      <Icon
+                        className={cn(
+                          'transition-all duration-200',
+                          shouldShowText ? 'h-5 w-5' : 'h-6 w-6',
+                          isActive && 'stroke-[2.5]'
+                        )}
+                      />
                       <SidebarBadge count={badgeCount} />
                       {!badgeCount && item.hasDot && (
                         <span className="absolute -top-0.5 -left-0.5 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
                       )}
                     </div>
                     {shouldShowText && (
-                      <span className={cn(
-                        "text-sm truncate flex-1 text-right transition-opacity duration-200",
-                        isActive ? "font-semibold" : "font-medium"
-                      )}>
+                      <span
+                        className={cn(
+                          'text-sm truncate flex-1 text-right transition-opacity duration-200',
+                          isActive ? 'font-semibold' : 'font-medium'
+                        )}
+                      >
                         {item.title}
                       </span>
                     )}
@@ -470,17 +768,19 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
                 <button
                   onClick={() => setAllToolsOpen(!allToolsOpen)}
                   className={cn(
-                    "w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200 mb-1",
-                    shouldShowText ? "px-3" : "px-0 justify-center",
+                    'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200 mb-1',
+                    shouldShowText ? 'px-3' : 'px-0 justify-center',
                     allToolsOpen
-                      ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                      : "text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800"
+                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                      : 'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
                   )}
                 >
-                  <Menu className={cn(
-                    "flex-shrink-0 transition-all duration-200",
-                    shouldShowText ? "h-5 w-5" : "h-6 w-6"
-                  )} />
+                  <Menu
+                    className={cn(
+                      'flex-shrink-0 transition-all duration-200',
+                      shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                    )}
+                  />
                   {shouldShowText && (
                     <span className="text-sm font-medium truncate flex-1 text-right">
                       كل الأدوات
@@ -488,9 +788,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
                   )}
                 </button>
               </TooltipTrigger>
-              {!shouldShowText && (
-                <TooltipContent side="left">كل الأدوات</TooltipContent>
-              )}
+              {!shouldShowText && <TooltipContent side="left">كل الأدوات</TooltipContent>}
             </Tooltip>
 
             {/* تعديل */}
@@ -499,25 +797,23 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
                 <button
                   onClick={() => setEditSidebarOpen(true)}
                   className={cn(
-                    "w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200",
-                    shouldShowText ? "px-3" : "px-0 justify-center",
-                    "text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800"
+                    'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                    shouldShowText ? 'px-3' : 'px-0 justify-center',
+                    'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
                   )}
                 >
-                  <Pencil className={cn(
-                    "flex-shrink-0 transition-all duration-200",
-                    shouldShowText ? "h-5 w-5" : "h-6 w-6"
-                  )} />
+                  <Pencil
+                    className={cn(
+                      'flex-shrink-0 transition-all duration-200',
+                      shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                    )}
+                  />
                   {shouldShowText && (
-                    <span className="text-sm font-medium truncate flex-1 text-right">
-                      تعديل
-                    </span>
+                    <span className="text-sm font-medium truncate flex-1 text-right">تعديل</span>
                   )}
                 </button>
               </TooltipTrigger>
-              {!shouldShowText && (
-                <TooltipContent side="left">تعديل الشريط</TooltipContent>
-              )}
+              {!shouldShowText && <TooltipContent side="left">تعديل الشريط</TooltipContent>}
             </Tooltip>
           </div>
         </nav>
@@ -529,61 +825,57 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
         <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
           <TooltipTrigger asChild>
             <button
-              onClick={() => handleNavClick("/admin/settings")}
+              onClick={() => handleNavClick('/admin/settings')}
               className={cn(
-                "w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200",
-                shouldShowText ? "px-3" : "px-0 justify-center",
-                isItemActive("/admin/settings")
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                  : "text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800"
+                'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                shouldShowText ? 'px-3' : 'px-0 justify-center',
+                isItemActive('/admin/settings')
+                  ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
               )}
             >
-              <SettingsIcon className={cn(
-                "flex-shrink-0 transition-all duration-200",
-                shouldShowText ? "h-5 w-5" : "h-6 w-6"
-              )} />
+              <SettingsIcon
+                className={cn(
+                  'flex-shrink-0 transition-all duration-200',
+                  shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                )}
+              />
               {shouldShowText && (
-                <span className="text-sm font-medium truncate flex-1 text-right">
-                  الإعدادات
-                </span>
+                <span className="text-sm font-medium truncate flex-1 text-right">الإعدادات</span>
               )}
             </button>
           </TooltipTrigger>
-          {!shouldShowText && (
-            <TooltipContent side="left">الإعدادات</TooltipContent>
-          )}
+          {!shouldShowText && <TooltipContent side="left">الإعدادات</TooltipContent>}
         </Tooltip>
 
         {/* زر تثبيت التطبيق */}
-        {shouldShowText && (
-          <InstallPWAButton appType="admin" variant="sidebar" />
-        )}
+        {shouldShowText && <InstallPWAButton appType="admin" variant="sidebar" />}
 
         {/* المساعدة */}
         <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
           <TooltipTrigger asChild>
             <button
-              onClick={() => {/* TODO: فتح المساعدة */}}
+              onClick={() => {
+                /* TODO: فتح المساعدة */
+              }}
               className={cn(
-                "w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200",
-                shouldShowText ? "px-3" : "px-0 justify-center",
-                "text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800"
+                'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                shouldShowText ? 'px-3' : 'px-0 justify-center',
+                'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
               )}
             >
-              <HelpCircle className={cn(
-                "flex-shrink-0 transition-all duration-200",
-                shouldShowText ? "h-5 w-5" : "h-6 w-6"
-              )} />
+              <HelpCircle
+                className={cn(
+                  'flex-shrink-0 transition-all duration-200',
+                  shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                )}
+              />
               {shouldShowText && (
-                <span className="text-sm font-medium truncate flex-1 text-right">
-                  المساعدة
-                </span>
+                <span className="text-sm font-medium truncate flex-1 text-right">المساعدة</span>
               )}
             </button>
           </TooltipTrigger>
-          {!shouldShowText && (
-            <TooltipContent side="left">المساعدة</TooltipContent>
-          )}
+          {!shouldShowText && <TooltipContent side="left">المساعدة</TooltipContent>}
         </Tooltip>
       </div>
     </aside>
@@ -592,19 +884,36 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
   // ============================================
   // الشريط السفلي للهاتف (Mobile Bottom Navigation)
   // ============================================
-  
+
   // أهم 5 أقسام للشريط السفلي
-  const bottomNavItems: NavItem[] = useMemo(() => [
-    { id: "home", title: "الرئيسية", href: "/admin", icon: Home },
-    { id: "leads", title: "العملاء", href: "/admin/bookings/leads", icon: UserCheck, hasDot: true },
-    { id: "appointments", title: "المواعيد", href: "/admin/bookings/appointments", icon: Calendar },
-    { id: "reports", title: "التقارير", href: "/admin/reports/reports", icon: FileText },
-  ], []);
+  const bottomNavItems: NavItem[] = useMemo(
+    () => [
+      { id: 'home', title: 'الرئيسية', href: '/admin', icon: Home },
+      {
+        id: 'leads',
+        title: 'العملاء',
+        href: '/admin/bookings/leads',
+        icon: UserCheck,
+        hasDot: true,
+      },
+      {
+        id: 'appointments',
+        title: 'المواعيد',
+        href: '/admin/bookings/appointments',
+        icon: Calendar,
+      },
+      { id: 'reports', title: 'التقارير', href: '/admin/reports/reports', icon: FileText },
+    ],
+    []
+  );
 
   const renderMobileBottomNav = () => (
     <>
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-border dark:border-gray-700 z-40 safe-area-inset-bottom" dir="rtl">
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-border dark:border-gray-700 z-40 safe-area-inset-bottom"
+        dir="rtl"
+      >
         <div className="h-full flex items-center justify-around px-2">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
@@ -616,26 +925,25 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
                 key={item.href}
                 onClick={() => handleNavClick(item.href)}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 min-w-[60px]",
+                  'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 min-w-[60px]',
                   isActive
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-muted-foreground dark:text-gray-400"
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-muted-foreground dark:text-gray-400'
                 )}
               >
                 <div className="relative">
-                  <Icon className={cn(
-                    "h-6 w-6",
-                    isActive && "stroke-[2.5]"
-                  )} />
+                  <Icon className={cn('h-6 w-6', isActive && 'stroke-[2.5]')} />
                   <SidebarBadge count={badgeCount} />
                   {!badgeCount && item.hasDot && (
                     <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
                   )}
                 </div>
-                <span className={cn(
-                  "text-[10px] truncate max-w-[60px]",
-                  isActive ? "font-semibold" : "font-medium"
-                )}>
+                <span
+                  className={cn(
+                    'text-[10px] truncate max-w-[60px]',
+                    isActive ? 'font-semibold' : 'font-medium'
+                  )}
+                >
                   {item.title}
                 </span>
               </button>

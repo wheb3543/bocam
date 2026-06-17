@@ -116,10 +116,10 @@ export const DATE_FILTER_OPTIONS = [
 
 /**
  * useFilterUtils - Unified filter management hook for data tables
- * 
+ *
  * Provides consistent filter state management, debounced search,
  * multi-select status/source/category filtering, and date range handling.
- * 
+ *
  * @example
  * ```tsx
  * const { filters, filteredData, dateRangeISO } = useFilterUtils({
@@ -139,9 +139,7 @@ export const DATE_FILTER_OPTIONS = [
  * });
  * ```
  */
-export function useFilterUtils<T>(
-  config?: Partial<FilterConfig<T>>
-): UseFilterUtilsReturn<T> {
+export function useFilterUtils<T>(config?: Partial<FilterConfig<T>>): UseFilterUtilsReturn<T> {
   // ─── State ───────────────────────────────────────────────────────────────
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
@@ -154,10 +152,13 @@ export function useFilterUtils<T>(
   const debouncedSearch = useDebounce(searchTerm, debounceDelay);
 
   // ─── Date Range ISO ──────────────────────────────────────────────────────
-  const dateRangeISO = useMemo(() => ({
-    dateFrom: dateRange.from.toISOString(),
-    dateTo: dateRange.to.toISOString(),
-  }), [dateRange]);
+  const dateRangeISO = useMemo(
+    () => ({
+      dateFrom: dateRange.from.toISOString(),
+      dateTo: dateRange.to.toISOString(),
+    }),
+    [dateRange]
+  );
 
   // ─── Active Filter Count ─────────────────────────────────────────────────
   const activeFilterCount = useMemo(() => {
@@ -233,10 +234,18 @@ export function useFilterUtils<T>(
     return filtered;
   }, [
     config?.data,
-    config?.categoryFilter, categoryFilter, config?.getCategory,
-    config?.sourceFilter, sourceFilter, config?.getSource,
-    config?.statusFilter, statusFilter, config?.getStatus,
-    config?.searchTerm, debouncedSearch, config?.searchFields,
+    config?.categoryFilter,
+    categoryFilter,
+    config?.getCategory,
+    config?.sourceFilter,
+    sourceFilter,
+    config?.getSource,
+    config?.statusFilter,
+    statusFilter,
+    config?.getStatus,
+    config?.searchTerm,
+    debouncedSearch,
+    config?.searchFields,
   ]);
 
   // ─── Counts ──────────────────────────────────────────────────────────────
@@ -244,28 +253,36 @@ export function useFilterUtils<T>(
   const filteredCount = filteredData.length;
 
   // ─── Filter State Object ─────────────────────────────────────────────────
-  const filters: FilterState = useMemo(() => ({
-    searchTerm,
-    setSearchTerm,
-    debouncedSearch,
-    statusFilter,
-    setStatusFilter,
-    sourceFilter,
-    setSourceFilter,
-    categoryFilter,
-    setCategoryFilter,
-    dateFilter,
-    setDateFilter,
-    dateRange,
-    setDateRange,
-    resetAll,
-    activeFilterCount,
-  }), [
-    searchTerm, debouncedSearch,
-    statusFilter, sourceFilter, categoryFilter,
-    dateFilter, dateRange,
-    resetAll, activeFilterCount,
-  ]);
+  const filters: FilterState = useMemo(
+    () => ({
+      searchTerm,
+      setSearchTerm,
+      debouncedSearch,
+      statusFilter,
+      setStatusFilter,
+      sourceFilter,
+      setSourceFilter,
+      categoryFilter,
+      setCategoryFilter,
+      dateFilter,
+      setDateFilter,
+      dateRange,
+      setDateRange,
+      resetAll,
+      activeFilterCount,
+    }),
+    [
+      searchTerm,
+      debouncedSearch,
+      statusFilter,
+      sourceFilter,
+      categoryFilter,
+      dateFilter,
+      dateRange,
+      resetAll,
+      activeFilterCount,
+    ]
+  );
 
   return {
     filters,
@@ -286,7 +303,7 @@ export function applyDefaultSort<T>(
   getCreatedAt: (item: T) => string | Date | null | undefined
 ): T[] {
   if (sortDirection) return data;
-  
+
   return [...data].sort((a, b) => {
     const aDate = new Date(getCreatedAt(a) || 0).getTime();
     const bDate = new Date(getCreatedAt(b) || 0).getTime();

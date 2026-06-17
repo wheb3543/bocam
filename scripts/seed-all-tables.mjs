@@ -31,7 +31,7 @@ async function seedAllTables() {
   try {
     // ==================== USERS & ACCESS ====================
     console.log('\n👥 المستخدمين والصلاحيات...');
-    
+
     // 1. Users
     console.log('  - users');
     const hashedPassword = await bcrypt.hash('admin123', 10);
@@ -70,16 +70,52 @@ async function seedAllTables() {
 
     // ==================== CAMPAIGNS & LEADS ====================
     console.log('\n📢 الحملات والعملاء المحتملين...');
-    
+
     // 3. Campaigns
     console.log('  - campaigns');
     const campaigns = [
-      ['حملة شهر رمضان', 'ramadan-campaign', 'حملة خاصة بشهر رمضان المبارك', 'digital', 'active', 50000, 45000, 'YER'],
-      ['حملة العناية بالبشرة', 'skincare-campaign', 'عروض خاصة للعناية بالبشرة', 'digital', 'active', 30000, 25000, 'YER'],
-      ['حملة الأسنان', 'dental-campaign', 'عروض زراعة وتجميل الأسنان', 'field', 'active', 40000, 35000, 'YER'],
+      [
+        'حملة شهر رمضان',
+        'ramadan-campaign',
+        'حملة خاصة بشهر رمضان المبارك',
+        'digital',
+        'active',
+        50000,
+        45000,
+        'YER',
+      ],
+      [
+        'حملة العناية بالبشرة',
+        'skincare-campaign',
+        'عروض خاصة للعناية بالبشرة',
+        'digital',
+        'active',
+        30000,
+        25000,
+        'YER',
+      ],
+      [
+        'حملة الأسنان',
+        'dental-campaign',
+        'عروض زراعة وتجميل الأسنان',
+        'field',
+        'active',
+        40000,
+        35000,
+        'YER',
+      ],
     ];
 
-    for (const [name, slug, description, type, status, plannedBudget, actualBudget, currency] of campaigns) {
+    for (const [
+      name,
+      slug,
+      description,
+      type,
+      status,
+      plannedBudget,
+      actualBudget,
+      currency,
+    ] of campaigns) {
       await connection.execute(
         `INSERT INTO campaigns (name, slug, description, type, status, plannedBudget, actualBudget, currency, startDate, endDate, isActive) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), true) 
@@ -116,17 +152,62 @@ async function seedAllTables() {
 
     // ==================== DOCTORS & APPOINTMENTS ====================
     console.log('\n👨‍⚕️ الأطباء والمواعيد...');
-    
+
     // 6. Doctors
     console.log('  - doctors');
     const doctors = [
-      ['د. أحمد العلي', 'dr-ahmed-alali', 'جراحة عامة', '10 سنوات', 'العربية, الإنجليزية', '5000', 'yes', 'yes'],
-      ['د. سارة المحمدي', 'dr-sara-almahmadi', 'جلدية وتجميل', '8 سنوات', 'العربية, الإنجليزية', '6000', 'yes', 'yes'],
-      ['د. خالد الصالحي', 'dr-khaled-alsalihi', 'أسنان', '12 سنة', 'العربية, الإنجليزية', '4000', 'yes', 'yes'],
-      ['د. فاطمة القحطاني', 'dr-fatima-alqahtani', 'عيون', '6 سنوات', 'العربية, الإنجليزية', '5500', 'yes', 'yes'],
+      [
+        'د. أحمد العلي',
+        'dr-ahmed-alali',
+        'جراحة عامة',
+        '10 سنوات',
+        'العربية, الإنجليزية',
+        '5000',
+        'yes',
+        'yes',
+      ],
+      [
+        'د. سارة المحمدي',
+        'dr-sara-almahmadi',
+        'جلدية وتجميل',
+        '8 سنوات',
+        'العربية, الإنجليزية',
+        '6000',
+        'yes',
+        'yes',
+      ],
+      [
+        'د. خالد الصالحي',
+        'dr-khaled-alsalihi',
+        'أسنان',
+        '12 سنة',
+        'العربية, الإنجليزية',
+        '4000',
+        'yes',
+        'yes',
+      ],
+      [
+        'د. فاطمة القحطاني',
+        'dr-fatima-alqahtani',
+        'عيون',
+        '6 سنوات',
+        'العربية, الإنجليزية',
+        '5500',
+        'yes',
+        'yes',
+      ],
     ];
 
-    for (const [name, slug, specialty, experience, languages, consultationFee, isVisiting, available] of doctors) {
+    for (const [
+      name,
+      slug,
+      specialty,
+      experience,
+      languages,
+      consultationFee,
+      isVisiting,
+      available,
+    ] of doctors) {
       await connection.execute(
         `INSERT INTO doctors (name, slug, specialty, experience, languages, consultationFee, isVisiting, available) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
@@ -138,23 +219,96 @@ async function seedAllTables() {
     // 7. Appointments
     console.log('  - appointments');
     const appointments = [
-      [1, 1, 'محمد أحمد', '777123456', 'mohammed@email.com', 30, 'male', 'جراحة عامة', '2025-06-01', '10:00', 'confirmed'],
-      [2, 2, 'فاطمة محمد', '777345678', 'fatima@email.com', 28, 'female', 'تجميل البشرة', '2025-06-02', '14:00', 'pending'],
-      [3, 3, 'سارة علي', '777456789', 'sara@email.com', 25, 'female', 'زراعة أسنان', '2025-06-03', '09:00', 'contacted'],
-      [1, 4, 'علي حسن', '777234567', 'ali@email.com', 35, 'male', 'جراحة عامة', '2025-06-04', '11:00', 'attended'],
+      [
+        1,
+        1,
+        'محمد أحمد',
+        '777123456',
+        'mohammed@email.com',
+        30,
+        'male',
+        'جراحة عامة',
+        '2025-06-01',
+        '10:00',
+        'confirmed',
+      ],
+      [
+        2,
+        2,
+        'فاطمة محمد',
+        '777345678',
+        'fatima@email.com',
+        28,
+        'female',
+        'تجميل البشرة',
+        '2025-06-02',
+        '14:00',
+        'pending',
+      ],
+      [
+        3,
+        3,
+        'سارة علي',
+        '777456789',
+        'sara@email.com',
+        25,
+        'female',
+        'زراعة أسنان',
+        '2025-06-03',
+        '09:00',
+        'contacted',
+      ],
+      [
+        1,
+        4,
+        'علي حسن',
+        '777234567',
+        'ali@email.com',
+        35,
+        'male',
+        'جراحة عامة',
+        '2025-06-04',
+        '11:00',
+        'attended',
+      ],
     ];
 
-    for (const [campaignId, doctorId, fullName, phone, email, age, gender, procedure, preferredDate, preferredTime, status] of appointments) {
+    for (const [
+      campaignId,
+      doctorId,
+      fullName,
+      phone,
+      email,
+      age,
+      gender,
+      procedure,
+      preferredDate,
+      preferredTime,
+      status,
+    ] of appointments) {
       await connection.execute(
         `INSERT INTO appointments (campaignId, doctorId, fullName, phone, email, age, gender, \`procedure\`, preferredDate, preferredTime, status, source) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [campaignId, doctorId, fullName, phone, email, age, gender, procedure, preferredDate, preferredTime, status, 'web']
+        [
+          campaignId,
+          doctorId,
+          fullName,
+          phone,
+          email,
+          age,
+          gender,
+          procedure,
+          preferredDate,
+          preferredTime,
+          status,
+          'web',
+        ]
       );
     }
 
     // ==================== OFFERS & CAMPS ====================
     console.log('\n🎁 العروض والمخيمات...');
-    
+
     // 8. Offers
     console.log('  - offers');
     const offers = [
@@ -194,12 +348,23 @@ async function seedAllTables() {
     await connection.execute(
       `INSERT INTO campRegistrations (campId, campaignId, fullName, phone, email, age, gender, status, preferredDate, preferredTimeSlot) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [1, 1, 'نورة محمد', '777789012', 'noura@email.com', 27, 'female', 'pending', '2025-06-05', 'morning']
+      [
+        1,
+        1,
+        'نورة محمد',
+        '777789012',
+        'noura@email.com',
+        27,
+        'female',
+        'pending',
+        '2025-06-05',
+        'morning',
+      ]
     );
 
     // ==================== CAMPAIGN RELATIONSHIPS ====================
     console.log('\n🔗 علاقات الحملات...');
-    
+
     // 12. Campaign Offers
     console.log('  - campaignOffers');
     await connection.execute(
@@ -223,7 +388,7 @@ async function seedAllTables() {
 
     // ==================== TEAMS & TASKS ====================
     console.log('\n👥 الفرق والمهام...');
-    
+
     // 15. Teams
     console.log('  - teams');
     await connection.execute(
@@ -282,7 +447,7 @@ async function seedAllTables() {
 
     // ==================== WHATSAPP CORE ====================
     console.log('\n💬 واتساب الأساسي...');
-    
+
     // 22. WhatsApp Conversations
     console.log('  - whatsappConversations');
     await connection.execute(
@@ -305,7 +470,17 @@ async function seedAllTables() {
       `INSERT INTO whatsapp_templates (name, category, content, variables, isActive, createdBy, metaName, languageCode, metaStatus) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
        ON DUPLICATE KEY UPDATE name=name`,
-      ['تأكيد الموعد', 'UTILITY', 'مرحباً {name}، تم تأكيد موعدك بتاريخ {date} الساعة {time}', '["name", "date", "time"]', 1, 1, 'appointment_confirmation', 'ar', 'APPROVED']
+      [
+        'تأكيد الموعد',
+        'UTILITY',
+        'مرحباً {name}، تم تأكيد موعدك بتاريخ {date} الساعة {time}',
+        '["name", "date", "time"]',
+        1,
+        1,
+        'appointment_confirmation',
+        'ar',
+        'APPROVED',
+      ]
     );
 
     // 25. WhatsApp Broadcasts
@@ -357,14 +532,23 @@ async function seedAllTables() {
 
     // ==================== MESSAGE SETTINGS ====================
     console.log('\n📨 إعدادات الرسائل...');
-    
+
     // 31. Message Settings
     console.log('  - messageSettings');
     await connection.execute(
       `INSERT INTO message_settings (messageType, displayName, category, messageContent, isEnabled, deliveryChannel, entityType, triggerEvent) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
        ON DUPLICATE KEY UPDATE messageType=messageType`,
-      ['appointment_confirmation', 'تأكيد الحجز', 'patient_journey', 'تم تأكيد موعدك بنجاح', 1, 'both', 'appointment', 'on_confirmed']
+      [
+        'appointment_confirmation',
+        'تأكيد الحجز',
+        'patient_journey',
+        'تم تأكيد موعدك بنجاح',
+        1,
+        'both',
+        'appointment',
+        'on_confirmed',
+      ]
     );
 
     // إضافة إعداد رسالة نتائج المختبر
@@ -372,7 +556,18 @@ async function seedAllTables() {
       `INSERT INTO message_settings (messageType, displayName, category, messageContent, isEnabled, deliveryChannel, availableVariables, description, entityType, triggerEvent) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
        ON DUPLICATE KEY UPDATE messageType=messageType`,
-      ['lab_result_ready', 'إرسال نتيجة فحص مختبر', 'patient_journey', 'مرحباً {name}، نتائج فحصك الجديدة جاهزة.\n\n📋 نوع الفحص: {test_type}\n👨‍⚕️ الطبيب: {doctor}\n📅 التاريخ: {date}\n\nيمكنك تحميل النتيجة من الملف المرفق.', 1, 'whatsapp_api', '["name", "test_type", "doctor", "date"]', 'إرسال نتائج فحوصات المختبر عبر واتساب باستخدام قالب Meta المعتمد', 'all', 'manual']
+      [
+        'lab_result_ready',
+        'إرسال نتيجة فحص مختبر',
+        'patient_journey',
+        'مرحباً {name}، نتائج فحصك الجديدة جاهزة.\n\n📋 نوع الفحص: {test_type}\n👨‍⚕️ الطبيب: {doctor}\n📅 التاريخ: {date}\n\nيمكنك تحميل النتيجة من الملف المرفق.',
+        1,
+        'whatsapp_api',
+        '["name", "test_type", "doctor", "date"]',
+        'إرسال نتائج فحوصات المختبر عبر واتساب باستخدام قالب Meta المعتمد',
+        'all',
+        'manual',
+      ]
     );
 
     // 32. Message Templates
@@ -381,12 +576,21 @@ async function seedAllTables() {
       `INSERT INTO message_templates (templateName, displayName, category, languageCode, status, bodyText, variables, createdBy) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
        ON DUPLICATE KEY UPDATE templateName=templateName`,
-      ['appointment_confirmation_ar', 'تأكيد الموعد', 'UTILITY', 'ar', 'APPROVED', 'مرحباً {name}، تم تأكيد موعدك', '["name"]', 1]
+      [
+        'appointment_confirmation_ar',
+        'تأكيد الموعد',
+        'UTILITY',
+        'ar',
+        'APPROVED',
+        'مرحباً {name}، تم تأكيد موعدك',
+        '["name"]',
+        1,
+      ]
     );
 
     // ==================== COMMENTS & FOLLOW-UPS ====================
     console.log('\n💬 التعليقات والمتابعة...');
-    
+
     // 33. Comments
     console.log('  - comments');
     await connection.execute(
@@ -399,12 +603,22 @@ async function seedAllTables() {
     await connection.execute(
       `INSERT INTO followUpTasks (entityType, entityId, title, description, status, priority, assignedToId, createdById, createdByName) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ['appointment', 1, 'متابعة العميل', 'الاتصال بالعميل للتأكيد', 'pending', 'medium', 3, 2, 'سارة أحمد']
+      [
+        'appointment',
+        1,
+        'متابعة العميل',
+        'الاتصال بالعميل للتأكيد',
+        'pending',
+        'medium',
+        3,
+        2,
+        'سارة أحمد',
+      ]
     );
 
     // ==================== PREFERENCES & FILTERS ====================
     console.log('\n⚙️ التفضيلات والفلاتر...');
-    
+
     // 35. User Preferences
     console.log('  - userPreferences');
     await connection.execute(
@@ -417,7 +631,13 @@ async function seedAllTables() {
     await connection.execute(
       `INSERT INTO sharedColumnTemplates (name, tableKey, columns, createdBy, createdByName) 
        VALUES (?, ?, ?, ?, ?)`,
-      ['عرض الموعد القياسي', 'appointments', '["fullName", "phone", "doctor", "status"]', 1, 'مدير النظام']
+      [
+        'عرض الموعد القياسي',
+        'appointments',
+        '["fullName", "phone", "doctor", "status"]',
+        1,
+        'مدير النظام',
+      ]
     );
 
     // 37. Saved Filters
@@ -437,7 +657,7 @@ async function seedAllTables() {
 
     // ==================== PATIENT PORTAL ====================
     console.log('\n🏥 بوابة المريض...');
-    
+
     // 39. Patients
     console.log('  - patients');
     await connection.execute(
@@ -463,7 +683,7 @@ async function seedAllTables() {
 
     // ==================== TRACKING & ANALYTICS ====================
     console.log('\n📊 التتبع والتحليلات...');
-    
+
     // 42. PWA Installs
     console.log('  - pwaInstalls');
     await connection.execute(
@@ -495,7 +715,7 @@ async function seedAllTables() {
 
     // ==================== WHATSAPP NOTIFICATIONS ====================
     console.log('\n🔔 إشعارات واتساب...');
-    
+
     // 46. WhatsApp Notifications
     console.log('  - whatsappNotifications');
     await connection.execute(
@@ -506,13 +726,13 @@ async function seedAllTables() {
 
     // ==================== WHATSAPP ADVANCED ====================
     console.log('\n🚀 واتساب المتقدم...');
-    
+
     // 47. WhatsApp Blocked Numbers
     console.log('  - whatsappBlockedNumbers');
-    await connection.execute(
-      `INSERT INTO whatsapp_blocked_numbers (phone, reason) VALUES (?, ?)`,
-      ['777000000', 'opt-out']
-    );
+    await connection.execute(`INSERT INTO whatsapp_blocked_numbers (phone, reason) VALUES (?, ?)`, [
+      '777000000',
+      'opt-out',
+    ]);
 
     // 48. WhatsApp Account Alerts
     console.log('  - whatsappAccountAlerts');
@@ -608,7 +828,7 @@ async function seedAllTables() {
 
     // ==================== SETTINGS ====================
     console.log('\n⚙️ الإعدادات...');
-    
+
     // 61. Settings
     console.log('  - settings');
     const settings = [
@@ -633,7 +853,6 @@ async function seedAllTables() {
     console.log('  - 61 جدول تمت تغذيتها بالبيانات');
     console.log('  - المستخدمين: admin / admin123');
     console.log('  - الموظفين: ahmed, sara, khalid, fatima / password123');
-
   } catch (error) {
     console.error('❌ خطأ:', error.message);
     throw error;

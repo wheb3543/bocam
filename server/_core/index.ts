@@ -1,36 +1,54 @@
-import "dotenv/config";
-import express from "express";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import { createServer } from "http";
-import net from "net";
-import path from "path";
-import fs from "fs";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
-import { createUploadRouter } from "../api/uploadRoute";
-import { createWebhookRouter } from "../api/webhookRoutes";
-import { createWhatsAppSseRouter } from "../integrations/whatsappSse";
-import { appRouter } from "../routers/routers";
-import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
-import { initializeLicense } from "./license";
-import { initializeHeartbeat } from "./heartbeat";
-import { initializeUpdateChecker, getUpdateStatus, startManualUpdate, startManualRollback } from "./updateChecker";
-import { logActivity, logUpdate, updateUpdateLog, logBackup, updateBackupLog, createNotification } from "./activityLogger";
-import { cacheManager } from "../services/redis";
-import { CacheKeys, CacheTTL, cachedQuery } from "./cacheHelper";
-import { createBackup, getBackupHistory, restoreBackup, deleteBackup, BackupConfig } from "./backupManager";
-import { startBackupCronJobs, runManualBackup } from "../tasks/cron/backupJob";
+import 'dotenv/config';
+import express from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { createServer } from 'http';
+import net from 'net';
+import path from 'path';
+import fs from 'fs';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import { registerOAuthRoutes } from './oauth';
+import { createUploadRouter } from '../api/uploadRoute';
+import { createWebhookRouter } from '../api/webhookRoutes';
+import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
+import { appRouter } from '../routers/routers';
+import { createContext } from './context';
+import { serveStatic, setupVite } from './vite';
+import { initializeLicense } from './license';
+import { initializeHeartbeat } from './heartbeat';
+import {
+  initializeUpdateChecker,
+  getUpdateStatus,
+  startManualUpdate,
+  startManualRollback,
+} from './updateChecker';
+import {
+  logActivity,
+  logUpdate,
+  updateUpdateLog,
+  logBackup,
+  updateBackupLog,
+  createNotification,
+} from './activityLogger';
+import { cacheManager } from '../services/redis';
+import { CacheKeys, CacheTTL, cachedQuery } from './cacheHelper';
+import {
+  createBackup,
+  getBackupHistory,
+  restoreBackup,
+  deleteBackup,
+  BackupConfig,
+} from './backupManager';
+import { startBackupCronJobs, runManualBackup } from '../tasks/cron/backupJob';
 // import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const server = net.createServer();
     server.listen(port, () => {
       server.close(() => resolve(true));
     });
-    server.on("error", () => resolve(false));
+    server.on('error', () => resolve(false));
   });
 }
 
@@ -47,7 +65,7 @@ async function startServer() {
   // Initialize license validation (Kill Switch)
   // Allow server to start in activation mode if license is missing
   const licenseInfo = initializeLicense(true);
-  
+
   // TEMPORARY: Disable heartbeat, update checker, and backup cron jobs for deployment
   // Initialize heartbeat system (Anti-Clock-Tampering) - only if license is valid
   // if (licenseInfo) {
@@ -57,14 +75,16 @@ async function startServer() {
   //   // Initialize backup cron jobs - only if license is valid
   //   startBackupCronJobs();
   // }
-  
+
   const app = express();
   const server = createServer(app);
 
   // Security headers
-  app.use(helmet({
-    contentSecurityPolicy: false, // CSP is managed separately for Vite dev/prod
-  }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // CSP is managed separately for Vite dev/prod
+    })
+  );
 
   // Rate limiting for auth endpoints
   const authLimiter = rateLimit({
@@ -72,23 +92,25 @@ async function startServer() {
     max: 20, // limit each IP to 20 auth requests per window
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: "Too many requests, please try again later" },
+    message: { error: 'Too many requests, please try again later' },
   });
-  app.use("/api/trpc/auth.login", authLimiter);
-  app.use("/api/trpc/auth.register", authLimiter);
-  app.use("/api/trpc/patientPortal.sendOtp", authLimiter);
-  app.use("/api/trpc/patientPortal.verifyOtp", authLimiter);
-  app.use("/api/trpc/patientPortal.loginWithPassword", authLimiter);
+  app.use('/api/trpc/auth.login', authLimiter);
+  app.use('/api/trpc/auth.register', authLimiter);
+  app.use('/api/trpc/patientPortal.sendOtp', authLimiter);
+  app.use('/api/trpc/patientPortal.verifyOtp', authLimiter);
+  app.use('/api/trpc/patientPortal.loginWithPassword', authLimiter);
 
   // Configure body parser with larger size limit for file uploads
   // Capture raw body for WhatsApp webhook signature verification (X-Hub-Signature-256)
-  app.use(express.json({
-    limit: "50mb",
-    verify: (req: any, _res, buf) => {
-      req.rawBody = buf;
-    },
-  }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  app.use(
+    express.json({
+      limit: '50mb',
+      verify: (req: any, _res, buf) => {
+        req.rawBody = buf;
+      },
+    })
+  );
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
@@ -113,7 +135,7 @@ async function startServer() {
   });
 
   // Update management API endpoints
-  app.get("/api/update/status", apiLimiter, async (req, res) => {
+  app.get('/api/update/status', apiLimiter, async (req, res) => {
     try {
       // Try to get from cache first
       const cachedStatus = await cacheManager.get(CacheKeys.UPDATE_STATUS);
@@ -136,12 +158,12 @@ async function startServer() {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
-  app.post("/api/update/install", sensitiveApiLimiter, async (req, res) => {
+  app.post('/api/update/install', sensitiveApiLimiter, async (req, res) => {
     try {
       await startManualUpdate();
       await logActivity({
@@ -152,25 +174,25 @@ async function startServer() {
       });
       res.json({
         success: true,
-        message: "Update started successfully",
+        message: 'Update started successfully',
       });
     } catch (error) {
       await logActivity({
         action: 'update_install',
         description: 'Manual update failed',
         status: 'error',
-        error_message: error instanceof Error ? error.message : "Unknown error",
+        error_message: error instanceof Error ? error.message : 'Unknown error',
         ip_address: req.ip,
         user_agent: req.get('user-agent'),
       });
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
-  app.post("/api/update/rollback", sensitiveApiLimiter, async (req, res) => {
+  app.post('/api/update/rollback', sensitiveApiLimiter, async (req, res) => {
     try {
       await startManualRollback();
       await logActivity({
@@ -181,32 +203,32 @@ async function startServer() {
       });
       res.json({
         success: true,
-        message: "Rollback started successfully",
+        message: 'Rollback started successfully',
       });
     } catch (error) {
       await logActivity({
         action: 'update_rollback',
         description: 'Manual rollback failed',
         status: 'error',
-        error_message: error instanceof Error ? error.message : "Unknown error",
+        error_message: error instanceof Error ? error.message : 'Unknown error',
         ip_address: req.ip,
         user_agent: req.get('user-agent'),
       });
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
   // Backup management API endpoints
-  app.get("/api/backup/status", apiLimiter, (req, res) => {
+  app.get('/api/backup/status', apiLimiter, (req, res) => {
     try {
       // Mock data for now - in production, this would read from actual backup system
       const backupStatus = {
         lastBackup: Math.floor(Date.now() / 1000) - 3600,
         lastBackupSize: 256,
-        nextBackup: Math.floor(Date.now() / 1000) + (23 * 60 * 60),
+        nextBackup: Math.floor(Date.now() / 1000) + 23 * 60 * 60,
         backupEnabled: true,
         cloudEnabled: true,
         retentionDays: 30,
@@ -220,13 +242,13 @@ async function startServer() {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
   // Backup management API endpoints
-  app.get("/api/backup/status", apiLimiter, async (req, res) => {
+  app.get('/api/backup/status', apiLimiter, async (req, res) => {
     try {
       // Try to get from cache first
       const cachedStatus = await cacheManager.get(CacheKeys.BACKUP_STATUS);
@@ -254,12 +276,12 @@ async function startServer() {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
-  app.get("/api/backup/history", apiLimiter, async (req, res) => {
+  app.get('/api/backup/history', apiLimiter, async (req, res) => {
     try {
       // Try to get from cache first
       const cachedHistory = await cacheManager.get(CacheKeys.BACKUP_HISTORY);
@@ -282,15 +304,15 @@ async function startServer() {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
-  app.post("/api/backup/create", sensitiveApiLimiter, async (req, res) => {
+  app.post('/api/backup/create', sensitiveApiLimiter, async (req, res) => {
     try {
       const { type = 'manual' } = req.body;
-      
+
       await logActivity({
         action: 'backup_create',
         description: 'Manual backup started',
@@ -303,38 +325,38 @@ async function startServer() {
       await cacheManager.delete(CacheKeys.BACKUP_HISTORY);
 
       // Run backup in background
-      runManualBackup(type).catch(error => {
+      runManualBackup(type).catch((error) => {
         console.error('Manual backup failed:', error);
       });
 
       res.json({
         success: true,
-        message: "Backup started successfully",
+        message: 'Backup started successfully',
       });
     } catch (error) {
       await logActivity({
         action: 'backup_create',
         description: 'Manual backup failed',
         status: 'error',
-        error_message: error instanceof Error ? error.message : "Unknown error",
+        error_message: error instanceof Error ? error.message : 'Unknown error',
         ip_address: req.ip,
         user_agent: req.get('user-agent'),
       });
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
-  app.post("/api/backup/restore", sensitiveApiLimiter, async (req, res) => {
+  app.post('/api/backup/restore', sensitiveApiLimiter, async (req, res) => {
     try {
       const { backupId } = req.body;
-      
+
       if (!backupId) {
         return res.status(400).json({
           success: false,
-          error: "Backup ID is required",
+          error: 'Backup ID is required',
         });
       }
 
@@ -356,28 +378,28 @@ async function startServer() {
 
       res.json({
         success: true,
-        message: "Backup restored successfully",
+        message: 'Backup restored successfully',
       });
     } catch (error) {
       await logActivity({
         action: 'backup_restore',
         description: 'Backup restore failed',
         status: 'error',
-        error_message: error instanceof Error ? error.message : "Unknown error",
+        error_message: error instanceof Error ? error.message : 'Unknown error',
         ip_address: req.ip,
         user_agent: req.get('user-agent'),
       });
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
-  app.delete("/api/backup/:id", sensitiveApiLimiter, async (req, res) => {
+  app.delete('/api/backup/:id', sensitiveApiLimiter, async (req, res) => {
     try {
       const backupId = parseInt(req.params.id);
-      
+
       await logActivity({
         action: 'backup_delete',
         description: `Delete backup ${backupId} started`,
@@ -400,26 +422,26 @@ async function startServer() {
 
       res.json({
         success: true,
-        message: "Backup deleted successfully",
+        message: 'Backup deleted successfully',
       });
     } catch (error) {
       await logActivity({
         action: 'backup_delete',
         description: 'Backup delete failed',
         status: 'error',
-        error_message: error instanceof Error ? error.message : "Unknown error",
+        error_message: error instanceof Error ? error.message : 'Unknown error',
         ip_address: req.ip,
         user_agent: req.get('user-agent'),
       });
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
   // System configuration API endpoints
-  app.get("/api/config", apiLimiter, async (req, res) => {
+  app.get('/api/config', apiLimiter, async (req, res) => {
     try {
       // Try to get from cache first
       const cachedConfig = await cacheManager.get(CacheKeys.CONFIG);
@@ -433,15 +455,15 @@ async function startServer() {
       // Mock data for now - in production, this would read from actual config
       const systemConfig = {
         sslEnabled: true,
-        sslExpiry: Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60),
+        sslExpiry: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60,
         sslIssuer: "Let's Encrypt",
         backupEnabled: true,
-        backupSchedule: "0 2 * * *",
+        backupSchedule: '0 2 * * *',
         backupRetention: 30,
         cloudBackupEnabled: true,
-        cloudProvider: "AWS S3",
+        cloudProvider: 'AWS S3',
         notificationsEnabled: true,
-        notificationEmail: "admin@example.com",
+        notificationEmail: 'admin@example.com',
         maintenanceMode: false,
         debugMode: false,
       };
@@ -456,19 +478,19 @@ async function startServer() {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
-  app.post("/api/config", sensitiveApiLimiter, async (req, res) => {
+  app.post('/api/config', sensitiveApiLimiter, async (req, res) => {
     try {
       // In production, this would update the actual config
       // For now, just return success
-      
+
       // Invalidate cache after update
       await cacheManager.delete(CacheKeys.CONFIG);
-      
+
       await logActivity({
         action: 'config_update',
         description: 'System configuration updated',
@@ -478,28 +500,28 @@ async function startServer() {
       });
       res.json({
         success: true,
-        message: "Configuration updated successfully",
+        message: 'Configuration updated successfully',
       });
     } catch (error) {
       await logActivity({
         action: 'config_update',
         description: 'System configuration update failed',
         status: 'error',
-        error_message: error instanceof Error ? error.message : "Unknown error",
+        error_message: error instanceof Error ? error.message : 'Unknown error',
         metadata: req.body,
         ip_address: req.ip,
         user_agent: req.get('user-agent'),
       });
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });
 
   // tRPC API
   app.use(
-    "/api/trpc",
+    '/api/trpc',
     createExpressMiddleware({
       router: appRouter,
       createContext,
@@ -507,13 +529,13 @@ async function startServer() {
   );
   // development mode uses Vite, production mode uses static files
   // NOTE: SW routes and manifest routes are handled inside serveStatic/setupVite
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === 'development') {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  const preferredPort = parseInt(process.env.PORT || "3000");
+  const preferredPort = parseInt(process.env.PORT || '3000');
   const port = await findAvailablePort(preferredPort);
 
   if (port !== preferredPort) {
@@ -522,20 +544,22 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
-    
+
     // Initialize cron scheduler for automatic deactivation
     // initSimpleCronScheduler(); // Disabled: Auto-deactivation feature removed per user request
 
     // Initialize WhatsApp appointment reminders scheduler (every 30 minutes)
-    import("../tasks/cron/appointmentReminders").then(({ initAppointmentRemindersScheduler }) => {
-      try {
-        initAppointmentRemindersScheduler();
-      } catch (error) {
-        console.error("[AppointmentReminders] Failed to initialize scheduler:", error);
-      }
-    }).catch((error) => {
-      console.error("[AppointmentReminders] Failed to load appointment reminders module:", error);
-    });
+    import('../tasks/cron/appointmentReminders')
+      .then(({ initAppointmentRemindersScheduler }) => {
+        try {
+          initAppointmentRemindersScheduler();
+        } catch (error) {
+          console.error('[AppointmentReminders] Failed to initialize scheduler:', error);
+        }
+      })
+      .catch((error) => {
+        console.error('[AppointmentReminders] Failed to load appointment reminders module:', error);
+      });
   });
 }
 

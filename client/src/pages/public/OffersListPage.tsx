@@ -1,15 +1,15 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { useState } from "react";
-import { useLocation } from "wouter";
-import Navbar from "@/components/layout/Navbar";
-import { trpc } from "@/lib/api/trpc";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Search, Gift, Calendar, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import Navbar from '@/components/layout/Navbar';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, Search, Gift, Calendar, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
-import InstallPWAButton from "@/components/InstallPWAButton";
+import InstallPWAButton from '@/components/InstallPWAButton';
 
 export default function OffersListPage() {
   return (
@@ -23,20 +23,24 @@ export default function OffersListPage() {
 function OffersListContent() {
   const { formatDate, formatDateTime } = useFormatDate();
   const [, setLocation] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: offers, isLoading } = trpc.offers.getAll.useQuery();
 
   // Separate active and expired offers based on endDate
   const now = new Date();
-  const activeOffers = Array.isArray(offers) ? offers.filter((offer: any) => {
-    if (!offer.endDate) return true;
-    return new Date(offer.endDate) >= now;
-  }) : [];
-  const expiredOffers = Array.isArray(offers) ? offers.filter((offer: any) => {
-    if (!offer.endDate) return false;
-    return new Date(offer.endDate) < now;
-  }) : [];
+  const activeOffers = Array.isArray(offers)
+    ? offers.filter((offer: any) => {
+        if (!offer.endDate) return true;
+        return new Date(offer.endDate) >= now;
+      })
+    : [];
+  const expiredOffers = Array.isArray(offers)
+    ? offers.filter((offer: any) => {
+        if (!offer.endDate) return false;
+        return new Date(offer.endDate) < now;
+      })
+    : [];
 
   const filteredActiveOffers = activeOffers.filter((offer: any) =>
     offer.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -62,7 +66,9 @@ function OffersListContent() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
-              <div className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}>
+              <div
+                className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}
+              >
                 {isExpired ? (
                   <>
                     <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -77,13 +83,17 @@ function OffersListContent() {
               </div>
             </div>
             <div className="absolute bottom-2.5 sm:bottom-4 right-2.5 sm:right-4 left-2.5 sm:left-4 text-white">
-              <h3 className="text-base sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 line-clamp-2">{offer.title}</h3>
+              <h3 className="text-base sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 line-clamp-2">
+                {offer.title}
+              </h3>
             </div>
           </div>
         ) : (
           <div className="relative h-44 sm:h-56 md:h-64 bg-gradient-to-br from-green-600 to-blue-600 flex flex-col items-center justify-center text-white p-4 sm:p-6">
             <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
-              <div className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}>
+              <div
+                className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}
+              >
                 {isExpired ? (
                   <>
                     <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -98,7 +108,9 @@ function OffersListContent() {
               </div>
             </div>
             <Gift className="h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16 mb-3 sm:mb-4" />
-            <h3 className="text-base sm:text-xl md:text-2xl font-bold text-center line-clamp-2">{offer.title}</h3>
+            <h3 className="text-base sm:text-xl md:text-2xl font-bold text-center line-clamp-2">
+              {offer.title}
+            </h3>
           </div>
         )}
 
@@ -112,9 +124,7 @@ function OffersListContent() {
           {offer.startDate && offer.endDate && (
             <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground text-[10px] sm:text-xs md:text-sm mb-3 sm:mb-4">
               <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span>
-                صالح حتى {formatDate(offer.endDate)}
-              </span>
+              <span>صالح حتى {formatDate(offer.endDate)}</span>
             </div>
           )}
 
@@ -125,7 +135,7 @@ function OffersListContent() {
               setLocation(`/offers/${offer.slug || offer.id}`);
             }}
           >
-            {isExpired ? "عرض التفاصيل" : "اطلب العرض"}
+            {isExpired ? 'عرض التفاصيل' : 'اطلب العرض'}
             <ArrowLeft className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 rotate-180" />
           </Button>
         </div>
@@ -135,7 +145,6 @@ function OffersListContent() {
 
   return (
     <div className="space-y-6" dir="rtl">
-
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-green-600 to-blue-600 text-white py-8 sm:py-12 md:py-16">
         <div className="container mx-auto px-4 sm:px-6">
@@ -198,8 +207,8 @@ function OffersListContent() {
                     <Gift className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-gray-300 mb-3 sm:mb-4" />
                     <p className="text-sm sm:text-lg md:text-xl text-muted-foreground">
                       {searchQuery
-                        ? "لم يتم العثور على عروض جارية مطابقة للبحث"
-                        : "لا توجد عروض جارية حالياً"}
+                        ? 'لم يتم العثور على عروض جارية مطابقة للبحث'
+                        : 'لا توجد عروض جارية حالياً'}
                     </p>
                   </div>
                 )}
@@ -218,8 +227,8 @@ function OffersListContent() {
                     <CheckCircle2 className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-gray-300 mb-3 sm:mb-4" />
                     <p className="text-sm sm:text-lg md:text-xl text-muted-foreground">
                       {searchQuery
-                        ? "لم يتم العثور على عروض منتهية مطابقة للبحث"
-                        : "لا توجد عروض منتهية"}
+                        ? 'لم يتم العثور على عروض منتهية مطابقة للبحث'
+                        : 'لا توجد عروض منتهية'}
                     </p>
                   </div>
                 )}

@@ -3,7 +3,7 @@
 /**
  * Migration script to normalize phone numbers in all tables
  * Converts phone numbers from "+967 777 165 305" format to "967777165305" format
- * 
+ *
  * Usage: node scripts/migrate-phone-numbers.mjs
  */
 
@@ -45,13 +45,13 @@ function normalizePhoneNumber(phone) {
 
 async function migratePhoneNumbers() {
   let connection;
-  
+
   try {
     const config = parseConnectionString(DATABASE_URL);
     connection = await mysql.createConnection(config);
-    
+
     console.log('✅ Connected to database');
-    
+
     const tables = [
       { name: 'leads', column: 'phone' },
       { name: 'appointments', column: 'phone' },
@@ -59,45 +59,44 @@ async function migratePhoneNumbers() {
       { name: 'campRegistrations', column: 'phone' },
       { name: 'whatsappConversations', column: 'phoneNumber' },
     ];
-    
+
     for (const table of tables) {
       console.log(`\n📋 Processing table: ${table.name}`);
-      
+
       try {
         // Get all records
         const [rows] = await connection.query(`SELECT id, ${table.column} FROM ${table.name}`);
-        
+
         if (rows.length === 0) {
           console.log(`   ℹ️  No records found`);
           continue;
         }
-        
+
         console.log(`   📊 Found ${rows.length} records`);
-        
+
         let updatedCount = 0;
-        
+
         // Update each record with normalized phone number
         for (const row of rows) {
           const normalized = normalizePhoneNumber(row[table.column]);
-          
+
           // Only update if the phone number changed
           if (normalized !== row[table.column]) {
-            await connection.query(
-              `UPDATE ${table.name} SET ${table.column} = ? WHERE id = ?`,
-              [normalized, row.id]
-            );
+            await connection.query(`UPDATE ${table.name} SET ${table.column} = ? WHERE id = ?`, [
+              normalized,
+              row.id,
+            ]);
             updatedCount++;
           }
         }
-        
+
         console.log(`   ✅ Updated ${updatedCount} records`);
       } catch (error) {
         console.error(`   ❌ Error processing ${table.name}:`, error.message);
       }
     }
-    
+
     console.log('\n✅ Migration completed successfully!');
-    
   } catch (error) {
     console.error('❌ Migration failed:', error.message);
     process.exit(1);

@@ -4,7 +4,7 @@ description: |-
   | --- | --- |
   | **`name`** |  **Optional.**<br/> Specifies the sender's profile name. |
 auth:
-  - id: ""
+  - id: ''
     type: noauth
     name: No Auth
 order: 6000

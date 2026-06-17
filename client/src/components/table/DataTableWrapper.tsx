@@ -1,6 +1,6 @@
 /**
  * DataTableWrapper - مكون مشترك يغلف الجداول
- * 
+ *
  * يوفر:
  * - شريط أدوات موحد (تصدير، طباعة، إدارة أعمدة، فلاتر محفوظة)
  * - شريط بحث وفلاتر
@@ -8,17 +8,17 @@
  * - حالة فارغة (empty state)
  * - ترقيم الصفحات (pagination)
  * - عرض عدد النتائج المفلترة
- * 
+ *
  * يُستخدم كغلاف حول محتوى الجدول الفعلي الذي يتم تمريره كـ children
  */
-import { ReactNode } from "react";
-import { Filter } from "lucide-react";
-import Pagination, { type PageSizeValue } from "@/components/table/Pagination";
-import DataTableToolbar from "@/components/table/DataTableToolbar";
-import TableSkeleton from "@/components/table/TableSkeleton";
-import EmptyState from "@/components/EmptyState";
-import { Users, type LucideIcon } from "lucide-react";
-import type { ColumnConfig, ColumnTemplate } from "@/components/table/ColumnVisibility";
+import { ReactNode } from 'react';
+import { Filter } from 'lucide-react';
+import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
+import DataTableToolbar from '@/components/table/DataTableToolbar';
+import TableSkeleton from '@/components/table/TableSkeleton';
+import EmptyState from '@/components/EmptyState';
+import { Users, type LucideIcon } from 'lucide-react';
+import type { ColumnConfig, ColumnTemplate } from '@/components/table/ColumnVisibility';
 
 interface DataTableWrapperProps {
   /** محتوى الجدول (children) */
@@ -76,7 +76,13 @@ interface DataTableWrapperProps {
     templates: any[];
     activeTemplateId: string | null;
     onApplyTemplate: (template: ColumnTemplate) => void;
-    onSaveTemplate: (name: string, columns: Record<string, boolean>, columnOrder: string[], columnWidths?: Record<string, number>, frozenColumns?: string[]) => void;
+    onSaveTemplate: (
+      name: string,
+      columns: Record<string, boolean>,
+      columnOrder: string[],
+      columnWidths?: Record<string, number>,
+      frozenColumns?: string[]
+    ) => void;
     onDeleteTemplate: (templateId: string) => void;
     tableKey: string;
     columnWidths: Record<string, number>;
@@ -84,11 +90,17 @@ interface DataTableWrapperProps {
     onToggleFrozen: (key: string) => void;
     isAdmin: boolean;
     sharedTemplates?: any[];
-    onSaveSharedTemplate?: (name: string, columns: Record<string, boolean>, columnOrder: string[], columnWidths?: Record<string, number>, frozenColumns?: string[]) => void;
+    onSaveSharedTemplate?: (
+      name: string,
+      columns: Record<string, boolean>,
+      columnOrder: string[],
+      columnWidths?: Record<string, number>,
+      frozenColumns?: string[]
+    ) => void;
     onDeleteSharedTemplate?: (dbId: number) => void;
   };
   savedFiltersProps?: {
-    pageKey: "appointments" | "offerLeads" | "campRegistrations" | "customers";
+    pageKey: 'appointments' | 'offerLeads' | 'campRegistrations' | 'customers';
     currentFilters: Record<string, any>;
     onApplyFilter: (filters: Record<string, any>) => void;
   };
@@ -112,9 +124,9 @@ export default function DataTableWrapper({
   hasActiveFilters,
   onClearFilters,
   emptyIcon,
-  emptyTitle = "لا توجد بيانات",
-  emptyFilteredDescription = "لا توجد نتائج مطابقة للفلاتر المحددة.",
-  emptyDescription = "لم يتم إضافة أي بيانات بعد.",
+  emptyTitle = 'لا توجد بيانات',
+  emptyFilteredDescription = 'لا توجد نتائج مطابقة للفلاتر المحددة.',
+  emptyDescription = 'لم يتم إضافة أي بيانات بعد.',
   skeletonColumns = 6,
   skeletonRows = 5,
   currentPage,
@@ -135,7 +147,7 @@ export default function DataTableWrapper({
   showToolbar = true,
   showResultCount = true,
   showPagination = true,
-  className = "",
+  className = '',
 }: DataTableWrapperProps) {
   return (
     <div className={`space-y-3 ${className}`}>
@@ -160,7 +172,10 @@ export default function DataTableWrapper({
       {showResultCount && hasActiveFilters && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Filter className="h-3.5 w-3.5" />
-          <span>عرض {filteredCount.toLocaleString("ar-SA")} من {totalCount.toLocaleString("ar-SA")} نتيجة</span>
+          <span>
+            عرض {filteredCount.toLocaleString('ar-SA')} من {totalCount.toLocaleString('ar-SA')}{' '}
+            نتيجة
+          </span>
         </div>
       )}
 
@@ -176,7 +191,9 @@ export default function DataTableWrapper({
             icon={emptyIcon || Users}
             title={emptyTitle}
             description={hasActiveFilters ? emptyFilteredDescription : emptyDescription}
-            action={hasActiveFilters ? { label: "مسح الفلاتر", onClick: onClearFilters } : undefined}
+            action={
+              hasActiveFilters ? { label: 'مسح الفلاتر', onClick: onClearFilters } : undefined
+            }
           />
         </div>
       ) : (

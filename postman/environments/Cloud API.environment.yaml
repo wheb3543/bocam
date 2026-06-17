@@ -1,6 +1,6 @@
-owner: "51839868"
-team: "13084340"
-lastUpdatedBy: "51839868"
+owner: '51839868'
+team: '13084340'
+lastUpdatedBy: '51839868'
 lastRevision: 1778730300000
 name: Cloud API
 color: null
@@ -9,37 +9,37 @@ values:
     value: v18.0
     enabled: true
   - key: User-Access-Token
-    value: "{{User-Access-Token}}"
+    value: '{{User-Access-Token}}'
     enabled: true
   - key: WABA-ID
-    value: "{{WABA-ID}}"
+    value: '{{WABA-ID}}'
     enabled: true
   - key: Phone-Number-ID
-    value: "{{Phone-Number-ID}}"
+    value: '{{Phone-Number-ID}}'
     enabled: true
   - key: Business-ID
-    value: "{{Business-ID}}"
+    value: '{{Business-ID}}'
     enabled: true
   - key: Recipient-Phone-Number
-    value: "{{Recipient-Phone-Number}}"
+    value: '{{Recipient-Phone-Number}}'
     enabled: true
   - key: Media-ID
-    value: "{{Media-ID}}"
+    value: '{{Media-ID}}'
     enabled: true
   - key: Media-URL
-    value: "{{Media-URL}}"
+    value: '{{Media-URL}}'
     enabled: true
   - key: Token-Returned-From-Embedded-Signup-Flow
-    value: "{{Token-Returned-From-Embedded-Signup-Flow}}"
+    value: '{{Token-Returned-From-Embedded-Signup-Flow}}'
     enabled: true
   - key: Upload-ID
-    value: "{{Upload-ID}}"
+    value: '{{Upload-ID}}'
     enabled: true
   - key: Flow-ID
-    value: "{{Flow-ID}}"
+    value: '{{Flow-ID}}'
     enabled: true
   - key: Flow-Name
-    value: "{{Flow-Name}}"
+    value: '{{Flow-Name}}'
     enabled: true
 createdAt: 2026-05-14T03:45:00.000Z
 updatedAt: 2026-05-14T03:45:00.000Z

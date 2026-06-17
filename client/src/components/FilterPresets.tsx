@@ -1,6 +1,6 @@
 /**
  * FilterPresets - مكون مشترك لحفظ واستدعاء مجموعات الفلاتر المستخدمة بكثرة
- * 
+ *
  * يوفر:
  * - حفظ مجموعات الفلاتر المخصصة
  * - استدعاء الفلاتر المحفوظة بنقرة واحدة
@@ -8,8 +8,8 @@
  * - فلاتر سريعة مُعرّفة مسبقاً (Quick Presets)
  * - دعم الفلاتر المشتركة للمدراء
  */
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuGroup,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -26,11 +26,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Filter, Save, Trash2, Zap } from "lucide-react";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Filter, Save, Trash2, Zap } from 'lucide-react';
+import { toast } from 'sonner';
 
 export interface FilterPreset {
   id: string;
@@ -70,7 +70,7 @@ export default function FilterPresets({
   onApplyFilters,
   quickPresets = [],
   isAdmin = false,
-  className = "",
+  className = '',
 }: FilterPresetsProps) {
   const [presets, setPresets] = useState<FilterPreset[]>(() => {
     const saved = localStorage.getItem(`filter-presets-${pageKey}`);
@@ -83,12 +83,12 @@ export default function FilterPresets({
   });
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-  const [presetName, setPresetName] = useState("");
+  const [presetName, setPresetName] = useState('');
   const [saveAsShared, setSaveAsShared] = useState(false);
 
   const handleSavePreset = () => {
     if (!presetName.trim()) {
-      toast.error("الرجاء إدخال اسم للفلتر");
+      toast.error('الرجاء إدخال اسم للفلتر');
       return;
     }
 
@@ -112,22 +112,22 @@ export default function FilterPresets({
       toast.success(`تم حفظ الفلتر "${presetName}" بنجاح`);
     }
 
-    setPresetName("");
+    setPresetName('');
     setSaveAsShared(false);
     setSaveDialogOpen(false);
   };
 
   const handleDeletePreset = (id: string, isShared: boolean = false) => {
     if (isShared && isAdmin) {
-      const updated = sharedPresets.filter(p => p.id !== id);
+      const updated = sharedPresets.filter((p) => p.id !== id);
       setSharedPresets(updated);
       localStorage.setItem(`filter-presets-${pageKey}-shared`, JSON.stringify(updated));
-      toast.success("تم حذف الفلتر المشترك");
+      toast.success('تم حذف الفلتر المشترك');
     } else {
-      const updated = presets.filter(p => p.id !== id);
+      const updated = presets.filter((p) => p.id !== id);
       setPresets(updated);
       localStorage.setItem(`filter-presets-${pageKey}`, JSON.stringify(updated));
-      toast.success("تم حذف الفلتر");
+      toast.success('تم حذف الفلتر');
     }
   };
 
@@ -136,7 +136,7 @@ export default function FilterPresets({
     toast.success(`تم تطبيق الفلتر "${name}"`);
   };
 
-  const hasActiveFilters = Object.values(currentFilters).some(value => {
+  const hasActiveFilters = Object.values(currentFilters).some((value) => {
     if (Array.isArray(value)) return value.length > 0;
     if (typeof value === 'string') return value !== '' && value !== 'all';
     return value !== null && value !== undefined;
@@ -146,11 +146,7 @@ export default function FilterPresets({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className={`gap-2 h-9 ${className}`}
-          >
+          <Button variant="outline" size="sm" className={`gap-2 h-9 ${className}`}>
             <Filter className="h-4 w-4" />
             <span className="hidden sm:inline">الفلاتر المحفوظة</span>
           </Button>
@@ -164,7 +160,7 @@ export default function FilterPresets({
                 فلاتر سريعة
               </DropdownMenuLabel>
               <DropdownMenuGroup>
-                {quickPresets.map(preset => (
+                {quickPresets.map((preset) => (
                   <DropdownMenuItem
                     key={preset.id}
                     onClick={() => handleApplyPreset(preset.filters, preset.name)}
@@ -184,7 +180,7 @@ export default function FilterPresets({
             <>
               <DropdownMenuLabel>الفلاتر المشتركة</DropdownMenuLabel>
               <DropdownMenuGroup>
-                {sharedPresets.map(preset => (
+                {sharedPresets.map((preset) => (
                   <DropdownMenuItem
                     key={preset.id}
                     className="flex items-center justify-between group"
@@ -216,7 +212,7 @@ export default function FilterPresets({
             <>
               <DropdownMenuLabel>الفلاتر المحفوظة</DropdownMenuLabel>
               <DropdownMenuGroup>
-                {presets.map(preset => (
+                {presets.map((preset) => (
                   <DropdownMenuItem
                     key={preset.id}
                     className="flex items-center justify-between group"
@@ -266,9 +262,7 @@ export default function FilterPresets({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>حفظ الفلاتر الحالية</DialogTitle>
-            <DialogDescription>
-              احفظ مجموعة الفلاتر الحالية لاستخدامها لاحقاً
-            </DialogDescription>
+            <DialogDescription>احفظ مجموعة الفلاتر الحالية لاستخدامها لاحقاً</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -304,9 +298,7 @@ export default function FilterPresets({
             <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
               إلغاء
             </Button>
-            <Button onClick={handleSavePreset}>
-              حفظ
-            </Button>
+            <Button onClick={handleSavePreset}>حفظ</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

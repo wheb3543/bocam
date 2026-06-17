@@ -1,9 +1,9 @@
-import { useState } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
+import { useState } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 import {
   CheckCircle2,
   AlertCircle,
@@ -17,9 +17,9 @@ import {
   Code2,
   Play,
   RefreshCw,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -28,7 +28,7 @@ function CopyButton({ value }: { value: string }) {
   const handleCopy = () => {
     navigator.clipboard.writeText(value);
     setCopied(true);
-    toast.success("تم النسخ!");
+    toast.success('تم النسخ!');
     setTimeout(() => setCopied(false), 2000);
   };
   return (
@@ -51,19 +51,25 @@ interface EnvVarRowProps {
   description: string;
   example?: string;
   required?: boolean;
-  side?: "frontend" | "backend" | "both";
+  side?: 'frontend' | 'backend' | 'both';
 }
 
-function EnvVarRow({ name, description, example, required = false, side = "backend" }: EnvVarRowProps) {
+function EnvVarRow({
+  name,
+  description,
+  example,
+  required = false,
+  side = 'backend',
+}: EnvVarRowProps) {
   const sideLabel: Record<string, string> = {
-    frontend: "Frontend",
-    backend: "Backend",
-    both: "Frontend + Backend",
+    frontend: 'Frontend',
+    backend: 'Backend',
+    both: 'Frontend + Backend',
   };
   const sideColor: Record<string, string> = {
-    frontend: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-    backend: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-    both: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+    frontend: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    backend: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    both: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
   };
 
   return (
@@ -74,18 +80,20 @@ function EnvVarRow({ name, description, example, required = false, side = "backe
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-foreground">{description}</p>
-        {example && (
-          <p className="text-xs text-muted-foreground mt-1 font-mono">مثال: {example}</p>
-        )}
+        {example && <p className="text-xs text-muted-foreground mt-1 font-mono">مثال: {example}</p>}
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${sideColor[side]}`}>
           {sideLabel[side]}
         </span>
         {required ? (
-          <Badge variant="destructive" className="text-xs">مطلوب</Badge>
+          <Badge variant="destructive" className="text-xs">
+            مطلوب
+          </Badge>
         ) : (
-          <Badge variant="outline" className="text-xs">اختياري</Badge>
+          <Badge variant="outline" className="text-xs">
+            اختياري
+          </Badge>
         )}
       </div>
     </div>
@@ -97,12 +105,12 @@ function EnvVarRow({ name, description, example, required = false, side = "backe
 export default function TrackingSettingsPage() {
   // Detect which env vars are configured (frontend-accessible ones only)
   const pixelId = import.meta.env.VITE_META_PIXEL_ID;
-  const isPixelConfigured = !!pixelId && pixelId !== "YOUR_PIXEL_ID";
+  const isPixelConfigured = !!pixelId && pixelId !== 'YOUR_PIXEL_ID';
   const [isTesting, setIsTesting] = useState(false);
 
   const handleTestPixel = async () => {
     if (!isPixelConfigured) {
-      toast.error("Meta Pixel غير مُهيَّأ. يرجى إضافة VITE_META_PIXEL_ID");
+      toast.error('Meta Pixel غير مُهيَّأ. يرجى إضافة VITE_META_PIXEL_ID');
       return;
     }
 
@@ -111,14 +119,14 @@ export default function TrackingSettingsPage() {
       // Send a test event to Meta Pixel
       if (typeof window !== 'undefined' && (window as any).fbq) {
         (window as any).fbq('track', 'TestEvent', {
-          test_event_code: import.meta.env.VITE_META_TEST_EVENT_CODE || 'TEST12345'
+          test_event_code: import.meta.env.VITE_META_TEST_EVENT_CODE || 'TEST12345',
         });
-        toast.success("تم إرسال حدث اختبار إلى Meta Pixel");
+        toast.success('تم إرسال حدث اختبار إلى Meta Pixel');
       } else {
-        toast.error("Meta Pixel غير محمّل. يرجى التحقق من التكوين");
+        toast.error('Meta Pixel غير محمّل. يرجى التحقق من التكوين');
       }
     } catch (error) {
-      toast.error("فشل إرسال حدث الاختبار");
+      toast.error('فشل إرسال حدث الاختبار');
     } finally {
       setIsTesting(false);
     }
@@ -130,19 +138,24 @@ export default function TrackingSettingsPage() {
       pageDescription="إدارة Meta Pixel وFacebook Conversions API وأدوات التتبع"
     >
       <div className="container py-6 space-y-6">
-
         {/* ── Status Overview ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-full ${isPixelConfigured ? "bg-green-100 dark:bg-green-900/30" : "bg-yellow-100 dark:bg-yellow-900/30"}`}>
-                  <Eye className={`h-5 w-5 ${isPixelConfigured ? "text-green-600" : "text-yellow-600"}`} />
+                <div
+                  className={`p-2 rounded-full ${isPixelConfigured ? 'bg-green-100 dark:bg-green-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30'}`}
+                >
+                  <Eye
+                    className={`h-5 w-5 ${isPixelConfigured ? 'text-green-600' : 'text-yellow-600'}`}
+                  />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Meta Pixel</p>
-                  <p className={`text-xs ${isPixelConfigured ? "text-green-600" : "text-yellow-600"}`}>
-                    {isPixelConfigured ? `مُفعَّل (${pixelId})` : "غير مُهيَّأ"}
+                  <p
+                    className={`text-xs ${isPixelConfigured ? 'text-green-600' : 'text-yellow-600'}`}
+                  >
+                    {isPixelConfigured ? `مُفعَّل (${pixelId})` : 'غير مُهيَّأ'}
                   </p>
                 </div>
               </div>
@@ -228,7 +241,20 @@ export default function TrackingSettingsPage() {
             <Alert className="mt-4">
               <Info className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                <strong>ملاحظة:</strong> إحصائيات الأحداث التفصيلية متاحة في <a href="/admin/reports/bi" className="text-blue-600 hover:underline">صفحة تحليلات الأعمال (BI)</a> و <a href="https://www.facebook.com/events_manager2" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Meta Events Manager</a>.
+                <strong>ملاحظة:</strong> إحصائيات الأحداث التفصيلية متاحة في{' '}
+                <a href="/admin/reports/bi" className="text-blue-600 hover:underline">
+                  صفحة تحليلات الأعمال (BI)
+                </a>{' '}
+                و{' '}
+                <a
+                  href="https://www.facebook.com/events_manager2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  Meta Events Manager
+                </a>
+                .
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -242,8 +268,8 @@ export default function TrackingSettingsPage() {
               إعداد Meta Pixel (Client-Side)
             </CardTitle>
             <CardDescription>
-              يُرسل أحداث التتبع من المتصفح مباشرةً إلى Meta عند تفاعل المستخدم مع الصفحة.
-              يعمل فقط عند موافقة المستخدم على ملفات تعريف الارتباط التسويقية.
+              يُرسل أحداث التتبع من المتصفح مباشرةً إلى Meta عند تفاعل المستخدم مع الصفحة. يعمل فقط
+              عند موافقة المستخدم على ملفات تعريف الارتباط التسويقية.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -252,10 +278,18 @@ export default function TrackingSettingsPage() {
               <AlertTitle>الأحداث المُرسَلة تلقائياً</AlertTitle>
               <AlertDescription>
                 <ul className="mt-2 space-y-1 text-sm list-disc list-inside">
-                  <li><strong>PageView</strong> — عند كل تحميل صفحة</li>
-                  <li><strong>ViewContent</strong> — عند مشاهدة صفحة طبيب أو عرض أو مخيم</li>
-                  <li><strong>Lead</strong> — عند إرسال نموذج حجز بنجاح</li>
-                  <li><strong>InitiateCheckout</strong> — عند بدء ملء نموذج الحجز</li>
+                  <li>
+                    <strong>PageView</strong> — عند كل تحميل صفحة
+                  </li>
+                  <li>
+                    <strong>ViewContent</strong> — عند مشاهدة صفحة طبيب أو عرض أو مخيم
+                  </li>
+                  <li>
+                    <strong>Lead</strong> — عند إرسال نموذج حجز بنجاح
+                  </li>
+                  <li>
+                    <strong>InitiateCheckout</strong> — عند بدء ملء نموذج الحجز
+                  </li>
                 </ul>
               </AlertDescription>
             </Alert>
@@ -274,9 +308,14 @@ export default function TrackingSettingsPage() {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleTestPixel} disabled={isTesting || !isPixelConfigured}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleTestPixel}
+                disabled={isTesting || !isPixelConfigured}
+              >
                 <Play className="h-4 w-4 mr-2" />
-                {isTesting ? "جاري الاختبار..." : "اختبار Pixel"}
+                {isTesting ? 'جاري الاختبار...' : 'اختبار Pixel'}
               </Button>
               <Button variant="outline" size="sm" asChild>
                 <a
@@ -301,8 +340,8 @@ export default function TrackingSettingsPage() {
               إعداد Facebook Conversions API (Server-Side)
             </CardTitle>
             <CardDescription>
-              يُرسل أحداث التحويل من الخادم مباشرةً إلى Meta، مما يضمن دقة التتبع حتى عند استخدام
-              Ad Blockers أو رفض ملفات تعريف الارتباط. يعمل بالتوازي مع Pixel لتقليل التكرار.
+              يُرسل أحداث التحويل من الخادم مباشرةً إلى Meta، مما يضمن دقة التتبع حتى عند استخدام Ad
+              Blockers أو رفض ملفات تعريف الارتباط. يعمل بالتوازي مع Pixel لتقليل التكرار.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -311,9 +350,15 @@ export default function TrackingSettingsPage() {
               <AlertTitle>الأحداث المُرسَلة تلقائياً</AlertTitle>
               <AlertDescription>
                 <ul className="mt-2 space-y-1 text-sm list-disc list-inside">
-                  <li><strong>Lead</strong> — عند إرسال نموذج حجز موعد طبيب</li>
-                  <li><strong>Lead</strong> — عند إرسال نموذج طلب عرض طبي</li>
-                  <li><strong>CompleteRegistration</strong> — عند التسجيل في مخيم طبي</li>
+                  <li>
+                    <strong>Lead</strong> — عند إرسال نموذج حجز موعد طبيب
+                  </li>
+                  <li>
+                    <strong>Lead</strong> — عند إرسال نموذج طلب عرض طبي
+                  </li>
+                  <li>
+                    <strong>CompleteRegistration</strong> — عند التسجيل في مخيم طبي
+                  </li>
                 </ul>
               </AlertDescription>
             </Alert>
@@ -322,8 +367,8 @@ export default function TrackingSettingsPage() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>تنبيه: البيانات الحساسة</AlertTitle>
               <AlertDescription>
-                يقوم الخادم بتشفير (Hash) بيانات المريض (الاسم، الهاتف، البريد) باستخدام SHA-256
-                قبل إرسالها إلى Meta. لا تُرسَل البيانات الخام أبداً.
+                يقوم الخادم بتشفير (Hash) بيانات المريض (الاسم، الهاتف، البريد) باستخدام SHA-256 قبل
+                إرسالها إلى Meta. لا تُرسَل البيانات الخام أبداً.
               </AlertDescription>
             </Alert>
 
@@ -353,10 +398,18 @@ export default function TrackingSettingsPage() {
                 كيفية الحصول على Access Token
               </h4>
               <ol className="text-sm space-y-2 list-decimal list-inside text-muted-foreground">
-                <li>افتح <strong>Meta Business Manager</strong> → Events Manager</li>
+                <li>
+                  افتح <strong>Meta Business Manager</strong> → Events Manager
+                </li>
                 <li>اختر الـ Pixel الخاص بك → Settings</li>
-                <li>انتقل إلى <strong>Conversions API</strong> → Generate Access Token</li>
-                <li>انسخ الرمز وأضفه كـ <code className="bg-background px-1 rounded">META_ACCESS_TOKEN</code> في إعدادات المشروع</li>
+                <li>
+                  انتقل إلى <strong>Conversions API</strong> → Generate Access Token
+                </li>
+                <li>
+                  انسخ الرمز وأضفه كـ{' '}
+                  <code className="bg-background px-1 rounded">META_ACCESS_TOKEN</code> في إعدادات
+                  المشروع
+                </li>
               </ol>
             </div>
 
@@ -426,9 +479,10 @@ export default function TrackingSettingsPage() {
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                <strong>ملاحظة:</strong> Facebook Conversions API (Server-Side) يعمل بغض النظر عن موافقة
-                ملفات تعريف الارتباط لأنه يعمل من الخادم. لكن يجب الإشارة إلى ذلك في سياسة الخصوصية
-                (المتوفرة على <code className="bg-muted px-1 rounded">/privacy-policy</code>).
+                <strong>ملاحظة:</strong> Facebook Conversions API (Server-Side) يعمل بغض النظر عن
+                موافقة ملفات تعريف الارتباط لأنه يعمل من الخادم. لكن يجب الإشارة إلى ذلك في سياسة
+                الخصوصية (المتوفرة على{' '}
+                <code className="bg-muted px-1 rounded">/privacy-policy</code>).
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -493,7 +547,7 @@ export default function TrackingSettingsPage() {
             <div className="bg-muted/50 rounded-lg p-4">
               <h4 className="text-sm font-semibold mb-2">نموذج ملف .env</h4>
               <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap break-all">
-{`# Meta Pixel (Frontend)
+                {`# Meta Pixel (Frontend)
 VITE_META_PIXEL_ID=1234567890123456
 
 # Facebook Conversions API (Backend)
@@ -508,7 +562,6 @@ INSTAGRAM_BUSINESS_ACCOUNT_ID=17841400000000000`}
             </div>
           </CardContent>
         </Card>
-
       </div>
     </DashboardLayout>
   );

@@ -1,26 +1,35 @@
-import { protectedProcedure, publicProcedure, router, adminProcedure, requireWhatsAppFeature } from "../_core/trpc";
-import { TRPCError } from "@trpc/server";
-import * as db from "../database/db";
-import { meta } from "../api/MetaApiService";
-import { z } from "zod";
+import {
+  protectedProcedure,
+  publicProcedure,
+  router,
+  adminProcedure,
+  requireWhatsAppFeature,
+} from '../_core/trpc';
+import { TRPCError } from '@trpc/server';
+import * as db from '../database/db';
+import { meta } from '../api/MetaApiService';
+import { z } from 'zod';
 import {
   sendWhatsAppTextMessage,
   getWhatsAppAPIStatus,
   formatPhoneNumber,
-  sendWhatsAppTypingIndicator
-} from "../services/whatsappCloudAPI";
+  sendWhatsAppTypingIndicator,
+} from '../services/whatsappCloudAPI';
 import {
   sendTextMessage,
   sendWelcomeMessage,
   sendBookingConfirmation,
   verifyWhatsAppHealth,
-} from "../services/whatsappService";
-import { normalizePhoneNumber } from "../database/db";
+} from '../services/whatsappService';
+import { normalizePhoneNumber } from '../database/db';
 // whatsappBot removed — using sendWhatsAppTextMessage (Cloud API) directly
 
 // Logging helper for sensitive operations
 function logOperation(operation: string, userId: number, details: any) {
-  console.log(`[WhatsApp Audit] ${operation} | User: ${userId} | Details:`, JSON.stringify(details));
+  console.log(
+    `[WhatsApp Audit] ${operation} | User: ${userId} | Details:`,
+    JSON.stringify(details)
+  );
 }
 
 // Simple in-memory rate limiter for manual messages
@@ -29,7 +38,11 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute window
 const RATE_LIMIT_MAX_REQUESTS = 10; // Max 10 messages per minute per user
 
-function checkRateLimit(userId: number): { allowed: boolean; remaining: number; resetTime: number } {
+function checkRateLimit(userId: number): {
+  allowed: boolean;
+  remaining: number;
+  resetTime: number;
+} {
   const now = Date.now();
   const key = `user:${userId}`;
   const entry = rateLimitStore.get(key);
@@ -40,7 +53,11 @@ function checkRateLimit(userId: number): { allowed: boolean; remaining: number; 
       count: 1,
       resetTime: now + RATE_LIMIT_WINDOW,
     });
-    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1, resetTime: now + RATE_LIMIT_WINDOW };
+    return {
+      allowed: true,
+      remaining: RATE_LIMIT_MAX_REQUESTS - 1,
+      resetTime: now + RATE_LIMIT_WINDOW,
+    };
   }
 
   if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
@@ -48,7 +65,11 @@ function checkRateLimit(userId: number): { allowed: boolean; remaining: number; 
   }
 
   entry.count++;
-  return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - entry.count, resetTime: entry.resetTime };
+  return {
+    allowed: true,
+    remaining: RATE_LIMIT_MAX_REQUESTS - entry.count,
+    resetTime: entry.resetTime,
+  };
 }
 
 export const whatsappRouter = router({
@@ -65,23 +86,27 @@ export const whatsappRouter = router({
     registerPhoneNumber: adminProcedure
       .input(
         z.object({
-          pin: z.string().regex(/^\d{6}$/, "PIN يجب أن يكون 6 أرقام"),
+          pin: z.string().regex(/^\d{6}$/, 'PIN يجب أن يكون 6 أرقام'),
           phoneNumberId: z.string().optional(),
         })
       )
       .mutation(async ({ input, ctx }) => {
         const phoneNumberId = input.phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID;
         if (!phoneNumberId) {
-          return { success: false, error: "WHATSAPP_PHONE_NUMBER_ID غير مُعيَّن" };
+          return { success: false, error: 'WHATSAPP_PHONE_NUMBER_ID غير مُعيَّن' };
         }
 
-        logOperation("registerPhoneNumber", ctx.user.id, {
+        logOperation('registerPhoneNumber', ctx.user.id, {
           phoneNumberId,
         });
 
         const result = await meta.registerWhatsAppPhoneNumber(phoneNumberId, input.pin);
         return result.success
-          ? { success: true, message: "تم تسجيل رقم الهاتف بنجاح في WhatsApp Cloud API", data: result.data }
+          ? {
+              success: true,
+              message: 'تم تسجيل رقم الهاتف بنجاح في WhatsApp Cloud API',
+              data: result.data,
+            }
           : { success: false, error: result.error };
       }),
 
@@ -96,7 +121,7 @@ export const whatsappRouter = router({
       .mutation(async ({ input, ctx }) => {
         const wabaId = input.wabaId || process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
         if (!wabaId) {
-          return { success: false, error: "WHATSAPP_BUSINESS_ACCOUNT_ID غير مُعيَّن" };
+          return { success: false, error: 'WHATSAPP_BUSINESS_ACCOUNT_ID غير مُعيَّن' };
         }
 
         const verifyToken =
@@ -107,11 +132,11 @@ export const whatsappRouter = router({
         if (input.overrideCallbackUri && !verifyToken) {
           return {
             success: false,
-            error: "عند استخدام override_callback_uri يجب توفير verify_token",
+            error: 'عند استخدام override_callback_uri يجب توفير verify_token',
           };
         }
 
-        logOperation("subscribeAppToWaba", ctx.user.id, {
+        logOperation('subscribeAppToWaba', ctx.user.id, {
           wabaId,
           hasOverrideCallbackUri: !!input.overrideCallbackUri,
         });
@@ -122,7 +147,7 @@ export const whatsappRouter = router({
         });
 
         return result.success
-          ? { success: true, message: "تم اشتراك التطبيق في WABA بنجاح", data: result.data }
+          ? { success: true, message: 'تم اشتراك التطبيق في WABA بنجاح', data: result.data }
           : { success: false, error: result.error };
       }),
   }),
@@ -134,25 +159,23 @@ export const whatsappRouter = router({
     }),
 
     getCustomerInfo: protectedProcedure
-      .input(z.object({ phone: z.string().min(1, "رقم الهاتف مطلوب") }))
+      .input(z.object({ phone: z.string().min(1, 'رقم الهاتف مطلوب') }))
       .query(async ({ input }) => {
         return await db.getCustomerInfoByPhone(input.phone);
       }),
 
     getCustomerRecords: protectedProcedure
-      .input(z.object({ phone: z.string().min(1, "رقم الهاتف مطلوب") }))
+      .input(z.object({ phone: z.string().min(1, 'رقم الهاتف مطلوب') }))
       .query(async ({ input }) => {
         return await db.getAllCustomerRecordsByPhone(input.phone);
       }),
 
-    getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return await db.getWhatsAppConversationById(input.id);
-      }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await db.getWhatsAppConversationById(input.id);
+    }),
 
     search: protectedProcedure
-      .input(z.object({ searchTerm: z.string().min(1, "مصطلح البحث مطلوب") }))
+      .input(z.object({ searchTerm: z.string().min(1, 'مصطلح البحث مطلوب') }))
       .query(async ({ input }) => {
         return await db.searchWhatsAppConversations(input.searchTerm);
       }),
@@ -164,8 +187,11 @@ export const whatsappRouter = router({
     create: protectedProcedure
       .input(
         z.object({
-          customerName: z.string().min(1, "اسم العميل مطلوب"),
-          customerPhone: z.string().min(9, "رقم الهاتف يجب أن يكون 9 أرقام على الأقل").max(15, "رقم الهاتف طويل جداً"),
+          customerName: z.string().min(1, 'اسم العميل مطلوب'),
+          customerPhone: z
+            .string()
+            .min(9, 'رقم الهاتف يجب أن يكون 9 أرقام على الأقل')
+            .max(15, 'رقم الهاتف طويل جداً'),
           leadId: z.number().optional(),
           appointmentId: z.number().optional(),
           offerLeadId: z.number().optional(),
@@ -198,7 +224,7 @@ export const whatsappRouter = router({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        logOperation("updateConversation", ctx.user.id, {
+        logOperation('updateConversation', ctx.user.id, {
           conversationId: input.id,
           hasCustomerName: !!input.customerName,
           hasUnreadCount: input.unreadCount !== undefined,
@@ -217,7 +243,7 @@ export const whatsappRouter = router({
     markAsRead: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        logOperation("markAsRead", ctx.user.id, { conversationId: input.id });
+        logOperation('markAsRead', ctx.user.id, { conversationId: input.id });
 
         return await db.updateWhatsAppConversation(input.id, {
           unreadCount: 0,
@@ -227,7 +253,10 @@ export const whatsappRouter = router({
     assignToUser: protectedProcedure
       .input(z.object({ id: z.number(), userId: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        logOperation("assignToUser", ctx.user.id, { conversationId: input.id, assignedToUserId: input.userId });
+        logOperation('assignToUser', ctx.user.id, {
+          conversationId: input.id,
+          assignedToUserId: input.userId,
+        });
 
         return await db.updateWhatsAppConversation(input.id, {
           assignedToUserId: input.userId,
@@ -237,7 +266,10 @@ export const whatsappRouter = router({
     updateNotes: protectedProcedure
       .input(z.object({ id: z.number(), notes: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        logOperation("updateNotes", ctx.user.id, { conversationId: input.id, hasNotes: !!input.notes });
+        logOperation('updateNotes', ctx.user.id, {
+          conversationId: input.id,
+          hasNotes: !!input.notes,
+        });
 
         return await db.updateWhatsAppConversation(input.id, {
           notes: input.notes,
@@ -247,47 +279,49 @@ export const whatsappRouter = router({
     updateName: protectedProcedure
       .input(z.object({ id: z.number(), customerName: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        logOperation("updateName", ctx.user.id, { conversationId: input.id, customerName: input.customerName });
+        logOperation('updateName', ctx.user.id, {
+          conversationId: input.id,
+          customerName: input.customerName,
+        });
 
         return await db.updateWhatsAppConversation(input.id, {
           customerName: input.customerName,
         });
       }),
 
-    delete: adminProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input, ctx }) => {
-        logOperation("deleteConversation", ctx.user.id, { conversationId: input.id });
+    delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
+      logOperation('deleteConversation', ctx.user.id, { conversationId: input.id });
 
-        const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      const dbConn = await db.getDb();
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
-        const { whatsappConversations, whatsappMessages } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+      const { whatsappConversations, whatsappMessages } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
 
-        // Delete all messages in the conversation first
-        await dbConn
-          .delete(whatsappMessages)
-          .where(eq(whatsappMessages.conversationId, input.id));
+      // Delete all messages in the conversation first
+      await dbConn.delete(whatsappMessages).where(eq(whatsappMessages.conversationId, input.id));
 
-        // Delete the conversation
-        await dbConn
-          .delete(whatsappConversations)
-          .where(eq(whatsappConversations.id, input.id));
+      // Delete the conversation
+      await dbConn.delete(whatsappConversations).where(eq(whatsappConversations.id, input.id));
 
-        return { success: true };
-      }),
+      return { success: true };
+    }),
 
     bulkArchive: adminProcedure
-      .input(z.object({ ids: z.array(z.number()).min(1, "يجب تحديد محادثة واحدة على الأقل") }))
+      .input(z.object({ ids: z.array(z.number()).min(1, 'يجب تحديد محادثة واحدة على الأقل') }))
       .mutation(async ({ input, ctx }) => {
-        logOperation("bulkArchive", ctx.user.id, { conversationIds: input.ids });
+        logOperation('bulkArchive', ctx.user.id, { conversationIds: input.ids });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
-        const { whatsappConversations } = await import("../../drizzle/schema");
-        const { eq, inArray } = await import("drizzle-orm");
+        const { whatsappConversations } = await import('../../drizzle/schema');
+        const { eq, inArray } = await import('drizzle-orm');
 
         await dbConn
           .update(whatsappConversations)
@@ -298,15 +332,27 @@ export const whatsappRouter = router({
       }),
 
     bulkMarkImportant: adminProcedure
-      .input(z.object({ ids: z.array(z.number()).min(1, "يجب تحديد محادثة واحدة على الأقل"), important: z.number().min(0).max(1) }))
+      .input(
+        z.object({
+          ids: z.array(z.number()).min(1, 'يجب تحديد محادثة واحدة على الأقل'),
+          important: z.number().min(0).max(1),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        logOperation("bulkMarkImportant", ctx.user.id, { conversationIds: input.ids, important: input.important });
+        logOperation('bulkMarkImportant', ctx.user.id, {
+          conversationIds: input.ids,
+          important: input.important,
+        });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
-        const { whatsappConversations } = await import("../../drizzle/schema");
-        const { inArray } = await import("drizzle-orm");
+        const { whatsappConversations } = await import('../../drizzle/schema');
+        const { inArray } = await import('drizzle-orm');
 
         await dbConn
           .update(whatsappConversations)
@@ -320,32 +366,36 @@ export const whatsappRouter = router({
       .input(z.object({ conversationId: z.number() }))
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
-        const { whatsappMessages } = await import("../../drizzle/schema");
-        const { eq, count, sql } = await import("drizzle-orm");
+        const { whatsappMessages } = await import('../../drizzle/schema');
+        const { eq, count, sql } = await import('drizzle-orm');
 
         const messages = await dbConn
           .select()
           .from(whatsappMessages)
           .where(eq(whatsappMessages.conversationId, input.conversationId));
-        
+
         const totalMessages = messages.length;
-        const inboundMessages = messages.filter(m => m.direction === "inbound").length;
-        const outboundMessages = messages.filter(m => m.direction === "outbound").length;
-        const templateMessages = messages.filter(m => m.messageType === "template").length;
-        
+        const inboundMessages = messages.filter((m) => m.direction === 'inbound').length;
+        const outboundMessages = messages.filter((m) => m.direction === 'outbound').length;
+        const templateMessages = messages.filter((m) => m.messageType === 'template').length;
+
         const firstMessage = messages[0];
         const lastMessage = messages[messages.length - 1];
-        
+
         // Calculate average response time (simplified)
         let avgResponseTime = 0;
         let responseCount = 0;
         for (let i = 1; i < messages.length; i++) {
-          if (messages[i].direction === "outbound" && messages[i-1].direction === "inbound") {
-            const prevTime = new Date(messages[i-1].createdAt).getTime();
+          if (messages[i].direction === 'outbound' && messages[i - 1].direction === 'inbound') {
+            const prevTime = new Date(messages[i - 1].createdAt).getTime();
             const currTime = new Date(messages[i].createdAt).getTime();
-            avgResponseTime += (currTime - prevTime);
+            avgResponseTime += currTime - prevTime;
             responseCount++;
           }
         }
@@ -364,15 +414,22 @@ export const whatsappRouter = router({
       }),
 
     exportConversation: protectedProcedure
-      .input(z.object({ conversationId: z.number(), format: z.enum(["json", "csv"]).optional() }))
+      .input(z.object({ conversationId: z.number(), format: z.enum(['json', 'csv']).optional() }))
       .query(async ({ input, ctx }) => {
-        logOperation("exportConversation", ctx.user.id, { conversationId: input.conversationId, format: input.format || "json" });
+        logOperation('exportConversation', ctx.user.id, {
+          conversationId: input.conversationId,
+          format: input.format || 'json',
+        });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
-        const { whatsappMessages, whatsappConversations } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        const { whatsappMessages, whatsappConversations } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
 
         const conversation = await dbConn
           .select()
@@ -381,7 +438,7 @@ export const whatsappRouter = router({
           .limit(1);
 
         if (!conversation || conversation.length === 0) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة غير موجودة" });
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'المحادثة غير موجودة' });
         }
 
         const messages = await dbConn
@@ -390,21 +447,24 @@ export const whatsappRouter = router({
           .where(eq(whatsappMessages.conversationId, input.conversationId))
           .orderBy(whatsappMessages.createdAt);
 
-        const format = input.format || "json";
+        const format = input.format || 'json';
 
-        if (format === "csv") {
+        if (format === 'csv') {
           // Convert to CSV format
-          const csvHeaders = "ID,Direction,Content,MessageType,Status,CreatedAt,SentBy\n";
-          const csvRows = messages.map(m =>
-            `${m.id},${m.direction},"${m.content.replace(/"/g, '""')}",${m.messageType},${m.status},${m.createdAt},${m.sentBy || ""}`
-          ).join("\n");
+          const csvHeaders = 'ID,Direction,Content,MessageType,Status,CreatedAt,SentBy\n';
+          const csvRows = messages
+            .map(
+              (m) =>
+                `${m.id},${m.direction},"${m.content.replace(/"/g, '""')}",${m.messageType},${m.status},${m.createdAt},${m.sentBy || ''}`
+            )
+            .join('\n');
           const csvContent = csvHeaders + csvRows;
 
           return {
             conversation: conversation[0],
             messages,
             exportData: csvContent,
-            format: "csv",
+            format: 'csv',
             filename: `conversation_${input.conversationId}_${Date.now()}.csv`,
           };
         }
@@ -413,7 +473,7 @@ export const whatsappRouter = router({
           conversation: conversation[0],
           messages,
           exportData: JSON.stringify({ conversation: conversation[0], messages }, null, 2),
-          format: "json",
+          format: 'json',
           filename: `conversation_${input.conversationId}_${Date.now()}.json`,
         };
       }),
@@ -436,13 +496,26 @@ export const whatsappRouter = router({
           replyToMessageId: z.number().optional(),
           mediaUrl: z.string().optional(),
           mediaId: z.string().optional(),
-          messageType: z.enum(["text", "image", "document", "audio", "video", "location", "template", "interactive", "contacts", "unknown"]).optional(),
+          messageType: z
+            .enum([
+              'text',
+              'image',
+              'document',
+              'audio',
+              'video',
+              'location',
+              'template',
+              'interactive',
+              'contacts',
+              'unknown',
+            ])
+            .optional(),
         })
       )
       .mutation(async ({ input, ctx }) => {
-        logOperation("sendMessage", ctx.user.id, {
+        logOperation('sendMessage', ctx.user.id, {
           conversationId: input.conversationId,
-          messageType: input.messageType || "text",
+          messageType: input.messageType || 'text',
           hasMediaUrl: !!input.mediaUrl,
         });
 
@@ -452,21 +525,23 @@ export const whatsappRouter = router({
           if (!rateLimit.allowed) {
             const resetInSeconds = Math.ceil((rateLimit.resetTime - Date.now()) / 1000);
             throw new TRPCError({
-              code: "TOO_MANY_REQUESTS",
+              code: 'TOO_MANY_REQUESTS',
               message: `تم تجاوز حد الإرسال. يرجى الانتظار ${resetInSeconds} ثانية قبل إرسال رسائل أخرى`,
             });
           }
 
           const conv = await db.getWhatsAppConversationById(input.conversationId);
-          if (!conv) throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة غير موجودة" });
+          if (!conv) throw new TRPCError({ code: 'NOT_FOUND', message: 'المحادثة غير موجودة' });
 
           // Server-side 24-hour window validation
-          const latestInboundMessage = await db.getLatestInboundWhatsAppMessage(input.conversationId);
+          const latestInboundMessage = await db.getLatestInboundWhatsAppMessage(
+            input.conversationId
+          );
           const lastInboundMessageTime = latestInboundMessage?.sentAt
             ? new Date(latestInboundMessage.sentAt)
             : latestInboundMessage?.createdAt
-            ? new Date(latestInboundMessage.createdAt)
-            : null;
+              ? new Date(latestInboundMessage.createdAt)
+              : null;
           const now = new Date();
           const hoursSinceLastInboundMessage = lastInboundMessageTime
             ? (now.getTime() - lastInboundMessageTime.getTime()) / (1000 * 60 * 60)
@@ -483,40 +558,54 @@ export const whatsappRouter = router({
           }
 
           let result;
-          const messageType = input.messageType || "text";
+          const messageType = input.messageType || 'text';
 
           // Send message based on type
-          if (input.mediaId && messageType !== "text") {
+          if (input.mediaId && messageType !== 'text') {
             // Send media message using mediaId
-            const { sendWhatsAppImageMessage, sendWhatsAppVideoMessage, sendWhatsAppAudioMessage, sendWhatsAppDocumentMessage } = await import("../services/whatsappCloudAPI");
+            const {
+              sendWhatsAppImageMessage,
+              sendWhatsAppVideoMessage,
+              sendWhatsAppAudioMessage,
+              sendWhatsAppDocumentMessage,
+            } = await import('../services/whatsappCloudAPI');
 
-            if (messageType === "image") {
-              result = await sendWhatsAppImageMessage(conv.phoneNumber, input.mediaId, input.message);
-            } else if (messageType === "video") {
-              result = await sendWhatsAppVideoMessage(conv.phoneNumber, input.mediaId, input.message);
-            } else if (messageType === "audio") {
+            if (messageType === 'image') {
+              result = await sendWhatsAppImageMessage(
+                conv.phoneNumber,
+                input.mediaId,
+                input.message
+              );
+            } else if (messageType === 'video') {
+              result = await sendWhatsAppVideoMessage(
+                conv.phoneNumber,
+                input.mediaId,
+                input.message
+              );
+            } else if (messageType === 'audio') {
               result = await sendWhatsAppAudioMessage(conv.phoneNumber, input.mediaId);
-            } else if (messageType === "document") {
-              result = await sendWhatsAppDocumentMessage(conv.phoneNumber, input.mediaId, input.message);
+            } else if (messageType === 'document') {
+              result = await sendWhatsAppDocumentMessage(
+                conv.phoneNumber,
+                input.mediaId,
+                input.message
+              );
             } else {
               // Fallback to text message
               result = await sendWhatsAppTextMessage(conv.phoneNumber, input.message);
             }
           } else {
             // Send text message
-            result = await sendWhatsAppTextMessage(
-              conv.phoneNumber,
-              input.message
-            );
+            result = await sendWhatsAppTextMessage(conv.phoneNumber, input.message);
           }
 
           if (result.success) {
             await db.createWhatsAppMessage({
               conversationId: input.conversationId,
-              direction: "outbound",
+              direction: 'outbound',
               content: input.message,
               messageType: messageType,
-              status: "sent",
+              status: 'sent',
               sentBy: ctx.user.id,
               whatsappMessageId: result.messageId,
               replyToMessageId: input.replyToMessageId,
@@ -532,11 +621,11 @@ export const whatsappRouter = router({
 
           return { ...result, rateLimit };
         } catch (error: any) {
-          console.error("[WhatsApp] Failed to send message:", error);
+          console.error('[WhatsApp] Failed to send message:', error);
           if (error instanceof TRPCError) throw error;
           throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: error.message || "فشل إرسال الرسالة",
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error.message || 'فشل إرسال الرسالة',
           });
         }
       }),
@@ -549,20 +638,20 @@ export const whatsappRouter = router({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        logOperation("uploadMedia", ctx.user.id, { mimeType: input.mimeType });
+        logOperation('uploadMedia', ctx.user.id, { mimeType: input.mimeType });
 
         try {
-          const { uploadWhatsAppMedia } = await import("../services/whatsappCloudAPI");
+          const { uploadWhatsAppMedia } = await import('../services/whatsappCloudAPI');
 
-          const buffer = Buffer.from(input.fileBuffer, "base64");
+          const buffer = Buffer.from(input.fileBuffer, 'base64');
           const result = await uploadWhatsAppMedia(buffer, input.mimeType);
 
           return result;
         } catch (error: any) {
-          console.error("[WhatsApp] Failed to upload media:", error);
+          console.error('[WhatsApp] Failed to upload media:', error);
           throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: error.message || "فشل رفع الملف",
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error.message || 'فشل رفع الملف',
           });
         }
       }),
@@ -570,31 +659,41 @@ export const whatsappRouter = router({
     delete: protectedProcedure
       .input(z.object({ messageId: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        logOperation("deleteMessage", ctx.user.id, { messageId: input.messageId });
+        logOperation('deleteMessage', ctx.user.id, { messageId: input.messageId });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
-        const { whatsappMessages } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        const { whatsappMessages } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
         await dbConn.delete(whatsappMessages).where(eq(whatsappMessages.id, input.messageId));
 
         return { success: true };
       }),
 
     exportConversation: protectedProcedure
-      .input(z.object({
-        conversationId: z.number(),
-      }))
+      .input(
+        z.object({
+          conversationId: z.number(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        logOperation("exportConversation", ctx.user.id, { conversationId: input.conversationId });
+        logOperation('exportConversation', ctx.user.id, { conversationId: input.conversationId });
 
         try {
           const dbConn = await db.getDb();
-          if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+          if (!dbConn)
+            throw new TRPCError({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'قاعدة البيانات غير متاحة',
+            });
 
-          const { whatsappMessages, whatsappConversations } = await import("../../drizzle/schema");
-          const { eq } = await import("drizzle-orm");
+          const { whatsappMessages, whatsappConversations } = await import('../../drizzle/schema');
+          const { eq } = await import('drizzle-orm');
 
           // Get conversation details
           const conversations = await dbConn
@@ -603,7 +702,7 @@ export const whatsappRouter = router({
             .where(eq(whatsappConversations.id, input.conversationId));
 
           if (!conversations || conversations.length === 0) {
-            throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة غير موجودة" });
+            throw new TRPCError({ code: 'NOT_FOUND', message: 'المحادثة غير موجودة' });
           }
 
           const conversation = conversations[0];
@@ -624,7 +723,7 @@ export const whatsappRouter = router({
               createdAt: conversation.createdAt,
               lastMessageAt: conversation.lastMessageAt,
             },
-            messages: messages.map(msg => ({
+            messages: messages.map((msg) => ({
               id: msg.id,
               direction: msg.direction,
               content: msg.content,
@@ -637,26 +736,32 @@ export const whatsappRouter = router({
 
           return { success: true, data: exportData };
         } catch (error: any) {
-          console.error("[WhatsApp] Failed to export conversation:", error);
+          console.error('[WhatsApp] Failed to export conversation:', error);
           if (error instanceof TRPCError) throw error;
           throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: error.message || "فشل تصدير المحادثة",
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error.message || 'فشل تصدير المحادثة',
           });
         }
       }),
 
     searchInConversation: protectedProcedure
-      .input(z.object({
-        conversationId: z.number(),
-        searchTerm: z.string().min(1, "مصطلح البحث مطلوب"),
-      }))
+      .input(
+        z.object({
+          conversationId: z.number(),
+          searchTerm: z.string().min(1, 'مصطلح البحث مطلوب'),
+        })
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
-        const { whatsappMessages } = await import("../../drizzle/schema");
-        const { eq, or, like, and } = await import("drizzle-orm");
+        const { whatsappMessages } = await import('../../drizzle/schema');
+        const { eq, or, like, and } = await import('drizzle-orm');
 
         const messages = await dbConn
           .select()
@@ -676,21 +781,27 @@ export const whatsappRouter = router({
       }),
 
     forward: protectedProcedure
-      .input(z.object({
-        messageId: z.number(),
-        targetConversationId: z.number(),
-      }))
+      .input(
+        z.object({
+          messageId: z.number(),
+          targetConversationId: z.number(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        logOperation("forwardMessage", ctx.user.id, {
+        logOperation('forwardMessage', ctx.user.id, {
           messageId: input.messageId,
           targetConversationId: input.targetConversationId,
         });
 
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
 
-        const { whatsappMessages, whatsappConversations } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        const { whatsappMessages, whatsappConversations } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
 
         // Get original message
         const originalMessages = await dbConn
@@ -699,7 +810,8 @@ export const whatsappRouter = router({
           .where(eq(whatsappMessages.id, input.messageId))
           .limit(1);
 
-        if (!originalMessages.length) throw new TRPCError({ code: "NOT_FOUND", message: "الرسالة الأصلية غير موجودة" });
+        if (!originalMessages.length)
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'الرسالة الأصلية غير موجودة' });
         const original = originalMessages[0];
 
         // Get target conversation
@@ -709,7 +821,8 @@ export const whatsappRouter = router({
           .where(eq(whatsappConversations.id, input.targetConversationId))
           .limit(1);
 
-        if (!targetConvs.length) throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة الهدف غير موجودة" });
+        if (!targetConvs.length)
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'المحادثة الهدف غير موجودة' });
         const targetConv = targetConvs[0];
 
         // Send the message to target conversation
@@ -718,10 +831,10 @@ export const whatsappRouter = router({
         if (result.success) {
           await db.createWhatsAppMessage({
             conversationId: input.targetConversationId,
-            direction: "outbound",
+            direction: 'outbound',
             content: original.content,
             messageType: original.messageType,
-            status: "sent",
+            status: 'sent',
             sentBy: ctx.user.id,
             whatsappMessageId: result.messageId,
             sentAt: new Date(),
@@ -743,11 +856,9 @@ export const whatsappRouter = router({
       return await db.getAllWhatsAppTemplates();
     }),
 
-    getById: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .query(async ({ input }) => {
-        return await db.getWhatsAppTemplateById(input.id);
-      }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await db.getWhatsAppTemplateById(input.id);
+    }),
 
     syncFromMeta: protectedProcedure.mutation(async () => {
       const wabaId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
@@ -758,7 +869,7 @@ export const whatsappRouter = router({
       if (!wabaId) {
         return {
           success: false,
-          error: "WHATSAPP_BUSINESS_ACCOUNT_ID غير مُعيَّن في متغيرات البيئة",
+          error: 'WHATSAPP_BUSINESS_ACCOUNT_ID غير مُعيَّن في متغيرات البيئة',
           synced: 0,
           updated: 0,
         };
@@ -766,13 +877,13 @@ export const whatsappRouter = router({
       if (!hasToken) {
         return {
           success: false,
-          error: "META_ACCESS_TOKEN غير مُعيَّن في متغيرات البيئة",
+          error: 'META_ACCESS_TOKEN غير مُعيَّن في متغيرات البيئة',
           synced: 0,
           updated: 0,
         };
       }
 
-      const { syncTemplatesFromMeta } = await import("../services/whatsappTemplates");
+      const { syncTemplatesFromMeta } = await import('../services/whatsappTemplates');
       const result = await syncTemplatesFromMeta();
       console.log(`[syncFromMeta] Result:`, JSON.stringify(result));
       return result;
@@ -785,17 +896,17 @@ export const whatsappRouter = router({
       if (!phoneId) {
         return {
           success: false,
-          error: "WHATSAPP_PHONE_NUMBER_ID غير مُعيَّن في متغيرات البيئة",
+          error: 'WHATSAPP_PHONE_NUMBER_ID غير مُعيَّن في متغيرات البيئة',
         };
       }
       if (!hasToken) {
         return {
           success: false,
-          error: "META_ACCESS_TOKEN غير مُعيَّن في متغيرات البيئة",
+          error: 'META_ACCESS_TOKEN غير مُعيَّن في متغيرات البيئة',
         };
       }
 
-      const { syncAllTemplates } = await import("../services/templateSyncService");
+      const { syncAllTemplates } = await import('../services/templateSyncService');
       const result = await syncAllTemplates(phoneId);
       console.log(`[syncStatus] Result:`, JSON.stringify(result));
       return result;
@@ -811,7 +922,7 @@ export const whatsappRouter = router({
         })
       )
       .mutation(async ({ input }) => {
-        const { createTemplate } = await import("../services/whatsappTemplates");
+        const { createTemplate } = await import('../services/whatsappTemplates');
         return createTemplate(input);
       }),
 
@@ -825,16 +936,14 @@ export const whatsappRouter = router({
         })
       )
       .mutation(async ({ input }) => {
-        const { updateTemplate } = await import("../services/whatsappTemplates");
+        const { updateTemplate } = await import('../services/whatsappTemplates');
         return updateTemplate(input.id, input);
       }),
 
-    delete: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
-        const { deleteTemplate } = await import("../services/whatsappTemplates");
-        return deleteTemplate(input.id);
-      }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+      const { deleteTemplate } = await import('../services/whatsappTemplates');
+      return deleteTemplate(input.id);
+    }),
   }),
 
   // Phase 2 Procedures
@@ -843,7 +952,7 @@ export const whatsappRouter = router({
       z.object({
         phone: z.string().min(9).max(15),
         message: z.string().min(1).max(4096),
-        priority: z.enum(["high", "normal", "low"]).optional(),
+        priority: z.enum(['high', 'normal', 'low']).optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -877,41 +986,41 @@ export const whatsappRouter = router({
     .mutation(async ({ input }) => {
       try {
         const normalizedPhone = normalizePhoneNumber(input.phone);
-        const testMessage = `اختبار الاتصال بـ WhatsApp ✅\nالوقت: ${new Date().toLocaleString("ar-YE")}`;
+        const testMessage = `اختبار الاتصال بـ WhatsApp ✅\nالوقت: ${new Date().toLocaleString('ar-YE')}`;
 
         const result = await sendWhatsAppTextMessage(normalizedPhone, testMessage);
 
         return {
           success: result.success,
-          message: result.success ? "تم إرسال رسالة الاختبار بنجاح" : undefined,
+          message: result.success ? 'تم إرسال رسالة الاختبار بنجاح' : undefined,
           error: result.error,
         };
       } catch (error) {
         return {
           success: false,
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: error instanceof Error ? error.message : 'Unknown error',
         };
       }
     }),
 
-  normalizePhone: publicProcedure
-    .input(z.object({ phone: z.string() }))
-    .query(({ input }) => {
-      const normalized = normalizePhoneNumber(input.phone);
-      return {
-        original: input.phone,
-        normalized,
-        isValid: normalized.length >= 9 && normalized.length <= 15,
-      };
-    }),
-sendTypingIndicator: protectedProcedure
-    .input(z.object({
-      conversationId: z.number(),
-      typing: z.boolean(),
-    }))
+  normalizePhone: publicProcedure.input(z.object({ phone: z.string() })).query(({ input }) => {
+    const normalized = normalizePhoneNumber(input.phone);
+    return {
+      original: input.phone,
+      normalized,
+      isValid: normalized.length >= 9 && normalized.length <= 15,
+    };
+  }),
+  sendTypingIndicator: protectedProcedure
+    .input(
+      z.object({
+        conversationId: z.number(),
+        typing: z.boolean(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       const conv = await db.getWhatsAppConversationById(input.conversationId);
-      if (!conv) throw new TRPCError({ code: "NOT_FOUND", message: "المحادثة غير موجودة" });
+      if (!conv) throw new TRPCError({ code: 'NOT_FOUND', message: 'المحادثة غير موجودة' });
 
       if (!input.typing) {
         return { success: true };
@@ -922,7 +1031,7 @@ sendTypingIndicator: protectedProcedure
       if (!latestInboundMessage?.whatsappMessageId) {
         return {
           success: false,
-          error: "لا يمكن إرسال مؤشر الكتابة قبل وجود رسالة واردة بمعرف واتساب صالح",
+          error: 'لا يمكن إرسال مؤشر الكتابة قبل وجود رسالة واردة بمعرف واتساب صالح',
         };
       }
 
@@ -935,21 +1044,20 @@ sendTypingIndicator: protectedProcedure
       // 🔔 Publish SSE event to global channel for typing indicator
       if (result.success) {
         try {
-          const { publish } = await import("../_core/pubsub");
-          publish("global:whatsapp", "typing", {
+          const { publish } = await import('../_core/pubsub');
+          publish('global:whatsapp', 'typing', {
             conversationId: input.conversationId,
             phoneNumber: conv.phoneNumber,
             timestamp: new Date().toISOString(),
           });
         } catch (error) {
-          console.error("[WhatsApp] Error publishing typing SSE:", error);
+          console.error('[WhatsApp] Error publishing typing SSE:', error);
         }
       }
 
       return result;
     }),
 
-  
   // Phase 3 Procedures
   sendTemplate: protectedProcedure
     .input(
@@ -965,7 +1073,7 @@ sendTypingIndicator: protectedProcedure
       })
     )
     .mutation(async ({ input }) => {
-      const { sendTemplateMessage } = await import("../services/whatsappTemplates");
+      const { sendTemplateMessage } = await import('../services/whatsappTemplates');
       const result = await sendTemplateMessage({
         phone: input.phone,
         templateName: input.templateName,
@@ -975,7 +1083,9 @@ sendTypingIndicator: protectedProcedure
       // حفظ الرسالة في المحادثة إذا نجح الإرسال
       if (result.success && input.conversationId) {
         try {
-          const { createWhatsAppMessage, updateWhatsAppConversation } = await import("../database/db");
+          const { createWhatsAppMessage, updateWhatsAppConversation } = await import(
+            '../database/db'
+          );
           const content = input.templateContent || `[قالب: ${input.templateName}]`;
           // حفظ بيانات القالب الكاملة في metadata
           const metadata = JSON.stringify({
@@ -986,10 +1096,10 @@ sendTypingIndicator: protectedProcedure
           });
           await createWhatsAppMessage({
             conversationId: input.conversationId,
-            direction: "outbound",
+            direction: 'outbound',
             content,
-            messageType: "template",
-            status: "sent",
+            messageType: 'template',
+            status: 'sent',
             whatsappMessageId: result.messageId || null,
             sentAt: new Date(),
             metadata,
@@ -999,7 +1109,7 @@ sendTypingIndicator: protectedProcedure
             lastMessageAt: new Date(),
           });
         } catch (err) {
-          console.error("[WhatsApp] Failed to save template message to conversation:", err);
+          console.error('[WhatsApp] Failed to save template message to conversation:', err);
         }
       }
 
@@ -1008,8 +1118,8 @@ sendTypingIndicator: protectedProcedure
 
   getTemplates: protectedProcedure.query(async () => {
     // جلب القوالب من قاعدة البيانات المحلية (بعد المزامنة مع Meta)
-    const { whatsappTemplates } = await import("../../drizzle/schema");
-    const dbConn = await import("../database/db").then(m => m.getDb());
+    const { whatsappTemplates } = await import('../../drizzle/schema');
+    const dbConn = await import('../database/db').then((m) => m.getDb());
     if (!dbConn) return { success: true, templates: [] };
     const templates = await dbConn.select().from(whatsappTemplates).orderBy(whatsappTemplates.name);
     return { success: true, templates };
@@ -1018,7 +1128,7 @@ sendTypingIndicator: protectedProcedure
   getTemplateStatus: protectedProcedure
     .input(z.object({ templateName: z.string() }))
     .query(async ({ input }) => {
-      const { getTemplateStatus } = await import("../services/whatsappTemplates");
+      const { getTemplateStatus } = await import('../services/whatsappTemplates');
       return getTemplateStatus(input.templateName);
     }),
 
@@ -1026,13 +1136,13 @@ sendTypingIndicator: protectedProcedure
     .input(
       z.object({
         phone: z.string().min(9).max(15),
-        mediaType: z.enum(["image", "video", "document", "audio"]),
+        mediaType: z.enum(['image', 'video', 'document', 'audio']),
         mediaUrl: z.string().url(),
         caption: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
-      const { sendMediaMessage } = await import("../services/whatsappTemplates");
+      const { sendMediaMessage } = await import('../services/whatsappTemplates');
       return sendMediaMessage({
         phone: input.phone,
         mediaType: input.mediaType,
@@ -1047,12 +1157,12 @@ sendTypingIndicator: protectedProcedure
       z.object({
         message: z.string().min(1).max(4096),
         recipients: z.array(z.string().min(9).max(15)),
-        priority: z.enum(["high", "normal", "low"]).optional(),
+        priority: z.enum(['high', 'normal', 'low']).optional(),
         delay: z.number().optional(),
       })
     )
     .mutation(async ({ input }) => {
-      const { sendBroadcast } = await import("../services/whatsappBroadcast");
+      const { sendBroadcast } = await import('../services/whatsappBroadcast');
       return sendBroadcast({
         message: input.message,
         recipients: input.recipients,
@@ -1064,22 +1174,23 @@ sendTypingIndicator: protectedProcedure
   getBroadcastStatus: protectedProcedure
     .input(z.object({ jobId: z.string() }))
     .query(async ({ input }) => {
-      const { getBroadcastStatus } = await import("../services/whatsappBroadcast");
+      const { getBroadcastStatus } = await import('../services/whatsappBroadcast');
       return getBroadcastStatus(parseInt(input.jobId));
     }),
 
   getBroadcastStats: protectedProcedure.query(async () => {
-    const { getBroadcastStats } = await import("../services/whatsappBroadcast");
+    const { getBroadcastStats } = await import('../services/whatsappBroadcast');
     return getBroadcastStats();
   }),
 
   getMessageStats: protectedProcedure.query(async () => {
     try {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
-      const { whatsappMessages } = await import("../../drizzle/schema");
-      const { gte, lte, and, sql } = await import("drizzle-orm");
+      const { whatsappMessages } = await import('../../drizzle/schema');
+      const { gte, lte, and, sql } = await import('drizzle-orm');
 
       // Get messages from last 7 days
       const sevenDaysAgo = new Date();
@@ -1091,7 +1202,7 @@ sendTypingIndicator: protectedProcedure
         .where(gte(whatsappMessages.createdAt, sevenDaysAgo));
 
       // Group by day (last 7 days)
-      const days = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+      const days = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
       const dailyStats = days.map((day, index) => {
         const targetDate = new Date();
         targetDate.setDate(targetDate.getDate() - (6 - index));
@@ -1106,18 +1217,26 @@ sendTypingIndicator: protectedProcedure
 
         return {
           name: day,
-          sent: dayMessages.filter((m: any) => m.direction === "outbound").length,
-          delivered: dayMessages.filter((m: any) => m.status === "delivered").length,
-          failed: dayMessages.filter((m: any) => m.status === "failed").length,
+          sent: dayMessages.filter((m: any) => m.direction === 'outbound').length,
+          delivered: dayMessages.filter((m: any) => m.status === 'delivered').length,
+          failed: dayMessages.filter((m: any) => m.status === 'failed').length,
         };
       });
 
       // Group by message type
       const typeStats = [
-        { name: "نصية", value: messages.filter((m: any) => m.messageType === "text").length },
-        { name: "قوالب", value: messages.filter((m: any) => m.messageType === "template").length },
-        { name: "وسائط", value: messages.filter((m: any) => ["image", "video", "document", "audio"].includes(m.messageType)).length },
-        { name: "تفاعلية", value: messages.filter((m: any) => m.messageType === "interactive").length },
+        { name: 'نصية', value: messages.filter((m: any) => m.messageType === 'text').length },
+        { name: 'قوالب', value: messages.filter((m: any) => m.messageType === 'template').length },
+        {
+          name: 'وسائط',
+          value: messages.filter((m: any) =>
+            ['image', 'video', 'document', 'audio'].includes(m.messageType)
+          ).length,
+        },
+        {
+          name: 'تفاعلية',
+          value: messages.filter((m: any) => m.messageType === 'interactive').length,
+        },
       ];
 
       // Calculate percentages for pie chart
@@ -1133,10 +1252,10 @@ sendTypingIndicator: protectedProcedure
         typeStats: typeStatsWithPercentage,
       };
     } catch (error) {
-      console.error("[WhatsApp] Failed to get message stats:", error);
+      console.error('[WhatsApp] Failed to get message stats:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
         dailyStats: [],
         typeStats: [],
       };
@@ -1149,11 +1268,11 @@ sendTypingIndicator: protectedProcedure
         message: z.string().min(1).max(4096),
         recipients: z.array(z.string().min(9).max(15)),
         scheduledAt: z.date(),
-        priority: z.enum(["high", "normal", "low"]).optional(),
+        priority: z.enum(['high', 'normal', 'low']).optional(),
       })
     )
     .mutation(async ({ input }) => {
-      const { scheduleBroadcast } = await import("../services/whatsappBroadcast");
+      const { scheduleBroadcast } = await import('../services/whatsappBroadcast');
       return scheduleBroadcast({
         message: input.message,
         recipients: input.recipients,
@@ -1166,14 +1285,14 @@ sendTypingIndicator: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
-        triggerType: z.enum(["keyword", "outside_hours", "first_message", "faq"]),
+        triggerType: z.enum(['keyword', 'outside_hours', 'first_message', 'faq']),
         triggerValue: z.string().optional(),
         replyMessage: z.string().min(1),
         priority: z.number().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const { addAutoReplyRule } = await import("../services/whatsappAutoReply");
+      const { addAutoReplyRule } = await import('../services/whatsappAutoReply');
       return addAutoReplyRule({
         name: input.name,
         triggerType: input.triggerType,
@@ -1187,12 +1306,12 @@ sendTypingIndicator: protectedProcedure
   deleteAutoReplyRule: protectedProcedure
     .input(z.object({ ruleId: z.number() }))
     .mutation(async ({ input }) => {
-      const { deleteAutoReplyRule } = await import("../services/whatsappAutoReply");
+      const { deleteAutoReplyRule } = await import('../services/whatsappAutoReply');
       return deleteAutoReplyRule(input.ruleId);
     }),
 
   getAutoReplyRules: protectedProcedure.query(async () => {
-    const { getAutoReplyRules } = await import("../services/whatsappAutoReply");
+    const { getAutoReplyRules } = await import('../services/whatsappAutoReply');
     return getAutoReplyRules();
   }),
 
@@ -1204,7 +1323,7 @@ sendTypingIndicator: protectedProcedure
       })
     )
     .mutation(async ({ input }) => {
-      const { toggleAutoReplyRule } = await import("../services/whatsappAutoReply");
+      const { toggleAutoReplyRule } = await import('../services/whatsappAutoReply');
       return toggleAutoReplyRule(input.ruleId, input.enabled);
     }),
 
@@ -1221,21 +1340,19 @@ sendTypingIndicator: protectedProcedure
       })
     )
     .mutation(async ({ input }) => {
-      const { dispatchWhatsAppMessage } = await import(
-        "../services/whatsappMessageDispatcher"
-      );
+      const { dispatchWhatsAppMessage } = await import('../services/whatsappMessageDispatcher');
       // استخدام dispatchWhatsAppMessage مع triggerEvent on_create
       return dispatchWhatsAppMessage({
         phone: input.phone,
-        entityType: "appointment",
+        entityType: 'appointment',
         entityId: input.appointmentId,
-        triggerEvent: "on_create",
+        triggerEvent: 'on_create',
         recipientName: input.patientName,
         variables: {
           name: input.patientName,
           doctor: input.doctorName,
-          date: input.appointmentTime.toLocaleDateString("ar-SA"),
-          time: input.appointmentTime.toLocaleTimeString("ar-SA"),
+          date: input.appointmentTime.toLocaleDateString('ar-SA'),
+          time: input.appointmentTime.toLocaleTimeString('ar-SA'),
           service: input.department,
         },
       });
@@ -1253,9 +1370,7 @@ sendTypingIndicator: protectedProcedure
       })
     )
     .mutation(async ({ input }) => {
-      const { sendAppointmentReminder } = await import(
-        "../services/whatsappAppointments"
-      );
+      const { sendAppointmentReminder } = await import('../services/whatsappAppointments');
       return sendAppointmentReminder(input);
     }),
 
@@ -1270,14 +1385,12 @@ sendTypingIndicator: protectedProcedure
       })
     )
     .mutation(async ({ input }) => {
-      const { sendAppointmentFollowup } = await import(
-        "../services/whatsappAppointments"
-      );
+      const { sendAppointmentFollowup } = await import('../services/whatsappAppointments');
       return sendAppointmentFollowup(input);
     }),
 
   checkAndSendReminders: protectedProcedure.mutation(async () => {
-    const { checkAndSendReminders } = await import("../services/whatsappAppointments");
+    const { checkAndSendReminders } = await import('../services/whatsappAppointments');
     return checkAndSendReminders();
   }),
 
@@ -1290,12 +1403,12 @@ sendTypingIndicator: protectedProcedure
       })
     )
     .query(async ({ input }) => {
-      const { getAuditLogs } = await import("../services/whatsappAuditLog");
+      const { getAuditLogs } = await import('../services/whatsappAuditLog');
       return getAuditLogs(input);
     }),
 
   getAuditStats: protectedProcedure.query(async () => {
-    const { getAuditStats } = await import("../services/whatsappAuditLog");
+    const { getAuditStats } = await import('../services/whatsappAuditLog');
     return getAuditStats();
   }),
 
@@ -1306,7 +1419,7 @@ sendTypingIndicator: protectedProcedure
       })
     )
     .query(async ({ input }) => {
-      const { exportAuditLogs } = await import("../services/whatsappAuditLog");
+      const { exportAuditLogs } = await import('../services/whatsappAuditLog');
       return exportAuditLogs(input);
     }),
 
@@ -1314,23 +1427,23 @@ sendTypingIndicator: protectedProcedure
     .input(
       z.object({
         phone: z.string().min(9).max(15),
-        reason: z.enum(["opt_out", "spam", "manual", "invalid"]),
+        reason: z.enum(['opt_out', 'spam', 'manual', 'invalid']),
       })
     )
     .mutation(async ({ input }) => {
-      const { blockPhone } = await import("../services/whatsappSecurity");
+      const { blockPhone } = await import('../services/whatsappSecurity');
       return blockPhone(input);
     }),
 
   unblockPhone: protectedProcedure
     .input(z.object({ phone: z.string().min(9).max(15) }))
     .mutation(async ({ input }) => {
-      const { unblockPhone } = await import("../services/whatsappSecurity");
+      const { unblockPhone } = await import('../services/whatsappSecurity');
       return unblockPhone(input.phone);
     }),
 
   getBlockedPhones: protectedProcedure.query(async () => {
-    const { getBlockedPhones } = await import("../services/whatsappSecurity");
+    const { getBlockedPhones } = await import('../services/whatsappSecurity');
     return getBlockedPhones();
   }),
 
@@ -1342,171 +1455,206 @@ sendTypingIndicator: protectedProcedure
       })
     )
     .mutation(async ({ input }) => {
-      const { handleOptOutRequest } = await import("../services/whatsappSecurity");
+      const { handleOptOutRequest } = await import('../services/whatsappSecurity');
       return handleOptOutRequest(input);
     }),
 
   getOptOutRequests: protectedProcedure.query(async () => {
-    const { getBlockedPhones } = await import("../services/whatsappSecurity");
+    const { getBlockedPhones } = await import('../services/whatsappSecurity');
     return getBlockedPhones();
   }),
 
   validateMetaCompliance: protectedProcedure
     .input(z.object({ message: z.string() }))
     .query(async ({ input }) => {
-      const { validateMetaCompliance } = await import("../services/whatsappSecurity");
+      const { validateMetaCompliance } = await import('../services/whatsappSecurity');
       return validateMetaCompliance(input.message);
     }),
 
   getSecurityStats: protectedProcedure.query(async () => {
-    const { getSecurityStats } = await import("../services/whatsappSecurity");
+    const { getSecurityStats } = await import('../services/whatsappSecurity');
     return getSecurityStats();
   }),
 
   // Phase 5 Procedures
   initializeScheduler: protectedProcedure.mutation(async () => {
-    const { initializeScheduler } = await import("../services/whatsappScheduler");
+    const { initializeScheduler } = await import('../services/whatsappScheduler');
     return initializeScheduler();
   }),
 
   getScheduledTasks: protectedProcedure.query(async () => {
-    const { getScheduledTasks } = await import("../services/whatsappScheduler");
+    const { getScheduledTasks } = await import('../services/whatsappScheduler');
     return getScheduledTasks();
   }),
 
   stopTask: protectedProcedure
     .input(z.object({ taskId: z.string() }))
     .mutation(async ({ input }) => {
-      const { stopTask } = await import("../services/whatsappScheduler");
+      const { stopTask } = await import('../services/whatsappScheduler');
       return stopTask(input.taskId);
     }),
 
   resumeTask: protectedProcedure
     .input(z.object({ taskId: z.string() }))
     .mutation(async ({ input }) => {
-      const { resumeTask } = await import("../services/whatsappScheduler");
+      const { resumeTask } = await import('../services/whatsappScheduler');
       return resumeTask(input.taskId);
     }),
 
   shutdownScheduler: protectedProcedure.mutation(async () => {
-    const { shutdownScheduler } = await import("../services/whatsappScheduler");
+    const { shutdownScheduler } = await import('../services/whatsappScheduler');
     return shutdownScheduler();
   }),
 
   // جلب سجلات إشعارات WhatsApp من قاعدة البيانات
   getNotificationLogs: protectedProcedure
-    .input(z.object({
-      entityType: z.enum(["appointment", "camp_registration", "offer_lead"]).optional(),
-      status: z.enum(["pending", "sent", "delivered", "read", "failed"]).optional(),
-      limit: z.number().min(1).max(100).default(50),
-      offset: z.number().min(0).default(0),
-    }))
+    .input(
+      z.object({
+        entityType: z.enum(['appointment', 'camp_registration', 'offer_lead']).optional(),
+        status: z.enum(['pending', 'sent', 'delivered', 'read', 'failed']).optional(),
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+      })
+    )
     .query(async ({ input }) => {
-      const { getNotificationLogs } = await import("../services/whatsappAppointments");
+      const { getNotificationLogs } = await import('../services/whatsappAppointments');
       return getNotificationLogs(input);
     }),
 
   getNotificationStats: protectedProcedure.query(async () => {
-    const { getNotificationStats } = await import("../services/whatsappAppointments");
+    const { getNotificationStats } = await import('../services/whatsappAppointments');
     return getNotificationStats();
   }),
 
   // إعادة إرسال إشعار WhatsApp لكيان محدد
   resendNotification: protectedProcedure
-    .input(z.object({
-      entityType: z.enum(["appointment", "camp_registration", "offer_lead"]),
-      entityId: z.number(),
-    }))
+    .input(
+      z.object({
+        entityType: z.enum(['appointment', 'camp_registration', 'offer_lead']),
+        entityId: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
-      const { dispatchWhatsAppMessage } = await import(
-        "../services/whatsappMessageDispatcher"
-      );
+      const { dispatchWhatsAppMessage } = await import('../services/whatsappMessageDispatcher');
       const dbConn = await db.getDb();
-      if (!dbConn) return { success: false, error: "لا يمكن الاتصال بقاعدة البيانات" };
+      if (!dbConn) return { success: false, error: 'لا يمكن الاتصال بقاعدة البيانات' };
 
-      if (input.entityType === "appointment") {
-        const { appointments, doctors } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        const rows = await dbConn.select().from(appointments).where(eq(appointments.id, input.entityId)).limit(1);
-        if (!rows.length) return { success: false, error: "الموعد غير موجود" };
+      if (input.entityType === 'appointment') {
+        const { appointments, doctors } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const rows = await dbConn
+          .select()
+          .from(appointments)
+          .where(eq(appointments.id, input.entityId))
+          .limit(1);
+        if (!rows.length) return { success: false, error: 'الموعد غير موجود' };
         const appt = rows[0];
         // بناء تاريخ+وقت مدمج (4 متغيرات: name, date, doctor, service)
-        const apptDate = appt.appointmentDate instanceof Date ? appt.appointmentDate : new Date(appt.appointmentDate || appt.createdAt);
-        const apptDateStr = apptDate.toLocaleDateString("ar-YE");
-        const apptTimeStr = apptDate.toLocaleTimeString("ar-YE", { hour: '2-digit', minute: '2-digit' });
+        const apptDate =
+          appt.appointmentDate instanceof Date
+            ? appt.appointmentDate
+            : new Date(appt.appointmentDate || appt.createdAt);
+        const apptDateStr = apptDate.toLocaleDateString('ar-YE');
+        const apptTimeStr = apptDate.toLocaleTimeString('ar-YE', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
         const apptDateTime = `${apptDateStr} - الساعة ${apptTimeStr}`;
-        let doctorName = "طبيب مختص";
+        let doctorName = 'طبيب مختص';
         if ((appt as any).doctorId) {
-          const doctorRows = await dbConn.select().from(doctors).where(eq(doctors.id, (appt as any).doctorId)).limit(1);
+          const doctorRows = await dbConn
+            .select()
+            .from(doctors)
+            .where(eq(doctors.id, (appt as any).doctorId))
+            .limit(1);
           doctorName = doctorRows[0]?.name || doctorName;
         }
         return dispatchWhatsAppMessage({
           phone: appt.phone,
-          entityType: "appointment",
+          entityType: 'appointment',
           entityId: appt.id,
-          triggerEvent: "on_create",
+          triggerEvent: 'on_create',
           recipientName: appt.fullName,
           variables: {
             name: appt.fullName,
             date: apptDateTime,
             doctor: doctorName,
-            service: appt.procedure || "عيادة عامة",
+            service: appt.procedure || 'عيادة عامة',
           },
         });
       }
 
-      if (input.entityType === "camp_registration") {
-        const { campRegistrations, camps } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        const rows = await dbConn.select().from(campRegistrations).where(eq(campRegistrations.id, input.entityId)).limit(1);
-        if (!rows.length) return { success: false, error: "التسجيل غير موجود" };
+      if (input.entityType === 'camp_registration') {
+        const { campRegistrations, camps } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const rows = await dbConn
+          .select()
+          .from(campRegistrations)
+          .where(eq(campRegistrations.id, input.entityId))
+          .limit(1);
+        if (!rows.length) return { success: false, error: 'التسجيل غير موجود' };
         const reg = rows[0];
         let campData: any = null;
         if (reg.campId) {
-          const campRows = await dbConn.select().from(camps).where(eq(camps.id, reg.campId)).limit(1);
+          const campRows = await dbConn
+            .select()
+            .from(camps)
+            .where(eq(camps.id, reg.campId))
+            .limit(1);
           campData = campRows[0] || null;
         }
         // بناء 5 متغيرات لقالب camp_reg_verification (150005)
         const regDateStr = (reg as any).preferredDate
-          ? new Date((reg as any).preferredDate).toLocaleDateString("ar-YE")
-          : (campData?.startDate ? new Date(campData.startDate).toLocaleDateString("ar-YE") : "غير محدد");
-        const regTimeStr = (reg as any).preferredTimeSlot === "morning"
-          ? `صباحاً ${campData?.morningTime || ""}`.trim()
-          : (reg as any).preferredTimeSlot === "evening"
-          ? `مساءً ${campData?.eveningTime || ""}`.trim()
-          : "غير محدد";
+          ? new Date((reg as any).preferredDate).toLocaleDateString('ar-YE')
+          : campData?.startDate
+            ? new Date(campData.startDate).toLocaleDateString('ar-YE')
+            : 'غير محدد';
+        const regTimeStr =
+          (reg as any).preferredTimeSlot === 'morning'
+            ? `صباحاً ${campData?.morningTime || ''}`.trim()
+            : (reg as any).preferredTimeSlot === 'evening'
+              ? `مساءً ${campData?.eveningTime || ''}`.trim()
+              : 'غير محدد';
         return dispatchWhatsAppMessage({
           phone: reg.phone,
-          entityType: "camp_registration",
+          entityType: 'camp_registration',
           entityId: reg.id,
-          triggerEvent: "on_create",
+          triggerEvent: 'on_create',
           recipientName: reg.fullName,
           variables: {
             name: reg.fullName,
-            camp_name: campData?.name || "المخيم",
+            camp_name: campData?.name || 'المخيم',
             date: regDateStr,
             time: regTimeStr,
-            location: "صنعاء - الستين الشمالي - قبل جولة الجمنه",
+            location: 'صنعاء - الستين الشمالي - قبل جولة الجمنه',
           },
         });
       }
 
-      if (input.entityType === "offer_lead") {
-        const { offerLeads, offers } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        const rows = await dbConn.select().from(offerLeads).where(eq(offerLeads.id, input.entityId)).limit(1);
-        if (!rows.length) return { success: false, error: "حجز العرض غير موجود" };
+      if (input.entityType === 'offer_lead') {
+        const { offerLeads, offers } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const rows = await dbConn
+          .select()
+          .from(offerLeads)
+          .where(eq(offerLeads.id, input.entityId))
+          .limit(1);
+        if (!rows.length) return { success: false, error: 'حجز العرض غير موجود' };
         const lead = rows[0];
-        let offerName = "";
+        let offerName = '';
         if (lead.offerId) {
-          const offerRows = await dbConn.select().from(offers).where(eq(offers.id, lead.offerId)).limit(1);
-          offerName = offerRows[0]?.title || "";
+          const offerRows = await dbConn
+            .select()
+            .from(offers)
+            .where(eq(offers.id, lead.offerId))
+            .limit(1);
+          offerName = offerRows[0]?.title || '';
         }
         return dispatchWhatsAppMessage({
           phone: lead.phone,
-          entityType: "offer_lead",
+          entityType: 'offer_lead',
           entityId: lead.id,
-          triggerEvent: "on_create",
+          triggerEvent: 'on_create',
           recipientName: lead.fullName,
           variables: {
             name: lead.fullName,
@@ -1515,18 +1663,23 @@ sendTypingIndicator: protectedProcedure
         });
       }
 
-      return { success: false, error: "نوع غير معروف" };
+      return { success: false, error: 'نوع غير معروف' };
     }),
 
   // جلب حالة إشعار WhatsApp لكيان محدد
   getEntityWhatsAppStatus: protectedProcedure
-    .input(z.object({
-      entityType: z.enum(["appointment", "camp_registration", "offer_lead"]),
-      entityId: z.number(),
-    }))
+    .input(
+      z.object({
+        entityType: z.enum(['appointment', 'camp_registration', 'offer_lead']),
+        entityId: z.number(),
+      })
+    )
     .query(async ({ input }) => {
-      const { getEntityNotifications } = await import("../services/whatsappAppointments");
-      const result = await getEntityNotifications({ entityType: input.entityType, entityId: input.entityId });
+      const { getEntityNotifications } = await import('../services/whatsappAppointments');
+      const result = await getEntityNotifications({
+        entityType: input.entityType,
+        entityId: input.entityId,
+      });
       const notifications = result.notifications || [];
       const latest = notifications[notifications.length - 1] || null;
       return {
@@ -1539,72 +1692,82 @@ sendTypingIndicator: protectedProcedure
     }),
 
   // ── تشغيل مهام التذكير يدوياً (للاختبار أو التشغيل الفوري) ─────────────────
-  runReminderJobs: protectedProcedure
-    .mutation(async () => {
-      const { runAppointmentReminderJobs } = await import("../tasks/cron/appointmentReminders");
-      const result = await runAppointmentReminderJobs();
-      return result;
-    }),
+  runReminderJobs: protectedProcedure.mutation(async () => {
+    const { runAppointmentReminderJobs } = await import('../tasks/cron/appointmentReminders');
+    const result = await runAppointmentReminderJobs();
+    return result;
+  }),
 
   // Quick Replies
   quickReplies: router({
     list: protectedProcedure.query(async () => {
       const dbConn = await db.getDb();
       if (!dbConn) return [];
-      const { quickReplies } = await import("../../drizzle/schema");
+      const { quickReplies } = await import('../../drizzle/schema');
       return await dbConn.select().from(quickReplies).orderBy(quickReplies.name);
     }),
 
     create: protectedProcedure
-      .input(z.object({
-        name: z.string().min(1),
-        content: z.string().min(1),
-        category: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(1),
+          content: z.string().min(1),
+          category: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { quickReplies } = await import("../../drizzle/schema");
-        const insertId = await dbConn.insert(quickReplies).values({
-          name: input.name,
-          content: input.content,
-          category: input.category,
-          createdBy: ctx.user.id,
-        }).$returningId();
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { quickReplies } = await import('../../drizzle/schema');
+        const insertId = await dbConn
+          .insert(quickReplies)
+          .values({
+            name: input.name,
+            content: input.content,
+            category: input.category,
+            createdBy: ctx.user.id,
+          })
+          .$returningId();
         return { id: insertId, ...input };
       }),
 
     update: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        name: z.string().optional(),
-        content: z.string().optional(),
-        category: z.string().optional(),
-        isActive: z.number().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          content: z.string().optional(),
+          category: z.string().optional(),
+          isActive: z.number().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { quickReplies } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { quickReplies } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
         const { id, ...updateData } = input;
-        await dbConn
-          .update(quickReplies)
-          .set(updateData)
-          .where(eq(quickReplies.id, id));
+        await dbConn.update(quickReplies).set(updateData).where(eq(quickReplies.id, id));
         return { success: true };
       }),
 
-    delete: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
-        const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { quickReplies } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        await dbConn.delete(quickReplies).where(eq(quickReplies.id, input.id));
-        return { success: true };
-      }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+      const dbConn = await db.getDb();
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { quickReplies } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
+      await dbConn.delete(quickReplies).where(eq(quickReplies.id, input.id));
+      return { success: true };
+    }),
   }),
 
   // Saved Searches
@@ -1612,44 +1775,52 @@ sendTypingIndicator: protectedProcedure
     list: protectedProcedure.query(async ({ ctx }) => {
       const dbConn = await db.getDb();
       if (!dbConn) return [];
-      const { savedSearches } = await import("../../drizzle/schema");
-      const { eq } = await import("drizzle-orm");
+      const { savedSearches } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
       return await dbConn.select().from(savedSearches).where(eq(savedSearches.userId, ctx.user.id));
     }),
 
     create: protectedProcedure
-      .input(z.object({
-        name: z.string().min(1),
-        searchQuery: z.string().optional(),
-        filterType: z.string().optional(),
-        dateRange: z.string().optional(),
-        messageType: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(1),
+          searchQuery: z.string().optional(),
+          filterType: z.string().optional(),
+          dateRange: z.string().optional(),
+          messageType: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { savedSearches } = await import("../../drizzle/schema");
-        const insertId = await dbConn.insert(savedSearches).values({
-          userId: ctx.user.id,
-          name: input.name,
-          searchQuery: input.searchQuery,
-          filterType: input.filterType,
-          dateRange: input.dateRange,
-          messageType: input.messageType,
-        }).$returningId();
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { savedSearches } = await import('../../drizzle/schema');
+        const insertId = await dbConn
+          .insert(savedSearches)
+          .values({
+            userId: ctx.user.id,
+            name: input.name,
+            searchQuery: input.searchQuery,
+            filterType: input.filterType,
+            dateRange: input.dateRange,
+            messageType: input.messageType,
+          })
+          .$returningId();
         return { id: insertId, ...input };
       }),
 
-    delete: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
-        const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { savedSearches } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        await dbConn.delete(savedSearches).where(eq(savedSearches.id, input.id));
-        return { success: true };
-      }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+      const dbConn = await db.getDb();
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { savedSearches } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
+      await dbConn.delete(savedSearches).where(eq(savedSearches.id, input.id));
+      return { success: true };
+    }),
   }),
 
   // ─── Webhook Events & Account Health ─────────────────────────────────────────
@@ -1657,16 +1828,24 @@ sendTypingIndicator: protectedProcedure
   accountHealth: router({
     // Account Alerts
     getAlerts: protectedProcedure
-      .input(z.object({
-        severity: z.enum(["low", "medium", "high", "critical"]).optional(),
-        resolved: z.boolean().optional(),
-        limit: z.number().default(50),
-      }).optional())
+      .input(
+        z
+          .object({
+            severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+            resolved: z.boolean().optional(),
+            limit: z.number().default(50),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappAccountAlerts } = await import("../../drizzle/schema");
-        const { eq, and, desc } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappAccountAlerts } = await import('../../drizzle/schema');
+        const { eq, and, desc } = await import('drizzle-orm');
 
         const conditions = [];
         if (input?.severity) {
@@ -1676,9 +1855,13 @@ sendTypingIndicator: protectedProcedure
           conditions.push(eq(whatsappAccountAlerts.resolved, input.resolved));
         }
 
-        const query = conditions.length > 0
-          ? dbConn.select().from(whatsappAccountAlerts).where(and(...conditions))
-          : dbConn.select().from(whatsappAccountAlerts);
+        const query =
+          conditions.length > 0
+            ? dbConn
+                .select()
+                .from(whatsappAccountAlerts)
+                .where(and(...conditions))
+            : dbConn.select().from(whatsappAccountAlerts);
 
         return await query.orderBy(desc(whatsappAccountAlerts.createdAt)).limit(input?.limit || 50);
       }),
@@ -1687,9 +1870,13 @@ sendTypingIndicator: protectedProcedure
       .input(z.object({ id: z.number(), resolvedBy: z.number() }))
       .mutation(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappAccountAlerts } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappAccountAlerts } = await import('../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
 
         await dbConn
           .update(whatsappAccountAlerts)
@@ -1705,38 +1892,62 @@ sendTypingIndicator: protectedProcedure
 
     // Security Events
     getSecurityEvents: protectedProcedure
-      .input(z.object({
-        severity: z.enum(["low", "medium", "high", "critical"]).optional(),
-        limit: z.number().default(50),
-      }).optional())
+      .input(
+        z
+          .object({
+            severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+            limit: z.number().default(50),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappSecurityEvents } = await import("../../drizzle/schema");
-        const { eq, desc } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappSecurityEvents } = await import('../../drizzle/schema');
+        const { eq, desc } = await import('drizzle-orm');
 
         const query = input?.severity
-          ? dbConn.select().from(whatsappSecurityEvents).where(eq(whatsappSecurityEvents.severity, input.severity))
+          ? dbConn
+              .select()
+              .from(whatsappSecurityEvents)
+              .where(eq(whatsappSecurityEvents.severity, input.severity))
           : dbConn.select().from(whatsappSecurityEvents);
 
-        return await query.orderBy(desc(whatsappSecurityEvents.createdAt)).limit(input?.limit || 50);
+        return await query
+          .orderBy(desc(whatsappSecurityEvents.createdAt))
+          .limit(input?.limit || 50);
       }),
   }),
 
   phoneQuality: router({
     getHistory: protectedProcedure
-      .input(z.object({
-        phoneNumber: z.string().optional(),
-        limit: z.number().default(100),
-      }).optional())
+      .input(
+        z
+          .object({
+            phoneNumber: z.string().optional(),
+            limit: z.number().default(100),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappPhoneQuality } = await import("../../drizzle/schema");
-        const { eq, desc } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappPhoneQuality } = await import('../../drizzle/schema');
+        const { eq, desc } = await import('drizzle-orm');
 
         const query = input?.phoneNumber
-          ? dbConn.select().from(whatsappPhoneQuality).where(eq(whatsappPhoneQuality.phoneNumber, input.phoneNumber))
+          ? dbConn
+              .select()
+              .from(whatsappPhoneQuality)
+              .where(eq(whatsappPhoneQuality.phoneNumber, input.phoneNumber))
           : dbConn.select().from(whatsappPhoneQuality);
 
         return await query.orderBy(desc(whatsappPhoneQuality.createdAt)).limit(input?.limit || 100);
@@ -1744,9 +1955,10 @@ sendTypingIndicator: protectedProcedure
 
     getCurrent: protectedProcedure.query(async () => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappPhoneQuality } = await import("../../drizzle/schema");
-      const { desc } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappPhoneQuality } = await import('../../drizzle/schema');
+      const { desc } = await import('drizzle-orm');
 
       const results = await dbConn
         .select()
@@ -1760,36 +1972,57 @@ sendTypingIndicator: protectedProcedure
 
   conversationQuality: router({
     getHistory: protectedProcedure
-      .input(z.object({
-        phoneNumber: z.string().optional(),
-        limit: z.number().default(100),
-      }).optional())
+      .input(
+        z
+          .object({
+            phoneNumber: z.string().optional(),
+            limit: z.number().default(100),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappConversationQuality } = await import("../../drizzle/schema");
-        const { eq, desc } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappConversationQuality } = await import('../../drizzle/schema');
+        const { eq, desc } = await import('drizzle-orm');
 
         const query = input?.phoneNumber
-          ? dbConn.select().from(whatsappConversationQuality).where(eq(whatsappConversationQuality.phoneNumber, input.phoneNumber))
+          ? dbConn
+              .select()
+              .from(whatsappConversationQuality)
+              .where(eq(whatsappConversationQuality.phoneNumber, input.phoneNumber))
           : dbConn.select().from(whatsappConversationQuality);
 
-        return await query.orderBy(desc(whatsappConversationQuality.createdAt)).limit(input?.limit || 100);
+        return await query
+          .orderBy(desc(whatsappConversationQuality.createdAt))
+          .limit(input?.limit || 100);
       }),
   }),
 
   userSubscriptions: router({
     getAll: protectedProcedure
-      .input(z.object({
-        status: z.enum(["opted_in", "opted_out"]).optional(),
-        optInType: z.enum(["general", "marketing"]).optional(),
-        limit: z.number().default(100),
-      }).optional())
+      .input(
+        z
+          .object({
+            status: z.enum(['opted_in', 'opted_out']).optional(),
+            optInType: z.enum(['general', 'marketing']).optional(),
+            limit: z.number().default(100),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappUserOptIns } = await import("../../drizzle/schema");
-        const { eq, and, desc } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappUserOptIns } = await import('../../drizzle/schema');
+        const { eq, and, desc } = await import('drizzle-orm');
 
         const conditions = [];
         if (input?.status) {
@@ -1799,34 +2032,46 @@ sendTypingIndicator: protectedProcedure
           conditions.push(eq(whatsappUserOptIns.optInType, input.optInType));
         }
 
-        const query = conditions.length > 0
-          ? dbConn.select().from(whatsappUserOptIns).where(and(...conditions))
-          : dbConn.select().from(whatsappUserOptIns);
+        const query =
+          conditions.length > 0
+            ? dbConn
+                .select()
+                .from(whatsappUserOptIns)
+                .where(and(...conditions))
+            : dbConn.select().from(whatsappUserOptIns);
 
         return await query.orderBy(desc(whatsappUserOptIns.createdAt)).limit(input?.limit || 100);
       }),
 
     updateStatus: protectedProcedure
-      .input(z.object({
-        phoneNumber: z.string(),
-        status: z.enum(["opted_in", "opted_out"]),
-        optInType: z.enum(["general", "marketing"]),
-        source: z.string().default("manual"),
-      }))
+      .input(
+        z.object({
+          phoneNumber: z.string(),
+          status: z.enum(['opted_in', 'opted_out']),
+          optInType: z.enum(['general', 'marketing']),
+          source: z.string().default('manual'),
+        })
+      )
       .mutation(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappUserOptIns } = await import("../../drizzle/schema");
-        const { eq, and } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappUserOptIns } = await import('../../drizzle/schema');
+        const { eq, and } = await import('drizzle-orm');
 
         // Check if record exists
         const existing = await dbConn
           .select()
           .from(whatsappUserOptIns)
-          .where(and(
-            eq(whatsappUserOptIns.phoneNumber, input.phoneNumber),
-            eq(whatsappUserOptIns.optInType, input.optInType)
-          ))
+          .where(
+            and(
+              eq(whatsappUserOptIns.phoneNumber, input.phoneNumber),
+              eq(whatsappUserOptIns.optInType, input.optInType)
+            )
+          )
           .limit(1);
 
         if (existing.length > 0) {
@@ -1838,10 +2083,12 @@ sendTypingIndicator: protectedProcedure
               source: input.source,
               updatedAt: new Date(),
             })
-            .where(and(
-              eq(whatsappUserOptIns.phoneNumber, input.phoneNumber),
-              eq(whatsappUserOptIns.optInType, input.optInType)
-            ));
+            .where(
+              and(
+                eq(whatsappUserOptIns.phoneNumber, input.phoneNumber),
+                eq(whatsappUserOptIns.optInType, input.optInType)
+              )
+            );
         } else {
           // Create new
           await dbConn.insert(whatsappUserOptIns).values({
@@ -1858,20 +2105,25 @@ sendTypingIndicator: protectedProcedure
 
     getStats: protectedProcedure.query(async () => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappUserOptIns } = await import("../../drizzle/schema");
-      const { eq, sql } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappUserOptIns } = await import('../../drizzle/schema');
+      const { eq, sql } = await import('drizzle-orm');
 
       const allSubs = await dbConn.select().from(whatsappUserOptIns);
 
       return {
         general: {
-          optedIn: allSubs.filter(s => s.optInType === "general" && s.status === "opted_in").length,
-          optedOut: allSubs.filter(s => s.optInType === "general" && s.status === "opted_out").length,
+          optedIn: allSubs.filter((s) => s.optInType === 'general' && s.status === 'opted_in')
+            .length,
+          optedOut: allSubs.filter((s) => s.optInType === 'general' && s.status === 'opted_out')
+            .length,
         },
         marketing: {
-          optedIn: allSubs.filter(s => s.optInType === "marketing" && s.status === "opted_in").length,
-          optedOut: allSubs.filter(s => s.optInType === "marketing" && s.status === "opted_out").length,
+          optedIn: allSubs.filter((s) => s.optInType === 'marketing' && s.status === 'opted_in')
+            .length,
+          optedOut: allSubs.filter((s) => s.optInType === 'marketing' && s.status === 'opted_out')
+            .length,
         },
       };
     }),
@@ -1879,21 +2131,34 @@ sendTypingIndicator: protectedProcedure
 
   templateQuality: router({
     getHistory: protectedProcedure
-      .input(z.object({
-        templateId: z.string().optional(),
-        limit: z.number().default(100),
-      }).optional())
+      .input(
+        z
+          .object({
+            templateId: z.string().optional(),
+            limit: z.number().default(100),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappTemplateQuality } = await import("../../drizzle/schema");
-        const { eq, desc } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappTemplateQuality } = await import('../../drizzle/schema');
+        const { eq, desc } = await import('drizzle-orm');
 
         const query = input?.templateId
-          ? dbConn.select().from(whatsappTemplateQuality).where(eq(whatsappTemplateQuality.templateId, input.templateId))
+          ? dbConn
+              .select()
+              .from(whatsappTemplateQuality)
+              .where(eq(whatsappTemplateQuality.templateId, input.templateId))
           : dbConn.select().from(whatsappTemplateQuality);
 
-        return await query.orderBy(desc(whatsappTemplateQuality.createdAt)).limit(input?.limit || 100);
+        return await query
+          .orderBy(desc(whatsappTemplateQuality.createdAt))
+          .limit(input?.limit || 100);
       }),
   }),
 
@@ -1901,17 +2166,25 @@ sendTypingIndicator: protectedProcedure
 
   webhookEvents: router({
     getAll: protectedProcedure
-      .input(z.object({
-        eventType: z.string().optional(),
-        processed: z.boolean().optional(),
-        handlerExists: z.boolean().optional(),
-        limit: z.number().default(100),
-      }).optional())
+      .input(
+        z
+          .object({
+            eventType: z.string().optional(),
+            processed: z.boolean().optional(),
+            handlerExists: z.boolean().optional(),
+            limit: z.number().default(100),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappWebhookEvents } = await import("../../drizzle/schema");
-        const { eq, and, desc } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappWebhookEvents } = await import('../../drizzle/schema');
+        const { eq, and, desc } = await import('drizzle-orm');
 
         const conditions = [];
         if (input?.eventType) {
@@ -1924,9 +2197,13 @@ sendTypingIndicator: protectedProcedure
           conditions.push(eq(whatsappWebhookEvents.handlerExists, input.handlerExists));
         }
 
-        const query = conditions.length > 0
-          ? dbConn.select().from(whatsappWebhookEvents).where(and(...conditions))
-          : dbConn.select().from(whatsappWebhookEvents);
+        const query =
+          conditions.length > 0
+            ? dbConn
+                .select()
+                .from(whatsappWebhookEvents)
+                .where(and(...conditions))
+            : dbConn.select().from(whatsappWebhookEvents);
 
         return await query
           .orderBy(desc(whatsappWebhookEvents.createdAt))
@@ -1951,9 +2228,10 @@ sendTypingIndicator: protectedProcedure
     // إحصائيات الأحداث حسب النوع
     getStatsByType: protectedProcedure.query(async () => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappWebhookEvents } = await import("../../drizzle/schema");
-      const { sql } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappWebhookEvents } = await import('../../drizzle/schema');
+      const { sql } = await import('drizzle-orm');
 
       const stats = await dbConn
         .select({
@@ -1968,15 +2246,29 @@ sendTypingIndicator: protectedProcedure
 
     // الأحداث حسب الفئة (messages, templates, account, etc.)
     getEventsByCategory: protectedProcedure
-      .input(z.object({
-        category: z.enum(['messages', 'templates', 'template_status', 'account', 'security', 'quality', 'subscriptions']),
-        limit: z.number().default(50),
-      }))
+      .input(
+        z.object({
+          category: z.enum([
+            'messages',
+            'templates',
+            'template_status',
+            'account',
+            'security',
+            'quality',
+            'subscriptions',
+          ]),
+          limit: z.number().default(50),
+        })
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappWebhookEvents } = await import("../../drizzle/schema");
-        const { like, desc } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappWebhookEvents } = await import('../../drizzle/schema');
+        const { like, desc } = await import('drizzle-orm');
 
         const categoryPatterns = {
           messages: 'message%',
@@ -1998,15 +2290,21 @@ sendTypingIndicator: protectedProcedure
 
     // أحداث القوالب المفصلة
     getTemplateEvents: protectedProcedure
-      .input(z.object({
-        templateId: z.string().optional(),
-        limit: z.number().default(100),
-      }))
+      .input(
+        z.object({
+          templateId: z.string().optional(),
+          limit: z.number().default(100),
+        })
+      )
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
-        if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-        const { whatsappWebhookEvents } = await import("../../drizzle/schema");
-        const { like, desc, eq } = await import("drizzle-orm");
+        if (!dbConn)
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'قاعدة البيانات غير متاحة',
+          });
+        const { whatsappWebhookEvents } = await import('../../drizzle/schema');
+        const { like, desc, eq } = await import('drizzle-orm');
 
         let query = dbConn
           .select()
@@ -2015,8 +2313,10 @@ sendTypingIndicator: protectedProcedure
 
         if (input.templateId) {
           // تصفية حسب templateId من الـ rawPayload
-          const events = await query.orderBy(desc(whatsappWebhookEvents.createdAt)).limit(input.limit);
-          return events.filter(e => {
+          const events = await query
+            .orderBy(desc(whatsappWebhookEvents.createdAt))
+            .limit(input.limit);
+          return events.filter((e) => {
             try {
               const payload = JSON.parse(e.rawPayload);
               return payload.message_template_id === input.templateId;
@@ -2036,17 +2336,24 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ startDate: z.string().optional(), endDate: z.string().optional() }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappConversations } = await import("../../drizzle/schema");
-      const { desc, and, gte, lte } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappConversations } = await import('../../drizzle/schema');
+      const { desc, and, gte, lte } = await import('drizzle-orm');
 
       const conditions = [];
-      if (input.startDate) conditions.push(gte(whatsappConversations.createdAt, new Date(input.startDate)));
-      if (input.endDate) conditions.push(lte(whatsappConversations.createdAt, new Date(input.endDate)));
+      if (input.startDate)
+        conditions.push(gte(whatsappConversations.createdAt, new Date(input.startDate)));
+      if (input.endDate)
+        conditions.push(lte(whatsappConversations.createdAt, new Date(input.endDate)));
 
-      const query = conditions.length > 0
-        ? dbConn.select().from(whatsappConversations).where(and(...conditions))
-        : dbConn.select().from(whatsappConversations);
+      const query =
+        conditions.length > 0
+          ? dbConn
+              .select()
+              .from(whatsappConversations)
+              .where(and(...conditions))
+          : dbConn.select().from(whatsappConversations);
 
       return await query.orderBy(desc(whatsappConversations.createdAt)).limit(100);
     }),
@@ -2055,12 +2362,16 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ phoneNumber: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappContacts } = await import("../../drizzle/schema");
-      const { desc, eq } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappContacts } = await import('../../drizzle/schema');
+      const { desc, eq } = await import('drizzle-orm');
 
       const query = input.phoneNumber
-        ? dbConn.select().from(whatsappContacts).where(eq(whatsappContacts.phoneNumber, input.phoneNumber))
+        ? dbConn
+            .select()
+            .from(whatsappContacts)
+            .where(eq(whatsappContacts.phoneNumber, input.phoneNumber))
         : dbConn.select().from(whatsappContacts);
 
       return await query.orderBy(desc(whatsappContacts.createdAt)).limit(input.limit);
@@ -2070,12 +2381,16 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ status: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappOrders } = await import("../../drizzle/schema");
-      const { desc, eq } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappOrders } = await import('../../drizzle/schema');
+      const { desc, eq } = await import('drizzle-orm');
 
       const query = input.status
-        ? dbConn.select().from(whatsappOrders).where(eq(whatsappOrders.status, input.status as any))
+        ? dbConn
+            .select()
+            .from(whatsappOrders)
+            .where(eq(whatsappOrders.status, input.status as any))
         : dbConn.select().from(whatsappOrders);
 
       return await query.orderBy(desc(whatsappOrders.createdAt)).limit(input.limit);
@@ -2085,12 +2400,16 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ sourceType: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappReferrals } = await import("../../drizzle/schema");
-      const { desc, eq } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappReferrals } = await import('../../drizzle/schema');
+      const { desc, eq } = await import('drizzle-orm');
 
       const query = input.sourceType
-        ? dbConn.select().from(whatsappReferrals).where(eq(whatsappReferrals.sourceType, input.sourceType))
+        ? dbConn
+            .select()
+            .from(whatsappReferrals)
+            .where(eq(whatsappReferrals.sourceType, input.sourceType))
         : dbConn.select().from(whatsappReferrals);
 
       return await query.orderBy(desc(whatsappReferrals.createdAt)).limit(input.limit);
@@ -2100,9 +2419,10 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ emoji: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappReactions } = await import("../../drizzle/schema");
-      const { desc, eq } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappReactions } = await import('../../drizzle/schema');
+      const { desc, eq } = await import('drizzle-orm');
 
       const query = input.emoji
         ? dbConn.select().from(whatsappReactions).where(eq(whatsappReactions.emoji, input.emoji))
@@ -2115,42 +2435,63 @@ sendTypingIndicator: protectedProcedure
     .input(z.object({ status: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappTransactions } = await import("../../drizzle/schema");
-      const { desc, eq } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappTransactions } = await import('../../drizzle/schema');
+      const { desc, eq } = await import('drizzle-orm');
 
       const query = input.status
-        ? dbConn.select().from(whatsappTransactions).where(eq(whatsappTransactions.status, input.status as any))
+        ? dbConn
+            .select()
+            .from(whatsappTransactions)
+            .where(eq(whatsappTransactions.status, input.status as any))
         : dbConn.select().from(whatsappTransactions);
 
       return await query.orderBy(desc(whatsappTransactions.createdAt)).limit(input.limit);
     }),
 
   getTemplatePerformance: protectedProcedure
-    .input(z.object({ templateName: z.string().optional(), startDate: z.string(), endDate: z.string() }))
+    .input(
+      z.object({ templateName: z.string().optional(), startDate: z.string(), endDate: z.string() })
+    )
     .query(async ({ input }) => {
       const dbConn = await db.getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
-      const { whatsappTemplates, whatsappNotifications } = await import("../../drizzle/schema");
-      const { sql, and, gte, lte, eq, like } = await import("drizzle-orm");
+      if (!dbConn)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const { whatsappTemplates, whatsappNotifications } = await import('../../drizzle/schema');
+      const { sql, and, gte, lte, eq, like } = await import('drizzle-orm');
 
       // Get template usage statistics
       const conditions = [];
-      if (input.startDate) conditions.push(gte(whatsappNotifications.createdAt, new Date(input.startDate)));
-      if (input.endDate) conditions.push(lte(whatsappNotifications.createdAt, new Date(input.endDate)));
+      if (input.startDate)
+        conditions.push(gte(whatsappNotifications.createdAt, new Date(input.startDate)));
+      if (input.endDate)
+        conditions.push(lte(whatsappNotifications.createdAt, new Date(input.endDate)));
       if (input.templateName) conditions.push(eq(whatsappTemplates.name, input.templateName));
-      
+
       const templateQuery = dbConn
         .select({
           templateId: whatsappTemplates.id,
           templateName: whatsappTemplates.name,
           sentCount: sql<number>`count(*)`.as('sentCount'),
-          deliveredCount: sql<number>`sum(case when ${whatsappNotifications.status} = 'delivered' then 1 else 0 end)`.as('deliveredCount'),
-          readCount: sql<number>`sum(case when ${whatsappNotifications.status} = 'read' then 1 else 0 end)`.as('readCount'),
-          failedCount: sql<number>`sum(case when ${whatsappNotifications.status} = 'failed' then 1 else 0 end)`.as('failedCount'),
+          deliveredCount:
+            sql<number>`sum(case when ${whatsappNotifications.status} = 'delivered' then 1 else 0 end)`.as(
+              'deliveredCount'
+            ),
+          readCount:
+            sql<number>`sum(case when ${whatsappNotifications.status} = 'read' then 1 else 0 end)`.as(
+              'readCount'
+            ),
+          failedCount:
+            sql<number>`sum(case when ${whatsappNotifications.status} = 'failed' then 1 else 0 end)`.as(
+              'failedCount'
+            ),
         })
         .from(whatsappTemplates)
-        .leftJoin(whatsappNotifications, like(whatsappTemplates.name, whatsappNotifications.templateName));
+        .leftJoin(
+          whatsappNotifications,
+          like(whatsappTemplates.name, whatsappNotifications.templateName)
+        );
 
       if (conditions.length > 0) {
         return await templateQuery.where(and(...conditions));

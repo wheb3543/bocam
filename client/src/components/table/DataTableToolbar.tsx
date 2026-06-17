@@ -1,20 +1,27 @@
 /**
  * DataTableToolbar - شريط أدوات مشترك للجداول
- * 
+ *
  * يجمع الأنماط المتكررة في جميع الجداول:
  * - أزرار الطباعة والتصدير (Excel/CSV/PDF)
  * - إدارة أعمدة الجدول (ColumnVisibility)
  * - الفلاتر المحفوظة (SavedFilters)
  * - أزرار إجراءات مخصصة
  */
-import { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Download, Printer, X } from "lucide-react";
-import { ColumnVisibility, type ColumnConfig, type ColumnTemplate } from "@/components/table/ColumnVisibility";
-import SavedFilters from "@/components/SavedFilters";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Download, Printer, X } from 'lucide-react';
+import {
+  ColumnVisibility,
+  type ColumnConfig,
+  type ColumnTemplate,
+} from '@/components/table/ColumnVisibility';
+import SavedFilters from '@/components/SavedFilters';
 
 type ExportFormat = 'excel' | 'csv' | 'pdf';
 
@@ -48,7 +55,13 @@ interface DataTableToolbarProps {
     templates: any[];
     activeTemplateId: string | null;
     onApplyTemplate: (template: ColumnTemplate) => void;
-    onSaveTemplate: (name: string, columns: Record<string, boolean>, columnOrder: string[], columnWidths?: Record<string, number>, frozenColumns?: string[]) => void;
+    onSaveTemplate: (
+      name: string,
+      columns: Record<string, boolean>,
+      columnOrder: string[],
+      columnWidths?: Record<string, number>,
+      frozenColumns?: string[]
+    ) => void;
     onDeleteTemplate: (templateId: string) => void;
     tableKey: string;
     columnWidths: Record<string, number>;
@@ -56,12 +69,18 @@ interface DataTableToolbarProps {
     onToggleFrozen: (key: string) => void;
     isAdmin: boolean;
     sharedTemplates?: any[];
-    onSaveSharedTemplate?: (name: string, columns: Record<string, boolean>, columnOrder: string[], columnWidths?: Record<string, number>, frozenColumns?: string[]) => void;
+    onSaveSharedTemplate?: (
+      name: string,
+      columns: Record<string, boolean>,
+      columnOrder: string[],
+      columnWidths?: Record<string, number>,
+      frozenColumns?: string[]
+    ) => void;
     onDeleteSharedTemplate?: (dbId: number) => void;
   };
   /** خصائص SavedFilters */
   savedFiltersProps?: {
-    pageKey: "appointments" | "offerLeads" | "campRegistrations" | "customers";
+    pageKey: 'appointments' | 'offerLeads' | 'campRegistrations' | 'customers';
     currentFilters: Record<string, any>;
     onApplyFilter: (filters: Record<string, any>) => void;
   };
@@ -118,13 +137,16 @@ export default function DataTableToolbar({
       )}
 
       {/* Saved Filters */}
-      {showSavedFilters && savedFiltersProps && (
-        <SavedFilters {...savedFiltersProps} />
-      )}
+      {showSavedFilters && savedFiltersProps && <SavedFilters {...savedFiltersProps} />}
 
       {/* Clear Filters */}
       {hasActiveFilters && onClearFilters && (
-        <Button variant="ghost" size="sm" onClick={onClearFilters} className="gap-1 h-9 text-muted-foreground">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClearFilters}
+          className="gap-1 h-9 text-muted-foreground"
+        >
           <X className="h-3.5 w-3.5" />
           مسح الفلاتر
         </Button>

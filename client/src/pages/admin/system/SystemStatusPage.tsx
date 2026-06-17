@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { 
-  Server, 
-  Database, 
-  Shield, 
+import { useEffect, useState } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import {
+  Server,
+  Database,
+  Shield,
   Activity,
   CheckCircle,
   XCircle,
@@ -17,8 +17,8 @@ import {
   Cpu,
   Globe,
   RefreshCw,
-  Cpu as Processor
-} from "lucide-react";
+  Cpu as Processor,
+} from 'lucide-react';
 
 interface SystemStatus {
   server: {
@@ -81,18 +81,18 @@ export default function SystemStatusPage() {
         ssl: {
           enabled: true,
           valid: true,
-          expiresAt: Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60), // 90 days from now
+          expiresAt: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60, // 90 days from now
           issuer: "Let's Encrypt",
         },
         heartbeat: {
           status: 'active',
           lastBeat: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
-          nextBeat: Math.floor(Date.now() / 1000) + (23 * 60 * 60), // 23 hours from now
+          nextBeat: Math.floor(Date.now() / 1000) + 23 * 60 * 60, // 23 hours from now
         },
         updateChecker: {
           status: 'active',
           lastCheck: Math.floor(Date.now() / 1000) - 1800, // 30 minutes ago
-          nextCheck: Math.floor(Date.now() / 1000) + (5 * 60 * 60), // 5 hours from now
+          nextCheck: Math.floor(Date.now() / 1000) + 5 * 60 * 60, // 5 hours from now
         },
         resources: {
           cpu: 45,
@@ -100,7 +100,7 @@ export default function SystemStatusPage() {
           disk: 38,
         },
       };
-      
+
       setStatus(mockStatus);
     } catch (error) {
       console.error('Failed to fetch system status:', error);
@@ -151,7 +151,7 @@ export default function SystemStatusPage() {
     const days = Math.floor(seconds / (24 * 60 * 60));
     const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
     const minutes = Math.floor((seconds % (60 * 60)) / 60);
-    
+
     if (days > 0) {
       return `${days} يوم، ${hours} ساعة`;
     }
@@ -170,7 +170,7 @@ export default function SystemStatusPage() {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
   if (isLoading) {
@@ -201,11 +201,15 @@ export default function SystemStatusPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">وقت التشغيل</p>
-                <p className="font-semibold">{status?.server.uptime ? formatUptime(status.server.uptime) : 'غير معروف'}</p>
+                <p className="font-semibold">
+                  {status?.server.uptime ? formatUptime(status.server.uptime) : 'غير معروف'}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">آخر إعادة تشغيل</p>
-                <p className="font-semibold">{status?.server.lastRestart ? formatDate(status.server.lastRestart) : 'غير معروف'}</p>
+                <p className="font-semibold">
+                  {status?.server.lastRestart ? formatDate(status.server.lastRestart) : 'غير معروف'}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -230,7 +234,11 @@ export default function SystemStatusPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">حجم قاعدة البيانات</p>
-                <p className="font-semibold">{status?.database.size ? formatBytes(status.database.size * 1024 * 1024) : 'غير معروف'}</p>
+                <p className="font-semibold">
+                  {status?.database.size
+                    ? formatBytes(status.database.size * 1024 * 1024)
+                    : 'غير معروف'}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -244,7 +252,11 @@ export default function SystemStatusPage() {
                 <Shield className="h-5 w-5" />
                 <CardTitle>شهادة SSL</CardTitle>
               </div>
-              {status?.ssl.enabled ? getStatusBadge(status?.ssl.valid ? 'valid' : 'invalid') : <Badge variant="secondary">غير مفعّل</Badge>}
+              {status?.ssl.enabled ? (
+                getStatusBadge(status?.ssl.valid ? 'valid' : 'invalid')
+              ) : (
+                <Badge variant="secondary">غير مفعّل</Badge>
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -257,13 +269,19 @@ export default function SystemStatusPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">تاريخ الانتهاء</p>
-                    <p className="font-semibold">{status.ssl.expiresAt ? formatDate(status.ssl.expiresAt) : 'غير معروف'}</p>
+                    <p className="font-semibold">
+                      {status.ssl.expiresAt ? formatDate(status.ssl.expiresAt) : 'غير معروف'}
+                    </p>
                   </div>
                 </div>
                 {status.ssl.expiresAt && (
                   <div className="text-sm">
                     <p className="text-muted-foreground">
-                      تنتهي خلال {Math.floor((status.ssl.expiresAt - Math.floor(Date.now() / 1000)) / (24 * 60 * 60))} يوم
+                      تنتهي خلال{' '}
+                      {Math.floor(
+                        (status.ssl.expiresAt - Math.floor(Date.now() / 1000)) / (24 * 60 * 60)
+                      )}{' '}
+                      يوم
                     </p>
                   </div>
                 )}
@@ -291,11 +309,15 @@ export default function SystemStatusPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">آخر نبضة</p>
-                <p className="font-semibold">{status?.heartbeat.lastBeat ? formatDate(status.heartbeat.lastBeat) : 'غير معروف'}</p>
+                <p className="font-semibold">
+                  {status?.heartbeat.lastBeat ? formatDate(status.heartbeat.lastBeat) : 'غير معروف'}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">النبضة القادمة</p>
-                <p className="font-semibold">{status?.heartbeat.nextBeat ? formatDate(status.heartbeat.nextBeat) : 'غير معروف'}</p>
+                <p className="font-semibold">
+                  {status?.heartbeat.nextBeat ? formatDate(status.heartbeat.nextBeat) : 'غير معروف'}
+                </p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -319,16 +341,22 @@ export default function SystemStatusPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">آخر فحص</p>
-                <p className="font-semibold">{status?.updateChecker.lastCheck ? formatDate(status.updateChecker.lastCheck) : 'غير معروف'}</p>
+                <p className="font-semibold">
+                  {status?.updateChecker.lastCheck
+                    ? formatDate(status.updateChecker.lastCheck)
+                    : 'غير معروف'}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">الفحص القادم</p>
-                <p className="font-semibold">{status?.updateChecker.nextCheck ? formatDate(status.updateChecker.nextCheck) : 'غير معروف'}</p>
+                <p className="font-semibold">
+                  {status?.updateChecker.nextCheck
+                    ? formatDate(status.updateChecker.nextCheck)
+                    : 'غير معروف'}
+                </p>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              يتحقق النظام من التحديثات كل 6 ساعات
-            </p>
+            <p className="text-sm text-muted-foreground">يتحقق النظام من التحديثات كل 6 ساعات</p>
           </CardContent>
         </Card>
 

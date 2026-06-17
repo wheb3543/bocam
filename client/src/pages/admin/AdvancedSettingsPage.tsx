@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { 
-  Shield, 
-  Globe, 
-  Database, 
+import { useEffect, useState } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Shield,
+  Globe,
+  Database,
   Bell,
   RefreshCw,
   CheckCircle,
@@ -20,8 +20,8 @@ import {
   Lock,
   Key,
   Clock,
-  Cloud
-} from "lucide-react";
+  Cloud,
+} from 'lucide-react';
 
 interface SystemConfig {
   sslEnabled: boolean;
@@ -52,15 +52,15 @@ export default function AdvancedSettingsPage() {
       // Mock data for now - in production, this would call an API endpoint
       const mockConfig: SystemConfig = {
         sslEnabled: true,
-        sslExpiry: Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60),
+        sslExpiry: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60,
         sslIssuer: "Let's Encrypt",
         backupEnabled: true,
-        backupSchedule: "0 2 * * *",
+        backupSchedule: '0 2 * * *',
         backupRetention: 30,
         cloudBackupEnabled: true,
-        cloudProvider: "AWS S3",
+        cloudProvider: 'AWS S3',
         notificationsEnabled: true,
-        notificationEmail: "admin@example.com",
+        notificationEmail: 'admin@example.com',
         maintenanceMode: false,
         debugMode: false,
       };
@@ -74,11 +74,11 @@ export default function AdvancedSettingsPage() {
 
   const handleSave = async () => {
     if (!config) return;
-    
+
     try {
       setIsSaving(true);
       // In production, this would call an API endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       alert('تم حفظ الإعدادات بنجاح');
     } catch (error) {
       alert('فشل حفظ الإعدادات');
@@ -155,7 +155,9 @@ export default function AdvancedSettingsPage() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">تنتهي خلال:</span>
-                  <Badge variant={getDaysUntilExpiry(config.sslExpiry) < 30 ? "destructive" : "default"}>
+                  <Badge
+                    variant={getDaysUntilExpiry(config.sslExpiry) < 30 ? 'destructive' : 'default'}
+                  >
                     {getDaysUntilExpiry(config.sslExpiry)} يوم
                   </Badge>
                 </div>
@@ -209,7 +211,9 @@ export default function AdvancedSettingsPage() {
               <Input
                 type="number"
                 value={config.backupRetention}
-                onChange={(e) => setConfig({ ...config, backupRetention: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setConfig({ ...config, backupRetention: parseInt(e.target.value) })
+                }
                 min={1}
                 max={365}
               />
@@ -270,7 +274,9 @@ export default function AdvancedSettingsPage() {
               </div>
               <Switch
                 checked={config.notificationsEnabled}
-                onCheckedChange={(checked) => setConfig({ ...config, notificationsEnabled: checked })}
+                onCheckedChange={(checked) =>
+                  setConfig({ ...config, notificationsEnabled: checked })
+                }
               />
             </div>
 
@@ -351,9 +357,7 @@ export default function AdvancedSettingsPage() {
                 <Key className="h-5 w-5" />
                 <div>
                   <p className="font-semibold">مفتاح JWT</p>
-                  <p className="text-sm text-muted-foreground">
-                    تم تكوينه
-                  </p>
+                  <p className="text-sm text-muted-foreground">تم تكوينه</p>
                 </div>
               </div>
               <CheckCircle className="h-5 w-5 text-green-500" />
@@ -364,9 +368,7 @@ export default function AdvancedSettingsPage() {
                 <Shield className="h-5 w-5" />
                 <div>
                   <p className="font-semibold">الترخيص</p>
-                  <p className="text-sm text-muted-foreground">
-                    صالح
-                  </p>
+                  <p className="text-sm text-muted-foreground">صالح</p>
                 </div>
               </div>
               <CheckCircle className="h-5 w-5 text-green-500" />

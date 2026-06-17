@@ -1,6 +1,6 @@
-import { Users, Loader2 } from "lucide-react";
-import LeadCard from "@/components/lead/LeadCard";
-import EmptyState from "@/components/EmptyState";
+import { Users, Loader2 } from 'lucide-react';
+import LeadCard from '@/components/lead/LeadCard';
+import EmptyState from '@/components/EmptyState';
 
 interface LeadMobileCardsProps {
   leads: any[];
@@ -29,8 +29,12 @@ export default function LeadMobileCards({
         <EmptyState
           icon={Users}
           title="لا توجد تسجيلات"
-          description={hasActiveFilters ? "لا توجد نتائج مطابقة للفلاتر المحددة. جرب تغيير معايير البحث." : "لم يتم تسجيل أي عملاء بعد."}
-          action={hasActiveFilters ? { label: "مسح الفلاتر", onClick: onClearFilters } : undefined}
+          description={
+            hasActiveFilters
+              ? 'لا توجد نتائج مطابقة للفلاتر المحددة. جرب تغيير معايير البحث.'
+              : 'لم يتم تسجيل أي عملاء بعد.'
+          }
+          action={hasActiveFilters ? { label: 'مسح الفلاتر', onClick: onClearFilters } : undefined}
         />
       ) : (
         leads.map((lead: any) => (

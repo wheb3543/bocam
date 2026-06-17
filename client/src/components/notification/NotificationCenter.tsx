@@ -1,10 +1,20 @@
-import { useFormatDate } from "@/hooks/export/useFormatDate";
-import { useState, useMemo } from "react";
-import { trpc } from "@/lib/api/trpc";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Users, Calendar, TrendingUp, UserCheck, AlertCircle, Loader2, CheckCircle } from "lucide-react";
-import { useLocation } from "wouter";
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState, useMemo } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  ChevronDown,
+  ChevronUp,
+  Users,
+  Calendar,
+  TrendingUp,
+  UserCheck,
+  AlertCircle,
+  Loader2,
+  CheckCircle,
+} from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export default function NotificationCenter() {
   const { formatDate, formatDateTime } = useFormatDate();
@@ -16,15 +26,27 @@ export default function NotificationCenter() {
   });
 
   // Fetch all pending bookings
-  const { data: appointments, isLoading: appointmentsLoading, error: appointmentsError } = trpc.appointments.list.useQuery(
+  const {
+    data: appointments,
+    isLoading: appointmentsLoading,
+    error: appointmentsError,
+  } = trpc.appointments.list.useQuery(
     undefined,
     { refetchInterval: 30000 } // Auto-refresh every 30 seconds
   );
-  const { data: offerLeads, isLoading: offerLeadsLoading, error: offerLeadsError } = trpc.offerLeads.list.useQuery(
+  const {
+    data: offerLeads,
+    isLoading: offerLeadsLoading,
+    error: offerLeadsError,
+  } = trpc.offerLeads.list.useQuery(
     undefined,
     { refetchInterval: 30000 } // Auto-refresh every 30 seconds
   );
-  const { data: campRegsPaged, isLoading: campLoading, error: campError } = trpc.campRegistrations.listPaginated.useQuery(
+  const {
+    data: campRegsPaged,
+    isLoading: campLoading,
+    error: campError,
+  } = trpc.campRegistrations.listPaginated.useQuery(
     { page: 1, limit: 50 },
     { refetchInterval: 30000 } // Auto-refresh every 30 seconds
   );
@@ -36,17 +58,17 @@ export default function NotificationCenter() {
   // Get last 5 pending items for each type
   const pendingItems = useMemo(() => {
     const pendingAppointments = (appointments || [])
-      .filter(a => a.status === 'pending')
+      .filter((a) => a.status === 'pending')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5);
-    
+
     const pendingOfferLeads = (offerLeads || [])
-      .filter(o => o.status === 'pending')
+      .filter((o) => o.status === 'pending')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5);
-    
+
     const pendingCampRegistrations = (campRegistrations || [])
-      .filter(c => c.status === 'pending')
+      .filter((c) => c.status === 'pending')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5);
 
@@ -58,16 +80,19 @@ export default function NotificationCenter() {
   }, [appointments, offerLeads, campRegistrations]);
 
   // Count pending items
-  const counts = useMemo(() => ({
-    appointments: appointments?.filter(a => a.status === 'pending').length || 0,
-    offerLeads: offerLeads?.filter(o => o.status === 'pending').length || 0,
-    campRegistrations: campRegistrations?.filter(c => c.status === 'pending').length || 0,
-  }), [appointments, offerLeads, campRegistrations]);
+  const counts = useMemo(
+    () => ({
+      appointments: appointments?.filter((a) => a.status === 'pending').length || 0,
+      offerLeads: offerLeads?.filter((o) => o.status === 'pending').length || 0,
+      campRegistrations: campRegistrations?.filter((c) => c.status === 'pending').length || 0,
+    }),
+    [appointments, offerLeads, campRegistrations]
+  );
 
   const totalCount = counts.appointments + counts.offerLeads + counts.campRegistrations;
 
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
@@ -143,7 +168,9 @@ export default function NotificationCenter() {
           <CardContent className="p-6 text-center">
             <AlertCircle className="h-8 w-8 mx-auto mb-3 text-destructive" />
             <p className="text-sm font-semibold text-destructive mb-2">فشل تحميل الإشعارات</p>
-            <p className="text-xs text-muted-foreground mb-4">حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</p>
+            <p className="text-xs text-muted-foreground mb-4">
+              حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm"
@@ -177,7 +204,9 @@ export default function NotificationCenter() {
                 <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
             </div>
-            <p className="text-lg font-semibold text-muted-foreground mb-2">لا توجد طلبات قيد الانتظار</p>
+            <p className="text-lg font-semibold text-muted-foreground mb-2">
+              لا توجد طلبات قيد الانتظار
+            </p>
             <p className="text-sm text-muted-foreground">جميع الحجوزات محدثة ومعالجة</p>
           </CardContent>
         </Card>
@@ -186,11 +215,11 @@ export default function NotificationCenter() {
           {sections.map((section) => {
             const Icon = section.icon;
             const isExpanded = expandedSections[section.id];
-            
+
             if (section.count === 0) return null;
 
             return (
-              <Card 
+              <Card
                 key={section.id}
                 className={`border-2 ${section.borderColor} ${section.bgColor} transition-all`}
               >
@@ -201,7 +230,9 @@ export default function NotificationCenter() {
                     className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 ${section.bgColor} rounded-full flex items-center justify-center border-2 ${section.borderColor}`}>
+                      <div
+                        className={`w-10 h-10 ${section.bgColor} rounded-full flex items-center justify-center border-2 ${section.borderColor}`}
+                      >
                         <Icon className={`h-5 w-5 ${section.color}`} />
                       </div>
                       <div className="text-right">

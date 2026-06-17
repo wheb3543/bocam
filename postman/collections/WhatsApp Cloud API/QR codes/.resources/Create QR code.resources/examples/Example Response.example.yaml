@@ -26,7 +26,7 @@ response:
     - key: x-app-usage
       value: '{"call_count":2,"total_cputime":0,"total_time":4}'
     - key: Access-Control-Allow-Origin
-      value: "*"
+      value: '*'
     - key: facebook-api-version
       value: v17.0
     - key: Strict-Transport-Security
@@ -42,7 +42,7 @@ response:
     - key: x-fb-trace-id
       value: EItwrXJiz+3
     - key: x-fb-rev
-      value: "1007848995"
+      value: '1007848995'
     - key: X-FB-Debug
       value: Ksgfum34ZCdBYgGDNUidde6xFR+1D4pD7Vr6IQji0TjOJT5QejgxGt7iyBbo0fEdKNZXB0QdimJ3Qv4mkvKyLw==
     - key: Date
@@ -52,7 +52,7 @@ response:
     - key: Connection
       value: keep-alive
     - key: Content-Length
-      value: "347"
+      value: '347'
   body:
     type: json
     content: |-

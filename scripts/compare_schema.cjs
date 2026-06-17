@@ -9,7 +9,7 @@ for (let i = 0; i < rawArgs.length; i++) {
   const a = rawArgs[i];
   if (a.startsWith('--')) {
     const k = a.slice(2);
-    const v = rawArgs[i+1] && !rawArgs[i+1].startsWith('--') ? rawArgs[++i] : true;
+    const v = rawArgs[i + 1] && !rawArgs[i + 1].startsWith('--') ? rawArgs[++i] : true;
     args[k] = v;
   } else if (!args._) {
     args._ = [a];
@@ -49,7 +49,10 @@ function parseSchemaTs(filePath) {
           // attempt to determine a type string
           let typeStr = fn;
           if (fn === 'varchar') {
-            const len = (fnArgs.match(/\{\s*length\s*:\s*(\d+)\s*\}/) || fnArgs.match(/\s*"?\w+"?\s*,\s*\{\s*length\s*:\s*(\d+)\s*\}/) || fnArgs.match(/(\d+)/));
+            const len =
+              fnArgs.match(/\{\s*length\s*:\s*(\d+)\s*\}/) ||
+              fnArgs.match(/\s*"?\w+"?\s*,\s*\{\s*length\s*:\s*(\d+)\s*\}/) ||
+              fnArgs.match(/(\d+)/);
             const lnum = len ? len[1] : '255';
             typeStr = `varchar(${lnum})`;
           } else if (fn === 'int') {
@@ -61,7 +64,7 @@ function parseSchemaTs(filePath) {
           } else if (fn === 'boolean') {
             typeStr = 'tinyint(1)';
           } else if (fn === 'decimal') {
-            const prec = (fnArgs.match(/\{\s*precision\s*:\s*(\d+)\s*,\s*scale\s*:\s*(\d+)\s*\}/));
+            const prec = fnArgs.match(/\{\s*precision\s*:\s*(\d+)\s*,\s*scale\s*:\s*(\d+)\s*\}/);
             typeStr = prec ? `decimal(${prec[1]},${prec[2]})` : 'decimal';
           } else if (fn === 'mysqlEnum') {
             typeStr = 'enum';
@@ -85,7 +88,11 @@ function getActualColumns(db, host, port, user) {
   const sql = `SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='${db}' ORDER BY TABLE_NAME, ORDINAL_POSITION;`;
   const cmd = `mysql -h${host} -P${port} -u${user} -N -e "${sql.replace(/"/g, '\\"')}"`;
   const out = execSync(cmd, { encoding: 'utf8' });
-  const rows = out.trim().split('\n').filter(Boolean).map(r => r.split('\t'));
+  const rows = out
+    .trim()
+    .split('\n')
+    .filter(Boolean)
+    .map((r) => r.split('\t'));
   const res = {};
   for (const r of rows) {
     const [table, col, colType, isNullable, colDefault, extra] = r;
@@ -100,8 +107,8 @@ function compare(expected, actual) {
   const expectedTables = Object.keys(expected).sort();
   const actualTables = Object.keys(actual || {}).sort();
 
-  const missingTables = expectedTables.filter(t => !actualTables.includes(t));
-  const extraTables = actualTables.filter(t => !expectedTables.includes(t));
+  const missingTables = expectedTables.filter((t) => !actualTables.includes(t));
+  const extraTables = actualTables.filter((t) => !expectedTables.includes(t));
   report.missingTables = missingTables;
   report.extraTables = extraTables;
 
@@ -110,15 +117,15 @@ function compare(expected, actual) {
     const actCols = (actual[t] && actual[t]) || {};
     const expNames = Object.keys(expCols);
     const actNames = Object.keys(actCols);
-    const missingCols = expNames.filter(c => !actNames.includes(c));
-    const extraCols = actNames.filter(c => !expNames.includes(c));
+    const missingCols = expNames.filter((c) => !actNames.includes(c));
+    const extraCols = actNames.filter((c) => !expNames.includes(c));
     const diffs = [];
-    for (const c of expNames.filter(n => actNames.includes(n))) {
+    for (const c of expNames.filter((n) => actNames.includes(n))) {
       const e = expCols[c];
       const a = actCols[c];
       // simple type compare: check base type
-      const eType = e.expectedType.replace(/\s+/g,'').toLowerCase();
-      const aType = a.columnType.replace(/\s+/g,'').toLowerCase();
+      const eType = e.expectedType.replace(/\s+/g, '').toLowerCase();
+      const aType = a.columnType.replace(/\s+/g, '').toLowerCase();
       let typeMismatch = false;
       if (eType.startsWith('varchar')) {
         if (!aType.startsWith('varchar')) typeMismatch = true;
@@ -128,19 +135,21 @@ function compare(expected, actual) {
           if (ev && av && ev[1] !== av[1]) typeMismatch = true;
         }
       } else if (eType === 'int') {
-        if (!aType.startsWith('int') && !aType.startsWith('bigint') && !aType.startsWith('tinyint')) typeMismatch = true;
+        if (!aType.startsWith('int') && !aType.startsWith('bigint') && !aType.startsWith('tinyint'))
+          typeMismatch = true;
       } else if (eType === 'text') {
         if (!aType.includes('text')) typeMismatch = true;
       } else if (eType === 'timestamp') {
         if (!aType.includes('timestamp') && !aType.includes('datetime')) typeMismatch = true;
-      } else if (eType === "tinyint(1)" || eType === 'boolean') {
+      } else if (eType === 'tinyint(1)' || eType === 'boolean') {
         if (!aType.startsWith('tinyint')) typeMismatch = true;
       } else if (eType.startsWith('decimal')) {
         if (!aType.startsWith('decimal')) typeMismatch = true;
       } else if (eType === 'enum') {
         if (!aType.startsWith('enum')) typeMismatch = true;
       }
-      const nullMismatch = (e.notNull && a.isNullable === 'YES') || (!e.notNull && a.isNullable === 'NO');
+      const nullMismatch =
+        (e.notNull && a.isNullable === 'YES') || (!e.notNull && a.isNullable === 'NO');
       if (typeMismatch || nullMismatch) {
         diffs.push({ column: c, expected: e, actual: a, typeMismatch, nullMismatch });
       }
@@ -150,7 +159,7 @@ function compare(expected, actual) {
   return report;
 }
 
-(function main(){
+(function main() {
   const schemaPath = path.join(__dirname, '..', 'drizzle', 'schema.ts');
   if (!fs.existsSync(schemaPath)) {
     console.error('schema.ts not found at', schemaPath);

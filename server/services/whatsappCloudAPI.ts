@@ -7,7 +7,7 @@
  *     استخدم: import { meta } from './MetaApiService';
  */
 
-import { meta } from "../api/MetaApiService";
+import { meta } from '../api/MetaApiService';
 
 // ─── Phone Formatting ──────────────────────────────────────────────────────────
 
@@ -15,16 +15,16 @@ import { meta } from "../api/MetaApiService";
  * Format phone number to international format (967XXXXXXXXX)
  */
 export function formatPhoneNumber(phone: string): string {
-  let cleaned = phone.replace(/[^\d]/g, "");
+  let cleaned = phone.replace(/[^\d]/g, '');
 
-  if (cleaned.startsWith("00967")) {
+  if (cleaned.startsWith('00967')) {
     cleaned = cleaned.substring(2);
-  } else if (cleaned.startsWith("967")) {
+  } else if (cleaned.startsWith('967')) {
     // Already has country code
-  } else if (cleaned.startsWith("0")) {
-    cleaned = "967" + cleaned.substring(1);
+  } else if (cleaned.startsWith('0')) {
+    cleaned = '967' + cleaned.substring(1);
   } else if (cleaned.length === 9) {
-    cleaned = "967" + cleaned;
+    cleaned = '967' + cleaned;
   }
 
   return cleaned;
@@ -53,8 +53,8 @@ export function getWhatsAppAPIStatus(): {
     hasQRCode: false,
     apiConfigured: configured,
     phoneNumberId: phoneNumberId || undefined,
-    apiVersion: "v25.0",
-    mode: "cloud_api",
+    apiVersion: 'v25.0',
+    mode: 'cloud_api',
   };
 }
 
@@ -81,16 +81,58 @@ interface WhatsAppError {
   message: string;
   userFriendlyMessage: string;
   shouldRetry: boolean;
-  category: "rate_limit" | "template" | "user" | "system" | "policy";
+  category: 'rate_limit' | 'template' | 'user' | 'system' | 'policy';
 }
 
 const WHATSAPP_ERROR_CODES: Record<number, WhatsAppError> = {
-  131049: { code: 131049, title: "Marketing messages to US users blocked", message: "Cannot send marketing messages to WhatsApp users in the United States", userFriendlyMessage: "لا يمكن إرسال رسائل تسويقية للمستخدمين في الولايات المتحدة", shouldRetry: false, category: "policy" },
-  131026: { code: 131026, title: "Template not approved or paused", message: "The template is not approved, paused, or disabled", userFriendlyMessage: "القالب غير معتمد أو متوقف مؤقتاً", shouldRetry: false, category: "template" },
-  131047: { code: 131047, title: "Messaging limit reached", message: "You have reached your messaging limit", userFriendlyMessage: "تم الوصول إلى حد الرسائل المسموح به", shouldRetry: true, category: "rate_limit" },
-  131051: { code: 131051, title: "Invalid phone number", message: "The phone number is blocked, invalid, or not registered on WhatsApp", userFriendlyMessage: "رقم الهاتف محظور أو غير صحيح أو غير مسجل في واتساب", shouldRetry: false, category: "user" },
-  130472: { code: 130472, title: "User number is part of an experiment", message: "The user number is part of an experiment", userFriendlyMessage: "رقم المستخدم جزء من تجربة", shouldRetry: false, category: "user" },
-  133016: { code: 133016, title: "Service temporarily unavailable", message: "WhatsApp service is temporarily unavailable", userFriendlyMessage: "خدمة واتساب غير متاحة مؤقتاً", shouldRetry: true, category: "system" },
+  131049: {
+    code: 131049,
+    title: 'Marketing messages to US users blocked',
+    message: 'Cannot send marketing messages to WhatsApp users in the United States',
+    userFriendlyMessage: 'لا يمكن إرسال رسائل تسويقية للمستخدمين في الولايات المتحدة',
+    shouldRetry: false,
+    category: 'policy',
+  },
+  131026: {
+    code: 131026,
+    title: 'Template not approved or paused',
+    message: 'The template is not approved, paused, or disabled',
+    userFriendlyMessage: 'القالب غير معتمد أو متوقف مؤقتاً',
+    shouldRetry: false,
+    category: 'template',
+  },
+  131047: {
+    code: 131047,
+    title: 'Messaging limit reached',
+    message: 'You have reached your messaging limit',
+    userFriendlyMessage: 'تم الوصول إلى حد الرسائل المسموح به',
+    shouldRetry: true,
+    category: 'rate_limit',
+  },
+  131051: {
+    code: 131051,
+    title: 'Invalid phone number',
+    message: 'The phone number is blocked, invalid, or not registered on WhatsApp',
+    userFriendlyMessage: 'رقم الهاتف محظور أو غير صحيح أو غير مسجل في واتساب',
+    shouldRetry: false,
+    category: 'user',
+  },
+  130472: {
+    code: 130472,
+    title: 'User number is part of an experiment',
+    message: 'The user number is part of an experiment',
+    userFriendlyMessage: 'رقم المستخدم جزء من تجربة',
+    shouldRetry: false,
+    category: 'user',
+  },
+  133016: {
+    code: 133016,
+    title: 'Service temporarily unavailable',
+    message: 'WhatsApp service is temporarily unavailable',
+    userFriendlyMessage: 'خدمة واتساب غير متاحة مؤقتاً',
+    shouldRetry: true,
+    category: 'system',
+  },
 };
 
 export function parseWhatsAppError(errorData: any): {
@@ -106,11 +148,11 @@ export function parseWhatsAppError(errorData: any): {
   if (knownError) return knownError;
   return {
     code: errorCode,
-    title: "Unknown error",
-    message: errorData?.error?.message || errorData?.message || "Unknown error occurred",
-    userFriendlyMessage: "حدث خطأ غير معروف",
+    title: 'Unknown error',
+    message: errorData?.error?.message || errorData?.message || 'Unknown error occurred',
+    userFriendlyMessage: 'حدث خطأ غير معروف',
     shouldRetry: false,
-    category: "system",
+    category: 'system',
   };
 }
 
@@ -129,12 +171,12 @@ export async function sendWhatsAppTextMessage(
   if (!phoneNumberId || !meta.accessToken) {
     return {
       success: false,
-      error: "واتساب Cloud API غير مُعد. يرجى تعيين WHATSAPP_PHONE_NUMBER_ID و META_ACCESS_TOKEN",
+      error: 'واتساب Cloud API غير مُعد. يرجى تعيين WHATSAPP_PHONE_NUMBER_ID و META_ACCESS_TOKEN',
     };
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending text to ${formattedPhone}:`, message.substring(0, 50) + "...");
+  console.log(`[WhatsApp] Sending text to ${formattedPhone}:`, message.substring(0, 50) + '...');
 
   const result = await meta.sendWhatsAppText(phoneNumberId, formattedPhone, message);
 
@@ -151,13 +193,13 @@ interface TemplateMessage {
   templateName: string;
   languageCode: string;
   components: Array<{
-    type: "header" | "body" | "footer" | "button";
+    type: 'header' | 'body' | 'footer' | 'button';
     parameters?: Array<{
-      type: "text" | "payload" | "image";
+      type: 'text' | 'payload' | 'image';
       text?: string;
       payload?: string;
     }>;
-    sub_type?: "quick_reply";
+    sub_type?: 'quick_reply';
     index?: number;
   }>;
 }
@@ -169,14 +211,14 @@ interface TemplateMessage {
 export async function sendWhatsAppTemplateMessage(
   phone: string,
   template: TemplateMessage,
-  options?: { category?: "marketing" | "utility" | "authentication" }
+  options?: { category?: 'marketing' | 'utility' | 'authentication' }
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
   if (!phoneNumberId || !meta.accessToken) {
     return {
       success: false,
-      error: "واتساب Cloud API غير مُعد",
+      error: 'واتساب Cloud API غير مُعد',
     };
   }
 
@@ -214,7 +256,7 @@ export async function sendWhatsAppTypingIndicator(
   if (!phoneNumberId || !meta.accessToken) {
     return {
       success: false,
-      error: "واتساب Cloud API غير مُعد",
+      error: 'واتساب Cloud API غير مُعد',
     };
   }
 
@@ -247,10 +289,10 @@ export function validatePhoneNumber(phone: string): {
   const formatted = formatPhoneNumber(phone);
 
   if (formatted.length < 10 || formatted.length > 15) {
-    return { valid: false, formatted, error: "رقم الهاتف غير صحيح" };
+    return { valid: false, formatted, error: 'رقم الهاتف غير صحيح' };
   }
 
-  if (!formatted.startsWith("967")) {
+  if (!formatted.startsWith('967')) {
     return { valid: true, formatted, error: undefined };
   }
 
@@ -258,7 +300,7 @@ export function validatePhoneNumber(phone: string): {
     return {
       valid: false,
       formatted,
-      error: "رقم الهاتف اليمني يجب أن يكون 9 أرقام بعد كود الدولة",
+      error: 'رقم الهاتف اليمني يجب أن يكون 9 أرقام بعد كود الدولة',
     };
   }
 
@@ -278,12 +320,12 @@ export async function sendWhatsAppImageMessage(
   if (!phoneNumberId || !meta.accessToken) {
     return {
       success: false,
-      error: "واتساب Cloud API غير مُعد. يرجى تعيين WHATSAPP_PHONE_NUMBER_ID و META_ACCESS_TOKEN",
+      error: 'واتساب Cloud API غير مُعد. يرجى تعيين WHATSAPP_PHONE_NUMBER_ID و META_ACCESS_TOKEN',
     };
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending image to ${formattedPhone}:`, imageRef.substring(0, 50) + "...");
+  console.log(`[WhatsApp] Sending image to ${formattedPhone}:`, imageRef.substring(0, 50) + '...');
 
   const result = await meta.sendWhatsAppImage(phoneNumberId, formattedPhone, imageRef, caption);
 
@@ -309,12 +351,12 @@ export async function sendWhatsAppVideoMessage(
   if (!phoneNumberId || !meta.accessToken) {
     return {
       success: false,
-      error: "واتساب Cloud API غير مُعد",
+      error: 'واتساب Cloud API غير مُعد',
     };
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending video to ${formattedPhone}:`, videoRef.substring(0, 50) + "...");
+  console.log(`[WhatsApp] Sending video to ${formattedPhone}:`, videoRef.substring(0, 50) + '...');
 
   const result = await meta.sendWhatsAppVideo(phoneNumberId, formattedPhone, videoRef, caption);
 
@@ -339,12 +381,12 @@ export async function sendWhatsAppAudioMessage(
   if (!phoneNumberId || !meta.accessToken) {
     return {
       success: false,
-      error: "واتساب Cloud API غير مُعد",
+      error: 'واتساب Cloud API غير مُعد',
     };
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending audio to ${formattedPhone}:`, audioRef.substring(0, 50) + "...");
+  console.log(`[WhatsApp] Sending audio to ${formattedPhone}:`, audioRef.substring(0, 50) + '...');
 
   const result = await meta.sendWhatsAppAudio(phoneNumberId, formattedPhone, audioRef);
 
@@ -370,14 +412,22 @@ export async function sendWhatsAppDocumentMessage(
   if (!phoneNumberId || !meta.accessToken) {
     return {
       success: false,
-      error: "واتساب Cloud API غير مُعد",
+      error: 'واتساب Cloud API غير مُعد',
     };
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending document to ${formattedPhone}:`, documentRef.substring(0, 50) + "...");
+  console.log(
+    `[WhatsApp] Sending document to ${formattedPhone}:`,
+    documentRef.substring(0, 50) + '...'
+  );
 
-  const result = await meta.sendWhatsAppDocument(phoneNumberId, formattedPhone, documentRef, filename);
+  const result = await meta.sendWhatsAppDocument(
+    phoneNumberId,
+    formattedPhone,
+    documentRef,
+    filename
+  );
 
   if (!result.success) {
     console.error(`[WhatsApp] Error:`, result.error);
@@ -400,7 +450,7 @@ export async function uploadWhatsAppMedia(
   if (!phoneNumberId || !meta.accessToken) {
     return {
       success: false,
-      error: "واتساب Cloud API غير مُعد",
+      error: 'واتساب Cloud API غير مُعد',
     };
   }
 
