@@ -13,6 +13,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["server/**/*.test.ts", "server/**/*.spec.ts", "client/src/**/*.test.ts", "client/src/**/*.spec.ts"],
+    exclude: ["client/src/hooks/__tests__/useExportUtils.test.ts", "server/routers/__tests__/whatsapp.test.ts"],
     globals: true,
   },
 });

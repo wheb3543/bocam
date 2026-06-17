@@ -134,8 +134,8 @@ describe('CampsManagement التحسينات', () => {
 
 describe('التناسق بين الصفحات الثلاث', () => {
   const doctors = readComponent('DoctorsManagement');
-  const offers = readComponent('OffersManagement');
-  const camps = readComponent('CampsManagement');
+  const offers = readComponent('offer/OffersManagement');
+  const camps = readComponent('camp/CampsManagement');
 
   it('جميع الصفحات تستخدم EmptyState', () => {
     expect(doctors).toContain('EmptyState');

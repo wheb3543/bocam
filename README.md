@@ -124,13 +124,16 @@
 - **Prettier** - تنسيق الكود
 - **ESLint** - فحص الكود
 - **Drizzle Kit** - إدارة الترحيل
+- **Docker** - حاويات التطبيق
+- **GitHub Actions** - CI/CD
 
 ### 📦 المتطلبات
 
-- **Node.js** >= 18.0.0
-- **pnpm** >= 8.0.0
+- **Node.js** >= 22.13.0
+- **pnpm** >= 10.4.0
 - **MySQL** >= 8.0 أو **TiDB**
 - **Redis** (اختياري - للطوابير)
+- **Docker** (اختياري - للحاويات)
 
 ### 🚀 التثبيت والتشغيل
 
@@ -272,6 +275,22 @@ sgh-crm-portal/
 ├── shared/                     # الكود المشترك
 │   ├── _core/                 # الأساسيات المشتركة
 │   └── const.ts               # الثوابت المشتركة
+├── .github/                    # GitHub Actions workflows
+│   └── workflows/              # CI/CD pipelines
+│       ├── ci.yml             # Lint, Type Check, Test, Build
+│       └── deploy.yml         # Deployment workflow
+├── deploy/                     # Deployment configurations
+│   ├── Dockerfile             # Docker image
+│   ├── docker-compose.yml     # Docker Compose
+│   ├── nginx/                 # Nginx configuration
+│   └── monitoring/            # Monitoring setup
+├── .eslintrc.js               # إعدادات ESLint
+├── .prettierrc                # إعدادات Prettier
+├── .editorconfig              # إعدادات المحرر
+├── .nvmrc                     # إصدار Node.js
+├── SECURITY.md                # سياسة الأمان
+├── Dockerfile                 # Docker image
+├── .dockerignore              # Docker ignore file
 ├── drizzle/                    # مخطط قاعدة البيانات
 │   ├── schema.ts              # تعريف الجداول (40+ جدول)
 │   ├── relations.ts           # العلاقات بين الجداول
@@ -484,7 +503,13 @@ pnpm db:studio        # فتح Drizzle Studio
 # Code Quality
 pnpm check            # فحص TypeScript
 pnpm format           # تنسيق الكود بـ Prettier
+pnpm lint             # فحص الكود بـ ESLint
 pnpm test             # تشغيل الاختبارات
+
+# Docker
+pnpm docker:build     # بناء صورة Docker
+pnpm docker:up        # تشغيل الحاويات
+pnpm docker:down      # إيقاف الحاويات
 
 # Scripts
 pnpm db:seed          # ملء البيانات الأولية (إذا وجد)
@@ -629,13 +654,16 @@ A comprehensive medical CRM platform developed specifically for Saudi German Hos
 - **Prettier** - Code formatter
 - **ESLint** - Code linter
 - **Drizzle Kit** - Migration management
+- **Docker** - Application containers
+- **GitHub Actions** - CI/CD
 
 ### 📦 Requirements
 
-- **Node.js** >= 18.0.0
-- **pnpm** >= 8.0.0
+- **Node.js** >= 22.13.0
+- **pnpm** >= 10.4.0
 - **MySQL** >= 8.0 or **TiDB**
 - **Redis** (Optional - for queues)
+- **Docker** (Optional - for containers)
 
 ### 🚀 Installation & Setup
 
@@ -752,6 +780,22 @@ sgh-crm-portal/
 ├── shared/                     # Shared code
 │   ├── _core/                 # Shared core
 │   └── const.ts               # Shared constants
+├── .github/                    # GitHub Actions workflows
+│   └── workflows/              # CI/CD pipelines
+│       ├── ci.yml             # Lint, Type Check, Test, Build
+│       └── deploy.yml         # Deployment workflow
+├── deploy/                     # Deployment configurations
+│   ├── Dockerfile             # Docker image
+│   ├── docker-compose.yml     # Docker Compose
+│   ├── nginx/                 # Nginx configuration
+│   └── monitoring/            # Monitoring setup
+├── .eslintrc.js               # ESLint configuration
+├── .prettierrc                # Prettier configuration
+├── .editorconfig              # Editor configuration
+├── .nvmrc                     # Node.js version
+├── SECURITY.md                # Security policy
+├── Dockerfile                 # Docker image
+├── .dockerignore              # Docker ignore file
 ├── drizzle/                    # Database schema
 │   ├── schema.ts              # Table definitions (40+ tables)
 │   ├── relations.ts           # Table relations
@@ -945,7 +989,13 @@ pnpm db:studio        # Open Drizzle Studio
 # Code Quality
 pnpm check            # TypeScript check
 pnpm format           # Format code with Prettier
+pnpm lint             # Lint code with ESLint
 pnpm test             # Run tests
+
+# Docker
+pnpm docker:build     # Build Docker image
+pnpm docker:up        # Start containers
+pnpm docker:down      # Stop containers
 
 # Scripts
 pnpm db:seed          # Seed initial data (if available)

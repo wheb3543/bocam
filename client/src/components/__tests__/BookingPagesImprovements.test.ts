@@ -47,7 +47,7 @@ describe('AppointmentStatsCards Improvements', () => {
 });
 
 describe('EmptyState Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'ui/EmptyState.tsx'));
+  const content = readFile(path.join(componentsDir, 'EmptyState.tsx'));
 
   it('should have a professional empty state design', () => {
     expect(content).toContain('EmptyState');
@@ -142,7 +142,7 @@ describe('CampRegistrationCard Improvements', () => {
 });
 
 describe('Pagination Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'ui/Pagination.tsx'));
+  const content = readFile(path.join(componentsDir, 'table/Pagination.tsx'));
 
   it('should have page navigation buttons', () => {
     expect(content).toContain('ChevronLeft');
@@ -159,7 +159,7 @@ describe('Pagination Improvements', () => {
 });
 
 describe('TableSkeleton Improvements', () => {
-  const content = readFile(path.join(componentsDir, 'ui/TableSkeleton.tsx'));
+  const content = readFile(path.join(componentsDir, 'table/TableSkeleton.tsx'));
 
   it('should have skeleton loading animation', () => {
     expect(content).toContain('Skeleton');
@@ -171,7 +171,7 @@ describe('TableSkeleton Improvements', () => {
 });
 
 describe('LeadsManagementPage Improvements', () => {
-  const pageContent = readFile(path.join(pagesDir, 'LeadsManagementPage.tsx'));
+  const pageContent = readFile(path.join(pagesDir, 'admin/bookings/LeadsManagementPage.tsx'));
   const leadsDir = path.join(componentsDir, 'leads');
   const filtersContent = readFile(path.join(leadsDir, 'LeadFilters.tsx'));
   const tableContent = readFile(path.join(leadsDir, 'LeadTableDesktop.tsx'));
@@ -203,7 +203,7 @@ describe('LeadsManagementPage Improvements', () => {
 });
 
 describe('AppointmentsManagementPage Improvements', () => {
-  const content = readFile(path.join(pagesDir, 'AppointmentsManagementPage.tsx'));
+  const content = readFile(path.join(pagesDir, 'admin/bookings/AppointmentsManagementPage.tsx'));
 
   it('should use DashboardLayout', () => {
     expect(content).toContain('DashboardLayout');

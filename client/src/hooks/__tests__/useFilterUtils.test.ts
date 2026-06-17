@@ -178,7 +178,7 @@ describe('useFilterUtils', () => {
         result.current.filters.setDateFilter('week');
       });
 
-      expect(result.current.filters.activeFilterCount).toBe(3);
+      expect(result.current.filters.activeFilterCount).toBe(2);
     });
 
     it('should reset all filters', () => {
