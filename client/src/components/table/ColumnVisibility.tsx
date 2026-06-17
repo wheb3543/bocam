@@ -478,7 +478,7 @@ export function ColumnVisibility({
                   {defaultTemplates.map((template) => (
                     <DropdownMenuItem
                       key={template.id}
-                      onClick={() => onApplyTemplate!(template)}
+                      onClick={() => onApplyTemplate?.(template)}
                       className="flex items-center justify-between"
                     >
                       <span>{template.name}</span>
@@ -505,7 +505,7 @@ export function ColumnVisibility({
                     >
                       <span
                         className="flex-1 cursor-pointer flex items-center gap-1.5"
-                        onClick={() => onApplyTemplate!(template)}
+                        onClick={() => onApplyTemplate?.(template)}
                       >
                         <Globe className="h-3 w-3 text-blue-500 shrink-0" />
                         <span className="truncate">{template.name}</span>
@@ -526,7 +526,7 @@ export function ColumnVisibility({
                             className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setDeleteSharedConfirmId(template.dbId!);
+                              setDeleteSharedConfirmId(template.dbId ?? 0);
                             }}
                           >
                             <Trash2 className="h-3 w-3" />
@@ -553,7 +553,7 @@ export function ColumnVisibility({
                     >
                       <span
                         className="flex-1 cursor-pointer"
-                        onClick={() => onApplyTemplate!(template)}
+                        onClick={() => onApplyTemplate?.(template)}
                       >
                         {template.name}
                       </span>

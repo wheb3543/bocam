@@ -197,8 +197,8 @@ export const campsRouter = router({
           const eveningRemaining = eveningTime ? Math.max(0, dailyCapacity - counts.evening) : null;
           return {
             date,
-            morningAvailable: morningTime ? morningRemaining! > 0 : false,
-            eveningAvailable: eveningTime ? eveningRemaining! > 0 : false,
+            morningAvailable: morningTime ? (morningRemaining ?? 0) > 0 : false,
+            eveningAvailable: eveningTime ? (eveningRemaining ?? 0) > 0 : false,
             morningRemaining,
             eveningRemaining,
           };

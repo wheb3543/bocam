@@ -12,6 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.1] - 2026-06-18
+
+### Fixed | الإصلاحات
+
+#### 🔧 تحسين جودة الكود (Code Quality Improvements)
+- تفعيل قاعدة `@typescript-eslint/no-non-null-assertion` (warn)
+- حل جميع مشاكل non-null assertion (54 تحذير في 18 ملف)
+- استبدال `!` بـ optional chaining `?.` و nullish coalescing `??` و فحوصات صريحة
+- الملفات المتأثرة:
+  - Client: `tracking.test.ts`, `ChatWindow.tsx`, `TasksSection.tsx`, `CustomerProfilesHooks.test.ts`, `ResizableTable.test.ts`, `DashboardSidebar.tsx`, `ColumnVisibility.tsx`, `useTableFeatures.sort.test.ts`, `usePersistFn.ts`, `useSSE.ts`, `main.tsx`, `PWAStatsPage.tsx`, `UsersManagementPage.tsx`, `WhatsAppTemplatesPage.tsx`
+  - Server: `pubsub.ts`, `db.ts`, `camps.ts`, `templateSyncService.ts`, `whatsappAuditLog.ts`
+
+---
+
 ## [1.3.0] - 2026-06-18
 
 ### Fixed | الإصلاحات

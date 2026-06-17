@@ -5,7 +5,10 @@ const subscribers: Map<string, Set<EventCallback>> = new Map();
 
 export function subscribe(channel: string, cb: EventCallback) {
   if (!subscribers.has(channel)) subscribers.set(channel, new Set());
-  subscribers.get(channel)!.add(cb);
+  const channelSubscribers = subscribers.get(channel);
+  if (channelSubscribers) {
+    channelSubscribers.add(cb);
+  }
   return () => unsubscribe(channel, cb);
 }
 

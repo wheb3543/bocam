@@ -502,6 +502,31 @@ try {
 }
 ```
 
+### 6.2.2 قاعدة no-non-null-assertion
+
+**القاعدة:** يمنع استخدام `!` (non-null assertion) في TypeScript
+
+**✅ ممارسة جيدة:**
+```typescript
+// استخدام optional chaining
+const value = obj?.property;
+
+// استخدام nullish coalescing
+const value = param ?? defaultValue;
+
+// فحص صريح
+if (value != null) {
+  // use value
+}
+```
+
+**❌ ممارسة سيئة:**
+```typescript
+// non-null assertion غير آمن
+const value = obj!.property;
+const value = param!;
+```
+
 ### 6.3 Custom Error Classes
 
 **القاعدة:** إنشاء custom error classes للأخطاء المختلفة

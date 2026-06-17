@@ -1040,7 +1040,9 @@ function WhatsAppTemplatesContent() {
                 className="bg-green-600 hover:bg-green-700 gap-1.5"
                 onClick={() => {
                   setIsPreviewOpen(false);
-                  handleTest(selectedTemplate!);
+                  if (selectedTemplate) {
+                    handleTest(selectedTemplate);
+                  }
                 }}
               >
                 <Send className="h-3.5 w-3.5" />

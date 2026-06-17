@@ -91,8 +91,8 @@ describe('CustomerProfilesTab Column Config', () => {
     expect(indexCol?.defaultWidth).toBe(50);
     expect(indexCol?.minWidth).toBe(40);
     expect(indexCol?.maxWidth).toBe(80);
-    expect(indexCol!.minWidth!).toBeLessThan(indexCol!.defaultWidth!);
-    expect(indexCol!.defaultWidth!).toBeLessThan(indexCol!.maxWidth!);
+    expect(indexCol?.minWidth).toBeLessThan(indexCol?.defaultWidth ?? 0);
+    expect(indexCol?.defaultWidth).toBeLessThan(indexCol?.maxWidth ?? 0);
   });
 });
 

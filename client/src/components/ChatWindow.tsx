@@ -761,7 +761,7 @@ export default function ChatWindow({
 
   const { data: messagesData, refetch: refetchMessages } =
     trpc.whatsapp.messages.listByConversation.useQuery(
-      { conversationId: conversationId! },
+      { conversationId: conversationId ?? '' },
       { enabled: !!conversationId }
     );
 

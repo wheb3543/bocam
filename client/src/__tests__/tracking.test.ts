@@ -160,8 +160,8 @@ describe('UTM Tracking System', () => {
       const saved = getSavedTrackingData();
 
       expect(saved).not.toBeNull();
-      expect(saved!.source).toBe('instagram');
-      expect(saved!.utmSource).toBe('instagram');
+      expect(saved?.source).toBe('instagram');
+      expect(saved?.utmSource).toBe('instagram');
     });
 
     it('should also save simple source for backward compatibility', () => {

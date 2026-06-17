@@ -193,7 +193,7 @@ describe('Column widths localStorage persistence', () => {
     
     const saved = localStorage.getItem('columnWidths_appointments');
     expect(saved).toBeTruthy();
-    expect(JSON.parse(saved!)).toEqual(widths);
+    expect(JSON.parse(saved ?? '{}')).toEqual(widths);
   });
 
   it('should handle empty localStorage gracefully', () => {
@@ -208,7 +208,7 @@ describe('Column widths localStorage persistence', () => {
     };
     localStorage.setItem('columnWidths_test', JSON.stringify(widths));
     
-    const saved = JSON.parse(localStorage.getItem('columnWidths_test')!);
+    const saved = JSON.parse(localStorage.getItem('columnWidths_test') ?? '{}');
     expect(Object.keys(saved)).toHaveLength(6);
     expect(saved.name).toBe(200);
     expect(saved.notes).toBe(300);
@@ -219,11 +219,11 @@ describe('Column widths localStorage persistence', () => {
     localStorage.setItem('columnWidths_test', JSON.stringify(initialWidths));
     
     // Simulate updating a single column width
-    const saved = JSON.parse(localStorage.getItem('columnWidths_test')!);
+    const saved = JSON.parse(localStorage.getItem('columnWidths_test') ?? '{}');
     saved.name = 250;
     localStorage.setItem('columnWidths_test', JSON.stringify(saved));
-    
-    const updated = JSON.parse(localStorage.getItem('columnWidths_test')!);
+
+    const updated = JSON.parse(localStorage.getItem('columnWidths_test') ?? '{}');
     expect(updated.name).toBe(250);
     expect(updated.phone).toBe(140); // unchanged
   });

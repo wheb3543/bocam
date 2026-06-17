@@ -1099,10 +1099,10 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
                         .filter(Boolean)
                         .map((item) => (
                           <SortableEditItem
-                            key={item!.id}
-                            item={item!}
+                            key={item?.id ?? ''}
+                            item={item}
                             isChecked={true}
-                            isHome={item!.id === 'home'}
+                            isHome={item?.id === 'home'}
                             onToggle={toggleEditItem}
                           />
                         ))}

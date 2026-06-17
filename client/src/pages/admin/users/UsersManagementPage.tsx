@@ -1121,7 +1121,7 @@ export default function UsersManagementPage() {
         itemName={deleteConfirm.item?.name}
         itemType="المستخدم"
         onConfirm={() =>
-          deleteConfirm.confirm(() => deleteMutation.mutate({ id: deleteConfirm.item!.id }))
+          deleteConfirm.confirm(() => deleteMutation.mutate({ id: deleteConfirm.item?.id ?? 0 }))
         }
         isLoading={deleteMutation.isPending}
       />

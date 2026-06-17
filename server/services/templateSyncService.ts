@@ -32,7 +32,7 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
     }
 
     // جلب القوالب من Meta
-    const templatesResult = await meta.getWhatsAppTemplates(wabaResult.wabaId!);
+    const templatesResult = await meta.getWhatsAppTemplates(wabaResult.wabaId ?? '');
     if (!templatesResult.success) {
       throw new Error(`Failed to fetch templates from Meta: ${templatesResult.error}`);
     }
@@ -121,7 +121,7 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
     }
 
     // جلب القوالب من Meta
-    const templatesResult = await meta.getWhatsAppTemplates(wabaResult.wabaId!);
+    const templatesResult = await meta.getWhatsAppTemplates(wabaResult.wabaId ?? '');
     if (!templatesResult.success) {
       throw new Error(`Failed to fetch templates from Meta: ${templatesResult.error}`);
     }

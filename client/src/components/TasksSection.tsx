@@ -55,7 +55,7 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
   const { data: tasks = [], isLoading } = trpc.followUpTasks.getByEntity.useQuery(
     entityType === 'all'
       ? { entityType: 'appointment', entityId: 0 } // Dummy query, will be replaced with getAll
-      : { entityType, entityId: entityId! },
+      : { entityType, entityId: entityId ?? 0 },
     { enabled: entityType !== 'all' }
   );
 
@@ -69,9 +69,9 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
   // Create task mutation
   const createTaskMutation = trpc.followUpTasks.create.useMutation({
     onSuccess: () => {
-      if (entityType !== 'all') {
-        utils.followUpTasks.getByEntity.invalidate({ entityType, entityId: entityId! });
-        utils.followUpTasks.getCount.invalidate({ entityType, entityId: entityId! });
+      if (entityType !== 'all' && entityId) {
+        utils.followUpTasks.getByEntity.invalidate({ entityType, entityId });
+        utils.followUpTasks.getCount.invalidate({ entityType, entityId });
       }
       utils.followUpTasks.getAll.invalidate();
       toast.success('تم إنشاء المهمة بنجاح');
@@ -90,9 +90,9 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
   // Update status mutation
   const updateStatusMutation = trpc.followUpTasks.updateStatus.useMutation({
     onSuccess: () => {
-      if (entityType !== 'all') {
-        utils.followUpTasks.getByEntity.invalidate({ entityType, entityId: entityId! });
-        utils.followUpTasks.getCount.invalidate({ entityType, entityId: entityId! });
+      if (entityType !== 'all' && entityId) {
+        utils.followUpTasks.getByEntity.invalidate({ entityType, entityId });
+        utils.followUpTasks.getCount.invalidate({ entityType, entityId });
       }
       utils.followUpTasks.getAll.invalidate();
       toast.success('تم تحديث حالة المهمة');
@@ -105,9 +105,9 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
   // Delete task mutation
   const deleteTaskMutation = trpc.followUpTasks.delete.useMutation({
     onSuccess: () => {
-      if (entityType !== 'all') {
-        utils.followUpTasks.getByEntity.invalidate({ entityType, entityId: entityId! });
-        utils.followUpTasks.getCount.invalidate({ entityType, entityId: entityId! });
+      if (entityType !== 'all' && entityId) {
+        utils.followUpTasks.getByEntity.invalidate({ entityType, entityId });
+        utils.followUpTasks.getCount.invalidate({ entityType, entityId });
       }
       utils.followUpTasks.getAll.invalidate();
       toast.success('تم حذف المهمة');
@@ -132,7 +132,7 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
 
     createTaskMutation.mutate({
       entityType,
-      entityId: entityId!,
+      entityId: entityId ?? 0,
       title,
       description,
       priority,

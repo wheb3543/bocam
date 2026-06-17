@@ -63,11 +63,13 @@ export default function PWAStatsPage() {
       if (!dailyMap.has(date)) {
         dailyMap.set(date, { public: 0, admin: 0 });
       }
-      const existing = dailyMap.get(date)!;
-      if (stat.appType === 'public') {
-        existing.public += stat.count;
-      } else {
-        existing.admin += stat.count;
+      const existing = dailyMap.get(date);
+      if (existing) {
+        if (stat.appType === 'public') {
+          existing.public += stat.count;
+        } else {
+          existing.admin += stat.count;
+        }
       }
     });
 

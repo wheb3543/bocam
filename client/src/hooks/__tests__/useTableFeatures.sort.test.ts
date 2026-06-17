@@ -31,8 +31,8 @@ function sortData<T>(
   const sortType = col.sortType || 'string';
 
   return [...data].sort((a, b) => {
-    const aVal = getFieldValue(a, sortState.field!);
-    const bVal = getFieldValue(b, sortState.field!);
+    const aVal = getFieldValue(a, sortState.field ?? '');
+    const bVal = getFieldValue(b, sortState.field ?? '');
 
     let comparison = 0;
 

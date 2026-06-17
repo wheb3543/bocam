@@ -26,7 +26,7 @@ export function useSSE(url: string | null, onMessage?: SSEHandler) {
 
     function connect() {
       try {
-        const es = new EventSource(url!);
+        const es = new EventSource(url ?? '');
         esRef.current = es;
 
         // Dispatch to the latest handler via ref

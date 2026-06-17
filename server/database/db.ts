@@ -172,7 +172,7 @@ export async function createAccessRequest(request: InsertAccessRequest) {
   const existing = await db
     .select()
     .from(accessRequests)
-    .where(eq(accessRequests.email, request.email!))
+    .where(eq(accessRequests.email, request.email ?? ''))
     .limit(1);
 
   if (existing.length > 0) {
@@ -597,7 +597,7 @@ export async function getAppointmentsPaginated(
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
 
-    if (startDate!) {
+    if (startDate) {
       whereConditions.push(sql`${appointments.createdAt} >= ${startDate.toISOString()}`);
     }
   }
@@ -1615,7 +1615,7 @@ export async function getOfferLeadsPaginated(
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
 
-    if (startDate!) {
+    if (startDate) {
       whereConditions.push(sql`${offerLeads.createdAt} >= ${startDate.toISOString()}`);
     }
   }
@@ -1776,7 +1776,7 @@ export async function getCampRegistrationsPaginated(
     }
   }
   if (dateParts.length > 0) {
-    whereConditions.push(dateParts.length === 1 ? dateParts[0]! : and(...dateParts));
+    whereConditions.push(dateParts.length === 1 ? dateParts[0] : and(...dateParts));
   }
 
   const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
