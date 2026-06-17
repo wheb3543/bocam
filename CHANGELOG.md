@@ -12,6 +12,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-06-18
+
+### Fixed | الإصلاحات
+
+#### 🔧 تحسين جودة الكود (Code Quality Improvements)
+- حل جميع مشاكل ESLint (0 errors, 0 warnings)
+- إزالة unused eslint-disable directives من:
+  - `ChatWindow.tsx` - إزالة unused directive لـ `react-hooks/exhaustive-deps`
+  - `MetaPixel.tsx` - إزالة unused directives لـ `@typescript-eslint/no-explicit-any`
+  - `facebookCAPI.ts` - إزالة unused directives لـ `@typescript-eslint/no-explicit-any`
+- إصلاح React Hooks usage:
+  - `OfferLeadsManagement.tsx` - إزالة استدعاء `usePhoneFormat` المكرر داخل `handleStatusUpdate`
+  - `CampStatsPage.tsx` - نقل جميع `useMemo` calls إلى قبل early return لحل مشكلة "React Hook called conditionally"
+- إضافة cause إلى Error objects لحل preserve-caught-error rule:
+  - `heartbeat.ts` - إضافة cause إلى Error
+  - `license.ts` - إضافة cause إلى 2 Errors
+  - `updateChecker.ts` - إضافة cause إلى Error
+  - `routers.ts` - إضافة cause إلى Error
+  - `fileUploadService.ts` - إضافة cause إلى 2 Errors
+
+---
+
 ## [1.2.0] - 2026-06-14
 
 ### Changed | التغييرات

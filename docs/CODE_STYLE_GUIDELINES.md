@@ -465,16 +465,40 @@ function getUserById(id: number, callback: (user: User) => void) {
 async function getUserById(id: number): Promise<User> {
   try {
     const user = await db.users.findUnique({ where: { id } });
-    
+
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     return user;
   } catch (error) {
     console.error('Failed to get user:', error);
-    throw new Error('Database error');
+    throw new Error('Database error', { cause: error });
   }
+}
+```
+
+### 6.2.1 قاعدة preserve-caught-error
+
+**القاعدة:** عند re-throwing errors، يجب إضافة `cause` إلى Error object للحفاظ على معلومات الخطأ الأصلي
+
+**✅ ممارسة جيدة:**
+```typescript
+try {
+  // some operation
+} catch (error) {
+  // إضافة cause للحفاظ على معلومات الخطأ الأصلي
+  throw new Error('Operation failed', { cause: error });
+}
+```
+
+**❌ ممارسة سيئة:**
+```typescript
+try {
+  // some operation
+} catch (error) {
+  // فقدان معلومات الخطأ الأصلي
+  throw new Error('Operation failed');
 }
 ```
 

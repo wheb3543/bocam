@@ -226,6 +226,74 @@ export async function updateUser(id: number, data: any) {
 - استخدم معاملات معلمية
 - عرف أنواع Insert و Select
 
+#### ESLint
+
+**القاعدة:** يجب أن يمر الكود عبر ESLint بدون أخطاء قبل الدمج
+
+**تشغيل ESLint:**
+```bash
+# فحص جميع الملفات
+pnpm lint
+
+# فحص ملف معين
+pnpm lint path/to/file.ts
+
+# إصلاح تلقائي للمشاكل القابلة للإصلاح
+pnpm lint --fix
+```
+
+**القواعد المهمة:**
+- **React Hooks Rules**: يجب استدعاء React Hooks في نفس الترتيب في كل render، على مستوى أعلى من المكون
+- **preserve-caught-error**: عند re-throwing errors، يجب إضافة `cause` للحفاظ على معلومات الخطأ الأصلي
+- **no-explicit-any**: ممنوع استخدام `any` في TypeScript
+- **no-unused-vars**: لا يسمح بمتغيرات غير مستخدمة
+
+**أمثلة على حل مشاكل ESLint الشائعة:**
+
+```typescript
+// ❌ سيء - React Hook called conditionally
+function MyComponent({ data }) {
+  if (!data) return <Loader />;
+
+  const processedData = useMemo(() => processData(data), [data]);
+  return <div>{processedData}</div>;
+}
+
+// ✅ جيد - جميع Hooks على مستوى أعلى
+function MyComponent({ data }) {
+  const processedData = useMemo(() => processData(data), [data]);
+
+  if (!data) return <Loader />;
+
+  return <div>{processedData}</div>;
+}
+```
+
+```typescript
+// ❌ سيء - فقدان معلومات الخطأ الأصلي
+try {
+  await someOperation();
+} catch (error) {
+  throw new Error('Operation failed');
+}
+
+// ✅ جيد - الحفاظ على معلومات الخطأ الأصلي
+try {
+  await someOperation();
+} catch (error) {
+  throw new Error('Operation failed', { cause: error });
+}
+```
+
+```typescript
+// ❌ سيء - unused eslint-disable directive
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const data: any = response.data;
+
+// ✅ جيد - استخدام types صحيحة
+const data: UserData = response.data;
+```
+
 ### 🧪 الاختبار
 
 قبل إرسال Pull Request، تأكد من:
@@ -529,6 +597,74 @@ export async function updateUser(id: number, data: any) {
 - Don't use raw SQL unless necessary
 - Use parameterized queries
 - Define Insert and Select types
+
+#### ESLint
+
+**Rule:** Code must pass ESLint without errors before merging
+
+**Running ESLint:**
+```bash
+# Check all files
+pnpm lint
+
+# Check specific file
+pnpm lint path/to/file.ts
+
+# Auto-fix fixable issues
+pnpm lint --fix
+```
+
+**Important Rules:**
+- **React Hooks Rules**: React Hooks must be called in the same order on every render, at the top level of the component
+- **preserve-caught-error**: When re-throwing errors, must add `cause` to preserve original error information
+- **no-explicit-any**: Using `any` in TypeScript is prohibited
+- **no-unused-vars**: Unused variables are not allowed
+
+**Examples of Solving Common ESLint Issues:**
+
+```typescript
+// ❌ Bad - React Hook called conditionally
+function MyComponent({ data }) {
+  if (!data) return <Loader />;
+
+  const processedData = useMemo(() => processData(data), [data]);
+  return <div>{processedData}</div>;
+}
+
+// ✅ Good - all Hooks at top level
+function MyComponent({ data }) {
+  const processedData = useMemo(() => processData(data), [data]);
+
+  if (!data) return <Loader />;
+
+  return <div>{processedData}</div>;
+}
+```
+
+```typescript
+// ❌ Bad - losing original error information
+try {
+  await someOperation();
+} catch (error) {
+  throw new Error('Operation failed');
+}
+
+// ✅ Good - preserving original error information
+try {
+  await someOperation();
+} catch (error) {
+  throw new Error('Operation failed', { cause: error });
+}
+```
+
+```typescript
+// ❌ Bad - unused eslint-disable directive
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const data: any = response.data;
+
+// ✅ Good - using proper types
+const data: UserData = response.data;
+```
 
 ### 🧪 Testing
 
