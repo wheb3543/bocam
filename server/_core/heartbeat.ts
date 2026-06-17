@@ -79,7 +79,7 @@ function collectHeartbeatData(): HeartbeatData {
     };
   } catch (error) {
     console.error('❌ Error collecting heartbeat data:', error);
-    throw new Error('Failed to collect heartbeat data');
+    throw new Error('Failed to collect heartbeat data', { cause: error });
   }
 }
 

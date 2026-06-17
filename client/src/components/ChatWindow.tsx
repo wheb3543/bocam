@@ -980,7 +980,6 @@ export default function ChatWindow({
     if (messagesData && Array.isArray(messagesData)) {
       setLocalMessages((prev) => mergeMessages(messagesData, prev));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messagesData]);
 
   // ── SSE subscription for this conversation ────────────────────────────────

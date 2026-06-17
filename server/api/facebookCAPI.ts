@@ -174,7 +174,6 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
 
   // ── Build hashed user_data object ──────────────────────────────────────────
   // Meta requires ph and em as arrays of hashed values
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hashedUserData: Record<string, any> = {};
 
   if (userData.phone) {
@@ -222,7 +221,6 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
 
   // ── Build custom_data object ───────────────────────────────────────────────
   // Include lead_event_source as required by Meta for CRM events
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const builtCustomData: Record<string, any> = {
     lead_event_source: 'SGH CRM Portal',
     event_source: 'crm',

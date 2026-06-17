@@ -68,19 +68,6 @@ export default function CampStatsPage() {
   });
   const { user } = useAuth();
 
-  if (campsLoading || registrationsLoading) {
-    return (
-      <DashboardLayout
-        pageTitle="إحصائيات المخيمات"
-        pageDescription="تقارير وإحصائيات شاملة للمخيمات"
-      >
-        <div className="flex items-center justify-center min-h-screen" dir="rtl">
-          <Loader2 className="w-12 h-12 animate-spin text-primary" />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   // Filter registrations by selected camp
   const filteredRegistrations =
     selectedCamp === 'all'
@@ -616,38 +603,6 @@ export default function CampStatsPage() {
       .slice(-30); // Last 30 days
   }, [filteredRegistrations]);
 
-  // UTM Analysis
-  const utmSourceCounts = new Map<string, number>();
-  const utmMediumCounts = new Map<string, number>();
-  const utmCampaignCounts = new Map<string, number>();
-
-  filteredRegistrations.forEach((r: any) => {
-    if (r.utmSource) {
-      utmSourceCounts.set(r.utmSource, (utmSourceCounts.get(r.utmSource) || 0) + 1);
-    }
-    if (r.utmMedium) {
-      utmMediumCounts.set(r.utmMedium, (utmMediumCounts.get(r.utmMedium) || 0) + 1);
-    }
-    if (r.utmCampaign) {
-      utmCampaignCounts.set(r.utmCampaign, (utmCampaignCounts.get(r.utmCampaign) || 0) + 1);
-    }
-  });
-
-  const utmSourceData = Array.from(utmSourceCounts.entries())
-    .map(([name, value]) => ({ name, value, color: '#8B5CF6' }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
-
-  const utmMediumData = Array.from(utmMediumCounts.entries())
-    .map(([name, value]) => ({ name, value, color: '#EC4899' }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
-
-  const utmCampaignData = Array.from(utmCampaignCounts.entries())
-    .map(([name, value]) => ({ name, value, color: '#F59E0B' }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
-
   // Time Metrics
   const timeMetrics = useMemo(() => {
     const toConfirmTimes: number[] = [];
@@ -844,6 +799,19 @@ export default function CampStatsPage() {
 
     return data.sort((a, b) => b.count - a.count).slice(0, 50); // Top 50 active slots
   }, [filteredRegistrations]);
+
+  if (campsLoading || registrationsLoading) {
+    return (
+      <DashboardLayout
+        pageTitle="إحصائيات المخيمات"
+        pageDescription="تقارير وإحصائيات شاملة للمخيمات"
+      >
+        <div className="flex items-center justify-center min-h-screen" dir="rtl">
+          <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout

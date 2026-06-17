@@ -109,7 +109,8 @@ export function getHardwareId(): string {
   } catch (error) {
     console.error('❌ Error getting Hardware ID:', error);
     throw new Error(
-      `Failed to get Hardware ID: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to get Hardware ID: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      { cause: error }
     );
   }
 }
@@ -188,7 +189,8 @@ function loadLicenseFile(licensePath: string): LicenseFile {
   } catch (error) {
     console.error('❌ Error loading license file:', error);
     throw new Error(
-      `Failed to load license file: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to load license file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      { cause: error }
     );
   }
 }

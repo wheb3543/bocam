@@ -127,7 +127,7 @@ function collectUpdateCheckData() {
     };
   } catch (error) {
     console.error('❌ Error collecting update check data:', error);
-    throw new Error('Failed to collect update check data');
+    throw new Error('Failed to collect update check data', { cause: error });
   }
 }
 

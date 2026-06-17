@@ -345,7 +345,7 @@ export const appRouter = router({
           return { success: true, pdf: base64 };
         } catch (error) {
           console.error('PDF generation error:', error);
-          throw new Error('فشل إنشاء ملف PDF');
+          throw new Error('فشل إنشاء ملف PDF', { cause: error });
         }
       }),
   }),

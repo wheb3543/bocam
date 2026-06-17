@@ -1,4 +1,5 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   AlertDialog,
@@ -544,7 +545,6 @@ export default function OfferLeadsManagement({
     offerExport.handlePrint(getOfferExportOptions());
   }, [offerExport, getOfferExportOptions]);
   const handleStatusUpdate = () => {
-    const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
     if (!selectedLead || !newStatus) return;
 
     updateStatusMutation.mutate({

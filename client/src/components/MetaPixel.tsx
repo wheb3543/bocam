@@ -20,9 +20,7 @@ import { useLocation } from 'wouter';
 
 declare global {
   interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fbq: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _fbq: any;
     FB_PIXEL_LOADED?: boolean;
   }
@@ -89,7 +87,6 @@ function loadPixelScript(pixelId: string): void {
   if (window.FB_PIXEL_LOADED || !pixelId) return;
   window.FB_PIXEL_LOADED = true;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
     if (f.fbq) return;
     n = f.fbq = function () {
