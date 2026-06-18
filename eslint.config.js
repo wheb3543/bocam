@@ -42,7 +42,7 @@ export default [
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/preserve-caught-error': 'off',
+      'preserve-caught-error': 'error',
       '@typescript-eslint/no-throw-literal': 'off',
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',

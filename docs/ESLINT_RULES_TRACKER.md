@@ -10,6 +10,7 @@
 |---------|---------|-------|--------|--------------|
 | `react-hooks/rules-of-hooks` | error | يضمن استدعاء React Hooks في نفس الترتيب في كل render، على مستوى أعلى من المكون | ✅ مفعلة | 2026-06-18 |
 | `@typescript-eslint/no-non-null-assertion` | warn | يمنع استخدام `!` (non-null assertion) | ✅ مفعلة | 2026-06-18 |
+| `preserve-caught-error` | error | يضمن إضافة `cause` عند re-throwing errors | ✅ مفعلة | 2026-06-18 |
 
 ---
 
@@ -21,7 +22,6 @@
 |---------|---------------|----------------|-------|--------|------------------|
 | `@typescript-eslint/no-explicit-any` | off | error | يمنع استخدام `any` في TypeScript | ❌ غير مفعلة | فقدان type safety |
 | `@typescript-eslint/no-unused-vars` | off | warn | يمنع المتغيرات غير المستخدمة | ❌ غير مفعلة | كود غير نظيف |
-| `@typescript-eslint/preserve-caught-error` | off | error | يضمن إضافة `cause` عند re-throwing errors | ❌ غير مفعلة | فقدان معلومات الخطأ الأصلي |
 | `react-hooks/exhaustive-deps` | off | warn | يضمن إضافة جميع dependencies في useEffect و useMemo | ❌ غير مفعلة | bugs محتملة في React |
 | `prefer-const` | off | error | يفضل استخدام const بدلاً من let | ❌ غير مفعلة | كود غير نظيف |
 
@@ -82,6 +82,10 @@
     - Server: `pubsub.ts`, `db.ts`, `camps.ts`, `templateSyncService.ts`, `whatsappAuditLog.ts`
   - الحالة: تم الحل بنجاح (54 تحذير في 18 ملف)
 
+- ✅ تفعيل `preserve-caught-error` (error)
+  - الحل: الكود الحالي يتبع القاعدة بالفعل (تم حلها يدوياً سابقاً)
+  - الحالة: تم الحل بنجاح (0 errors, 0 warnings)
+
 ---
 
 ## الخطة المقترحة للتفعيل
@@ -89,7 +93,7 @@
 ### المرحلة 1: الأهمية العالية
 1. ✅ `react-hooks/rules-of-hooks` - تم التفعيل
 2. ✅ `@typescript-eslint/no-non-null-assertion` - تم التفعيل
-3. `@typescript-eslint/preserve-caught-error` - تم الحل يدوياً، يمكن تفعيله
+3. ✅ `preserve-caught-error` - تم التفعيل
 4. `@typescript-eslint/no-explicit-any` - يحتاج مراجعة شاملة للكود
 5. `@typescript-eslint/no-unused-vars` - يحتاج تنظيف الكود
 6. `react-hooks/exhaustive-deps` - يحتاج مراجعة dependencies

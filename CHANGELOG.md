@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.2] - 2026-06-18
+
+### Fixed | الإصلاحات
+
+#### 🔧 تحسين جودة الكود (Code Quality Improvements)
+- تفعيل قاعدة `preserve-caught-error` (error)
+- القاعدة موجودة في ESLint نفسها (ليس في @typescript-eslint)
+- الكود الحالي يتبع القاعدة بالفعل (تم حلها يدوياً سابقاً)
+- النتيجة: 0 errors, 0 warnings
+
+---
+
 ## [1.3.1] - 2026-06-18
 
 ### Fixed | الإصلاحات
