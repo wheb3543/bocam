@@ -75,7 +75,7 @@ export const appRouter = router({
       .input(
         z.object({
           key: z.string(),
-          value: z.any(),
+          value: z.unknown(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -92,7 +92,7 @@ export const appRouter = router({
           acc[pref.preferenceKey] = JSON.parse(pref.preferenceValue);
           return acc;
         },
-        {} as Record<string, any>
+        {} as Record<string, unknown>
       );
     }),
   }),
@@ -329,7 +329,7 @@ export const appRouter = router({
               label: z.string(),
             })
           ),
-          data: z.array(z.record(z.string(), z.any())),
+          data: z.array(z.record(z.string(), z.unknown())),
         })
       )
       .mutation(async ({ input }) => {

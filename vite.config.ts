@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin()]; // Temporarily disabled vitePluginManusRuntime
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
 
 export default defineConfig({
   plugins,
@@ -23,14 +23,17 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 1000,
+    minify: 'terser',
+    sourcemap: false,
+    reportCompressedSize: true,
     rollupOptions: {
       input: {
         main: path.resolve(import.meta.dirname, "client", "index.html"),
         admin: path.resolve(import.meta.dirname, "client", "index-admin.html"),
       },
       output: {
-        manualChunks(id) {
+        manualChunks(id: string) {
           // React core
           if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
             return "vendor-react";
@@ -104,10 +107,30 @@ export default defineConfig({
       protocol: 'ws',
       host: 'localhost',
       port: 5173,
+      overlay: true,
     },
     fs: {
-      strict: true,
-      deny: ["**/.*"],
+      strict: false,
+    },
+    watch: {
+      usePolling: false,
+      interval: 1000,
+    },
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
     },
   },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      'framer-motion',
+      'recharts',
+    ],
+  },
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.webp'],
 });

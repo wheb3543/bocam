@@ -5,6 +5,15 @@
 
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
+
+interface BlockedPhone {
+  phone?: string;
+  reason?: string;
+  [key: string]: unknown;
+}
+
+type BlockReason = 'manual' | 'opt_out' | 'spam' | 'invalid';
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -240,8 +249,8 @@ export default function WhatsAppCompliance() {
 
   // Filter blocked phones
   const filteredPhones = Array.isArray(blockedPhonesQuery.data?.phones)
-    ? blockedPhonesQuery.data.phones.filter((phone: any) => {
-        const matchesSearch = searchQuery === '' || phone.phone.includes(searchQuery);
+    ? blockedPhonesQuery.data.phones.filter((phone: BlockedPhone) => {
+        const matchesSearch = searchQuery === '' || (phone.phone && phone.phone.includes(searchQuery));
         const matchesFilter = filterReason === 'all' || phone.reason?.includes(filterReason);
         return matchesSearch && matchesFilter;
       })
@@ -506,7 +515,7 @@ export default function WhatsAppCompliance() {
 
               <div>
                 <label className="text-sm font-medium">السبب</label>
-                <Select value={blockReason} onValueChange={(value: any) => setBlockReason(value)}>
+                <Select value={blockReason} onValueChange={(value: BlockReason) => setBlockReason(value)}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
@@ -555,7 +564,7 @@ export default function WhatsAppCompliance() {
               <div className="mt-6 space-y-2">
                 <h3 className="font-semibold">الأرقام المحظورة ({filteredPhones.length}):</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {filteredPhones.map((phone: any) => (
+                  {filteredPhones.map((phone: BlockedPhone) => (
                     <div
                       key={phone.phone}
                       className="flex items-center justify-between p-3 bg-muted rounded-lg"
@@ -567,7 +576,7 @@ export default function WhatsAppCompliance() {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleUnblockPhone(phone.phone)}
+                        onClick={() => handleUnblockPhone(phone.phone || '')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

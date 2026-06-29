@@ -1,5 +1,21 @@
 import { useMemo } from 'react';
 import { trpc } from '@/lib/api/trpc';
+
+interface CampRegistration {
+  status?: string;
+  [key: string]: unknown;
+}
+
+interface Appointment {
+  status?: string;
+  [key: string]: unknown;
+}
+
+interface OfferLead {
+  status?: string;
+  [key: string]: unknown;
+}
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Users,
@@ -55,32 +71,33 @@ export default function DetailedStatsCards() {
 
   // Calculate statistics
   const stats = useMemo(() => {
+    const campRegistrations = campRegsPaged?.data || [];
     const campStats = {
       total: campRegistrations?.length || 0,
-      pending: campRegistrations?.filter((r: any) => r.status === 'pending').length || 0,
+      pending: campRegistrations?.filter((r: CampRegistration) => r.status === 'pending').length || 0,
       confirmed:
         campRegistrations?.filter(
-          (r: any) =>
+          (r: CampRegistration) =>
             r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
         ).length || 0,
-      attended: campRegistrations?.filter((r: any) => r.status === 'attended').length || 0,
-      cancelled: campRegistrations?.filter((r: any) => r.status === 'cancelled').length || 0,
+      attended: campRegistrations?.filter((r: CampRegistration) => r.status === 'attended').length || 0,
+      cancelled: campRegistrations?.filter((r: CampRegistration) => r.status === 'cancelled').length || 0,
     };
 
     const appointmentStats = {
       total: appointments?.length || 0,
-      pending: appointments?.filter((a: any) => a.status === 'pending').length || 0,
-      confirmed: appointments?.filter((a: any) => a.status === 'confirmed').length || 0,
-      completed: appointments?.filter((a: any) => a.status === 'completed').length || 0,
-      cancelled: appointments?.filter((a: any) => a.status === 'cancelled').length || 0,
+      pending: appointments?.filter((a: Appointment) => a.status === 'pending').length || 0,
+      confirmed: appointments?.filter((a: Appointment) => a.status === 'confirmed').length || 0,
+      completed: appointments?.filter((a: Appointment) => a.status === 'completed').length || 0,
+      cancelled: appointments?.filter((a: Appointment) => a.status === 'cancelled').length || 0,
     };
 
     const offerStats = {
       total: offerLeads?.length || 0,
-      pending: offerLeads?.filter((o: any) => o.status === 'pending').length || 0,
-      confirmed: offerLeads?.filter((o: any) => o.status === 'confirmed').length || 0,
-      completed: offerLeads?.filter((o: any) => o.status === 'completed').length || 0,
-      cancelled: offerLeads?.filter((o: any) => o.status === 'cancelled').length || 0,
+      pending: offerLeads?.filter((o: OfferLead) => o.status === 'pending').length || 0,
+      confirmed: offerLeads?.filter((o: OfferLead) => o.status === 'confirmed').length || 0,
+      completed: offerLeads?.filter((o: OfferLead) => o.status === 'completed').length || 0,
+      cancelled: offerLeads?.filter((o: OfferLead) => o.status === 'cancelled').length || 0,
     };
 
     const totalStats = {

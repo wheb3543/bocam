@@ -93,7 +93,7 @@ function formatForDisplay(phone: string): string {
     return `+967 ${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}`;
   }
   // محاولة إضافة + إذا كان الرقم يبدأ بـ 967 أو +967
-  let cleaned = cleanPhone(phone);
+  const cleaned = cleanPhone(phone);
   if (cleaned.startsWith('967') && cleaned.length === 12) {
     return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6, 9)} ${cleaned.slice(9)}`;
   }
@@ -150,26 +150,26 @@ export function processPhoneInput(raw: string): string {
 export function usePhoneFormat() {
   /** تنسيق للعرض: +967 7XX XXX XXX */
   const formatPhoneDisplay = useCallback((phone: string | null | undefined): string => {
-    if (!phone) return '-';
+    if (!phone) {return '-';}
     return formatForDisplay(phone);
   }, []);
 
   /** تنسيق للإرسال: 9677XXXXXXXX */
   const formatPhone = useCallback((phone: string | null | undefined): string => {
-    if (!phone) return '';
+    if (!phone) {return '';}
     return formatForSend(phone);
   }, []);
 
   /** رابط واتساب */
   const getWhatsAppLink = useCallback((phone: string | null | undefined): string => {
-    if (!phone) return '#';
+    if (!phone) {return '#';}
     const formatted = formatForSend(phone);
     return `https://wa.me/${formatted}`;
   }, []);
 
   /** رابط اتصال */
   const getCallLink = useCallback((phone: string | null | undefined): string => {
-    if (!phone) return '#';
+    if (!phone) {return '#';}
     const formatted = formatForSend(phone);
     return `tel:+${formatted}`;
   }, []);

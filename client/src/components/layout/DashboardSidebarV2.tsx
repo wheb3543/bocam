@@ -1,6 +1,15 @@
 import { useAuth } from '@/_core/hooks/useAuth';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
+interface WindowWithAudioContext extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
+
+interface MessageEventWithType extends MessageEvent {
+  type: string;
+}
+
 import {
   LayoutDashboard,
   Settings as SettingsIcon,
@@ -476,7 +485,7 @@ const allToolsGroups: NavGroup[] = [
 
 // Badge Component
 function SidebarBadge({ count }: { count: number }) {
-  if (!count) return null;
+  if (!count) {return null;}
   return (
     <span className="absolute -top-1 -left-1 h-4 w-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
       {count > 9 ? '9+' : count}
@@ -528,7 +537,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
   // Play a gentle notification beep using Web Audio API
   const playNotificationSound = useCallback(() => {
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const ctx = new (window.AudioContext || (window as WindowWithAudioContext).webkitAudioContext)();
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
       oscillator.connect(gainNode);
@@ -551,7 +560,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
     useCallback(
       (e: MessageEvent) => {
         try {
-          const eventName = (e as any).type || 'message';
+          const eventName = (e as MessageEventWithType).type || 'message';
           if (eventName === 'new_inbound_message') {
             const data = JSON.parse(e.data);
             // Only show badge if user is not currently on WhatsApp page

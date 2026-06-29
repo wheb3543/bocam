@@ -5,9 +5,13 @@ import { describe, it, expect } from "vitest";
  * نختبر دوال المعالجة والتصفية والتنظيف
  */
 
+interface Lead {
+  [key: string]: unknown;
+}
+
 // استخراج دالة sanitizeLead من المكون
-const sanitizeLead = (lead: any) => {
-  if (!lead) return null;
+const sanitizeLead = (lead: Lead) => {
+  if (!lead) {return null;}
   const sanitized = { ...lead };
   Object.keys(sanitized).forEach(key => {
     if (typeof sanitized[key] === 'string') {

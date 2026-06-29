@@ -30,7 +30,7 @@ const actionLabels: Record<string, string> = {
 };
 
 function formatDateTime(date: string | Date | null | undefined) {
-  if (!date) return '-';
+  if (!date) {return '-';}
   try {
     return new Date(date).toLocaleString('ar-EG', {
       year: 'numeric',
@@ -42,6 +42,17 @@ function formatDateTime(date: string | Date | null | undefined) {
   } catch {
     return '-';
   }
+}
+
+interface AuditLog {
+  id: number;
+  action?: string;
+  userName?: string | null;
+  oldValue?: string | null;
+  newValue?: string | null;
+  notes?: string | null;
+  createdAt?: string | Date;
+  [key: string]: unknown;
 }
 
 interface AuditLogSectionProps {
@@ -83,7 +94,7 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
         <div className="absolute right-3 top-0 bottom-0 w-0.5 bg-border" />
 
         <div className="space-y-4">
-          {logs.map((log: any) => (
+          {logs.map((log: AuditLog) => (
             <div key={log.id} className="relative flex gap-3 pr-8">
               {/* Timeline dot */}
               <div className="absolute right-1.5 top-1 w-3 h-3 rounded-full bg-primary border-2 border-background" />
@@ -92,7 +103,7 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
-                      {actionLabels[log.action] || log.action}
+                      {log.action ? (actionLabels[log.action] || log.action) : '-'}
                     </Badge>
                     {log.userName && (
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -112,12 +123,12 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
                   <div className="flex items-center gap-2 mt-1">
                     {log.oldValue && (
                       <Badge variant="secondary" className="text-xs">
-                        {statusLabels[log.oldValue] || log.oldValue}
+                        {log.oldValue ? (statusLabels[log.oldValue] || log.oldValue) : '-'}
                       </Badge>
                     )}
                     <ArrowRight className="h-3 w-3 text-muted-foreground" />
                     <Badge className="text-xs bg-primary/10 text-primary">
-                      {statusLabels[log.newValue] || log.newValue}
+                      {log.newValue ? (statusLabels[log.newValue] || log.newValue) : '-'}
                     </Badge>
                   </div>
                 )}

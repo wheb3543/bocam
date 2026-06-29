@@ -178,7 +178,7 @@ async function getCustomersPaginated(params: { page: number; limit: number; sear
 
     const countRows = Array.isArray(countResult) ? countResult[0] : countResult;
     const countArr = Array.isArray(countRows) ? countRows : [];
-    const total = countArr.length > 0 ? Number((countArr[0] as any)?.total || 0) : 0;
+    const total = countArr.length > 0 ? Number((countArr[0] as { total?: number })?.total || 0) : 0;
 
     console.log(`[Customers] Found ${customers.length} customers, total: ${total}`);
 

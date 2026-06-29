@@ -135,7 +135,7 @@ const WHATSAPP_ERROR_CODES: Record<number, WhatsAppError> = {
   },
 };
 
-export function parseWhatsAppError(errorData: any): {
+export function parseWhatsAppError(errorData: Record<string, unknown>): {
   code: number;
   title: string;
   message: string;
@@ -143,13 +143,13 @@ export function parseWhatsAppError(errorData: any): {
   shouldRetry: boolean;
   category: string;
 } {
-  const errorCode = errorData?.error?.code || errorData?.code || 0;
+  const errorCode = (errorData as { error?: { code?: number }; code?: number })?.error?.code || (errorData as { code?: number }).code || 0;
   const knownError = WHATSAPP_ERROR_CODES[errorCode];
   if (knownError) return knownError;
   return {
     code: errorCode,
     title: 'Unknown error',
-    message: errorData?.error?.message || errorData?.message || 'Unknown error occurred',
+    message: (errorData as { error?: { message?: string }; message?: string })?.error?.message || (errorData as { message?: string }).message || 'Unknown error occurred',
     userFriendlyMessage: 'حدث خطأ غير معروف',
     shouldRetry: false,
     category: 'system',

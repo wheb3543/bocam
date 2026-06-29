@@ -40,7 +40,7 @@ export async function sendTemplateMessage(params: {
     }
 
     // بناء components للقالب وفق بنية Meta الرسمية
-    const components: any[] = [];
+    const components: Record<string, unknown>[] = [];
     if (params.parameters && params.parameters.length > 0) {
       components.push({
         type: 'body',
@@ -57,7 +57,7 @@ export async function sendTemplateMessage(params: {
     const result = await sendWhatsAppTemplateMessage(normalizedPhone, {
       templateName: params.templateName,
       languageCode: params.language || 'ar',
-      components,
+      components: components as unknown as any,
     });
 
     return {
@@ -108,7 +108,7 @@ export async function syncTemplatesFromMeta(): Promise<{
     }
 
     // Meta تُرجع {data: [...]} والمصفوفة تكون response.data.data
-    const templates: any[] = response.data?.data ?? [];
+    const templates: Record<string, unknown>[] = (response.data as { data?: Record<string, unknown>[] })?.data ?? [];
     console.log(
       `[WhatsApp Templates] Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`
     );
@@ -139,36 +139,36 @@ export async function syncTemplatesFromMeta(): Promise<{
         let variables: string[] = [];
         let headerText: string | null = null;
         let footerText: string | null = null;
-        let buttons: any[] = [];
+        let buttons: Record<string, unknown>[] = [];
 
         if (template.components) {
-          for (const component of template.components) {
-            if (component.type === 'HEADER' && component.text) {
-              headerText = component.text;
-            } else if (component.type === 'BODY' && component.text) {
-              content = component.text;
-              const positional = component.text.match(/\{\{(\d+)\}\}/g) || [];
-              const named = component.text.match(/\{\{([a-z_]+)\}\}/g) || [];
+          for (const component of template.components as Record<string, unknown>[]) {
+            if ((component.type as string) === 'HEADER' && component.text) {
+              headerText = component.text as string;
+            } else if ((component.type as string) === 'BODY' && component.text) {
+              content = component.text as string;
+              const positional = (component.text as string).match(/\{\{(\d+)\}\}/g) || [];
+              const named = (component.text as string).match(/\{\{([a-z_]+)\}\}/g) || [];
               variables = [...positional, ...named].map((m: string) => m.replace(/[{}]/g, ''));
-            } else if (component.type === 'FOOTER' && component.text) {
-              footerText = component.text;
-            } else if (component.type === 'BUTTONS' && component.buttons) {
-              buttons = component.buttons;
+            } else if ((component.type as string) === 'FOOTER' && component.text) {
+              footerText = component.text as string;
+            } else if ((component.type as string) === 'BUTTONS' && component.buttons) {
+              buttons = component.buttons as Record<string, unknown>[];
             }
           }
         }
 
         // تحديد الفئة - استخدام فئة Meta مباشرة
         const validCategories = ['MARKETING', 'UTILITY', 'AUTHENTICATION'];
-        const category = validCategories.includes(template.category?.toUpperCase())
-          ? (template.category.toUpperCase() as 'MARKETING' | 'UTILITY' | 'AUTHENTICATION')
+        const category = validCategories.includes((template.category as string)?.toUpperCase())
+          ? ((template.category as string).toUpperCase() as 'MARKETING' | 'UTILITY' | 'AUTHENTICATION')
           : 'UTILITY';
 
         // التحقق من وجود القالب بالاسم
         const existing = await db
           .select()
           .from(whatsappTemplates)
-          .where(eq(whatsappTemplates.metaName, template.name))
+          .where(eq(whatsappTemplates.metaName, template.name as string))
           .limit(1);
 
         if (existing.length > 0) {
@@ -176,28 +176,28 @@ export async function syncTemplatesFromMeta(): Promise<{
           await db
             .update(whatsappTemplates)
             .set({
-              metaStatus: template.status,
-              metaCategory: template.category,
-              metaTemplateId: template.id,
+              metaStatus: template.status as string,
+              metaCategory: template.category as string,
+              metaTemplateId: template.id as string,
               content: content || existing[0].content,
               variables: JSON.stringify(variables),
-              languageCode: template.language,
+              languageCode: template.language as string,
               headerText: headerText ?? existing[0].headerText,
               footerText: footerText ?? existing[0].footerText,
               buttons: buttons.length > 0 ? JSON.stringify(buttons) : existing[0].buttons,
               updatedAt: new Date(),
             })
-            .where(eq(whatsappTemplates.metaName, template.name));
+            .where(eq(whatsappTemplates.metaName, template.name as string));
           updated++;
         } else {
           // إضافة قالب جديد
           await db.insert(whatsappTemplates).values({
-            name: template.name,
-            metaName: template.name,
-            metaTemplateId: template.id,
-            metaStatus: template.status,
-            metaCategory: template.category,
-            languageCode: template.language,
+            name: template.name as string,
+            metaName: template.name as string,
+            metaTemplateId: template.id as string,
+            metaStatus: template.status as string,
+            metaCategory: template.category as string,
+            languageCode: template.language as string,
             category,
             content,
             variables: JSON.stringify(variables),
@@ -219,7 +219,7 @@ export async function syncTemplatesFromMeta(): Promise<{
 
     // ── حذف القوالب المحلية غير الموجودة في Meta ──────────────────────────────
     // نجمع أسماء القوالب التي جلبناها من Meta
-    const metaTemplateNames = templates.map((t: any) => t.name as string);
+    const metaTemplateNames = templates.map((t: Record<string, unknown>) => t.name as string);
     let deleted = 0;
 
     if (metaTemplateNames.length > 0) {
@@ -278,7 +278,7 @@ export async function createTemplate(params: {
       return { success: false, error: 'WHATSAPP_BUSINESS_ACCOUNT_ID not configured' };
     }
 
-    const response: any = await meta.post(`/${wabaId}/message_templates`, {
+    const response = await meta.post(`/${wabaId}/message_templates`, {
       name: params.name,
       language: params.language || 'ar',
       category: params.category.toUpperCase(),
@@ -292,7 +292,7 @@ export async function createTemplate(params: {
 
     return {
       success: true,
-      templateId: response.id || `template_${Date.now()}`,
+      templateId: ((response.data as Record<string, unknown>)?.id as string) || `template_${Date.now()}`,
     };
   } catch (error) {
     console.error('[WhatsApp Templates] Failed to create template:', error);
@@ -315,7 +315,7 @@ export async function updateTemplate(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (params.content) {
       updateData.components = [{ type: 'BODY', text: params.content }];
     }
@@ -366,7 +366,7 @@ export async function deleteTemplate(
  */
 export async function getAvailableTemplates(): Promise<{
   success: boolean;
-  templates?: any[];
+  templates?: Record<string, unknown>[];
   error?: string;
 }> {
   try {
@@ -382,7 +382,7 @@ export async function getAvailableTemplates(): Promise<{
 
     return {
       success: true,
-      templates: response.data || [],
+      templates: (response.data as Record<string, unknown>[]) || [],
     };
   } catch (error) {
     console.error('[WhatsApp Templates] Failed to get templates:', error);
@@ -412,10 +412,10 @@ export async function getTemplateStatus(templateName: string): Promise<{
       `/${wabaId}/message_templates?name=${templateName}&fields=name,status`
     );
 
-    const template = response.data?.[0];
+    const template = (response.data as Record<string, unknown>[])?.[0];
     return {
       success: true,
-      status: template?.status || 'UNKNOWN',
+      status: (template?.status as string) || 'UNKNOWN',
     };
   } catch (error) {
     console.error('[WhatsApp Templates] Failed to get template status:', error);
@@ -449,7 +449,7 @@ export async function sendMediaMessage(params: {
     }
 
     // بناء payload وفق بنية Meta الرسمية للوسائط
-    const mediaPayload: any = {
+    const mediaPayload: Record<string, unknown> = {
       messaging_product: 'whatsapp',
       recipient_type: 'individual',
       to: normalizedPhone,
@@ -473,11 +473,11 @@ export async function sendMediaMessage(params: {
         return { success: false, error: 'Unsupported media type' };
     }
 
-    const response: any = await meta.post(`/${phoneNumberId}/messages`, mediaPayload);
+    const response = await meta.post(`/${phoneNumberId}/messages`, mediaPayload);
 
     return {
       success: true,
-      messageId: response.messages?.[0]?.id || 'media_sent',
+      messageId: ((response.data as Record<string, unknown>)?.messages as Record<string, unknown>[])?.[0]?.id as string || 'media_sent',
     };
   } catch (error) {
     console.error('[WhatsApp Templates] Failed to send media message:', error);

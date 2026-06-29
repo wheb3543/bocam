@@ -73,7 +73,7 @@ async function getAppointmentsNeedingReminder(
  * إرسال تذكير مع إعادة المحاولة باستخدام تراجع أسي
  */
 async function sendReminderWithRetry(
-  appt: any,
+  appt: { id: number; phone?: string | null; fullName?: string | null; appointmentDate: Date | string | null; createdAt: Date | string },
   hoursUntil: number,
   notifType: 'reminder_24h' | 'reminder_1h',
   maxRetries: number = 3
@@ -85,7 +85,7 @@ async function sendReminderWithRetry(
     try {
       const result = await sendAppointmentReminder({
         appointmentId: appt.id,
-        phone: appt.phone,
+        phone: appt.phone || '',
         patientName: appt.fullName || 'المريض',
         doctorName: '',
         appointmentTime:

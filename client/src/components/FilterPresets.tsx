@@ -35,7 +35,7 @@ import { toast } from 'sonner';
 export interface FilterPreset {
   id: string;
   name: string;
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
   isQuick?: boolean;
   isShared?: boolean;
   createdBy?: string;
@@ -46,16 +46,16 @@ interface QuickPreset {
   id: string;
   name: string;
   icon?: React.ReactNode;
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
 }
 
 interface FilterPresetsProps {
   /** مفتاح الصفحة لحفظ الفلاتر */
   pageKey: string;
   /** الفلاتر الحالية */
-  currentFilters: Record<string, any>;
+  currentFilters: Record<string, unknown>;
   /** دالة تطبيق الفلاتر */
-  onApplyFilters: (filters: Record<string, any>) => void;
+  onApplyFilters: (filters: Record<string, unknown>) => void;
   /** الفلاتر السريعة المُعرّفة مسبقاً */
   quickPresets?: QuickPreset[];
   /** هل المستخدم مدير */
@@ -131,14 +131,14 @@ export default function FilterPresets({
     }
   };
 
-  const handleApplyPreset = (filters: Record<string, any>, name: string) => {
+  const handleApplyPreset = (filters: Record<string, unknown>, name: string) => {
     onApplyFilters(filters);
     toast.success(`تم تطبيق الفلتر "${name}"`);
   };
 
   const hasActiveFilters = Object.values(currentFilters).some((value) => {
-    if (Array.isArray(value)) return value.length > 0;
-    if (typeof value === 'string') return value !== '' && value !== 'all';
+    if (Array.isArray(value)) {return value.length > 0;}
+    if (typeof value === 'string') {return value !== '' && value !== 'all';}
     return value !== null && value !== undefined;
   });
 

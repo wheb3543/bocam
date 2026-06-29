@@ -1,4 +1,4 @@
-type EventCallback = (event: string, data: any) => void;
+type EventCallback = (event: string, data: unknown) => void;
 
 // Simple in-memory pub/sub for SSE - suitable for single-instance dev or MVP.
 const subscribers: Map<string, Set<EventCallback>> = new Map();
@@ -19,7 +19,7 @@ export function unsubscribe(channel: string, cb: EventCallback) {
   if (s.size === 0) subscribers.delete(channel);
 }
 
-export function publish(channel: string, event: string, data: any) {
+export function publish(channel: string, event: string, data: unknown) {
   const s = subscribers.get(channel);
   if (!s) return;
   for (const cb of Array.from(s)) {

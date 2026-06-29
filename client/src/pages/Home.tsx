@@ -10,7 +10,7 @@ import { APP_LOGO, APP_TITLE, getLoginUrl } from '@/const';
 export default function Home() {
   // The userAuth hooks provides authentication state
   // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { user, loading, error, isAuthenticated, logout } = useAuth();
 
   // If theme is switchable in App.tsx, we can implement theme toggling like this:
   // const { theme, toggleTheme } = useTheme();

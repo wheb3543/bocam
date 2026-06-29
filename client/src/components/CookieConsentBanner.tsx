@@ -87,7 +87,7 @@ export default function CookieConsentBanner() {
     setVisible(false);
   };
 
-  if (!visible) return null;
+  if (!visible) {return null;}
 
   return (
     <div

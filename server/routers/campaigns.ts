@@ -81,13 +81,13 @@ export const campaignsRouter = router({
 
   // Create campaign
   create: protectedProcedure.input(createCampaignSchema).mutation(async ({ input }) => {
-    return await createCampaign(input as any);
+    return await createCampaign(input as typeof import('../../drizzle/schema').campaigns.$inferInsert);
   }),
 
   // Update campaign
   update: protectedProcedure.input(updateCampaignSchema).mutation(async ({ input }) => {
     const { id, ...data } = input;
-    return await updateCampaign(id, data as any);
+    return await updateCampaign(id, data as Partial<typeof import('../../drizzle/schema').campaigns.$inferInsert>);
   }),
 
   // Delete campaign

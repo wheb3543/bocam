@@ -29,7 +29,7 @@ export default function ProtectedRoute({ feature, children, fallbackPath }: Prot
 
   useEffect(() => {
     // الانتظار حتى انتهاء التحميل
-    if (isLoading) return;
+    if (isLoading) {return;}
 
     // التحقق من الميزة
     if (!hasFeature(feature)) {

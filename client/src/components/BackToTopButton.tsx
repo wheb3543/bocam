@@ -28,7 +28,7 @@ export default function BackToTopButton({ threshold = 300, className = '' }: Bac
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (!showBackToTop) return null;
+  if (!showBackToTop) {return null;}
 
   return (
     <button

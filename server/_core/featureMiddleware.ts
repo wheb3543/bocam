@@ -37,7 +37,7 @@ export const requireFeature = (features: string | string[], options: FeatureOpti
   const featureArray = Array.isArray(features) ? features : [features];
   const { requireAll = true, errorMessage } = options;
 
-  return async ({ ctx, next }: { ctx: TrpcContext; next: () => Promise<any> }) => {
+  return async ({ ctx, next }: { ctx: TrpcContext; next: () => Promise<unknown> }) => {
     if (requireAll) {
       // All features must be enabled
       const allEnabled = featureArray.every((feature) => isFeatureEnabled(feature));
@@ -123,7 +123,7 @@ export const requireAllFeatures = () => requireFeature('*');
  * @returns tRPC middleware
  */
 export const checkFeatures = (features: string[]) => {
-  return async ({ ctx, next }: { ctx: TrpcContext; next: () => Promise<any> }) => {
+  return async ({ ctx, next }: { ctx: TrpcContext; next: () => Promise<unknown> }) => {
     const featureStatus = features.reduce(
       (acc, feature) => {
         acc[feature] = isFeatureEnabled(feature);
@@ -155,7 +155,7 @@ export const requireFeatureWithAdminBypass = (
   const featureArray = Array.isArray(features) ? features : [features];
   const { requireAll = true, errorMessage } = options;
 
-  return async ({ ctx, next }: { ctx: TrpcContext; next: () => Promise<any> }) => {
+  return async ({ ctx, next }: { ctx: TrpcContext; next: () => Promise<unknown> }) => {
     // Admin bypass
     if (ctx.user?.role === 'admin') {
       return next();

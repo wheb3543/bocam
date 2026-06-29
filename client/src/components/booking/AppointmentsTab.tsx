@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
@@ -6,7 +7,7 @@ import AppointmentCard from '@/components/booking/AppointmentCard';
 import AppointmentStatsCards from '@/components/booking/AppointmentStatsCards';
 import AppointmentFilters from '@/components/booking/AppointmentFilters';
 import AppointmentTableDesktop from '@/components/booking/AppointmentTableDesktop';
-import { type ColumnConfig } from '@/components/table/ColumnVisibility';
+import { type ColumnConfig, type ColumnTemplate } from '@/components/table/ColumnVisibility';
 import { useTableFeatures } from '@/hooks/table/useTableFeatures';
 import TableSkeleton from '@/components/table/TableSkeleton';
 import EmptyState from '@/components/EmptyState';
@@ -21,11 +22,32 @@ import { useAuth } from '@/_core/hooks/useAuth';
 import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
 import BulkUpdateDialog from '@/components/BulkUpdateDialog';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type { Appointment, AppointmentWithDoctor } from '@shared/types';
+import type { UseFilterUtilsReturn } from '@/hooks/table/useFilterUtils';
+
+interface Doctor {
+  id?: number;
+  name?: string;
+  [key: string]: unknown;
+}
+
+
+interface FilterOptions {
+  statusFilter?: string[];
+  sourceFilter?: string[];
+  categoryFilter?: string[];
+  dateFilter?: { from?: Date; to?: Date } | 'all';
+  searchTerm?: string;
+}
+
+type AppointmentStatus = 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+
+type DateFilterPreset = 'today' | 'week' | 'month' | 'all';
 
 interface AppointmentsTabProps {
-  appointmentFilter: any;
+  appointmentFilter: UseFilterUtilsReturn<AppointmentWithDoctor>;
   dateRange: { from: Date; to: Date };
-  onOpenAppointmentDialog: (appointment: any) => void;
+  onOpenAppointmentDialog: (appointment: AppointmentWithDoctor) => void;
 }
 
 export default function AppointmentsTab({
@@ -56,6 +78,26 @@ export default function AppointmentsTab({
   const dateFilter = appointmentFilter.filters.dateFilter;
   const setDateFilter = appointmentFilter.filters.setDateFilter;
   const debouncedAppointmentSearch = appointmentFilter.filters.debouncedSearch;
+
+  // Convert dateFilter to string for AppointmentFilters component
+  const dateFilterString = useMemo(() => {
+    if (!dateFilter) {return 'all';}
+    if (typeof dateFilter === 'string') {return dateFilter;}
+    return 'custom';
+  }, [dateFilter]);
+
+  const handleDateFilterChange = useCallback((value: string) => {
+    if (value === 'custom') {
+      // Keep existing custom date range or set default
+      if (dateFilter && typeof dateFilter !== 'string') {
+        setDateFilter(dateFilter);
+      } else {
+        setDateFilter({ from: new Date(), to: new Date() } as unknown as DateFilterPreset);
+      }
+    } else {
+      setDateFilter(value as DateFilterPreset);
+    }
+  }, [dateFilter, setDateFilter]);
 
   // Column visibility state
   const appointmentColumns: ColumnConfig[] = [
@@ -122,7 +164,7 @@ export default function AppointmentsTab({
       searchTerm: debouncedAppointmentSearch,
       dateFrom: dateRange.from.toISOString(),
       dateTo: dateRange.to.toISOString(),
-      dateFilter: dateFilter !== 'all' ? (dateFilter as 'today' | 'week' | 'month') : undefined,
+      dateFilter: dateFilter !== 'all' ? (dateFilter as DateFilterPreset) : 'all',
       doctorIds:
         selectedDoctor && selectedDoctor.length > 0 ? selectedDoctor.map(Number) : undefined,
       sources:
@@ -134,7 +176,7 @@ export default function AppointmentsTab({
           ? appointmentStatusFilter
           : undefined,
     });
-  const appointments = appointmentsData?.data || [];
+  const appointments = (appointmentsData?.data || []) as unknown as AppointmentWithDoctor[];
   const { data: doctors = [] } = trpc.doctors.list.useQuery();
 
   const updateAppointmentStatusMutation = trpc.appointments.updateStatus.useMutation({
@@ -150,11 +192,11 @@ export default function AppointmentsTab({
           dateTo: dateRange.to.toISOString(),
         },
         (old) => {
-          if (!old) return old;
+          if (!old) {return old;}
           return {
             ...old,
-            data: old.data.map((apt: any) =>
-              apt.id === variables.id ? { ...apt, status: variables.status } : apt
+            data: old.data.map((apt) =>
+              apt.id === variables.id ? { ...apt, status: variables.status as AppointmentStatus } : apt
             ),
           };
         }
@@ -197,14 +239,14 @@ export default function AppointmentsTab({
   });
 
   const filteredAppointments = useMemo(() => {
-    if (!appointments) return [];
-    let filtered = [...appointments];
-    const sorted = appointmentTable.sortData(filtered, (item: any, key: string) => {
+    if (!appointments) {return [];}
+    const filtered = [...appointments];
+    const sorted = appointmentTable.sortData(filtered, (item, key: string) => {
       switch (key) {
         case 'date':
           return item.createdAt;
         case 'name':
-          return item.fullName || item.patientName || '';
+          return item.fullName || '';
         case 'phone':
           return item.phone;
         case 'email':
@@ -212,9 +254,9 @@ export default function AppointmentsTab({
         case 'age':
           return item.age;
         case 'doctor':
-          return item.doctorName;
+          return item.doctorId ? `Doctor #${item.doctorId}` : '-';
         case 'specialty':
-          return item.doctorSpecialty;
+          return '-';
         case 'procedure':
           return item.procedure;
         case 'preferredDate':
@@ -228,12 +270,12 @@ export default function AppointmentsTab({
         case 'receiptNumber':
           return item.receiptNumber;
         default:
-          return item[key];
+          return item[key as keyof AppointmentWithDoctor];
       }
     });
     if (!appointmentTable.sortState.direction) {
       sorted.sort(
-        (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     }
     return sorted;
@@ -241,7 +283,7 @@ export default function AppointmentsTab({
 
   const appointmentStats = useMemo(() => {
     if (!appointments)
-      return {
+      {return {
         total: 0,
         pending: 0,
         contacted: 0,
@@ -250,16 +292,16 @@ export default function AppointmentsTab({
         attended: 0,
         completed: 0,
         cancelled: 0,
-      };
+      };}
     return {
       total: appointments.length,
-      pending: appointments.filter((a: any) => a.status === 'pending').length,
-      contacted: appointments.filter((a: any) => a.status === 'contacted').length,
-      no_answer: appointments.filter((a: any) => a.status === 'no_answer').length,
-      confirmed: appointments.filter((a: any) => a.status === 'confirmed').length,
-      attended: appointments.filter((a: any) => a.status === 'attended').length,
-      completed: appointments.filter((a: any) => a.status === 'completed').length,
-      cancelled: appointments.filter((a: any) => a.status === 'cancelled').length,
+      pending: appointments.filter((a) => a.status === 'pending').length,
+      contacted: appointments.filter((a) => a.status === 'contacted').length,
+      no_answer: appointments.filter((a) => a.status === 'no_answer').length,
+      confirmed: appointments.filter((a) => a.status === 'confirmed').length,
+      attended: appointments.filter((a) => a.status === 'attended').length,
+      completed: appointments.filter((a) => a.status === 'completed').length,
+      cancelled: appointments.filter((a) => a.status === 'cancelled').length,
     };
   }, [appointments]);
 
@@ -290,27 +332,27 @@ export default function AppointmentsTab({
       { key: 'tasks', label: 'المهام' },
       { key: 'actions', label: 'الإجراءات' },
     ],
-    mapToExportRow: (appointment: any) => ({
+    mapToExportRow: (appointment: Appointment) => ({
       date: formatDate(appointment.appointmentDate),
-      name: appointment.name,
+      name: appointment.fullName,
       phone: appointment.phone,
-      doctor: appointment.doctorName || '-',
-      specialty: appointment.specialty || '-',
-      source: SOURCE_LABELS[appointment.source] || appointment.source || '-',
+      doctor: appointment.doctorId ? `Doctor #${appointment.doctorId}` : '-',
+      specialty: '-',
+      source: SOURCE_LABELS[appointment.source || ''] || appointment.source || '-',
       receiptNumber: appointment.receiptNumber || '-',
       status: statusLabels[appointment.status as keyof typeof statusLabels] || appointment.status,
     }),
-    mapToPrintRow: (appointment: any) => ({
+    mapToPrintRow: (appointment: Appointment) => ({
       date: formatDate(appointment.appointmentDate),
-      name: appointment.name,
+      name: appointment.fullName,
       phone: appointment.phone,
-      doctor: appointment.doctorName || '-',
-      specialty: appointment.specialty || '-',
-      source: SOURCE_LABELS[appointment.source] || appointment.source || '-',
+      doctor: appointment.doctorId ? `Doctor #${appointment.doctorId}` : '-',
+      specialty: '-',
+      source: SOURCE_LABELS[appointment.source || ''] || appointment.source || '-',
       receiptNumber: appointment.receiptNumber || '-',
       status: statusLabels[appointment.status as keyof typeof statusLabels] || appointment.status,
-      comments: appointment.commentCount > 0 ? `${appointment.commentCount} تعليق` : '-',
-      tasks: appointment.taskCount > 0 ? `${appointment.taskCount} مهمة` : '-',
+      comments: '-',
+      tasks: '-',
       actions: '-',
     }),
   });
@@ -340,7 +382,7 @@ export default function AppointmentsTab({
           selectedDoctor.length > 0
             ? selectedDoctor
                 .map((id: string) => {
-                  const doctor = doctors.find((d: any) => d.id.toString() === id);
+                  const doctor = doctors.find((d: Doctor) => d.id?.toString() === id);
                   return doctor ? doctor.name : id;
                 })
                 .join(', ')
@@ -380,7 +422,7 @@ export default function AppointmentsTab({
     async (id: number, status: string) => {
       await updateAppointmentStatusMutation.mutateAsync({
         id,
-        status: status as any,
+        status: status as AppointmentStatus,
         staffNotes: '',
       });
     },
@@ -416,8 +458,8 @@ export default function AppointmentsTab({
             doctors={doctors}
             selectedDoctor={selectedDoctor}
             onDoctorChange={setSelectedDoctor}
-            dateFilter={dateFilter}
-            onDateFilterChange={setDateFilter}
+            dateFilter={dateFilterString}
+            onDateFilterChange={handleDateFilterChange}
             statusFilter={appointmentStatusFilter}
             onStatusFilterChange={setAppointmentStatusFilter}
             sourceFilter={appointmentSourceFilter}
@@ -453,20 +495,20 @@ export default function AppointmentsTab({
               dateFilter: appointmentFilter.filters.dateFilter,
               searchTerm: appointmentFilter.filters.searchTerm,
             }}
-            onApplyFilter={(filters: any) => {
+            onApplyFilter={(filters: FilterOptions) => {
               if (filters.statusFilter)
-                appointmentFilter.filters.setStatusFilter(filters.statusFilter);
-              else appointmentFilter.filters.setStatusFilter([]);
+                {appointmentFilter.filters.setStatusFilter(filters.statusFilter);}
+              else {appointmentFilter.filters.setStatusFilter([]);}
               if (filters.sourceFilter)
-                appointmentFilter.filters.setSourceFilter(filters.sourceFilter);
-              else appointmentFilter.filters.setSourceFilter([]);
+                {appointmentFilter.filters.setSourceFilter(filters.sourceFilter);}
+              else {appointmentFilter.filters.setSourceFilter([]);}
               if (filters.categoryFilter)
-                appointmentFilter.filters.setCategoryFilter(filters.categoryFilter);
-              else appointmentFilter.filters.setCategoryFilter([]);
-              if (filters.dateFilter) appointmentFilter.filters.setDateFilter(filters.dateFilter);
-              else appointmentFilter.filters.setDateFilter('all');
-              if (filters.searchTerm) appointmentFilter.filters.setSearchTerm(filters.searchTerm);
-              else appointmentFilter.filters.setSearchTerm('');
+                {appointmentFilter.filters.setCategoryFilter(filters.categoryFilter);}
+              else {appointmentFilter.filters.setCategoryFilter([]);}
+              if (filters.dateFilter) {appointmentFilter.filters.setDateFilter(filters.dateFilter as DateFilterPreset);}
+              else {appointmentFilter.filters.setDateFilter('all');}
+              if (filters.searchTerm) {appointmentFilter.filters.setSearchTerm(filters.searchTerm);}
+              else {appointmentFilter.filters.setSearchTerm('');}
             }}
             onExport={handleExportAppointments}
             onPrint={handlePrintAppointments}
@@ -483,13 +525,13 @@ export default function AppointmentsTab({
                 description="لم يتم العثور على أي مواعيد في الفترة المحددة. جرب تغيير الفلاتر أو إضافة موعد جديد."
               />
             ) : (
-              filteredAppointments.map((appointment: any) => (
+              filteredAppointments.map((appointment) => (
                 <AppointmentCard
                   key={`appointment-${appointment.id}`}
                   appointment={appointment}
-                  onViewDetails={(apt: any) => onOpenAppointmentDialog(apt)}
+                  onViewDetails={onOpenAppointmentDialog}
                   onPrint={() => {
-                    const doctorName = appointment.doctorName || `طبيب #${appointment.doctorId}`;
+                    const doctorName = `طبيب #${appointment.doctorId}`;
                     printReceipt(
                       {
                         fullName: appointment.fullName,

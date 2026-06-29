@@ -18,10 +18,10 @@ export function usePatientStorage() {
   function getSavedPatientInfo(): PatientInfo | null {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return null;
+      if (!saved) {return null;}
       const parsed = JSON.parse(saved) as PatientInfo;
       // التحقق من أن البيانات صالحة
-      if (!parsed.fullName && !parsed.phone) return null;
+      if (!parsed.fullName && !parsed.phone) {return null;}
       return parsed;
     } catch {
       return null;

@@ -1,6 +1,47 @@
+
 import { useFormatDate } from '@/hooks/export/useFormatDate';
-import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { useState, useMemo, useEffect, useCallback } from 'react';
+
+interface OfferLead {
+  id: number;
+  offerId: number;
+  offerTitle: string | null;
+  campaignId: number | null;
+  fullName: string;
+  phone: string;
+  email: string | null;
+  notes: string | null;
+  status: 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+  statusNotes: string | null;
+  contactedAt: Date | null;
+  confirmedAt: Date | null;
+  attendedAt: Date | null;
+  completedAt: Date | null;
+  cancelledAt: Date | null;
+  source: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmTerm: string | null;
+  utmContent: string | null;
+  utmPlacement: string | null;
+  referrer: string | null;
+  fbclid: string | null;
+  gclid: string | null;
+  receiptNumber: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
+interface Offer {
+  id: number;
+  title: string | null;
+  [key: string]: unknown;
+}
+
+type OfferLeadStatus = 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -147,7 +188,7 @@ export default function OfferLeadsManagement({
     },
     onError: () => toast.error('فشل في حذف الحجز'),
   });
-  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [selectedLead, setSelectedLead] = useState<OfferLead | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -158,7 +199,7 @@ export default function OfferLeadsManagement({
   const [offerPageSize, setOfferPageSize] = useState<PageSizeValue>('100');
 
   // === Unified filter state via useFilterUtils ===
-  const offerFilter = useFilterUtils<any>();
+  const offerFilter = useFilterUtils<OfferLead>();
 
   // Aliases for backward compatibility
   const searchTerm = offerFilter.filters.searchTerm;
@@ -244,12 +285,12 @@ export default function OfferLeadsManagement({
     },
   ];
 
-  const handleApplyPreset = (filters: Record<string, any>) => {
-    if (filters.dateFilter) setDateFilter(filters.dateFilter);
-    if (filters.status) setStatusFilter(filters.status);
-    if (filters.source) setSourceFilter(filters.source);
-    if (filters.searchTerm !== undefined) setSearchTerm(filters.searchTerm);
-    if (filters.offer) setSelectedOffer(filters.offer);
+  const handleApplyPreset = (filters: Record<string, unknown>) => {
+    if (filters.dateFilter) {setDateFilter(filters.dateFilter as 'all' | 'today' | 'week' | 'month');}
+    if (filters.status) {setStatusFilter(filters.status as string[]);}
+    if (filters.source) {setSourceFilter(filters.source as string[]);}
+    if (filters.searchTerm !== undefined) {setSearchTerm(filters.searchTerm as string);}
+    if (filters.offer) {setSelectedOffer(filters.offer as string[]);}
   };
 
   const currentFilters = {
@@ -322,11 +363,11 @@ export default function OfferLeadsManagement({
           dateTo: dateRange.to.toISOString(),
         },
         (old) => {
-          if (!old) return old;
+          if (!old) {return old;}
           return {
             ...old,
-            data: old.data.map((lead: any) =>
-              lead.id === variables.id ? { ...lead, status: variables.status } : lead
+            data: old.data.map((lead) =>
+              lead.id === variables.id ? { ...lead, status: variables.status as OfferLead['status'] } : lead
             ),
           };
         }
@@ -374,22 +415,22 @@ export default function OfferLeadsManagement({
 
   // Get unique offers for filter
   const uniqueOffers = useMemo(() => {
-    if (!offerLeads) return [];
+    if (!offerLeads) {return [];}
     const offers = offerLeads
-      .filter((lead: any) => lead.offerTitle)
-      .map((lead: any) => ({ id: lead.offerId, title: lead.offerTitle }));
-    const unique = Array.from(new Map(offers.map((o: any) => [o.id, o])).values());
+      .filter((lead) => lead.offerTitle)
+      .map((lead) => ({ id: lead.offerId, title: lead.offerTitle }));
+    const unique = Array.from(new Map(offers.map((o) => [o.id, o])).values());
     return unique;
   }, [offerLeads]);
 
   // Apply sorting to offer leads (filtering is now done server-side)
   const filteredLeads = useMemo(() => {
-    if (!offerLeads) return [];
+    if (!offerLeads) {return [];}
 
-    let filtered = [...offerLeads];
+    const filtered = [...offerLeads];
 
     // Apply sorting using useTableFeatures
-    const sorted = offerTable.sortData(filtered, (item: any, key: string) => {
+    const sorted = offerTable.sortData(filtered, (item, key: string) => {
       switch (key) {
         case 'date':
           return item.createdAt;
@@ -428,13 +469,13 @@ export default function OfferLeadsManagement({
         case 'campaignId':
           return item.campaignId;
         default:
-          return item[key];
+          return (item as Record<string, unknown>)[key];
       }
     });
 
     // Default sort: newest first if no sort is active
     if (!offerTable.sortState.direction) {
-      sorted.sort((a: any, b: any) => {
+      sorted.sort((a, b) => {
         const aDate = new Date(a.createdAt).getTime();
         const bDate = new Date(b.createdAt).getTime();
         return bDate - aDate;
@@ -472,28 +513,28 @@ export default function OfferLeadsManagement({
       { key: 'tasks', label: 'المهام' },
       { key: 'actions', label: 'الإجراءات' },
     ],
-    mapToExportRow: (lead: any) => ({
+    mapToExportRow: (lead: OfferLead) => ({
       receiptNumber: lead.receiptNumber || '-',
       name: lead.fullName,
       phone: lead.phone,
       email: lead.email || '-',
       offer: lead.offerTitle || '-',
-      source: SOURCE_LABELS[lead.source] || lead.source || '-',
+      source: lead.source ? (SOURCE_LABELS[lead.source] || lead.source) : '-',
       status: statusLabels[lead.status as keyof typeof statusLabels] || lead.status,
       date: formatDate(lead.createdAt),
     }),
-    mapToPrintRow: (lead: any) => ({
+    mapToPrintRow: (lead: OfferLead) => ({
       checkbox: '-',
       receiptNumber: lead.receiptNumber || '-',
       name: lead.fullName,
       phone: lead.phone,
       email: lead.email || '-',
       offer: lead.offerTitle || '-',
-      source: SOURCE_LABELS[lead.source] || lead.source || '-',
+      source: lead.source ? (SOURCE_LABELS[lead.source] || lead.source) : '-',
       status: statusLabels[lead.status as keyof typeof statusLabels] || lead.status,
       date: formatDate(lead.createdAt),
-      comments: lead.commentCount > 0 ? `${lead.commentCount} تعليق` : '-',
-      tasks: lead.taskCount > 0 ? `${lead.taskCount} مهمة` : '-',
+      comments: (lead.commentCount as number) > 0 ? `${lead.commentCount as number} تعليق` : '-',
+      tasks: (lead.taskCount as number) > 0 ? `${lead.taskCount as number} مهمة` : '-',
       actions: '-',
     }),
   });
@@ -545,11 +586,11 @@ export default function OfferLeadsManagement({
     offerExport.handlePrint(getOfferExportOptions());
   }, [offerExport, getOfferExportOptions]);
   const handleStatusUpdate = () => {
-    if (!selectedLead || !newStatus) return;
+    if (!selectedLead || !newStatus) {return;}
 
     updateStatusMutation.mutate({
       id: selectedLead.id,
-      status: newStatus as any,
+      status: newStatus as OfferLeadStatus,
     });
   };
 
@@ -697,17 +738,17 @@ export default function OfferLeadsManagement({
               searchTerm: offerFilter.filters.searchTerm,
             }}
             onApplyFilter={(filters) => {
-              if (filters.statusFilter) offerFilter.filters.setStatusFilter(filters.statusFilter);
-              else offerFilter.filters.setStatusFilter([]);
-              if (filters.sourceFilter) offerFilter.filters.setSourceFilter(filters.sourceFilter);
-              else offerFilter.filters.setSourceFilter([]);
+              if (filters.statusFilter) {offerFilter.filters.setStatusFilter(filters.statusFilter as string[]);}
+              else {offerFilter.filters.setStatusFilter([]);}
+              if (filters.sourceFilter) {offerFilter.filters.setSourceFilter(filters.sourceFilter as string[]);}
+              else {offerFilter.filters.setSourceFilter([]);}
               if (filters.categoryFilter)
-                offerFilter.filters.setCategoryFilter(filters.categoryFilter);
-              else offerFilter.filters.setCategoryFilter([]);
-              if (filters.dateFilter) offerFilter.filters.setDateFilter(filters.dateFilter);
-              else offerFilter.filters.setDateFilter('all');
-              if (filters.searchTerm) offerFilter.filters.setSearchTerm(filters.searchTerm);
-              else offerFilter.filters.setSearchTerm('');
+                {offerFilter.filters.setCategoryFilter(filters.categoryFilter as string[]);}
+              else {offerFilter.filters.setCategoryFilter([]);}
+              if (filters.dateFilter) {offerFilter.filters.setDateFilter(filters.dateFilter as 'all' | 'today' | 'week' | 'month');}
+              else {offerFilter.filters.setDateFilter('all');}
+              if (filters.searchTerm) {offerFilter.filters.setSearchTerm(filters.searchTerm as string);}
+              else {offerFilter.filters.setSearchTerm('');}
             }}
           />
         </div>
@@ -723,9 +764,9 @@ export default function OfferLeadsManagement({
             />
           </div>
           <MultiSelect
-            options={uniqueOffers.map((offer: any) => ({
+            options={uniqueOffers.map((offer) => ({
               value: offer.id.toString(),
-              label: offer.title,
+              label: offer.title || '',
             }))}
             selected={selectedOffer}
             onChange={setSelectedOffer}
@@ -798,7 +839,7 @@ export default function OfferLeadsManagement({
             description="لم يتم العثور على أي حجوزات للعروض في الفترة المحددة. جرب تغيير الفلاتر."
           />
         ) : (
-          filteredLeads.map((lead: any) => (
+          filteredLeads.map((lead) => (
             <OfferLeadCard
               key={lead.id}
               lead={{
@@ -807,11 +848,11 @@ export default function OfferLeadsManagement({
                 phone: lead.phone,
                 email: lead.email,
                 status: lead.status,
-                offerName: lead.offerTitle,
+                offerName: lead.offerTitle || undefined,
                 createdAt: lead.createdAt,
               }}
               onEdit={() => {
-                setSelectedLead(lead);
+                setSelectedLead(lead as OfferLead);
                 setNewStatus(lead.status);
                 setStatusDialogOpen(true);
               }}
@@ -855,7 +896,7 @@ export default function OfferLeadsManagement({
                 .filter((key) => offerTable.visibleColumns[key])
                 .map((colKey) => {
                   const col = offerLeadColumns.find((c) => c.key === colKey);
-                  if (!col) return null;
+                  if (!col) {return null;}
                   if (colKey === 'checkbox') {
                     return (
                       <ResizableHeaderCell
@@ -934,7 +975,7 @@ export default function OfferLeadsManagement({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredLeads.map((lead: any) => (
+              filteredLeads.map((lead) => (
                 <TableRow
                   key={lead.id}
                   className={`group ${lead.status === 'pending' ? 'bg-blue-50/40 hover:bg-blue-50/60' : 'hover:bg-muted/30'}`}
@@ -1016,7 +1057,7 @@ export default function OfferLeadsManagement({
                         case 'age':
                           return (
                             <FrozenTableCell key={colKey} columnKey={colKey}>
-                              {lead.age ? `${lead.age} سنة` : '-'}
+                              {(lead as Record<string, unknown>).age ? `${(lead as Record<string, unknown>).age as number} سنة` : '-'}
                             </FrozenTableCell>
                           );
                         case 'offer':
@@ -1073,7 +1114,7 @@ export default function OfferLeadsManagement({
                                 onSave={async (newStatus) => {
                                   await updateStatusMutation.mutateAsync({
                                     id: lead.id,
-                                    status: newStatus as any,
+                                    status: newStatus as OfferLeadStatus,
                                     notes: '',
                                   });
                                 }}
@@ -1086,7 +1127,7 @@ export default function OfferLeadsManagement({
                               key={colKey}
                               columnKey={colKey}
                               wrap
-                              title={lead.statusNotes}
+                              title={lead.statusNotes || undefined}
                             >
                               {lead.statusNotes || '-'}
                             </FrozenTableCell>
@@ -1247,7 +1288,7 @@ export default function OfferLeadsManagement({
                                       variant="outline"
                                       size="sm"
                                       onClick={() => {
-                                        setSelectedLead(lead);
+                                        setSelectedLead(lead as OfferLead);
                                         setNewStatus(lead.status);
                                         setStatusDialogOpen(true);
                                       }}
@@ -1272,12 +1313,12 @@ export default function OfferLeadsManagement({
                                               id: lead.id,
                                             });
                                           const offerName =
-                                            lead.offerName || `عرض #${lead.offerId}`;
+                                            lead.offerTitle || `عرض #${lead.offerId}`;
                                           printReceipt(
                                             {
                                               fullName: lead.fullName,
                                               phone: lead.phone,
-                                              age: lead.age ?? undefined,
+                                              age: (lead as Record<string, unknown>).age as number | undefined,
                                               registrationDate: new Date(lead.createdAt),
                                               type: 'offer',
                                               typeName: offerName,

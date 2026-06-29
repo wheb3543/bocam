@@ -41,7 +41,7 @@ export default function AnimatedCounter({
     const endValue = value;
 
     // Skip animation if value hasn't changed
-    if (startValue === endValue && hasAnimatedRef.current) return;
+    if (startValue === endValue && hasAnimatedRef.current) {return;}
 
     // Flash effect when value changes (not on first render)
     if (hasAnimatedRef.current && startValue !== endValue) {

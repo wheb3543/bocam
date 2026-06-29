@@ -2,7 +2,7 @@
  * تصدير البيانات إلى Excel
  * يستخدم dynamic import لتأجيل تحميل xlsx (277KB) حتى الحاجة الفعلية
  */
-export async function exportToExcel(data: any[], filename: string, sheetName: string = 'Sheet1') {
+export async function exportToExcel(data: Record<string, unknown>[], filename: string, sheetName: string = 'Sheet1') {
   // Dynamic import - يُحمَّل فقط عند الضغط على زر التصدير
   const XLSX = await import('xlsx');
 
@@ -19,58 +19,58 @@ export async function exportToExcel(data: any[], filename: string, sheetName: st
   XLSX.writeFile(wb, `${filename}.xlsx`);
 }
 
-export function formatLeadsForExport(leads: any[]) {
+export function formatLeadsForExport(leads: Record<string, unknown>[]) {
   return leads.map((lead) => ({
-    'الاسم الكامل': lead.fullName,
-    'رقم الهاتف': lead.phone,
-    'البريد الإلكتروني': lead.email || '-',
-    الحالة: getStatusLabel(lead.status),
-    المصدر: lead.source || '-',
-    'تاريخ التسجيل': new Date(lead.createdAt).toLocaleDateString('ar-SA'),
-    ملاحظات: lead.notes || '-',
+    'الاسم الكامل': lead.fullName as string,
+    'رقم الهاتف': lead.phone as string,
+    'البريد الإلكتروني': (lead.email as string | null) || '-',
+    الحالة: getStatusLabel(lead.status as string),
+    المصدر: (lead.source as string | null) || '-',
+    'تاريخ التسجيل': new Date(lead.createdAt as Date | string).toLocaleDateString('ar-SA'),
+    ملاحظات: (lead.notes as string | null) || '-',
   }));
 }
 
-export function formatAppointmentsForExport(appointments: any[]) {
+export function formatAppointmentsForExport(appointments: Record<string, unknown>[]) {
   return appointments.map((apt) => ({
-    'الاسم الكامل': apt.fullName,
-    'رقم الهاتف': apt.phone,
-    'البريد الإلكتروني': apt.email || '-',
-    الطبيب: apt.doctorName || `طبيب #${apt.doctorId}`,
-    التخصص: apt.doctorSpecialty || '-',
-    'التاريخ المفضل': apt.preferredDate || '-',
-    'الوقت المفضل': apt.preferredTime || '-',
-    الحالة: getAppointmentStatusLabel(apt.status),
-    'تاريخ التسجيل': new Date(apt.createdAt).toLocaleDateString('ar-SA'),
-    ملاحظات: apt.notes || '-',
+    'الاسم الكامل': apt.fullName as string,
+    'رقم الهاتف': apt.phone as string,
+    'البريد الإلكتروني': (apt.email as string | null) || '-',
+    الطبيب: (apt.doctorName as string | null) || `طبيب #${apt.doctorId as number}`,
+    التخصص: (apt.doctorSpecialty as string | null) || '-',
+    'التاريخ المفضل': (apt.preferredDate as string | null) || '-',
+    'الوقت المفضل': (apt.preferredTime as string | null) || '-',
+    الحالة: getAppointmentStatusLabel(apt.status as string),
+    'تاريخ التسجيل': new Date(apt.createdAt as Date | string).toLocaleDateString('ar-SA'),
+    ملاحظات: (apt.notes as string | null) || '-',
   }));
 }
 
-export function formatOfferLeadsForExport(offerLeads: any[]) {
+export function formatOfferLeadsForExport(offerLeads: Record<string, unknown>[]) {
   return offerLeads.map((lead) => ({
-    'الاسم الكامل': lead.fullName,
-    'رقم الهاتف': lead.phone,
-    'البريد الإلكتروني': lead.email || '-',
-    العرض: lead.offerTitle || 'غير محدد',
-    الحالة: getStatusLabel(lead.status),
-    المصدر: lead.source || '-',
-    'تاريخ التسجيل': new Date(lead.createdAt).toLocaleDateString('ar-SA'),
-    ملاحظات: lead.notes || '-',
+    'الاسم الكامل': lead.fullName as string,
+    'رقم الهاتف': lead.phone as string,
+    'البريد الإلكتروني': (lead.email as string | null) || '-',
+    العرض: (lead.offerTitle as string | null) || 'غير محدد',
+    الحالة: getStatusLabel(lead.status as string),
+    المصدر: (lead.source as string | null) || '-',
+    'تاريخ التسجيل': new Date(lead.createdAt as Date | string).toLocaleDateString('ar-SA'),
+    ملاحظات: (lead.notes as string | null) || '-',
   }));
 }
 
-export function formatCampRegistrationsForExport(registrations: any[]) {
+export function formatCampRegistrationsForExport(registrations: Record<string, unknown>[]) {
   return registrations.map((reg) => ({
-    'الاسم الكامل': reg.fullName,
-    'رقم الهاتف': reg.phone,
-    'البريد الإلكتروني': reg.email || '-',
-    المخيم: reg.campTitle || 'غير محدد',
-    العمر: reg.age || '-',
-    'الحالة الطبية': reg.medicalCondition || '-',
-    الحالة: getCampStatusLabel(reg.status),
-    المصدر: reg.source || '-',
-    'تاريخ التسجيل': new Date(reg.createdAt).toLocaleDateString('ar-SA'),
-    ملاحظات: reg.notes || '-',
+    'الاسم الكامل': reg.fullName as string,
+    'رقم الهاتف': reg.phone as string,
+    'البريد الإلكتروني': (reg.email as string | null) || '-',
+    المخيم: (reg.campTitle as string | null) || 'غير محدد',
+    العمر: (reg.age as number | null) || '-',
+    'الحالة الطبية': (reg.medicalCondition as string | null) || '-',
+    الحالة: getCampStatusLabel(reg.status as string),
+    المصدر: (reg.source as string | null) || '-',
+    'تاريخ التسجيل': new Date(reg.createdAt as Date | string).toLocaleDateString('ar-SA'),
+    ملاحظات: (reg.notes as string | null) || '-',
   }));
 }
 

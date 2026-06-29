@@ -1,5 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+interface TableTemplate {
+  id: string;
+  name: string;
+  columns: Record<string, boolean>;
+  columnOrder: string[];
+  columnWidths?: Record<string, number>;
+  isDefault: boolean;
+  [key: string]: unknown;
+}
+
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
@@ -169,7 +179,7 @@ describe('ColumnTemplate with columnWidths', () => {
   });
 
   it('should work without columnWidths (backward compatible)', () => {
-    const template: any = {
+    const template: TableTemplate = {
       id: 'test_template_no_widths',
       name: 'Test Template No Widths',
       columns: { name: true, phone: true } as Record<string, boolean>,

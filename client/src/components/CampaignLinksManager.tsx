@@ -29,6 +29,24 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+interface LinkedOffer {
+  offerId: number;
+  offerTitle?: string;
+  offerIsActive?: boolean;
+}
+
+interface LinkedCamp {
+  campId: number;
+  campName?: string;
+  campIsActive?: boolean;
+}
+
+interface LinkedDoctor {
+  doctorId: number;
+  doctorName?: string;
+  doctorSpecialty?: string;
+}
+
 interface CampaignLinksManagerProps {
   campaignId: number;
   campaignName: string;
@@ -79,11 +97,11 @@ export default function CampaignLinksManager({
   // Initialize selections when dialog opens
   useEffect(() => {
     if (activeDialog === 'offers' && links?.linkedOffers) {
-      setSelectedOfferIds(links.linkedOffers.map((o: any) => o.offerId));
+      setSelectedOfferIds(links.linkedOffers.map((o: LinkedOffer) => o.offerId));
     } else if (activeDialog === 'camps' && links?.linkedCamps) {
-      setSelectedCampIds(links.linkedCamps.map((c: any) => c.campId));
+      setSelectedCampIds(links.linkedCamps.map((c: LinkedCamp) => c.campId));
     } else if (activeDialog === 'doctors' && links?.linkedDoctors) {
-      setSelectedDoctorIds(links.linkedDoctors.map((d: any) => d.doctorId));
+      setSelectedDoctorIds(links.linkedDoctors.map((d: LinkedDoctor) => d.doctorId));
     }
     setSearchQuery('');
   }, [activeDialog, links]);
@@ -179,7 +197,7 @@ export default function CampaignLinksManager({
         </div>
         {linkedOffers.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {linkedOffers.map((offer: any) => (
+            {linkedOffers.map((offer: LinkedOffer) => (
               <Badge
                 key={offer.offerId}
                 variant="outline"
@@ -217,7 +235,7 @@ export default function CampaignLinksManager({
         </div>
         {linkedCamps.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {linkedCamps.map((camp: any) => (
+            {linkedCamps.map((camp: LinkedCamp) => (
               <Badge
                 key={camp.campId}
                 variant="outline"
@@ -255,7 +273,7 @@ export default function CampaignLinksManager({
         </div>
         {linkedDoctors.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {linkedDoctors.map((doctor: any) => (
+            {linkedDoctors.map((doctor: LinkedDoctor) => (
               <Badge
                 key={doctor.doctorId}
                 variant="outline"
@@ -306,28 +324,28 @@ export default function CampaignLinksManager({
                 <div className="space-y-2">
                   {allOffers
                     .filter(
-                      (o: any) =>
-                        !searchQuery || o.title?.toLowerCase().includes(searchQuery.toLowerCase())
+                      (o: Record<string, unknown>) =>
+                        !searchQuery || (o.title as string)?.toLowerCase().includes(searchQuery.toLowerCase())
                     )
-                    .map((offer: any) => (
+                    .map((offer: Record<string, unknown>) => (
                       <div
-                        key={offer.id}
+                        key={offer.id as number}
                         className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
-                          selectedOfferIds.includes(offer.id)
+                          selectedOfferIds.includes(offer.id as number)
                             ? 'bg-orange-50 border border-orange-200'
                             : 'hover:bg-muted/50 border border-transparent'
                         }`}
-                        onClick={() => toggleOffer(offer.id)}
+                        onClick={() => toggleOffer(offer.id as number)}
                       >
                         <Checkbox
-                          checked={selectedOfferIds.includes(offer.id)}
-                          onCheckedChange={() => toggleOffer(offer.id)}
+                          checked={selectedOfferIds.includes(offer.id as number)}
+                          onCheckedChange={() => toggleOffer(offer.id as number)}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{offer.title}</p>
+                          <p className="text-sm font-medium truncate">{offer.title as string}</p>
                           {!offer.isActive && <span className="text-xs text-red-500">غير نشط</span>}
                         </div>
-                        {selectedOfferIds.includes(offer.id) && (
+                        {selectedOfferIds.includes(offer.id as number) && (
                           <CheckCircle className="h-4 w-4 text-orange-600 shrink-0" />
                         )}
                       </div>
@@ -384,28 +402,29 @@ export default function CampaignLinksManager({
                 <div className="space-y-2">
                   {allCamps
                     .filter(
-                      (c: any) =>
-                        !searchQuery || c.name?.toLowerCase().includes(searchQuery.toLowerCase())
+                      (c: Record<string, unknown>) =>
+                        !searchQuery ||
+                        (c.name as string)?.toLowerCase().includes(searchQuery.toLowerCase())
                     )
-                    .map((camp: any) => (
+                    .map((camp: Record<string, unknown>) => (
                       <div
-                        key={camp.id}
+                        key={camp.id as number}
                         className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
-                          selectedCampIds.includes(camp.id)
+                          selectedCampIds.includes(camp.id as number)
                             ? 'bg-green-50 border border-green-200'
                             : 'hover:bg-muted/50 border border-transparent'
                         }`}
-                        onClick={() => toggleCamp(camp.id)}
+                        onClick={() => toggleCamp(camp.id as number)}
                       >
                         <Checkbox
-                          checked={selectedCampIds.includes(camp.id)}
-                          onCheckedChange={() => toggleCamp(camp.id)}
+                          checked={selectedCampIds.includes(camp.id as number)}
+                          onCheckedChange={() => toggleCamp(camp.id as number)}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{camp.name}</p>
+                          <p className="text-sm font-medium truncate">{camp.name as string}</p>
                           {!camp.isActive && <span className="text-xs text-red-500">غير نشط</span>}
                         </div>
-                        {selectedCampIds.includes(camp.id) && (
+                        {selectedCampIds.includes(camp.id as number) && (
                           <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
                         )}
                       </div>
@@ -462,30 +481,30 @@ export default function CampaignLinksManager({
                 <div className="space-y-2">
                   {allDoctors
                     .filter(
-                      (d: any) =>
+                      (d: Record<string, unknown>) =>
                         !searchQuery ||
-                        d.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        d.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
+                        (d.name as string)?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (d.specialty as string)?.toLowerCase().includes(searchQuery.toLowerCase())
                     )
-                    .map((doctor: any) => (
+                    .map((doctor: Record<string, unknown>) => (
                       <div
-                        key={doctor.id}
+                        key={doctor.id as number}
                         className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
-                          selectedDoctorIds.includes(doctor.id)
+                          selectedDoctorIds.includes(doctor.id as number)
                             ? 'bg-blue-50 border border-blue-200'
                             : 'hover:bg-muted/50 border border-transparent'
                         }`}
-                        onClick={() => toggleDoctor(doctor.id)}
+                        onClick={() => toggleDoctor(doctor.id as number)}
                       >
                         <Checkbox
-                          checked={selectedDoctorIds.includes(doctor.id)}
-                          onCheckedChange={() => toggleDoctor(doctor.id)}
+                          checked={selectedDoctorIds.includes(doctor.id as number)}
+                          onCheckedChange={() => toggleDoctor(doctor.id as number)}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{doctor.name}</p>
-                          <p className="text-xs text-muted-foreground">{doctor.specialty}</p>
+                          <p className="text-sm font-medium truncate">{doctor.name as string}</p>
+                          <p className="text-xs text-muted-foreground">{doctor.specialty as string}</p>
                         </div>
-                        {selectedDoctorIds.includes(doctor.id) && (
+                        {selectedDoctorIds.includes(doctor.id as number) && (
                           <CheckCircle className="h-4 w-4 text-blue-600 shrink-0" />
                         )}
                       </div>

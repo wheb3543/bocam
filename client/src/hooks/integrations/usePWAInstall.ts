@@ -46,7 +46,7 @@ const INSTALL_COUNT_KEY = (appType: PWAAppType) => `sgh-pwa-install-count-${appT
  * الحل: إلغاء أي SW ليس sw-admin.js (أي لا يحتوي على /admin أو /admin في نطاقه)
  */
 async function unregisterPublicSWInAdminPages(): Promise<void> {
-  if (!('serviceWorker' in navigator)) return;
+  if (!('serviceWorker' in navigator)) {return;}
   try {
     const registrations = await navigator.serviceWorker.getRegistrations();
     for (const registration of registrations) {
@@ -80,7 +80,7 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
 
   useEffect(() => {
     // التحقق من iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
     setIsIOS(isIOSDevice);
 
     // التحقق من دعم PWA
@@ -90,7 +90,7 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
     // التحقق من وضع standalone (مثبت بالفعل)
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true;
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
     setIsInstalled(isStandalone);
 
     // التحقق من رفض صريح سابق (زر "لاحقاً" فقط)

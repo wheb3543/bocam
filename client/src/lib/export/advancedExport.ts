@@ -28,7 +28,7 @@ export interface ExportOptions {
   format: 'excel' | 'csv' | 'pdf';
   metadata: ExportMetadata;
   columns: Array<{ key: string; label: string }>;
-  data: Array<Record<string, any>>;
+  data: Array<Record<string, unknown>>;
   filename?: string;
 }
 
@@ -59,10 +59,10 @@ async function exportToExcel(options: ExportOptions): Promise<void> {
   const wb = XLSX.utils.book_new();
 
   // إنشاء ورقة البيانات
-  const wsData: any[][] = [];
+  const wsData: unknown[][] = [];
 
   // بناء العنوان
-  let titleParts: string[] = [`تسجيلات ${metadata.tableName}`];
+  const titleParts: string[] = [`تسجيلات ${metadata.tableName}`];
 
   if (metadata.dateRange) {
     titleParts.push(`خلال الفترة من ${metadata.dateRange}`);

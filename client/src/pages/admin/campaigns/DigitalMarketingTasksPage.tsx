@@ -28,6 +28,17 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import type { RouterOutputs } from '@/types/trpc';
+
+type Task = RouterOutputs['tasks']['list'][number];
+type TaskStatus = Task['status'];
+type TaskPriority = Task['priority'];
+type TaskCategory = Task['category'];
+type Comment = RouterOutputs['tasks']['getComments'][number];
+type Attachment = RouterOutputs['tasks']['getAttachments'][number];
+type UserEntity = RouterOutputs['users']['getAll'][number];
+type CampaignEntity = RouterOutputs['campaigns']['list'][number];
+
 import {
   Plus,
   Search,
@@ -67,32 +78,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-
-// Types
-type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled';
-type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
-type TaskCategory = 'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  category: TaskCategory;
-  assignedTo: number | null;
-  assignedUser: { id: number; name: string | null; username: string } | null;
-  campaignId: number | null;
-  campaign: { id: number; name: string } | null;
-  dueDate: Date | null;
-  completedAt: Date | null;
-  estimatedHours: number | null;
-  actualHours: number | null;
-  tags: string | null;
-  createdBy: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 // Helper functions
 const getStatusLabel = (status: TaskStatus) => {
@@ -166,7 +151,7 @@ const getCategoryColor = (category: TaskCategory) => {
 const formatDate = formatDateUtil;
 
 const isOverdue = (dueDate: Date | null, status: TaskStatus) => {
-  if (!dueDate || status === 'completed' || status === 'cancelled') return false;
+  if (!dueDate || status === 'completed' || status === 'cancelled') {return false;}
   return new Date(dueDate) < new Date();
 };
 
@@ -334,11 +319,11 @@ function TaskDetailsDialog({
   });
 
   const handleAddComment = () => {
-    if (!task || !newComment.trim()) return;
+    if (!task || !newComment.trim()) {return;}
     addCommentMutation.mutate({ taskId: task.id, content: newComment });
   };
 
-  if (!task) return null;
+  if (!task) {return null;}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -435,7 +420,7 @@ function TaskDetailsDialog({
               </div>
               {attachments && attachments.length > 0 ? (
                 <div className="space-y-2">
-                  {attachments.map((att: any) => (
+                  {attachments.map((att: Attachment) => (
                     <div key={att.id} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                       <File className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm flex-1 truncate">{att.fileName}</span>
@@ -463,7 +448,7 @@ function TaskDetailsDialog({
 
               <div className="space-y-3 mb-4">
                 {comments && comments.length > 0 ? (
-                  comments.map((comment: any) => (
+                  comments.map((comment: Comment) => (
                     <div key={comment.id} className="flex gap-3">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="text-xs">
@@ -709,7 +694,7 @@ function TaskFormDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">غير معيّن</SelectItem>
-                  {users?.map((user: any) => (
+                  {users?.map((user: UserEntity) => (
                     <SelectItem key={user.id} value={user.id.toString()}>
                       {user.name || user.username}
                     </SelectItem>
@@ -731,7 +716,7 @@ function TaskFormDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">بدون حملة</SelectItem>
-                  {campaigns?.map((campaign: any) => (
+                  {campaigns?.map((campaign: CampaignEntity) => (
                     <SelectItem key={campaign.id} value={campaign.id.toString()}>
                       {campaign.name}
                     </SelectItem>

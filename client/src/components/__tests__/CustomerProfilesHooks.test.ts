@@ -5,6 +5,16 @@ import { describe, it, expect } from 'vitest';
  * على جدول ملفات العملاء (CustomerProfilesTab)
  */
 
+interface Customer {
+  name?: string;
+  phone?: string;
+  email?: string;
+  totalRecords?: number;
+  lastSeen?: string | Date;
+  firstSeen?: string | Date;
+  [key: string]: unknown;
+}
+
 // === تعريف أعمدة العملاء (مطابق لما في CustomerProfilesTab) ===
 const customerColumns = [
   { key: 'index', label: '#', defaultVisible: true, sortable: false, defaultWidth: 50, minWidth: 40, maxWidth: 80 },
@@ -132,7 +142,7 @@ describe('CustomerProfilesTab Export Columns', () => {
 
 // === اختبار mapToExportRow ===
 describe('CustomerProfilesTab Export Row Mapping', () => {
-  const mapToExportRow = (customer: any) => ({
+  const mapToExportRow = (customer: Customer) => ({
     name: customer.name || '-',
     phone: customer.phone || '-',
     email: customer.email || '-',
@@ -167,7 +177,7 @@ describe('CustomerProfilesTab Export Row Mapping', () => {
       totalRecords: null,
       lastSeen: null,
       firstSeen: null,
-    };
+    } as unknown as Customer;
     const row = mapToExportRow(customer);
     expect(row.name).toBe('-');
     expect(row.phone).toBe('-');
@@ -202,7 +212,7 @@ describe('CustomerProfilesTab useTableFeatures Integration', () => {
   });
 
   it('should support sort field accessor for all sortable columns', () => {
-    const getField = (item: any, key: string) => {
+    const getField = (item: Customer, key: string) => {
       switch (key) {
         case 'name': return item.name || '';
         case 'phone': return item.phone || '';
@@ -236,8 +246,8 @@ describe('CustomerProfilesTab useTableFeatures Integration', () => {
 describe('CustomerProfilesTab useFilterUtils Integration', () => {
   it('should support search by name and phone', () => {
     const searchFields = [
-      (item: any) => item.name,
-      (item: any) => item.phone,
+      (item: Customer) => item.name,
+      (item: Customer) => item.phone,
     ];
 
     const testItem = { name: 'أحمد', phone: '+967777123456' };
@@ -245,21 +255,21 @@ describe('CustomerProfilesTab useFilterUtils Integration', () => {
     // Test name search
     const nameResult = searchFields.some(accessor => {
       const val = accessor(testItem);
-      return val != null && val.toLowerCase().includes('أحمد'.toLowerCase());
+      return val !== null && val !== undefined && val.toLowerCase().includes('أحمد'.toLowerCase());
     });
     expect(nameResult).toBe(true);
 
     // Test phone search
     const phoneResult = searchFields.some(accessor => {
       const val = accessor(testItem);
-      return val != null && val.toLowerCase().includes('777'.toLowerCase());
+      return val !== null && val !== undefined && val.toLowerCase().includes('777'.toLowerCase());
     });
     expect(phoneResult).toBe(true);
 
     // Test non-matching search
     const noResult = searchFields.some(accessor => {
       const val = accessor(testItem);
-      return val != null && val.toLowerCase().includes('xyz'.toLowerCase());
+      return val !== null && val !== undefined && val.toLowerCase().includes('xyz'.toLowerCase());
     });
     expect(noResult).toBe(false);
   });

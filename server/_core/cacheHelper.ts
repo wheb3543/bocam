@@ -10,10 +10,10 @@ import { cacheManager } from '../services/redis';
  * Caches the result of a function based on its arguments
  */
 export function cache(ttl: number = 300, keyPrefix: string = 'cache') {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       // Generate cache key based on function name and arguments
       const key = `${keyPrefix}:${propertyKey}:${JSON.stringify(args)}`;
 

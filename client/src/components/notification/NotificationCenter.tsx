@@ -16,6 +16,13 @@ import {
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
+interface NotificationItem {
+  fullName?: string;
+  name?: string;
+  createdAt?: string | Date;
+  [key: string]: unknown;
+}
+
 export default function NotificationCenter() {
   const { formatDate, formatDateTime } = useFormatDate();
   const [, setLocation] = useLocation();
@@ -216,7 +223,7 @@ export default function NotificationCenter() {
             const Icon = section.icon;
             const isExpanded = expandedSections[section.id];
 
-            if (section.count === 0) return null;
+            if (section.count === 0) {return null;}
 
             return (
               <Card
@@ -259,7 +266,7 @@ export default function NotificationCenter() {
                     <div className="border-t bg-white dark:bg-card">
                       {section.items.length > 0 ? (
                         <div className="divide-y">
-                          {section.items.map((item: any, index: number) => (
+                          {section.items.map((item: NotificationItem, index: number) => (
                             <button
                               key={index}
                               onClick={() => handleItemClick(section.type)}

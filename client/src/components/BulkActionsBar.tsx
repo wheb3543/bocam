@@ -14,7 +14,7 @@ interface BulkActionsBarProps {
 }
 
 export default function BulkActionsBar({ selectedCount, onClear, actions }: BulkActionsBarProps) {
-  if (selectedCount === 0) return null;
+  if (selectedCount === 0) {return null;}
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5">

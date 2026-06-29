@@ -16,7 +16,7 @@ interface CacheEntry<T> {
 }
 
 class ServerCache {
-  private store = new Map<string, CacheEntry<any>>();
+  private store = new Map<string, CacheEntry<unknown>>();
   private cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
@@ -150,11 +150,11 @@ export const CacheKeys = {
   campaignsList: () => 'list:campaigns',
 
   // Paginated query caches (TTL: 15 seconds - user-specific queries)
-  appointmentsPaginated: (params: Record<string, any>) =>
+  appointmentsPaginated: (params: Record<string, unknown>) =>
     `paginated:appointments:${JSON.stringify(params)}`,
-  offerLeadsPaginated: (params: Record<string, any>) =>
+  offerLeadsPaginated: (params: Record<string, unknown>) =>
     `paginated:offerLeads:${JSON.stringify(params)}`,
-  campRegistrationsPaginated: (params: Record<string, any>) =>
+  campRegistrationsPaginated: (params: Record<string, unknown>) =>
     `paginated:campRegistrations:${JSON.stringify(params)}`,
 };
 

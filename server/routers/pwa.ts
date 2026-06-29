@@ -33,7 +33,7 @@ export const pwaRouter = router({
 
       await db.insert(pwaInstalls).values({
         appType: input.appType,
-        userId: (ctx.user as any)?.id || null,
+        userId: (ctx.user as { id?: number })?.id || null,
         userAgent: input.userAgent || null,
         platform: input.platform || null,
         ipAddress: ipAddress ? ipAddress.split(',')[0].trim() : null,

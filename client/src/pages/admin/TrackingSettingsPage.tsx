@@ -117,8 +117,8 @@ export default function TrackingSettingsPage() {
     setIsTesting(true);
     try {
       // Send a test event to Meta Pixel
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'TestEvent', {
+      if (typeof window !== 'undefined' && (window as Window & { fbq?: unknown }).fbq) {
+        (window as Window & { fbq: (event: string, eventName: string, data?: Record<string, unknown>) => void }).fbq('track', 'TestEvent', {
           test_event_code: import.meta.env.VITE_META_TEST_EVENT_CODE || 'TEST12345',
         });
         toast.success('تم إرسال حدث اختبار إلى Meta Pixel');

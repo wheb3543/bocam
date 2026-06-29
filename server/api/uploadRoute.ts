@@ -105,7 +105,7 @@ export function createUploadRouter(): Router {
   );
 
   // Multer error handling
-  router.use((err: any, _req: Request, res: Response, next: any) => {
+  router.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ error: 'حجم الملف يتجاوز الحد المسموح (10MB)' });
@@ -113,7 +113,7 @@ export function createUploadRouter(): Router {
       return res.status(400).json({ error: `خطأ في رفع الملف: ${err.message}` });
     }
     if (err) {
-      return res.status(400).json({ error: err.message || 'خطأ غير معروف' });
+      return res.status(400).json({ error: (err as { message?: string }).message || 'خطأ غير معروف' });
     }
     next();
   });

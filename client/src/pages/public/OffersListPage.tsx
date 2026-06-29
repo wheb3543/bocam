@@ -3,6 +3,21 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import Navbar from '@/components/layout/Navbar';
 import { trpc } from '@/lib/api/trpc';
+
+interface Offer {
+  id: number;
+  title: string;
+  slug: string;
+  description: string | null;
+  imageUrl: string | null;
+  isActive: boolean;
+  startDate: Date | null;
+  endDate: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,27 +45,27 @@ function OffersListContent() {
   // Separate active and expired offers based on endDate
   const now = new Date();
   const activeOffers = Array.isArray(offers)
-    ? offers.filter((offer: any) => {
-        if (!offer.endDate) return true;
+    ? offers.filter((offer) => {
+        if (!offer.endDate) {return true;}
         return new Date(offer.endDate) >= now;
       })
     : [];
   const expiredOffers = Array.isArray(offers)
-    ? offers.filter((offer: any) => {
-        if (!offer.endDate) return false;
+    ? offers.filter((offer) => {
+        if (!offer.endDate) {return false;}
         return new Date(offer.endDate) < now;
       })
     : [];
 
-  const filteredActiveOffers = activeOffers.filter((offer: any) =>
+  const filteredActiveOffers = activeOffers.filter((offer) =>
     offer.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredExpiredOffers = expiredOffers.filter((offer: any) =>
+  const filteredExpiredOffers = expiredOffers.filter((offer) =>
     offer.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const OfferCard = ({ offer, isExpired = false }: { offer: any; isExpired?: boolean }) => (
+  const OfferCard = ({ offer, isExpired = false }: { offer: Offer; isExpired?: boolean }) => (
     <Card
       key={offer.id}
       className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-t-4 border-green-600 overflow-hidden"
@@ -60,9 +75,10 @@ function OffersListContent() {
         {offer.imageUrl ? (
           <div className="relative h-44 sm:h-56 md:h-64 overflow-hidden">
             <img
-              src={offer.imageUrl}
+              src={offer.imageUrl || ''}
               alt={offer.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              onError={(e) => { e.currentTarget.src = '/images/default-offer.jpg'; }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
@@ -109,7 +125,7 @@ function OffersListContent() {
             </div>
             <Gift className="h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16 mb-3 sm:mb-4" />
             <h3 className="text-base sm:text-xl md:text-2xl font-bold text-center line-clamp-2">
-              {offer.title}
+              {String(offer.title)}
             </h3>
           </div>
         )}
@@ -117,7 +133,7 @@ function OffersListContent() {
         <div className="p-3.5 sm:p-5 md:p-6">
           {offer.description && (
             <p className="text-muted-foreground text-right line-clamp-2 sm:line-clamp-3 mb-3 sm:mb-4 text-xs sm:text-sm md:text-base">
-              {offer.description}
+              {String(offer.description)}
             </p>
           )}
 
@@ -198,7 +214,7 @@ function OffersListContent() {
               <TabsContent value="active">
                 {filteredActiveOffers && filteredActiveOffers.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-                    {filteredActiveOffers.map((offer: any) => (
+                    {filteredActiveOffers.map((offer) => (
                       <OfferCard key={offer.id} offer={offer} isExpired={false} />
                     ))}
                   </div>
@@ -218,7 +234,7 @@ function OffersListContent() {
               <TabsContent value="expired">
                 {filteredExpiredOffers && filteredExpiredOffers.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-                    {filteredExpiredOffers.map((offer: any) => (
+                    {filteredExpiredOffers.map((offer) => (
                       <OfferCard key={offer.id} offer={offer} isExpired={true} />
                     ))}
                   </div>

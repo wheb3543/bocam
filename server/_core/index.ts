@@ -6,6 +6,7 @@ import { createServer } from 'http';
 import net from 'net';
 import path from 'path';
 import fs from 'fs';
+import type { IncomingMessage } from 'http';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { registerOAuthRoutes } from './oauth';
 import { createUploadRouter } from '../api/uploadRoute';
@@ -105,7 +106,7 @@ async function startServer() {
   app.use(
     express.json({
       limit: '50mb',
-      verify: (req: any, _res, buf) => {
+      verify: (req: IncomingMessage & { rawBody?: Buffer }, _res, buf) => {
         req.rawBody = buf;
       },
     })

@@ -11,7 +11,7 @@ const userInputSchema = z.object({
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل').optional(),
   name: z.string().optional(),
   email: z.string().email('البريد الإلكتروني غير صحيح').optional(),
-  role: z.enum(['user', 'admin', 'manager', 'staff', 'viewer']).default('user'),
+  role: z.enum(['user', 'admin', 'manager', 'staff', 'viewer', 'team_leader']).default('user'),
   isActive: z.enum(['yes', 'no']).default('yes'),
 });
 
@@ -152,7 +152,7 @@ export const usersRouter = router({
         });
       }
 
-      const updateData: any = { ...data };
+      const updateData: Record<string, unknown> = { ...data };
 
       // Hash password if provided
       if (password) {

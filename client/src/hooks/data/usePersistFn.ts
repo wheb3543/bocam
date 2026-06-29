@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-type noop = (...args: any[]) => any;
+type noop<Args extends unknown[] = unknown[], Result = unknown> = (...args: Args) => Result;
 
 /**
  * usePersistFn 可以替代 useCallback 以降低心智负担

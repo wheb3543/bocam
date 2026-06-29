@@ -13,33 +13,50 @@ import { normalizePhoneNumber } from '../../database/db';
 
 const MAX_RETRIES = 3;
 
+interface LabOrder {
+  ORDER_ID: string;
+  PATIENT_NAME: string;
+  PHONE_NO: string;
+  DOCTOR_NAME?: string;
+  MAIN_TEST_NAME?: string;
+  RESULT_DATE?: string;
+  retry_count?: number;
+  status?: string;
+  error_message?: string;
+}
+
+// Note: Using any for database connections because hospitalDb and db are external database
+// connections with complex types that are not easily defined in TypeScript.
+// Using unknown would require type assertions in every single database operation,
+// which would make the code unnecessarily complex and harder to maintain.
+
 /**
  * Validation function for lab order data
  */
-function validateLabOrder(order: any): { valid: boolean; error?: string } {
+function validateLabOrder(order: Record<string, unknown>): { valid: boolean; error?: string } {
   if (!order) {
     return { valid: false, error: 'Order is null or undefined' };
   }
   if (!order.ORDER_ID) {
     return { valid: false, error: 'ORDER_ID is required' };
   }
-  if (!order.PATIENT_NAME || order.PATIENT_NAME.trim() === '') {
+  if (!order.PATIENT_NAME || (order.PATIENT_NAME as string).trim() === '') {
     return { valid: false, error: 'PATIENT_NAME is required' };
   }
-  if (!order.PHONE_NO || order.PHONE_NO.trim() === '') {
+  if (!order.PHONE_NO || (order.PHONE_NO as string).trim() === '') {
     return { valid: false, error: 'PHONE_NO is required' };
   }
-  if (!order.DOCTOR_NAME || order.DOCTOR_NAME.trim() === '') {
+  if (!order.DOCTOR_NAME || (order.DOCTOR_NAME as string).trim() === '') {
     return { valid: false, error: 'DOCTOR_NAME is required' };
   }
-  if (!order.MAIN_TEST_NAME || order.MAIN_TEST_NAME.trim() === '') {
+  if (!order.MAIN_TEST_NAME || (order.MAIN_TEST_NAME as string).trim() === '') {
     return { valid: false, error: 'MAIN_TEST_NAME is required' };
   }
   if (!order.RESULT_DATE) {
     return { valid: false, error: 'RESULT_DATE is required' };
   }
   // تحقق من صحة تاريخ النتيجة
-  const resultDate = new Date(order.RESULT_DATE);
+  const resultDate = new Date(order.RESULT_DATE as string);
   if (isNaN(resultDate.getTime())) {
     return { valid: false, error: 'RESULT_DATE is invalid' };
   }
@@ -68,27 +85,27 @@ export async function pollLabResults() {
 
     console.log(`[Lab Results Poller] Found ${pendingOrders.length} pending orders`);
 
-    for (const order of pendingOrders) {
+    for (const order of pendingOrders as unknown as Record<string, unknown>[]) {
       // Validation قبل المعالجة
-      const validation = validateLabOrder(order as any);
+      const validation = validateLabOrder(order);
       if (!validation.valid) {
         console.error(
-          `[Lab Results Poller] Invalid order ${(order as any).ORDER_ID}: ${validation.error}`
+          `[Lab Results Poller] Invalid order ${order.ORDER_ID}: ${validation.error}`
         );
         await hospitalDb.execute(
-          sql`UPDATE lab_orders SET status = 'failed', error_message = ${validation.error} WHERE ORDER_ID = ${(order as any).ORDER_ID}`
+          sql`UPDATE lab_orders SET status = 'failed', error_message = ${validation.error} WHERE ORDER_ID = ${order.ORDER_ID}`
         );
         continue;
       }
 
-      await processOrder(order as any, hospitalDb, db);
+      await processOrder(order as unknown as LabOrder, hospitalDb, db);
     }
   } catch (error) {
     console.error('[Lab Results Poller] Error:', error);
   }
 }
 
-async function processOrder(order: any, hospitalDb: any, db: any) {
+async function processOrder(order: LabOrder, hospitalDb: any, db: any) {
   const startTime = Date.now();
   try {
     // تحديث الحالة في قاعدة بيانات المستشفى
@@ -99,7 +116,7 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
       `[Lab Results Poller] Processing order ${order.ORDER_ID} for patient ${order.PATIENT_NAME}`
     );
 
-    const pdfBuffer = await generateLabResultPDF(order.ORDER_ID);
+    const pdfBuffer = await generateLabResultPDF(parseInt(order.ORDER_ID, 10));
     console.log(
       `[Lab Results Poller] PDF generated for order ${order.ORDER_ID} (${pdfBuffer.length} bytes)`
     );
@@ -142,11 +159,11 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
         name: order.PATIENT_NAME,
         test_type: order.MAIN_TEST_NAME,
         doctor: order.DOCTOR_NAME,
-        date: new Date(order.RESULT_DATE).toLocaleDateString('ar-SA'),
+        date: order.RESULT_DATE ? new Date(order.RESULT_DATE).toLocaleDateString('ar-SA') : 'غير محدد',
       };
 
       // بناء مكونات القالب
-      const components: any[] = [];
+      const components: Record<string, unknown>[] = [];
 
       // إضافة header component للملف (PDF) - الطريقة الرسمية من WhatsApp API
       components.push({
@@ -199,7 +216,7 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
       const templateResult = await sendWhatsAppTemplateMessage(normalizedPhone, {
         templateName: templateNameToSend,
         languageCode: template.languageCode ?? 'ar',
-        components,
+        components: components as any,
       });
 
       if (!templateResult.success) {
@@ -226,7 +243,7 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
           customerName: order.PATIENT_NAME,
           messageContent: `ملف: نتيجة ${order.MAIN_TEST_NAME}.pdf`,
           messageId: docResult.messageId,
-          labOrderId: order.ORDER_ID,
+          labOrderId: parseInt(order.ORDER_ID, 10),
           mediaUrl: pdfUrl,
         });
 
@@ -248,7 +265,7 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
         customerName: order.PATIENT_NAME,
         messageContent: `نتيجة فحص: ${order.MAIN_TEST_NAME}`,
         messageId: templateResult.messageId,
-        labOrderId: order.ORDER_ID,
+        labOrderId: parseInt(order.ORDER_ID, 10),
         mediaUrl: pdfUrl,
       });
 
@@ -272,7 +289,7 @@ async function processOrder(order: any, hospitalDb: any, db: any) {
       errorMessage
     );
 
-    const newRetryCount = order.retry_count + 1;
+    const newRetryCount = (order.retry_count || 0) + 1;
 
     if (newRetryCount >= MAX_RETRIES) {
       await hospitalDb.execute(

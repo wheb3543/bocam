@@ -138,17 +138,17 @@ export default function CampRegistrationCard({
               <h3 className="font-semibold text-sm leading-tight truncate">
                 {registration.fullName}
               </h3>
-              {(registration as any).source && (
+              {registration.source && (
                 <span
                   className="text-[10px] font-medium px-1.5 py-0.5 rounded-full inline-block mt-0.5"
                   style={{
-                    backgroundColor: SOURCE_COLORS[(registration as any).source]
-                      ? `${SOURCE_COLORS[(registration as any).source]}15`
+                    backgroundColor: SOURCE_COLORS[registration.source]
+                      ? `${SOURCE_COLORS[registration.source]}15`
                       : '#f3f4f6',
-                    color: SOURCE_COLORS[(registration as any).source] || '#6b7280',
+                    color: SOURCE_COLORS[registration.source] || '#6b7280',
                   }}
                 >
-                  {SOURCE_LABELS[(registration as any).source] || (registration as any).source}
+                  {SOURCE_LABELS[registration.source] || registration.source}
                 </span>
               )}
             </div>

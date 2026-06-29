@@ -43,7 +43,7 @@ export default function EditSidebarModal({
 
   // Toggle selection
   const toggleItem = (itemId: string) => {
-    if (itemId === 'home') return; // Cannot remove home
+    if (itemId === 'home') {return;} // Cannot remove home
 
     if (selectedIds.includes(itemId)) {
       setSelectedIds(selectedIds.filter((id) => id !== itemId));
@@ -56,17 +56,17 @@ export default function EditSidebarModal({
 
   // Remove item from selected
   const removeItem = (itemId: string) => {
-    if (itemId === 'home') return;
+    if (itemId === 'home') {return;}
     setSelectedIds(selectedIds.filter((id) => id !== itemId));
   };
 
   // Move item up/down
   const moveItem = (itemId: string, direction: 'up' | 'down') => {
     const index = selectedIds.indexOf(itemId);
-    if (index === -1) return;
+    if (index === -1) {return;}
 
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= selectedIds.length) return;
+    if (newIndex < 0 || newIndex >= selectedIds.length) {return;}
 
     const newIds = [...selectedIds];
     [newIds[index], newIds[newIndex]] = [newIds[newIndex], newIds[index]];

@@ -14,6 +14,23 @@ import { Badge } from '@/components/ui/badge';
 
 import { trpc } from '@/lib/api/trpc';
 
+interface Doctor {
+  id: number;
+  name: string;
+  slug: string;
+  specialty: string;
+  image: string | null;
+  bio: string | null;
+  experience: string | null;
+  languages: string | null;
+  consultationFee: string | null;
+  isVisiting: 'yes' | 'no';
+  available: 'yes' | 'no';
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
 export default function VisitingDoctors() {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -31,16 +48,16 @@ function VisitingDoctorsContent() {
 
   // Filter only visiting doctors who are available
   const visitingDoctors = useMemo(() => {
-    if (!allDoctors) return [];
+    if (!allDoctors) {return [];}
     return allDoctors.filter(
-      (doctor: any) => doctor.isVisiting === 'yes' && doctor.available === 'yes'
+      (doctor) => doctor.isVisiting === 'yes' && doctor.available === 'yes'
     );
   }, [allDoctors]);
 
   // Get unique specialties from visiting doctors
   const specialties = useMemo(() => {
-    if (!visitingDoctors) return [];
-    const uniqueSpecialties = Array.from(new Set(visitingDoctors.map((doc: any) => doc.specialty)));
+    if (!visitingDoctors) {return [];}
+    const uniqueSpecialties = Array.from(new Set(visitingDoctors.map((doc) => doc.specialty)));
     return uniqueSpecialties;
   }, [visitingDoctors]);
 
@@ -50,14 +67,14 @@ function VisitingDoctorsContent() {
 
     // Filter by specialty
     if (selectedSpecialty !== 'all') {
-      filtered = filtered.filter((doc: any) => doc.specialty === selectedSpecialty);
+      filtered = filtered.filter((doc) => doc.specialty === selectedSpecialty);
     }
 
     // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (doc: any) =>
+        (doc) =>
           doc.name.toLowerCase().includes(term) ||
           doc.specialty.toLowerCase().includes(term) ||
           (doc.bio && doc.bio.toLowerCase().includes(term))
@@ -167,7 +184,7 @@ function VisitingDoctorsContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-              {filteredDoctors.map((doctor: any) => (
+              {filteredDoctors.map((doctor) => (
                 <Link key={doctor.id} href={`/doctors/${doctor.slug}`}>
                   <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-green-500 group">
                     <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4 md:p-6">
@@ -178,6 +195,7 @@ function VisitingDoctorsContent() {
                               src={doctor.image || '/images/default-doctor.jpg'}
                               alt={doctor.name}
                               className="w-full h-full object-cover"
+                              onError={(e) => { e.currentTarget.src = '/images/default-doctor.jpg'; }}
                             />
                           </div>
                           <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full p-1.5 shadow-lg">
@@ -208,13 +226,13 @@ function VisitingDoctorsContent() {
                         {doctor.experience && (
                           <div className="flex items-center gap-1 text-[10px] sm:text-xs md:text-sm text-muted-foreground bg-muted px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                             <Award className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                            <span>{doctor.experience}</span>
+                            <span>{String(doctor.experience)}</span>
                           </div>
                         )}
                         {doctor.consultationFee && (
                           <div className="flex items-center gap-1 text-[10px] sm:text-xs md:text-sm text-muted-foreground bg-muted px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                             <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                            <span>{doctor.consultationFee} ريال</span>
+                            <span>{String(doctor.consultationFee)} ريال</span>
                           </div>
                         )}
                       </div>

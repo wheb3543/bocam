@@ -53,7 +53,7 @@ export default function SourceBadge({
 
   // Get icon and color based on source
   const getSourceConfig = (src: string) => {
-    const configs: Record<string, { icon: any; color: string; bgColor: string; label: string }> = {
+    const configs: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bgColor: string; label: string }> = {
       facebook: {
         icon: Facebook,
         color: 'text-blue-600',

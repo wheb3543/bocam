@@ -33,6 +33,13 @@ import { toast } from 'sonner';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { getCompanySlogan, COMPANY_ARABIC_NAME } from '@/const';
 
+interface Doctor {
+  id?: number;
+  name?: string;
+  specialty?: string;
+  [key: string]: unknown;
+}
+
 export default function DoctorAppointments() {
   return (
     <DashboardLayout pageTitle="حجز موعد" pageDescription="حجز موعد مع الطبيب">
@@ -87,8 +94,8 @@ function DoctorAppointmentsContent() {
       toast.success('تم حجز الموعد بنجاح!');
       setLocation('/thank-you');
     },
-    onError: (error: any) => {
-      const msg = error?.message;
+    onError: (error: unknown) => {
+      const msg = error instanceof Error ? error.message : '';
       if (msg && (msg.includes('تكرار') || msg.includes('حجز'))) {
         toast.error(msg);
       } else {
@@ -137,7 +144,7 @@ function DoctorAppointmentsContent() {
     });
   };
 
-  const selectedDoctor = doctors?.find((d: any) => d.id === parseInt(formData.doctorId));
+  const selectedDoctor = doctors?.find((d: Doctor) => d.id === parseInt(formData.doctorId));
 
   return (
     <>
@@ -194,21 +201,21 @@ function DoctorAppointmentsContent() {
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-                {doctors?.map((doctor: any) => (
+                {doctors?.map((doctor: Doctor) => (
                   <Card
-                    key={doctor.id}
+                    key={doctor.id || doctor.name}
                     className={`cursor-pointer transition-all hover:shadow-lg ${
-                      formData.doctorId === doctor.id.toString()
+                      formData.doctorId === (doctor.id?.toString() || '')
                         ? 'ring-2 ring-primary shadow-lg'
                         : ''
                     }`}
-                    onClick={() => setFormData({ ...formData, doctorId: doctor.id.toString() })}
+                    onClick={() => setFormData({ ...formData, doctorId: doctor.id?.toString() || '' })}
                   >
                     <CardContent className="p-4">
                       <div className="aspect-square rounded-lg overflow-hidden mb-3">
                         <img
-                          src={doctor.image || '/assets/new-logo.png'}
-                          alt={doctor.name}
+                          src={typeof doctor.image === 'string' ? doctor.image : '/assets/new-logo.png'}
+                          alt={doctor.name || 'طبيب'}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -270,8 +277,8 @@ function DoctorAppointmentsContent() {
                           <SelectValue placeholder="اختر الطبيب المطلوب" />
                         </SelectTrigger>
                         <SelectContent>
-                          {doctors?.map((doctor: any) => (
-                            <SelectItem key={doctor.id} value={doctor.id.toString()}>
+                          {doctors?.map((doctor: Doctor) => (
+                            <SelectItem key={doctor.id || doctor.name} value={doctor.id?.toString() || ''}>
                               {doctor.name} - {doctor.specialty}
                             </SelectItem>
                           ))}

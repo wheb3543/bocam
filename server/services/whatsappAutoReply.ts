@@ -66,7 +66,7 @@ export async function addAutoReplyRule(params: {
     };
 
     const [result] = await db.insert(whatsappAutoReplies).values(values);
-    const ruleId = (result as any).insertId;
+    const ruleId = (result as unknown as { insertId: number }).insertId;
 
     console.log(`[WhatsApp AutoReply] ✅ Added rule "${params.name}" (id: ${ruleId})`);
     return { success: true, ruleId };
@@ -220,7 +220,7 @@ export async function processIncomingMessage(params: {
               isAutomated: 1,
             });
 
-            await updateWhatsAppConversation(conversation.id, {
+            await updateWhatsAppConversation(conversation.id as number, {
               lastMessage: rule.replyMessage.substring(0, 100),
               lastMessageAt: new Date(),
             });

@@ -122,8 +122,8 @@ export default function PatientResultsAdminPage() {
   };
 
   const resultIcon = (type: ResultType) => {
-    if (type === 'lab') return <FlaskConical className="h-4 w-4 text-blue-500" />;
-    if (type === 'radiology') return <ScanLine className="h-4 w-4 text-purple-500" />;
+    if (type === 'lab') {return <FlaskConical className="h-4 w-4 text-blue-500" />;}
+    if (type === 'radiology') {return <ScanLine className="h-4 w-4 text-purple-500" />;}
     return <ClipboardList className="h-4 w-4 text-amber-500" />;
   };
 

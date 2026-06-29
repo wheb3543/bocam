@@ -174,7 +174,7 @@ export const offerLeadsRouter = router({
         fullName: input.fullName,
         phone: input.phone,
         email: input.email,
-        clientIpAddress: ctx.req.ip || (ctx.req.socket as any)?.remoteAddress,
+        clientIpAddress: ctx.req.ip || (ctx.req.socket as { remoteAddress?: string })?.remoteAddress,
         clientUserAgent: ctx.req.headers['user-agent'] as string,
         fbc: ctx.req.cookies?.['_fbc'],
         fbp: ctx.req.cookies?.['_fbp'],
@@ -392,7 +392,7 @@ export const offerLeadsRouter = router({
           if (triggerEvent) {
             dispatchWhatsAppMessage({
               entityType: 'offer_lead',
-              triggerEvent: triggerEvent as any,
+              triggerEvent: triggerEvent as 'on_confirmed' | 'on_arrived' | 'on_completed' | 'on_cancelled',
               phone: lead.phone,
               recipientName: lead.fullName || undefined,
               variables: {
@@ -532,7 +532,7 @@ export const offerLeadsRouter = router({
         WHERE receiptNumber LIKE CONCAT('SGH-', ${year}, '-%')
       `);
 
-      const count = (result as any).count || 0;
+      const count = (result as { count?: number }).count || 0;
       const sequenceNumber = count + 1;
       const paddedNumber = String(sequenceNumber).padStart(3, '0');
       const receiptNumber = `SGH-${year}-${paddedNumber}`;

@@ -8,22 +8,48 @@ import App from './App';
 import { getLoginUrl, getLocalLoginUrl } from './const';
 import './index.css';
 
+// Clear cache and service workers on reload to prevent stale content
+if (typeof window !== 'undefined') {
+  // Unregister any service workers
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(registration => registration.unregister());
+    });
+  }
+  
+  // Clear any caches
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      names.forEach(name => caches.delete(name));
+    });
+  }
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('reload')) {
+    // Clear URL parameter without triggering a reload
+    const newUrl = window.location.pathname + window.location.search.replace(/[?&]reload=true/, '').replace(/^&/, '?');
+    window.history.replaceState({}, '', newUrl);
+  }
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
+      staleTime: 0,
+      gcTime: 0,
     },
   },
 });
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
-  if (!(error instanceof TRPCClientError)) return;
-  if (typeof window === 'undefined') return;
+  if (!(error instanceof TRPCClientError)) {return;}
+  if (typeof window === 'undefined') {return;}
 
   const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
 
-  if (!isUnauthorized) return;
+  if (!isUnauthorized) {return;}
 
   const currentPath = window.location.pathname;
   const adminLoginUrl = getLocalLoginUrl();

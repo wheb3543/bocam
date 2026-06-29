@@ -58,7 +58,11 @@ export default function Pagination({
             </span>
             <Select
               value={pageSize || '100'}
-              onValueChange={(val) => onPageSizeChange(val as PageSizeValue)}
+              onValueChange={(val) => {
+                if (val === '50' || val === '100' || val === '500' || val === '1000' || val === 'all') {
+                  onPageSizeChange(val);
+                }
+              }}
             >
               <SelectTrigger className="h-8 w-[72px] text-xs">
                 <SelectValue />
@@ -140,7 +144,11 @@ export default function Pagination({
                   variant={currentPage === page ? 'default' : 'ghost'}
                   size="icon"
                   className={`h-8 w-8 text-xs ${currentPage === page ? 'pointer-events-none' : ''}`}
-                  onClick={() => onPageChange(page as number)}
+                  onClick={() => {
+                    if (typeof page === 'number') {
+                      onPageChange(page);
+                    }
+                  }}
                 >
                   {page}
                 </Button>

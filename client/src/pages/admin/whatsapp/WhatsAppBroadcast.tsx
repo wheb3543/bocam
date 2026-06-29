@@ -162,7 +162,7 @@ export default function WhatsAppBroadcast() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {broadcastStatusQuery.data.status || 'غير متوفر'}
+                {(broadcastStatusQuery.data.status as unknown as string) || 'غير متوفر'}
               </div>
             </CardContent>
           </Card>

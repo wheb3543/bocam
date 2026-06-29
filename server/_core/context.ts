@@ -37,7 +37,7 @@ function verifyLocalAuthToken(
   token: string
 ): { userId: number; username: string; role: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number; username: string; role: string; type: string };
     if (decoded.type !== 'admin') return null;
     return { userId: decoded.userId, username: decoded.username, role: decoded.role };
   } catch {

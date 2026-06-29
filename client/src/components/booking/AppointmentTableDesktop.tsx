@@ -10,6 +10,7 @@ import {
   FrozenTableCell,
 } from '@/components/table/ResizableTable';
 import { getColumnWidth, type ColumnConfig } from '@/components/table/ColumnVisibility';
+import type { UseTableFeaturesReturn } from '@/hooks/table/useTableFeatures';
 import TableSkeleton from '@/components/table/TableSkeleton';
 import EmptyState from '@/components/EmptyState';
 import InlineStatusEditor from '@/components/InlineStatusEditor';
@@ -23,9 +24,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Phone, Settings, Printer, CalendarOff } from 'lucide-react';
 import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type { Appointment, AppointmentWithDoctor } from '@shared/types';
 
 interface AppointmentTableDesktopProps {
-  appointments: any[];
+  appointments: AppointmentWithDoctor[];
   isLoading: boolean;
   columns: ColumnConfig[];
   visibleColumns: Record<string, boolean>;
@@ -36,10 +38,10 @@ interface AppointmentTableDesktopProps {
     getWidth: (key: string) => number;
     handleResize: (key: string, width: number) => void;
   };
-  getSortProps: (key: string) => any;
+  getSortProps: UseTableFeaturesReturn['getSortProps'];
   selectedIds: number[];
   onSelectionChange: (ids: number[]) => void;
-  onOpenDialog: (appointment: any) => void;
+  onOpenDialog: (appointment: AppointmentWithDoctor) => void;
   onUpdateStatus: (id: number, status: string) => Promise<void>;
   userName: string;
 }
@@ -74,7 +76,7 @@ export default function AppointmentTableDesktop({
           <TableRow>
             {visibleColumnKeys.map((colKey) => {
               const col = columns.find((c) => c.key === colKey);
-              if (!col) return null;
+              if (!col) {return null;}
               if (colKey === 'checkbox') {
                 return (
                   <ResizableHeaderCell
@@ -92,7 +94,7 @@ export default function AppointmentTableDesktop({
                       }
                       onChange={(e) => {
                         if (e.target.checked) {
-                          onSelectionChange(appointments.map((a: any) => a.id));
+                          onSelectionChange(appointments.map((a) => a.id));
                         } else {
                           onSelectionChange([]);
                         }
@@ -137,7 +139,7 @@ export default function AppointmentTableDesktop({
               </TableCell>
             </TableRow>
           ) : (
-            appointments.map((appointment: any) => (
+            appointments.map((appointment) => (
               <TableRow
                 key={`appointment-${appointment.id}`}
                 className={appointment.status === 'pending' ? 'bg-red-50 hover:bg-red-100' : ''}
@@ -155,7 +157,7 @@ export default function AppointmentTableDesktop({
                                 onSelectionChange([...selectedIds, appointment.id]);
                               } else {
                                 onSelectionChange(
-                                  selectedIds.filter((id: number) => id !== appointment.id)
+                                  selectedIds.filter((id) => id !== appointment.id)
                                 );
                               }
                             }}
@@ -183,7 +185,7 @@ export default function AppointmentTableDesktop({
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
                           <span className="font-medium">
-                            {appointment.fullName || appointment.patientName}
+                            {appointment.fullName}
                           </span>
                         </FrozenTableCell>
                       );
@@ -236,7 +238,7 @@ export default function AppointmentTableDesktop({
                     case 'preferredDate':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
-                          {formatDate(appointment.preferredDate)}
+                          {formatDate(appointment.preferredDate || '')}
                         </FrozenTableCell>
                       );
                     case 'preferredTime':
@@ -248,7 +250,7 @@ export default function AppointmentTableDesktop({
                     case 'appointmentDate':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
-                          {formatDate(appointment.appointmentDate)}
+                          {formatDate(appointment.appointmentDate || '')}
                         </FrozenTableCell>
                       );
                     case 'notes':
@@ -257,9 +259,9 @@ export default function AppointmentTableDesktop({
                           key={colKey}
                           columnKey={colKey}
                           wrap
-                          title={appointment.notes}
+                          title={appointment.patientMessage || ''}
                         >
-                          {appointment.notes || '-'}
+                          {appointment.patientMessage || '-'}
                         </FrozenTableCell>
                       );
                     case 'additionalNotes':
@@ -268,7 +270,7 @@ export default function AppointmentTableDesktop({
                           key={colKey}
                           columnKey={colKey}
                           wrap
-                          title={appointment.additionalNotes}
+                          title={appointment.additionalNotes || undefined}
                         >
                           {appointment.additionalNotes || '-'}
                         </FrozenTableCell>
@@ -279,7 +281,7 @@ export default function AppointmentTableDesktop({
                           key={colKey}
                           columnKey={colKey}
                           wrap
-                          title={appointment.staffNotes}
+                          title={appointment.staffNotes || undefined}
                         >
                           {appointment.staffNotes || '-'}
                         </FrozenTableCell>
@@ -292,11 +294,11 @@ export default function AppointmentTableDesktop({
                               variant="outline"
                               className="text-xs font-medium"
                               style={{
-                                backgroundColor: SOURCE_COLORS[appointment.source]
+                                backgroundColor: appointment.source && SOURCE_COLORS[appointment.source]
                                   ? `${SOURCE_COLORS[appointment.source]}15`
                                   : undefined,
-                                borderColor: SOURCE_COLORS[appointment.source] || undefined,
-                                color: SOURCE_COLORS[appointment.source] || undefined,
+                                borderColor: appointment.source ? SOURCE_COLORS[appointment.source] : undefined,
+                                color: appointment.source ? SOURCE_COLORS[appointment.source] : undefined,
                               }}
                             >
                               {SOURCE_LABELS[appointment.source] || appointment.source}
@@ -377,7 +379,7 @@ export default function AppointmentTableDesktop({
                     case 'referrer':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
-                          {appointment[colKey] || '-'}
+                          {String((appointment as unknown as Record<string, unknown>)[colKey] || '-')}
                         </FrozenTableCell>
                       );
                     case 'fbclid':
@@ -388,7 +390,7 @@ export default function AppointmentTableDesktop({
                           columnKey={colKey}
                           className="text-xs font-mono"
                         >
-                          {appointment[colKey] || '-'}
+                          {String((appointment as unknown as Record<string, unknown>)[colKey] || '-')}
                         </FrozenTableCell>
                       );
                     case 'comments':
@@ -432,11 +434,11 @@ export default function AppointmentTableDesktop({
                                       appointment.doctorName || `طبيب #${appointment.doctorId}`;
                                     printReceipt(
                                       {
-                                        fullName: appointment.fullName || appointment.patientName,
+                                        fullName: appointment.fullName,
                                         phone: appointment.phone,
                                         age: appointment.age ?? undefined,
                                         registrationDate: new Date(
-                                          appointment.createdAt || appointment.appointmentDate
+                                          appointment.createdAt || appointment.appointmentDate || new Date()
                                         ),
                                         type: 'appointment',
                                         typeName: doctorName,

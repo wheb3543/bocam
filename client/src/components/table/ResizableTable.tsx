@@ -147,7 +147,7 @@ export function ResizableHeaderCell({
   );
 
   useEffect(() => {
-    if (!isResizing) return;
+    if (!isResizing) {return;}
 
     const handleMouseMove = (e: MouseEvent) => {
       // RTL: moving mouse to the left (negative diff) increases width
@@ -297,7 +297,7 @@ export function useFrozenColumns(
   const [frozenColumns, setFrozenColumns] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem(`frozenColumns_${storageKey}`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {return JSON.parse(saved);}
     } catch {}
     return defaultFrozen;
   });
@@ -321,7 +321,7 @@ export function useFrozenColumns(
         try {
           localStorage.setItem(`frozenColumns_${storageKey}`, JSON.stringify(updated));
         } catch {}
-        if (dbSaveFn) dbSaveFn(updated);
+        if (dbSaveFn) {dbSaveFn(updated);}
         return updated;
       });
     },
@@ -334,7 +334,7 @@ export function useFrozenColumns(
       try {
         localStorage.setItem(`frozenColumns_${storageKey}`, JSON.stringify(columns));
       } catch {}
-      if (dbSaveFn) dbSaveFn(columns);
+      if (dbSaveFn) {dbSaveFn(columns);}
     },
     [storageKey, dbSaveFn]
   );
@@ -344,7 +344,7 @@ export function useFrozenColumns(
     try {
       localStorage.removeItem(`frozenColumns_${storageKey}`);
     } catch {}
-    if (dbSaveFn) dbSaveFn(defaultFrozen);
+    if (dbSaveFn) {dbSaveFn(defaultFrozen);}
   }, [defaultFrozen, storageKey, dbSaveFn]);
 
   return {
@@ -453,7 +453,7 @@ export function useColumnWidths(
 
   const getWidth = useCallback(
     (key: string) => {
-      if (columnWidths[key]) return columnWidths[key];
+      if (columnWidths[key]) {return columnWidths[key];}
       const col = columns.find((c) => c.key === key);
       return getColumnWidth(key, col).width;
     },

@@ -4,17 +4,22 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * Tests for DashboardCharts components and charts router
  */
 
+interface MockComponentProps {
+  children?: React.ReactNode;
+  [key: string]: unknown;
+}
+
 // Mock recharts to avoid canvas/SVG rendering issues in tests
 vi.mock("recharts", () => ({
-  ResponsiveContainer: ({ children }: any) => children,
-  AreaChart: ({ children }: any) => children,
-  LineChart: ({ children }: any) => children,
-  BarChart: ({ children }: any) => children,
-  PieChart: ({ children }: any) => children,
+  ResponsiveContainer: ({ children }: MockComponentProps) => children,
+  AreaChart: ({ children }: MockComponentProps) => children,
+  LineChart: ({ children }: MockComponentProps) => children,
+  BarChart: ({ children }: MockComponentProps) => children,
+  PieChart: ({ children }: MockComponentProps) => children,
   Area: () => null,
   Line: () => null,
   Bar: () => null,
-  Pie: ({ children }: any) => children,
+  Pie: ({ children }: MockComponentProps) => children,
   Cell: () => null,
   XAxis: () => null,
   YAxis: () => null,
@@ -81,7 +86,7 @@ describe("Charts Router - Data Structures", () => {
 
 describe("Charts - Change Indicator Logic", () => {
   function calcChange(current: number, previous: number): number {
-    if (previous === 0) return current > 0 ? 100 : 0;
+    if (previous === 0) {return current > 0 ? 100 : 0;}
     return Math.round(((current - previous) / previous) * 100);
   }
 

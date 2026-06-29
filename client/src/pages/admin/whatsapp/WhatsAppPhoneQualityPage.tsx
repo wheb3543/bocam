@@ -1,5 +1,12 @@
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
+import type { RouterOutputs } from '@/types/trpc';
+import type { WhatsAppConversation } from '@shared/types';
+
+type QualityRecord = RouterOutputs['whatsapp']['phoneQuality']['getHistory'][number];
+type QualityWebhookEvent = RouterOutputs['whatsapp']['webhookEvents']['getEventsByCategory'][number];
+type ConversationQualityRecord = RouterOutputs['whatsapp']['conversationQuality']['getHistory'][number];
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -66,12 +73,12 @@ export default function WhatsAppPhoneQualityPage() {
   } = trpc.whatsapp.conversationQuality.getHistory.useQuery(
     { phoneNumber: phoneFilter || undefined, limit: 100 },
     { refetchInterval: 300000 }
-  );
+  ) as unknown as { data: ConversationQualityRecord[] | undefined; isLoading: boolean; refetch: () => void };
 
   const { data: conversationCosts } = trpc.whatsapp.getConversationCosts.useQuery(
     {},
     { refetchInterval: 300000 }
-  );
+  ) as unknown as { data: WhatsAppConversation[] | undefined };
 
   const handleRefresh = () => {
     refetchCurrent();
@@ -156,7 +163,7 @@ export default function WhatsAppPhoneQualityPage() {
 
   // Calculate trend from history
   const getQualityTrend = () => {
-    if (!qualityHistory || qualityHistory.length < 2) return null;
+    if (!qualityHistory || qualityHistory.length < 2) {return null;}
     const current = qualityHistory[0]?.qualityScore || 0;
     const previous = qualityHistory[1]?.qualityScore || 0;
     return { icon: getTrendIcon(current, previous), change: current - previous };
@@ -332,7 +339,7 @@ export default function WhatsAppPhoneQualityPage() {
                 <p className="text-2xl font-bold text-blue-600">
                   $
                   {conversationCosts
-                    ?.reduce((sum: number, c: any) => sum + (c.conversationCost || 0), 0)
+                    ?.reduce((sum: number, c: WhatsAppConversation) => sum + (c.totalCost || 0), 0)
                     .toFixed(2) || '0.00'}
                 </p>
               </div>
@@ -351,7 +358,7 @@ export default function WhatsAppPhoneQualityPage() {
                   {conversationCosts && conversationCosts.length > 0
                     ? (
                         conversationCosts.reduce(
-                          (sum: number, c: any) => sum + (c.conversationCost || 0),
+                          (sum: number, c: WhatsAppConversation) => sum + (c.totalCost || 0),
                           0
                         ) / conversationCosts.length
                       ).toFixed(2)
@@ -416,15 +423,15 @@ export default function WhatsAppPhoneQualityPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {qualityHistory.map((record: any, index: number) => (
+                      {qualityHistory.map((record: QualityRecord, index: number) => (
                         <tr key={record.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4">
-                            {new Date(record.createdAt).toLocaleString('ar-SA')}
+                            {record.createdAt ? new Date(record.createdAt).toLocaleString('ar-SA') : '-'}
                           </td>
-                          <td className="py-3 px-4">{record.phoneNumber}</td>
+                          <td className="py-3 px-4">{record.phoneNumber || ''}</td>
                           <td className="py-3 px-4">
-                            <Badge className={getRatingColor(record.qualityRating)}>
-                              {getRatingText(record.qualityRating)}
+                            <Badge className={getRatingColor(record.qualityRating || '')}>
+                              {getRatingText(record.qualityRating || '')}
                             </Badge>
                           </td>
                           <td className="py-3 px-4">{record.qualityScore || 'N/A'}</td>
@@ -476,10 +483,10 @@ export default function WhatsAppPhoneQualityPage() {
                   </thead>
                   <tbody>
                     {conversationCosts && conversationCosts.length > 0 ? (
-                      conversationCosts.map((conv: any) => (
+                      conversationCosts.map((conv: WhatsAppConversation) => (
                         <tr key={conv.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4" dir="ltr">
-                            {conv.phoneNumber}
+                            {conv.phoneNumber || ''}
                           </td>
                           <td className="py-3 px-4">{conv.pricingModel || 'غير محدد'}</td>
                           <td className="py-3 px-4">
@@ -491,10 +498,10 @@ export default function WhatsAppPhoneQualityPage() {
                             </Badge>
                           </td>
                           <td className="py-3 px-4 font-semibold">
-                            ${(conv.conversationCost || 0).toFixed(2)}
+                            ${(conv.totalCost || 0).toFixed(2)}
                           </td>
                           <td className="py-3 px-4">
-                            {new Date(conv.createdAt).toLocaleString('ar-SA')}
+                            {conv.createdAt ? new Date(conv.createdAt).toLocaleString('ar-SA') : '-'}
                           </td>
                         </tr>
                       ))
@@ -526,19 +533,19 @@ export default function WhatsAppPhoneQualityPage() {
                 <div className="text-center py-8">جاري التحميل...</div>
               ) : qualityWebhookEvents && qualityWebhookEvents.length > 0 ? (
                 <div className="space-y-3">
-                  {qualityWebhookEvents.map((event: any) => (
+                  {qualityWebhookEvents.map((event: QualityWebhookEvent) => (
                     <div key={event.id} className="p-4 border rounded-lg bg-gray-50">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold">{event.eventType}</h4>
+                            <h4 className="font-semibold">{event.eventType || ''}</h4>
                             {event.subType && <Badge variant="outline">{event.subType}</Badge>}
                           </div>
                           {event.phoneNumber && (
                             <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber}</p>
                           )}
                           <p className="text-xs text-gray-500 mt-2">
-                            {new Date(event.createdAt).toLocaleString('ar-SA')}
+                            {event.createdAt ? new Date(event.createdAt).toLocaleString('ar-SA') : '-'}
                           </p>
                         </div>
                         <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>
@@ -579,10 +586,10 @@ export default function WhatsAppPhoneQualityPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {conversationQualityQuery.map((record: any) => (
+                      {conversationQualityQuery.map((record: ConversationQualityRecord) => (
                         <tr key={record.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4">
-                            {new Date(record.createdAt).toLocaleString('ar-SA')}
+                            {record.createdAt ? new Date(record.createdAt).toLocaleString('ar-SA') : '-'}
                           </td>
                           <td className="py-3 px-4">{record.phoneNumber}</td>
                           <td className="py-3 px-4">{record.qualityScore || 'N/A'}</td>

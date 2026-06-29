@@ -15,6 +15,16 @@ import {
   ConversationCostUpdateEvent,
 } from '@/hooks/integrations/useWhatsAppSSE';
 import { trpc } from '@/lib/api/trpc';
+import type { RouterOutputs } from '@/types/trpc';
+
+type WebhookEvent = RouterOutputs['whatsapp']['webhookEvents']['getAll'][number];
+
+interface EventType {
+  eventType?: string;
+  count?: number;
+  [key: string]: unknown;
+}
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -57,16 +67,7 @@ export default function WhatsAppWebhookInspectorPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedEvent, setSelectedEvent] = useState<{
-    id: number;
-    eventType: string;
-    subType?: string;
-    phoneNumber?: string;
-    createdAt: string;
-    rawPayload: string;
-    processed: boolean;
-    handlerExists: boolean;
-  } | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<WebhookEvent | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [liveEventCount, setLiveEventCount] = useState(0);
   const [lastLiveEvent, setLastLiveEvent] = useState<string | null>(null);
@@ -132,9 +133,9 @@ export default function WhatsAppWebhookInspectorPage() {
   // ── SSE: تحديث فوري عند وصول أحداث جديدة ──────────────────────────────────
   useWhatsAppSSE({
     onWebhookEvent: useCallback(
-      (event: any) => {
+      (event: unknown) => {
         setLiveEventCount((prev) => prev + 1);
-        setLastLiveEvent(event.eventType);
+        setLastLiveEvent((event as { eventType?: string }).eventType || null);
         // تحديث القائمة تلقائياً
         refetch();
         refetchCount();
@@ -143,18 +144,18 @@ export default function WhatsAppWebhookInspectorPage() {
       [refetch, refetchCount, refetchTypes]
     ),
     onTemplateStatusUpdate: useCallback(
-      (event: any) => {
+      (event: unknown) => {
         setLiveEventCount((prev) => prev + 1);
-        setLastLiveEvent(`template_status: ${event.status}`);
+        setLastLiveEvent(`template_status: ${(event as { status?: string }).status}`);
         refetch();
         refetchCount();
       },
       [refetch, refetchCount]
     ),
     onAccountAlert: useCallback(
-      (event: any) => {
+      (event: unknown) => {
         setLiveEventCount((prev) => prev + 1);
-        setLastLiveEvent(`account_alert: ${event.alertType}`);
+        setLastLiveEvent(`account_alert: ${(event as { alertType?: string }).alertType}`);
         refetch();
         refetchCount();
       },
@@ -299,9 +300,9 @@ export default function WhatsAppWebhookInspectorPage() {
   };
 
   const filteredEvents = Array.isArray(displayEvents)
-    ? displayEvents.filter((event: any) => {
+    ? displayEvents.filter((event: WebhookEvent) => {
         const matchesSearch =
-          event.eventType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (event.eventType?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
           (event.rawPayload && event.rawPayload.includes(searchTerm));
         return matchesSearch;
       })
@@ -322,7 +323,7 @@ export default function WhatsAppWebhookInspectorPage() {
     ? statsByType.reduce((sum, stat) => sum + (stat.count || 0), 0)
     : 0;
   const processedEvents = Array.isArray(displayEvents)
-    ? displayEvents.filter((e: any) => e.processed).length
+    ? displayEvents.filter((e: WebhookEvent) => e.processed).length
     : 0;
 
   return (
@@ -484,14 +485,14 @@ export default function WhatsAppWebhookInspectorPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {eventTypes.map((type: any) => (
+              {eventTypes.map((type: EventType) => (
                 <Badge
                   key={type.eventType}
                   variant="outline"
                   className="text-sm cursor-pointer hover:bg-gray-100"
-                  onClick={() => setSearchTerm(type.eventType)}
+                  onClick={() => setSearchTerm(type.eventType || '')}
                 >
-                  {type.eventType} ({type.count})
+                  {(type.eventType as string) || ''} ({type.count || 0})
                 </Badge>
               ))}
             </div>
@@ -543,7 +544,7 @@ export default function WhatsAppWebhookInspectorPage() {
                 <div className="text-center py-8">جاري التحميل...</div>
               ) : filteredEvents && filteredEvents.length > 0 ? (
                 <div className="space-y-4">
-                  {filteredEvents.map((event: any) => (
+                  {filteredEvents.map((event: WebhookEvent) => (
                     <div
                       key={event.id}
                       className={`p-4 border rounded-lg ${
@@ -553,8 +554,8 @@ export default function WhatsAppWebhookInspectorPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold text-lg">{event.eventType}</h4>
-                            {event.subType && <Badge variant="outline">{event.subType}</Badge>}
+                            <h4 className="font-semibold text-lg">{(event.eventType as string) || ''}</h4>
+                            {(event.subType as string) && <Badge variant="outline">{(event.subType as string)}</Badge>}
                             {!event.handlerExists && (
                               <Badge className="bg-red-500 text-white gap-1">
                                 <AlertTriangle className="h-3 w-3" />
@@ -572,18 +573,18 @@ export default function WhatsAppWebhookInspectorPage() {
                           <div className="mt-2 text-sm text-gray-600">
                             <p>
                               <span className="font-semibold">التاريخ:</span>{' '}
-                              {new Date(event.createdAt).toLocaleString('ar-SA')}
+                              {event.createdAt ? new Date(event.createdAt).toLocaleString('ar-SA') : '-'}
                             </p>
-                            {event.phoneNumber && (
+                            {(event.phoneNumber as string) && (
                               <p>
-                                <span className="font-semibold">الرقم:</span> {event.phoneNumber}
+                                <span className="font-semibold">الرقم:</span> {(event.phoneNumber as string)}
                               </p>
                             )}
                           </div>
 
                           {/* Preview of payload */}
                           <div className="mt-3 p-2 bg-gray-100 rounded text-xs font-mono overflow-hidden text-ellipsis whitespace-nowrap">
-                            {event.rawPayload.substring(0, 200)}...
+                            {(event.rawPayload as string || '').substring(0, 200)}...
                           </div>
                         </div>
 
@@ -601,32 +602,32 @@ export default function WhatsAppWebhookInspectorPage() {
                             </DialogTrigger>
                             <DialogContent className="max-w-3xl max-h-[80vh] overflow-auto">
                               <DialogHeader>
-                                <DialogTitle>تفاصيل الحدث: {event.eventType}</DialogTitle>
+                                <DialogTitle>تفاصيل الحدث: {(event.eventType as string) || ''}</DialogTitle>
                               </DialogHeader>
                               <div className="mt-4 space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
                                     <p className="text-sm font-semibold">النوع:</p>
-                                    <p>{event.eventType}</p>
+                                    <p>{(event.eventType as string) || ''}</p>
                                   </div>
                                   <div>
                                     <p className="text-sm font-semibold">النوع الفرعي:</p>
-                                    <p>{event.subType || '-'}</p>
+                                    <p>{(event.subType as string) || '-'}</p>
                                   </div>
                                   <div>
                                     <p className="text-sm font-semibold">رقم الهاتف:</p>
-                                    <p>{event.phoneNumber || '-'}</p>
+                                    <p>{(event.phoneNumber as string) || '-'}</p>
                                   </div>
                                   <div>
                                     <p className="text-sm font-semibold">التاريخ:</p>
-                                    <p>{new Date(event.createdAt).toLocaleString('ar-SA')}</p>
+                                    <p>{event.createdAt ? new Date(event.createdAt).toLocaleString('ar-SA') : '-'}</p>
                                   </div>
                                 </div>
 
                                 <div>
                                   <p className="text-sm font-semibold mb-2">البيانات الكاملة:</p>
                                   <pre className="p-4 bg-gray-900 text-green-400 rounded-lg overflow-auto max-h-96 text-xs">
-                                    {JSON.stringify(JSON.parse(event.rawPayload), null, 2)}
+                                    {JSON.stringify(JSON.parse(event.rawPayload as string || '{}'), null, 2)}
                                   </pre>
                                 </div>
                               </div>
@@ -639,7 +640,7 @@ export default function WhatsAppWebhookInspectorPage() {
                                 size="sm"
                                 variant="outline"
                                 className="text-green-600 hover:bg-green-50"
-                                onClick={() => handleMarkAsProcessed(event.id, true)}
+                                onClick={() => handleMarkAsProcessed(event.id || 0, true)}
                                 disabled={markAsProcessedMutation.isPending}
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
@@ -649,7 +650,7 @@ export default function WhatsAppWebhookInspectorPage() {
                                 size="sm"
                                 variant="outline"
                                 className="text-orange-600 hover:bg-orange-50"
-                                onClick={() => handleMarkAsProcessed(event.id, false)}
+                                onClick={() => handleMarkAsProcessed(event.id || 0, false)}
                                 disabled={markAsProcessedMutation.isPending}
                               >
                                 <AlertCircle className="h-4 w-4 mr-1" />

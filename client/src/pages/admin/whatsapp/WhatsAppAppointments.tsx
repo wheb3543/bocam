@@ -5,6 +5,13 @@
 
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
+import type { WhatsappNotificationWithDetails } from '@shared/types';
+
+type EntityType = 'appointment' | 'camp_registration' | 'offer_lead';
+type NotificationStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
+
+type NotificationLog = WhatsappNotificationWithDetails;
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +42,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
+import type { RouterOutputs } from '@/types/trpc';
 
 const entityTypeLabels: Record<string, string> = {
   appointment: 'موعد طبي',
@@ -129,8 +137,8 @@ export default function WhatsAppAppointments() {
 
   // جلب سجلات الإشعارات مع فلترة
   const logsQuery = trpc.whatsapp.getNotificationLogs.useQuery({
-    entityType: filterEntityType !== 'all' ? (filterEntityType as any) : undefined,
-    status: filterStatus !== 'all' ? (filterStatus as any) : undefined,
+    entityType: filterEntityType !== 'all' ? (filterEntityType as EntityType) : undefined,
+    status: filterStatus !== 'all' ? (filterStatus as NotificationStatus) : undefined,
     limit,
     offset,
   });
@@ -144,7 +152,7 @@ export default function WhatsAppAppointments() {
     notificationStatsQuery.refetch();
   };
 
-  const handleResendNotification = (log: any) => {
+  const handleResendNotification = (log: NotificationLog) => {
     resendNotificationMutation.mutate({
       entityType: log.entityType,
       entityId: log.entityId,
@@ -159,7 +167,7 @@ export default function WhatsAppAppointments() {
     runJobsMutation.mutate();
   };
 
-  const handleSendReminder = (log: any) => {
+  const handleSendReminder = (log: NotificationLog) => {
     sendReminderMutation.mutate({
       appointmentId: log.entityId,
       phone: log.phone,
@@ -170,7 +178,7 @@ export default function WhatsAppAppointments() {
     });
   };
 
-  const handleSendFollowup = (log: any) => {
+  const handleSendFollowup = (log: NotificationLog) => {
     sendFollowupMutation.mutate({
       appointmentId: log.entityId,
       phone: log.phone,
@@ -200,7 +208,7 @@ export default function WhatsAppAppointments() {
   };
 
   const formatDate = (dateStr: string | Date | null) => {
-    if (!dateStr) return '—';
+    if (!dateStr) {return '—';}
     const d = new Date(dateStr);
     return d.toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short' });
   };
@@ -443,7 +451,7 @@ export default function WhatsAppAppointments() {
               </div>
             ) : (
               <div className="space-y-2">
-                {logs.map((log: any) => (
+                {logs.map((log: NotificationLog) => (
                   <div
                     key={log.id}
                     className="p-4 border rounded-lg hover:bg-muted/30 transition-colors"

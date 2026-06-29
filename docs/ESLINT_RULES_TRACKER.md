@@ -9,8 +9,13 @@
 | القاعدة | المستوى | الوصف | الحالة | تاريخ التفعيل |
 |---------|---------|-------|--------|--------------|
 | `react-hooks/rules-of-hooks` | error | يضمن استدعاء React Hooks في نفس الترتيب في كل render، على مستوى أعلى من المكون | ✅ مفعلة | 2026-06-18 |
-| `@typescript-eslint/no-non-null-assertion` | warn | يمنع استخدام `!` (non-null assertion) | ✅ مفعلة | 2026-06-18 |
+| `@typescript-eslint/no-non-null-assertion` | error | يمنع استخدام `!` (non-null assertion) | ✅ مفعلة | 2026-06-18 |
 | `preserve-caught-error` | error | يضمن إضافة `cause` عند re-throwing errors | ✅ مفعلة | 2026-06-18 |
+| `@typescript-eslint/no-explicit-any` | error | يمنع استخدام `any` في TypeScript | ✅ مفعلة | 2026-06-28 |
+| `prefer-const` | error | يفضل استخدام const بدلاً من let | ✅ مفعلة | 2026-06-28 |
+| `eqeqeq` | error | يفرض استخدام === بدلاً من == | ✅ مفعلة | 2026-06-28 |
+| `curly` | error | يفرض استخدام أقواس معارضة دائماً | ✅ مفعلة | 2026-06-28 |
+| `no-undef` | error | يمنع استخدام متغيرات غير معرفة | ✅ مفعلة | 2026-06-28 |
 
 ---
 
@@ -20,10 +25,8 @@
 
 | القاعدة | المستوى الحالي | المستوى المقترح | الوصف | الحالة | المشاكل المتوقعة |
 |---------|---------------|----------------|-------|--------|------------------|
-| `@typescript-eslint/no-explicit-any` | off | error | يمنع استخدام `any` في TypeScript | ❌ غير مفعلة | فقدان type safety |
 | `@typescript-eslint/no-unused-vars` | off | warn | يمنع المتغيرات غير المستخدمة | ❌ غير مفعلة | كود غير نظيف |
 | `react-hooks/exhaustive-deps` | off | warn | يضمن إضافة جميع dependencies في useEffect و useMemo | ❌ غير مفعلة | bugs محتملة في React |
-| `prefer-const` | off | error | يفضل استخدام const بدلاً من let | ❌ غير مفعلة | كود غير نظيف |
 
 ### المستوى: الأهمية المتوسطة (Medium Priority)
 
@@ -33,9 +36,6 @@
 | `no-unused-vars` | off | warn | يمنع المتغيرات غير المستخدمة في JavaScript | ❌ غير مفعلة | كود غير نظيف |
 | `no-console` | off | warn | يمنع استخدام console.log في production | ❌ غير مفعلة | تسريبات معلومات |
 | `no-debugger` | off | error | يمنع استخدام debugger statement | ❌ غير مفعلة | debugger statements في production |
-| `eqeqeq` | off | error | يفرض استخدام === بدلاً من == | ❌ غير مفعلة | bugs محتملة من type coercion |
-| `curly` | off | error | يفرض استخدام أقواس معارضة دائماً | ❌ غير مفعلة | bugs محتملة من syntax |
-| `no-undef` | off | error | يمنع استخدام متغيرات غير معرفة | ❌ غير مفعلة | runtime errors |
 
 ### المستوى: الأهمية المنخفضة (Low Priority)
 
@@ -75,7 +75,7 @@
   - الملفات المتأثرة: `CampStatsPage.tsx`, `OfferLeadsManagement.tsx`
   - الحالة: تم الحل بنجاح
 
-- ✅ تفعيل `@typescript-eslint/no-non-null-assertion` (warn)
+- ✅ تفعيل `@typescript-eslint/no-non-null-assertion` (error)
   - الحل: استبدال `!` بـ optional chaining `?.` و nullish coalescing `??` و فحوصات صريحة
   - الملفات المتأثرة:
     - Client: `tracking.test.ts`, `ChatWindow.tsx`, `TasksSection.tsx`, `CustomerProfilesHooks.test.ts`, `ResizableTable.test.ts`, `DashboardSidebar.tsx`, `ColumnVisibility.tsx`, `useTableFeatures.sort.test.ts`, `usePersistFn.ts`, `useSSE.ts`, `main.tsx`, `PWAStatsPage.tsx`, `UsersManagementPage.tsx`, `WhatsAppTemplatesPage.tsx`
@@ -86,6 +86,36 @@
   - الحل: الكود الحالي يتبع القاعدة بالفعل (تم حلها يدوياً سابقاً)
   - الحالة: تم الحل بنجاح (0 errors, 0 warnings)
 
+### 2026-06-28
+- ✅ تفعيل `@typescript-eslint/no-explicit-any` (error)
+  - الحل: استبدال `any` بواجهات TypeScript مناسبة و `unknown` و `keyof`
+  - الملفات المتأثرة:
+    - Client: `MetaPixel.tsx`, `AppointmentsTab.tsx`, `WhatsAppPhoneQualityPage.tsx`, `WhatsAppWebhookInspectorPage.tsx`, `PatientAppointmentDetailsPage.tsx`, `PatientAppointmentsPage.tsx`, `PatientDashboard.tsx`, `PatientResultDetailsPage.tsx`, `PatientResultsPage.tsx`
+  - الحالة: تم الحل بنجاح (16 خطأ في 9 ملفات)
+  - الواجهات المضافة: `ConnectionStatus`, `SavedSearch`, `SSEMessageEvent`, `AutoReplyRule`, `SearchMessage`, `ConversationCost`, `QualityRecord`, `QualityWebhookEvent`, `WebhookEvent`
+
+- ✅ تفعيل `prefer-const` (error)
+  - الحل: استبدال `let` بـ `const` للمتغيرات التي لا يتم إعادة تعيينها
+  - الملفات المتأثرة:
+    - Client: `AppointmentsTab.tsx`, `CampRegistrationsManagement.tsx`, `OfferLeadsManagement.tsx`, `useSlugGenerator.ts`, `usePhoneFormat.ts`, `advancedExport.ts`, `Home.tsx`, `AppointmentsManagementPage.tsx`, `UsersManagementPage.tsx`, `ChatWindow.test.tsx`
+  - الحالة: تم الحل بنجاح (13 خطأ في 10 ملفات)
+
+- ✅ تفعيل `eqeqeq` (error)
+  - الحل: استبدال `==` بـ `===` و `!=` بـ `!==`
+  - الملفات المتأثرة:
+    - Client: `ChatWindow.tsx`, `CustomerProfilesHooks.test.ts`, `useTableFeatures.sort.test.ts`, `useFilterUtils.ts`, `useTableFeatures.ts`
+  - الحالة: تم الحل بنجاح (30 خطأ في 5 ملفات)
+
+- ✅ تفعيل `curly` (error)
+  - الحل: إضافة أقواس معارضة لجميع عبارات if/else
+  - الملفات المتأثرة: جميع الملفات التي تحتوي على عبارات if بدون أقواس
+  - الحالة: تم الحل بنجاح (530 خطأ تم إصلاحها تلقائياً)
+
+- ✅ تفعيل `no-undef` (error)
+  - الحل: إضافة المتغيرات العالمية المفقودة إلى ESLint config (React, Blob, URL, FormData, إلخ)
+  - الملفات المتأثرة: جميع الملفات التي تستخدم متغيرات عالمية
+  - الحالة: تم الحل بنجاح (416 خطأ تم حلها بإضافة 62 متغير عالمي)
+
 ---
 
 ## الخطة المقترحة للتفعيل
@@ -94,15 +124,15 @@
 1. ✅ `react-hooks/rules-of-hooks` - تم التفعيل
 2. ✅ `@typescript-eslint/no-non-null-assertion` - تم التفعيل
 3. ✅ `preserve-caught-error` - تم التفعيل
-4. `@typescript-eslint/no-explicit-any` - يحتاج مراجعة شاملة للكود
-5. `@typescript-eslint/no-unused-vars` - يحتاج تنظيف الكود
-6. `react-hooks/exhaustive-deps` - يحتاج مراجعة dependencies
-7. `prefer-const` - يمكن تفعيله بسهولة
+4. ✅ `@typescript-eslint/no-explicit-any` - تم التفعيل
+5. ✅ `prefer-const` - تم التفعيل
+6. `@typescript-eslint/no-unused-vars` - يحتاج تنظيف الكود
+7. `react-hooks/exhaustive-deps` - يحتاج مراجعة dependencies
 
 ### المرحلة 2: الأهمية المتوسطة
-1. `eqeqeq` - يمكن تفعيله بسهولة
-2. `curly` - يمكن تفعيله بسهولة
-3. `no-undef` - يمكن تفعيله بسهولة
+1. ✅ `eqeqeq` - تم التفعيل
+2. ✅ `curly` - تم التفعيل
+3. ✅ `no-undef` - تم التفعيل
 4. `no-console` - يحتاج إزالة console.logs
 5. `no-debugger` - يمكن تفعيله بسهولة
 6. `@typescript-eslint/no-throw-literal` - يحتاج مراجعة

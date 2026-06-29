@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 type Direction = 'up' | 'down' | 'left' | 'right' | 'none';
 
-interface FadeInProps {
+interface FadeInProps<T extends React.ElementType> {
   children: ReactNode;
   direction?: Direction;
   delay?: number; // ms
@@ -12,14 +12,14 @@ interface FadeInProps {
   className?: string;
   once?: boolean; // animate only once (default true)
   threshold?: number; // intersection observer threshold
-  as?: React.ElementType;
+  as?: T;
 }
 
 /**
  * FadeIn - مكون ظهور تدريجي مع اتجاه الحركة
  * يدعم IntersectionObserver للتفعيل عند الظهور في viewport
  */
-export default function FadeIn({
+export default function FadeIn<T extends React.ElementType = 'div'>({
   children,
   direction = 'up',
   delay = 0,
@@ -28,14 +28,14 @@ export default function FadeIn({
   className,
   once = true,
   threshold = 0.1,
-  as: Component = 'div',
-}: FadeInProps) {
+  as: Component = 'div' as T,
+}: FadeInProps<T>) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element) {return;}
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -59,7 +59,7 @@ export default function FadeIn({
   }, [once, threshold]);
 
   const getTransform = (): string => {
-    if (isVisible) return 'translate3d(0, 0, 0)';
+    if (isVisible) {return 'translate3d(0, 0, 0)';}
     switch (direction) {
       case 'up':
         return `translate3d(0, ${distance}px, 0)`;
@@ -74,7 +74,7 @@ export default function FadeIn({
     }
   };
 
-  const Tag = Component as any;
+  const Tag = Component as React.ElementType;
 
   return (
     <Tag

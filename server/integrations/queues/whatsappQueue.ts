@@ -55,7 +55,7 @@ export interface WhatsAppMessageJob {
 
 // Create the queue (will be initialized only if Redis is available)
 let whatsappQueue: Queue<WhatsAppMessageJob> | null = null;
-let whatsappWorker: Worker<WhatsAppMessageJob, any, string> | null = null;
+let whatsappWorker: Worker<WhatsAppMessageJob, unknown, string> | null = null;
 
 async function initializeQueue() {
   if (whatsappQueue) return whatsappQueue;

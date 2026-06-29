@@ -26,7 +26,7 @@ interface MetaTemplate {
     format?: string;
     text?: string;
     buttons?: Array<{ type: string; text: string; url?: string }>;
-    example?: any;
+    example?: Record<string, unknown>;
   }>;
 }
 
@@ -77,7 +77,7 @@ export async function fetchTemplatesFromMeta(
       };
     }
 
-    const templates: MetaTemplate[] = result.templates || [];
+    const templates = (result.templates as unknown as MetaTemplate[]) || [];
     console.log(
       `[MetaTemplateSync] Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`
     );
@@ -183,7 +183,7 @@ export async function pushTemplateToMeta(
   content?: string,
   category: string = 'UTILITY',
   language: string = 'ar',
-  components?: any[]
+  components?: Record<string, unknown>[]
 ): Promise<SyncResult> {
   try {
     const wabaId = await getWabaId(phoneNumberId);
@@ -221,7 +221,7 @@ export async function pushTemplateToMeta(
       };
     }
 
-    const metaTemplateId = res.data?.id;
+    const metaTemplateId = (res.data as { id?: string })?.id;
 
     // تحديث حالة القالب في قاعدة البيانات
     const db = await getDb();
@@ -273,7 +273,7 @@ export async function checkTemplateStatus(
       };
     }
 
-    const status = res.data?.status;
+    const status = (res.data as { status?: string })?.status;
 
     // تحديث الحالة في قاعدة البيانات
     const db = await getDb();

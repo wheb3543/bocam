@@ -64,7 +64,7 @@ export function OptionalUpdateBanner({ onInstall, onDismiss }: OptionalUpdateBan
       const data = await response.json();
 
       if (data.success) {
-        if (onInstall) onInstall();
+        if (onInstall) {onInstall();}
         setIsVisible(false);
       } else {
         alert('فشل بدء التحديث: ' + data.error);
@@ -78,7 +78,7 @@ export function OptionalUpdateBanner({ onInstall, onDismiss }: OptionalUpdateBan
 
   const handleDismiss = () => {
     setIsVisible(false);
-    if (onDismiss) onDismiss();
+    if (onDismiss) {onDismiss();}
   };
 
   if (!isVisible || !status?.pendingUpdate || status.pendingUpdate.mandatory) {

@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -25,19 +26,86 @@ import {
   BusinessAccountUpdateEvent,
 } from '@/hooks/integrations/useWhatsAppSSE';
 
+interface LiveAlert {
+  alertType: string;
+  severity: string;
+  details?: unknown;
+  timestamp: string;
+}
+
+interface Conversation {
+  id: number;
+  phoneNumber: string;
+  customerName: string | null;
+  lastMessage: string | null;
+  lastMessageAt: Date | null;
+  unreadCount: number;
+  isImportant: number;
+  isArchived: number;
+  leadId: number | null;
+  appointmentId: number | null;
+  offerLeadId: number | null;
+  campRegistrationId: number | null;
+  assignedToUserId: number | null;
+  notes: string | null;
+  conversationIdMeta: string | null;
+  originType: string | null;
+  expirationTimestamp: Date | null;
+  pricingModel: string | null;
+  billable: boolean;
+  pricingCategory: string | null;
+  totalCost: number;
+  messageCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
+interface ConversationCost {
+  id: number;
+  phoneNumber: string;
+  conversationCost: number;
+  pricingModel?: string | null;
+  [key: string]: unknown;
+}
+
+interface Alert {
+  id: number;
+  alertType: string;
+  severity: string;
+  details: string | null;
+  resolved: boolean;
+  createdAt: string | Date;
+  [key: string]: unknown;
+}
+
+interface SecurityEvent {
+  id: number;
+  eventType: string;
+  details: string | null;
+  severity: string;
+  phoneNumber?: string | null;
+  createdAt: string | Date;
+  [key: string]: unknown;
+}
+
+interface WebhookEvent {
+  id: number;
+  eventType: string;
+  subType?: string | null;
+  phoneNumber?: string | null;
+  createdAt: string | Date;
+  [key: string]: unknown;
+}
+
+type Severity = 'critical' | 'high' | 'medium' | 'low' | null;
+
 export default function WhatsAppAccountHealthPage() {
   const [activeTab, setActiveTab] = useState('alerts');
   const [severityFilter, setSeverityFilter] = useState<string | null>(null);
 
   // حالة التنبيهات المباشرة عبر SSE
-  const [liveAlerts, setLiveAlerts] = useState<
-    Array<{
-      alertType: string;
-      severity: string;
-      details?: any;
-      timestamp: string;
-    }>
-  >([]);
+  const [liveAlerts, setLiveAlerts] = useState<LiveAlert[]>([]);
   const [hasNewCritical, setHasNewCritical] = useState(false);
 
   const {
@@ -45,7 +113,7 @@ export default function WhatsAppAccountHealthPage() {
     isLoading: alertsLoading,
     refetch: refetchAlerts,
   } = trpc.whatsapp.accountHealth.getAlerts.useQuery(
-    { severity: severityFilter as any, resolved: false, limit: 50 },
+    { resolved: false, limit: 50, severity: severityFilter as 'low' | 'medium' | 'high' | 'critical' | undefined },
     { refetchInterval: 120000 }
   );
 
@@ -54,7 +122,7 @@ export default function WhatsAppAccountHealthPage() {
     isLoading: securityLoading,
     refetch: refetchSecurity,
   } = trpc.whatsapp.accountHealth.getSecurityEvents.useQuery(
-    { severity: severityFilter as any, limit: 50 },
+    { limit: 50, severity: severityFilter as 'low' | 'medium' | 'high' | 'critical' | undefined },
     { refetchInterval: 120000 }
   );
 
@@ -122,8 +190,8 @@ export default function WhatsAppAccountHealthPage() {
 
   // حساب التنبيهات الذكية
   const windowExpiredConversations = Array.isArray(conversations)
-    ? conversations.filter((c: any) => {
-        if (!c.lastMessageAt) return false;
+    ? conversations.filter((c: Conversation) => {
+        if (!c.lastMessageAt) {return false;}
         const hoursSinceLastMessage =
           (Date.now() - new Date(c.lastMessageAt).getTime()) / (1000 * 60 * 60);
         return hoursSinceLastMessage > 24;
@@ -131,11 +199,11 @@ export default function WhatsAppAccountHealthPage() {
     : [];
 
   const highCostConversations = Array.isArray(conversationCosts)
-    ? conversationCosts.filter((c: any) => (c.conversationCost || 0) > 1.0)
+    ? conversationCosts.filter((c) => (c.totalCost || 0) > 1.0)
     : [];
 
   const totalHighCost = highCostConversations.reduce(
-    (sum: number, c: any) => sum + (c.conversationCost || 0),
+    (sum: number, c) => sum + (c.totalCost || 0),
     0
   );
 
@@ -152,7 +220,7 @@ export default function WhatsAppAccountHealthPage() {
   // ── SSE: تنبيهات فورية من الـ webhook ──────────────────────────────────────
   useWhatsAppSSE({
     onAccountAlert: useCallback(
-      (event: any) => {
+      (event: { alertType: string; severity: string; details?: unknown; timestamp: string }) => {
         // إضافة التنبيه للقائمة المحلية فوراً
         setLiveAlerts((prev) => [
           {
@@ -263,7 +331,7 @@ export default function WhatsAppAccountHealthPage() {
                 <p className="text-sm text-gray-600">تنبيهات حرجة</p>
                 <p className="text-2xl font-bold text-red-600">
                   {Array.isArray(alerts)
-                    ? alerts.filter((a: any) => a.severity === 'critical' && !a.resolved).length
+                    ? alerts.filter((a: Alert) => a.severity === 'critical' && !a.resolved).length
                     : 0}
                 </p>
               </div>
@@ -279,7 +347,7 @@ export default function WhatsAppAccountHealthPage() {
                 <p className="text-sm text-gray-600">تنبيهات عالية</p>
                 <p className="text-2xl font-bold text-orange-600">
                   {Array.isArray(alerts)
-                    ? alerts.filter((a: any) => a.severity === 'high' && !a.resolved).length
+                    ? alerts.filter((a: Alert) => a.severity === 'high' && !a.resolved).length
                     : 0}
                 </p>
               </div>
@@ -306,7 +374,7 @@ export default function WhatsAppAccountHealthPage() {
               <div>
                 <p className="text-sm text-gray-600">تم حلها</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {Array.isArray(alerts) ? alerts.filter((a: any) => a.resolved).length : 0}
+                  {Array.isArray(alerts) ? alerts.filter((a: Alert) => a.resolved).length : 0}
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
@@ -337,7 +405,7 @@ export default function WhatsAppAccountHealthPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">تكاليف مرتفعة</p>
-                <p className="text-2xl font-bold text-red-600">${totalHighCost.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-red-600">${typeof totalHighCost === 'number' ? totalHighCost.toFixed(2) : '0.00'}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {highCostConversations.length} محادثة مكلفة
                 </p>
@@ -455,7 +523,7 @@ export default function WhatsAppAccountHealthPage() {
                 <div className="text-center py-8">جاري التحميل...</div>
               ) : alerts && alerts.length > 0 ? (
                 <div className="space-y-4">
-                  {alerts.map((alert: any) => (
+                  {alerts.map((alert: Alert) => (
                     <div
                       key={alert.id}
                       className={`p-4 border rounded-lg ${alert.resolved ? 'bg-gray-50 opacity-60' : 'bg-white'}`}
@@ -524,25 +592,25 @@ export default function WhatsAppAccountHealthPage() {
               <CardContent>
                 {windowExpiredConversations.length > 0 ? (
                   <div className="space-y-3">
-                    {windowExpiredConversations.slice(0, 5).map((conv: any) => (
+                    {windowExpiredConversations.slice(0, 5).map((conv: Conversation) => (
                       <div
                         key={conv.id}
                         className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg"
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-semibold text-sm">
-                              {conv.customerName || 'عميل جديد'}
-                            </p>
-                            <p className="text-xs text-gray-600" dir="ltr">
-                              {conv.phoneNumber}
-                            </p>
-                          </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-sm">
+                            {conv.customerName ?? 'عميل جديد'}
+                          </p>
+                          <p className="text-xs text-gray-600" dir="ltr">
+                            {conv.phoneNumber ?? ''}
+                          </p>
+                        </div>
                           <Badge className="bg-amber-100 text-amber-800">
-                            {Math.floor(
+                            {conv.lastMessageAt ? Math.floor(
                               (Date.now() - new Date(conv.lastMessageAt).getTime()) /
                                 (1000 * 60 * 60)
-                            )}{' '}
+                            ) : 0}{' '}
                             ساعة
                           </Badge>
                         </div>
@@ -575,20 +643,20 @@ export default function WhatsAppAccountHealthPage() {
               <CardContent>
                 {highCostConversations.length > 0 ? (
                   <div className="space-y-3">
-                    {highCostConversations.slice(0, 5).map((conv: any) => (
+                    {highCostConversations.slice(0, 5).map((conv) => (
                       <div
                         key={conv.id}
                         className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-lg"
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-semibold text-sm">{conv.phoneNumber}</p>
-                            <p className="text-xs text-gray-600">
-                              {conv.pricingModel || 'غير محدد'}
-                            </p>
-                          </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-sm">{conv.phoneNumber ?? ''}</p>
+                          <p className="text-xs text-gray-600">
+                            {conv.pricingModel ?? 'غير محدد'}
+                          </p>
+                        </div>
                           <Badge className="bg-red-100 text-red-800">
-                            ${(conv.conversationCost || 0).toFixed(2)}
+                            ${(conv.totalCost || 0).toFixed(2)}
                           </Badge>
                         </div>
                       </div>
@@ -621,7 +689,7 @@ export default function WhatsAppAccountHealthPage() {
                 <div className="text-center py-8">جاري التحميل...</div>
               ) : securityEvents && securityEvents.length > 0 ? (
                 <div className="space-y-4">
-                  {securityEvents.map((event: any) => (
+                  {securityEvents.map((event: SecurityEvent) => (
                     <div key={event.id} className="p-4 border rounded-lg bg-white">
                       <div className="flex items-start gap-3">
                         <Shield className="h-5 w-5 text-blue-500" />
@@ -675,7 +743,7 @@ export default function WhatsAppAccountHealthPage() {
                     <div className="text-center py-8">جاري التحميل...</div>
                   ) : accountWebhookEvents && accountWebhookEvents.length > 0 ? (
                     <div className="space-y-3">
-                      {accountWebhookEvents.map((event: any) => (
+                      {accountWebhookEvents.map((event: WebhookEvent) => (
                         <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
                           <div className="flex items-center justify-between">
                             <div>
@@ -687,7 +755,7 @@ export default function WhatsAppAccountHealthPage() {
                               )}
                             </div>
                             <span className="text-xs text-gray-500">
-                              {new Date(event.createdAt).toLocaleString('ar-SA')}
+                              {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
                             </span>
                           </div>
                         </div>
@@ -704,7 +772,7 @@ export default function WhatsAppAccountHealthPage() {
                     <div className="text-center py-8">جاري التحميل...</div>
                   ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
                     <div className="space-y-3">
-                      {securityWebhookEvents.map((event: any) => (
+                      {securityWebhookEvents.map((event: WebhookEvent) => (
                         <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
                           <div className="flex items-center justify-between">
                             <div>
@@ -716,7 +784,7 @@ export default function WhatsAppAccountHealthPage() {
                               )}
                             </div>
                             <span className="text-xs text-gray-500">
-                              {new Date(event.createdAt).toLocaleString('ar-SA')}
+                              {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
                             </span>
                           </div>
                         </div>

@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import CampRegistrationsManagement from '@/components/camp/CampRegistrationsManagement';
@@ -19,8 +20,30 @@ import {
   CartesianGrid,
 } from 'recharts';
 
+interface CampRegistration {
+  id: number;
+  campId: number;
+  campName: string | null;
+  campSlug: string | null;
+  fullName: string;
+  phone: string;
+  email: string | null;
+  age: number | null;
+  procedures: string | null;
+  medicalCondition: string | null;
+  notes: string | null;
+  patientMessage: string | null;
+  source: string | null;
+  status: string;
+  preferredDate: string | null;
+  preferredTimeSlot: 'morning' | 'evening' | null;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
 function inDateRange(createdAt: unknown, from: Date, to: Date): boolean {
-  if (!createdAt) return false;
+  if (!createdAt) {return false;}
   const t = new Date(createdAt as string | Date).getTime();
   return t >= from.getTime() && t <= to.getTime();
 }
@@ -36,8 +59,8 @@ export default function CampRegistrationsPage() {
   const { data: registrations } = trpc.campRegistrations.list.useQuery();
 
   const rangeRegistrations = useMemo(() => {
-    if (!registrations) return [];
-    return registrations.filter((r: any) => inDateRange(r.createdAt, dateRange.from, dateRange.to));
+    if (!registrations) {return [];}
+    return registrations.filter((r) => inDateRange(r.createdAt, dateRange.from, dateRange.to));
   }, [registrations, dateRange.from, dateRange.to]);
 
   // Calculate statistics (aligned with backend stats.confirmed = confirmed + attended + completed)
@@ -45,27 +68,27 @@ export default function CampRegistrationsPage() {
     const list = rangeRegistrations;
     return {
       total: list.length,
-      pending: list.filter((r: any) => r.status === 'pending').length,
+      pending: list.filter((r) => r.status === 'pending').length,
       confirmed: list.filter(
-        (r: any) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
+        (r) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
       ).length,
-      attended: list.filter((r: any) => r.status === 'attended' || r.status === 'completed').length,
-      cancelled: list.filter((r: any) => r.status === 'cancelled').length,
+      attended: list.filter((r) => r.status === 'attended' || r.status === 'completed').length,
+      cancelled: list.filter((r) => r.status === 'cancelled').length,
     };
   }, [rangeRegistrations]);
 
   // Status distribution for pie chart
   const statusData = useMemo(() => {
-    if (!rangeRegistrations.length) return [];
+    if (!rangeRegistrations.length) {return [];}
 
     const statusCounts = {
-      pending: rangeRegistrations.filter((r: any) => r.status === 'pending').length,
-      contacted: rangeRegistrations.filter((r: any) => r.status === 'contacted').length,
-      no_answer: rangeRegistrations.filter((r: any) => r.status === 'no_answer').length,
-      confirmed: rangeRegistrations.filter((r: any) => r.status === 'confirmed').length,
-      attended: rangeRegistrations.filter((r: any) => r.status === 'attended').length,
-      completed: rangeRegistrations.filter((r: any) => r.status === 'completed').length,
-      cancelled: rangeRegistrations.filter((r: any) => r.status === 'cancelled').length,
+      pending: rangeRegistrations.filter((r) => r.status === 'pending').length,
+      contacted: rangeRegistrations.filter((r) => r.status === 'contacted').length,
+      no_answer: rangeRegistrations.filter((r) => r.status === 'no_answer').length,
+      confirmed: rangeRegistrations.filter((r) => r.status === 'confirmed').length,
+      attended: rangeRegistrations.filter((r) => r.status === 'attended').length,
+      completed: rangeRegistrations.filter((r) => r.status === 'completed').length,
+      cancelled: rangeRegistrations.filter((r) => r.status === 'cancelled').length,
     };
 
     return [
@@ -81,10 +104,10 @@ export default function CampRegistrationsPage() {
 
   // Daily registrations within selected range (cap display buckets)
   const dailyRegistrations = useMemo(() => {
-    if (!rangeRegistrations.length) return [];
+    if (!rangeRegistrations.length) {return [];}
 
     const dateMap = new Map<string, number>();
-    rangeRegistrations.forEach((r: any) => {
+    rangeRegistrations.forEach((r) => {
       if (r.createdAt) {
         const date = new Date(r.createdAt).toLocaleDateString('ar-SA', {
           month: 'short',

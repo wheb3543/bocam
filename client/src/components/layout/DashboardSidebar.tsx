@@ -207,7 +207,7 @@ function getVisibleItemIds(): string[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {return parsed;}
     }
   } catch {}
   return DEFAULT_VISIBLE_IDS;
@@ -579,7 +579,7 @@ function SidebarBadge({ count, className }: { count: number; className?: string 
     prevCountRef.current = count;
   }, [count]);
 
-  if (!count || count <= 0) return null;
+  if (!count || count <= 0) {return null;}
   const display = count > 99 ? '99+' : String(count);
   return (
     <span
@@ -631,7 +631,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
   // Map nav item IDs to their badge counts
   const getBadgeCount = useCallback(
     (itemId: string): number => {
-      if (!badgeCounts) return 0;
+      if (!badgeCounts) {return 0;}
       const mapping: Record<string, number> = {
         leads: badgeCounts.leads,
         tasks: badgeCounts.tasks,
@@ -666,7 +666,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
     const newExpanded: Record<string, boolean> = {};
     filteredToolsGroups.forEach((group) => {
       const hasActive = group.items.some((item) => {
-        if (item.href === '/admin') return currentPath === '/admin';
+        if (item.href === '/admin') {return currentPath === '/admin';}
         return currentPath === item.href || currentPath.startsWith(item.href + '/');
       });
       if (hasActive || group.defaultOpen) {
@@ -788,7 +788,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
   const toggleEditItem = useCallback((id: string) => {
     setEditingItemIds((prev) => {
       if (prev.includes(id)) {
-        if (id === 'home') return prev;
+        if (id === 'home') {return prev;}
         return prev.filter((i) => i !== id);
       } else {
         return [...prev, id];
@@ -798,7 +798,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over || active.id === over.id) {return;}
 
     setEditingItemIds((prev) => {
       // Only reorder within checked items
@@ -809,11 +809,11 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
       const oldIndex = prev.indexOf(activeId);
       const newIndex = prev.indexOf(overId);
 
-      if (oldIndex === -1 || newIndex === -1) return prev;
+      if (oldIndex === -1 || newIndex === -1) {return prev;}
       // Don't allow moving "home" from first position
       if (activeId === 'home' || (newIndex === 0 && prev[0] === 'home')) {
         // Allow moving home only within checked, but keep it first
-        if (activeId === 'home') return prev;
+        if (activeId === 'home') {return prev;}
         // If trying to move something to index 0 where home is, put it at index 1
         if (newIndex === 0) {
           const withoutActive = prev.filter((id) => id !== activeId);
@@ -1096,13 +1096,13 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
                     <SortableContext items={editingItemIds} strategy={verticalListSortingStrategy}>
                       {editingItemIds
                         .map((id) => allNavItems.find((item) => item.id === id))
-                        .filter(Boolean)
+                        .filter((item): item is NonNullable<typeof item> => Boolean(item))
                         .map((item) => (
                           <SortableEditItem
-                            key={item?.id ?? ''}
+                            key={item.id}
                             item={item}
                             isChecked={true}
-                            isHome={item?.id === 'home'}
+                            isHome={item.id === 'home'}
                             onToggle={toggleEditItem}
                           />
                         ))}

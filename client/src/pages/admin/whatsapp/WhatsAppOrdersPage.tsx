@@ -32,6 +32,23 @@ import {
 } from '@/hooks/integrations/useWhatsAppSSE';
 import { toast } from 'sonner';
 
+interface Order {
+  id: number;
+  phoneNumber: string;
+  conversationId: number;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  messageId?: number;
+  catalogId?: string | null;
+  productItems?: string | null;
+  orderText?: string | null;
+  totalAmount?: number | null;
+  currency?: string | null;
+  metadata?: string;
+  content?: string;
+}
+
 export default function WhatsAppOrdersPage() {
   const [status, setStatus] = useState<string>('all');
   const [limit, setLimit] = useState(50);
@@ -73,13 +90,13 @@ export default function WhatsAppOrdersPage() {
   // Calculate stats
   const totalOrders = Array.isArray(orders) ? orders.length : 0;
   const pendingOrders = Array.isArray(orders)
-    ? orders.filter((o: any) => o.status === 'pending').length
+    ? orders.filter((o: Order) => o.status === 'pending').length
     : 0;
   const confirmedOrders = Array.isArray(orders)
-    ? orders.filter((o: any) => o.status === 'confirmed').length
+    ? orders.filter((o: Order) => o.status === 'confirmed').length
     : 0;
   const completedOrders = Array.isArray(orders)
-    ? orders.filter((o: any) => o.status === 'completed').length
+    ? orders.filter((o: Order) => o.status === 'completed').length
     : 0;
 
   const getStatusBadge = (status: string) => {
@@ -228,7 +245,7 @@ export default function WhatsAppOrdersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders?.map((order: any) => (
+                  {orders?.map((order: Order) => (
                     <TableRow key={order.id}>
                       <TableCell dir="ltr">{order.phoneNumber}</TableCell>
                       <TableCell>{order.conversationId}</TableCell>

@@ -103,6 +103,16 @@ interface Conversation {
   offerLeadId?: number | null;
   campRegistrationId?: number | null;
   labOrderId?: number | null;
+  conversationIdMeta?: string | null;
+  originType?: string | null;
+  expirationTimestamp?: string | Date | null;
+  pricingModel?: string | null;
+  billable?: boolean;
+  pricingCategory?: string | null;
+  totalCost?: number;
+  messageCount?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 interface User {
@@ -122,6 +132,52 @@ interface Template {
   languageCode?: string | null;
 }
 
+interface ConnectionStatus {
+  isReady?: boolean;
+  isConnecting?: boolean;
+  hasQRCode?: boolean;
+  apiConfigured?: boolean;
+  phoneNumberId?: string;
+  apiVersion?: string;
+  mode?: string;
+  [key: string]: unknown;
+}
+
+interface SavedSearch {
+  id: number;
+  userId: number;
+  name: string;
+  searchQuery: string | null;
+  filterType: string | null;
+  dateRange: string | null;
+  messageType: string | null;
+  createdAt: Date;
+  [key: string]: unknown;
+}
+
+interface SSEMessageEvent {
+  type?: string;
+  data?: unknown;
+  [key: string]: unknown;
+}
+
+interface AutoReplyRule {
+  id: number;
+  name: string;
+  triggerValue: string;
+  isActive: boolean;
+  [key: string]: unknown;
+}
+
+interface SearchMessage {
+  id: number;
+  direction: string;
+  content: string;
+  messageType?: string;
+  createdAt: string;
+  [key: string]: unknown;
+}
+
 type FilterType =
   | 'all'
   | 'unread'
@@ -133,21 +189,21 @@ type FilterType =
 
 // Helper function to get time elapsed color
 function getTimeElapsedColor(lastMessageAt: string | Date | null): string {
-  if (!lastMessageAt) return 'text-[var(--whatsapp-gray)]';
+  if (!lastMessageAt) {return 'text-[var(--whatsapp-gray)]';}
   const hours = (Date.now() - new Date(lastMessageAt).getTime()) / (1000 * 60 * 60);
-  if (hours < 1) return 'text-[var(--whatsapp-green)]';
-  if (hours < 24) return 'text-[var(--whatsapp-blue)]';
-  if (hours < 168) return 'text-[var(--whatsapp-orange)]'; // 7 days
+  if (hours < 1) {return 'text-[var(--whatsapp-green)]';}
+  if (hours < 24) {return 'text-[var(--whatsapp-blue)]';}
+  if (hours < 168) {return 'text-[var(--whatsapp-orange)]';} // 7 days
   return 'text-red-600';
 }
 
 // Helper function to get time elapsed text
 function getTimeElapsedText(lastMessageAt: string | Date | null): string {
-  if (!lastMessageAt) return '';
+  if (!lastMessageAt) {return '';}
   const hours = (Date.now() - new Date(lastMessageAt).getTime()) / (1000 * 60 * 60);
-  if (hours < 1) return 'أقل من ساعة';
-  if (hours < 24) return `${Math.floor(hours)} ساعة`;
-  if (hours < 168) return `${Math.floor(hours / 24)} يوم`;
+  if (hours < 1) {return 'أقل من ساعة';}
+  if (hours < 24) {return `${Math.floor(hours)} ساعة`;}
+  if (hours < 168) {return `${Math.floor(hours / 24)} يوم`;}
   return `${Math.floor(hours / 168)} أسبوع`;
 }
 
@@ -238,7 +294,7 @@ interface ConversationsListProps {
   templates: Template[] | undefined;
   onSendNewMessage: () => void;
   isSendingNewMessage: boolean;
-  connectionStatus: any;
+  connectionStatus: ConnectionStatus | undefined;
   statusLoading: boolean;
   allConversations: Conversation[] | undefined;
   activeFilter: FilterType;
@@ -261,8 +317,8 @@ interface ConversationsListProps {
   isSplitView: boolean;
   secondConversationId: number | null;
   onSelectSecondConversation: (id: number) => void;
-  savedSearches: any[] | undefined;
-  onApplySavedSearch: (savedSearch: any) => void;
+  savedSearches: SavedSearch[] | undefined;
+  onApplySavedSearch: (savedSearch: SavedSearch) => void;
   onDeleteConversation: (id: number) => void;
 }
 
@@ -619,7 +675,7 @@ const ConversationsList = memo(function ConversationsList({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
-              {savedSearches.map((search: any) => (
+              {savedSearches.map((search: SavedSearch) => (
                 <DropdownMenuItem
                   key={search.id}
                   onClick={() => onApplySavedSearch?.(search)}
@@ -627,7 +683,7 @@ const ConversationsList = memo(function ConversationsList({
                 >
                   <span className="font-medium text-[var(--text-sm)]">{search.name}</span>
                   <span className="text-[var(--text-xs)] text-muted-foreground line-clamp-1">
-                    {search.searchQuery || search.query}
+                    {String(search.searchQuery || search.query || '')}
                   </span>
                 </DropdownMenuItem>
               ))}
@@ -1067,16 +1123,16 @@ function WhatsAppContent() {
 
   // Determine entity type and ID based on what's available
   const entityInfo = useMemo(() => {
-    if (!selectedConv) return null;
+    if (!selectedConv) {return null;}
     if (selectedConv.appointmentId)
-      return { entityType: 'appointment' as const, entityId: selectedConv.appointmentId };
+      {return { entityType: 'appointment' as const, entityId: selectedConv.appointmentId };}
     if (selectedConv.offerLeadId)
-      return { entityType: 'offer_lead' as const, entityId: selectedConv.offerLeadId };
+      {return { entityType: 'offer_lead' as const, entityId: selectedConv.offerLeadId };}
     if (selectedConv.campRegistrationId)
-      return {
+      {return {
         entityType: 'camp_registration' as const,
         entityId: selectedConv.campRegistrationId,
-      };
+      };}
     return null;
   }, [selectedConv]);
 
@@ -1169,7 +1225,7 @@ function WhatsAppContent() {
       setIsNewMessageOpen(false);
       // No refetch needed - SSE stream handles updates
     },
-    onError: (error: any) => toast.error(`فشل إرسال القالب: ${error?.message || 'خطأ غير معروف'}`),
+    onError: (error: unknown) => toast.error(`فشل إرسال القالب: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`),
   });
 
   // Auto Reply Toggle Mutation
@@ -1237,7 +1293,7 @@ function WhatsAppContent() {
       const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       result = result.filter((c) => {
-        if (!c.lastMessageAt) return false;
+        if (!c.lastMessageAt) {return false;}
         const lastMsgDate = new Date(c.lastMessageAt);
         switch (dateFilter) {
           case 'today':
@@ -1368,7 +1424,7 @@ function WhatsAppContent() {
   const isSavingNotes = updateConversationMutation.isPending;
 
   const handleSaveNotes = useCallback(() => {
-    if (!selectedConv) return;
+    if (!selectedConv) {return;}
 
     // Save notes to local storage for now
     const notesData = JSON.parse(localStorage.getItem('conversationNotes') || '{}');
@@ -1396,10 +1452,10 @@ function WhatsAppContent() {
     });
   }, [searchName, searchQuery, activeFilter, dateFilter, saveSearchMutation]);
 
-  const handleApplySavedSearch = useCallback((savedSearch: any) => {
-    setSearchQuery(savedSearch.searchQuery || savedSearch.query || '');
-    setActiveFilter(savedSearch.filterType || savedSearch.filter || 'all');
-    setDateFilter(savedSearch.dateRange || savedSearch.dateFilter || 'all');
+  const handleApplySavedSearch = useCallback((savedSearch: SavedSearch) => {
+    setSearchQuery(String(savedSearch.searchQuery || savedSearch.query || ''));
+    setActiveFilter((savedSearch.filterType || savedSearch.filter || 'all') as FilterType);
+    setDateFilter((savedSearch.dateRange || savedSearch.dateFilter || 'all') as 'all' | 'today' | 'week' | 'month');
   }, []);
 
   const handleToggleSelection = useCallback((id: number) => {
@@ -1426,7 +1482,7 @@ function WhatsAppContent() {
   }, []);
 
   const handleConfirmAction = useCallback(() => {
-    if (!confirmDialogAction) return;
+    if (!confirmDialogAction) {return;}
 
     if (confirmDialogAction.action === 'archive' && confirmDialogAction.id) {
       updateConversationMutation.mutate({ id: confirmDialogAction.id, archived: true });
@@ -1460,14 +1516,14 @@ function WhatsAppContent() {
   ]);
 
   const handleBulkArchive = useCallback(() => {
-    if (selectedConversations.size === 0) return;
+    if (selectedConversations.size === 0) {return;}
     const ids = Array.from(selectedConversations);
     setConfirmDialogAction({ action: 'bulk-archive', ids });
     setConfirmDialogOpen(true);
   }, [selectedConversations]);
 
   const handleBulkMarkImportant = useCallback(() => {
-    if (selectedConversations.size === 0) return;
+    if (selectedConversations.size === 0) {return;}
     const ids = Array.from(selectedConversations);
     setConfirmDialogAction({ action: 'bulk-important', ids });
     setConfirmDialogOpen(true);
@@ -1616,7 +1672,8 @@ function WhatsAppContent() {
     useCallback(
       (e: MessageEvent) => {
         try {
-          if ((e as any).type === 'new_inbound_message') refetchConversations();
+          const eventData = e.data ? JSON.parse(String(e.data)) : {};
+          if (eventData.type === 'new_inbound_message') {refetchConversations();}
         } catch (error) {
           console.error('SSE error:', error);
           toast.error('حدث خطأ في الاتصال بالخادم');
@@ -1681,7 +1738,7 @@ function WhatsAppContent() {
 
   const isSendingNewMessage = sendNewMessageMutation.isPending || sendTemplateMutation.isPending;
 
-  const listProps = {
+  const listProps: ConversationsListProps = {
     filteredConversations,
     conversationsLoading,
     selectedConversation,
@@ -1869,7 +1926,7 @@ function WhatsAppContent() {
             </DialogHeader>
             <div className="space-y-4 py-2">
               {autoReplyRules && Array.isArray(autoReplyRules)
-                ? autoReplyRules.map((rule: any) => (
+                ? autoReplyRules.map((rule: AutoReplyRule) => (
                     <div
                       key={rule.id}
                       className="flex items-center justify-between p-3 border rounded-lg"
@@ -1985,7 +2042,7 @@ function WhatsAppContent() {
                   </div>
                 ) : searchResults && searchResults.length > 0 ? (
                   <div className="space-y-2">
-                    {searchResults.map((msg: any) => (
+                    {searchResults.map((msg) => (
                       <div
                         key={msg.id}
                         className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800"
@@ -1994,7 +2051,7 @@ function WhatsAppContent() {
                           <Badge variant={msg.direction === 'inbound' ? 'default' : 'secondary'}>
                             {msg.direction === 'inbound' ? 'وارد' : 'صادر'}
                           </Badge>
-                          <Badge variant="outline">{msg.messageType}</Badge>
+                          <Badge variant="outline">{String(msg.messageType || 'text')}</Badge>
                           <span className="text-xs text-muted-foreground">
                             {new Date(msg.createdAt).toLocaleString('ar-SA')}
                           </span>
@@ -2138,7 +2195,7 @@ function WhatsAppContent() {
                     onConversationUpdate={handleConversationUpdate}
                     onSendReminder={handleSendReminder}
                     onSendFollowup={handleSendFollowup}
-                    entityWhatsAppStatus={entityStatusQuery.data}
+                    entityWhatsAppStatus={entityStatusQuery.data as typeof entityStatusQuery.data}
                     isSendingReminder={isSendingReminder}
                     isSendingFollowup={isSendingFollowup}
                   />

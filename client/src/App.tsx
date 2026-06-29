@@ -76,9 +76,10 @@ const OfferLeadsPage = lazy(() => import('./pages/admin/bookings/OfferLeadsPage'
 const CampRegistrationsPage = lazy(() => import('./pages/admin/bookings/CampRegistrationsPage'));
 const CustomersPage = lazy(() => import('./pages/admin/bookings/CustomersPage'));
 const TasksPage = lazy(() => import('./pages/admin/bookings/TasksPage'));
-import PWAManager from './components/PWAManager';
+// Temporarily disabled PWA components to fix refresh issues
+// import PWAManager from './components/PWAManager';
 import MetaPixel from './components/MetaPixel';
-import OfflineIndicator from './components/OfflineIndicator';
+// import OfflineIndicator from './components/OfflineIndicator';
 import CookieConsentBanner from './components/CookieConsentBanner';
 const DigitalMarketingTeamPage = lazy(() => import('./pages/admin/teams/DigitalMarketingTeamPage'));
 const MediaTeamPage = lazy(() => import('./pages/admin/teams/MediaTeamPage'));
@@ -409,8 +410,8 @@ function App() {
       <ThemeProvider defaultTheme="light" switchable>
         <TooltipProvider>
           <Toaster />
-          <PWAManager />
-          <OfflineIndicator />
+          {/* <PWAManager /> */}
+          {/* <OfflineIndicator /> */}
           <CookieConsentBanner />
           <MetaPixel />
           <OptionalUpdateBanner />

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import type { ReactNode } from 'react';
 import {
   Users,
   CheckCircle,
@@ -87,10 +88,10 @@ export default function WhatsAppUserSubscriptionsPage() {
   };
 
   const filteredSubscriptions = Array.isArray(subscriptions)
-    ? subscriptions.filter((sub: any) => {
+    ? subscriptions.filter((sub: Record<string, unknown>) => {
         const matchesSearch =
-          sub.phoneNumber.includes(searchTerm) ||
-          (sub.details && JSON.parse(sub.details).name?.includes(searchTerm));
+          (sub.phoneNumber as string).includes(searchTerm) ||
+          (sub.details && JSON.parse(sub.details as string).name?.includes(searchTerm));
         const matchesTab =
           activeTab === 'all' ||
           (activeTab === 'opted_in' && sub.status === 'opted_in') ||
@@ -227,9 +228,9 @@ export default function WhatsAppUserSubscriptionsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredSubscriptions.map((sub: any) => (
-                        <tr key={sub.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4 font-mono">{sub.phoneNumber}</td>
+                      {filteredSubscriptions.map((sub: Record<string, unknown>) => (
+                        <tr key={sub.id as string} className="border-b hover:bg-gray-50">
+                          <td className="py-3 px-4 font-mono">{sub.phoneNumber as string}</td>
                           <td className="py-3 px-4">
                             {sub.status === 'opted_in' ? (
                               <Badge className="bg-green-500 text-white gap-1">
@@ -243,9 +244,9 @@ export default function WhatsAppUserSubscriptionsPage() {
                               </Badge>
                             )}
                           </td>
-                          <td className="py-3 px-4">{sub.source}</td>
+                          <td className="py-3 px-4">{sub.source as ReactNode}</td>
                           <td className="py-3 px-4">
-                            {new Date(sub.updatedAt).toLocaleString('ar-SA')}
+                            {new Date(sub.updatedAt as string | number | Date).toLocaleString('ar-SA')}
                           </td>
                           <td className="py-3 px-4">
                             {sub.status === 'opted_in' ? (
@@ -253,7 +254,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                                 size="sm"
                                 variant="outline"
                                 className="text-red-600 hover:bg-red-50"
-                                onClick={() => handleUpdateStatus(sub.phoneNumber, 'opted_out')}
+                                onClick={() => handleUpdateStatus(sub.phoneNumber as string, 'opted_out')}
                                 disabled={updateStatusMutation.isPending}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
@@ -264,7 +265,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                                 size="sm"
                                 variant="outline"
                                 className="text-green-600 hover:bg-green-50"
-                                onClick={() => handleUpdateStatus(sub.phoneNumber, 'opted_in')}
+                                onClick={() => handleUpdateStatus(sub.phoneNumber as string, 'opted_in')}
                                 disabled={updateStatusMutation.isPending}
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
@@ -301,19 +302,19 @@ export default function WhatsAppUserSubscriptionsPage() {
                 <div className="text-center py-8">جاري التحميل...</div>
               ) : subscriptionWebhookEvents && subscriptionWebhookEvents.length > 0 ? (
                 <div className="space-y-3">
-                  {subscriptionWebhookEvents.map((event: any) => (
-                    <div key={event.id} className="p-4 border rounded-lg bg-gray-50">
+                  {subscriptionWebhookEvents.map((event: Record<string, unknown>) => (
+                    <div key={event.id as string} className="p-4 border rounded-lg bg-gray-50">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold">{event.eventType}</h4>
-                            {event.subType && <Badge variant="outline">{event.subType}</Badge>}
+                            <h4 className="font-semibold">{event.eventType as ReactNode}</h4>
+                            {(event.subType as string) && <Badge variant="outline">{event.subType as string}</Badge>}
                           </div>
-                          {event.phoneNumber && (
-                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber}</p>
+                          {(event.phoneNumber as string) && (
+                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber as string}</p>
                           )}
                           <p className="text-xs text-gray-500 mt-2">
-                            {new Date(event.createdAt).toLocaleString('ar-SA')}
+                            {new Date(event.createdAt as string | number | Date).toLocaleString('ar-SA')}
                           </p>
                         </div>
                         <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>

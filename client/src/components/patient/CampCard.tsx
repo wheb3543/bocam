@@ -2,8 +2,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tent } from 'lucide-react';
 
+interface Camp {
+  fullName?: string;
+  createdAt?: string | Date;
+  status?: string;
+  [key: string]: unknown;
+}
+
 type CampCardProps = {
-  item: any;
+  item: Camp;
   formatDate: (value: string | Date) => string;
 };
 
@@ -14,7 +21,7 @@ export default function CampCard({ item, formatDate }: CampCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold truncate">{item.fullName || 'تسجيل مخيم'}</p>
-            <p className="text-xs text-muted-foreground mt-1">{formatDate(item.createdAt)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{formatDate(item.createdAt || new Date())}</p>
           </div>
           <div className="flex items-center gap-2">
             <Tent className="h-4 w-4 text-purple-600" />

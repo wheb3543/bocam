@@ -1,4 +1,10 @@
 import { trpc } from '@/lib/api/trpc';
+
+interface CampRegistration {
+  id?: number;
+  [key: string]: unknown;
+}
+
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { Loader2, Tent } from 'lucide-react';
 import CampCard from '@/components/patient/CampCard';
@@ -34,7 +40,7 @@ export default function PatientCampsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {camps.map((item: any) => (
+          {camps.map((item: CampRegistration) => (
             <CampCard key={item.id} item={item} formatDate={formatDate} />
           ))}
         </div>

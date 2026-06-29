@@ -1,5 +1,7 @@
 import { useRoute } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
+import type { AppointmentWithDoctor } from '@shared/types';
+
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +12,7 @@ export default function PatientAppointmentDetailsPage() {
   const [, params] = useRoute('/patient-portal/appointments/:id');
   const appointmentId = Number(params?.id);
   const { data: appointments, isLoading } = trpc.patientPortal.myAppointments.useQuery();
-  const appointment = appointments?.find((item: any) => item.id === appointmentId);
+  const appointment = appointments?.find((item: AppointmentWithDoctor) => item.id === appointmentId);
 
   if (isLoading) {
     return (

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, X, Users, Calendar, TrendingUp, UserCheck, Phone, Mail } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type { Lead, Appointment, OfferLead, CampRegistration, LeadWithRegistrationType, AppointmentWithDoctorName, OfferLeadWithTitle, CampRegistrationWithCampName } from '@shared/types';
 
 interface GlobalSearchProps {
   onClose?: () => void;
@@ -33,42 +35,42 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
   // Search results
   const searchResults = {
     leads:
-      leads
+      (leads as unknown as LeadWithRegistrationType[])
         ?.filter(
-          (l) =>
-            searchQuery &&
-            (l.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              l.phone.includes(searchQuery) ||
-              (l.email && l.email.toLowerCase().includes(searchQuery.toLowerCase())))
+          (l: LeadWithRegistrationType) =>
+            !!searchQuery &&
+            ((l.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (l.phone ?? '').toString().includes(searchQuery) ||
+              (typeof l.email === 'string' && l.email.toLowerCase().includes(searchQuery.toLowerCase())))
         )
         .slice(0, 3) || [],
     appointments:
-      appointments
+      (appointments as unknown as AppointmentWithDoctorName[])
         ?.filter(
-          (a) =>
-            searchQuery &&
-            (a.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              a.phone.includes(searchQuery) ||
-              (a.email && a.email.toLowerCase().includes(searchQuery.toLowerCase())))
+          (a: AppointmentWithDoctorName) =>
+            !!searchQuery &&
+            ((a.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (a.phone ?? '').toString().includes(searchQuery) ||
+              (typeof a.email === 'string' && a.email.toLowerCase().includes(searchQuery.toLowerCase())))
         )
         .slice(0, 3) || [],
     offerLeads:
-      offerLeads
+      (offerLeads as unknown as OfferLeadWithTitle[])
         ?.filter(
-          (o) =>
-            searchQuery &&
-            (o.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              o.phone.includes(searchQuery) ||
-              (o.email && o.email.toLowerCase().includes(searchQuery.toLowerCase())))
+          (o: OfferLeadWithTitle) =>
+            !!searchQuery &&
+            ((o.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (o.phone ?? '').toString().includes(searchQuery) ||
+              (typeof o.email === 'string' && o.email.toLowerCase().includes(searchQuery.toLowerCase())))
         )
         .slice(0, 3) || [],
     campRegistrations:
-      campRegistrations
+      (campRegistrations as unknown as CampRegistrationWithCampName[])
         ?.filter(
-          (c) =>
-            searchQuery &&
-            (c.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              c.phone.includes(searchQuery))
+          (c: CampRegistrationWithCampName) =>
+            !!searchQuery &&
+            ((c.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (c.phone ?? '').toString().includes(searchQuery))
         )
         .slice(0, 3) || [],
   };
@@ -212,7 +214,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                       </h3>
                     </div>
                     <div className="space-y-2">
-                      {searchResults.leads.map((lead: any) => (
+                      {searchResults.leads.map((lead: LeadWithRegistrationType) => (
                         <Card
                           key={lead.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
@@ -238,9 +240,9 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                                 )}
                               </div>
                               <Badge variant="outline" className="text-xs">
-                                {lead.registrationType === 'appointment' && 'موعد'}
-                                {lead.registrationType === 'offer' && 'عرض'}
-                                {lead.registrationType === 'camp' && 'مخيم'}
+                              {lead.registrationType === 'appointment' && 'موعد'}
+                              {lead.registrationType === 'offer' && 'عرض'}
+                              {lead.registrationType === 'camp' && 'مخيم'}
                               </Badge>
                             </div>
                           </CardContent>
@@ -260,7 +262,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                       </h3>
                     </div>
                     <div className="space-y-2">
-                      {searchResults.appointments.map((apt: any) => (
+                      {searchResults.appointments.map((apt: AppointmentWithDoctorName) => (
                         <Card
                           key={apt.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
@@ -302,8 +304,8 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                                                 : ''
                                 }
                               >
-                                {(
-                                  {
+                                {(() => {
+                                  const statusMap: Record<string, string> = {
                                     pending: 'قيد الانتظار',
                                     contacted: 'تم التواصل',
                                     no_answer: 'لم يرد',
@@ -311,8 +313,12 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                                     attended: 'حضر',
                                     completed: 'مكتمل',
                                     cancelled: 'ملغي',
-                                  } as Record<string, string>
-                                )[apt.status] || apt.status}
+                                  };
+                                  if (apt.status && apt.status in statusMap) {
+                                    return statusMap[apt.status];
+                                  }
+                                  return apt.status;
+                                })()}
                               </Badge>
                             </div>
                           </CardContent>
@@ -332,7 +338,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                       </h3>
                     </div>
                     <div className="space-y-2">
-                      {searchResults.offerLeads.map((offer: any) => (
+                      {searchResults.offerLeads.map((offer: OfferLeadWithTitle) => (
                         <Card
                           key={offer.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
@@ -372,7 +378,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                       </h3>
                     </div>
                     <div className="space-y-2">
-                      {searchResults.campRegistrations.map((camp: any) => (
+                      {searchResults.campRegistrations.map((camp: CampRegistrationWithCampName) => (
                         <Card
                           key={camp.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"

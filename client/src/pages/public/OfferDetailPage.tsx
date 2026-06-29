@@ -145,7 +145,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
     }
     setPhoneError('');
 
-    if (!offer) return;
+    if (!offer) {return;}
 
     try {
       const trackingData = getCompleteTrackingData();

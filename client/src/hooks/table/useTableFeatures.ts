@@ -62,7 +62,7 @@ export interface UseTableFeaturesReturn {
   handleSort: (columnKey: string) => void;
   getSortDirection: (columnKey: string) => SortDirection;
   /** Sort an array of data using the current sort state */
-  sortData: <T>(data: T[], getField: (item: T, key: string) => any) => T[];
+  sortData: <T>(data: T[], getField: (item: T, key: string) => unknown) => T[];
   /** Check if a column is sortable */
   isColumnSortable: (columnKey: string) => boolean;
 
@@ -169,7 +169,7 @@ export function useTableFeatures({
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(() => {
     try {
       const saved = localStorage.getItem(`${tableKey}VisibleColumns`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {return JSON.parse(saved);}
     } catch {}
     const defaults: Record<string, boolean> = {};
     columns.forEach((col) => {
@@ -213,7 +213,7 @@ export function useTableFeatures({
   const [columnOrder, setColumnOrder] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem(`${tableKey}ColumnOrder`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {return JSON.parse(saved);}
     } catch {}
     return defaultColumnOrder;
   });
@@ -263,7 +263,7 @@ export function useTableFeatures({
   const [columnWidthsState, setColumnWidthsState] = useState<Record<string, number>>(() => {
     try {
       const saved = localStorage.getItem(`columnWidths_${tableKey}`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {return JSON.parse(saved);}
     } catch {}
     const defaults: Record<string, number> = {};
     columns.forEach((col) => {
@@ -295,7 +295,7 @@ export function useTableFeatures({
         try {
           localStorage.setItem(`columnWidths_${tableKey}`, JSON.stringify(updated));
         } catch {}
-        if (widthSaveTimerRef.current) clearTimeout(widthSaveTimerRef.current);
+        if (widthSaveTimerRef.current) {clearTimeout(widthSaveTimerRef.current);}
         widthSaveTimerRef.current = setTimeout(() => {
           saveColumnWidthsFn(updated);
         }, 500);
@@ -335,7 +335,7 @@ export function useTableFeatures({
 
   const getWidth = useCallback(
     (key: string) => {
-      if (columnWidthsState[key]) return columnWidthsState[key];
+      if (columnWidthsState[key]) {return columnWidthsState[key];}
       const col = columns.find((c) => c.key === key);
       return getColumnWidth(key, col).width;
     },
@@ -398,7 +398,7 @@ export function useTableFeatures({
   const [frozenColumnsState, setFrozenColumnsState] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem(`frozenColumns_${tableKey}`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {return JSON.parse(saved);}
     } catch {}
     return defaultFrozenColumns;
   });
@@ -481,7 +481,7 @@ export function useTableFeatures({
   const [customTemplates, setCustomTemplates] = useState<ColumnTemplate[]>(() => {
     try {
       const saved = localStorage.getItem(`${tableKey}ColumnTemplates`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {return JSON.parse(saved);}
     } catch {}
     return [];
   });
@@ -546,17 +546,18 @@ export function useTableFeatures({
 
   const sharedTemplates: ColumnTemplate[] = useMemo(
     () =>
-      (sharedTemplatesData || []).map((t: any) => ({
+      (sharedTemplatesData || []).map((t: Record<string, unknown>) => ({
         id: `shared_${tableKey}_${t.id}`,
-        name: t.name,
-        columns: t.columns,
-        columnOrder: t.columnOrder,
-        columnWidths: t.columnWidths,
-        frozenColumns: t.frozenColumns,
+        name: t.name as string,
+        tableKey,
+        columns: t.columns as Record<string, boolean>,
+        columnOrder: t.columnOrder as string[],
+        columnWidths: t.columnWidths as Record<string, number>,
+        frozenColumns: t.frozenColumns as string[],
         isDefault: false,
         isShared: true,
-        createdByName: t.createdByName,
-        dbId: t.id,
+        createdByName: t.createdByName as string,
+        dbId: t.id as number,
       })),
     [sharedTemplatesData, tableKey]
   );
@@ -615,6 +616,7 @@ export function useTableFeatures({
       const newTemplate: ColumnTemplate = {
         id: `${tableKey}_custom_${Date.now()}`,
         name,
+        tableKey,
         columns: cols,
         columnOrder: order || columnOrder,
         columnWidths: widths || columnWidthsState,
@@ -671,14 +673,15 @@ export function useTableFeatures({
       widths?: Record<string, number>,
       frozenCols?: string[]
     ) => {
-      createSharedTemplateMutation.mutate({
+      const templateData = {
         name,
         tableKey,
         columns: cols,
         columnOrder: order || columnOrder,
         columnWidths: widths || columnWidthsState,
         frozenColumns: frozenCols || frozenColumnsState,
-      } as any);
+      };
+      createSharedTemplateMutation.mutate(templateData as unknown as ColumnTemplate);
     },
     [tableKey, columnOrder, columnWidthsState, frozenColumnsState, createSharedTemplateMutation]
   );
@@ -703,7 +706,7 @@ export function useTableFeatures({
     if (persistSort) {
       try {
         const saved = localStorage.getItem(`${tableKey}SortState`);
-        if (saved) return JSON.parse(saved);
+        if (saved) {return JSON.parse(saved);}
       } catch {}
     }
     return { columnKey: '', direction: null };
@@ -714,7 +717,7 @@ export function useTableFeatures({
       persistSort &&
       savedSortState &&
       typeof savedSortState === 'object' &&
-      'columnKey' in (savedSortState as any)
+      'columnKey' in savedSortState
     ) {
       setSortState(savedSortState as SortState);
       try {
@@ -761,18 +764,18 @@ export function useTableFeatures({
   const isColumnSortable = useCallback(
     (columnKey: string): boolean => {
       const col = columns.find((c) => c.key === columnKey);
-      if (!col) return false;
+      if (!col) {return false;}
       // Default sortable=true unless explicitly set to false, or it's 'actions'/'comments'/'tasks'
-      if (col.sortable === false) return false;
-      if (['actions', 'comments', 'tasks'].includes(columnKey)) return false;
+      if (col.sortable === false) {return false;}
+      if (['actions', 'comments', 'tasks'].includes(columnKey)) {return false;}
       return true;
     },
     [columns]
   );
 
   const sortData = useCallback(
-    <T>(data: T[], getField: (item: T, key: string) => any): T[] => {
-      if (!sortState.direction || !sortState.columnKey) return data;
+    <T>(data: T[], getField: (item: T, key: string) => unknown): T[] => {
+      if (!sortState.direction || !sortState.columnKey) {return data;}
 
       const col = columns.find((c) => c.key === sortState.columnKey);
       const sortType = col?.sortType || 'string';
@@ -784,9 +787,9 @@ export function useTableFeatures({
         const bVal = getField(b, key);
 
         // Handle null/undefined
-        if (aVal == null && bVal == null) return 0;
-        if (aVal == null) return direction === 'asc' ? 1 : -1;
-        if (bVal == null) return direction === 'asc' ? -1 : 1;
+        if (aVal === null && bVal === null) {return 0;}
+        if (aVal === null) {return direction === 'asc' ? 1 : -1;}
+        if (bVal === null) {return direction === 'asc' ? -1 : 1;}
 
         let comparison = 0;
 
@@ -794,19 +797,19 @@ export function useTableFeatures({
           case 'number': {
             const numA = typeof aVal === 'number' ? aVal : parseFloat(String(aVal));
             const numB = typeof bVal === 'number' ? bVal : parseFloat(String(bVal));
-            if (isNaN(numA) && isNaN(numB)) comparison = 0;
-            else if (isNaN(numA)) comparison = 1;
-            else if (isNaN(numB)) comparison = -1;
-            else comparison = numA - numB;
+            if (isNaN(numA) && isNaN(numB)) {comparison = 0;}
+            else if (isNaN(numA)) {comparison = 1;}
+            else if (isNaN(numB)) {comparison = -1;}
+            else {comparison = numA - numB;}
             break;
           }
           case 'date': {
             const dateA = aVal instanceof Date ? aVal.getTime() : new Date(String(aVal)).getTime();
             const dateB = bVal instanceof Date ? bVal.getTime() : new Date(String(bVal)).getTime();
-            if (isNaN(dateA) && isNaN(dateB)) comparison = 0;
-            else if (isNaN(dateA)) comparison = 1;
-            else if (isNaN(dateB)) comparison = -1;
-            else comparison = dateA - dateB;
+            if (isNaN(dateA) && isNaN(dateB)) {comparison = 0;}
+            else if (isNaN(dateA)) {comparison = 1;}
+            else if (isNaN(dateB)) {comparison = -1;}
+            else {comparison = dateA - dateB;}
             break;
           }
           case 'boolean': {

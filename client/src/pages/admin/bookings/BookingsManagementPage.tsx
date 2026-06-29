@@ -40,6 +40,7 @@ import { useLocation } from 'wouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { SOURCE_LABELS } from '@shared/sources';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type { Lead, Appointment, AppointmentWithDoctor, OfferLead, CampRegistration } from '@shared/types';
 
 export default function BookingsManagementPage() {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
@@ -52,13 +53,13 @@ export default function BookingsManagementPage() {
   >('leads');
 
   // === Lead Status Dialog State ===
-  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [statusNotes, setStatusNotes] = useState('');
 
   // === Appointment Status Dialog State ===
-  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithDoctor | null>(null);
   const [appointmentStatusDialogOpen, setAppointmentStatusDialogOpen] = useState(false);
   const [newAppointmentStatus, setNewAppointmentStatus] = useState('');
   const [appointmentStatusNotes, setAppointmentStatusNotes] = useState('');
@@ -72,11 +73,11 @@ export default function BookingsManagementPage() {
   const [campRegistrationsPendingCount, setCampRegistrationsPendingCount] = useState(0);
 
   // === Filter state ===
-  const leadsFilter = useFilterUtils<any>({
+  const leadsFilter = useFilterUtils<Lead>({
     data: undefined,
     searchFields: [],
   });
-  const appointmentFilter = useFilterUtils<any>();
+  const appointmentFilter = useFilterUtils<AppointmentWithDoctor>();
   const dateRange = appointmentFilter.filters.dateRange;
   const setDateRange = appointmentFilter.filters.setDateRange;
 
@@ -103,9 +104,9 @@ export default function BookingsManagementPage() {
     const tab = params.get('tab');
 
     if (id && type) {
-      if (type === 'appointment') setActiveTab('appointments');
-      else if (type === 'offer') setActiveTab('offerLeads');
-      else if (type === 'camp') setActiveTab('campRegistrations');
+      if (type === 'appointment') {setActiveTab('appointments');}
+      else if (type === 'offer') {setActiveTab('offerLeads');}
+      else if (type === 'camp') {setActiveTab('campRegistrations');}
       window.history.replaceState({}, '', '/admin/bookings');
     } else if (tab) {
       if (
@@ -114,7 +115,7 @@ export default function BookingsManagementPage() {
         tab === 'campRegistrations' ||
         tab === 'leads'
       ) {
-        setActiveTab(tab as any);
+        setActiveTab(tab as 'leads' | 'appointments' | 'offerLeads' | 'campRegistrations' | 'tasks' | 'customers');
       }
       window.history.replaceState({}, '', '/admin/bookings');
     }
@@ -126,10 +127,10 @@ export default function BookingsManagementPage() {
       : 0;
     const appointmentsPending = appointmentsData?.total || 0;
     const offerLeadsPending = Array.isArray(offerLeadsData)
-      ? offerLeadsData.filter((o: any) => o.status === 'pending').length
+      ? offerLeadsData.filter((o) => o.status === 'pending').length
       : offerLeadsPendingCount;
     const campRegistrationsPending = Array.isArray(campRegistrationsData)
-      ? campRegistrationsData.filter((c: any) => c.status === 'pending').length
+      ? campRegistrationsData.filter((c) => c.status === 'pending').length
       : campRegistrationsPendingCount;
     return {
       leads: leadsPending,
@@ -178,7 +179,7 @@ export default function BookingsManagementPage() {
   });
 
   const handleStatusUpdate = () => {
-    if (!selectedLead || !newStatus) return;
+    if (!selectedLead || !newStatus) {return;}
     updateStatusMutation.mutate({
       id: selectedLead.id,
       status: newStatus as 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer',
@@ -187,7 +188,7 @@ export default function BookingsManagementPage() {
   };
 
   const handleAppointmentStatusUpdate = () => {
-    if (!selectedAppointment || !newAppointmentStatus) return;
+    if (!selectedAppointment || !newAppointmentStatus) {return;}
     updateAppointmentStatusMutation.mutate({
       id: selectedAppointment.id,
       status: newAppointmentStatus,
@@ -195,17 +196,17 @@ export default function BookingsManagementPage() {
     });
   };
 
-  const openLeadStatusDialog = (lead: any) => {
+  const openLeadStatusDialog = (lead: Lead) => {
     setSelectedLead(lead);
     setNewStatus(lead.status || 'new');
     setStatusNotes('');
     setStatusDialogOpen(true);
   };
 
-  const openAppointmentDialog = (appointment: any) => {
+  const openAppointmentDialog = (appointment: AppointmentWithDoctor) => {
     setSelectedAppointment(appointment);
     setNewAppointmentStatus(appointment.status);
-    setAppointmentDate(appointment.appointmentDate);
+    setAppointmentDate((appointment.appointmentDate as string | null) || '');
     setAppointmentStatusDialogOpen(true);
   };
 
@@ -391,11 +392,7 @@ export default function BookingsManagementPage() {
                   )}
                   <p className="text-sm">
                     <span className="font-medium">النوع:</span>{' '}
-                    {selectedLead.type === 'general'
-                      ? 'عام'
-                      : selectedLead.type === 'offer'
-                        ? 'عرض'
-                        : 'مخيم'}
+                    {'عام'}
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">المصدر:</span>{' '}
@@ -491,7 +488,7 @@ export default function BookingsManagementPage() {
                         <div className="space-y-2">
                           <p className="text-sm">
                             <span className="font-medium">المريض:</span>{' '}
-                            {selectedAppointment.patientName}
+                            {selectedAppointment.fullName}
                           </p>
                           <p className="text-sm">
                             <span className="font-medium">الهاتف:</span>{' '}
@@ -507,11 +504,11 @@ export default function BookingsManagementPage() {
                         <div className="space-y-2">
                           <p className="text-sm">
                             <span className="font-medium">الطبيب:</span>{' '}
-                            {selectedAppointment.doctorName}
+                            {'-'}
                           </p>
                           <p className="text-sm">
                             <span className="font-medium">التخصص:</span>{' '}
-                            {selectedAppointment.doctorSpecialty}
+                            {''}
                           </p>
                           {selectedAppointment.procedure && (
                             <p className="text-sm">
@@ -524,15 +521,15 @@ export default function BookingsManagementPage() {
                       <div className="space-y-2">
                         <p className="text-sm">
                           <span className="font-medium">المصدر:</span>{' '}
-                          {(selectedAppointment as any).source
-                            ? SOURCE_LABELS[(selectedAppointment as any).source] ||
-                              (selectedAppointment as any).source
+                          {selectedAppointment.source
+                            ? SOURCE_LABELS[selectedAppointment.source] ||
+                              selectedAppointment.source
                             : '-'}
                         </p>
-                        {selectedAppointment.patientNotes && (
+                        {(selectedAppointment.patientMessage || selectedAppointment.notes) && (
                           <p className="text-sm">
                             <span className="font-medium">ملاحظات المريض:</span>{' '}
-                            {selectedAppointment.patientNotes}
+                            {selectedAppointment.patientMessage || selectedAppointment.notes}
                           </p>
                         )}
                         <p className="text-sm">

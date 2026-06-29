@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +33,17 @@ import { toast } from 'sonner';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
 
+interface Template {
+  id: number;
+  name: string;
+  metaName: string | null;
+  category: "MARKETING" | "UTILITY" | "AUTHENTICATION";
+  languageCode: string | null;
+  metaStatus: string | null;
+  metaCategory: string | null;
+  variables: unknown;
+}
+
 export default function WhatsAppIntegration() {
   const companyName = getCompanyName('ar');
   const [phone, setPhone] = useState('');
@@ -42,7 +54,7 @@ export default function WhatsAppIntegration() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
-  const [sentMessages, setSentMessages] = useState<any[]>([]);
+  const [sentMessages, setSentMessages] = useState<Record<string, unknown>[]>([]);
 
   // Queries
   const {
@@ -178,18 +190,18 @@ export default function WhatsAppIntegration() {
 
   // Filter templates
   const filteredTemplates = Array.isArray(templates?.templates)
-    ? templates.templates.filter((tmpl: any) => {
+    ? templates.templates.filter((tmpl: Template) => {
         const matchesSearch =
           searchQuery === '' ||
           tmpl.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          tmpl.metaName.toLowerCase().includes(searchQuery.toLowerCase());
+          (tmpl.metaName || '').toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = filterCategory === 'all' || tmpl.category === filterCategory;
         return matchesSearch && matchesCategory;
       })
     : [];
 
   // Get unique categories
-  const categories = Array.from(new Set(templates?.templates?.map((t: any) => t.category) || []));
+  const categories = Array.from(new Set(templates?.templates?.map((t: Template) => t.category) || []));
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -424,7 +436,7 @@ export default function WhatsAppIntegration() {
                     </div>
                   ) : filteredTemplates.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {filteredTemplates.map((tmpl: any) => (
+                      {filteredTemplates.map((tmpl: Template) => (
                         <div
                           key={tmpl.id}
                           className="p-3 border border-gray-200 rounded-lg hover:border-green-400 hover:bg-green-50 cursor-pointer transition"
@@ -567,7 +579,7 @@ export default function WhatsAppIntegration() {
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium text-sm">{msg.phone}</span>
+                              <span className="font-medium text-sm">{msg.phone as ReactNode}</span>
                               <Badge variant="outline" className="text-xs">
                                 {msg.type === 'welcome' ? 'ترحيب' : 'قالب'}
                               </Badge>
@@ -575,22 +587,22 @@ export default function WhatsAppIntegration() {
                                 variant="outline"
                                 className="text-xs bg-green-50 text-green-700"
                               >
-                                {msg.status}
+                                {msg.status as ReactNode}
                               </Badge>
                             </div>
-                            {msg.recipient && (
+                            {msg.recipient as string && (
                               <p className="text-sm text-muted-foreground mt-1">
-                                المستلم: {msg.recipient}
+                                المستلم: {msg.recipient as ReactNode}
                               </p>
                             )}
                             <p className="text-xs text-muted-foreground mt-1">
-                              القالب: {msg.template}
+                              القالب: {msg.template as ReactNode}
                             </p>
                           </div>
                           <div className="text-left">
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Clock className="w-3 h-3" />
-                              {formatDate(msg.sentAt)}
+                              {formatDate(msg.sentAt as string)}
                             </div>
                           </div>
                         </div>

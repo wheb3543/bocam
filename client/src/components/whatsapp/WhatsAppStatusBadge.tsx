@@ -91,9 +91,9 @@ export function WhatsAppStatusBadge({
   const handleMessageStatusUpdate = useCallback(
     (event: { status: string; errorCode?: number; errorTitle?: string }) => {
       // نحدّث فقط إذا كانت الحالة الجديدة أعلى رتبة من الحالية
-      const currentStatus = liveStatus || data?.status || 'pending';
-      const currentRank = statusRank[currentStatus] ?? 0;
-      const newRank = statusRank[event.status] ?? 0;
+      const currentStatus = liveStatus || (data?.status as string) || 'pending';
+      const currentRank = statusRank[currentStatus as keyof typeof statusRank] ?? 0;
+      const newRank = statusRank[event.status as keyof typeof statusRank] ?? 0;
 
       if (event.status === 'failed' || newRank > currentRank) {
         setLiveStatus(event.status);
@@ -164,7 +164,7 @@ export function WhatsAppStatusBadge({
           </TooltipTrigger>
           <TooltipContent side="top" className="text-xs">
             {data.sentAt
-              ? `أُرسل ${formatDistanceToNow(new Date(data.sentAt), { addSuffix: true, locale: ar })}`
+              ? `أُرسل ${formatDistanceToNow(new Date(data.sentAt as string), { addSuffix: true, locale: ar })}`
               : 'تم الإرسال'}
             {data.count > 1 && ` · ${data.count} رسائل`}
             {isLive && ' · تحديث مباشر ⚡'}

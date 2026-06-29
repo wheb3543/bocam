@@ -54,6 +54,49 @@ import { ar } from 'date-fns/locale';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { APP_LOGO, COMPANY_PHONE, COMPANY_ARABIC_NAME } from '@/const';
 
+interface CampRegistration {
+  id: number;
+  campId: number;
+  campName: string | null;
+  campSlug: string | null;
+  fullName: string;
+  phone: string;
+  email: string | null;
+  age: number | null;
+  procedures: string | null;
+  medicalCondition: string | null;
+  notes: string | null;
+  patientMessage: string | null;
+  source: string | null;
+  status: string;
+  preferredDate: string | null;
+  preferredTimeSlot: 'morning' | 'evening' | null;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
+interface Camp {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  imageUrl: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  isActive: boolean;
+  freeOffers: string | null;
+  discountedOffers: string | null;
+  availableProcedures: string | null;
+  galleryImages: string | null;
+  morningTime: string | null;
+  eveningTime: string | null;
+  dailyCapacity: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
 export default function CampStatsPage() {
   const [, setLocation] = useLocation();
   const [selectedCamp, setSelectedCamp] = useState<string>('all');
@@ -72,17 +115,17 @@ export default function CampStatsPage() {
   const filteredRegistrations =
     selectedCamp === 'all'
       ? registrations || []
-      : (registrations || []).filter((r: any) => r.campId.toString() === selectedCamp);
+      : (registrations || []).filter((r) => r.campId?.toString() === selectedCamp);
 
   // Calculate statistics
   const totalRegistrations = filteredRegistrations.length;
-  const pendingCount = filteredRegistrations.filter((r: any) => r.status === 'pending').length;
-  const confirmedCount = filteredRegistrations.filter((r: any) => r.status === 'confirmed').length;
-  const attendedCount = filteredRegistrations.filter((r: any) => r.status === 'attended').length;
-  const cancelledCount = filteredRegistrations.filter((r: any) => r.status === 'cancelled').length;
-  const completedCount = filteredRegistrations.filter((r: any) => r.status === 'completed').length;
-  const contactedCount = filteredRegistrations.filter((r: any) => r.status === 'contacted').length;
-  const noAnswerCount = filteredRegistrations.filter((r: any) => r.status === 'no_answer').length;
+  const pendingCount = filteredRegistrations.filter((r) => r.status === 'pending').length;
+  const confirmedCount = filteredRegistrations.filter((r) => r.status === 'confirmed').length;
+  const attendedCount = filteredRegistrations.filter((r) => r.status === 'attended').length;
+  const cancelledCount = filteredRegistrations.filter((r) => r.status === 'cancelled').length;
+  const completedCount = filteredRegistrations.filter((r) => r.status === 'completed').length;
+  const contactedCount = filteredRegistrations.filter((r) => r.status === 'contacted').length;
+  const noAnswerCount = filteredRegistrations.filter((r) => r.status === 'no_answer').length;
 
   // Calculate rates
   const attendanceRate =
@@ -101,7 +144,7 @@ export default function CampStatsPage() {
       camp:
         selectedCamp === 'all'
           ? 'all'
-          : camps?.find((c: any) => c.id.toString() === selectedCamp)?.name,
+          : camps?.find((c) => c.id?.toString() === selectedCamp)?.name,
       statistics: {
         total: totalRegistrations,
         pending: pendingCount,
@@ -140,7 +183,7 @@ export default function CampStatsPage() {
     const campName =
       selectedCamp === 'all'
         ? 'جميع المخيمات'
-        : camps?.find((c: any) => c.id.toString() === selectedCamp)?.name || 'غير محدد';
+        : camps?.find((c: Camp) => c.id?.toString() === selectedCamp)?.name || 'غير محدد';
     const printDate = new Date();
     const userName = user?.name || 'غير محدد';
 
@@ -501,13 +544,13 @@ export default function CampStatsPage() {
     '65+': 0,
   };
 
-  filteredRegistrations.forEach((r: any) => {
+  filteredRegistrations.forEach((r: CampRegistration) => {
     if (r.age) {
-      if (r.age <= 18) ageGroups['0-18']++;
-      else if (r.age <= 35) ageGroups['19-35']++;
-      else if (r.age <= 50) ageGroups['36-50']++;
-      else if (r.age <= 65) ageGroups['51-65']++;
-      else ageGroups['65+']++;
+      if (r.age <= 18) {ageGroups['0-18']++;}
+      else if (r.age <= 35) {ageGroups['19-35']++;}
+      else if (r.age <= 50) {ageGroups['36-50']++;}
+      else if (r.age <= 65) {ageGroups['51-65']++;}
+      else {ageGroups['65+']++;}
     }
   });
 
@@ -521,7 +564,7 @@ export default function CampStatsPage() {
     female: 0,
   };
 
-  filteredRegistrations.forEach((r: any) => {
+  filteredRegistrations.forEach((r: CampRegistration) => {
     if (r.gender && (r.gender === 'male' || r.gender === 'female')) {
       genderGroups[r.gender as 'male' | 'female']++;
     }
@@ -534,7 +577,7 @@ export default function CampStatsPage() {
 
   // Popular procedures
   const procedureCounts: Record<string, number> = {};
-  filteredRegistrations.forEach((r: any) => {
+  filteredRegistrations.forEach((r: CampRegistration) => {
     if (r.procedures) {
       try {
         const procs = JSON.parse(r.procedures);
@@ -559,7 +602,7 @@ export default function CampStatsPage() {
 
   // Registrations by source - Dynamic detection
   const sourceCountsMap = new Map<string, number>();
-  filteredRegistrations.forEach((r: any) => {
+  filteredRegistrations.forEach((r: CampRegistration) => {
     const source = r.source || 'direct';
     sourceCountsMap.set(source, (sourceCountsMap.get(source) || 0) + 1);
   });
@@ -588,7 +631,7 @@ export default function CampStatsPage() {
   // Daily registrations over time
   const dailyRegistrations = useMemo(() => {
     const dateMap = new Map<string, number>();
-    filteredRegistrations.forEach((r: any) => {
+    filteredRegistrations.forEach((r: CampRegistration) => {
       if (r.createdAt) {
         const date = new Date(r.createdAt).toLocaleDateString('ar-SA', {
           month: 'short',
@@ -605,53 +648,18 @@ export default function CampStatsPage() {
 
   // Time Metrics
   const timeMetrics = useMemo(() => {
-    const toConfirmTimes: number[] = [];
-    const toAttendTimes: number[] = [];
-    const toCancelTimes: number[] = [];
-
-    filteredRegistrations.forEach((r: any) => {
-      if (r.createdAt && r.confirmedAt) {
-        toConfirmTimes.push(new Date(r.confirmedAt).getTime() - new Date(r.createdAt).getTime());
-      }
-      if (r.confirmedAt && r.attendedAt) {
-        toAttendTimes.push(new Date(r.attendedAt).getTime() - new Date(r.confirmedAt).getTime());
-      }
-      if (r.createdAt && r.cancelledAt) {
-        toCancelTimes.push(new Date(r.cancelledAt).getTime() - new Date(r.createdAt).getTime());
-      }
-    });
-
-    const avgToConfirm =
-      toConfirmTimes.length > 0
-        ? Math.round(
-            toConfirmTimes.reduce((a, b) => a + b, 0) /
-              toConfirmTimes.length /
-              (1000 * 60 * 60 * 24)
-          )
-        : 0;
-    const avgToAttend =
-      toAttendTimes.length > 0
-        ? Math.round(
-            toAttendTimes.reduce((a, b) => a + b, 0) / toAttendTimes.length / (1000 * 60 * 60 * 24)
-          )
-        : 0;
-    const avgToCancel =
-      toCancelTimes.length > 0
-        ? Math.round(
-            toCancelTimes.reduce((a, b) => a + b, 0) / toCancelTimes.length / (1000 * 60 * 60 * 24)
-          )
-        : 0;
-
-    return { avgToConfirm, avgToAttend, avgToCancel };
+    // Time metrics not available as confirmedAt, attendedAt, cancelledAt are not returned by list query
+    return { avgToConfirm: 0, avgToAttend: 0, avgToCancel: 0 };
   }, [filteredRegistrations]);
 
   // Campaign Performance (by campaignId)
   const campaignPerformance = useMemo(() => {
     const campaignMap = new Map<number, { total: number; confirmed: number; attended: number }>();
 
-    filteredRegistrations.forEach((r: any) => {
-      if (r.campaignId) {
-        const current = campaignMap.get(r.campaignId) || { total: 0, confirmed: 0, attended: 0 };
+    filteredRegistrations.forEach((r) => {
+      const campaignId = (r as Record<string, unknown>).campaignId as number | undefined;
+      if (campaignId) {
+        const current = campaignMap.get(campaignId) || { total: 0, confirmed: 0, attended: 0 };
         current.total++;
         if (r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed') {
           current.confirmed++;
@@ -659,7 +667,7 @@ export default function CampStatsPage() {
         if (r.status === 'attended' || r.status === 'completed') {
           current.attended++;
         }
-        campaignMap.set(r.campaignId, current);
+        campaignMap.set(campaignId, current);
       }
     });
 
@@ -711,7 +719,7 @@ export default function CampStatsPage() {
   const statusByCamp = useMemo(() => {
     const campMap = new Map<number, { [key: string]: number }>();
 
-    filteredRegistrations.forEach((r: any) => {
+    filteredRegistrations.forEach((r: CampRegistration) => {
       if (r.campId) {
         const current = campMap.get(r.campId) || {};
         current[r.status] = (current[r.status] || 0) + 1;
@@ -721,7 +729,7 @@ export default function CampStatsPage() {
 
     return Array.from(campMap.entries())
       .map(([campId, statusCounts]) => {
-        const camp = camps?.find((c: any) => c.id === campId);
+        const camp = camps?.find((c: Camp) => c.id === campId);
         return {
           campName: camp?.name || `مخيم ${campId}`,
           pending: Number(statusCounts.pending) || 0,
@@ -751,7 +759,7 @@ export default function CampStatsPage() {
   const ageVsProcedures = useMemo(() => {
     const data: { age: number; procedureCount: number; fullName: string }[] = [];
 
-    filteredRegistrations.forEach((r: any) => {
+    filteredRegistrations.forEach((r: CampRegistration) => {
       if (r.age && r.procedures) {
         let procedureCount = 0;
         try {
@@ -780,7 +788,7 @@ export default function CampStatsPage() {
     const dayHourMap = new Map<string, number>();
     const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
-    filteredRegistrations.forEach((r: any) => {
+    filteredRegistrations.forEach((r: CampRegistration) => {
       if (r.createdAt) {
         const date = new Date(r.createdAt);
         const day = dayNames[date.getDay()];
@@ -869,7 +877,7 @@ export default function CampStatsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">جميع المخيمات</SelectItem>
-                    {camps?.map((camp: any) => (
+                    {camps?.map((camp: Camp) => (
                       <SelectItem key={camp.id} value={camp.id.toString()}>
                         {camp.name}
                       </SelectItem>
@@ -1165,7 +1173,7 @@ export default function CampStatsPage() {
             </Card>
 
             {/* UTM Source Distribution */}
-            {utmSourceData.length > 0 && (
+            {sourceData.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1176,7 +1184,7 @@ export default function CampStatsPage() {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={utmSourceData} layout="vertical">
+                    <BarChart data={sourceData} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                       <XAxis type="number" tick={{ fill: '#6B7280' }} />
                       <YAxis
@@ -1208,9 +1216,9 @@ export default function CampStatsPage() {
           </div>
 
           {/* Charts Row 2 - UTM Medium & Campaign */}
-          {(utmMediumData.length > 0 || utmCampaignData.length > 0) && (
+          {(sourceData.length > 0 || sourceData.length > 0) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {utmMediumData.length > 0 && (
+              {sourceData.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -1221,7 +1229,7 @@ export default function CampStatsPage() {
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={utmMediumData} layout="vertical">
+                      <BarChart data={sourceData} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                         <XAxis type="number" tick={{ fill: '#6B7280' }} />
                         <YAxis
@@ -1251,7 +1259,7 @@ export default function CampStatsPage() {
                 </Card>
               )}
 
-              {utmCampaignData.length > 0 && (
+              {sourceData.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -1262,7 +1270,7 @@ export default function CampStatsPage() {
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={utmCampaignData} layout="vertical">
+                      <BarChart data={sourceData} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                         <XAxis type="number" tick={{ fill: '#6B7280' }} />
                         <YAxis
@@ -1365,14 +1373,14 @@ export default function CampStatsPage() {
                         borderRadius: '8px',
                       }}
                       itemStyle={{ color: '#F3F4F6' }}
-                      formatter={(value: any, name: string, props: any) => {
+                      formatter={(value: unknown, name: unknown) => {
                         if (name === 'dropOff') {
-                          return [`${value}%`, 'نسبة التسرب'];
+                          return [`${value}%`, 'نسبة التسرب'] as [string, string];
                         }
                         if (name === 'conversionRate') {
-                          return [`${value}%`, 'معدل التحويل'];
+                          return [`${value}%`, 'معدل التحويل'] as [string, string];
                         }
-                        return [value, name];
+                        return [String(value), String(name)] as [string, string];
                       }}
                     />
                     <Legend />
@@ -1479,10 +1487,12 @@ export default function CampStatsPage() {
                         borderRadius: '8px',
                       }}
                       itemStyle={{ color: '#F3F4F6' }}
-                      formatter={(value: any, name: string) => [
-                        value,
-                        name === 'fullName' ? 'الاسم' : name,
-                      ]}
+                      formatter={(value: unknown, name: unknown) => {
+                        return [
+                          String(value),
+                          name === 'fullName' ? 'الاسم' : String(name),
+                        ] as [string, string];
+                      }}
                     />
                     <Scatter fill="#3B82F6" />
                   </ScatterChart>

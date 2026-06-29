@@ -61,6 +61,29 @@ import { Progress } from '@/components/ui/progress';
 import CampaignLinksManager from '@/components/CampaignLinksManager';
 import { useSlugGenerator } from '@/hooks/data/useSlugGenerator';
 
+interface Campaign {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  type: 'digital' | 'field' | 'awareness' | 'mixed';
+  status: 'draft' | 'active' | 'paused' | 'completed' | 'cancelled';
+  plannedBudget?: number | null;
+  actualBudget?: number | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  targetLeads?: number | null;
+  targetBookings?: number | null;
+  targetRevenue?: string | null;
+  platforms?: string | null;
+  teamMembers?: string | null;
+  kpis?: string | null;
+  notes?: string | null;
+  actualLeads?: number | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 // Helper functions
 const getCampaignTypeLabel = (type: string) => {
   const labels: Record<string, string> = {
@@ -168,7 +191,7 @@ export default function CampaignsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [formData, setFormData] = useState<CampaignFormData>(initialFormData);
 
   // Queries
@@ -233,8 +256,8 @@ export default function CampaignsPage() {
       name: formData.name,
       slug: formData.slug,
       description: formData.description || undefined,
-      type: formData.type as any,
-      status: formData.status as any,
+      type: formData.type as 'digital' | 'field' | 'awareness' | 'mixed',
+      status: formData.status as 'draft' | 'active' | 'paused' | 'completed' | 'cancelled',
       plannedBudget: formData.plannedBudget ? Number(formData.plannedBudget) : undefined,
       actualBudget: formData.actualBudget ? Number(formData.actualBudget) : undefined,
       targetLeads: formData.targetLeads ? Number(formData.targetLeads) : undefined,
@@ -251,14 +274,14 @@ export default function CampaignsPage() {
 
   const handleEditCampaign = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCampaign) return;
+    if (!selectedCampaign) {return;}
 
     updateMutation.mutate({
       id: selectedCampaign.id,
       name: formData.name,
       description: formData.description || undefined,
-      type: formData.type as any,
-      status: formData.status as any,
+      type: formData.type as 'digital' | 'field' | 'awareness' | 'mixed',
+      status: formData.status as 'draft' | 'active' | 'paused' | 'completed' | 'cancelled',
       plannedBudget: formData.plannedBudget ? Number(formData.plannedBudget) : undefined,
       actualBudget: formData.actualBudget ? Number(formData.actualBudget) : undefined,
       targetLeads: formData.targetLeads ? Number(formData.targetLeads) : undefined,
@@ -279,7 +302,7 @@ export default function CampaignsPage() {
     }
   };
 
-  const openEditDialog = (campaign: any) => {
+  const openEditDialog = (campaign: Campaign) => {
     setSelectedCampaign(campaign);
     setFormData({
       name: campaign.name || '',
@@ -302,7 +325,7 @@ export default function CampaignsPage() {
     setIsEditDialogOpen(true);
   };
 
-  const openViewDialog = (campaign: any) => {
+  const openViewDialog = (campaign: Campaign) => {
     setSelectedCampaign(campaign);
     setIsViewDialogOpen(true);
   };
@@ -323,8 +346,8 @@ export default function CampaignsPage() {
   };
 
   // Calculate progress
-  const calculateProgress = (campaign: any) => {
-    if (!campaign.targetLeads || campaign.targetLeads === 0) return 0;
+  const calculateProgress = (campaign: Campaign) => {
+    if (!campaign.targetLeads || campaign.targetLeads === 0) {return 0;}
     const actualLeads = campaign.actualLeads || 0;
     return Math.min(100, Math.round((actualLeads / campaign.targetLeads) * 100));
   };
@@ -386,7 +409,7 @@ export default function CampaignsPage() {
               ) : (
                 <div className="text-xl sm:text-2xl font-bold text-yellow-800">
                   {Array.isArray(campaigns)
-                    ? campaigns.filter((c: any) => c.status === 'paused').length
+                    ? campaigns.filter((c: Campaign) => c.status === 'paused').length
                     : 0}
                 </div>
               )}
@@ -444,7 +467,7 @@ export default function CampaignsPage() {
               ) : (
                 <div className="text-base sm:text-lg font-bold text-teal-800">
                   {campaigns
-                    ?.reduce((sum: number, c: any) => sum + (c.targetLeads || 0), 0)
+                    ?.reduce((sum: number, c: Campaign) => sum + (c.targetLeads || 0), 0)
                     .toLocaleString() || 0}
                   <span className="text-xs mr-1">عميل</span>
                 </div>
@@ -552,7 +575,7 @@ export default function CampaignsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {campaigns.map((campaign: any) => (
+                    {campaigns.map((campaign: Campaign) => (
                       <TableRow key={campaign.id} className="hover:bg-muted/50">
                         <TableCell>
                           <div>

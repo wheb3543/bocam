@@ -59,7 +59,7 @@ export function usePagination<T>(
   const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(data.length / numericPageSize));
 
   const paginatedData = useMemo(() => {
-    if (pageSize === 'all') return data;
+    if (pageSize === 'all') {return data;}
     const start = (currentPage - 1) * numericPageSize;
     return data.slice(start, start + numericPageSize);
   }, [data, currentPage, numericPageSize, pageSize]);

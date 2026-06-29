@@ -56,7 +56,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}) {
    */
   const validateFile = useCallback(
     (file: File): string | null => {
-      if (!file) return 'لم يتم اختيار ملف';
+      if (!file) {return 'لم يتم اختيار ملف';}
 
       if (file.size > maxSize) {
         const maxSizeMB = (maxSize / (1024 * 1024)).toFixed(1);

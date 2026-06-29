@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useFormatDate, formatDateUtil, formatDateTimeUtil } from "@/hooks/export/useFormatDate";

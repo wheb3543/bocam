@@ -1,4 +1,10 @@
 import { trpc } from '@/lib/api/trpc';
+
+interface OfferBooking {
+  id?: number;
+  [key: string]: unknown;
+}
+
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { Loader2, Gift } from 'lucide-react';
 import OfferCard from '@/components/patient/OfferCard';
@@ -34,7 +40,7 @@ export default function PatientOffersPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {offers.map((item: any) => (
+          {offers.map((item: OfferBooking) => (
             <OfferCard key={item.id} item={item} formatDate={formatDate} />
           ))}
         </div>

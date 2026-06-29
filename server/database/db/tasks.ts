@@ -30,13 +30,13 @@ export async function getAllTasks(filters?: {
   let conditions = [];
 
   if (filters?.status && filters.status !== 'all') {
-    conditions.push(eq(tasks.status, filters.status as any));
+    conditions.push(eq(tasks.status, filters.status as 'completed' | 'in_progress' | 'cancelled' | 'todo' | 'review'));
   }
   if (filters?.priority && filters.priority !== 'all') {
-    conditions.push(eq(tasks.priority, filters.priority as any));
+    conditions.push(eq(tasks.priority, filters.priority as 'high' | 'medium' | 'low'));
   }
   if (filters?.category && filters.category !== 'all') {
-    conditions.push(eq(tasks.category, filters.category as any));
+    conditions.push(eq(tasks.category, filters.category as 'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other'));
   }
   if (filters?.assignedTo) {
     conditions.push(eq(tasks.assignedTo, filters.assignedTo));
@@ -145,7 +145,7 @@ export async function updateTaskStatus(id: number, status: string) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
-  const updateData: any = { status };
+  const updateData: { status: 'completed' | 'in_progress' | 'cancelled' | 'todo' | 'review'; completedAt?: Date } = { status: status as 'completed' | 'in_progress' | 'cancelled' | 'todo' | 'review' };
   if (status === 'completed') {
     updateData.completedAt = new Date();
   }

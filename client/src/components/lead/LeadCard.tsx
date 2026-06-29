@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Phone, Mail, Calendar, Eye, MessageSquare, User } from 'lucide-react';
 import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type { UnifiedLead } from '@shared/types';
 
 const statusLabels: Record<string, string> = {
   new: 'جديد',
@@ -43,15 +44,15 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string; bord
 };
 
 interface LeadCardProps {
-  lead: any;
-  onUpdateStatus: (lead: any) => void;
-  onWhatsApp: (lead: any) => void;
+  lead: UnifiedLead;
+  onUpdateStatus: (lead: UnifiedLead) => void;
+  onWhatsApp: (lead: UnifiedLead) => void;
 }
 
 export default function LeadCard({ lead, onUpdateStatus, onWhatsApp }: LeadCardProps) {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
   const { formatDate, formatDateTime } = useFormatDate();
-  const status = statusConfig[lead.status] || statusConfig.new;
+  const status = statusConfig[lead.status || 'new'] || statusConfig.new;
   const isUrgent = lead.status === 'new' || lead.status === 'pending';
 
   return (
@@ -91,7 +92,7 @@ export default function LeadCard({ lead, onUpdateStatus, onWhatsApp }: LeadCardP
             className={`${status.bg} ${status.text} border ${status.border} text-[10px] px-2 py-0.5 flex-shrink-0`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${status.dot} ml-1.5 inline-block`} />
-            {statusLabels[lead.status] || lead.status}
+            {statusLabels[lead.status || 'new'] || lead.status}
           </Badge>
         </div>
 

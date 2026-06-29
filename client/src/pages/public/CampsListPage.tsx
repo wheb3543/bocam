@@ -2,6 +2,34 @@ import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
+
+interface Camp {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  imageUrl: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  isActive: boolean;
+  freeOffers: string | null;
+  discountedOffers: string | null;
+  availableProcedures: string | null;
+  galleryImages: string | null;
+  morningTime: string | null;
+  eveningTime: string | null;
+  dailyCapacity: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
+interface CampRegistration {
+  campId: number | null;
+  status: string | null;
+  [key: string]: unknown;
+}
+
 import { useAuth } from '@/_core/hooks/useAuth';
 import { getCompanyName } from '@/const';
 import { Button } from '@/components/ui/button';
@@ -58,37 +86,37 @@ function CampsListContent() {
   // Separate active and expired camps based on endDate
   const now = new Date();
   const activeCamps = Array.isArray(camps)
-    ? camps.filter((camp: any) => {
-        if (!camp.endDate) return true;
+    ? camps.filter((camp) => {
+        if (!camp.endDate) {return true;}
         return new Date(camp.endDate) >= now;
       })
     : [];
   const expiredCamps = Array.isArray(camps)
-    ? camps.filter((camp: any) => {
-        if (!camp.endDate) return false;
+    ? camps.filter((camp) => {
+        if (!camp.endDate) {return false;}
         return new Date(camp.endDate) < now;
       })
     : [];
 
-  const filteredActiveCamps = activeCamps.filter((camp: any) =>
+  const filteredActiveCamps = activeCamps.filter((camp) =>
     camp.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredExpiredCamps = expiredCamps.filter((camp: any) =>
+  const filteredExpiredCamps = expiredCamps.filter((camp) =>
     camp.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Calculate registration stats for each camp
   const getCampStats = (campId: number) => {
     const campRegistrations = Array.isArray(registrations)
-      ? registrations.filter((r: any) => r.campId === campId)
+      ? registrations.filter((r) => r.campId === campId)
       : [];
     const total = campRegistrations.length;
     const confirmed = campRegistrations.filter(
-      (r: any) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
+      (r) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
     ).length;
     const attended = campRegistrations.filter(
-      (r: any) => r.status === 'attended' || r.status === 'completed'
+      (r) => r.status === 'attended' || r.status === 'completed'
     ).length;
     return { total, confirmed, attended };
   };
@@ -98,11 +126,11 @@ function CampsListContent() {
     isExpired = false,
     index = 0,
   }: {
-    camp: any;
+    camp: Camp;
     isExpired?: boolean;
     index?: number;
   }) => {
-    const stats = getCampStats(camp.id);
+    const stats = getCampStats(camp.id ?? 0);
 
     return (
       <AnimatedCard
@@ -315,7 +343,7 @@ function CampsListContent() {
                 <TabsContent value="active">
                   {filteredActiveCamps && filteredActiveCamps.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-                      {filteredActiveCamps.map((camp: any, index: number) => (
+                      {filteredActiveCamps.map((camp, index) => (
                         <CampCard key={camp.id} camp={camp} isExpired={false} index={index} />
                       ))}
                     </div>
@@ -335,7 +363,7 @@ function CampsListContent() {
                 <TabsContent value="expired">
                   {filteredExpiredCamps && filteredExpiredCamps.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-                      {filteredExpiredCamps.map((camp: any, index: number) => (
+                      {filteredExpiredCamps.map((camp, index) => (
                         <CampCard key={camp.id} camp={camp} isExpired={true} index={index} />
                       ))}
                     </div>

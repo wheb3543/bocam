@@ -18,17 +18,19 @@ export default function ProfilePage() {
   const [email, setEmail] = useState(user?.email || '');
 
   const updateProfileMutation = trpc.auth.updateProfile.useMutation({
-    onSuccess: (updatedUser: any) => {
+    onSuccess: (updatedUser: unknown) => {
+      const user = updatedUser as { name?: string; email?: string };
       toast.success('تم تحديث الملف الشخصي بنجاح');
       setIsEditing(false);
       // Update local state
-      setName(updatedUser.name || '');
-      setEmail(updatedUser.email || '');
+      setName(user.name || '');
+      setEmail(user.email || '');
       // Reload page to update auth context
       window.location.reload();
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'فشل تحديث الملف الشخصي');
+    onError: (error: unknown) => {
+      const msg = error instanceof Error ? error.message : 'فشل تحديث الملف الشخصي';
+      toast.error(msg);
     },
   });
 

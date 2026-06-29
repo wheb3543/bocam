@@ -52,7 +52,7 @@ interface DataTableToolbarProps {
     onVisibilityChange: (key: string, visible: boolean) => void;
     onColumnOrderChange: (order: string[]) => void;
     onReset: () => void;
-    templates: any[];
+    templates: ColumnTemplate[];
     activeTemplateId: string | null;
     onApplyTemplate: (template: ColumnTemplate) => void;
     onSaveTemplate: (
@@ -68,7 +68,7 @@ interface DataTableToolbarProps {
     frozenColumns: string[];
     onToggleFrozen: (key: string) => void;
     isAdmin: boolean;
-    sharedTemplates?: any[];
+    sharedTemplates?: ColumnTemplate[];
     onSaveSharedTemplate?: (
       name: string,
       columns: Record<string, boolean>,
@@ -81,8 +81,8 @@ interface DataTableToolbarProps {
   /** خصائص SavedFilters */
   savedFiltersProps?: {
     pageKey: 'appointments' | 'offerLeads' | 'campRegistrations' | 'customers';
-    currentFilters: Record<string, any>;
-    onApplyFilter: (filters: Record<string, any>) => void;
+    currentFilters: Record<string, unknown>;
+    onApplyFilter: (filters: Record<string, unknown>) => void;
   };
 }
 

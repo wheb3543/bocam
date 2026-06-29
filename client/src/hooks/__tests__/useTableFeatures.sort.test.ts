@@ -17,16 +17,23 @@ interface ColumnConfig {
   sortType?: SortType;
 }
 
+interface TestData {
+  name: string;
+  age: number;
+  date: string;
+  [key: string]: unknown;
+}
+
 function sortData<T>(
   data: T[],
   sortState: SortState,
   columns: ColumnConfig[],
-  getFieldValue: (item: T, key: string) => any
+  getFieldValue: (item: T, key: string) => unknown
 ): T[] {
-  if (!sortState.field) return data;
+  if (!sortState.field) {return data;}
 
   const col = columns.find(c => c.key === sortState.field);
-  if (!col || col.sortable === false) return data;
+  if (!col || col.sortable === false) {return data;}
 
   const sortType = col.sortType || 'string';
 
@@ -36,16 +43,16 @@ function sortData<T>(
 
     let comparison = 0;
 
-    if (aVal == null && bVal == null) comparison = 0;
-    else if (aVal == null) comparison = 1;
-    else if (bVal == null) comparison = -1;
+    if (aVal === null && bVal === null) {comparison = 0;}
+    else if (aVal === null) {comparison = 1;}
+    else if (bVal === null) {comparison = -1;}
     else if (sortType === 'number') {
       const numA = typeof aVal === 'number' ? aVal : parseFloat(String(aVal));
       const numB = typeof bVal === 'number' ? bVal : parseFloat(String(bVal));
       comparison = (isNaN(numA) ? 0 : numA) - (isNaN(numB) ? 0 : numB);
     } else if (sortType === 'date') {
-      const dateA = new Date(aVal).getTime();
-      const dateB = new Date(bVal).getTime();
+      const dateA = (aVal !== undefined && (typeof aVal === 'string' || typeof aVal === 'number')) ? new Date(aVal).getTime() : 0;
+      const dateB = (bVal !== undefined && (typeof bVal === 'string' || typeof bVal === 'number')) ? new Date(bVal).getTime() : 0;
       comparison = (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
     } else {
       comparison = String(aVal).localeCompare(String(bVal), 'ar');
@@ -57,7 +64,7 @@ function sortData<T>(
 
 function toggleSort(currentState: SortState, field: string): SortState {
   if (currentState.field === field) {
-    if (currentState.direction === 'asc') return { field, direction: 'desc' };
+    if (currentState.direction === 'asc') {return { field, direction: 'desc' };}
     return { field: null, direction: 'asc' };
   }
   return { field, direction: 'asc' };
@@ -78,7 +85,7 @@ const testData = [
   { name: 'خالد', age: 28, date: '2023-12-01' },
 ];
 
-const getFieldValue = (item: any, key: string) => item[key];
+const getFieldValue = (item: TestData, key: string) => item[key];
 
 // === Tests ===
 describe('نظام الفرز - Sort System', () => {
@@ -172,7 +179,7 @@ describe('نظام الفرز - Sort System', () => {
         { name: 'أحمد', age: 30, date: '2024-01-15' },
         { name: null, age: null, date: null },
         { name: 'علي', age: 35, date: '2024-02-10' },
-      ];
+      ] as unknown as TestData[];
       const sorted = sortData(dataWithNull, { field: 'name', direction: 'asc' }, testColumns, getFieldValue);
       expect(sorted.length).toBe(3);
       // null values should be at the end
@@ -192,7 +199,7 @@ describe('نظام الفرز - Sort System', () => {
         { name: 'أ', age: '30', date: '' },
         { name: 'ب', age: '5', date: '' },
         { name: 'ج', age: '100', date: '' },
-      ];
+      ] as unknown as TestData[];
       const sorted = sortData(
         dataWithStringNumbers,
         { field: 'age', direction: 'asc' },

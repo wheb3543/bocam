@@ -50,7 +50,7 @@ function DoctorsContent() {
   const filteredDoctors = Array.isArray(doctors)
     ? doctors.filter((doctor) => {
         // Only show available doctors
-        if (doctor.available !== 'yes') return false;
+        if (doctor.available !== 'yes') {return false;}
 
         // Search filter
         const matchesSearch =

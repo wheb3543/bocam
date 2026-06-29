@@ -1,3 +1,4 @@
+
 import { useFormatDate, formatDateUtil } from '@/hooks/export/useFormatDate';
 import { useState, useMemo } from 'react';
 import { useConfirmDialog } from '@/hooks/ui/useConfirmDialog';
@@ -55,6 +56,10 @@ import {
 } from '@/components/table/ResizableTable';
 import { useTableFeatures } from '@/hooks/table/useTableFeatures';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type { RouterInputs, RouterOutputs } from '@/types/trpc';
+
+type User = RouterOutputs['users']['getAll'][number];
+type AccessRequest = RouterOutputs['accessRequests']['pending'][number];
 
 const roleLabels: Record<string, string> = {
   admin: 'مسؤول',
@@ -62,6 +67,7 @@ const roleLabels: Record<string, string> = {
   staff: 'موظف',
   viewer: 'مشاهد',
   user: 'مستخدم',
+  team_leader: 'قائد فريق',
 };
 
 const roleColors: Record<string, string> = {
@@ -70,11 +76,12 @@ const roleColors: Record<string, string> = {
   staff: 'bg-green-100 text-green-800 border-green-200',
   viewer: 'bg-muted text-foreground border-border',
   user: 'bg-purple-100 text-purple-800 border-purple-200',
+  team_leader: 'bg-orange-100 text-orange-800 border-orange-200',
 };
 
 // Helper function to get initials from name
 const getInitials = (name: string) => {
-  if (!name) return '؟';
+  if (!name) {return '؟';}
   const parts = name.split(' ');
   if (parts.length >= 2) {
     return parts[0][0] + parts[1][0];
@@ -83,7 +90,7 @@ const getInitials = (name: string) => {
 };
 
 // Helper function to export users to CSV
-const exportToCSV = (users: any[]) => {
+const exportToCSV = (users: User[]) => {
   const headers = [
     'اسم المستخدم',
     'الاسم الكامل',
@@ -240,7 +247,7 @@ export default function UsersManagementPage() {
   const { formatDate, formatDateTime } = useFormatDate();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [activeSection, setActiveSection] = useState<'users' | 'requests' | 'activity'>('users');
-  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -249,7 +256,7 @@ export default function UsersManagementPage() {
     password: '',
     name: '',
     email: '',
-    role: 'user' as 'user' | 'admin' | 'manager' | 'staff' | 'viewer',
+    role: 'user' as RouterInputs['users']['create']['role'],
     isActive: 'yes' as 'yes' | 'no',
   });
 
@@ -348,20 +355,29 @@ export default function UsersManagementPage() {
 
   const handleSubmit = () => {
     if (editingUser) {
-      const updateData: any = {
+      const updateData: RouterInputs['users']['update'] = {
         id: editingUser.id,
-        ...formData,
+        name: formData.name.trim() ? formData.name.trim() : undefined,
+        email: formData.email.trim() ? formData.email.trim() : undefined,
+        role: formData.role,
+        isActive: formData.isActive,
+        ...(formData.password.trim() ? { password: formData.password } : {}),
       };
-      if (!formData.password) {
-        delete updateData.password;
-      }
       updateMutation.mutate(updateData);
     } else {
-      createMutation.mutate(formData);
+      const createData: RouterInputs['users']['create'] = {
+        username: formData.username.trim(),
+        name: formData.name.trim() ? formData.name.trim() : undefined,
+        email: formData.email.trim() ? formData.email.trim() : undefined,
+        role: formData.role,
+        isActive: formData.isActive,
+        ...(formData.password.trim() ? { password: formData.password } : {}),
+      };
+      createMutation.mutate(createData);
     }
   };
 
-  const handleEdit = (user: any) => {
+  const handleEdit = (user: User) => {
     setEditingUser(user);
     setFormData({
       username: user.username,
@@ -382,9 +398,9 @@ export default function UsersManagementPage() {
 
   // Filter and sort users
   const filteredUsers = useMemo(() => {
-    if (!users) return [];
+    if (!users) {return [];}
 
-    let filtered = users.filter((user) => {
+    const filtered = users.filter((user) => {
       const matchesSearch =
         user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -397,7 +413,7 @@ export default function UsersManagementPage() {
     });
 
     // Apply sorting using useTableFeatures
-    return userTable.sortData(filtered, (item: any, key: string) => {
+    return userTable.sortData(filtered, (item: User, key: string) => {
       switch (key) {
         case 'user':
           return item.name || item.username;
@@ -412,15 +428,15 @@ export default function UsersManagementPage() {
         case 'createdAt':
           return item.createdAt;
         default:
-          return item[key];
+          return undefined;
       }
     });
   }, [users, searchQuery, roleFilter, statusFilter, userTable.sortState, userTable.sortData]);
 
   // Sort access requests using useTableFeatures
   const sortedRequests = useMemo(() => {
-    if (!accessRequests) return [];
-    return requestTable.sortData(accessRequests, (item: any, key: string) => {
+    if (!accessRequests) {return [];}
+    return requestTable.sortData(accessRequests, (item: AccessRequest, key: string) => {
       switch (key) {
         case 'name':
           return item.name;
@@ -433,7 +449,7 @@ export default function UsersManagementPage() {
         case 'requestedAt':
           return item.requestedAt;
         default:
-          return item[key];
+          return undefined;
       }
     });
   }, [accessRequests, requestTable.sortState, requestTable.sortData]);
@@ -628,7 +644,7 @@ export default function UsersManagementPage() {
                             <Label htmlFor="role">الدور *</Label>
                             <Select
                               value={formData.role}
-                              onValueChange={(value: any) =>
+                              onValueChange={(value: 'user' | 'admin' | 'manager' | 'staff' | 'viewer') =>
                                 setFormData({ ...formData, role: value })
                               }
                             >
@@ -648,7 +664,7 @@ export default function UsersManagementPage() {
                             <Label htmlFor="isActive">الحالة *</Label>
                             <Select
                               value={formData.isActive}
-                              onValueChange={(value: any) =>
+                              onValueChange={(value: 'yes' | 'no') =>
                                 setFormData({ ...formData, isActive: value })
                               }
                             >
@@ -734,7 +750,7 @@ export default function UsersManagementPage() {
                     <TableRow>
                       {userTable.visibleColumnOrder.map((colKey) => {
                         const col = userColumns.find((c) => c.key === colKey);
-                        if (!col || !userTable.visibleColumns[colKey]) return null;
+                        if (!col || !userTable.visibleColumns[colKey]) {return null;}
                         return (
                           <ResizableHeaderCell
                             key={colKey}
@@ -760,7 +776,7 @@ export default function UsersManagementPage() {
                       filteredUsers.map((user) => (
                         <TableRow key={user.id}>
                           {userTable.visibleColumnOrder.map((colKey) => {
-                            if (!userTable.visibleColumns[colKey]) return null;
+                            if (!userTable.visibleColumns[colKey]) {return null;}
 
                             switch (colKey) {
                               case 'user':
@@ -970,7 +986,7 @@ export default function UsersManagementPage() {
                       <TableRow>
                         {requestTable.visibleColumnOrder.map((colKey) => {
                           const col = requestColumns.find((c) => c.key === colKey);
-                          if (!col || !requestTable.visibleColumns[colKey]) return null;
+                          if (!col || !requestTable.visibleColumns[colKey]) {return null;}
                           return (
                             <ResizableHeaderCell
                               key={colKey}
@@ -995,7 +1011,7 @@ export default function UsersManagementPage() {
                       {sortedRequests.map((request) => (
                         <TableRow key={request.id}>
                           {requestTable.visibleColumnOrder.map((colKey) => {
-                            if (!requestTable.visibleColumns[colKey]) return null;
+                            if (!requestTable.visibleColumns[colKey]) {return null;}
 
                             switch (colKey) {
                               case 'name':

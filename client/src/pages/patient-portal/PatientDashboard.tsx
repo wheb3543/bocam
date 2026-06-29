@@ -7,6 +7,8 @@ import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
+import type { Appointment, PatientResult, OfferLead, CampRegistration } from '@shared/types';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -97,7 +99,7 @@ export default function PatientDashboard() {
   }, [patient, authLoading, navigate]);
 
   useEffect(() => {
-    if (!patient) return;
+    if (!patient) {return;}
     setProfileForm({
       fullName: patient.fullName || '',
       age: patient.age ? String(patient.age) : '',
@@ -114,7 +116,7 @@ export default function PatientDashboard() {
     );
   }
 
-  if (!patient) return null;
+  if (!patient) {return null;}
 
   const handleProfileSave = () => {
     const fullName = profileForm.fullName.trim();
@@ -321,21 +323,21 @@ export default function PatientDashboard() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {appointments.slice(0, 3).map((apt: any) => (
+                    {appointments.slice(0, 3).map((apt) => (
                       <div
                         key={apt.id}
                         className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50"
                       >
                         <div className="flex-1 min-w-0">
                           <p className="text-xs sm:text-sm font-medium truncate">
-                            {apt.doctorName || 'موعد طبي'}
+                            {'موعد طبي'}
                           </p>
                           <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Clock className="h-3 w-3" />
-                            {formatDate(apt.appointmentDate || apt.createdAt)}
+                            {formatDate((apt.appointmentDate as Date | string | null) || (apt["createdAt"] as Date | string))}
                           </p>
                         </div>
-                        {statusBadge(apt.status)}
+                        {statusBadge(apt.status as string)}
                       </div>
                     ))}
                     {appointments.length > 3 && (
@@ -374,7 +376,7 @@ export default function PatientDashboard() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {results.slice(0, 3).map((res: any) => (
+                    {results.slice(0, 3).map((res) => (
                       <div
                         key={res.id}
                         className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50"
@@ -392,11 +394,11 @@ export default function PatientDashboard() {
                           <div className="min-w-0">
                             <p className="text-xs sm:text-sm font-medium truncate">{res.title}</p>
                             <p className="text-[10px] sm:text-xs text-muted-foreground">
-                              {formatDate(res.resultDate || res.createdAt)}
+                              {formatDate((res.resultDate as Date | string | null) || (res["createdAt"] as Date | string))}
                             </p>
                           </div>
                         </div>
-                        {statusBadge(res.status)}
+                        {statusBadge(res.status as string)}
                       </div>
                     ))}
                   </div>
@@ -445,28 +447,22 @@ export default function PatientDashboard() {
                       <Stethoscope className="h-3.5 w-3.5" /> مواعيد الأطباء
                     </h3>
                     <div className="space-y-2">
-                      {appointments.map((apt: any) => (
+                      {appointments.map((apt) => (
                         <Card key={apt.id} className="border-green-50 dark:border-gray-700">
                           <CardContent className="p-3 sm:p-4">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium">
-                                  {apt.doctorName || apt.name || 'موعد طبي'}
+                                  {'موعد طبي'}
                                 </p>
                                 <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-[10px] sm:text-xs text-muted-foreground">
                                   <span className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    {formatDate(apt.appointmentDate || apt.createdAt)}
+                                    {formatDate((apt.appointmentDate as Date | string | null) || (apt["createdAt"] as Date | string))}
                                   </span>
-                                  {apt.specialty && (
-                                    <span className="flex items-center gap-1">
-                                      <Stethoscope className="h-3 w-3" />
-                                      {apt.specialty}
-                                    </span>
-                                  )}
                                 </div>
                               </div>
-                              {statusBadge(apt.status)}
+                              {statusBadge(apt.status as string)}
                             </div>
                           </CardContent>
                         </Card>
@@ -482,17 +478,17 @@ export default function PatientDashboard() {
                       <Gift className="h-3.5 w-3.5" /> حجوزات العروض
                     </h3>
                     <div className="space-y-2">
-                      {offerBookings.map((booking: any) => (
+                      {offerBookings.map((booking: OfferLead) => (
                         <Card key={booking.id} className="border-blue-50 dark:border-gray-700">
                           <CardContent className="p-3 sm:p-4">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium">{booking.name || 'حجز عرض'}</p>
+                                <p className="text-sm font-medium">{booking.fullName || 'حجز عرض'}</p>
                                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                                  {formatDate(booking.createdAt)}
+                                  {formatDate(booking.createdAt as Date | string)}
                                 </p>
                               </div>
-                              {statusBadge(booking.status)}
+                              {statusBadge(booking.status as string)}
                             </div>
                           </CardContent>
                         </Card>
@@ -508,17 +504,17 @@ export default function PatientDashboard() {
                       <Tent className="h-3.5 w-3.5" /> تسجيلات المخيمات
                     </h3>
                     <div className="space-y-2">
-                      {campRegistrations.map((reg: any) => (
+                      {campRegistrations.map((reg) => (
                         <Card key={reg.id} className="border-purple-50 dark:border-gray-700">
                           <CardContent className="p-3 sm:p-4">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium">{reg.name || 'تسجيل مخيم'}</p>
+                                <p className="text-sm font-medium">{reg.fullName || 'تسجيل مخيم'}</p>
                                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                                  {formatDate(reg.createdAt)}
+                                  {formatDate(reg.createdAt as Date | string)}
                                 </p>
                               </div>
-                              {statusBadge(reg.status)}
+                              {statusBadge(reg.status as string)}
                             </div>
                           </CardContent>
                         </Card>
@@ -553,33 +549,33 @@ export default function PatientDashboard() {
             ) : (
               <div className="space-y-3">
                 {/* Lab Results */}
-                {results.filter((r: any) => r.resultType === 'lab').length > 0 && (
+                {results.filter((r) => r.resultType === 'lab').length > 0 && (
                   <div>
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
                       <FlaskConical className="h-3.5 w-3.5 text-blue-500" /> نتائج التحاليل
                     </h3>
                     <div className="space-y-2">
                       {results
-                        .filter((r: any) => r.resultType === 'lab')
-                        .map((res: any) => (
+                        .filter((r) => r.resultType === 'lab')
+                        .map((res) => (
                           <Card key={res.id} className="border-blue-50 dark:border-gray-700">
                             <CardContent className="p-3 sm:p-4">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium">{res.title}</p>
-                                  {res.doctorName && (
+                                  {(res["doctorName"] as string | null) && (
                                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                                      د. {res.doctorName}
+                                      د. {(res["doctorName"] as string)}
                                     </p>
                                   )}
                                   <p className="text-[10px] sm:text-xs text-muted-foreground">
-                                    {formatDate(res.resultDate || res.createdAt)}
+                                    {formatDate((res.resultDate as Date | string | null) || (res["createdAt"] as Date | string))}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {statusBadge(res.status)}
-                                  {res.fileUrl && (
-                                    <a href={res.fileUrl} target="_blank" rel="noopener noreferrer">
+                                  {statusBadge(res.status as string)}
+                                  {(res["fileUrl"] as string | null) && (
+                                    <a href={(res["fileUrl"] as string)} target="_blank" rel="noopener noreferrer">
                                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                                         <FileText className="h-3.5 w-3.5 text-blue-500" />
                                       </Button>
@@ -595,33 +591,33 @@ export default function PatientDashboard() {
                 )}
 
                 {/* Radiology */}
-                {results.filter((r: any) => r.resultType === 'radiology').length > 0 && (
+                {results.filter((r) => r.resultType === 'radiology').length > 0 && (
                   <div className="mt-4">
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
                       <ScanLine className="h-3.5 w-3.5 text-purple-500" /> نتائج الأشعة
                     </h3>
                     <div className="space-y-2">
                       {results
-                        .filter((r: any) => r.resultType === 'radiology')
-                        .map((res: any) => (
+                        .filter((r) => r.resultType === 'radiology')
+                        .map((res) => (
                           <Card key={res.id} className="border-purple-50 dark:border-gray-700">
                             <CardContent className="p-3 sm:p-4">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium">{res.title}</p>
-                                  {res.doctorName && (
+                                  {(res["doctorName"] as string | null) && (
                                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                                      د. {res.doctorName}
+                                      د. {(res["doctorName"] as string)}
                                     </p>
                                   )}
                                   <p className="text-[10px] sm:text-xs text-muted-foreground">
-                                    {formatDate(res.resultDate || res.createdAt)}
+                                    {formatDate((res.resultDate as Date | string | null) || (res["createdAt"] as Date | string))}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {statusBadge(res.status)}
-                                  {res.fileUrl && (
-                                    <a href={res.fileUrl} target="_blank" rel="noopener noreferrer">
+                                  {statusBadge(res.status as string)}
+                                  {(res["fileUrl"] as string | null) && (
+                                    <a href={(res["fileUrl"] as string)} target="_blank" rel="noopener noreferrer">
                                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                                         <FileText className="h-3.5 w-3.5 text-purple-500" />
                                       </Button>
@@ -637,33 +633,33 @@ export default function PatientDashboard() {
                 )}
 
                 {/* Reports */}
-                {results.filter((r: any) => r.resultType === 'report').length > 0 && (
+                {results.filter((r) => r.resultType === 'report').length > 0 && (
                   <div className="mt-4">
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
                       <ClipboardList className="h-3.5 w-3.5 text-amber-500" /> التقارير الطبية
                     </h3>
                     <div className="space-y-2">
                       {results
-                        .filter((r: any) => r.resultType === 'report')
-                        .map((res: any) => (
+                        .filter((r) => r.resultType === 'report')
+                        .map((res) => (
                           <Card key={res.id} className="border-amber-50 dark:border-gray-700">
                             <CardContent className="p-3 sm:p-4">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium">{res.title}</p>
-                                  {res.doctorName && (
+                                  {(res["doctorName"] as string | null) && (
                                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                                      د. {res.doctorName}
+                                      د. {(res["doctorName"] as string)}
                                     </p>
                                   )}
                                   <p className="text-[10px] sm:text-xs text-muted-foreground">
-                                    {formatDate(res.resultDate || res.createdAt)}
+                                    {formatDate((res.resultDate as Date | string | null) || (res["createdAt"] as Date | string))}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {statusBadge(res.status)}
-                                  {res.fileUrl && (
-                                    <a href={res.fileUrl} target="_blank" rel="noopener noreferrer">
+                                  {statusBadge(res.status as string)}
+                                  {(res["fileUrl"] as string | null) && (
+                                    <a href={(res["fileUrl"] as string)} target="_blank" rel="noopener noreferrer">
                                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                                         <FileText className="h-3.5 w-3.5 text-amber-500" />
                                       </Button>

@@ -33,9 +33,9 @@ export async function generateLabResultPDF(orderId: number): Promise<Buffer> {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
-      addLabHeader(doc, order);
-      addLabResultsTable(doc, details);
-      addLabFooter(doc, order);
+      addLabHeader(doc, order as unknown as { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date });
+      addLabResultsTable(doc, details as unknown as Array<{ TEST_NAME: string; RESULT_VALUE: string; NORMAL_RANGE: string; UNIT: string; PARAMETER_NAME?: string }>);
+      addLabFooter(doc, order as unknown as { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date });
 
       doc.end();
     } catch (error) {
@@ -44,7 +44,7 @@ export async function generateLabResultPDF(orderId: number): Promise<Buffer> {
   });
 }
 
-function addLabHeader(doc: PDFKit.PDFDocument, order: any) {
+function addLabHeader(doc: PDFKit.PDFDocument, order: { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date }) {
   const logoPath = path.join(process.cwd(), 'client', 'public', 'SGHHospitalColorBilingual.png');
   try {
     doc.image(logoPath, doc.page.width - 200, 30, { width: 150 });
@@ -83,7 +83,7 @@ function addLabHeader(doc: PDFKit.PDFDocument, order: any) {
   });
 }
 
-function addLabResultsTable(doc: PDFKit.PDFDocument, details: any[]) {
+function addLabResultsTable(doc: PDFKit.PDFDocument, details: Array<{ TEST_NAME: string; RESULT_VALUE: string; NORMAL_RANGE: string; UNIT: string; PARAMETER_NAME?: string }>) {
   const tableTop = 250;
   const tableLeft = 50;
   const tableWidth = doc.page.width - 100;
@@ -114,7 +114,7 @@ function addLabResultsTable(doc: PDFKit.PDFDocument, details: any[]) {
 
     const fillColor = rowIndex % 2 === 0 ? '#FFFFFF' : '#F5F5F5';
     const values = [
-      detail.PARAMETER_NAME,
+      detail.TEST_NAME,
       detail.RESULT_VALUE,
       detail.NORMAL_RANGE || '-',
       detail.UNIT || '-',
@@ -133,7 +133,7 @@ function addLabResultsTable(doc: PDFKit.PDFDocument, details: any[]) {
   });
 }
 
-function addLabFooter(doc: PDFKit.PDFDocument, order: any) {
+function addLabFooter(doc: PDFKit.PDFDocument, order: { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date }) {
   const pageHeight = doc.page.height;
   const footerY = pageHeight - 50;
 
@@ -145,7 +145,7 @@ function addLabFooter(doc: PDFKit.PDFDocument, order: any) {
   doc
     .fontSize(9)
     .font(AMIRI_REGULAR)
-    .text(`رقم الطلب: ${order.ORDER_ID}`, 50, footerY, { align: 'left' })
+    .text(`رقم الطلب: ${(order as { ORDER_ID?: string }).ORDER_ID || 'N/A'}`, 50, footerY, { align: 'left' })
     .text('نرعاكم كأهالينا', 0, footerY, { align: 'center', width: doc.page.width })
     .text(new Date().toLocaleDateString('ar-SA'), doc.page.width - 200, footerY, {
       align: 'right',

@@ -174,7 +174,7 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
 
   // ── Build hashed user_data object ──────────────────────────────────────────
   // Meta requires ph and em as arrays of hashed values
-  const hashedUserData: Record<string, any> = {};
+  const hashedUserData: Record<string, unknown> = {};
 
   if (userData.phone) {
     const normalizedPhone = normalizePhone(userData.phone);
@@ -221,7 +221,7 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
 
   // ── Build custom_data object ───────────────────────────────────────────────
   // Include lead_event_source as required by Meta for CRM events
-  const builtCustomData: Record<string, any> = {
+  const builtCustomData: Record<string, unknown> = {
     lead_event_source: 'SGH CRM Portal',
     event_source: 'crm',
   };

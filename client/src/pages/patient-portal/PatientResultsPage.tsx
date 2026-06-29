@@ -1,5 +1,7 @@
 import { useLocation } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
+import type { PatientResult } from '@shared/types';
+
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, FileText } from 'lucide-react';
@@ -36,7 +38,7 @@ export default function PatientResultsPage() {
           <p>لا توجد نتائج أو تقارير حالياً</p>
         </div>
       ) : (
-        results.map((result: any) => (
+        results.map((result: PatientResult) => (
           <ResultCard
             key={result.id}
             result={result}

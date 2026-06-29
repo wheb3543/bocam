@@ -11,7 +11,7 @@ const POLLING_INTERVAL = 15_000; // 15 seconds for faster detection
  */
 function playNotificationSound() {
   try {
-    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioCtx = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
 
     // First tone (lower)
     const osc1 = audioCtx.createOscillator();
@@ -130,7 +130,7 @@ export function useNotificationSound() {
 
   // Monitor WhatsApp unread count changes
   useEffect(() => {
-    if (!badgeCounts) return;
+    if (!badgeCounts) {return;}
 
     const currentWhatsappCount = badgeCounts.whatsapp || 0;
 

@@ -7,7 +7,7 @@ interface ActivityLog {
   entity_type?: string;
   entity_id?: string;
   description?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   ip_address?: string;
   user_agent?: string;
   status?: 'success' | 'error';
@@ -48,7 +48,7 @@ interface SystemNotification {
   message: string;
   severity?: 'info' | 'warning' | 'error' | 'success';
   action_url?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export async function logActivity(data: ActivityLog) {
@@ -85,7 +85,7 @@ export async function updateUpdateLog(id: number, data: Partial<UpdateLog>) {
     if (!db) throw new Error('Database not available');
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
 
     if (data.status !== undefined) {
       updates.push(`status = ${data.status}`);
@@ -136,7 +136,7 @@ export async function updateBackupLog(id: number, data: Partial<BackupLog>) {
     if (!db) throw new Error('Database not available');
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
 
     if (data.status !== undefined) {
       updates.push(`status = ${data.status}`);

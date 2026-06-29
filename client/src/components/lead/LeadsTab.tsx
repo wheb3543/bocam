@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
@@ -32,21 +33,23 @@ import { toast } from 'sonner';
 import { exportToExcel, formatLeadsForExport } from '@/lib/export/exportToExcel';
 import { SOURCE_OPTIONS, SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type { Lead, UnifiedLead } from '@shared/types';
+import type { UseFilterUtilsReturn } from '@/hooks/table/useFilterUtils';
 
 interface LeadsTabProps {
-  leadsFilter: any;
-  onOpenStatusDialog: (lead: any) => void;
+  leadsFilter: UseFilterUtilsReturn<Lead>;
+  onOpenStatusDialog: (lead: Lead) => void;
   pendingCount: number;
 }
 
 // Sanitize lead data to prevent JSON parsing errors
-const sanitizeLead = (lead: any) => {
-  if (!lead) return null;
-  const sanitized = { ...lead };
+const sanitizeLead = (lead: Lead | unknown): Lead | null => {
+  if (!lead) {return null;}
+  const sanitized: Lead = { ...lead } as Lead;
   Object.keys(sanitized).forEach((key) => {
-    const value = sanitized[key];
+    const value = sanitized[key as keyof Lead];
     if (value === undefined || value === null || (typeof value === 'number' && isNaN(value))) {
-      delete sanitized[key];
+      delete sanitized[key as keyof Lead];
     }
   });
   return sanitized;
@@ -55,7 +58,7 @@ const sanitizeLead = (lead: any) => {
 export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount }: LeadsTabProps) {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
   const { formatDate } = useFormatDate();
-  const { data: unifiedLeads, isLoading: leadsLoading } = trpc.leads.list.useQuery();
+  const { data: unifiedLeads, isLoading: leadsLoading } = trpc.leads.unifiedList.useQuery();
   const { data: stats } = trpc.leads.stats.useQuery();
 
   const searchTerm = leadsFilter.filters.searchTerm;
@@ -68,17 +71,17 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
   const setLeadsSourceFilter = leadsFilter.filters.setSourceFilter;
 
   const filteredLeads = useMemo(() => {
-    if (!unifiedLeads) return [];
+    if (!unifiedLeads) {return [];}
 
-    let filtered = unifiedLeads;
+    let filtered = unifiedLeads as unknown as UnifiedLead[];
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (lead: any) =>
-          lead.fullName.toLowerCase().includes(term) ||
-          lead.phone.includes(term) ||
-          (lead.email && lead.email.toLowerCase().includes(term))
+        (lead: UnifiedLead) =>
+          (lead.fullName ?? '').toString().toLowerCase().includes(term) ||
+          (lead.phone ?? '').toString().includes(term) ||
+          (typeof lead.email === 'string' && lead.email.toLowerCase().includes(term))
       );
     }
 
@@ -86,9 +89,10 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-      filtered = filtered.filter((lead: any) => {
+      filtered = filtered.filter((lead: UnifiedLead) => {
+        if (!lead?.createdAt) {return false;}
         const leadDate = new Date(lead.createdAt);
-        if (leadsDateFilter === 'today') return leadDate >= today;
+        if (leadsDateFilter === 'today') {return leadDate >= today;}
         if (leadsDateFilter === 'week') {
           const weekAgo = new Date(today);
           weekAgo.setDate(weekAgo.getDate() - 7);
@@ -104,11 +108,11 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
     }
 
     if (leadsStatusFilter && leadsStatusFilter.length > 0) {
-      filtered = filtered.filter((lead: any) => leadsStatusFilter.includes(lead.status));
+      filtered = filtered.filter((lead: UnifiedLead) => lead.status && leadsStatusFilter.includes(lead.status));
     }
 
     if (leadsSourceFilter && leadsSourceFilter.length > 0) {
-      filtered = filtered.filter((lead: any) => leadsSourceFilter.includes(lead.source));
+      filtered = filtered.filter((lead: UnifiedLead) => lead.source && leadsSourceFilter.includes(lead.source));
     }
 
     return filtered;
@@ -119,7 +123,7 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
       toast.error('لا توجد بيانات للتصدير');
       return;
     }
-    const formattedData = formatLeadsForExport(filteredLeads);
+    const formattedData = formatLeadsForExport(filteredLeads as unknown as Record<string, unknown>[]);
     exportToExcel(formattedData, 'تسجيلات_العملاء');
     toast.success('تم تصدير البيانات بنجاح');
   };
@@ -225,13 +229,16 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
             ) : filteredLeads.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">لا توجد تسجيلات</div>
             ) : (
-              filteredLeads.map((lead: any) => (
+              filteredLeads.map((lead: UnifiedLead) => (
                 <LeadCard
                   key={`lead-${lead.id}`}
                   lead={lead}
-                  onUpdateStatus={(lead) => onOpenStatusDialog(sanitizeLead(lead))}
+                  onUpdateStatus={(lead) => {
+                    const sanitized = sanitizeLead(lead);
+                    if (sanitized) {onOpenStatusDialog(sanitized);}
+                  }}
                   onWhatsApp={(phone) => {
-                    window.open(`https://wa.me/${phone.replace(/\D/g, '')}`, '_blank');
+                    window.open(`https://wa.me/${String(phone).replace(/\D/g, '')}`, '_blank');
                   }}
                 />
               ))
@@ -268,7 +275,7 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredLeads.map((lead: any) => (
+                  filteredLeads.map((lead: UnifiedLead) => (
                     <TableRow
                       key={`lead-${lead.id}`}
                       className={lead.status === 'pending' ? 'bg-red-50 hover:bg-red-100' : ''}
@@ -314,8 +321,18 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge className={statusColors[lead.status as keyof typeof statusColors]}>
-                          {statusLabels[lead.status as keyof typeof statusLabels]}
+                        <Badge className={(() => {
+                          if (lead.status && lead.status in statusColors) {
+                            return statusColors[lead.status];
+                          }
+                          return '';
+                        })()}>
+                          {(() => {
+                            if (lead.status && lead.status in statusLabels) {
+                              return statusLabels[lead.status];
+                            }
+                            return lead.status;
+                          })()}
                         </Badge>
                       </TableCell>
                       <TableCell>{formatDate(lead.createdAt)}</TableCell>
@@ -323,7 +340,10 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => onOpenStatusDialog(sanitizeLead(lead))}
+                          onClick={() => {
+                            const sanitized = sanitizeLead(lead);
+                            if (sanitized) {onOpenStatusDialog(sanitized);}
+                          }}
                         >
                           تحديث الحالة
                         </Button>

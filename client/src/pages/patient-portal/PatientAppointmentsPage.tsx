@@ -2,12 +2,15 @@ import { useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
+
+import type { AppointmentWithDoctor } from "@shared/types";
+
+type AppointmentFilter = 'upcoming' | 'past';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Calendar } from 'lucide-react';
 import AppointmentCard from '@/components/patient/AppointmentCard';
-
-type AppointmentFilter = 'upcoming' | 'past';
 
 export default function PatientAppointmentsPage() {
   const [, navigate] = useLocation();
@@ -35,16 +38,16 @@ export default function PatientAppointmentsPage() {
     const now = new Date();
     const all = appointments || [];
     const upcoming = all
-      .filter((apt: any) => new Date(apt.appointmentDate || apt.createdAt) >= now)
+      .filter((apt) => new Date(apt.appointmentDate || apt.createdAt) >= now)
       .sort(
-        (a: any, b: any) =>
+        (a, b) =>
           new Date(a.appointmentDate || a.createdAt).getTime() -
           new Date(b.appointmentDate || b.createdAt).getTime()
       );
     const past = all
-      .filter((apt: any) => new Date(apt.appointmentDate || apt.createdAt) < now)
+      .filter((apt) => new Date(apt.appointmentDate || apt.createdAt) < now)
       .sort(
-        (a: any, b: any) =>
+        (a, b) =>
           new Date(b.appointmentDate || b.createdAt).getTime() -
           new Date(a.appointmentDate || a.createdAt).getTime()
       );
@@ -87,7 +90,7 @@ export default function PatientAppointmentsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((appointment: any) => (
+          {filtered.map((appointment: AppointmentWithDoctor) => (
             <AppointmentCard
               key={appointment.id}
               appointment={appointment}

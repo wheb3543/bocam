@@ -19,6 +19,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Search, Download, Printer, RotateCcw } from 'lucide-react';
 import { SOURCE_OPTIONS } from '@shared/sources';
+import type { ColumnTemplate } from '@/components/table/ColumnVisibility';
+
+interface FilterParams {
+  searchTerm?: string;
+  [key: string]: unknown;
+}
 
 interface AppointmentFiltersProps {
   // Search
@@ -48,9 +54,9 @@ interface AppointmentFiltersProps {
   onColumnOrderChange: (order: string[]) => void;
   onResetColumns: () => void;
   // Column templates
-  allTemplates: any[];
+  allTemplates: ColumnTemplate[];
   activeTemplateId: string | null;
-  onApplyTemplate: (template: any) => void;
+  onApplyTemplate: (template: ColumnTemplate) => void;
   onSaveTemplate: (
     name: string,
     columns: Record<string, boolean>,
@@ -65,7 +71,7 @@ interface AppointmentFiltersProps {
   onToggleFrozen: (key: string) => void;
   // Admin
   isAdmin: boolean;
-  sharedTemplates: any[];
+  sharedTemplates: ColumnTemplate[];
   onSaveSharedTemplate: (
     name: string,
     columns: Record<string, boolean>,
@@ -75,8 +81,8 @@ interface AppointmentFiltersProps {
   ) => void;
   onDeleteSharedTemplate: (dbId: number) => void;
   // Saved filters
-  currentFilters: any;
-  onApplyFilter: (filters: any) => void;
+  currentFilters: FilterParams;
+  onApplyFilter: (filters: FilterParams) => void;
   // Export & Print
   onExport: (format: 'excel' | 'csv' | 'pdf') => void;
   onPrint: () => void;

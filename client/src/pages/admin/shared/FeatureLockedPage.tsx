@@ -133,7 +133,7 @@ export default function FeatureLockedPage({
 
   // إعادة التوجيه إذا كان الترخيص صالحاً (لمنع التكرار)
   useEffect(() => {
-    if (!featureName) return;
+    if (!featureName) {return;}
 
     // التحقق من الميزة
     const checkFeature = async () => {

@@ -1,12 +1,32 @@
 // Extend jsPDF type to include autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-    lastAutoTable?: {
-      finalY: number;
+type JsPDFInstance = {
+  autoTable: (options: unknown) => JsPDFInstance;
+  lastAutoTable?: {
+    finalY: number;
+  };
+  setR2L: (value: boolean) => void;
+  setLanguage: (lang: string) => void;
+  setFontSize: (size: number) => void;
+  setFont: (font: string, style?: string) => void;
+  text: (text: string, x: number, y: number, options?: { align?: string }) => void;
+  setDrawColor: (r: number, g: number, b: number) => void;
+  line: (x1: number, y1: number, x2: number, y2: number) => void;
+  internal: {
+    pageSize: {
+      getWidth: () => number;
+      getHeight: () => number;
     };
-  }
-}
+  };
+  getNumberOfPages: () => number;
+  setPage: (page: number) => void;
+  setTextColor: (r: number, g?: number, b?: number) => void;
+  save: (filename: string) => void;
+  [key: string]: unknown;
+};
+
+type JsPDFConstructor = {
+  new (options?: { orientation?: string; unit?: string; format?: string }): JsPDFInstance;
+};
 
 export interface BookingData {
   id: number;
@@ -91,7 +111,8 @@ export const exportToPDF = async (
     ['الإيرادات', `${stats.revenue.toLocaleString('ar-YE')} ريال`],
   ];
 
-  (doc as any).autoTable({
+  if ('autoTable' in doc) {
+    (doc as unknown as JsPDFInstance).autoTable({
     startY: yPos,
     head: [['المؤشر', 'القيمة']],
     body: statsData,
@@ -112,10 +133,12 @@ export const exportToPDF = async (
       fillColor: [245, 245, 245],
     },
     margin: { left: 20, right: 20 },
-  });
+    } as unknown);
+  }
 
   // جدول الحجوزات التفصيلية
-  yPos = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 10 : yPos + 50;
+  const lastAutoTableFinalY = 'lastAutoTable' in doc ? (doc as unknown as JsPDFInstance).lastAutoTable?.finalY : undefined;
+  yPos = lastAutoTableFinalY ? lastAutoTableFinalY + 10 : yPos + 50;
 
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
@@ -132,7 +155,8 @@ export const exportToPDF = async (
     new Date(booking.createdAt).toLocaleDateString('ar-YE'),
   ]);
 
-  (doc as any).autoTable({
+  if ('autoTable' in doc) {
+    (doc as unknown as JsPDFInstance).autoTable({
     startY: yPos,
     head: [['#', 'اسم المريض', 'الهاتف', 'التخصص', 'الحالة', 'التاريخ']],
     body: bookingsData,
@@ -161,7 +185,8 @@ export const exportToPDF = async (
       4: { cellWidth: 25, halign: 'center' },
       5: { cellWidth: 30, halign: 'center' },
     },
-  });
+    } as unknown);
+  }
 
   // تذييل الصفحة
   const pageCount = doc.getNumberOfPages();
@@ -227,7 +252,7 @@ export const exportToExcel = async (
   statsWs['!cols'] = [{ wch: 30 }, { wch: 25 }];
 
   // دمج خلايا العنوان
-  if (!statsWs['!merges']) statsWs['!merges'] = [];
+  if (!statsWs['!merges']) {statsWs['!merges'] = [];}
   statsWs['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } });
 
   // إضافة الورقة
@@ -317,7 +342,7 @@ function getSourceLabel(source: string): string {
  * دالة مساعدة للحصول على تسمية نوع الحجز بالعربية
  */
 function getBookingTypeLabel(type?: string): string {
-  if (!type) return 'غير محدد';
+  if (!type) {return 'غير محدد';}
 
   const typeMap: Record<string, string> = {
     appointment: 'موعد طبيب',

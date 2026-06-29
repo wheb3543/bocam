@@ -93,7 +93,12 @@ export async function updatePatientProfile(
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
-  const updateData: any = {};
+  const updateData: Partial<{
+    fullName: string;
+    address: string | null;
+    age: number | null;
+    email: string | null;
+  }> = {};
   if (data.fullName) updateData.fullName = data.fullName;
   if (data.address !== undefined) updateData.address = data.address;
   if (data.age !== undefined) updateData.age = data.age;

@@ -155,8 +155,8 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
       .from(messageSettings)
       .where(
         and(
-          eq(messageSettings.entityType, entityType as any),
-          eq(messageSettings.triggerEvent, triggerEvent as any),
+          eq(messageSettings.entityType, entityType as 'appointment' | 'camp_registration' | 'offer_lead'),
+          eq(messageSettings.triggerEvent, triggerEvent as 'manual' | 'on_create' | 'on_confirmed' | 'on_arrived' | 'on_completed' | 'on_cancelled' | 'on_reminder_24h' | 'on_reminder_1h'),
           eq(messageSettings.isEnabled, 1)
         )
       )
@@ -290,7 +290,7 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
           }
         }
 
-        const allComponents: any[] = [];
+        const allComponents: Array<{ type: 'body' | 'header' | 'footer' | 'button'; parameters?: Array<{ type: 'text' | 'image' | 'payload'; text?: string; payload?: string }>; sub_type?: 'quick_reply'; index?: number }> = [];
         if (bodyParams.length > 0) {
           allComponents.push({ type: 'body', parameters: bodyParams });
         }
@@ -384,9 +384,9 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
     }
 
     return { success: false, error: 'No valid channel configured' };
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[WhatsApp Dispatcher] Error dispatching ${entityType}:${triggerEvent}:`, error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
@@ -413,7 +413,7 @@ export async function ensureConversationAndSaveMessage(params: {
     const now = new Date();
 
     // ربط المحادثة بالكيان المناسب بناءً على entityType
-    const entityLinks: Record<string, any> = {};
+    const entityLinks: Record<string, unknown> = {};
     if (params.entityType && params.entityId) {
       switch (params.entityType) {
         case 'appointment':
@@ -448,7 +448,7 @@ export async function ensureConversationAndSaveMessage(params: {
       conversation = await getWhatsAppConversationByPhone(normalizedPhone);
     } else {
       // تحديث المحادثة الموجودة
-      await updateWhatsAppConversation(conversation.id, {
+      await updateWhatsAppConversation(conversation.id as number, {
         lastMessage: params.messageContent.substring(0, 200),
         lastMessageAt: now,
         customerName: params.customerName || conversation.customerName || null,

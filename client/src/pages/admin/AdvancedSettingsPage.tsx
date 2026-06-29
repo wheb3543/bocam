@@ -73,7 +73,7 @@ export default function AdvancedSettingsPage() {
   };
 
   const handleSave = async () => {
-    if (!config) return;
+    if (!config) {return;}
 
     try {
       setIsSaving(true);

@@ -3,6 +3,7 @@ import { trpc } from '@/lib/api/trpc';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import type { ReactNode } from 'react';
 import {
   Smartphone,
   Monitor,
@@ -43,11 +44,11 @@ export default function PWAStatsPage() {
   const totalInstalls = stats?.total ?? 0;
 
   const platformData = useMemo(() => {
-    if (!stats?.recentInstalls) return [];
+    if (!stats?.recentInstalls) {return [];}
     // تجميع المنصات من recentInstalls
     const platformMap = new Map<string, number>();
-    stats.recentInstalls.forEach((install: any) => {
-      const platform = install.platform || 'غير معروف';
+    stats.recentInstalls.forEach((install: Record<string, unknown>) => {
+      const platform = (install.platform as string) || 'غير معروف';
       platformMap.set(platform, (platformMap.get(platform) || 0) + 1);
     });
     return Array.from(platformMap.entries()).map(([platform, count]) => ({ platform, count }));
@@ -55,20 +56,20 @@ export default function PWAStatsPage() {
 
   // Prepare daily stats for chart
   const chartData = useMemo(() => {
-    if (!stats?.dailyStats) return [];
+    if (!stats?.dailyStats) {return [];}
     const dailyMap = new Map<string, { public: number; admin: number }>();
 
-    stats.dailyStats.forEach((stat: any) => {
-      const date = stat.date;
+    stats.dailyStats.forEach((stat: Record<string, unknown>) => {
+      const date = stat.date as string;
       if (!dailyMap.has(date)) {
         dailyMap.set(date, { public: 0, admin: 0 });
       }
       const existing = dailyMap.get(date);
       if (existing) {
         if (stat.appType === 'public') {
-          existing.public += stat.count;
+          existing.public += (stat.count as number);
         } else {
-          existing.admin += stat.count;
+          existing.admin += (stat.count as number);
         }
       }
     });
@@ -347,7 +348,7 @@ export default function PWAStatsPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {platformData.map((item: any) => (
+                  {platformData.map((item: { platform: string; count: number }) => (
                     <div key={item.platform} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Smartphone className="h-4 w-4 text-muted-foreground" />
@@ -399,8 +400,8 @@ export default function PWAStatsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {stats.recentInstalls.map((install: any) => (
-                      <tr key={install.id} className="border-b last:border-0 hover:bg-muted/30">
+                    {stats.recentInstalls.map((install: Record<string, unknown>) => (
+                      <tr key={install.id as string} className="border-b last:border-0 hover:bg-muted/30">
                         <td className="py-2 px-3">
                           <Badge
                             variant="secondary"
@@ -414,11 +415,11 @@ export default function PWAStatsPage() {
                           </Badge>
                         </td>
                         <td className="py-2 px-3 text-muted-foreground">
-                          {install.platform || 'غير معروف'}
+                          {install.platform as ReactNode || 'غير معروف'}
                         </td>
                         <td className="py-2 px-3 text-muted-foreground">
                           {install.installedAt
-                            ? new Date(install.installedAt).toLocaleDateString('ar-YE', {
+                            ? new Date(install.installedAt as string).toLocaleDateString('ar-YE', {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric',

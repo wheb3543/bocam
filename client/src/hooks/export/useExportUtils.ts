@@ -32,9 +32,9 @@ export interface ExportConfig<T> {
   /** تعريفات أعمدة الطباعة (قد تتضمن أعمدة إضافية مثل التعليقات والمهام) */
   printColumns?: ExportColumnDef[];
   /** دالة تحويل عنصر واحد إلى صف تصدير */
-  mapToExportRow: (item: T) => Record<string, any>;
+  mapToExportRow: (item: T) => Record<string, unknown>;
   /** دالة تحويل عنصر واحد إلى صف طباعة (اختيارية، تستخدم mapToExportRow إن لم تحدد) */
-  mapToPrintRow?: (item: T) => Record<string, any>;
+  mapToPrintRow?: (item: T) => Record<string, unknown>;
 }
 
 /**
@@ -42,7 +42,7 @@ export interface ExportConfig<T> {
  */
 export interface ExportCallOptions {
   /** البيانات المفلترة */
-  data: any[];
+  data: unknown[];
   /** الفلاتر النشطة */
   activeFilters?: Record<string, string>;
   /** نطاق التاريخ (نص) */
@@ -65,7 +65,7 @@ export function useExportUtils<T>(config: ExportConfig<T>) {
    */
   const buildMetadata = useCallback(
     (
-      data: any[],
+      data: unknown[],
       activeFilters?: Record<string, string>,
       dateRangeStr?: string
     ): ExportMetadata => {
@@ -90,7 +90,7 @@ export function useExportUtils<T>(config: ExportConfig<T>) {
       columnDefs: ExportColumnDef[],
       visibleColumns?: Record<string, boolean>
     ): ExportColumnDef[] => {
-      if (!visibleColumns) return columnDefs;
+      if (!visibleColumns) {return columnDefs;}
 
       return Object.entries(visibleColumns)
         .filter(([_, visible]) => visible)
@@ -210,7 +210,7 @@ export function useExportUtils<T>(config: ExportConfig<T>) {
     ): Record<string, string> => {
       const result: Record<string, string> = {};
       for (const filter of filters) {
-        if (!filter.value) continue;
+        if (!filter.value) {continue;}
         const val = Array.isArray(filter.value) ? filter.value.join(', ') : filter.value;
         if (val) {
           result[filter.label] = val;

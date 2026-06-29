@@ -8,7 +8,7 @@ import crypto from "crypto";
 // ─── Helpers (duplicated from facebookCAPI.ts for unit testing) ───────────────
 
 function hashValue(value: string | undefined | null): string {
-  if (!value) return "";
+  if (!value) {return "";}
   return crypto
     .createHash("sha256")
     .update(value.trim().toLowerCase())
@@ -17,9 +17,9 @@ function hashValue(value: string | undefined | null): string {
 
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
-  if (digits.startsWith("967") && digits.length === 12) return `+${digits}`;
-  if (digits.startsWith("0") && digits.length === 10) return `+967${digits.slice(1)}`;
-  if (digits.length === 9) return `+967${digits}`;
+  if (digits.startsWith("967") && digits.length === 12) {return `+${digits}`;}
+  if (digits.startsWith("0") && digits.length === 10) {return `+967${digits.slice(1)}`;}
+  if (digits.length === 9) {return `+967${digits}`;}
   return `+${digits}`;
 }
 

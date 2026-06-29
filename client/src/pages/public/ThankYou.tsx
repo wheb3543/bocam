@@ -16,10 +16,22 @@ import { Link, useLocation } from 'wouter';
 import { useEffect, useState } from 'react';
 import { getCompanySlogan, COMPANY_ARABIC_NAME } from '@/const';
 
+interface BookingInfo {
+  type: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  doctor?: string;
+  offer?: string;
+  camp?: string;
+  date?: string;
+  time?: string;
+}
+
 export default function ThankYou() {
   const { formatDate, formatDateTime } = useFormatDate();
   const [location] = useLocation();
-  const [bookingInfo, setBookingInfo] = useState<any>(null);
+  const [bookingInfo, setBookingInfo] = useState<BookingInfo | null>(null);
 
   useEffect(() => {
     // Parse URL parameters
@@ -38,20 +50,20 @@ export default function ThankYou() {
       setBookingInfo({
         type,
         name,
-        phone,
-        email,
-        doctor,
-        offer,
-        camp,
-        date,
-        time,
+        phone: phone || undefined,
+        email: email || undefined,
+        doctor: doctor || undefined,
+        offer: offer || undefined,
+        camp: camp || undefined,
+        date: date || undefined,
+        time: time || undefined,
       });
     }
   }, [location]);
 
   const getTypeInfo = () => {
     if (!bookingInfo)
-      return { title: 'شكراً لتسجيلك!', icon: CheckCircle2, color: 'text-secondary' };
+      {return { title: 'شكراً لتسجيلك!', icon: CheckCircle2, color: 'text-secondary' };}
 
     switch (bookingInfo.type) {
       case 'appointment':

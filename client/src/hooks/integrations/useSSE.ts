@@ -17,7 +17,7 @@ export function useSSE(url: string | null, onMessage?: SSEHandler) {
   });
 
   useEffect(() => {
-    if (!url || typeof window === 'undefined') return;
+    if (!url || typeof window === 'undefined') {return;}
 
     let retryTimeout: ReturnType<typeof setTimeout> | null = null;
     let retryCount = 0;
@@ -83,7 +83,7 @@ export function useSSE(url: string | null, onMessage?: SSEHandler) {
     connect();
 
     return () => {
-      if (retryTimeout) clearTimeout(retryTimeout);
+      if (retryTimeout) {clearTimeout(retryTimeout);}
       esRef.current?.close();
       esRef.current = null;
     };

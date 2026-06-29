@@ -54,6 +54,46 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { processPhoneInput } from '@/hooks/form/usePhoneFormat';
 
+interface MessageSetting {
+  id?: number;
+  category?: string;
+  messageContent?: string;
+  deliveryChannel?: string;
+  whatsappTemplateId?: number | null;
+  isEnabled?: number;
+  [key: string]: unknown;
+}
+
+interface MetaTemplate {
+  id?: number;
+  name?: string;
+  metaStatus?: string;
+  isActive?: number;
+  [key: string]: unknown;
+}
+
+interface AuditLog {
+  id?: number;
+  phone?: string;
+  templateName?: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
+interface ScheduledTask {
+  id?: number;
+  [key: string]: unknown;
+}
+
+interface AuditStats {
+  total?: number;
+  sent?: number;
+  failed?: number;
+  successRate?: number;
+  byType?: Record<string, number>;
+  [key: string]: unknown;
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 const categoryLabels: Record<string, string> = {
   patient_journey: 'رحلة المريض',
@@ -62,7 +102,7 @@ const categoryLabels: Record<string, string> = {
   doctor_notifications: 'إشعارات الأطباء',
 };
 
-const categoryIcons: Record<string, any> = {
+const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   patient_journey: Users,
   executive_reports: BarChart2,
   task_management: Zap,
@@ -101,7 +141,7 @@ function MessageSettingsContent() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [selectedMessage, setSelectedMessage] = useState<MessageSetting | null>(null);
   const [editedContent, setEditedContent] = useState('');
   const [editedChannel, setEditedChannel] = useState('whatsapp_integration');
   const [editedTemplateId, setEditedTemplateId] = useState<number | null>(null);
@@ -112,8 +152,8 @@ function MessageSettingsContent() {
   // Queries
   const { data: allMessages, isLoading, refetch } = trpc.messageSettings.list.useQuery();
   const { data: metaTemplates } = trpc.whatsapp.getTemplates.useQuery(undefined, {
-    select: (data: any) =>
-      (data?.templates || []).filter((t: any) => t.metaStatus === 'APPROVED' && t.isActive === 1),
+    select: (data: unknown) =>
+      (data as { templates?: MetaTemplate[] })?.templates?.filter((t: MetaTemplate) => t.metaStatus === 'APPROVED' && t.isActive === 1) || [],
   });
   const { data: auditLogs, isLoading: auditLoading } = trpc.whatsapp.getAuditLogs.useQuery(
     { limit: 50 },
@@ -150,7 +190,7 @@ function MessageSettingsContent() {
       setTestDialogOpen(false);
       setTestPhone('');
     },
-    onError: (error: any) => toast.error(`فشل الإرسال: ${error?.message || 'خطأ'}`),
+    onError: (error: unknown) => toast.error(`فشل الإرسال: ${error instanceof Error ? error.message : 'خطأ'}`),
   });
 
   const stopTaskMutation = trpc.whatsapp.stopTask.useMutation({
@@ -179,33 +219,33 @@ function MessageSettingsContent() {
 
   // Handlers
   const filteredMessages = Array.isArray(allMessages)
-    ? allMessages.filter((msg: any) => msg.category === selectedCategory)
+    ? allMessages.filter((msg: MessageSetting) => msg.category === selectedCategory)
     : [];
 
-  const handleEdit = (message: any) => {
+  const handleEdit = (message: MessageSetting) => {
     setSelectedMessage(message);
-    setEditedContent(message.messageContent);
-    setEditedChannel(message.deliveryChannel);
+    setEditedContent(message.messageContent || '');
+    setEditedChannel(message.deliveryChannel || '');
     setEditedTemplateId(message.whatsappTemplateId || null);
     setEditDialogOpen(true);
   };
 
-  const handlePreview = (message: any) => {
+  const handlePreview = (message: MessageSetting) => {
     setSelectedMessage(message);
     setPreviewDialogOpen(true);
   };
 
-  const handleTest = (message: any) => {
+  const handleTest = (message: MessageSetting) => {
     setSelectedMessage(message);
     setTestDialogOpen(true);
   };
 
   const handleSave = () => {
-    if (!selectedMessage) return;
+    if (!selectedMessage) {return;}
     updateMutation.mutate({
-      id: selectedMessage.id,
+      id: selectedMessage.id || 0,
       messageContent: editedContent,
-      deliveryChannel: editedChannel as any,
+      deliveryChannel: editedChannel as 'whatsapp_api' | 'whatsapp_integration' | 'both',
       whatsappTemplateId: editedTemplateId,
     });
   };
@@ -241,22 +281,22 @@ function MessageSettingsContent() {
 
   // Stats summary
   const stats = useMemo(() => {
-    if (!allMessages) return { total: 0, enabled: 0, disabled: 0 };
+    if (!allMessages) {return { total: 0, enabled: 0, disabled: 0 };}
     return {
       total: allMessages.length,
-      enabled: allMessages.filter((m: any) => m.isEnabled === 1).length,
-      disabled: allMessages.filter((m: any) => m.isEnabled !== 1).length,
+      enabled: allMessages.filter((m: MessageSetting) => m.isEnabled === 1).length,
+      disabled: allMessages.filter((m: MessageSetting) => m.isEnabled !== 1).length,
     };
   }, [allMessages]);
 
   // Filtered audit logs
-  const auditLogsArray = Array.isArray(auditLogs) ? auditLogs : (auditLogs as any)?.logs || [];
+  const auditLogsArray = Array.isArray(auditLogs) ? auditLogs : (auditLogs as { logs?: AuditLog[] })?.logs || [];
 
   const filteredAuditLogs = useMemo(() => {
-    if (!auditLogsArray.length) return [];
-    if (!auditSearch) return auditLogsArray;
+    if (!auditLogsArray.length) {return [];}
+    if (!auditSearch) {return auditLogsArray;}
     return auditLogsArray.filter(
-      (log: any) =>
+      (log: AuditLog) =>
         log.phone?.includes(auditSearch) ||
         log.templateName?.toLowerCase().includes(auditSearch.toLowerCase()) ||
         log.status?.toLowerCase().includes(auditSearch.toLowerCase())
@@ -367,10 +407,10 @@ function MessageSettingsContent() {
             {Object.entries(categoryLabels).map(([key, label]) => {
               const Icon = categoryIcons[key] || MessageSquare;
               const count = Array.isArray(allMessages)
-                ? allMessages.filter((m: any) => m.category === key).length
+                ? allMessages.filter((m: MessageSetting) => m.category === key).length
                 : 0;
               const enabled = Array.isArray(allMessages)
-                ? allMessages.filter((m: any) => m.category === key && m.isEnabled === 1).length
+                ? allMessages.filter((m: MessageSetting) => m.category === key && m.isEnabled === 1).length
                 : 0;
               return (
                 <button
@@ -410,7 +450,7 @@ function MessageSettingsContent() {
                 </CardContent>
               </Card>
             ) : (
-              filteredMessages?.map((message: any) => (
+              filteredMessages?.map((message: MessageSetting) => (
                 <Card
                   key={message.id}
                   className={`transition-all ${message.isEnabled !== 1 ? 'opacity-60' : ''}`}
@@ -419,15 +459,15 @@ function MessageSettingsContent() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <CardTitle className="text-sm sm:text-base">
-                          {message.displayName}
+                          {(message.displayName as string) || ''}
                         </CardTitle>
                         <CardDescription className="text-xs mt-0.5">
-                          {message.description}
+                          {(message.description as string) || ''}
                         </CardDescription>
                       </div>
                       <Switch
                         checked={message.isEnabled === 1}
-                        onCheckedChange={() => handleToggle(message.id)}
+                        onCheckedChange={() => handleToggle(message.id || 0)}
                         className="flex-shrink-0"
                       />
                     </div>
@@ -436,8 +476,8 @@ function MessageSettingsContent() {
                     {/* Message Preview */}
                     <div className="bg-muted/50 p-3 rounded-lg border">
                       <p className="text-xs whitespace-pre-wrap text-muted-foreground">
-                        {message.messageContent.substring(0, 180)}
-                        {message.messageContent.length > 180 && '...'}
+                        {(message.messageContent as string || '').substring(0, 180)}
+                        {(message.messageContent as string || '').length > 180 && '...'}
                       </p>
                     </div>
 
@@ -446,16 +486,16 @@ function MessageSettingsContent() {
                       <Badge variant="outline" className="text-[10px]">
                         {
                           deliveryChannelLabels[
-                            message.deliveryChannel as keyof typeof deliveryChannelLabels
+                            (message.deliveryChannel as string) as keyof typeof deliveryChannelLabels
                           ]
                         }
                       </Badge>
-                      {message.triggerEvent && (
+                      {(message.triggerEvent as string) && (
                         <Badge
                           variant="outline"
                           className="text-[10px] text-blue-600 border-blue-300 bg-blue-50 dark:bg-blue-900/20"
                         >
-                          ⚡ {triggerEventLabels[message.triggerEvent] || message.triggerEvent}
+                          ⚡ {triggerEventLabels[(message.triggerEvent as string)] || (message.triggerEvent as string)}
                         </Badge>
                       )}
                       {message.whatsappTemplateId && (
@@ -464,14 +504,14 @@ function MessageSettingsContent() {
                           className="text-[10px] text-green-600 border-green-300 bg-green-50 dark:bg-green-900/20"
                         >
                           📝{' '}
-                          {((metaTemplates as any[]) || []).find(
-                            (t: any) => t.id === message.whatsappTemplateId
+                          {((metaTemplates as MetaTemplate[]) || []).find(
+                            (t: MetaTemplate) => t.id === message.whatsappTemplateId
                           )?.name || `قالب #${message.whatsappTemplateId}`}
                         </Badge>
                       )}
-                      {message.availableVariables && (
+                      {(message.availableVariables as string) && (
                         <Badge variant="secondary" className="text-[10px]">
-                          {JSON.parse(message.availableVariables).length} متغيرات
+                          {JSON.parse((message.availableVariables as string) || '[]').length} متغيرات
                         </Badge>
                       )}
                       <Badge
@@ -526,28 +566,28 @@ function MessageSettingsContent() {
                 {[
                   {
                     label: 'إجمالي المرسلة',
-                    value: (auditStats as any).total || 0,
+                    value: (auditStats as AuditStats).total || 0,
                     icon: Send,
                     color: 'text-blue-600',
                     bg: 'bg-blue-50 dark:bg-blue-900/20',
                   },
                   {
                     label: 'ناجحة',
-                    value: (auditStats as any).sent || 0,
+                    value: (auditStats as AuditStats).sent || 0,
                     icon: CheckCircle2,
                     color: 'text-green-600',
                     bg: 'bg-green-50 dark:bg-green-900/20',
                   },
                   {
                     label: 'فاشلة',
-                    value: (auditStats as any).failed || 0,
+                    value: (auditStats as AuditStats).failed || 0,
                     icon: XCircle,
                     color: 'text-red-600',
                     bg: 'bg-red-50 dark:bg-red-900/20',
                   },
                   {
                     label: 'معدل النجاح',
-                    value: `${(auditStats as any).successRate || 0}%`,
+                    value: `${(auditStats as AuditStats).successRate || 0}%`,
                     icon: TrendingUp,
                     color: 'text-purple-600',
                     bg: 'bg-purple-50 dark:bg-purple-900/20',
@@ -564,15 +604,15 @@ function MessageSettingsContent() {
               </div>
 
               {/* By Type */}
-              {(auditStats as any).byType && Object.keys((auditStats as any).byType).length > 0 && (
+              {(auditStats as AuditStats).byType && Object.keys((auditStats as AuditStats).byType || {}).length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-sm">توزيع الرسائل حسب النوع</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {Object.entries((auditStats as any).byType).map(
-                        ([type, count]: [string, any]) => (
+                      {Object.entries((auditStats as AuditStats).byType || {}).map(
+                        ([type, count]: [string, number]) => (
                           <div key={type} className="flex items-center justify-between">
                             <span className="text-xs text-muted-foreground">{type}</span>
                             <div className="flex items-center gap-2">
@@ -580,7 +620,7 @@ function MessageSettingsContent() {
                                 <div
                                   className="bg-purple-500 h-1.5 rounded-full"
                                   style={{
-                                    width: `${Math.min(100, (count / ((auditStats as any).total || 1)) * 100)}%`,
+                                    width: `${Math.min(100, (count / ((auditStats as AuditStats).total || 1)) * 100)}%`,
                                   }}
                                 />
                               </div>
@@ -624,7 +664,7 @@ function MessageSettingsContent() {
             </div>
           ) : filteredAuditLogs.length > 0 ? (
             <div className="space-y-2">
-              {filteredAuditLogs.map((log: any) => (
+              {filteredAuditLogs.map((log: AuditLog) => (
                 <div
                   key={log.id}
                   className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700"
@@ -649,11 +689,11 @@ function MessageSettingsContent() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs font-medium truncate">
-                        {log.templateName || log.messageType || 'رسالة'}
+                        {(log.templateName as string) || (log.messageType as string) || 'رسالة'}
                       </p>
                       <span className="text-[10px] text-muted-foreground flex-shrink-0">
-                        {log.createdAt
-                          ? formatDistanceToNow(new Date(log.createdAt), {
+                        {(log.createdAt as string)
+                          ? formatDistanceToNow(new Date(log.createdAt as string), {
                               locale: ar,
                               addSuffix: true,
                             })
@@ -661,10 +701,10 @@ function MessageSettingsContent() {
                       </span>
                     </div>
                     <p className="text-[10px] text-muted-foreground mt-0.5" dir="ltr">
-                      {log.phone}
+                      {(log.phone as string) || ''}
                     </p>
-                    {log.errorMessage && (
-                      <p className="text-[10px] text-red-500 mt-0.5">{log.errorMessage}</p>
+                    {(log.errorMessage as string) && (
+                      <p className="text-[10px] text-red-500 mt-0.5">{log.errorMessage as string}</p>
                     )}
                   </div>
                   <Badge
@@ -706,14 +746,14 @@ function MessageSettingsContent() {
 
           {scheduledTasks && Array.isArray(scheduledTasks) && scheduledTasks.length > 0 ? (
             <div className="space-y-3">
-              {scheduledTasks.map((task: any) => (
+              {scheduledTasks.map((task: ScheduledTask) => (
                 <Card key={task.id}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <Calendar className="h-3.5 w-3.5 text-purple-500" />
-                          <p className="text-sm font-medium">{task.name || task.id}</p>
+                          <p className="text-sm font-medium">{(task.name as string) || task.id}</p>
                           <Badge
                             variant="outline"
                             className={`text-[10px] ${
@@ -724,26 +764,26 @@ function MessageSettingsContent() {
                                   : 'border-gray-200 text-gray-600'
                             }`}
                           >
-                            {task.status === 'running'
+                            {(task.status as string) === 'running'
                               ? 'يعمل'
-                              : task.status === 'stopped'
+                              : (task.status as string) === 'stopped'
                                 ? 'موقوف'
-                                : task.status}
+                                : (task.status as string)}
                           </Badge>
                         </div>
-                        {task.nextRun && (
+                        {(task.nextRun as string) && (
                           <p className="text-[10px] text-muted-foreground">
                             التشغيل التالي:{' '}
-                            {formatDistanceToNow(new Date(task.nextRun), {
+                            {formatDistanceToNow(new Date(task.nextRun as string), {
                               locale: ar,
                               addSuffix: true,
                             })}
                           </p>
                         )}
-                        {task.lastRun && (
+                        {(task.lastRun as string) && (
                           <p className="text-[10px] text-muted-foreground">
                             آخر تشغيل:{' '}
-                            {formatDistanceToNow(new Date(task.lastRun), {
+                            {formatDistanceToNow(new Date(task.lastRun as string), {
                               locale: ar,
                               addSuffix: true,
                             })}
@@ -751,12 +791,12 @@ function MessageSettingsContent() {
                         )}
                       </div>
                       <div className="flex gap-1.5">
-                        {task.status === 'running' ? (
+                        {(task.status as string) === 'running' ? (
                           <Button
                             size="sm"
                             variant="outline"
                             className="h-7 text-xs gap-1 text-red-600 hover:text-red-700"
-                            onClick={() => stopTaskMutation.mutate({ taskId: task.id })}
+                            onClick={() => stopTaskMutation.mutate({ taskId: String(task.id || 0) })}
                             disabled={stopTaskMutation.isPending}
                           >
                             <XCircle className="h-3 w-3" />
@@ -767,7 +807,7 @@ function MessageSettingsContent() {
                             size="sm"
                             variant="outline"
                             className="h-7 text-xs gap-1 text-green-600 hover:text-green-700"
-                            onClick={() => resumeTaskMutation.mutate({ taskId: task.id })}
+                            onClick={() => resumeTaskMutation.mutate({ taskId: String(task.id || 0) })}
                             disabled={resumeTaskMutation.isPending}
                           >
                             <CheckCircle2 className="h-3 w-3" />
@@ -801,7 +841,7 @@ function MessageSettingsContent() {
             <div className="space-y-4 py-4">
               <div className="space-y-1.5">
                 <Label>اسم الرسالة</Label>
-                <p className="text-sm font-medium">{selectedMessage.displayName}</p>
+                <p className="text-sm font-medium">{(selectedMessage.displayName as string) || ''}</p>
               </div>
               <div className="space-y-1.5">
                 <Label>قناة الإرسال</Label>
@@ -837,12 +877,12 @@ function MessageSettingsContent() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">بدون قالب (استخدام النص المباشر)</SelectItem>
-                      {((metaTemplates as any[]) || []).map((t: any) => (
+                      {((metaTemplates as MetaTemplate[]) || []).map((t: MetaTemplate) => (
                         <SelectItem key={t.id} value={String(t.id)}>
                           <div className="flex items-center gap-2">
                             <span>{t.name}</span>
                             <Badge variant="outline" className="text-[10px]">
-                              {t.category}
+                              {(t.category as string) || ''}
                             </Badge>
                           </div>
                         </SelectItem>
@@ -864,11 +904,11 @@ function MessageSettingsContent() {
                   dir="rtl"
                 />
               </div>
-              {selectedMessage.availableVariables && (
+              {(selectedMessage.availableVariables as string) && (
                 <div className="space-y-1.5">
                   <Label>المتغيرات المتاحة</Label>
                   <div className="flex flex-wrap gap-1.5">
-                    {JSON.parse(selectedMessage.availableVariables).map((v: string) => (
+                    {JSON.parse((selectedMessage.availableVariables as string) || '[]').map((v: string) => (
                       <Badge
                         key={v}
                         variant="secondary"
@@ -921,7 +961,7 @@ function MessageSettingsContent() {
         <DialogContent className="max-w-lg" dir="rtl">
           <DialogHeader>
             <DialogTitle>معاينة الرسالة</DialogTitle>
-            <DialogDescription>{selectedMessage?.displayName}</DialogDescription>
+            <DialogDescription>{(selectedMessage?.displayName as string) || ''}</DialogDescription>
           </DialogHeader>
           {selectedMessage && (
             <div className="space-y-4 py-2">
@@ -931,8 +971,8 @@ function MessageSettingsContent() {
                     className="text-sm whitespace-pre-wrap"
                     dangerouslySetInnerHTML={{
                       __html: renderMessageWithVariables(
-                        selectedMessage.messageContent,
-                        selectedMessage.availableVariables
+                        (selectedMessage.messageContent as string) || '',
+                        (selectedMessage.availableVariables as string) || ''
                       ),
                     }}
                   />
@@ -986,7 +1026,7 @@ function MessageSettingsContent() {
         open={testDialogOpen}
         onOpenChange={(v) => {
           setTestDialogOpen(v);
-          if (!v) setTestPhone('');
+          if (!v) {setTestPhone('');}
         }}
       >
         <DialogContent className="sm:max-w-sm" dir="rtl">
@@ -996,7 +1036,7 @@ function MessageSettingsContent() {
               اختبار إرسال الرسالة
             </DialogTitle>
             <DialogDescription>
-              اختبار رسالة <strong>{selectedMessage?.displayName}</strong>
+              اختبار رسالة <strong>{(selectedMessage?.displayName as string) || ''}</strong>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">

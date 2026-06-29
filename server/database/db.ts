@@ -1,6 +1,7 @@
-import { eq, desc, and, like, or, sql, inArray } from 'drizzle-orm';
+import { eq, desc, and, like, or, sql, inArray, SQL } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/mysql2';
 import crypto from 'crypto';
+import * as schema from '../../drizzle/schema';
 import {
   InsertUser,
   users,
@@ -19,6 +20,18 @@ import {
   InsertAccessRequest,
   sharedColumnTemplates,
   InsertSharedColumnTemplate,
+  InsertWhatsAppConversation,
+  WhatsAppConversation,
+  InsertWhatsAppMessage,
+  InsertWhatsAppTemplate,
+  InsertWhatsappAccountAlert,
+  InsertWhatsappSecurityEvent,
+  InsertWhatsappWebhookEvent,
+  InsertWhatsappPhoneQuality,
+  InsertWhatsappConversationQuality,
+  InsertWhatsappUserOptIn,
+  InsertWhatsappTemplateQuality,
+  InsertMessageSetting,
 } from '../../drizzle/schema';
 import { ENV } from '../_core/env';
 import { publish, channelForConversation } from '../_core/pubsub';
@@ -49,7 +62,7 @@ let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _db = drizzle(process.env.DATABASE_URL, { schema, mode: 'default' });
     } catch (error) {
       console.warn('[Database] Failed to connect:', error);
       _db = null;
@@ -63,7 +76,7 @@ let _hospitalDb: ReturnType<typeof drizzle> | null = null;
 export async function getHospitalDb() {
   if (!_hospitalDb && process.env.HOSPITAL_DB_URL) {
     try {
-      _hospitalDb = drizzle(process.env.HOSPITAL_DB_URL);
+      _hospitalDb = drizzle(process.env.HOSPITAL_DB_URL, { schema, mode: 'default' });
     } catch (error) {
       console.warn('[Hospital Database] Failed to connect:', error);
       _hospitalDb = null;
@@ -587,7 +600,7 @@ export async function getAppointmentsPaginated(
   } else if (dateFilter && dateFilter !== 'all') {
     // Fallback to old dateFilter logic
     const now = new Date();
-    let startDate: Date;
+    let startDate: Date | undefined;
 
     if (dateFilter === 'today') {
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -1039,7 +1052,7 @@ export async function getWhatsAppConversationById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function getWhatsAppConversationByPhone(phone: string) {
+export async function getWhatsAppConversationByPhone(phone: string): Promise<WhatsAppConversation | undefined> {
   const db = await getDb();
   if (!db) return undefined;
 
@@ -1055,10 +1068,10 @@ export async function getWhatsAppConversationByPhone(phone: string) {
     LIMIT 1
   `);
 
-  const rows = result as any;
+  const rows = result as unknown as WhatsAppConversation[];
   return rows?.length > 0 ? rows[0] : undefined;
 }
-export async function createWhatsAppConversation(conversation: any) {
+export async function createWhatsAppConversation(conversation: InsertWhatsAppConversation) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1067,7 +1080,7 @@ export async function createWhatsAppConversation(conversation: any) {
   return result;
 }
 
-export async function updateWhatsAppConversation(id: number, conversation: any) {
+export async function updateWhatsAppConversation(id: number, conversation: Partial<InsertWhatsAppConversation>) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1127,7 +1140,7 @@ export async function getWhatsAppMessageByWhatsAppId(whatsappId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function createWhatsAppMessage(message: any) {
+export async function createWhatsAppMessage(message: InsertWhatsAppMessage) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1138,9 +1151,9 @@ export async function createWhatsAppMessage(message: any) {
   try {
     const convId = message.conversationId;
     if (convId && message.direction === 'outbound') {
-      publish(channelForConversation(convId), 'message_created', {
+      publish(channelForConversation(convId as number), 'message_created', {
         ...message,
-        id: (result as any)?.[0]?.insertId || null,
+        id: ((result as unknown as Record<string, unknown>[])?.[0] as Record<string, unknown>)?.insertId || null,
       });
     }
   } catch (err) {
@@ -1149,7 +1162,7 @@ export async function createWhatsAppMessage(message: any) {
   return result;
 }
 
-export async function updateWhatsAppMessage(id: number, message: any) {
+export async function updateWhatsAppMessage(id: number, message: Partial<InsertWhatsAppMessage>) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1201,7 +1214,7 @@ export async function getWhatsAppTemplateById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function createWhatsAppTemplate(template: any) {
+export async function createWhatsAppTemplate(template: InsertWhatsAppTemplate) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1210,7 +1223,7 @@ export async function createWhatsAppTemplate(template: any) {
   return result;
 }
 
-export async function updateWhatsAppTemplate(id: number, template: any) {
+export async function updateWhatsAppTemplate(id: number, template: Partial<InsertWhatsAppTemplate>) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1228,7 +1241,7 @@ export async function deleteWhatsAppTemplate(id: number) {
 
 // ─── WhatsApp Event Logging Functions ─────────────────────────────────────────
 
-export async function createWhatsAppWebhookEvent(event: any) {
+export async function createWhatsAppWebhookEvent(event: InsertWhatsappWebhookEvent) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1236,7 +1249,7 @@ export async function createWhatsAppWebhookEvent(event: any) {
   return db.insert(whatsappWebhookEvents).values(event);
 }
 
-export async function createWhatsAppAccountAlert(alert: any) {
+export async function createWhatsAppAccountAlert(alert: InsertWhatsappAccountAlert) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1244,7 +1257,7 @@ export async function createWhatsAppAccountAlert(alert: any) {
   return db.insert(whatsappAccountAlerts).values(alert);
 }
 
-export async function createWhatsAppSecurityEvent(event: any) {
+export async function createWhatsAppSecurityEvent(event: InsertWhatsappSecurityEvent) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1252,7 +1265,7 @@ export async function createWhatsAppSecurityEvent(event: any) {
   return db.insert(whatsappSecurityEvents).values(event);
 }
 
-export async function createWhatsAppPhoneQuality(quality: any) {
+export async function createWhatsAppPhoneQuality(quality: InsertWhatsappPhoneQuality) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1260,7 +1273,7 @@ export async function createWhatsAppPhoneQuality(quality: any) {
   return db.insert(whatsappPhoneQuality).values(quality);
 }
 
-export async function createWhatsAppConversationQuality(quality: any) {
+export async function createWhatsAppConversationQuality(quality: InsertWhatsappConversationQuality) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1268,7 +1281,7 @@ export async function createWhatsAppConversationQuality(quality: any) {
   return db.insert(whatsappConversationQuality).values(quality);
 }
 
-export async function createWhatsAppUserOptIn(optIn: any) {
+export async function createWhatsAppUserOptIn(optIn: InsertWhatsappUserOptIn) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1276,7 +1289,7 @@ export async function createWhatsAppUserOptIn(optIn: any) {
   return db.insert(whatsappUserOptIns).values(optIn);
 }
 
-export async function updateWhatsAppUserOptIn(phone: string, updates: any) {
+export async function updateWhatsAppUserOptIn(phone: string, updates: Partial<InsertWhatsappUserOptIn>) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1287,7 +1300,7 @@ export async function updateWhatsAppUserOptIn(phone: string, updates: any) {
     .where(eq(whatsappUserOptIns.phoneNumber, phone));
 }
 
-export async function createWhatsAppTemplateQuality(quality: any) {
+export async function createWhatsAppTemplateQuality(quality: InsertWhatsappTemplateQuality) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
@@ -1514,13 +1527,13 @@ export async function getMessageSettingByType(messageType: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function updateMessageSetting(data: any) {
+export async function updateMessageSetting(data: Partial<InsertMessageSetting>) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
   const { messageSettings } = await import('../../drizzle/schema');
   const { id, ...updateData } = data;
-  return db.update(messageSettings).set(updateData).where(eq(messageSettings.id, id));
+  return db.update(messageSettings).set(updateData).where(eq(messageSettings.id, id as number));
 }
 
 export async function toggleMessageSettingEnabled(id: number) {
@@ -1587,7 +1600,7 @@ export async function getOfferLeadsPaginated(
 
   // Filter by status (multi-select)
   if (statuses && statuses.length > 0) {
-    whereConditions.push(inArray(offerLeads.status, statuses as any));
+    whereConditions.push(inArray(offerLeads.status, statuses as ('completed' | 'cancelled' | 'contacted' | 'no_answer' | 'pending' | 'confirmed' | 'attended')[]));
   }
 
   // Filter by date range (custom dateFrom/dateTo takes priority)
@@ -1605,7 +1618,7 @@ export async function getOfferLeadsPaginated(
   } else if (dateFilter && dateFilter !== 'all') {
     // Fallback to old dateFilter logic
     const now = new Date();
-    let startDate: Date;
+    let startDate: Date | undefined;
 
     if (dateFilter === 'today') {
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -1731,12 +1744,12 @@ export async function getCampRegistrationsPaginated(
 
   // Filter by status (multi-select)
   if (statuses && statuses.length > 0) {
-    whereConditions.push(inArray(campRegistrations.status, statuses as any));
+    whereConditions.push(inArray(campRegistrations.status, statuses as readonly ("pending" | "completed" | "cancelled" | "contacted" | "no_answer" | "confirmed" | "attended")[]));
   }
 
   // Date filtering: dateFrom/dateTo and dateFilter combine with AND when both are set
   // (so quick presets like "today" still narrow rows inside the parent date range).
-  const dateParts: any[] = [];
+  const dateParts: SQL<unknown>[] = [];
   if (dateFrom && dateTo) {
     const from = new Date(dateFrom);
     const to = new Date(dateTo);
@@ -1745,7 +1758,7 @@ export async function getCampRegistrationsPaginated(
       and(
         sql`${campRegistrations.createdAt} >= ${from.toISOString()}`,
         sql`${campRegistrations.createdAt} <= ${to.toISOString()}`
-      )
+      )!
     );
   }
   if (dateFilter && dateFilter !== 'all') {
@@ -1769,14 +1782,14 @@ export async function getCampRegistrationsPaginated(
         and(
           sql`${campRegistrations.createdAt} >= ${startDate.toISOString()}`,
           sql`${campRegistrations.createdAt} <= ${endDate.toISOString()}`
-        )
+        )!
       );
     } else {
       dateParts.push(sql`${campRegistrations.createdAt} >= ${startDate.toISOString()}`);
     }
   }
   if (dateParts.length > 0) {
-    whereConditions.push(dateParts.length === 1 ? dateParts[0] : and(...dateParts));
+    whereConditions.push(dateParts.length === 1 ? dateParts[0]! : and(...dateParts));
   }
 
   const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;

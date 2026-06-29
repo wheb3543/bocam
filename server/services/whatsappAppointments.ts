@@ -12,7 +12,7 @@ import { eq, and } from 'drizzle-orm';
 import { normalizePhoneNumber } from '../database/db';
 import { getDb } from '../database/db';
 import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from './whatsappCloudAPI';
-import { whatsappNotifications, whatsappBlockedNumbers } from '../../drizzle/schema';
+import { whatsappNotifications, whatsappBlockedNumbers, type WhatsappNotification } from '../../drizzle/schema';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -56,7 +56,15 @@ async function saveNotification(params: {
       isAutomatic: params.isAutomatic !== false,
       sentAt: params.status === 'sent' ? new Date() : undefined,
     });
-    return (result as any).insertId ?? null;
+    if (Array.isArray(result) && result.length > 0) {
+      const first = result[0];
+      if (typeof first === 'object' && first !== null && 'insertId' in first) {
+        const insertId = (first as { insertId?: unknown }).insertId;
+        if (typeof insertId === 'number') return insertId;
+        if (typeof insertId === 'bigint') return Number(insertId);
+      }
+    }
+    return null;
   } catch (err) {
     console.error('[WhatsApp Appointments] Failed to save notification:', err);
     return null;
@@ -430,7 +438,7 @@ ${priceInfo}
 export async function getEntityNotifications(params: {
   entityType: 'appointment' | 'camp_registration' | 'offer_lead';
   entityId: number;
-}): Promise<{ success: boolean; notifications?: any[]; error?: string }> {
+}): Promise<{ success: boolean; notifications?: Record<string, unknown>[]; error?: string }> {
   try {
     const db = await getDb();
     if (!db) return { success: false, error: 'قاعدة البيانات غير متاحة' };
@@ -510,7 +518,7 @@ export async function getNotificationLogs(params: {
   status?: 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
   limit?: number;
   offset?: number;
-}): Promise<{ success: boolean; logs?: any[]; total?: number; error?: string }> {
+}): Promise<{ success: boolean; logs?: WhatsappNotification[]; total?: number; error?: string }> {
   try {
     const db = await getDb();
     if (!db) return { success: false, error: 'قاعدة البيانات غير متاحة' };

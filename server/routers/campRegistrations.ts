@@ -110,9 +110,9 @@ export const campRegistrationsRouter = router({
           .where(eq(campsTable.id, input.campId))
           .limit(1);
         if (campForDate && campForDate.startDate && campForDate.endDate) {
-          const morningTime = (campForDate as any).morningTime as string | null;
-          const eveningTime = (campForDate as any).eveningTime as string | null;
-          const dailyCapacity = (campForDate as any).dailyCapacity as number | null;
+          const morningTime = (campForDate as { morningTime?: string | null }).morningTime as Record<string, unknown> | null;
+          const eveningTime = (campForDate as { eveningTime?: string | null }).eveningTime as Record<string, unknown> | null;
+          const dailyCapacity = (campForDate as { dailyCapacity?: number | null }).dailyCapacity as number | null;
           const start = new Date(campForDate.startDate);
           const end = new Date(campForDate.endDate);
           const today = new Date();
@@ -128,8 +128,8 @@ export const campRegistrationsRouter = router({
               // Count confirmed per day/slot
               const confirmedRegs = await db
                 .select({
-                  preferredDate: (campRegistrations as any).preferredDate,
-                  preferredTimeSlot: (campRegistrations as any).preferredTimeSlot,
+                  preferredDate: campRegistrations.preferredDate,
+                  preferredTimeSlot: campRegistrations.preferredTimeSlot,
                   count: sql<number>`count(*)`,
                 })
                 .from(campRegistrations)
@@ -141,8 +141,8 @@ export const campRegistrationsRouter = router({
                   )
                 )
                 .groupBy(
-                  (campRegistrations as any).preferredDate,
-                  (campRegistrations as any).preferredTimeSlot
+                  campRegistrations.preferredDate,
+                  campRegistrations.preferredTimeSlot
                 );
               const countMap: Record<string, { morning: number; evening: number }> = {};
               for (const row of confirmedRegs) {
@@ -203,7 +203,7 @@ export const campRegistrationsRouter = router({
         ...campStatusTimestamps,
         preferredDate: assignedDate ? assignedDate.toISOString().split('T')[0] : undefined,
         preferredTimeSlot: assignedTimeSlot,
-      } as any);
+      });
 
       // Get camp details for notification
       const { camps } = await import('../../drizzle/schema');
@@ -248,9 +248,9 @@ export const campRegistrationsRouter = router({
                   : 'غير محدد',
               time:
                 assignedTimeSlot === 'morning'
-                  ? `صباحاً ${(camp as any).morningTime || ''}`.trim()
+                  ? `صباحاً ${(camp as { morningTime?: string }).morningTime || ''}`.trim()
                   : assignedTimeSlot === 'evening'
-                    ? `مساءً ${(camp as any).eveningTime || ''}`.trim()
+                    ? `مساءً ${(camp as { eveningTime?: string }).eveningTime || ''}`.trim()
                     : 'غير محدد',
               location: 'صنعاء - الستين الشمالي - قبل جولة الجمنه',
             },
@@ -293,7 +293,7 @@ export const campRegistrationsRouter = router({
           if (manualTrigger) {
             dispatchWhatsAppMessage({
               entityType: 'camp_registration',
-              triggerEvent: manualTrigger as any,
+              triggerEvent: manualTrigger as 'on_confirmed' | 'on_arrived' | 'on_completed' | 'on_cancelled',
               phone: input.phone,
               recipientName: input.fullName,
               variables: {
@@ -306,9 +306,9 @@ export const campRegistrationsRouter = router({
                     : 'غير محدد',
                 time:
                   assignedTimeSlot === 'morning'
-                    ? `صباحاً ${(camp as any).morningTime || ''}`
+                    ? `صباحاً ${(camp as { morningTime?: string }).morningTime || ''}`
                     : assignedTimeSlot === 'evening'
-                      ? `مساءً ${(camp as any).eveningTime || ''}`
+                      ? `مساءً ${(camp as { eveningTime?: string }).eveningTime || ''}`
                       : 'غير محدد',
                 location: 'صنعاء - الستين الشمالي - قبل جولة الجمنه',
               },
@@ -334,7 +334,7 @@ export const campRegistrationsRouter = router({
         fullName: input.fullName,
         phone: input.phone,
         email: input.email,
-        clientIpAddress: ctx.req.ip || (ctx.req.socket as any)?.remoteAddress,
+        clientIpAddress: ctx.req.ip || (ctx.req.socket as { remoteAddress?: string })?.remoteAddress,
         clientUserAgent: ctx.req.headers['user-agent'] as string,
         fbc: ctx.req.cookies?.['_fbc'],
         fbp: ctx.req.cookies?.['_fbp'],
@@ -374,8 +374,8 @@ export const campRegistrationsRouter = router({
           patientMessage: campRegistrations.patientMessage,
           source: campRegistrations.source,
           status: campRegistrations.status,
-          preferredDate: (campRegistrations as any).preferredDate,
-          preferredTimeSlot: (campRegistrations as any).preferredTimeSlot,
+          preferredDate: campRegistrations.preferredDate,
+          preferredTimeSlot: campRegistrations.preferredTimeSlot,
           createdAt: campRegistrations.createdAt,
           updatedAt: campRegistrations.updatedAt,
         })
@@ -478,7 +478,7 @@ export const campRegistrationsRouter = router({
       const oldStatus = old?.status || '';
 
       const now = new Date();
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         status: input.status,
         statusNotes: input.notes,
         updatedAt: now,
@@ -496,9 +496,9 @@ export const campRegistrationsRouter = router({
       if (input.phone) updateData.phone = input.phone;
       if (input.attendanceDate) updateData.attendanceDate = input.attendanceDate;
       if (input.preferredDate !== undefined)
-        (updateData as any).preferredDate = input.preferredDate;
+        (updateData as Record<string, unknown>).preferredDate = input.preferredDate;
       if (input.preferredTimeSlot !== undefined)
-        (updateData as any).preferredTimeSlot = input.preferredTimeSlot;
+        (updateData as Record<string, unknown>).preferredTimeSlot = input.preferredTimeSlot;
 
       await db.update(campRegistrations).set(updateData).where(eq(campRegistrations.id, input.id));
 
@@ -557,22 +557,22 @@ export const campRegistrationsRouter = router({
           if (triggerEvent) {
             dispatchWhatsAppMessage({
               entityType: 'camp_registration',
-              triggerEvent: triggerEvent as any,
+              triggerEvent: triggerEvent as 'on_confirmed' | 'on_arrived' | 'on_completed' | 'on_cancelled',
               phone: reg.phone,
               recipientName: reg.fullName || undefined,
               variables: {
                 name: reg.fullName || 'المسجل',
                 camp_name: camp?.name || 'المخيم',
-                date: (reg as any).preferredDate
-                  ? new Date((reg as any).preferredDate).toLocaleDateString('ar-YE')
+                date: (reg as { preferredDate?: string }).preferredDate
+                  ? new Date((reg as { preferredDate?: string }).preferredDate!).toLocaleDateString('ar-YE')
                   : camp?.startDate
                     ? new Date(camp.startDate).toLocaleDateString('ar-YE')
                     : 'غير محدد',
                 time:
-                  (reg as any).preferredTimeSlot === 'morning'
-                    ? `صباحاً ${(camp as any)?.morningTime || ''}`
-                    : (reg as any).preferredTimeSlot === 'evening'
-                      ? `مساءً ${(camp as any)?.eveningTime || ''}`
+                  (reg as { preferredTimeSlot?: string }).preferredTimeSlot === 'morning'
+                    ? `صباحاً ${(camp as { morningTime?: string })?.morningTime || ''}`
+                    : (reg as { preferredTimeSlot?: string }).preferredTimeSlot === 'evening'
+                      ? `مساءً ${(camp as { eveningTime?: string })?.eveningTime || ''}`
                       : 'غير محدد',
                 location: 'صنعاء - الستين الشمالي - قبل جولة الجمنه',
               },
@@ -617,7 +617,7 @@ export const campRegistrationsRouter = router({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       const now = new Date();
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         status: input.status,
         statusNotes: input.notes,
         updatedAt: now,
@@ -677,22 +677,22 @@ export const campRegistrationsRouter = router({
             const [camp] = await db.select().from(camps).where(eq(camps.id, reg.campId)).limit(1);
             dispatchWhatsAppMessage({
               entityType: 'camp_registration',
-              triggerEvent: triggerEvent as any,
+              triggerEvent: triggerEvent as 'on_confirmed' | 'on_arrived' | 'on_completed' | 'on_cancelled',
               phone: reg.phone,
               recipientName: reg.fullName || undefined,
               variables: {
                 name: reg.fullName || 'المسجل',
                 camp_name: camp?.name || 'المخيم',
-                date: (reg as any).preferredDate
-                  ? new Date((reg as any).preferredDate).toLocaleDateString('ar-YE')
+                date: (reg as { preferredDate?: string }).preferredDate
+                  ? new Date((reg as { preferredDate?: string }).preferredDate!).toLocaleDateString('ar-YE')
                   : camp?.startDate
                     ? new Date(camp.startDate).toLocaleDateString('ar-YE')
                     : 'غير محدد',
                 time:
-                  (reg as any).preferredTimeSlot === 'morning'
-                    ? `صباحاً ${(camp as any)?.morningTime || ''}`
-                    : (reg as any).preferredTimeSlot === 'evening'
-                      ? `مساءً ${(camp as any)?.eveningTime || ''}`
+                  (reg as { preferredTimeSlot?: string }).preferredTimeSlot === 'morning'
+                    ? `صباحاً ${(camp as { morningTime?: string })?.morningTime || ''}`
+                    : (reg as { preferredTimeSlot?: string }).preferredTimeSlot === 'evening'
+                      ? `مساءً ${(camp as { eveningTime?: string })?.eveningTime || ''}`
                       : 'غير محدد',
                 location: 'صنعاء - الستين الشمالي - قبل جولة الجمنه',
               },
@@ -767,7 +767,7 @@ export const campRegistrationsRouter = router({
         WHERE receiptNumber LIKE CONCAT('SGH-', ${year}, '-%')
       `);
 
-      const count = (result as any).count || 0;
+      const count = (result as { count?: number }).count || 0;
       const sequenceNumber = count + 1;
       const paddedNumber = String(sequenceNumber).padStart(3, '0');
       const receiptNumber = `SGH-${year}-${paddedNumber}`;

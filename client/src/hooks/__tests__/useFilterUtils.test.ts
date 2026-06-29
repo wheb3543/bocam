@@ -8,6 +8,16 @@ import {
   DATE_FILTER_OPTIONS,
 } from '../table/useFilterUtils';
 
+interface TestData {
+  id: number;
+  name: string;
+  phone: string;
+  status: string;
+  source: string;
+  category: string;
+  [key: string]: unknown;
+}
+
 // Mock useDebounce to return value immediately for testing
 vi.mock('../useDebounce', () => ({
   useDebounce: (value: string) => value,
@@ -229,15 +239,15 @@ describe('useFilterUtils', () => {
         useFilterUtils({
           data: testData,
           searchTerm: 'أحمد',
-          searchFields: [(item: any) => item.name],
+          searchFields: [(item: TestData) => item.name],
           statusFilter: [],
           sourceFilter: [],
         })
       );
 
       expect(result.current.filteredData).toHaveLength(2);
-      expect(result.current.filteredData.map((d: any) => d.id)).toContain(1);
-      expect(result.current.filteredData.map((d: any) => d.id)).toContain(4);
+      expect(result.current.filteredData.map((d: TestData) => d.id)).toContain(1);
+      expect(result.current.filteredData.map((d: TestData) => d.id)).toContain(4);
     });
 
     it('should filter by status', () => {
@@ -247,7 +257,7 @@ describe('useFilterUtils', () => {
           searchTerm: '',
           searchFields: [],
           statusFilter: ['pending'],
-          getStatus: (item: any) => item.status,
+          getStatus: (item: TestData) => item.status,
           sourceFilter: [],
         })
       );
@@ -263,12 +273,12 @@ describe('useFilterUtils', () => {
           searchFields: [],
           statusFilter: [],
           sourceFilter: ['instagram'],
-          getSource: (item: any) => item.source,
+          getSource: (item: TestData) => item.source,
         })
       );
 
       expect(result.current.filteredData).toHaveLength(1);
-      expect((result.current.filteredData[0] as any).id).toBe(2);
+      expect(result.current.filteredData[0]?.id).toBe(2);
     });
 
     it('should filter by category', () => {
@@ -280,7 +290,7 @@ describe('useFilterUtils', () => {
           statusFilter: [],
           sourceFilter: [],
           categoryFilter: ['cat1'],
-          getCategory: (item: any) => item.category,
+          getCategory: (item: TestData) => item.category,
         })
       );
 
@@ -294,14 +304,14 @@ describe('useFilterUtils', () => {
           searchTerm: '',
           searchFields: [],
           statusFilter: ['pending'],
-          getStatus: (item: any) => item.status,
+          getStatus: (item: TestData) => item.status,
           sourceFilter: ['website'],
-          getSource: (item: any) => item.source,
+          getSource: (item: TestData) => item.source,
         })
       );
 
       expect(result.current.filteredData).toHaveLength(2);
-      expect(result.current.filteredData.every((d: any) => d.status === 'pending' && d.source === 'website')).toBe(true);
+      expect(result.current.filteredData.every((d: TestData) => d.status === 'pending' && d.source === 'website')).toBe(true);
     });
 
     it('should return all data when no filters are active', () => {
@@ -335,7 +345,7 @@ describe('useFilterUtils', () => {
           searchTerm: '',
           searchFields: [],
           statusFilter: ['pending'],
-          getStatus: (item: any) => item.status,
+          getStatus: (item: TestData) => item.status,
           sourceFilter: [],
         })
       );

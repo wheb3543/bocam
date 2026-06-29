@@ -14,6 +14,11 @@ import {
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
+interface Booking {
+  source?: string | null;
+  [key: string]: unknown;
+}
+
 // Map sources to display info
 const sourceDisplayMap: Record<
   string,
@@ -130,7 +135,7 @@ export default function SourceAnalytics() {
 
     // Count by source
     const sourceCountsMap = new Map<string, number>();
-    allBookings.forEach((b: any) => {
+    allBookings.forEach((b: Booking) => {
       const source = b.source || 'direct';
       sourceCountsMap.set(source, (sourceCountsMap.get(source) || 0) + 1);
     });

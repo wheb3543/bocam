@@ -14,6 +14,7 @@ import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
 import ActionButtons from '@/components/ActionButtons';
+import type { UnifiedLead } from '@shared/types';
 
 const statusLabels: Record<string, string> = {
   new: 'جديد',
@@ -52,11 +53,11 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string; bord
 };
 
 interface LeadTableDesktopProps {
-  leads: any[];
+  leads: UnifiedLead[];
   isLoading: boolean;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
-  onUpdateStatus: (lead: any) => void;
+  onUpdateStatus: (lead: UnifiedLead) => void;
 }
 
 export default function LeadTableDesktop({
@@ -112,7 +113,7 @@ export default function LeadTableDesktop({
                 </TableCell>
               </TableRow>
             ) : (
-              leads.map((lead: any) => {
+              leads.map((lead: UnifiedLead) => {
                 const sc = statusConfig[lead.status] || statusConfig.new;
                 return (
                   <TableRow

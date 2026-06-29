@@ -132,7 +132,7 @@ export default function MultiSelect({
                     onClick={(e) => {
                       e.stopPropagation();
                       const value = options.find((opt) => opt.label === label)?.value;
-                      if (value) handleToggle(value);
+                      if (value) {handleToggle(value);}
                     }}
                     className="mr-1 hover:bg-muted rounded-full"
                   >

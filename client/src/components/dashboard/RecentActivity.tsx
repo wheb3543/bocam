@@ -5,6 +5,20 @@ import { Badge } from '@/components/ui/badge';
 import { Activity, Users, Calendar, TrendingUp, UserCheck, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { LucideIcon } from 'lucide-react';
+
+interface Activity {
+  id: number;
+  type: string;
+  icon: LucideIcon;
+  color: string;
+  bgColor: string;
+  label: string;
+  fullName?: string;
+  status?: string;
+  createdAt?: string | Date;
+  [key: string]: unknown;
+}
 
 export default function RecentActivity() {
   const { data: leads } = trpc.leads.unifiedList.useQuery();
@@ -66,7 +80,7 @@ export default function RecentActivity() {
     }
   };
 
-  const getStatusBadge = (activity: any) => {
+  const getStatusBadge = (activity: Activity) => {
     const statusMap: Record<
       string,
       { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
@@ -83,8 +97,8 @@ export default function RecentActivity() {
       no_answer: { label: 'لم يرد', variant: 'outline' },
     };
 
-    const status = statusMap[activity.status] || {
-      label: activity.status,
+    const status = activity.status ? statusMap[activity.status] : {
+      label: activity.status || 'غير معروف',
       variant: 'outline' as const,
     };
     return (
@@ -111,7 +125,7 @@ export default function RecentActivity() {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentActivities.map((activity: any, index: number) => {
+            {recentActivities.map((activity: Activity, index: number) => {
               const Icon = activity.icon;
               return (
                 <div
@@ -134,7 +148,7 @@ export default function RecentActivity() {
                     <div className="flex items-center gap-2 mt-2">
                       <Clock className="h-3 w-3 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
-                        {getRelativeTime(activity.createdAt)}
+                        {activity.createdAt ? getRelativeTime(typeof activity.createdAt === 'string' ? activity.createdAt : activity.createdAt.toISOString()) : '-'}
                       </span>
                     </div>
                   </div>

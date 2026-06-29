@@ -139,7 +139,7 @@ export default function WhatsAppAnalytics() {
             <p className="text-muted-foreground text-sm">مراقبة الإحصائيات والأداء</p>
           </div>
           <div className="flex items-center gap-2">
-            <Select value={dateRange} onValueChange={(value: any) => setDateRange(value)}>
+            <Select value={dateRange} onValueChange={(value: "7d" | "30d" | "90d") => setDateRange(value)}>
               <SelectTrigger className="w-[140px]">
                 <Calendar className="h-4 w-4 ml-2" />
                 <SelectValue />
@@ -295,7 +295,7 @@ export default function WhatsAppAnalytics() {
               <div className="text-2xl font-bold">
                 $
                 {conversationCosts
-                  .reduce((sum: number, c: any) => sum + (c.conversationCost || 0), 0)
+                  .reduce((sum: number, c: Record<string, unknown>) => sum + ((c.conversationCost as number) || 0), 0)
                   .toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground">تكلفة المحادثات</p>
@@ -443,9 +443,9 @@ export default function WhatsAppAnalytics() {
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart
-                  data={conversationCosts.map((c: any) => ({
-                    date: new Date(c.createdAt).toLocaleDateString('ar-SA'),
-                    cost: c.conversationCost || 0,
+                  data={conversationCosts.map((c: Record<string, unknown>) => ({
+                    date: new Date(c.createdAt as string).toLocaleDateString('ar-SA'),
+                    cost: (c.conversationCost as number) || 0,
                   }))}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
@@ -520,16 +520,16 @@ export default function WhatsAppAnalytics() {
                 </thead>
                 <tbody>
                   {templatePerformance.length > 0 ? (
-                    templatePerformance.map((t: any) => (
-                      <tr key={t.templateId} className="border-b">
-                        <td className="p-2">{t.templateName}</td>
-                        <td className="p-2">{t.sentCount || 0}</td>
-                        <td className="p-2">{t.deliveredCount || 0}</td>
-                        <td className="p-2">{t.readCount || 0}</td>
-                        <td className="p-2">{t.failedCount || 0}</td>
+                    templatePerformance.map((t: Record<string, unknown>) => (
+                      <tr key={t.templateId as string} className="border-b">
+                        <td className="p-2">{t.templateName as string}</td>
+                        <td className="p-2">{(t.sentCount as number) || 0}</td>
+                        <td className="p-2">{(t.deliveredCount as number) || 0}</td>
+                        <td className="p-2">{(t.readCount as number) || 0}</td>
+                        <td className="p-2">{(t.failedCount as number) || 0}</td>
                         <td className="p-2">
-                          {t.sentCount > 0
-                            ? ((t.deliveredCount / t.sentCount) * 100).toFixed(1)
+                          {(t.sentCount as number) > 0
+                            ? (((t.deliveredCount as number) / (t.sentCount as number)) * 100).toFixed(1)
                             : 0}
                           %
                         </td>

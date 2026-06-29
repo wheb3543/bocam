@@ -83,7 +83,7 @@ export async function unblockPhone(phone: string): Promise<{ success: boolean; e
 // ── جلب قائمة الأرقام المحظورة ───────────────────────────────────────────────
 export async function getBlockedPhones(): Promise<{
   success: boolean;
-  phones?: any[];
+  phones?: Record<string, unknown>[];
   total?: number;
   error?: string;
 }> {

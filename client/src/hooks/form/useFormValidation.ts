@@ -46,7 +46,7 @@ interface ValidationRule {
   /** الحد الأقصى للقيمة الرقمية */
   max?: number;
   /** دالة تحقق مخصصة */
-  custom?: (value: any, formData: Record<string, any>) => boolean;
+  custom?: (value: unknown, formData: Record<string, unknown>) => boolean;
   /** رسالة الخطأ */
   message: string;
 }
@@ -61,9 +61,9 @@ export function useFormValidation(rules: ValidationRules) {
    * التحقق من حقل واحد
    */
   const validateField = useCallback(
-    (fieldName: string, value: any, formData: Record<string, any> = {}): string | null => {
+    (fieldName: string, value: unknown, formData: Record<string, unknown> = {}): string | null => {
       const fieldRules = rules[fieldName];
-      if (!fieldRules) return null;
+      if (!fieldRules) {return null;}
 
       for (const rule of fieldRules) {
         // التحقق من المطلوب
@@ -79,7 +79,7 @@ export function useFormValidation(rules: ValidationRules) {
         }
 
         // لا نتحقق من القواعد الأخرى إذا كانت القيمة فارغة وغير مطلوبة
-        if (value === undefined || value === null || value === '') continue;
+        if (value === undefined || value === null || value === '') {continue;}
 
         // التحقق من الحد الأدنى للطول
         if (
@@ -129,7 +129,7 @@ export function useFormValidation(rules: ValidationRules) {
    * التحقق من جميع الحقول
    */
   const validate = useCallback(
-    (formData: Record<string, any>): boolean => {
+    (formData: Record<string, unknown>): boolean => {
       const newErrors: ValidationErrors = {};
       let isValid = true;
 
@@ -151,7 +151,7 @@ export function useFormValidation(rules: ValidationRules) {
    * التحقق من حقل واحد وتحديث الأخطاء
    */
   const validateSingleField = useCallback(
-    (fieldName: string, value: any, formData: Record<string, any> = {}) => {
+    (fieldName: string, value: unknown, formData: Record<string, unknown> = {}) => {
       const error = validateField(fieldName, value, formData);
       setErrors((prev) => {
         if (error) {

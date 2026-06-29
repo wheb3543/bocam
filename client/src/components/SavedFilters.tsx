@@ -19,12 +19,15 @@ import {
 } from '@/components/ui/dialog';
 import { Bookmark, Save, Trash2, ChevronDown, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import type { RouterOutputs } from '@/types/trpc';
 
 interface SavedFiltersProps {
   pageKey: 'appointments' | 'offerLeads' | 'campRegistrations' | 'customers';
-  currentFilters: Record<string, any>;
-  onApplyFilter: (filters: Record<string, any>) => void;
+  currentFilters: Record<string, unknown>;
+  onApplyFilter: (filters: Record<string, unknown>) => void;
 }
+
+type SavedFilter = RouterOutputs['savedFilters']['list'][number];
 
 export default function SavedFilters({
   pageKey,
@@ -70,10 +73,10 @@ export default function SavedFilters({
   });
 
   const handleSave = () => {
-    if (!filterName.trim()) return;
+    if (!filterName.trim()) {return;}
 
     // Clean up filters - remove empty arrays and undefined values
-    const cleanFilters: Record<string, any> = {};
+    const cleanFilters: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(currentFilters)) {
       if (
         value !== undefined &&
@@ -94,7 +97,7 @@ export default function SavedFilters({
 
   const handleApply = (filterConfig: string) => {
     try {
-      const filters = JSON.parse(filterConfig);
+      const filters = JSON.parse(filterConfig) as Record<string, unknown>;
       onApplyFilter(filters);
       toast.success('تم تطبيق الفلتر');
     } catch {
@@ -143,7 +146,7 @@ export default function SavedFilters({
           )}
 
           {savedFilters && savedFilters.length > 0 ? (
-            savedFilters.map((filter: any) => (
+            savedFilters.map((filter: SavedFilter) => (
               <DropdownMenuItem
                 key={filter.id}
                 className="flex items-center justify-between group"
@@ -195,7 +198,7 @@ export default function SavedFilters({
               value={filterName}
               onChange={(e) => setFilterName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSave();
+                if (e.key === 'Enter') {handleSave();}
               }}
             />
           </div>

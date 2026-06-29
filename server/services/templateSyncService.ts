@@ -41,7 +41,7 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
     console.log(`[Template Sync] Fetched ${metaTemplates.length} templates from Meta`);
 
     // إنشاء خريطة للقوالب من Meta
-    const metaTemplateMap = new Map(metaTemplates.map((t: any) => [t.name, t]));
+    const metaTemplateMap = new Map(metaTemplates.map((t: Record<string, unknown>) => [t.name, t]));
 
     // جلب القوالب من قاعدة البيانات
     const dbTemplates = await db.select().from(messageTemplates);
@@ -66,8 +66,8 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
         await db
           .update(messageTemplates)
           .set({
-            status: metaTemplate.status,
-            metaTemplateId: metaTemplate.id,
+            status: metaTemplate.status as 'PENDING' | 'APPROVED' | 'REJECTED' | 'DISABLED',
+            metaTemplateId: metaTemplate.id as string,
             updatedAt: new Date(),
           })
           .where(eq(messageTemplates.id, dbTemplate.id));
@@ -80,7 +80,7 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
         await db
           .update(messageTemplates)
           .set({
-            metaTemplateId: metaTemplate.id,
+            metaTemplateId: metaTemplate.id as string,
             updatedAt: new Date(),
           })
           .where(eq(messageTemplates.id, dbTemplate.id));
@@ -91,9 +91,9 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
 
     console.log(`[Template Sync] Synced ${synced} templates`);
     return { success: true, synced, errors };
-  } catch (error: any) {
+  } catch (error) {
     console.error('[Template Sync] Failed:', error);
-    return { success: false, synced, errors: [error.message] };
+    return { success: false, synced, errors: [error instanceof Error ? error.message : 'خطأ غير معروف'] };
   }
 }
 
@@ -130,7 +130,7 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
     console.log(`[Template Sync] Fetched ${metaTemplates.length} templates from Meta`);
 
     // إنشاء خريطة للقوالب من Meta
-    const metaTemplateMap = new Map(metaTemplates.map((t: any) => [t.name, t]));
+    const metaTemplateMap = new Map(metaTemplates.map((t: Record<string, unknown>) => [t.name, t]));
 
     // جلب القوالب من قاعدة البيانات
     const dbTemplates = await db.select().from(whatsappTemplates);
@@ -156,8 +156,8 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
         await db
           .update(whatsappTemplates)
           .set({
-            metaStatus: metaTemplate.status,
-            metaTemplateId: metaTemplate.id,
+            metaStatus: metaTemplate.status as 'PENDING' | 'APPROVED' | 'REJECTED' | 'DISABLED',
+            metaTemplateId: metaTemplate.id as string,
             updatedAt: new Date(),
           })
           .where(eq(whatsappTemplates.id, dbTemplate.id));
@@ -170,7 +170,7 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
         await db
           .update(whatsappTemplates)
           .set({
-            metaTemplateId: metaTemplate.id,
+            metaTemplateId: metaTemplate.id as string,
             updatedAt: new Date(),
           })
           .where(eq(whatsappTemplates.id, dbTemplate.id));
@@ -181,9 +181,9 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
 
     console.log(`[Template Sync] Synced ${synced} templates`);
     return { success: true, synced, errors };
-  } catch (error: any) {
+  } catch (error) {
     console.error('[Template Sync] Failed:', error);
-    return { success: false, synced, errors: [error.message] };
+    return { success: false, synced, errors: [error instanceof Error ? error.message : 'خطأ غير معروف'] };
   }
 }
 

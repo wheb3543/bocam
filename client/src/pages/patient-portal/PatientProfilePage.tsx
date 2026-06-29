@@ -69,7 +69,7 @@ export default function PatientProfilePage() {
     );
   }
 
-  if (!patient) return null;
+  if (!patient) {return null;}
 
   const handleSave = () => {
     const fullName = form.fullName.trim();

@@ -18,28 +18,28 @@ const NAV_ITEMS = [
 ] as const;
 
 function resolveActiveKey(pathname: string): string {
-  if (pathname.startsWith('/patient-portal/appointments')) return 'appointments';
+  if (pathname.startsWith('/patient-portal/appointments')) {return 'appointments';}
   if (pathname.startsWith('/patient-portal/offers') || pathname.startsWith('/patient-portal/camps'))
-    return 'offers';
-  if (pathname.startsWith('/patient-portal/results')) return 'results';
-  if (pathname.startsWith('/patient-portal/profile')) return 'profile';
+    {return 'offers';}
+  if (pathname.startsWith('/patient-portal/results')) {return 'results';}
+  if (pathname.startsWith('/patient-portal/profile')) {return 'profile';}
   return 'home';
 }
 
 function resolveTitle(pathname: string): string {
-  if (pathname.startsWith('/patient-portal/appointments/')) return 'تفاصيل الموعد';
-  if (pathname.startsWith('/patient-portal/appointments')) return 'المواعيد';
-  if (pathname.startsWith('/patient-portal/offers')) return 'العروض';
-  if (pathname.startsWith('/patient-portal/camps')) return 'المخيمات';
-  if (pathname.startsWith('/patient-portal/results/')) return 'تفاصيل النتيجة';
-  if (pathname.startsWith('/patient-portal/results')) return 'النتائج الطبية';
-  if (pathname.startsWith('/patient-portal/profile')) return 'حسابي';
+  if (pathname.startsWith('/patient-portal/appointments/')) {return 'تفاصيل الموعد';}
+  if (pathname.startsWith('/patient-portal/appointments')) {return 'المواعيد';}
+  if (pathname.startsWith('/patient-portal/offers')) {return 'العروض';}
+  if (pathname.startsWith('/patient-portal/camps')) {return 'المخيمات';}
+  if (pathname.startsWith('/patient-portal/results/')) {return 'تفاصيل النتيجة';}
+  if (pathname.startsWith('/patient-portal/results')) {return 'النتائج الطبية';}
+  if (pathname.startsWith('/patient-portal/profile')) {return 'حسابي';}
   return 'بوابة المريض';
 }
 
 function resolveBackHref(pathname: string): string | null {
-  if (pathname.startsWith('/patient-portal/appointments/')) return '/patient-portal/appointments';
-  if (pathname.startsWith('/patient-portal/results/')) return '/patient-portal/results';
+  if (pathname.startsWith('/patient-portal/appointments/')) {return '/patient-portal/appointments';}
+  if (pathname.startsWith('/patient-portal/results/')) {return '/patient-portal/results';}
   return null;
 }
 
@@ -75,7 +75,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
     );
   }
 
-  if (!patient) return null;
+  if (!patient) {return null;}
 
   const currentOrder = PAGE_ORDER[activeKey] ?? PAGE_ORDER.home;
   const slideFrom = currentOrder >= previousOrder.current ? 28 : -28;

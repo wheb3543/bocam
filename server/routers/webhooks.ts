@@ -220,7 +220,7 @@ export const webhooksRouter = router({
               if (type === 'APPOINTMENT') {
                 const newStatus = action === 'CONFIRM' ? 'confirmed' : 'cancelled';
                 const now = new Date();
-                const apptUpdateData: any = { status: newStatus, updatedAt: now };
+                const apptUpdateData: Record<string, unknown> = { status: newStatus, updatedAt: now };
                 if (newStatus === 'confirmed') apptUpdateData.confirmedAt = now;
                 else if (newStatus === 'cancelled') apptUpdateData.cancelledAt = now;
 
@@ -282,7 +282,7 @@ export const webhooksRouter = router({
               } else if (type === 'OFFER') {
                 const newStatus = action === 'CONFIRM' ? 'confirmed' : 'cancelled';
                 const now = new Date();
-                const offerUpdateData: any = { status: newStatus, updatedAt: now };
+                const offerUpdateData: Record<string, unknown> = { status: newStatus, updatedAt: now };
                 if (newStatus === 'confirmed') offerUpdateData.confirmedAt = now;
                 else if (newStatus === 'cancelled') offerUpdateData.cancelledAt = now;
 
@@ -335,7 +335,7 @@ export const webhooksRouter = router({
               } else if (type === 'CAMP') {
                 const newStatus = action === 'CONFIRM' ? 'confirmed' : 'cancelled';
                 const now = new Date();
-                const campUpdateData: any = { status: newStatus, updatedAt: now };
+                const campUpdateData: Record<string, unknown> = { status: newStatus, updatedAt: now };
                 if (newStatus === 'confirmed') campUpdateData.confirmedAt = now;
                 else if (newStatus === 'cancelled') campUpdateData.cancelledAt = now;
 
@@ -362,16 +362,16 @@ export const webhooksRouter = router({
                   const triggerEvent = newStatus === 'confirmed' ? 'on_confirmed' : 'on_cancelled';
                   // camp_reg_confirmed (150004) يقبل 5 متغيرات: name, camp_name, date, time, location
                   // camp_reg_cancelled (150003) يقبل 2 متغيرات: name, camp_name
-                  const wh_dateStr = (reg as any).preferredDate
-                    ? new Date((reg as any).preferredDate).toLocaleDateString('ar-YE')
+                  const wh_dateStr = (reg as { preferredDate?: string }).preferredDate
+                    ? new Date((reg as { preferredDate?: string }).preferredDate!).toLocaleDateString('ar-YE')
                     : camp?.startDate
                       ? new Date(camp.startDate).toLocaleDateString('ar-YE')
                       : 'غير محدد';
                   const wh_timeStr =
-                    (reg as any).preferredTimeSlot === 'morning'
-                      ? `صباحاً ${(camp as any)?.morningTime || ''}`.trim()
-                      : (reg as any).preferredTimeSlot === 'evening'
-                        ? `مساءً ${(camp as any)?.eveningTime || ''}`.trim()
+                    (reg as { preferredTimeSlot?: string }).preferredTimeSlot === 'morning'
+                      ? `صباحاً ${(camp as { morningTime?: string })?.morningTime || ''}`.trim()
+                      : (reg as { preferredTimeSlot?: string }).preferredTimeSlot === 'evening'
+                        ? `مساءً ${(camp as { eveningTime?: string })?.eveningTime || ''}`.trim()
                         : 'غير محدد';
                   dispatchWhatsAppMessage({
                     entityType: 'camp_registration',

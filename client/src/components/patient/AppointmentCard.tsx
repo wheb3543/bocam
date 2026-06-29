@@ -2,9 +2,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Stethoscope, ChevronLeft } from 'lucide-react';
 import { ReactNode } from 'react';
+import type { AppointmentWithDoctor } from '@shared/types';
 
-type AppointmentCardProps = {
-  appointment: any;
+interface AppointmentCardProps {
+  appointment: AppointmentWithDoctor;
   statusBadge: (status: string) => ReactNode;
   formatDate: (value: string | Date) => string;
   onOpenDetails?: () => void;
@@ -25,7 +26,7 @@ export default function AppointmentCard({
             <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />
-                {formatDate(appointment.appointmentDate || appointment.createdAt)}
+                {formatDate(appointment.appointmentDate || appointment.createdAt || new Date())}
               </span>
               {appointment.procedure && (
                 <span className="inline-flex items-center gap-1">

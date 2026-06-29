@@ -729,71 +729,71 @@ async function seedAllTables() {
 
     // 47. WhatsApp Blocked Numbers
     console.log('  - whatsappBlockedNumbers');
-    await connection.execute(`INSERT INTO whatsapp_blocked_numbers (phone, reason) VALUES (?, ?)`, [
-      '777000000',
-      'opt-out',
-    ]);
+    await connection.execute(
+      `INSERT INTO whatsapp_blocked_numbers (phone, reason) VALUES (?, ?) ON DUPLICATE KEY UPDATE phone=phone`,
+      ['777000000', 'opt-out']
+    );
 
     // 48. WhatsApp Account Alerts
     console.log('  - whatsappAccountAlerts');
     await connection.execute(
-      `INSERT INTO whatsapp_account_alerts (alertType, details, severity, resolved) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO whatsapp_account_alerts (alertType, details, severity, resolved) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE alertType=alertType`,
       ['quality_update', '{"score": 90}', 'low', true]
     );
 
     // 49. WhatsApp Security Events
     console.log('  - whatsappSecurityEvents');
     await connection.execute(
-      `INSERT INTO whatsapp_security_events (eventType, details, severity) VALUES (?, ?, ?)`,
+      `INSERT INTO whatsapp_security_events (eventType, details, severity) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE eventType=eventType`,
       ['login_attempt', '{"ip": "192.168.1.1"}', 'medium']
     );
 
     // 50. WhatsApp Phone Quality
     console.log('  - whatsappPhoneQuality');
     await connection.execute(
-      `INSERT INTO whatsapp_phone_quality (phoneNumber, qualityScore, qualityRating) VALUES (?, ?, ?)`,
+      `INSERT INTO whatsapp_phone_quality (phoneNumber, qualityScore, qualityRating) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE phoneNumber=phoneNumber`,
       ['777123456', 85, 'green']
     );
 
     // 51. WhatsApp Conversation Quality
     console.log('  - whatsappConversationQuality');
     await connection.execute(
-      `INSERT INTO whatsapp_conversation_quality (phoneNumber, qualityScore) VALUES (?, ?)`,
+      `INSERT INTO whatsapp_conversation_quality (phoneNumber, qualityScore) VALUES (?, ?) ON DUPLICATE KEY UPDATE phoneNumber=phoneNumber`,
       ['777123456', 90]
     );
 
     // 52. WhatsApp User Opt-ins
     console.log('  - whatsappUserOptIns');
     await connection.execute(
-      `INSERT INTO whatsapp_user_opt_ins (phoneNumber, optInType, status, source) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO whatsapp_user_opt_ins (phoneNumber, optInType, status, source) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE phoneNumber=phoneNumber`,
       ['777123456', 'general', 'opted_in', 'web']
     );
 
     // 53. WhatsApp Template Quality
     console.log('  - whatsappTemplateQuality');
     await connection.execute(
-      `INSERT INTO whatsapp_template_quality (templateId, qualityScore) VALUES (?, ?)`,
+      `INSERT INTO whatsapp_template_quality (templateId, qualityScore) VALUES (?, ?) ON DUPLICATE KEY UPDATE templateId=templateId`,
       ['appointment_confirmation_ar', 95]
     );
 
     // 54. WhatsApp Webhook Events
     console.log('  - whatsappWebhookEvents');
     await connection.execute(
-      `INSERT INTO whatsapp_webhook_events (eventType, phoneNumber, rawPayload, processed) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO whatsapp_webhook_events (eventType, phoneNumber, rawPayload, processed) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE eventType=eventType`,
       ['messages', '777123456', '{"test": "data"}', true]
     );
 
     // 55. WhatsApp Contacts
     console.log('  - whatsappContacts');
     await connection.execute(
-      `INSERT INTO whatsapp_contacts (messageId, conversationId, phoneNumber, name) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO whatsapp_contacts (messageId, conversationId, phoneNumber, name) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE messageId=messageId`,
       [1, 1, '777123456', '{"first_name": "محمد"}']
     );
 
     // 56. WhatsApp Orders
     console.log('  - whatsappOrders');
     await connection.execute(
-      `INSERT INTO whatsapp_orders (messageId, conversationId, phoneNumber, status) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO whatsapp_orders (messageId, conversationId, phoneNumber, status) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE messageId=messageId`,
       [1, 1, '777123456', 'pending']
     );
 
@@ -801,28 +801,28 @@ async function seedAllTables() {
     console.log('  - whatsappProducts');
     await connection.execute(
       `INSERT INTO whatsapp_products (catalogId, productRetailerId, productName, price, currency, isAvailable) 
-       VALUES (?, ?, ?, ?, ?, true)`,
+       VALUES (?, ?, ?, ?, ?, true) ON DUPLICATE KEY UPDATE catalogId=catalogId`,
       ['catalog123', 'prod123', 'خدمة تجميل', 50000, 'YER']
     );
 
     // 58. WhatsApp Referrals
     console.log('  - whatsappReferrals');
     await connection.execute(
-      `INSERT INTO whatsapp_referrals (messageId, conversationId, phoneNumber, sourceUrl) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO whatsapp_referrals (messageId, conversationId, phoneNumber, sourceUrl) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE messageId=messageId`,
       [1, 1, '777123456', 'https://facebook.com/ad123']
     );
 
     // 59. WhatsApp Reactions
     console.log('  - whatsappReactions');
     await connection.execute(
-      `INSERT INTO whatsapp_reactions (messageId, conversationId, phoneNumber, emoji) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO whatsapp_reactions (messageId, conversationId, phoneNumber, emoji) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE messageId=messageId`,
       [1, 1, '777123456', '👍']
     );
 
     // 60. WhatsApp Transactions
     console.log('  - whatsappTransactions');
     await connection.execute(
-      `INSERT INTO whatsapp_transactions (conversationId, phoneNumber, amount, currency, status) VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO whatsapp_transactions (conversationId, phoneNumber, amount, currency, status) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE conversationId=conversationId`,
       [1, '777123456', 50000, 'YER', 'completed']
     );
 

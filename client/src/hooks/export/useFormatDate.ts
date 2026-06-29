@@ -54,7 +54,7 @@ export function useFormatDate() {
   /** تنسيق التاريخ الكامل: "23 فبراير 2026" */
   const formatDate = useCallback(
     (date: string | Date | null | undefined): string => {
-      if (!date) return '-';
+      if (!date) {return '-';}
       try {
         return formatters.date.format(new Date(date));
       } catch {
@@ -67,7 +67,7 @@ export function useFormatDate() {
   /** تنسيق التاريخ المختصر: "23 فبر 2026" */
   const formatDateShort = useCallback(
     (date: string | Date | null | undefined): string => {
-      if (!date) return '-';
+      if (!date) {return '-';}
       try {
         return formatters.dateShort.format(new Date(date));
       } catch {
@@ -80,7 +80,7 @@ export function useFormatDate() {
   /** تنسيق التاريخ والوقت: "23 فبراير 2026 02:30 م" */
   const formatDateTime = useCallback(
     (date: string | Date | null | undefined): string => {
-      if (!date) return '-';
+      if (!date) {return '-';}
       try {
         return formatters.dateTime.format(new Date(date));
       } catch {
@@ -93,7 +93,7 @@ export function useFormatDate() {
   /** تنسيق مضغوط: "23/02/2026" */
   const formatDateCompact = useCallback(
     (date: string | Date | null | undefined): string => {
-      if (!date) return '-';
+      if (!date) {return '-';}
       try {
         return formatters.dateCompact.format(new Date(date));
       } catch {
@@ -108,9 +108,9 @@ export function useFormatDate() {
     (from: string | Date | null | undefined, to: string | Date | null | undefined): string => {
       const fromStr = formatDate(from);
       const toStr = formatDate(to);
-      if (fromStr === '-' && toStr === '-') return '-';
-      if (fromStr === '-') return toStr;
-      if (toStr === '-') return fromStr;
+      if (fromStr === '-' && toStr === '-') {return '-';}
+      if (fromStr === '-') {return toStr;}
+      if (toStr === '-') {return fromStr;}
       return `${fromStr} - ${toStr}`;
     },
     [formatDate]
@@ -121,7 +121,7 @@ export function useFormatDate() {
    * التنسيق المطلوب: h:mm AM/PM dd-MM-yyyy
    */
   const formatRegistrationDate = useCallback((date: string | Date | null | undefined): string => {
-    if (!date) return '-';
+    if (!date) {return '-';}
     try {
       const d = new Date(date);
       const hours = d.getHours();
@@ -151,7 +151,7 @@ export function useFormatDate() {
 // === Standalone utility functions (for non-component contexts) ===
 
 export function formatDateUtil(date: string | Date | null | undefined): string {
-  if (!date) return '-';
+  if (!date) {return '-';}
   try {
     return new Date(date).toLocaleDateString(LOCALE, DATE_OPTIONS);
   } catch {
@@ -160,7 +160,7 @@ export function formatDateUtil(date: string | Date | null | undefined): string {
 }
 
 export function formatDateTimeUtil(date: string | Date | null | undefined): string {
-  if (!date) return '-';
+  if (!date) {return '-';}
   try {
     return new Date(date).toLocaleDateString(LOCALE, DATE_TIME_OPTIONS);
   } catch {
@@ -173,7 +173,7 @@ export function formatDateTimeUtil(date: string | Date | null | undefined): stri
  * للاستخدام خارج React components
  */
 export function formatRegistrationDateUtil(date: string | Date | null | undefined): string {
-  if (!date) return '-';
+  if (!date) {return '-';}
   try {
     const d = new Date(date);
     const hours = d.getHours();

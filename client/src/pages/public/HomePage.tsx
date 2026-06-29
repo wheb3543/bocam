@@ -61,7 +61,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (!animationsEnabled) return;
+    if (!animationsEnabled) {return;}
 
     const animateStats = () => {
       const duration = 2000;
@@ -97,7 +97,7 @@ export default function HomePage() {
   }, [animationsEnabled, statsRef]);
 
   useEffect(() => {
-    if (!animationsEnabled) return;
+    if (!animationsEnabled) {return;}
 
     const observerOptions = {
       threshold: 0.1,

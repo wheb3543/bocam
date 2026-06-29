@@ -53,9 +53,9 @@ export async function getInstagramInsights(): Promise<InstagramInsights | null> 
     if (!insightsRes.ok) {
       console.error('[Meta API] Instagram insights error:', insightsRes.error);
       return {
-        followers_count: accountData?.followers_count || 0,
-        follows_count: accountData?.follows_count || 0,
-        media_count: accountData?.media_count || 0,
+        followers_count: (accountData as { followers_count?: number })?.followers_count || 0,
+        follows_count: (accountData as { follows_count?: number })?.follows_count || 0,
+        media_count: (accountData as { media_count?: number })?.media_count || 0,
         profile_views: 0,
         reach: 0,
         impressions: 0,
@@ -64,26 +64,26 @@ export async function getInstagramInsights(): Promise<InstagramInsights | null> 
     }
 
     const insightsData = insightsRes.data;
-    const insights: any = {};
-    if (insightsData?.data) {
-      insightsData.data.forEach((metric: any) => {
+    const insights: Record<string, unknown> = {};
+    if ((insightsData as { data?: Array<{ name: string; values: Array<{ value: number }> }> }).data) {
+      (insightsData as { data?: Array<{ name: string; values: Array<{ value: number }> }> }).data?.forEach((metric: { name: string; values: Array<{ value: number }> }) => {
         if (metric.values && metric.values.length > 0) {
           insights[metric.name] = metric.values[metric.values.length - 1].value;
         }
       });
     }
 
-    const totalEngagement = insights.reach || 0;
+    const totalEngagement = (insights as { reach?: number })?.reach || 0;
     const engagement =
-      accountData?.followers_count > 0 ? (totalEngagement / accountData.followers_count) * 100 : 0;
+      ((accountData as { followers_count?: number })?.followers_count || 0) > 0 ? (totalEngagement / ((accountData as { followers_count?: number })?.followers_count || 1)) * 100 : 0;
 
     return {
-      followers_count: accountData?.followers_count || 0,
-      follows_count: accountData?.follows_count || 0,
-      media_count: accountData?.media_count || 0,
-      profile_views: insights.profile_views || 0,
-      reach: insights.reach || 0,
-      impressions: insights.impressions || 0,
+      followers_count: (accountData as { followers_count?: number })?.followers_count || 0,
+      follows_count: (accountData as { follows_count?: number })?.follows_count || 0,
+      media_count: (accountData as { media_count?: number })?.media_count || 0,
+      profile_views: (insights as { profile_views?: number })?.profile_views || 0,
+      reach: (insights as { reach?: number })?.reach || 0,
+      impressions: (insights as { impressions?: number })?.impressions || 0,
       engagement: Math.round(engagement * 10) / 10,
     };
   } catch (error) {
@@ -115,7 +115,7 @@ export async function getFacebookPageInsights(): Promise<FacebookPageInsights | 
     if (!insightsRes.ok) {
       console.error('[Meta API] Facebook insights error:', insightsRes.error);
       return {
-        fan_count: pageData?.fan_count || 0,
+        fan_count: (pageData as { fan_count?: number })?.fan_count || 0,
         page_views_total: 0,
         page_engaged_users: 0,
         page_impressions: 0,
@@ -125,9 +125,9 @@ export async function getFacebookPageInsights(): Promise<FacebookPageInsights | 
     }
 
     const insightsData = insightsRes.data;
-    const insights: any = {};
-    if (insightsData?.data) {
-      insightsData.data.forEach((metric: any) => {
+    const insights: Record<string, unknown> = {};
+    if ((insightsData as { data?: Array<{ name: string; values: Array<{ value: number }> }> }).data) {
+      (insightsData as { data?: Array<{ name: string; values: Array<{ value: number }> }> }).data?.forEach((metric: { name: string; values: Array<{ value: number }> }) => {
         if (metric.values && metric.values.length > 0) {
           insights[metric.name] = metric.values[metric.values.length - 1].value;
         }
@@ -135,12 +135,12 @@ export async function getFacebookPageInsights(): Promise<FacebookPageInsights | 
     }
 
     return {
-      fan_count: pageData?.fan_count || 0,
-      page_views_total: insights.page_views_total || 0,
-      page_engaged_users: insights.page_engaged_users || 0,
-      page_impressions: insights.page_impressions || 0,
-      page_post_engagements: insights.page_post_engagements || 0,
-      page_impressions_organic: insights.page_impressions_organic || 0,
+      fan_count: (pageData as { fan_count?: number })?.fan_count || 0,
+      page_views_total: (insights as { page_views_total?: number })?.page_views_total || 0,
+      page_engaged_users: (insights as { page_engaged_users?: number })?.page_engaged_users || 0,
+      page_impressions: (insights as { page_impressions?: number })?.page_impressions || 0,
+      page_post_engagements: (insights as { page_post_engagements?: number })?.page_post_engagements || 0,
+      page_impressions_organic: (insights as { page_impressions_organic?: number })?.page_impressions_organic || 0,
     };
   } catch (error) {
     console.error('[Meta API] Facebook error:', error);

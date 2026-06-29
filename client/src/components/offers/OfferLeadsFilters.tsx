@@ -18,7 +18,7 @@ interface OfferLeadsFiltersProps {
   onOfferChange: (value: string[]) => void;
   uniqueOffers: Array<{ id: number; title: string }>;
   dateFilter: string;
-  onDateFilterChange: (value: any) => void;
+  onDateFilterChange: (value: string) => void;
   statusFilter: string[];
   onStatusFilterChange: (value: string[]) => void;
   sourceFilter: string[];

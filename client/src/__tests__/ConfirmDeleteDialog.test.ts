@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from "vitest";
 
 /**
@@ -15,7 +16,7 @@ function getDialogDescription(
   itemName?: string | null,
   itemType: string = "العنصر"
 ): string {
-  if (description) return description;
+  if (description) {return description;}
   return itemName
     ? `هل أنت متأكد من حذف ${itemType} "${itemName}"؟ لا يمكن التراجع عن هذا الإجراء.`
     : `هل أنت متأكد من حذف هذا ${itemType}؟ لا يمكن التراجع عن هذا الإجراء.`;

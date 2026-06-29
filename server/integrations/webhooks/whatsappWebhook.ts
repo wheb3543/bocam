@@ -11,6 +11,16 @@
  * https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/overview/
  */
 
+interface AppointmentData {
+  phone: string;
+  fullName?: string;
+  appointmentDate?: Date | null;
+  preferredDate?: string | null;
+  preferredTime?: string | null;
+  procedure?: string | null;
+  doctorId?: number;
+}
+
 import crypto from 'crypto';
 import { Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
@@ -195,16 +205,16 @@ async function handleButtonPayload(payload: string, userPhone: string): Promise<
         entityType: 'appointment',
         triggerEvent,
         phone: appt.phone,
-        recipientName: (appt as any).fullName || undefined,
+        recipientName: (appt as AppointmentData).fullName || undefined,
         variables: {
-          name: (appt as any).fullName || 'العميل',
-          date: (appt as any).appointmentDate
-            ? new Date((appt as any).appointmentDate).toLocaleDateString('ar-YE') +
-              ' الساعة ' +
-              ((appt as any).appointmentTime || '')
-            : 'غير محدد',
-          doctor: (appt as any).doctorName || 'الطبيب',
-          service: (appt as any).serviceName || 'الخدمة',
+          name: (appt as AppointmentData).fullName || 'العميل',
+          date: (appt as AppointmentData).appointmentDate && (appt as AppointmentData).appointmentDate !== null
+            ? new Date((appt as AppointmentData).appointmentDate as Date).toLocaleDateString('ar-YE')
+            : ((appt as AppointmentData).preferredDate
+                ? `${(appt as AppointmentData).preferredDate} الساعة ${(appt as AppointmentData).preferredTime || ''}`
+                : 'غير محدد'),
+          doctor: 'الطبيب',
+          service: (appt as AppointmentData).procedure || 'الخدمة',
         },
         entityId: bookingId,
       }).catch((err) =>
@@ -215,7 +225,7 @@ async function handleButtonPayload(payload: string, userPhone: string): Promise<
       );
     }
   } else if (type === 'OFFER') {
-    const updateData: any = { status: newStatus, updatedAt: now };
+    const updateData: Record<string, unknown> = { status: newStatus, updatedAt: now };
     if (newStatus === 'confirmed') updateData.confirmedAt = now;
     else if (newStatus === 'cancelled') updateData.cancelledAt = now;
     await db.update(offerLeads).set(updateData).where(eq(offerLeads.id, bookingId));
@@ -250,7 +260,7 @@ async function handleButtonPayload(payload: string, userPhone: string): Promise<
       );
     }
   } else if (type === 'CAMP') {
-    const updateData: any = { status: newStatus, updatedAt: now };
+    const updateData: Record<string, unknown> = { status: newStatus, updatedAt: now };
     if (newStatus === 'confirmed') updateData.confirmedAt = now;
     else if (newStatus === 'cancelled') updateData.cancelledAt = now;
     await db.update(campRegistrations).set(updateData).where(eq(campRegistrations.id, bookingId));
@@ -458,32 +468,33 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       console.log(`[WhatsApp Webhook] Debug: insertId =`, insertId);
 
       if (insertId) {
-        conversation = {
-          id: insertId,
-          phoneNumber: phoneNumber,
-          customerName: customerName || null,
-          lastMessage: messagePreview,
-          lastMessageAt: new Date(),
-          unreadCount: 1,
-          isImportant: 0,
-          isArchived: 0,
-          leadId: null,
-          appointmentId: null,
-          offerLeadId: null,
-          campRegistrationId: null,
-          assignedToUserId: null,
-          notes: null,
-          conversationIdMeta: null,
-          originType: null,
-          expirationTimestamp: null,
-          pricingModel: null,
-          billable: false,
-          pricingCategory: null,
-          totalCost: 0,
-          messageCount: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
+    conversation = {
+      id: Number(insertId),
+      phoneNumber: phoneNumber,
+      customerName: customerName || null,
+      lastMessage: messagePreview,
+      lastMessageAt: new Date(),
+      unreadCount: 1,
+      isImportant: 0,
+      isArchived: 0,
+      leadId: null,
+      appointmentId: null,
+      offerLeadId: null,
+      campRegistrationId: null,
+      assignedToUserId: null,
+      notes: null,
+      conversationIdMeta: null,
+      originType: null,
+      expirationTimestamp: null,
+      pricingModel: null,
+      billable: false,
+      pricingCategory: null,
+      totalCost: 0,
+      messageCount: 0,
+      labOrderId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
         console.log(`[WhatsApp Webhook] Debug: Created conversation with ID: ${insertId}`);
       } else {
         // Fallback: try to get the conversation by phone
@@ -684,10 +695,10 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     );
 
     const newMessageResult = await createWhatsAppMessage({
-      conversationId: conversation.id,
+      conversationId: conversation.id as number,
       direction: 'inbound',
       content,
-      messageType,
+      messageType: messageType as any,
       status: 'received',
       whatsappMessageId: messageId || null,
       sentAt: new Date(parseInt(timestamp) * 1000),
@@ -702,12 +713,12 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
 
     // حفظ البيانات الإضافية في الجداول المخصصة
     if (type === 'contacts' && messageContacts && newMessageId) {
-      await handleContacts(messageContacts, conversation.id, newMessageId, phoneNumber);
+      await handleContacts(messageContacts, conversation.id as number, newMessageId, phoneNumber);
       // 🔔 Publish SSE event for contacts received
       try {
         const { publish } = await import('../../_core/pubsub');
         publish('global:whatsapp', 'contacts_received', {
-          conversationId: conversation.id,
+          conversationId: conversation.id as number,
           phoneNumber,
           contactsCount: messageContacts.length,
           timestamp: new Date().toISOString(),
@@ -717,12 +728,12 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       }
     }
     if (type === 'order' && order && newMessageId) {
-      await handleOrders(order, conversation.id, newMessageId, phoneNumber);
+      await handleOrders(order, conversation.id as number, newMessageId, phoneNumber);
       // 🔔 Publish SSE event for order received
       try {
         const { publish } = await import('../../_core/pubsub');
         publish('global:whatsapp', 'order_received', {
-          conversationId: conversation.id,
+          conversationId: conversation.id as number,
           phoneNumber,
           orderText: order.text,
           catalogId: order.catalog_id,
@@ -733,12 +744,12 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       }
     }
     if (referral && newMessageId) {
-      await handleReferrals(referral, conversation.id, newMessageId, phoneNumber);
+      await handleReferrals(referral, conversation.id as number, newMessageId, phoneNumber);
       // 🔔 Publish SSE event for referral received
       try {
         const { publish } = await import('../../_core/pubsub');
         publish('global:whatsapp', 'referral_received', {
-          conversationId: conversation.id,
+          conversationId: conversation.id as number,
           phoneNumber,
           sourceType: referral.source_type,
           headline: referral.headline,
@@ -749,12 +760,12 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       }
     }
     if (type === 'reaction' && reaction && newMessageId) {
-      await handleReactions(reaction, conversation.id, newMessageId, phoneNumber);
+      await handleReactions(reaction, conversation.id as number, newMessageId, phoneNumber);
       // 🔔 Publish SSE event for reaction received
       try {
         const { publish } = await import('../../_core/pubsub');
         publish('global:whatsapp', 'reaction_received', {
-          conversationId: conversation.id,
+          conversationId: conversation.id as number,
           phoneNumber,
           emoji: reaction.emoji,
           timestamp: new Date().toISOString(),
@@ -765,8 +776,8 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     }
 
     // تحديث المحادثة
-    const updatedUnreadCount = (conversation.unreadCount || 0) + 1;
-    await updateWhatsAppConversation(conversation.id, {
+    const updatedUnreadCount = (conversation.unreadCount as number || 0) + 1;
+    await updateWhatsAppConversation(conversation.id as number, {
       lastMessage: content.substring(0, 100),
       lastMessageAt: new Date(),
       unreadCount: updatedUnreadCount,
@@ -777,9 +788,9 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     console.log(`[WhatsApp Webhook] 🔔 Publishing SSE event to conversation ${conversation.id}`);
     console.log(`[WhatsApp Webhook] 🔔 newMessageId = ${newMessageId}`);
     console.log(`[WhatsApp Webhook] 🔔 Message content: ${content}`);
-    publish(channelForConversation(conversation.id), 'new_message', {
+    publish(channelForConversation(conversation.id as number), 'new_message', {
       id: newMessageId,
-      conversationId: conversation.id,
+      conversationId: conversation.id as number,
       direction: 'inbound',
       content,
       messageType,
@@ -791,7 +802,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
 
     const ownerId = parseInt(process.env.OWNER_ID || '1', 10);
     publish(channelForUser(ownerId), 'new_inbound_message', {
-      conversationId: conversation.id,
+      conversationId: conversation.id as number,
       phoneNumber: phoneNumber,
       customerName: conversation.customerName,
       content: content.substring(0, 100),
@@ -1469,7 +1480,7 @@ async function handleTemplateEvent(templateEvent: any) {
 
     // تحديث حالة القالب بناءً على نوع الحدث
     const eventType = templateEvent.event || 'unknown';
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
 
     if (eventType === 'template_deleted') {
       updateData.metaStatus = 'DELETED';
@@ -1702,7 +1713,7 @@ async function handleConversationUpdate(conversationEvent: any) {
     }
 
     // تحديث بيانات المحادثة
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
 
     if (conversationData) {
       updateData.conversationIdMeta = conversationData.id;
@@ -2030,7 +2041,7 @@ export async function processWebhookEvent(body: any) {
               if (phoneNumber) {
                 const conversation = await getWhatsAppConversationByPhone(phoneNumber);
                 if (conversation) {
-                  await handleTransactionStatus(value, conversation.id, phoneNumber);
+                  await handleTransactionStatus(value, conversation.id as number, phoneNumber);
                   // 🔔 Publish SSE event for transaction status update
                   try {
                     const { publish } = await import('../../_core/pubsub');

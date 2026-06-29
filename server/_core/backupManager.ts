@@ -54,7 +54,7 @@ export interface BackupInfo {
   createdAt?: Date;
   completedAt?: Date;
   errorMessage?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -398,7 +398,7 @@ async function saveBackupToDatabase(backupInfo: BackupInfo): Promise<number> {
     `);
 
     console.log('✅ Backup info saved to database');
-    const rows = result as any;
+    const rows = result as unknown as { insertId: number };
     return rows.insertId;
   } catch (error) {
     console.error('❌ Failed to save backup to database:', error);
@@ -453,8 +453,8 @@ export async function getBackupHistory(limit: number = 50): Promise<BackupInfo[]
       LIMIT ${limit}
     `);
 
-    const rows = result as any;
-    return rows as BackupInfo[];
+    const rows = result as unknown as BackupInfo[];
+    return rows;
   } catch (error) {
     console.error('❌ Failed to get backup history:', error);
     throw error;
@@ -583,8 +583,8 @@ export async function restoreBackup(backupId: number): Promise<void> {
       SELECT * FROM backup WHERE id = ${backupId}
     `);
 
-    const rows = result as any;
-    const backup = rows[0] as BackupInfo;
+    const rows = result as unknown as BackupInfo[];
+    const backup = rows[0];
 
     if (!backup) {
       throw new Error('Backup not found');
@@ -647,8 +647,8 @@ export async function deleteBackup(backupId: number): Promise<void> {
       SELECT * FROM backup WHERE id = ${backupId}
     `);
 
-    const rows = result as any;
-    const backup = rows[0] as BackupInfo;
+    const rows = result as unknown as BackupInfo[];
+    const backup = rows[0];
 
     if (!backup) {
       throw new Error('Backup not found');

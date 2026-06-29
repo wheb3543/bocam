@@ -1,6 +1,39 @@
 import { useState, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { trpc } from '@/lib/api/trpc';
+
+interface ConversationCost {
+  id: number;
+  phoneNumber: string;
+  customerName: string | null;
+  lastMessage: string | null;
+  lastMessageAt: Date | null;
+  unreadCount: number;
+  isImportant: number;
+  isArchived: number;
+  leadId: number | null;
+  appointmentId: number | null;
+  offerLeadId: number | null;
+  campRegistrationId: number | null;
+  assignedToUserId: number | null;
+  notes: string | null;
+  conversationIdMeta: string | null;
+  originType: string | null;
+  expirationTimestamp: Date | null;
+  pricingModel: string | null;
+  billable: boolean;
+  pricingCategory: string | null;
+  totalCost: number;
+  messageCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
+interface CategoryData {
+  [key: string]: number;
+}
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,19 +108,19 @@ export default function WhatsAppCostsPage() {
 
   // Process data for charts
   const costData =
-    conversationCosts?.map((conv: any) => ({
-      date: format(new Date(conv.createdAt), 'dd/MM', { locale: ar }),
-      conversationCost: conv.conversationCost || 0,
+    conversationCosts?.map((conv) => ({
+      date: format(new Date(conv.createdAt || Date.now()), 'dd/MM', { locale: ar }),
+      conversationCost: conv.totalCost || 0,
       billable: conv.billable ? 1 : 0,
       pricingCategory: conv.pricingCategory || 'غير محدد',
     })) || [];
 
   // Group by pricing category
   const categoryData =
-    conversationCosts?.reduce((acc: any, conv: any) => {
+    conversationCosts?.reduce((acc: CategoryData, conv) => {
       const category = conv.pricingCategory || 'غير محدد';
-      if (!acc[category]) acc[category] = 0;
-      acc[category] += conv.conversationCost || 0;
+      if (!acc[category]) {acc[category] = 0;}
+      acc[category] += conv.totalCost || 0;
       return acc;
     }, {}) || {};
 
@@ -98,10 +131,10 @@ export default function WhatsAppCostsPage() {
 
   // Calculate totals
   const totalCost = Array.isArray(conversationCosts)
-    ? conversationCosts.reduce((sum: number, conv: any) => sum + (conv.conversationCost || 0), 0)
+    ? conversationCosts.reduce((sum: number, conv) => sum + (conv.totalCost || 0), 0)
     : 0;
   const billableCount = Array.isArray(conversationCosts)
-    ? conversationCosts.filter((conv: any) => conv.billable).length
+    ? conversationCosts.filter((conv) => conv.billable).length
     : 0;
   const totalCount = Array.isArray(conversationCosts) ? conversationCosts.length : 0;
 
@@ -167,7 +200,7 @@ export default function WhatsAppCostsPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalCost.toFixed(2)}</div>
+              <div className="text-2xl font-bold">${typeof totalCost === 'number' ? totalCost.toFixed(2) : '0.00'}</div>
               <p className="text-xs text-muted-foreground">{totalCount} محادثة</p>
             </CardContent>
           </Card>
@@ -188,7 +221,7 @@ export default function WhatsAppCostsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${totalCount > 0 ? (totalCost / totalCount).toFixed(2) : '0.00'}
+                ${totalCount > 0 && typeof totalCost === 'number' ? (totalCost / totalCount).toFixed(2) : '0.00'}
               </div>
               <p className="text-xs text-muted-foreground">لكل محادثة</p>
             </CardContent>
@@ -278,7 +311,7 @@ export default function WhatsAppCostsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {conversationCosts?.map((conv: any) => (
+                  {conversationCosts?.map((conv) => (
                     <TableRow key={conv.id}>
                       <TableCell dir="ltr">{conv.phoneNumber}</TableCell>
                       <TableCell>{conv.pricingModel || 'غير محدد'}</TableCell>
@@ -290,7 +323,7 @@ export default function WhatsAppCostsPage() {
                           {conv.billable ? 'نعم' : 'لا'}
                         </Badge>
                       </TableCell>
-                      <TableCell>${(conv.conversationCost || 0).toFixed(2)}</TableCell>
+                      <TableCell>${(conv.totalCost || 0).toFixed(2)}</TableCell>
                       <TableCell>
                         {format(new Date(conv.createdAt), 'dd/MM/yyyy HH:mm', { locale: ar })}
                       </TableCell>

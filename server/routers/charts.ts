@@ -107,12 +107,20 @@ export const chartsRouter = router({
 
       // Merge all dates into a unified timeline
       const allDates = new Set<string>();
-      const extractRows = (result: any): Array<{ date_label: string; total: number }> => {
-        const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-        return rows.map((r: any) => ({
-          date_label: String(r.date_label),
-          total: Number(r.total),
-        }));
+      const extractRows = (result: unknown): Array<{ date_label: string; total: number }> => {
+        let rows: unknown[] = [];
+        if (Array.isArray(result)) {
+          rows = result;
+        } else if (result && typeof result === 'object' && Array.isArray((result as { [key: string]: unknown })?.[0])) {
+          rows = (result as { [key: string]: unknown })?.[0] as unknown[];
+        }
+        return rows.map((r: unknown) => {
+          const row = r as { date_label: string; total: number };
+          return {
+            date_label: String(row.date_label),
+            total: Number(row.total),
+          };
+        });
       };
 
       const leadsRows = extractRows(leadsTrend);
@@ -207,12 +215,20 @@ export const chartsRouter = router({
         LIMIT 10
       `);
 
-    const extractRows = (result: any): Array<{ source_name: string; total: number }> => {
-      const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-      return rows.map((r: any) => ({
-        source_name: String(r.source_name),
-        total: Number(r.total),
-      }));
+    const extractRows = (result: unknown): Array<{ source_name: string; total: number }> => {
+      let rows: unknown[] = [];
+      if (Array.isArray(result)) {
+        rows = result;
+      } else if (result && typeof result === 'object' && Array.isArray((result as { [key: string]: unknown })?.[0])) {
+        rows = (result as { [key: string]: unknown })?.[0] as unknown[];
+      }
+      return rows.map((r: unknown) => {
+        const row = r as { source_name: string; total: number };
+        return {
+          source_name: String(row.source_name),
+          total: Number(row.total),
+        };
+      });
     };
 
     return {
@@ -254,14 +270,22 @@ export const chartsRouter = router({
       `);
 
     const extractRows = (
-      result: any
+      result: unknown
     ): Array<{ name: string; total: number; converted: number }> => {
-      const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-      return rows.map((r: any) => ({
-        name: String(r.name),
-        total: Number(r.total),
-        converted: Number(r.converted || 0),
-      }));
+      let rows: unknown[] = [];
+      if (Array.isArray(result)) {
+        rows = result;
+      } else if (result && typeof result === 'object' && Array.isArray((result as { [key: string]: unknown })?.[0])) {
+        rows = (result as { [key: string]: unknown })?.[0] as unknown[];
+      }
+      return rows.map((r: unknown) => {
+        const row = r as { name: string; total: number; converted?: number };
+        return {
+          name: String(row.name),
+          total: Number(row.total),
+          converted: Number(row.converted || 0),
+        };
+      });
     };
 
     return {
@@ -322,12 +346,20 @@ export const chartsRouter = router({
         ORDER BY date_group ASC
       `);
 
-      const extractRows = (result: any): Array<{ date_label: string; total: number }> => {
-        const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-        return rows.map((r: any) => ({
-          date_label: String(r.date_label),
-          total: Number(r.total),
-        }));
+      const extractRows = (result: unknown): Array<{ date_label: string; total: number }> => {
+        let rows: unknown[] = [];
+        if (Array.isArray(result)) {
+          rows = result;
+        } else if (result && typeof result === 'object' && Array.isArray((result as { [key: string]: unknown })?.[0])) {
+          rows = (result as { [key: string]: unknown })?.[0] as unknown[];
+        }
+        return rows.map((r: unknown) => {
+          const row = r as { date_label: string; total: number };
+          return {
+            date_label: String(row.date_label),
+            total: Number(row.total),
+          };
+        });
       };
 
       const inboundRows = extractRows(inboundTrend);
@@ -387,13 +419,13 @@ export const chartsRouter = router({
       const currentStart = new Date(now.getTime() - periodDays * 24 * 60 * 60 * 1000);
       const previousStart = new Date(currentStart.getTime() - periodDays * 24 * 60 * 60 * 1000);
 
-      const getCount = async (table: any, start: Date, end: Date) => {
+      const getCount = async (table: string, start: Date, end: Date) => {
         const result = await db.execute(sql`
-          SELECT COUNT(*) as total FROM ${table}
+          SELECT COUNT(*) as total FROM ${sql.raw(table)}
           WHERE createdAt >= ${start} AND createdAt < ${end}
         `);
-        const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-        return Number(rows[0]?.total || 0);
+        const rows = Array.isArray(result) ? result : (result as unknown as { [key: string]: unknown })?.[0] as unknown[] || [];
+        return Number((rows[0] as { total?: number })?.total || 0);
       };
 
       const [
@@ -406,14 +438,14 @@ export const chartsRouter = router({
         currentCampRegs,
         previousCampRegs,
       ] = await Promise.all([
-        getCount(leads, currentStart, now),
-        getCount(leads, previousStart, currentStart),
-        getCount(appointments, currentStart, now),
-        getCount(appointments, previousStart, currentStart),
-        getCount(offerLeads, currentStart, now),
-        getCount(offerLeads, previousStart, currentStart),
-        getCount(campRegistrations, currentStart, now),
-        getCount(campRegistrations, previousStart, currentStart),
+        getCount('leads', currentStart, now),
+        getCount('leads', previousStart, currentStart),
+        getCount('appointments', currentStart, now),
+        getCount('appointments', previousStart, currentStart),
+        getCount('offerLeads', currentStart, now),
+        getCount('offerLeads', previousStart, currentStart),
+        getCount('campRegistrations', currentStart, now),
+        getCount('campRegistrations', previousStart, currentStart),
       ]);
 
       const calcChange = (current: number, previous: number) => {

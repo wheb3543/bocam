@@ -469,10 +469,10 @@ export default function BIPage() {
 
   // Calculate trends
   const trends = useMemo(() => {
-    if (!funnelData || !prevFunnelData) return null;
+    if (!funnelData || !prevFunnelData) {return null;}
 
     const calculateTrend = (current: number, previous: number) => {
-      if (previous === 0) return current > 0 ? 100 : 0;
+      if (previous === 0) {return current > 0 ? 100 : 0;}
       return ((current - previous) / previous) * 100;
     };
 
@@ -496,7 +496,7 @@ export default function BIPage() {
 
   // Format daily stats for chart
   const dailyChartData = useMemo(() => {
-    if (!dailyStats) return [];
+    if (!dailyStats) {return [];}
     return dailyStats.map((stat) => ({
       date: new Date(stat.date).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' }),
       sessions: stat.sessions,

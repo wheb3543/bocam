@@ -28,7 +28,7 @@ export interface TrackingData {
  * Get all URL parameters
  */
 function getUrlParams(): URLSearchParams {
-  if (typeof window === 'undefined') return new URLSearchParams();
+  if (typeof window === 'undefined') {return new URLSearchParams();}
   return new URLSearchParams(window.location.search);
 }
 
@@ -36,7 +36,7 @@ function getUrlParams(): URLSearchParams {
  * Get referrer domain
  */
 function getReferrerDomain(): string | null {
-  if (typeof window === 'undefined' || !document.referrer) return null;
+  if (typeof window === 'undefined' || !document.referrer) {return null;}
 
   try {
     const url = new URL(document.referrer);
@@ -51,24 +51,24 @@ function getReferrerDomain(): string | null {
  */
 function detectSourceFromReferrer(): string | null {
   const referrer = getReferrerDomain();
-  if (!referrer) return null;
+  if (!referrer) {return null;}
 
   // Social media platforms
-  if (referrer.includes('facebook.com') || referrer.includes('fb.com')) return 'facebook';
-  if (referrer.includes('instagram.com')) return 'instagram';
-  if (referrer.includes('twitter.com') || referrer.includes('t.co')) return 'twitter';
-  if (referrer.includes('linkedin.com')) return 'linkedin';
-  if (referrer.includes('tiktok.com')) return 'tiktok';
-  if (referrer.includes('youtube.com')) return 'youtube';
+  if (referrer.includes('facebook.com') || referrer.includes('fb.com')) {return 'facebook';}
+  if (referrer.includes('instagram.com')) {return 'instagram';}
+  if (referrer.includes('twitter.com') || referrer.includes('t.co')) {return 'twitter';}
+  if (referrer.includes('linkedin.com')) {return 'linkedin';}
+  if (referrer.includes('tiktok.com')) {return 'tiktok';}
+  if (referrer.includes('youtube.com')) {return 'youtube';}
 
   // Search engines
-  if (referrer.includes('google.com')) return 'google';
-  if (referrer.includes('bing.com')) return 'bing';
-  if (referrer.includes('yahoo.com')) return 'yahoo';
+  if (referrer.includes('google.com')) {return 'google';}
+  if (referrer.includes('bing.com')) {return 'bing';}
+  if (referrer.includes('yahoo.com')) {return 'yahoo';}
 
   // Messaging apps
-  if (referrer.includes('whatsapp.com') || referrer.includes('wa.me')) return 'whatsapp';
-  if (referrer.includes('telegram.org') || referrer.includes('t.me')) return 'telegram';
+  if (referrer.includes('whatsapp.com') || referrer.includes('wa.me')) {return 'whatsapp';}
+  if (referrer.includes('telegram.org') || referrer.includes('t.me')) {return 'telegram';}
 
   // Other referrer
   return 'referral';
@@ -135,7 +135,7 @@ export function getTrackingData(): TrackingData {
  * Save tracking data to localStorage
  */
 export function saveTrackingData(data: TrackingData): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
 
   try {
     localStorage.setItem(TRACKING_DATA_KEY, JSON.stringify(data));
@@ -150,7 +150,7 @@ export function saveTrackingData(data: TrackingData): void {
  * Get saved tracking data from localStorage
  */
 export function getSavedTrackingData(): TrackingData | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined') {return null;}
 
   try {
     const saved = localStorage.getItem(TRACKING_DATA_KEY);
@@ -217,7 +217,7 @@ export function getCompleteTrackingData(): TrackingData {
  * Call this in App.tsx or main.tsx
  */
 export function initializeTracking(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
 
   const trackingData = getTrackingData();
 

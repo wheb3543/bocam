@@ -42,11 +42,11 @@ export function useAbandonedFormTracking({
   }, [submitted]);
 
   const saveAbandoned = useCallback(() => {
-    if (submittedRef.current) return; // اكتمل الإرسال - لا تسجيل
-    if (savedRef.current) return; // تم التسجيل مسبقاً
+    if (submittedRef.current) {return;} // اكتمل الإرسال - لا تسجيل
+    if (savedRef.current) {return;} // تم التسجيل مسبقاً
 
     const { name, phone } = getFormData();
-    if (!name && !phone) return; // لم يُدخَل شيء - لا تسجيل
+    if (!name && !phone) {return;} // لم يُدخَل شيء - لا تسجيل
 
     savedRef.current = true;
     const tracking = getCompleteTrackingData();
@@ -66,7 +66,7 @@ export function useAbandonedFormTracking({
   useEffect(() => {
     const handleBeforeUnload = () => saveAbandoned();
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') saveAbandoned();
+      if (document.visibilityState === 'hidden') {saveAbandoned();}
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);

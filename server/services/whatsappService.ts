@@ -158,10 +158,10 @@ export async function verifyWhatsAppHealth(): Promise<{
     if (phoneInfo.success && phoneInfo.phoneNumber) {
       setup.phoneNumberReachable = true;
       setup.phoneNumberRegisteredCheck = true;
-      setup.displayPhoneNumber = phoneInfo.phoneNumber.display_phone_number || undefined;
-      setup.verifiedName = phoneInfo.phoneNumber.verified_name || undefined;
-      setup.phoneStatus = phoneInfo.phoneNumber.status || null;
-      setup.qualityRating = phoneInfo.phoneNumber.quality_rating || null;
+      setup.displayPhoneNumber = (phoneInfo.phoneNumber as { display_phone_number?: string }).display_phone_number || undefined;
+      setup.verifiedName = (phoneInfo.phoneNumber as { verified_name?: string }).verified_name || undefined;
+      setup.phoneStatus = (phoneInfo.phoneNumber as { status?: string }).status || null;
+      setup.qualityRating = (phoneInfo.phoneNumber as { quality_rating?: string }).quality_rating || null;
     } else if (phoneInfo.error) {
       errors.push(`Phone number health check failed: ${phoneInfo.error}`);
     }
@@ -173,7 +173,7 @@ export async function verifyWhatsAppHealth(): Promise<{
       const apps = subscriptions.apps || [];
       setup.subscribedAppsCount = apps.length;
       setup.currentAppSubscribed = ENV.appId
-        ? apps.some((app: any) => String(app?.id) === String(ENV.appId))
+        ? apps.some((app: { id?: unknown }) => String(app?.id) === String(ENV.appId))
         : null;
 
       if (ENV.appId && setup.currentAppSubscribed === false) {

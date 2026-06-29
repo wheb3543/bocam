@@ -34,7 +34,7 @@ function createPatientToken(patientId: number, phone: string): string {
 // Helper to verify patient JWT
 function verifyPatientToken(token: string): { patientId: number; phone: string } | null {
   try {
-    const decoded = jwt.verify(token, PATIENT_JWT_SECRET) as any;
+    const decoded = jwt.verify(token, PATIENT_JWT_SECRET) as { type: string; patientId: number; phone: string };
     if (decoded.type !== 'patient') return null;
     return { patientId: decoded.patientId, phone: decoded.phone };
   } catch {
@@ -279,27 +279,27 @@ export const patientPortalRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const updated = await updatePatientProfile((ctx as any).patient.id, input);
+      const updated = await updatePatientProfile((ctx as { patient: { id: number } }).patient.id, input);
       return sanitizePatient(updated);
     }),
 
   // الحصول على حجوزات المريض (مواعيد الأطباء)
   myAppointments: patientProcedure.query(async ({ ctx }) => {
-    return getPatientAppointments((ctx as any).patient.phone);
+    return getPatientAppointments((ctx as { patient: { phone: string } }).patient.phone);
   }),
 
   // الحصول على حجوزات العروض
   myOfferBookings: patientProcedure.query(async ({ ctx }) => {
-    return getPatientOfferLeads((ctx as any).patient.phone);
+    return getPatientOfferLeads((ctx as { patient: { phone: string } }).patient.phone);
   }),
 
   // الحصول على تسجيلات المخيمات
   myCampRegistrations: patientProcedure.query(async ({ ctx }) => {
-    return getPatientCampRegistrations((ctx as any).patient.phone);
+    return getPatientCampRegistrations((ctx as { patient: { phone: string } }).patient.phone);
   }),
 
   // الحصول على النتائج والتقارير
   myResults: patientProcedure.query(async ({ ctx }) => {
-    return getPatientResults((ctx as any).patient.id);
+    return getPatientResults((ctx as { patient: { id: number } }).patient.id);
   }),
 });

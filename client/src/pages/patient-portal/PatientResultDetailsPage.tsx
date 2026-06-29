@@ -1,5 +1,7 @@
 import { useRoute } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
+import type { PatientResult } from '@shared/types';
+
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +12,7 @@ export default function PatientResultDetailsPage() {
   const [, params] = useRoute('/patient-portal/results/:id');
   const resultId = Number(params?.id);
   const { data: results, isLoading } = trpc.patientPortal.myResults.useQuery();
-  const result = results?.find((item: any) => item.id === resultId);
+  const result = results?.find((item: PatientResult) => item.id === resultId);
 
   if (isLoading) {
     return (

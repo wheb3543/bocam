@@ -50,7 +50,13 @@ export async function updateFollowUpTaskStatus(
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
-  const updateData: any = {
+  const updateData: {
+    status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+    updatedAt: Date;
+    completedAt?: Date;
+    completedById?: number;
+    completedByName?: string;
+  } = {
     status,
     updatedAt: new Date(),
   };

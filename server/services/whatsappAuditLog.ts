@@ -150,11 +150,11 @@ export async function getAuditLogs(params?: {
     }
 
     if (params?.startDate) {
-      filtered = filtered.filter((log) => log.timestamp >= params.startDate);
+      filtered = filtered.filter((log) => log.timestamp >= params.startDate!);
     }
 
     if (params?.endDate) {
-      filtered = filtered.filter((log) => log.timestamp <= params.endDate);
+      filtered = filtered.filter((log) => log.timestamp <= params.endDate!);
     }
 
     const limit = params?.limit || 100;
@@ -190,11 +190,11 @@ export async function getAuditStats(params?: { startDate?: Date; endDate?: Date 
     let filtered = [...auditLogs];
 
     if (params?.startDate) {
-      filtered = filtered.filter((log) => log.timestamp >= params.startDate);
+      filtered = filtered.filter((log) => log.timestamp >= params.startDate!);
     }
 
     if (params?.endDate) {
-      filtered = filtered.filter((log) => log.timestamp <= params.endDate);
+      filtered = filtered.filter((log) => log.timestamp <= params.endDate!);
     }
 
     const stats = {
@@ -236,11 +236,11 @@ export async function exportAuditLogs(params?: {
     }
 
     if (params?.startDate) {
-      filtered = filtered.filter((log) => log.timestamp >= params.startDate);
+      filtered = filtered.filter((log) => log.timestamp >= params.startDate!);
     }
 
     if (params?.endDate) {
-      filtered = filtered.filter((log) => log.timestamp <= params.endDate);
+      filtered = filtered.filter((log) => log.timestamp <= params.endDate!);
     }
 
     const headers = ['ID', 'Timestamp', 'Type', 'Phone', 'Status', 'Message', 'Error'];

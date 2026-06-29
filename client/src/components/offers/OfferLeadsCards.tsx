@@ -1,15 +1,18 @@
 import OfferLeadCard from '@/components/offer/OfferLeadCard';
+import type { RouterOutputs } from '@/types/trpc';
+
+type OfferLead = RouterOutputs['offerLeads']['listPaginated']['data'][number];
 
 interface OfferLeadsCardsProps {
-  leads: any[];
-  onEdit: (lead: any) => void;
-  onPrint: (lead: any) => Promise<void>;
+  leads: OfferLead[];
+  onEdit: (lead: OfferLead) => void;
+  onPrint: (lead: OfferLead) => Promise<void>;
 }
 
 export default function OfferLeadsCards({ leads, onEdit, onPrint }: OfferLeadsCardsProps) {
   return (
     <>
-      {leads.map((lead: any) => (
+      {leads.map((lead: OfferLead) => (
         <OfferLeadCard
           key={lead.id}
           lead={{
@@ -18,7 +21,7 @@ export default function OfferLeadsCards({ leads, onEdit, onPrint }: OfferLeadsCa
             phone: lead.phone,
             email: lead.email,
             status: lead.status,
-            offerName: lead.offerTitle,
+            offerName: lead.offerTitle || undefined,
             createdAt: lead.createdAt,
           }}
           onEdit={() => onEdit(lead)}

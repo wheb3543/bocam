@@ -65,13 +65,13 @@ export function useLicense(options: UseLicenseOptions = {}) {
 
   // معلومات الترخيص
   const licenseInfo: LicenseInfo | null = useMemo(() => {
-    if (!licenseQuery.data) return null;
+    if (!licenseQuery.data) {return null;}
     return licenseQuery.data;
   }, [licenseQuery.data]);
 
   // الميزات المفعلة
   const enabledFeatures: string[] = useMemo(() => {
-    if (!featuresQuery.data?.success) return [];
+    if (!featuresQuery.data?.success) {return [];}
     return featuresQuery.data.features || [];
   }, [featuresQuery.data]);
 
@@ -137,7 +137,7 @@ export function useLicense(options: UseLicenseOptions = {}) {
    * @returns true إذا كان الترخيص منتهي
    */
   const isLicenseExpired = useMemo(() => {
-    if (!licenseInfo?.expiryDate) return true;
+    if (!licenseInfo?.expiryDate) {return true;}
     const currentTime = Math.floor(Date.now() / 1000);
     return licenseInfo.expiryDate < currentTime;
   }, [licenseInfo]);
@@ -147,7 +147,7 @@ export function useLicense(options: UseLicenseOptions = {}) {
    * @returns عدد الأيام المتبقية
    */
   const daysRemaining = useMemo(() => {
-    if (!licenseInfo?.expiryDate) return 0;
+    if (!licenseInfo?.expiryDate) {return 0;}
     const currentTime = Math.floor(Date.now() / 1000);
     const secondsRemaining = licenseInfo.expiryDate - currentTime;
     return Math.floor(secondsRemaining / (24 * 60 * 60));

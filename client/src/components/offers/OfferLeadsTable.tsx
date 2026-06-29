@@ -17,9 +17,12 @@ import CommentCount from '@/components/notification/CommentCount';
 import TaskCount from '@/components/TaskCount';
 import { Badge } from '@/components/ui/badge';
 import { Eye } from 'lucide-react';
+import type { RouterOutputs } from '@/types/trpc';
+
+type OfferLead = RouterOutputs['offerLeads']['listPaginated']['data'][number];
 
 interface OfferLeadsTableProps {
-  leads: any[];
+  leads: OfferLead[];
   columns: ColumnConfig[];
   visibleColumns: Record<string, boolean>;
   columnOrder: string[];
@@ -27,10 +30,10 @@ interface OfferLeadsTableProps {
   frozenColumns: ReturnType<typeof import('@/components/table/ResizableTable').useFrozenColumns>;
   selectedIds: number[];
   onSelectedIdsChange: (ids: number[]) => void;
-  onEdit: (lead: any) => void;
-  onPrint: (lead: any) => Promise<void>;
+  onEdit: (lead: OfferLead) => void;
+  onPrint: (lead: OfferLead) => Promise<void>;
   formatPhoneDisplay: (phone: string) => string;
-  formatDate: (date: any) => string;
+  formatDate: (date: Date | string) => string;
 }
 
 const statusLabels = {
@@ -76,7 +79,7 @@ export default function OfferLeadsTable({
               .filter((key) => visibleColumns[key])
               .map((colKey) => {
                 const col = columns.find((c) => c.key === colKey);
-                if (!col) return null;
+                if (!col) {return null;}
 
                 if (colKey === 'checkbox') {
                   return (
@@ -121,10 +124,10 @@ export default function OfferLeadsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {leads.map((lead: any) => (
+          {leads.map((lead: OfferLead) => (
             <TableRow
               key={lead.id}
-              className={`group ${lead.status === 'new' ? 'bg-blue-50/40 hover:bg-blue-50/60' : 'hover:bg-muted/30'}`}
+              className={`group ${lead.status === 'pending' ? 'bg-blue-50/40 hover:bg-blue-50/60' : 'hover:bg-muted/30'}`}
             >
               {columnOrder
                 .filter((key) => visibleColumns[key])

@@ -1,5 +1,19 @@
 import { useState, useMemo } from 'react';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
+import type { RouterOutputs } from '@/types/trpc';
+
+type Offer = RouterOutputs['offers']['getAll'][number];
+
+interface OfferFormData {
+  title: string;
+  slug: string;
+  description: string;
+  imageUrl: string;
+  isActive: boolean;
+  startDate: string;
+  endDate: string;
+}
+
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { useConfirmDialog } from '@/hooks/ui/useConfirmDialog';
 import { Button } from '@/components/ui/button';
@@ -128,9 +142,9 @@ const offerColumns: ColumnConfig[] = [
 
 export default function OffersManagement() {
   const { formatDate } = useFormatDate();
-  const deleteConfirm = useConfirmDialog<any>();
+  const deleteConfirm = useConfirmDialog<Offer>();
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingOffer, setEditingOffer] = useState<any>(null);
+  const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     title: '',
@@ -208,16 +222,16 @@ export default function OffersManagement() {
   };
 
   // Duplicate offer
-  const handleDuplicate = (offer: any) => {
+  const handleDuplicate = (offer: Offer) => {
     setEditingOffer(null);
     setFormData({
       title: offer.title + ' (نسخة)',
       slug: offer.slug + '-copy',
-      description: offer.description || '',
-      imageUrl: offer.imageUrl || '',
+      description: offer.description ?? '',
+      imageUrl: offer.imageUrl ?? '',
       isActive: false,
-      startDate: offer.startDate ? new Date(offer.startDate).toISOString().split('T')[0] : '',
-      endDate: offer.endDate ? new Date(offer.endDate).toISOString().split('T')[0] : '',
+      startDate: offer.startDate ? offer.startDate.toISOString().split('T')[0] : '',
+      endDate: offer.endDate ? offer.endDate.toISOString().split('T')[0] : '',
     });
     setShowAddDialog(true);
   };
@@ -239,45 +253,45 @@ export default function OffersManagement() {
     }
   };
 
-  const handleEdit = (offer: any) => {
+  const handleEdit = (offer: Offer) => {
     setEditingOffer(offer);
     setFormData({
       title: offer.title,
       slug: offer.slug,
-      description: offer.description || '',
-      imageUrl: offer.imageUrl || '',
+      description: offer.description ?? '',
+      imageUrl: offer.imageUrl ?? '',
       isActive: offer.isActive,
-      startDate: offer.startDate ? new Date(offer.startDate).toISOString().split('T')[0] : '',
-      endDate: offer.endDate ? new Date(offer.endDate).toISOString().split('T')[0] : '',
+      startDate: offer.startDate ? offer.startDate.toISOString().split('T')[0] : '',
+      endDate: offer.endDate ? offer.endDate.toISOString().split('T')[0] : '',
     });
     setShowAddDialog(true);
   };
 
   const filteredOffers = useMemo(() => {
-    if (!offers) return [];
+    if (!offers) {return [];}
     let filtered = [...offers];
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (o: any) => o.title.toLowerCase().includes(term) || o.slug.toLowerCase().includes(term)
+        (o: Offer) => o.title.toLowerCase().includes(term) || o.slug.toLowerCase().includes(term)
       );
     }
 
-    return offerTable.sortData(filtered, (item: any, key: string) => {
+    return offerTable.sortData(filtered, (item: Offer, key: string) => {
       switch (key) {
         case 'title':
           return item.title;
         case 'slug':
           return item.slug;
         case 'status':
-          return item.status;
+          return item.isActive ? 1 : 0;
         case 'startDate':
           return item.startDate;
         case 'endDate':
           return item.endDate;
         default:
-          return item[key];
+          return undefined;
       }
     });
   }, [offers, searchTerm, offerTable.sortState, offerTable.sortData]);
@@ -408,7 +422,7 @@ export default function OffersManagement() {
               <TableRow>
                 {offerTable.visibleColumnOrder.map((colKey) => {
                   const col = offerColumns.find((c) => c.key === colKey);
-                  if (!col || !offerTable.visibleColumns[colKey]) return null;
+                  if (!col || !offerTable.visibleColumns[colKey]) {return null;}
                   return (
                     <ResizableHeaderCell
                       key={colKey}
@@ -428,10 +442,10 @@ export default function OffersManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOffers.map((offer: any) => (
+              {filteredOffers.map((offer: Offer) => (
                 <TableRow key={offer.id} className="hover:bg-muted/50/50">
                   {offerTable.visibleColumnOrder.map((colKey) => {
-                    if (!offerTable.visibleColumns[colKey]) return null;
+                    if (!offerTable.visibleColumns[colKey]) {return null;}
 
                     switch (colKey) {
                       case 'title':

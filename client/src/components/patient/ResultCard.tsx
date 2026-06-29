@@ -2,9 +2,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FlaskConical, ScanLine, ClipboardList, FileText, ChevronLeft } from 'lucide-react';
 import { ReactNode } from 'react';
+import type { PatientResult } from '@shared/types';
 
 type ResultCardProps = {
-  result: any;
+  result: PatientResult;
   statusBadge: (status: string) => ReactNode;
   formatDate: (value: string | Date) => string;
   onOpenDetails?: () => void;
@@ -37,7 +38,7 @@ export default function ResultCard({
                 <p className="text-xs text-muted-foreground mt-0.5">د. {result.doctorName}</p>
               )}
               <p className="text-xs text-muted-foreground mt-0.5">
-                {formatDate(result.resultDate || result.createdAt)}
+                {formatDate(result.resultDate || result.createdAt || new Date())}
               </p>
             </div>
           </div>

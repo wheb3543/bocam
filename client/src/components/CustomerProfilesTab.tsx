@@ -1,3 +1,4 @@
+
 /**
  * CustomerProfilesTab - تبويب ملفات العملاء الموحد
  * يعرض قائمة بجميع العملاء الفريدين مع إمكانية عرض تفاصيل كل عميل
@@ -16,6 +17,74 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+
+interface Customer {
+  id?: number;
+  name?: string;
+  phone?: string;
+  email?: string;
+  lastSeen?: string | Date;
+  firstSeen?: string | Date;
+  status?: string;
+  source?: string;
+  totalRecords?: number;
+  [key: string]: unknown;
+}
+
+interface FilterParams {
+  searchTerm?: string;
+  [key: string]: unknown;
+}
+
+interface CustomerAppointment {
+  id?: number;
+  fullName?: string;
+  phone?: string;
+  status?: string;
+  appointmentDate?: string | Date | null;
+  doctorName?: string | null;
+  doctorSpecialty?: string | null;
+  procedure?: string | null;
+  createdAt?: string | Date;
+  source?: string | null;
+  notes?: string | null;
+  [key: string]: unknown;
+}
+
+interface CustomerLead {
+  id?: number;
+  fullName?: string;
+  phone?: string;
+  status?: string;
+  createdAt?: string | Date;
+  source?: string | null;
+  notes?: string | null;
+  [key: string]: unknown;
+}
+
+interface CustomerOfferLead {
+  id?: number;
+  fullName?: string;
+  phone?: string;
+  status?: string;
+  createdAt?: string | Date;
+  offerTitle?: string | null;
+  source?: string | null;
+  notes?: string | null;
+  [key: string]: unknown;
+}
+
+interface CustomerCampRegistration {
+  id?: number;
+  fullName?: string;
+  phone?: string;
+  status?: string;
+  createdAt?: string | Date;
+  campName?: string | null;
+  source?: string | null;
+  notes?: string | null;
+  [key: string]: unknown;
+}
 import {
   Dialog,
   DialogContent,
@@ -93,17 +162,21 @@ const statusColors: Record<string, string> = {
   attended: 'bg-green-100 text-green-800',
 };
 
-function formatDate(date: string | Date | null | undefined) {
-  if (!date) return '-';
+function formatDateOnly(date: string | Date | null | undefined) {
+  if (!date) {return '-';}
   try {
-    return formatDate(date);
+    return new Date(date).toLocaleDateString('ar-EG', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   } catch {
     return '-';
   }
 }
 
 function formatDateTime(date: string | Date | null | undefined) {
-  if (!date) return '-';
+  if (!date) {return '-';}
   try {
     return new Date(date).toLocaleString('ar-EG', {
       year: 'numeric',
@@ -147,7 +220,7 @@ export default function CustomerProfilesTab() {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   // === useFilterUtils hook ===
-  const customerFilter = useFilterUtils<any>({
+  const customerFilter = useFilterUtils<Customer>({
     data: undefined,
     searchFields: [],
   });
@@ -174,13 +247,13 @@ export default function CustomerProfilesTab() {
       { key: 'lastSeen', label: 'آخر تفاعل' },
       { key: 'firstSeen', label: 'أول تفاعل' },
     ],
-    mapToExportRow: (customer: any) => ({
+    mapToExportRow: (customer: Customer) => ({
       name: customer.name || '-',
       phone: customer.phone || '-',
       email: customer.email || '-',
       totalRecords: customer.totalRecords || 0,
-      lastSeen: formatDate(customer.lastSeen),
-      firstSeen: formatDate(customer.firstSeen),
+      lastSeen: formatDateOnly(customer.lastSeen),
+      firstSeen: formatDateOnly(customer.firstSeen),
     }),
   });
 
@@ -214,9 +287,9 @@ export default function CustomerProfilesTab() {
 
   // === Apply sorting using useTableFeatures ===
   const sortedCustomers = useMemo(() => {
-    if (!customers || customers.length === 0) return [];
+    if (!customers || customers.length === 0) {return [];}
 
-    const sorted = customerTable.sortData(customers, (item: any, key: string) => {
+    const sorted = customerTable.sortData(customers, (item: Customer, key: string) => {
       switch (key) {
         case 'name':
           return item.name || '';
@@ -237,7 +310,7 @@ export default function CustomerProfilesTab() {
 
     // Default sort: newest first if no sort is active
     if (!customerTable.sortState.direction) {
-      sorted.sort((a: any, b: any) => {
+      sorted.sort((a: Customer, b: Customer) => {
         const aDate = new Date(a.lastSeen || 0).getTime();
         const bDate = new Date(b.lastSeen || 0).getTime();
         return bDate - aDate;
@@ -328,13 +401,13 @@ export default function CustomerProfilesTab() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleExport('excel')}>
+                    <DropdownMenuItem onClick={() => handleExport("excel")}>
                       تصدير Excel
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport('csv')}>
+                    <DropdownMenuItem onClick={() => handleExport("csv")}>
                       تصدير CSV
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                    <DropdownMenuItem onClick={() => handleExport("pdf")}>
                       تصدير PDF
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -369,10 +442,10 @@ export default function CustomerProfilesTab() {
                   currentFilters={{
                     searchTerm: customerFilter.filters.searchTerm,
                   }}
-                  onApplyFilter={(filters) => {
-                    if (filters.searchTerm)
-                      customerFilter.filters.setSearchTerm(filters.searchTerm);
-                    else customerFilter.filters.setSearchTerm('');
+                  onApplyFilter={(filters: FilterParams) => {
+                    if (filters && typeof filters.searchTerm === 'string')
+                      {customerFilter.filters.setSearchTerm(filters.searchTerm);}
+                    else {customerFilter.filters.setSearchTerm('');}
                   }}
                 />
               </div>
@@ -421,7 +494,7 @@ export default function CustomerProfilesTab() {
                       .filter((key) => customerTable.visibleColumns[key])
                       .map((colKey) => {
                         const col = customerColumns.find((c) => c.key === colKey);
-                        if (!col) return null;
+                        if (!col) {return null;}
                         const widthConfig = getColumnWidth(colKey, col);
                         return (
                           <ResizableHeaderCell
@@ -440,12 +513,12 @@ export default function CustomerProfilesTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedCustomers.map((customer: any, index: number) => (
+                  {sortedCustomers.map((customer: Customer, index: number) => (
                     <TableRow
                       key={formatPhoneDisplay(customer.phone)}
                       className="cursor-pointer hover:bg-muted/50"
                       onClick={() => {
-                        setSelectedPhone(customer.phone);
+                        setSelectedPhone(customer.phone || null);
                         setDetailsOpen(true);
                       }}
                     >
@@ -498,19 +571,19 @@ export default function CustomerProfilesTab() {
                             case 'totalRecords':
                               return (
                                 <FrozenTableCell key={colKey} columnKey={colKey}>
-                                  <Badge variant="secondary">{customer.totalRecords}</Badge>
+                                  <Badge variant="secondary">{customer.totalRecords || 0}</Badge>
                                 </FrozenTableCell>
                               );
                             case 'lastSeen':
                               return (
                                 <FrozenTableCell key={colKey} columnKey={colKey}>
-                                  {formatDate(customer.lastSeen)}
+                                  {formatDateOnly(customer.lastSeen)}
                                 </FrozenTableCell>
                               );
                             case 'firstSeen':
                               return (
                                 <FrozenTableCell key={colKey} columnKey={colKey}>
-                                  {formatDate(customer.firstSeen)}
+                                  {formatDateOnly(customer.firstSeen)}
                                 </FrozenTableCell>
                               );
                             case 'actions':
@@ -521,7 +594,7 @@ export default function CustomerProfilesTab() {
                                     size="sm"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setSelectedPhone(customer.phone);
+                                      setSelectedPhone(customer.phone || null);
                                       setDetailsOpen(true);
                                     }}
                                   >
@@ -603,11 +676,11 @@ export default function CustomerProfilesTab() {
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    أول تفاعل: {formatDate(customerProfile.firstSeen)}
+                    أول تفاعل: {formatDateOnly(customerProfile.firstSeen)}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    آخر تفاعل: {formatDate(customerProfile.lastSeen)}
+                    آخر تفاعل: {formatDateOnly(customerProfile.lastSeen)}
                   </span>
                 </div>
                 <div className="mt-2">
@@ -657,7 +730,7 @@ export default function CustomerProfilesTab() {
                     {customerProfile.appointments.length === 0 ? (
                       <p className="text-center text-muted-foreground py-8">لا توجد مواعيد</p>
                     ) : (
-                      customerProfile.appointments.map((apt: any) => (
+                      customerProfile.appointments.map((apt: CustomerAppointment) => (
                         <Card key={apt.id} className="p-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-1 flex-1">
@@ -688,8 +761,13 @@ export default function CustomerProfilesTab() {
                                 <p className="text-xs text-muted-foreground mt-1">{apt.notes}</p>
                               )}
                             </div>
-                            <Badge className={`text-xs ${statusColors[apt.status] || ''}`}>
-                              {statusLabels[apt.status] || apt.status}
+                            <Badge className={`text-xs ${statusColors[apt.status || ''] || ''}`}>
+                              {(() => {
+                                if (apt.status && apt.status in statusLabels) {
+                                  return statusLabels[apt.status];
+                                }
+                                return apt.status;
+                              })()}
                             </Badge>
                           </div>
                         </Card>
@@ -702,7 +780,7 @@ export default function CustomerProfilesTab() {
                     {customerProfile.leads.length === 0 ? (
                       <p className="text-center text-muted-foreground py-8">لا توجد تسجيلات</p>
                     ) : (
-                      customerProfile.leads.map((lead: any) => (
+                      customerProfile.leads.map((lead: CustomerLead) => (
                         <Card key={lead.id} className="p-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-1 flex-1">
@@ -719,8 +797,13 @@ export default function CustomerProfilesTab() {
                                 <p className="text-xs text-muted-foreground mt-1">{lead.notes}</p>
                               )}
                             </div>
-                            <Badge className={`text-xs ${statusColors[lead.status] || ''}`}>
-                              {statusLabels[lead.status] || lead.status}
+                            <Badge className={`text-xs ${statusColors[lead.status || ''] || ''}`}>
+                              {(() => {
+                                if (lead.status && lead.status in statusLabels) {
+                                  return statusLabels[lead.status];
+                                }
+                                return lead.status;
+                              })()}
                             </Badge>
                           </div>
                         </Card>
@@ -733,7 +816,7 @@ export default function CustomerProfilesTab() {
                     {customerProfile.offerLeads.length === 0 ? (
                       <p className="text-center text-muted-foreground py-8">لا توجد حجوزات عروض</p>
                     ) : (
-                      customerProfile.offerLeads.map((ol: any) => (
+                      customerProfile.offerLeads.map((ol: CustomerOfferLead) => (
                         <Card key={ol.id} className="p-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-1 flex-1">
@@ -754,8 +837,13 @@ export default function CustomerProfilesTab() {
                                 <p className="text-xs text-muted-foreground mt-1">{ol.notes}</p>
                               )}
                             </div>
-                            <Badge className={`text-xs ${statusColors[ol.status] || ''}`}>
-                              {statusLabels[ol.status] || ol.status}
+                            <Badge className={`text-xs ${statusColors[ol.status || ''] || ''}`}>
+                              {(() => {
+                                if (ol.status && ol.status in statusLabels) {
+                                  return statusLabels[ol.status];
+                                }
+                                return ol.status;
+                              })()}
                             </Badge>
                           </div>
                         </Card>
@@ -770,7 +858,7 @@ export default function CustomerProfilesTab() {
                         لا توجد تسجيلات مخيمات
                       </p>
                     ) : (
-                      customerProfile.campRegistrations.map((cr: any) => (
+                      customerProfile.campRegistrations.map((cr: CustomerCampRegistration) => (
                         <Card key={cr.id} className="p-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-1 flex-1">
@@ -791,8 +879,13 @@ export default function CustomerProfilesTab() {
                                 <p className="text-xs text-muted-foreground mt-1">{cr.notes}</p>
                               )}
                             </div>
-                            <Badge className={`text-xs ${statusColors[cr.status] || ''}`}>
-                              {statusLabels[cr.status] || cr.status}
+                            <Badge className={`text-xs ${statusColors[cr.status || ''] || ''}`}>
+                              {(() => {
+                                if (cr.status && cr.status in statusLabels) {
+                                  return statusLabels[cr.status];
+                                }
+                                return cr.status;
+                              })()}
                             </Badge>
                           </div>
                         </Card>

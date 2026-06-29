@@ -22,7 +22,7 @@ import { useState, useCallback } from 'react';
  * </Dialog>
  */
 
-export function useConfirmDialog<T = any>() {
+export function useConfirmDialog<T = unknown>() {
   const [isOpen, setIsOpen] = useState(false);
   const [item, setItem] = useState<T | null>(null);
 

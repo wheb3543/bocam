@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Phone, User, Calendar, Eye, Stethoscope, MessageCircle, Printer } from 'lucide-react';
 import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type { Appointment, AppointmentWithDoctor } from '@shared/types';
 
 interface AppointmentCardProps {
-  appointment: any;
-  onViewDetails: (appointment: any) => void;
+  appointment: AppointmentWithDoctor;
+  onViewDetails: (appointment: AppointmentWithDoctor) => void;
   onPrint?: () => void;
 }
 

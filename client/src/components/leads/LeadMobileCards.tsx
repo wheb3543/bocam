@@ -1,14 +1,15 @@
 import { Users, Loader2 } from 'lucide-react';
 import LeadCard from '@/components/lead/LeadCard';
 import EmptyState from '@/components/EmptyState';
+import type { UnifiedLead } from '@shared/types';
 
 interface LeadMobileCardsProps {
-  leads: any[];
+  leads: UnifiedLead[];
   isLoading: boolean;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
-  onUpdateStatus: (lead: any) => void;
-  onWhatsApp: (lead: any) => void;
+  onUpdateStatus: (lead: UnifiedLead) => void;
+  onWhatsApp: (lead: UnifiedLead) => void;
 }
 
 export default function LeadMobileCards({
@@ -37,7 +38,7 @@ export default function LeadMobileCards({
           action={hasActiveFilters ? { label: 'مسح الفلاتر', onClick: onClearFilters } : undefined}
         />
       ) : (
-        leads.map((lead: any) => (
+        leads.map((lead: UnifiedLead) => (
           <LeadCard
             key={`lead-mobile-${lead.id}`}
             lead={lead}

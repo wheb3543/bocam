@@ -113,7 +113,7 @@ export default function UpdateManagementPage() {
   };
 
   const getStatusBadge = () => {
-    if (!status) return null;
+    if (!status) {return null;}
 
     if (status.updateInProgress) {
       return (

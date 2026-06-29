@@ -62,7 +62,7 @@ export default function ImageUpload({
 
   const handleFile = useCallback(
     async (file: File) => {
-      if (disabled || uploading) return;
+      if (disabled || uploading) {return;}
       await uploadImage(file);
     },
     [disabled, uploading, uploadImage]

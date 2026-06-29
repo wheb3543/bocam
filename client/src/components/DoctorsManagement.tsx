@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
@@ -50,6 +51,22 @@ import { useTableFeatures } from '@/hooks/table/useTableFeatures';
 import EmptyState from '@/components/EmptyState';
 import { useSlugGenerator } from '@/hooks/data/useSlugGenerator';
 import ImageUpload from '@/components/form/ImageUpload';
+
+interface Doctor {
+  id?: number;
+  name?: string | null;
+  slug?: string | null;
+  specialty?: string | null;
+  bio?: string | null;
+  image?: string | null;
+  languages?: string | null;
+  procedures?: string | null;
+  consultationFee?: string | null;
+  experience?: string | null;
+  available?: 'yes' | 'no' | null;
+  createdAt?: string | Date | null;
+  [key: string]: unknown;
+}
 
 // === تعريف أعمدة جدول الأطباء ===
 const doctorColumns: ColumnConfig[] = [
@@ -165,10 +182,10 @@ const doctorColumns: ColumnConfig[] = [
 
 export default function DoctorsManagement() {
   const { formatDate } = useFormatDate();
-  const deleteConfirm = useConfirmDialog<any>();
+  const deleteConfirm = useConfirmDialog<Doctor>();
   const [searchTerm, setSearchTerm] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingDoctor, setEditingDoctor] = useState<any>(null);
+  const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -201,14 +218,14 @@ export default function DoctorsManagement() {
 
   const doctorStats = useMemo(() => {
     if (!doctors)
-      return {
+      {return {
         total: 0,
         available: 0,
         unavailable: 0,
         visiting: 0,
         visitingAvailable: 0,
         visitingUnavailable: 0,
-      };
+      };}
     const visiting = doctors.filter((d) => d.isVisiting === 'yes');
     return {
       total: doctors.length,
@@ -266,20 +283,20 @@ export default function DoctorsManagement() {
   });
 
   const filteredDoctors = useMemo(() => {
-    if (!doctors) return [];
+    if (!doctors) {return [];}
     let filtered = [...doctors];
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (doc: any) =>
-          doc.name.toLowerCase().includes(term) ||
-          doc.specialty.toLowerCase().includes(term) ||
-          (doc.languages && doc.languages.toLowerCase().includes(term))
+        (doc: Doctor) =>
+          (doc.name ?? '').toLowerCase().includes(term) ||
+          (doc.specialty ?? '').toLowerCase().includes(term) ||
+          (doc.languages ?? '').toLowerCase().includes(term)
       );
     }
 
-    return doctorTable.sortData(filtered, (item: any, key: string) => {
+    return doctorTable.sortData(filtered, (item: Doctor, key: string) => {
       switch (key) {
         case 'name':
           return item.name;
@@ -320,11 +337,11 @@ export default function DoctorsManagement() {
   };
 
   // Duplicate doctor
-  const handleDuplicate = (doctor: any) => {
+  const handleDuplicate = (doctor: Doctor) => {
     setEditingDoctor(null);
     setFormData({
-      name: doctor.name + ' (نسخة)',
-      slug: doctor.slug + '-copy',
+      name: (doctor.name || '') + ' (نسخة)',
+      slug: (doctor.slug || '') + '-copy',
       specialty: doctor.specialty || '',
       image: doctor.image || '',
       bio: doctor.bio || '',
@@ -332,13 +349,13 @@ export default function DoctorsManagement() {
       languages: doctor.languages || '',
       consultationFee: doctor.consultationFee || '',
       procedures: doctor.procedures || '',
-      isVisiting: doctor.isVisiting || 'no',
+      isVisiting: (doctor.isVisiting as 'yes' | 'no') || 'no',
       available: 'yes',
     });
     setDialogOpen(true);
   };
 
-  const handleOpenDialog = (doctor?: any) => {
+  const handleOpenDialog = (doctor?: Doctor) => {
     if (doctor) {
       setEditingDoctor(doctor);
       setFormData({
@@ -351,8 +368,8 @@ export default function DoctorsManagement() {
         languages: doctor.languages || '',
         consultationFee: doctor.consultationFee || '',
         procedures: doctor.procedures || '',
-        isVisiting: doctor.isVisiting || 'no',
-        available: doctor.available || 'yes',
+        isVisiting: (doctor.isVisiting as 'yes' | 'no') || 'no',
+        available: (doctor.available as 'yes' | 'no') || 'yes',
       });
     } else {
       resetForm();
@@ -368,7 +385,7 @@ export default function DoctorsManagement() {
 
     if (editingDoctor) {
       updateMutation.mutate({
-        id: editingDoctor.id,
+        id: editingDoctor.id ?? 0,
         ...formData,
       });
     } else {
@@ -376,10 +393,10 @@ export default function DoctorsManagement() {
     }
   };
 
-  const handleToggleAvailability = (doctor: any) => {
+  const handleToggleAvailability = (doctor: Doctor) => {
     const newAvailability = doctor.available === 'yes' ? 'no' : 'yes';
     toggleAvailabilityMutation.mutate({
-      id: doctor.id,
+      id: doctor.id ?? 0,
       available: newAvailability,
     });
   };
@@ -562,7 +579,7 @@ export default function DoctorsManagement() {
               <TableRow>
                 {doctorTable.visibleColumnOrder.map((colKey) => {
                   const col = doctorColumns.find((c) => c.key === colKey);
-                  if (!col || !doctorTable.visibleColumns[colKey]) return null;
+                  if (!col || !doctorTable.visibleColumns[colKey]) {return null;}
                   return (
                     <ResizableHeaderCell
                       key={colKey}
@@ -582,10 +599,10 @@ export default function DoctorsManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDoctors.map((doctor: any) => (
-                <TableRow key={doctor.id} className="hover:bg-muted/50/50">
+              {filteredDoctors.map((doctor: Doctor) => (
+                <TableRow key={`${doctor.id ?? doctor.slug ?? ''}`} className="hover:bg-muted/50/50">
                   {doctorTable.visibleColumnOrder.map((colKey) => {
-                    if (!doctorTable.visibleColumns[colKey]) return null;
+                    if (!doctorTable.visibleColumns[colKey]) {return null;}
 
                     switch (colKey) {
                       case 'name':
@@ -595,7 +612,7 @@ export default function DoctorsManagement() {
                               {doctor.image ? (
                                 <img
                                   src={doctor.image}
-                                  alt={doctor.name}
+                                  alt={doctor.name || undefined}
                                   className="h-10 w-10 rounded-full object-cover flex-shrink-0 ring-2 ring-gray-100"
                                 />
                               ) : (
@@ -726,7 +743,7 @@ export default function DoctorsManagement() {
                             columnKey={colKey}
                             className="text-sm text-muted-foreground"
                           >
-                            {formatDate(doctor.createdAt)}
+                            {formatDate(doctor.createdAt ?? undefined)}
                           </FrozenTableCell>
                         );
                       case 'actions':
@@ -1041,10 +1058,10 @@ export default function DoctorsManagement() {
       <ConfirmDeleteDialog
         open={deleteConfirm.isOpen}
         onOpenChange={() => deleteConfirm.closeConfirm()}
-        itemName={deleteConfirm.item?.name}
+        itemName={deleteConfirm.item?.name || undefined}
         itemType="الطبيب"
         onConfirm={() => {
-          if (deleteConfirm.item) {
+          if (deleteConfirm.item && deleteConfirm.item.id) {
             deleteMutation.mutate({ id: deleteConfirm.item.id });
           }
         }}

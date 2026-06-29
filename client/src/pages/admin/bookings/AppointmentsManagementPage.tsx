@@ -1,3 +1,4 @@
+
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { trpc } from '@/lib/api/trpc';
@@ -97,6 +98,24 @@ import BulkUpdateDialog from '@/components/BulkUpdateDialog';
 import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
 import { appointmentStatusLabels as statusLabels } from '@/hooks/data/useStatusLabels';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type { AppointmentWithDoctor } from '@shared/types';
+
+interface Doctor {
+  id: number;
+  name: string;
+  slug: string;
+  specialty: string;
+  image: string | null;
+  bio: string | null;
+  experience: string | null;
+  languages: string | null;
+  consultationFee: string | null;
+  isVisiting: 'yes' | 'no';
+  available: 'yes' | 'no';
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
 
 export default function AppointmentsManagementPage() {
   const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
@@ -111,7 +130,7 @@ export default function AppointmentsManagementPage() {
     onError: () => toast.error('فشل في حذف الموعد'),
   });
 
-  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithDoctor | null>(null);
   const [appointmentStatusDialogOpen, setAppointmentStatusDialogOpen] = useState(false);
   const [newAppointmentStatus, setNewAppointmentStatus] = useState('');
   const [appointmentStatusNotes, setAppointmentStatusNotes] = useState('');
@@ -124,7 +143,7 @@ export default function AppointmentsManagementPage() {
   const [appointmentPageSize, setAppointmentPageSize] = useState<PageSizeValue>('100');
 
   // Filter state
-  const appointmentFilter = useFilterUtils<any>();
+  const appointmentFilter = useFilterUtils<AppointmentWithDoctor>();
   const dateRange = appointmentFilter.filters.dateRange;
   const setDateRange = appointmentFilter.filters.setDateRange;
   const appointmentSearchTerm = appointmentFilter.filters.searchTerm;
@@ -163,12 +182,12 @@ export default function AppointmentsManagementPage() {
     },
   ];
 
-  const handleApplyPreset = (filters: Record<string, any>) => {
-    if (filters.dateFilter) setDateFilter(filters.dateFilter);
-    if (filters.status) setAppointmentStatusFilter(filters.status);
-    if (filters.source) setAppointmentSourceFilter(filters.source);
-    if (filters.searchTerm !== undefined) setAppointmentSearchTerm(filters.searchTerm);
-    if (filters.doctor) setSelectedDoctor(filters.doctor);
+  const handleApplyPreset = (filters: Record<string, unknown>) => {
+    if (filters.dateFilter) {setDateFilter(filters.dateFilter as 'all' | 'today' | 'week' | 'month');}
+    if (filters.status) {setAppointmentStatusFilter(filters.status as string[]);}
+    if (filters.source) {setAppointmentSourceFilter(filters.source as string[]);}
+    if (filters.searchTerm !== undefined) {setAppointmentSearchTerm(filters.searchTerm as string);}
+    if (filters.doctor) {setSelectedDoctor(filters.doctor as string[]);}
   };
 
   const currentFilters = {
@@ -238,8 +257,8 @@ export default function AppointmentsManagementPage() {
       page: appointmentPageSize === 'all' ? 1 : appointmentPage,
       limit: appointmentLimit,
       searchTerm: debouncedAppointmentSearch,
-      dateFrom: dateRange.from.toISOString(),
-      dateTo: dateRange.to.toISOString(),
+      dateFrom: dateRange.from ? dateRange.from.toISOString() : undefined,
+      dateTo: dateRange.to ? dateRange.to.toISOString() : undefined,
       dateFilter: dateFilter !== 'all' ? (dateFilter as 'today' | 'week' | 'month') : undefined,
       doctorIds:
         selectedDoctor && selectedDoctor.length > 0 ? selectedDoctor.map(Number) : undefined,
@@ -268,11 +287,11 @@ export default function AppointmentsManagementPage() {
           dateTo: dateRange.to.toISOString(),
         },
         (old) => {
-          if (!old) return old;
+          if (!old) {return old;}
           return {
             ...old,
-            data: old.data.map((apt: any) =>
-              apt.id === variables.id ? { ...apt, status: variables.status } : apt
+            data: old.data.map((apt) =>
+              apt.id === variables.id ? { ...apt, status: variables.status as AppointmentWithDoctor['status'] } : apt
             ),
           };
         }
@@ -293,8 +312,8 @@ export default function AppointmentsManagementPage() {
             page: appointmentPageSize === 'all' ? 1 : appointmentPage,
             limit: appointmentLimit,
             searchTerm: debouncedAppointmentSearch,
-            dateFrom: dateRange.from.toISOString(),
-            dateTo: dateRange.to.toISOString(),
+            dateFrom: dateRange.from ? dateRange.from.toISOString() : undefined,
+            dateTo: dateRange.to ? dateRange.to.toISOString() : undefined,
           },
           context.previousData
         );
@@ -319,14 +338,14 @@ export default function AppointmentsManagementPage() {
   });
 
   const filteredAppointments = useMemo(() => {
-    if (!appointments) return [];
-    let filtered = [...appointments];
-    const sorted = appointmentTable.sortData(filtered, (item: any, key: string) => {
+    if (!appointments) {return [];}
+    const filtered = [...appointments];
+    const sorted = appointmentTable.sortData(filtered, (item, key) => {
       switch (key) {
         case 'date':
           return item.createdAt;
         case 'name':
-          return item.fullName || item.patientName || '';
+          return item.fullName || '';
         case 'phone':
           return item.phone;
         case 'email':
@@ -352,29 +371,29 @@ export default function AppointmentsManagementPage() {
         case 'receiptNumber':
           return item.receiptNumber;
         default:
-          return item[key];
+          return (item as Record<string, unknown>)[key];
       }
     });
     if (!appointmentTable.sortState.direction) {
       sorted.sort(
-        (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     }
     return sorted;
   }, [appointments, appointmentTable.sortState, appointmentTable.sortData]);
 
   const appointmentStats = useMemo(() => {
-    if (!appointments) return { total: 0, pending: 0, confirmed: 0, cancelled: 0 };
+    if (!appointments) {return { total: 0, pending: 0, confirmed: 0, cancelled: 0 };}
     return {
       total: appointments.length,
-      pending: appointments.filter((a: any) => a.status === 'pending').length,
-      confirmed: appointments.filter((a: any) => a.status === 'confirmed').length,
-      cancelled: appointments.filter((a: any) => a.status === 'cancelled').length,
+      pending: appointments.filter((a) => a.status === 'pending').length,
+      confirmed: appointments.filter((a) => a.status === 'confirmed').length,
+      cancelled: appointments.filter((a) => a.status === 'cancelled').length,
     };
   }, [appointments]);
 
   const handleAppointmentStatusUpdate = () => {
-    if (!selectedAppointment || !newAppointmentStatus) return;
+    if (!selectedAppointment || !newAppointmentStatus) {return;}
     updateAppointmentStatusMutation.mutate({
       id: selectedAppointment.id,
       status: newAppointmentStatus,
@@ -405,23 +424,23 @@ export default function AppointmentsManagementPage() {
       { key: 'receiptNumber', label: 'رقم السند' },
       { key: 'status', label: 'الحالة' },
     ],
-    mapToExportRow: (appointment: any) => ({
+    mapToExportRow: (appointment: AppointmentWithDoctor) => ({
       date: formatDate(appointment.appointmentDate),
-      name: appointment.name,
+      name: appointment.fullName,
       phone: appointment.phone,
       doctor: appointment.doctorName || '-',
-      specialty: appointment.specialty || '-',
-      source: SOURCE_LABELS[appointment.source] || appointment.source || '-',
+      specialty: appointment.doctorSpecialty || '-',
+      source: SOURCE_LABELS[appointment.source || ''] || appointment.source || '-',
       receiptNumber: appointment.receiptNumber || '-',
       status: statusLabels[appointment.status] || appointment.status,
     }),
-    mapToPrintRow: (appointment: any) => ({
+    mapToPrintRow: (appointment: AppointmentWithDoctor) => ({
       date: formatDate(appointment.appointmentDate),
-      name: appointment.name,
+      name: appointment.fullName,
       phone: appointment.phone,
       doctor: appointment.doctorName || '-',
-      specialty: appointment.specialty || '-',
-      source: SOURCE_LABELS[appointment.source] || appointment.source || '-',
+      specialty: appointment.doctorSpecialty || '-',
+      source: SOURCE_LABELS[appointment.source || ''] || appointment.source || '-',
       receiptNumber: appointment.receiptNumber || '-',
       status: statusLabels[appointment.status] || appointment.status,
     }),
@@ -450,7 +469,7 @@ export default function AppointmentsManagementPage() {
           selectedDoctor.length > 0
             ? selectedDoctor
                 .map((id) => {
-                  const doctor = doctors.find((d: any) => d.id.toString() === id);
+                  const doctor = doctors.find((d: Doctor) => d.id.toString() === id);
                   return doctor ? doctor.name : id;
                 })
                 .join(', ')
@@ -578,18 +597,18 @@ export default function AppointmentsManagementPage() {
               }}
               onApplyFilter={(filters) => {
                 if (filters.statusFilter)
-                  appointmentFilter.filters.setStatusFilter(filters.statusFilter);
-                else appointmentFilter.filters.setStatusFilter([]);
+                  {appointmentFilter.filters.setStatusFilter(filters.statusFilter as string[]);}
+                else {appointmentFilter.filters.setStatusFilter([]);}
                 if (filters.sourceFilter)
-                  appointmentFilter.filters.setSourceFilter(filters.sourceFilter);
-                else appointmentFilter.filters.setSourceFilter([]);
+                  {appointmentFilter.filters.setSourceFilter(filters.sourceFilter as string[]);}
+                else {appointmentFilter.filters.setSourceFilter([]);}
                 if (filters.categoryFilter)
-                  appointmentFilter.filters.setCategoryFilter(filters.categoryFilter);
-                else appointmentFilter.filters.setCategoryFilter([]);
-                if (filters.dateFilter) appointmentFilter.filters.setDateFilter(filters.dateFilter);
-                else appointmentFilter.filters.setDateFilter('all');
-                if (filters.searchTerm) appointmentFilter.filters.setSearchTerm(filters.searchTerm);
-                else appointmentFilter.filters.setSearchTerm('');
+                  {appointmentFilter.filters.setCategoryFilter(filters.categoryFilter as string[]);}
+                else {appointmentFilter.filters.setCategoryFilter([]);}
+                if (filters.dateFilter) {appointmentFilter.filters.setDateFilter(filters.dateFilter as 'all' | 'today' | 'week' | 'month');}
+                else {appointmentFilter.filters.setDateFilter('all');}
+                if (filters.searchTerm) {appointmentFilter.filters.setSearchTerm(filters.searchTerm as string);}
+                else {appointmentFilter.filters.setSearchTerm('');}
               }}
             />
           </div>
@@ -606,7 +625,7 @@ export default function AppointmentsManagementPage() {
               />
             </div>
             <MultiSelect
-              options={doctors.map((doctor: any) => ({
+              options={doctors.map((doctor: Doctor) => ({
                 value: doctor.id.toString(),
                 label: doctor.name,
               }))}
@@ -678,14 +697,14 @@ export default function AppointmentsManagementPage() {
               description="لم يتم العثور على أي مواعيد في الفترة المحددة."
             />
           ) : (
-            filteredAppointments.map((appointment: any) => (
+            filteredAppointments.map((appointment) => (
               <AppointmentCard
                 key={`appointment-${appointment.id}`}
                 appointment={appointment}
-                onViewDetails={(appointment: any) => {
+                onViewDetails={(appointment) => {
                   setSelectedAppointment(appointment);
-                  setNewAppointmentStatus(appointment.status);
-                  setAppointmentDate(appointment.appointmentDate);
+                  setNewAppointmentStatus(appointment.status || 'pending');
+                  setAppointmentDate(appointment.appointmentDate ? (appointment.appointmentDate instanceof Date ? appointment.appointmentDate.toISOString() : appointment.appointmentDate) : '');
                   setAppointmentStatusDialogOpen(true);
                 }}
                 onPrint={() => {
@@ -723,7 +742,7 @@ export default function AppointmentsManagementPage() {
                     .filter((key) => appointmentTable.visibleColumns[key])
                     .map((colKey) => {
                       const col = appointmentColumns.find((c) => c.key === colKey);
-                      if (!col) return null;
+                      if (!col) {return null;}
                       if (colKey === 'checkbox') {
                         return (
                           <ResizableHeaderCell
@@ -742,10 +761,10 @@ export default function AppointmentsManagementPage() {
                               }
                               onChange={(e) => {
                                 if (e.target.checked)
-                                  setSelectedAppointmentIds(
-                                    filteredAppointments.map((a: any) => a.id)
-                                  );
-                                else setSelectedAppointmentIds([]);
+                                  {setSelectedAppointmentIds(
+                                    filteredAppointments.map((a) => a.id)
+                                  );}
+                                else {setSelectedAppointmentIds([]);}
                               }}
                               className="rounded border-border"
                             />
@@ -812,7 +831,7 @@ export default function AppointmentsManagementPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredAppointments.map((appointment: any) => (
+                  filteredAppointments.map((appointment) => (
                     <TableRow
                       key={`appointment-${appointment.id}`}
                       className={`group ${appointment.status === 'pending' ? 'bg-amber-50/40 hover:bg-amber-50/60' : 'hover:bg-muted/30'} ${selectedAppointmentIds.includes(appointment.id) ? 'bg-blue-50/60' : ''}`}
@@ -829,14 +848,14 @@ export default function AppointmentsManagementPage() {
                                     checked={selectedAppointmentIds.includes(appointment.id)}
                                     onChange={(e) => {
                                       if (e.target.checked)
-                                        setSelectedAppointmentIds((prev) => [
+                                        {setSelectedAppointmentIds((prev) => [
                                           ...prev,
                                           appointment.id,
-                                        ]);
+                                        ]);}
                                       else
-                                        setSelectedAppointmentIds((prev) =>
+                                        {setSelectedAppointmentIds((prev) =>
                                           prev.filter((id) => id !== appointment.id)
-                                        );
+                                        );}
                                     }}
                                     className="rounded border-border"
                                   />
@@ -869,7 +888,7 @@ export default function AppointmentsManagementPage() {
                                   columnKey={colKey}
                                   className="font-medium"
                                 >
-                                  {appointment.fullName || appointment.patientName}
+                                  {appointment.fullName}
                                 </FrozenTableCell>
                               );
                             case 'phone':
@@ -930,7 +949,7 @@ export default function AppointmentsManagementPage() {
                                   columnKey={colKey}
                                   className="text-xs"
                                 >
-                                  {formatDate(appointment.preferredDate)}
+                                  {formatDate(appointment.preferredDate || '')}
                                 </FrozenTableCell>
                               );
                             case 'preferredTime':
@@ -950,7 +969,7 @@ export default function AppointmentsManagementPage() {
                                   columnKey={colKey}
                                   className="text-xs"
                                 >
-                                  {formatDate(appointment.appointmentDate)}
+                                  {formatDate(appointment.appointmentDate || '')}
                                 </FrozenTableCell>
                               );
                             case 'notes':
@@ -960,7 +979,7 @@ export default function AppointmentsManagementPage() {
                                   columnKey={colKey}
                                   className="text-xs max-w-[200px] truncate"
                                 >
-                                  {appointment.patientNotes || '-'}
+                                  {appointment.patientMessage || '-'}
                                 </FrozenTableCell>
                               );
                             case 'additionalNotes':
@@ -991,11 +1010,11 @@ export default function AppointmentsManagementPage() {
                                       variant="outline"
                                       className="text-xs font-medium"
                                       style={{
-                                        backgroundColor: SOURCE_COLORS[appointment.source]
+                                        backgroundColor: appointment.source && SOURCE_COLORS[appointment.source]
                                           ? `${SOURCE_COLORS[appointment.source]}15`
                                           : undefined,
-                                        borderColor: SOURCE_COLORS[appointment.source] || undefined,
-                                        color: SOURCE_COLORS[appointment.source] || undefined,
+                                        borderColor: appointment.source ? SOURCE_COLORS[appointment.source] : undefined,
+                                        color: appointment.source ? SOURCE_COLORS[appointment.source] : undefined,
                                       }}
                                     >
                                       {SOURCE_LABELS[appointment.source] || appointment.source}
@@ -1162,8 +1181,8 @@ export default function AppointmentsManagementPage() {
                                           size="sm"
                                           onClick={() => {
                                             setSelectedAppointment(appointment);
-                                            setNewAppointmentStatus(appointment.status);
-                                            setAppointmentDate(appointment.appointmentDate);
+                                            setNewAppointmentStatus(appointment.status || 'pending');
+                                            setAppointmentDate(appointment.appointmentDate ? (appointment.appointmentDate instanceof Date ? appointment.appointmentDate.toISOString() : appointment.appointmentDate) : '');
                                             setAppointmentStatusDialogOpen(true);
                                           }}
                                         >
@@ -1186,8 +1205,7 @@ export default function AppointmentsManagementPage() {
                                               `طبيب #${appointment.doctorId}`;
                                             printReceipt(
                                               {
-                                                fullName:
-                                                  appointment.fullName || appointment.patientName,
+                                                fullName: appointment.fullName,
                                                 phone: appointment.phone,
                                                 age: appointment.age ?? undefined,
                                                 registrationDate: new Date(
@@ -1327,7 +1345,7 @@ export default function AppointmentsManagementPage() {
                         <div className="space-y-2">
                           <p className="text-sm">
                             <span className="font-medium">المريض:</span>{' '}
-                            {selectedAppointment.patientName}
+                            {selectedAppointment.fullName}
                           </p>
                           <p className="text-sm">
                             <span className="font-medium">الهاتف:</span>{' '}
@@ -1360,15 +1378,15 @@ export default function AppointmentsManagementPage() {
                       <div className="space-y-2">
                         <p className="text-sm">
                           <span className="font-medium">المصدر:</span>{' '}
-                          {(selectedAppointment as any).source
-                            ? SOURCE_LABELS[(selectedAppointment as any).source] ||
-                              (selectedAppointment as any).source
+                          {selectedAppointment.source
+                            ? SOURCE_LABELS[selectedAppointment.source] ||
+                              selectedAppointment.source
                             : '-'}
                         </p>
-                        {selectedAppointment.patientNotes && (
+                        {selectedAppointment.patientMessage && (
                           <p className="text-sm">
                             <span className="font-medium">ملاحظات المريض:</span>{' '}
-                            {selectedAppointment.patientNotes}
+                            {selectedAppointment.patientMessage}
                           </p>
                         )}
                         <p className="text-sm">
@@ -1468,7 +1486,7 @@ export default function AppointmentsManagementPage() {
           onConfirm={(newStatus) => {
             bulkUpdateAppointmentsMutation.mutate({
               ids: selectedAppointmentIds,
-              status: newStatus as any,
+              status: newStatus as AppointmentWithDoctor['status'],
             });
           }}
           isLoading={bulkUpdateAppointmentsMutation.isPending}

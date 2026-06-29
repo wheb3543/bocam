@@ -168,7 +168,7 @@ export function AIChatBox({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedInput = input.trim();
-    if (!trimmedInput || isLoading) return;
+    if (!trimmedInput || isLoading) {return;}
 
     onSendMessage(trimmedInput);
     setInput('');

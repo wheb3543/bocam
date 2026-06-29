@@ -80,10 +80,10 @@ function transliterateArabic(text: string): string {
  * توليد slug من نص (يدعم العربية والإنجليزية)
  */
 export function generateSlugFromText(text: string): string {
-  if (!text) return '';
+  if (!text) {return '';}
 
   // تحويل الحروف العربية إلى لاتينية
-  let slug = transliterateArabic(text);
+  const slug = transliterateArabic(text);
 
   return slug
     .toLowerCase()
@@ -125,7 +125,7 @@ export function useSlugGenerator(
    */
   const autoGenerateSlug = useCallback(
     (text: string) => {
-      if (isEditing || manuallyEditedRef.current) return;
+      if (isEditing || manuallyEditedRef.current) {return;}
       const slug = generateSlugFromText(text);
       onSlugChange(slug);
     },

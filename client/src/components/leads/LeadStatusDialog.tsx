@@ -14,6 +14,7 @@ import { Phone, Mail, User, MessageSquare, Loader2 } from 'lucide-react';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { SOURCE_LABELS } from '@shared/sources';
+import type { UnifiedLead } from '@shared/types';
 
 const statusLabels: Record<string, string> = {
   new: 'جديد',
@@ -62,7 +63,7 @@ const STATUS_BUTTONS = [
 interface LeadStatusDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  lead: any | null;
+  lead: UnifiedLead | null;
   onSubmit: (status: string, notes: string) => void;
   isPending: boolean;
 }
@@ -96,7 +97,7 @@ export default function LeadStatusDialog({
   }
 
   const handleSubmit = () => {
-    if (!newStatus) return;
+    if (!newStatus) {return;}
     onSubmit(newStatus, statusNotes);
     setNewStatus('');
     setStatusNotes('');
@@ -155,7 +156,7 @@ export default function LeadStatusDialog({
                 <div>
                   <span className="text-muted-foreground">النوع:</span>{' '}
                   <span className="font-medium">
-                    {lead.type === 'general' ? 'عام' : lead.type === 'offer' ? 'عرض' : 'مخيم'}
+                    {lead.type === 'appointment' ? 'موعد طبيب' : lead.type === 'offer' ? 'عرض' : 'مخيم'}
                   </span>
                 </div>
                 <div>

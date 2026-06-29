@@ -1,3 +1,4 @@
+
 /**
  * MetaPixel - مكوّن Meta Pixel (النسخة المحسّنة)
  *
@@ -20,10 +21,19 @@ import { useLocation } from 'wouter';
 
 declare global {
   interface Window {
-    fbq: any;
-    _fbq: any;
+    fbq: FBQ;
+    _fbq: FBQ;
     FB_PIXEL_LOADED?: boolean;
   }
+}
+
+interface FBQ {
+  (event: string, ...args: unknown[]): void;
+  callMethod?: (...args: unknown[]) => void;
+  queue?: unknown[][];
+  push?: (...args: unknown[]) => void;
+  loaded?: boolean;
+  version?: string;
 }
 
 const PIXEL_ID = (import.meta.env.VITE_META_PIXEL_ID as string | undefined) || '';
@@ -44,9 +54,9 @@ function isDashboardPath(path: string): boolean {
 /** تحقق من موافقة المستخدم على الكوكيز التسويقية */
 function hasMarketingConsent(): boolean {
   try {
-    if (localStorage.getItem(COOKIE_CONSENT_KEY) !== 'true') return false;
+    if (localStorage.getItem(COOKIE_CONSENT_KEY) !== 'true') {return false;}
     const prefs = localStorage.getItem(COOKIE_PREFS_KEY);
-    if (!prefs) return false;
+    if (!prefs) {return false;}
     const parsed = JSON.parse(prefs);
     return parsed?.marketing === true;
   } catch {
@@ -70,9 +80,9 @@ async function sha256(text: string): Promise<string> {
 async function hashPhone(phone: string): Promise<string> {
   // تطبيع: إزالة المسافات والشرطات، إضافة كود الدولة إذا لم يكن موجوداً
   let normalized = phone.replace(/[\s\-()]/g, '');
-  if (normalized.startsWith('0')) normalized = '967' + normalized.slice(1);
-  else if (normalized.startsWith('7')) normalized = '967' + normalized;
-  else if (normalized.startsWith('+')) normalized = normalized.slice(1);
+  if (normalized.startsWith('0')) {normalized = '967' + normalized.slice(1);}
+  else if (normalized.startsWith('7')) {normalized = '967' + normalized;}
+  else if (normalized.startsWith('+')) {normalized = normalized.slice(1);}
   return sha256(normalized);
 }
 
@@ -84,24 +94,34 @@ async function hashPhone(phone: string): Promise<string> {
  * عند الموافقة على الكوكيز التسويقية يُستدعى fbq('consent', 'grant').
  */
 function loadPixelScript(pixelId: string): void {
-  if (window.FB_PIXEL_LOADED || !pixelId) return;
+  if (window.FB_PIXEL_LOADED || !pixelId) {return;}
   window.FB_PIXEL_LOADED = true;
 
-  (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-    if (f.fbq) return;
-    n = f.fbq = function () {
-      n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-    };
-    if (!f._fbq) f._fbq = n;
-    n.push = n;
-    n.loaded = true;
-    n.version = '2.0';
-    n.queue = [];
-    t = b.createElement(e);
+  (function (f: Window, b: Document, e: string, v: string, n?: FBQ, t?: HTMLScriptElement, s?: Element) {
+    if (f.fbq && f.fbq.loaded) {return;}
+    n = f.fbq = function (...args: unknown[]) {
+      if (n && n.callMethod) {
+        n.callMethod.apply(n, args);
+      } else if (n && n.queue) {
+        n.queue.push(args);
+      }
+    } as FBQ;
+    if (!f._fbq) {f._fbq = n;}
+    if (n) {
+      n.push = function (...args: unknown[]) {
+        if (n.queue) {n.queue.push(args);}
+      };
+      n.loaded = true;
+      n.version = '2.0';
+      n.queue = [];
+    }
+    t = b.createElement(e) as HTMLScriptElement;
     t.async = true;
     t.src = v;
     s = b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t, s);
+    if (s && s.parentNode && t) {
+      s.parentNode.insertBefore(t, s);
+    }
   })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
   // تهيئة Pixel في وضع Limited Data Use (LDU) افتراضياً
@@ -134,8 +154,8 @@ export async function updatePixelUserData(data: {
   email?: string;
   externalId?: string | number;
 }): Promise<void> {
-  if (typeof window === 'undefined' || !window.fbq || !PIXEL_ID) return;
-  if (!hasMarketingConsent()) return;
+  if (typeof window === 'undefined' || !window.fbq || !PIXEL_ID) {return;}
+  if (!hasMarketingConsent()) {return;}
 
   const userData: Record<string, string | string[]> = {};
 
@@ -298,9 +318,9 @@ export default function MetaPixel() {
   const initialized = useRef(false);
 
   useEffect(() => {
-    if (!PIXEL_ID) return;
+    if (!PIXEL_ID) {return;}
     // لا تُحمَّل Pixel في صفحات الداشبورد (موظفون فقط)
-    if (isDashboardPath(window.location.pathname)) return;
+    if (isDashboardPath(window.location.pathname)) {return;}
 
     // تحميل Pixel لجميع الزوار فور تحميل الصفحة
     if (!initialized.current) {
@@ -316,8 +336,8 @@ export default function MetaPixel() {
 
   // إرسال PageView عند كل تنقل — مع استثناء صفحات الداشبورد
   useEffect(() => {
-    if (!initialized.current || !window.fbq) return;
-    if (isDashboardPath(location)) return;
+    if (!initialized.current || !window.fbq) {return;}
+    if (isDashboardPath(location)) {return;}
     window.fbq('track', 'PageView');
   }, [location]);
 

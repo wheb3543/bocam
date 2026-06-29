@@ -1,3 +1,4 @@
+
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -27,6 +28,9 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import type { RouterOutputs } from '@/types/trpc';
+
+
 import {
   Plus,
   Search,
@@ -67,6 +71,9 @@ type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled';
 type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 // التصنيفات المدعومة في قاعدة البيانات
 type TaskCategory = 'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other';
+
+type UserEntity = RouterOutputs['users']['getAll'][number];
+type CampaignEntity = RouterOutputs['campaigns']['list'][number];
 
 interface Task {
   id: number;
@@ -244,7 +251,7 @@ export default function MediaTeamPage() {
   // فلترة المهام لعرض مهام فريق الإعلام فقط (tags = 'media')
   const tasks = useMemo(() => {
     const allTasks = tasksData || [];
-    return allTasks.filter((t: any) => t.tags === 'media');
+    return allTasks.filter((t: Task) => t.tags === 'media');
   }, [tasksData]);
 
   const users = usersData || [];
@@ -254,12 +261,12 @@ export default function MediaTeamPage() {
   const stats = useMemo(() => {
     return {
       total: tasks.length,
-      pending: tasks.filter((t: any) => t.status === 'todo').length,
-      inProgress: tasks.filter((t: any) => t.status === 'in_progress').length,
-      review: tasks.filter((t: any) => t.status === 'review').length,
-      completed: tasks.filter((t: any) => t.status === 'completed').length,
+      pending: tasks.filter((t: Task) => t.status === 'todo').length,
+      inProgress: tasks.filter((t: Task) => t.status === 'in_progress').length,
+      review: tasks.filter((t: Task) => t.status === 'review').length,
+      completed: tasks.filter((t: Task) => t.status === 'completed').length,
       overdue: tasks.filter(
-        (t: any) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed'
+        (t: Task) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed'
       ).length,
     };
   }, [tasks]);
@@ -267,10 +274,10 @@ export default function MediaTeamPage() {
   // تجميع المهام حسب الحالة للـ Kanban
   const tasksByStatus = useMemo(() => {
     return {
-      todo: tasks.filter((t: any) => t.status === 'todo'),
-      in_progress: tasks.filter((t: any) => t.status === 'in_progress'),
-      review: tasks.filter((t: any) => t.status === 'review'),
-      completed: tasks.filter((t: any) => t.status === 'completed'),
+      todo: tasks.filter((t: Task) => t.status === 'todo'),
+      in_progress: tasks.filter((t: Task) => t.status === 'in_progress'),
+      review: tasks.filter((t: Task) => t.status === 'review'),
+      completed: tasks.filter((t: Task) => t.status === 'completed'),
     };
   }, [tasks]);
 
@@ -598,7 +605,7 @@ export default function MediaTeamPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">غير محدد</SelectItem>
-              {users.map((user: any) => (
+              {users.map((user: UserEntity) => (
                 <SelectItem key={user.id} value={user.id.toString()}>
                   {user.name || user.email}
                 </SelectItem>
@@ -618,7 +625,7 @@ export default function MediaTeamPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">غير محدد</SelectItem>
-              {campaigns.map((campaign: any) => (
+              {campaigns.map((campaign: CampaignEntity) => (
                 <SelectItem key={campaign.id} value={campaign.id.toString()}>
                   {campaign.name}
                 </SelectItem>
@@ -843,7 +850,7 @@ export default function MediaTeamPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tasks.map((task: any) => {
+                    {tasks.map((task: Task) => {
                       const categoryInfo = getCategoryInfo(task.category as TaskCategory);
                       const isOverdue =
                         task.dueDate &&

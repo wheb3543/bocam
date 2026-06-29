@@ -24,11 +24,11 @@ export async function getCampaigns(filters?: { status?: string; type?: string; s
   let conditions = [];
 
   if (filters?.status) {
-    conditions.push(eq(campaigns.status, filters.status as any));
+    conditions.push(eq(campaigns.status, filters.status as 'completed' | 'draft' | 'active' | 'paused' | 'cancelled'));
   }
 
   if (filters?.type) {
-    conditions.push(eq(campaigns.type, filters.type as any));
+    conditions.push(eq(campaigns.type, filters.type as 'digital' | 'field' | 'awareness' | 'mixed'));
   }
 
   if (filters?.search) {

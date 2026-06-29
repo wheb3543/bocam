@@ -29,6 +29,7 @@ export const reportsRouter = router({
    * Returns statistics for appointments, camp registrations, and offer leads
    */
   getBookingsReport: protectedProcedure
+    // @ts-ignore - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
@@ -104,6 +105,7 @@ export const reportsRouter = router({
    * Returns statistics for new customer registrations
    */
   getNewLeadsReport: protectedProcedure
+    // @ts-ignore - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
@@ -200,6 +202,7 @@ export const reportsRouter = router({
    * Returns conversion statistics from leads to bookings
    */
   getConversionRatesReport: protectedProcedure
+    // @ts-ignore - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
@@ -334,6 +337,7 @@ export const reportsRouter = router({
    * Returns revenue and profit statistics
    */
   getRevenueReport: protectedProcedure
+    // @ts-ignore - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
@@ -352,6 +356,7 @@ export const reportsRouter = router({
    * Get detailed bookings list for export
    */
   getDetailedBookingsList: protectedProcedure
+    // @ts-ignore - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {

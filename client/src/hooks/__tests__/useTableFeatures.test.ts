@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+interface SharedTemplate {
+  id: number;
+  name: string;
+  columns: Record<string, boolean>;
+  createdByName: string;
+  [key: string]: unknown;
+}
+
 // Test the useTableFeatures hook logic without React rendering
 // We test the pure logic functions that the hook uses internally
 
@@ -183,7 +191,7 @@ describe('useTableFeatures - Core Logic', () => {
       const visibleColumnOrder = ['checkbox', 'name', 'phone', 'status'];
       
       const getLeftOffset = (colKey: string): number => {
-        if (!frozenColumns.includes(colKey)) return 0;
+        if (!frozenColumns.includes(colKey)) {return 0;}
         const frozenIndex = visibleColumnOrder.indexOf(colKey);
         let offset = 0;
         for (let i = 0; i < frozenIndex; i++) {
@@ -306,7 +314,7 @@ describe('useTableFeatures - Core Logic', () => {
       ];
       const tableKey = 'appointments';
       
-      const formatted = apiResponse.map((t: any) => ({
+      const formatted = apiResponse.map((t: SharedTemplate) => ({
         id: `shared_${tableKey}_${t.id}`,
         name: t.name,
         columns: t.columns,

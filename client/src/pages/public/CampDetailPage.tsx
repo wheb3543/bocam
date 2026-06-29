@@ -51,6 +51,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface CampRegistration {
+  id: number;
+  campId: number;
+  status: string;
+  [key: string]: unknown;
+}
+
 export default function CampDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
@@ -123,10 +130,10 @@ function CampDetailContent({ slug }: { slug: string }) {
 
   // Get available procedures from camp data
   const availableProcedures = useMemo(() => {
-    if (!camp?.availableProcedures) return [];
+    if (!camp?.availableProcedures) {return [];}
     try {
       const parsed = JSON.parse(camp.availableProcedures);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) {return parsed;}
       return camp.availableProcedures.split('\n').filter((p: string) => p.trim());
     } catch {
       return camp.availableProcedures.split('\n').filter((p: string) => p.trim());
@@ -135,15 +142,15 @@ function CampDetailContent({ slug }: { slug: string }) {
 
   // Calculate camp statistics
   const campStats = useMemo(() => {
-    if (!camp || !registrations) return null;
+    if (!camp || !registrations) {return null;}
 
-    const campRegistrations = registrations.filter((r: any) => r.campId === camp.id);
+    const campRegistrations = registrations.filter((r: CampRegistration) => r.campId === camp.id);
     const total = campRegistrations.length;
     const confirmed = campRegistrations.filter(
-      (r: any) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
+      (r: CampRegistration) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
     ).length;
     const attended = campRegistrations.filter(
-      (r: any) => r.status === 'attended' || r.status === 'completed'
+      (r: CampRegistration) => r.status === 'attended' || r.status === 'completed'
     ).length;
     const attendanceRate = confirmed > 0 ? Math.round((attended / confirmed) * 100) : 0;
 
@@ -191,7 +198,7 @@ function CampDetailContent({ slug }: { slug: string }) {
       return;
     }
 
-    if (!camp) return;
+    if (!camp) {return;}
 
     try {
       const trackingData = getCompleteTrackingData();
@@ -581,7 +588,7 @@ function CampDetailContent({ slug }: { slug: string }) {
             images = camp.galleryImages.split('\n').filter((url: string) => url.trim());
           }
 
-          if (images.length === 0) return null;
+          if (images.length === 0) {return null;}
 
           return (
             <section className="pb-6 sm:pb-10 md:pb-14">
@@ -882,7 +889,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                               selectedDay?.morningAvailable && availableDates.morningTime;
                             const hasEvening =
                               selectedDay?.eveningAvailable && availableDates.eveningTime;
-                            if (!hasMorning && !hasEvening) return null;
+                            if (!hasMorning && !hasEvening) {return null;}
                             return (
                               <div>
                                 <Label className="text-xs text-muted-foreground mb-1 block">

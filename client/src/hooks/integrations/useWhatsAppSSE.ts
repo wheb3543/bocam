@@ -11,7 +11,7 @@ import useSSE from '@/hooks/integrations/useSSE';
 export interface AccountAlertEvent {
   alertType: string;
   severity: 'critical' | 'high' | 'medium' | 'low';
-  details?: any;
+  details?: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -323,8 +323,8 @@ export function useWhatsAppSSE({
   // ── معالج الأحداث العامة (global channel) ─────────────────────────────────
   const handleGlobalEvent = useCallback((e: MessageEvent) => {
     try {
-      const eventName = (e as any).type || 'message';
-      let payload: any;
+      const eventName = (e as MessageEvent & { type?: string }).type || 'message';
+      let payload: unknown;
       try {
         payload = JSON.parse(e.data);
       } catch {
@@ -433,8 +433,8 @@ export function useWhatsAppSSE({
   // ── معالج أحداث المحادثة (conversation channel) ───────────────────────────
   const handleConversationEvent = useCallback((e: MessageEvent) => {
     try {
-      const eventName = (e as any).type || 'message';
-      let payload: any;
+      const eventName = (e as MessageEvent & { type?: string }).type || 'message';
+      let payload: unknown;
       try {
         payload = JSON.parse(e.data);
       } catch {
@@ -444,17 +444,17 @@ export function useWhatsAppSSE({
       switch (eventName) {
         case 'message_updated':
           // تحديث حالة رسالة (delivered/read/failed)
-          if (payload?.status) {
+          if ((payload as Record<string, unknown>)?.status) {
             onMessageStatusRef.current?.({
-              messageId: payload.messageId || payload.id,
-              whatsappMessageId: payload.whatsappMessageId,
-              conversationId: payload.conversationId,
-              status: payload.status,
-              deliveredAt: payload.deliveredAt,
-              readAt: payload.readAt,
-              errorCode: payload.errorCode,
-              errorTitle: payload.errorTitle,
-              timestamp: payload.timestamp || new Date().toISOString(),
+              messageId: (payload as Record<string, unknown>).messageId as string || (payload as Record<string, unknown>).id as string,
+              whatsappMessageId: (payload as Record<string, unknown>).whatsappMessageId as string | undefined,
+              conversationId: (payload as Record<string, unknown>).conversationId as number | undefined,
+              status: (payload as Record<string, unknown>).status as "sent" | "delivered" | "read" | "failed",
+              deliveredAt: (payload as Record<string, unknown>).deliveredAt as string | undefined,
+              readAt: (payload as Record<string, unknown>).readAt as string | undefined,
+              errorCode: (payload as Record<string, unknown>).errorCode as number | undefined,
+              errorTitle: (payload as Record<string, unknown>).errorTitle as string | undefined,
+              timestamp: ((payload as Record<string, unknown>).timestamp as string) || new Date().toISOString(),
             });
           }
           break;

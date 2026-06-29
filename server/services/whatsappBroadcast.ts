@@ -148,7 +148,7 @@ export async function sendBroadcast(params: {
 
 export async function getBroadcastStatus(jobId: number): Promise<{
   success: boolean;
-  status?: any;
+  status?: Record<string, unknown>;
   error?: string;
 }> {
   try {
@@ -195,11 +195,11 @@ export async function getBroadcastStats(): Promise<{
     const broadcasts = await db.select().from(whatsappBroadcasts);
     const stats = {
       totalBroadcasts: broadcasts.length,
-      completedBroadcasts: broadcasts.filter((b: any) => b.status === 'completed').length,
-      failedBroadcasts: broadcasts.filter((b: any) => b.status === 'failed').length,
-      totalMessagesSent: broadcasts.reduce((sum: number, b: any) => sum + (b.sentCount || 0), 0),
+      completedBroadcasts: broadcasts.filter((b: { status: string }) => b.status === 'completed').length,
+      failedBroadcasts: broadcasts.filter((b: { status: string }) => b.status === 'failed').length,
+      totalMessagesSent: broadcasts.reduce((sum: number, b: { sentCount?: number }) => sum + (b.sentCount || 0), 0),
       totalMessagesFailed: broadcasts.reduce(
-        (sum: number, b: any) => sum + (b.failedCount || 0),
+        (sum: number, b: { failedCount?: number }) => sum + (b.failedCount || 0),
         0
       ),
     };

@@ -26,7 +26,7 @@ export interface ExportMetadata {
 export interface PDFOptions {
   metadata: ExportMetadata;
   columns: Array<{ key: string; label: string }>;
-  data: Array<Record<string, any>>;
+  data: Array<Record<string, unknown>>;
 }
 
 /**
@@ -142,7 +142,7 @@ function addFooter(doc: PDFKit.PDFDocument, metadata: ExportMetadata) {
 function addTable(
   doc: PDFKit.PDFDocument,
   columns: Array<{ key: string; label: string }>,
-  data: Array<Record<string, any>>,
+  data: Array<Record<string, unknown>>,
   startY: number
 ) {
   const tableTop = startY;

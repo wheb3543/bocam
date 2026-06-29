@@ -15,11 +15,12 @@ import {
   LeadMobileCards,
 } from '@/components/leads';
 import FilterPresets from '@/components/FilterPresets';
+import type { UnifiedLead } from '@shared/types';
 
-const sanitizeLead = (lead: any) => {
-  if (!lead) return null;
+const sanitizeLead = (lead: UnifiedLead) => {
+  if (!lead) {return null;}
   const sanitized = { ...lead };
-  Object.keys(sanitized).forEach((key) => {
+  (Object.keys(sanitized) as Array<keyof UnifiedLead>).forEach((key) => {
     const value = sanitized[key];
     if (value === undefined || value === null || (typeof value === 'number' && isNaN(value))) {
       delete sanitized[key];
@@ -30,10 +31,10 @@ const sanitizeLead = (lead: any) => {
 
 export default function LeadsManagementPage() {
   const { user } = useAuth();
-  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [selectedLead, setSelectedLead] = useState<UnifiedLead | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
 
-  const leadsFilter = useFilterUtils<any>({
+  const leadsFilter = useFilterUtils<UnifiedLead>({
     data: undefined,
     searchFields: [],
   });
@@ -71,11 +72,11 @@ export default function LeadsManagementPage() {
     },
   ];
 
-  const handleApplyPreset = (filters: Record<string, any>) => {
-    if (filters.dateFilter) setLeadsDateFilter(filters.dateFilter);
-    if (filters.status) setLeadsStatusFilter(filters.status);
-    if (filters.source) setLeadsSourceFilter(filters.source);
-    if (filters.searchTerm !== undefined) setSearchTerm(filters.searchTerm);
+  const handleApplyPreset = (filters: Record<string, unknown>) => {
+    if (filters.dateFilter) {setLeadsDateFilter(filters.dateFilter as DateFilterPreset);}
+    if (filters.status) {setLeadsStatusFilter(filters.status as string[]);}
+    if (filters.source) {setLeadsSourceFilter(filters.source as string[]);}
+    if (filters.searchTerm !== undefined) {setSearchTerm(filters.searchTerm as string);}
   };
 
   const currentFilters = {
@@ -89,7 +90,7 @@ export default function LeadsManagementPage() {
     data: unifiedLeads,
     isLoading: leadsLoading,
     refetch: refetchLeads,
-  } = trpc.leads.list.useQuery();
+  } = trpc.leads.unifiedList.useQuery();
   const { data: stats } = trpc.leads.stats.useQuery();
 
   const updateStatusMutation = trpc.leads.updateStatus.useMutation({
@@ -105,13 +106,13 @@ export default function LeadsManagementPage() {
   });
 
   const filteredLeads = useMemo(() => {
-    if (!unifiedLeads) return [];
+    if (!unifiedLeads) {return [];}
     let filtered = unifiedLeads;
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (lead: any) =>
+        (lead) =>
           lead.fullName.toLowerCase().includes(term) ||
           lead.phone.includes(term) ||
           (lead.email && lead.email.toLowerCase().includes(term))
@@ -121,9 +122,9 @@ export default function LeadsManagementPage() {
     if (leadsDateFilter && leadsDateFilter !== 'all') {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      filtered = filtered.filter((lead: any) => {
+      filtered = filtered.filter((lead) => {
         const leadDate = new Date(lead.createdAt);
-        if (leadsDateFilter === 'today') return leadDate >= today;
+        if (leadsDateFilter === 'today') {return leadDate >= today;}
         if (leadsDateFilter === 'week') {
           const weekAgo = new Date(today);
           weekAgo.setDate(weekAgo.getDate() - 7);
@@ -139,11 +140,14 @@ export default function LeadsManagementPage() {
     }
 
     if (leadsStatusFilter && leadsStatusFilter.length > 0) {
-      filtered = filtered.filter((lead: any) => leadsStatusFilter.includes(lead.status));
+      filtered = filtered.filter((lead) => leadsStatusFilter.includes(lead.status));
     }
 
     if (leadsSourceFilter && leadsSourceFilter.length > 0) {
-      filtered = filtered.filter((lead: any) => leadsSourceFilter.includes(lead.source));
+      filtered = filtered.filter((lead) => {
+        const source = (lead as UnifiedLead).source || '';
+        return leadsSourceFilter.includes(source);
+      });
     }
 
     return filtered;
@@ -173,7 +177,7 @@ export default function LeadsManagementPage() {
 
   const handleStatusUpdate = useCallback(
     (status: string, notes: string) => {
-      if (!selectedLead || !status) return;
+      if (!selectedLead || !status) {return;}
       updateStatusMutation.mutate({
         id: selectedLead.id,
         status: status as 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer',
@@ -204,12 +208,12 @@ export default function LeadsManagementPage() {
     window.print();
   }, [filteredLeads]);
 
-  const handleUpdateStatusClick = useCallback((lead: any) => {
+  const handleUpdateStatusClick = useCallback((lead: UnifiedLead) => {
     setSelectedLead(sanitizeLead(lead));
     setStatusDialogOpen(true);
   }, []);
 
-  const handleWhatsApp = useCallback((lead: any) => {
+  const handleWhatsApp = useCallback((lead: UnifiedLead) => {
     window.open(`https://wa.me/${lead.phone.replace(/\D/g, '')}`, '_blank');
   }, []);
 
@@ -242,7 +246,7 @@ export default function LeadsManagementPage() {
   );
 
   const pendingCount = Array.isArray(unifiedLeads)
-    ? unifiedLeads.filter((l: any) => l.status === 'new').length
+    ? unifiedLeads.filter((l) => l.type !== 'appointment' && l.status === 'new' as UnifiedLead['status']).length
     : 0;
 
   return (
@@ -281,7 +285,7 @@ export default function LeadsManagementPage() {
 
         {/* Mobile Cards View */}
         <LeadMobileCards
-          leads={pagination.paginatedData}
+          leads={pagination.paginatedData as unknown as UnifiedLead[]}
           isLoading={leadsLoading}
           hasActiveFilters={hasActiveFilters}
           onClearFilters={clearAllFilters}

@@ -62,6 +62,41 @@ import { Label } from '@/components/ui/label';
 import useSSE from '@/hooks/integrations/useSSE';
 import { toast } from 'sonner';
 import { useAuth } from '@/_core/hooks/useAuth';
+import type { WhatsAppMessage as DBWhatsAppMessage, WhatsAppTemplate as DBWhatsAppTemplate, QuickReply as DBQuickReply } from '@shared/types';
+
+// Re-export database types with local aliases for convenience
+type WhatsAppMessage = DBWhatsAppMessage;
+type WhatsAppTemplate = DBWhatsAppTemplate;
+type DBQuickReplyType = DBQuickReply;
+
+// Extended Message interface for UI use (includes temp IDs and optimistic updates)
+interface Message {
+  id?: string | number | null; // Allow string for temp IDs
+  conversationId?: number | string | null;
+  whatsappMessageId?: string | null;
+  content?: string | null;
+  messageType?: DBWhatsAppMessage['messageType'];
+  direction?: DBWhatsAppMessage['direction'];
+  sentAt?: string | Date | null;
+  createdAt?: string | Date | null;
+  sentBy?: number | null;
+  metadata?: string | null;
+  mediaId?: string | null;
+  status?: DBWhatsAppMessage['status'];
+  deliveredAt?: string | Date | null;
+  readAt?: string | Date | null;
+  replyToMessageId?: string | number | null;
+  errorTitle?: string | null;
+  errorCode?: string | null;
+  reactions?: string[] | null;
+  [key: string]: unknown;
+}
+
+// Template interface for UI use
+type Template = WhatsAppTemplate;
+
+// QuickReply interface for UI use
+type QuickReply = DBQuickReplyType;
 
 // Lazy image component for performance
 const LazyImage = memo(
@@ -124,7 +159,7 @@ interface ChatWindowProps {
 
 /** Returns true if the last message was more than 24 hours ago (or never) */
 function isOutsideWindow(lastMessageAt?: string | Date | null): boolean {
-  if (!lastMessageAt) return true;
+  if (!lastMessageAt) {return true;}
   const last = new Date(lastMessageAt).getTime();
   return Date.now() - last > 24 * 60 * 60 * 1000;
 }
@@ -149,27 +184,86 @@ function getDateKey(date: Date | string): string {
   return format(d, 'yyyy-MM-dd');
 }
 
+function getMessageTimestamp(msg: Message): number {
+  return new Date(msg.sentAt ?? msg.createdAt ?? Date.now()).getTime();
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isMessage(value: unknown): value is Message {
+  if (!isRecord(value)) {return false;}
+  if ('direction' in value && value.direction !== null) {
+    if (value.direction !== 'inbound' && value.direction !== 'outbound') {return false;}
+  }
+  if ('id' in value && value.id !== null) {
+    if (typeof value.id !== 'string' && typeof value.id !== 'number') {return false;}
+  }
+  if ('content' in value && value.content !== null && typeof value.content !== 'string') {return false;}
+  if ('sentAt' in value && value.sentAt !== null) {
+    if (typeof value.sentAt !== 'string' && !(value.sentAt instanceof Date)) {return false;}
+  }
+  if ('createdAt' in value && value.createdAt !== null) {
+    if (typeof value.createdAt !== 'string' && !(value.createdAt instanceof Date)) {return false;}
+  }
+  return true;
+}
+
+// Type guard for SSE payload validation
+function isMessagePayload(value: unknown): value is Partial<Message> {
+  return isRecord(value);
+}
+
+// Type guard for message update payload
+function isMessageUpdatePayload(value: unknown): value is Partial<Message> & {
+  messageId?: string | number;
+  id?: string | number;
+  whatsappMessageId?: string;
+  status?: string;
+  deliveredAt?: string | Date;
+  readAt?: string | Date;
+} {
+  return isRecord(value);
+}
+
+// Type guard for message failed payload
+function isMessageFailedPayload(value: unknown): value is Partial<Message> & {
+  messageId?: string | number;
+  id?: string | number;
+  whatsappMessageId?: string;
+  errorTitle?: string;
+  errorCode?: string;
+} {
+  return isRecord(value);
+}
+
+// Type guard for conversation update payload
+function isConversationUpdatePayload(value: unknown): value is {
+  event?: string;
+  conversationId?: number;
+} {
+  return isRecord(value);
+}
+
 /** Merge two message arrays: DB data takes priority, then local additions */
-function mergeMessages(dbMsgs: any[], localMsgs: any[]): any[] {
-  const map = new Map<string | number, any>();
+function mergeMessages(dbMsgs: Message[], localMsgs: Message[]): Message[] {
+  const map = new Map<string | number, Message>();
   // DB messages first (authoritative)
   for (const m of dbMsgs) {
-    if (m.id != null) map.set(m.id, m);
+    if (m.id !== null && m.id !== undefined) {map.set(m.id, m);}
   }
   // Local messages: only add those not in DB (new SSE arrivals or optimistic)
   for (const m of localMsgs) {
     const key = m.id;
-    if (key != null && !map.has(key)) {
+    if (key !== null && key !== undefined && !map.has(key)) {
       map.set(key, m);
-    } else if (key != null && String(key).startsWith('temp-')) {
+    } else if (key !== null && key !== undefined && String(key).startsWith('temp-')) {
       // Keep optimistic messages that haven't been confirmed yet
       map.set(key, m);
     }
   }
-  return Array.from(map.values()).sort(
-    (a: any, b: any) =>
-      new Date(a.sentAt || a.createdAt).getTime() - new Date(b.sentAt || b.createdAt).getTime()
-  );
+  return Array.from(map.values()).sort((a, b) => getMessageTimestamp(a) - getMessageTimestamp(b));
 }
 
 export default function ChatWindow({
@@ -183,7 +277,7 @@ export default function ChatWindow({
   const userId = user?.id;
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [messageText, setMessageText] = useState('');
-  const [localMessages, setLocalMessages] = useState<any[]>([]);
+  const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [isContactTyping, setIsContactTyping] = useState(false);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Track the last conversationId to reset state on change
@@ -191,7 +285,7 @@ export default function ChatWindow({
   // تتحدث بعد إرسال قالب بنجاح لفتح نافذة الكتابة
   const [localLastMessageAt, setLocalLastMessageAt] = useState<Date | null>(null);
   // Track the message being replied to
-  const [replyToMessage, setReplyToMessage] = useState<any | null>(null);
+  const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
 
   // Track attached file
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -204,7 +298,7 @@ export default function ChatWindow({
 
   // Track forward message dialog
   const [forwardDialogOpen, setForwardDialogOpen] = useState(false);
-  const [messageToForward, setMessageToForward] = useState<any | null>(null);
+  const [messageToForward, setMessageToForward] = useState<Message | null>(null);
 
   // Track voice recording
   const [isRecording, setIsRecording] = useState(false);
@@ -226,22 +320,22 @@ export default function ChatWindow({
 
   // Track reactions
   const [reactionDialogOpen, setReactionDialogOpen] = useState(false);
-  const [messageToReact, setMessageToReact] = useState<any | null>(null);
+  const [messageToReact, setMessageToReact] = useState<Message | null>(null);
   const reactions = ['👍', '❤️', '😂', '😮', '😢', '😡'];
 
   // Track message selection
   const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedMessages, setSelectedMessages] = useState<Set<number>>(new Set());
+  const [selectedMessages, setSelectedMessages] = useState<Set<string | number>>(new Set());
 
   // Track search in conversation
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<number[]>([]);
+  const [searchResults, setSearchResults] = useState<Array<string | number>>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Track media gallery
   const [isMediaGalleryOpen, setIsMediaGalleryOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<any | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<Message | null>(null);
 
   // Track sticker library
   const [isStickerLibraryOpen, setIsStickerLibraryOpen] = useState(false);
@@ -268,13 +362,18 @@ export default function ChatWindow({
     [localMessages.length]
   );
 
+  type SSEUpdate = { eventName: string; payload: unknown };
+
   // Performance: Debounced SSE updates
   const sseUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingSSEUpdatesRef = useRef<any[]>([]);
+  const pendingSSEUpdatesRef = useRef<SSEUpdate[]>([]);
+
+  const getMessageTimestamp = (msg: Message) =>
+    new Date(msg.sentAt ?? msg.createdAt ?? Date.now()).getTime();
 
   // Performance: Process SSE updates in batches
   const processSSEUpdates = useCallback(() => {
-    if (pendingSSEUpdatesRef.current.length === 0) return;
+    if (pendingSSEUpdatesRef.current.length === 0) {return;}
 
     const updates = [...pendingSSEUpdatesRef.current];
     pendingSSEUpdatesRef.current = [];
@@ -287,31 +386,31 @@ export default function ChatWindow({
 
         // ── New inbound message (from webhook via pubsub) ──
         if (eventName === 'new_message') {
-          const msg = payload;
-          if (!msg || String(msg.conversationId) !== String(conversationId)) return;
+          const msg = isMessagePayload(payload) ? payload : undefined;
+          if (!msg || String(msg.conversationId) !== String(conversationId)) {return;}
 
           // Avoid duplicate by id or whatsappMessageId
           const isDuplicate = updated.some(
             (m) =>
-              (m.id != null && m.id === msg.id) ||
+              (m.id !== null && m.id === msg.id) ||
               (m.whatsappMessageId &&
                 msg.whatsappMessageId &&
                 m.whatsappMessageId === msg.whatsappMessageId)
           );
           if (!isDuplicate) {
-            const newMsg = { ...msg, id: msg.id ?? `sse-${Date.now()}` };
+            const newMsg: Message = { ...msg, id: msg.id ?? `sse-${Date.now()}` };
             updated = [...updated, newMsg].sort(
               (a, b) =>
-                new Date(a.sentAt || a.createdAt).getTime() -
-                new Date(b.sentAt || b.createdAt).getTime()
+                new Date(a.sentAt || a.createdAt || Date.now()).getTime() -
+                new Date(b.sentAt || b.createdAt || Date.now()).getTime()
             );
           }
         }
 
         // ── Message created (from db.ts helper for outbound) ──
         if (eventName === 'message_created') {
-          const msg = payload;
-          if (!msg || String(msg.conversationId) !== String(conversationId)) return;
+          const msg = isMessagePayload(payload) ? payload : undefined;
+          if (!msg || String(msg.conversationId) !== String(conversationId)) {return;}
 
           // Replace optimistic temp message if content matches
           const tempIdx = updated.findIndex(
@@ -326,16 +425,16 @@ export default function ChatWindow({
             // Avoid duplicate
             updated = [...updated, msg].sort(
               (a, b) =>
-                new Date(a.sentAt || a.createdAt).getTime() -
-                new Date(b.sentAt || b.createdAt).getTime()
+                new Date(a.sentAt || a.createdAt || Date.now()).getTime() -
+                new Date(b.sentAt || b.createdAt || Date.now()).getTime()
             );
           }
         }
 
         // ── Message status updated (delivered / read) ──
         if (eventName === 'message_updated') {
-          const update = payload;
-          if (!update) return;
+          const update = isMessageUpdatePayload(payload) ? payload : undefined;
+          if (!update) {return;}
           const idx = updated.findIndex(
             (m) =>
               m.id === update.messageId ||
@@ -356,8 +455,8 @@ export default function ChatWindow({
 
         // ── Message failed ──
         if (eventName === 'message_failed') {
-          const fail = payload;
-          if (!fail) return;
+          const fail = isMessageFailedPayload(payload) ? payload : undefined;
+          if (!fail) {return;}
           const idx = updated.findIndex(
             (m) =>
               m.id === fail.messageId ||
@@ -468,7 +567,7 @@ export default function ChatWindow({
   // Media gallery functions
   const getMediaMessages = useCallback(() => {
     return localMessages.filter(
-      (msg: any) => msg.messageType === 'image' || msg.messageType === 'video'
+      (msg: Message) => msg.messageType === 'image' || msg.messageType === 'video'
     );
   }, [localMessages]);
 
@@ -481,7 +580,7 @@ export default function ChatWindow({
     setSelectedMedia(null);
   }, []);
 
-  const handleDownloadMedia = useCallback((media: any) => {
+  const handleDownloadMedia = useCallback((media: Message) => {
     if (media.mediaId) {
       const link = document.createElement('a');
       link.href = `/api/whatsapp/media/${media.mediaId}`;
@@ -524,9 +623,9 @@ export default function ChatWindow({
         return;
       }
 
-      const results: number[] = [];
-      localMessages.forEach((msg: any) => {
-        if (msg.content && msg.content.toLowerCase().includes(query.toLowerCase())) {
+      const results: Array<string | number> = [];
+      localMessages.forEach((msg: Message) => {
+        if (msg.content && msg.content.toLowerCase().includes(query.toLowerCase()) && msg.id !== null && msg.id !== undefined) {
           results.push(msg.id);
         }
       });
@@ -538,7 +637,7 @@ export default function ChatWindow({
   );
 
   const handleNextSearchResult = useCallback(() => {
-    if (searchResults.length === 0) return;
+    if (searchResults.length === 0) {return;}
     setCurrentSearchIndex((prev) => (prev + 1) % searchResults.length);
     // Scroll to the next result
     setTimeout(() => {
@@ -549,7 +648,7 @@ export default function ChatWindow({
   }, [searchResults, currentSearchIndex]);
 
   const handlePreviousSearchResult = useCallback(() => {
-    if (searchResults.length === 0) return;
+    if (searchResults.length === 0) {return;}
     setCurrentSearchIndex((prev) => (prev - 1 + searchResults.length) % searchResults.length);
     // Scroll to the previous result
     setTimeout(() => {
@@ -561,7 +660,7 @@ export default function ChatWindow({
   }, [searchResults, currentSearchIndex]);
 
   const highlightText = useCallback((text: string, query: string) => {
-    if (!query.trim()) return text;
+    if (!query.trim()) {return text;}
     const regex = new RegExp(`(${query})`, 'gi');
     const parts = text.split(regex);
     return parts.map((part, i) =>
@@ -578,21 +677,21 @@ export default function ChatWindow({
   // File helper functions
   const getFileIcon = useCallback((filename: string) => {
     const ext = filename.split('.').pop()?.toLowerCase() || '';
-    if (['pdf'].includes(ext)) return <FileText className="h-8 w-8 text-red-500" />;
-    if (['doc', 'docx'].includes(ext)) return <FileText className="h-8 w-8 text-blue-500" />;
-    if (['xls', 'xlsx'].includes(ext)) return <FileText className="h-8 w-8 text-green-500" />;
-    if (['ppt', 'pptx'].includes(ext)) return <FileText className="h-8 w-8 text-orange-500" />;
-    if (['zip', 'rar', '7z'].includes(ext)) return <FileText className="h-8 w-8 text-purple-500" />;
+    if (['pdf'].includes(ext)) {return <FileText className="h-8 w-8 text-red-500" />;}
+    if (['doc', 'docx'].includes(ext)) {return <FileText className="h-8 w-8 text-blue-500" />;}
+    if (['xls', 'xlsx'].includes(ext)) {return <FileText className="h-8 w-8 text-green-500" />;}
+    if (['ppt', 'pptx'].includes(ext)) {return <FileText className="h-8 w-8 text-orange-500" />;}
+    if (['zip', 'rar', '7z'].includes(ext)) {return <FileText className="h-8 w-8 text-purple-500" />;}
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext))
-      return <Image className="h-8 w-8 text-blue-400" />;
+      {return <Image className="h-8 w-8 text-blue-400" />;}
     if (['mp4', 'avi', 'mov', 'mkv'].includes(ext))
-      return <Video className="h-8 w-8 text-purple-400" />;
-    if (['mp3', 'wav', 'ogg'].includes(ext)) return <Music className="h-8 w-8 text-pink-400" />;
+      {return <Video className="h-8 w-8 text-purple-400" />;}
+    if (['mp3', 'wav', 'ogg'].includes(ext)) {return <Music className="h-8 w-8 text-pink-400" />;}
     return <FileText className="h-8 w-8 text-gray-400" />;
   }, []);
 
   const formatFileSize = useCallback((bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) {return '0 Bytes';}
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -723,13 +822,13 @@ export default function ChatWindow({
     [extractUrl, linkPreview?.url, fetchLinkPreview]
   );
 
-  const handleReact = (msg: any) => {
+  const handleReact = (msg: Message) => {
     setMessageToReact(msg);
     setReactionDialogOpen(true);
   };
 
   const handleSendReaction = (emoji: string) => {
-    if (!messageToReact) return;
+    if (!messageToReact) {return;}
 
     // For now, just show a toast notification
     // In a real implementation, you would send this to the server
@@ -745,7 +844,7 @@ export default function ChatWindow({
     setSelectedMessages(new Set());
   }, []);
 
-  const toggleMessageSelection = useCallback((messageId: number) => {
+  const toggleMessageSelection = useCallback((messageId: string | number) => {
     setSelectedMessages((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(messageId)) {
@@ -761,7 +860,7 @@ export default function ChatWindow({
 
   const { data: messagesData, refetch: refetchMessages } =
     trpc.whatsapp.messages.listByConversation.useQuery(
-      { conversationId: conversationId ?? '' },
+      { conversationId: conversationId ?? 0 },
       { enabled: !!conversationId }
     );
 
@@ -778,7 +877,7 @@ export default function ChatWindow({
   });
 
   const handleExportConversation = useCallback(async () => {
-    if (!conversationId) return;
+    if (!conversationId) {return;}
     try {
       // For now, just export the current messages without using tRPC
       // This is a temporary solution until exportConversation is properly configured
@@ -800,14 +899,14 @@ export default function ChatWindow({
       // Add messages
       doc.setFontSize(10);
       let yPosition = 60;
-      localMessages.forEach((msg: any) => {
+      localMessages.forEach((msg: Message) => {
         if (yPosition > 270) {
           doc.addPage();
           yPosition = 20;
         }
 
         const direction = msg.direction === 'outbound' ? 'أنت' : 'العميل';
-        const time = new Date(msg.sentAt || msg.createdAt).toLocaleTimeString('ar-EG');
+        const time = new Date(msg.sentAt || msg.createdAt || Date.now()).toLocaleTimeString('ar-EG');
         const content = msg.content || '';
 
         doc.setFont('helvetica', 'bold');
@@ -856,12 +955,14 @@ export default function ChatWindow({
   });
 
   const handleDeleteSelectedMessages = useCallback(async () => {
-    if (selectedMessages.size === 0) return;
+    if (selectedMessages.size === 0) {return;}
 
     if (confirm(`هل أنت متأكد من حذف ${selectedMessages.size} رسالة؟`)) {
       const messageIds = Array.from(selectedMessages);
       for (const messageId of messageIds) {
-        await deleteMessageMutation.mutateAsync({ messageId });
+        const id = typeof messageId === 'number' ? messageId : Number(messageId);
+        if (Number.isNaN(id)) {continue;}
+        await deleteMessageMutation.mutateAsync({ messageId: id });
       }
       toast.success(`تم حذف ${selectedMessages.size} رسالة`);
       setSelectedMessages(new Set());
@@ -870,9 +971,10 @@ export default function ChatWindow({
   }, [selectedMessages, deleteMessageMutation]);
 
   const handleDeleteMedia = useCallback(
-    (media: any) => {
+    (media: Message) => {
+      if (media.id === null) {return;}
       if (confirm('هل أنت متأكد من حذف هذه الوسائط؟')) {
-        deleteMessageMutation.mutate({ messageId: media.id });
+        deleteMessageMutation.mutate({ messageId: Number(media.id) });
       }
     },
     [deleteMessageMutation]
@@ -897,8 +999,9 @@ export default function ChatWindow({
       onConversationUpdate?.();
       toast.success('تم إرسال القالب بنجاح — يمكنك الآن إرسال رسائل عادية');
     },
-    onError: (err: any) => {
-      toast.error(`فشل إرسال القالب: ${err?.message || 'خطأ غير معروف'}`);
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      toast.error(`فشل إرسال القالب: ${message || 'خطأ غير معروف'}`);
     },
   });
 
@@ -911,7 +1014,7 @@ export default function ChatWindow({
 
   // ── Send recorded audio ──────────────────────────────────────────────────────
   const sendRecordedAudio = useCallback(async () => {
-    if (!recordedAudio || !conversationId) return;
+    if (!recordedAudio || !conversationId) {return;}
 
     try {
       const audioFile = new File([recordedAudio], 'voice-message.webm', { type: 'audio/webm' });
@@ -978,7 +1081,10 @@ export default function ChatWindow({
   // ── Sync DB data into localMessages ───────────────────────────────────────
   useEffect(() => {
     if (messagesData && Array.isArray(messagesData)) {
-      setLocalMessages((prev) => mergeMessages(messagesData, prev));
+      const validatedMessages = messagesData.filter(
+        (msg: unknown): msg is Message => isMessage(msg)
+      );
+      setLocalMessages((prev) => mergeMessages(validatedMessages, prev));
     }
   }, [messagesData]);
 
@@ -988,8 +1094,8 @@ export default function ChatWindow({
     useCallback(
       (e: MessageEvent) => {
         try {
-          const eventName = (e as any).type || 'message';
-          let payload: any;
+          const eventName = (e as MessageEvent).type || 'message';
+let payload: unknown;
           try {
             payload = JSON.parse(e.data);
           } catch {
@@ -1019,7 +1125,7 @@ export default function ChatWindow({
           // ── Message created (from db.ts helper for outbound) ──
           if (eventName === 'message_created') {
             pendingSSEUpdatesRef.current.push({ eventName, payload });
-            if (sseUpdateTimeoutRef.current) clearTimeout(sseUpdateTimeoutRef.current);
+            if (sseUpdateTimeoutRef.current) {clearTimeout(sseUpdateTimeoutRef.current);}
             sseUpdateTimeoutRef.current = setTimeout(() => processSSEUpdates(), 100);
             return;
           }
@@ -1027,7 +1133,7 @@ export default function ChatWindow({
           // ── Message status updated (delivered / read) ──
           if (eventName === 'message_updated') {
             pendingSSEUpdatesRef.current.push({ eventName, payload });
-            if (sseUpdateTimeoutRef.current) clearTimeout(sseUpdateTimeoutRef.current);
+            if (sseUpdateTimeoutRef.current) {clearTimeout(sseUpdateTimeoutRef.current);}
             sseUpdateTimeoutRef.current = setTimeout(() => processSSEUpdates(), 100);
             return;
           }
@@ -1035,26 +1141,28 @@ export default function ChatWindow({
           // ── Message failed ──
           if (eventName === 'message_failed') {
             pendingSSEUpdatesRef.current.push({ eventName, payload });
-            if (sseUpdateTimeoutRef.current) clearTimeout(sseUpdateTimeoutRef.current);
+            if (sseUpdateTimeoutRef.current) {clearTimeout(sseUpdateTimeoutRef.current);}
             sseUpdateTimeoutRef.current = setTimeout(() => processSSEUpdates(), 100);
             return;
           }
 
           // ── Typing indicator ──
           if (eventName === 'typing') {
+            const typingPayload = isRecord(payload) ? payload : undefined;
             if (
-              payload?.conversationId &&
-              String(payload.conversationId) === String(conversationId)
+              typingPayload?.conversationId &&
+              String(typingPayload.conversationId) === String(conversationId)
             ) {
               setIsContactTyping(true);
-              if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+              if (typingTimeoutRef.current) {clearTimeout(typingTimeoutRef.current);}
               typingTimeoutRef.current = setTimeout(() => setIsContactTyping(false), 4000);
             }
             return;
           }
 
           // ── Conversation updated ──
-          if (eventName === 'conversation_updated' || payload?.event === 'conversation_updated') {
+          const convUpdatePayload = isConversationUpdatePayload(payload) ? payload : undefined;
+          if (eventName === 'conversation_updated' || convUpdatePayload?.event === 'conversation_updated') {
             onConversationUpdate?.();
           }
         } catch (_) {}
@@ -1065,8 +1173,8 @@ export default function ChatWindow({
 
   useEffect(() => {
     return () => {
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+      if (typingTimeoutRef.current) {clearTimeout(typingTimeoutRef.current);}
+      if (recordingIntervalRef.current) {clearInterval(recordingIntervalRef.current);}
       if (mediaRecorderRef.current && isRecording) {
         mediaRecorderRef.current.stop();
       }
@@ -1079,7 +1187,7 @@ export default function ChatWindow({
 
   // Scroll when messages change
   useEffect(() => {
-    if (localMessages.length > 0) scrollToBottom();
+    if (localMessages.length > 0) {scrollToBottom();}
   }, [localMessages.length, scrollToBottom]);
 
   const getStatusIcon = (status: string) => {
@@ -1097,7 +1205,7 @@ export default function ChatWindow({
     }
   };
 
-  const getMessageTypeIcon = (messageType: string) => {
+  const getMessageTypeIcon = (messageType?: string) => {
     switch (messageType) {
       case 'image':
         return <Image className="h-4 w-4" />;
@@ -1131,8 +1239,8 @@ export default function ChatWindow({
   };
 
   const handleSend = useCallback(async () => {
-    if (!messageText.trim() && !attachedFile) return;
-    if (!conversationId) return;
+    if (!messageText.trim() && !attachedFile) {return;}
+    if (!conversationId) {return;}
 
     let mediaId = null;
     let messageType: 'text' | 'image' | 'document' | 'video' | 'audio' = 'text';
@@ -1191,10 +1299,11 @@ export default function ChatWindow({
     };
     setLocalMessages((prev) => [...prev, optimistic]);
     scrollToBottom();
+    const replyToMessageId = typeof replyToMessage?.id === 'number' ? replyToMessage.id : undefined;
     sendMessageMutation.mutate({
       conversationId,
       message: messageText.trim(),
-      replyToMessageId: replyToMessage?.id || undefined,
+      replyToMessageId,
       mediaId: mediaId || undefined,
       messageType,
     });
@@ -1213,20 +1322,20 @@ export default function ChatWindow({
     scrollToBottom,
   ]);
 
-  const handleReply = (msg: any) => {
+  const handleReply = (msg: Message) => {
     setReplyToMessage(msg);
     // Focus on textarea
     document.querySelector('textarea')?.focus();
   };
 
-  const handleDelete = (msg: any) => {
-    if (!msg.id) return;
+  const handleDelete = (msg: Message) => {
+    if (msg.id === null) {return;}
     if (confirm('هل أنت متأكد من حذف هذه الرسالة؟')) {
-      deleteMessageMutation.mutate({ messageId: msg.id });
+      deleteMessageMutation.mutate({ messageId: Number(msg.id) });
     }
   };
 
-  const handleForward = (msg: any) => {
+  const handleForward = (msg: Message) => {
     if (!msg.content) {
       toast.error('لا يمكن إعادة توجيه رسالة فارغة');
       return;
@@ -1237,13 +1346,18 @@ export default function ChatWindow({
   };
 
   const handleForwardToConversation = async (targetConversationId: number) => {
-    if (!messageToForward) return;
+    if (!messageToForward) {return;}
 
     try {
+      const forwardableTypes = ['image', 'video', 'audio', 'document', 'template'] as const;
+      const messageType = forwardableTypes.includes(messageToForward.messageType as 'image' | 'video' | 'audio' | 'document' | 'template')
+        ? (messageToForward.messageType as 'image' | 'video' | 'audio' | 'document' | 'template')
+        : 'text';
+
       await sendMessageMutation.mutateAsync({
         conversationId: targetConversationId,
-        message: messageToForward.content,
-        messageType: messageToForward.messageType || 'text',
+        message: messageToForward.content || '',
+        messageType,
       });
 
       toast.success('تم إعادة توجيه الرسالة بنجاح');
@@ -1276,7 +1390,7 @@ export default function ChatWindow({
       toast.error('يرجى إدخال الرسالة وتاريخ الجدولة');
       return;
     }
-    if (!conversationId) return;
+    if (!conversationId) {return;}
 
     // Save scheduled message to local storage for now
     const scheduledMsg = {
@@ -1306,7 +1420,7 @@ export default function ChatWindow({
     headerText?: string | null;
     footerText?: string | null;
   }) => {
-    if (!conversationId) return;
+    if (!conversationId) {return;}
     if (!phone) {
       toast.error('لا يوجد رقم هاتف لهذه المحادثة');
       return;
@@ -1391,7 +1505,7 @@ export default function ChatWindow({
             <div style={{ height: visibleRange.start * 100 }} />
             {localMessages
               .slice(visibleRange.start, visibleRange.end)
-              .map((msg: any, idx: number) => {
+              .map((msg: Message, idx: number) => {
                 // inbound = رسالة من العميل → تظهر على اليمين (في RTL)
                 // outbound = رسالة من الموظف → تظهر على اليسار (في RTL)
                 const isOutbound = msg.direction === 'outbound';
@@ -1399,18 +1513,20 @@ export default function ChatWindow({
                 // Get sender name for outbound messages
                 const senderName =
                   isOutbound && msg.sentBy
-                    ? activeUsers?.find((u: any) => u.id === msg.sentBy)?.name || 'موظف'
+                    ? activeUsers?.find((u) => u.id === msg.sentBy)?.name || 'موظف'
                     : null;
 
                 // Get message date for separator
-                const msgDate = new Date(msg.sentAt || msg.createdAt);
+                const msgDate = new Date(msg.sentAt ?? msg.createdAt ?? Date.now());
                 const prevMsg = idx > 0 ? localMessages[idx - 1] : null;
-                const prevDate = prevMsg ? new Date(prevMsg.sentAt || prevMsg.createdAt) : null;
+                const prevDate = prevMsg
+                  ? new Date(prevMsg.sentAt ?? prevMsg.createdAt ?? Date.now())
+                  : null;
                 const showDateSeparator = !prevDate || getDateKey(msgDate) !== getDateKey(prevDate);
 
                 // Check if this message is a search result
-                const isSearchResult = searchResults.includes(msg.id);
-                const isCurrentSearchResult = searchResults[currentSearchIndex] === msg.id;
+                const isSearchResult = msg.id !== null && msg.id !== undefined && searchResults.includes(msg.id);
+                const isCurrentSearchResult = msg.id !== null && searchResults[currentSearchIndex] === msg.id;
 
                 return (
                   <React.Fragment key={msg.id || `${idx}`}>
@@ -1430,10 +1546,10 @@ export default function ChatWindow({
                       {isSelectionMode && (
                         <div className="flex items-center justify-center px-2">
                           <button
-                            onClick={() => toggleMessageSelection(msg.id)}
+                            onClick={() => msg.id !== null && msg.id !== undefined && toggleMessageSelection(msg.id)}
                             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                           >
-                            {selectedMessages.has(msg.id) ? (
+                            {selectedMessages.has(msg.id ?? '') ? (
                               <CheckSquare className="h-5 w-5 text-blue-600" />
                             ) : (
                               <Square className="h-5 w-5 text-gray-400" />
@@ -1491,14 +1607,37 @@ export default function ChatWindow({
                         {/* عرض رسائل القالب مع الأزرار */}
                         {msg.messageType === 'template' ? (
                           (() => {
-                            let meta: any = null;
+                            type TemplateButton = {
+                              type?: string;
+                              text: string;
+                              title?: string;
+                            };
+
+                            let meta: Record<string, unknown> | null = null;
                             try {
                               meta = msg.metadata ? JSON.parse(msg.metadata) : null;
-                            } catch {}
-                            const buttons: Array<{ type: string; text: string }> =
-                              meta?.buttons || [];
-                            const headerText = meta?.headerText;
-                            const footerText = meta?.footerText;
+                            } catch {
+                              meta = null;
+                            }
+
+                            const buttons: TemplateButton[] = Array.isArray(meta?.buttons)
+                              ? (meta.buttons as unknown[])
+                                  .filter(
+                                    (button): button is TemplateButton =>
+                                      typeof button === 'object' &&
+                                      button !== null &&
+                                      'text' in button &&
+                                      typeof button.text === 'string'
+                                  )
+                                  .map((button) => ({
+                                    type: button.type,
+                                    text: button.text,
+                                    title: (button as TemplateButton).title,
+                                  }))
+                              : [];
+
+                            const headerText = typeof meta?.headerText === 'string' ? meta.headerText : undefined;
+                            const footerText = typeof meta?.footerText === 'string' ? meta.footerText : undefined;
                             return (
                               <div>
                                 {/* Header */}
@@ -1534,7 +1673,7 @@ export default function ChatWindow({
                                 {/* Buttons */}
                                 {buttons.length > 0 && (
                                   <div className="mt-2 flex flex-col gap-1">
-                                    {buttons.map((btn: any, i: number) => (
+                                    {buttons.map((btn: TemplateButton, i: number) => (
                                       <div
                                         key={i}
                                         className={`text-center text-[12px] font-medium py-1.5 px-3 rounded border cursor-default select-none ${
@@ -1543,7 +1682,7 @@ export default function ChatWindow({
                                             : 'border-white/40 text-white bg-white/10'
                                         }`}
                                       >
-                                        {btn.text || btn.title || btn}
+                                        {btn.text || btn.title || ''}
                                       </div>
                                     ))}
                                   </div>
@@ -1570,7 +1709,7 @@ export default function ChatWindow({
                                   : 'border-white/40 text-white bg-white/20'
                               }`}
                             >
-                              {msg.content
+                              {(msg.content ?? '')
                                 .replace(/^🔘\s*/, '')
                                 .replace(/^📋\s*/, '')
                                 .replace(/\s*\(ID:.*\)$/, '')}
@@ -1582,7 +1721,7 @@ export default function ChatWindow({
                             {msg.mediaId ? (
                               <LazyImage
                                 src={`/api/whatsapp/media/${msg.mediaId}`}
-                                alt={msg.content}
+                                alt={msg.content ?? ''}
                                 className="max-w-full h-auto rounded"
                               />
                             ) : (
@@ -1628,7 +1767,7 @@ export default function ChatWindow({
                           /* عرض الملفات */
                           <div>
                             <div className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                              {getFileIcon(msg.content)}
+                              {getFileIcon(msg.content ?? '')}
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">{msg.content}</p>
                                 {msg.metadata &&
@@ -1668,7 +1807,7 @@ export default function ChatWindow({
                                       onClick={() => {
                                         const link = document.createElement('a');
                                         link.href = `/api/whatsapp/media/${msg.mediaId}`;
-                                        link.download = msg.content;
+                                        link.download = msg.content ?? 'file';
                                         link.click();
                                       }}
                                       title="تحميل"
@@ -1869,14 +2008,14 @@ export default function ChatWindow({
                             className="whitespace-pre-wrap break-words leading-relaxed"
                             style={{ fontSize: `${messageFontSize}px` }}
                           >
-                            {searchQuery ? highlightText(msg.content, searchQuery) : msg.content}
+                            {searchQuery ? highlightText(msg.content ?? '', searchQuery) : msg.content ?? ''}
                           </div>
                         )}
                         <div
                           className={`flex items-center justify-between mt-1 text-[10px] sm:text-xs ${isOutbound ? 'text-muted-foreground' : 'text-white/80'}`}
                         >
                           <span>
-                            {new Date(msg.sentAt || msg.createdAt).toLocaleTimeString('ar-EG', {
+                            {new Date(msg.sentAt ?? msg.createdAt ?? Date.now()).toLocaleTimeString('ar-EG', {
                               hour: '2-digit',
                               minute: '2-digit',
                             })}
@@ -2037,7 +2176,7 @@ export default function ChatWindow({
             <div className="flex items-center gap-2 text-xs sm:text-sm">
               <Reply className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
               <span className="text-blue-700 dark:text-blue-300 truncate max-w-[150px] sm:max-w-[200px]">
-                رد على: {replyToMessage.content.substring(0, 30)}...
+                رد على: {replyToMessage.content ? `${replyToMessage.content.substring(0, 30)}...` : 'رسالة'}
               </span>
             </div>
             <Button
@@ -2171,8 +2310,8 @@ export default function ChatWindow({
                 {!templates || templates.length === 0 ? (
                   <DropdownMenuItem disabled>لا توجد قوالب متاحة</DropdownMenuItem>
                 ) : (
-                  (templates as any[])
-                    .filter((t) => t.isActive)
+                  templates
+                    .filter((t) => t.isActive === 1)
                     .map((t) => (
                       <DropdownMenuItem
                         key={t.id}
@@ -2402,12 +2541,12 @@ export default function ChatWindow({
                         </div>
                       ) : (
                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                          {getMediaMessages().map((media: any) => (
+                          {getMediaMessages().map((media: Message) => (
                             <div key={media.id} className="relative group">
                               {media.messageType === 'image' ? (
                                 <img
                                   src={`/api/whatsapp/media/${media.mediaId}`}
-                                  alt={media.content}
+                                  alt={media.content ?? ''}
                                   className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => setSelectedMedia(media)}
                                 />
@@ -2461,7 +2600,7 @@ export default function ChatWindow({
                         {selectedMedia.messageType === 'image' ? (
                           <img
                             src={`/api/whatsapp/media/${selectedMedia.mediaId}`}
-                            alt={selectedMedia.content}
+                            alt={selectedMedia.content ?? ''}
                             className="w-full max-h-[60vh] object-contain rounded-lg"
                           />
                         ) : (
@@ -2654,8 +2793,8 @@ export default function ChatWindow({
                     {!quickReplies || quickReplies.length === 0 ? (
                       <DropdownMenuItem disabled>لا توجد ردود سريعة</DropdownMenuItem>
                     ) : (
-                      (quickReplies as any[])
-                        .filter((r) => r.isActive)
+                      quickReplies
+                        .filter((r) => r.isActive === 1)
                         .map((r) => (
                           <DropdownMenuItem
                             key={r.id}
@@ -2687,7 +2826,7 @@ export default function ChatWindow({
                     {!templates || templates.length === 0 ? (
                       <DropdownMenuItem disabled>لا توجد قوالب متاحة</DropdownMenuItem>
                     ) : (
-                      (templates as any[])
+                      (templates as Template[])
                         .filter((t) => t.isActive)
                         .map((t) => (
                           <DropdownMenuItem

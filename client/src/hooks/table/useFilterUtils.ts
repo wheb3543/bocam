@@ -163,11 +163,11 @@ export function useFilterUtils<T>(config?: Partial<FilterConfig<T>>): UseFilterU
   // ─── Active Filter Count ─────────────────────────────────────────────────
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (debouncedSearch) count++;
-    if (statusFilter.length > 0) count++;
-    if (sourceFilter.length > 0) count++;
-    if (categoryFilter.length > 0) count++;
-    if (dateFilter !== 'all') count++;
+    if (debouncedSearch) {count++;}
+    if (statusFilter.length > 0) {count++;}
+    if (sourceFilter.length > 0) {count++;}
+    if (categoryFilter.length > 0) {count++;}
+    if (dateFilter !== 'all') {count++;}
     return count;
   }, [debouncedSearch, statusFilter, sourceFilter, categoryFilter, dateFilter]);
 
@@ -184,7 +184,7 @@ export function useFilterUtils<T>(config?: Partial<FilterConfig<T>>): UseFilterU
   // ─── Filtering Logic ────────────────────────────────────────────────────
   const filteredData = useMemo(() => {
     const data = config?.data;
-    if (!data) return [];
+    if (!data) {return [];}
 
     let filtered = [...data];
 
@@ -194,7 +194,7 @@ export function useFilterUtils<T>(config?: Partial<FilterConfig<T>>): UseFilterU
     if (catFilter.length > 0 && getCat) {
       filtered = filtered.filter((item) => {
         const val = getCat(item);
-        return val != null && catFilter.includes(val);
+        return val !== null && val !== undefined && catFilter.includes(val);
       });
     }
 
@@ -204,7 +204,7 @@ export function useFilterUtils<T>(config?: Partial<FilterConfig<T>>): UseFilterU
     if (srcFilter.length > 0 && getSrc) {
       filtered = filtered.filter((item) => {
         const val = getSrc(item);
-        return val != null && srcFilter.includes(val);
+        return val !== null && val !== undefined && srcFilter.includes(val);
       });
     }
 
@@ -214,7 +214,7 @@ export function useFilterUtils<T>(config?: Partial<FilterConfig<T>>): UseFilterU
     if (statFilter.length > 0 && getStat) {
       filtered = filtered.filter((item) => {
         const val = getStat(item);
-        return val != null && statFilter.includes(val);
+        return val !== null && val !== undefined && statFilter.includes(val);
       });
     }
 
@@ -226,7 +226,7 @@ export function useFilterUtils<T>(config?: Partial<FilterConfig<T>>): UseFilterU
       filtered = filtered.filter((item) =>
         searchFields.some((accessor) => {
           const val = accessor(item);
-          return val != null && val.toLowerCase().includes(lowerSearch);
+          return val !== null && val !== undefined && val.toLowerCase().includes(lowerSearch);
         })
       );
     }
@@ -302,7 +302,7 @@ export function applyDefaultSort<T>(
   sortDirection: string | null | undefined,
   getCreatedAt: (item: T) => string | Date | null | undefined
 ): T[] {
-  if (sortDirection) return data;
+  if (sortDirection) {return data;}
 
   return [...data].sort((a, b) => {
     const aDate = new Date(getCreatedAt(a) || 0).getTime();

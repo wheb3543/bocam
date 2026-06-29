@@ -13,6 +13,12 @@ import { trpc } from '@/lib/api/trpc';
 import { useMemo } from 'react';
 import { useLocation } from 'wouter';
 
+interface Request {
+  id?: number;
+  type?: string;
+  [key: string]: unknown;
+}
+
 export default function PendingRequestsNotification() {
   const [, setLocation] = useLocation();
 
@@ -21,7 +27,7 @@ export default function PendingRequestsNotification() {
 
   // Get last 5 pending requests
   const pendingRequests = useMemo(() => {
-    if (!unifiedLeads) return [];
+    if (!unifiedLeads) {return [];}
 
     const pending = unifiedLeads.filter((lead) => lead.status === 'pending');
 
@@ -32,11 +38,11 @@ export default function PendingRequestsNotification() {
   }, [unifiedLeads]);
 
   const totalPending = useMemo(() => {
-    if (!unifiedLeads) return 0;
+    if (!unifiedLeads) {return 0;}
     return unifiedLeads.filter((lead) => lead.status === 'pending').length;
   }, [unifiedLeads]);
 
-  const handleRequestClick = (request: any) => {
+  const handleRequestClick = (request: Request) => {
     // Navigate to bookings management page
     // The page will need to handle highlighting the selected request
     setLocation(`/admin/bookings?id=${request.id}&type=${request.type}`);

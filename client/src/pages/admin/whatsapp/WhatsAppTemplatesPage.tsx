@@ -1,5 +1,15 @@
 import { useState, useMemo, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
+import type { WhatsappTemplateQuality } from '@shared/types';
+
+type LucideIcon = React.ComponentType<{ className?: string }>;
+
+interface TemplateButton {
+  type?: string;
+  text?: string;
+  [key: string]: unknown;
+}
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,13 +101,13 @@ interface Template {
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status?: string | null }) {
   if (!status)
-    return (
+    {return (
       <Badge variant="outline" className="text-[10px] gap-1">
         <Clock className="h-2.5 w-2.5" />
         غير محدد
       </Badge>
-    );
-  const map: Record<string, { label: string; icon: any; className: string }> = {
+    );}
+  const map: Record<string, { label: string; icon: LucideIcon; className: string }> = {
     APPROVED: {
       label: 'معتمد',
       icon: CheckCircle2,
@@ -141,7 +151,7 @@ const AUTO_TEMPLATES: Record<string, string> = {
 
 // ─── Usage Badge ──────────────────────────────────────────────────────────────
 function UsageBadge({ metaName }: { metaName?: string | null }) {
-  if (!metaName || !AUTO_TEMPLATES[metaName]) return null;
+  if (!metaName || !AUTO_TEMPLATES[metaName]) {return null;}
   return (
     <Badge
       variant="outline"
@@ -202,7 +212,7 @@ function WhatsAppPreview({ template }: { template: Template }) {
         )}
         {buttons.length > 0 && (
           <div className="mt-3 space-y-2">
-            {buttons.map((button: any, index: number) => (
+            {buttons.map((button: TemplateButton, index: number) => (
               <button
                 key={index}
                 className={`w-full py-2 px-3 rounded-lg text-xs font-medium ${
@@ -389,11 +399,12 @@ function WhatsAppTemplatesContent() {
 
   // Mutations
   const syncFromMetaMutation = trpc.whatsapp.templates.syncFromMeta.useMutation({
-    onSuccess: (result: any) => {
-      toast.success(result.message || `تمت المزامنة: ${result.synced} قالب جديد`);
+    onSuccess: (result: unknown) => {
+      const message = (result as { message?: string; synced?: number }).message || `تمت المزامنة: ${(result as { synced?: number }).synced} قالب جديد`;
+      toast.success(message);
       refetch();
     },
-    onError: (error: any) => toast.error(`فشل المزامنة: ${error?.message || 'خطأ'}`),
+    onError: (error: unknown) => toast.error(`فشل المزامنة: ${(error as { message?: string })?.message || 'خطأ'}`),
   });
 
   const createMutation = trpc.whatsapp.templates.create.useMutation({
@@ -403,7 +414,7 @@ function WhatsAppTemplatesContent() {
       resetForm();
       refetch();
     },
-    onError: (error: any) => toast.error(`فشل إنشاء القالب: ${error?.message || 'خطأ'}`),
+    onError: (error: unknown) => toast.error(`فشل إنشاء القالب: ${(error as { message?: string })?.message || 'خطأ'}`),
   });
 
   const updateMutation = trpc.whatsapp.templates.update.useMutation({
@@ -413,7 +424,7 @@ function WhatsAppTemplatesContent() {
       resetForm();
       refetch();
     },
-    onError: (error: any) => toast.error(`فشل تحديث القالب: ${error?.message || 'خطأ'}`),
+    onError: (error: unknown) => toast.error(`فشل تحديث القالب: ${(error as { message?: string })?.message || 'خطأ'}`),
   });
 
   // SSE: تحديث فوري عند وصول أحداث القوالب الجديدة
@@ -467,7 +478,7 @@ function WhatsAppTemplatesContent() {
       toast.success('تم حذف القالب');
       refetch();
     },
-    onError: (error: any) => toast.error(`فشل الحذف: ${error?.message || 'خطأ'}`),
+    onError: (error: unknown) => toast.error(`فشل الحذف: ${(error as { message?: string })?.message || 'خطأ'}`),
   });
 
   const sendTemplateMutation = trpc.whatsapp.sendTemplate.useMutation({
@@ -476,7 +487,7 @@ function WhatsAppTemplatesContent() {
       setIsTestOpen(false);
       setTestPhone('');
     },
-    onError: (error: any) => toast.error(`فشل الإرسال: ${error?.message || 'خطأ'}`),
+    onError: (error: unknown) => toast.error(`فشل الإرسال: ${(error as { message?: string })?.message || 'خطأ'}`),
   });
 
   const resetForm = () => {
@@ -496,7 +507,7 @@ function WhatsAppTemplatesContent() {
   };
 
   const handleUpdate = () => {
-    if (!selectedTemplate) return;
+    if (!selectedTemplate) {return;}
     updateMutation.mutate({
       id: selectedTemplate.id,
       name: name.trim(),
@@ -542,7 +553,7 @@ function WhatsAppTemplatesContent() {
       toast.error('يرجى إدخال رقم الهاتف');
       return;
     }
-    if (!selectedTemplate) return;
+    if (!selectedTemplate) {return;}
     sendTemplateMutation.mutate({
       phone: testPhone,
       templateName: selectedTemplate.metaName || selectedTemplate.name,
@@ -552,7 +563,7 @@ function WhatsAppTemplatesContent() {
 
   // Stats
   const stats = useMemo(() => {
-    if (!templates) return { total: 0, approved: 0, pending: 0, rejected: 0 };
+    if (!templates) {return { total: 0, approved: 0, pending: 0, rejected: 0 };}
     return {
       total: templates.length,
       approved: templates.filter((t: Template) => t.metaStatus === 'APPROVED').length,
@@ -565,9 +576,9 @@ function WhatsAppTemplatesContent() {
   const filteredTemplates = useMemo(() => {
     let result = templates || [];
     if (filterStatus !== 'all')
-      result = result.filter((t: Template) => t.metaStatus === filterStatus);
+      {result = result.filter((t: Template) => t.metaStatus === filterStatus);}
     if (filterCategory !== 'all')
-      result = result.filter((t: Template) => t.category === filterCategory);
+      {result = result.filter((t: Template) => t.category === filterCategory);}
     if (searchQuery) {
       result = result.filter(
         (t: Template) =>
@@ -611,7 +622,7 @@ function WhatsAppTemplatesContent() {
             open={isCreateOpen}
             onOpenChange={(v) => {
               setIsCreateOpen(v);
-              if (!v) resetForm();
+              if (!v) {resetForm();}
             }}
           >
             <DialogTrigger asChild>
@@ -906,7 +917,7 @@ function WhatsAppTemplatesContent() {
                       </tr>
                     </thead>
                     <tbody>
-                      {templateQualityQuery.data.map((record: any) => (
+                      {templateQualityQuery.data.map((record: WhatsappTemplateQuality) => (
                         <tr key={record.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4">
                             {new Date(record.createdAt).toLocaleString('ar-SA')}
@@ -945,7 +956,7 @@ function WhatsAppTemplatesContent() {
         open={isEditOpen}
         onOpenChange={(v) => {
           setIsEditOpen(v);
-          if (!v) resetForm();
+          if (!v) {resetForm();}
         }}
       >
         <DialogContent className="sm:max-w-lg" dir="rtl">
@@ -1061,7 +1072,7 @@ function WhatsAppTemplatesContent() {
         open={isTestOpen}
         onOpenChange={(v) => {
           setIsTestOpen(v);
-          if (!v) setTestPhone('');
+          if (!v) {setTestPhone('');}
         }}
       >
         <DialogContent className="sm:max-w-sm" dir="rtl">

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as db from '../../db';
 
@@ -12,7 +13,7 @@ describe('WhatsApp Router Procedures', () => {
   describe('markAsRead', () => {
     it('should update conversation unreadCount to 0', async () => {
       const mockUpdate = vi.fn().mockResolvedValue({ success: true });
-      (db.updateWhatsAppConversation as any).mockImplementation(mockUpdate);
+      (db.updateWhatsAppConversation as Record<string, unknown>).mockImplementation(mockUpdate);
 
       // Simulate the procedure
       const conversationId = 123;
@@ -28,7 +29,7 @@ describe('WhatsApp Router Procedures', () => {
         { id: 1, customerName: 'أحمد', phoneNumber: '967712345678', unreadCount: 2 },
         { id: 2, customerName: 'فاطمة', phoneNumber: '967712345679', unreadCount: 0 },
       ];
-      (db.getAllWhatsAppConversations as any).mockResolvedValue(mockConversations);
+      (db.getAllWhatsAppConversations as Record<string, unknown>).mockResolvedValue(mockConversations);
 
       const result = await db.getAllWhatsAppConversations();
 
@@ -42,7 +43,7 @@ describe('WhatsApp Router Procedures', () => {
       const mockResults = [
         { id: 1, customerName: 'أحمد', phoneNumber: '967712345678', unreadCount: 0 },
       ];
-      (db.searchWhatsAppConversations as any).mockResolvedValue(mockResults);
+      (db.searchWhatsAppConversations as Record<string, unknown>).mockResolvedValue(mockResults);
 
       const result = await db.searchWhatsAppConversations('أحمد');
 
@@ -53,7 +54,7 @@ describe('WhatsApp Router Procedures', () => {
 
   describe('unreadCount', () => {
     it('should return count of unread conversations', async () => {
-      (db.getUnreadWhatsAppConversationsCount as any).mockResolvedValue(5);
+      (db.getUnreadWhatsAppConversationsCount as Record<string, unknown>).mockResolvedValue(5);
 
       const result = await db.getUnreadWhatsAppConversationsCount();
 

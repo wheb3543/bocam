@@ -1,5 +1,31 @@
+
 import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/api/trpc';
+
+interface Doctor {
+  id?: number;
+  name?: string | null;
+  specialty?: string | null;
+  procedures?: string | null;
+  [key: string]: unknown;
+}
+
+interface Offer {
+  id?: number;
+  title?: string | null;
+  [key: string]: unknown;
+}
+
+interface Camp {
+  id?: number;
+  name?: string | null;
+  availableProcedures?: string | null;
+  [key: string]: unknown;
+}
+
+type RegistrationType = 'lead' | 'appointment' | 'offer' | 'camp';
+type RegistrationStatus = 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer';
+
 import { processPhoneInput, validateYemeniPhone } from '@/hooks/form/usePhoneFormat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,7 +124,7 @@ export default function ManualRegistrationForm() {
   const hasError = doctorsError || offersError || campsError;
 
   // Get selected doctor's procedures
-  const selectedDoctor = doctors?.find((d: any) => d.id.toString() === doctorId);
+  const selectedDoctor = doctors?.find((d: Doctor) => d.id?.toString() === doctorId);
   const doctorProcedures = selectedDoctor?.procedures
     ? selectedDoctor.procedures
         .split(',')
@@ -107,21 +133,21 @@ export default function ManualRegistrationForm() {
     : [];
 
   // Get selected camp's procedures
-  const selectedCamp = camps?.find((c: any) => c.id.toString() === campId);
+  const selectedCamp = camps?.find((c: Camp) => c.id?.toString() === campId);
   const availableCampProcedures = (() => {
-    if (!selectedCamp?.availableProcedures) return [];
+    if (!selectedCamp?.availableProcedures) {return [];}
     const raw = selectedCamp.availableProcedures;
     // Try JSON parse first (array format)
     try {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed.map((p: string) => p.trim()).filter(Boolean);
+      if (Array.isArray(parsed)) {return parsed.map((p: string) => p.trim()).filter(Boolean);}
     } catch {}
     // Try newline-separated
     if (raw.includes('\n'))
-      return raw
+      {return raw
         .split('\n')
         .map((p: string) => p.trim())
-        .filter(Boolean);
+        .filter(Boolean);}
     // Fallback: comma-separated
     return raw
       .split(',')
@@ -197,7 +223,7 @@ export default function ManualRegistrationForm() {
           const result = await generateAppointmentReceiptMutation.mutateAsync({
             id: data.insertId,
           });
-          const doctor = doctors?.find((d: any) => d.id.toString() === doctorId);
+          const doctor = doctors?.find((d: Doctor) => d.id?.toString() === doctorId);
           printReceipt(
             {
               fullName,
@@ -219,8 +245,8 @@ export default function ManualRegistrationForm() {
       setDialogOpen(false);
       setShouldPrint(false);
     },
-    onError: (error: any) => {
-      const msg = error?.message;
+    onError: (error: unknown) => {
+      const msg = error instanceof Error ? error.message : String(error);
       if (msg && (msg.includes('تكرار') || msg.includes('حجز'))) {
         toast.error(msg);
       } else {
@@ -241,7 +267,7 @@ export default function ManualRegistrationForm() {
       if (shouldPrint && data?.id) {
         try {
           const result = await generateOfferLeadReceiptMutation.mutateAsync({ id: data.id });
-          const offer = offers?.find((o: any) => o.id.toString() === offerId);
+          const offer = offers?.find((o: Offer) => o.id?.toString() === offerId);
           printReceipt(
             {
               fullName,
@@ -263,8 +289,8 @@ export default function ManualRegistrationForm() {
       setDialogOpen(false);
       setShouldPrint(false);
     },
-    onError: (error: any) => {
-      const msg = error?.message;
+    onError: (error: unknown) => {
+      const msg = error instanceof Error ? error.message : String(error);
       if (msg && (msg.includes('تكرار') || msg.includes('طلب'))) {
         toast.error(msg);
       } else {
@@ -285,7 +311,7 @@ export default function ManualRegistrationForm() {
       if (shouldPrint && data?.id) {
         try {
           const result = await generateCampRegistrationReceiptMutation.mutateAsync({ id: data.id });
-          const camp = camps?.find((c: any) => c.id.toString() === campId);
+          const camp = camps?.find((c: Camp) => c.id?.toString() === campId);
           printReceipt(
             {
               fullName,
@@ -307,8 +333,8 @@ export default function ManualRegistrationForm() {
       setDialogOpen(false);
       setShouldPrint(false);
     },
-    onError: (error: any) => {
-      const msg = error?.message;
+    onError: (error: unknown) => {
+      const msg = error instanceof Error ? error.message : String(error);
       if (msg && (msg.includes('تكرار') || msg.includes('مخيم'))) {
         toast.error(msg);
       } else {
@@ -368,7 +394,7 @@ export default function ManualRegistrationForm() {
       gender: (gender as 'male' | 'female' | undefined) || undefined,
       notes: notes || undefined,
       source: 'manual' as const,
-      status: registrationStatus as any, // Type will be validated by backend schema
+      status: registrationStatus as RegistrationStatus, // Type will be validated by backend schema
     };
 
     switch (registrationType) {
@@ -394,6 +420,7 @@ export default function ManualRegistrationForm() {
           age: appointmentAge ? parseInt(appointmentAge) : undefined,
           procedure: appointmentProcedure || undefined,
           additionalNotes: additionalNotes || undefined,
+          status: (registrationStatus as 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled'),
         });
         break;
       case 'offer':
@@ -410,6 +437,7 @@ export default function ManualRegistrationForm() {
           ...baseData,
           offerId: parsedOfferId,
           gender: (gender as 'male' | 'female') || 'male', // default to male if not set
+          status: (registrationStatus as 'pending' | 'completed' | 'cancelled' | 'contacted' | 'no_answer' | 'confirmed' | 'attended'),
         });
         break;
       case 'camp':
@@ -426,11 +454,14 @@ export default function ManualRegistrationForm() {
           toast.error('معرف المخيم غير صالح');
           return;
         }
-        // Convert 'completed' to 'attended' for camp registrations
-        const campStatus = registrationStatus === 'completed' ? 'attended' : registrationStatus;
+        // Convert status to match CampRegistration status type
+        const campStatus = (registrationStatus === 'completed' || registrationStatus === 'booked') ? 'attended' : 
+                            registrationStatus === 'new' ? 'pending' : 
+                            registrationStatus === 'not_interested' ? 'cancelled' : 
+                            registrationStatus as 'pending' | 'completed' | 'cancelled' | 'contacted' | 'no_answer' | 'confirmed' | 'attended';
         createCampRegistrationMutation.mutate({
           ...baseData,
-          status: campStatus as any,
+          status: campStatus,
           campId: parsedCampId,
           age: campAge ? parseInt(campAge) : undefined,
           procedures: campProcedures.length > 0 ? JSON.stringify(campProcedures) : undefined,
@@ -505,7 +536,7 @@ export default function ManualRegistrationForm() {
                 <Label>نوع الحجز</Label>
                 <Select
                   value={registrationType}
-                  onValueChange={(value: any) => setRegistrationType(value)}
+                  onValueChange={(value: RegistrationType) => setRegistrationType(value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="اختر نوع الحجز" />
@@ -525,7 +556,7 @@ export default function ManualRegistrationForm() {
                 <Label>حالة التسجيل</Label>
                 <Select
                   value={registrationStatus}
-                  onValueChange={(value: any) => setRegistrationStatus(value)}
+                  onValueChange={(value: RegistrationStatus) => setRegistrationStatus(value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="اختر الحالة" />
@@ -596,8 +627,8 @@ export default function ManualRegistrationForm() {
                       <SelectValue placeholder="اختر الطبيب" />
                     </SelectTrigger>
                     <SelectContent>
-                      {doctors?.map((doctor: any) => (
-                        <SelectItem key={doctor.id} value={doctor.id.toString()}>
+                      {doctors?.map((doctor: Doctor) => (
+                        <SelectItem key={doctor.id} value={String(doctor.id)}>
                           {doctor.name} - {doctor.specialty}
                         </SelectItem>
                       ))}
@@ -680,8 +711,8 @@ export default function ManualRegistrationForm() {
                     <SelectValue placeholder="اختر العرض" />
                   </SelectTrigger>
                   <SelectContent>
-                    {offers?.map((offer: any) => (
-                      <SelectItem key={offer.id} value={offer.id.toString()}>
+                    {offers?.map((offer: Offer) => (
+                      <SelectItem key={offer.id} value={String(offer.id)}>
                         {offer.title}
                       </SelectItem>
                     ))}
@@ -700,8 +731,8 @@ export default function ManualRegistrationForm() {
                       <SelectValue placeholder="اختر المخيم" />
                     </SelectTrigger>
                     <SelectContent>
-                      {camps?.map((camp: any) => (
-                        <SelectItem key={camp.id} value={camp.id.toString()}>
+                      {camps?.map((camp: Camp) => (
+                        <SelectItem key={camp.id} value={String(camp.id)}>
                           {camp.name}
                         </SelectItem>
                       ))}
@@ -850,7 +881,7 @@ export default function ManualRegistrationForm() {
                 variant="outline"
                 onClick={(e) => {
                   setShouldPrint(true);
-                  handleSubmit(e as any);
+                  handleSubmit(e as React.FormEvent);
                 }}
                 disabled={isPending}
               >

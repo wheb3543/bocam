@@ -250,7 +250,7 @@ export const appointmentsRouter = router({
         fullName: input.fullName,
         phone: input.phone,
         email: input.email,
-        clientIpAddress: ctx.req.ip || (ctx.req.socket as any)?.remoteAddress,
+        clientIpAddress: ctx.req.ip || (ctx.req.socket as { remoteAddress?: string })?.remoteAddress,
         clientUserAgent: ctx.req.headers['user-agent'] as string,
         fbc: ctx.req.cookies?.['_fbc'],
         fbp: ctx.req.cookies?.['_fbp'],
@@ -395,7 +395,7 @@ export const appointmentsRouter = router({
             if (triggerEvent) {
               dispatchWhatsAppMessage({
                 entityType: 'appointment',
-                triggerEvent: triggerEvent as any,
+                triggerEvent: triggerEvent as 'on_confirmed' | 'on_arrived' | 'on_completed' | 'on_cancelled',
                 phone: appt.phone,
                 recipientName: appt.fullName || undefined,
                 variables: {
@@ -433,7 +433,7 @@ export const appointmentsRouter = router({
       if (!db)
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       if (input.appointmentDate) {
         updateData.appointmentDate = new Date(input.appointmentDate);
       }
@@ -573,7 +573,7 @@ export const appointmentsRouter = router({
         WHERE receiptNumber LIKE CONCAT('SGH-', ${year}, '-%')
       `);
 
-      const count = (result as any).count || 0;
+      const count = (result as { count?: number }).count || 0;
       const sequenceNumber = count + 1;
       const paddedNumber = String(sequenceNumber).padStart(3, '0');
       const receiptNumber = `SGH-${year}-${paddedNumber}`;
