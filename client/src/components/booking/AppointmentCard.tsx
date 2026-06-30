@@ -133,7 +133,7 @@ export default function AppointmentCard({
           {appointment.preferredDate && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>{appointment.preferredDate}</span>
+              <span>{formatDate(appointment.preferredDate)}</span>
             </div>
           )}
 

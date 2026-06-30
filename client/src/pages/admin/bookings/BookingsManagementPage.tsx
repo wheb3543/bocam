@@ -94,7 +94,7 @@ export default function BookingsManagementPage() {
     page: 1,
     limit: 5000,
   });
-  const campRegistrationsData = campRegsPaged?.data ?? [];
+  const campRegistrationsData = useMemo(() => campRegsPaged?.data ?? [], [campRegsPaged?.data]);
 
   // Handle query parameters for direct navigation from notifications
   useEffect(() => {

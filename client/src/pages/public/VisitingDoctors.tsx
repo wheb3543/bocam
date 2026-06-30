@@ -14,23 +14,6 @@ import { Badge } from '@/components/ui/badge';
 
 import { trpc } from '@/lib/api/trpc';
 
-interface Doctor {
-  id: number;
-  name: string;
-  slug: string;
-  specialty: string;
-  image: string | null;
-  bio: string | null;
-  experience: string | null;
-  languages: string | null;
-  consultationFee: string | null;
-  isVisiting: 'yes' | 'no';
-  available: 'yes' | 'no';
-  createdAt: Date;
-  updatedAt: Date;
-  [key: string]: unknown;
-}
-
 export default function VisitingDoctors() {
   return (
     <div className="min-h-screen bg-background" dir="rtl">

@@ -330,7 +330,7 @@ export default function OfferLeadsManagement({
     sources: sourceFilter && sourceFilter.length > 0 ? sourceFilter : undefined,
     statuses: statusFilter && statusFilter.length > 0 ? statusFilter : undefined,
   });
-  const offerLeads = offerLeadsData?.data || [];
+  const offerLeads = useMemo(() => offerLeadsData?.data || [], [offerLeadsData?.data]);
   const { data: stats } = trpc.offerLeads.stats.useQuery();
 
   // Removed pagination reset effect
@@ -483,7 +483,7 @@ export default function OfferLeadsManagement({
     }
 
     return sorted;
-  }, [offerLeads, offerTable.sortState, offerTable.sortData]);
+  }, [offerLeads, offerTable]);
 
   // useExportUtils hook لحجوزات العروض
   const offerExport = useExportUtils({

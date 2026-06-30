@@ -421,7 +421,7 @@ export default function CampRegistrationsManagement({
     isLoading,
     refetch,
   } = trpc.campRegistrations.listPaginated.useQuery(listPaginatedInput);
-  const registrations = registrationsData?.data || [];
+  const registrations = useMemo(() => registrationsData?.data || [], [registrationsData?.data]);
   const { data: stats } = trpc.campRegistrations.stats.useQuery();
 
   // Removed pagination reset effect
@@ -555,7 +555,7 @@ export default function CampRegistrationsManagement({
     }
 
     return sorted;
-  }, [registrations, campTable.sortState, campTable.sortData]);
+  }, [registrations, campTable]);
 
   // useExportUtils hook لتسجيلات المخيمات
   const campExport = useExportUtils({

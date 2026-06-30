@@ -16,6 +16,8 @@
 | `eqeqeq` | error | يفرض استخدام === بدلاً من == | ✅ مفعلة | 2026-06-28 |
 | `curly` | error | يفرض استخدام أقواس معارضة دائماً | ✅ مفعلة | 2026-06-28 |
 | `no-undef` | error | يمنع استخدام متغيرات غير معرفة | ✅ مفعلة | 2026-06-28 |
+| `react-hooks/exhaustive-deps` | error | يضمن إضافة جميع dependencies في useEffect و useMemo | ✅ مفعلة | 2026-06-29 |
+| `@typescript-eslint/no-unused-vars` | warn | يمنع المتغيرات غير المستخدمة في TypeScript | ✅ مفعلة | 2026-06-29 |
 
 ---
 
@@ -25,8 +27,6 @@
 
 | القاعدة | المستوى الحالي | المستوى المقترح | الوصف | الحالة | المشاكل المتوقعة |
 |---------|---------------|----------------|-------|--------|------------------|
-| `@typescript-eslint/no-unused-vars` | off | warn | يمنع المتغيرات غير المستخدمة | ❌ غير مفعلة | كود غير نظيف |
-| `react-hooks/exhaustive-deps` | off | warn | يضمن إضافة جميع dependencies في useEffect و useMemo | ❌ غير مفعلة | bugs محتملة في React |
 
 ### المستوى: الأهمية المتوسطة (Medium Priority)
 
@@ -116,6 +116,17 @@
   - الملفات المتأثرة: جميع الملفات التي تستخدم متغيرات عالمية
   - الحالة: تم الحل بنجاح (416 خطأ تم حلها بإضافة 62 متغير عالمي)
 
+- ✅ تفعيل `react-hooks/exhaustive-deps` (error)
+  - الحل: إضافة dependencies المفقودة، استخدام useMemo للقيم المحسوبة، تعريف الدوال داخل useEffect أو استخدام useCallback
+  - الملفات المتأثرة:
+    - Client: `ChatWindow.tsx`, `CustomerProfilesTab.tsx`, `DoctorsManagement.tsx`, `AppointmentsTab.tsx`, `CampRegistrationsManagement.tsx`, `CampsManagement.tsx`, `DashboardSidebar.tsx`, `DashboardSidebarV2.tsx`, `NotificationCenter.tsx`, `OfferLeadsManagement.tsx`, `OffersManagement.tsx`, `UpdateProgressModal.tsx`, `OfflinePage.tsx`, `MessageSettingsPage.tsx`, `AppointmentsManagementPage.tsx`, `BookingsManagementPage.tsx`, `LeadsManagementPage.tsx`, `CampStatsPage.tsx`, `UsersManagementPage.tsx`, `DoctorDetailPage.tsx`, `OfferDetailPage.tsx`, `DetailedStatsCards.tsx`, `QuickPatientSearch.tsx`, `RecentActivity.tsx`, `SourceAnalytics.tsx`
+  - الحالة: تم الحل بنجاح (38 خطأ تم حلها في 24 ملف)
+
+- ✅ تفعيل `@typescript-eslint/no-unused-vars` (warn)
+  - الحل: تفعيل القاعدة مع إعدادات مناسبة لتجنب المتغيرات غير المستخدمة التي تبدأ بـ _ أو المتغيرات في معاملات الدوال
+  - الملفات المتأثرة: جميع الملفات التي تحتوي على متغيرات غير مستخدمة
+  - الحالة: تم التفعيل بنجاح (442 تحذير، تم تفعيل القاعدة كـ warn للسماح بتنظيف الكود تدريجياً)
+
 ---
 
 ## الخطة المقترحة للتفعيل
@@ -133,10 +144,11 @@
 1. ✅ `eqeqeq` - تم التفعيل
 2. ✅ `curly` - تم التفعيل
 3. ✅ `no-undef` - تم التفعيل
-4. `no-console` - يحتاج إزالة console.logs
-5. `no-debugger` - يمكن تفعيله بسهولة
-6. `@typescript-eslint/no-throw-literal` - يحتاج مراجعة
-7. `no-unused-vars` - يحتاج تنظيف الكود
+4. ✅ `react-hooks/exhaustive-deps` - تم التفعيل
+5. ✅ `@typescript-eslint/no-unused-vars` - تم التفعيل
+6. `no-console` - يحتاج إزالة console.logs
+7. `no-debugger` - يمكن تفعيله بسهولة
+8. `@typescript-eslint/no-throw-literal` - يحتاج مراجعة
 
 ### المرحلة 3: الأهمية المنخفضة
 1. `no-redeclare` - يمكن تفعيله بسهولة

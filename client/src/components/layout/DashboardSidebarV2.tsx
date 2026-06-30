@@ -514,7 +514,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
   // const { data: unreadCounts } = trpc.leads.getUnreadCounts.useQuery(undefined, {
   //   refetchInterval: 30000,
   // });
-  const unreadCounts = { leads: 0, appointments: 0, offerLeads: 0, campRegistrations: 0 };
+  const unreadCounts = useMemo(() => ({ leads: 0, appointments: 0, offerLeads: 0, campRegistrations: 0 }), []);
 
   // 🔔 WhatsApp Notification State
   const [whatsappUnreadCount, setWhatsappUnreadCount] = useState(0);

@@ -1,6 +1,6 @@
  // @ts-nocheck
 import { useFormatDate } from '@/hooks/export/useFormatDate';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { trpc } from '@/lib/api/trpc';
 
 interface Patient {
@@ -388,7 +388,7 @@ export default function QuickPatientSearch() {
     { page: 1, limit: 200 },
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
-  const campRegistrations = campRegsPaged?.data ?? [];
+  const campRegistrations = useMemo(() => campRegsPaged?.data ?? [], [campRegsPaged?.data]);
 
   const isLoading = leadsLoading || appointmentsLoading || offerLeadsLoading || campLoading;
   const hasError = leadsError || appointmentsError || offerLeadsError || campError;

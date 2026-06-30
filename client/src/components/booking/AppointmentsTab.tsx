@@ -176,7 +176,7 @@ export default function AppointmentsTab({
           ? appointmentStatusFilter
           : undefined,
     });
-  const appointments = (appointmentsData?.data || []) as unknown as AppointmentWithDoctor[];
+  const appointments = useMemo(() => (appointmentsData?.data || []) as unknown as AppointmentWithDoctor[], [appointmentsData?.data]);
   const { data: doctors = [] } = trpc.doctors.list.useQuery();
 
   const updateAppointmentStatusMutation = trpc.appointments.updateStatus.useMutation({
@@ -279,7 +279,7 @@ export default function AppointmentsTab({
       );
     }
     return sorted;
-  }, [appointments, appointmentTable.sortState, appointmentTable.sortData]);
+  }, [appointments, appointmentTable]);
 
   const appointmentStats = useMemo(() => {
     if (!appointments)

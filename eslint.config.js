@@ -87,7 +87,11 @@ export default [
       'react-hooks': reactHooks,
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true 
+      }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/ban-ts-comment': 'off',
@@ -99,7 +103,7 @@ export default [
       'react/prop-types': 'off',
       'react/display-name': 'off',
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/exhaustive-deps': 'error',
       'no-console': 'off',
       'no-debugger': 'off',
       'no-alert': 'off',

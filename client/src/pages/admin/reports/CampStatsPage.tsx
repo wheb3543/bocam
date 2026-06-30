@@ -112,10 +112,11 @@ export default function CampStatsPage() {
   const { user } = useAuth();
 
   // Filter registrations by selected camp
-  const filteredRegistrations =
-    selectedCamp === 'all'
+  const filteredRegistrations = useMemo(() => {
+    return selectedCamp === 'all'
       ? registrations || []
       : (registrations || []).filter((r) => r.campId?.toString() === selectedCamp);
+  }, [selectedCamp, registrations]);
 
   // Calculate statistics
   const totalRegistrations = filteredRegistrations.length;
@@ -650,7 +651,7 @@ export default function CampStatsPage() {
   const timeMetrics = useMemo(() => {
     // Time metrics not available as confirmedAt, attendedAt, cancelledAt are not returned by list query
     return { avgToConfirm: 0, avgToAttend: 0, avgToCancel: 0 };
-  }, [filteredRegistrations]);
+  }, []);
 
   // Campaign Performance (by campaignId)
   const campaignPerformance = useMemo(() => {

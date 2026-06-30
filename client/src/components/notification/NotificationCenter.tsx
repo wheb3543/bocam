@@ -42,13 +42,14 @@ export default function NotificationCenter() {
     { refetchInterval: 30000 } // Auto-refresh every 30 seconds
   );
   const {
-    data: offerLeads,
+    data: offerLeadsData,
     isLoading: offerLeadsLoading,
     error: offerLeadsError,
   } = trpc.offerLeads.list.useQuery(
     undefined,
     { refetchInterval: 30000 } // Auto-refresh every 30 seconds
   );
+  const offerLeads = useMemo(() => offerLeadsData ?? [], [offerLeadsData]);
   const {
     data: campRegsPaged,
     isLoading: campLoading,
@@ -57,7 +58,7 @@ export default function NotificationCenter() {
     { page: 1, limit: 50 },
     { refetchInterval: 30000 } // Auto-refresh every 30 seconds
   );
-  const campRegistrations = campRegsPaged?.data ?? [];
+  const campRegistrations = useMemo(() => campRegsPaged?.data ?? [], [campRegsPaged?.data]);
 
   const isLoading = appointmentsLoading || offerLeadsLoading || campLoading;
   const hasError = appointmentsError || offerLeadsError || campError;

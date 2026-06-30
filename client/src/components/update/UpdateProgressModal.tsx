@@ -36,31 +36,31 @@ export function UpdateProgressModal({ open, onOpenChange }: UpdateProgressModalP
 
   useEffect(() => {
     if (open) {
+      const fetchUpdateStatus = async () => {
+        try {
+          const response = await fetch('/api/update/status');
+          const data = await response.json();
+          if (data.success) {
+            setStatus(data.data);
+
+            // Close modal if update is completed
+            if (data.data.updateStatus === 'completed') {
+              setTimeout(() => {
+                onOpenChange(false);
+                window.location.reload(); // Reload to apply update
+              }, 2000);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch update status:', error);
+        }
+      };
+
       fetchUpdateStatus();
       const interval = setInterval(fetchUpdateStatus, 2000); // Check every 2 seconds when modal is open
       return () => clearInterval(interval);
     }
-  }, [open]);
-
-  const fetchUpdateStatus = async () => {
-    try {
-      const response = await fetch('/api/update/status');
-      const data = await response.json();
-      if (data.success) {
-        setStatus(data.data);
-
-        // Close modal if update is completed
-        if (data.data.updateStatus === 'completed') {
-          setTimeout(() => {
-            onOpenChange(false);
-            window.location.reload(); // Reload to apply update
-          }, 2000);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch update status:', error);
-    }
-  };
+  }, [open, onOpenChange]);
 
   if (!status) {
     return null;

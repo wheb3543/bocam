@@ -114,7 +114,7 @@ export default function DetailedStatsCards() {
       appointments: appointmentStats,
       offers: offerStats,
     };
-  }, [leads, appointments, offerLeads, campRegistrations]);
+  }, [leads, appointments, offerLeads, campRegsPaged?.data]);
 
   // Loading state
   if (isLoading) {

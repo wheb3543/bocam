@@ -281,7 +281,7 @@ export default function CustomerProfilesTab() {
     { enabled: !!selectedPhone && detailsOpen }
   );
 
-  const customers = customersData?.customers || [];
+  const customers = useMemo(() => customersData?.customers || [], [customersData?.customers]);
   const totalCustomers = customersData?.total || 0;
   const totalPages = Math.ceil(totalCustomers / limit);
 
@@ -318,7 +318,7 @@ export default function CustomerProfilesTab() {
     }
 
     return sorted;
-  }, [customers, customerTable.sortState, customerTable.sortData]);
+  }, [customers, customerTable]);
 
   // === Export options ===
   const getExportOptions = useCallback(() => {

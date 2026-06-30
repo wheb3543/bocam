@@ -674,7 +674,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
       }
     });
     setExpandedGroups((prev) => ({ ...prev, ...newExpanded }));
-  }, [currentPath]);
+  }, [currentPath, filteredToolsGroups]);
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -765,7 +765,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
       .filter((item) => !editingItemIds.includes(item.id))
       .filter((item) => !item.feature || hasFeature(item.feature));
     return [...checkedItems, ...uncheckedItems];
-  }, [editingItemIds]);
+  }, [editingItemIds, hasFeature]);
 
   // Edit mode handlers
   const startEditMode = useCallback(() => {

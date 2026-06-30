@@ -431,7 +431,7 @@ export default function UsersManagementPage() {
           return undefined;
       }
     });
-  }, [users, searchQuery, roleFilter, statusFilter, userTable.sortState, userTable.sortData]);
+  }, [users, searchQuery, roleFilter, statusFilter, userTable]);
 
   // Sort access requests using useTableFeatures
   const sortedRequests = useMemo(() => {
@@ -452,7 +452,7 @@ export default function UsersManagementPage() {
           return undefined;
       }
     });
-  }, [accessRequests, requestTable.sortState, requestTable.sortData]);
+  }, [accessRequests, requestTable]);
 
   // Calculate statistics
   const totalUsers = Array.isArray(users) ? users.length : 0;

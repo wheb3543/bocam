@@ -159,7 +159,7 @@ export default function LeadsManagementPage() {
   // إعادة تعيين الصفحة عند تغيير الفلاتر
   useEffect(() => {
     pagination.resetPage();
-  }, [searchTerm, leadsDateFilter, leadsStatusFilter, leadsSourceFilter]);
+  }, [searchTerm, leadsDateFilter, leadsStatusFilter, leadsSourceFilter, pagination]);
 
   const hasActiveFilters = !!(
     searchTerm ||

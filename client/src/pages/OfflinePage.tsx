@@ -1,5 +1,5 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { WifiOff, RefreshCw, Calendar, Users, FileText } from 'lucide-react';
@@ -21,6 +21,23 @@ export default function OfflinePage() {
   const [cachedAppointments, setCachedAppointments] = useState<CachedAppointment[]>([]);
   const [lastSync, setLastSync] = useState<string | null>(null);
 
+  const loadCachedData = useCallback(async () => {
+    try {
+      // Try to open IndexedDB
+      const db = await openDatabase();
+      const appointments = await getAppointmentsFromDB(db);
+      setCachedAppointments(appointments);
+
+      // Get last sync time
+      const lastSyncTime = localStorage.getItem('lastSyncTime');
+      if (lastSyncTime) {
+        setLastSync(formatDateTime(lastSyncTime));
+      }
+    } catch (error) {
+      console.error('Failed to load cached data:', error);
+    }
+  }, [formatDateTime]);
+
   useEffect(() => {
     // Listen for online/offline events
     const handleOnline = () => setIsOnline(true);
@@ -36,24 +53,7 @@ export default function OfflinePage() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
-
-  const loadCachedData = async () => {
-    try {
-      // Try to open IndexedDB
-      const db = await openDatabase();
-      const appointments = await getAppointmentsFromDB(db);
-      setCachedAppointments(appointments);
-
-      // Get last sync time
-      const lastSyncTime = localStorage.getItem('lastSyncTime');
-      if (lastSyncTime) {
-        setLastSync(formatDateTime(lastSyncTime));
-      }
-    } catch (error) {
-      console.error('Error loading cached data:', error);
-    }
-  };
+  }, [loadCachedData]);
 
   const openDatabase = (): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {

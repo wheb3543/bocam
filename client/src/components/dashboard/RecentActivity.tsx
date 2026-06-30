@@ -28,7 +28,7 @@ export default function RecentActivity() {
     page: 1,
     limit: 100,
   });
-  const campRegistrations = campRegsPaged?.data ?? [];
+  const campRegistrations = useMemo(() => campRegsPaged?.data ?? [], [campRegsPaged?.data]);
 
   // Combine and sort all activities
   const recentActivities = useMemo(() => {

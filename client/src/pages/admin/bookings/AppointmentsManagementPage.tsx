@@ -271,7 +271,7 @@ export default function AppointmentsManagementPage() {
           ? appointmentStatusFilter
           : undefined,
     });
-  const appointments = appointmentsData?.data || [];
+  const appointments = useMemo(() => appointmentsData?.data || [], [appointmentsData?.data]);
   const { data: doctors = [] } = trpc.doctors.list.useQuery();
 
   const updateAppointmentStatusMutation = trpc.appointments.updateStatus.useMutation({
@@ -380,7 +380,7 @@ export default function AppointmentsManagementPage() {
       );
     }
     return sorted;
-  }, [appointments, appointmentTable.sortState, appointmentTable.sortData]);
+  }, [appointments, appointmentTable]);
 
   const appointmentStats = useMemo(() => {
     if (!appointments) {return { total: 0, pending: 0, confirmed: 0, cancelled: 0 };}

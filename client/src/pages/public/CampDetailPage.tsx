@@ -7,6 +7,7 @@ import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useLocation, Link } from 'wouter';
 import Navbar from '@/components/layout/Navbar';
+import SEO from '@/components/SEO';
 import { getCompanyName } from '@/const';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
@@ -18,13 +19,11 @@ import {
   ArrowRight,
   Phone,
   Calendar,
-  MapPin,
   Loader2,
   Heart,
   Users,
   CheckCircle2,
   Clock,
-  Star,
   MessageSquare,
   Tag,
   ChevronDown,
@@ -343,6 +342,7 @@ function CampDetailContent({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-6" dir="rtl">
+      <SEO title={seoTitle} description={seoDescription} />
       {/* Breadcrumb */}
       <div className="bg-white dark:bg-card border-b">
         <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">

@@ -294,7 +294,7 @@ export default function OffersManagement() {
           return undefined;
       }
     });
-  }, [offers, searchTerm, offerTable.sortState, offerTable.sortData]);
+  }, [offers, searchTerm, offerTable]);
 
   // Calculate stats
   const totalOffers = offers?.length || 0;

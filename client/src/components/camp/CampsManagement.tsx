@@ -348,7 +348,7 @@ export default function CampsManagement() {
           return item[key];
       }
     });
-  }, [camps, searchTerm, campTable.sortState, campTable.sortData]);
+  }, [camps, searchTerm, campTable]);
 
   // Calculate stats
   const totalCamps = camps?.length || 0;

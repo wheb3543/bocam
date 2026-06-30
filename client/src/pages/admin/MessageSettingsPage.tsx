@@ -290,9 +290,8 @@ function MessageSettingsContent() {
   }, [allMessages]);
 
   // Filtered audit logs
-  const auditLogsArray = Array.isArray(auditLogs) ? auditLogs : (auditLogs as { logs?: AuditLog[] })?.logs || [];
-
   const filteredAuditLogs = useMemo(() => {
+    const auditLogsArray = Array.isArray(auditLogs) ? auditLogs : (auditLogs as { logs?: AuditLog[] })?.logs || [];
     if (!auditLogsArray.length) {return [];}
     if (!auditSearch) {return auditLogsArray;}
     return auditLogsArray.filter(

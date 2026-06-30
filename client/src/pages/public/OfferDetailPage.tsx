@@ -7,6 +7,7 @@ import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'wouter';
 import Navbar from '@/components/layout/Navbar';
+import SEO from '@/components/SEO';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -102,7 +103,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
         content_type: 'offer',
       });
     }
-  }, [offer?.id]);
+  }, [offer]);
 
   useEffect(() => {
     if (!isLoading && !offer) {
@@ -286,6 +287,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-6" dir="rtl">
+      <SEO title={seoTitle} description={seoDescription} />
       {/* Breadcrumb */}
       <div className="bg-white dark:bg-card border-b">
         <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
@@ -734,7 +736,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
-              href="tel:8000018"
+              href={getCallLink('8000018')}
               className="inline-flex items-center gap-2 bg-white dark:bg-card text-green-600 px-5 py-2.5 rounded-full font-bold text-sm hover:bg-muted transition-colors shadow-lg"
             >
               <Phone className="h-4 w-4" />

@@ -633,7 +633,7 @@ export default function ChatWindow({
       setSearchResults(results);
       setCurrentSearchIndex(0);
     },
-    [localMessages]
+    [localMessages, setSearchQuery, setSearchResults, setCurrentSearchIndex]
   );
 
   const handleNextSearchResult = useCallback(() => {
@@ -1167,7 +1167,7 @@ let payload: unknown;
           }
         } catch (_) {}
       },
-      [conversationId, scrollToBottom, onConversationUpdate, refetchMessages]
+      [conversationId, onConversationUpdate, refetchMessages, processSSEUpdates]
     )
   );
 

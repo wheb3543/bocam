@@ -6,6 +6,8 @@
 import { useState, useEffect } from 'react';
 import { useRoute, Link, useLocation } from 'wouter';
 import Navbar from '@/components/layout/Navbar';
+import SEO from '@/components/SEO';
+import { useFormatDate } from '@/hooks/export/useFormatDate';
 import {
   ArrowRight,
   Calendar,
@@ -57,6 +59,7 @@ export default function DoctorDetailPage() {
 }
 
 function DoctorDetailContent({ slug }: { slug: string }) {
+  const { formatDate, formatDateTime } = useFormatDate();
   const {
     formatPhoneDisplay,
     getWhatsAppLink,
@@ -83,7 +86,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
         content_type: 'doctor',
       });
     }
-  }, [doctor?.id]);
+  }, [doctor]);
 
   const savedInfo = getSavedPatientInfo();
   const [formData, setFormData] = useState({
@@ -274,6 +277,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-6" dir="rtl">
+      <SEO title={seoTitle} description={seoDescription} />
       {/* Breadcrumb Navigation */}
       <div className="bg-white dark:bg-card border-b">
         <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
@@ -408,7 +412,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                         احجز موعد
                       </Button>
                     </a>
-                    <a href="tel:8000018">
+                    <a href={getCallLink('8000018')}>
                       <Button size="sm" variant="outline" className="gap-1.5 text-sm border-border">
                         <Phone className="h-3.5 w-3.5" />
                         اتصل الآن

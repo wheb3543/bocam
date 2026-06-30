@@ -316,7 +316,7 @@ export default function DoctorsManagement() {
           return item[key];
       }
     });
-  }, [doctors, searchTerm, doctorTable.sortState, doctorTable.sortData]);
+  }, [doctors, searchTerm, doctorTable]);
 
   const resetForm = () => {
     setFormData({

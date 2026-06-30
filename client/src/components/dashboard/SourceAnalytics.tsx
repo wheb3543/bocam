@@ -116,7 +116,7 @@ export default function SourceAnalytics() {
     { page: 1, limit: 500 },
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
-  const campRegistrations = campRegsPaged?.data ?? [];
+  const campRegistrations = useMemo(() => campRegsPaged?.data ?? [], [campRegsPaged?.data]);
 
   const isLoading = leadsLoading || appointmentsLoading || offerLeadsLoading || campLoading;
   const hasError = leadsError || appointmentsError || offerLeadsError || campError;
@@ -164,7 +164,7 @@ export default function SourceAnalytics() {
       sources,
       total,
     };
-  }, [leads, appointments, offerLeads, campRegistrations]);
+  }, [appointments, offerLeads, campRegistrations]);
 
   // Get top source for insights
   const topSource = sourceStats.sources[0];
