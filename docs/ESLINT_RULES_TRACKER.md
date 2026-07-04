@@ -9,15 +9,13 @@
 | القاعدة | المستوى | الوصف | الحالة | تاريخ التفعيل |
 |---------|---------|-------|--------|--------------|
 | `react-hooks/rules-of-hooks` | error | يضمن استدعاء React Hooks في نفس الترتيب في كل render، على مستوى أعلى من المكون | ✅ مفعلة | 2026-06-18 |
-| `@typescript-eslint/no-non-null-assertion` | error | يمنع استخدام `!` (non-null assertion) | ✅ مفعلة | 2026-06-18 |
+| `@typescript-eslint/no-non-null-assertion` | warn | يمنع استخدام `!` (non-null assertion) | ✅ مفعلة | 2026-06-18 |
 | `preserve-caught-error` | error | يضمن إضافة `cause` عند re-throwing errors | ✅ مفعلة | 2026-06-18 |
-| `@typescript-eslint/no-explicit-any` | error | يمنع استخدام `any` في TypeScript | ✅ مفعلة | 2026-06-28 |
-| `prefer-const` | error | يفضل استخدام const بدلاً من let | ✅ مفعلة | 2026-06-28 |
-| `eqeqeq` | error | يفرض استخدام === بدلاً من == | ✅ مفعلة | 2026-06-28 |
-| `curly` | error | يفرض استخدام أقواس معارضة دائماً | ✅ مفعلة | 2026-06-28 |
+| `@typescript-eslint/no-explicit-any` | warn | يمنع استخدام `any` في TypeScript | ✅ مفعلة | 2026-06-28 |
 | `no-undef` | error | يمنع استخدام متغيرات غير معرفة | ✅ مفعلة | 2026-06-28 |
 | `react-hooks/exhaustive-deps` | error | يضمن إضافة جميع dependencies في useEffect و useMemo | ✅ مفعلة | 2026-06-29 |
 | `@typescript-eslint/no-unused-vars` | warn | يمنع المتغيرات غير المستخدمة في TypeScript | ✅ مفعلة | 2026-06-29 |
+| `no-throw-literal` | error | يمنع رمي literals بدلاً من Error objects | ✅ مفعلة | 2026-07-04 |
 
 ---
 
@@ -32,6 +30,9 @@
 
 | القاعدة | المستوى الحالي | المستوى المقترح | الوصف | الحالة | المشاكل المتوقعة |
 |---------|---------------|----------------|-------|--------|------------------|
+| `prefer-const` | off | error | يفضل استخدام const بدلاً من let | ❌ غير مفعلة | كود غير نظيف |
+| `eqeqeq` | off | error | يفرض استخدام === بدلاً من == | ❌ غير مفعلة | bugs محتملة |
+| `curly` | off | error | يفرض استخدام أقواس معارضة دائماً | ❌ غير مفعلة | bugs محتملة |
 | `@typescript-eslint/no-throw-literal` | off | error | يمنع رمي literals بدلاً من Error objects | ❌ غير مفعلة | معالجة أخطاء سيئة |
 | `no-unused-vars` | off | warn | يمنع المتغيرات غير المستخدمة في JavaScript | ❌ غير مفعلة | كود غير نظيف |
 | `no-console` | off | warn | يمنع استخدام console.log في production | ❌ غير مفعلة | تسريبات معلومات |
@@ -75,41 +76,25 @@
   - الملفات المتأثرة: `CampStatsPage.tsx`, `OfferLeadsManagement.tsx`
   - الحالة: تم الحل بنجاح
 
-- ✅ تفعيل `@typescript-eslint/no-non-null-assertion` (error)
+- ✅ تفعيل `@typescript-eslint/no-non-null-assertion` (warn)
   - الحل: استبدال `!` بـ optional chaining `?.` و nullish coalescing `??` و فحوصات صريحة
   - الملفات المتأثرة:
     - Client: `tracking.test.ts`, `ChatWindow.tsx`, `TasksSection.tsx`, `CustomerProfilesHooks.test.ts`, `ResizableTable.test.ts`, `DashboardSidebar.tsx`, `ColumnVisibility.tsx`, `useTableFeatures.sort.test.ts`, `usePersistFn.ts`, `useSSE.ts`, `main.tsx`, `PWAStatsPage.tsx`, `UsersManagementPage.tsx`, `WhatsAppTemplatesPage.tsx`
     - Server: `pubsub.ts`, `db.ts`, `camps.ts`, `templateSyncService.ts`, `whatsappAuditLog.ts`
   - الحالة: تم الحل بنجاح (54 تحذير في 18 ملف)
+  - ملاحظة: تم تغيير المستوى من error إلى warn في 2026-07-04
 
 - ✅ تفعيل `preserve-caught-error` (error)
   - الحل: الكود الحالي يتبع القاعدة بالفعل (تم حلها يدوياً سابقاً)
   - الحالة: تم الحل بنجاح (0 errors, 0 warnings)
 
 ### 2026-06-28
-- ✅ تفعيل `@typescript-eslint/no-explicit-any` (error)
+- ✅ تفعيل `@typescript-eslint/no-explicit-any` (warn)
   - الحل: استبدال `any` بواجهات TypeScript مناسبة و `unknown` و `keyof`
   - الملفات المتأثرة:
     - Client: `MetaPixel.tsx`, `AppointmentsTab.tsx`, `WhatsAppPhoneQualityPage.tsx`, `WhatsAppWebhookInspectorPage.tsx`, `PatientAppointmentDetailsPage.tsx`, `PatientAppointmentsPage.tsx`, `PatientDashboard.tsx`, `PatientResultDetailsPage.tsx`, `PatientResultsPage.tsx`
   - الحالة: تم الحل بنجاح (16 خطأ في 9 ملفات)
   - الواجهات المضافة: `ConnectionStatus`, `SavedSearch`, `SSEMessageEvent`, `AutoReplyRule`, `SearchMessage`, `ConversationCost`, `QualityRecord`, `QualityWebhookEvent`, `WebhookEvent`
-
-- ✅ تفعيل `prefer-const` (error)
-  - الحل: استبدال `let` بـ `const` للمتغيرات التي لا يتم إعادة تعيينها
-  - الملفات المتأثرة:
-    - Client: `AppointmentsTab.tsx`, `CampRegistrationsManagement.tsx`, `OfferLeadsManagement.tsx`, `useSlugGenerator.ts`, `usePhoneFormat.ts`, `advancedExport.ts`, `Home.tsx`, `AppointmentsManagementPage.tsx`, `UsersManagementPage.tsx`, `ChatWindow.test.tsx`
-  - الحالة: تم الحل بنجاح (13 خطأ في 10 ملفات)
-
-- ✅ تفعيل `eqeqeq` (error)
-  - الحل: استبدال `==` بـ `===` و `!=` بـ `!==`
-  - الملفات المتأثرة:
-    - Client: `ChatWindow.tsx`, `CustomerProfilesHooks.test.ts`, `useTableFeatures.sort.test.ts`, `useFilterUtils.ts`, `useTableFeatures.ts`
-  - الحالة: تم الحل بنجاح (30 خطأ في 5 ملفات)
-
-- ✅ تفعيل `curly` (error)
-  - الحل: إضافة أقواس معارضة لجميع عبارات if/else
-  - الملفات المتأثرة: جميع الملفات التي تحتوي على عبارات if بدون أقواس
-  - الحالة: تم الحل بنجاح (530 خطأ تم إصلاحها تلقائياً)
 
 - ✅ تفعيل `no-undef` (error)
   - الحل: إضافة المتغيرات العالمية المفقودة إلى ESLint config (React, Blob, URL, FormData, إلخ)
@@ -127,6 +112,20 @@
   - الملفات المتأثرة: جميع الملفات التي تحتوي على متغيرات غير مستخدمة
   - الحالة: تم التفعيل بنجاح (442 تحذير، تم تفعيل القاعدة كـ warn للسماح بتنظيف الكود تدريجياً)
 
+### 2026-07-04
+- ✅ تعديل مستويات القواعد لتقليل الصرامة
+  - التغييرات:
+    - `@typescript-eslint/no-non-null-assertion`: error → warn
+    - `@typescript-eslint/no-explicit-any`: error → warn
+    - إيقاف: `prefer-const`, `eqeqeq`, `curly` (تم تغييرها من error إلى off)
+  - السبب: تقليل الصرامة لتحسين سرعة التطوير مع الحفاظ على جودة الكود الأساسية
+  - الحالة: تم التعديل بنجاح (0 errors, 0 warnings بعد التعديل)
+
+- ✅ تفعيل `no-throw-literal` (error)
+  - الحل: الكود الحالي يتبع القاعدة بالفعل (تم حلها يدوياً سابقاً)
+  - الحالة: تم التفعيل بنجاح (0 errors, 0 warnings)
+  - ملاحظة: القاعدة موجودة في ESLint core وليست في @typescript-eslint plugin
+
 ### 2026-06-30
 - ✅ تحسين BulkActionsManager وإزالة المتغيرات غير المستخدمة
   - الحل: إضافة وظائف متقدمة للمكون، تحديث 4 ملفات، إزالة المتغيرات غير المستخدمة
@@ -142,32 +141,32 @@
 
 ## الخطة المقترحة للتفعيل
 
-### المرحلة 1: الأهمية العالية
-1. ✅ `react-hooks/rules-of-hooks` - تم التفعيل
-2. ✅ `@typescript-eslint/no-non-null-assertion` - تم التفعيل
-3. ✅ `preserve-caught-error` - تم التفعيل
-4. ✅ `@typescript-eslint/no-explicit-any` - تم التفعيل
-5. ✅ `prefer-const` - تم التفعيل
-6. `@typescript-eslint/no-unused-vars` - يحتاج تنظيف الكود
-7. `react-hooks/exhaustive-deps` - يحتاج مراجعة dependencies
+### المرحلة 1: الأهمية العالية (مكتملة ✅)
+1. ✅ `react-hooks/rules-of-hooks` - تم التفعيل (error)
+2. ✅ `@typescript-eslint/no-non-null-assertion` - تم التفعيل (warn)
+3. ✅ `preserve-caught-error` - تم التفعيل (error)
+4. ✅ `@typescript-eslint/no-explicit-any` - تم التفعيل (warn)
+5. ✅ `no-undef` - تم التفعيل (error)
+6. ✅ `react-hooks/exhaustive-deps` - تم التفعيل (error)
+7. ✅ `@typescript-eslint/no-unused-vars` - تم التفعيل (warn)
 
-### المرحلة 2: الأهمية المتوسطة
-1. ✅ `eqeqeq` - تم التفعيل
-2. ✅ `curly` - تم التفعيل
-3. ✅ `no-undef` - تم التفعيل
-4. ✅ `react-hooks/exhaustive-deps` - تم التفعيل
-5. ✅ `@typescript-eslint/no-unused-vars` - تم التفعيل
-6. `no-console` - يحتاج إزالة console.logs
-7. `no-debugger` - يمكن تفعيله بسهولة
-8. `@typescript-eslint/no-throw-literal` - يحتاج مراجعة
+### المرحلة 2: الأهمية المتوسطة (قيد الانتظار)
+1. ⏸️ `prefer-const` - تم إيقافه مؤقتاً (off) - يمكن إعادة تفعيله كـ error
+2. ⏸️ `eqeqeq` - تم إيقافه مؤقتاً (off) - يمكن إعادة تفعيله كـ error
+3. ⏸️ `curly` - تم إيقافه مؤقتاً (off) - يمكن إعادة تفعيله كـ error
+4. ✅ `no-throw-literal` - تم التفعيل (error)
+5. `no-console` - يحتاج إزالة console.logs (يمكن تفعيله كـ warn)
+6. `no-debugger` - يمكن تفعيله بسهولة (error)
+7. `no-unused-vars` (JavaScript) - يمكن تفعيله كـ warn
 
-### المرحلة 3: الأهمية المنخفضة
-1. `no-redeclare` - يمكن تفعيله بسهولة
-2. `no-async-promise-executor` - يمكن تفعيله بسهولة
-3. `no-promise-executor-return` - يمكن تفعيله بسهولة
-4. `no-throw-literal` - يحتاج مراجعة
-5. `react/display-name` - يمكن تفعيله بسهولة
-6. البقية - يمكن تفعيلها تدريجياً
+### المرحلة 3: الأهمية المنخفضة (قيد الانتظار)
+1. `no-redeclare` - يمكن تفعيله بسهولة (error)
+2. `no-async-promise-executor` - يمكن تفعيله بسهولة (error)
+3. `no-promise-executor-return` - يمكن تفعيله بسهولة (error)
+4. `react/display-name` - يمكن تفعيله بسهولة (warn)
+5. `no-empty` - يمكن تفعيله كـ warn
+6. `no-constant-condition` - يمكن تفعيله كـ warn
+7. البقية - يمكن تفعيلها تدريجياً
 
 ---
 

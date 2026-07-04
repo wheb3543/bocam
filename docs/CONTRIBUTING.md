@@ -15,7 +15,7 @@
 قبل المساهمة، يرجى:
 
 1. **قراءة الوثائق**: تأكد من قراءة [README.md](README.md) و [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) لفهم المشروع وبنيته
-2. **البحث عن المشاكل الموجودة**: تحقق من [Issues](https://github.com/abood22828/sgh-crm-portal/issues) للتأكد من عدم وجود مشكلة مماثلة
+2. **البحث عن المشاكل الموجودة**: تحقق من [Issues](https://github.com/wheb3543/bocam/issues) للتأكد من عدم وجود مشكلة مماثلة
 3. **فهم معايير الكود**: راجع قسم "معايير الكود" أدناه
 4. **إعداد بيئة التطوير**: اتبع تعليمات التثبيت في [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md)
 
@@ -28,8 +28,8 @@
 #### 2. استنساخ المستودع
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/sgh-crm-portal.git
-cd sgh-crm-portal
+git clone https://github.com/YOUR-USERNAME/bocam.git
+cd bocam
 ```
 
 #### 3. إنشاء فرع جديد
@@ -387,7 +387,7 @@ We welcome all contributions that help improve this project! Whether you want to
 Before contributing, please:
 
 1. **Read the documentation**: Make sure to read [README.md](README.md) and [Installation Guide](INSTALLATION_GUIDE.md) to understand the project and its structure
-2. **Search existing issues**: Check [Issues](https://github.com/abood22828/sgh-crm-portal/issues) to ensure there isn't a similar issue
+2. **Search existing issues**: Check [Issues](https://github.com/wheb3543/bocam/issues) to ensure there isn't a similar issue
 3. **Understand code standards**: Review the "Code Standards" section below
 4. **Setup development environment**: Follow installation instructions in [Installation Guide](INSTALLATION_GUIDE.md)
 
@@ -400,8 +400,8 @@ Click the "Fork" button at the top of the page to create your own copy of the re
 #### 2. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/sgh-crm-portal.git
-cd sgh-crm-portal
+git clone https://github.com/YOUR-USERNAME/bocam.git
+cd bocam
 ```
 
 #### 3. Create a New Branch

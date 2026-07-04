@@ -185,7 +185,7 @@
 للحصول على استفسارات أمنية عامة:
 
 - **البريد الإلكتروني:** abood22828@gmail.com
-- **GitHub Issues:** [إنشاء issue](https://github.com/abood22828/sgh-crm-portal/issues) (للمشاكل غير الحساسة فقط)
+- **GitHub Issues:** [إنشاء issue](https://github.com/wheb3543/bocam/issues) (للمشاكل غير الحساسة فقط)
 
 ---
 
@@ -370,7 +370,7 @@ This project complies with:
 For general security inquiries:
 
 - **Email:** abood22828@gmail.com
-- **GitHub Issues:** [Create issue](https://github.com/abood22828/sgh-crm-portal/issues) (for non-sensitive issues only)
+- **GitHub Issues:** [Create issue](https://github.com/wheb3543/bocam/issues) (for non-sensitive issues only)
 
 ---
 

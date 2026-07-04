@@ -81,8 +81,8 @@ redis-cli ping  # يجب أن يظهر PONG
 ### 1. استنساخ المستودع
 
 ```bash
-git clone https://github.com/abood22828/sgh-crm-portal.git
-cd sgh-crm-portal
+git clone https://github.com/wheb3543/bocam.git
+cd bocam
 ```
 
 ### 2. تثبيت الحزم
@@ -404,8 +404,8 @@ redis-cli ping  # Should return PONG
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/abood22828/sgh-crm-portal.git
-cd sgh-crm-portal
+git clone https://github.com/wheb3543/bocam.git
+cd bocam
 ```
 
 ### 2. Install Dependencies

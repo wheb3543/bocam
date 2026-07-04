@@ -226,7 +226,7 @@ docs/
 ## 📞 الدعم
 
 للحصول على المساعدة:
-- **GitHub Issues:** [إنشاء مشكلة](https://github.com/abood22828/sgh-crm-portal/issues)
+- **GitHub Issues:** [إنشاء مشكلة](https://github.com/wheb3543/bocam/issues)
 - **البريد الإلكتروني:** abood22828@gmail.com
 
 ---
@@ -453,7 +453,7 @@ These files are located in the project root:
 ## 📞 Support
 
 For help:
-- **GitHub Issues:** [Create an issue](https://github.com/abood22828/sgh-crm-portal/issues)
+- **GitHub Issues:** [Create an issue](https://github.com/wheb3543/bocam/issues)
 - **Email:** abood22828@gmail.com
 
 ---
