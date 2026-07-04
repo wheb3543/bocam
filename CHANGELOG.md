@@ -12,6 +12,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-07-01
+
+### Added | الإضافات
+
+#### 🧩 مكونات موحدة جديدة | New Unified Components
+- **SourceBadge** - مكون موحد لعرض مصدر التسجيل مع دعم UTM parameters
+  - أيقونات مخصصة لكل مصدر (فيسبوك، جوجل، واتساب، تيليجرام، إلخ)
+  - دعم UTM parameters (utmSource, utmMedium, utmCampaign)
+  - دعم fbclid و gclid للكشف التلقائي عن المصدر
+  - أحجام مختلفة (sm, md, lg)
+  - تطبيق في: AppointmentTableDesktop, OfferLeadsManagement, CampRegistrationsManagement, AppointmentsManagementPage
+
+- **FeatureGate** - مكون لحماية الميزات المدفوعة بناءً على الترخيص
+  - التحقق من تفعيل الميزة في الترخيص
+  - عرض واجهة احتياطية (fallback) عند عدم تفعيل الميزة
+  - أنواع مختلفة من الفولباك (card, minimal, inline)
+  - زر الترقية المخصص
+  - تطبيق في: WhatsAppAnalytics, WhatsAppOrdersPage
+
+- **GlobalSearch** - بحث عام في جميع البيانات مع اختصار لوحة المفاتيح
+  - بحث في العملاء، المواعيد، الحجوزات، تسجيلات المخيمات
+  - نتائج مصنفة حسب النوع
+  - اختصار Ctrl+K لفتح البحث
+  - عرض تفاصيل النتائج والتنقل المباشر
+  - تطبيق في: TopNavbar
+
+- **ResponsiveDialog** - dialog responsive يتحول إلى sheet على الجوال
+  - dialog قياسي على سطح المكتب
+  - sheet كامل الشاشة على الجوال
+  - تبديل تلقائي حسب حجم الشاشة
+  - تطبيق في: CampRegistrationsManagement
+
+- **DashboardLayoutSkeleton** - skeleton loader موحد لصفحات لوحة التحكم
+  - هيكل skeleton يطبع تخطيط لوحة التحكم
+  - حالة التحميل الموحدة
+  - تطبيق في: UsersManagementPage, AdvancedSettingsPage, SystemStatusPage, BackupManagementPage
+
+#### 🎯 تحسينات الأداء | Performance Improvements
+- تحويل المكونات الثقيلة في AdminDashboard إلى lazy-loaded components
+  - ManualRegistrationForm
+  - NotificationCenter
+  - SourceAnalytics
+  - QuickPatientSearch
+  - DetailedStatsCards
+  - DashboardCharts
+- استخدام Suspense مع fallback loaders لجميع المكونات المحملة بتأخير
+
+#### 📊 تحسينات العرض | UI Improvements
+- استخدام AnimatedCounter في DigitalMarketingTasksPage لعرض إحصائيات المهام
+- استبدال Badge بـ SourceBadge في جميع جداول الحجوزات لعرض أفضل للمصدر
+
+---
+
 ## [1.3.2] - 2026-06-18
 
 ### Fixed | الإصلاحات

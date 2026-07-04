@@ -79,6 +79,16 @@ export default [
         IDBOpenDBRequest: 'readonly',
         Location: 'readonly',
         HTMLFormElement: 'readonly',
+        // Service Worker globals
+        self: 'readonly',
+        Response: 'readonly',
+        clients: 'readonly',
+        Cache: 'readonly',
+        CacheStorage: 'readonly',
+        ExtendableEvent: 'readonly',
+        FetchEvent: 'readonly',
+        ServiceWorkerRegistration: 'readonly',
+        ServiceWorkerGlobalScope: 'readonly',
       },
     },
     plugins: {

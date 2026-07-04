@@ -2,7 +2,7 @@
 
 تم إنشاء هذا المستند لتوثيق جميع المتغيرات غير المستخدمة في المشروع (433 تحذير @typescript-eslint/no-unused-vars)
 
-**آخر تحديث:** تم إكمال المرحلة 1 من خطة العمل (2026-06-30)
+**آخر تحديث:** تم إكمال المرحلة 3 - تنظيف الكود (2026-07-03)
 
 ## جدول المتغيرات غير المستخدمة
 
@@ -147,29 +147,77 @@
    - DoctorDetailPage: إضافة useFormatDate واستخدامه
    - AppointmentCard: استخدام formatDate لتنسيق التواريخ
 
-#### المرحلة 2: تنظيف الكود (2-3 أسابيع)
-1. إزالة المكونات غير المستخدمة
-2. إزالة الأيقونات غير المستخدمة
-3. إزالة الثوابت غير المستخدمة
-4. إزالة الأنواع المكررة
+#### المرحلة 2: إضافة المكونات الموحدة ✅ مكتملة (2026-07-01)
+1. ✅ إضافة SourceBadge لعرض مصدر التسجيل
+   - استبدال Badge بـ SourceBadge في AppointmentTableDesktop
+   - استبدال Badge بـ SourceBadge في OfferLeadsManagement
+   - استبدال Badge بـ SourceBadge في CampRegistrationsManagement
+   - استبدال Badge بـ SourceBadge في AppointmentsManagementPage
+2. ✅ إضافة FeatureGate لحماية الميزات المدفوعة
+   - إضافة FeatureGate إلى WhatsAppAnalytics
+   - إضافة FeatureGate إلى WhatsAppOrdersPage
+3. ✅ إضافة GlobalSearch للبحث العام
+   - إضافة GlobalSearch إلى TopNavbar
+4. ✅ إضافة ResponsiveDialog للحوارات المتجاوبة
+   - استبدال Dialog بـ ResponsiveDialog في CampRegistrationsManagement
+5. ✅ إضافة DashboardLayoutSkeleton لحالات التحميل
+   - استبدال حالات التحميل بـ DashboardLayoutSkeleton في UsersManagementPage
+   - استبدال حالات التحميل بـ DashboardLayoutSkeleton في AdvancedSettingsPage
+   - استبدال حالات التحميل بـ DashboardLayoutSkeleton في SystemStatusPage
+   - استبدال حالات التحميل بـ DashboardLayoutSkeleton في BackupManagementPage
+6. ✅ تحسين الأداء باستخدام lazy-loaded components
+   - تحويل ManualRegistrationForm إلى lazy-loaded
+   - تحويل NotificationCenter إلى lazy-loaded
+   - تحويل SourceAnalytics إلى lazy-loaded
+   - تحويل QuickPatientSearch إلى lazy-loaded
+   - تحويل DetailedStatsCards إلى lazy-loaded
+   - تحويل DashboardCharts إلى lazy-loaded
 
-#### المرحلة 3: المراجعة النهائية (1 أسبوع)
-1. تشغيل ESLint للتأكد من إزالة جميع المتغيرات غير المستخدمة
-2. مراجعة الميزات المستقبلية المخطط لها
-3. تحديث هذا المستند
+#### المرحلة 3: تنظيف الكود ✅ مكتملة (2026-07-03)
+1. ✅ إزالة المكونات غير المستخدمة
+   - إزالة Card, Navbar, Footer, DialogTrigger, Table من الاستيرادات
+2. ✅ إزالة الأيقونات غير المستخدمة
+   - إزالة Phone, Unlink, X, Star من الاستيرادات
+3. ✅ إزالة الثوابت غير المستخدمة
+   - إزالة SOURCE_COLORS, utils من الاستيرادات
+4. ✅ إزالة الأنواع المكررة
+   - إزالة Lead, Appointment, OfferLead, CampRegistration المكررة
+   - إزالة WhatsAppMessage, QuickReply المكررة
+5. ✅ إزالة دوال غير مستخدمة
+   - إزالة useCallback, formatDateTime, getWhatsAppLink, getCallLink
+   - إزالة getMessageTimestamp, getRecordIcon
+
+#### المرحلة 4: المراجعة النهائية ✅ مكتملة (2026-07-03)
+1. ✅ تشغيل ESLint للتأكد من إزالة جميع المتغيرات غير المستخدمة
+   - تم إزالة جميع تحذيرات unused-vars من جانب العميل
+   - ✅ تم إصلاح تحذيرات Service Worker (sw.js, sw-admin.js, admin/sw-admin.js)
+     - إضافة متغيرات Service Worker إلى ESLint config (self, Response, clients, Cache, etc.)
+     - إزالة OFFLINE_URL غير المستخدم من sw-admin.js و admin/sw-admin.js
+     - إصلاح معاملات catch غير المستخدمة
+   - التحذيرات المتبقية في ملفات الخادم خارج نطاق المهمة
+2. ✅ مراجعة الميزات المستقبلية المخطط لها
+   - تم توثيق الميزات المستقبلية في الجدول
+3. ✅ تحديث هذا المستند
 
 ## الإحصائيات
 
 - **إجمالي المتغيرات غير المستخدمة:** 433 تحذير (تم تقليلها في المرحلة 1)
-- **المكونات غير المستخدمة:** ~10
-- **الأيقونات غير المستخدمة:** ~6
-- **دوال تنسيق الهواتف:** ~4 (تم استخدام 3 منها)
-- **دوال تنسيق التاريخ:** ~3 (تم استخدام 2 منها)
-- **الثوابت غير المستخدمة:** ~5
+- **المكونات غير المستخدمة:** ~10 ✅ تم تنظيفها
+- **الأيقونات غير المستخدمة:** ~6 ✅ تم تنظيفها
+- **دوال تنسيق الهواتف:** ~4 (تم استخدام 3 منها) ✅ تم تنظيفها
+- **دوال تنسيق التاريخ:** ~3 (تم استخدام 2 منها) ✅ تم تنظيفها
+- **الثوابت غير المستخدمة:** ~5 ✅ تم تنظيفها
 - **متغيرات SEO:** ~6 (تم استخدام 2 منها)
-- **أنواع TypeScript:** ~5
-- **Mutations و Hooks:** ~3
-- **متغيرات أخرى:** ~10
+- **أنواع TypeScript:** ~5 ✅ تم تنظيفها
+- **Mutations و Hooks:** ~3 ✅ تم تنظيفها
+- **متغيرات أخرى:** ~10 ✅ تم تنظيفها
+
+## التقدم
+
+- ✅ المرحلة 1: تحليل المتغيرات غير المستخدمة
+- ✅ المرحلة 2: إضافة المكونات الموحدة
+- ✅ المرحلة 3: تنظيف الكود
+- ✅ المرحلة 4: المراجعة النهائية
 
 ## الملاحظات
 
@@ -181,5 +229,5 @@
 ## تاريخ التحديث
 
 - **تاريخ الإنشاء:** 2026-06-29
-- **آخر تحديث:** 2026-06-30 (إكمال المرحلة 1)
+- **آخر تحديث:** 2026-07-01 (إكمال المرحلة 2 - إضافة المكونات الموحدة)
 - **المسؤول:** Cascade AI Assistant

@@ -1,0 +1,23 @@
+# Medical CRM Project Context: React 19, TypeScript 5.9, Tailwind 4, tRPC 11, Drizzle ORM, MySQL [README.md]
+# Objective: Maximize free plan token saving while strictly adhering to the tech stack.
+
+[Strict Cost-Saving Directives]
+1. ULTRA-CONCISE RESPONSES: Provide code-only or hyper-focused answers. Skip introductory or concluding polite phrases.
+2. CODE SNIPPETS ONLY: Print ONLY the specific lines or functions modified. Never reprint the entire file.
+3. NO AUTO-LOOPING: Stop completely after the immediate task is done. Never run proactive background CLI or cloud validation agents.
+4. SCAN RESTRAINT: Do not read heavy directories like 'node_modules', '.next', '.vite', or 'dist'.
+
+[Frontend Stack Rules (React 19 + Tailwind 4 + Wouter)]
+1. STYLING: Use Tailwind CSS v4 native utility classes. Keep styles inline.
+2. UI COMPONENTS: Use shadcn/ui components. Use Lucide React for icons.
+3. ROUTING & DATA: Use Wouter for client-side routing. Use TanStack Query for data fetching, but leverage tRPC v11 hooks where possible.
+4. FORMS: Manage forms with React Hook Form and Zod for validation schemas.
+
+[Backend & Database Stack Rules (Node.js + tRPC 11 + Drizzle)]
+1. TYPE SAFETY: End-to-end type safety via tRPC v11 is mandatory.
+2. DATABASE: Use Drizzle ORM syntax for MySQL queries. Never write raw SQL unless requested.
+3. AUTHENTICATION: Secure all procedures using Manus OAuth or JWT middleware.
+4. SCHEMAS: Strictly reference existing Drizzle table schemas when writing queries.
+
+[Project Domains to Respect]
+- Contexts: Marketing Campaigns, Appointments, Patient Portal, WhatsApp Business API, Tasks/Projects, Audit Logs [README.md].

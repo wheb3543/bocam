@@ -673,16 +673,93 @@
 ---
 
 ### SourceBadge
-**الوصف**: badge لعرض مصدر التسجيل
+**الوصف**: badge لعرض مصدر التسجيل مع دعم UTM parameters
 
 **المحتوى**:
 - ألوان مختلفة حسب المصدر
-- أيقونات مخصصة
+- أيقونات مخصصة لكل مصدر (فيسبوك، جوجل، واتساب، تيليجرام، إلخ)
+- دعم UTM parameters (utmSource, utmMedium, utmCampaign)
+- دعم fbclid و gclid للكشف التلقائي عن المصدر
+- أحجام مختلفة (sm, md, lg)
+- عرض تفاصيل إضافية اختياري
 
 **أماكن التطبيق**:
-- جميع الجداول والبطاقات
+- `AppointmentTableDesktop` - جدول المواعيد
+- `OfferLeadsManagement` - جدول حجوزات العروض
+- `CampRegistrationsManagement` - جدول تسجيلات المخيمات
+- `AppointmentsManagementPage` - صفحة إدارة المواعيد
 
 **المسار**: `client/src/components/SourceBadge.tsx`
+
+---
+
+### FeatureGate
+**الوصف**: مكون لحماية الميزات المدفوعة بناءً على الترخيص
+
+**المحتوى**:
+- التحقق من تفعيل الميزة في الترخيص
+- عرض واجهة احتياطية (fallback) عند عدم تفعيل الميزة
+- أنواع مختلفة من الفولباك (card, minimal, inline)
+- زر الترقية المخصص
+- دعم RTL
+
+**أماكن التطبيق**:
+- `WhatsAppAnalytics` - حماية صفحة تحليلات واتساب
+- `WhatsAppOrdersPage` - حماية صفحة طلبات واتساب
+
+**المسار**: `client/src/components/FeatureGate.tsx`
+
+---
+
+### GlobalSearch
+**الوصف**: بحث عام في جميع البيانات مع اختصار لوحة المفاتيح
+
+**المحتوى**:
+- بحث في العملاء، المواعيد، الحجوزات، تسجيلات المخيمات
+- نتائج مصنفة حسب النوع
+- اختصار Ctrl+K لفتح البحث
+- عرض تفاصيل النتائج
+- التنقل المباشر للنتائج
+
+**أماكن التطبيق**:
+- `TopNavbar` - شريط التنقل العلوي في لوحة التحكم
+
+**المسار**: `client/src/components/GlobalSearch.tsx`
+
+---
+
+### ResponsiveDialog
+**الوصف**: dialog responsive يتحول إلى sheet على الجوال
+
+**المحتوى**:
+- dialog قياسي على سطح المكتب
+- sheet كامل الشاشة على الجوال
+- تبديل تلقائي حسب حجم الشاشة
+- دعم RTL
+- header و footer مخصصين
+
+**أماكن التطبيق**:
+- `CampRegistrationsManagement` - حوارات تحديث الحالة والتفاصيل
+
+**المسار**: `client/src/components/ResponsiveDialog.tsx`
+
+---
+
+### DashboardLayoutSkeleton
+**الوصف**: skeleton loader موحد لصفحات لوحة التحكم
+
+**المحتوى**:
+- هيكل skeleton يطبع تخطيط لوحة التحكم
+- حالة التحميل الموحدة
+- دعم RTL
+
+**أماكن التطبيق**:
+- `UsersManagementPage` - صفحة إدارة المستخدمين
+- `AdvancedSettingsPage` - صفحة الإعدادات المتقدمة
+- `SystemStatusPage` - صفحة حالة النظام
+- `BackupManagementPage` - صفحة إدارة النسخ الاحتياطية
+
+**المسار**: `client/src/components/layout/DashboardLayoutSkeleton.tsx`
 
 ---
 
