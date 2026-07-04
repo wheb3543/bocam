@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getRegistrationSource, getTrackingData, initializeTracking, saveTrackingData, getSavedTrackingData, getSourceDisplayName, getCompleteTrackingData } from "@/lib/tracking/tracking";
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { getRegistrationSource, getTrackingData, saveTrackingData, getSavedTrackingData, getSourceDisplayName } from "@/lib/tracking/tracking";
 
 interface WindowWithLocation extends Window {
   location?: Location;

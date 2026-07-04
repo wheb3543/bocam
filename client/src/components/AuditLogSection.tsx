@@ -29,21 +29,6 @@ const actionLabels: Record<string, string> = {
   delete: 'حذف',
 };
 
-function formatDateTime(date: string | Date | null | undefined) {
-  if (!date) {return '-';}
-  try {
-    return new Date(date).toLocaleString('ar-EG', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return '-';
-  }
-}
-
 interface AuditLog {
   id: number;
   action?: string;
@@ -61,7 +46,7 @@ interface AuditLogSectionProps {
 }
 
 export default function AuditLogSection({ entityType, entityId }: AuditLogSectionProps) {
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDateTime } = useFormatDate();
   const { data: logs, isLoading } = trpc.auditLogs.getByEntity.useQuery(
     { entityType, entityId },
     { enabled: !!entityId }

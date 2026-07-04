@@ -2,7 +2,7 @@
  * Tests for Facebook Conversions API helper (facebookCAPI.ts)
  * Validates pixel ID format and hashing logic without making real API calls.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import crypto from "crypto";
 
 // ─── Helpers (duplicated from facebookCAPI.ts for unit testing) ───────────────

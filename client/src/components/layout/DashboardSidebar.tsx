@@ -57,7 +57,7 @@ import { useNotificationSound } from '@/hooks/integrations/useNotificationSound'
 import { useLicense } from '@/hooks/integrations/useLicense';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { APP_TITLE, APP_LOGO, COMPANY_ARABIC_NAME } from '@/const';
+import { APP_LOGO, COMPANY_ARABIC_NAME } from '@/const';
 import {
   DndContext,
   closestCenter,
@@ -756,7 +756,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
   );
 
   // Edit mode: combined list of checked (ordered) + unchecked items
-  const editOrderedItems = useMemo(() => {
+  const _editOrderedItems = useMemo(() => {
     const checkedItems = editingItemIds
       .map((id) => allNavItems.find((item) => item.id === id))
       .filter((item): item is NavItem => item !== undefined)
@@ -1143,7 +1143,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
             <div className="py-2 px-3">
               {filteredGroups.map((group, index) => {
                 const isExpanded = expandedGroups[group.label] !== false;
-                const GroupIcon = group.icon;
+                const _GroupIcon = group.icon;
 
                 return (
                   <div key={group.label}>
@@ -1429,7 +1429,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
             </button>
 
             {/* Groups */}
-            {(searchQuery ? filteredGroups : filteredToolsGroups).map((group, index) => {
+            {(searchQuery ? filteredGroups : filteredToolsGroups).map((group, _index) => {
               const isExpanded = expandedGroups[group.label] !== false;
               const hasActiveItem = group.items.some((item) => isItemActive(item.href));
 

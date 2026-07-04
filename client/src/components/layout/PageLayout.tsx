@@ -10,7 +10,6 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import InstallPWAButton from '@/components/InstallPWAButton';
-import { APP_LOGO } from '@/const';
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -30,7 +29,7 @@ export default function PageLayout({
   keywords,
   image = '/sgh-logo-full.png',
   showInstallPWA = true,
-  showBackToTop = true,
+  showBackToTop: _showBackToTop = true,
   className = '',
 }: PageLayoutProps) {
   return (

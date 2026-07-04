@@ -8,10 +8,8 @@ import {
   appointmentStatusLabels,
   appointmentStatusColors,
   campaignStatusLabels,
-  campaignStatusColors,
   campaignTypeLabels,
   campRegistrationStatusLabels,
-  campRegistrationStatusColors,
 } from "@/hooks/data/useStatusLabels";
 
 describe("useStatusLabels hook", () => {

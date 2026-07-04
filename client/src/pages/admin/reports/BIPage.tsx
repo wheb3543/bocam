@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/select';
 import {
   TrendingUp,
-  TrendingDown,
   Users,
   Target,
   Phone,
@@ -32,7 +31,6 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Minus,
-  Filter,
   Download,
   Calendar,
 } from 'lucide-react';
@@ -51,8 +49,7 @@ import {
   Line,
   Legend,
 } from 'recharts';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { format, subDays } from 'date-fns';
 import { toast } from 'sonner';
 
 // ألوان موحدة
@@ -419,7 +416,6 @@ export default function BIPage() {
 
   // Calculate previous period for comparison
   const { start: prevStart, end: prevEnd } = useMemo(() => {
-    const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
     const currentEnd = new Date(end);
     const currentStart = new Date(start);
     const duration = currentEnd.getTime() - currentStart.getTime();
@@ -431,7 +427,7 @@ export default function BIPage() {
       start: previousStart.toISOString(),
       end: previousEnd.toISOString(),
     };
-  }, [dateRange, start, end]);
+  }, [start, end]);
 
   const {
     data: funnelData,
@@ -441,7 +437,7 @@ export default function BIPage() {
     { startDate: start, endDate: end },
     { refetchInterval: autoRefresh ? 60000 : false }
   );
-  const { data: prevFunnelData, isLoading: prevFunnelLoading } =
+  const { data: prevFunnelData } =
     trpc.tracking.conversionFunnel.useQuery(
       { startDate: prevStart, endDate: prevEnd },
       { enabled: !!start && !!end }
@@ -847,7 +843,7 @@ export default function BIPage() {
                             />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value, name) => [value, 'الزيارات']} />
+                        <Tooltip formatter={(value, _name) => [value, 'الزيارات']} />
                       </PieChart>
                     </ResponsiveContainer>
                   ) : (

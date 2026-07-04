@@ -14,7 +14,7 @@ import { useEffect } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lock, Crown, Sparkles, ArrowRight, Phone, Mail, Home, ShieldCheck } from 'lucide-react';
+import { Lock, Crown, Sparkles, Phone, Home, ShieldCheck } from 'lucide-react';
 import { useLicense } from '@/hooks/integrations/useLicense';
 import { APP_TITLE, COMPANY_PHONE } from '@/const';
 

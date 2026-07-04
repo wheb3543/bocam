@@ -9,14 +9,13 @@ import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { getCompanyName } from '@/const';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Loader2, Gift, Calendar, Phone, Mail, User, CheckCircle } from 'lucide-react';
 import { getRegistrationSource } from '@/lib/tracking/tracking';
-import { APP_LOGO, APP_TITLE } from '@/const';
 import PageLayout from '@/components/layout/PageLayout';
 import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
@@ -24,7 +23,6 @@ import SectionDivider from '@/components/SectionDivider';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
-import TextShimmer from '@/components/TextShimmer';
 
 interface OfferFormData {
   fullName: string;
@@ -48,7 +46,7 @@ export default function OffersPage() {
 }
 
 function OffersPageContent() {
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
   const { validateYemeniPhone, processPhoneInput } = usePhoneFormat();
   const [selectedOffer, setSelectedOffer] = useState<number | null>(null);
   const [formData, setFormData] = useState<OfferFormData>({

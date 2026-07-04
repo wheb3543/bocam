@@ -51,14 +51,12 @@ export default function OfferDetailPage() {
 
 function OfferDetailContent({ slug }: { slug: string }) {
   const {
-    formatPhoneDisplay,
-    getWhatsAppLink,
     getCallLink,
     validateYemeniPhone,
     processPhoneInput,
   } = usePhoneFormat();
   const { getSavedPatientInfo, savePatientInfo } = usePatientStorage();
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
   const [, setLocation] = useLocation();
   const [phoneError, setPhoneError] = useState<string>('');
 

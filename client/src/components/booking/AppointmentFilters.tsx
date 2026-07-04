@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import MultiSelect from '@/components/form/MultiSelect';
 import SavedFilters from '@/components/SavedFilters';
 import { ColumnVisibility, type ColumnConfig } from '@/components/table/ColumnVisibility';

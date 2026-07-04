@@ -38,7 +38,6 @@ export default function SavedFilters({
   const [filterName, setFilterName] = useState('');
 
   const { data: savedFilters, refetch } = trpc.savedFilters.list.useQuery({ pageType: pageKey });
-  const utils = trpc.useUtils();
 
   const createMutation = trpc.savedFilters.create.useMutation({
     onSuccess: () => {

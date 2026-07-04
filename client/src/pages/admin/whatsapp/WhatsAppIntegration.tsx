@@ -21,9 +21,6 @@ import {
   Send,
   MessageSquare,
   RefreshCw,
-  Copy,
-  Check,
-  Search,
   Ban,
   TrendingUp,
   Clock,
@@ -51,7 +48,6 @@ export default function WhatsAppIntegration() {
   const [templateName, setTemplateName] = useState('sgh_welcome_greeting_ar');
   const [parameters, setParameters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [sentMessages, setSentMessages] = useState<Record<string, unknown>[]>([]);
@@ -62,7 +58,7 @@ export default function WhatsAppIntegration() {
     isLoading: templatesLoading,
     refetch: refetchTemplates,
   } = trpc.whatsappTemplateTest.listApprovedTemplates.useQuery();
-  const { data: templateDetails, isLoading: detailsLoading } =
+  const { data: templateDetails, isLoading: _detailsLoading } =
     trpc.whatsappTemplateTest.getTemplateDetails.useQuery(
       { templateName },
       { enabled: !!templateName }
@@ -120,7 +116,7 @@ export default function WhatsAppIntegration() {
       } else {
         toast.error(`❌ ${result.error}`);
       }
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ في الإرسال');
     } finally {
       setIsLoading(false);
@@ -174,18 +170,16 @@ export default function WhatsAppIntegration() {
       } else {
         toast.error(`❌ ${result.error}`);
       }
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ في الإرسال');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const copyToClipboard = (text: string, id: string) => {
+  const _copyToClipboard = (text: string, _id: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedId(id);
     toast.success('تم النسخ!');
-    setTimeout(() => setCopiedId(null), 2000);
   };
 
   // Filter templates

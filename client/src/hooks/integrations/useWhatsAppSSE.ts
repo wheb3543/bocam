@@ -427,7 +427,7 @@ export function useWhatsAppSSE({
         default:
           break;
       }
-    } catch (_) {}
+    } catch {}
   }, []);
 
   // ── معالج أحداث المحادثة (conversation channel) ───────────────────────────
@@ -466,7 +466,7 @@ export function useWhatsAppSSE({
         default:
           break;
       }
-    } catch (_) {}
+    } catch {}
   }, []);
 
   // ── الاشتراك في القناة العامة ──────────────────────────────────────────────

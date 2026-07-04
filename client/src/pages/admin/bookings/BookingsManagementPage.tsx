@@ -40,12 +40,12 @@ import { useLocation } from 'wouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { SOURCE_LABELS } from '@shared/sources';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
-import type { Lead, Appointment, AppointmentWithDoctor, OfferLead, CampRegistration } from '@shared/types';
+import type { Lead, AppointmentWithDoctor } from '@shared/types';
 
 export default function BookingsManagementPage() {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime } = useFormatDate();
-  const { user } = useAuth();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const { formatDate } = useFormatDate();
+  useAuth();
   const utils = trpc.useUtils();
   const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<
@@ -407,7 +407,7 @@ export default function BookingsManagementPage() {
                   )}
                   <p className="text-sm">
                     <span className="font-medium">تاريخ التسجيل:</span>{' '}
-                    {formatDateTime(selectedLead.createdAt)}
+                    {formatDate(selectedLead.createdAt)}
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -534,7 +534,7 @@ export default function BookingsManagementPage() {
                         )}
                         <p className="text-sm">
                           <span className="font-medium">تاريخ التسجيل:</span>{' '}
-                          {formatDateTime(selectedAppointment.createdAt)}
+                          {formatDate(selectedAppointment.createdAt)}
                         </p>
                       </div>
                       <div className="space-y-2">

@@ -6,6 +6,7 @@
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import FeatureGate from '@/components/FeatureGate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -131,7 +132,8 @@ export default function WhatsAppAnalytics() {
 
   return (
     <DashboardLayout pageTitle="تحليلات WhatsApp" pageDescription="مراقبة الإحصائيات والأداء">
-      <div className="space-y-6">
+      <FeatureGate feature="whatsapp">
+        <div className="space-y-6">
         {/* Header with Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -548,6 +550,7 @@ export default function WhatsAppAnalytics() {
           </CardContent>
         </Card>
       </div>
+      </FeatureGate>
     </DashboardLayout>
   );
 }

@@ -133,7 +133,7 @@ self.addEventListener('push', (event) => {
     if (event.data) {
       data = { ...data, ...JSON.parse(event.data.text()) };
     }
-  } catch (e) {
+  } catch {
     data.body = event.data ? event.data.text() : 'إشعار جديد';
   }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { DashboardLayoutSkeleton } from '@/components/DashboardLayoutSkeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -80,7 +81,7 @@ export default function AdvancedSettingsPage() {
       // In production, this would call an API endpoint
       await new Promise((resolve) => setTimeout(resolve, 1000));
       alert('تم حفظ الإعدادات بنجاح');
-    } catch (error) {
+    } catch {
       alert('فشل حفظ الإعدادات');
     } finally {
       setIsSaving(false);
@@ -98,13 +99,7 @@ export default function AdvancedSettingsPage() {
   };
 
   if (isLoading) {
-    return (
-      <DashboardLayout pageTitle="الإعدادات المتقدمة" pageDescription="إعدادات النظام المتقدمة">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <RefreshCw className="h-8 w-8 animate-spin" />
-        </div>
-      </DashboardLayout>
-    );
+    return <DashboardLayoutSkeleton />;
   }
 
   if (!config) {

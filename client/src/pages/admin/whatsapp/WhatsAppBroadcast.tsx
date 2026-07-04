@@ -75,7 +75,7 @@ export default function WhatsAppBroadcast() {
       } else {
         toast.error(result.error || 'فشل إرسال البث');
       }
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ أثناء إرسال البث');
     } finally {
       setIsLoading(false);

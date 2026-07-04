@@ -14,10 +14,8 @@ import {
   Stethoscope,
   Search,
   Link2,
-  Unlink,
   Save,
   CheckCircle,
-  X,
 } from 'lucide-react';
 import {
   Dialog,

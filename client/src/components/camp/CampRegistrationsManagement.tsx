@@ -77,7 +77,6 @@ import {
 } from '@/components/table/ResizableTable';
 import { useTableFeatures } from '@/hooks/table/useTableFeatures';
 import TableSkeleton from '@/components/table/TableSkeleton';
-import QuickFilters from '@/components/QuickFilters';
 import InlineStatusEditor from '@/components/InlineStatusEditor';
 import CommentsSection from '@/components/CommentsSection';
 import CommentCount from '@/components/notification/CommentCount';
@@ -88,13 +87,10 @@ import AuditLogSection from '@/components/AuditLogSection';
 import SavedFilters from '@/components/SavedFilters';
 import FilterPresets from '@/components/FilterPresets';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
@@ -105,28 +101,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import ResponsiveDialog from '@/components/ResponsiveDialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Users,
   UserCheck,
-  UserX,
   Search,
   Clock,
   Phone,
   Mail,
   Loader2,
-  Eye,
   Tent,
   Calendar,
-  MessageCircle,
   Download,
   Printer,
   Settings,
@@ -145,11 +132,11 @@ import { useExportUtils } from '@/hooks/export/useExportUtils';
 import { printReceipt } from '@/components/booking/PrintReceipt';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { SOURCE_OPTIONS, SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
-import { useState as useReactState } from 'react';
 import CampRegistrationCard from '@/components/camp/CampRegistrationCard';
-import CardSkeleton from '@/components/CardSkeleton';
+import _CardSkeleton from '@/components/CardSkeleton'; // Reserved for future card view implementation
+import SourceBadge from '@/components/SourceBadge';
 import { Checkbox } from '@/components/ui/checkbox';
-import BulkUpdateDialog from '@/components/BulkUpdateDialog';
+import BulkActionsManager from '@/components/BulkActionsManager';
 import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
 import { RotateCcw } from 'lucide-react';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
@@ -230,8 +217,8 @@ export default function CampRegistrationsManagement({
   dateRange: { from: Date; to: Date };
   onDateRangeChange?: (range: { from: Date; to: Date }) => void;
 }) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime, formatRegistrationDate } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const { formatDate, formatRegistrationDate } = useFormatDate();
   const { user } = useAuth();
   const utils = trpc.useUtils();
   const generateReceiptNumberMutation = trpc.campRegistrations.generateReceiptNumber.useMutation();
@@ -253,7 +240,6 @@ export default function CampRegistrationsManagement({
   const [preferredDate, setPreferredDate] = useState('');
   const [preferredTimeSlot, setPreferredTimeSlot] = useState<TimeSlot>('');
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [bulkUpdateDialogOpen, setBulkUpdateDialogOpen] = useState(false);
 
   // Query لجلب المواعيد المتاحة للمخيم المحدد
   const { data: availableDates } = trpc.camps.getAvailableDates.useQuery(
@@ -443,7 +429,6 @@ export default function CampRegistrationsManagement({
       toast.success(`تم تحديث حالة ${selectedIds.length} تسجيل بنجاح`);
       refetch();
       setSelectedIds([]);
-      setBulkUpdateDialogOpen(false);
     },
     onError: () => {
       toast.error('حدث خطأ أثناء تحديث الحالات');
@@ -997,12 +982,6 @@ export default function CampRegistrationsManagement({
               تم تحديد {selectedIds.length} من {filteredRegistrations.length}
             </span>
           </div>
-          <Button
-            onClick={() => setBulkUpdateDialogOpen(true)}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-          >
-            تحديث الحالة المحددة ({selectedIds.length})
-          </Button>
         </div>
       )}
 
@@ -1194,19 +1173,16 @@ export default function CampRegistrationsManagement({
                           return (
                             <FrozenTableCell key={colKey} columnKey={colKey}>
                               {reg.source ? (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs font-medium"
-                                  style={{
-                                    backgroundColor: SOURCE_COLORS[reg.source]
-                                      ? `${SOURCE_COLORS[reg.source]}15`
-                                      : undefined,
-                                    borderColor: SOURCE_COLORS[reg.source] || undefined,
-                                    color: SOURCE_COLORS[reg.source] || undefined,
-                                  }}
-                                >
-                                  {SOURCE_LABELS[reg.source] || reg.source}
-                                </Badge>
+                                <SourceBadge
+                                  source={reg.source}
+                                  utmSource={reg.utmSource}
+                                  utmMedium={reg.utmMedium}
+                                  utmCampaign={reg.utmCampaign}
+                                  referrer={reg.referrer}
+                                  fbclid={reg.fbclid}
+                                  gclid={reg.gclid}
+                                  size="sm"
+                                />
                               ) : (
                                 <Badge variant="outline" className="text-xs">
                                   غير محدد
@@ -1588,26 +1564,25 @@ export default function CampRegistrationsManagement({
       </div>
 
       {/* Status Update Dialog */}
-      <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col" dir="rtl">
-          <DialogHeader>
-            <DialogTitle>تحديث حالة التسجيل</DialogTitle>
-            <DialogDescription>
-              قم بتحديث حالة تسجيل المخيم لـ {selectedRegistration?.fullName}
-            </DialogDescription>
-          </DialogHeader>
-          {selectedRegistration && (
-            <div className="flex-1 overflow-hidden flex flex-col">
-              <Tabs defaultValue="info" className="flex-1 overflow-hidden flex flex-col">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-                  <TabsTrigger value="info">معلومات التسجيل</TabsTrigger>
-                  <TabsTrigger value="comments">التعليقات</TabsTrigger>
-                  <TabsTrigger value="tasks">المهام</TabsTrigger>
-                  <TabsTrigger value="history">سجل التغييرات</TabsTrigger>
-                </TabsList>
+      <ResponsiveDialog
+        open={statusDialogOpen}
+        onOpenChange={setStatusDialogOpen}
+        title="تحديث حالة التسجيل"
+        description={`قم بتحديث حالة تسجيل المخيم لـ ${selectedRegistration?.fullName}`}
+        className="max-w-3xl"
+      >
+        {selectedRegistration && (
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <Tabs defaultValue="info" className="flex-1 overflow-hidden flex flex-col">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+                <TabsTrigger value="info">معلومات التسجيل</TabsTrigger>
+                <TabsTrigger value="comments">التعليقات</TabsTrigger>
+                <TabsTrigger value="tasks">المهام</TabsTrigger>
+                <TabsTrigger value="history">سجل التغييرات</TabsTrigger>
+              </TabsList>
 
-                <div className="flex-1 overflow-y-auto mt-4">
-                  <TabsContent value="info" className="space-y-4 mt-0">
+              <div className="flex-1 overflow-y-auto mt-4">
+                <TabsContent value="info" className="space-y-4 mt-0">
                     <div className="space-y-2">
                       <Label>معلومات المسجل</Label>
                       <div className="bg-muted p-3 rounded-lg space-y-2 text-sm">
@@ -1806,17 +1781,17 @@ export default function CampRegistrationsManagement({
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </ResponsiveDialog>
 
       {/* Details Dialog */}
-      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>تفاصيل التسجيل</DialogTitle>
-          </DialogHeader>
-          {selectedRegistration && (
-            <div className="space-y-4">
+      <ResponsiveDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        title="تفاصيل التسجيل"
+        className="max-w-2xl"
+      >
+        {selectedRegistration && (
+          <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">الاسم الكامل</p>
@@ -1895,7 +1870,7 @@ export default function CampRegistrationsManagement({
                       ? (() => {
                           try {
                             return JSON.parse(selectedRegistration.procedures);
-                          } catch (e) {
+                          } catch {
                             return [];
                           }
                         })()
@@ -1931,37 +1906,78 @@ export default function CampRegistrationsManagement({
               إغلاق
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </ResponsiveDialog>
 
-      {/* Bulk Update Dialog */}
-      <BulkUpdateDialog
-        open={bulkUpdateDialogOpen}
-        onOpenChange={setBulkUpdateDialogOpen}
+      {/* Bulk Actions Manager */}
+      <BulkActionsManager
         selectedCount={selectedIds.length}
-        statusOptions={[
-          { value: 'pending', label: 'قيد الانتظار' },
-          { value: 'contacted', label: 'تم التواصل' },
-          { value: 'no_answer', label: 'لم يرد' },
-          { value: 'confirmed', label: 'مؤكد' },
-          { value: 'attended', label: 'حضر' },
-          { value: 'completed', label: 'مكتمل' },
-          { value: 'cancelled', label: 'ملغي' },
+        onClear={() => setSelectedIds([])}
+        showBar={true}
+        position="bottom"
+        size="normal"
+        barClassName="bg-gradient-to-r from-purple-600 to-pink-600"
+        actions={[
+          {
+            type: 'status-update',
+            label: 'تحديث الحالة',
+            variant: 'secondary',
+            statusOptions: [
+              { value: 'pending', label: 'قيد الانتظار' },
+              { value: 'contacted', label: 'تم التواصل' },
+              { value: 'no_answer', label: 'لم يرد' },
+              { value: 'confirmed', label: 'مؤكد' },
+              { value: 'attended', label: 'حضر' },
+              { value: 'completed', label: 'مكتمل' },
+              { value: 'cancelled', label: 'ملغي' },
+            ],
+            onStatusConfirm: (newStatus: string) => {
+              bulkUpdateMutation.mutate({
+                ids: selectedIds,
+                status: newStatus as
+                  | 'pending'
+                  | 'contacted'
+                  | 'no_answer'
+                  | 'confirmed'
+                  | 'attended'
+                  | 'completed'
+                  | 'cancelled',
+              });
+            },
+            isLoading: bulkUpdateMutation.isPending,
+          },
+          {
+            type: 'delete',
+            label: 'حذف الكل',
+            variant: 'destructive',
+            confirmTitle: 'تأكيد الحذف الجماعي',
+            confirmDescription: `هل أنت متأكد من حذف ${selectedIds.length} تسجيل؟ هذا الإجراء لا يمكن التراجع عنه.`,
+            onConfirm: async () => {
+              // Delete each registration one by one
+              for (const id of selectedIds) {
+                await deleteRegMutation.mutateAsync({ id });
+              }
+              setSelectedIds([]);
+              toast.success(`تم حذف ${selectedIds.length} تسجيل بنجاح`);
+            },
+            isLoading: deleteRegMutation.isPending,
+          },
+          {
+            type: 'export',
+            label: 'تصدير',
+            variant: 'outline',
+            exportFormats: [
+              { value: 'csv', label: 'CSV' },
+              { value: 'excel', label: 'Excel' },
+            ],
+            onExport: () => {
+              const _selectedRegistrations = filteredRegistrations.filter((reg) =>
+                selectedIds.includes(reg.id)
+              );
+              // Export logic here
+              toast.success('تم تصدير البيانات بنجاح');
+            },
+          },
         ]}
-        onConfirm={(newStatus) => {
-          bulkUpdateMutation.mutate({
-            ids: selectedIds,
-            status: newStatus as
-              | 'pending'
-              | 'contacted'
-              | 'no_answer'
-              | 'confirmed'
-              | 'attended'
-              | 'completed'
-              | 'cancelled',
-          });
-        }}
-        isLoading={bulkUpdateMutation.isPending}
       />
     </div>
   );

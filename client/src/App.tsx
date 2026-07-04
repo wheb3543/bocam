@@ -7,18 +7,14 @@ import { Route, Switch, useLocation } from 'wouter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { trpc } from '@/lib/api/trpc';
-import { UpdateStatusBadge } from '@/components/update/UpdateStatusBadge';
 import { UpdateProgressModal } from '@/components/update/UpdateProgressModal';
 import { MandatoryUpdateModal } from '@/components/update/MandatoryUpdateModal';
 import { OptionalUpdateBanner } from '@/components/update/OptionalUpdateBanner';
 import { useUpdateChecker } from '@/hooks/integrations/useUpdateChecker';
 // Lazy load pages for better performance
-const Home = lazy(() => import('./pages/Home'));
 const HomePage = lazy(() => import('./pages/public/HomePage'));
 const ThankYou = lazy(() => import('./pages/public/ThankYou'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const DoctorAppointments = lazy(() => import('./pages/admin/bookings/DoctorAppointments'));
 const Doctors = lazy(() => import('./pages/public/Doctors'));
 const Unauthorized = lazy(() => import('./pages/Unauthorized'));
 const AccessRequest = lazy(() => import('./pages/AccessRequest'));
@@ -63,7 +59,6 @@ const WhatsAppProductsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppP
 const WhatsAppReferralsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppReferralsPage'));
 const WhatsAppLabResultsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppLabResultsPage'));
 const MessagesPage = lazy(() => import('./pages/admin/communications/MessagesPage'));
-const ReportsPage = lazy(() => import('./pages/admin/reports/ReportsPage'));
 const ReportsPageNew = lazy(() => import('./pages/admin/reports/ReportsPage'));
 const AnalyticsPage = lazy(() => import('./pages/admin/reports/AnalyticsPage'));
 const CampStatsPage = lazy(() => import('./pages/admin/reports/CampStatsPage'));
@@ -81,11 +76,9 @@ const TasksPage = lazy(() => import('./pages/admin/bookings/TasksPage'));
 import MetaPixel from './components/MetaPixel';
 // import OfflineIndicator from './components/OfflineIndicator';
 import CookieConsentBanner from './components/CookieConsentBanner';
-const DigitalMarketingTeamPage = lazy(() => import('./pages/admin/teams/DigitalMarketingTeamPage'));
 const MediaTeamPage = lazy(() => import('./pages/admin/teams/MediaTeamPage'));
 const FieldMarketingTeamPage = lazy(() => import('./pages/admin/teams/FieldMarketingTeamPage'));
 const CustomerServiceTeamPage = lazy(() => import('./pages/admin/teams/CustomerServiceTeamPage'));
-const ProjectsManagementPage = lazy(() => import('./pages/admin/campaigns/ProjectsManagementPage'));
 const ReviewApprovalPage = lazy(() => import('./pages/admin/campaigns/ReviewApprovalPage'));
 const CampaignsPage = lazy(() => import('./pages/admin/campaigns/CampaignsPage'));
 const DigitalMarketingTasksPage = lazy(
@@ -125,8 +118,6 @@ import ProtectedRoute from '@/components/layout/ProtectedRoute';
 
 function Router() {
   const [location] = useLocation();
-  const { data: licenseCheck, isLoading: checkingLicense } =
-    trpc.license.checkLicenseExists.useQuery();
 
   // Scroll to top on route change
   useEffect(() => {

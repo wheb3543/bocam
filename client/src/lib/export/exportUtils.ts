@@ -24,10 +24,6 @@ type JsPDFInstance = {
   [key: string]: unknown;
 };
 
-type JsPDFConstructor = {
-  new (options?: { orientation?: string; unit?: string; format?: string }): JsPDFInstance;
-};
-
 export interface BookingData {
   id: number;
   patientName: string;

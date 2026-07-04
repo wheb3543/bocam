@@ -34,8 +34,6 @@ import {
 } from '@/hooks/integrations/useWhatsAppSSE';
 import { toast } from 'sonner';
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -55,7 +53,6 @@ import {
   Trash2,
   Download,
   RefreshCw,
-  Search,
   Ban,
   Users,
   FileText,
@@ -133,7 +130,7 @@ export default function WhatsAppCompliance() {
       } else {
         toast.error(result.error || 'فشل حظر الرقم');
       }
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ أثناء حظر الرقم');
     } finally {
       setIsLoading(false);
@@ -151,7 +148,7 @@ export default function WhatsAppCompliance() {
       } else {
         toast.error(result.error || 'فشل إلغاء الحظر');
       }
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ أثناء إلغاء الحظر');
     } finally {
       setIsLoading(false);
@@ -175,7 +172,7 @@ export default function WhatsAppCompliance() {
           toast.error(`الرسالة تحتوي على مشاكل: ${result.data?.issues?.join(', ')}`);
         }
       }
-    } catch (error) {
+    } catch {
       toast.error('فشل التحقق من الامتثال');
     } finally {
       setIsLoading(false);
@@ -202,7 +199,7 @@ export default function WhatsAppCompliance() {
 
         toast.success('تم تحميل السجل بنجاح');
       }
-    } catch (error) {
+    } catch {
       toast.error('فشل تحميل السجل');
     } finally {
       setIsLoading(false);
@@ -265,7 +262,7 @@ export default function WhatsAppCompliance() {
   const nonCompliantPercentage =
     totalMessages > 0 ? Math.round((errorCount / totalMessages) * 100) : 0;
 
-  const complianceData = [
+  const _complianceData = [
     { name: 'متوافق', value: compliantPercentage },
     { name: 'غير متوافق', value: nonCompliantPercentage },
   ];

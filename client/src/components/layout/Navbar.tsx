@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useRef } from 'react';
 import { Phone, Menu, X, ChevronLeft } from 'lucide-react';
-import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from '@/const';
+import { APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from '@/const';
 import { Link } from 'wouter';
 import InstallPWAButton from '@/components/InstallPWAButton';
 

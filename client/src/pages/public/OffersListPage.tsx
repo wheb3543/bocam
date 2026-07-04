@@ -36,7 +36,7 @@ export default function OffersListPage() {
 }
 
 function OffersListContent() {
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
 

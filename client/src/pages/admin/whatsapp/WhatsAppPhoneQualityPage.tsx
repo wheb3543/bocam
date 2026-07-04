@@ -19,7 +19,6 @@ import {
   Minus,
   Activity,
   Zap,
-  AlertTriangle,
   DollarSign,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -31,7 +30,7 @@ import {
 } from '@/hooks/integrations/useWhatsAppSSE';
 
 export default function WhatsAppPhoneQualityPage() {
-  const [phoneFilter, setPhoneFilter] = useState('');
+  const [phoneFilter, _setPhoneFilter] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
 
   // حالة الجودة المباشرة عبر SSE
@@ -423,7 +422,7 @@ export default function WhatsAppPhoneQualityPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {qualityHistory.map((record: QualityRecord, index: number) => (
+                      {qualityHistory.map((record: QualityRecord, _index: number) => (
                         <tr key={record.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4">
                             {record.createdAt ? new Date(record.createdAt).toLocaleString('ar-SA') : '-'}

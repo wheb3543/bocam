@@ -4,16 +4,6 @@ import type { RouterOutputs } from '@/types/trpc';
 
 type Offer = RouterOutputs['offers']['getAll'][number];
 
-interface OfferFormData {
-  title: string;
-  slug: string;
-  description: string;
-  imageUrl: string;
-  isActive: boolean;
-  startDate: string;
-  endDate: string;
-}
-
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { useConfirmDialog } from '@/hooks/ui/useConfirmDialog';
 import { Button } from '@/components/ui/button';

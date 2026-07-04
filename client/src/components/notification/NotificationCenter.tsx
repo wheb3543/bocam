@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import {
   ChevronDown,
   ChevronUp,
-  Users,
   Calendar,
   TrendingUp,
   UserCheck,
@@ -24,7 +23,7 @@ interface NotificationItem {
 }
 
 export default function NotificationCenter() {
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
   const [, setLocation] = useLocation();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     campRegistrations: false,

@@ -155,21 +155,6 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'قيد الانتظار';
-      case 'in_progress':
-        return 'قيد التنفيذ';
-      case 'completed':
-        return 'مكتملة';
-      case 'cancelled':
-        return 'ملغية';
-      default:
-        return status;
-    }
-  };
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':

@@ -9,7 +9,6 @@
  * - useExportUtils: للتصدير والطباعة
  */
 
-import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useMemo, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
@@ -99,7 +98,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Table, TableBody, TableRow, TableHeader } from '@/components/ui/table';
+import { TableBody, TableRow, TableHeader } from '@/components/ui/table';
 import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
 import TableSkeleton from '@/components/table/TableSkeleton';
 import ActionButtons from '@/components/ActionButtons';
@@ -133,7 +132,7 @@ import {
   Printer,
   RotateCcw,
 } from 'lucide-react';
-import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
+import { SOURCE_LABELS } from '@shared/sources';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 const statusLabels: Record<string, string> = {
@@ -211,8 +210,7 @@ const customerColumns: ColumnConfig[] = [
 ];
 
 export default function CustomerProfilesTab() {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
   const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSizeValue>('100');

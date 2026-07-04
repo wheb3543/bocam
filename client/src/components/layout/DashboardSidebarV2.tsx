@@ -33,10 +33,8 @@ import {
   Tent,
   Contact,
   Menu,
-  X,
   Home,
   ClipboardList,
-  Search,
   HelpCircle,
   MoreHorizontal,
   Pencil,
@@ -494,21 +492,18 @@ function SidebarBadge({ count }: { count: number }) {
 }
 
 export default function DashboardSidebarV2({ currentPath }: { currentPath: string }) {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const {
     shouldShowText,
-    isHomePage,
     handleMouseEnter,
     handleMouseLeave,
-    isMobileOpen,
-    toggleMobile,
     closeMobile,
   } = useSidebarState();
 
-  const { recentlyUsed, addRecentlyUsed } = useRecentlyUsed();
+  const { addRecentlyUsed } = useRecentlyUsed();
   const [allToolsOpen, setAllToolsOpen] = useState(false);
   const [editSidebarOpen, setEditSidebarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [_searchQuery, _setSearchQuery] = useState('');
 
   // TODO: إضافة procedure للحصول على عدد الإشعارات
   // const { data: unreadCounts } = trpc.leads.getUnreadCounts.useQuery(undefined, {
@@ -518,7 +513,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
 
   // 🔔 WhatsApp Notification State
   const [whatsappUnreadCount, setWhatsappUnreadCount] = useState(0);
-  const notificationSoundRef = useRef<AudioContext | null>(null);
+  const _notificationSoundRef = useRef<AudioContext | null>(null);
   const currentPathRef = useRef(currentPath);
   useEffect(() => {
     currentPathRef.current = currentPath;
@@ -549,7 +544,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
       gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       oscillator.start(ctx.currentTime);
       oscillator.stop(ctx.currentTime + 0.3);
-    } catch (_) {
+    } catch {
       /* Audio not available */
     }
   }, []);
@@ -562,7 +557,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
         try {
           const eventName = (e as MessageEventWithType).type || 'message';
           if (eventName === 'new_inbound_message') {
-            const data = JSON.parse(e.data);
+            const _data = JSON.parse(e.data);
             // Only show badge if user is not currently on WhatsApp page
             const isOnWhatsApp = currentPathRef.current.includes('/admin/whatsapp');
             if (!isOnWhatsApp) {
@@ -570,7 +565,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
               playNotificationSound();
             }
           }
-        } catch (_) {}
+        } catch {}
       },
       [playNotificationSound]
     )

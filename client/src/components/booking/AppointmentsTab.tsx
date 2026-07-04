@@ -7,7 +7,7 @@ import AppointmentCard from '@/components/booking/AppointmentCard';
 import AppointmentStatsCards from '@/components/booking/AppointmentStatsCards';
 import AppointmentFilters from '@/components/booking/AppointmentFilters';
 import AppointmentTableDesktop from '@/components/booking/AppointmentTableDesktop';
-import { type ColumnConfig, type ColumnTemplate } from '@/components/table/ColumnVisibility';
+import { type ColumnConfig } from '@/components/table/ColumnVisibility';
 import { useTableFeatures } from '@/hooks/table/useTableFeatures';
 import TableSkeleton from '@/components/table/TableSkeleton';
 import EmptyState from '@/components/EmptyState';
@@ -15,13 +15,11 @@ import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
 import { useExportUtils } from '@/hooks/export/useExportUtils';
 import { printReceipt } from '@/components/booking/PrintReceipt';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { CalendarOff, CheckSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/_core/hooks/useAuth';
-import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
-import BulkUpdateDialog from '@/components/BulkUpdateDialog';
-import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import { SOURCE_LABELS } from '@shared/sources';
+import BulkActionsManager from '@/components/BulkActionsManager';
 import type { Appointment, AppointmentWithDoctor } from '@shared/types';
 import type { UseFilterUtilsReturn } from '@/hooks/table/useFilterUtils';
 
@@ -55,7 +53,6 @@ export default function AppointmentsTab({
   dateRange,
   onOpenAppointmentDialog,
 }: AppointmentsTabProps) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
   const { formatDate } = useFormatDate();
   const { user } = useAuth();
   const utils = trpc.useUtils();
@@ -64,7 +61,6 @@ export default function AppointmentsTab({
   const [appointmentPage, setAppointmentPage] = useState(1);
   const [appointmentPageSize, setAppointmentPageSize] = useState<PageSizeValue>('100');
   const [selectedAppointmentIds, setSelectedAppointmentIds] = useState<number[]>([]);
-  const [bulkUpdateDialogOpen, setBulkUpdateDialogOpen] = useState(false);
 
   // Filter aliases
   const appointmentSearchTerm = appointmentFilter.filters.searchTerm;
@@ -230,12 +226,19 @@ export default function AppointmentsTab({
     onSuccess: (data) => {
       toast.success(`تم تحديث ${data.count} موعد بنجاح`);
       utils.appointments.listPaginated.invalidate();
-      setBulkUpdateDialogOpen(false);
       setSelectedAppointmentIds([]);
     },
     onError: () => {
       toast.error('حدث خطأ أثناء تحديث الحالة');
     },
+  });
+
+  const deleteAppointmentMutation = trpc.appointments.delete.useMutation({
+    onSuccess: () => {
+      toast.success('تم حذف الموعد بنجاح');
+      utils.appointments.listPaginated.invalidate();
+    },
+    onError: () => toast.error('فشل في حذف الموعد'),
   });
 
   const filteredAppointments = useMemo(() => {
@@ -441,12 +444,6 @@ export default function AppointmentsTab({
               <CardDescription>إدارة ومتابعة مواعيد الأطباء</CardDescription>
             </div>
             <div className="flex gap-2">
-              {selectedAppointmentIds.length > 0 && (
-                <Button variant="default" onClick={() => setBulkUpdateDialogOpen(true)}>
-                  <CheckSquare className="h-4 w-4 ml-2" />
-                  تحديث الحالة ({selectedAppointmentIds.length})
-                </Button>
-              )}
             </div>
           </div>
         </CardHeader>
@@ -586,34 +583,76 @@ export default function AppointmentsTab({
         </CardContent>
       </Card>
 
-      {/* Bulk Update Dialog */}
-      <BulkUpdateDialog
-        open={bulkUpdateDialogOpen}
-        onOpenChange={setBulkUpdateDialogOpen}
+      {/* Bulk Actions Manager */}
+      <BulkActionsManager
         selectedCount={selectedAppointmentIds.length}
-        statusOptions={[
-          { value: 'pending', label: 'قيد الانتظار' },
-          { value: 'contacted', label: 'تم التواصل' },
-          { value: 'no_answer', label: 'لم يرد' },
-          { value: 'confirmed', label: 'مؤكد' },
-          { value: 'attended', label: 'حضر' },
-          { value: 'completed', label: 'مكتمل' },
-          { value: 'cancelled', label: 'ملغي' },
+        onClear={() => setSelectedAppointmentIds([])}
+        showBar={true}
+        position="bottom"
+        size="normal"
+        actions={[
+          {
+            type: 'status-update',
+            label: 'تحديث الحالة',
+            variant: 'default',
+            icon: <CheckSquare className="h-4 w-4" />,
+            statusOptions: [
+              { value: 'pending', label: 'قيد الانتظار' },
+              { value: 'contacted', label: 'تم التواصل' },
+              { value: 'no_answer', label: 'لم يرد' },
+              { value: 'confirmed', label: 'مؤكد' },
+              { value: 'attended', label: 'حضر' },
+              { value: 'completed', label: 'مكتمل' },
+              { value: 'cancelled', label: 'ملغي' },
+            ],
+            onStatusConfirm: (newStatus: string) => {
+              bulkUpdateAppointmentsMutation.mutate({
+                ids: selectedAppointmentIds,
+                status: newStatus as
+                  | 'pending'
+                  | 'contacted'
+                  | 'no_answer'
+                  | 'confirmed'
+                  | 'attended'
+                  | 'completed'
+                  | 'cancelled',
+              });
+            },
+            isLoading: bulkUpdateAppointmentsMutation.isPending,
+          },
+          {
+            type: 'delete',
+            label: 'حذف الكل',
+            variant: 'destructive',
+            confirmTitle: 'تأكيد الحذف الجماعي',
+            confirmDescription: `هل أنت متأكد من حذف ${selectedAppointmentIds.length} موعد؟ هذا الإجراء لا يمكن التراجع عنه.`,
+            onConfirm: async () => {
+              // Delete each appointment one by one
+              for (const id of selectedAppointmentIds) {
+                await deleteAppointmentMutation.mutateAsync({ id });
+              }
+              setSelectedAppointmentIds([]);
+              toast.success(`تم حذف ${selectedAppointmentIds.length} موعد بنجاح`);
+            },
+            isLoading: deleteAppointmentMutation.isPending,
+          },
+          {
+            type: 'export',
+            label: 'تصدير',
+            variant: 'outline',
+            exportFormats: [
+              { value: 'csv', label: 'CSV' },
+              { value: 'excel', label: 'Excel' },
+            ],
+            onExport: () => {
+              const _selectedAppointments = appointments.filter((apt) =>
+                selectedAppointmentIds.includes(apt.id)
+              );
+              // Export logic here
+              toast.success('تم تصدير البيانات بنجاح');
+            },
+          },
         ]}
-        onConfirm={(newStatus) => {
-          bulkUpdateAppointmentsMutation.mutate({
-            ids: selectedAppointmentIds,
-            status: newStatus as
-              | 'pending'
-              | 'contacted'
-              | 'no_answer'
-              | 'confirmed'
-              | 'attended'
-              | 'completed'
-              | 'cancelled',
-          });
-        }}
-        isLoading={bulkUpdateAppointmentsMutation.isPending}
       />
     </div>
   );

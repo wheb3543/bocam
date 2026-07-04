@@ -3,7 +3,7 @@
  * لوحة تحكم WhatsApp - عرض الإحصائيات والحالة
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -116,7 +116,7 @@ function WhatsAppDashboardContent() {
       } else {
         toast.error(result.error || 'فشل إرسال الرسالة');
       }
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ أثناء إرسال الرسالة');
     } finally {
       setIsLoading(false);
@@ -140,7 +140,7 @@ function WhatsAppDashboardContent() {
       } else {
         toast.error(result.error || 'فشل اختبار الاتصال');
       }
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ أثناء اختبار الاتصال');
     } finally {
       setIsLoading(false);

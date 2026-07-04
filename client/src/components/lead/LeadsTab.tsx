@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Users, Search, TrendingUp, Phone, Loader2, Download } from 'lucide-react';
+import { Search, TrendingUp, Phone, Loader2, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { exportToExcel, formatLeadsForExport } from '@/lib/export/exportToExcel';
 import { SOURCE_OPTIONS, SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
@@ -56,7 +56,7 @@ const sanitizeLead = (lead: Lead | unknown): Lead | null => {
 };
 
 export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount }: LeadsTabProps) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
+  const { formatPhoneDisplay } = usePhoneFormat();
   const { formatDate } = useFormatDate();
   const { data: unifiedLeads, isLoading: leadsLoading } = trpc.leads.unifiedList.useQuery();
   const { data: stats } = trpc.leads.stats.useQuery();

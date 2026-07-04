@@ -2,7 +2,7 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,10 +37,6 @@ import {
   LayoutGrid,
   List,
   Calendar,
-  Clock,
-  User,
-  MessageSquare,
-  Paperclip,
   MoreVertical,
   Edit,
   Trash2,
@@ -52,8 +48,6 @@ import {
   Camera,
   Palette,
   Film,
-  Image,
-  Music,
   FileVideo,
   Clapperboard,
   RefreshCw,
@@ -152,7 +146,7 @@ const getCategoryInfo = (category: TaskCategory) => {
 };
 
 export default function MediaTeamPage() {
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

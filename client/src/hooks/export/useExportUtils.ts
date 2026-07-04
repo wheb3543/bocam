@@ -85,7 +85,7 @@ export function useExportUtils<T>(config: ExportConfig<T>) {
   /**
    * تحضير الأعمدة المرئية من visibleColumns map
    */
-  const getVisibleColumns = useCallback(
+  const _getVisibleColumns = useCallback(
     (
       columnDefs: ExportColumnDef[],
       visibleColumns?: Record<string, boolean>

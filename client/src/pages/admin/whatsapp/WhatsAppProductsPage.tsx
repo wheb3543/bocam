@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { trpc } from '@/lib/api/trpc';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,9 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Package, Download, Filter, Search, TrendingUp, DollarSign, Box } from 'lucide-react';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { Package, Download, Filter, Search, DollarSign, Box } from 'lucide-react';
 import {
   useWhatsAppSSE,
   AccountUpdateEvent,
@@ -37,10 +34,10 @@ export default function WhatsAppProductsPage() {
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
-    onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
-      toast.info(`تحديث الحساب: ${event.eventType}`);
+    onAccountUpdate: useCallback((_event: AccountUpdateEvent) => {
+      toast.info(`تحديث الحساب`);
     }, []),
-    onOrderReceived: useCallback((event: OrderReceivedEvent) => {
+    onOrderReceived: useCallback((_event: OrderReceivedEvent) => {
       toast.info(`استلام طلب جديد`);
     }, []),
   });

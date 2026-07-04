@@ -9,11 +9,8 @@
  */
 
 import { useEffect } from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { getCompanyName, getAppTitle } from '@/const';
-import { Shield, Phone, Mail, ChevronRight } from 'lucide-react';
-import { Link } from 'wouter';
+import { Shield, Phone, Mail } from 'lucide-react';
 import PageLayout from '@/components/layout/PageLayout';
 import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
@@ -21,7 +18,6 @@ import SectionDivider from '@/components/SectionDivider';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
-import TextShimmer from '@/components/TextShimmer';
 
 export default function PrivacyPolicyPage() {
   const companyName = getCompanyName('ar');

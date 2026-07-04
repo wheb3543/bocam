@@ -133,7 +133,7 @@ export default function CampStatsPage() {
     confirmedCount > 0 ? Math.round((attendedCount / confirmedCount) * 100) : 0;
   const cancellationRate =
     totalRegistrations > 0 ? Math.round((cancelledCount / totalRegistrations) * 100) : 0;
-  const completionRate = attendedCount > 0 ? Math.round((completedCount / attendedCount) * 100) : 0;
+  const _completionRate = attendedCount > 0 ? Math.round((completedCount / attendedCount) * 100) : 0;
 
   const handleRefresh = async () => {
     await refetch();

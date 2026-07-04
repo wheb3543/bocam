@@ -2,7 +2,6 @@
 // مستقل تماماً عن Service Worker التطبيق العام
 const CACHE_NAME = 'sgh-admin-v2';
 const RUNTIME_CACHE = 'sgh-admin-runtime-v2';
-const OFFLINE_URL = '/admin/offline';
 
 // الملفات الأساسية لتطبيق الإدارة
 // NOTE: لا تُضف favicon.ico هنا - قد يُعيد redirect إلى CDN خارجي ويُسبب CORS error
@@ -136,7 +135,7 @@ self.addEventListener('push', (event) => {
     if (event.data) {
       data = { ...data, ...JSON.parse(event.data.text()) };
     }
-  } catch (e) {
+  } catch {
     data.body = event.data ? event.data.text() : 'إشعار جديد';
   }
 

@@ -188,7 +188,7 @@ export default function LeadsManagementPage() {
   );
 
   const handleExport = useCallback(
-    (format: 'excel' | 'csv' | 'pdf') => {
+    () => {
       if (!filteredLeads || filteredLeads.length === 0) {
         toast.error('لا توجد بيانات للتصدير');
         return;

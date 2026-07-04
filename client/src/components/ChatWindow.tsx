@@ -62,12 +62,10 @@ import { Label } from '@/components/ui/label';
 import useSSE from '@/hooks/integrations/useSSE';
 import { toast } from 'sonner';
 import { useAuth } from '@/_core/hooks/useAuth';
-import type { WhatsAppMessage as DBWhatsAppMessage, WhatsAppTemplate as DBWhatsAppTemplate, QuickReply as DBQuickReply } from '@shared/types';
+import type { WhatsAppMessage as DBWhatsAppMessage, WhatsAppTemplate as DBWhatsAppTemplate } from '@shared/types';
 
 // Re-export database types with local aliases for convenience
-type WhatsAppMessage = DBWhatsAppMessage;
 type WhatsAppTemplate = DBWhatsAppTemplate;
-type DBQuickReplyType = DBQuickReply;
 
 // Extended Message interface for UI use (includes temp IDs and optimistic updates)
 interface Message {
@@ -94,9 +92,6 @@ interface Message {
 
 // Template interface for UI use
 type Template = WhatsAppTemplate;
-
-// QuickReply interface for UI use
-type QuickReply = DBQuickReplyType;
 
 // Lazy image component for performance
 const LazyImage = memo(
@@ -316,7 +311,7 @@ export default function ChatWindow({
     description: string;
     image: string;
   } | null>(null);
-  const [isFetchingLinkPreview, setIsFetchingLinkPreview] = useState(false);
+  const [_isFetchingLinkPreview, setIsFetchingLinkPreview] = useState(false);
 
   // Track reactions
   const [reactionDialogOpen, setReactionDialogOpen] = useState(false);
@@ -349,8 +344,6 @@ export default function ChatWindow({
     (e: React.UIEvent<HTMLDivElement>) => {
       const container = e.currentTarget;
       const scrollTop = container.scrollTop;
-      const scrollHeight = container.scrollHeight;
-      const clientHeight = container.clientHeight;
 
       // Calculate visible range based on scroll position
       const messageHeight = 100; // Approximate height per message
@@ -367,9 +360,6 @@ export default function ChatWindow({
   // Performance: Debounced SSE updates
   const sseUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingSSEUpdatesRef = useRef<SSEUpdate[]>([]);
-
-  const getMessageTimestamp = (msg: Message) =>
-    new Date(msg.sentAt ?? msg.createdAt ?? Date.now()).getTime();
 
   // Performance: Process SSE updates in batches
   const processSSEUpdates = useCallback(() => {
@@ -980,17 +970,6 @@ export default function ChatWindow({
     [deleteMessageMutation]
   );
 
-  const forwardMessageMutation = trpc.whatsapp.messages.forward.useMutation({
-    onSuccess: () => {
-      toast.success('تم إعادة توجيه الرسالة');
-      refetchMessages();
-      onConversationUpdate?.();
-    },
-    onError: (err) => {
-      toast.error(`فشل إعادة التوجيه: ${err.message}`);
-    },
-  });
-
   const sendTemplateMutation = trpc.whatsapp.sendTemplate.useMutation({
     onSuccess: () => {
       // فتح نافذة الكتابة فوراً بتحديث وقت آخر رسالة محلياً
@@ -1165,7 +1144,7 @@ let payload: unknown;
           if (eventName === 'conversation_updated' || convUpdatePayload?.event === 'conversation_updated') {
             onConversationUpdate?.();
           }
-        } catch (_) {}
+        } catch {}
       },
       [conversationId, onConversationUpdate, refetchMessages, processSSEUpdates]
     )
@@ -1278,7 +1257,7 @@ let payload: unknown;
         } else {
           messageType = 'document';
         }
-      } catch (error) {
+      } catch {
         toast.error('فشل تحميل الملف');
         return;
       }
@@ -1525,7 +1504,7 @@ let payload: unknown;
                 const showDateSeparator = !prevDate || getDateKey(msgDate) !== getDateKey(prevDate);
 
                 // Check if this message is a search result
-                const isSearchResult = msg.id !== null && msg.id !== undefined && searchResults.includes(msg.id);
+                const _isSearchResult = msg.id !== null && msg.id !== undefined && searchResults.includes(msg.id);
                 const isCurrentSearchResult = msg.id !== null && searchResults[currentSearchIndex] === msg.id;
 
                 return (

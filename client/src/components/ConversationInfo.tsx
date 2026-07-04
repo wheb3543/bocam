@@ -39,7 +39,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -343,16 +342,6 @@ export default function ConversationInfo({
       camp: 'تسجيل مخيم',
     };
     return labels[type] || type;
-  };
-
-  const getRecordIcon = (type: string) => {
-    const icons: Record<string, string> = {
-      appointment: '📅',
-      lead: '👤',
-      offer: '🏥',
-      camp: '🏕️',
-    };
-    return icons[type] || '📋';
   };
 
   return (

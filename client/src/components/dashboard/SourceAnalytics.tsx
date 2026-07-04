@@ -85,7 +85,7 @@ const sourceDisplayMap: Record<
 
 export default function SourceAnalytics() {
   const {
-    data: leads,
+    data: _leads,
     isLoading: leadsLoading,
     error: leadsError,
   } = trpc.leads.unifiedList.useQuery(

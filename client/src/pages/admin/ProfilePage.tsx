@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Loader2, User, Mail, Shield, Calendar } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
   const { user, loading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');

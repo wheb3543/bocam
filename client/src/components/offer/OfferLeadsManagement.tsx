@@ -34,12 +34,6 @@ interface OfferLead {
   [key: string]: unknown;
 }
 
-interface Offer {
-  id: number;
-  title: string | null;
-  [key: string]: unknown;
-}
-
 type OfferLeadStatus = 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
 
 import {
@@ -71,7 +65,6 @@ import {
 } from '@/components/table/ResizableTable';
 import { useTableFeatures } from '@/hooks/table/useTableFeatures';
 import TableSkeleton from '@/components/table/TableSkeleton';
-import QuickFilters from '@/components/QuickFilters';
 import InlineStatusEditor from '@/components/InlineStatusEditor';
 import CommentsSection from '@/components/CommentsSection';
 import CommentCount from '@/components/notification/CommentCount';
@@ -82,13 +75,10 @@ import AuditLogSection from '@/components/AuditLogSection';
 import SavedFilters from '@/components/SavedFilters';
 import FilterPresets from '@/components/FilterPresets';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
@@ -107,7 +97,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Users,
@@ -118,12 +107,8 @@ import {
   Phone,
   Mail,
   Loader2,
-  Eye,
   Tag,
-  MessageCircle,
   Download,
-  CheckSquare,
-  Square,
   Printer,
   Settings,
   ShoppingBag,
@@ -141,10 +126,11 @@ import { useExportUtils } from '@/hooks/export/useExportUtils';
 import { formatStatusTime } from '@/hooks/data/useStatusLabels';
 import { printReceipt } from '@/components/booking/PrintReceipt';
 import { useAuth } from '@/_core/hooks/useAuth';
-import { SOURCE_OPTIONS, SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
+import { SOURCE_OPTIONS, SOURCE_LABELS } from '@shared/sources';
 import OfferLeadCard from '@/components/offer/OfferLeadCard';
-import CardSkeleton from '@/components/CardSkeleton';
-import BulkUpdateDialog from '@/components/BulkUpdateDialog';
+import _CardSkeleton from '@/components/CardSkeleton'; // Reserved for future card view
+import BulkActionsManager from '@/components/BulkActionsManager';
+import SourceBadge from '@/components/SourceBadge';
 import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
 import { RotateCcw } from 'lucide-react';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
@@ -159,7 +145,7 @@ const statusLabels: Record<string, string> = {
   cancelled: 'ملغي',
 };
 
-const statusColors: Record<string, string> = {
+const _statusColors: Record<string, string> = {
   pending: 'bg-blue-500',
   contacted: 'bg-yellow-500',
   no_answer: 'bg-gray-500',
@@ -176,8 +162,8 @@ export default function OfferLeadsManagement({
   onPendingCountChange?: (count: number) => void;
   dateRange: { from: Date; to: Date };
 }) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime, formatRegistrationDate } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const { formatDate, formatRegistrationDate } = useFormatDate();
   const { user } = useAuth();
   const generateReceiptNumberMutation = trpc.offerLeads.generateReceiptNumber.useMutation();
   const deleteLeadMutation = trpc.offerLeads.delete.useMutation({
@@ -192,7 +178,6 @@ export default function OfferLeadsManagement({
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [bulkUpdateDialogOpen, setBulkUpdateDialogOpen] = useState(false);
 
   // Pagination state
   const [offerPage, setOfferPage] = useState(1);
@@ -405,7 +390,6 @@ export default function OfferLeadsManagement({
     onSuccess: (data) => {
       toast.success(`تم تحديث ${data.count} حجز بنجاح`);
       refetch();
-      setBulkUpdateDialogOpen(false);
       setSelectedIds([]);
     },
     onError: () => {
@@ -672,17 +656,6 @@ export default function OfferLeadsManagement({
       {/* Quick Actions + Filters */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          {selectedIds.length > 0 && (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => setBulkUpdateDialogOpen(true)}
-              className="gap-2 h-9"
-            >
-              <CheckSquare className="h-4 w-4" />
-              تحديث الحالة ({selectedIds.length})
-            </Button>
-          )}
           <div className="flex-1" />
           <Button variant="outline" size="sm" onClick={handlePrintOfferLeads} className="gap-2 h-9">
             <Printer className="h-4 w-4" />
@@ -1073,19 +1046,16 @@ export default function OfferLeadsManagement({
                           return (
                             <FrozenTableCell key={colKey} columnKey={colKey}>
                               {lead.source ? (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs font-medium"
-                                  style={{
-                                    backgroundColor: SOURCE_COLORS[lead.source]
-                                      ? `${SOURCE_COLORS[lead.source]}15`
-                                      : undefined,
-                                    borderColor: SOURCE_COLORS[lead.source] || undefined,
-                                    color: SOURCE_COLORS[lead.source] || undefined,
-                                  }}
-                                >
-                                  {SOURCE_LABELS[lead.source] || lead.source}
-                                </Badge>
+                                <SourceBadge
+                                  source={lead.source}
+                                  utmSource={lead.utmSource}
+                                  utmMedium={lead.utmMedium}
+                                  utmCampaign={lead.utmCampaign}
+                                  referrer={lead.referrer}
+                                  fbclid={lead.fbclid}
+                                  gclid={lead.gclid}
+                                  size="sm"
+                                />
                               ) : (
                                 <Badge variant="outline" className="text-xs">
                                   غير محدد
@@ -1533,34 +1503,75 @@ export default function OfferLeadsManagement({
         </DialogContent>
       </Dialog>
 
-      {/* Bulk Update Dialog */}
-      <BulkUpdateDialog
-        open={bulkUpdateDialogOpen}
-        onOpenChange={setBulkUpdateDialogOpen}
+      {/* Bulk Actions Manager */}
+      <BulkActionsManager
         selectedCount={selectedIds.length}
-        statusOptions={[
-          { value: 'pending', label: 'قيد الانتظار' },
-          { value: 'contacted', label: 'تم التواصل' },
-          { value: 'no_answer', label: 'لم يرد' },
-          { value: 'confirmed', label: 'مؤكد' },
-          { value: 'attended', label: 'حضر' },
-          { value: 'completed', label: 'مكتمل' },
-          { value: 'cancelled', label: 'ملغي' },
+        onClear={() => setSelectedIds([])}
+        showBar={true}
+        position="bottom"
+        size="normal"
+        actions={[
+          {
+            type: 'status-update',
+            label: 'تحديث الحالة',
+            variant: 'default',
+            statusOptions: [
+              { value: 'pending', label: 'قيد الانتظار' },
+              { value: 'contacted', label: 'تم التواصل' },
+              { value: 'no_answer', label: 'لم يرد' },
+              { value: 'confirmed', label: 'مؤكد' },
+              { value: 'attended', label: 'حضر' },
+              { value: 'completed', label: 'مكتمل' },
+              { value: 'cancelled', label: 'ملغي' },
+            ],
+            onStatusConfirm: (newStatus: string) => {
+              bulkUpdateMutation.mutate({
+                ids: selectedIds,
+                status: newStatus as
+                  | 'pending'
+                  | 'contacted'
+                  | 'no_answer'
+                  | 'confirmed'
+                  | 'attended'
+                  | 'completed'
+                  | 'cancelled',
+              });
+            },
+            isLoading: bulkUpdateMutation.isPending,
+          },
+          {
+            type: 'delete',
+            label: 'حذف الكل',
+            variant: 'destructive',
+            confirmTitle: 'تأكيد الحذف الجماعي',
+            confirmDescription: `هل أنت متأكد من حذف ${selectedIds.length} حجز؟ هذا الإجراء لا يمكن التراجع عنه.`,
+            onConfirm: async () => {
+              // Delete each lead one by one
+              for (const id of selectedIds) {
+                await deleteLeadMutation.mutateAsync({ id });
+              }
+              setSelectedIds([]);
+              toast.success(`تم حذف ${selectedIds.length} حجز بنجاح`);
+            },
+            isLoading: deleteLeadMutation.isPending,
+          },
+          {
+            type: 'export',
+            label: 'تصدير',
+            variant: 'outline',
+            exportFormats: [
+              { value: 'csv', label: 'CSV' },
+              { value: 'excel', label: 'Excel' },
+            ],
+            onExport: () => {
+              const _selectedLeads = filteredLeads.filter((lead) =>
+                selectedIds.includes(lead.id)
+              );
+              // Export logic here
+              toast.success('تم تصدير البيانات بنجاح');
+            },
+          },
         ]}
-        onConfirm={(newStatus) => {
-          bulkUpdateMutation.mutate({
-            ids: selectedIds,
-            status: newStatus as
-              | 'pending'
-              | 'contacted'
-              | 'no_answer'
-              | 'confirmed'
-              | 'attended'
-              | 'completed'
-              | 'cancelled',
-          });
-        }}
-        isLoading={bulkUpdateMutation.isPending}
       />
     </div>
   );

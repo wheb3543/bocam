@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Users, Loader2, Phone, MessageSquare } from 'lucide-react';
+import { Users, Loader2 } from 'lucide-react';
 import EmptyState from '@/components/EmptyState';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';

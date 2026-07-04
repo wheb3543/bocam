@@ -79,8 +79,8 @@ const statusConfig: Record<
 };
 
 export default function OfferLeadCard({ lead, onEdit, onPrint }: OfferLeadCardProps) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const { formatDate } = useFormatDate();
   const status = statusConfig[lead.status] || {
     bg: 'bg-muted/50',
     text: 'text-foreground',

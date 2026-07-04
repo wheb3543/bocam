@@ -14,7 +14,7 @@ export default function ManagementPage() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('offers');
 
-  const logoutMutation = trpc.auth.logout.useMutation({
+  const _logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
       toast.success('تم تسجيل الخروج بنجاح');
       setLocation('/');

@@ -93,8 +93,8 @@ export default function CampRegistrationCard({
   onViewDetails,
   onPrint,
 }: CampRegistrationCardProps) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const { formatDate } = useFormatDate();
   const status = statusConfig[registration.status] || {
     bg: 'bg-muted/50',
     text: 'text-foreground',

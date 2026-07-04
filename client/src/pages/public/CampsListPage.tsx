@@ -24,16 +24,10 @@ interface Camp {
   [key: string]: unknown;
 }
 
-interface CampRegistration {
-  campId: number | null;
-  status: string | null;
-  [key: string]: unknown;
-}
-
 import { useAuth } from '@/_core/hooks/useAuth';
 import { getCompanyName } from '@/const';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -47,7 +41,6 @@ import {
   CheckCircle2,
   Users,
 } from 'lucide-react';
-import InstallPWAButton from '@/components/InstallPWAButton';
 import PageLayout from '@/components/layout/PageLayout';
 import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
@@ -55,7 +48,6 @@ import SectionDivider from '@/components/SectionDivider';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
-import TextShimmer from '@/components/TextShimmer';
 
 export default function CampsListPage() {
   const companyName = getCompanyName('ar');
@@ -72,7 +64,7 @@ export default function CampsListPage() {
 
 function CampsListContent() {
   const companyName = getCompanyName('ar');
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
 

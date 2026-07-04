@@ -13,7 +13,6 @@ import {
   Mail,
   User,
 } from 'lucide-react';
-import { getSourceDisplayName } from '@/lib/tracking/tracking';
 
 interface SourceBadgeProps {
   source: string;

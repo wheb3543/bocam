@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
-import { APP_LOGO } from '@/const';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -16,6 +14,7 @@ import { useLocation } from 'wouter';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useNotificationSound } from '@/hooks/integrations/useNotificationSound';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import GlobalSearch from '@/components/GlobalSearch';
 
 interface TopNavbarProps {
   pageTitle?: string;
@@ -24,7 +23,7 @@ interface TopNavbarProps {
 
 export default function TopNavbar({ pageTitle, pageDescription }: TopNavbarProps) {
   const { user, logout } = useAuth();
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { soundEnabled, toggleSound } = useNotificationSound();
 
@@ -50,8 +49,11 @@ export default function TopNavbar({ pageTitle, pageDescription }: TopNavbarProps
           </div>
         </div>
 
-        {/* Left Actions: Notifications + Theme + User */}
+        {/* Left Actions: Global Search + Sound + Theme + User */}
         <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Global Search */}
+          <GlobalSearch />
+
           {/* Sound Control */}
           <Tooltip>
             <TooltipTrigger asChild>

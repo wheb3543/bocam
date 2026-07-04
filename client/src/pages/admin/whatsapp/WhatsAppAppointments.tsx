@@ -24,7 +24,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Calendar,
   Clock,
   Send,
   RefreshCw,
@@ -36,13 +35,11 @@ import {
   AlertCircle,
   Loader2,
   Download,
-  Filter,
   Bell,
   Play,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
-import type { RouterOutputs } from '@/types/trpc';
 
 const entityTypeLabels: Record<string, string> = {
   appointment: 'موعد طبي',
@@ -82,7 +79,7 @@ export default function WhatsAppAppointments() {
   const [offset, setOffset] = useState(0);
   const limit = 20;
 
-  const sendConfirmationMutation = trpc.whatsapp.sendAppointmentConfirmation.useMutation();
+  const _sendConfirmationMutation = trpc.whatsapp.sendAppointmentConfirmation.useMutation();
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
@@ -112,7 +109,7 @@ export default function WhatsAppAppointments() {
 
   // تشغيل وظائف التذكير
   const runJobsMutation = trpc.whatsapp.runReminderJobs.useMutation({
-    onSuccess: (result) => {
+    onSuccess: (_result) => {
       toast.success(`تم تشغيل وظائف التذكير بنجاح`);
       logsQuery.refetch();
       notificationStatsQuery.refetch();

@@ -45,11 +45,11 @@ interface PatientCardProps {
 }
 
 function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
-  const { formatDate, formatDateTime } = useFormatDate();
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
+  const { formatDate } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
   const [selectedStatus, setSelectedStatus] = useState(patient.status);
   const { user } = useAuth();
-  const [isPrinting, setIsPrinting] = useState(false);
+  const [_isPrinting, _setIsPrinting] = useState(false); // Reserved for future print functionality
 
   const generateAppointmentReceipt = trpc.appointments.generateReceiptNumber.useMutation();
   const generateOfferReceipt = trpc.offerLeads.generateReceiptNumber.useMutation();
@@ -88,7 +88,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
     }
 
     try {
-      setIsPrinting(true);
+      _setIsPrinting(true);
 
       // Generate or retrieve receipt number
       let receiptNumber = 'غير متاح';
@@ -121,7 +121,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
       console.error('Failed to generate receipt number:', error);
       toast.error('فشل توليد رقم السند');
     } finally {
-      setIsPrinting(false);
+      _setIsPrinting(false);
     }
   };
 
@@ -349,8 +349,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
 }
 
 export default function QuickPatientSearch() {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -479,7 +478,7 @@ export default function QuickPatientSearch() {
       }
       toast.success('تم تحديث الحالة بنجاح');
       setSelectedPatient({ ...selectedPatient, status });
-    } catch (error) {
+    } catch {
       toast.error('فشل تحديث الحالة');
     }
   };

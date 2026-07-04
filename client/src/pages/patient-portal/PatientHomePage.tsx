@@ -2,7 +2,7 @@ import { Link } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Calendar, FileText, Gift, Phone, Plus, ArrowLeft } from 'lucide-react';
 import AnimatedCard from '@/components/AnimatedCard';
 

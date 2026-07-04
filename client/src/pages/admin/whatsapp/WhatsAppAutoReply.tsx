@@ -61,7 +61,7 @@ export default function WhatsAppAutoReply() {
       } else {
         toast.error(result.error || 'فشل إضافة القاعدة');
       }
-    } catch (error) {
+    } catch {
       toast.error('حدث خطأ أثناء إضافة القاعدة');
     } finally {
       setIsLoading(false);
@@ -75,7 +75,7 @@ export default function WhatsAppAutoReply() {
         toast.success('تم حذف القاعدة');
         autoReplyRulesQuery.refetch();
       }
-    } catch (error) {
+    } catch {
       toast.error('فشل حذف القاعدة');
     }
   };

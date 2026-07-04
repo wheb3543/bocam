@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react';
 import { useRoute, Link, useLocation } from 'wouter';
 import Navbar from '@/components/layout/Navbar';
 import SEO from '@/components/SEO';
-import { useFormatDate } from '@/hooks/export/useFormatDate';
 import {
   ArrowRight,
   Calendar,
@@ -59,10 +58,7 @@ export default function DoctorDetailPage() {
 }
 
 function DoctorDetailContent({ slug }: { slug: string }) {
-  const { formatDate, formatDateTime } = useFormatDate();
   const {
-    formatPhoneDisplay,
-    getWhatsAppLink,
     getCallLink,
     validateYemeniPhone,
     processPhoneInput,

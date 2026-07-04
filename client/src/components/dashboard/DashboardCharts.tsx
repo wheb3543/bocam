@@ -109,7 +109,7 @@ const STATUS_LABELS: Record<string, string> = {
   not_interested: 'غير مهتم',
 };
 
-const PIE_COLORS = [
+const _PIE_COLORS = [
   '#3b82f6',
   '#10b981',
   '#f59e0b',

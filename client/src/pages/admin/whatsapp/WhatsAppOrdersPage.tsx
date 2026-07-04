@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import FeatureGate from '@/components/FeatureGate';
 import { trpc } from '@/lib/api/trpc';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -72,14 +72,14 @@ export default function WhatsAppOrdersPage() {
       [refetch]
     ),
     onOrderReceived: useCallback(
-      (event: OrderReceivedEvent) => {
+      (_event: OrderReceivedEvent) => {
         toast.info(`استلام طلب جديد`);
         refetch();
       },
       [refetch]
     ),
     onTransactionStatusUpdate: useCallback(
-      (event: TransactionStatusUpdateEvent) => {
+      (_event: TransactionStatusUpdateEvent) => {
         toast.info(`تحديث حالة المعاملة`);
         refetch();
       },
@@ -125,7 +125,8 @@ export default function WhatsAppOrdersPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6">
+      <FeatureGate feature="whatsapp">
+        <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -300,6 +301,7 @@ export default function WhatsAppOrdersPage() {
           </CardContent>
         </Card>
       </div>
+      </FeatureGate>
     </DashboardLayout>
   );
 }

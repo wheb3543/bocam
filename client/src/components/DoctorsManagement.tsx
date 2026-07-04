@@ -36,7 +36,6 @@ import {
   Loader2,
   Stethoscope,
   Plane,
-  Phone,
   Copy,
 } from 'lucide-react';
 import { toast } from 'sonner';

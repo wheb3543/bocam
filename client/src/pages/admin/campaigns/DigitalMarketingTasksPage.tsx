@@ -1,10 +1,9 @@
 import { useFormatDate, formatDateUtil } from '@/hooks/export/useFormatDate';
-import { useState, useMemo } from 'react';
-import { useAuth } from '@/_core/hooks/useAuth';
+import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,7 +14,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
@@ -26,8 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { AnimatedCounter } from '@/components/animations';
 import type { RouterOutputs } from '@/types/trpc';
 
 type Task = RouterOutputs['tasks']['list'][number];
@@ -42,12 +40,10 @@ type CampaignEntity = RouterOutputs['campaigns']['list'][number];
 import {
   Plus,
   Search,
-  Filter,
   LayoutGrid,
   List,
   Calendar,
   Clock,
-  User,
   CheckCircle2,
   Circle,
   AlertCircle,
@@ -61,13 +57,8 @@ import {
   TrendingUp,
   RefreshCw,
   GripVertical,
-  ChevronLeft,
-  ChevronRight,
-  X,
   Send,
   Upload,
-  FileText,
-  Image as ImageIcon,
   File,
 } from 'lucide-react';
 import {
@@ -288,7 +279,7 @@ function TaskDetailsDialog({
   task,
   open,
   onOpenChange,
-  onUpdate,
+  onUpdate: _onUpdate,
   onDelete,
 }: {
   task: Task | null;
@@ -297,7 +288,7 @@ function TaskDetailsDialog({
   onUpdate: () => void;
   onDelete: (id: number) => void;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [_isEditing, _setIsEditing] = useState(false);
   const [newComment, setNewComment] = useState('');
 
   const { data: comments, refetch: refetchComments } = trpc.tasks.getComments.useQuery(
@@ -305,7 +296,7 @@ function TaskDetailsDialog({
     { enabled: !!task?.id && open }
   );
 
-  const { data: attachments, refetch: refetchAttachments } = trpc.tasks.getAttachments.useQuery(
+  const { data: attachments, refetch: _refetchAttachments } = trpc.tasks.getAttachments.useQuery(
     { taskId: task?.id || 0 },
     { enabled: !!task?.id && open }
   );
@@ -349,7 +340,7 @@ function TaskDetailsDialog({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                <DropdownMenuItem onClick={() => _setIsEditing(true)}>
                   <Edit className="h-4 w-4 me-2" />
                   تعديل
                 </DropdownMenuItem>
@@ -767,8 +758,7 @@ function TaskFormDialog({
 
 // Main Page Component
 export default function DigitalMarketingTasksPage() {
-  const { formatDate, formatDateTime } = useFormatDate();
-  const { user } = useAuth();
+  const { formatDate } = useFormatDate();
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -862,7 +852,9 @@ export default function DigitalMarketingTasksPage() {
                 </div>
                 <div>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">الإجمالي</p>
-                  <p className="text-lg sm:text-xl font-bold">{stats?.total || 0}</p>
+                  <p className="text-lg sm:text-xl font-bold">
+                    <AnimatedCounter value={stats?.total || 0} duration={800} />
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -876,7 +868,9 @@ export default function DigitalMarketingTasksPage() {
                 </div>
                 <div>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">قيد الانتظار</p>
-                  <p className="text-lg sm:text-xl font-bold">{stats?.todo || 0}</p>
+                  <p className="text-lg sm:text-xl font-bold">
+                    <AnimatedCounter value={stats?.todo || 0} duration={700} />
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -890,7 +884,9 @@ export default function DigitalMarketingTasksPage() {
                 </div>
                 <div>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">قيد التنفيذ</p>
-                  <p className="text-lg sm:text-xl font-bold">{stats?.inProgress || 0}</p>
+                  <p className="text-lg sm:text-xl font-bold">
+                    <AnimatedCounter value={stats?.inProgress || 0} duration={700} />
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -904,7 +900,9 @@ export default function DigitalMarketingTasksPage() {
                 </div>
                 <div>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">مراجعة</p>
-                  <p className="text-lg sm:text-xl font-bold">{stats?.review || 0}</p>
+                  <p className="text-lg sm:text-xl font-bold">
+                    <AnimatedCounter value={stats?.review || 0} duration={700} />
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -918,7 +916,9 @@ export default function DigitalMarketingTasksPage() {
                 </div>
                 <div>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">مكتمل</p>
-                  <p className="text-lg sm:text-xl font-bold">{stats?.completed || 0}</p>
+                  <p className="text-lg sm:text-xl font-bold">
+                    <AnimatedCounter value={stats?.completed || 0} duration={700} />
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -932,7 +932,9 @@ export default function DigitalMarketingTasksPage() {
                 </div>
                 <div>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">متأخر</p>
-                  <p className="text-lg sm:text-xl font-bold">{stats?.overdue || 0}</p>
+                  <p className="text-lg sm:text-xl font-bold">
+                    <AnimatedCounter value={stats?.overdue || 0} duration={700} />
+                  </p>
                 </div>
               </div>
             </CardContent>

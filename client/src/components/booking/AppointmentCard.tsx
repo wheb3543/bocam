@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Phone, User, Calendar, Eye, Stethoscope, MessageCircle, Printer } from 'lucide-react';
 import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
-import type { Appointment, AppointmentWithDoctor } from '@shared/types';
+import type { AppointmentWithDoctor } from '@shared/types';
 
 interface AppointmentCardProps {
   appointment: AppointmentWithDoctor;
@@ -52,8 +52,8 @@ export default function AppointmentCard({
   onViewDetails,
   onPrint,
 }: AppointmentCardProps) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
   const status = statusConfig[appointment.status] || statusConfig.pending;
   const isUrgent = appointment.status === 'pending';
 

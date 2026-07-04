@@ -1,6 +1,5 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import {
-  unifiedStatusLabels as statusLabels,
   unifiedStatusOptions,
   formatStatusTime,
 } from '@/hooks/data/useStatusLabels';
@@ -18,13 +17,12 @@ import CommentCount from '@/components/notification/CommentCount';
 import TaskCount from '@/components/TaskCount';
 import { printReceipt } from '@/components/booking/PrintReceipt';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Phone, Settings, Printer, CalendarOff } from 'lucide-react';
-import { SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
+import SourceBadge from '@/components/SourceBadge';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
-import type { Appointment, AppointmentWithDoctor } from '@shared/types';
+import type { AppointmentWithDoctor } from '@shared/types';
 
 interface AppointmentTableDesktopProps {
   appointments: AppointmentWithDoctor[];
@@ -61,7 +59,7 @@ export default function AppointmentTableDesktop({
   onUpdateStatus,
   userName,
 }: AppointmentTableDesktopProps) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
+  const { formatPhoneDisplay } = usePhoneFormat();
   const { formatDate } = useFormatDate();
   const visibleColumnKeys = columnOrder.filter((key) => visibleColumns[key]);
 
@@ -290,19 +288,16 @@ export default function AppointmentTableDesktop({
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
                           {appointment.source ? (
-                            <Badge
-                              variant="outline"
-                              className="text-xs font-medium"
-                              style={{
-                                backgroundColor: appointment.source && SOURCE_COLORS[appointment.source]
-                                  ? `${SOURCE_COLORS[appointment.source]}15`
-                                  : undefined,
-                                borderColor: appointment.source ? SOURCE_COLORS[appointment.source] : undefined,
-                                color: appointment.source ? SOURCE_COLORS[appointment.source] : undefined,
-                              }}
-                            >
-                              {SOURCE_LABELS[appointment.source] || appointment.source}
-                            </Badge>
+                            <SourceBadge
+                              source={appointment.source}
+                              utmSource={appointment.utmSource}
+                              utmMedium={appointment.utmMedium}
+                              utmCampaign={appointment.utmCampaign}
+                              referrer={appointment.referrer}
+                              fbclid={appointment.fbclid}
+                              gclid={appointment.gclid}
+                              size="sm"
+                            />
                           ) : (
                             <span className="text-muted-foreground">-</span>
                           )}

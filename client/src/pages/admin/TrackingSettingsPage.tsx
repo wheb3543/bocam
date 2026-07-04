@@ -16,7 +16,6 @@ import {
   Shield,
   Code2,
   Play,
-  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -125,7 +124,7 @@ export default function TrackingSettingsPage() {
       } else {
         toast.error('Meta Pixel غير محمّل. يرجى التحقق من التكوين');
       }
-    } catch (error) {
+    } catch {
       toast.error('فشل إرسال حدث الاختبار');
     } finally {
       setIsTesting(false);

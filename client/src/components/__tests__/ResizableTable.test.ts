@@ -91,7 +91,7 @@ function getColumnWidth(key: string, config?: ColumnConfig): { width: number; mi
 // Test COLUMN_WIDTH_PRESETS
 describe('COLUMN_WIDTH_PRESETS', () => {
   it('should have correct structure for all presets', () => {
-    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([key, preset]) => {
+    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([_key, preset]) => {
       expect(preset).toHaveProperty('width');
       expect(preset).toHaveProperty('min');
       expect(preset).toHaveProperty('max');
@@ -102,13 +102,13 @@ describe('COLUMN_WIDTH_PRESETS', () => {
   });
 
   it('should have reasonable min values (>= 40)', () => {
-    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([key, preset]) => {
+    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([_key, preset]) => {
       expect(preset.min).toBeGreaterThanOrEqual(40);
     });
   });
 
   it('should have reasonable max values allowing flexibility', () => {
-    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([key, preset]) => {
+    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([_key, preset]) => {
       expect(preset.max).toBeGreaterThanOrEqual(preset.width);
     });
   });

@@ -16,7 +16,7 @@ interface CachedAppointment {
 }
 
 export default function OfflinePage() {
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [cachedAppointments, setCachedAppointments] = useState<CachedAppointment[]>([]);
   const [lastSync, setLastSync] = useState<string | null>(null);
@@ -31,12 +31,12 @@ export default function OfflinePage() {
       // Get last sync time
       const lastSyncTime = localStorage.getItem('lastSyncTime');
       if (lastSyncTime) {
-        setLastSync(formatDateTime(lastSyncTime));
+        setLastSync(formatDate(lastSyncTime));
       }
     } catch (error) {
       console.error('Failed to load cached data:', error);
     }
-  }, [formatDateTime]);
+  }, [formatDate]);
 
   useEffect(() => {
     // Listen for online/offline events
@@ -180,7 +180,7 @@ export default function OfflinePage() {
                           الهاتف: {appointment.phone}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {formatDateTime(appointment.createdAt)}
+                          {formatDate(appointment.createdAt)}
                         </div>
                       </div>
                       <div>{getStatusBadge(appointment.status)}</div>

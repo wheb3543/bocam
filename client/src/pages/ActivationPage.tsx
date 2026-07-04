@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Key, Shield, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Key, Shield, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ActivationPage() {
@@ -72,7 +72,7 @@ export default function ActivationPage() {
         issuedAt: new Date(payload.iat * 1000).toISOString(),
         version: payload.ver || '1.0',
       });
-    } catch (error) {
+    } catch {
       toast.error('كود الترخيص غير صالح');
       setIsSubmitting(false);
     }

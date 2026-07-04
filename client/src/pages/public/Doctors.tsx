@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import Navbar from '@/components/layout/Navbar';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -13,9 +11,7 @@ import {
 } from '@/components/ui/select';
 import { trpc } from '@/lib/api/trpc';
 import { Loader2, Search, Stethoscope, Calendar, User } from 'lucide-react';
-import { APP_LOGO, getCompanyName } from '@/const';
-import SEO from '@/components/SEO';
-import InstallPWAButton from '@/components/InstallPWAButton';
+import { getCompanyName } from '@/const';
 import PageLayout from '@/components/layout/PageLayout';
 import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
@@ -23,7 +19,6 @@ import SectionDivider from '@/components/SectionDivider';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
-import TextShimmer from '@/components/TextShimmer';
 
 export default function Doctors() {
   const companyName = getCompanyName('ar');
@@ -89,7 +84,7 @@ function DoctorsContent() {
         <section className="pb-4 sm:pb-6 md:pb-8 px-4 sm:px-5 md:px-6">
           <div className="container mx-auto max-w-4xl">
             <AnimatedCard className="dark:bg-gray-800/50 dark:border-gray-700/50" delay={0.1}>
-              <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+              <div className="pt-4 sm:pt-6 px-3 sm:px-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4">
                   <div className="relative">
                     <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
@@ -114,7 +109,7 @@ function DoctorsContent() {
                     </SelectContent>
                   </Select>
                 </div>
-              </CardContent>
+              </div>
             </AnimatedCard>
           </div>
         </section>

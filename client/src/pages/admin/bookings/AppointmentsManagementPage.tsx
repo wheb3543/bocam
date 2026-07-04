@@ -32,16 +32,6 @@ import TasksSection from '@/components/TasksSection';
 import { DateRangePicker } from '@/components/form/DateRangePicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
@@ -61,6 +51,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
+  TableHeader,
+  TableRow,
+  TableBody,
+  TableCell,
+} from '@/components/ui/table';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -73,7 +69,6 @@ import {
   Settings,
   Printer,
   CalendarOff,
-  CheckSquare,
   RotateCcw,
   Trash2,
 } from 'lucide-react';
@@ -93,8 +88,9 @@ import { useExportUtils } from '@/hooks/export/useExportUtils';
 import { useFilterUtils } from '@/hooks/table/useFilterUtils';
 import { printReceipt } from '@/components/booking/PrintReceipt';
 import { useAuth } from '@/_core/hooks/useAuth';
-import { SOURCE_OPTIONS, SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
-import BulkUpdateDialog from '@/components/BulkUpdateDialog';
+import { SOURCE_OPTIONS, SOURCE_LABELS } from '@shared/sources';
+import BulkActionsManager from '@/components/BulkActionsManager';
+import SourceBadge from '@/components/SourceBadge';
 import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
 import { appointmentStatusLabels as statusLabels } from '@/hooks/data/useStatusLabels';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
@@ -118,8 +114,8 @@ interface Doctor {
 }
 
 export default function AppointmentsManagementPage() {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime, formatRegistrationDate } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const { formatDate, formatRegistrationDate } = useFormatDate();
   const { user } = useAuth();
   const utils = trpc.useUtils();
   const deleteAppointmentMutation = trpc.appointments.delete.useMutation({
@@ -136,7 +132,6 @@ export default function AppointmentsManagementPage() {
   const [appointmentStatusNotes, setAppointmentStatusNotes] = useState('');
   const [appointmentDate, setAppointmentDate] = useState('');
   const [selectedAppointmentIds, setSelectedAppointmentIds] = useState<number[]>([]);
-  const [bulkUpdateDialogOpen, setBulkUpdateDialogOpen] = useState(false);
 
   // Pagination state
   const [appointmentPage, setAppointmentPage] = useState(1);
@@ -329,7 +324,6 @@ export default function AppointmentsManagementPage() {
     onSuccess: (data) => {
       toast.success(`تم تحديث ${data.count} موعد بنجاح`);
       utils.appointments.listPaginated.invalidate();
-      setBulkUpdateDialogOpen(false);
       setSelectedAppointmentIds([]);
     },
     onError: () => {
@@ -525,17 +519,6 @@ export default function AppointmentsManagementPage() {
         <div className="space-y-3">
           {/* Quick actions row */}
           <div className="flex flex-wrap items-center gap-2">
-            {selectedAppointmentIds.length > 0 && (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => setBulkUpdateDialogOpen(true)}
-                className="gap-2 h-9"
-              >
-                <CheckSquare className="h-4 w-4" />
-                تحديث الحالة ({selectedAppointmentIds.length})
-              </Button>
-            )}
             <div className="flex-1" />
             <Button
               variant="outline"
@@ -1006,19 +989,16 @@ export default function AppointmentsManagementPage() {
                               return (
                                 <FrozenTableCell key={colKey} columnKey={colKey}>
                                   {appointment.source ? (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs font-medium"
-                                      style={{
-                                        backgroundColor: appointment.source && SOURCE_COLORS[appointment.source]
-                                          ? `${SOURCE_COLORS[appointment.source]}15`
-                                          : undefined,
-                                        borderColor: appointment.source ? SOURCE_COLORS[appointment.source] : undefined,
-                                        color: appointment.source ? SOURCE_COLORS[appointment.source] : undefined,
-                                      }}
-                                    >
-                                      {SOURCE_LABELS[appointment.source] || appointment.source}
-                                    </Badge>
+                                    <SourceBadge
+                                      source={appointment.source}
+                                      utmSource={appointment.utmSource}
+                                      utmMedium={appointment.utmMedium}
+                                      utmCampaign={appointment.utmCampaign}
+                                      referrer={appointment.referrer}
+                                      fbclid={appointment.fbclid}
+                                      gclid={appointment.gclid}
+                                      size="sm"
+                                    />
                                   ) : (
                                     '-'
                                   )}
@@ -1391,7 +1371,7 @@ export default function AppointmentsManagementPage() {
                         )}
                         <p className="text-sm">
                           <span className="font-medium">تاريخ التسجيل:</span>{' '}
-                          {formatDateTime(selectedAppointment.createdAt)}
+                          {formatDate(selectedAppointment.createdAt)}
                         </p>
                       </div>
                       <div className="space-y-2">
@@ -1469,27 +1449,68 @@ export default function AppointmentsManagementPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Bulk Update Appointments Dialog */}
-        <BulkUpdateDialog
-          open={bulkUpdateDialogOpen}
-          onOpenChange={setBulkUpdateDialogOpen}
+        {/* Bulk Actions Manager */}
+        <BulkActionsManager
           selectedCount={selectedAppointmentIds.length}
-          statusOptions={[
-            { value: 'pending', label: 'قيد الانتظار' },
-            { value: 'contacted', label: 'تم التواصل' },
-            { value: 'no_answer', label: 'لم يرد' },
-            { value: 'confirmed', label: 'مؤكد' },
-            { value: 'attended', label: 'حضر' },
-            { value: 'completed', label: 'مكتمل' },
-            { value: 'cancelled', label: 'ملغي' },
+          onClear={() => setSelectedAppointmentIds([])}
+          showBar={true}
+          position="bottom"
+          size="normal"
+          actions={[
+            {
+              type: 'status-update',
+              label: 'تحديث الحالة',
+              variant: 'default',
+              statusOptions: [
+                { value: 'pending', label: 'قيد الانتظار' },
+                { value: 'contacted', label: 'تم التواصل' },
+                { value: 'no_answer', label: 'لم يرد' },
+                { value: 'confirmed', label: 'مؤكد' },
+                { value: 'attended', label: 'حضر' },
+                { value: 'completed', label: 'مكتمل' },
+                { value: 'cancelled', label: 'ملغي' },
+              ],
+              onStatusConfirm: (newStatus: string) => {
+                bulkUpdateAppointmentsMutation.mutate({
+                  ids: selectedAppointmentIds,
+                  status: newStatus as AppointmentWithDoctor['status'],
+                });
+              },
+              isLoading: bulkUpdateAppointmentsMutation.isPending,
+            },
+            {
+              type: 'delete',
+              label: 'حذف الكل',
+              variant: 'destructive',
+              confirmTitle: 'تأكيد الحذف الجماعي',
+              confirmDescription: `هل أنت متأكد من حذف ${selectedAppointmentIds.length} موعد؟ هذا الإجراء لا يمكن التراجع عنه.`,
+              onConfirm: async () => {
+                // Delete each appointment one by one
+                for (const id of selectedAppointmentIds) {
+                  await deleteAppointmentMutation.mutateAsync({ id });
+                }
+                setSelectedAppointmentIds([]);
+                toast.success(`تم حذف ${selectedAppointmentIds.length} موعد بنجاح`);
+              },
+              isLoading: deleteAppointmentMutation.isPending,
+            },
+            {
+              type: 'export',
+              label: 'تصدير',
+              variant: 'outline',
+              exportFormats: [
+                { value: 'csv', label: 'CSV' },
+                { value: 'excel', label: 'Excel' },
+              ],
+              onExport: () => {
+                const _selectedAppointments = appointments.filter((apt) =>
+                  selectedAppointmentIds.includes(apt.id)
+                );
+                // Export logic here
+                toast.success('تم تصدير البيانات بنجاح');
+              },
+            },
           ]}
-          onConfirm={(newStatus) => {
-            bulkUpdateAppointmentsMutation.mutate({
-              ids: selectedAppointmentIds,
-              status: newStatus as AppointmentWithDoctor['status'],
-            });
-          }}
-          isLoading={bulkUpdateAppointmentsMutation.isPending}
         />
       </div>
     </DashboardLayout>

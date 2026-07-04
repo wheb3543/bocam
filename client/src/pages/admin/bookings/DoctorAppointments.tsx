@@ -25,8 +25,6 @@ import {
   Phone,
   Mail,
   MapPin,
-  Calendar,
-  Clock,
   Stethoscope,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -50,9 +48,6 @@ export default function DoctorAppointments() {
 
 function DoctorAppointmentsContent() {
   const {
-    formatPhoneDisplay,
-    getWhatsAppLink,
-    getCallLink,
     validateYemeniPhone,
     processPhoneInput,
   } = usePhoneFormat();

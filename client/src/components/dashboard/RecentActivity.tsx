@@ -75,7 +75,7 @@ export default function RecentActivity() {
   const getRelativeTime = (date: string) => {
     try {
       return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ar });
-    } catch (e) {
+    } catch {
       return 'الآن';
     }
   };
@@ -125,7 +125,7 @@ export default function RecentActivity() {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentActivities.map((activity: Activity, index: number) => {
+            {recentActivities.map((activity: Activity, _index: number) => {
               const Icon = activity.icon;
               return (
                 <div

@@ -45,11 +45,9 @@ import {
   WifiOff,
   Loader2 as LoaderIcon,
   ArrowRight,
-  ChevronLeft,
   ChevronRight,
   AlertCircle,
   Archive,
-  Filter,
   BarChart2,
   Clock,
   CheckCheck,
@@ -81,8 +79,6 @@ import {
   TransactionStatusUpdateEvent,
 } from '@/hooks/integrations/useWhatsAppSSE';
 import { toast } from 'sonner';
-import { formatDistanceToNow, format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { Link } from 'wouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 
@@ -155,26 +151,11 @@ interface SavedSearch {
   [key: string]: unknown;
 }
 
-interface SSEMessageEvent {
-  type?: string;
-  data?: unknown;
-  [key: string]: unknown;
-}
-
 interface AutoReplyRule {
   id: number;
   name: string;
   triggerValue: string;
   isActive: boolean;
-  [key: string]: unknown;
-}
-
-interface SearchMessage {
-  id: number;
-  direction: string;
-  content: string;
-  messageType?: string;
-  createdAt: string;
   [key: string]: unknown;
 }
 
@@ -217,7 +198,6 @@ const StatsBar = memo(function StatsBar({ conversations }: StatsBarProps) {
   const total = safeConversations.length;
   const unread = safeConversations.filter((c) => c.unreadCount > 0).length;
   const important = safeConversations.filter((c) => c.isImportant === 1).length;
-  const archived = safeConversations.filter((c) => c.isArchived === 1).length;
   const labResults = safeConversations.filter(
     (c) => c.labOrderId !== null && c.labOrderId !== undefined
   ).length;
@@ -314,12 +294,8 @@ interface ConversationsListProps {
   onBulkArchive: () => void;
   onBulkMarkImportant: () => void;
   onToggleSelectionMode: () => void;
-  isSplitView: boolean;
-  secondConversationId: number | null;
-  onSelectSecondConversation: (id: number) => void;
   savedSearches: SavedSearch[] | undefined;
   onApplySavedSearch: (savedSearch: SavedSearch) => void;
-  onDeleteConversation: (id: number) => void;
 }
 
 const ConversationsList = memo(function ConversationsList({
@@ -360,12 +336,8 @@ const ConversationsList = memo(function ConversationsList({
   onBulkArchive,
   onBulkMarkImportant,
   onToggleSelectionMode,
-  isSplitView,
-  secondConversationId,
-  onSelectSecondConversation,
   savedSearches,
   onApplySavedSearch,
-  onDeleteConversation,
 }: ConversationsListProps) {
   return (
     <div className="flex flex-col h-full">
@@ -702,7 +674,7 @@ const ConversationsList = memo(function ConversationsList({
             </div>
           ) : filteredConversations && filteredConversations.length > 0 ? (
             <div className="divide-y dark:divide-gray-800">
-              {filteredConversations.map((conv, index) => (
+              {filteredConversations.map((conv) => (
                 <div
                   key={conv.id}
                   className={`group relative p-3 sm:p-4 cursor-pointer transition-colors hover:bg-[var(--whatsapp-green-light)] dark:hover:bg-[var(--whatsapp-green-dark)]/20 active:bg-[var(--whatsapp-green)]/20 ${
@@ -1340,17 +1312,6 @@ function WhatsAppContent() {
     [markConversationAsReadMutation]
   );
 
-  const handleSelectSecondConversation = useCallback(
-    (id: number) => {
-      // Prevent selecting the same conversation twice
-      if (id === selectedConversation) {
-        toast.error('لا يمكن اختيار نفس المحادثة مرتين');
-        return;
-      }
-      setSecondConversationId(id);
-    },
-    [selectedConversation]
-  );
 
   const handleBackToList = useCallback(() => setMobileShowChat(false), []);
   const handleNewMessageOpenChange = useCallback((open: boolean) => setIsNewMessageOpen(open), []);
@@ -1635,7 +1596,7 @@ function WhatsAppContent() {
   const {
     data: exportData,
     isLoading: exportLoading,
-    refetch: refetchExport,
+    refetch: _refetchExport,
   } = trpc.whatsapp.conversations.exportConversation.useQuery(
     {
       conversationId: selectedConversation || 0,
@@ -1700,35 +1661,35 @@ function WhatsAppContent() {
       [refetchConversations]
     ),
     onContactsReceived: useCallback(
-      (event: ContactsReceivedEvent) => {
+      (_event: ContactsReceivedEvent) => {
         toast.info(`استلام جهات اتصال`);
         refetchConversations();
       },
       [refetchConversations]
     ),
     onOrderReceived: useCallback(
-      (event: OrderReceivedEvent) => {
+      (_event: OrderReceivedEvent) => {
         toast.info(`استلام طلب جديد`);
         refetchConversations();
       },
       [refetchConversations]
     ),
     onReferralReceived: useCallback(
-      (event: ReferralReceivedEvent) => {
+      (_event: ReferralReceivedEvent) => {
         toast.info(`استلام إحالة جديدة`);
         refetchConversations();
       },
       [refetchConversations]
     ),
     onReactionReceived: useCallback(
-      (event: ReactionReceivedEvent) => {
+      (_event: ReactionReceivedEvent) => {
         toast.info(`استلام رد فعل`);
         refetchConversations();
       },
       [refetchConversations]
     ),
     onTransactionStatusUpdate: useCallback(
-      (event: TransactionStatusUpdateEvent) => {
+      (_event: TransactionStatusUpdateEvent) => {
         toast.info(`تحديث حالة المعاملة`);
         refetchConversations();
       },
@@ -1776,12 +1737,8 @@ function WhatsAppContent() {
     onBulkArchive: handleBulkArchive,
     onBulkMarkImportant: handleBulkMarkImportant,
     onToggleSelectionMode: () => setIsSelectionMode(!isSelectionMode),
-    isSplitView,
-    secondConversationId,
-    onSelectSecondConversation: handleSelectSecondConversation,
     savedSearches,
     onApplySavedSearch: handleApplySavedSearch,
-    onDeleteConversation: handleDeleteConversation,
   };
 
   return (

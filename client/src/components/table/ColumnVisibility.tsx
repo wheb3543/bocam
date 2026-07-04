@@ -341,7 +341,7 @@ export function ColumnVisibility({
   onApplyTemplate,
   onSaveTemplate,
   onDeleteTemplate,
-  tableKey,
+  tableKey: _tableKey,
   columnWidths,
   frozenColumns = [],
   onToggleFrozen,

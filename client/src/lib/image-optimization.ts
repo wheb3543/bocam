@@ -14,7 +14,6 @@ export function getOptimizedImageUrl(
     quality = 80,
     maxWidth = 1200,
     format = 'webp',
-    lazy = true
   } = options;
 
   // If it's already an optimized URL, return as is

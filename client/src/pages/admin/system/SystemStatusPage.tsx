@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardLayoutSkeleton } from '@/components/DashboardLayoutSkeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -8,16 +9,14 @@ import {
   Server,
   Database,
   Shield,
-  Activity,
   CheckCircle,
   XCircle,
   AlertTriangle,
-  Clock,
   HardDrive,
   Cpu,
-  Globe,
   RefreshCw,
   Cpu as Processor,
+  Activity,
 } from 'lucide-react';
 
 interface SystemStatus {
@@ -109,7 +108,7 @@ export default function SystemStatusPage() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const _getStatusIcon = (status: string) => {
     switch (status) {
       case 'running':
       case 'connected':
@@ -174,13 +173,7 @@ export default function SystemStatusPage() {
   };
 
   if (isLoading) {
-    return (
-      <DashboardLayout pageTitle="حالة النظام" pageDescription="مراقبة حالة النظام">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <RefreshCw className="h-8 w-8 animate-spin" />
-        </div>
-      </DashboardLayout>
-    );
+    return <DashboardLayoutSkeleton />;
   }
 
   return (

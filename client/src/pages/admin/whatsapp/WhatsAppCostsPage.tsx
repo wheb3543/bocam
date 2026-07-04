@@ -2,34 +2,6 @@ import { useState, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { trpc } from '@/lib/api/trpc';
 
-interface ConversationCost {
-  id: number;
-  phoneNumber: string;
-  customerName: string | null;
-  lastMessage: string | null;
-  lastMessageAt: Date | null;
-  unreadCount: number;
-  isImportant: number;
-  isArchived: number;
-  leadId: number | null;
-  appointmentId: number | null;
-  offerLeadId: number | null;
-  campRegistrationId: number | null;
-  assignedToUserId: number | null;
-  notes: string | null;
-  conversationIdMeta: string | null;
-  originType: string | null;
-  expirationTimestamp: Date | null;
-  pricingModel: string | null;
-  billable: boolean;
-  pricingCategory: string | null;
-  totalCost: number;
-  messageCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  [key: string]: unknown;
-}
-
 interface CategoryData {
   [key: string]: number;
 }
@@ -66,8 +38,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  BarChart,
-  Bar,
 } from 'recharts';
 import { Download, Calendar, TrendingUp, DollarSign, Filter } from 'lucide-react';
 import { format } from 'date-fns';

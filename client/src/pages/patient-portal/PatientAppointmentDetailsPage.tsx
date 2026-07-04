@@ -5,7 +5,7 @@ import type { AppointmentWithDoctor } from '@shared/types';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Stethoscope, Clock, Phone, FileText } from 'lucide-react';
+import { Loader2, Calendar, Stethoscope, Phone, FileText } from 'lucide-react';
 
 export default function PatientAppointmentDetailsPage() {
   const { formatDate } = useFormatDate();

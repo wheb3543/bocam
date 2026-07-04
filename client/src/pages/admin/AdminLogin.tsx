@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, User, Lock, Shield, ArrowRight, Heart, Sparkles } from 'lucide-react';
+import { Loader2, User, Lock, Shield, Heart, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminLogin() {

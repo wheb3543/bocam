@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,14 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Search, X, Users, Calendar, TrendingUp, UserCheck, Phone, Mail } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
-import type { Lead, Appointment, OfferLead, CampRegistration, LeadWithRegistrationType, AppointmentWithDoctorName, OfferLeadWithTitle, CampRegistrationWithCampName } from '@shared/types';
+import type { LeadWithRegistrationType, AppointmentWithDoctorName, OfferLeadWithTitle, CampRegistrationWithCampName } from '@shared/types';
 
 interface GlobalSearchProps {
   onClose?: () => void;
 }
 
 export default function GlobalSearch({ onClose }: GlobalSearchProps) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
+  const { formatPhoneDisplay } = usePhoneFormat();
   const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [, setLocation] = useLocation();
@@ -131,17 +131,29 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
     setLocation(`/bookings?tab=${tabMap[type]}`);
   };
 
+  const handleResultKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>, type: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleResultClick(type);
+    }
+  };
+
   return (
     <div className="relative" ref={containerRef}>
       {/* Search Button */}
       <Button
         variant="outline"
         size="sm"
+        type="button"
         onClick={() => {
           setIsOpen(!isOpen);
           setTimeout(() => inputRef.current?.focus(), 100);
         }}
         className="gap-2 hidden md:flex"
+        aria-label="فتح البحث العام"
+        aria-expanded={isOpen}
+        aria-controls="global-search-panel"
+        aria-haspopup="dialog"
       >
         <Search className="h-4 w-4" />
         <span>بحث...</span>
@@ -154,24 +166,37 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
       <Button
         variant="outline"
         size="icon"
+        type="button"
         onClick={() => {
           setIsOpen(!isOpen);
           setTimeout(() => inputRef.current?.focus(), 100);
         }}
         className="md:hidden h-9 w-9"
+        aria-label="فتح البحث العام"
+        aria-expanded={isOpen}
+        aria-controls="global-search-panel"
+        aria-haspopup="dialog"
       >
         <Search className="h-4 w-4" />
       </Button>
 
       {/* Search Dropdown */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-[90vw] md:w-[500px] max-h-[80vh] overflow-y-auto bg-white dark:bg-card rounded-lg shadow-2xl border z-[100]">
+        <div
+          id="global-search-panel"
+          role="dialog"
+          aria-modal="false"
+          aria-label="بحث عام"
+          className="absolute left-0 top-full mt-2 w-[90vw] md:w-[500px] max-h-[80vh] overflow-y-auto bg-white dark:bg-card rounded-lg shadow-2xl border z-[100]"
+        >
           <div className="p-4 border-b sticky top-0 bg-white dark:bg-card">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 ref={inputRef}
                 placeholder="ابحث عن عميل، موعد، أو حجز..."
+                aria-label="حقل البحث العام"
+                aria-describedby="global-search-help"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pr-10 pl-10"
@@ -180,8 +205,10 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                 <Button
                   variant="ghost"
                   size="icon"
+                  type="button"
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 h-6 w-6"
                   onClick={() => setSearchQuery('')}
+                  aria-label="مسح نص البحث"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -194,7 +221,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
               <div className="text-center py-8 text-muted-foreground">
                 <Search className="h-12 w-12 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">ابدأ الكتابة للبحث في جميع الحجوزات</p>
-                <p className="text-xs mt-1">يمكنك البحث بالاسم، رقم الهاتف، أو البريد الإلكتروني</p>
+                <p id="global-search-help" className="text-xs mt-1">يمكنك البحث بالاسم، رقم الهاتف، أو البريد الإلكتروني</p>
               </div>
             ) : totalResults === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -218,7 +245,10 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                         <Card
                           key={lead.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
+                          role="button"
+                          tabIndex={0}
                           onClick={() => handleResultClick('leads')}
+                          onKeyDown={(event) => handleResultKeyDown(event, 'leads')}
                         >
                           <CardContent className="p-3">
                             <div className="flex items-start justify-between">
@@ -266,7 +296,10 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                         <Card
                           key={apt.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
+                          role="button"
+                          tabIndex={0}
                           onClick={() => handleResultClick('appointments')}
+                          onKeyDown={(event) => handleResultKeyDown(event, 'appointments')}
                         >
                           <CardContent className="p-3">
                             <div className="flex items-start justify-between">
@@ -342,7 +375,10 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                         <Card
                           key={offer.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
+                          role="button"
+                          tabIndex={0}
                           onClick={() => handleResultClick('offerLeads')}
+                          onKeyDown={(event) => handleResultKeyDown(event, 'offerLeads')}
                         >
                           <CardContent className="p-3">
                             <div className="flex items-start justify-between">
@@ -382,7 +418,10 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                         <Card
                           key={camp.id}
                           className="cursor-pointer hover:bg-slate-50 transition-colors"
+                          role="button"
+                          tabIndex={0}
                           onClick={() => handleResultClick('campRegistrations')}
+                          onKeyDown={(event) => handleResultKeyDown(event, 'campRegistrations')}
                         >
                           <CardContent className="p-3">
                             <div className="flex items-start justify-between">

@@ -20,28 +20,6 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-interface CampRegistration {
-  id: number;
-  campId: number;
-  campName: string | null;
-  campSlug: string | null;
-  fullName: string;
-  phone: string;
-  email: string | null;
-  age: number | null;
-  procedures: string | null;
-  medicalCondition: string | null;
-  notes: string | null;
-  patientMessage: string | null;
-  source: string | null;
-  status: string;
-  preferredDate: string | null;
-  preferredTimeSlot: 'morning' | 'evening' | null;
-  createdAt: Date;
-  updatedAt: Date;
-  [key: string]: unknown;
-}
-
 function inDateRange(createdAt: unknown, from: Date, to: Date): boolean {
   if (!createdAt) {return false;}
   const t = new Date(createdAt as string | Date).getTime();

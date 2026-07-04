@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { DashboardLayoutSkeleton } from '@/components/DashboardLayoutSkeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -106,7 +107,7 @@ export default function BackupManagementPage() {
       } else {
         alert('فشل بدء النسخة الاحتياطية: ' + data.error);
       }
-    } catch (error) {
+    } catch {
       alert('فشل بدء النسخة الاحتياطية');
     } finally {
       setIsCreatingBackup(false);
@@ -140,7 +141,7 @@ export default function BackupManagementPage() {
       } else {
         alert('فشل استعادة النسخة الاحتياطية: ' + data.error);
       }
-    } catch (error) {
+    } catch {
       alert('فشل استعادة النسخة الاحتياطية');
     }
   };
@@ -167,7 +168,7 @@ export default function BackupManagementPage() {
       } else {
         alert('فشل حذف النسخة الاحتياطية: ' + data.error);
       }
-    } catch (error) {
+    } catch {
       alert('فشل حذف النسخة الاحتياطية');
     }
   };
@@ -224,16 +225,7 @@ export default function BackupManagementPage() {
   };
 
   if (isLoading) {
-    return (
-      <DashboardLayout
-        pageTitle="إدارة النسخ الاحتياطية"
-        pageDescription="إدارة النسخ الاحتياطية للنظام"
-      >
-        <div className="flex items-center justify-center min-h-[400px]">
-          <RefreshCw className="h-8 w-8 animate-spin" />
-        </div>
-      </DashboardLayout>
-    );
+    return <DashboardLayoutSkeleton />;
   }
 
   return (

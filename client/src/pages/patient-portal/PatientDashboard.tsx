@@ -7,10 +7,10 @@ import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
-import type { Appointment, PatientResult, OfferLead, CampRegistration } from '@shared/types';
+import type { OfferLead } from '@shared/types';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -26,12 +26,8 @@ import {
   Stethoscope,
   Gift,
   Tent,
-  ChevronLeft,
   Phone,
   Clock,
-  MapPin,
-  AlertCircle,
-  CheckCircle2,
   Settings,
   Home,
   FlaskConical,
@@ -46,8 +42,8 @@ import Footer from '@/components/layout/Footer';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 export default function PatientDashboard() {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const { formatDate } = useFormatDate();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const [activeTab, setActiveTab] = useState('overview');
@@ -65,9 +61,9 @@ export default function PatientDashboard() {
   // Fetch data
   const { data: appointments, isLoading: appointmentsLoading } =
     trpc.patientPortal.myAppointments.useQuery(undefined, { enabled: !!patient });
-  const { data: offerBookings, isLoading: offersLoading } =
+  const { data: offerBookings, isLoading: _offersLoading } =
     trpc.patientPortal.myOfferBookings.useQuery(undefined, { enabled: !!patient });
-  const { data: campRegistrations, isLoading: campsLoading } =
+  const { data: campRegistrations, isLoading: _campsLoading } =
     trpc.patientPortal.myCampRegistrations.useQuery(undefined, { enabled: !!patient });
   const { data: results, isLoading: resultsLoading } = trpc.patientPortal.myResults.useQuery(
     undefined,

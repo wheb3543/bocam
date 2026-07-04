@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -38,19 +37,16 @@ import {
   XCircle,
   AlertCircle,
   RefreshCw,
-  Activity,
   History,
   Bell,
-  Filter,
   Search,
   Calendar,
   TrendingUp,
   Users,
   Zap,
-  Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatDistanceToNow, format } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { processPhoneInput } from '@/hooks/form/usePhoneFormat';
 
@@ -145,7 +141,6 @@ function MessageSettingsContent() {
   const [editedContent, setEditedContent] = useState('');
   const [editedChannel, setEditedChannel] = useState('whatsapp_integration');
   const [editedTemplateId, setEditedTemplateId] = useState<number | null>(null);
-  const [templatesLoading, setTemplatesLoading] = useState(false);
   const [testPhone, setTestPhone] = useState('');
   const [auditSearch, setAuditSearch] = useState('');
 
@@ -182,15 +177,6 @@ function MessageSettingsContent() {
       refetch();
     },
     onError: () => toast.error('حدث خطأ أثناء التحديث'),
-  });
-
-  const sendTemplateMutation = trpc.whatsapp.sendTemplate.useMutation({
-    onSuccess: () => {
-      toast.success('✅ تم إرسال رسالة الاختبار بنجاح!');
-      setTestDialogOpen(false);
-      setTestPhone('');
-    },
-    onError: (error: unknown) => toast.error(`فشل الإرسال: ${error instanceof Error ? error.message : 'خطأ'}`),
   });
 
   const stopTaskMutation = trpc.whatsapp.stopTask.useMutation({
@@ -275,7 +261,9 @@ function MessageSettingsContent() {
           `<span class="text-purple-600 font-semibold bg-purple-50 px-1 rounded">{${v}}</span>`
         );
       });
-    } catch (_) {}
+    } catch {
+      // ignore
+    }
     return rendered;
   };
 

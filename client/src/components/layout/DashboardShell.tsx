@@ -1,5 +1,5 @@
 import { useAuth } from '@/_core/hooks/useAuth';
-import { APP_TITLE, getLoginUrl, getLocalLoginUrl } from '@/const';
+import { APP_TITLE, getLocalLoginUrl } from '@/const';
 import { Button } from '@/components/ui/button';
 import DashboardSidebarV2 from '@/components/layout/DashboardSidebarV2';
 import { useLocation } from 'wouter';

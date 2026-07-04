@@ -23,7 +23,7 @@ interface PrintReceiptProps {
 
 // دالة لتنسيق رقم تسلسلي بسيط (تستخدم كود الشركة)
 // سيتم توليد الرقم الفعلي من السيرفر لضمان التسلسل الصحيح
-function formatReceiptNumber(sequenceNumber: number): string {
+function _formatReceiptNumber(sequenceNumber: number): string {
   const year = new Date().getFullYear();
   const paddedNumber = String(sequenceNumber).padStart(3, '0');
   const companyCode = COMPANY_NAME.substring(0, 3).toUpperCase();

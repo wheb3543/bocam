@@ -11,7 +11,6 @@ import {
   CheckCircle,
   AlertCircle,
   RefreshCw,
-  Bell,
   BellRing,
   Zap,
   Clock,
@@ -61,14 +60,6 @@ interface Conversation {
   [key: string]: unknown;
 }
 
-interface ConversationCost {
-  id: number;
-  phoneNumber: string;
-  conversationCost: number;
-  pricingModel?: string | null;
-  [key: string]: unknown;
-}
-
 interface Alert {
   id: number;
   alertType: string;
@@ -97,8 +88,6 @@ interface WebhookEvent {
   createdAt: string | Date;
   [key: string]: unknown;
 }
-
-type Severity = 'critical' | 'high' | 'medium' | 'low' | null;
 
 export default function WhatsAppAccountHealthPage() {
   const [activeTab, setActiveTab] = useState('alerts');

@@ -1,4 +1,3 @@
-import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
@@ -30,7 +29,6 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import {
   Plus,
@@ -43,9 +41,6 @@ import {
   Trash2,
   Eye,
   Loader2,
-  Calendar,
-  Users,
-  BarChart3,
   Megaphone,
   CheckCircle,
   Clock,
@@ -56,7 +51,6 @@ import {
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { Link } from 'wouter';
 import { Progress } from '@/components/ui/progress';
 import CampaignLinksManager from '@/components/CampaignLinksManager';
 import { useSlugGenerator } from '@/hooks/data/useSlugGenerator';
@@ -184,7 +178,6 @@ const initialFormData: CampaignFormData = {
 };
 
 export default function CampaignsPage() {
-  const { formatDate, formatDateTime } = useFormatDate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');

@@ -50,8 +50,8 @@ interface LeadCardProps {
 }
 
 export default function LeadCard({ lead, onUpdateStatus, onWhatsApp }: LeadCardProps) {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const { formatDate } = useFormatDate();
   const status = statusConfig[lead.status || 'new'] || statusConfig.new;
   const isUrgent = lead.status === 'new' || lead.status === 'pending';
 

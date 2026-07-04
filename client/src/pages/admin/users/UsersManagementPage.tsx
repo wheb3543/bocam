@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TableBody, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
@@ -46,6 +46,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { DashboardLayoutSkeleton } from '@/components/DashboardLayoutSkeleton';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import { type ColumnConfig } from '@/components/table/ColumnVisibility';
 import { ColumnVisibility } from '@/components/table/ColumnVisibility';
@@ -243,8 +244,8 @@ const userColumns: ColumnConfig[] = [
 ];
 
 export default function UsersManagementPage() {
-  const { formatPhoneDisplay, getWhatsAppLink, getCallLink } = usePhoneFormat();
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const { formatDate } = useFormatDate();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [activeSection, setActiveSection] = useState<'users' | 'requests' | 'activity'>('users');
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -460,16 +461,7 @@ export default function UsersManagementPage() {
   const adminUsers = Array.isArray(users) ? users.filter((u) => u.role === 'admin').length : 0;
 
   if (isLoading) {
-    return (
-      <DashboardLayout pageTitle="إدارة المستخدمين" pageDescription="إدارة ومتابعة مستخدمي النظام">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground dark:text-muted-foreground">جاري التحميل...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
+    return <DashboardLayoutSkeleton />;
   }
 
   return (

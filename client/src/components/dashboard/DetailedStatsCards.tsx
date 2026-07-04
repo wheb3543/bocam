@@ -27,7 +27,6 @@ import {
   XCircle,
   UserCheck,
   AlertCircle,
-  Loader2,
 } from 'lucide-react';
 import { AnimatedCounter } from '@/components/animations';
 
@@ -64,7 +63,7 @@ export default function DetailedStatsCards() {
     { page: 1, limit: 500 },
     { refetchInterval: 60000 } // Auto-refresh every 60 seconds
   );
-  const campRegistrations = campRegsPaged?.data ?? [];
+  const _campRegistrations = campRegsPaged?.data ?? [];
 
   const isLoading = leadsLoading || appointmentsLoading || offerLeadsLoading || campLoading;
   const hasError = leadsError || appointmentsError || offerLeadsError || campError;

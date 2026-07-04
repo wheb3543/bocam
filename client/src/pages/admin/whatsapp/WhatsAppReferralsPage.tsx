@@ -5,7 +5,6 @@ import type { WhatsappReferral } from '@shared/types';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -64,7 +63,7 @@ export default function WhatsAppReferralsPage() {
       [refetch]
     ),
     onReferralReceived: useCallback(
-      (event: ReferralReceivedEvent) => {
+      (_event: ReferralReceivedEvent) => {
         toast.info(`استلام إحالة جديدة`);
         refetch();
       },

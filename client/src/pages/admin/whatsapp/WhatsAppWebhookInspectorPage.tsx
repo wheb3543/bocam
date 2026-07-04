@@ -55,19 +55,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 export default function WhatsAppWebhookInspectorPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedEvent, setSelectedEvent] = useState<WebhookEvent | null>(null);
+  const [_selectedEvent, setSelectedEvent] = useState<WebhookEvent | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [liveEventCount, setLiveEventCount] = useState(0);
   const [lastLiveEvent, setLastLiveEvent] = useState<string | null>(null);
@@ -104,7 +97,7 @@ export default function WhatsAppWebhookInspectorPage() {
     { enabled: selectedCategory !== 'all', refetchInterval: 60000 }
   );
 
-  const { data: statsByType, isLoading: isLoadingStats } =
+  const { data: statsByType, isLoading: _isLoadingStats } =
     trpc.whatsapp.webhookEvents.getStatsByType.useQuery(undefined, { refetchInterval: 120000 });
 
   const { data: unhandledCount, refetch: refetchCount } =

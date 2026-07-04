@@ -69,7 +69,7 @@ const statusRank: Record<string, number> = {
 export function WhatsAppStatusBadge({
   entityType,
   entityId,
-  phoneNumber,
+  phoneNumber: _phoneNumber,
   showResend = true,
   size = 'sm',
 }: WhatsAppStatusBadgeProps) {

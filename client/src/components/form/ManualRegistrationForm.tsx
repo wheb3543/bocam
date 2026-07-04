@@ -29,7 +29,6 @@ type RegistrationStatus = 'new' | 'contacted' | 'booked' | 'not_interested' | 'n
 import { processPhoneInput, validateYemeniPhone } from '@/hooks/form/usePhoneFormat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -55,7 +54,7 @@ import { useLicense } from '@/hooks/integrations/useLicense';
 
 export default function ManualRegistrationForm() {
   const { user } = useAuth();
-  const { hasFeature, isLicenseValid } = useLicense();
+  const { hasFeature } = useLicense();
   const generateAppointmentReceiptMutation = trpc.appointments.generateReceiptNumber.useMutation();
   const generateOfferLeadReceiptMutation = trpc.offerLeads.generateReceiptNumber.useMutation();
   const generateCampRegistrationReceiptMutation =

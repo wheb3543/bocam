@@ -29,7 +29,7 @@ interface BookingInfo {
 }
 
 export default function ThankYou() {
-  const { formatDate, formatDateTime } = useFormatDate();
+  const { formatDate } = useFormatDate();
   const [location] = useLocation();
   const [bookingInfo, setBookingInfo] = useState<BookingInfo | null>(null);
 

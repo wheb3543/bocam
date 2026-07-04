@@ -17,7 +17,7 @@ export default function UnderDevelopmentPage({
   description,
   icon: Icon,
   features,
-  currentPath,
+  currentPath: _currentPath,
 }: UnderDevelopmentPageProps) {
   const [, setLocation] = useLocation();
 
