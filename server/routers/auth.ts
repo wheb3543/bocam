@@ -22,7 +22,7 @@ function createAuthToken(userId: number, username: string, role: string): string
 }
 
 // Helper to verify JWT token
-function verifyAuthToken(token: string): { userId: number; username: string; role: string } | null {
+function _verifyAuthToken(token: string): { userId: number; username: string; role: string } | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { type: string; userId: number; username: string; role: string };
     if (decoded.type !== 'admin') return null;

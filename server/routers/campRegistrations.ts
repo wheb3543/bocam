@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { eq, desc, and, gte, sql, inArray } from 'drizzle-orm';
+import { eq, desc, and, sql, inArray } from 'drizzle-orm';
 import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
 import { getDb } from '../database/db';
 import { campRegistrations } from '../../drizzle/schema';
@@ -564,7 +564,7 @@ export const campRegistrationsRouter = router({
                 name: reg.fullName || 'المسجل',
                 camp_name: camp?.name || 'المخيم',
                 date: (reg as { preferredDate?: string }).preferredDate
-                  ? new Date((reg as { preferredDate?: string }).preferredDate!).toLocaleDateString('ar-YE')
+                  ? new Date((reg as { preferredDate?: string }).preferredDate || '').toLocaleDateString('ar-YE')
                   : camp?.startDate
                     ? new Date(camp.startDate).toLocaleDateString('ar-YE')
                     : 'غير محدد',
@@ -684,7 +684,7 @@ export const campRegistrationsRouter = router({
                 name: reg.fullName || 'المسجل',
                 camp_name: camp?.name || 'المخيم',
                 date: (reg as { preferredDate?: string }).preferredDate
-                  ? new Date((reg as { preferredDate?: string }).preferredDate!).toLocaleDateString('ar-YE')
+                  ? new Date((reg as { preferredDate?: string }).preferredDate || '').toLocaleDateString('ar-YE')
                   : camp?.startDate
                     ? new Date(camp.startDate).toLocaleDateString('ar-YE')
                     : 'غير محدد',

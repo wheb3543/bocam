@@ -3,6 +3,8 @@ import path from 'path';
 import { getHospitalDb } from '../database/db';
 import { sql } from 'drizzle-orm';
 
+type PDFDocumentInstance = InstanceType<typeof PDFDocument>;
+
 const AMIRI_REGULAR = path.join(process.cwd(), 'server', 'fonts', 'Amiri-Regular.ttf');
 const AMIRI_BOLD = path.join(process.cwd(), 'server', 'fonts', 'Amiri-Bold.ttf');
 
@@ -44,7 +46,7 @@ export async function generateLabResultPDF(orderId: number): Promise<Buffer> {
   });
 }
 
-function addLabHeader(doc: PDFKit.PDFDocument, order: { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date }) {
+function addLabHeader(doc: PDFDocumentInstance, order: { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date }) {
   const logoPath = path.join(process.cwd(), 'client', 'public', 'SGHHospitalColorBilingual.png');
   try {
     doc.image(logoPath, doc.page.width - 200, 30, { width: 150 });
@@ -83,7 +85,7 @@ function addLabHeader(doc: PDFKit.PDFDocument, order: { PATIENT_NAME: string; PH
   });
 }
 
-function addLabResultsTable(doc: PDFKit.PDFDocument, details: Array<{ TEST_NAME: string; RESULT_VALUE: string; NORMAL_RANGE: string; UNIT: string; PARAMETER_NAME?: string }>) {
+function addLabResultsTable(doc: PDFDocumentInstance, details: Array<{ TEST_NAME: string; RESULT_VALUE: string; NORMAL_RANGE: string; UNIT: string; PARAMETER_NAME?: string }>) {
   const tableTop = 250;
   const tableLeft = 50;
   const tableWidth = doc.page.width - 100;
@@ -133,7 +135,7 @@ function addLabResultsTable(doc: PDFKit.PDFDocument, details: Array<{ TEST_NAME:
   });
 }
 
-function addLabFooter(doc: PDFKit.PDFDocument, order: { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date }) {
+function addLabFooter(doc: PDFDocumentInstance, order: { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date }) {
   const pageHeight = doc.page.height;
   const footerY = pageHeight - 50;
 

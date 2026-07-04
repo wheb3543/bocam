@@ -55,7 +55,7 @@ export async function sendBroadcast(params: {
     }
 
     // تسجيل الـ job في قاعدة البيانات
-    const [broadcast] = await db.insert(whatsappBroadcasts).values({
+    await db.insert(whatsappBroadcasts).values({
       name: `Broadcast ${new Date().toISOString()}`,
       message: params.message,
       recipientCount: normalizedRecipients.length,

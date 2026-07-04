@@ -193,13 +193,9 @@ interface TemplateMessage {
   templateName: string;
   languageCode: string;
   components: Array<{
-    type: 'header' | 'body' | 'footer' | 'button';
-    parameters?: Array<{
-      type: 'text' | 'payload' | 'image';
-      text?: string;
-      payload?: string;
-    }>;
-    sub_type?: 'quick_reply';
+    type: string;
+    parameters?: Array<Record<string, unknown>>;
+    sub_type?: string;
     index?: number;
   }>;
 }
@@ -211,7 +207,7 @@ interface TemplateMessage {
 export async function sendWhatsAppTemplateMessage(
   phone: string,
   template: TemplateMessage,
-  options?: { category?: 'marketing' | 'utility' | 'authentication' }
+  _options?: { category?: 'marketing' | 'utility' | 'authentication' }
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 

@@ -8,7 +8,6 @@ import {
   campRegistrations,
   doctors,
   offers,
-  camps,
 } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { dispatchWhatsAppMessage } from '../services/whatsappMessageDispatcher';
@@ -20,7 +19,7 @@ import { serverCache, CacheKeys } from '../services/cache';
  */
 
 // Webhook verification (Meta requirement)
-const verifyWebhookSchema = z.object({
+const _verifyWebhookSchema = z.object({
   'hub.mode': z.string(),
   'hub.verify_token': z.string(),
   'hub.challenge': z.string(),
@@ -363,7 +362,7 @@ export const webhooksRouter = router({
                   // camp_reg_confirmed (150004) يقبل 5 متغيرات: name, camp_name, date, time, location
                   // camp_reg_cancelled (150003) يقبل 2 متغيرات: name, camp_name
                   const wh_dateStr = (reg as { preferredDate?: string }).preferredDate
-                    ? new Date((reg as { preferredDate?: string }).preferredDate!).toLocaleDateString('ar-YE')
+                    ? new Date((reg as { preferredDate?: string }).preferredDate || '').toLocaleDateString('ar-YE')
                     : camp?.startDate
                       ? new Date(camp.startDate).toLocaleDateString('ar-YE')
                       : 'غير محدد';

@@ -3,7 +3,6 @@ import { getRedisConnection } from '../../services/redis';
 import { sendWhatsAppTemplateMessage } from '../../services/whatsappCloudAPI';
 
 // Check if Redis is available
-let isRedisAvailable = false;
 let redisCheckPromise: Promise<boolean> | null = null;
 
 async function checkRedisConnection(): Promise<boolean> {
@@ -13,11 +12,9 @@ async function checkRedisConnection(): Promise<boolean> {
     try {
       const redis = getRedisConnection();
       await redis.ping();
-      isRedisAvailable = true;
       console.log('[WhatsApp Queue] Redis connection successful');
       return true;
-    } catch (error) {
-      isRedisAvailable = false;
+    } catch {
       console.warn('[WhatsApp Queue] Redis not available, will send messages directly');
       return false;
     }
@@ -93,7 +90,7 @@ async function initializeWorker() {
   const redisAvailable = await checkRedisConnection();
   if (!redisAvailable) return null;
 
-  whatsappWorker = new Worker<WhatsAppMessageJob, any, string>(
+  whatsappWorker = new Worker<WhatsAppMessageJob, unknown, string>(
     'whatsapp-messages',
     async (job: Job<WhatsAppMessageJob>) => {
       const { to, phone, templateName, language, components, category, metadata } = job.data;

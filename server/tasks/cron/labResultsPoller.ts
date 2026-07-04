@@ -25,7 +25,7 @@ interface LabOrder {
   error_message?: string;
 }
 
-// Note: Using any for database connections because hospitalDb and db are external database
+// Note: Using unknown for database connections because hospitalDb and db are external database
 // connections with complex types that are not easily defined in TypeScript.
 // Using unknown would require type assertions in every single database operation,
 // which would make the code unnecessarily complex and harder to maintain.
@@ -105,11 +105,15 @@ export async function pollLabResults() {
   }
 }
 
-async function processOrder(order: LabOrder, hospitalDb: any, db: any) {
+async function processOrder(
+  order: LabOrder,
+  hospitalDb: NonNullable<Awaited<ReturnType<typeof getHospitalDb>>>,
+  db: NonNullable<Awaited<ReturnType<typeof getDb>>>
+) {
   const startTime = Date.now();
   try {
     // تحديث الحالة في قاعدة بيانات المستشفى
-    await hospitalDb.execute(
+    await (hospitalDb as { execute: (query: unknown) => Promise<unknown> }).execute(
       sql`UPDATE lab_orders SET status = 'processing' WHERE ORDER_ID = ${order.ORDER_ID}`
     );
     console.log(
@@ -193,7 +197,7 @@ async function processOrder(order: LabOrder, hospitalDb: any, db: any) {
           for (const varName of parsedVars) {
             bodyParams.push({
               type: 'text',
-              text: String((variables as any)[varName] ?? ''),
+              text: String((variables as Record<string, unknown>)[varName] ?? ''),
               parameter_name: varName,
             });
           }
@@ -216,7 +220,7 @@ async function processOrder(order: LabOrder, hospitalDb: any, db: any) {
       const templateResult = await sendWhatsAppTemplateMessage(normalizedPhone, {
         templateName: templateNameToSend,
         languageCode: template.languageCode ?? 'ar',
-        components: components as any,
+        components: components as Array<{ type: string; parameters?: Array<Record<string, unknown>> }>,
       });
 
       if (!templateResult.success) {

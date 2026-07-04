@@ -13,7 +13,7 @@
 import { eq, notInArray } from 'drizzle-orm';
 import { normalizePhoneNumber } from '../database/db';
 import { getDb } from '../database/db';
-import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from './whatsappCloudAPI';
+import { sendWhatsAppTemplateMessage } from './whatsappCloudAPI';
 import { meta } from '../api/MetaApiService';
 import { ENV } from '../_core/env';
 import { whatsappTemplates } from '../../drizzle/schema';
@@ -40,7 +40,7 @@ export async function sendTemplateMessage(params: {
     }
 
     // بناء components للقالب وفق بنية Meta الرسمية
-    const components: Record<string, unknown>[] = [];
+    const components: Array<{ type: string; parameters?: Array<Record<string, unknown>> }> = [];
     if (params.parameters && params.parameters.length > 0) {
       components.push({
         type: 'body',
@@ -57,7 +57,7 @@ export async function sendTemplateMessage(params: {
     const result = await sendWhatsAppTemplateMessage(normalizedPhone, {
       templateName: params.templateName,
       languageCode: params.language || 'ar',
-      components: components as unknown as any,
+      components,
     });
 
     return {

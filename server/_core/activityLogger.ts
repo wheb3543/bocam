@@ -85,7 +85,7 @@ export async function updateUpdateLog(id: number, data: Partial<UpdateLog>) {
     if (!db) throw new Error('Database not available');
 
     const updates: string[] = [];
-    const values: unknown[] = [];
+    const _values: unknown[] = [];
 
     if (data.status !== undefined) {
       updates.push(`status = ${data.status}`);
@@ -136,7 +136,7 @@ export async function updateBackupLog(id: number, data: Partial<BackupLog>) {
     if (!db) throw new Error('Database not available');
 
     const updates: string[] = [];
-    const values: unknown[] = [];
+    const _values: unknown[] = [];
 
     if (data.status !== undefined) {
       updates.push(`status = ${data.status}`);

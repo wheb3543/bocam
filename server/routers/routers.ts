@@ -1,11 +1,6 @@
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
-import { getDb } from '../database/db';
-import { users } from '../../drizzle/schema';
-import { COOKIE_NAME } from '@shared/const';
-import { getSessionCookieOptions } from '../_core/cookies';
 import { systemRouter } from '../_core/systemRouter';
-import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { protectedProcedure, router } from '../_core/trpc';
 import {
   getAllAccessRequests,
   getPendingAccessRequests,
@@ -44,7 +39,7 @@ import { patientResultsRouter } from './patientResults';
 import { pwaRouter } from './pwa';
 import { metaSyncRouter } from './metaSync';
 import { authRouter } from './auth';
-import { generatePDF, type ExportMetadata } from '../services/pdfService';
+import { generatePDF } from '../services/pdfService';
 import { licenseRouter } from './license';
 
 export const appRouter = router({

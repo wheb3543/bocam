@@ -11,7 +11,7 @@ import {
   offers,
   doctors,
 } from '../../drizzle/schema';
-import { and, between, count, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, count, eq, gte, lte, sql } from 'drizzle-orm';
 
 /**
  * Reports Router
@@ -340,7 +340,7 @@ export const reportsRouter = router({
     // @ts-ignore - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
-    .query(async ({ input }) => {
+    .query(async () => {
       // This is a placeholder for future revenue tracking
       // Will be implemented when payment integration is added
       return {

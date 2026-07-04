@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { eq, and, gte } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { getDb } from '../database/db';
 import { appointments } from '../../drizzle/schema';
 import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
@@ -96,7 +96,7 @@ export const appointmentsRouter = router({
       // }
 
       const normalizedPhone = normalizePhoneNumber(input.phone);
-      const db = await getDb();
+      const _db = await getDb();
 
       // Get or create campaign by slug
       let campaign = await getCampaignBySlug(input.campaignSlug);

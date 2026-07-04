@@ -153,7 +153,8 @@ async function checkForUpdates(): Promise<UpdateCheckResponse | null> {
         'User-Agent': 'BOCAM-CRM-UpdateChecker/1.0',
       },
       body: JSON.stringify(checkData),
-      signal: AbortSignal.timeout(15000), // 15 ثانية
+      // eslint-disable-next-line no-undef
+      signal: (AbortSignal as unknown as AbortSignalWithTimeout).timeout(15000), // 15 ثانية
     });
 
     if (response.ok) {
@@ -362,7 +363,8 @@ async function downloadUpdate(updateInfo: UpdateInfo): Promise<string> {
     ensureUpdateDirectories();
 
     const response = await fetch(updateInfo.downloadUrl, {
-      signal: AbortSignal.timeout(300000), // 5 دقائق
+      // eslint-disable-next-line no-undef
+      signal: (AbortSignal as unknown as AbortSignalWithTimeout).timeout(300000), // 5 دقائق
     });
 
     if (!response.ok) {
@@ -739,12 +741,12 @@ async function restartServer(): Promise<void> {
     // محاولة استخدام PM2 إذا كان موجوداً
     await execAsync('pm2 restart bocam-crm');
     console.log('✅ Server restarted via PM2');
-  } catch (pm2Error) {
+  } catch {
     // إذا فشل PM2، حاول استخدام systemd
     try {
       await execAsync('sudo systemctl restart bocam-crm');
       console.log('✅ Server restarted via systemd');
-    } catch (systemdError) {
+    } catch {
       // إذا فشل كل شيء، أوقف العملية الحالية
       console.log('⚠️  Could not restart via PM2 or systemd, exiting...');
       process.exit(0);

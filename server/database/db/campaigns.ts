@@ -1,10 +1,8 @@
-import { eq, desc, and, gte, lte, sql, or, like, inArray } from 'drizzle-orm';
+import { eq, desc, and, sql, or, like } from 'drizzle-orm';
 import {
   campaigns,
   appointments,
   leads,
-  offerLeads,
-  campRegistrations,
   campaignOffers,
   campaignCamps,
   campaignDoctors,

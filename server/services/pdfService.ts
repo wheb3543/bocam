@@ -1,7 +1,8 @@
 import PDFDocument from 'pdfkit';
-import { Readable } from 'stream';
 import path from 'path';
 import { COMPANY_SLOGAN_AR } from '@shared/config';
+
+type PDFDocumentInstance = InstanceType<typeof PDFDocument>;
 
 // مسارات الخطوط العربية
 const AMIRI_REGULAR = path.join(process.cwd(), 'server', 'fonts', 'Amiri-Regular.ttf');
@@ -32,7 +33,7 @@ export interface PDFOptions {
 /**
  * تنسيق التاريخ والوقت بالعربية
  */
-function formatDateTime(date: Date): string {
+function _formatDateTime(date: Date): string {
   return new Intl.DateTimeFormat('ar-SA', {
     year: 'numeric',
     month: 'long',
@@ -45,7 +46,7 @@ function formatDateTime(date: Date): string {
 /**
  * إنشاء ترويسة PDF
  */
-function addHeader(doc: PDFKit.PDFDocument, metadata: ExportMetadata) {
+function addHeader(doc: PDFDocumentInstance, metadata: ExportMetadata) {
   // شعار المستشفى (سيتم تحميله من الملف)
   const logoPath = '/home/ubuntu/sgh-crm-portal/client/public/sgh-logo-full.png';
 
@@ -110,7 +111,7 @@ function addHeader(doc: PDFKit.PDFDocument, metadata: ExportMetadata) {
 /**
  * إنشاء ذييل PDF
  */
-function addFooter(doc: PDFKit.PDFDocument, metadata: ExportMetadata) {
+function addFooter(doc: PDFDocumentInstance, metadata: ExportMetadata) {
   const pageHeight = doc.page.height;
   const footerY = pageHeight - 50;
 
@@ -140,7 +141,7 @@ function addFooter(doc: PDFKit.PDFDocument, metadata: ExportMetadata) {
  * إنشاء جدول في PDF مع دعم RTL
  */
 function addTable(
-  doc: PDFKit.PDFDocument,
+  doc: PDFDocumentInstance,
   columns: Array<{ key: string; label: string }>,
   data: Array<Record<string, unknown>>,
   startY: number

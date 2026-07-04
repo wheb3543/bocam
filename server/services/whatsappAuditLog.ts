@@ -149,12 +149,15 @@ export async function getAuditLogs(params?: {
       filtered = filtered.filter((log) => log.type === params.type);
     }
 
-    if (params?.startDate) {
-      filtered = filtered.filter((log) => log.timestamp >= params.startDate!);
+    const startDate = params?.startDate;
+    const endDate = params?.endDate;
+
+    if (startDate) {
+      filtered = filtered.filter((log) => log.timestamp >= startDate);
     }
 
-    if (params?.endDate) {
-      filtered = filtered.filter((log) => log.timestamp <= params.endDate!);
+    if (endDate) {
+      filtered = filtered.filter((log) => log.timestamp <= endDate);
     }
 
     const limit = params?.limit || 100;
@@ -189,12 +192,15 @@ export async function getAuditStats(params?: { startDate?: Date; endDate?: Date 
   try {
     let filtered = [...auditLogs];
 
-    if (params?.startDate) {
-      filtered = filtered.filter((log) => log.timestamp >= params.startDate!);
+    const startDate = params?.startDate;
+    const endDate = params?.endDate;
+
+    if (startDate) {
+      filtered = filtered.filter((log) => log.timestamp >= startDate);
     }
 
-    if (params?.endDate) {
-      filtered = filtered.filter((log) => log.timestamp <= params.endDate!);
+    if (endDate) {
+      filtered = filtered.filter((log) => log.timestamp <= endDate);
     }
 
     const stats = {
@@ -235,12 +241,15 @@ export async function exportAuditLogs(params?: {
       filtered = filtered.filter((log) => log.phone === params.phone);
     }
 
-    if (params?.startDate) {
-      filtered = filtered.filter((log) => log.timestamp >= params.startDate!);
+    const startDate = params?.startDate;
+    const endDate = params?.endDate;
+
+    if (startDate) {
+      filtered = filtered.filter((log) => log.timestamp >= startDate);
     }
 
-    if (params?.endDate) {
-      filtered = filtered.filter((log) => log.timestamp <= params.endDate!);
+    if (endDate) {
+      filtered = filtered.filter((log) => log.timestamp <= endDate);
     }
 
     const headers = ['ID', 'Timestamp', 'Type', 'Phone', 'Status', 'Message', 'Error'];

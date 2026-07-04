@@ -18,7 +18,7 @@ import { COMPANY_SLOGAN_AR } from '@shared/config';
 export async function sendTextMessage(
   phone: string,
   message: string,
-  options?: { priority?: 'high' | 'normal' | 'low' }
+  _options?: { priority?: 'high' | 'normal' | 'low' }
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     const normalizedPhone = normalizePhoneNumber(phone);

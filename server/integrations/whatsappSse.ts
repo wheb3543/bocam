@@ -17,7 +17,7 @@ function safeSend(res: Response, event: string, data: unknown) {
     if (!res.writableEnded) {
       res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
     }
-  } catch (_) {
+  } catch {
     /* ignore */
   }
 }
@@ -42,7 +42,7 @@ export function createWhatsAppSseRouter(): Router {
     const keepAlive = setInterval(() => {
       try {
         if (!res.writableEnded) res.write(': ping\n\n');
-      } catch (_) {}
+      } catch {}
     }, 15000);
 
     req.on('close', () => {
@@ -64,7 +64,7 @@ export function createWhatsAppSseRouter(): Router {
     const keepAlive = setInterval(() => {
       try {
         if (!res.writableEnded) res.write(': ping\n\n');
-      } catch (_) {}
+      } catch {}
     }, 15000);
 
     req.on('close', () => {
@@ -86,7 +86,7 @@ export function createWhatsAppSseRouter(): Router {
     const keepAlive = setInterval(() => {
       try {
         if (!res.writableEnded) res.write(': ping\n\n');
-      } catch (_) {}
+      } catch {}
     }, 15000);
 
     req.on('close', () => {
@@ -110,7 +110,7 @@ export function createWhatsAppSseRouter(): Router {
     const keepAlive = setInterval(() => {
       try {
         if (!res.writableEnded) res.write(': ping\n\n');
-      } catch (_) {}
+      } catch {}
     }, 15000);
 
     req.on('close', () => {

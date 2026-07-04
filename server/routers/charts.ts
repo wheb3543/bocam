@@ -5,12 +5,8 @@ import { getDb } from '../database/db';
 import {
   leads,
   appointments,
-  offerLeads,
-  campRegistrations,
-  whatsappConversations,
-  whatsappMessages,
 } from '../../drizzle/schema';
-import { sql, count, eq, gte, lte, and } from 'drizzle-orm';
+import { sql, count } from 'drizzle-orm';
 
 /**
  * Charts Router - يوفر بيانات الرسوم البيانية للوحة التحكم

@@ -1,8 +1,6 @@
 import { eq, and } from 'drizzle-orm';
 import { getDb } from '../database/db';
-import * as whatsappServiceModule from './whatsappService';
-import * as whatsappTemplatesModule from './whatsappTemplates';
-import * as whatsappSchedulerModule from './whatsappScheduler';
+import { sendTemplateMessage } from './whatsappTemplates';
 import {
   appointments,
   campRegistrations,
@@ -80,7 +78,7 @@ export async function sendAppointmentConfirmation(appointmentId: number) {
     ];
 
     // إرسال الرسالة عبر القالب المعتمد
-    const result = await whatsappTemplatesModule.sendTemplateMessage({
+    const result = await sendTemplateMessage({
       phone: apt.phone,
       templateName: tmpl.metaName || 'appointment_confirmation_ar',
       language: 'ar',
@@ -169,7 +167,7 @@ export async function sendCampRegistrationConfirmation(campRegistrationId: numbe
     ];
 
     // إرسال الرسالة عبر القالب المعتمد
-    const result = await whatsappTemplatesModule.sendTemplateMessage({
+    const result = await sendTemplateMessage({
       phone: reg.phone,
       templateName: tmpl.metaName || 'camp_registration_confirmation_ar',
       language: 'ar',
@@ -259,7 +257,7 @@ export async function sendOfferLeadConfirmation(offerLeadId: number) {
     ];
 
     // إرسال الرسالة عبر القالب المعتمد
-    const result = await whatsappTemplatesModule.sendTemplateMessage({
+    const result = await sendTemplateMessage({
       phone: lead.phone,
       templateName: tmpl.metaName || 'offer_booking_confirmation_ar',
       language: 'ar',
@@ -351,7 +349,7 @@ export async function scheduleAppointmentReminder24h(appointmentId: number) {
     const parameters = [apt.fullName, doc.name, apt.preferredTime || 'حسب الحاجة'];
 
     // إرسال الرسالة عبر القالب المعتمد
-    const result = await whatsappTemplatesModule.sendTemplateMessage({
+    const result = await sendTemplateMessage({
       phone: apt.phone,
       templateName: tmpl.metaName || 'appointment_reminder_24h_ar',
       language: 'ar',
@@ -424,7 +422,7 @@ export async function scheduleAppointmentReminder1h(appointmentId: number) {
     ];
 
     // إرسال الرسالة عبر القالب المعتمد
-    const result = await whatsappTemplatesModule.sendTemplateMessage({
+    const result = await sendTemplateMessage({
       phone: apt.phone,
       templateName: tmpl.metaName || 'appointment_reminder_1h_ar',
       language: 'ar',
@@ -551,7 +549,7 @@ export async function sendAppointmentStatusUpdate(
     const tmpl = template[0];
 
     // إرسال الرسالة عبر القالب المعتمد
-    const result = await whatsappTemplatesModule.sendTemplateMessage({
+    const result = await sendTemplateMessage({
       phone: apt.phone,
       templateName: tmpl.metaName || templateName,
       language: 'ar',
@@ -647,7 +645,7 @@ export async function sendCampRegistrationStatusUpdate(
     const tmpl = template[0];
 
     // إرسال الرسالة عبر القالب المعتمد
-    const result = await whatsappTemplatesModule.sendTemplateMessage({
+    const result = await sendTemplateMessage({
       phone: reg.phone,
       templateName: tmpl.metaName || templateName,
       language: 'ar',
@@ -677,7 +675,7 @@ export async function sendCampRegistrationStatusUpdate(
 export async function sendOfferLeadStatusUpdate(
   offerLeadId: number,
   newStatus: string,
-  reason?: string
+  _reason?: string
 ) {
   try {
     const db = await getDb();
@@ -747,7 +745,7 @@ export async function sendOfferLeadStatusUpdate(
     const tmpl = template[0];
 
     // إرسال الرسالة عبر القالب المعتمد
-    const result = await whatsappTemplatesModule.sendTemplateMessage({
+    const result = await sendTemplateMessage({
       phone: lead.phone,
       templateName: tmpl.metaName || templateName,
       language: 'ar',

@@ -11,8 +11,8 @@ import { TRPCError } from '@trpc/server';
 import { publicProcedure, protectedProcedure, router, requireOffersFeature } from '../_core/trpc';
 import { getDb } from '../database/db';
 import { offers } from '../../drizzle/schema';
-import { eq, and, isNotNull } from 'drizzle-orm';
-import { generateSlug, isValidSlug } from '../../shared/_core/utils/slug';
+import { eq, and } from 'drizzle-orm';
+import { generateSlug } from '../../shared/_core/utils/slug';
 import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
 
 /**
@@ -174,7 +174,7 @@ export const offersRouter = router({
           input.imageUrl && input.imageUrl.trim() !== '' ? input.imageUrl : undefined;
 
         // Create the offer
-        const newOffer = await dbInstance.insert(offers).values({
+        await dbInstance.insert(offers).values({
           title: input.title,
           slug,
           description: input.description,

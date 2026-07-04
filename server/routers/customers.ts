@@ -4,9 +4,9 @@
  */
 
 import { z } from 'zod';
-import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { protectedProcedure, router } from '../_core/trpc';
 import { getDb } from '../database/db';
-import { eq, desc, like, or, sql, and } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import {
   appointments,
   leads,

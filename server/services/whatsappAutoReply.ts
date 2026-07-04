@@ -10,7 +10,7 @@
  * https://developers.facebook.com/documentation/business-messaging/whatsapp/guides/send-messages
  */
 
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import {
   getDb,
   normalizePhoneNumber,

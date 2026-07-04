@@ -106,7 +106,7 @@ function calculateSize(filePath: string): number {
 /**
  * حساب hash للملف
  */
-function calculateHash(filePath: string): string {
+function _calculateHash(filePath: string): string {
   const hash = crypto.createHash('sha256');
   const buffer = fs.readFileSync(filePath);
   hash.update(buffer);
@@ -138,7 +138,7 @@ function copyDirectory(source: string, destination: string): void {
 /**
  * إنشاء نسخة احتياطية محلية
  */
-async function createLocalBackup(backupName: string, config: BackupConfig): Promise<string> {
+async function createLocalBackup(backupName: string, _config: BackupConfig): Promise<string> {
   console.log(`💾 Creating local backup: ${backupName}`);
 
   ensureBackupDirectories();

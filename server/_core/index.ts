@@ -4,8 +4,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import net from 'net';
-import path from 'path';
-import fs from 'fs';
 import type { IncomingMessage } from 'http';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { registerOAuthRoutes } from './oauth';
@@ -16,31 +14,22 @@ import { appRouter } from '../routers/routers';
 import { createContext } from './context';
 import { serveStatic, setupVite } from './vite';
 import { initializeLicense } from './license';
-import { initializeHeartbeat } from './heartbeat';
 import {
-  initializeUpdateChecker,
   getUpdateStatus,
   startManualUpdate,
   startManualRollback,
 } from './updateChecker';
 import {
   logActivity,
-  logUpdate,
-  updateUpdateLog,
-  logBackup,
-  updateBackupLog,
-  createNotification,
 } from './activityLogger';
 import { cacheManager } from '../services/redis';
-import { CacheKeys, CacheTTL, cachedQuery } from './cacheHelper';
+import { CacheKeys, CacheTTL } from './cacheHelper';
 import {
-  createBackup,
+  deleteBackup,
   getBackupHistory,
   restoreBackup,
-  deleteBackup,
-  BackupConfig,
 } from './backupManager';
-import { startBackupCronJobs, runManualBackup } from '../tasks/cron/backupJob';
+import { runManualBackup } from '../tasks/cron/backupJob';
 // import { initSimpleCronScheduler } from "../cron/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -65,7 +54,7 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   // Initialize license validation (Kill Switch)
   // Allow server to start in activation mode if license is missing
-  const licenseInfo = initializeLicense(true);
+  const _licenseInfo = initializeLicense(true);
 
   // TEMPORARY: Disable heartbeat, update checker, and backup cron jobs for deployment
   // Initialize heartbeat system (Anti-Clock-Tampering) - only if license is valid

@@ -37,7 +37,7 @@ export const requireFeature = (features: string | string[], options: FeatureOpti
   const featureArray = Array.isArray(features) ? features : [features];
   const { requireAll = true, errorMessage } = options;
 
-  return async ({ ctx, next }: { ctx: TrpcContext; next: () => Promise<unknown> }) => {
+  return async ({ ctx: _ctx, next }: { ctx: TrpcContext; next: () => Promise<unknown> }) => {
     if (requireAll) {
       // All features must be enabled
       const allEnabled = featureArray.every((feature) => isFeatureEnabled(feature));

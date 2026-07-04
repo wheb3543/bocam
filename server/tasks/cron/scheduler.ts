@@ -5,9 +5,6 @@
 import { runDeactivationJobs } from './deactivateExpired';
 import { pollLabResults } from './labResultsPoller';
 
-// Run every day at midnight (00:00)
-const CRON_SCHEDULE = '0 0 * * *'; // minute hour day month weekday
-
 /**
  * Initialize cron scheduler
  * تهيئة جدولة المهام

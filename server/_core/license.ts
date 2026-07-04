@@ -152,7 +152,7 @@ export function licenseFileExists(licensePath?: string): boolean {
   try {
     const path = licensePath || getLicenseFilePath();
     return fs.existsSync(path);
-  } catch (error) {
+  } catch {
     return false;
   }
 }

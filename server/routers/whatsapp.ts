@@ -12,13 +12,11 @@ import { z } from 'zod';
 import {
   sendWhatsAppTextMessage,
   getWhatsAppAPIStatus,
-  formatPhoneNumber,
   sendWhatsAppTypingIndicator,
 } from '../services/whatsappCloudAPI';
 import {
   sendTextMessage,
   sendWelcomeMessage,
-  sendBookingConfirmation,
   verifyWhatsAppHealth,
 } from '../services/whatsappService';
 import { normalizePhoneNumber } from '../database/db';
@@ -321,7 +319,7 @@ export const whatsappRouter = router({
           });
 
         const { whatsappConversations } = await import('../../drizzle/schema');
-        const { eq, inArray } = await import('drizzle-orm');
+        const { inArray } = await import('drizzle-orm');
 
         await dbConn
           .update(whatsappConversations)
@@ -373,7 +371,7 @@ export const whatsappRouter = router({
           });
 
         const { whatsappMessages } = await import('../../drizzle/schema');
-        const { eq, count, sql } = await import('drizzle-orm');
+        const { eq } = await import('drizzle-orm');
 
         const messages = await dbConn
           .select()
@@ -1019,7 +1017,7 @@ export const whatsappRouter = router({
         typing: z.boolean(),
       })
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input }) => {
       const conv = await db.getWhatsAppConversationById(input.conversationId);
       if (!conv) throw new TRPCError({ code: 'NOT_FOUND', message: 'المحادثة غير موجودة' });
 
@@ -1192,7 +1190,7 @@ export const whatsappRouter = router({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
 
       const { whatsappMessages } = await import('../../drizzle/schema');
-      const { gte, lte, and, sql } = await import('drizzle-orm');
+      const { gte } = await import('drizzle-orm');
 
       // Get messages from last 7 days
       const sevenDaysAgo = new Date();
@@ -1567,7 +1565,7 @@ export const whatsappRouter = router({
           const doctorRows = await dbConn
             .select()
             .from(doctors)
-            .where(eq(doctors.id, (appt as { doctorId?: number }).doctorId!))
+            .where(eq(doctors.id, (appt as { doctorId?: number }).doctorId ?? 0))
             .limit(1);
           doctorName = doctorRows[0]?.name || doctorName;
         }
@@ -1607,9 +1605,9 @@ export const whatsappRouter = router({
         }
         // بناء 5 متغيرات لقالب camp_reg_verification (150005)
         const regDateStr = (reg as { preferredDate?: string }).preferredDate
-          ? new Date((reg as { preferredDate?: string }).preferredDate!).toLocaleDateString('ar-YE')
+          ? new Date((reg as { preferredDate?: string }).preferredDate || '').toLocaleDateString('ar-YE')
           : campData?.startDate
-            ? new Date((campData as { startDate?: string }).startDate!).toLocaleDateString('ar-YE')
+            ? new Date((campData as { startDate?: string }).startDate || '').toLocaleDateString('ar-YE')
             : 'غير محدد';
         const regTimeStr =
           (reg as { preferredTimeSlot?: string }).preferredTimeSlot === 'morning'
@@ -2110,7 +2108,6 @@ export const whatsappRouter = router({
       if (!dbConn)
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
       const { whatsappUserOptIns } = await import('../../drizzle/schema');
-      const { eq, sql } = await import('drizzle-orm');
 
       const allSubs = await dbConn.select().from(whatsappUserOptIns);
 
@@ -2306,7 +2303,7 @@ export const whatsappRouter = router({
             message: 'قاعدة البيانات غير متاحة',
           });
         const { whatsappWebhookEvents } = await import('../../drizzle/schema');
-        const { like, desc, eq } = await import('drizzle-orm');
+        const { like, desc } = await import('drizzle-orm');
 
         let query = dbConn
           .select()

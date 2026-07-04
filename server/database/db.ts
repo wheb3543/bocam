@@ -3,7 +3,6 @@ import { drizzle } from 'drizzle-orm/mysql2';
 import crypto from 'crypto';
 import * as schema from '../../drizzle/schema';
 import {
-  InsertUser,
   users,
   campaigns,
   leads,
@@ -19,7 +18,6 @@ import {
   InsertAppointment,
   InsertAccessRequest,
   sharedColumnTemplates,
-  InsertSharedColumnTemplate,
   InsertWhatsAppConversation,
   WhatsAppConversation,
   InsertWhatsAppMessage,
@@ -33,7 +31,6 @@ import {
   InsertWhatsappTemplateQuality,
   InsertMessageSetting,
 } from '../../drizzle/schema';
-import { ENV } from '../_core/env';
 import { publish, channelForConversation } from '../_core/pubsub';
 
 /**
@@ -1056,7 +1053,6 @@ export async function getWhatsAppConversationByPhone(phone: string): Promise<Wha
   const db = await getDb();
   if (!db) return undefined;
 
-  const { whatsappConversations } = await import('../../drizzle/schema');
   const normalizedPhone = normalizePhoneNumber(phone);
 
   // Use SQL query to directly filter by normalized phone number
@@ -1754,12 +1750,13 @@ export async function getCampRegistrationsPaginated(
     const from = new Date(dateFrom);
     const to = new Date(dateTo);
     to.setHours(23, 59, 59, 999);
-    dateParts.push(
-      and(
-        sql`${campRegistrations.createdAt} >= ${from.toISOString()}`,
-        sql`${campRegistrations.createdAt} <= ${to.toISOString()}`
-      )!
-    );
+
+    const fromCondition: SQL<unknown> = sql`${campRegistrations.createdAt} >= ${from.toISOString()}`;
+    const toCondition: SQL<unknown> = sql`${campRegistrations.createdAt} <= ${to.toISOString()}`;
+    const rangeCondition = and(fromCondition, toCondition);
+    if (rangeCondition) {
+      dateParts.push(rangeCondition);
+    }
   }
   if (dateFilter && dateFilter !== 'all') {
     const now = new Date();
@@ -1778,18 +1775,19 @@ export async function getCampRegistrationsPaginated(
       startDate = new Date(0);
     }
     if (endDate) {
-      dateParts.push(
-        and(
-          sql`${campRegistrations.createdAt} >= ${startDate.toISOString()}`,
-          sql`${campRegistrations.createdAt} <= ${endDate.toISOString()}`
-        )!
-      );
+      const fromCondition: SQL<unknown> = sql`${campRegistrations.createdAt} >= ${startDate.toISOString()}`;
+      const toCondition: SQL<unknown> = sql`${campRegistrations.createdAt} <= ${endDate.toISOString()}`;
+      const rangeCondition = and(fromCondition, toCondition);
+      if (rangeCondition) {
+        dateParts.push(rangeCondition);
+      }
     } else {
-      dateParts.push(sql`${campRegistrations.createdAt} >= ${startDate.toISOString()}`);
+      const fromCondition: SQL<unknown> = sql`${campRegistrations.createdAt} >= ${startDate.toISOString()}`;
+      dateParts.push(fromCondition);
     }
   }
   if (dateParts.length > 0) {
-    whereConditions.push(dateParts.length === 1 ? dateParts[0]! : and(...dateParts));
+    whereConditions.push(dateParts.length === 1 ? (dateParts[0] ?? sql`TRUE`) : and(...dateParts));
   }
 
   const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;

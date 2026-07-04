@@ -3,6 +3,8 @@
 
 import { ENV } from '../_core/env';
 
+/* global BlobPart, HeadersInit */
+
 type StorageConfig = { baseUrl: string; apiKey: string };
 
 function getStorageConfig(): StorageConfig {

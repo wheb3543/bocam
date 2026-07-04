@@ -1,6 +1,4 @@
 // Database query optimizations
-import { getDb } from './db';
-import { eq, and, or, desc, asc, sql } from 'drizzle-orm';
 
 export interface QueryOptions {
   limit?: number;
@@ -11,7 +9,7 @@ export interface QueryOptions {
 }
 
 // Simple in-memory cache for database queries
-const queryCache = new Map<string, { data: any; timestamp: number }>();
+const queryCache = new Map<string, { data: unknown; timestamp: number }>();
 
 export function clearQueryCache() {
   queryCache.clear();
@@ -139,16 +137,18 @@ export class DatabasePerformanceMonitor {
     if (!this.queryTimes.has(queryName)) {
       this.queryTimes.set(queryName, []);
     }
-    
-    const times = this.queryTimes.get(queryName)!;
-    times.push(duration);
-    
-    // Keep only last 100 measurements
-    if (times.length > 100) {
-      times.shift();
+
+    const times = this.queryTimes.get(queryName);
+    if (times) {
+      times.push(duration);
+
+      // Keep only last 100 measurements
+      if (times.length > 100) {
+        times.shift();
+      }
     }
   }
-  
+
   getAverageTime(queryName: string): number {
     const times = this.queryTimes.get(queryName);
     if (!times || times.length === 0) return 0;
@@ -159,15 +159,15 @@ export class DatabasePerformanceMonitor {
   
   getSlowQueries(threshold: number = 1000): string[] {
     const slowQueries: string[] = [];
-    
+
     const entries = Array.from(this.queryTimes.entries());
-    for (const [queryName, times] of entries) {
+    for (const [queryName, _times] of entries) {
       const avgTime = this.getAverageTime(queryName);
       if (avgTime > threshold) {
         slowQueries.push(queryName);
       }
     }
-    
+
     return slowQueries;
   }
 }

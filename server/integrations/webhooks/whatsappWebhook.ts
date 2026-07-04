@@ -7,6 +7,7 @@
  * ✅ حفظ الرسائل الواردة في قاعدة البيانات
  * ✅ تحديث حالة القوالب تلقائياً عند تغيير Meta لها
  *
+ * 
  * وفق وثائق Meta الرسمية:
  * https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/overview/
  */
@@ -21,10 +22,122 @@ interface AppointmentData {
   doctorId?: number;
 }
 
+interface MetaWebhookError {
+  code: number;
+  title: string;
+  message?: string;
+}
+
+interface MetaWebhookContactPayload {
+  profile?: {
+    name?: string;
+  };
+  wa_id?: string;
+  addresses?: unknown;
+  birthday?: string;
+  emails?: unknown;
+  name?: unknown;
+  org?: unknown;
+  phones?: unknown;
+  urls?: unknown;
+}
+
+interface MetaWebhookTextPayload {
+  body: string;
+}
+
+interface MetaWebhookMediaPayload {
+  id: string;
+  caption?: string;
+  filename?: string;
+  mime_type?: string;
+  sha256?: string;
+  voice?: boolean;
+}
+
+interface MetaWebhookLocationPayload {
+  latitude: number;
+  longitude: number;
+  name?: string;
+  address?: string;
+}
+
+interface MetaWebhookIdentityPayload {
+  acknowledged: boolean;
+  created_timestamp?: string;
+  hash: string;
+}
+
+interface MetaWebhookButtonPayload {
+  payload: string;
+  text: string;
+}
+
+interface MetaWebhookInteractivePayload {
+  type: string;
+  button_reply?: {
+    id: string;
+    title: string;
+  };
+  list_reply?: {
+    id: string;
+    title: string;
+    description?: string;
+  };
+  referred_product?: {
+    catalog_id?: string;
+    product_retailer_id?: string;
+  };
+}
+
+interface MetaWebhookMessagePayload {
+  from: string;
+  id: string;
+  timestamp: string;
+  type: string;
+  text?: MetaWebhookTextPayload;
+  button?: MetaWebhookButtonPayload;
+  interactive?: MetaWebhookInteractivePayload;
+  image?: MetaWebhookMediaPayload;
+  document?: MetaWebhookMediaPayload & { filename?: string };
+  video?: MetaWebhookMediaPayload;
+  audio?: MetaWebhookMediaPayload & { voice?: boolean };
+  location?: MetaWebhookLocationPayload;
+  identity?: MetaWebhookIdentityPayload;
+  sticker?: Record<string, unknown>;
+  reaction?: Record<string, unknown>;
+  order?: Record<string, unknown>;
+  referral?: Record<string, unknown>;
+  contacts?: MetaWebhookContactPayload[];
+  errors?: MetaWebhookError[];
+}
+
+interface MetaWebhookStatusPayload {
+  id: string;
+  status: 'sent' | 'delivered' | 'read' | 'failed';
+  timestamp: string;
+  recipient_id: string;
+  errors?: MetaWebhookError[];
+}
+
+interface MetaWebhookValuePayload {
+  messaging_product: string;
+  metadata: {
+    display_phone_number: string;
+    phone_number_id: string;
+  };
+  contacts?: Array<{
+    profile?: { name?: string };
+    wa_id?: string;
+  }>;
+  messages?: MetaWebhookMessagePayload[];
+  statuses?: MetaWebhookStatusPayload[];
+}
+
+
 import crypto from 'crypto';
 import { Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
-import { ENV } from '../../_core/env';
 import {
   getDb,
   getWhatsAppConversationByPhone,
@@ -56,7 +169,6 @@ import {
   whatsappReactions,
   whatsappTransactions,
   whatsappConversations,
-  whatsappTemplateQuality,
 } from '../../../drizzle/schema';
 import { sendWhatsAppTextMessage } from '../../services/whatsappCloudAPI';
 import { processIncomingMessage } from '../../services/whatsappAutoReply';
@@ -159,7 +271,7 @@ export function verifyWebhookToken(req: Request, res: Response): boolean {
  * تعمل مع كلا نوعي الأزرار: message.button.payload و interactive.button_reply.id
  * Format: CONFIRM_APPOINTMENT_123 أو CANCEL_CAMP_456
  */
-async function handleButtonPayload(payload: string, userPhone: string): Promise<void> {
+async function handleButtonPayload(payload: string, _userPhone: string): Promise<void> {
   const parts = payload.split('_');
   const action = parts[0];
   const type = parts[1];
@@ -234,11 +346,11 @@ async function handleButtonPayload(payload: string, userPhone: string): Promise<
     // إرسال رسالة تلقائية
     const [lead] = await db.select().from(offerLeads).where(eq(offerLeads.id, bookingId)).limit(1);
     if (lead?.phone) {
-      const [offer] = (lead as any).offerId
+      const [offer] = lead.offerId
         ? await db
             .select({ title: offers.title })
             .from(offers)
-            .where(eq(offers.id, (lead as any).offerId))
+            .where(eq(offers.id, lead.offerId))
             .limit(1)
         : [undefined];
       const triggerEvent = newStatus === 'confirmed' ? 'on_confirmed' : 'on_cancelled';
@@ -246,9 +358,9 @@ async function handleButtonPayload(payload: string, userPhone: string): Promise<
         entityType: 'offer_lead',
         triggerEvent,
         phone: lead.phone,
-        recipientName: (lead as any).fullName || undefined,
+        recipientName: lead.fullName || undefined,
         variables: {
-          name: (lead as any).fullName || 'العميل',
+          name: lead.fullName || 'العميل',
           service: offer?.title || 'العرض',
         },
         entityId: bookingId,
@@ -275,16 +387,16 @@ async function handleButtonPayload(payload: string, userPhone: string): Promise<
     if (reg?.phone) {
       const [camp] = await db.select().from(camps).where(eq(camps.id, reg.campId)).limit(1);
       const triggerEvent = newStatus === 'confirmed' ? 'on_confirmed' : 'on_cancelled';
-      const dateStr = (reg as any).preferredDate
-        ? String((reg as any).preferredDate)
+      const dateStr = reg.preferredDate
+        ? String(reg.preferredDate)
         : camp?.startDate
           ? new Date(camp.startDate).toLocaleDateString('ar-YE')
           : 'غير محدد';
       const timeStr =
-        (reg as any).preferredTimeSlot === 'morning'
-          ? `صباحاً ${(camp as any)?.morningTime || ''}`.trim()
-          : (reg as any).preferredTimeSlot === 'evening'
-            ? `مساءً ${(camp as any)?.eveningTime || ''}`.trim()
+        reg.preferredTimeSlot === 'morning'
+          ? `صباحاً ${camp?.morningTime || ''}`.trim()
+          : reg.preferredTimeSlot === 'evening'
+            ? `مساءً ${camp?.eveningTime || ''}`.trim()
             : 'غير محدد';
       dispatchWhatsAppMessage({
         entityType: 'camp_registration',
@@ -313,7 +425,11 @@ async function handleButtonPayload(payload: string, userPhone: string): Promise<
  * معالجة الرسائل الواردة وحفظها في قاعدة البيانات
  * وفق: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-example#messages
  */
-async function handleIncomingMessage(message: any, metadata: any, contacts?: any[]) {
+async function handleIncomingMessage(
+  message: MetaWebhookMessagePayload,
+  metadata: MetaWebhookValuePayload['metadata'],
+  contacts?: MetaWebhookContactPayload[]
+) {
   try {
     const {
       from,
@@ -326,8 +442,8 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       image,
       document,
       video,
-      audio,
-      location,
+      audio: _audio,
+      location: _location,
       identity,
       sticker,
       reaction,
@@ -335,8 +451,8 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       referral,
       contacts: messageContacts,
     } = message;
-    const phoneNumberId = metadata?.phone_number_id;
-    const contactsList = contacts || metadata?.contacts || [];
+    const _phoneNumberId = metadata?.phone_number_id;
+    const contactsList = contacts || [];
 
     // ✅ التحقق 1: التحقق من وجود البيانات الأساسية
     if (!from || !messageId || !type) {
@@ -350,7 +466,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     );
 
     // ── استخراج بيانات identity للتحقق من هوية المستخدم ─────────────────────
-    let identityData = null;
+    let identityData: { acknowledged: boolean; createdTimestamp?: string; hash: string } | null = null;
     if (identity) {
       identityData = {
         acknowledged: identity.acknowledged,
@@ -363,7 +479,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     }
 
     // ✅ التحقق 2: استخراج اسم العميل من contacts بشكل آمن
-    let customerName = undefined;
+    let customerName: string | undefined = undefined;
     if (
       contactsList &&
       Array.isArray(contactsList) &&
@@ -404,7 +520,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
         source: 'webhook_message',
         updatedAt: new Date(),
       });
-    } catch (error) {
+    } catch {
       // إذا لم يكن السجل موجوداً، أنشئه
       try {
         await createWhatsAppUserOptIn({
@@ -464,7 +580,9 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       console.log(`[WhatsApp Webhook] Debug: createResult =`, createResult);
 
       // Get the insert ID from the result
-      const insertId = (createResult as any)?.[0]?.insertId;
+      const insertId = Array.isArray(createResult)
+        ? (createResult[0] as { insertId?: number | bigint } | undefined)?.insertId
+        : undefined;
       console.log(`[WhatsApp Webhook] Debug: insertId =`, insertId);
 
       if (insertId) {
@@ -516,7 +634,7 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     // تحديد نوع المحتوى
     let content = '';
     let messageType = 'text';
-    let metaPayload: any = null;
+    let metaPayload: Record<string, unknown> | null = null;
 
     if (type === 'text' && text?.body) {
       content = text.body;
@@ -598,8 +716,9 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       // ── معالجة رسالة جهات اتصال ───────────────────────────────────────────
       content = '👥 جهات اتصال';
       messageType = 'contacts';
+       
       metaPayload = {
-        contacts: messageContacts.map((contact: any) => ({
+        contacts: messageContacts.map((contact: MetaWebhookContactPayload) => ({
           addresses: contact.addresses,
           birthday: contact.birthday,
           emails: contact.emails,
@@ -679,10 +798,10 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
     }
 
     // حفظ الرسالة
-    let mediaId = null;
+    let mediaId: string | null = null;
 
     // حفظ mediaId من الوسائط الواردة
-    if (metaPayload?.mediaId) {
+    if (metaPayload && typeof metaPayload === 'object' && 'mediaId' in metaPayload && typeof metaPayload.mediaId === 'string') {
       mediaId = metaPayload.mediaId;
       console.log(`[WhatsApp Webhook] ✅ Saved mediaId for ${type}: ${mediaId}`);
     }
@@ -698,22 +817,26 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
       conversationId: conversation.id as number,
       direction: 'inbound',
       content,
-      messageType: messageType as any,
+      messageType: messageType as 'text' | 'image' | 'document' | 'video' | 'audio' | 'location' | 'button_reply' | 'list_reply' | 'contacts' | 'sticker' | 'reaction' | 'order' | 'referral' | 'product_enquiry' | 'unsupported' | 'unknown',
       status: 'received',
       whatsappMessageId: messageId || null,
-      sentAt: new Date(parseInt(timestamp) * 1000),
+      sentAt: new Date(parseInt(timestamp || '0') * 1000),
       metadata: metaPayload ? JSON.stringify(metaPayload) : null,
       mediaId: mediaId,
       // حفظ identity data
       identityAcknowledged: identityData?.acknowledged || false,
       identityHash: identityData?.hash || null,
     });
-    const newMessageId = (newMessageResult as any)?.[0]?.insertId || null;
-    console.log(`[WhatsApp Webhook] Debug: Message saved to DB with ID: ${newMessageId}`);
+    const newMessageId = Array.isArray(newMessageResult)
+      ? (newMessageResult[0] as { insertId?: number | bigint } | undefined)?.insertId
+      : undefined;
+    const normalizedNewMessageId = newMessageId !== undefined ? Number(newMessageId) : null;
+    const messageRecordId = normalizedNewMessageId ?? 0;
+    console.log(`[WhatsApp Webhook] Debug: Message saved to DB with ID: ${normalizedNewMessageId}`);
 
     // حفظ البيانات الإضافية في الجداول المخصصة
-    if (type === 'contacts' && messageContacts && newMessageId) {
-      await handleContacts(messageContacts, conversation.id as number, newMessageId, phoneNumber);
+    if (type === 'contacts' && messageContacts && normalizedNewMessageId !== null) {
+      await handleContacts(messageContacts, conversation.id as number, messageRecordId, phoneNumber);
       // 🔔 Publish SSE event for contacts received
       try {
         const { publish } = await import('../../_core/pubsub');
@@ -723,12 +846,12 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
           contactsCount: messageContacts.length,
           timestamp: new Date().toISOString(),
         });
-      } catch (error) {
-        console.error('[WhatsApp Webhook] Error publishing contacts SSE:', error);
+      } catch {
+        console.error('[WhatsApp Webhook] Error publishing contacts SSE');
       }
     }
-    if (type === 'order' && order && newMessageId) {
-      await handleOrders(order, conversation.id as number, newMessageId, phoneNumber);
+    if (type === 'order' && order && normalizedNewMessageId !== null) {
+      await handleOrders(order, conversation.id as number, messageRecordId, phoneNumber);
       // 🔔 Publish SSE event for order received
       try {
         const { publish } = await import('../../_core/pubsub');
@@ -739,12 +862,12 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
           catalogId: order.catalog_id,
           timestamp: new Date().toISOString(),
         });
-      } catch (error) {
-        console.error('[WhatsApp Webhook] Error publishing order SSE:', error);
+      } catch {
+        console.error('[WhatsApp Webhook] Error publishing order SSE');
       }
     }
-    if (referral && newMessageId) {
-      await handleReferrals(referral, conversation.id as number, newMessageId, phoneNumber);
+    if (referral && normalizedNewMessageId !== null) {
+      await handleReferrals(referral, conversation.id as number, messageRecordId, phoneNumber);
       // 🔔 Publish SSE event for referral received
       try {
         const { publish } = await import('../../_core/pubsub');
@@ -755,12 +878,12 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
           headline: referral.headline,
           timestamp: new Date().toISOString(),
         });
-      } catch (error) {
-        console.error('[WhatsApp Webhook] Error publishing referral SSE:', error);
+      } catch {
+        console.error('[WhatsApp Webhook] Error publishing referral SSE');
       }
     }
-    if (type === 'reaction' && reaction && newMessageId) {
-      await handleReactions(reaction, conversation.id as number, newMessageId, phoneNumber);
+    if (type === 'reaction' && reaction && normalizedNewMessageId !== null) {
+      await handleReactions(reaction, conversation.id as number, messageRecordId, phoneNumber);
       // 🔔 Publish SSE event for reaction received
       try {
         const { publish } = await import('../../_core/pubsub');
@@ -820,7 +943,17 @@ async function handleIncomingMessage(message: any, metadata: any, contacts?: any
  * معالجة تحديثات حالة الرسائل (sent, delivered, read, failed)
  * وفق: https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/components/statuses
  */
-async function handleMessageStatus(status: any) {
+async function handleMessageStatus(
+  status: {
+    id: string;
+    status: string;
+    timestamp: string;
+    recipient_id: string;
+    errors?: { code: number; title: string; message: string }[];
+    conversation?: { id: string; expiration_timestamp: string; origin?: { type: string } };
+    pricing?: { pricing_model: string; billable: boolean; category: string };
+  }
+) {
   try {
     const {
       id: messageId,
@@ -837,7 +970,7 @@ async function handleMessageStatus(status: any) {
     );
 
     // ── استخراج بيانات conversation.pricing ───────────────────────────────
-    let conversationData = null;
+    let conversationData: { id: string; expirationTimestamp?: string; originType?: string } | null = null;
     if (conversation) {
       conversationData = {
         id: conversation.id,
@@ -849,7 +982,7 @@ async function handleMessageStatus(status: any) {
       console.log(`[WhatsApp Webhook] 💬 Conversation data:`, conversationData);
     }
 
-    let pricingData = null;
+    let pricingData: { pricingModel: string; billable: boolean; category: string } | null = null;
     if (pricing) {
       pricingData = {
         pricingModel: pricing.pricing_model,
@@ -860,12 +993,13 @@ async function handleMessageStatus(status: any) {
     }
 
     // معالجة حالة الفشل
-    let errorCode = null;
-    let errorTitle = null;
-    if (messageStatus === 'failed' && errors?.length > 0) {
-      errorCode = errors[0]?.code;
-      errorTitle = errors[0]?.title;
-      const errorMessage = errors[0]?.message;
+    let errorCode: number | null = null;
+    let errorTitle: string | null = null;
+    const hasMessageErrors = Array.isArray(errors) && errors.length > 0;
+    if (messageStatus === 'failed' && hasMessageErrors) {
+      errorCode = errors[0].code;
+      errorTitle = errors[0].title;
+      const errorMessage = errors[0].message;
       console.error(
         `[WhatsApp Webhook] ❌ Message failed: ${errorTitle} (code: ${errorCode}) - ${errorMessage}`
       );
@@ -886,10 +1020,10 @@ async function handleMessageStatus(status: any) {
     }
 
     // تحديث حالة الرسالة في جدول whatsappMessages
-    const messageUpdate = await db
+    await db
       .update(whatsappMessages)
       .set({
-        status: messageStatus,
+        status: messageStatus as "received" | "failed" | "read" | "sent" | "delivered",
         deliveredAt:
           messageStatus === 'delivered' ? new Date(parseInt(timestamp) * 1000) : undefined,
         readAt: messageStatus === 'read' ? new Date(parseInt(timestamp) * 1000) : undefined,
@@ -901,17 +1035,14 @@ async function handleMessageStatus(status: any) {
     console.log(`[WhatsApp Webhook] ✅ Updated message status: ${messageId} → ${messageStatus}`);
 
     // تحديث حالة الإشعار في جدول whatsappNotifications
-    const notificationUpdate = await db
+    await db
       .update(whatsappNotifications)
       .set({
-        status: messageStatus,
-        errorMessage:
-          messageStatus === 'failed' && errors?.length > 0
-            ? `${errors[0]?.title}: ${errors[0]?.message}`
-            : null,
+        status: messageStatus as "failed" | "pending" | "read" | "sent" | "delivered",
+        errorMessage: messageStatus === 'failed' && hasMessageErrors ? `${errors[0].title}: ${errors[0].message}` : null,
         deliveredAt:
           messageStatus === 'delivered' ? new Date(parseInt(timestamp) * 1000) : undefined,
-        readAt: messageStatus === 'read' ? new Date(parseInt(timestamp) * 1000) : undefined,
+          readAt: messageStatus === 'read' ? new Date(parseInt(timestamp) * 1000) : undefined,
       })
       .where(eq(whatsappNotifications.metaMessageId, messageId));
 
@@ -947,11 +1078,11 @@ async function handleMessageStatus(status: any) {
             pricingCategory: pricingData?.category,
             timestamp: new Date().toISOString(),
           });
-        } catch (error) {
-          console.error('[WhatsApp Webhook] Error publishing conversation cost SSE:', error);
+        } catch {
+          console.error('[WhatsApp Webhook] Error publishing conversation cost SSE');
         }
-      } catch (error) {
-        console.error('[WhatsApp Webhook] Error updating conversation pricing:', error);
+      } catch {
+        console.error('[WhatsApp Webhook] Error updating conversation pricing');
       }
     }
 
@@ -974,11 +1105,11 @@ async function handleMessageStatus(status: any) {
         pricing: pricingData,
         timestamp: new Date().toISOString(),
       });
-    } catch (error) {
-      console.error('[WhatsApp Webhook] Error publishing message status SSE:', error);
+    } catch {
+      console.error('[WhatsApp Webhook] Error publishing message status SSE');
     }
-  } catch (error) {
-    console.error('[WhatsApp Webhook] Error handling message status:', error);
+  } catch {
+    console.error('[WhatsApp Webhook] Error handling message status');
   }
 }
 
@@ -988,7 +1119,9 @@ async function handleMessageStatus(status: any) {
  *
  * الأحداث: APPROVED, REJECTED, DISABLED, PENDING_DELETION, FLAGGED, PAUSED, REINSTATED
  */
-async function handleTemplateStatusUpdate(update: any) {
+async function handleTemplateStatusUpdate(
+  update: { message_template_id: string; message_template_name: string; event: string; reason?: string }
+) {
   try {
     const { message_template_id, message_template_name, event, reason } = update;
 
@@ -1030,8 +1163,8 @@ async function handleTemplateStatusUpdate(update: any) {
         reason,
         timestamp: new Date().toISOString(),
       });
-    } catch (error) {
-      console.error('[WhatsApp Webhook] Error publishing template status SSE:', error);
+    } catch {
+      console.error('[WhatsApp Webhook] Error publishing template status SSE');
     }
 
     // إذا تم رفض القالب أو تعطيله، سجّل السبب
@@ -1046,8 +1179,8 @@ async function handleTemplateStatusUpdate(update: any) {
         `[WhatsApp Webhook] ✅ Template "${message_template_name}" APPROVED — ready to use`
       );
     }
-  } catch (error) {
-    console.error('[WhatsApp Webhook] Error handling template status update:', error);
+  } catch {
+    console.error('[WhatsApp Webhook] Error handling template status update');
   }
 }
 
@@ -1071,8 +1204,8 @@ async function handleOptOut(phone: string) {
         updatedAt: new Date(),
       });
       console.log(`[WhatsApp Webhook] ✅ Opt-out confirmed for ${phone}`);
-    } catch (error) {
-      console.error('[WhatsApp Webhook] Error updating opt-out status:', error);
+    } catch {
+      console.error('[WhatsApp Webhook] Error updating opt-out status');
       // إذا لم يكن السجل موجوداً، أنشئه
       try {
         await createWhatsAppUserOptIn({
@@ -1082,12 +1215,12 @@ async function handleOptOut(phone: string) {
           source: 'webhook_opt_out',
           details: JSON.stringify({ message: 'User sent STOP' }),
         });
-      } catch (createError) {
-        console.error('[WhatsApp Webhook] Error creating opt-out record:', createError);
+      } catch {
+        console.error('[WhatsApp Webhook] Error creating opt-out record');
       }
     }
-  } catch (error) {
-    console.error('[WhatsApp Webhook] Error handling opt-out:', error);
+  } catch {
+    console.error('[WhatsApp Webhook] Error handling opt-out');
   }
 }
 
@@ -1095,7 +1228,7 @@ async function handleOptOut(phone: string) {
  * معالجة تنبيهات الحساب (account_alerts)
  * وفق: https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/components/account-alerts
  */
-async function handleAccountAlert(alert: any) {
+async function handleAccountAlert(alert: { type: string; details: unknown }) {
   const { type: alertType, details } = alert;
   console.warn(`[WhatsApp Webhook] ⚠️  Account Alert: ${alertType}`, details);
 
@@ -1112,8 +1245,8 @@ async function handleAccountAlert(alert: any) {
             : 'low',
       resolved: false,
     });
-  } catch (error) {
-    console.error('[WhatsApp Webhook] Error saving account alert:', error);
+  } catch {
+    console.error('[WhatsApp Webhook] Error saving account alert');
   }
 
   // 🔔 Publish SSE event to global channel
@@ -1130,8 +1263,8 @@ async function handleAccountAlert(alert: any) {
       details,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
-    console.error('[WhatsApp Webhook] Error publishing account alert SSE:', error);
+  } catch {
+    console.error('[WhatsApp Webhook] Error publishing account alert SSE');
   }
 
   // تنبيهات مهمة تستدعي تدخلاً فورياً
@@ -1148,7 +1281,7 @@ async function handleAccountAlert(alert: any) {
  * حفظ جهات الاتصال المرسلة من المستخدمين
  */
 async function handleContacts(
-  contacts: any[],
+  contacts: MetaWebhookContactPayload[],
   conversationId: number,
   messageId: number,
   phoneNumber: string
@@ -1181,7 +1314,7 @@ async function handleContacts(
  * حفظ الطلبات الواردة من واتساب
  */
 async function handleOrders(
-  order: any,
+  order: { catalog_id?: string; product_items?: unknown[]; text?: string },
   conversationId: number,
   messageId: number,
   phoneNumber: string
@@ -1208,7 +1341,17 @@ async function handleOrders(
  * حفظ الإحالات من الإعلانات
  */
 async function handleReferrals(
-  referral: any,
+  referral: {
+    source_url?: string;
+    source_id?: string;
+    source_type?: string;
+    headline?: string;
+    body?: string;
+    media_type?: string;
+    image_url?: string;
+    video_url?: string;
+    thumbnail_url?: string;
+  },
   conversationId: number,
   messageId: number,
   phoneNumber: string
@@ -1241,7 +1384,7 @@ async function handleReferrals(
  * حفظ الردود العاطفية على الرسائل
  */
 async function handleReactions(
-  reaction: any,
+  reaction: { emoji?: string; message_id?: string },
   conversationId: number,
   messageId: number,
   phoneNumber: string
@@ -1254,7 +1397,7 @@ async function handleReactions(
       messageId,
       conversationId,
       phoneNumber,
-      emoji: reaction.emoji || null,
+      emoji: reaction.emoji || '',
       reactedToMessageId: reaction.message_id || null,
     });
     console.log(`[WhatsApp Webhook] ✅ Saved reaction for ${phoneNumber}`);
@@ -1266,7 +1409,7 @@ async function handleReactions(
 /**
  * معالجة تعطيل القوالب
  */
-async function handleTemplateDisable(templateEvent: any) {
+async function handleTemplateDisable(templateEvent: { id?: string; reason?: string }) {
   try {
     const metaTemplateId = templateEvent.id || null;
     if (!metaTemplateId) {
@@ -1307,7 +1450,7 @@ async function handleTemplateDisable(templateEvent: any) {
 /**
  * معالجة تفعيل القوالب
  */
-async function handleTemplateEnable(templateEvent: any) {
+async function handleTemplateEnable(templateEvent: { id?: string }) {
   try {
     const metaTemplateId = templateEvent.id || null;
     if (!metaTemplateId) {
@@ -1347,7 +1490,7 @@ async function handleTemplateEnable(templateEvent: any) {
 /**
  * معالجة تحديثات اسم القالب
  */
-async function handleTemplateNameUpdate(templateEvent: any) {
+async function handleTemplateNameUpdate(templateEvent: { id?: string; name?: string }) {
   try {
     const metaTemplateId = templateEvent.id || null;
     if (!metaTemplateId) {
@@ -1387,7 +1530,7 @@ async function handleTemplateNameUpdate(templateEvent: any) {
 /**
  * معالجة تحديثات فئة القالب
  */
-async function handleTemplateCategoryUpdate(templateEvent: any) {
+async function handleTemplateCategoryUpdate(templateEvent: { id?: string; category?: string }) {
   try {
     const metaTemplateId = templateEvent.id || null;
     if (!metaTemplateId) {
@@ -1427,7 +1570,7 @@ async function handleTemplateCategoryUpdate(templateEvent: any) {
 /**
  * معالجة تحديثات لغة القالب
  */
-async function handleTemplateLanguageUpdate(templateEvent: any) {
+async function handleTemplateLanguageUpdate(templateEvent: { id?: string; language?: string }) {
   try {
     const metaTemplateId = templateEvent.id || null;
     if (!metaTemplateId) {
@@ -1467,7 +1610,7 @@ async function handleTemplateLanguageUpdate(templateEvent: any) {
 /**
  * معالجة أحداث القوالب العامة
  */
-async function handleTemplateEvent(templateEvent: any) {
+async function handleTemplateEvent(templateEvent: { id?: string; event?: string }) {
   try {
     const metaTemplateId = templateEvent.id || null;
     if (!metaTemplateId) {
@@ -1525,7 +1668,7 @@ async function handleTemplateEvent(templateEvent: any) {
 /**
  * معالجة تحديثات الملف التجاري
  */
-async function handleBusinessProfileUpdate(profileEvent: any) {
+async function handleBusinessProfileUpdate(profileEvent: { phone_number?: string; event?: string }) {
   try {
     const phoneNumber = profileEvent.phone_number || null;
     if (!phoneNumber) {
@@ -1558,7 +1701,7 @@ async function handleBusinessProfileUpdate(profileEvent: any) {
 /**
  * معالجة تحديثات منتج المراسلة
  */
-async function handleMessagingProductUpdate(productEvent: any) {
+async function handleMessagingProductUpdate(productEvent: { phone_number?: string; event?: string }) {
   try {
     const phoneNumber = productEvent.phone_number || null;
 
@@ -1590,7 +1733,7 @@ async function handleMessagingProductUpdate(productEvent: any) {
 /**
  * معالجة تحديثات حساب الأعمال
  */
-async function handleBusinessAccountUpdate(accountEvent: any) {
+async function handleBusinessAccountUpdate(accountEvent: { phone_number?: string; event?: string }) {
   try {
     const phoneNumber = accountEvent.phone_number || null;
     if (!phoneNumber) {
@@ -1623,7 +1766,7 @@ async function handleBusinessAccountUpdate(accountEvent: any) {
 /**
  * معالجة تحديثات الحساب
  */
-async function handleAccountUpdate(accountEvent: any) {
+async function handleAccountUpdate(accountEvent: { phone_number?: string; event?: string }) {
   try {
     const phoneNumber = accountEvent.phone_number || null;
     if (!phoneNumber) {
@@ -1668,7 +1811,7 @@ async function handleAccountUpdate(accountEvent: any) {
 /**
  * معالجة تحديثات مراجعة الحساب
  */
-async function handleAccountReviewUpdate(reviewEvent: any) {
+async function handleAccountReviewUpdate(reviewEvent: { phone_number?: string; status?: string }) {
   try {
     const db = await getDb();
     if (!db) return;
@@ -1692,7 +1835,11 @@ async function handleAccountReviewUpdate(reviewEvent: any) {
 /**
  * معالجة تحديثات المحادثات (بيانات التسعير)
  */
-async function handleConversationUpdate(conversationEvent: any) {
+async function handleConversationUpdate(conversationEvent: {
+  phone_number?: string;
+  pricing?: { pricing_model?: string; billable?: boolean; category?: string };
+  conversation?: { id?: string; origin?: { type: string }; expiration_timestamp?: string };
+}) {
   try {
     const phoneNumber = conversationEvent.phone_number || null;
     if (!phoneNumber) {
@@ -1757,7 +1904,7 @@ async function handleConversationUpdate(conversationEvent: any) {
  * حفظ المعاملات المالية
  */
 async function handleTransactionStatus(
-  transaction: any,
+  transaction: { transaction_id?: string; status?: string; amount?: number; currency?: string; payment_method?: string },
   conversationId: number,
   phoneNumber: string
 ) {
@@ -1802,7 +1949,16 @@ async function handleTransactionStatus(
  *   }]
  * }
  */
-export async function processWebhookEvent(body: any) {
+export async function processWebhookEvent(body: {
+  object: string;
+  entry?: {
+    changes?: {
+      field: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      value: any;
+    }[];
+  }[];
+}) {
   try {
     // ✅ التحقق 1: أن الحدث من WhatsApp Business
     if (body.object !== 'whatsapp_business_account') {
@@ -2065,7 +2221,7 @@ export async function processWebhookEvent(body: any) {
 
           case 'conversation_quality_update': {
             // ── تحديثات جودة المحادثات ─────────────────────────────────────────
-            console.log('[WhatsApp Webhook] � Conversation quality update:', value);
+            console.log('[WhatsApp Webhook] Conversation quality update:', value);
             try {
               await createWhatsAppConversationQuality({
                 phoneNumber: value.phone_number || 'unknown',
@@ -2146,7 +2302,7 @@ export async function processWebhookEvent(body: any) {
 
           case 'marketing_opt_out_updates': {
             // ── تحديثات إلغاء الاشتراك التسويقي ───────────────────────────────
-            console.log('[WhatsApp Webhook] � Marketing opt-out updates:', value);
+            console.log('[WhatsApp Webhook] Marketing opt-out updates:', value);
             try {
               const normalizedPhone = normalizePhoneNumber(value.phone_number);
               await updateWhatsAppUserOptIn(normalizedPhone, {
@@ -2162,7 +2318,7 @@ export async function processWebhookEvent(body: any) {
 
           case 'message_template_quality_update': {
             // ── تحديثات جودة القوالب ───────────────────────────────────────────
-            console.log('[WhatsApp Webhook] � Message template quality update:', value);
+            console.log('[WhatsApp Webhook] Message template quality update:', value);
             try {
               await createWhatsAppTemplateQuality({
                 templateId: value.message_template_id || 'unknown',

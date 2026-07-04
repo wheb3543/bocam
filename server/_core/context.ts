@@ -65,7 +65,7 @@ export async function createContext(opts: CreateExpressContextOptions): Promise<
   if (!user) {
     try {
       user = await sdk.authenticateRequest(opts.req);
-    } catch (error) {
+    } catch {
       // Authentication is optional for public procedures.
       user = null;
     }

@@ -11,7 +11,7 @@
 
 import { getDb } from '../../database/db';
 import { appointments, whatsappNotifications } from '../../../drizzle/schema';
-import { and, between, eq, isNull, sql } from 'drizzle-orm';
+import { and, between, eq, sql } from 'drizzle-orm';
 import { sendAppointmentReminder } from '../../services/whatsappAppointments';
 
 const LOG_PREFIX = '[AppointmentReminders]';

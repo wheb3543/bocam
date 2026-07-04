@@ -12,10 +12,11 @@
  * @module heartbeat
  */
 
+/* global fetch, AbortController */
+
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import { getHardwareId, validateLicense } from './license';
 
 /**
@@ -98,6 +99,9 @@ async function sendHeartbeat(): Promise<boolean> {
     console.log(`   Timestamp: ${new Date(heartbeatData.serverTimestamp * 1000).toISOString()}`);
 
     // إرسال طلب POST صامت
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 ثواني
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -105,9 +109,10 @@ async function sendHeartbeat(): Promise<boolean> {
         'User-Agent': 'BOCAM-CRM-Heartbeat/1.0',
       },
       body: JSON.stringify(heartbeatData),
-      // إعدادات timeout لمنع التعليق
-      signal: AbortSignal.timeout(10000), // 10 ثواني
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (response.ok) {
       console.log('✅ Heartbeat sent successfully');

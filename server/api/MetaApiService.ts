@@ -27,6 +27,10 @@
 const GRAPH_API_VERSION = 'v25.0'; // ✅ أحدث إصدار من Meta (2026)
 const GRAPH_API_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
 
+/* global fetch, AbortSignal, RequestInit */
+
+type FetchOptions = RequestInit;
+
 /** إعدادات Retry Logic لمعالجة Rate Limiting وانقطاع الاتصال */
 const RETRY_CONFIG = {
   maxRetries: 3,
@@ -121,7 +125,7 @@ class MetaApiService {
    */
   private async _fetchWithRetry(
     url: string,
-    options: RequestInit,
+    options: FetchOptions,
     endpoint: string
   ): Promise<{ res: Response; body: unknown }> {
     let lastError: unknown;
@@ -129,7 +133,8 @@ class MetaApiService {
 
     for (let attempt = 0; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
       try {
-        const res = await fetch(url, { ...options, signal: AbortSignal.timeout(30000) });
+        // eslint-disable-next-line no-undef
+        const res = await fetch(url, { ...options, signal: (AbortSignal as unknown as AbortSignalWithTimeout).timeout(30000) });
         const body = await res.json();
 
         // معالجة Rate Limiting (429) - انتظر وأعد المحاولة
