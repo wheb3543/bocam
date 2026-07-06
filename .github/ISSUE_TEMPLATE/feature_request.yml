@@ -1,0 +1,42 @@
+name: "✨ اقتراح ميزة جديدة (Feature Request)"
+description: "اقتراح ميزة أو فكرة أو تحسين جديد لمنصة BOCAM CRM"
+title: "[FEATURE]: "
+labels: ["enhancement", "feature"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        يسعدنا دائماً سماع أفكاركم ومقترحاتكم لتطوير منصة BOCAM CRM! يرجى استخدام هذا النموذج لتوضيح الميزة المقترحة لكي نتمكن من دراستها وتنفيذها بشكل يلبي احتياجاتكم.
+  - type: textarea
+    id: problem
+    attributes:
+      label: "❓ ما هي المشكلة أو الحاجة التي تحلها هذه الميزة؟"
+      description: "هل هناك صعوبة في استخدام النظام حالياً؟ أو حاجة معينة لدى الكادر الطبي لم يتم تغطيتها؟"
+      placeholder: "مثال: حالياً يستغرق تصدير تقارير الحجوزات وقتاً طويلاً لأننا نحتاج لتصفيتها يدوياً كل مرة..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: "💡 الميزة المقترحة ووصف الحل"
+      description: "صف كيف تتخيل عمل هذه الميزة، وما هي الواجهات أو التغييرات التي تقترحها."
+      placeholder: "مثال: نقترح إضافة زر 'حفظ التصفية الحالية كقالب افتراضي' في صفحة التقارير، بحيث يسهل تصفيتها بنقرة واحدة..."
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "🔄 الحلول البديلة (Alternatives Considered)"
+      description: "هل فكرت في أي حلول بديلة أو طرق التفافية لإنجاز هذه المهمة حالياً؟"
+      placeholder: "مثال: نقوم حالياً بنسخ رابط الصفحة الذي يحتوي على الـ query parameters ومشاركته في المذكرة..."
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "🎨 معلومات إضافية أو لقطات توضيحية (Screenshots / Context)"
+      description: "أضف أي رسومات، لقطات شاشة، أو وثائق خارجية تدعم مقترحك وتوضحه لفريق التطوير."
+      placeholder: "يمكنك سحب وإفلات الصور هنا..."
+    validations:
+      required: false
