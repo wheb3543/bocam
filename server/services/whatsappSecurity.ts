@@ -12,12 +12,17 @@ import crypto from 'crypto';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../database/db';
 import { whatsappBlockedNumbers } from '../../drizzle/schema';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsappSecurity');
 
 // ── التحقق من حظر الرقم ──────────────────────────────────────────────────────
 export async function isPhoneBlocked(phone: string): Promise<boolean> {
   try {
     const db = await getDb();
-    if (!db) return false;
+    if (!db) {
+      return false;
+    }
     const result = await db
       .select()
       .from(whatsappBlockedNumbers)
@@ -37,7 +42,9 @@ export async function blockPhone(params: {
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: 'قاعدة البيانات غير متاحة' };
+    if (!db) {
+      return { success: false, error: 'قاعدة البيانات غير متاحة' };
+    }
 
     // التحقق من عدم وجود الرقم مسبقاً
     const existing = await db
@@ -56,10 +63,10 @@ export async function blockPhone(params: {
       blockedBy: params.blockedBy,
     });
 
-    console.log(`[WhatsApp Security] Blocked phone ${params.phone}`);
+    logger.info(`Blocked phone ${params.phone}`);
     return { success: true };
   } catch (error) {
-    console.error('[WhatsApp Security] Failed to block phone:', error);
+    logger.error('Failed to block phone:', error);
     return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
@@ -68,14 +75,16 @@ export async function blockPhone(params: {
 export async function unblockPhone(phone: string): Promise<{ success: boolean; error?: string }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: 'قاعدة البيانات غير متاحة' };
+    if (!db) {
+      return { success: false, error: 'قاعدة البيانات غير متاحة' };
+    }
 
     await db.delete(whatsappBlockedNumbers).where(eq(whatsappBlockedNumbers.phone, phone));
 
-    console.log(`[WhatsApp Security] Unblocked phone ${phone}`);
+    logger.info(`Unblocked phone ${phone}`);
     return { success: true };
   } catch (error) {
-    console.error('[WhatsApp Security] Failed to unblock phone:', error);
+    logger.error('Failed to unblock phone:', error);
     return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
@@ -89,7 +98,9 @@ export async function getBlockedPhones(): Promise<{
 }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: 'قاعدة البيانات غير متاحة' };
+    if (!db) {
+      return { success: false, error: 'قاعدة البيانات غير متاحة' };
+    }
 
     const phones = await db
       .select()
@@ -98,7 +109,7 @@ export async function getBlockedPhones(): Promise<{
 
     return { success: true, phones, total: phones.length };
   } catch (error) {
-    console.error('[WhatsApp Security] Failed to get blocked phones:', error);
+    logger.error('Failed to get blocked phones:', error);
     return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
@@ -110,13 +121,13 @@ export async function handleOptOutRequest(params: {
   blockedBy?: number;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    return await blockPhone({
+    return blockPhone({
       phone: params.phone,
       reason: params.reason || 'opt_out - طلب العميل إيقاف الرسائل',
       blockedBy: params.blockedBy,
     });
   } catch (error) {
-    console.error('[WhatsApp Security] Failed to handle opt-out:', error);
+    logger.error('Failed to handle opt-out:', error);
     return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
@@ -133,7 +144,9 @@ export async function getSecurityStats(): Promise<{
 }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: 'قاعدة البيانات غير متاحة' };
+    if (!db) {
+      return { success: false, error: 'قاعدة البيانات غير متاحة' };
+    }
 
     const all = await db.select().from(whatsappBlockedNumbers);
 
@@ -145,7 +158,7 @@ export async function getSecurityStats(): Promise<{
 
     return { success: true, stats };
   } catch (error) {
-    console.error('[WhatsApp Security] Failed to get stats:', error);
+    logger.error('Failed to get stats:', error);
     return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
   }
 }
@@ -153,7 +166,14 @@ export async function getSecurityStats(): Promise<{
 // ── تشفير البيانات الحساسة ────────────────────────────────────────────────────
 export function encryptSensitiveData(data: string, encryptionKey?: string): string {
   try {
-    const key = encryptionKey || process.env.ENCRYPTION_KEY || 'sgh-default-key-change-in-prod';
+    const key = encryptionKey || process.env.WHATSAPP_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+    if (!key) {
+      if (process.env.NODE_ENV === 'test') {
+        // In tests, don't throw; return input unchanged.
+        return data;
+      }
+      throw new Error('Missing encryption key: set WHATSAPP_ENCRYPTION_KEY or ENCRYPTION_KEY');
+    }
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(
       'aes-256-cbc',
@@ -170,9 +190,18 @@ export function encryptSensitiveData(data: string, encryptionKey?: string): stri
 
 export function decryptSensitiveData(encryptedData: string, encryptionKey?: string): string {
   try {
-    const key = encryptionKey || process.env.ENCRYPTION_KEY || 'sgh-default-key-change-in-prod';
+    const key = encryptionKey || process.env.WHATSAPP_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+    if (!key) {
+      if (process.env.NODE_ENV === 'test') {
+        // In tests, don't throw; return input unchanged.
+        return encryptedData;
+      }
+      throw new Error('Missing encryption key: set WHATSAPP_ENCRYPTION_KEY or ENCRYPTION_KEY');
+    }
     const parts = encryptedData.split(':');
-    if (parts.length !== 2) return encryptedData;
+    if (parts.length !== 2) {
+      return encryptedData;
+    }
     const iv = Buffer.from(parts[0], 'hex');
     const decipher = crypto.createDecipheriv(
       'aes-256-cbc',
