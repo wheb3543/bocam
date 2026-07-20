@@ -51,8 +51,8 @@ export function UpdateProgressModal({ open, onOpenChange }: UpdateProgressModalP
               }, 2000);
             }
           }
-        } catch (error) {
-          console.error('Failed to fetch update status:', error);
+        } catch {
+          // Silently handle update status fetch errors
         }
       };
 

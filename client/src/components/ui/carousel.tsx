@@ -15,6 +15,7 @@ type CarouselProps = {
   plugins?: CarouselPlugin;
   orientation?: 'horizontal' | 'vertical';
   setApi?: (api: CarouselApi) => void;
+  label?: string; // Accessibility label for the carousel
 };
 
 type CarouselContextProps = {
@@ -24,6 +25,8 @@ type CarouselContextProps = {
   scrollNext: () => void;
   canScrollPrev: boolean;
   canScrollNext: boolean;
+  selectedIndex: number; // Current slide index for accessibility
+  scrollSnapList: number[]; // List of snap positions
 } & CarouselProps;
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
@@ -45,6 +48,7 @@ function Carousel({
   plugins,
   className,
   children,
+  label = 'معرض الصور', // Default accessibility label
   ...props
 }: React.ComponentProps<'div'> & CarouselProps) {
   const [carouselRef, api] = useEmblaCarousel(
@@ -56,11 +60,17 @@ function Carousel({
   );
   const [canScrollPrev, setCanScrollPrev] = React.useState(false);
   const [canScrollNext, setCanScrollNext] = React.useState(false);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [scrollSnapList, setScrollSnapList] = React.useState<number[]>([]);
 
   const onSelect = React.useCallback((api: CarouselApi) => {
-    if (!api) {return;}
+    if (!api) {
+      return;
+    }
     setCanScrollPrev(api.canScrollPrev());
     setCanScrollNext(api.canScrollNext());
+    setSelectedIndex(api.selectedScrollSnap());
+    setScrollSnapList(api.scrollSnapList());
   }, []);
 
   const scrollPrev = React.useCallback(() => {
@@ -79,18 +89,28 @@ function Carousel({
       } else if (event.key === 'ArrowRight') {
         event.preventDefault();
         scrollNext();
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        api?.scrollTo(0);
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        api?.scrollTo(api.scrollSnapList().length - 1);
       }
     },
-    [scrollPrev, scrollNext]
+    [scrollPrev, scrollNext, api]
   );
 
   React.useEffect(() => {
-    if (!api || !setApi) {return;}
+    if (!api || !setApi) {
+      return;
+    }
     setApi(api);
   }, [api, setApi]);
 
   React.useEffect(() => {
-    if (!api) {return;}
+    if (!api) {
+      return;
+    }
     onSelect(api);
     api.on('reInit', onSelect);
     api.on('select', onSelect);
@@ -111,6 +131,9 @@ function Carousel({
         scrollNext,
         canScrollPrev,
         canScrollNext,
+        selectedIndex,
+        scrollSnapList,
+        label,
       }}
     >
       <div
@@ -118,6 +141,8 @@ function Carousel({
         className={cn('relative', className)}
         role="region"
         aria-roledescription="carousel"
+        aria-label={label}
+        aria-live="polite"
         data-slot="carousel"
         {...props}
       >
@@ -133,6 +158,8 @@ function CarouselContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div ref={carouselRef} className="overflow-hidden" data-slot="carousel-content">
       <div
+        role="group"
+        aria-roledescription="slides"
         className={cn('flex', orientation === 'horizontal' ? '-ml-4' : '-mt-4 flex-col', className)}
         {...props}
       />
@@ -141,12 +168,35 @@ function CarouselContent({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function CarouselItem({ className, ...props }: React.ComponentProps<'div'>) {
-  const { orientation } = useCarousel();
+  const { orientation, selectedIndex, scrollSnapList } = useCarousel();
+  const itemRef = React.useRef<HTMLDivElement>(null);
+  const [index, setIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    // Calculate index based on DOM position
+    if (itemRef.current) {
+      const parent = itemRef.current.parentElement;
+      if (parent) {
+        const siblings = Array.from(parent.children);
+        const idx = siblings.indexOf(itemRef.current);
+        setIndex(idx);
+      }
+    }
+  }, []);
+
+  const isActive = index === selectedIndex;
+  const totalSlides = scrollSnapList.length || 1;
 
   return (
     <div
+      ref={itemRef}
       role="group"
       aria-roledescription="slide"
+      aria-label={`${index + 1} من ${totalSlides}`}
+      aria-setsize={totalSlides}
+      aria-posinset={index + 1}
+      aria-current={isActive ? 'true' : undefined}
+      tabIndex={isActive ? 0 : -1}
       data-slot="carousel-item"
       className={cn(
         'min-w-0 shrink-0 grow-0 basis-full',
@@ -180,10 +230,11 @@ function CarouselPrevious({
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
+      aria-label="الشريحة السابقة"
       {...props}
     >
-      <ArrowLeft />
-      <span className="sr-only">Previous slide</span>
+      <ArrowLeft aria-hidden="true" />
+      <span className="sr-only">الشريحة السابقة</span>
     </Button>
   );
 }
@@ -210,10 +261,11 @@ function CarouselNext({
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}
+      aria-label="الشريحة التالية"
       {...props}
     >
-      <ArrowRight />
-      <span className="sr-only">Next slide</span>
+      <ArrowRight aria-hidden="true" />
+      <span className="sr-only">الشريحة التالية</span>
     </Button>
   );
 }

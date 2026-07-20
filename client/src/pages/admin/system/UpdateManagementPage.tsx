@@ -60,8 +60,8 @@ export default function UpdateManagementPage() {
           }, 3000);
         }
       }
-    } catch (error) {
-      console.error('Failed to fetch update status:', error);
+    } catch {
+      // Silently handle update status fetch errors
     } finally {
       setIsLoading(false);
     }
@@ -79,16 +79,19 @@ export default function UpdateManagementPage() {
         // Update will start, modal will show progress
         fetchUpdateStatus();
       } else {
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('فشل بدء التحديث: ' + data.error);
         setIsInstalling(false);
       }
     } catch (error) {
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('فشل بدء التحديث: ' + error);
       setIsInstalling(false);
     }
   };
 
   const handleRollback = async () => {
+    // eslint-disable-next-line no-alert -- Intentional user confirmation
     if (!confirm('هل أنت متأكد من أنك تريد التراجع عن التحديث؟ سيتم استعادة النسخة السابقة.')) {
       return;
     }
@@ -103,17 +106,21 @@ export default function UpdateManagementPage() {
       if (data.success) {
         fetchUpdateStatus();
       } else {
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('فشل التراجع: ' + data.error);
         setIsRollingBack(false);
       }
     } catch (error) {
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('فشل التراجع: ' + error);
       setIsRollingBack(false);
     }
   };
 
   const getStatusBadge = () => {
-    if (!status) {return null;}
+    if (!status) {
+      return null;
+    }
 
     if (status.updateInProgress) {
       return (

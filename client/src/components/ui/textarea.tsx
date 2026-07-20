@@ -8,6 +8,9 @@ function Textarea({
   onKeyDown,
   onCompositionStart,
   onCompositionEnd,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
+  'aria-describedby': ariaDescribedby,
   ...props
 }: React.ComponentProps<'textarea'>) {
   // Get dialog composition context if available (will be no-op if not inside Dialog)
@@ -22,7 +25,9 @@ function Textarea({
     onKeyDown: (e) => {
       // Check if this is an Enter key that should be blocked
       const isComposing =
-        'isComposing' in e.nativeEvent ? (e.nativeEvent as Event & { isComposing: boolean }).isComposing : dialogComposition.justEndedComposing();
+        'isComposing' in e.nativeEvent
+          ? (e.nativeEvent as Event & { isComposing: boolean }).isComposing
+          : dialogComposition.justEndedComposing();
 
       // If Enter key is pressed while composing or just after composition ended,
       // don't call the user's onKeyDown (this blocks the business logic)
@@ -57,6 +62,9 @@ function Textarea({
         'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
         className
       )}
+      aria-label={ariaLabel || (props.placeholder ? undefined : 'Textarea')}
+      aria-labelledby={ariaLabelledby}
+      aria-describedby={ariaDescribedby}
       onCompositionStart={handleCompositionStart}
       onCompositionEnd={handleCompositionEnd}
       onKeyDown={handleKeyDown}

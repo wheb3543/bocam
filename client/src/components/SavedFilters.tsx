@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,7 +72,9 @@ export default function SavedFilters({
   });
 
   const handleSave = () => {
-    if (!filterName.trim()) {return;}
+    if (!filterName.trim()) {
+      return;
+    }
 
     // Clean up filters - remove empty arrays and undefined values
     const cleanFilters: Record<string, unknown> = {};
@@ -197,7 +199,9 @@ export default function SavedFilters({
               value={filterName}
               onChange={(e) => setFilterName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {handleSave();}
+                if (e.key === 'Enter') {
+                  handleSave();
+                }
               }}
             />
           </div>

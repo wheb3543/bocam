@@ -6,6 +6,26 @@
  * - حساب عدد الصفحات الكلي
  * - تقطيع البيانات حسب الصفحة الحالية
  * - إعادة تعيين الصفحة عند تغيير الفلاتر
+ *
+ * @param data - البيانات المراد ترقيم صفحاتها
+ * @param options - خيارات التهيئة
+ * @param options.defaultPageSize - حجم الصفحة الافتراضي (الافتراضي: '100')
+ * @param options.defaultPage - الصفحة الافتراضية (الافتراضي: 1)
+ * @returns كائن يحتوي على حالة الترقيم الصفحات والوظائف المرتبطة بها
+ * @returns currentPage - الصفحة الحالية
+ * @returns setCurrentPage - دالة لتعيين الصفحة الحالية
+ * @returns pageSize - حجم الصفحة
+ * @returns setPageSize - دالة لتعيين حجم الصفحة (تعيد الصفحة إلى 1)
+ * @returns numericPageSize - حجم الصفحة كرقم
+ * @returns totalPages - عدد الصفحات الكلي
+ * @returns paginatedData - البيانات المقطعة حسب الصفحة الحالية
+ * @returns resetPage - دالة لإعادة تعيين الصفحة إلى 1
+ * @returns paginationProps - خصائص جاهزة لمكون Pagination
+ * @example
+ * const { currentPage, paginatedData, paginationProps } = usePagination(data, {
+ *   defaultPageSize: '50',
+ *   defaultPage: 1
+ * });
  */
 import { useState, useMemo, useCallback } from 'react';
 import type { PageSizeValue } from '@/components/table/Pagination';
@@ -59,7 +79,9 @@ export function usePagination<T>(
   const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(data.length / numericPageSize));
 
   const paginatedData = useMemo(() => {
-    if (pageSize === 'all') {return data;}
+    if (pageSize === 'all') {
+      return data;
+    }
     const start = (currentPage - 1) * numericPageSize;
     return data.slice(start, start + numericPageSize);
   }, [data, currentPage, numericPageSize, pageSize]);

@@ -40,38 +40,30 @@ export function useUpdateChecker() {
   }, []);
 
   const installUpdate = useCallback(async () => {
-    try {
-      const response = await fetch('/api/update/install', {
-        method: 'POST',
-      });
-      const data = await response.json();
+    const response = await fetch('/api/update/install', {
+      method: 'POST',
+    });
+    const data = await response.json();
 
-      if (data.success) {
-        await fetchUpdateStatus();
-        return true;
-      } else {
-        throw new Error(data.error || 'Failed to install update');
-      }
-    } catch (err) {
-      throw err;
+    if (data.success) {
+      await fetchUpdateStatus();
+      return true;
+    } else {
+      throw new Error(data.error || 'Failed to install update');
     }
   }, [fetchUpdateStatus]);
 
   const rollbackUpdate = useCallback(async () => {
-    try {
-      const response = await fetch('/api/update/rollback', {
-        method: 'POST',
-      });
-      const data = await response.json();
+    const response = await fetch('/api/update/rollback', {
+      method: 'POST',
+    });
+    const data = await response.json();
 
-      if (data.success) {
-        await fetchUpdateStatus();
-        return true;
-      } else {
-        throw new Error(data.error || 'Failed to rollback update');
-      }
-    } catch (err) {
-      throw err;
+    if (data.success) {
+      await fetchUpdateStatus();
+      return true;
+    } else {
+      throw new Error(data.error || 'Failed to rollback update');
     }
   }, [fetchUpdateStatus]);
 

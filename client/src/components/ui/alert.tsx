@@ -22,12 +22,16 @@ const alertVariants = cva(
 function Alert({
   className,
   variant,
+  'aria-live': ariaLive = 'polite',
+  'aria-atomic': ariaAtomic = 'true',
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof alertVariants>) {
   return (
     <div
       data-slot="alert"
       role="alert"
+      aria-live={ariaLive}
+      aria-atomic={ariaAtomic}
       className={cn(alertVariants({ variant }), className)}
       {...props}
     />

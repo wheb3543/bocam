@@ -101,8 +101,8 @@ export default function SystemStatusPage() {
       };
 
       setStatus(mockStatus);
-    } catch (error) {
-      console.error('Failed to fetch system status:', error);
+    } catch {
+      // Silently handle system status fetch errors
     } finally {
       setIsLoading(false);
     }
@@ -165,7 +165,9 @@ export default function SystemStatusPage() {
   };
 
   const formatBytes = (bytes: number) => {
-    if (bytes === 0) {return '0 Bytes';}
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));

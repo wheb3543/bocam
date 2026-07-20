@@ -50,7 +50,24 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="bg-white dark:bg-card dark:bg-gray-900 shadow-sm sticky top-0 z-50">
+      {/* Skip Navigation Links */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:font-medium"
+      >
+        تخطي إلى المحتوى الرئيسي
+      </a>
+      <a
+        href="#navigation"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-64 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:font-medium"
+      >
+        تخطي إلى التنقل
+      </a>
+
+      <header
+        className="bg-white dark:bg-card dark:bg-gray-900 shadow-sm sticky top-0 z-50"
+        id="navigation"
+      >
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="flex items-center justify-between py-2.5 sm:py-3 md:py-4">
             {/* Mobile: Hamburger Button */}

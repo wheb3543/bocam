@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { Input } from '@/components/ui/input';
@@ -8,7 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Search, X, Users, Calendar, TrendingUp, UserCheck, Phone, Mail } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
-import type { LeadWithRegistrationType, AppointmentWithDoctorName, OfferLeadWithTitle, CampRegistrationWithCampName } from '@shared/types';
+import type {
+  LeadWithRegistrationType,
+  AppointmentWithDoctorName,
+  OfferLeadWithTitle,
+  CampRegistrationWithCampName,
+} from '@shared/types';
 
 interface GlobalSearchProps {
   onClose?: () => void;
@@ -41,7 +45,8 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
             !!searchQuery &&
             ((l.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
               (l.phone ?? '').toString().includes(searchQuery) ||
-              (typeof l.email === 'string' && l.email.toLowerCase().includes(searchQuery.toLowerCase())))
+              (typeof l.email === 'string' &&
+                l.email.toLowerCase().includes(searchQuery.toLowerCase())))
         )
         .slice(0, 3) || [],
     appointments:
@@ -51,7 +56,8 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
             !!searchQuery &&
             ((a.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
               (a.phone ?? '').toString().includes(searchQuery) ||
-              (typeof a.email === 'string' && a.email.toLowerCase().includes(searchQuery.toLowerCase())))
+              (typeof a.email === 'string' &&
+                a.email.toLowerCase().includes(searchQuery.toLowerCase())))
         )
         .slice(0, 3) || [],
     offerLeads:
@@ -61,7 +67,8 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
             !!searchQuery &&
             ((o.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
               (o.phone ?? '').toString().includes(searchQuery) ||
-              (typeof o.email === 'string' && o.email.toLowerCase().includes(searchQuery.toLowerCase())))
+              (typeof o.email === 'string' &&
+                o.email.toLowerCase().includes(searchQuery.toLowerCase())))
         )
         .slice(0, 3) || [],
     campRegistrations:
@@ -80,6 +87,19 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
     searchResults.appointments.length +
     searchResults.offerLeads.length +
     searchResults.campRegistrations.length;
+
+  // Live region announcement for screen readers
+  const [resultsAnnouncement, setResultsAnnouncement] = useState('');
+
+  useEffect(() => {
+    if (searchQuery && totalResults > 0) {
+      setResultsAnnouncement(`وجد ${totalResults} نتيجة لـ "${searchQuery}"`);
+    } else if (searchQuery && totalResults === 0) {
+      setResultsAnnouncement(`لا توجد نتائج لـ "${searchQuery}"`);
+    } else {
+      setResultsAnnouncement('');
+    }
+  }, [searchQuery, totalResults]);
 
   // Keyboard shortcut (Ctrl+K)
   useEffect(() => {
@@ -189,6 +209,11 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
           aria-label="بحث عام"
           className="absolute left-0 top-full mt-2 w-[90vw] md:w-[500px] max-h-[80vh] overflow-y-auto bg-white dark:bg-card rounded-lg shadow-2xl border z-[100]"
         >
+          {/* Live region for screen reader announcements */}
+          <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+            {resultsAnnouncement}
+          </div>
+
           <div className="p-4 border-b sticky top-0 bg-white dark:bg-card">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -221,7 +246,9 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
               <div className="text-center py-8 text-muted-foreground">
                 <Search className="h-12 w-12 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">ابدأ الكتابة للبحث في جميع الحجوزات</p>
-                <p id="global-search-help" className="text-xs mt-1">يمكنك البحث بالاسم، رقم الهاتف، أو البريد الإلكتروني</p>
+                <p id="global-search-help" className="text-xs mt-1">
+                  يمكنك البحث بالاسم، رقم الهاتف، أو البريد الإلكتروني
+                </p>
               </div>
             ) : totalResults === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -270,9 +297,9 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                                 )}
                               </div>
                               <Badge variant="outline" className="text-xs">
-                              {lead.registrationType === 'appointment' && 'موعد'}
-                              {lead.registrationType === 'offer' && 'عرض'}
-                              {lead.registrationType === 'camp' && 'مخيم'}
+                                {lead.registrationType === 'appointment' && 'موعد'}
+                                {lead.registrationType === 'offer' && 'عرض'}
+                                {lead.registrationType === 'camp' && 'مخيم'}
                               </Badge>
                             </div>
                           </CardContent>

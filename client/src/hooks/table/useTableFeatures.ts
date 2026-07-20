@@ -19,6 +19,8 @@
  * ```
  */
 
+import { SafeLocalStorage } from '@/utils/errorHandling';
+
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import {
@@ -167,10 +169,13 @@ export function useTableFeatures({
   );
 
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem(`${tableKey}VisibleColumns`);
-      if (saved) {return JSON.parse(saved);}
-    } catch {}
+    const saved = SafeLocalStorage.getItem(`${tableKey}VisibleColumns`);
+    if (saved) {
+      const parsed = SafeLocalStorage.getJSON<Record<string, boolean>>(`${tableKey}VisibleColumns`);
+      if (parsed) {
+        return parsed;
+      }
+    }
     const defaults: Record<string, boolean> = {};
     columns.forEach((col) => {
       defaults[col.key] = col.defaultVisible;
@@ -181,9 +186,7 @@ export function useTableFeatures({
   useEffect(() => {
     if (savedVisibleColumns) {
       setVisibleColumns(savedVisibleColumns);
-      try {
-        localStorage.setItem(`${tableKey}VisibleColumns`, JSON.stringify(savedVisibleColumns));
-      } catch {}
+      SafeLocalStorage.setJSON(`${tableKey}VisibleColumns`, savedVisibleColumns);
     }
   }, [savedVisibleColumns, tableKey]);
 
@@ -191,9 +194,7 @@ export function useTableFeatures({
     (columnKey: string, visible: boolean) => {
       const updated = { ...visibleColumns, [columnKey]: visible };
       setVisibleColumns(updated);
-      try {
-        localStorage.setItem(`${tableKey}VisibleColumns`, JSON.stringify(updated));
-      } catch {}
+      SafeLocalStorage.setJSON(`${tableKey}VisibleColumns`, updated);
       savePreferencesMutation.mutate({ key: `${tableKey}VisibleColumns`, value: updated });
     },
     [visibleColumns, tableKey, savePreferencesMutation]
@@ -211,28 +212,27 @@ export function useTableFeatures({
   );
 
   const [columnOrder, setColumnOrder] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(`${tableKey}ColumnOrder`);
-      if (saved) {return JSON.parse(saved);}
-    } catch {}
+    const saved = SafeLocalStorage.getItem(`${tableKey}ColumnOrder`);
+    if (saved) {
+      const parsed = SafeLocalStorage.getJSON<string[]>(`${tableKey}ColumnOrder`);
+      if (parsed) {
+        return parsed;
+      }
+    }
     return defaultColumnOrder;
   });
 
   useEffect(() => {
     if (savedColumnOrder && Array.isArray(savedColumnOrder)) {
       setColumnOrder(savedColumnOrder);
-      try {
-        localStorage.setItem(`${tableKey}ColumnOrder`, JSON.stringify(savedColumnOrder));
-      } catch {}
+      SafeLocalStorage.setJSON(`${tableKey}ColumnOrder`, savedColumnOrder);
     }
   }, [savedColumnOrder, tableKey]);
 
   const handleColumnOrderChange = useCallback(
     (newOrder: string[]) => {
       setColumnOrder(newOrder);
-      try {
-        localStorage.setItem(`${tableKey}ColumnOrder`, JSON.stringify(newOrder));
-      } catch {}
+      SafeLocalStorage.setJSON(`${tableKey}ColumnOrder`, newOrder);
       savePreferencesMutation.mutate({ key: `${tableKey}ColumnOrder`, value: newOrder });
     },
     [tableKey, savePreferencesMutation]
@@ -261,10 +261,13 @@ export function useTableFeatures({
 
   // Inline implementation of useColumnWidths to avoid circular dependency
   const [columnWidthsState, setColumnWidthsState] = useState<Record<string, number>>(() => {
-    try {
-      const saved = localStorage.getItem(`columnWidths_${tableKey}`);
-      if (saved) {return JSON.parse(saved);}
-    } catch {}
+    const saved = SafeLocalStorage.getItem(`columnWidths_${tableKey}`);
+    if (saved) {
+      const parsed = SafeLocalStorage.getJSON<Record<string, number>>(`columnWidths_${tableKey}`);
+      if (parsed) {
+        return parsed;
+      }
+    }
     const defaults: Record<string, number> = {};
     columns.forEach((col) => {
       const preset = getColumnWidth(col.key, col);
@@ -278,9 +281,7 @@ export function useTableFeatures({
     if (dbWidths && Object.keys(dbWidths).length > 0) {
       setColumnWidthsState((prev) => {
         const merged = { ...prev, ...dbWidths };
-        try {
-          localStorage.setItem(`columnWidths_${tableKey}`, JSON.stringify(merged));
-        } catch {}
+        SafeLocalStorage.setJSON(`columnWidths_${tableKey}`, merged);
         return merged;
       });
     }
@@ -292,10 +293,10 @@ export function useTableFeatures({
     (key: string, width: number) => {
       setColumnWidthsState((prev) => {
         const updated = { ...prev, [key]: width };
-        try {
-          localStorage.setItem(`columnWidths_${tableKey}`, JSON.stringify(updated));
-        } catch {}
-        if (widthSaveTimerRef.current) {clearTimeout(widthSaveTimerRef.current);}
+        SafeLocalStorage.setJSON(`columnWidths_${tableKey}`, updated);
+        if (widthSaveTimerRef.current) {
+          clearTimeout(widthSaveTimerRef.current);
+        }
         widthSaveTimerRef.current = setTimeout(() => {
           saveColumnWidthsFn(updated);
         }, 500);
@@ -312,9 +313,7 @@ export function useTableFeatures({
       defaults[col.key] = preset.width;
     });
     setColumnWidthsState(defaults);
-    try {
-      localStorage.removeItem(`columnWidths_${tableKey}`);
-    } catch {}
+    SafeLocalStorage.removeItem(`columnWidths_${tableKey}`);
     saveColumnWidthsFn(defaults);
   }, [columns, tableKey, saveColumnWidthsFn]);
 
@@ -323,9 +322,7 @@ export function useTableFeatures({
       if (widths && Object.keys(widths).length > 0) {
         setColumnWidthsState((prev) => {
           const merged = { ...prev, ...widths };
-          try {
-            localStorage.setItem(`columnWidths_${tableKey}`, JSON.stringify(merged));
-          } catch {}
+          SafeLocalStorage.setJSON(`columnWidths_${tableKey}`, merged);
           return merged;
         });
       }
@@ -335,7 +332,9 @@ export function useTableFeatures({
 
   const getWidth = useCallback(
     (key: string) => {
-      if (columnWidthsState[key]) {return columnWidthsState[key];}
+      if (columnWidthsState[key]) {
+        return columnWidthsState[key];
+      }
       const col = columns.find((c) => c.key === key);
       return getColumnWidth(key, col).width;
     },
@@ -396,10 +395,13 @@ export function useTableFeatures({
   );
 
   const [frozenColumnsState, setFrozenColumnsState] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(`frozenColumns_${tableKey}`);
-      if (saved) {return JSON.parse(saved);}
-    } catch {}
+    const saved = SafeLocalStorage.getItem(`frozenColumns_${tableKey}`);
+    if (saved) {
+      const parsed = SafeLocalStorage.getJSON<string[]>(`frozenColumns_${tableKey}`);
+      if (parsed) {
+        return parsed;
+      }
+    }
     return defaultFrozenColumns;
   });
 
@@ -407,9 +409,7 @@ export function useTableFeatures({
     const dbFrozen = savedFrozenColumns as string[] | null;
     if (dbFrozen && dbFrozen.length > 0) {
       setFrozenColumnsState(dbFrozen);
-      try {
-        localStorage.setItem(`frozenColumns_${tableKey}`, JSON.stringify(dbFrozen));
-      } catch {}
+      SafeLocalStorage.setJSON(`frozenColumns_${tableKey}`, dbFrozen);
     }
   }, [savedFrozenColumns, tableKey]);
 
@@ -419,9 +419,7 @@ export function useTableFeatures({
         const updated = prev.includes(columnKey)
           ? prev.filter((k) => k !== columnKey)
           : [...prev, columnKey];
-        try {
-          localStorage.setItem(`frozenColumns_${tableKey}`, JSON.stringify(updated));
-        } catch {}
+        SafeLocalStorage.setJSON(`frozenColumns_${tableKey}`, updated);
         saveFrozenColumnsFn(updated);
         return updated;
       });
@@ -432,9 +430,7 @@ export function useTableFeatures({
   const setFrozen = useCallback(
     (cols: string[]) => {
       setFrozenColumnsState(cols);
-      try {
-        localStorage.setItem(`frozenColumns_${tableKey}`, JSON.stringify(cols));
-      } catch {}
+      SafeLocalStorage.setJSON(`frozenColumns_${tableKey}`, cols);
       saveFrozenColumnsFn(cols);
     },
     [tableKey, saveFrozenColumnsFn]
@@ -442,9 +438,7 @@ export function useTableFeatures({
 
   const resetFrozen = useCallback(() => {
     setFrozenColumnsState(defaultFrozenColumns);
-    try {
-      localStorage.removeItem(`frozenColumns_${tableKey}`);
-    } catch {}
+    SafeLocalStorage.removeItem(`frozenColumns_${tableKey}`);
     saveFrozenColumnsFn(defaultFrozenColumns);
   }, [defaultFrozenColumns, tableKey, saveFrozenColumnsFn]);
 
@@ -479,49 +473,36 @@ export function useTableFeatures({
   );
 
   const [customTemplates, setCustomTemplates] = useState<ColumnTemplate[]>(() => {
-    try {
-      const saved = localStorage.getItem(`${tableKey}ColumnTemplates`);
-      if (saved) {return JSON.parse(saved);}
-    } catch {}
+    const saved = SafeLocalStorage.getItem(`${tableKey}ColumnTemplates`);
+    if (saved) {
+      const parsed = SafeLocalStorage.getJSON<ColumnTemplate[]>(`${tableKey}ColumnTemplates`);
+      if (parsed) {
+        return parsed;
+      }
+    }
     return [];
   });
 
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(() => {
-    try {
-      return (
-        localStorage.getItem(
-          `active${tableKey.charAt(0).toUpperCase() + tableKey.slice(1)}TemplateId`
-        ) || null
-      );
-    } catch {}
-    return null;
+    const activeTemplateIdKey = `active${tableKey.charAt(0).toUpperCase() + tableKey.slice(1)}TemplateId`;
+    return SafeLocalStorage.getItem(activeTemplateIdKey) || null;
   });
 
   useEffect(() => {
     if (savedTemplates && Array.isArray(savedTemplates)) {
       setCustomTemplates(savedTemplates);
-      try {
-        localStorage.setItem(`${tableKey}ColumnTemplates`, JSON.stringify(savedTemplates));
-      } catch {}
+      SafeLocalStorage.setJSON(`${tableKey}ColumnTemplates`, savedTemplates);
     }
   }, [savedTemplates, tableKey]);
 
   useEffect(() => {
     if (savedActiveTemplateId !== undefined) {
       setActiveTemplateId(savedActiveTemplateId);
+      const activeTemplateIdKey = `active${tableKey.charAt(0).toUpperCase() + tableKey.slice(1)}TemplateId`;
       if (savedActiveTemplateId) {
-        try {
-          localStorage.setItem(
-            `active${tableKey.charAt(0).toUpperCase() + tableKey.slice(1)}TemplateId`,
-            savedActiveTemplateId
-          );
-        } catch {}
+        SafeLocalStorage.setItem(activeTemplateIdKey, savedActiveTemplateId);
       } else {
-        try {
-          localStorage.removeItem(
-            `active${tableKey.charAt(0).toUpperCase() + tableKey.slice(1)}TemplateId`
-          );
-        } catch {}
+        SafeLocalStorage.removeItem(activeTemplateIdKey);
       }
     }
   }, [savedActiveTemplateId, tableKey]);
@@ -575,9 +556,7 @@ export function useTableFeatures({
       setActiveTemplateId(template.id);
       if (template.columnOrder) {
         setColumnOrder(template.columnOrder);
-        try {
-          localStorage.setItem(`${tableKey}ColumnOrder`, JSON.stringify(template.columnOrder));
-        } catch {}
+        SafeLocalStorage.setJSON(`${tableKey}ColumnOrder`, template.columnOrder);
         savePreferencesMutation.mutate({
           key: `${tableKey}ColumnOrder`,
           value: template.columnOrder,
@@ -593,12 +572,8 @@ export function useTableFeatures({
       if (template.frozenColumns) {
         setFrozen(template.frozenColumns);
       }
-      try {
-        localStorage.setItem(`${tableKey}VisibleColumns`, JSON.stringify(template.columns));
-      } catch {}
-      try {
-        localStorage.setItem(activeTemplateIdKey, template.id);
-      } catch {}
+      SafeLocalStorage.setJSON(`${tableKey}VisibleColumns`, template.columns);
+      SafeLocalStorage.setItem(activeTemplateIdKey, template.id);
       savePreferencesMutation.mutate({ key: `${tableKey}VisibleColumns`, value: template.columns });
       savePreferencesMutation.mutate({ key: activeTemplateIdKey, value: template.id });
     },
@@ -626,12 +601,8 @@ export function useTableFeatures({
       const updated = [...customTemplates, newTemplate];
       setCustomTemplates(updated);
       setActiveTemplateId(newTemplate.id);
-      try {
-        localStorage.setItem(`${tableKey}ColumnTemplates`, JSON.stringify(updated));
-      } catch {}
-      try {
-        localStorage.setItem(activeTemplateIdKey, newTemplate.id);
-      } catch {}
+      SafeLocalStorage.setJSON(`${tableKey}ColumnTemplates`, updated);
+      SafeLocalStorage.setItem(activeTemplateIdKey, newTemplate.id);
       savePreferencesMutation.mutate({ key: `${tableKey}ColumnTemplates`, value: updated });
       savePreferencesMutation.mutate({ key: activeTemplateIdKey, value: newTemplate.id });
     },
@@ -652,14 +623,10 @@ export function useTableFeatures({
       setCustomTemplates(updated);
       if (activeTemplateId === templateId) {
         setActiveTemplateId(null);
-        try {
-          localStorage.removeItem(activeTemplateIdKey);
-        } catch {}
+        SafeLocalStorage.removeItem(activeTemplateIdKey);
         savePreferencesMutation.mutate({ key: activeTemplateIdKey, value: null });
       }
-      try {
-        localStorage.setItem(`${tableKey}ColumnTemplates`, JSON.stringify(updated));
-      } catch {}
+      SafeLocalStorage.setJSON(`${tableKey}ColumnTemplates`, updated);
       savePreferencesMutation.mutate({ key: `${tableKey}ColumnTemplates`, value: updated });
     },
     [customTemplates, activeTemplateId, activeTemplateIdKey, tableKey, savePreferencesMutation]
@@ -704,10 +671,13 @@ export function useTableFeatures({
 
   const [sortState, setSortState] = useState<SortState>(() => {
     if (persistSort) {
-      try {
-        const saved = localStorage.getItem(`${tableKey}SortState`);
-        if (saved) {return JSON.parse(saved);}
-      } catch {}
+      const saved = SafeLocalStorage.getItem(`${tableKey}SortState`);
+      if (saved) {
+        const parsed = SafeLocalStorage.getJSON<SortState>(`${tableKey}SortState`);
+        if (parsed) {
+          return parsed;
+        }
+      }
     }
     return { columnKey: '', direction: null };
   });
@@ -720,9 +690,7 @@ export function useTableFeatures({
       'columnKey' in savedSortState
     ) {
       setSortState(savedSortState as SortState);
-      try {
-        localStorage.setItem(`${tableKey}SortState`, JSON.stringify(savedSortState));
-      } catch {}
+      SafeLocalStorage.setJSON(`${tableKey}SortState`, savedSortState);
     }
   }, [savedSortState, tableKey, persistSort]);
 
@@ -743,9 +711,7 @@ export function useTableFeatures({
           newState = { columnKey, direction: 'asc' };
         }
         if (persistSort) {
-          try {
-            localStorage.setItem(`${tableKey}SortState`, JSON.stringify(newState));
-          } catch {}
+          SafeLocalStorage.setJSON(`${tableKey}SortState`, newState);
           savePreferencesMutation.mutate({ key: `${tableKey}SortState`, value: newState });
         }
         return newState;
@@ -764,10 +730,16 @@ export function useTableFeatures({
   const isColumnSortable = useCallback(
     (columnKey: string): boolean => {
       const col = columns.find((c) => c.key === columnKey);
-      if (!col) {return false;}
+      if (!col) {
+        return false;
+      }
       // Default sortable=true unless explicitly set to false, or it's 'actions'/'comments'/'tasks'
-      if (col.sortable === false) {return false;}
-      if (['actions', 'comments', 'tasks'].includes(columnKey)) {return false;}
+      if (col.sortable === false) {
+        return false;
+      }
+      if (['actions', 'comments', 'tasks'].includes(columnKey)) {
+        return false;
+      }
       return true;
     },
     [columns]
@@ -775,7 +747,9 @@ export function useTableFeatures({
 
   const sortData = useCallback(
     <T>(data: T[], getField: (item: T, key: string) => unknown): T[] => {
-      if (!sortState.direction || !sortState.columnKey) {return data;}
+      if (!sortState.direction || !sortState.columnKey) {
+        return data;
+      }
 
       const col = columns.find((c) => c.key === sortState.columnKey);
       const sortType = col?.sortType || 'string';
@@ -787,29 +761,45 @@ export function useTableFeatures({
         const bVal = getField(b, key);
 
         // Handle null/undefined
-        if (aVal === null && bVal === null) {return 0;}
-        if (aVal === null) {return direction === 'asc' ? 1 : -1;}
-        if (bVal === null) {return direction === 'asc' ? -1 : 1;}
+        if (aVal === null && bVal === null) {
+          return 0;
+        }
+        if (aVal === null) {
+          return direction === 'asc' ? 1 : -1;
+        }
+        if (bVal === null) {
+          return direction === 'asc' ? -1 : 1;
+        }
 
-        let comparison = 0;
+        let comparison: number;
 
         switch (sortType) {
           case 'number': {
             const numA = typeof aVal === 'number' ? aVal : parseFloat(String(aVal));
             const numB = typeof bVal === 'number' ? bVal : parseFloat(String(bVal));
-            if (isNaN(numA) && isNaN(numB)) {comparison = 0;}
-            else if (isNaN(numA)) {comparison = 1;}
-            else if (isNaN(numB)) {comparison = -1;}
-            else {comparison = numA - numB;}
+            if (isNaN(numA) && isNaN(numB)) {
+              comparison = 0;
+            } else if (isNaN(numA)) {
+              comparison = 1;
+            } else if (isNaN(numB)) {
+              comparison = -1;
+            } else {
+              comparison = numA - numB;
+            }
             break;
           }
           case 'date': {
             const dateA = aVal instanceof Date ? aVal.getTime() : new Date(String(aVal)).getTime();
             const dateB = bVal instanceof Date ? bVal.getTime() : new Date(String(bVal)).getTime();
-            if (isNaN(dateA) && isNaN(dateB)) {comparison = 0;}
-            else if (isNaN(dateA)) {comparison = 1;}
-            else if (isNaN(dateB)) {comparison = -1;}
-            else {comparison = dateA - dateB;}
+            if (isNaN(dateA) && isNaN(dateB)) {
+              comparison = 0;
+            } else if (isNaN(dateA)) {
+              comparison = 1;
+            } else if (isNaN(dateB)) {
+              comparison = -1;
+            } else {
+              comparison = dateA - dateB;
+            }
             break;
           }
           case 'boolean': {
@@ -856,15 +846,9 @@ export function useTableFeatures({
     setColumnOrder(defaultColumnOrder);
     resetWidths();
     resetFrozen();
-    try {
-      localStorage.setItem(`${tableKey}VisibleColumns`, JSON.stringify(defaultVisible));
-    } catch {}
-    try {
-      localStorage.removeItem(activeTemplateIdKey);
-    } catch {}
-    try {
-      localStorage.setItem(`${tableKey}ColumnOrder`, JSON.stringify(defaultColumnOrder));
-    } catch {}
+    SafeLocalStorage.setJSON(`${tableKey}VisibleColumns`, defaultVisible);
+    SafeLocalStorage.removeItem(activeTemplateIdKey);
+    SafeLocalStorage.setJSON(`${tableKey}ColumnOrder`, defaultColumnOrder);
     savePreferencesMutation.mutate({ key: `${tableKey}VisibleColumns`, value: defaultVisible });
     savePreferencesMutation.mutate({ key: activeTemplateIdKey, value: null });
     savePreferencesMutation.mutate({ key: `${tableKey}ColumnOrder`, value: defaultColumnOrder });

@@ -41,7 +41,7 @@ function sortData<T>(
     const aVal = getFieldValue(a, sortState.field ?? '');
     const bVal = getFieldValue(b, sortState.field ?? '');
 
-    let comparison = 0;
+    let comparison: number;
 
     if (aVal === null && bVal === null) {comparison = 0;}
     else if (aVal === null) {comparison = 1;}

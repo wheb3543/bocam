@@ -105,6 +105,7 @@ function LockedFeatureCard({
                 window.location.href = upgradeLink;
               } else {
                 // Default action: show contact info
+                // eslint-disable-next-line no-alert -- Intentional user notification
                 alert('يرجى التواصل مع الدعم الفني لترقية الترخيص');
               }
             }}

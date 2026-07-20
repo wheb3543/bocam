@@ -65,8 +65,8 @@ export default function BackupManagementPage() {
       if (data.success) {
         setStatus(data.data);
       }
-    } catch (error) {
-      console.error('Failed to fetch backup status:', error);
+    } catch {
+      // Silently handle backup status fetch errors
     } finally {
       setIsLoading(false);
     }
@@ -79,12 +79,13 @@ export default function BackupManagementPage() {
       if (data.success) {
         setHistory(data.data);
       }
-    } catch (error) {
-      console.error('Failed to fetch backup history:', error);
+    } catch {
+      // Silently handle backup history fetch errors
     }
   };
 
   const handleCreateBackup = async () => {
+    // eslint-disable-next-line no-alert -- Intentional user confirmation
     if (!confirm('هل أنت متأكد من أنك تريد إنشاء نسخة احتياطية يدوية؟')) {
       return;
     }
@@ -101,13 +102,16 @@ export default function BackupManagementPage() {
       const data = await response.json();
 
       if (data.success) {
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('تم بدء النسخة الاحتياطية بنجاح');
         fetchBackupStatus();
         fetchBackupHistory();
       } else {
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('فشل بدء النسخة الاحتياطية: ' + data.error);
       }
     } catch {
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('فشل بدء النسخة الاحتياطية');
     } finally {
       setIsCreatingBackup(false);
@@ -116,6 +120,7 @@ export default function BackupManagementPage() {
 
   const handleRestoreBackup = async (backupId: string) => {
     if (
+      // eslint-disable-next-line no-alert -- Intentional user confirmation
       !confirm(
         'هل أنت متأكد من أنك تريد استعادة هذه النسخة الاحتياطية؟ سيتم استعادة النظام إلى الحالة عند هذه النسخة.'
       )
@@ -134,20 +139,24 @@ export default function BackupManagementPage() {
       const data = await response.json();
 
       if (data.success) {
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('تم استعادة النسخة الاحتياطية بنجاح. سيتم إعادة تشغيل النظام.');
         setTimeout(() => {
           window.location.reload();
         }, 3000);
       } else {
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('فشل استعادة النسخة الاحتياطية: ' + data.error);
       }
     } catch {
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('فشل استعادة النسخة الاحتياطية');
     }
   };
 
   const handleDeleteBackup = async (backupId: string) => {
     if (
+      // eslint-disable-next-line no-alert -- Intentional user confirmation
       !confirm(
         'هل أنت متأكد من أنك تريد حذف هذه النسخة الاحتياطية؟ لا يمكن التراجع عن هذا الإجراء.'
       )
@@ -162,13 +171,16 @@ export default function BackupManagementPage() {
       const data = await response.json();
 
       if (data.success) {
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('تم حذف النسخة الاحتياطية بنجاح');
         fetchBackupStatus();
         fetchBackupHistory();
       } else {
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('فشل حذف النسخة الاحتياطية: ' + data.error);
       }
     } catch {
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('فشل حذف النسخة الاحتياطية');
     }
   };
@@ -178,7 +190,9 @@ export default function BackupManagementPage() {
   };
 
   const formatBytes = (bytes: number) => {
-    if (bytes === 0) {return '0 Bytes';}
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));

@@ -8,7 +8,7 @@
  * - فلاتر سريعة مُعرّفة مسبقاً (Quick Presets)
  * - دعم الفلاتر المشتركة للمدراء
  */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -137,8 +137,12 @@ export default function FilterPresets({
   };
 
   const hasActiveFilters = Object.values(currentFilters).some((value) => {
-    if (Array.isArray(value)) {return value.length > 0;}
-    if (typeof value === 'string') {return value !== '' && value !== 'all';}
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    if (typeof value === 'string') {
+      return value !== '' && value !== 'all';
+    }
     return value !== null && value !== undefined;
   });
 

@@ -90,7 +90,9 @@ export function useExportUtils<T>(config: ExportConfig<T>) {
       columnDefs: ExportColumnDef[],
       visibleColumns?: Record<string, boolean>
     ): ExportColumnDef[] => {
-      if (!visibleColumns) {return columnDefs;}
+      if (!visibleColumns) {
+        return columnDefs;
+      }
 
       return Object.entries(visibleColumns)
         .filter(([_, visible]) => visible)
@@ -143,8 +145,7 @@ export function useExportUtils<T>(config: ExportConfig<T>) {
         });
 
         toast.success(`تم تصدير البيانات بنجاح بتنسيق ${format.toUpperCase()}`);
-      } catch (error) {
-        console.error('Export error:', error);
+      } catch {
         toast.error('حدث خطأ أثناء التصدير');
       }
     },
@@ -192,8 +193,7 @@ export function useExportUtils<T>(config: ExportConfig<T>) {
           columns: visibleCols,
           data: dataToExport,
         });
-      } catch (error) {
-        console.error('Print error:', error);
+      } catch {
         toast.error('حدث خطأ أثناء الطباعة');
       }
     },
@@ -210,7 +210,9 @@ export function useExportUtils<T>(config: ExportConfig<T>) {
     ): Record<string, string> => {
       const result: Record<string, string> = {};
       for (const filter of filters) {
-        if (!filter.value) {continue;}
+        if (!filter.value) {
+          continue;
+        }
         const val = Array.isArray(filter.value) ? filter.value.join(', ') : filter.value;
         if (val) {
           result[filter.label] = val;

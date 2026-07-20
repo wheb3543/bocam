@@ -1,22 +1,63 @@
 /**
  * تصدير البيانات إلى Excel
- * يستخدم dynamic import لتأجيل تحميل xlsx (277KB) حتى الحاجة الفعلية
+ * يستخدم dynamic import لتأجيل تحميل exceljs حتى الحاجة الفعلية
  */
-export async function exportToExcel(data: Record<string, unknown>[], filename: string, sheetName: string = 'Sheet1') {
+export async function exportToExcel(
+  data: Record<string, unknown>[],
+  filename: string,
+  sheetName: string = 'Sheet1'
+) {
   // Dynamic import - يُحمَّل فقط عند الضغط على زر التصدير
-  const XLSX = await import('xlsx');
+  const ExcelJS = await import('exceljs');
 
   // Create a new workbook
-  const wb = XLSX.utils.book_new();
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'BOCAM CRM';
+  workbook.created = new Date();
 
-  // Convert data to worksheet
-  const ws = XLSX.utils.json_to_sheet(data);
+  // Create worksheet
+  const worksheet = workbook.addWorksheet(sheetName);
 
-  // Add worksheet to workbook
-  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  // Add headers
+  if (data.length > 0) {
+    const headers = Object.keys(data[0]);
+    worksheet.addRow(headers);
+
+    // Style header row
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF3498DB' },
+    };
+    headerRow.eachCell((cell) => {
+      cell.alignment = { horizontal: 'center' };
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    });
+
+    // Add data
+    data.forEach((row) => {
+      worksheet.addRow(headers.map((header) => row[header] || ''));
+    });
+
+    // Auto-fit columns
+    headers.forEach((_, index) => {
+      worksheet.getColumn(index + 1).width = 20;
+    });
+  }
 
   // Generate file and trigger download
-  XLSX.writeFile(wb, `${filename}.xlsx`);
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${filename}.xlsx`;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export function formatLeadsForExport(leads: Record<string, unknown>[]) {

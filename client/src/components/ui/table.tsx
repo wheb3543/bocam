@@ -2,13 +2,18 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-function Table({ className, ...props }: React.ComponentProps<'table'>) {
+type TableProps = React.ComponentProps<'table'> & {
+  caption?: string; // Accessibility caption for screen readers
+};
+
+function Table({ className, caption, ...props }: TableProps) {
   return (
     <div data-slot="table-container" className="relative w-full overflow-x-auto" dir="rtl">
       <table
         data-slot="table"
         className={cn('w-full caption-bottom text-sm', className)}
         style={{ direction: 'rtl' }}
+        aria-label={caption}
         {...props}
       />
     </div>
@@ -58,15 +63,34 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
   );
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
+type TableHeadProps = React.ComponentProps<'th'> & {
+  sortable?: boolean;
+  sortDirection?: 'ascending' | 'descending' | 'none';
+  onSort?: () => void;
+};
+
+function TableHead({ className, sortable, sortDirection, onSort, ...props }: TableHeadProps) {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (sortable && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      onSort?.();
+    }
+  };
+
   return (
     <th
       data-slot="table-head"
       className={cn(
         'text-foreground h-10 px-3 text-right align-middle font-medium whitespace-nowrap border-l border-border [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
+        sortable && 'cursor-pointer hover:bg-muted/50',
         className
       )}
       style={{ direction: 'rtl' }}
+      scope="col"
+      aria-sort={sortable ? sortDirection || 'none' : undefined}
+      tabIndex={sortable ? 0 : undefined}
+      onKeyDown={handleKeyDown}
+      onClick={sortable ? onSort : undefined}
       {...props}
     />
   );

@@ -50,8 +50,8 @@ export function OptionalUpdateBanner({ onInstall, onDismiss }: OptionalUpdateBan
           setIsVisible(true);
         }
       }
-    } catch (error) {
-      console.error('Failed to fetch update status:', error);
+    } catch {
+      // Silently handle update status fetch errors
     }
   };
 
@@ -64,13 +64,17 @@ export function OptionalUpdateBanner({ onInstall, onDismiss }: OptionalUpdateBan
       const data = await response.json();
 
       if (data.success) {
-        if (onInstall) {onInstall();}
+        if (onInstall) {
+          onInstall();
+        }
         setIsVisible(false);
       } else {
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('فشل بدء التحديث: ' + data.error);
         setIsInstalling(false);
       }
     } catch (error) {
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('فشل بدء التحديث: ' + error);
       setIsInstalling(false);
     }
@@ -78,7 +82,9 @@ export function OptionalUpdateBanner({ onInstall, onDismiss }: OptionalUpdateBan
 
   const handleDismiss = () => {
     setIsVisible(false);
-    if (onDismiss) {onDismiss();}
+    if (onDismiss) {
+      onDismiss();
+    }
   };
 
   if (!isVisible || !status?.pendingUpdate || status.pendingUpdate.mandatory) {

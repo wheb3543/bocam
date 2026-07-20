@@ -47,19 +47,21 @@ function formatDateTime(date: Date): string {
 
 /**
  * تصدير إلى Excel مع metadata
- * يستخدم dynamic import لتأجيل تحميل xlsx (277KB) حتى الحاجة الفعلية
+ * يستخدم dynamic import لتأجيل تحميل exceljs حتى الحاجة الفعلية
  */
 async function exportToExcel(options: ExportOptions): Promise<void> {
   const { metadata, columns, data, filename } = options;
 
   // Dynamic import - يُحمَّل فقط عند الضغط على زر التصدير
-  const XLSX = await import('xlsx');
+  const ExcelJS = await import('exceljs');
 
   // إنشاء workbook
-  const wb = XLSX.utils.book_new();
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'BOCAM CRM';
+  workbook.created = new Date();
 
   // إنشاء ورقة البيانات
-  const wsData: unknown[][] = [];
+  const sheet = workbook.addWorksheet('البيانات');
 
   // بناء العنوان
   const titleParts: string[] = [`تسجيلات ${metadata.tableName}`];
@@ -75,26 +77,47 @@ async function exportToExcel(options: ExportOptions): Promise<void> {
     titleParts.push(filtersText);
   }
 
-  wsData.push([titleParts.join(' - ')]);
-  wsData.push([]);
+  // إضافة العنوان
+  sheet.mergeCells('A1:' + String.fromCharCode(65 + columns.length - 1) + '1');
+  sheet.getCell('A1').value = titleParts.join(' - ');
+  sheet.getCell('A1').font = { bold: true, size: 14 };
+  sheet.getCell('A1').alignment = { horizontal: 'center' };
 
   // إضافة رؤوس الأعمدة
-  wsData.push(columns.map((col) => col.label));
+  const headerRow = sheet.addRow(columns.map((col) => col.label));
+  headerRow.font = { bold: true };
+  headerRow.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF3498DB' },
+  };
+  headerRow.eachCell((cell) => {
+    cell.alignment = { horizontal: 'center' };
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  });
 
   // إضافة البيانات
   data.forEach((row) => {
-    wsData.push(columns.map((col) => row[col.key] || ''));
+    sheet.addRow(columns.map((col) => row[col.key] || ''));
   });
 
-  // إنشاء الورقة
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-  // إضافة الورقة إلى workbook
-  XLSX.utils.book_append_sheet(wb, ws, 'البيانات');
+  // تنسيق عرض الأعمدة
+  columns.forEach((_, index) => {
+    sheet.getColumn(index + 1).width = 20;
+  });
 
   // تصدير الملف
   const finalFilename = filename || `${metadata.tableName}_${Date.now()}.xlsx`;
-  XLSX.writeFile(wb, finalFilename);
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = finalFilename;
+  link.click();
+  URL.revokeObjectURL(url);
 
   toast.success('تم التصدير إلى Excel بنجاح');
 }
@@ -178,7 +201,6 @@ async function exportToPDF(options: ExportOptions): Promise<void> {
 
     toast.success('تم التصدير إلى PDF بنجاح', { id: toastId });
   } catch (error) {
-    console.error('PDF export error:', error);
     toast.error('حدث خطأ أثناء التصدير إلى PDF', { id: toastId });
     throw error;
   }
@@ -346,7 +368,6 @@ export async function exportData(options: ExportOptions): Promise<void> {
         throw new Error('تنسيق غير مدعوم');
     }
   } catch (error) {
-    console.error('Export error:', error);
     toast.error('حدث خطأ أثناء التصدير');
     throw error;
   }

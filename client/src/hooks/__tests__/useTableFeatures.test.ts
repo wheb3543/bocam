@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-interface SharedTemplate {
+interface _SharedTemplate {
   id: number;
   name: string;
   columns: Record<string, boolean>;
@@ -314,7 +314,7 @@ describe('useTableFeatures - Core Logic', () => {
       ];
       const tableKey = 'appointments';
       
-      const formatted = apiResponse.map((t: SharedTemplate) => ({
+      const formatted = apiResponse.map((t) => ({
         id: `shared_${tableKey}_${t.id}`,
         name: t.name,
         columns: t.columns,

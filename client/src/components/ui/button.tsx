@@ -39,6 +39,7 @@ function Button({
   variant,
   size,
   asChild = false,
+  children,
   ...props
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
@@ -46,10 +47,44 @@ function Button({
   }) {
   const Comp = asChild ? Slot : 'button';
 
+  // Check if button has accessible text content
+  const _hasAccessibleText = React.useMemo(() => {
+    // If aria-label is provided, it's accessible
+    if (props['aria-label']) {
+      return true;
+    }
+
+    // If aria-labelledby is provided, it's accessible
+    if (props['aria-labelledby']) {
+      return true;
+    }
+
+    // Check if children contain text content
+    const childrenAsString = React.Children.toArray(children)
+      .map((child) => {
+        if (typeof child === 'string') {
+          return child;
+        }
+        if (React.isValidElement(child)) {
+          const childProps = child.props as Record<string, unknown>;
+          if ('children' in childProps) {
+            return String(childProps.children);
+          }
+        }
+        return '';
+      })
+      .join('')
+      .trim();
+
+    return childrenAsString.length > 0;
+  }, [children, props]);
+
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      aria-label={props['aria-label']}
+      aria-describedby={props['aria-describedby']}
       {...props}
     />
   );

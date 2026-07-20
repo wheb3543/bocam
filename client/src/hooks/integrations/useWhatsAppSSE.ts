@@ -27,13 +27,7 @@ export interface TemplateStatusUpdateEvent {
   templateId: string;
   templateName: string;
   status:
-    | 'APPROVED'
-    | 'REJECTED'
-    | 'DISABLED'
-    | 'PAUSED'
-    | 'REINSTATED'
-    | 'FLAGGED'
-    | 'PENDING_DELETION';
+    'APPROVED' | 'REJECTED' | 'DISABLED' | 'PAUSED' | 'REINSTATED' | 'FLAGGED' | 'PENDING_DELETION';
   reason?: string;
   timestamp: string;
 }
@@ -427,7 +421,9 @@ export function useWhatsAppSSE({
         default:
           break;
       }
-    } catch {}
+    } catch {
+      // Silently handle SSE processing errors
+    }
   }, []);
 
   // ── معالج أحداث المحادثة (conversation channel) ───────────────────────────
@@ -446,15 +442,22 @@ export function useWhatsAppSSE({
           // تحديث حالة رسالة (delivered/read/failed)
           if ((payload as Record<string, unknown>)?.status) {
             onMessageStatusRef.current?.({
-              messageId: (payload as Record<string, unknown>).messageId as string || (payload as Record<string, unknown>).id as string,
-              whatsappMessageId: (payload as Record<string, unknown>).whatsappMessageId as string | undefined,
-              conversationId: (payload as Record<string, unknown>).conversationId as number | undefined,
-              status: (payload as Record<string, unknown>).status as "sent" | "delivered" | "read" | "failed",
+              messageId:
+                ((payload as Record<string, unknown>).messageId as string) ||
+                ((payload as Record<string, unknown>).id as string),
+              whatsappMessageId: (payload as Record<string, unknown>).whatsappMessageId as
+                string | undefined,
+              conversationId: (payload as Record<string, unknown>).conversationId as
+                number | undefined,
+              status: (payload as Record<string, unknown>).status as
+                'sent' | 'delivered' | 'read' | 'failed',
               deliveredAt: (payload as Record<string, unknown>).deliveredAt as string | undefined,
               readAt: (payload as Record<string, unknown>).readAt as string | undefined,
               errorCode: (payload as Record<string, unknown>).errorCode as number | undefined,
               errorTitle: (payload as Record<string, unknown>).errorTitle as string | undefined,
-              timestamp: ((payload as Record<string, unknown>).timestamp as string) || new Date().toISOString(),
+              timestamp:
+                ((payload as Record<string, unknown>).timestamp as string) ||
+                new Date().toISOString(),
             });
           }
           break;
@@ -466,7 +469,9 @@ export function useWhatsAppSSE({
         default:
           break;
       }
-    } catch {}
+    } catch {
+      // Silently handle SSE processing errors
+    }
   }, []);
 
   // ── الاشتراك في القناة العامة ──────────────────────────────────────────────

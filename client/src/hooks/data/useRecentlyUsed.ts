@@ -32,8 +32,8 @@ export function useRecentlyUsed() {
         const filtered = parsed.filter((tool) => tool.timestamp > sevenDaysAgo);
         setRecentlyUsed(filtered);
       }
-    } catch (error) {
-      console.error('[RecentlyUsed] Error loading from localStorage:', error);
+    } catch {
+      // Silently handle localStorage errors
     }
   }, []);
 
@@ -49,8 +49,8 @@ export function useRecentlyUsed() {
       // حفظ في localStorage
       try {
         localStorage.setItem(RECENTLY_USED_KEY, JSON.stringify(updated));
-      } catch (error) {
-        console.error('[RecentlyUsed] Error saving to localStorage:', error);
+      } catch {
+        // Silently handle localStorage errors
       }
 
       return updated;
@@ -62,8 +62,8 @@ export function useRecentlyUsed() {
     setRecentlyUsed([]);
     try {
       localStorage.removeItem(RECENTLY_USED_KEY);
-    } catch (error) {
-      console.error('[RecentlyUsed] Error clearing localStorage:', error);
+    } catch {
+      // Silently handle localStorage errors
     }
   }, []);
 

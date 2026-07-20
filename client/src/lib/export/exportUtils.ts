@@ -109,31 +109,32 @@ export const exportToPDF = async (
 
   if ('autoTable' in doc) {
     (doc as unknown as JsPDFInstance).autoTable({
-    startY: yPos,
-    head: [['المؤشر', 'القيمة']],
-    body: statsData,
-    theme: 'grid',
-    styles: {
-      font: 'helvetica',
-      fontSize: 10,
-      cellPadding: 3,
-      halign: 'right',
-    },
-    headStyles: {
-      fillColor: [41, 128, 185],
-      textColor: 255,
-      fontStyle: 'bold',
-      halign: 'center',
-    },
-    alternateRowStyles: {
-      fillColor: [245, 245, 245],
-    },
-    margin: { left: 20, right: 20 },
+      startY: yPos,
+      head: [['المؤشر', 'القيمة']],
+      body: statsData,
+      theme: 'grid',
+      styles: {
+        font: 'helvetica',
+        fontSize: 10,
+        cellPadding: 3,
+        halign: 'right',
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      margin: { left: 20, right: 20 },
     } as unknown);
   }
 
   // جدول الحجوزات التفصيلية
-  const lastAutoTableFinalY = 'lastAutoTable' in doc ? (doc as unknown as JsPDFInstance).lastAutoTable?.finalY : undefined;
+  const lastAutoTableFinalY =
+    'lastAutoTable' in doc ? (doc as unknown as JsPDFInstance).lastAutoTable?.finalY : undefined;
   yPos = lastAutoTableFinalY ? lastAutoTableFinalY + 10 : yPos + 50;
 
   doc.setFontSize(14);
@@ -153,34 +154,34 @@ export const exportToPDF = async (
 
   if ('autoTable' in doc) {
     (doc as unknown as JsPDFInstance).autoTable({
-    startY: yPos,
-    head: [['#', 'اسم المريض', 'الهاتف', 'التخصص', 'الحالة', 'التاريخ']],
-    body: bookingsData,
-    theme: 'striped',
-    styles: {
-      font: 'helvetica',
-      fontSize: 9,
-      cellPadding: 2,
-      halign: 'right',
-    },
-    headStyles: {
-      fillColor: [52, 152, 219],
-      textColor: 255,
-      fontStyle: 'bold',
-      halign: 'center',
-    },
-    alternateRowStyles: {
-      fillColor: [250, 250, 250],
-    },
-    margin: { left: 15, right: 15 },
-    columnStyles: {
-      0: { cellWidth: 10, halign: 'center' },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 30 },
-      3: { cellWidth: 35 },
-      4: { cellWidth: 25, halign: 'center' },
-      5: { cellWidth: 30, halign: 'center' },
-    },
+      startY: yPos,
+      head: [['#', 'اسم المريض', 'الهاتف', 'التخصص', 'الحالة', 'التاريخ']],
+      body: bookingsData,
+      theme: 'striped',
+      styles: {
+        font: 'helvetica',
+        fontSize: 9,
+        cellPadding: 2,
+        halign: 'right',
+      },
+      headStyles: {
+        fillColor: [52, 152, 219],
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      alternateRowStyles: {
+        fillColor: [250, 250, 250],
+      },
+      margin: { left: 15, right: 15 },
+      columnStyles: {
+        0: { cellWidth: 10, halign: 'center' },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: 35 },
+        4: { cellWidth: 25, halign: 'center' },
+        5: { cellWidth: 30, halign: 'center' },
+      },
     } as unknown);
   }
 
@@ -211,7 +212,7 @@ export const exportToPDF = async (
 
 /**
  * تصدير التقارير إلى Excel - محسّن
- * يستخدم dynamic import لتأجيل تحميل xlsx حتى الحاجة الفعلية
+ * يستخدم dynamic import لتأجيل تحميل exceljs حتى الحاجة الفعلية
  */
 export const exportToExcel = async (
   bookings: BookingData[],
@@ -219,78 +220,122 @@ export const exportToExcel = async (
   dateRange: { from: Date; to: Date }
 ) => {
   // Dynamic import - يُحمَّل فقط عند الضغط على زر التصدير
-  const XLSX = await import('xlsx');
+  const ExcelJS = await import('exceljs');
 
   // إنشاء workbook جديد
-  const wb = XLSX.utils.book_new();
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'BOCAM CRM';
+  workbook.created = new Date();
 
   // ===== ورقة الإحصائيات =====
-  const statsData = [
-    ['تقرير الحجوزات والمواعيد - المستشفى السعودي الألماني - صنعاء'],
-    [],
-    ['الفترة الزمنية'],
-    ['من', dateRange.from.toLocaleDateString('ar-YE')],
-    ['إلى', dateRange.to.toLocaleDateString('ar-YE')],
-    [],
-    ['الإحصائيات الرئيسية'],
-    ['المؤشر', 'القيمة'],
-    ['إجمالي الحجوزات', stats.totalBookings],
-    ['العملاء الجدد', stats.newLeads],
-    ['معدل التحويل', `${stats.conversionRate.toFixed(1)}%`],
-    ['الإيرادات (ريال)', stats.revenue.toLocaleString('ar-YE')],
-    [],
-    [`تم الإنشاء: ${new Date().toLocaleString('ar-YE')}`],
-  ];
+  const statsSheet = workbook.addWorksheet('الإحصائيات');
 
-  const statsWs = XLSX.utils.aoa_to_sheet(statsData);
+  // إضافة العنوان
+  statsSheet.mergeCells('A1:B1');
+  statsSheet.getCell('A1').value = 'تقرير الحجوزات والمواعيد - المستشفى السعودي الألماني - صنعاء';
+  statsSheet.getCell('A1').font = { bold: true, size: 14 };
+  statsSheet.getCell('A1').alignment = { horizontal: 'center' };
+
+  // إضافة الفترة الزمنية
+  statsSheet.getCell('A3').value = 'الفترة الزمنية';
+  statsSheet.getCell('A3').font = { bold: true };
+  statsSheet.getCell('A4').value = 'من';
+  statsSheet.getCell('B4').value = dateRange.from.toLocaleDateString('ar-YE');
+  statsSheet.getCell('A5').value = 'إلى';
+  statsSheet.getCell('B5').value = dateRange.to.toLocaleDateString('ar-YE');
+
+  // إضافة الإحصائيات الرئيسية
+  statsSheet.getCell('A7').value = 'الإحصائيات الرئيسية';
+  statsSheet.getCell('A7').font = { bold: true };
+  statsSheet.getCell('A8').value = 'المؤشر';
+  statsSheet.getCell('B8').value = 'القيمة';
+  statsSheet.getCell('A8').font = { bold: true };
+  statsSheet.getCell('B8').font = { bold: true };
+
+  statsSheet.getCell('A9').value = 'إجمالي الحجوزات';
+  statsSheet.getCell('B9').value = stats.totalBookings;
+  statsSheet.getCell('A10').value = 'العملاء الجدد';
+  statsSheet.getCell('B10').value = stats.newLeads;
+  statsSheet.getCell('A11').value = 'معدل التحويل';
+  statsSheet.getCell('B11').value = `${stats.conversionRate.toFixed(1)}%`;
+  statsSheet.getCell('A12').value = 'الإيرادات (ريال)';
+  statsSheet.getCell('B12').value = stats.revenue.toLocaleString('ar-YE');
+
+  statsSheet.getCell('A14').value = `تم الإنشاء: ${new Date().toLocaleString('ar-YE')}`;
 
   // تنسيق عرض الأعمدة
-  statsWs['!cols'] = [{ wch: 30 }, { wch: 25 }];
-
-  // دمج خلايا العنوان
-  if (!statsWs['!merges']) {statsWs['!merges'] = [];}
-  statsWs['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } });
-
-  // إضافة الورقة
-  XLSX.utils.book_append_sheet(wb, statsWs, 'الإحصائيات');
+  statsSheet.getColumn('A').width = 30;
+  statsSheet.getColumn('B').width = 25;
 
   // ===== ورقة الحجوزات التفصيلية =====
-  const bookingsData = bookings.map((booking, index) => ({
-    '#': index + 1,
-    'اسم المريض': booking.patientName || 'غير محدد',
-    'رقم الهاتف': booking.phone || '',
-    'التخصص/الخدمة': booking.specialty || 'غير محدد',
-    'نوع الحجز': getBookingTypeLabel(booking.type),
-    الحالة: getStatusLabel(booking.status),
-    المصدر: getSourceLabel(booking.source || 'direct'),
-    'تاريخ الحجز': new Date(booking.createdAt).toLocaleDateString('ar-YE'),
-    'وقت الحجز': new Date(booking.createdAt).toLocaleTimeString('ar-YE', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-  }));
+  const bookingsSheet = workbook.addWorksheet('الحجوزات التفصيلية');
 
-  const bookingsWs = XLSX.utils.json_to_sheet(bookingsData);
+  // إضافة رؤوس الأعمدة
+  const headers = [
+    '#',
+    'اسم المريض',
+    'رقم الهاتف',
+    'التخصص/الخدمة',
+    'نوع الحجز',
+    'الحالة',
+    'المصدر',
+    'تاريخ الحجز',
+    'وقت الحجز',
+  ];
+  bookingsSheet.addRow(headers);
+  const headerRow = bookingsSheet.getRow(1);
+  headerRow.font = { bold: true };
+  headerRow.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF3498DB' },
+  };
+  headerRow.eachCell((cell) => {
+    cell.alignment = { horizontal: 'center' };
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  });
+
+  // إضافة البيانات
+  bookings.forEach((booking, index) => {
+    bookingsSheet.addRow([
+      index + 1,
+      booking.patientName || 'غير محدد',
+      booking.phone || '',
+      booking.specialty || 'غير محدد',
+      getBookingTypeLabel(booking.type),
+      getStatusLabel(booking.status),
+      getSourceLabel(booking.source || 'direct'),
+      new Date(booking.createdAt).toLocaleDateString('ar-YE'),
+      new Date(booking.createdAt).toLocaleTimeString('ar-YE', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    ]);
+  });
 
   // تنسيق عرض الأعمدة
-  bookingsWs['!cols'] = [
-    { wch: 5 }, // #
-    { wch: 25 }, // اسم المريض
-    { wch: 15 }, // رقم الهاتف
-    { wch: 20 }, // التخصص/الخدمة
-    { wch: 18 }, // نوع الحجز
-    { wch: 15 }, // الحالة
-    { wch: 15 }, // المصدر
-    { wch: 15 }, // تاريخ الحجز
-    { wch: 12 }, // وقت الحجز
-  ];
-
-  // إضافة الورقة
-  XLSX.utils.book_append_sheet(wb, bookingsWs, 'الحجوزات التفصيلية');
+  bookingsSheet.getColumn(1).width = 5;
+  bookingsSheet.getColumn(2).width = 25;
+  bookingsSheet.getColumn(3).width = 15;
+  bookingsSheet.getColumn(4).width = 20;
+  bookingsSheet.getColumn(5).width = 18;
+  bookingsSheet.getColumn(6).width = 15;
+  bookingsSheet.getColumn(7).width = 15;
+  bookingsSheet.getColumn(8).width = 15;
+  bookingsSheet.getColumn(9).width = 12;
 
   // حفظ الملف
   const fileName = `تقرير_الحجوزات_${new Date().toISOString().split('T')[0]}.xlsx`;
-  XLSX.writeFile(wb, fileName);
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
 };
 
 /**
@@ -338,7 +383,9 @@ function getSourceLabel(source: string): string {
  * دالة مساعدة للحصول على تسمية نوع الحجز بالعربية
  */
 function getBookingTypeLabel(type?: string): string {
-  if (!type) {return 'غير محدد';}
+  if (!type) {
+    return 'غير محدد';
+  }
 
   const typeMap: Record<string, string> = {
     appointment: 'موعد طبيب',

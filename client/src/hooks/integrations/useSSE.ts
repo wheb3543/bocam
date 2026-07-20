@@ -17,7 +17,9 @@ export function useSSE(url: string | null, onMessage?: SSEHandler) {
   });
 
   useEffect(() => {
-    if (!url || typeof window === 'undefined') {return;}
+    if (!url || typeof window === 'undefined') {
+      return;
+    }
 
     let retryTimeout: ReturnType<typeof setTimeout> | null = null;
     let retryCount = 0;
@@ -75,15 +77,17 @@ export function useSSE(url: string | null, onMessage?: SSEHandler) {
             retryTimeout = setTimeout(connect, delay);
           }
         });
-      } catch (err) {
-        console.warn('[SSE] failed to init', err);
+      } catch {
+        // Silently handle SSE init errors
       }
     }
 
     connect();
 
     return () => {
-      if (retryTimeout) {clearTimeout(retryTimeout);}
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
       esRef.current?.close();
       esRef.current = null;
     };

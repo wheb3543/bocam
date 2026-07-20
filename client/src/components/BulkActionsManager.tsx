@@ -104,7 +104,8 @@ export default function BulkActionsManager({
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [selectedExportFormat, setSelectedExportFormat] = useState('');
 
-  const statusDialogOpen = externalDialogOpen !== undefined ? externalDialogOpen : internalDialogOpen;
+  const statusDialogOpen =
+    externalDialogOpen !== undefined ? externalDialogOpen : internalDialogOpen;
   const setStatusDialogOpen = externalDialogOpenChange || setInternalDialogOpen;
 
   const handleActionClick = (action: Action) => {
@@ -194,14 +195,20 @@ export default function BulkActionsManager({
     }
   };
 
-  if (selectedCount === 0) return null;
+  if (selectedCount === 0) {
+    return null;
+  }
 
   return (
     <>
       {/* Bulk Actions Bar */}
       {showBar && (
-        <div className={`fixed ${getPositionClasses()} ${position === 'bottom' || position === 'top' ? 'left-1/2 -translate-x-1/2' : ''} z-50 animate-in slide-in-from-bottom-5`}>
-          <div className={`bg-primary text-primary-foreground rounded-lg shadow-lg ${getSizeClasses()} flex items-center gap-4 ${barClassName}`}>
+        <div
+          className={`fixed ${getPositionClasses()} ${position === 'bottom' || position === 'top' ? 'left-1/2 -translate-x-1/2' : ''} z-50 animate-in slide-in-from-bottom-5`}
+        >
+          <div
+            className={`bg-primary text-primary-foreground rounded-lg shadow-lg ${getSizeClasses()} flex items-center gap-4 ${barClassName}`}
+          >
             {showCount && (
               <>
                 <div className="flex items-center gap-2">
@@ -219,12 +226,12 @@ export default function BulkActionsManager({
 
             <div className="flex gap-2">
               {actions.map((action, index) => {
-                const isLoading = 
+                const isLoading =
                   (action.type === 'status-update' && action.isLoading) ||
                   (action.type === 'delete' && action.isLoading) ||
                   (action.type === 'export' && action.isLoading) ||
                   (action.type === 'simple' && action.isLoading);
-                
+
                 return (
                   <Button
                     key={index}
@@ -262,7 +269,8 @@ export default function BulkActionsManager({
           <DialogHeader>
             <DialogTitle>{currentStatusAction?.dialogTitle || 'تحديث الحالة المحددة'}</DialogTitle>
             <DialogDescription>
-              {currentStatusAction?.dialogDescription || `سيتم تحديث حالة ${selectedCount} عنصر محدد. اختر الحالة الجديدة:`}
+              {currentStatusAction?.dialogDescription ||
+                `سيتم تحديث حالة ${selectedCount} عنصر محدد. اختر الحالة الجديدة:`}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -280,10 +288,17 @@ export default function BulkActionsManager({
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handleStatusDialogClose} disabled={currentStatusAction?.isLoading}>
+            <Button
+              variant="outline"
+              onClick={handleStatusDialogClose}
+              disabled={currentStatusAction?.isLoading}
+            >
               إلغاء
             </Button>
-            <Button onClick={handleStatusConfirm} disabled={!newStatus || currentStatusAction?.isLoading}>
+            <Button
+              onClick={handleStatusConfirm}
+              disabled={!newStatus || currentStatusAction?.isLoading}
+            >
               {currentStatusAction?.isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
               تحديث
             </Button>
@@ -295,9 +310,12 @@ export default function BulkActionsManager({
       <AlertDialog open={deleteDialogOpen} onOpenChange={handleDeleteDialogClose}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{currentDeleteAction?.confirmTitle || 'تأكيد الحذف'}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {currentDeleteAction?.confirmTitle || 'تأكيد الحذف'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {currentDeleteAction?.confirmDescription || `هل أنت متأكد من حذف ${selectedCount} عنصر محدد؟ هذا الإجراء لا يمكن التراجع عنه.`}
+              {currentDeleteAction?.confirmDescription ||
+                `هل أنت متأكد من حذف ${selectedCount} عنصر محدد؟ هذا الإجراء لا يمكن التراجع عنه.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -339,11 +357,20 @@ export default function BulkActionsManager({
               </Select>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={handleExportDialogClose} disabled={currentExportAction?.isLoading}>
+              <Button
+                variant="outline"
+                onClick={handleExportDialogClose}
+                disabled={currentExportAction?.isLoading}
+              >
                 إلغاء
               </Button>
-              <Button onClick={handleExportConfirm} disabled={!selectedExportFormat || currentExportAction?.isLoading}>
-                {currentExportAction?.isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              <Button
+                onClick={handleExportConfirm}
+                disabled={!selectedExportFormat || currentExportAction?.isLoading}
+              >
+                {currentExportAction?.isLoading && (
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                )}
                 تصدير
               </Button>
             </DialogFooter>

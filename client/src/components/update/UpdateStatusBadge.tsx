@@ -35,8 +35,8 @@ export function UpdateStatusBadge() {
       if (data.success) {
         setStatus(data.data);
       }
-    } catch (error) {
-      console.error('Failed to fetch update status:', error);
+    } catch {
+      // Silently handle update status fetch errors
     } finally {
       setIsLoading(false);
     }

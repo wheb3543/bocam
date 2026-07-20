@@ -8,7 +8,7 @@ export interface DateRange {
   to: Date;
 }
 
-export type DateFilterPreset = 'all' | 'today' | 'week' | 'month';
+export type DateFilterPreset = 'all' | 'today' | 'week' | 'month' | 'custom';
 
 export interface FilterConfig<T> {
   /** The raw data array to filter */
@@ -163,11 +163,21 @@ export function useFilterUtils<T>(config?: Partial<FilterConfig<T>>): UseFilterU
   // ─── Active Filter Count ─────────────────────────────────────────────────
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (debouncedSearch) {count++;}
-    if (statusFilter.length > 0) {count++;}
-    if (sourceFilter.length > 0) {count++;}
-    if (categoryFilter.length > 0) {count++;}
-    if (dateFilter !== 'all') {count++;}
+    if (debouncedSearch) {
+      count++;
+    }
+    if (statusFilter.length > 0) {
+      count++;
+    }
+    if (sourceFilter.length > 0) {
+      count++;
+    }
+    if (categoryFilter.length > 0) {
+      count++;
+    }
+    if (dateFilter !== 'all') {
+      count++;
+    }
     return count;
   }, [debouncedSearch, statusFilter, sourceFilter, categoryFilter, dateFilter]);
 
@@ -184,7 +194,9 @@ export function useFilterUtils<T>(config?: Partial<FilterConfig<T>>): UseFilterU
   // ─── Filtering Logic ────────────────────────────────────────────────────
   const filteredData = useMemo(() => {
     const data = config?.data;
-    if (!data) {return [];}
+    if (!data) {
+      return [];
+    }
 
     let filtered = [...data];
 
@@ -302,7 +314,9 @@ export function applyDefaultSort<T>(
   sortDirection: string | null | undefined,
   getCreatedAt: (item: T) => string | Date | null | undefined
 ): T[] {
-  if (sortDirection) {return data;}
+  if (sortDirection) {
+    return data;
+  }
 
   return [...data].sort((a, b) => {
     const aDate = new Date(getCreatedAt(a) || 0).getTime();

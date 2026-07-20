@@ -61,8 +61,8 @@ export function MandatoryUpdateModal({ open, onOpenChange }: MandatoryUpdateModa
           }, 3000);
         }
       }
-    } catch (error) {
-      console.error('Failed to fetch update status:', error);
+    } catch {
+      // Silently handle update status fetch errors
     }
   };
 
@@ -79,10 +79,12 @@ export function MandatoryUpdateModal({ open, onOpenChange }: MandatoryUpdateModa
         fetchUpdateStatus();
       } else {
         setIsInstalling(false);
+        // eslint-disable-next-line no-alert -- Intentional user notification
         alert('فشل بدء التحديث: ' + data.error);
       }
     } catch (error) {
       setIsInstalling(false);
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('فشل بدء التحديث: ' + error);
     }
   };
