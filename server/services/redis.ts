@@ -1,4 +1,7 @@
 import Redis from 'ioredis';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('redis');
 
 /**
  * Redis connection for BullMQ queues and caching
@@ -22,11 +25,11 @@ export function getRedisConnection(): Redis {
     });
 
     redisClient.on('error', (err) => {
-      console.error('[Redis] Connection error:', err);
+      logger.error('Connection error:', err);
     });
 
     redisClient.on('connect', () => {
-      console.log('[Redis] Connected successfully');
+      logger.info('Connected successfully');
     });
   }
 
@@ -48,11 +51,11 @@ export function getCacheClient(): Redis {
     });
 
     cacheClient.on('error', (err) => {
-      console.error('[Redis Cache] Connection error:', err);
+      logger.error('Cache Connection error:', err);
     });
 
     cacheClient.on('connect', () => {
-      console.log('[Redis Cache] Connected successfully');
+      logger.info('Cache Connected successfully');
     });
   }
 
@@ -63,13 +66,13 @@ export async function closeRedisConnection(): Promise<void> {
   if (redisClient) {
     await redisClient.quit();
     redisClient = null;
-    console.log('[Redis] Connection closed');
+    logger.info('Connection closed');
   }
 
   if (cacheClient) {
     await cacheClient.quit();
     cacheClient = null;
-    console.log('[Redis Cache] Connection closed');
+    logger.info('Cache Connection closed');
   }
 }
 
@@ -89,10 +92,12 @@ export class CacheManager {
   async get<T>(key: string): Promise<T | null> {
     try {
       const value = await this.client.get(key);
-      if (!value) return null;
+      if (!value) {
+        return null;
+      }
       return JSON.parse(value) as T;
     } catch (error) {
-      console.error('[Cache] Get error:', error);
+      logger.error('Get error:', error);
       return null;
     }
   }
@@ -109,7 +114,7 @@ export class CacheManager {
         await this.client.set(key, serialized);
       }
     } catch (error) {
-      console.error('[Cache] Set error:', error);
+      logger.error('Set error:', error);
     }
   }
 
@@ -120,7 +125,7 @@ export class CacheManager {
     try {
       await this.client.del(key);
     } catch (error) {
-      console.error('[Cache] Delete error:', error);
+      logger.error('Delete error:', error);
     }
   }
 
@@ -134,7 +139,7 @@ export class CacheManager {
         await this.client.del(...keys);
       }
     } catch (error) {
-      console.error('[Cache] Delete pattern error:', error);
+      logger.error('Delete pattern error:', error);
     }
   }
 
@@ -146,7 +151,7 @@ export class CacheManager {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      console.error('[Cache] Exists error:', error);
+      logger.error('Exists error:', error);
       return false;
     }
   }
@@ -158,7 +163,7 @@ export class CacheManager {
     try {
       await this.client.expire(key, ttl);
     } catch (error) {
-      console.error('[Cache] Expire error:', error);
+      logger.error('Expire error:', error);
     }
   }
 
@@ -167,9 +172,9 @@ export class CacheManager {
    */
   async ttl(key: string): Promise<number> {
     try {
-      return await this.client.ttl(key);
+      return this.client.ttl(key);
     } catch (error) {
-      console.error('[Cache] TTL error:', error);
+      logger.error('TTL error:', error);
       return -1;
     }
   }
@@ -181,7 +186,7 @@ export class CacheManager {
     try {
       await this.client.flushdb();
     } catch (error) {
-      console.error('[Cache] Flush error:', error);
+      logger.error('Flush error:', error);
     }
   }
 }

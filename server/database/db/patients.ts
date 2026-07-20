@@ -1,5 +1,6 @@
 import { eq, and, gt, desc } from 'drizzle-orm';
-import { getDb, normalizePhoneNumber } from '../db';
+import { getDb } from './connection';
+import { normalizePhoneNumber } from './whatsapp';
 import {
   patients,
   patientOtps,
@@ -14,7 +15,9 @@ import bcrypt from 'bcrypt';
 export type SafePatient = Omit<Patient, 'password'>;
 
 export function sanitizePatient(patient: Patient | null): SafePatient | null {
-  if (!patient) return null;
+  if (!patient) {
+    return null;
+  }
   const { password: _password, ...safe } = patient;
   return safe;
 }
@@ -27,7 +30,9 @@ function normalizePatientPhone(phone: string): string {
 
 export async function getPatientByPhone(phone: string) {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) {
+    return null;
+  }
   const normalizedPhone = normalizePatientPhone(phone);
   const result = await db
     .select()
@@ -39,7 +44,9 @@ export async function getPatientByPhone(phone: string) {
 
 export async function getPatientById(id: number) {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) {
+    return null;
+  }
   const result = await db.select().from(patients).where(eq(patients.id, id)).limit(1);
   return result.length > 0 ? result[0] : null;
 }
@@ -54,7 +61,9 @@ export async function createPatient(data: {
   password?: string;
 }) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
   const normalizedPhone = normalizePatientPhone(data.phone);
 
   let hashedPassword: string | null = null;
@@ -77,7 +86,9 @@ export async function createPatient(data: {
 
 export async function updatePatientLastLogin(patientId: number) {
   const db = await getDb();
-  if (!db) return;
+  if (!db) {
+    return;
+  }
   await db.update(patients).set({ lastLoginAt: new Date() }).where(eq(patients.id, patientId));
 }
 
@@ -91,7 +102,9 @@ export async function updatePatientProfile(
   }
 ) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const updateData: Partial<{
     fullName: string;
@@ -99,10 +112,18 @@ export async function updatePatientProfile(
     age: number | null;
     email: string | null;
   }> = {};
-  if (data.fullName) updateData.fullName = data.fullName;
-  if (data.address !== undefined) updateData.address = data.address;
-  if (data.age !== undefined) updateData.age = data.age;
-  if (data.email !== undefined) updateData.email = data.email;
+  if (data.fullName) {
+    updateData.fullName = data.fullName;
+  }
+  if (data.address !== undefined) {
+    updateData.address = data.address;
+  }
+  if (data.age !== undefined) {
+    updateData.age = data.age;
+  }
+  if (data.email !== undefined) {
+    updateData.email = data.email;
+  }
 
   if (Object.keys(updateData).length > 0) {
     await db.update(patients).set(updateData).where(eq(patients.id, patientId));
@@ -115,7 +136,9 @@ export async function updatePatientProfile(
 
 export async function createOtp(phone: string): Promise<string> {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
   const normalizedPhone = normalizePatientPhone(phone);
 
   // Generate 6-digit OTP
@@ -146,7 +169,9 @@ export async function verifyOtp(
   options?: { consume?: boolean }
 ): Promise<boolean> {
   const db = await getDb();
-  if (!db) return false;
+  if (!db) {
+    return false;
+  }
   const normalizedPhone = normalizePatientPhone(phone);
   const consume = options?.consume !== false;
 
@@ -163,7 +188,9 @@ export async function verifyOtp(
     )
     .limit(1);
 
-  if (result.length === 0) return false;
+  if (result.length === 0) {
+    return false;
+  }
 
   if (consume) {
     await db.update(patientOtps).set({ isUsed: true }).where(eq(patientOtps.id, result[0].id));
@@ -177,7 +204,9 @@ export async function verifyPatientPassword(
   password: string
 ): Promise<{ success: boolean; hasPassword: boolean }> {
   const db = await getDb();
-  if (!db) return { success: false, hasPassword: false };
+  if (!db) {
+    return { success: false, hasPassword: false };
+  }
   const normalizedPhone = normalizePatientPhone(phone);
 
   const patient = await getPatientByPhone(normalizedPhone);
@@ -196,7 +225,9 @@ export async function verifyPatientPassword(
 
 export async function getPatientAppointments(phone: string) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
   const normalizedPhone = normalizePatientPhone(phone);
 
   const result = await db
@@ -212,7 +243,9 @@ export async function getPatientAppointments(phone: string) {
 
 export async function getPatientOfferLeads(phone: string) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
   const normalizedPhone = normalizePatientPhone(phone);
 
   const result = await db
@@ -228,7 +261,9 @@ export async function getPatientOfferLeads(phone: string) {
 
 export async function getPatientCampRegistrations(phone: string) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
   const normalizedPhone = normalizePatientPhone(phone);
 
   const result = await db
@@ -244,7 +279,9 @@ export async function getPatientCampRegistrations(phone: string) {
 
 export async function getPatientResults(patientId: number) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
 
   const result = await db
     .select()
@@ -266,7 +303,9 @@ export async function createPatientResult(data: {
   status?: 'pending' | 'ready' | 'delivered';
 }) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   await db.insert(patientResults).values({
     patientId: data.patientId,
@@ -287,7 +326,9 @@ export async function updatePatientResultStatus(
   status: 'pending' | 'ready' | 'delivered'
 ) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   await db
     .update(patientResults)

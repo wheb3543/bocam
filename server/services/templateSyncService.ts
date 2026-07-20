@@ -7,6 +7,9 @@ import { meta } from '../api/MetaApiService';
 import { getDb } from '../database/db';
 import { messageTemplates, whatsappTemplates } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('templateSyncService');
 
 /**
  * مزامنة حالة قوالب messageTemplates مع Meta
@@ -38,29 +41,29 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
     }
 
     const metaTemplates = templatesResult.templates || [];
-    console.log(`[Template Sync] Fetched ${metaTemplates.length} templates from Meta`);
+    logger.info(`Fetched ${metaTemplates.length} templates from Meta`);
 
     // إنشاء خريطة للقوالب من Meta
     const metaTemplateMap = new Map(metaTemplates.map((t: Record<string, unknown>) => [t.name, t]));
 
     // جلب القوالب من قاعدة البيانات
     const dbTemplates = await db.select().from(messageTemplates);
-    console.log(`[Template Sync] Found ${dbTemplates.length} templates in database`);
+    logger.info(`Found ${dbTemplates.length} templates in database`);
 
     // تحديث حالة كل قالب
     for (const dbTemplate of dbTemplates) {
       const metaTemplate = metaTemplateMap.get(dbTemplate.templateName);
 
       if (!metaTemplate) {
-        console.warn(`[Template Sync] Template "${dbTemplate.templateName}" not found in Meta`);
+        logger.warn(`Template "${dbTemplate.templateName}" not found in Meta`);
         errors.push(`Template "${dbTemplate.templateName}" not found in Meta`);
         continue;
       }
 
       // تحديث الحالة إذا تغيرت
       if (metaTemplate.status !== dbTemplate.status) {
-        console.log(
-          `[Template Sync] Updating status of "${dbTemplate.templateName}" from ${dbTemplate.status} to ${metaTemplate.status}`
+        logger.info(
+          `Updating status of "${dbTemplate.templateName}" from ${dbTemplate.status} to ${metaTemplate.status}`
         );
 
         await db
@@ -89,11 +92,15 @@ export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise
       }
     }
 
-    console.log(`[Template Sync] Synced ${synced} templates`);
+    logger.info(`Synced ${synced} templates`);
     return { success: true, synced, errors };
   } catch (error) {
-    console.error('[Template Sync] Failed:', error);
-    return { success: false, synced, errors: [error instanceof Error ? error.message : 'خطأ غير معروف'] };
+    logger.error('Failed:', error);
+    return {
+      success: false,
+      synced,
+      errors: [error instanceof Error ? error.message : 'خطأ غير معروف'],
+    };
   }
 }
 
@@ -127,14 +134,14 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
     }
 
     const metaTemplates = templatesResult.templates || [];
-    console.log(`[Template Sync] Fetched ${metaTemplates.length} templates from Meta`);
+    logger.info(`Fetched ${metaTemplates.length} templates from Meta`);
 
     // إنشاء خريطة للقوالب من Meta
     const metaTemplateMap = new Map(metaTemplates.map((t: Record<string, unknown>) => [t.name, t]));
 
     // جلب القوالب من قاعدة البيانات
     const dbTemplates = await db.select().from(whatsappTemplates);
-    console.log(`[Template Sync] Found ${dbTemplates.length} templates in database`);
+    logger.info(`Found ${dbTemplates.length} templates in database`);
 
     // تحديث حالة كل قالب
     for (const dbTemplate of dbTemplates) {
@@ -142,15 +149,15 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
       const metaTemplate = metaTemplateMap.get(metaName);
 
       if (!metaTemplate) {
-        console.warn(`[Template Sync] Template "${metaName}" not found in Meta`);
+        logger.warn(`Template "${metaName}" not found in Meta`);
         errors.push(`Template "${metaName}" not found in Meta`);
         continue;
       }
 
       // تحديث الحالة إذا تغيرت
       if (metaTemplate.status !== dbTemplate.metaStatus) {
-        console.log(
-          `[Template Sync] Updating status of "${metaName}" from ${dbTemplate.metaStatus} to ${metaTemplate.status}`
+        logger.info(
+          `Updating status of "${metaName}" from ${dbTemplate.metaStatus} to ${metaTemplate.status}`
         );
 
         await db
@@ -179,11 +186,15 @@ export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promis
       }
     }
 
-    console.log(`[Template Sync] Synced ${synced} templates`);
+    logger.info(`Synced ${synced} templates`);
     return { success: true, synced, errors };
   } catch (error) {
-    console.error('[Template Sync] Failed:', error);
-    return { success: false, synced, errors: [error instanceof Error ? error.message : 'خطأ غير معروف'] };
+    logger.error('Failed:', error);
+    return {
+      success: false,
+      synced,
+      errors: [error instanceof Error ? error.message : 'خطأ غير معروف'],
+    };
   }
 }
 
@@ -195,7 +206,7 @@ export async function syncAllTemplates(phoneNumberId: string): Promise<{
   messageTemplates: { synced: number; errors: string[] };
   whatsappTemplates: { synced: number; errors: string[] };
 }> {
-  console.log('[Template Sync] Starting full template sync...');
+  logger.info('Starting full template sync...');
 
   const messageResult = await syncMessageTemplatesStatus(phoneNumberId);
   const whatsappResult = await syncWhatsAppTemplatesStatus(phoneNumberId);

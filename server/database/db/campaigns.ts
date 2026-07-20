@@ -10,23 +10,32 @@ import {
   camps,
   doctors,
 } from '../../../drizzle/schema';
-import { getDb } from '../db';
+import { getDb } from './connection';
 
 /**
  * Get all campaigns with optional filters
  */
 export async function getCampaigns(filters?: { status?: string; type?: string; search?: string }) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
-  let conditions = [];
+  const conditions = [];
 
   if (filters?.status) {
-    conditions.push(eq(campaigns.status, filters.status as 'completed' | 'draft' | 'active' | 'paused' | 'cancelled'));
+    conditions.push(
+      eq(
+        campaigns.status,
+        filters.status as 'completed' | 'draft' | 'active' | 'paused' | 'cancelled'
+      )
+    );
   }
 
   if (filters?.type) {
-    conditions.push(eq(campaigns.type, filters.type as 'digital' | 'field' | 'awareness' | 'mixed'));
+    conditions.push(
+      eq(campaigns.type, filters.type as 'digital' | 'field' | 'awareness' | 'mixed')
+    );
   }
 
   if (filters?.search) {
@@ -47,7 +56,7 @@ export async function getCampaigns(filters?: { status?: string; type?: string; s
           .orderBy(desc(campaigns.createdAt))
       : db.select().from(campaigns).orderBy(desc(campaigns.createdAt));
 
-  return await query;
+  return query;
 }
 
 /**
@@ -55,7 +64,9 @@ export async function getCampaigns(filters?: { status?: string; type?: string; s
  */
 export async function getCampaignById(id: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1);
   return result[0];
@@ -66,7 +77,9 @@ export async function getCampaignById(id: number) {
  */
 export async function getCampaignBySlug(slug: string) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db.select().from(campaigns).where(eq(campaigns.slug, slug)).limit(1);
   return result[0];
@@ -77,7 +90,9 @@ export async function getCampaignBySlug(slug: string) {
  */
 export async function createCampaign(data: typeof campaigns.$inferInsert) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db.insert(campaigns).values(data);
   return result;
@@ -88,10 +103,12 @@ export async function createCampaign(data: typeof campaigns.$inferInsert) {
  */
 export async function updateCampaign(id: number, data: Partial<typeof campaigns.$inferInsert>) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   await db.update(campaigns).set(data).where(eq(campaigns.id, id));
-  return await getCampaignById(id);
+  return getCampaignById(id);
 }
 
 /**
@@ -99,7 +116,9 @@ export async function updateCampaign(id: number, data: Partial<typeof campaigns.
  */
 export async function deleteCampaign(id: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   await db.delete(campaigns).where(eq(campaigns.id, id));
   return { success: true };
@@ -110,7 +129,9 @@ export async function deleteCampaign(id: number) {
  */
 export async function getCampaignStats(campaignId: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   // Get total leads
   const leadsResult = await db
@@ -175,7 +196,9 @@ export async function getCampaignStats(campaignId: number) {
  */
 export async function getCampaignLinkedOffers(campaignId: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db
     .select({
@@ -199,7 +222,9 @@ export async function getCampaignLinkedOffers(campaignId: number) {
  */
 export async function getCampaignLinkedCamps(campaignId: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db
     .select({
@@ -223,7 +248,9 @@ export async function getCampaignLinkedCamps(campaignId: number) {
  */
 export async function getCampaignLinkedDoctors(campaignId: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db
     .select({
@@ -248,7 +275,9 @@ export async function getCampaignLinkedDoctors(campaignId: number) {
  */
 export async function linkOffersToCampaign(campaignId: number, offerIds: number[]) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   // Remove existing links
   await db.delete(campaignOffers).where(eq(campaignOffers.campaignId, campaignId));
@@ -266,7 +295,9 @@ export async function linkOffersToCampaign(campaignId: number, offerIds: number[
  */
 export async function linkCampsToCampaign(campaignId: number, campIds: number[]) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   // Remove existing links
   await db.delete(campaignCamps).where(eq(campaignCamps.campaignId, campaignId));
@@ -284,7 +315,9 @@ export async function linkCampsToCampaign(campaignId: number, campIds: number[])
  */
 export async function linkDoctorsToCampaign(campaignId: number, doctorIds: number[]) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   // Remove existing links
   await db.delete(campaignDoctors).where(eq(campaignDoctors.campaignId, campaignId));
@@ -317,7 +350,9 @@ export async function getCampaignAllLinks(campaignId: number) {
  */
 export async function getCampaignsOverview() {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   // Total campaigns
   const totalResult = await db.select({ count: sql<number>`count(*)` }).from(campaigns);

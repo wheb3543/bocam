@@ -17,24 +17,26 @@ export function clearQueryCache() {
 
 export function getCachedQuery<T>(key: string): T | null {
   const cached = queryCache.get(key);
-  if (!cached) return null;
-  
+  if (!cached) {
+    return null;
+  }
+
   const now = Date.now();
   const age = (now - cached.timestamp) / 1000; // convert to seconds
-  
+
   // Cache expires after 5 minutes by default
   if (age > 300) {
     queryCache.delete(key);
     return null;
   }
-  
+
   return cached.data as T;
 }
 
 export function setCachedQuery<T>(key: string, data: T): void {
   queryCache.set(key, {
     data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
@@ -45,29 +47,29 @@ export async function optimizedQuery<T>(
   options: QueryOptions = {}
 ): Promise<T> {
   const { cache = true } = options;
-  
+
   // Check cache first
   if (cache) {
     const cached = getCachedQuery<T>(queryKey);
-    if (cached) return cached;
+    if (cached) {
+      return cached;
+    }
   }
-  
+
   // Execute query
   const result = await queryFn();
-  
+
   // Cache result
   if (cache) {
     setCachedQuery(queryKey, result);
   }
-  
+
   return result;
 }
 
 // Batch query helper
-export async function batchQuery<T>(
-  queries: Array<() => Promise<T>>
-): Promise<T[]> {
-  return Promise.all(queries.map(query => query()));
+export async function batchQuery<T>(queries: Array<() => Promise<T>>): Promise<T[]> {
+  return Promise.all(queries.map((query) => query()));
 }
 
 // Optimized pagination
@@ -78,7 +80,9 @@ export function getPaginationParams(page: number = 1, limit: number = 10) {
 
 // Query result size limiter
 export function limitResultSize<T>(data: T[], maxSize: number = 1000): T[] {
-  if (data.length <= maxSize) return data;
+  if (data.length <= maxSize) {
+    return data;
+  }
   return data.slice(0, maxSize);
 }
 
@@ -89,12 +93,12 @@ export function createDebouncedQuery<T>(
 ): () => Promise<T> {
   let timeoutId: NodeJS.Timeout | null = null;
   let lastPromise: Promise<T> | null = null;
-  
+
   return () => {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
-    
+
     return new Promise((resolve, reject) => {
       timeoutId = setTimeout(async () => {
         try {
@@ -114,17 +118,17 @@ export const dbPoolConfig = {
   // Connection pool size
   min: 2,
   max: 10,
-  
+
   // Connection timeout
   acquireTimeoutMillis: 30000,
-  
+
   // Idle connection timeout
   idleTimeoutMillis: 30000,
-  
+
   // Connection retry settings
   retries: 3,
   retryDelay: 1000,
-  
+
   // Query timeout
   queryTimeout: 10000,
 };
@@ -132,7 +136,7 @@ export const dbPoolConfig = {
 // Monitor database performance
 export class DatabasePerformanceMonitor {
   private queryTimes: Map<string, number[]> = new Map();
-  
+
   recordQuery(queryName: string, duration: number) {
     if (!this.queryTimes.has(queryName)) {
       this.queryTimes.set(queryName, []);
@@ -151,12 +155,14 @@ export class DatabasePerformanceMonitor {
 
   getAverageTime(queryName: string): number {
     const times = this.queryTimes.get(queryName);
-    if (!times || times.length === 0) return 0;
-    
+    if (!times || times.length === 0) {
+      return 0;
+    }
+
     const sum = times.reduce((a, b) => a + b, 0);
     return sum / times.length;
   }
-  
+
   getSlowQueries(threshold: number = 1000): string[] {
     const slowQueries: string[] = [];
 

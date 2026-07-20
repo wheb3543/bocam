@@ -1,5 +1,5 @@
 import { eq, desc, and, sql, like, or } from 'drizzle-orm';
-import { getDb } from '../db';
+import { getDb } from './connection';
 import {
   tasks,
   taskComments,
@@ -22,18 +22,31 @@ export async function getAllTasks(filters?: {
   search?: string;
 }) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
 
-  let conditions = [];
+  const conditions = [];
 
   if (filters?.status && filters.status !== 'all') {
-    conditions.push(eq(tasks.status, filters.status as 'completed' | 'in_progress' | 'cancelled' | 'todo' | 'review'));
+    conditions.push(
+      eq(
+        tasks.status,
+        filters.status as 'completed' | 'in_progress' | 'cancelled' | 'todo' | 'review'
+      )
+    );
   }
   if (filters?.priority && filters.priority !== 'all') {
     conditions.push(eq(tasks.priority, filters.priority as 'high' | 'medium' | 'low'));
   }
   if (filters?.category && filters.category !== 'all') {
-    conditions.push(eq(tasks.category, filters.category as 'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other'));
+    conditions.push(
+      eq(
+        tasks.category,
+        filters.category as
+          'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other'
+      )
+    );
   }
   if (filters?.assignedTo) {
     conditions.push(eq(tasks.assignedTo, filters.assignedTo));
@@ -75,7 +88,9 @@ export async function getAllTasks(filters?: {
 
 export async function getTaskById(id: number) {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) {
+    return null;
+  }
 
   const result = await db
     .select({
@@ -96,7 +111,9 @@ export async function getTaskById(id: number) {
     .where(eq(tasks.id, id))
     .limit(1);
 
-  if (result.length === 0) return null;
+  if (result.length === 0) {
+    return null;
+  }
 
   const r = result[0];
   return {
@@ -108,7 +125,9 @@ export async function getTaskById(id: number) {
 
 export async function createTask(data: InsertTask) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db.insert(tasks).values(data);
   return { id: result[0].insertId };
@@ -116,7 +135,9 @@ export async function createTask(data: InsertTask) {
 
 export async function updateTask(id: number, data: Partial<InsertTask>) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   // If status is being changed to completed, set completedAt
   if (data.status === 'completed' && !data.completedAt) {
@@ -129,7 +150,9 @@ export async function updateTask(id: number, data: Partial<InsertTask>) {
 
 export async function deleteTask(id: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   // Delete related comments and attachments first
   await db.delete(taskComments).where(eq(taskComments.taskId, id));
@@ -140,9 +163,14 @@ export async function deleteTask(id: number) {
 
 export async function updateTaskStatus(id: number, status: string) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
-  const updateData: { status: 'completed' | 'in_progress' | 'cancelled' | 'todo' | 'review'; completedAt?: Date } = { status: status as 'completed' | 'in_progress' | 'cancelled' | 'todo' | 'review' };
+  const updateData: {
+    status: 'completed' | 'in_progress' | 'cancelled' | 'todo' | 'review';
+    completedAt?: Date;
+  } = { status: status as 'completed' | 'in_progress' | 'cancelled' | 'todo' | 'review' };
   if (status === 'completed') {
     updateData.completedAt = new Date();
   }
@@ -153,7 +181,9 @@ export async function updateTaskStatus(id: number, status: string) {
 
 export async function getTasksStats() {
   const db = await getDb();
-  if (!db) return { total: 0, todo: 0, inProgress: 0, review: 0, completed: 0, overdue: 0 };
+  if (!db) {
+    return { total: 0, todo: 0, inProgress: 0, review: 0, completed: 0, overdue: 0 };
+  }
 
   const now = new Date();
 
@@ -195,7 +225,9 @@ export async function getTasksStats() {
 
 export async function getTaskComments(taskId: number) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
 
   const result = await db
     .select({
@@ -219,7 +251,9 @@ export async function getTaskComments(taskId: number) {
 
 export async function addTaskComment(data: InsertTaskComment) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db.insert(taskComments).values(data);
   return { id: result[0].insertId };
@@ -227,7 +261,9 @@ export async function addTaskComment(data: InsertTaskComment) {
 
 export async function deleteTaskComment(id: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   await db.delete(taskComments).where(eq(taskComments.id, id));
   return { success: true };
@@ -237,7 +273,9 @@ export async function deleteTaskComment(id: number) {
 
 export async function getTaskAttachments(taskId: number) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
 
   const result = await db
     .select({
@@ -261,7 +299,9 @@ export async function getTaskAttachments(taskId: number) {
 
 export async function addTaskAttachment(data: InsertTaskAttachment) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db.insert(taskAttachments).values(data);
   return { id: result[0].insertId };
@@ -269,7 +309,9 @@ export async function addTaskAttachment(data: InsertTaskAttachment) {
 
 export async function deleteTaskAttachment(id: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   await db.delete(taskAttachments).where(eq(taskAttachments.id, id));
   return { success: true };
@@ -279,20 +321,20 @@ export async function deleteTaskAttachment(id: number) {
 
 export async function getTasksByUser(userId: number) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
 
-  return await db
-    .select()
-    .from(tasks)
-    .where(eq(tasks.assignedTo, userId))
-    .orderBy(desc(tasks.createdAt));
+  return db.select().from(tasks).where(eq(tasks.assignedTo, userId)).orderBy(desc(tasks.createdAt));
 }
 
 export async function getTasksByCampaign(campaignId: number) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
 
-  return await db
+  return db
     .select()
     .from(tasks)
     .where(eq(tasks.campaignId, campaignId))
@@ -301,11 +343,13 @@ export async function getTasksByCampaign(campaignId: number) {
 
 export async function getOverdueTasks() {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
 
   const now = new Date();
 
-  return await db
+  return db
     .select()
     .from(tasks)
     .where(

@@ -13,6 +13,9 @@ import { eq } from 'drizzle-orm';
 import { whatsappTemplates } from '../../drizzle/schema';
 import { getDb } from '../database/db';
 import { meta } from '../api/MetaApiService';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('metaTemplateSync');
 
 interface MetaTemplate {
   id?: string;
@@ -78,9 +81,7 @@ export async function fetchTemplatesFromMeta(
     }
 
     const templates = (result.templates as unknown as MetaTemplate[]) || [];
-    console.log(
-      `[MetaTemplateSync] Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`
-    );
+    logger.info(`Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`);
 
     const db = await getDb();
     if (!db) {
