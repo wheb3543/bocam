@@ -1,4 +1,7 @@
 import { getMessageSettingByType } from '../database/db';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('messaging');
 
 /**
  * Replace variables in message template
@@ -35,7 +38,7 @@ export async function sendBookingConfirmationInteractive(data: {
   // Check if message is enabled
   const setting = await getMessageSettingByType('booking_confirmation_interactive');
   if (!setting || setting.isEnabled === 0) {
-    console.log('[Messaging] booking_confirmation_interactive is disabled');
+    logger.info('booking_confirmation_interactive is disabled');
     return { success: false, reason: 'disabled' };
   }
 
@@ -52,7 +55,7 @@ export async function sendBookingConfirmationInteractive(data: {
   const { isWhatsAppBusinessAPIConfigured } = await import('./whatsappCloudAPI');
 
   if (isWhatsAppBusinessAPIConfigured()) {
-    console.log('[Messaging] Adding to WhatsApp Queue (interactive buttons)');
+    logger.info('Adding to WhatsApp Queue (interactive buttons)');
 
     const bookingTypeMap = {
       appointment: 'APPOINTMENT',
@@ -111,7 +114,7 @@ export async function sendBookingConfirmationInteractive(data: {
     return { success: true, message, jobId };
   } else {
     // Fallback to WhatsApp Integration (without interactive buttons)
-    console.log('[Messaging] WhatsApp Business API not configured, using WhatsApp Integration');
+    logger.info('WhatsApp Business API not configured, using WhatsApp Integration');
     const { sendCustomMessage } = await import('./whatsapp');
     const success = await sendCustomMessage(data.phone, message);
     return { success, message };
@@ -132,7 +135,7 @@ export async function sendBookingConfirmedSuccess(data: {
   // Check if message is enabled
   const setting = await getMessageSettingByType('booking_confirmed_success');
   if (!setting || setting.isEnabled === 0) {
-    console.log('[Messaging] booking_confirmed_success is disabled');
+    logger.info('booking_confirmed_success is disabled');
     return { success: false, reason: 'disabled' };
   }
 
@@ -148,7 +151,7 @@ export async function sendBookingConfirmedSuccess(data: {
   const { sendCustomMessage } = await import('./whatsapp');
   const success = await sendCustomMessage(data.phone, message);
 
-  console.log('[Messaging] Sent booking confirmed success:', {
+  logger.info('Sent booking confirmed success:', {
     phone: data.phone,
     success,
   });
@@ -169,7 +172,7 @@ export async function sendPatientArrivalWelcome(data: {
   // Check if message is enabled
   const setting = await getMessageSettingByType('patient_arrival_welcome');
   if (!setting || setting.isEnabled === 0) {
-    console.log('[Messaging] patient_arrival_welcome is disabled');
+    logger.info('patient_arrival_welcome is disabled');
     return { success: false, reason: 'disabled' };
   }
 
@@ -184,7 +187,7 @@ export async function sendPatientArrivalWelcome(data: {
   const { sendCustomMessage } = await import('./whatsapp');
   const success = await sendCustomMessage(data.phone, message);
 
-  console.log('[Messaging] Sent patient arrival welcome:', {
+  logger.info('Sent patient arrival welcome:', {
     phone: data.phone,
     success,
   });
@@ -233,7 +236,7 @@ export async function sendOfferBookingConfirmationInteractive(data: {
 }) {
   const setting = await getMessageSettingByType('offer_booking_confirmation_interactive');
   if (!setting || setting.isEnabled === 0) {
-    console.log('[Messaging] offer_booking_confirmation_interactive is disabled');
+    logger.info('offer_booking_confirmation_interactive is disabled');
     return { success: false, reason: 'disabled' };
   }
 
@@ -247,7 +250,7 @@ export async function sendOfferBookingConfirmationInteractive(data: {
   const { isWhatsAppBusinessAPIConfigured } = await import('./whatsappCloudAPI');
 
   if (isWhatsAppBusinessAPIConfigured()) {
-    console.log('[Messaging] Adding offer booking confirmation to WhatsApp Queue');
+    logger.info('Adding offer booking confirmation to WhatsApp Queue');
 
     const { queueWhatsAppMessage } = await import('../integrations/queues/whatsappQueue');
 
@@ -288,7 +291,7 @@ export async function sendOfferBookingConfirmationInteractive(data: {
 
     return { success: true, message, jobId };
   } else {
-    console.log('[Messaging] WhatsApp Business API not configured, using WhatsApp Integration');
+    logger.info('WhatsApp Business API not configured, using WhatsApp Integration');
     const { sendCustomMessage } = await import('./whatsapp');
     const success = await sendCustomMessage(data.phone, message);
     return { success, message };
@@ -307,7 +310,7 @@ export async function sendOfferBookingConfirmedSuccess(data: {
 }) {
   const setting = await getMessageSettingByType('offer_booking_confirmed_success');
   if (!setting || setting.isEnabled === 0) {
-    console.log('[Messaging] offer_booking_confirmed_success is disabled');
+    logger.info('offer_booking_confirmed_success is disabled');
     return { success: false, reason: 'disabled' };
   }
 
@@ -321,7 +324,7 @@ export async function sendOfferBookingConfirmedSuccess(data: {
   const { sendCustomMessage } = await import('./whatsapp');
   const success = await sendCustomMessage(data.phone, message);
 
-  console.log('[Messaging] Sent offer booking confirmed success:', {
+  logger.info('Sent offer booking confirmed success:', {
     phone: data.phone,
     success,
   });
@@ -339,7 +342,7 @@ export async function sendOfferPatientArrivalWelcome(data: {
 }) {
   const setting = await getMessageSettingByType('offer_patient_arrival_welcome');
   if (!setting || setting.isEnabled === 0) {
-    console.log('[Messaging] offer_patient_arrival_welcome is disabled');
+    logger.info('offer_patient_arrival_welcome is disabled');
     return { success: false, reason: 'disabled' };
   }
 
@@ -351,7 +354,7 @@ export async function sendOfferPatientArrivalWelcome(data: {
   const { sendCustomMessage } = await import('./whatsapp');
   const success = await sendCustomMessage(data.phone, message);
 
-  console.log('[Messaging] Sent offer patient arrival welcome:', {
+  logger.info('Sent offer patient arrival welcome:', {
     phone: data.phone,
     success,
   });
@@ -379,7 +382,7 @@ export async function sendCampRegistrationConfirmationInteractive(data: {
 }) {
   const setting = await getMessageSettingByType('camp_registration_confirmation_interactive');
   if (!setting || setting.isEnabled === 0) {
-    console.log('[Messaging] camp_registration_confirmation_interactive is disabled');
+    logger.info('camp_registration_confirmation_interactive is disabled');
     return { success: false, reason: 'disabled' };
   }
 
@@ -394,7 +397,7 @@ export async function sendCampRegistrationConfirmationInteractive(data: {
   const { isWhatsAppBusinessAPIConfigured } = await import('./whatsappCloudAPI');
 
   if (isWhatsAppBusinessAPIConfigured()) {
-    console.log('[Messaging] Adding camp registration confirmation to WhatsApp Queue');
+    logger.info('Adding camp registration confirmation to WhatsApp Queue');
 
     const { queueWhatsAppMessage } = await import('../integrations/queues/whatsappQueue');
 
@@ -436,7 +439,7 @@ export async function sendCampRegistrationConfirmationInteractive(data: {
 
     return { success: true, message, jobId };
   } else {
-    console.log('[Messaging] WhatsApp Business API not configured, using WhatsApp Integration');
+    logger.info('WhatsApp Business API not configured, using WhatsApp Integration');
     const { sendCustomMessage } = await import('./whatsapp');
     const success = await sendCustomMessage(data.phone, message);
     return { success, message };
@@ -456,7 +459,7 @@ export async function sendCampRegistrationConfirmedSuccess(data: {
 }) {
   const setting = await getMessageSettingByType('camp_registration_confirmed_success');
   if (!setting || setting.isEnabled === 0) {
-    console.log('[Messaging] camp_registration_confirmed_success is disabled');
+    logger.info('camp_registration_confirmed_success is disabled');
     return { success: false, reason: 'disabled' };
   }
 
@@ -471,7 +474,7 @@ export async function sendCampRegistrationConfirmedSuccess(data: {
   const { sendCustomMessage } = await import('./whatsapp');
   const success = await sendCustomMessage(data.phone, message);
 
-  console.log('[Messaging] Sent camp registration confirmed success:', {
+  logger.info('Sent camp registration confirmed success:', {
     phone: data.phone,
     success,
   });
@@ -489,7 +492,7 @@ export async function sendCampPatientArrivalWelcome(data: {
 }) {
   const setting = await getMessageSettingByType('camp_patient_arrival_welcome');
   if (!setting || setting.isEnabled === 0) {
-    console.log('[Messaging] camp_patient_arrival_welcome is disabled');
+    logger.info('camp_patient_arrival_welcome is disabled');
     return { success: false, reason: 'disabled' };
   }
 
@@ -501,7 +504,7 @@ export async function sendCampPatientArrivalWelcome(data: {
   const { sendCustomMessage } = await import('./whatsapp');
   const success = await sendCustomMessage(data.phone, message);
 
-  console.log('[Messaging] Sent camp patient arrival welcome:', {
+  logger.info('Sent camp patient arrival welcome:', {
     phone: data.phone,
     success,
   });

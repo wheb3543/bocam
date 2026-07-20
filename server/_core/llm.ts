@@ -103,9 +103,7 @@ export type JsonSchema = {
 export type OutputSchema = JsonSchema;
 
 export type ResponseFormat =
-  | { type: 'text' }
-  | { type: 'json_object' }
-  | { type: 'json_schema'; json_schema: JsonSchema };
+  { type: 'text' } | { type: 'json_object' } | { type: 'json_schema'; json_schema: JsonSchema };
 
 const ensureArray = (value: MessageContent | MessageContent[]): MessageContent[] =>
   Array.isArray(value) ? value : [value];
@@ -168,7 +166,9 @@ const normalizeToolChoice = (
   toolChoice: ToolChoice | undefined,
   tools: Tool[] | undefined
 ): 'none' | 'auto' | ToolChoiceExplicit | undefined => {
-  if (!toolChoice) return undefined;
+  if (!toolChoice) {
+    return undefined;
+  }
 
   if (toolChoice === 'none' || toolChoice === 'auto') {
     return toolChoice;
@@ -236,7 +236,9 @@ const normalizeResponseFormat = ({
   }
 
   const schema = outputSchema || output_schema;
-  if (!schema) return undefined;
+  if (!schema) {
+    return undefined;
+  }
 
   if (!schema.name || !schema.schema) {
     throw new Error('outputSchema requires both name and schema');

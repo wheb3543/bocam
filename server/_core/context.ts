@@ -19,7 +19,9 @@ export type TrpcContext = {
 
 // Helper to parse cookies from header
 function parseCookies(cookieHeader: string | undefined): Record<string, string> {
-  if (!cookieHeader) return {};
+  if (!cookieHeader) {
+    return {};
+  }
 
   const cookies: Record<string, string> = {};
   cookieHeader.split(';').forEach((cookie) => {
@@ -37,8 +39,15 @@ function verifyLocalAuthToken(
   token: string
 ): { userId: number; username: string; role: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number; username: string; role: string; type: string };
-    if (decoded.type !== 'admin') return null;
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      userId: number;
+      username: string;
+      role: string;
+      type: string;
+    };
+    if (decoded.type !== 'admin') {
+      return null;
+    }
     return { userId: decoded.userId, username: decoded.username, role: decoded.role };
   } catch {
     return null;

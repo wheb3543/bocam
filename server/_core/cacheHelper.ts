@@ -4,6 +4,9 @@
  */
 
 import { cacheManager } from '../services/redis';
+import { createLogger } from './logger';
+
+const logger = createLogger('cacheHelper');
 
 /**
  * Cache decorator for async functions
@@ -20,12 +23,12 @@ export function cache(ttl: number = 300, keyPrefix: string = 'cache') {
       // Try to get from cache
       const cached = await cacheManager.get(key);
       if (cached !== null) {
-        console.log(`[Cache] Hit: ${key}`);
+        logger.debug(`Cache hit: ${key}`);
         return cached;
       }
 
       // Execute original method
-      console.log(`[Cache] Miss: ${key}`);
+      logger.debug(`Cache miss: ${key}`);
       const result = await originalMethod.apply(this, args);
 
       // Cache the result
@@ -43,7 +46,7 @@ export function cache(ttl: number = 300, keyPrefix: string = 'cache') {
  */
 export async function invalidateCache(pattern: string): Promise<void> {
   await cacheManager.deletePattern(pattern);
-  console.log(`[Cache] Invalidated pattern: ${pattern}`);
+  logger.debug(`Invalidated pattern: ${pattern}`);
 }
 
 /**
@@ -110,12 +113,12 @@ export async function cachedQuery<T>(
   // Try to get from cache
   const cached = await cacheManager.get<T>(key);
   if (cached !== null) {
-    console.log(`[Cache] Query hit: ${key}`);
+    logger.debug(`Query hit: ${key}`);
     return cached;
   }
 
   // Execute query
-  console.log(`[Cache] Query miss: ${key}`);
+  logger.debug(`Query miss: ${key}`);
   const result = await queryFn();
 
   // Cache the result
@@ -131,31 +134,31 @@ export async function invalidateRelatedCache(patterns: string[]): Promise<void> 
   for (const pattern of patterns) {
     await cacheManager.deletePattern(pattern);
   }
-  console.log(`[Cache] Invalidated patterns: ${patterns.join(', ')}`);
+  logger.debug(`Invalidated patterns: ${patterns.join(', ')}`);
 }
 
 /**
  * Cache warming - pre-populate cache with frequently accessed data
  */
 export async function warmCache(): Promise<void> {
-  console.log('[Cache] Warming cache...');
+  logger.info('Warming cache...');
 
   // Warm system status
   try {
     // This would be called from the appropriate modules
     // await cacheManager.set(CacheKeys.SYSTEM_STATUS, await getSystemStatus(), CacheTTL.SHORT);
-    console.log('[Cache] System status warmed');
+    logger.info('System status warmed');
   } catch (error) {
-    console.error('[Cache] Error warming system status:', error);
+    logger.error('Error warming system status:', error);
   }
 
   // Warm configuration
   try {
     // await cacheManager.set(CacheKeys.CONFIG, await getConfig(), CacheTTL.LONG);
-    console.log('[Cache] Configuration warmed');
+    logger.info('Configuration warmed');
   } catch (error) {
-    console.error('[Cache] Error warming configuration:', error);
+    logger.error('Error warming configuration:', error);
   }
 
-  console.log('[Cache] Cache warming complete');
+  logger.info('Cache warming complete');
 }

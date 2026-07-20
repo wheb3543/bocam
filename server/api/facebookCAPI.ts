@@ -25,6 +25,9 @@
 
 import crypto from 'crypto';
 import { meta } from './MetaApiService';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('facebookCAPI');
 
 /**
  * ⚠️  التوكن يأتي من MetaApiService.accessToken حصراً.
@@ -41,7 +44,9 @@ const META_TEST_EVENT_CODE = process.env.META_TEST_EVENT_CODE || '';
  * Returns empty string if value is falsy.
  */
 function hashValue(value: string | undefined | null): string {
-  if (!value) return '';
+  if (!value) {
+    return '';
+  }
   return crypto.createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
 }
 
@@ -51,9 +56,15 @@ function hashValue(value: string | undefined | null): string {
  */
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, '');
-  if (digits.startsWith('967') && digits.length === 12) return `+${digits}`;
-  if (digits.startsWith('0') && digits.length === 10) return `+967${digits.slice(1)}`;
-  if (digits.length === 9) return `+967${digits}`;
+  if (digits.startsWith('967') && digits.length === 12) {
+    return `+${digits}`;
+  }
+  if (digits.startsWith('0') && digits.length === 10) {
+    return `+967${digits.slice(1)}`;
+  }
+  if (digits.length === 9) {
+    return `+967${digits}`;
+  }
   return `+${digits}`;
 }
 
@@ -159,7 +170,7 @@ export interface CAPIEventOptions {
  */
 export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
   if (!meta.accessToken || !META_PIXEL_ID) {
-    console.warn('[CAPI] Skipping – META_ACCESS_TOKEN or META_PIXEL_ID not configured');
+    logger.warn('Skipping – META_ACCESS_TOKEN or META_PIXEL_ID not configured');
     return;
   }
 
@@ -198,10 +209,14 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
   if (userData.fullName) {
     const nameParts = userData.fullName.trim().split(/\s+/);
     const fn = hashValue(nameParts[0]);
-    if (fn) hashedUserData.fn = fn;
+    if (fn) {
+      hashedUserData.fn = fn;
+    }
     if (nameParts.length > 1) {
       const ln = hashValue(nameParts[nameParts.length - 1]);
-      if (ln) hashedUserData.ln = ln;
+      if (ln) {
+        hashedUserData.ln = ln;
+      }
     }
   }
 
@@ -227,13 +242,27 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
   };
 
   if (customData) {
-    if (customData.contentName) builtCustomData.content_name = customData.contentName;
-    if (customData.contentCategory) builtCustomData.content_category = customData.contentCategory;
-    if (customData.contentIds?.length) builtCustomData.content_ids = customData.contentIds;
-    if (customData.currency) builtCustomData.currency = customData.currency;
-    if (customData.value !== undefined) builtCustomData.value = customData.value;
-    if (customData.numItems !== undefined) builtCustomData.num_items = customData.numItems;
-    if (customData.status) builtCustomData.status = customData.status;
+    if (customData.contentName) {
+      builtCustomData.content_name = customData.contentName;
+    }
+    if (customData.contentCategory) {
+      builtCustomData.content_category = customData.contentCategory;
+    }
+    if (customData.contentIds?.length) {
+      builtCustomData.content_ids = customData.contentIds;
+    }
+    if (customData.currency) {
+      builtCustomData.currency = customData.currency;
+    }
+    if (customData.value !== undefined) {
+      builtCustomData.value = customData.value;
+    }
+    if (customData.numItems !== undefined) {
+      builtCustomData.num_items = customData.numItems;
+    }
+    if (customData.status) {
+      builtCustomData.status = customData.status;
+    }
   }
 
   // ── Determine if standard or custom event ─────────────────────────────────
@@ -249,9 +278,13 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
     custom_data: builtCustomData,
   };
 
-  if (eventSourceUrl) event.event_source_url = eventSourceUrl;
+  if (eventSourceUrl) {
+    event.event_source_url = eventSourceUrl;
+  }
   // event_id enables deduplication with client-side Pixel events
-  if (eventId) event.event_id = eventId;
+  if (eventId) {
+    event.event_id = eventId;
+  }
 
   // ── Build final payload ────────────────────────────────────────────────────
   const payload: Record<string, unknown> = { data: [event] };
@@ -270,15 +303,15 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
     );
 
     if (!capiRes.success) {
-      console.error('[CAPI] API error:', capiRes.error);
+      logger.error('API error:', capiRes.error);
     } else {
-      console.log(
-        `[CAPI] ${isStandardEvent ? 'Standard' : 'Custom'} event "${eventName}" sent successfully.`
+      logger.info(
+        `${isStandardEvent ? 'Standard' : 'Custom'} event "${eventName}" sent successfully.`
       );
     }
   } catch (error) {
     // Never let CAPI errors break the booking flow
-    console.error('[CAPI] Network error:', error);
+    logger.error('Network error:', error);
   }
 }
 
@@ -343,7 +376,9 @@ export interface CAPIStatusChangeParams {
  */
 export async function sendStatusChangeEvent(params: CAPIStatusChangeParams): Promise<boolean> {
   const eventName = mapStatusToEvent(params.status);
-  if (!eventName) return false; // لا حدث لهذه الحالة
+  if (!eventName) {
+    return false;
+  } // لا حدث لهذه الحالة
 
   const serviceLabels: Record<string, string> = {
     appointment: 'حجز موعد طبيب',

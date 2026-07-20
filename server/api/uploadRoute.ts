@@ -1,8 +1,25 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import multer from 'multer';
+import multer, { FileFilterCallback } from 'multer';
 import jwt from 'jsonwebtoken';
 import { storagePut } from '../services/storage';
 import crypto from 'crypto';
+import { createLogger } from '../_core/logger';
+import { asMulterMiddleware } from '../_core/expressCompatibility';
+
+// Type definition for multer file (compatibility layer)
+type MulterFile = {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  destination: string;
+  filename: string;
+  path: string;
+  buffer: Buffer;
+};
+
+const logger = createLogger('upload');
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   const cookieHeader = req.headers.cookie;
@@ -13,7 +30,9 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   const cookies: Record<string, string> = {};
   cookieHeader.split(';').forEach((c) => {
     const [name, value] = c.trim().split('=');
-    if (name && value) cookies[name] = decodeURIComponent(value);
+    if (name && value) {
+      cookies[name] = decodeURIComponent(value);
+    }
   });
   const token = cookies['admin_session'];
   if (!token) {
@@ -48,7 +67,7 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max
   },
-  fileFilter: (_req, file, cb) => {
+  fileFilter: (_req: unknown, file: MulterFile, cb: FileFilterCallback) => {
     // السماح بالصور فقط
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
 
@@ -81,7 +100,7 @@ export function createUploadRouter(): Router {
   router.post(
     '/api/upload',
     requireAuth,
-    upload.single('file'),
+    asMulterMiddleware(upload.single('file')),
     async (req: Request, res: Response) => {
       try {
         const file = req.file;
@@ -97,7 +116,7 @@ export function createUploadRouter(): Router {
 
         return res.json({ url, key });
       } catch (error) {
-        console.error('[Upload] Error:', error);
+        logger.error('Error:', error);
         const message = error instanceof Error ? error.message : 'حدث خطأ أثناء رفع الملف';
         return res.status(500).json({ error: message });
       }
@@ -112,8 +131,8 @@ export function createUploadRouter(): Router {
       }
       return res.status(400).json({ error: `خطأ في رفع الملف: ${err.message}` });
     }
-    if (err) {
-      return res.status(400).json({ error: (err as { message?: string }).message || 'خطأ غير معروف' });
+    if (err instanceof Error) {
+      return res.status(400).json({ error: err.message || 'خطأ غير معروف' });
     }
     next();
   });

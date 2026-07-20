@@ -2,12 +2,16 @@ import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { publish } from '../_core/pubsub';
 import {
-  processWebhookEvent,
+  handleWebhookVerification,
+  handleWebhookPost,
   verifyWebhookSignature,
-  verifyWebhookToken,
 } from '../integrations/webhooks/whatsappWebhook';
 import { ENV } from '../_core/env';
 import multer from 'multer';
+import { createLogger } from '../_core/logger';
+import { asMulterMiddleware } from '../_core/expressCompatibility';
+
+const logger = createLogger('webhook');
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   const cookieHeader = req.headers.cookie;
@@ -18,7 +22,9 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   const cookies: Record<string, string> = {};
   cookieHeader.split(';').forEach((c) => {
     const [n, v] = c.trim().split('=');
-    if (n && v) cookies[n] = decodeURIComponent(v);
+    if (n && v) {
+      cookies[n] = decodeURIComponent(v);
+    }
   });
   const token = cookies['admin_session'];
   if (!token) {
@@ -47,8 +53,8 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
 const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
 if (!VERIFY_TOKEN) {
-  console.warn(
-    '[Webhook] WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests'
+  logger.warn(
+    'WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests'
   );
 }
 
@@ -70,8 +76,8 @@ export function createWebhookRouter(): Router {
    * GET /api/webhooks/whatsapp
    * Meta verification endpoint - returns hub.challenge on success
    */
-  router.get('/api/webhooks/whatsapp', (req: Request, res: Response) => {
-    verifyWebhookToken(req, res);
+  router.get('/api/webhooks/whatsapp', async (req: Request, res: Response) => {
+    await handleWebhookVerification(req, res);
   });
 
   /**
@@ -119,7 +125,7 @@ export function createWebhookRouter(): Router {
       const buffer = await fileResponse.arrayBuffer();
       res.send(Buffer.from(buffer));
     } catch (error) {
-      console.error('[WhatsApp Media Proxy] Error:', error);
+      logger.error('[WhatsApp Media Proxy] Error:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -131,7 +137,7 @@ export function createWebhookRouter(): Router {
   router.post(
     '/api/whatsapp/upload',
     requireAuth,
-    upload.single('file'),
+    asMulterMiddleware(upload.single('file')),
     async (req: Request, res: Response) => {
       try {
         if (!req.file) {
@@ -152,7 +158,7 @@ export function createWebhookRouter(): Router {
           size: file.size,
         });
       } catch (error) {
-        console.error('[WhatsApp Upload] Error:', error);
+        logger.error('[WhatsApp Upload] Error:', error);
         res.status(500).json({ error: 'Internal server error' });
       }
     }
@@ -166,7 +172,7 @@ export function createWebhookRouter(): Router {
     try {
       // ✅ التحقق من التوقيع قبل معالجة أي حدث
       if (!verifyWebhookSignature(req)) {
-        console.error('[WhatsApp Webhook] ❌ Invalid signature — request rejected');
+        logger.error('❌ Invalid signature — request rejected');
         res.status(403).json({ error: 'Invalid signature' });
         return;
       }
@@ -176,16 +182,16 @@ export function createWebhookRouter(): Router {
 
       const body = req.body;
       if (!body) {
-        console.error('[Webhook] Empty payload received');
+        logger.error('Empty payload received');
         return;
       }
 
       if (body.object !== 'whatsapp_business_account') {
-        console.log('[Webhook] Ignoring non-WhatsApp webhook');
+        logger.info('Ignoring non-WhatsApp webhook');
         return;
       }
 
-      console.log('[Webhook] Received webhook event for object:', body.object);
+      logger.info('Received webhook event for object:', body.object);
 
       // تسجيل الحدث في قاعدة البيانات للتحليل
       try {
@@ -204,14 +210,14 @@ export function createWebhookRouter(): Router {
                     phoneNumber = value.messages[0].from || null;
                   }
 
-                  console.log(`[Webhook Logger] Logging event: ${field}, phone: ${phoneNumber}`);
+                  logger.info(`Logging event: ${field}, phone: ${phoneNumber}`);
                   const result = await createWhatsAppWebhookEvent({
                     eventType: field,
                     subType: value.statuses ? 'status' : value.messages ? 'message' : undefined,
                     phoneNumber,
                     rawPayload: JSON.stringify(value),
                   });
-                  console.log(`[Webhook Logger] Event logged successfully:`, result);
+                  logger.info(`Event logged successfully:`, result);
 
                   // 🔔 Publish SSE event to global channel for webhook events
                   try {
@@ -225,7 +231,7 @@ export function createWebhookRouter(): Router {
                       timestamp: new Date().toISOString(),
                     });
                   } catch (error) {
-                    console.error('[Webhook] Error publishing webhook event SSE:', error);
+                    logger.error('Error publishing webhook event SSE:', error);
                   }
                 }
               }
@@ -233,17 +239,17 @@ export function createWebhookRouter(): Router {
           }
         }
       } catch (error) {
-        console.error('[Webhook] Error logging webhook event:', error);
+        logger.error('Error logging webhook event:', error);
       }
 
-      // معالجة الحدث باستخدام المعالج المتقدم من whatsappWebhook.ts
-      await processWebhookEvent(body);
+      // معالجة الحدث باستخدام المعالج المتقدم من whatsappWebhookRefactored.ts
+      await handleWebhookPost(req, res);
     } catch (error) {
-      console.error('[Webhook] Error processing webhook:', error);
+      logger.error('Error processing webhook:', error);
       // Don't throw - we already sent 200 to Meta
       // Log detailed error information for debugging
       if (error instanceof Error) {
-        console.error('[Webhook] Error details:', {
+        logger.error('Error details:', {
           message: error.message,
           stack: error.stack,
         });

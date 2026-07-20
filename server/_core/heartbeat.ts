@@ -12,12 +12,13 @@
  * @module heartbeat
  */
 
-/* global fetch, AbortController */
+/* global AbortController */
 
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { getHardwareId, validateLicense } from './license';
+import { createLogger } from './logger';
 
 /**
  * بيانات النبضات
@@ -44,6 +45,8 @@ interface LastRunData {
  */
 const LAST_RUN_FILE = '.last-successful-run';
 const HEARTBEAT_LOG_FILE = '.heartbeat-log';
+
+const logger = createLogger('heartbeat');
 
 /**
  * الحصول على رابط السيرفر المركزي من البيئة
@@ -79,7 +82,7 @@ function collectHeartbeatData(): HeartbeatData {
       signature,
     };
   } catch (error) {
-    console.error('❌ Error collecting heartbeat data:', error);
+    logger.error('Error collecting heartbeat data:', error);
     throw new Error('Failed to collect heartbeat data', { cause: error });
   }
 }
@@ -92,11 +95,11 @@ async function sendHeartbeat(): Promise<boolean> {
     const heartbeatData = collectHeartbeatData();
     const url = getCentralActivationUrl();
 
-    console.log('💓 Sending heartbeat to central server...');
-    console.log(`   URL: ${url}`);
-    console.log(`   Hardware ID: ${heartbeatData.hardwareId}`);
-    console.log(`   License Version: ${heartbeatData.licenseVersion}`);
-    console.log(`   Timestamp: ${new Date(heartbeatData.serverTimestamp * 1000).toISOString()}`);
+    logger.heartbeat('Sending heartbeat to central server...');
+    logger.info(`URL: ${url}`);
+    logger.info(`Hardware ID: ${heartbeatData.hardwareId}`);
+    logger.info(`License Version: ${heartbeatData.licenseVersion}`);
+    logger.info(`Timestamp: ${new Date(heartbeatData.serverTimestamp * 1000).toISOString()}`);
 
     // إرسال طلب POST صامت
     const controller = new AbortController();
@@ -115,21 +118,21 @@ async function sendHeartbeat(): Promise<boolean> {
     clearTimeout(timeoutId);
 
     if (response.ok) {
-      console.log('✅ Heartbeat sent successfully');
+      logger.success('Heartbeat sent successfully');
 
       // تسجيل النجاح في ملف السجل
       logHeartbeatSuccess(heartbeatData);
 
       return true;
     } else {
-      console.warn(`⚠️  Heartbeat failed with status: ${response.status}`);
+      logger.warn(`Heartbeat failed with status: ${response.status}`);
       logHeartbeatFailure(heartbeatData, response.status);
       return false;
     }
   } catch (error) {
     // Silent failure - لا نوقف السيرفر إذا فشل الإرسال
-    console.warn(
-      '⚠️  Heartbeat failed (silent):',
+    logger.warn(
+      'Heartbeat failed (silent):',
       error instanceof Error ? error.message : 'Unknown error'
     );
     logHeartbeatFailure(collectHeartbeatData(), 0);
@@ -161,7 +164,7 @@ function logHeartbeatSuccess(data: HeartbeatData): void {
     fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
   } catch (error) {
     // Silent error - لا نوقف السيرفر بسبب مشاكل السجل
-    console.warn('Failed to log heartbeat success:', error);
+    logger.warn('Failed to log heartbeat success:', error);
   }
 }
 
@@ -190,7 +193,7 @@ function logHeartbeatFailure(data: HeartbeatData, statusCode: number): void {
     fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
   } catch (error) {
     // Silent error
-    console.warn('Failed to log heartbeat failure:', error);
+    logger.warn('Failed to log heartbeat failure:', error);
   }
 }
 
@@ -210,9 +213,9 @@ function saveLastRunTime(): void {
     const filePath = path.join(process.cwd(), LAST_RUN_FILE);
     fs.writeFileSync(filePath, JSON.stringify(lastRunData), { mode: 0o600 }); // صلاحيات قراءة/كتابة للمالك فقط
 
-    console.log('💾 Last run time saved:', new Date(currentTime * 1000).toISOString());
+    logger.info(`Last run time saved: ${new Date(currentTime * 1000).toISOString()}`);
   } catch (error) {
-    console.error('❌ Error saving last run time:', error);
+    logger.error('Error saving last run time:', error);
   }
 }
 
@@ -232,7 +235,7 @@ function getLastRunTime(): LastRunData | null {
 
     return lastRunData;
   } catch (error) {
-    console.warn('⚠️  Error reading last run time:', error);
+    logger.warn('Error reading last run time:', error);
     return null;
   }
 }
@@ -249,24 +252,24 @@ export function checkClockTampering(): void {
     const currentTime = Math.floor(Date.now() / 1000);
     const lastRunData = getLastRunTime();
 
-    console.log('🕐 Checking for clock tampering...');
-    console.log(`   Current Hardware ID: ${currentHardwareId}`);
-    console.log(`   Current Time: ${new Date(currentTime * 1000).toISOString()}`);
+    logger.info('Checking for clock tampering...');
+    logger.info(`Current Hardware ID: ${currentHardwareId}`);
+    logger.info(`Current Time: ${new Date(currentTime * 1000).toISOString()}`);
 
     // إذا لم يكن هناك سجل سابق، احفظ الوقت الحالي واكمل
     if (!lastRunData) {
-      console.log('ℹ️  No previous run record found. Saving current time.');
+      logger.info('No previous run record found. Saving current time.');
       saveLastRunTime();
       return;
     }
 
-    console.log(`   Last Run Time: ${new Date(lastRunData.timestamp * 1000).toISOString()}`);
-    console.log(`   Last Hardware ID: ${lastRunData.hardwareId}`);
+    logger.info(`Last Run Time: ${new Date(lastRunData.timestamp * 1000).toISOString()}`);
+    logger.info(`Last Hardware ID: ${lastRunData.hardwareId}`);
 
     // التحقق من أن Hardware ID لم يتغير (لمنع نقل الملف)
     if (lastRunData.hardwareId !== currentHardwareId) {
-      console.log('⚠️  Hardware ID changed. This might indicate file transfer.');
-      console.log('   Resetting last run time for new hardware.');
+      logger.warn('Hardware ID changed. This might indicate file transfer.');
+      logger.info('Resetting last run time for new hardware.');
       saveLastRunTime();
       return;
     }
@@ -276,23 +279,23 @@ export function checkClockTampering(): void {
     const timeDifference = currentTime - lastRunData.timestamp;
     const hoursDifference = timeDifference / 3600; // تحويل إلى ساعات
 
-    console.log(`   Time Difference: ${hoursDifference.toFixed(2)} hours`);
+    logger.info(`Time Difference: ${hoursDifference.toFixed(2)} hours`);
 
     // إذا كان الوقت الحالي أقدم بـ 24 ساعة أو أكثر، فهذا يعني تلاعب واضح
     if (currentTime < lastRunData.timestamp) {
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('🚨 SECURITY ALERT: CLOCK TAMPERING DETECTED!');
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('');
-      console.error('Current time is OLDER than last successful run time.');
-      console.error('This indicates manual clock manipulation to bypass license expiry.');
-      console.error('');
-      console.error(`Expected: ${new Date(lastRunData.timestamp * 1000).toISOString()}`);
-      console.error(`Current:  ${new Date(currentTime * 1000).toISOString()}`);
-      console.error('');
-      console.error('KILL SWITCH ACTIVATED: Server cannot start.');
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('');
+      logger.security('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      logger.security('SECURITY ALERT: CLOCK TAMPERING DETECTED!');
+      logger.security('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      logger.security('');
+      logger.security('Current time is OLDER than last successful run time.');
+      logger.security('This indicates manual clock manipulation to bypass license expiry.');
+      logger.security('');
+      logger.security(`Expected: ${new Date(lastRunData.timestamp * 1000).toISOString()}`);
+      logger.security(`Current:  ${new Date(currentTime * 1000).toISOString()}`);
+      logger.security('');
+      logger.security('KILL SWITCH ACTIVATED: Server cannot start.');
+      logger.security('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      logger.security('');
 
       process.exit(1);
     }
@@ -301,31 +304,31 @@ export function checkClockTampering(): void {
     // قد يكون هذا مؤشراً على تلاعب
     if (timeDifference < -172800) {
       // -48 ساعة
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('🚨 SECURITY ALERT: EXCESSIVE CLOCK SETBACK DETECTED!');
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('');
-      console.error('Clock has been set back by more than 48 hours.');
-      console.error('This indicates potential clock manipulation.');
-      console.error('');
-      console.error(`Last Run: ${new Date(lastRunData.timestamp * 1000).toISOString()}`);
-      console.error(`Current:  ${new Date(currentTime * 1000).toISOString()}`);
-      console.error(`Difference: ${(timeDifference / 3600).toFixed(2)} hours`);
-      console.error('');
-      console.error('KILL SWITCH ACTIVATED: Server cannot start.');
-      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.error('');
+      logger.security('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      logger.security('SECURITY ALERT: EXCESSIVE CLOCK SETBACK DETECTED!');
+      logger.security('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      logger.security('');
+      logger.security('Clock has been set back by more than 48 hours.');
+      logger.security('This indicates potential clock manipulation.');
+      logger.security('');
+      logger.security(`Last Run: ${new Date(lastRunData.timestamp * 1000).toISOString()}`);
+      logger.security(`Current:  ${new Date(currentTime * 1000).toISOString()}`);
+      logger.security(`Difference: ${(timeDifference / 3600).toFixed(2)} hours`);
+      logger.security('');
+      logger.security('KILL SWITCH ACTIVATED: Server cannot start.');
+      logger.security('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      logger.security('');
 
       process.exit(1);
     }
 
     // كل شيء على ما يرام
-    console.log('✅ No clock tampering detected');
+    logger.success('No clock tampering detected');
 
     // تحديث وقت آخر تشغيل
     saveLastRunTime();
   } catch (error) {
-    console.error('❌ Error checking clock tampering:', error);
+    logger.error('Error checking clock tampering:', error);
     // في حالة الخطأ، نحفظ الوقت الحالي ونكمل (لتجنب مشاكل حقيقية)
     saveLastRunTime();
   }
@@ -339,16 +342,16 @@ function startHeartbeatScheduler(): void {
   try {
     const heartbeatInterval = 24 * 60 * 60 * 1000; // 24 ساعة بالمللي ثانية
 
-    console.log('💓 Starting heartbeat scheduler...');
-    console.log(`   Interval: ${heartbeatInterval / (60 * 60 * 1000)} hours`);
-    console.log(`   Central Server: ${getCentralActivationUrl()}`);
+    logger.heartbeat('Starting heartbeat scheduler...');
+    logger.info(`Interval: ${heartbeatInterval / (60 * 60 * 1000)} hours`);
+    logger.info(`Central Server: ${getCentralActivationUrl()}`);
 
     // إرسال نبضة فورية عند البدء
     sendHeartbeat();
 
     // جدولة النبضات
     const intervalId = setInterval(() => {
-      console.log('💓 Heartbeat triggered');
+      logger.heartbeat('Heartbeat triggered');
       sendHeartbeat();
     }, heartbeatInterval);
 
@@ -357,9 +360,9 @@ function startHeartbeatScheduler(): void {
       intervalId.unref();
     }
 
-    console.log('✅ Heartbeat scheduler started successfully');
+    logger.success('Heartbeat scheduler started successfully');
   } catch (error) {
-    console.error('❌ Error starting heartbeat scheduler:', error);
+    logger.error('Error starting heartbeat scheduler:', error);
     // Silent failure - لا نوقف السيرفر بسبب مشاكل النبضات
   }
 }
@@ -370,9 +373,9 @@ function startHeartbeatScheduler(): void {
  */
 export function initializeHeartbeat(): void {
   try {
-    console.log('');
-    console.log('💓 Initializing Silent Heartbeat System...');
-    console.log('');
+    logger.info('');
+    logger.heartbeat('Initializing Silent Heartbeat System...');
+    logger.info('');
 
     // 1. التحقق من التلاعب بالوقت أولاً
     checkClockTampering();
@@ -380,11 +383,11 @@ export function initializeHeartbeat(): void {
     // 2. تشغيل جدولة النبضات
     startHeartbeatScheduler();
 
-    console.log('');
-    console.log('✅ Silent Heartbeat System initialized successfully');
-    console.log('');
+    logger.info('');
+    logger.success('Silent Heartbeat System initialized successfully');
+    logger.info('');
   } catch (error) {
-    console.error('❌ Error initializing heartbeat system:', error);
+    logger.error('Error initializing heartbeat system:', error);
     // Silent failure - لا نوقف السيرفر بسبب مشاكل التهيئة
   }
 }
@@ -393,12 +396,12 @@ export function initializeHeartbeat(): void {
  * دالة لاختبار النبضات يدوياً (للتطوير فقط)
  */
 export async function testHeartbeat(): Promise<void> {
-  console.log('🧪 Testing heartbeat system...');
+  logger.info('Testing heartbeat system...');
 
   try {
     const success = await sendHeartbeat();
-    console.log(`Test result: ${success ? 'SUCCESS' : 'FAILED'}`);
+    logger.info(`Test result: ${success ? 'SUCCESS' : 'FAILED'}`);
   } catch (error) {
-    console.error('Test failed:', error);
+    logger.error('Test failed:', error);
   }
 }

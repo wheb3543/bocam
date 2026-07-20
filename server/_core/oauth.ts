@@ -3,6 +3,9 @@ import type { Express, Request, Response } from 'express';
 import * as db from '../database/db';
 import { getSessionCookieOptions } from './cookies';
 import { sdk } from './sdk';
+import { createLogger } from './logger';
+
+const logger = createLogger('oauth');
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -37,7 +40,7 @@ export function registerOAuthRoutes(app: Express) {
 
       const isAllowed = await db.isUserAllowed(userEmail);
       if (!isAllowed) {
-        console.log(`[OAuth] Unauthorized access attempt by ${userEmail}`);
+        logger.warn(`Unauthorized access attempt by ${userEmail}`);
 
         // Create access request automatically with openId
         await db.createAccessRequest({
@@ -75,7 +78,7 @@ export function registerOAuthRoutes(app: Express) {
 
       res.redirect(302, '/admin');
     } catch (error) {
-      console.error('[OAuth] Callback failed', error);
+      logger.error('OAuth callback failed', error);
       res.status(500).json({ error: 'OAuth callback failed' });
     }
   });

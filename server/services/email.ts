@@ -4,6 +4,9 @@
  */
 
 import { COMPANY_SLOGAN_AR, COMPANY_ARABIC_NAME } from '@shared/config';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('email');
 
 interface EmailParams {
   to: string;
@@ -19,7 +22,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
     // TODO: Integrate with actual email service
     // For now, we'll use the notification system to alert the owner
-    console.log('[Email] Would send email:', {
+    logger.info('Would send email:', {
       to: params.to,
       subject: params.subject,
       preview: params.html.substring(0, 100),
@@ -27,7 +30,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('[Email] Failed to send email:', error);
+    logger.error('Failed to send email:', error);
     return false;
   }
 }

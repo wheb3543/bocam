@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { ENV } from '../_core/env';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('fileUpload');
 
 /**
  * File Upload Service
@@ -19,21 +22,21 @@ export async function uploadPdfFile(buffer: Buffer, filename: string): Promise<s
     const uploadPath = ENV.fileUploadPath;
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
-      console.log(`[File Upload] Created directory: ${uploadPath}`);
+      logger.info(`Created directory: ${uploadPath}`);
     }
 
     // حفظ الملف
     const filePath = path.join(uploadPath, filename);
     fs.writeFileSync(filePath, buffer);
-    console.log(`[File Upload] File saved: ${filePath}`);
+    logger.info(`File saved: ${filePath}`);
 
     // إرجاع URL عام للملف
     const publicUrl = `${ENV.fileUploadBaseUrl}/${filename}`;
-    console.log(`[File Upload] Public URL: ${publicUrl}`);
+    logger.info(`Public URL: ${publicUrl}`);
 
     return publicUrl;
   } catch (error) {
-    console.error('[File Upload] Error uploading file:', error);
+    logger.error('Error uploading file:', error);
     throw new Error(
       `Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       { cause: error }
@@ -50,10 +53,10 @@ export async function deletePdfFile(filename: string): Promise<void> {
     const filePath = path.join(ENV.fileUploadPath, filename);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
-      console.log(`[File Upload] File deleted: ${filePath}`);
+      logger.info(`File deleted: ${filePath}`);
     }
   } catch (error) {
-    console.error('[File Upload] Error deleting file:', error);
+    logger.error('Error deleting file:', error);
     throw new Error(
       `Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       { cause: error }

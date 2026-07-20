@@ -5,6 +5,9 @@ import { nanoid } from 'nanoid';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import viteConfig from '../../vite.config';
+import { createLogger } from './logger';
+
+const logger = createLogger('vite');
 
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
@@ -21,7 +24,7 @@ export async function setupVite(app: Express, server: Server) {
   });
 
   app.use(vite.middlewares);
-  app.use('*', async (req, res, next) => {
+  app.use(async (req, res, next) => {
     const url = req.originalUrl;
 
     try {
@@ -57,14 +60,14 @@ export function serveStatic(app: Express) {
       : path.resolve(import.meta.dirname, 'public');
 
   if (!fs.existsSync(distPath)) {
-    console.error(
+    logger.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
   } else {
     // Log available HTML files for debugging
     const files = fs.readdirSync(distPath).filter((f) => f.endsWith('.html'));
-    console.log(`[serveStatic] distPath: ${distPath}`);
-    console.log(`[serveStatic] HTML files found: ${files.join(', ')}`);
+    logger.info(`distPath: ${distPath}`);
+    logger.info(`HTML files found: ${files.join(', ')}`);
   }
 
   // ===== Service Worker files need special headers =====
@@ -74,7 +77,7 @@ export function serveStatic(app: Express) {
   // Admin SW: served from /admin/sw-admin.js, controls /admin/ scope
   app.get('/admin/sw-admin.js', (req, res) => {
     const swFile = path.resolve(distPath, 'admin', 'sw-admin.js');
-    console.log(`[SW] /admin/sw-admin.js → ${swFile} (exists: ${fs.existsSync(swFile)})`);
+    logger.info(`/admin/sw-admin.js → ${swFile} (exists: ${fs.existsSync(swFile)})`);
     if (!fs.existsSync(swFile)) {
       return res.status(404).send('Service Worker not found');
     }
@@ -121,10 +124,38 @@ export function serveStatic(app: Express) {
   });
 
   // Serve static files (this handles all other assets)
-  app.use(express.static(distPath));
+  // Add Cache-Control headers for static assets
+  app.use(
+    express.static(distPath, {
+      maxAge: '1y', // Cache static assets for 1 year
+      etag: true, // Enable ETag generation
+      lastModified: true, // Enable Last-Modified header
+      setHeaders: (res, filePath) => {
+        // Service Worker files should not be cached
+        if (filePath.endsWith('sw.js') || filePath.endsWith('sw-admin.js')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        }
+        // HTML files should not be cached
+        else if (filePath.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        }
+        // Images, CSS, JS can be cached for 1 year
+        else if (
+          filePath.match(/\.(jpg|jpeg|png|gif|webp|svg|ico)$/) ||
+          filePath.match(/\.(css|js)$/)
+        ) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      },
+    })
+  );
 
   // fall through to index.html or index-admin.html based on route
-  app.use('*', (req, res) => {
+  app.use((req, res) => {
     const isAdminRoute =
       req.originalUrl.startsWith('/admin') || req.originalUrl.startsWith('/admin');
     const htmlFile = isAdminRoute ? 'index-admin.html' : 'index.html';
@@ -132,7 +163,7 @@ export function serveStatic(app: Express) {
 
     // Verify the file exists before serving
     if (!fs.existsSync(htmlPath)) {
-      console.error(`[serveStatic] File not found: ${htmlPath}. Falling back to index.html`);
+      logger.error(`File not found: ${htmlPath}. Falling back to index.html`);
       return res.sendFile(path.resolve(distPath, 'index.html'));
     }
 

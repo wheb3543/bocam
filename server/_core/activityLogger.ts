@@ -54,7 +54,9 @@ interface SystemNotification {
 export async function logActivity(data: ActivityLog) {
   try {
     const db = await getDb();
-    if (!db) return;
+    if (!db) {
+      return;
+    }
 
     await db.execute(
       sql`INSERT INTO activity_log (user_id, action, entity_type, entity_id, description, metadata, ip_address, user_agent, status, error_message) VALUES (${data.user_id || null}, ${data.action}, ${data.entity_type || null}, ${data.entity_id || null}, ${data.description || null}, ${data.metadata ? JSON.stringify(data.metadata) : null}, ${data.ip_address || null}, ${data.user_agent || null}, ${data.status || 'success'}, ${data.error_message || null})`
@@ -67,7 +69,9 @@ export async function logActivity(data: ActivityLog) {
 export async function logUpdate(data: UpdateLog): Promise<boolean> {
   try {
     const db = await getDb();
-    if (!db) throw new Error('Database not available');
+    if (!db) {
+      throw new Error('Database not available');
+    }
 
     await db.execute(
       sql`INSERT INTO update_log (version, previous_version, update_type, status, progress, download_path, backup_path, error_message, release_notes, started_by) VALUES (${data.version}, ${data.previous_version || null}, ${data.update_type}, ${data.status}, ${data.progress || 0}, ${data.download_path || null}, ${data.backup_path || null}, ${data.error_message || null}, ${data.release_notes || null}, ${data.started_by || null})`
@@ -82,7 +86,9 @@ export async function logUpdate(data: UpdateLog): Promise<boolean> {
 export async function updateUpdateLog(id: number, data: Partial<UpdateLog>) {
   try {
     const db = await getDb();
-    if (!db) throw new Error('Database not available');
+    if (!db) {
+      throw new Error('Database not available');
+    }
 
     const updates: string[] = [];
     const _values: unknown[] = [];
@@ -118,7 +124,9 @@ export async function updateUpdateLog(id: number, data: Partial<UpdateLog>) {
 export async function logBackup(data: BackupLog): Promise<boolean> {
   try {
     const db = await getDb();
-    if (!db) throw new Error('Database not available');
+    if (!db) {
+      throw new Error('Database not available');
+    }
 
     await db.execute(
       sql`INSERT INTO backup_log (backup_type, status, database_size, files_size, total_size, backup_path, cloud_provider, cloud_path, retention_days, error_message, started_by, expires_at) VALUES (${data.backup_type}, ${data.status}, ${data.database_size || null}, ${data.files_size || null}, ${data.total_size || null}, ${data.backup_path || null}, ${data.cloud_provider || null}, ${data.cloud_path || null}, ${data.retention_days || 30}, ${data.error_message || null}, ${data.started_by || null}, ${data.expires_at || null})`
@@ -133,7 +141,9 @@ export async function logBackup(data: BackupLog): Promise<boolean> {
 export async function updateBackupLog(id: number, data: Partial<BackupLog>) {
   try {
     const db = await getDb();
-    if (!db) throw new Error('Database not available');
+    if (!db) {
+      throw new Error('Database not available');
+    }
 
     const updates: string[] = [];
     const _values: unknown[] = [];
@@ -175,7 +185,9 @@ export async function updateBackupLog(id: number, data: Partial<BackupLog>) {
 export async function createNotification(data: SystemNotification) {
   try {
     const db = await getDb();
-    if (!db) return;
+    if (!db) {
+      return;
+    }
 
     await db.execute(
       sql`INSERT INTO system_notifications (type, title, message, severity, action_url, metadata) VALUES (${data.type}, ${data.title}, ${data.message}, ${data.severity || 'info'}, ${data.action_url || null}, ${data.metadata ? JSON.stringify(data.metadata) : null})`
@@ -188,7 +200,9 @@ export async function createNotification(data: SystemNotification) {
 export async function getRecentActivity(limit: number = 50) {
   try {
     const db = await getDb();
-    if (!db) return [];
+    if (!db) {
+      return [];
+    }
 
     const results = await db.execute(
       sql`SELECT * FROM activity_log ORDER BY created_at DESC LIMIT ${limit}`
@@ -203,7 +217,9 @@ export async function getRecentActivity(limit: number = 50) {
 export async function getRecentUpdates(limit: number = 10) {
   try {
     const db = await getDb();
-    if (!db) return [];
+    if (!db) {
+      return [];
+    }
 
     const results = await db.execute(
       sql`SELECT * FROM update_log ORDER BY started_at DESC LIMIT ${limit}`
@@ -218,7 +234,9 @@ export async function getRecentUpdates(limit: number = 10) {
 export async function getRecentBackups(limit: number = 10) {
   try {
     const db = await getDb();
-    if (!db) return [];
+    if (!db) {
+      return [];
+    }
 
     const results = await db.execute(
       sql`SELECT * FROM backup_log ORDER BY started_at DESC LIMIT ${limit}`
@@ -233,7 +251,9 @@ export async function getRecentBackups(limit: number = 10) {
 export async function getUnreadNotifications(limit: number = 20) {
   try {
     const db = await getDb();
-    if (!db) return [];
+    if (!db) {
+      return [];
+    }
 
     const results = await db.execute(
       sql`SELECT * FROM system_notifications WHERE is_read = FALSE ORDER BY created_at DESC LIMIT ${limit}`
@@ -248,7 +268,9 @@ export async function getUnreadNotifications(limit: number = 20) {
 export async function markNotificationAsRead(id: number) {
   try {
     const db = await getDb();
-    if (!db) return;
+    if (!db) {
+      return;
+    }
 
     await db.execute(
       sql`UPDATE system_notifications SET is_read = TRUE, read_at = NOW() WHERE id = ${id}`

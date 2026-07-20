@@ -23,67 +23,41 @@
  *   const token = meta.accessToken;
  */
 
-/** نسخة Graph API الافتراضية لجميع الخدمات */
-const GRAPH_API_VERSION = 'v25.0'; // ✅ أحدث إصدار من Meta (2026)
-const GRAPH_API_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
-
-/* global fetch, AbortSignal, RequestInit */
-
-type FetchOptions = RequestInit;
-
-/** إعدادات Retry Logic لمعالجة Rate Limiting وانقطاع الاتصال */
-const RETRY_CONFIG = {
-  maxRetries: 3,
-  initialDelayMs: 1000,
-  maxDelayMs: 30000,
-  backoffMultiplier: 2,
-  retryOnCodes: [429, 500, 502, 503, 504], // Rate limit + Server errors
-};
-
-export interface MetaApiResponse<T = unknown> {
-  data?: T;
-  error?: {
-    message: string;
-    type: string;
-    code: number;
-    fbtrace_id?: string;
-  };
-  /** HTTP status code */
-  status: number;
-  /** true if HTTP 2xx and no error field */
-  ok: boolean;
-}
+import {
+  GRAPH_API_BASE,
+  RETRY_CONFIG,
+  assertToken,
+  buildUrl,
+  fetchWithRetry,
+  handleMetaResponse,
+  handleMetaError,
+} from './meta.helpers';
+import { MetaApiResponse } from './meta.types';
+import {
+  sendWhatsAppText,
+  sendWhatsAppTemplate,
+  sendWhatsAppTypingIndicator,
+  sendWhatsAppImage,
+  sendWhatsAppVideo,
+  sendWhatsAppAudio,
+  sendWhatsAppDocument,
+  uploadWhatsAppMedia,
+  getWhatsAppTemplates,
+  getWabaIdFromPhoneNumberId,
+  getWhatsAppPhoneNumber,
+  registerWhatsAppPhoneNumber,
+  getWabaSubscribedApps,
+  subscribeAppToWaba,
+} from './meta.whatsapp';
+import {
+  getInstagramProfile,
+  getInstagramInsights,
+  getFacebookPage,
+  getFacebookPageInsights,
+  sendCAPIEvent,
+} from './meta.other';
 
 class MetaApiService {
-  private _isMediaUrl(value: string): boolean {
-    return /^https?:\/\//i.test(value);
-  }
-
-  private _buildMediaPayload(
-    mediaType: 'image' | 'video' | 'audio' | 'document',
-    mediaRef: string,
-    options: { caption?: string; filename?: string } = {}
-  ): Record<string, unknown> {
-    const mediaObject: Record<string, unknown> = this._isMediaUrl(mediaRef)
-      ? { link: mediaRef }
-      : { id: mediaRef };
-
-    if (options.caption) {
-      mediaObject.caption = options.caption;
-    }
-
-    if (options.filename) {
-      mediaObject.filename = options.filename;
-    }
-
-    return {
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
-      type: mediaType,
-      [mediaType]: mediaObject,
-    };
-  }
-
   /**
    * التوكن الموحد — يُقرأ من process.env.META_ACCESS_TOKEN في كل استدعاء
    * لضمان التقاط أي تحديث للمتغير دون إعادة تشغيل الخادم.
@@ -92,93 +66,12 @@ class MetaApiService {
     return process.env.META_ACCESS_TOKEN ?? '';
   }
 
-  /** التحقق من وجود التوكن قبل أي طلب */
-  private assertToken(): void {
-    if (!this.accessToken) {
-      throw new Error(
-        '[MetaApiService] META_ACCESS_TOKEN غير مُعيَّن في متغيرات البيئة. ' +
-          'أضف التوكن في ملف .env أو إعدادات المنصة.'
-      );
-    }
-  }
-
   /**
    * بناء URL كامل بدون access_token (يُرسَل عبر Authorization header)
+   * متاح للاستخدام في الاختبارات
    */
   buildUrl(endpoint: string, params: Record<string, string> = {}): string {
-    const url = new URL(`${GRAPH_API_BASE}/${endpoint.replace(/^\//, '')}`);
-    for (const [key, value] of Object.entries(params)) {
-      url.searchParams.set(key, value);
-    }
-    return url.toString();
-  }
-
-  /**
-   * تأخير مع Exponential Backoff لمعالجة Rate Limiting
-   */
-  private async _delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  /**
-   * تنفيذ طلب مع Retry Logic تلقائي
-   */
-  private async _fetchWithRetry(
-    url: string,
-    options: FetchOptions,
-    endpoint: string
-  ): Promise<{ res: Response; body: unknown }> {
-    let lastError: unknown;
-    let delay = RETRY_CONFIG.initialDelayMs;
-
-    for (let attempt = 0; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
-      try {
-        // eslint-disable-next-line no-undef
-        const res = await fetch(url, { ...options, signal: (AbortSignal as unknown as AbortSignalWithTimeout).timeout(30000) });
-        const body = await res.json();
-
-        // معالجة Rate Limiting (429) - انتظر وأعد المحاولة
-        if (res.status === 429 || body.error?.code === 4 || body.error?.code === 80007) {
-          const retryAfter = res.headers.get('Retry-After');
-          const waitMs = retryAfter ? parseInt(retryAfter) * 1000 : delay;
-          console.warn(
-            `[MetaApiService] Rate limited on ${endpoint}. Waiting ${waitMs}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries})`
-          );
-          if (attempt < RETRY_CONFIG.maxRetries) {
-            await this._delay(Math.min(waitMs, RETRY_CONFIG.maxDelayMs));
-            delay = Math.min(delay * RETRY_CONFIG.backoffMultiplier, RETRY_CONFIG.maxDelayMs);
-            continue;
-          }
-        }
-
-        // إعادة المحاولة على أخطاء الخادم
-        if (
-          RETRY_CONFIG.retryOnCodes.includes(res.status) &&
-          res.status !== 429 &&
-          attempt < RETRY_CONFIG.maxRetries
-        ) {
-          console.warn(
-            `[MetaApiService] Server error ${res.status} on ${endpoint}. Retrying in ${delay}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries})`
-          );
-          await this._delay(delay);
-          delay = Math.min(delay * RETRY_CONFIG.backoffMultiplier, RETRY_CONFIG.maxDelayMs);
-          continue;
-        }
-
-        return { res, body };
-      } catch (err) {
-        lastError = err;
-        if (attempt < RETRY_CONFIG.maxRetries) {
-          console.warn(
-            `[MetaApiService] Network error on ${endpoint}. Retrying in ${delay}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries}):`,
-            err
-          );
-          await this._delay(delay);
-          delay = Math.min(delay * RETRY_CONFIG.backoffMultiplier, RETRY_CONFIG.maxDelayMs);
-        }
-      }
-    }
-    throw lastError || new Error(`فشل الطلب بعد ${RETRY_CONFIG.maxRetries} محاولات`);
+    return buildUrl(endpoint, params);
   }
 
   /**
@@ -190,10 +83,10 @@ class MetaApiService {
     endpoint: string,
     params: Record<string, string> = {}
   ): Promise<MetaApiResponse<T>> {
-    this.assertToken();
-    const url = this.buildUrl(endpoint, params);
+    assertToken(this.accessToken);
+    const url = buildUrl(endpoint, params);
     try {
-      const { res, body } = await this._fetchWithRetry(
+      const { res, body } = await fetchWithRetry(
         url,
         {
           method: 'GET',
@@ -202,18 +95,12 @@ class MetaApiService {
             Authorization: `Bearer ${this.accessToken}`,
           },
         },
-        endpoint
+        endpoint,
+        RETRY_CONFIG
       );
-      return {
-        data: body as T,
-        error: (body as { error?: { message: string; type: string; code: number; fbtrace_id?: string } }).error,
-        status: res.status,
-        ok: res.ok && !(body as { error?: unknown }).error,
-      };
+      return handleMetaResponse<T>(res, body);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[MetaApiService] GET ${endpoint} failed after retries:`, msg);
-      return { error: { message: msg, type: 'NetworkError', code: 0 }, status: 0, ok: false };
+      return handleMetaError(err, endpoint, 'GET');
     }
   }
 
@@ -226,10 +113,10 @@ class MetaApiService {
     endpoint: string,
     payload: Record<string, unknown> = {}
   ): Promise<MetaApiResponse<T>> {
-    this.assertToken();
+    assertToken(this.accessToken);
     const url = `${GRAPH_API_BASE}/${endpoint.replace(/^\//, '')}`;
     try {
-      const { res, body } = await this._fetchWithRetry(
+      const { res, body } = await fetchWithRetry(
         url,
         {
           method: 'POST',
@@ -239,18 +126,12 @@ class MetaApiService {
           },
           body: JSON.stringify(payload),
         },
-        endpoint
+        endpoint,
+        RETRY_CONFIG
       );
-      return {
-        data: body as T,
-        error: (body as { error?: { message: string; type: string; code: number; fbtrace_id?: string } }).error,
-        status: res.status,
-        ok: res.ok && !(body as { error?: unknown }).error,
-      };
+      return handleMetaResponse<T>(res, body);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[MetaApiService] POST ${endpoint} failed after retries:`, msg);
-      return { error: { message: msg, type: 'NetworkError', code: 0 }, status: 0, ok: false };
+      return handleMetaError(err, endpoint, 'POST');
     }
   }
 
@@ -258,23 +139,19 @@ class MetaApiService {
    * طلب DELETE عام
    */
   async delete<T = unknown>(endpoint: string): Promise<MetaApiResponse<T>> {
-    this.assertToken();
-    const url = this.buildUrl(endpoint);
+    assertToken(this.accessToken);
+    const url = buildUrl(endpoint);
     try {
-      const { res, body } = await this._fetchWithRetry(
+      const { res, body } = await fetchWithRetry(
         url,
         {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${this.accessToken}` },
         },
-        endpoint
+        endpoint,
+        RETRY_CONFIG
       );
-      return {
-        data: body as T,
-        error: (body as { error?: { message: string; type: string; code: number; fbtrace_id?: string } }).error,
-        status: res.status,
-        ok: res.ok && !(body as { error?: unknown }).error,
-      };
+      return handleMetaResponse<T>(res, body);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`[MetaApiService] DELETE ${endpoint} failed after retries:`, msg);
@@ -287,24 +164,8 @@ class MetaApiService {
   // ══════════════════════════════════════════════════════════════════════════════
 
   /** إرسال رسالة نصية عبر WhatsApp Cloud API */
-  async sendWhatsAppText(
-    phoneNumberId: string,
-    to: string,
-    text: string
-  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const res = await this.post(`${phoneNumberId}/messages`, {
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
-      to,
-      type: 'text',
-      text: { preview_url: false, body: text },
-    });
-    if (!res.ok) {
-      const errMsg = this._formatMetaError(res.error || { code: 0, message: 'Unknown error' });
-      console.error(`[MetaApiService] sendWhatsAppText failed:`, JSON.stringify(res.error));
-      return { success: false, error: errMsg };
-    }
-    return { success: true, messageId: (res.data as { messages?: Array<{ id: string }> })?.messages?.[0]?.id };
+  async sendWhatsAppText(phoneNumberId: string, to: string, text: string) {
+    return sendWhatsAppText(phoneNumberId, to, text, this.post.bind(this));
   }
 
   /** إرسال رسالة قالب عبر WhatsApp Cloud API */
@@ -314,26 +175,15 @@ class MetaApiService {
     templateName: string,
     languageCode: string,
     components: Record<string, unknown>[] = []
-  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const payload: Record<string, unknown> = {
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
+  ) {
+    return sendWhatsAppTemplate(
+      phoneNumberId,
       to,
-      type: 'template',
-      template: { name: templateName, language: { code: languageCode } },
-    };
-    if (components.length > 0) (payload as { template: { components?: unknown[] } }).template.components = components;
-
-    console.log(
-      `[MetaApiService] Sending template "${templateName}" (lang: ${languageCode}) to ${to}`
+      templateName,
+      languageCode,
+      components,
+      this.post.bind(this)
     );
-    const res = await this.post(`${phoneNumberId}/messages`, payload);
-    if (!res.ok) {
-      const errMsg = this._formatMetaError(res.error || { code: 0, message: 'Unknown error' });
-      console.error(`[MetaApiService] sendWhatsAppTemplate failed:`, JSON.stringify(res.error));
-      return { success: false, error: errMsg };
-    }
-    return { success: true, messageId: (res.data as { messages?: Array<{ id: string }> })?.messages?.[0]?.id };
   }
 
   /** إرسال مؤشر الكتابة (typing indicator) عبر WhatsApp Cloud API */
@@ -341,90 +191,23 @@ class MetaApiService {
     phoneNumberId: string,
     messageId: string,
     typing: boolean = true
-  ): Promise<{ success: boolean; error?: string }> {
-    if (!typing) {
-      return { success: true };
-    }
-
-    const payload = {
-      messaging_product: 'whatsapp',
-      status: 'read',
-      message_id: messageId,
-      typing_indicator: {
-        type: 'text',
-      },
-    };
-
-    console.log(`[MetaApiService] Sending typing indicator for message ${messageId}`);
-    const res = await this.post(`${phoneNumberId}/messages`, payload);
-    if (!res.ok) {
-      const errMsg = this._formatMetaError(res.error || { code: 0, message: 'Unknown error' });
-      console.error(
-        `[MetaApiService] sendWhatsAppTypingIndicator failed:`,
-        JSON.stringify(res.error)
-      );
-      return { success: false, error: errMsg };
-    }
-    return { success: true };
+  ) {
+    return sendWhatsAppTypingIndicator(phoneNumberId, messageId, typing, this.post.bind(this));
   }
 
   /** إرسال رسالة صورة عبر WhatsApp Cloud API */
-  async sendWhatsAppImage(
-    phoneNumberId: string,
-    to: string,
-    imageRef: string,
-    caption?: string
-  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const payload = {
-      to,
-      ...this._buildMediaPayload('image', imageRef, { caption }),
-    };
-
-    const res = await this.post(`${phoneNumberId}/messages`, payload);
-    if (!res.ok) {
-      const errMsg = this._formatMetaError(res.error || { code: 0, message: 'Unknown error' });
-      return { success: false, error: errMsg };
-    }
-    return { success: true, messageId: (res.data as { messages?: Array<{ id: string }> })?.messages?.[0]?.id };
+  async sendWhatsAppImage(phoneNumberId: string, to: string, imageRef: string, caption?: string) {
+    return sendWhatsAppImage(phoneNumberId, to, imageRef, caption, this.post.bind(this));
   }
 
   /** إرسال رسالة فيديو عبر WhatsApp Cloud API */
-  async sendWhatsAppVideo(
-    phoneNumberId: string,
-    to: string,
-    videoRef: string,
-    caption?: string
-  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const payload = {
-      to,
-      ...this._buildMediaPayload('video', videoRef, { caption }),
-    };
-
-    const res = await this.post(`${phoneNumberId}/messages`, payload);
-    if (!res.ok) {
-      const errMsg = this._formatMetaError(res.error || { code: 0, message: 'Unknown error' });
-      return { success: false, error: errMsg };
-    }
-    return { success: true, messageId: (res.data as { messages?: Array<{ id: string }> })?.messages?.[0]?.id };
+  async sendWhatsAppVideo(phoneNumberId: string, to: string, videoRef: string, caption?: string) {
+    return sendWhatsAppVideo(phoneNumberId, to, videoRef, caption, this.post.bind(this));
   }
 
   /** إرسال رسالة صوت عبر WhatsApp Cloud API */
-  async sendWhatsAppAudio(
-    phoneNumberId: string,
-    to: string,
-    audioRef: string
-  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const payload = {
-      to,
-      ...this._buildMediaPayload('audio', audioRef),
-    };
-
-    const res = await this.post(`${phoneNumberId}/messages`, payload);
-    if (!res.ok) {
-      const errMsg = this._formatMetaError(res.error || { code: 0, message: 'Unknown error' });
-      return { success: false, error: errMsg };
-    }
-    return { success: true, messageId: (res.data as { messages?: Array<{ id: string }> })?.messages?.[0]?.id };
+  async sendWhatsAppAudio(phoneNumberId: string, to: string, audioRef: string) {
+    return sendWhatsAppAudio(phoneNumberId, to, audioRef, this.post.bind(this));
   }
 
   /** إرسال رسالة مستند عبر WhatsApp Cloud API */
@@ -433,190 +216,46 @@ class MetaApiService {
     to: string,
     documentRef: string,
     filename?: string
-  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const payload = {
-      to,
-      ...this._buildMediaPayload('document', documentRef, { filename }),
-    };
-
-    const res = await this.post(`${phoneNumberId}/messages`, payload);
-    if (!res.ok) {
-      const errMsg = this._formatMetaError(res.error || { code: 0, message: 'Unknown error' });
-      return { success: false, error: errMsg };
-    }
-    return { success: true, messageId: (res.data as { messages?: Array<{ id: string }> })?.messages?.[0]?.id };
+  ) {
+    return sendWhatsAppDocument(phoneNumberId, to, documentRef, filename, this.post.bind(this));
   }
 
   /** رفع ملف وسائط إلى WhatsApp Media API */
-  async uploadWhatsAppMedia(
-    phoneNumberId: string,
-    fileBuffer: Buffer,
-    mimeType: string
-  ): Promise<{ success: boolean; mediaId?: string; error?: string }> {
-    try {
-      const url = `${GRAPH_API_BASE}/${phoneNumberId}/media`;
-      const formData = new FormData();
-      // Convert Buffer to Uint8Array to avoid type error
-      const uint8Array = new Uint8Array(fileBuffer);
-      formData.append('file', new Blob([uint8Array], { type: mimeType }), 'media');
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-        },
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const error = this._formatMetaError(data.error);
-        return { success: false, error };
-      }
-
-      return { success: true, mediaId: data.id };
-    } catch (error) {
-      console.error('[MetaApiService] uploadWhatsAppMedia error:', error);
-      return { success: false, error: 'Failed to upload media' };
-    }
-  }
-
-  /**
-   * تحويل خطأ Meta API إلى رسالة واضحة للمستخدم
-   * وفق وثائق Meta الرسمية: https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes
-   */
-  private _formatMetaError(error: { code?: number; message?: string }): string {
-    if (!error) return 'خطأ غير معروف';
-    const code = error.code || 0;
-    const metaErrors: Record<number, string> = {
-      // Auth
-      190: 'انتهت صلاحية توكن الوصول أو تم إلغاؤه',
-      // WhatsApp Business
-      131000: 'خطأ في المعاملات — تحقق من صحة البيانات المُرسَلة',
-      131005: 'ليس لديك صلاحية إرسال هذا النوع من الرسائل',
-      131008: 'معامل مطلوب مفقود في الطلب',
-      131009: 'قيمة معامل غير صحيحة',
-      131016: 'الخدمة غير متاحة مؤقتاً، حاول مرة أخرى',
-      131021: 'لا يمكن إرسال رسالة لنفس الرقم',
-      131026: 'لا يمكن تسليم الرسالة — الرقم غير مسجل في واتساب أو محظور',
-      131042: 'مشكلة في طريقة الدفع لحساب واتساب للأعمال',
-      131047: 'انتهت نافذة 24 ساعة — يجب إرسال قالب معتمد من Meta',
-      131051: 'نوع الرسالة غير مدعوم',
-      132000: 'عدد متغيرات القالب لا يتطابق مع ما هو معرّف في Meta',
-      132001: 'القالب غير موجود أو غير معتمد من Meta — تحقق من الاسم واللغة',
-      132005: 'نص القالب بعد تعبئة المتغيرات طويل جداً',
-      132007: 'محتوى القالب يخالف سياسة Meta',
-      132012: 'تنسيق متغيرات القالب غير صحيح',
-      132015: 'القالب متوقف مؤقتاً بسبب جودة منخفضة',
-      132016: 'القالب معطّل نهائياً بسبب جودة منخفضة',
-    };
-    if (metaErrors[code]) {
-      return `${metaErrors[code]} (كود الخطأ: ${code})`;
-    }
-    return error.message || `خطأ من Meta API (كود: ${code})`;
+  async uploadWhatsAppMedia(phoneNumberId: string, fileBuffer: Buffer, mimeType: string) {
+    return uploadWhatsAppMedia(phoneNumberId, fileBuffer, mimeType, this.accessToken);
   }
 
   /** جلب قوالب WhatsApp من WABA */
-  async getWhatsAppTemplates(
-    wabaId: string,
-    limit = 250
-  ): Promise<{ success: boolean; templates?: Record<string, unknown>[]; error?: string; rawError?: unknown }> {
-    // وفق وثائق Meta v25.0: GET /{whatsapp-business-account-id}/message_templates
-    // الحقول المتاحة: id, name, status, category, language, components, quality_score, rejected_reason
-    const res = await this.get(`${wabaId}/message_templates`, {
-      fields: 'id,name,status,category,language,components,quality_score,rejected_reason',
-      limit: String(limit),
-    });
-    if (!res.ok) {
-      const errMsg = this._formatMetaError(res.error || { code: 0, message: 'Unknown error' });
-      console.error(
-        `[MetaApiService] getWhatsAppTemplates failed for WABA ${wabaId}:`,
-        JSON.stringify(res.error)
-      );
-      return { success: false, error: errMsg, rawError: res.error };
-    }
-    const templates = (res.data as { data?: Record<string, unknown>[] })?.data ?? [];
-    console.log(`[MetaApiService] Fetched ${templates.length} templates from WABA ${wabaId}`);
-    return { success: true, templates };
+  async getWhatsAppTemplates(wabaId: string, limit = 250) {
+    return getWhatsAppTemplates(wabaId, limit, this.get.bind(this));
   }
 
   /** الحصول على WABA ID من Phone Number ID */
-  async getWabaIdFromPhoneNumberId(
-    phoneNumberId: string
-  ): Promise<{ success: boolean; wabaId?: string; error?: string }> {
-    const res = await this.get(`${phoneNumberId}`, {
-      fields: 'whatsapp_business_account',
-    });
-    if (!res.ok) {
-      return { success: false, error: res.error?.message ?? 'خطأ غير معروف' };
-    }
-    const wabaId = (res.data as { whatsapp_business_account?: { id?: string } })?.whatsapp_business_account?.id;
-    if (!wabaId) {
-      return { success: false, error: 'لم يتم العثور على WABA ID' };
-    }
-    return { success: true, wabaId };
+  async getWabaIdFromPhoneNumberId(phoneNumberId: string) {
+    return getWabaIdFromPhoneNumberId(phoneNumberId, this.get.bind(this));
   }
 
   /** جلب بيانات رقم واتساب للأعمال */
-  async getWhatsAppPhoneNumber(
-    phoneNumberId: string
-  ): Promise<{ success: boolean; phoneNumber?: Record<string, unknown>; error?: string }> {
-    const res = await this.get(`${phoneNumberId}`, {
-      fields: 'id,verified_name,display_phone_number,quality_rating,status',
-    });
-    if (!res.ok) {
-      return { success: false, error: this._formatMetaError(res.error || { code: 0, message: 'Unknown error' }) };
-    }
-    return { success: true, phoneNumber: res.data as Record<string, unknown> };
+  async getWhatsAppPhoneNumber(phoneNumberId: string) {
+    return getWhatsAppPhoneNumber(phoneNumberId, this.get.bind(this));
   }
 
   /** تسجيل رقم الهاتف لاستخدامه مع WhatsApp Cloud API */
-  async registerWhatsAppPhoneNumber(
-    phoneNumberId: string,
-    pin: string
-  ): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
-    const res = await this.post(`${phoneNumberId}/register`, {
-      messaging_product: 'whatsapp',
-      pin,
-    });
-    if (!res.ok) {
-      return { success: false, error: this._formatMetaError(res.error || { code: 0, message: 'Unknown error' }) };
-    }
-    return { success: true, data: res.data as Record<string, unknown> };
+  async registerWhatsAppPhoneNumber(phoneNumberId: string, pin: string) {
+    return registerWhatsAppPhoneNumber(phoneNumberId, pin, this.post.bind(this));
   }
 
   /** جلب التطبيقات المشتركة على WABA */
-  async getWabaSubscribedApps(
-    wabaId: string
-  ): Promise<{ success: boolean; apps?: Record<string, unknown>[]; error?: string }> {
-    const res = await this.get(`${wabaId}/subscribed_apps`);
-    if (!res.ok) {
-      return { success: false, error: this._formatMetaError(res.error || { code: 0, message: 'Unknown error' }) };
-    }
-    return { success: true, apps: (res.data as { data?: Record<string, unknown>[] })?.data ?? [] };
+  async getWabaSubscribedApps(wabaId: string) {
+    return getWabaSubscribedApps(wabaId, this.get.bind(this));
   }
 
   /** اشتراك التطبيق الحالي في Webhooks الخاصة بـ WABA */
   async subscribeAppToWaba(
     wabaId: string,
     options?: { overrideCallbackUri?: string; verifyToken?: string }
-  ): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
-    const payload: Record<string, string> = {};
-
-    if (options?.overrideCallbackUri) {
-      payload.override_callback_uri = options.overrideCallbackUri;
-    }
-
-    if (options?.verifyToken) {
-      payload.verify_token = options.verifyToken;
-    }
-
-    const res = await this.post(`${wabaId}/subscribed_apps`, payload);
-    if (!res.ok) {
-      return { success: false, error: this._formatMetaError(res.error || { code: 0, message: 'Unknown error' }) };
-    }
-    return { success: true, data: res.data as Record<string, unknown> };
+  ) {
+    return subscribeAppToWaba(wabaId, this.post.bind(this), options);
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
@@ -625,16 +264,11 @@ class MetaApiService {
 
   /** جلب إحصائيات حساب Instagram Business */
   async getInstagramProfile(accountId: string) {
-    return this.get(accountId, {
-      fields: 'followers_count,follows_count,media_count,profile_picture_url',
-    });
+    return getInstagramProfile(accountId, this.get.bind(this));
   }
 
   async getInstagramInsights(accountId: string, period = 'days_28') {
-    return this.get(`${accountId}/insights`, {
-      metric: 'reach,impressions,profile_views',
-      period,
-    });
+    return getInstagramInsights(accountId, period, this.get.bind(this));
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
@@ -643,15 +277,11 @@ class MetaApiService {
 
   /** جلب بيانات صفحة Facebook */
   async getFacebookPage(pageId: string) {
-    return this.get(pageId, { fields: 'fan_count,name,picture' });
+    return getFacebookPage(pageId, this.get.bind(this));
   }
 
   async getFacebookPageInsights(pageId: string, period = 'days_28') {
-    return this.get(`${pageId}/insights`, {
-      metric:
-        'page_views_total,page_engaged_users,page_impressions,page_post_engagements,page_impressions_organic',
-      period,
-    });
+    return getFacebookPageInsights(pageId, period, this.get.bind(this));
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
@@ -659,19 +289,8 @@ class MetaApiService {
   // ══════════════════════════════════════════════════════════════════════════════
 
   /** إرسال حدث تحويل إلى Meta CAPI */
-  async sendCAPIEvent(
-    pixelId: string,
-    events: Record<string, unknown>[],
-    testEventCode?: string
-  ): Promise<{ success: boolean; error?: string }> {
-    const payload: Record<string, unknown> = { data: events };
-    if (testEventCode) payload.test_event_code = testEventCode;
-
-    const res = await this.post(`${pixelId}/events`, payload);
-    if (!res.ok) {
-      return { success: false, error: res.error?.message ?? 'خطأ غير معروف' };
-    }
-    return { success: true };
+  async sendCAPIEvent(pixelId: string, events: Record<string, unknown>[], testEventCode?: string) {
+    return sendCAPIEvent(pixelId, events, this.post.bind(this), testEventCode);
   }
 }
 

@@ -5,6 +5,9 @@
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('telegram');
 
 interface TelegramMessage {
   title: string;
@@ -17,7 +20,7 @@ interface TelegramMessage {
  */
 export async function sendTelegramNotification(params: TelegramMessage): Promise<boolean> {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.warn('[Telegram] Bot token or chat ID not configured');
+    logger.warn('Bot token or chat ID not configured');
     return false;
   }
 
@@ -39,14 +42,14 @@ export async function sendTelegramNotification(params: TelegramMessage): Promise
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('[Telegram] Failed to send message:', errorData);
+      logger.error('Failed to send message:', errorData);
       return false;
     }
 
-    console.log('[Telegram] Message sent successfully');
+    logger.info('Message sent successfully');
     return true;
   } catch (error) {
-    console.error('[Telegram] Error sending message:', error);
+    logger.error('Error sending message:', error);
     return false;
   }
 }

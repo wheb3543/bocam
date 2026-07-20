@@ -29,7 +29,7 @@ function hashData(value: string): string {
  */
 function hashPhone(phone: string): string {
   // تطبيع رقم الهاتف: إزالة + والمسافات والشرطات
-  const normalized = phone.replace(/[\s\-\(\)\+]/g, '');
+  const normalized = phone.replace(/[\s\-()+]/g, '');
   return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
@@ -88,14 +88,30 @@ export async function sendMetaConversionEvent(event: MetaEventData): Promise<Met
 
   // بناء بيانات المستخدم المشفرة
   const userData: Record<string, string> = {};
-  if (event.userData?.email) userData.em = hashData(event.userData.email);
-  if (event.userData?.phone) userData.ph = hashPhone(event.userData.phone);
-  if (event.userData?.firstName) userData.fn = hashData(event.userData.firstName);
-  if (event.userData?.lastName) userData.ln = hashData(event.userData.lastName);
-  if (event.userData?.clientIpAddress) userData.client_ip_address = event.userData.clientIpAddress;
-  if (event.userData?.clientUserAgent) userData.client_user_agent = event.userData.clientUserAgent;
-  if (event.userData?.fbp) userData.fbp = event.userData.fbp;
-  if (event.userData?.fbc) userData.fbc = event.userData.fbc;
+  if (event.userData?.email) {
+    userData.em = hashData(event.userData.email);
+  }
+  if (event.userData?.phone) {
+    userData.ph = hashPhone(event.userData.phone);
+  }
+  if (event.userData?.firstName) {
+    userData.fn = hashData(event.userData.firstName);
+  }
+  if (event.userData?.lastName) {
+    userData.ln = hashData(event.userData.lastName);
+  }
+  if (event.userData?.clientIpAddress) {
+    userData.client_ip_address = event.userData.clientIpAddress;
+  }
+  if (event.userData?.clientUserAgent) {
+    userData.client_user_agent = event.userData.clientUserAgent;
+  }
+  if (event.userData?.fbp) {
+    userData.fbp = event.userData.fbp;
+  }
+  if (event.userData?.fbc) {
+    userData.fbc = event.userData.fbc;
+  }
 
   const payload = {
     data: [

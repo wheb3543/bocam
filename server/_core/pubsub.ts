@@ -4,7 +4,9 @@ type EventCallback = (event: string, data: unknown) => void;
 const subscribers: Map<string, Set<EventCallback>> = new Map();
 
 export function subscribe(channel: string, cb: EventCallback) {
-  if (!subscribers.has(channel)) subscribers.set(channel, new Set());
+  if (!subscribers.has(channel)) {
+    subscribers.set(channel, new Set());
+  }
   const channelSubscribers = subscribers.get(channel);
   if (channelSubscribers) {
     channelSubscribers.add(cb);
@@ -14,14 +16,20 @@ export function subscribe(channel: string, cb: EventCallback) {
 
 export function unsubscribe(channel: string, cb: EventCallback) {
   const s = subscribers.get(channel);
-  if (!s) return;
+  if (!s) {
+    return;
+  }
   s.delete(cb);
-  if (s.size === 0) subscribers.delete(channel);
+  if (s.size === 0) {
+    subscribers.delete(channel);
+  }
 }
 
 export function publish(channel: string, event: string, data: unknown) {
   const s = subscribers.get(channel);
-  if (!s) return;
+  if (!s) {
+    return;
+  }
   for (const cb of Array.from(s)) {
     try {
       cb(event, data);
