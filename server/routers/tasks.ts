@@ -34,12 +34,12 @@ export const tasksRouter = router({
         .optional()
     )
     .query(async ({ input }) => {
-      return await getAllTasks(input);
+      return getAllTasks(input);
     }),
 
   // Get single task by ID
   getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
-    return await getTaskById(input.id);
+    return getTaskById(input.id);
   }),
 
   // Create new task
@@ -63,7 +63,7 @@ export const tasksRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return await createTask({
+      return createTask({
         ...input,
         createdBy: ctx.user.id,
       });
@@ -92,12 +92,12 @@ export const tasksRouter = router({
     )
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
-      return await updateTask(id, data);
+      return updateTask(id, data);
     }),
 
   // Delete task
   delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    return await deleteTask(input.id);
+    return deleteTask(input.id);
   }),
 
   // Update task status (for drag & drop)
@@ -109,22 +109,22 @@ export const tasksRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return await updateTaskStatus(input.id, input.status);
+      return updateTaskStatus(input.id, input.status);
     }),
 
   // Get tasks statistics
   stats: protectedProcedure.query(async () => {
-    return await getTasksStats();
+    return getTasksStats();
   }),
 
   // Get my tasks
   myTasks: protectedProcedure.query(async ({ ctx }) => {
-    return await getTasksByUser(ctx.user.id);
+    return getTasksByUser(ctx.user.id);
   }),
 
   // Get overdue tasks
   overdue: protectedProcedure.query(async () => {
-    return await getOverdueTasks();
+    return getOverdueTasks();
   }),
 
   // ============ COMMENTS ============
@@ -133,7 +133,7 @@ export const tasksRouter = router({
   getComments: protectedProcedure
     .input(z.object({ taskId: z.number() }))
     .query(async ({ input }) => {
-      return await getTaskComments(input.taskId);
+      return getTaskComments(input.taskId);
     }),
 
   // Add comment
@@ -145,7 +145,7 @@ export const tasksRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return await addTaskComment({
+      return addTaskComment({
         taskId: input.taskId,
         userId: ctx.user.id,
         content: input.content,
@@ -156,7 +156,7 @@ export const tasksRouter = router({
   deleteComment: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      return await deleteTaskComment(input.id);
+      return deleteTaskComment(input.id);
     }),
 
   // ============ ATTACHMENTS ============
@@ -165,7 +165,7 @@ export const tasksRouter = router({
   getAttachments: protectedProcedure
     .input(z.object({ taskId: z.number() }))
     .query(async ({ input }) => {
-      return await getTaskAttachments(input.taskId);
+      return getTaskAttachments(input.taskId);
     }),
 
   // Add attachment
@@ -181,7 +181,7 @@ export const tasksRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return await addTaskAttachment({
+      return addTaskAttachment({
         taskId: input.taskId,
         userId: ctx.user.id,
         fileName: input.fileName,
@@ -196,6 +196,6 @@ export const tasksRouter = router({
   deleteAttachment: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      return await deleteTaskAttachment(input.id);
+      return deleteTaskAttachment(input.id);
     }),
 });

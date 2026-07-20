@@ -5,7 +5,7 @@ import * as db from '../database/db';
 export const messageSettingsRouter = router({
   // Get all message settings
   list: protectedProcedure.query(async () => {
-    return await db.getAllMessageSettings();
+    return db.getAllMessageSettings();
   }),
 
   // Get message settings by category
@@ -21,7 +21,7 @@ export const messageSettingsRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return await db.getMessageSettingsByCategory(input.category);
+      return db.getMessageSettingsByCategory(input.category);
     }),
 
   // Get a single message setting by type
@@ -32,7 +32,7 @@ export const messageSettingsRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return await db.getMessageSettingByType(input.messageType);
+      return db.getMessageSettingByType(input.messageType);
     }),
 
   // Update message setting
@@ -49,7 +49,7 @@ export const messageSettingsRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return await db.updateMessageSetting(input);
+      return db.updateMessageSettingCompat(input);
     }),
 
   // Toggle message enabled/disabled
@@ -60,7 +60,7 @@ export const messageSettingsRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return await db.toggleMessageSettingEnabled(input.id);
+      return db.toggleMessageSettingEnabled(input.id);
     }),
 
   // Get enabled message setting by type (for sending messages)

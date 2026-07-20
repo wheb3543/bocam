@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { router, publicProcedure, protectedProcedure } from '../_core/trpc';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { getDb } from '../database/db';
 import { visitSessions, abandonedForms, trackingEvents } from '../../drizzle/schema';
 import { eq, desc, and, gte, lte, sql, count, asc } from 'drizzle-orm';
@@ -33,7 +34,9 @@ export const trackingRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) return { success: false };
+      if (!db) {
+        return { success: false };
+      }
 
       try {
         await db
@@ -76,7 +79,9 @@ export const trackingRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) return { success: false };
+      if (!db) {
+        return { success: false };
+      }
 
       try {
         await db.insert(trackingEvents).values({
@@ -112,7 +117,9 @@ export const trackingRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) return { success: false };
+      if (!db) {
+        return { success: false };
+      }
 
       try {
         await db.insert(abandonedForms).values({
@@ -146,7 +153,9 @@ export const trackingRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db) return { success: false };
+      if (!db) {
+        return { success: false };
+      }
 
       try {
         await db
@@ -177,9 +186,7 @@ export const trackingRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const start = input.startDate
         ? new Date(input.startDate)
@@ -254,9 +261,7 @@ export const trackingRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const start = input.startDate
         ? new Date(input.startDate)
@@ -300,9 +305,7 @@ export const trackingRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const offset = (input.page - 1) * input.limit;
       const start = input.startDate
@@ -342,8 +345,9 @@ export const trackingRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      if (!db)
+      if (!db) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
 
       await db
         .update(abandonedForms)
@@ -363,9 +367,7 @@ export const trackingRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const start = input.startDate
         ? new Date(input.startDate)
@@ -414,9 +416,7 @@ export const trackingRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const start = input.startDate
         ? new Date(input.startDate)

@@ -4,9 +4,8 @@
  */
 
 import { z } from 'zod';
-import { TRPCError } from '@trpc/server';
 import { protectedProcedure, router } from '../_core/trpc';
-import { getDb } from '../database/db';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { savedFilters } from '../../drizzle/schema';
 import { eq, and, desc } from 'drizzle-orm';
 
@@ -22,8 +21,7 @@ export const savedFiltersRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) return [];
+      const db = await ensureDatabaseAvailable();
 
       return db
         .select()
@@ -46,9 +44,7 @@ export const savedFiltersRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       // If setting as default, unset other defaults for this page
       if (input.isDefault) {
@@ -85,9 +81,7 @@ export const savedFiltersRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const { id, ...updateData } = input;
 
@@ -132,9 +126,7 @@ export const savedFiltersRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       await db
         .delete(savedFilters)

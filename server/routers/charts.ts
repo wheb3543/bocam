@@ -1,11 +1,7 @@
 import { z } from 'zod';
-import { TRPCError } from '@trpc/server';
 import { router, protectedProcedure } from '../_core/trpc';
-import { getDb } from '../database/db';
-import {
-  leads,
-  appointments,
-} from '../../drizzle/schema';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { leads, appointments } from '../../drizzle/schema';
 import { sql, count } from 'drizzle-orm';
 
 /**
@@ -59,9 +55,7 @@ export const chartsRouter = router({
   registrationsTrend: protectedProcedure
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const { startDate, groupBy, dateFormat } = getDateRange(input.period);
 
@@ -107,7 +101,11 @@ export const chartsRouter = router({
         let rows: unknown[] = [];
         if (Array.isArray(result)) {
           rows = result;
-        } else if (result && typeof result === 'object' && Array.isArray((result as { [key: string]: unknown })?.[0])) {
+        } else if (
+          result &&
+          typeof result === 'object' &&
+          Array.isArray((result as { [key: string]: unknown })?.[0])
+        ) {
           rows = (result as { [key: string]: unknown })?.[0] as unknown[];
         }
         return rows.map((r: unknown) => {
@@ -157,9 +155,7 @@ export const chartsRouter = router({
    * Lead status distribution
    */
   leadStatusDistribution: protectedProcedure.query(async () => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+    const db = await ensureDatabaseAvailable();
 
     const result = await db
       .select({
@@ -180,9 +176,7 @@ export const chartsRouter = router({
    * Registrations by source
    */
   registrationsBySource: protectedProcedure.query(async () => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+    const db = await ensureDatabaseAvailable();
 
     // Leads by source
     const leadsResult = await db.execute(sql`
@@ -215,7 +209,11 @@ export const chartsRouter = router({
       let rows: unknown[] = [];
       if (Array.isArray(result)) {
         rows = result;
-      } else if (result && typeof result === 'object' && Array.isArray((result as { [key: string]: unknown })?.[0])) {
+      } else if (
+        result &&
+        typeof result === 'object' &&
+        Array.isArray((result as { [key: string]: unknown })?.[0])
+      ) {
         rows = (result as { [key: string]: unknown })?.[0] as unknown[];
       }
       return rows.map((r: unknown) => {
@@ -239,9 +237,7 @@ export const chartsRouter = router({
    * Offers and camps performance
    */
   offersAndCampsPerformance: protectedProcedure.query(async () => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+    const db = await ensureDatabaseAvailable();
 
     // Offer leads count per offer
     const offersPerformance = await db.execute(sql`
@@ -271,7 +267,11 @@ export const chartsRouter = router({
       let rows: unknown[] = [];
       if (Array.isArray(result)) {
         rows = result;
-      } else if (result && typeof result === 'object' && Array.isArray((result as { [key: string]: unknown })?.[0])) {
+      } else if (
+        result &&
+        typeof result === 'object' &&
+        Array.isArray((result as { [key: string]: unknown })?.[0])
+      ) {
         rows = (result as { [key: string]: unknown })?.[0] as unknown[];
       }
       return rows.map((r: unknown) => {
@@ -295,9 +295,7 @@ export const chartsRouter = router({
    * Appointments by status
    */
   appointmentStatusDistribution: protectedProcedure.query(async () => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+    const db = await ensureDatabaseAvailable();
 
     const result = await db
       .select({
@@ -320,9 +318,7 @@ export const chartsRouter = router({
   whatsappTrend: protectedProcedure
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const { startDate, groupBy, dateFormat } = getDateRange(input.period);
 
@@ -346,7 +342,11 @@ export const chartsRouter = router({
         let rows: unknown[] = [];
         if (Array.isArray(result)) {
           rows = result;
-        } else if (result && typeof result === 'object' && Array.isArray((result as { [key: string]: unknown })?.[0])) {
+        } else if (
+          result &&
+          typeof result === 'object' &&
+          Array.isArray((result as { [key: string]: unknown })?.[0])
+        ) {
           rows = (result as { [key: string]: unknown })?.[0] as unknown[];
         }
         return rows.map((r: unknown) => {
@@ -389,9 +389,7 @@ export const chartsRouter = router({
   summaryComparison: protectedProcedure
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const now = new Date();
       let periodDays: number;
@@ -420,7 +418,9 @@ export const chartsRouter = router({
           SELECT COUNT(*) as total FROM ${sql.raw(table)}
           WHERE createdAt >= ${start} AND createdAt < ${end}
         `);
-        const rows = Array.isArray(result) ? result : (result as unknown as { [key: string]: unknown })?.[0] as unknown[] || [];
+        const rows = Array.isArray(result)
+          ? result
+          : ((result as unknown as { [key: string]: unknown })?.[0] as unknown[]) || [];
         return Number((rows[0] as { total?: number })?.total || 0);
       };
 
@@ -445,7 +445,9 @@ export const chartsRouter = router({
       ]);
 
       const calcChange = (current: number, previous: number) => {
-        if (previous === 0) return current > 0 ? 100 : 0;
+        if (previous === 0) {
+          return current > 0 ? 100 : 0;
+        }
         return Math.round(((current - previous) / previous) * 100);
       };
 

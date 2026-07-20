@@ -16,6 +16,9 @@ import {
   offers,
   camps,
 } from '../../drizzle/schema';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('customers');
 
 /**
  * Get unified customer profile by phone number
@@ -23,10 +26,12 @@ import {
  */
 async function getCustomerByPhone(phone: string) {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) {
+    return null;
+  }
 
   // Normalize phone number (remove spaces, dashes)
-  const normalizedPhone = phone.replace(/[\s\-]/g, '');
+  const normalizedPhone = phone.replace(/[\s-]/g, '');
 
   // Fetch from all tables in parallel
   const [appointmentRecords, leadRecords, offerLeadRecords, campRegRecords] = await Promise.all([
@@ -126,7 +131,9 @@ async function getCustomerByPhone(phone: string) {
  */
 async function getCustomersPaginated(params: { page: number; limit: number; searchTerm?: string }) {
   const db = await getDb();
-  if (!db) return { customers: [], total: 0 };
+  if (!db) {
+    return { customers: [], total: 0 };
+  }
 
   const { page, limit, searchTerm } = params;
   const offset = (page - 1) * limit;
@@ -180,14 +187,14 @@ async function getCustomersPaginated(params: { page: number; limit: number; sear
     const countArr = Array.isArray(countRows) ? countRows : [];
     const total = countArr.length > 0 ? Number((countArr[0] as { total?: number })?.total || 0) : 0;
 
-    console.log(`[Customers] Found ${customers.length} customers, total: ${total}`);
+    logger.info(`Found ${customers.length} customers, total: ${total}`);
 
     return {
       customers,
       total,
     };
   } catch (error) {
-    console.error('[Customers] Error fetching customers:', error);
+    logger.error('Error fetching customers:', error);
     return { customers: [], total: 0 };
   }
 }

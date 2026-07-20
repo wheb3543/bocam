@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import { protectedProcedure, router } from '../_core/trpc';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('queue');
 
 export const queueRouter = router({
   /**
@@ -11,7 +14,7 @@ export const queueRouter = router({
       const stats = await getQueueStats();
       return stats;
     } catch (error) {
-      console.error('[Queue Router] Failed to get stats:', error);
+      logger.error('Failed to get stats:', error);
       return {
         waiting: 0,
         active: 0,
@@ -80,7 +83,7 @@ export const queueRouter = router({
 
         return formattedJobs;
       } catch (error) {
-        console.error('[Queue Router] Failed to get recent jobs:', error);
+        logger.error('Failed to get recent jobs:', error);
         return [];
       }
     }),

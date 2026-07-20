@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { users } from '../../drizzle/schema';
 import { protectedProcedure, router } from '../_core/trpc';
-import { getDb } from '../database/db';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcryptjs';
 
@@ -29,9 +29,7 @@ const adminOnlyProcedure = protectedProcedure.use(({ ctx, next }) => {
 export const usersRouter = router({
   // Get active users list (for task assignment)
   getActiveUsers: protectedProcedure.query(async () => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+    const db = await ensureDatabaseAvailable();
 
     const activeUsers = await db
       .select({
@@ -47,9 +45,7 @@ export const usersRouter = router({
 
   // Get all users (admin only)
   getAll: adminOnlyProcedure.query(async () => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+    const db = await ensureDatabaseAvailable();
 
     const allUsers = await db
       .select({
@@ -70,9 +66,7 @@ export const usersRouter = router({
 
   // Get user by ID (admin only)
   getById: adminOnlyProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+    const db = await ensureDatabaseAvailable();
 
     const user = await db
       .select({
@@ -99,9 +93,7 @@ export const usersRouter = router({
 
   // Create new user (admin only)
   create: adminOnlyProcedure.input(userInputSchema).mutation(async ({ input }) => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+    const db = await ensureDatabaseAvailable();
 
     // Check if username already exists
     const existingUser = await db
@@ -138,9 +130,7 @@ export const usersRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+      const db = await ensureDatabaseAvailable();
 
       const { id, password, ...data } = input;
 
@@ -168,9 +158,7 @@ export const usersRouter = router({
   delete: adminOnlyProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+      const db = await ensureDatabaseAvailable();
 
       // Prevent user from deleting themselves
       if (input.id === ctx.user.id) {
@@ -189,9 +177,7 @@ export const usersRouter = router({
   toggleActive: adminOnlyProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+      const db = await ensureDatabaseAvailable();
 
       // Prevent user from deactivating themselves
       if (input.id === ctx.user.id) {

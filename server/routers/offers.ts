@@ -14,6 +14,9 @@ import { offers } from '../../drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 import { generateSlug } from '../../shared/_core/utils/slug';
 import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('offers');
 
 /**
  * Validation schema for creating/updating offers
@@ -38,11 +41,12 @@ export const offersRouter = router({
     return serverCache.getOrCompute(CacheKeys.offersList(), CacheTTL.LONG, async () => {
       try {
         const dbInstance = await getDb();
-        if (!dbInstance)
+        if (!dbInstance) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'قاعدة البيانات غير متاحة',
           });
+        }
 
         const allOffers = await dbInstance
           .select()
@@ -52,8 +56,10 @@ export const offersRouter = router({
 
         return allOffers;
       } catch (error) {
-        console.error('Error fetching offers:', error);
-        if (error instanceof TRPCError) throw error;
+        logger.error('Error fetching offers:', error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'فشل في جلب العروض' });
       }
     });
@@ -74,15 +80,18 @@ export const offersRouter = router({
 
     try {
       const dbInstance = await getDb();
-      if (!dbInstance)
+      if (!dbInstance) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
 
       const allOffers = await dbInstance.select().from(offers).orderBy(offers.createdAt);
 
       return allOffers;
     } catch (error) {
-      console.error('Error fetching offers:', error);
-      if (error instanceof TRPCError) throw error;
+      logger.error('Error fetching offers:', error);
+      if (error instanceof TRPCError) {
+        throw error;
+      }
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'فشل في جلب العروض' });
     }
   }),
@@ -94,8 +103,9 @@ export const offersRouter = router({
   getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
     try {
       const dbInstance = await getDb();
-      if (!dbInstance)
+      if (!dbInstance) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      }
 
       const offer = await dbInstance
         .select()
@@ -109,8 +119,10 @@ export const offersRouter = router({
 
       return offer[0];
     } catch (error) {
-      console.error('Error fetching offer:', error);
-      if (error instanceof TRPCError) throw error;
+      logger.error('Error fetching offer:', error);
+      if (error instanceof TRPCError) {
+        throw error;
+      }
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'فشل في جلب العرض' });
     }
   }),
@@ -120,7 +132,7 @@ export const offersRouter = router({
    * إنشاء عرض جديد (مسؤول فقط)
    */
   create: protectedProcedure
-    // @ts-ignore - tRPC middleware type compatibility issue
+    // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireOffersFeature())
     .input(offerInputSchema)
     .mutation(async ({ input, ctx }) => {
@@ -134,11 +146,12 @@ export const offersRouter = router({
 
       try {
         const dbInstance = await getDb();
-        if (!dbInstance)
+        if (!dbInstance) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'قاعدة البيانات غير متاحة',
           });
+        }
 
         // Use provided slug (normalize to lowercase) or generate from title
         let slug =
@@ -189,8 +202,10 @@ export const offersRouter = router({
 
         return { success: true, slug };
       } catch (error) {
-        console.error('Error creating offer:', error);
-        if (error instanceof TRPCError) throw error;
+        logger.error('Error creating offer:', error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: error instanceof Error ? error.message : 'فشل في إنشاء العرض',
@@ -203,7 +218,7 @@ export const offersRouter = router({
    * تحديث عرض موجود (مسؤول فقط)
    */
   update: protectedProcedure
-    // @ts-ignore - tRPC middleware type compatibility issue
+    // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireOffersFeature())
     .input(
       z.object({
@@ -222,11 +237,12 @@ export const offersRouter = router({
 
       try {
         const dbInstance = await getDb();
-        if (!dbInstance)
+        if (!dbInstance) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'قاعدة البيانات غير متاحة',
           });
+        }
 
         // Use provided slug (normalize to lowercase) or keep existing from DB
         let slug: string;
@@ -276,8 +292,10 @@ export const offersRouter = router({
 
         return { success: true };
       } catch (error) {
-        console.error('Error updating offer:', error);
-        if (error instanceof TRPCError) throw error;
+        logger.error('Error updating offer:', error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: error instanceof Error ? error.message : 'فشل في تحديث العرض',
@@ -290,7 +308,7 @@ export const offersRouter = router({
    * إلغاء تفعيل عرض (مسؤول فقط)
    */
   deactivate: protectedProcedure
-    // @ts-ignore - tRPC middleware type compatibility issue
+    // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireOffersFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
@@ -304,11 +322,12 @@ export const offersRouter = router({
 
       try {
         const dbInstance = await getDb();
-        if (!dbInstance)
+        if (!dbInstance) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'قاعدة البيانات غير متاحة',
           });
+        }
 
         await dbInstance.update(offers).set({ isActive: false }).where(eq(offers.id, input.id));
 
@@ -317,8 +336,10 @@ export const offersRouter = router({
 
         return { success: true };
       } catch (error) {
-        console.error('Error deactivating offer:', error);
-        if (error instanceof TRPCError) throw error;
+        logger.error('Error deactivating offer:', error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'فشل في إلغاء تفعيل العرض' });
       }
     }),
@@ -328,7 +349,7 @@ export const offersRouter = router({
    * حذف عرض (مسؤول فقط)
    */
   delete: protectedProcedure
-    // @ts-ignore - tRPC middleware type compatibility issue
+    // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireOffersFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
@@ -342,11 +363,12 @@ export const offersRouter = router({
 
       try {
         const dbInstance = await getDb();
-        if (!dbInstance)
+        if (!dbInstance) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'قاعدة البيانات غير متاحة',
           });
+        }
 
         await dbInstance.delete(offers).where(eq(offers.id, input.id));
 
@@ -355,8 +377,10 @@ export const offersRouter = router({
 
         return { success: true };
       } catch (error) {
-        console.error('Error deleting offer:', error);
-        if (error instanceof TRPCError) throw error;
+        logger.error('Error deleting offer:', error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'فشل في حذف العرض' });
       }
     }),

@@ -6,7 +6,7 @@ import { publicProcedure, adminProcedure, router } from '../_core/trpc';
 import { getUserByUsername, getUserByEmail, getUserById } from '../database/db';
 import { users } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
-import { getDb } from '../database/db';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is required');
@@ -22,10 +22,19 @@ function createAuthToken(userId: number, username: string, role: string): string
 }
 
 // Helper to verify JWT token
-function _verifyAuthToken(token: string): { userId: number; username: string; role: string } | null {
+function _verifyAuthToken(
+  token: string
+): { userId: number; username: string; role: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { type: string; userId: number; username: string; role: string };
-    if (decoded.type !== 'admin') return null;
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      type: string;
+      userId: number;
+      username: string;
+      role: string;
+    };
+    if (decoded.type !== 'admin') {
+      return null;
+    }
     return { userId: decoded.userId, username: decoded.username, role: decoded.role };
   } catch {
     return null;
@@ -77,10 +86,8 @@ export const authRouter = router({
       }
 
       // Update last signed in
-      const db = await getDb();
-      if (db) {
-        await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, user.id));
-      }
+      const db = await ensureDatabaseAvailable();
+      await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, user.id));
 
       // Create token and set cookie
       const token = createAuthToken(user.id, user.username, user.role);
@@ -114,7 +121,9 @@ export const authRouter = router({
   // الحصول على بيانات المستخدم الحالي
   me: publicProcedure.query(async ({ ctx }) => {
     // Use ctx.user which is already set by context.ts
-    if (!ctx.user) return null;
+    if (!ctx.user) {
+      return null;
+    }
 
     return {
       id: ctx.user.id,
@@ -134,14 +143,13 @@ export const authRouter = router({
         password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
         name: z.string().min(2, 'الاسم يجب أن يكون حرفين على الأقل'),
         email: z.string().email('البريد الإلكتروني غير صحيح').optional(),
-        role: z.enum(['user', 'admin', 'manager', 'staff', 'viewer', 'team_leader']).default('user'),
+        role: z
+          .enum(['user', 'admin', 'manager', 'staff', 'viewer', 'team_leader'])
+          .default('user'),
       })
     )
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) {
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
-      }
+      const db = await ensureDatabaseAvailable();
 
       // Check if username already exists
       const existingUsername = await getUserByUsername(input.username);
@@ -187,10 +195,7 @@ export const authRouter = router({
         throw new TRPCError({ code: 'UNAUTHORIZED', message: 'يجب تسجيل الدخول أولاً' });
       }
 
-      const db = await getDb();
-      if (!db) {
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
-      }
+      const db = await ensureDatabaseAvailable();
 
       // Check if email already exists (if provided and different from current)
       if (input.email && input.email !== ctx.user.email) {
@@ -202,8 +207,12 @@ export const authRouter = router({
 
       // Update user
       const updateData: Record<string, unknown> = {};
-      if (input.name !== undefined) updateData.name = input.name;
-      if (input.email !== undefined) updateData.email = input.email;
+      if (input.name !== undefined) {
+        updateData.name = input.name;
+      }
+      if (input.email !== undefined) {
+        updateData.email = input.email;
+      }
 
       await db.update(users).set(updateData).where(eq(users.id, ctx.user.id));
 

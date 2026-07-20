@@ -9,7 +9,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { publicProcedure, protectedProcedure, router, requireCampsFeature } from '../_core/trpc';
-import { getDb } from '../database/db';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { camps, campRegistrations } from '../../drizzle/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { generateSlug, isValidSlug } from '../../shared/_core/utils/slug';
@@ -44,8 +44,7 @@ export const campsRouter = router({
    */
   getAll: publicProcedure.query(async () => {
     return serverCache.getOrCompute('camps:active', CacheTTL.LONG, async () => {
-      const db = await getDb();
-      if (!db) return [];
+      const db = await ensureDatabaseAvailable();
 
       const result = await db
         .select()
@@ -63,8 +62,7 @@ export const campsRouter = router({
    */
   getAllAdmin: publicProcedure.query(async () => {
     return serverCache.getOrCompute(CacheKeys.campsList(), CacheTTL.LONG, async () => {
-      const db = await getDb();
-      if (!db) return [];
+      const db = await ensureDatabaseAvailable();
 
       const result = await db.select().from(camps).orderBy(desc(camps.createdAt));
 
@@ -77,8 +75,7 @@ export const campsRouter = router({
    * الحصول على مخيم بواسطة المعرف
    */
   getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
-    const db = await getDb();
-    if (!db) return null;
+    const db = await ensureDatabaseAvailable();
 
     const result = await db.select().from(camps).where(eq(camps.id, input.id)).limit(1);
 
@@ -90,8 +87,7 @@ export const campsRouter = router({
    * الحصول على مخيم بواسطة الرابط
    */
   getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
-    const db = await getDb();
-    if (!db) return null;
+    const db = await ensureDatabaseAvailable();
 
     const result = await db
       .select()
@@ -109,8 +105,7 @@ export const campsRouter = router({
   getAvailableDates: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) return { dates: [], morningTime: null, eveningTime: null, dailyCapacity: null };
+      const db = await ensureDatabaseAvailable();
 
       // Get camp info
       const [camp] = await db
@@ -124,7 +119,8 @@ export const campsRouter = router({
 
       const morningTime = (camp as { morningTime?: string | null }).morningTime as string | null;
       const eveningTime = (camp as { eveningTime?: string | null }).eveningTime as string | null;
-      const dailyCapacity = (camp as { dailyCapacity?: number | null }).dailyCapacity as number | null;
+      const dailyCapacity = (camp as { dailyCapacity?: number | null }).dailyCapacity as
+        number | null;
 
       // Build list of all days in camp period
       const start = new Date(camp.startDate);
@@ -172,10 +168,7 @@ export const campsRouter = router({
             sql`preferredDate IS NOT NULL`
           )
         )
-        .groupBy(
-          campRegistrations.preferredDate,
-          campRegistrations.preferredTimeSlot
-        );
+        .groupBy(campRegistrations.preferredDate, campRegistrations.preferredTimeSlot);
 
       // Build a map: date -> { morning: count, evening: count }
       const countMap: Record<string, { morning: number; evening: number }> = {};
@@ -183,11 +176,17 @@ export const campsRouter = router({
         const dateKey = row.preferredDate
           ? new Date(row.preferredDate).toISOString().split('T')[0]
           : null;
-        if (!dateKey) continue;
-        if (!countMap[dateKey]) countMap[dateKey] = { morning: 0, evening: 0 };
-        if (row.preferredTimeSlot === 'morning') countMap[dateKey].morning += Number(row.count);
-        else if (row.preferredTimeSlot === 'evening')
+        if (!dateKey) {
+          continue;
+        }
+        if (!countMap[dateKey]) {
+          countMap[dateKey] = { morning: 0, evening: 0 };
+        }
+        if (row.preferredTimeSlot === 'morning') {
+          countMap[dateKey].morning += Number(row.count);
+        } else if (row.preferredTimeSlot === 'evening') {
           countMap[dateKey].evening += Number(row.count);
+        }
       }
 
       const dates = allDays
@@ -213,13 +212,11 @@ export const campsRouter = router({
    * إنشاء مخيم جديد (للإدارة فقط)
    */
   create: protectedProcedure
-    // @ts-ignore - tRPC middleware type compatibility issue
+    // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireCampsFeature())
     .input(campInputSchema)
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       // Generate slug if not provided (normalize to lowercase)
       let slug =
@@ -284,9 +281,7 @@ export const campsRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const { id, ...data } = input;
 
@@ -359,9 +354,7 @@ export const campsRouter = router({
     .use(requireCampsFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       await db.delete(camps).where(eq(camps.id, input.id));
 
@@ -381,9 +374,7 @@ export const campsRouter = router({
     .use(requireCampsFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       // Get current status
       const current = await db.select().from(camps).where(eq(camps.id, input.id)).limit(1);

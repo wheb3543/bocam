@@ -18,6 +18,9 @@ import {
   sanitizePatient,
 } from '../database/db/patients';
 import { meta } from '../api/MetaApiService';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('patientPortal');
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is required');
@@ -34,8 +37,14 @@ function createPatientToken(patientId: number, phone: string): string {
 // Helper to verify patient JWT
 function verifyPatientToken(token: string): { patientId: number; phone: string } | null {
   try {
-    const decoded = jwt.verify(token, PATIENT_JWT_SECRET) as { type: string; patientId: number; phone: string };
-    if (decoded.type !== 'patient') return null;
+    const decoded = jwt.verify(token, PATIENT_JWT_SECRET) as {
+      type: string;
+      patientId: number;
+      phone: string;
+    };
+    if (decoded.type !== 'patient') {
+      return null;
+    }
     return { patientId: decoded.patientId, phone: decoded.phone };
   } catch {
     return null;
@@ -87,15 +96,15 @@ export const patientPortalRouter = router({
             input.phone,
             `رمز التحقق الخاص بك هو: ${code}\n\nهذا الرمز صالح لمدة 5 دقائق. لا تشاركه مع أحد.`
           );
-          console.log(`[PatientPortal] OTP sent via WhatsApp to ${input.phone}:`, result);
+          logger.info(`OTP sent via WhatsApp to ${input.phone}:`, result);
         } catch (error) {
-          console.error(`[PatientPortal] Failed to send OTP via WhatsApp:`, error);
+          logger.error(`Failed to send OTP via WhatsApp:`, error);
           // في حالة فشل WhatsApp، نعيد الرمز في بيئة التطوير
-          console.log(`[PatientPortal] OTP for ${input.phone} (fallback): ${code}`);
+          logger.info(`OTP for ${input.phone} (fallback): ${code}`);
         }
       } else {
-        // في حالة عدم وجود WhatsApp Phone Number ID، نستخدم console.log
-        console.log(`[PatientPortal] OTP for ${input.phone}: ${code}`);
+        // في حالة عدم وجود WhatsApp Phone Number ID، نستخدم logger
+        logger.info(`OTP for ${input.phone}: ${code}`);
       }
 
       return {
@@ -252,13 +261,19 @@ export const patientPortalRouter = router({
   // الحصول على بيانات المريض الحالي
   me: publicProcedure.query(async ({ ctx }) => {
     const token = ctx.req.cookies?.[PATIENT_COOKIE_NAME];
-    if (!token) return null;
+    if (!token) {
+      return null;
+    }
 
     const decoded = verifyPatientToken(token);
-    if (!decoded) return null;
+    if (!decoded) {
+      return null;
+    }
 
     const patient = await getPatientById(decoded.patientId);
-    if (!patient?.isActive) return null;
+    if (!patient?.isActive) {
+      return null;
+    }
     return sanitizePatient(patient);
   }),
 
@@ -279,7 +294,10 @@ export const patientPortalRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const updated = await updatePatientProfile((ctx as { patient: { id: number } }).patient.id, input);
+      const updated = await updatePatientProfile(
+        (ctx as { patient: { id: number } }).patient.id,
+        input
+      );
       return sanitizePatient(updated);
     }),
 

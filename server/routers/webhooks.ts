@@ -1,17 +1,14 @@
 import { z } from 'zod';
 import { publicProcedure, router } from '../_core/trpc';
 import { TRPCError } from '@trpc/server';
-import { getDb } from '../database/db';
-import {
-  appointments,
-  offerLeads,
-  campRegistrations,
-  doctors,
-  offers,
-} from '../../drizzle/schema';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { appointments, offerLeads, campRegistrations, doctors, offers } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { dispatchWhatsAppMessage } from '../services/whatsappMessageDispatcher';
-import { serverCache, CacheKeys } from '../services/cache';
+import { createLogger } from '../_core/logger';
+import { invalidateEntityCache } from '../services/cacheInvalidator';
+
+const logger = createLogger('webhooks');
 
 /**
  * WhatsApp Webhook Router
@@ -139,10 +136,10 @@ export const webhooksRouter = router({
       const VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
 
       if (input.mode === 'subscribe' && input.token === VERIFY_TOKEN) {
-        console.log('[Webhook] Verification successful');
+        logger.info('Verification successful');
         return { challenge: input.challenge };
       } else {
-        console.error('[Webhook] Verification failed');
+        logger.error('Verification failed');
         throw new TRPCError({
           code: 'FORBIDDEN',
           message: 'Verification token mismatch',
@@ -156,15 +153,9 @@ export const webhooksRouter = router({
    */
   receive: publicProcedure.input(webhookSchema).mutation(async ({ input }) => {
     try {
-      console.log('[Webhook] Received webhook event for object:', input.object);
+      logger.info('Received webhook event for object:', input.object);
 
-      const db = await getDb();
-      if (!db) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Database not available',
-        });
-      }
+      const db = await ensureDatabaseAvailable();
 
       // معالجة كل entry
       for (const entry of input.entry) {
@@ -173,13 +164,13 @@ export const webhooksRouter = router({
           const statuses = change.value.statuses;
           if (statuses && statuses.length > 0) {
             for (const status of statuses) {
-              console.log(`[Webhook] Message status: ${status.status} for message ${status.id}`);
+              logger.info(`Message status: ${status.status} for message ${status.id}`);
 
               // Log failed messages
               if (status.status === 'failed' && status.errors) {
                 for (const error of status.errors) {
-                  console.error(
-                    `[Webhook] Message failed - Code: ${error.code}, Title: ${error.title}, Message: ${error.message || 'N/A'}`
+                  logger.error(
+                    `Message failed - Code: ${error.code}, Title: ${error.title}, Message: ${error.message || 'N/A'}`
                   );
                 }
               }
@@ -190,7 +181,9 @@ export const webhooksRouter = router({
 
           // معالجة incoming messages
           const messages = change.value.messages;
-          if (!messages || messages.length === 0) continue;
+          if (!messages || messages.length === 0) {
+            continue;
+          }
 
           for (const message of messages) {
             const userPhone = message.from;
@@ -198,20 +191,20 @@ export const webhooksRouter = router({
             if (message.type === 'button' && message.button) {
               const payload = message.button.payload;
 
-              console.log(`[Webhook] Button clicked: ${payload} from ${userPhone}`);
+              logger.info(`Button clicked: ${payload} from ${userPhone}`);
 
               // تحليل الـ payload لمعرفة نوع الحجز والإجراء
               // Format: CONFIRM_APPOINTMENT_123 أو CANCEL_APPOINTMENT_123
               const [action, type, id] = payload.split('_');
 
               if (!action || !type || !id) {
-                console.error(`[Webhook] Invalid payload format: ${payload}`);
+                logger.error(`Invalid payload format: ${payload}`);
                 continue;
               }
 
               const bookingId = parseInt(id);
               if (isNaN(bookingId)) {
-                console.error(`[Webhook] Invalid booking ID: ${id}`);
+                logger.error(`Invalid booking ID: ${id}`);
                 continue;
               }
 
@@ -219,15 +212,21 @@ export const webhooksRouter = router({
               if (type === 'APPOINTMENT') {
                 const newStatus = action === 'CONFIRM' ? 'confirmed' : 'cancelled';
                 const now = new Date();
-                const apptUpdateData: Record<string, unknown> = { status: newStatus, updatedAt: now };
-                if (newStatus === 'confirmed') apptUpdateData.confirmedAt = now;
-                else if (newStatus === 'cancelled') apptUpdateData.cancelledAt = now;
+                const apptUpdateData: Record<string, unknown> = {
+                  status: newStatus,
+                  updatedAt: now,
+                };
+                if (newStatus === 'confirmed') {
+                  apptUpdateData.confirmedAt = now;
+                } else if (newStatus === 'cancelled') {
+                  apptUpdateData.cancelledAt = now;
+                }
 
                 await db
                   .update(appointments)
                   .set(apptUpdateData)
                   .where(eq(appointments.id, bookingId));
-                console.log(`[Webhook] Appointment ${bookingId} updated to ${newStatus}`);
+                logger.info(`Appointment ${bookingId} updated to ${newStatus}`);
 
                 // إرسال رسالة WhatsApp تلقائية
                 const [appt] = await db
@@ -268,28 +267,29 @@ export const webhooksRouter = router({
                     },
                     entityId: bookingId,
                   }).catch((err) =>
-                    console.error(
-                      `[Webhook] Failed to send ${triggerEvent} for appt ${bookingId}:`,
-                      err
-                    )
+                    logger.error(`Failed to send ${triggerEvent} for appt ${bookingId}:`, err)
                   );
                 }
 
-                serverCache.invalidateByPrefix('paginated:appointments:');
-                serverCache.invalidate('list:appointments');
-                serverCache.invalidate(CacheKeys.appointmentStats());
+                invalidateEntityCache('appointments');
               } else if (type === 'OFFER') {
                 const newStatus = action === 'CONFIRM' ? 'confirmed' : 'cancelled';
                 const now = new Date();
-                const offerUpdateData: Record<string, unknown> = { status: newStatus, updatedAt: now };
-                if (newStatus === 'confirmed') offerUpdateData.confirmedAt = now;
-                else if (newStatus === 'cancelled') offerUpdateData.cancelledAt = now;
+                const offerUpdateData: Record<string, unknown> = {
+                  status: newStatus,
+                  updatedAt: now,
+                };
+                if (newStatus === 'confirmed') {
+                  offerUpdateData.confirmedAt = now;
+                } else if (newStatus === 'cancelled') {
+                  offerUpdateData.cancelledAt = now;
+                }
 
                 await db
                   .update(offerLeads)
                   .set(offerUpdateData)
                   .where(eq(offerLeads.id, bookingId));
-                console.log(`[Webhook] Offer lead ${bookingId} updated to ${newStatus}`);
+                logger.info(`Offer lead ${bookingId} updated to ${newStatus}`);
 
                 // إرسال رسالة WhatsApp تلقائية
                 const [lead] = await db
@@ -321,29 +321,30 @@ export const webhooksRouter = router({
                     },
                     entityId: bookingId,
                   }).catch((err) =>
-                    console.error(
-                      `[Webhook] Failed to send ${triggerEvent} for offer ${bookingId}:`,
-                      err
-                    )
+                    logger.error(`Failed to send ${triggerEvent} for offer ${bookingId}:`, err)
                   );
                 }
 
-                serverCache.invalidateByPrefix('paginated:offerLeads:');
-                serverCache.invalidate('list:offerLeads');
-                serverCache.invalidate(CacheKeys.offerLeadStats());
+                invalidateEntityCache('offerLeads');
               } else if (type === 'CAMP') {
                 const newStatus = action === 'CONFIRM' ? 'confirmed' : 'cancelled';
                 const now = new Date();
-                const campUpdateData: Record<string, unknown> = { status: newStatus, updatedAt: now };
-                if (newStatus === 'confirmed') campUpdateData.confirmedAt = now;
-                else if (newStatus === 'cancelled') campUpdateData.cancelledAt = now;
+                const campUpdateData: Record<string, unknown> = {
+                  status: newStatus,
+                  updatedAt: now,
+                };
+                if (newStatus === 'confirmed') {
+                  campUpdateData.confirmedAt = now;
+                } else if (newStatus === 'cancelled') {
+                  campUpdateData.cancelledAt = now;
+                }
 
                 await db
                   .update(campRegistrations)
                   .set(campUpdateData)
                   .where(eq(campRegistrations.id, bookingId));
 
-                console.log(`[Webhook] Camp registration ${bookingId} updated to ${newStatus}`);
+                logger.info(`Camp registration ${bookingId} updated to ${newStatus}`);
 
                 // إرسال رسالة WhatsApp تلقائية بناءً على الحالة الجديدة
                 const [reg] = await db
@@ -362,7 +363,9 @@ export const webhooksRouter = router({
                   // camp_reg_confirmed (150004) يقبل 5 متغيرات: name, camp_name, date, time, location
                   // camp_reg_cancelled (150003) يقبل 2 متغيرات: name, camp_name
                   const wh_dateStr = (reg as { preferredDate?: string }).preferredDate
-                    ? new Date((reg as { preferredDate?: string }).preferredDate || '').toLocaleDateString('ar-YE')
+                    ? new Date(
+                        (reg as { preferredDate?: string }).preferredDate || ''
+                      ).toLocaleDateString('ar-YE')
                     : camp?.startDate
                       ? new Date(camp.startDate).toLocaleDateString('ar-YE')
                       : 'غير محدد';
@@ -386,23 +389,18 @@ export const webhooksRouter = router({
                     },
                     entityId: bookingId,
                   }).catch((err) =>
-                    console.error(
-                      `[Webhook] Failed to send ${triggerEvent} for camp reg ${bookingId}:`,
-                      err
-                    )
+                    logger.error(`Failed to send ${triggerEvent} for camp reg ${bookingId}:`, err)
                   );
                 }
 
                 // إبطال الـ cache
-                serverCache.invalidateByPrefix('paginated:campRegistrations:');
-                serverCache.invalidate('list:campRegistrations');
-                serverCache.invalidate(CacheKeys.campRegistrationStats());
+                invalidateEntityCache('campRegistrations');
               }
 
               // معالجة APPOINTMENT و OFFER: إرسال رسائل تلقائية أيضاً
             } else if (message.type === 'text' && message.text) {
               // معالجة الرسائل النصية الواردة
-              console.log(`[Webhook] Text message from ${userPhone}: ${message.text.body}`);
+              logger.info(`Text message from ${userPhone}: ${message.text.body}`);
               // TODO: معالجة الرسائل النصية (مثل الردود التلقائية)
             }
           }
@@ -412,7 +410,7 @@ export const webhooksRouter = router({
       // Always return 200 OK to Meta (even if processing failed internally)
       return { success: true, message: 'Webhook processed successfully' };
     } catch (error) {
-      console.error('[Webhook] Error processing webhook:', error);
+      logger.error('Error processing webhook:', error);
       // Return 200 to Meta so it doesn't retry — log the error internally
       return { success: false, message: 'Processing error logged' };
     }

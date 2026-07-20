@@ -41,6 +41,9 @@ import { metaSyncRouter } from './metaSync';
 import { authRouter } from './auth';
 import { generatePDF } from '../services/pdfService';
 import { licenseRouter } from './license';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('routers');
 
 export const appRouter = router({
   campaigns: campaignsRouter,
@@ -299,7 +302,7 @@ export const appRouter = router({
         management: pendingAccessCount,
       };
     } catch (error) {
-      console.error('[SidebarBadges] Error fetching badge counts:', error);
+      logger.error('Error fetching badge counts:', error);
       return { leads: 0, tasks: 0, whatsapp: 0, management: 0 };
     }
   }),
@@ -339,7 +342,7 @@ export const appRouter = router({
           const base64 = pdfBuffer.toString('base64');
           return { success: true, pdf: base64 };
         } catch (error) {
-          console.error('PDF generation error:', error);
+          logger.error('PDF generation error:', error);
           throw new Error('فشل إنشاء ملف PDF', { cause: error });
         }
       }),

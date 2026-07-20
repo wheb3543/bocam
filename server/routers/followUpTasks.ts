@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { protectedProcedure, router } from '../_core/trpc';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
   createFollowUpTask,
   getFollowUpTasksByEntity,
@@ -11,11 +12,10 @@ import {
 export const followUpTasksRouter = router({
   // Get all tasks
   getAll: protectedProcedure.query(async () => {
-    const db = await import('../database/db').then((m) => m.getDb());
-    if (!db) return [];
+    const db = await ensureDatabaseAvailable();
     const { followUpTasks } = await import('../../drizzle/schema');
     const { desc } = await import('drizzle-orm');
-    return await db.select().from(followUpTasks).orderBy(desc(followUpTasks.createdAt));
+    return db.select().from(followUpTasks).orderBy(desc(followUpTasks.createdAt));
   }),
 
   // Get tasks for a specific entity
@@ -27,7 +27,7 @@ export const followUpTasksRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return await getFollowUpTasksByEntity(input.entityType, input.entityId);
+      return getFollowUpTasksByEntity(input.entityType, input.entityId);
     }),
 
   // Get task count for a specific entity
@@ -39,7 +39,7 @@ export const followUpTasksRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return await getFollowUpTaskCount(input.entityType, input.entityId);
+      return getFollowUpTaskCount(input.entityType, input.entityId);
     }),
 
   // Create a new task

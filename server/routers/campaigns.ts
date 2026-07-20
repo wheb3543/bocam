@@ -66,52 +66,55 @@ export const campaignsRouter = router({
         .optional()
     )
     .query(async ({ input }) => {
-      return await getCampaigns(input);
+      return getCampaigns(input);
     }),
 
   // Get campaign by ID
   getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
-    return await getCampaignById(input.id);
+    return getCampaignById(input.id);
   }),
 
   // Get campaign by slug
   getBySlug: protectedProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
-    return await getCampaignBySlug(input.slug);
+    return getCampaignBySlug(input.slug);
   }),
 
   // Create campaign
   create: protectedProcedure.input(createCampaignSchema).mutation(async ({ input }) => {
-    return await createCampaign(input as typeof import('../../drizzle/schema').campaigns.$inferInsert);
+    return createCampaign(input as typeof import('../../drizzle/schema').campaigns.$inferInsert);
   }),
 
   // Update campaign
   update: protectedProcedure.input(updateCampaignSchema).mutation(async ({ input }) => {
     const { id, ...data } = input;
-    return await updateCampaign(id, data as Partial<typeof import('../../drizzle/schema').campaigns.$inferInsert>);
+    return updateCampaign(
+      id,
+      data as Partial<typeof import('../../drizzle/schema').campaigns.$inferInsert>
+    );
   }),
 
   // Delete campaign
   delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    return await deleteCampaign(input.id);
+    return deleteCampaign(input.id);
   }),
 
   // Get campaign statistics
   getStats: protectedProcedure
     .input(z.object({ campaignId: z.number() }))
     .query(async ({ input }) => {
-      return await getCampaignStats(input.campaignId);
+      return getCampaignStats(input.campaignId);
     }),
 
   // Get campaigns overview
   getOverview: protectedProcedure.query(async () => {
-    return await getCampaignsOverview();
+    return getCampaignsOverview();
   }),
 
   // Get all campaign links (offers, camps, doctors)
   getLinks: protectedProcedure
     .input(z.object({ campaignId: z.number() }))
     .query(async ({ input }) => {
-      return await getCampaignAllLinks(input.campaignId);
+      return getCampaignAllLinks(input.campaignId);
     }),
 
   // Link offers to campaign
@@ -123,7 +126,7 @@ export const campaignsRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return await linkOffersToCampaign(input.campaignId, input.offerIds);
+      return linkOffersToCampaign(input.campaignId, input.offerIds);
     }),
 
   // Link camps to campaign
@@ -135,7 +138,7 @@ export const campaignsRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return await linkCampsToCampaign(input.campaignId, input.campIds);
+      return linkCampsToCampaign(input.campaignId, input.campIds);
     }),
 
   // Link doctors to campaign
@@ -147,6 +150,6 @@ export const campaignsRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return await linkDoctorsToCampaign(input.campaignId, input.doctorIds);
+      return linkDoctorsToCampaign(input.campaignId, input.doctorIds);
     }),
 });

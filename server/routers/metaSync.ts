@@ -71,7 +71,7 @@ export const metaSyncRouter = router({
         };
       }
 
-      return await pushTemplateToMeta(
+      return pushTemplateToMeta(
         phoneNumberId,
         accessToken,
         input.templateName,
@@ -101,7 +101,7 @@ export const metaSyncRouter = router({
         };
       }
 
-      return await checkTemplateStatus(phoneNumberId, accessToken, input.templateId);
+      return checkTemplateStatus(phoneNumberId, accessToken, input.templateId);
     }),
 
   /**
@@ -124,7 +124,7 @@ export const metaSyncRouter = router({
         };
       }
 
-      return await deleteTemplateFromMeta(phoneNumberId, accessToken, input.templateName);
+      return deleteTemplateFromMeta(phoneNumberId, accessToken, input.templateName);
     }),
 
   /**
@@ -141,6 +141,6 @@ export const metaSyncRouter = router({
       };
     }
 
-    return await syncTemplatesCompletely(phoneNumberId, accessToken);
+    return syncTemplatesCompletely(phoneNumberId, accessToken);
   }),
 });

@@ -14,7 +14,7 @@ export const commentsRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return await getCommentsByEntity(input.entityType, input.entityId);
+      return getCommentsByEntity(input.entityType, input.entityId);
     }),
 
   /**
@@ -37,7 +37,7 @@ export const commentsRouter = router({
         userName: ctx.user.name || ctx.user.username || 'مستخدم',
       };
 
-      return await addComment(comment);
+      return addComment(comment);
     }),
 
   /**
@@ -47,7 +47,7 @@ export const commentsRouter = router({
     .input(z.object({ commentId: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const isAdmin = ctx.user.role === 'admin';
-      return await deleteComment(input.commentId, ctx.user.id, isAdmin);
+      return deleteComment(input.commentId, ctx.user.id, isAdmin);
     }),
 
   /**
@@ -61,6 +61,6 @@ export const commentsRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return await getCommentCount(input.entityType, input.entityId);
+      return getCommentCount(input.entityType, input.entityId);
     }),
 });

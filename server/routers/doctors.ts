@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import { TRPCError } from '@trpc/server';
 import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
-import { getDb } from '../database/db';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { doctors } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
@@ -10,8 +9,7 @@ export const doctorsRouter = router({
   // List all doctors (public) - cached
   list: publicProcedure.query(async () => {
     return serverCache.getOrCompute(CacheKeys.doctorsList(), CacheTTL.LONG, async () => {
-      const db = await getDb();
-      if (!db) return [];
+      const db = await ensureDatabaseAvailable();
 
       const results = await db.select().from(doctors);
       return results;
@@ -20,8 +18,7 @@ export const doctorsRouter = router({
 
   // Get doctor by ID (public)
   getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
-    const db = await getDb();
-    if (!db) return null;
+    const db = await ensureDatabaseAvailable();
 
     const result = await db.select().from(doctors).where(eq(doctors.id, input.id)).limit(1);
     return result.length > 0 ? result[0] : null;
@@ -29,8 +26,7 @@ export const doctorsRouter = router({
 
   // Get doctor by slug (public)
   getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
-    const db = await getDb();
-    if (!db) return null;
+    const db = await ensureDatabaseAvailable();
 
     const result = await db.select().from(doctors).where(eq(doctors.slug, input.slug)).limit(1);
     return result.length > 0 ? result[0] : null;
@@ -54,9 +50,7 @@ export const doctorsRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const doctor = await db.insert(doctors).values(input);
 
@@ -85,9 +79,7 @@ export const doctorsRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const { id, ...data } = input;
 
@@ -101,9 +93,7 @@ export const doctorsRouter = router({
 
   // Delete doctor (protected)
   delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+    const db = await ensureDatabaseAvailable();
 
     await db.delete(doctors).where(eq(doctors.id, input.id));
 
@@ -122,9 +112,7 @@ export const doctorsRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       await db.update(doctors).set({ available: input.available }).where(eq(doctors.id, input.id));
 
