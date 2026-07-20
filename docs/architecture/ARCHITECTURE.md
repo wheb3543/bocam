@@ -103,6 +103,11 @@ client/src/
 - **tRPC 11** - API آمن نوعياً
 - **Drizzle ORM** - إدارة قاعدة البيانات
 
+**ملاحظات تنفيذية (محدث):**
+- `server/services/redis.ts` و `server/_core/cacheHelper.ts` توفران طبقة كاش مركزية مبنية على Redis مع فصل بين اتصال الطوابير (BullMQ) واتصال الكاش لتحسين الأداء.
+- راوترات الـ tRPC منظمة كـ `server/routers/*` مع تقسيم منطقي (مثال: `server/routers/whatsapp/*` يحتوي على `conversations`, `messages`, `templates`, `analytics`, `settings`).
+- معالجة Webhooks مركَّزة في `server/integrations/webhooks/` مع نقطة دخول HTTP في `server/api/webhookRoutes.ts` (مطلوب من Meta). هذا يفصل بين مسارات الـ tRPC الداخلية ونقاط النهاية العامة للـ Webhooks.
+
 **الهيكل:**
 ```
 server/

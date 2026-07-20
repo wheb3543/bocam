@@ -37,6 +37,23 @@ Includes:
 - Health checks
 - Password protection
 
+## Implementation Notes (updated)
+
+- Primary implementation files:
+  - `server/services/redis.ts` — manages Redis connections and exposes `getRedisConnection()` and `getCacheClient()`; separates connections for BullMQ and general caching.
+  - `server/_core/cacheHelper.ts` — cache decorators, helpers, and `warmCache()` entrypoints.
+  - `server/services/cacheInvalidator.ts` — centralized invalidation helpers used across routers (appointments, campRegistrations, offerLeads).
+  - `server/integrations/queues/` and `server/_core/routes/*` use the cache utilities where appropriate (e.g., `backupRoutes`, `updateRoutes`, `configRoutes`).
+
+- The codebase exports a singleton `cacheManager` (implemented in `server/services/redis.ts`) used throughout the server to `get`, `set`, `delete`, and `deletePattern` keys. Many tRPC procedures call caching helpers via `server/_core/cacheHelper.ts` and `server/database/db-optimizations.ts`.
+
+## Usage locations (examples)
+
+- `server/_core/routes/backupRoutes.ts` — reads/writes `CacheKeys.BACKUP_STATUS` and uses cached update status when available.
+- `server/_core/routes/configRoutes.ts` — caches configuration (`config:all`) and invalidates on updates.
+- `server/routers/whatsapp/settings/routes/*` — uses caching for templates and connection metadata.
+
+
 ## Setup
 
 ### Prerequisites
