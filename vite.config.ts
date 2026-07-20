@@ -4,9 +4,46 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+import { visualizer } from 'rollup-plugin-visualizer';
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  visualizer({ open: false, gzipSize: true, brotliSize: true }),
+  ViteImageOptimizer({
+    png: {
+      quality: 85,
+      compressionLevel: 9,
+    },
+    jpeg: {
+      quality: 85,
+      progressive: true,
+    },
+    jpg: {
+      quality: 85,
+      progressive: true,
+    },
+    webp: {
+      quality: 85,
+      lossless: false,
+    },
+    avif: {
+      quality: 85,
+      lossless: false,
+    },
+    svg: {
+      multipass: true,
+      plugins: [
+        { name: 'preset-default', params: { overrides: { cleanupNumericValues: false } } },
+      ],
+    },
+    include: /\/assets\/.*\.(png|jpe?g|webp|avif|svg)$/i,
+  }),
+];
 
 export default defineConfig({
   plugins,
@@ -46,7 +83,7 @@ export default defineConfig({
           if (id.includes("node_modules/@radix-ui/")) {
             return "vendor-radix";
           }
-          // Charts (recharts + d3) - heavy, admin-only
+          // Charts (recharts + d3) - heavy, admin-only - lazy loaded
           if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) {
             return "vendor-charts";
           }
@@ -87,6 +124,10 @@ export default defineConfig({
           // Wouter router
           if (id.includes("node_modules/wouter")) {
             return "vendor-router";
+          }
+          // Web Vitals
+          if (id.includes("node_modules/web-vitals")) {
+            return "vendor-web-vitals";
           }
         },
       },
