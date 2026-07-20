@@ -3,9 +3,11 @@ import { trpc } from '@/lib/api/trpc';
 import type { RouterOutputs } from '@/types/trpc';
 import type { WhatsAppConversation } from '@shared/types';
 
-type QualityRecord = RouterOutputs['whatsapp']['phoneQuality']['getHistory'][number];
-type QualityWebhookEvent = RouterOutputs['whatsapp']['webhookEvents']['getEventsByCategory'][number];
-type ConversationQualityRecord = RouterOutputs['whatsapp']['conversationQuality']['getHistory'][number];
+type QualityRecord = RouterOutputs['whatsapp']['quality']['phoneQuality']['getHistory'][number];
+type QualityWebhookEvent =
+  RouterOutputs['whatsapp']['webhookEvents']['getEventsByCategory'][number];
+type ConversationQualityRecord =
+  RouterOutputs['whatsapp']['quality']['conversationQuality']['getHistory'][number];
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -45,13 +47,15 @@ export default function WhatsAppPhoneQualityPage() {
     data: currentQuality,
     isLoading: currentLoading,
     refetch: refetchCurrent,
-  } = trpc.whatsapp.phoneQuality.getCurrent.useQuery(undefined, { refetchInterval: 300000 });
+  } = trpc.whatsapp.quality.phoneQuality.getCurrent.useQuery(undefined, {
+    refetchInterval: 300000,
+  });
 
   const {
     data: qualityHistory,
     isLoading: historyLoading,
     refetch: refetchHistory,
-  } = trpc.whatsapp.phoneQuality.getHistory.useQuery(
+  } = trpc.whatsapp.quality.phoneQuality.getHistory.useQuery(
     { phoneNumber: phoneFilter || undefined, limit: 100 },
     { refetchInterval: 300000 }
   );
@@ -69,10 +73,14 @@ export default function WhatsAppPhoneQualityPage() {
     data: conversationQualityQuery,
     isLoading: conversationLoading,
     refetch: refetchConversation,
-  } = trpc.whatsapp.conversationQuality.getHistory.useQuery(
+  } = trpc.whatsapp.quality.conversationQuality.getHistory.useQuery(
     { phoneNumber: phoneFilter || undefined, limit: 100 },
     { refetchInterval: 300000 }
-  ) as unknown as { data: ConversationQualityRecord[] | undefined; isLoading: boolean; refetch: () => void };
+  ) as unknown as {
+    data: ConversationQualityRecord[] | undefined;
+    isLoading: boolean;
+    refetch: () => void;
+  };
 
   const { data: conversationCosts } = trpc.whatsapp.getConversationCosts.useQuery(
     {},
@@ -162,7 +170,9 @@ export default function WhatsAppPhoneQualityPage() {
 
   // Calculate trend from history
   const getQualityTrend = () => {
-    if (!qualityHistory || qualityHistory.length < 2) {return null;}
+    if (!qualityHistory || qualityHistory.length < 2) {
+      return null;
+    }
     const current = qualityHistory[0]?.qualityScore || 0;
     const previous = qualityHistory[1]?.qualityScore || 0;
     return { icon: getTrendIcon(current, previous), change: current - previous };
@@ -425,7 +435,9 @@ export default function WhatsAppPhoneQualityPage() {
                       {qualityHistory.map((record: QualityRecord, _index: number) => (
                         <tr key={record.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4">
-                            {record.createdAt ? new Date(record.createdAt).toLocaleString('ar-SA') : '-'}
+                            {record.createdAt
+                              ? new Date(record.createdAt).toLocaleString('ar-SA')
+                              : '-'}
                           </td>
                           <td className="py-3 px-4">{record.phoneNumber || ''}</td>
                           <td className="py-3 px-4">
@@ -500,7 +512,9 @@ export default function WhatsAppPhoneQualityPage() {
                             ${(conv.totalCost || 0).toFixed(2)}
                           </td>
                           <td className="py-3 px-4">
-                            {conv.createdAt ? new Date(conv.createdAt).toLocaleString('ar-SA') : '-'}
+                            {conv.createdAt
+                              ? new Date(conv.createdAt).toLocaleString('ar-SA')
+                              : '-'}
                           </td>
                         </tr>
                       ))
@@ -544,7 +558,9 @@ export default function WhatsAppPhoneQualityPage() {
                             <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber}</p>
                           )}
                           <p className="text-xs text-gray-500 mt-2">
-                            {event.createdAt ? new Date(event.createdAt).toLocaleString('ar-SA') : '-'}
+                            {event.createdAt
+                              ? new Date(event.createdAt).toLocaleString('ar-SA')
+                              : '-'}
                           </p>
                         </div>
                         <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>
@@ -588,7 +604,9 @@ export default function WhatsAppPhoneQualityPage() {
                       {conversationQualityQuery.map((record: ConversationQualityRecord) => (
                         <tr key={record.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4">
-                            {record.createdAt ? new Date(record.createdAt).toLocaleString('ar-SA') : '-'}
+                            {record.createdAt
+                              ? new Date(record.createdAt).toLocaleString('ar-SA')
+                              : '-'}
                           </td>
                           <td className="py-3 px-4">{record.phoneNumber}</td>
                           <td className="py-3 px-4">{record.qualityScore || 'N/A'}</td>

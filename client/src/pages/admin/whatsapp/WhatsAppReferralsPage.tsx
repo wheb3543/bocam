@@ -101,7 +101,7 @@ export default function WhatsAppReferralsPage() {
   };
 
   const handleExport = () => {
-    console.log('Exporting referrals data...');
+    // Export functionality placeholder
   };
 
   return (

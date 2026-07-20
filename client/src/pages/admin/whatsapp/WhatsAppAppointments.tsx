@@ -79,7 +79,8 @@ export default function WhatsAppAppointments() {
   const [offset, setOffset] = useState(0);
   const limit = 20;
 
-  const _sendConfirmationMutation = trpc.whatsapp.sendAppointmentConfirmation.useMutation();
+  // sendAppointmentConfirmation - feature removed in refactored router
+  // const _sendConfirmationMutation = trpc.whatsapp.sendAppointmentConfirmation.useMutation();
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
@@ -88,28 +89,28 @@ export default function WhatsAppAppointments() {
     }, []),
   });
 
-  // إعادة إرسال الإشعار
-  const resendNotificationMutation = trpc.whatsapp.resendNotification.useMutation({
-    onSuccess: () => {
-      toast.success('تم إعادة إرسال الإشعار');
-      logsQuery.refetch();
-    },
-    onError: () => toast.error('فشل إعادة الإرسال'),
-  });
+  // إعادة إرسال الإشعار - feature removed in refactored router
+  // const resendNotificationMutation = trpc.whatsapp.resendNotification.useMutation({
+  //   onSuccess: () => {
+  //     toast.success('تم إعادة إرسال الإشعار');
+  //     logsQuery.refetch();
+  //   },
+  //   onError: () => toast.error('فشل إعادة الإرسال'),
+  // });
 
-  // فحص وإرسال التذكيرات
-  const checkRemindersMutation = trpc.whatsapp.checkAndSendReminders.useMutation({
-    onSuccess: () => {
-      toast.success('تم فحص وإرسال التذكيرات');
-      logsQuery.refetch();
-      notificationStatsQuery.refetch();
-    },
-    onError: () => toast.error('فشل فحص التذكيرات'),
-  });
+  // فحص وإرسال التذكيرات - feature removed in refactored router
+  // const checkRemindersMutation = trpc.whatsapp.checkAndSendReminders.useMutation({
+  //   onSuccess: () => {
+  //     toast.success('تم فحص وإرسال التذكيرات');
+  //     logsQuery.refetch();
+  //     notificationStatsQuery.refetch();
+  //   },
+  //   onError: () => toast.error('فشل فحص التذكيرات'),
+  // });
 
   // تشغيل وظائف التذكير
-  const runJobsMutation = trpc.whatsapp.runReminderJobs.useMutation({
-    onSuccess: (_result) => {
+  const runJobsMutation = trpc.whatsapp.scheduler.runReminderJobs.useMutation({
+    onSuccess: (_result: unknown) => {
       toast.success(`تم تشغيل وظائف التذكير بنجاح`);
       logsQuery.refetch();
       notificationStatsQuery.refetch();
@@ -117,17 +118,17 @@ export default function WhatsAppAppointments() {
     onError: () => toast.error('فشل تشغيل الوظائف'),
   });
 
-  // إرسال تذكير موعد
-  const sendReminderMutation = trpc.whatsapp.sendAppointmentReminder.useMutation({
-    onSuccess: () => toast.success('تم إرسال التذكير'),
-    onError: () => toast.error('فشل إرسال التذكير'),
-  });
+  // إرسال تذكير موعد - feature removed in refactored router
+  // const sendReminderMutation = trpc.whatsapp.sendAppointmentReminder.useMutation({
+  //   onSuccess: () => toast.success('تم إرسال التذكير'),
+  //   onError: () => toast.error('فشل إرسال التذكير'),
+  // });
 
-  // إرسال متابعة بعد الموعد
-  const sendFollowupMutation = trpc.whatsapp.sendAppointmentFollowup.useMutation({
-    onSuccess: () => toast.success('تم إرسال المتابعة'),
-    onError: () => toast.error('فشل إرسال المتابعة'),
-  });
+  // إرسال متابعة بعد الموعد - feature removed in refactored router
+  // const sendFollowupMutation = trpc.whatsapp.sendAppointmentFollowup.useMutation({
+  //   onSuccess: () => toast.success('تم إرسال المتابعة'),
+  //   onError: () => toast.error('فشل إرسال المتابعة'),
+  // });
 
   // جلب إحصائيات الإشعارات
   const notificationStatsQuery = trpc.whatsapp.getNotificationStats.useQuery();
@@ -149,40 +150,48 @@ export default function WhatsAppAppointments() {
     notificationStatsQuery.refetch();
   };
 
-  const handleResendNotification = (log: NotificationLog) => {
-    resendNotificationMutation.mutate({
-      entityType: log.entityType,
-      entityId: log.entityId,
-    });
+  const handleResendNotification = (_log: NotificationLog) => {
+    // Feature removed in refactored router
+    toast.error('ميزة إعادة الإرسال غير متوفرة في الإصدار الحالي');
+    // resendNotificationMutation.mutate({
+    //   entityType: log.entityType,
+    //   entityId: log.entityId,
+    // });
   };
 
   const handleCheckReminders = () => {
-    checkRemindersMutation.mutate();
+    // Feature removed in refactored router
+    toast.error('ميزة فحص التذكيرات غير متوفرة في الإصدار الحالي');
+    // checkRemindersMutation.mutate();
   };
 
   const handleRunJobs = () => {
     runJobsMutation.mutate();
   };
 
-  const handleSendReminder = (log: NotificationLog) => {
-    sendReminderMutation.mutate({
-      appointmentId: log.entityId,
-      phone: log.phone,
-      patientName: log.recipientName || '',
-      doctorName: log.doctorName || '',
-      appointmentTime: new Date(log.appointmentTime || Date.now()),
-      hoursUntil: 24,
-    });
+  const handleSendReminder = (_log: NotificationLog) => {
+    // Feature removed in refactored router
+    toast.error('ميزة إرسال التذكير غير متوفرة في الإصدار الحالي');
+    // sendReminderMutation.mutate({
+    //   appointmentId: log.entityId,
+    //   phone: log.phone,
+    //   patientName: log.recipientName || '',
+    //   doctorName: log.doctorName || '',
+    //   appointmentTime: new Date(log.appointmentTime || Date.now()),
+    //   hoursUntil: 24,
+    // });
   };
 
-  const handleSendFollowup = (log: NotificationLog) => {
-    sendFollowupMutation.mutate({
-      appointmentId: log.entityId,
-      phone: log.phone,
-      patientName: log.recipientName || '',
-      doctorName: log.doctorName || '',
-      department: log.department || '',
-    });
+  const handleSendFollowup = (_log: NotificationLog) => {
+    // Feature removed in refactored router
+    toast.error('ميزة إرسال المتابعة غير متوفرة في الإصدار الحالي');
+    // sendFollowupMutation.mutate({
+    //   appointmentId: log.entityId,
+    //   phone: log.phone,
+    //   patientName: log.recipientName || '',
+    //   doctorName: log.doctorName || '',
+    //   department: log.department || '',
+    // });
   };
 
   const handleExport = () => {
@@ -205,7 +214,9 @@ export default function WhatsAppAppointments() {
   };
 
   const formatDate = (dateStr: string | Date | null) => {
-    if (!dateStr) {return '—';}
+    if (!dateStr) {
+      return '—';
+    }
     const d = new Date(dateStr);
     return d.toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short' });
   };
@@ -234,12 +245,7 @@ export default function WhatsAppAppointments() {
               <RefreshCw className={`w-4 h-4 ml-2 ${logsQuery.isFetching ? 'animate-spin' : ''}`} />
               تحديث
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCheckReminders}
-              disabled={checkRemindersMutation.isPending}
-            >
+            <Button variant="outline" size="sm" onClick={handleCheckReminders} disabled={false}>
               <Bell className="w-4 h-4 ml-2" />
               فحص التذكيرات
             </Button>
@@ -493,7 +499,7 @@ export default function WhatsAppAppointments() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleResendNotification(log)}
-                            disabled={resendNotificationMutation.isPending}
+                            disabled={false}
                             className="h-6 px-2 text-xs text-red-600 hover:text-red-700"
                           >
                             إعادة الإرسال
@@ -505,7 +511,7 @@ export default function WhatsAppAppointments() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleSendReminder(log)}
-                              disabled={sendReminderMutation.isPending}
+                              disabled={false}
                               className="h-6 px-2 text-xs"
                               title="إرسال تذكير"
                             >
@@ -515,7 +521,7 @@ export default function WhatsAppAppointments() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleSendFollowup(log)}
-                              disabled={sendFollowupMutation.isPending}
+                              disabled={false}
                               className="h-6 px-2 text-xs"
                               title="إرسال متابعة"
                             >

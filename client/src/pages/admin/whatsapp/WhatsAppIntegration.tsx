@@ -34,7 +34,7 @@ interface Template {
   id: number;
   name: string;
   metaName: string | null;
-  category: "MARKETING" | "UTILITY" | "AUTHENTICATION";
+  category: 'MARKETING' | 'UTILITY' | 'AUTHENTICATION';
   languageCode: string | null;
   metaStatus: string | null;
   metaCategory: string | null;
@@ -71,7 +71,7 @@ export default function WhatsAppIntegration() {
     }, []),
   });
 
-  const { data: securityStats } = trpc.whatsapp.getSecurityStats.useQuery();
+  const { data: securityStats } = trpc.whatsapp.security.getSecurityStats.useQuery();
 
   // Mutations
   const sendWelcomeGreeting = trpc.whatsappTemplateTest.sendWelcomeGreeting.useMutation();
@@ -195,7 +195,9 @@ export default function WhatsAppIntegration() {
     : [];
 
   // Get unique categories
-  const categories = Array.from(new Set(templates?.templates?.map((t: Template) => t.category) || []));
+  const categories = Array.from(
+    new Set(templates?.templates?.map((t: Template) => t.category) || [])
+  );
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -584,7 +586,7 @@ export default function WhatsAppIntegration() {
                                 {msg.status as ReactNode}
                               </Badge>
                             </div>
-                            {msg.recipient as string && (
+                            {(msg.recipient as string) && (
                               <p className="text-sm text-muted-foreground mt-1">
                                 المستلم: {msg.recipient as ReactNode}
                               </p>

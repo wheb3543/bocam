@@ -71,7 +71,9 @@ function WhatsAppConnectionContent() {
         </Badge>
       );
     }
-    if (statusData?.isReady) {
+    // Check if all components are ready based on new health check structure
+    const isReady = statusData?.botReady && statusData?.clientReady && statusData?.queueReady;
+    if (isReady) {
       return (
         <Badge className="bg-green-500 hover:bg-green-600 text-xs sm:text-sm">
           <CheckCircle2 className="h-3 w-3 ml-1" />
@@ -126,31 +128,33 @@ function WhatsAppConnectionContent() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex flex-col items-center gap-1.5 p-2.5 sm:p-4 bg-muted/50 rounded-lg text-center">
                   <div
-                    className={`p-1.5 sm:p-2 rounded-full flex-shrink-0 ${statusData?.apiConfigured ? 'bg-green-100' : 'bg-red-100'}`}
+                    className={`p-1.5 sm:p-2 rounded-full flex-shrink-0 ${statusData?.setup?.phoneNumberConfigured ? 'bg-green-100' : 'bg-red-100'}`}
                   >
                     <Shield
-                      className={`h-4 w-4 sm:h-5 sm:w-5 ${statusData?.apiConfigured ? 'text-green-600' : 'text-red-600'}`}
+                      className={`h-4 w-4 sm:h-5 sm:w-5 ${statusData?.setup?.phoneNumberConfigured ? 'text-green-600' : 'text-red-600'}`}
                     />
                   </div>
                   <div>
                     <p className="text-[10px] sm:text-sm text-muted-foreground">API</p>
                     <p className="font-semibold text-xs sm:text-base">
-                      {statusData?.apiConfigured ? 'مُعد' : 'غير مُعد'}
+                      {statusData?.setup?.phoneNumberConfigured ? 'مُعد' : 'غير مُعد'}
                     </p>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-1.5 p-2.5 sm:p-4 bg-muted/50 rounded-lg text-center">
                   <div
-                    className={`p-1.5 sm:p-2 rounded-full flex-shrink-0 ${statusData?.isReady ? 'bg-green-100' : 'bg-muted'}`}
+                    className={`p-1.5 sm:p-2 rounded-full flex-shrink-0 ${statusData?.botReady && statusData?.clientReady && statusData?.queueReady ? 'bg-green-100' : 'bg-muted'}`}
                   >
                     <Cloud
-                      className={`h-4 w-4 sm:h-5 sm:w-5 ${statusData?.isReady ? 'text-green-600' : 'text-muted-foreground'}`}
+                      className={`h-4 w-4 sm:h-5 sm:w-5 ${statusData?.botReady && statusData?.clientReady && statusData?.queueReady ? 'text-green-600' : 'text-muted-foreground'}`}
                     />
                   </div>
                   <div>
                     <p className="text-[10px] sm:text-sm text-muted-foreground">الحالة</p>
                     <p className="font-semibold text-xs sm:text-base">
-                      {statusData?.isReady ? 'جاهز' : 'غير جاهز'}
+                      {statusData?.botReady && statusData?.clientReady && statusData?.queueReady
+                        ? 'جاهز'
+                        : 'غير جاهز'}
                     </p>
                   </div>
                 </div>
@@ -160,9 +164,7 @@ function WhatsAppConnectionContent() {
                   </div>
                   <div>
                     <p className="text-[10px] sm:text-sm text-muted-foreground">الإصدار</p>
-                    <p className="font-semibold text-xs sm:text-base">
-                      {statusData?.apiVersion || 'v21.0'}
-                    </p>
+                    <p className="font-semibold text-xs sm:text-base">v21.0</p>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-1.5 p-2.5 sm:p-4 bg-muted/50 rounded-lg text-center">
@@ -176,7 +178,8 @@ function WhatsAppConnectionContent() {
                 </div>
               </div>
 
-              {statusData?.phoneNumberId && (
+              {/* phoneNumberId removed in refactored health check */}
+              {/* {statusData?.phoneNumberId && (
                 <div className="bg-muted/30 rounded-lg p-3 sm:p-4 mb-4">
                   <p className="text-xs sm:text-sm text-muted-foreground mb-1">
                     معرف رقم الهاتف (Phone Number ID)
@@ -185,7 +188,7 @@ function WhatsAppConnectionContent() {
                     {statusData.phoneNumberId}
                   </p>
                 </div>
-              )}
+              )} */}
 
               <div className="flex gap-2 sm:gap-3">
                 <Button
@@ -207,7 +210,7 @@ function WhatsAppConnectionContent() {
           </Card>
 
           {/* Connected Success Card */}
-          {statusData?.isReady && (
+          {statusData?.botReady && statusData?.clientReady && statusData?.queueReady && (
             <Alert className="bg-green-50 border-green-200 shadow-lg">
               <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               <AlertTitle className="text-green-900 text-sm sm:text-lg">
@@ -221,27 +224,28 @@ function WhatsAppConnectionContent() {
           )}
 
           {/* Not Configured Warning */}
-          {!statusData?.isReady && !statusLoading && (
-            <Alert className="bg-amber-50 border-amber-200 shadow-lg">
-              <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
-              <AlertTitle className="text-amber-900 text-sm sm:text-lg">
-                Cloud API غير مُعد
-              </AlertTitle>
-              <AlertDescription className="text-amber-800 text-xs sm:text-sm">
-                يرجى التأكد من تعيين المتغيرات البيئية التالية:
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>
-                    <code className="bg-amber-100 px-1 rounded">WHATSAPP_PHONE_NUMBER_ID</code> -
-                    معرف رقم الهاتف
-                  </li>
-                  <li>
-                    <code className="bg-amber-100 px-1 rounded">META_ACCESS_TOKEN</code> - رمز
-                    الوصول من Meta
-                  </li>
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
+          {!(statusData?.botReady && statusData?.clientReady && statusData?.queueReady) &&
+            !statusLoading && (
+              <Alert className="bg-amber-50 border-amber-200 shadow-lg">
+                <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+                <AlertTitle className="text-amber-900 text-sm sm:text-lg">
+                  Cloud API غير مُعد
+                </AlertTitle>
+                <AlertDescription className="text-amber-800 text-xs sm:text-sm">
+                  يرجى التأكد من تعيين المتغيرات البيئية التالية:
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>
+                      <code className="bg-amber-100 px-1 rounded">WHATSAPP_PHONE_NUMBER_ID</code> -
+                      معرف رقم الهاتف
+                    </li>
+                    <li>
+                      <code className="bg-amber-100 px-1 rounded">META_ACCESS_TOKEN</code> - رمز
+                      الوصول من Meta
+                    </li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
 
           {/* Info Card */}
           <Card className="shadow-lg border-0">

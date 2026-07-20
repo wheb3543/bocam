@@ -71,10 +71,10 @@ export default function WhatsAppCompliance() {
   const [optOutReason, setOptOutReason] = useState('');
 
   // Queries
-  const securityStatsQuery = trpc.whatsapp.getSecurityStats.useQuery();
+  const securityStatsQuery = trpc.whatsapp.security.getSecurityStats.useQuery();
   const auditStatsQuery = trpc.whatsapp.getAuditStats.useQuery();
-  const blockedPhonesQuery = trpc.whatsapp.getBlockedPhones.useQuery();
-  const optOutRequestsQuery = trpc.whatsapp.getOptOutRequests.useQuery();
+  const blockedPhonesQuery = trpc.whatsapp.security.getBlockedPhones.useQuery();
+  const optOutRequestsQuery = trpc.whatsapp.security.getOptOutRequests.useQuery();
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
@@ -95,11 +95,13 @@ export default function WhatsAppCompliance() {
   });
 
   // Mutations
-  const blockPhoneMutation = trpc.whatsapp.blockPhone.useMutation();
-  const unblockPhoneMutation = trpc.whatsapp.unblockPhone.useMutation();
-  const validateComplianceQuery = trpc.whatsapp.validateMetaCompliance.useQuery({ message: '' });
+  const blockPhoneMutation = trpc.whatsapp.security.blockPhone.useMutation();
+  const unblockPhoneMutation = trpc.whatsapp.security.unblockPhone.useMutation();
+  const validateComplianceQuery = trpc.whatsapp.security.validateMetaCompliance.useQuery({
+    message: '',
+  });
   const exportAuditQuery = trpc.whatsapp.exportAuditLogs.useQuery({ phone: undefined });
-  const handleOptOutMutation = trpc.whatsapp.handleOptOutRequest.useMutation({
+  const handleOptOutMutation = trpc.whatsapp.security.handleOptOutRequest.useMutation({
     onSuccess: () => {
       toast.success('تم معالجة طلب إلغاء الاشتراك');
       setOptOutPhone('');
@@ -247,7 +249,8 @@ export default function WhatsAppCompliance() {
   // Filter blocked phones
   const filteredPhones = Array.isArray(blockedPhonesQuery.data?.phones)
     ? blockedPhonesQuery.data.phones.filter((phone: BlockedPhone) => {
-        const matchesSearch = searchQuery === '' || (phone.phone && phone.phone.includes(searchQuery));
+        const matchesSearch =
+          searchQuery === '' || (phone.phone && phone.phone.includes(searchQuery));
         const matchesFilter = filterReason === 'all' || phone.reason?.includes(filterReason);
         return matchesSearch && matchesFilter;
       })
@@ -512,7 +515,10 @@ export default function WhatsAppCompliance() {
 
               <div>
                 <label className="text-sm font-medium">السبب</label>
-                <Select value={blockReason} onValueChange={(value: BlockReason) => setBlockReason(value)}>
+                <Select
+                  value={blockReason}
+                  onValueChange={(value: BlockReason) => setBlockReason(value)}
+                >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>

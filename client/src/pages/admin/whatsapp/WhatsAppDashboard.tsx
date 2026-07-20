@@ -46,14 +46,14 @@ function WhatsAppDashboardContent() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Queries
-  const healthQuery = trpc.whatsapp.health.useQuery();
+  const healthQuery = trpc.whatsapp.connection.status.useQuery();
   const normalizePhoneQuery = trpc.whatsapp.normalizePhone.useQuery(
     { phone: testPhone },
     { enabled: testPhone.length > 0 }
   );
 
   // Mutations
-  const sendTextMutation = trpc.whatsapp.sendSimpleText.useMutation();
+  const sendTextMutation = trpc.whatsapp.messages.send.useMutation();
   const testConnectionMutation = trpc.whatsapp.testConnection.useMutation();
 
   // SSE: تحديث فوري عند وصول جميع الأحداث الجديدة
@@ -105,16 +105,15 @@ function WhatsAppDashboardContent() {
     setIsLoading(true);
     try {
       const result = await sendTextMutation.mutateAsync({
-        phone: testPhone,
+        conversationId: 0, // Will be created if needed
         message: testMessage,
-        priority: 'high',
       });
 
       if (result.success) {
         toast.success('تم إرسال الرسالة بنجاح!');
         setTestMessage('');
       } else {
-        toast.error(result.error || 'فشل إرسال الرسالة');
+        toast.error('فشل إرسال الرسالة');
       }
     } catch {
       toast.error('حدث خطأ أثناء إرسال الرسالة');
@@ -204,7 +203,7 @@ function WhatsAppDashboardContent() {
                 <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
                   <p className="text-sm font-semibold text-red-800">الأخطاء:</p>
                   <ul className="text-sm text-red-700 mt-2">
-                    {healthQuery.data.errors.map((error, idx) => (
+                    {healthQuery.data.errors.map((error: string, idx: number) => (
                       <li key={idx}>• {error}</li>
                     ))}
                   </ul>

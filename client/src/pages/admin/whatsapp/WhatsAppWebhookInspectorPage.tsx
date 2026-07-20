@@ -19,12 +19,6 @@ import type { RouterOutputs } from '@/types/trpc';
 
 type WebhookEvent = RouterOutputs['whatsapp']['webhookEvents']['getAll'][number];
 
-interface EventType {
-  eventType?: string;
-  count?: number;
-  [key: string]: unknown;
-}
-
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -444,9 +438,11 @@ export default function WhatsAppWebhookInspectorPage() {
           <CardContent>
             <div className="space-y-3">
               {statsByType
-                .sort((a, b) => (b.count || 0) - (a.count || 0))
+                .sort(
+                  (a: { count?: number }, b: { count?: number }) => (b.count || 0) - (a.count || 0)
+                )
                 .slice(0, 10)
-                .map((stat) => {
+                .map((stat: { eventType?: string; count?: number }) => {
                   const percentage = totalEvents > 0 ? ((stat.count || 0) / totalEvents) * 100 : 0;
                   return (
                     <div key={stat.eventType} className="space-y-1">
@@ -478,14 +474,14 @@ export default function WhatsAppWebhookInspectorPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {eventTypes.map((type: EventType) => (
+              {eventTypes.map((type: string) => (
                 <Badge
-                  key={type.eventType}
+                  key={type}
                   variant="outline"
                   className="text-sm cursor-pointer hover:bg-gray-100"
-                  onClick={() => setSearchTerm(type.eventType || '')}
+                  onClick={() => setSearchTerm(type || '')}
                 >
-                  {(type.eventType as string) || ''} ({type.count || 0})
+                  {type || ''}
                 </Badge>
               ))}
             </div>
@@ -547,8 +543,12 @@ export default function WhatsAppWebhookInspectorPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold text-lg">{(event.eventType as string) || ''}</h4>
-                            {(event.subType as string) && <Badge variant="outline">{(event.subType as string)}</Badge>}
+                            <h4 className="font-semibold text-lg">
+                              {(event.eventType as string) || ''}
+                            </h4>
+                            {(event.subType as string) && (
+                              <Badge variant="outline">{event.subType as string}</Badge>
+                            )}
                             {!event.handlerExists && (
                               <Badge className="bg-red-500 text-white gap-1">
                                 <AlertTriangle className="h-3 w-3" />
@@ -566,18 +566,21 @@ export default function WhatsAppWebhookInspectorPage() {
                           <div className="mt-2 text-sm text-gray-600">
                             <p>
                               <span className="font-semibold">التاريخ:</span>{' '}
-                              {event.createdAt ? new Date(event.createdAt).toLocaleString('ar-SA') : '-'}
+                              {event.createdAt
+                                ? new Date(event.createdAt).toLocaleString('ar-SA')
+                                : '-'}
                             </p>
                             {(event.phoneNumber as string) && (
                               <p>
-                                <span className="font-semibold">الرقم:</span> {(event.phoneNumber as string)}
+                                <span className="font-semibold">الرقم:</span>{' '}
+                                {event.phoneNumber as string}
                               </p>
                             )}
                           </div>
 
                           {/* Preview of payload */}
                           <div className="mt-3 p-2 bg-gray-100 rounded text-xs font-mono overflow-hidden text-ellipsis whitespace-nowrap">
-                            {(event.rawPayload as string || '').substring(0, 200)}...
+                            {((event.rawPayload as string) || '').substring(0, 200)}...
                           </div>
                         </div>
 
@@ -595,7 +598,9 @@ export default function WhatsAppWebhookInspectorPage() {
                             </DialogTrigger>
                             <DialogContent className="max-w-3xl max-h-[80vh] overflow-auto">
                               <DialogHeader>
-                                <DialogTitle>تفاصيل الحدث: {(event.eventType as string) || ''}</DialogTitle>
+                                <DialogTitle>
+                                  تفاصيل الحدث: {(event.eventType as string) || ''}
+                                </DialogTitle>
                               </DialogHeader>
                               <div className="mt-4 space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
@@ -613,14 +618,22 @@ export default function WhatsAppWebhookInspectorPage() {
                                   </div>
                                   <div>
                                     <p className="text-sm font-semibold">التاريخ:</p>
-                                    <p>{event.createdAt ? new Date(event.createdAt).toLocaleString('ar-SA') : '-'}</p>
+                                    <p>
+                                      {event.createdAt
+                                        ? new Date(event.createdAt).toLocaleString('ar-SA')
+                                        : '-'}
+                                    </p>
                                   </div>
                                 </div>
 
                                 <div>
                                   <p className="text-sm font-semibold mb-2">البيانات الكاملة:</p>
                                   <pre className="p-4 bg-gray-900 text-green-400 rounded-lg overflow-auto max-h-96 text-xs">
-                                    {JSON.stringify(JSON.parse(event.rawPayload as string || '{}'), null, 2)}
+                                    {JSON.stringify(
+                                      JSON.parse((event.rawPayload as string) || '{}'),
+                                      null,
+                                      2
+                                    )}
                                   </pre>
                                 </div>
                               </div>

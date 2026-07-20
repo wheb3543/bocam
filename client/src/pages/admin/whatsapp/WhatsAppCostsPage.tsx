@@ -89,7 +89,9 @@ export default function WhatsAppCostsPage() {
   const categoryData =
     conversationCosts?.reduce((acc: CategoryData, conv) => {
       const category = conv.pricingCategory || 'غير محدد';
-      if (!acc[category]) {acc[category] = 0;}
+      if (!acc[category]) {
+        acc[category] = 0;
+      }
       acc[category] += conv.totalCost || 0;
       return acc;
     }, {}) || {};
@@ -110,7 +112,6 @@ export default function WhatsAppCostsPage() {
 
   const handleExport = () => {
     // Export functionality placeholder
-    console.log('Exporting costs data...');
   };
 
   return (
@@ -170,7 +171,9 @@ export default function WhatsAppCostsPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${typeof totalCost === 'number' ? totalCost.toFixed(2) : '0.00'}</div>
+              <div className="text-2xl font-bold">
+                ${typeof totalCost === 'number' ? totalCost.toFixed(2) : '0.00'}
+              </div>
               <p className="text-xs text-muted-foreground">{totalCount} محادثة</p>
             </CardContent>
           </Card>
@@ -191,7 +194,10 @@ export default function WhatsAppCostsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${totalCount > 0 && typeof totalCost === 'number' ? (totalCost / totalCount).toFixed(2) : '0.00'}
+                $
+                {totalCount > 0 && typeof totalCost === 'number'
+                  ? (totalCost / totalCount).toFixed(2)
+                  : '0.00'}
               </div>
               <p className="text-xs text-muted-foreground">لكل محادثة</p>
             </CardContent>
@@ -243,7 +249,10 @@ export default function WhatsAppCostsPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    label={(props: any) =>
+                      `${props.name} ${((props.percent ?? 0) * 100).toFixed(0)}%`
+                    }
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"

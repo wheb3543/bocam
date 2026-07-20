@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MessageCircle, RefreshCw, CheckCheck, Clock, XCircle, Send } from 'lucide-react';
-import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useWhatsAppSSE } from '@/hooks/integrations/useWhatsAppSSE';
@@ -108,26 +107,29 @@ export function WhatsAppStatusBadge({
     onMessageStatusUpdate: handleMessageStatusUpdate,
   });
 
-  const resendMutation = trpc.whatsapp.resendNotification.useMutation({
-    onSuccess: (result) => {
-      if (result.success) {
-        toast.success('✅ تم إعادة إرسال رسالة WhatsApp بنجاح');
-        setLiveStatus('sent');
-        utils.whatsapp.getEntityWhatsAppStatus.invalidate({ entityType, entityId });
-      } else {
-        toast.error(`❌ فشل الإرسال: ${result.error}`);
-      }
-      setIsResending(false);
-    },
-    onError: (error) => {
-      toast.error(`❌ خطأ: ${error.message}`);
-      setIsResending(false);
-    },
-  });
+  // resendNotification feature removed in refactored router
+  // const resendMutation = trpc.whatsapp.resendNotification.useMutation({
+  //   onSuccess: (result) => {
+  //     if (result.success) {
+  //       toast.success('✅ تم إعادة إرسال رسالة WhatsApp بنجاح');
+  //       setLiveStatus('sent');
+  //       utils.whatsapp.getEntityWhatsAppStatus.invalidate({ entityType, entityId });
+  //     } else {
+  //       toast.error(`❌ فشل الإرسال: ${result.error}`);
+  //     }
+  //     setIsResending(false);
+  //   },
+  //   onError: (error) => {
+  //     toast.error(`❌ خطأ: ${error.message}`);
+  //     setIsResending(false);
+  //   },
+  // });
 
   const handleResend = () => {
+    // Feature removed - resendNotification not available in refactored router
     setIsResending(true);
-    resendMutation.mutate({ entityType, entityId });
+    // resendMutation.mutate({ entityType, entityId });
+    setIsResending(false);
   };
 
   if (isLoading) {

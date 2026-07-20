@@ -18,7 +18,7 @@ export default function WhatsAppAutoReply() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Queries
-  const autoReplyRulesQuery = trpc.whatsapp.getAutoReplyRules.useQuery();
+  const autoReplyRulesQuery = trpc.whatsapp.autoReply.getAutoReplyRules.useQuery();
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
@@ -28,9 +28,9 @@ export default function WhatsAppAutoReply() {
   });
 
   // Mutations
-  const addAutoReplyMutation = trpc.whatsapp.addAutoReplyRule.useMutation();
-  const deleteAutoReplyMutation = trpc.whatsapp.deleteAutoReplyRule.useMutation();
-  const toggleAutoReplyMutation = trpc.whatsapp.toggleAutoReplyRule.useMutation({
+  const addAutoReplyMutation = trpc.whatsapp.autoReply.addAutoReplyRule.useMutation();
+  const deleteAutoReplyMutation = trpc.whatsapp.autoReply.deleteAutoReplyRule.useMutation();
+  const toggleAutoReplyMutation = trpc.whatsapp.autoReply.toggleAutoReplyRule.useMutation({
     onSuccess: () => {
       toast.success('تم تحديث قاعدة الرد التلقائي');
       autoReplyRulesQuery.refetch();

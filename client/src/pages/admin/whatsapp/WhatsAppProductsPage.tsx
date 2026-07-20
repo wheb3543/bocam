@@ -118,7 +118,7 @@ export default function WhatsAppProductsPage() {
   };
 
   const handleExport = () => {
-    console.log('Exporting products data...');
+    // Export functionality placeholder
   };
 
   return (
