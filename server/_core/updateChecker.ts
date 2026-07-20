@@ -16,59 +16,20 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import AdmZip from 'adm-zip';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { createLogger } from './logger';
 import { getHardwareId, validateLicense } from './license';
+import { downloadUpdate } from './updateDownloader';
+import { installUpdate, rollbackUpdate } from './updateInstaller';
+import {
+  getUpdateState,
+  saveUpdateState,
+  logUpdateCheck,
+  logUpdateCheckFailure,
+  logUpdateProgress,
+} from './updateState';
+import type { UpdateInfo, UpdateCheckResponse, LocalUpdateState } from './updateTypes';
 
-const execAsync = promisify(exec);
-
-/**
- * بيانات التحديث من السيرفر المركزي
- */
-interface UpdateInfo {
-  version: string;
-  mandatory: boolean;
-  releaseDate: number;
-  downloadUrl: string;
-  checksum: string;
-  size: number;
-  releaseNotes: string;
-  protocolVersion: string;
-}
-
-/**
- * استجابة السيرفر المركزي
- */
-interface UpdateCheckResponse {
-  hasUpdate: boolean;
-  currentVersion: string;
-  latestVersion: string;
-  update?: UpdateInfo;
-  serverTime: number;
-}
-
-/**
- * حالة التحديث المحلية
- */
-interface LocalUpdateState {
-  lastCheck: number;
-  pendingUpdate: UpdateInfo | null;
-  updateInProgress: boolean;
-  downloadPath: string | null;
-  backupPath: string | null;
-  updateProgress: number;
-  updateStatus: 'idle' | 'downloading' | 'installing' | 'completed' | 'failed' | 'rolling_back';
-  updateError: string | null;
-}
-
-/**
- * ملف حفظ حالة التحديث
- */
-const UPDATE_STATE_FILE = '.update-state';
-const UPDATE_LOG_FILE = '.update-log';
-const UPDATES_DIR = 'updates';
-const BACKUP_DIR = 'backups';
+const logger = createLogger('updateChecker');
 
 /**
  * الحصول على رابط السيرفر المركزي للتحديثات
@@ -93,7 +54,7 @@ function getCurrentVersion(): string {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
     return packageJson.version || '1.0.0';
   } catch (error) {
-    console.error('❌ Error reading package.json:', error);
+    logger.error('Error reading package.json:', error);
     return '1.0.0';
   }
 }
@@ -126,7 +87,7 @@ function collectUpdateCheckData() {
       signature,
     };
   } catch (error) {
-    console.error('❌ Error collecting update check data:', error);
+    logger.error('Error collecting update check data:', error);
     throw new Error('Failed to collect update check data', { cause: error });
   }
 }
@@ -139,11 +100,11 @@ async function checkForUpdates(): Promise<UpdateCheckResponse | null> {
     const checkData = collectUpdateCheckData();
     const url = getCentralUpdateUrl();
 
-    console.log('🔄 Checking for updates from central server...');
-    console.log(`   URL: ${url}`);
-    console.log(`   Current Version: ${checkData.currentVersion}`);
-    console.log(`   Protocol Version: ${checkData.protocolVersion}`);
-    console.log(`   Hardware ID: ${checkData.hardwareId}`);
+    logger.info('Checking for updates from central server...');
+    logger.info(`URL: ${url}`);
+    logger.info(`Current Version: ${checkData.currentVersion}`);
+    logger.info(`Protocol Version: ${checkData.protocolVersion}`);
+    logger.info(`Hardware ID: ${checkData.hardwareId}`);
 
     // إرسال طلب POST
     const response = await fetch(url, {
@@ -159,14 +120,14 @@ async function checkForUpdates(): Promise<UpdateCheckResponse | null> {
 
     if (response.ok) {
       const data: UpdateCheckResponse = await response.json();
-      console.log('✅ Update check completed');
+      logger.info('Update check completed');
 
       if (data.hasUpdate) {
-        console.log(`📦 New version available: ${data.latestVersion}`);
-        console.log(`   Mandatory: ${data.update?.mandatory ? 'Yes' : 'No'}`);
-        console.log(`   Release Notes: ${data.update?.releaseNotes}`);
+        logger.info(`New version available: ${data.latestVersion}`);
+        logger.info(`Mandatory: ${data.update?.mandatory ? 'Yes' : 'No'}`);
+        logger.info(`Release Notes: ${data.update?.releaseNotes}`);
       } else {
-        console.log('✅ System is up to date');
+        logger.info('System is up to date');
       }
 
       // تسجيل النتيجة
@@ -174,14 +135,14 @@ async function checkForUpdates(): Promise<UpdateCheckResponse | null> {
 
       return data;
     } else {
-      console.warn(`⚠️  Update check failed with status: ${response.status}`);
+      logger.warn(`Update check failed with status: ${response.status}`);
       logUpdateCheckFailure(response.status);
       return null;
     }
   } catch (error) {
     // Silent failure - لا نوقف السيرفر إذا فشل التحقق
-    console.warn(
-      '⚠️  Update check failed (silent):',
+    logger.warn(
+      'Update check failed (silent):',
       error instanceof Error ? error.message : 'Unknown error'
     );
     logUpdateCheckFailure(0);
@@ -190,583 +151,18 @@ async function checkForUpdates(): Promise<UpdateCheckResponse | null> {
 }
 
 /**
- * تسجيل عملية التحقق من التحديثات
- */
-function logUpdateCheck(data: UpdateCheckResponse): void {
-  try {
-    const logEntry = {
-      timestamp: Math.floor(Date.now() / 1000),
-      hasUpdate: data.hasUpdate,
-      currentVersion: data.currentVersion,
-      latestVersion: data.latestVersion,
-      mandatory: data.update?.mandatory || false,
-    };
-
-    const logPath = path.join(process.cwd(), UPDATE_LOG_FILE);
-    const logs = JSON.parse(fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf-8') : '[]');
-
-    logs.push(logEntry);
-
-    // الاحتفاظ بآخر 50 سجل فقط
-    if (logs.length > 50) {
-      logs.shift();
-    }
-
-    fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
-  } catch (error) {
-    console.warn('Failed to log update check:', error);
-  }
-}
-
-/**
- * تسجيل فشل التحقق من التحديثات
- */
-function logUpdateCheckFailure(statusCode: number): void {
-  try {
-    const logEntry = {
-      timestamp: Math.floor(Date.now() / 1000),
-      status: 'failed',
-      statusCode,
-    };
-
-    const logPath = path.join(process.cwd(), UPDATE_LOG_FILE);
-    const logs = JSON.parse(fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf-8') : '[]');
-
-    logs.push(logEntry);
-
-    if (logs.length > 50) {
-      logs.shift();
-    }
-
-    fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
-  } catch (error) {
-    console.warn('Failed to log update check failure:', error);
-  }
-}
-
-/**
- * حفظ حالة التحديث
- */
-function saveUpdateState(state: LocalUpdateState): void {
-  try {
-    const filePath = path.join(process.cwd(), UPDATE_STATE_FILE);
-    fs.writeFileSync(filePath, JSON.stringify(state), { mode: 0o600 });
-  } catch (error) {
-    console.error('❌ Error saving update state:', error);
-  }
-}
-
-/**
- * قراءة حالة التحديث
- */
-function getUpdateState(): LocalUpdateState {
-  try {
-    const filePath = path.join(process.cwd(), UPDATE_STATE_FILE);
-
-    if (!fs.existsSync(filePath)) {
-      return {
-        lastCheck: 0,
-        pendingUpdate: null,
-        updateInProgress: false,
-        downloadPath: null,
-        backupPath: null,
-        updateProgress: 0,
-        updateStatus: 'idle',
-        updateError: null,
-      };
-    }
-
-    const content = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(content);
-  } catch (error) {
-    console.warn('⚠️  Error reading update state:', error);
-    return {
-      lastCheck: 0,
-      pendingUpdate: null,
-      updateInProgress: false,
-      downloadPath: null,
-      backupPath: null,
-      updateProgress: 0,
-      updateStatus: 'idle',
-      updateError: null,
-    };
-  }
-}
-
-/**
- * إنشاء المجلدات المطلوبة للتحديثات
- */
-function ensureUpdateDirectories(): void {
-  const updatesPath = path.join(process.cwd(), UPDATES_DIR);
-  const backupPath = path.join(process.cwd(), BACKUP_DIR);
-
-  if (!fs.existsSync(updatesPath)) {
-    fs.mkdirSync(updatesPath, { recursive: true });
-  }
-
-  if (!fs.existsSync(backupPath)) {
-    fs.mkdirSync(backupPath, { recursive: true });
-  }
-}
-
-/**
- * تحديث حالة التحديث
- */
-function updateUpdateStatus(
-  status: LocalUpdateState['updateStatus'],
-  progress: number,
-  error: string | null = null
-): void {
-  const state = getUpdateState();
-  state.updateStatus = status;
-  state.updateProgress = progress;
-  if (error) {
-    state.updateError = error;
-  }
-  saveUpdateState(state);
-}
-
-/**
- * تسجيل تقدم التحديث
- */
-function logUpdateProgress(message: string): void {
-  const logEntry = {
-    timestamp: Math.floor(Date.now() / 1000),
-    type: 'progress',
-    message,
-  };
-
-  const logPath = path.join(process.cwd(), UPDATE_LOG_FILE);
-  const logs = JSON.parse(fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf-8') : '[]');
-
-  logs.push(logEntry);
-
-  if (logs.length > 50) {
-    logs.shift();
-  }
-
-  fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
-}
-
-/**
- * تنزيل التحديث مع التحقق من Checksum
- */
-async function downloadUpdate(updateInfo: UpdateInfo): Promise<string> {
-  try {
-    console.log('📥 Starting download...');
-    console.log(`   URL: ${updateInfo.downloadUrl}`);
-    console.log(`   Expected size: ${(updateInfo.size / 1024 / 1024).toFixed(2)} MB`);
-
-    updateUpdateStatus('downloading', 0, null);
-    logUpdateProgress('Starting download...');
-
-    ensureUpdateDirectories();
-
-    const response = await fetch(updateInfo.downloadUrl, {
-      // eslint-disable-next-line no-undef
-      signal: (AbortSignal as unknown as AbortSignalWithTimeout).timeout(300000), // 5 دقائق
-    });
-
-    if (!response.ok) {
-      throw new Error(`Download failed with status: ${response.status}`);
-    }
-
-    const contentLength = response.headers.get('content-length');
-    const totalBytes = contentLength ? parseInt(contentLength, 10) : updateInfo.size;
-    let downloadedBytes = 0;
-
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error('Failed to get response body reader');
-    }
-
-    const chunks: Uint8Array[] = [];
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      chunks.push(value);
-      downloadedBytes += value.length;
-
-      const progress = (downloadedBytes / totalBytes) * 100;
-      updateUpdateStatus('downloading', progress, null);
-
-      if (progress % 10 === 0) {
-        console.log(`   Download progress: ${progress.toFixed(0)}%`);
-      }
-    }
-
-    const buffer = Buffer.concat(chunks);
-
-    console.log('✅ Download completed');
-    console.log(`   Downloaded size: ${(buffer.length / 1024 / 1024).toFixed(2)} MB`);
-
-    // التحقق من Checksum
-    console.log('🔍 Verifying checksum...');
-    const hash = crypto.createHash('sha256').update(buffer).digest('hex');
-
-    if (hash !== updateInfo.checksum) {
-      throw new Error(`Checksum mismatch: expected ${updateInfo.checksum}, got ${hash}`);
-    }
-
-    console.log('✅ Checksum verified');
-
-    // حفظ الملف
-    const fileName = `update-${updateInfo.version}.zip`;
-    const filePath = path.join(process.cwd(), UPDATES_DIR, fileName);
-    fs.writeFileSync(filePath, buffer);
-
-    console.log(`✅ Update saved to: ${filePath}`);
-    logUpdateProgress(`Update downloaded and verified: ${fileName}`);
-
-    // تحديث الحالة
-    const state = getUpdateState();
-    state.downloadPath = filePath;
-    state.updateProgress = 100;
-    saveUpdateState(state);
-
-    return filePath;
-  } catch (error) {
-    console.error('❌ Download failed:', error);
-    updateUpdateStatus('failed', 0, error instanceof Error ? error.message : 'Unknown error');
-    logUpdateProgress(
-      `Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
-    throw error;
-  }
-}
-
-/**
- * إنشاء نسخة احتياطية من النظام الحالي
- */
-async function createBackup(): Promise<string> {
-  try {
-    console.log('💾 Creating backup...');
-
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const backupName = `backup-${timestamp}`;
-    const backupPath = path.join(process.cwd(), BACKUP_DIR, backupName);
-
-    fs.mkdirSync(backupPath, { recursive: true });
-
-    // نسخ الملفات المهمة
-    const filesToBackup = [
-      'package.json',
-      'package-lock.json',
-      'pnpm-lock.yaml',
-      'tsconfig.json',
-      'vite.config.ts',
-      'server',
-      'client',
-      'shared',
-    ];
-
-    for (const file of filesToBackup) {
-      const sourcePath = path.join(process.cwd(), file);
-      const destPath = path.join(backupPath, file);
-
-      if (fs.existsSync(sourcePath)) {
-        if (fs.statSync(sourcePath).isDirectory()) {
-          copyDirectory(sourcePath, destPath);
-        } else {
-          fs.copyFileSync(sourcePath, destPath);
-        }
-      }
-    }
-
-    console.log(`✅ Backup created: ${backupPath}`);
-    logUpdateProgress(`Backup created: ${backupName}`);
-
-    // تحديث الحالة
-    const state = getUpdateState();
-    state.backupPath = backupPath;
-    saveUpdateState(state);
-
-    return backupPath;
-  } catch (error) {
-    console.error('❌ Backup failed:', error);
-    logUpdateProgress(`Backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    throw error;
-  }
-}
-
-/**
- * نسخ دليل بشكل متكرر
- */
-function copyDirectory(source: string, destination: string): void {
-  if (!fs.existsSync(destination)) {
-    fs.mkdirSync(destination, { recursive: true });
-  }
-
-  const entries = fs.readdirSync(source, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const srcPath = path.join(source, entry.name);
-    const destPath = path.join(destination, entry.name);
-
-    if (entry.isDirectory()) {
-      copyDirectory(srcPath, destPath);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
-    }
-  }
-}
-
-/**
- * تثبيت التحديث
- */
-async function installUpdate(updatePath: string, updateInfo: UpdateInfo): Promise<void> {
-  try {
-    console.log('🔧 Starting installation...');
-    updateUpdateStatus('installing', 0, null);
-    logUpdateProgress('Starting installation...');
-
-    // إنشاء نسخة احتياطية
-    await createBackup();
-
-    console.log('📦 Extracting update...');
-    updateUpdateStatus('installing', 20, null);
-    logUpdateProgress('Extracting update package...');
-
-    // فك الضغط باستخدام adm-zip
-    const zip = new AdmZip(updatePath);
-    const extractPath = path.join(process.cwd(), 'temp-update');
-
-    // حذف مجلد temp-update إذا موجود
-    if (fs.existsSync(extractPath)) {
-      fs.rmSync(extractPath, { recursive: true, force: true });
-    }
-
-    // فك الضغط
-    zip.extractAllTo(extractPath, true);
-    console.log(`✅ Update extracted to: ${extractPath}`);
-    logUpdateProgress('Update extracted successfully');
-
-    updateUpdateStatus('installing', 50, null);
-
-    // استبدال الملفات
-    console.log('🔄 Replacing files...');
-    updateUpdateStatus('installing', 60, null);
-    logUpdateProgress('Replacing files...');
-
-    const filesToReplace = [
-      'package.json',
-      'package-lock.json',
-      'pnpm-lock.yaml',
-      'tsconfig.json',
-      'vite.config.ts',
-      'server',
-      'client',
-      'shared',
-    ];
-
-    for (const file of filesToReplace) {
-      const sourcePath = path.join(extractPath, file);
-      const destPath = path.join(process.cwd(), file);
-
-      if (fs.existsSync(sourcePath)) {
-        console.log(`   Replacing: ${file}`);
-
-        if (fs.statSync(sourcePath).isDirectory()) {
-          // حذف الدليل القديم
-          if (fs.existsSync(destPath)) {
-            fs.rmSync(destPath, { recursive: true, force: true });
-          }
-          // نسخ الدليل الجديد
-          copyDirectory(sourcePath, destPath);
-        } else {
-          fs.copyFileSync(sourcePath, destPath);
-        }
-      }
-    }
-
-    console.log('✅ Files replaced');
-    logUpdateProgress('Files replaced successfully');
-    updateUpdateStatus('installing', 70, null);
-
-    // حذف مجلد temp-update
-    fs.rmSync(extractPath, { recursive: true, force: true });
-    console.log('✅ Cleanup completed');
-
-    // تشغيل الترحيلات إذا لزم الأمر
-    console.log('🗄️  Running migrations...');
-    updateUpdateStatus('installing', 80, null);
-    logUpdateProgress('Running database migrations...');
-
-    try {
-      await execAsync('pnpm db:push');
-      console.log('✅ Migrations completed');
-      logUpdateProgress('Database migrations completed');
-    } catch (migrationError) {
-      console.warn('⚠️  Migration failed (might not have migrations):', migrationError);
-      logUpdateProgress('Migration skipped or failed');
-    }
-
-    updateUpdateStatus('installing', 90, null);
-
-    // تحديث package.json
-    console.log('📝 Updating package.json...');
-    const packageJsonPath = path.join(process.cwd(), 'package.json');
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-    packageJson.version = updateInfo.version;
-    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-    console.log('✅ Version updated');
-    logUpdateProgress('Version updated successfully');
-
-    updateUpdateStatus('installing', 100, null);
-
-    console.log('✅ Installation completed');
-    logUpdateProgress('Installation completed successfully');
-
-    // تحديث الحالة
-    const state = getUpdateState();
-    state.updateStatus = 'completed';
-    state.updateProgress = 100;
-    state.updateError = null;
-    state.pendingUpdate = null;
-    state.updateInProgress = false;
-    saveUpdateState(state);
-
-    // إعادة التشغيل التلقائية
-    console.log('🔄 Restarting server...');
-    logUpdateProgress('Restarting server...');
-    await restartServer();
-  } catch (error) {
-    console.error('❌ Installation failed:', error);
-    updateUpdateStatus('failed', 0, error instanceof Error ? error.message : 'Unknown error');
-    logUpdateProgress(
-      `Installation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
-
-    // محاولة التراجع تلقائياً
-    console.log('🔄 Attempting automatic rollback...');
-    try {
-      await rollbackUpdate();
-    } catch (rollbackError) {
-      console.error('❌ Automatic rollback failed:', rollbackError);
-      logUpdateProgress('Automatic rollback failed');
-    }
-
-    throw error;
-  }
-}
-
-/**
- * التراجع عن التحديث
- */
-async function rollbackUpdate(): Promise<void> {
-  try {
-    console.log('🔄 Starting rollback...');
-    updateUpdateStatus('rolling_back', 0, null);
-    logUpdateProgress('Starting rollback...');
-
-    const state = getUpdateState();
-
-    if (!state.backupPath || !fs.existsSync(state.backupPath)) {
-      throw new Error('No backup found for rollback');
-    }
-
-    console.log(`📦 Restoring from backup: ${state.backupPath}`);
-    updateUpdateStatus('rolling_back', 30, null);
-
-    const backupPath = state.backupPath;
-    const filesToRestore = [
-      'package.json',
-      'package-lock.json',
-      'pnpm-lock.yaml',
-      'tsconfig.json',
-      'vite.config.ts',
-      'server',
-      'client',
-      'shared',
-    ];
-
-    for (const file of filesToRestore) {
-      const sourcePath = path.join(backupPath, file);
-      const destPath = path.join(process.cwd(), file);
-
-      if (fs.existsSync(sourcePath)) {
-        if (fs.statSync(sourcePath).isDirectory()) {
-          // حذف الدليل القديم
-          if (fs.existsSync(destPath)) {
-            fs.rmSync(destPath, { recursive: true, force: true });
-          }
-          // نسخ الدليل الجديد
-          copyDirectory(sourcePath, destPath);
-        } else {
-          fs.copyFileSync(sourcePath, destPath);
-        }
-      }
-    }
-
-    updateUpdateStatus('rolling_back', 100, null);
-
-    console.log('✅ Rollback completed');
-    logUpdateProgress('Rollback completed successfully');
-
-    // تحديث الحالة
-    state.updateStatus = 'idle';
-    state.updateProgress = 0;
-    state.updateError = null;
-    state.pendingUpdate = null;
-    state.updateInProgress = false;
-    state.backupPath = null;
-    saveUpdateState(state);
-  } catch (error) {
-    console.error('❌ Rollback failed:', error);
-    updateUpdateStatus('failed', 0, error instanceof Error ? error.message : 'Unknown error');
-    logUpdateProgress(
-      `Rollback failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
-    throw error;
-  }
-}
-
-/**
- * إعادة تشغيل السيرفر بعد التحديث
- */
-async function restartServer(): Promise<void> {
-  console.log('🔄 Restarting server...');
-  logUpdateProgress('Restarting server...');
-
-  // إيقاف العملية الحالية
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  console.log('👋 Shutting down for restart...');
-  logUpdateProgress('Shutting down...');
-
-  // إعادة تشغيل السيرفر باستخدام PM2 أو systemd
-  try {
-    // محاولة استخدام PM2 إذا كان موجوداً
-    await execAsync('pm2 restart bocam-crm');
-    console.log('✅ Server restarted via PM2');
-  } catch {
-    // إذا فشل PM2، حاول استخدام systemd
-    try {
-      await execAsync('sudo systemctl restart bocam-crm');
-      console.log('✅ Server restarted via systemd');
-    } catch {
-      // إذا فشل كل شيء، أوقف العملية الحالية
-      console.log('⚠️  Could not restart via PM2 or systemd, exiting...');
-      process.exit(0);
-    }
-  }
-}
-
-/**
  * تنفيذ التحديث الكامل
  */
 export async function executeUpdate(updateInfo: UpdateInfo): Promise<void> {
   try {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🚀 STARTING UPDATE PROCESS');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('');
-    console.log(`Version: ${updateInfo.version}`);
-    console.log(`Mandatory: ${updateInfo.mandatory ? 'YES' : 'NO'}`);
-    console.log(`Size: ${(updateInfo.size / 1024 / 1024).toFixed(2)} MB`);
-    console.log('');
+    logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    logger.info('STARTING UPDATE PROCESS');
+    logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    logger.info('');
+    logger.info(`Version: ${updateInfo.version}`);
+    logger.info(`Mandatory: ${updateInfo.mandatory ? 'YES' : 'NO'}`);
+    logger.info(`Size: ${(updateInfo.size / 1024 / 1024).toFixed(2)} MB`);
+    logger.info('');
 
     // تحديث الحالة
     const state = getUpdateState();
@@ -780,16 +176,13 @@ export async function executeUpdate(updateInfo: UpdateInfo): Promise<void> {
     // تثبيت التحديث
     await installUpdate(downloadPath, updateInfo);
 
-    console.log('');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('✅ UPDATE COMPLETED SUCCESSFULLY');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('');
-
-    // إعادة تشغيل السيرفر
-    restartServer();
+    logger.info('');
+    logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    logger.info('UPDATE COMPLETED SUCCESSFULLY');
+    logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    logger.info('');
   } catch (error) {
-    console.error('❌ Update process failed:', error);
+    logger.error('Update process failed:', error);
     throw error;
   }
 }
@@ -816,21 +209,21 @@ export function getPendingUpdate(): UpdateInfo | null {
 function handleAvailableUpdate(updateInfo: UpdateInfo): void {
   const state = getUpdateState();
 
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('📦 UPDATE AVAILABLE');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('');
-  console.log(`Version: ${updateInfo.version}`);
-  console.log(`Mandatory: ${updateInfo.mandatory ? 'YES' : 'NO'}`);
-  console.log(`Size: ${(updateInfo.size / 1024 / 1024).toFixed(2)} MB`);
-  console.log(`Release Notes: ${updateInfo.releaseNotes}`);
-  console.log('');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  logger.info('UPDATE AVAILABLE');
+  logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  logger.info('');
+  logger.info(`Version: ${updateInfo.version}`);
+  logger.info(`Mandatory: ${updateInfo.mandatory ? 'YES' : 'NO'}`);
+  logger.info(`Size: ${(updateInfo.size / 1024 / 1024).toFixed(2)} MB`);
+  logger.info(`Release Notes: ${updateInfo.releaseNotes}`);
+  logger.info('');
+  logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   if (updateInfo.mandatory) {
-    console.log('⚠️  MANDATORY UPDATE DETECTED');
-    console.log('   Interface will be frozen until update is installed.');
-    console.log('');
+    logger.warn('MANDATORY UPDATE DETECTED');
+    logger.info('Interface will be frozen until update is installed.');
+    logger.info('');
 
     // حفظ التحديث المعلق
     state.pendingUpdate = updateInfo;
@@ -839,16 +232,16 @@ function handleAvailableUpdate(updateInfo: UpdateInfo): void {
     saveUpdateState(state);
 
     // بدء التحديث تلقائياً للتحديثات الإجبارية
-    console.log('� Starting automatic update installation...');
+    logger.info('Starting automatic update installation...');
     executeUpdate(updateInfo).catch((error) => {
-      console.error('❌ Automatic update failed:', error);
+      logger.error('Automatic update failed:', error);
       logUpdateProgress(
         `Automatic update failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     });
   } else {
-    console.log('ℹ️  Optional update available. Administrator can install it manually.');
-    console.log('');
+    logger.info('Optional update available. Administrator can install it manually.');
+    logger.info('');
 
     // حفظ التحديث كمعلق اختياري
     state.pendingUpdate = updateInfo;
@@ -864,9 +257,9 @@ function startUpdateCheckerScheduler(): void {
   try {
     const checkInterval = 6 * 60 * 60 * 1000; // 6 ساعات
 
-    console.log('🔄 Starting update checker scheduler...');
-    console.log(`   Interval: ${checkInterval / (60 * 60 * 1000)} hours`);
-    console.log(`   Central Server: ${getCentralUpdateUrl()}`);
+    logger.info('Starting update checker scheduler...');
+    logger.info(`Interval: ${checkInterval / (60 * 60 * 1000)} hours`);
+    logger.info(`Central Server: ${getCentralUpdateUrl()}`);
 
     // التحقق فوري عند البدء
     checkForUpdates()
@@ -876,12 +269,12 @@ function startUpdateCheckerScheduler(): void {
         }
       })
       .catch((error) => {
-        console.error('❌ Error in initial update check:', error);
+        logger.error('Error in initial update check:', error);
       });
 
     // جدولة التحقق الدوري
     const intervalId = setInterval(() => {
-      console.log('🔄 Update check triggered');
+      logger.info('Update check triggered');
       checkForUpdates()
         .then((response) => {
           if (response && response.hasUpdate && response.update) {
@@ -889,7 +282,7 @@ function startUpdateCheckerScheduler(): void {
           }
         })
         .catch((error) => {
-          console.error('❌ Error in scheduled update check:', error);
+          logger.error('Error in scheduled update check:', error);
         });
     }, checkInterval);
 
@@ -898,9 +291,9 @@ function startUpdateCheckerScheduler(): void {
       intervalId.unref();
     }
 
-    console.log('✅ Update checker scheduler started successfully');
+    logger.info('Update checker scheduler started successfully');
   } catch (error) {
-    console.error('❌ Error starting update checker scheduler:', error);
+    logger.error('Error starting update checker scheduler:', error);
     // Silent failure - لا نوقف السيرفر بسبب مشاكل التحقق من التحديثات
   }
 }
@@ -911,30 +304,30 @@ function startUpdateCheckerScheduler(): void {
  */
 export function initializeUpdateChecker(): void {
   try {
-    console.log('');
-    console.log('🔄 Initializing Update Checker System...');
-    console.log('');
+    logger.info('');
+    logger.info('Initializing Update Checker System...');
+    logger.info('');
 
     // التحقق من وجود تحديث معلق
     const state = getUpdateState();
     if (state.pendingUpdate) {
-      console.log('⚠️  Pending update detected from previous check:');
-      console.log(`   Version: ${state.pendingUpdate.version}`);
-      console.log(`   Mandatory: ${state.pendingUpdate.mandatory ? 'Yes' : 'No'}`);
+      logger.warn('Pending update detected from previous check:');
+      logger.info(`Version: ${state.pendingUpdate.version}`);
+      logger.info(`Mandatory: ${state.pendingUpdate.mandatory ? 'Yes' : 'No'}`);
 
       if (state.pendingUpdate.mandatory) {
-        console.log('   ⚠️  This is a mandatory update. Interface will remain frozen.');
+        logger.warn('This is a mandatory update. Interface will remain frozen.');
       }
     }
 
     // تشغيل جدولة التحقق من التحديثات
     startUpdateCheckerScheduler();
 
-    console.log('');
-    console.log('✅ Update Checker System initialized successfully');
-    console.log('');
+    logger.info('');
+    logger.info('Update Checker System initialized successfully');
+    logger.info('');
   } catch (error) {
-    console.error('❌ Error initializing update checker system:', error);
+    logger.error('Error initializing update checker system:', error);
     // Silent failure - لا نوقف السيرفر بسبب مشاكل التهيئة
   }
 }
@@ -943,17 +336,17 @@ export function initializeUpdateChecker(): void {
  * دالة لاختبار التحقق من التحديثات يدوياً (للتطوير فقط)
  */
 export async function testUpdateChecker(): Promise<void> {
-  console.log('🧪 Testing update checker system...');
+  logger.info('Testing update checker system...');
 
   try {
     const response = await checkForUpdates();
-    console.log(`Test result: ${response ? 'SUCCESS' : 'FAILED'}`);
+    logger.info(`Test result: ${response ? 'SUCCESS' : 'FAILED'}`);
 
     if (response && response.hasUpdate && response.update) {
       handleAvailableUpdate(response.update);
     }
   } catch (error) {
-    console.error('Test failed:', error);
+    logger.error('Test failed:', error);
   }
 }
 
@@ -974,7 +367,7 @@ export async function startManualUpdate(): Promise<void> {
     throw new Error('No pending update available');
   }
 
-  console.log('🚀 Starting manual update...');
+  logger.info('Starting manual update...');
   await executeUpdate(state.pendingUpdate);
 }
 
@@ -982,7 +375,6 @@ export async function startManualUpdate(): Promise<void> {
  * بدء التراجع عن التحديث يدوياً
  */
 export async function startManualRollback(): Promise<void> {
-  console.log('🔄 Starting manual rollback...');
+  logger.info('Starting manual rollback...');
   await rollbackUpdate();
-  restartServer();
 }

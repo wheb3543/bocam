@@ -8,6 +8,9 @@
 
 import { CronJob } from 'cron';
 import { createBackup, BackupConfig, BackupType } from '../../_core/backupManager';
+import { createLogger } from '../../_core/logger';
+
+const logger = createLogger('backupJob');
 
 /**
  * إعدادات النسخ الاحتياطي التلقائي
@@ -49,12 +52,12 @@ function generateBackupName(type: BackupType): string {
  */
 async function runDailyBackup(): Promise<void> {
   try {
-    console.log('📅 Running daily backup...');
+    logger.info('Running daily backup...');
     const backupName = generateBackupName('daily');
     await createBackup(backupName, BACKUP_CONFIGS.daily);
-    console.log('✅ Daily backup completed');
+    logger.info('Daily backup completed');
   } catch (error) {
-    console.error('❌ Daily backup failed:', error);
+    logger.error('Daily backup failed:', error);
   }
 }
 
@@ -63,12 +66,12 @@ async function runDailyBackup(): Promise<void> {
  */
 async function runWeeklyBackup(): Promise<void> {
   try {
-    console.log('📅 Running weekly backup...');
+    logger.info('Running weekly backup...');
     const backupName = generateBackupName('weekly');
     await createBackup(backupName, BACKUP_CONFIGS.weekly);
-    console.log('✅ Weekly backup completed');
+    logger.info('Weekly backup completed');
   } catch (error) {
-    console.error('❌ Weekly backup failed:', error);
+    logger.error('Weekly backup failed:', error);
   }
 }
 
@@ -77,12 +80,12 @@ async function runWeeklyBackup(): Promise<void> {
  */
 async function runMonthlyBackup(): Promise<void> {
   try {
-    console.log('📅 Running monthly backup...');
+    logger.info('Running monthly backup...');
     const backupName = generateBackupName('monthly');
     await createBackup(backupName, BACKUP_CONFIGS.monthly);
-    console.log('✅ Monthly backup completed');
+    logger.info('Monthly backup completed');
   } catch (error) {
-    console.error('❌ Monthly backup failed:', error);
+    logger.error('Monthly backup failed:', error);
   }
 }
 
@@ -90,33 +93,33 @@ async function runMonthlyBackup(): Promise<void> {
  * بدء Cron Jobs
  */
 export function startBackupCronJobs(): void {
-  console.log('🕐 Starting backup cron jobs...');
+  logger.info('Starting backup cron jobs...');
 
   // النسخ الاحتياطي اليومي - كل يوم الساعة 2:00 صباحاً
   const dailyJob = new CronJob('0 2 * * *', runDailyBackup);
   dailyJob.start();
-  console.log('✅ Daily backup job scheduled: 0 2 * * *');
+  logger.info('Daily backup job scheduled: 0 2 * * *');
 
   // النسخ الاحتياطي الأسبوعي - كل يوم الأحد الساعة 3:00 صباحاً
   const weeklyJob = new CronJob('0 3 * * 0', runWeeklyBackup);
   weeklyJob.start();
-  console.log('✅ Weekly backup job scheduled: 0 3 * * 0');
+  logger.info('Weekly backup job scheduled: 0 3 * * 0');
 
   // النسخ الاحتياطي الشهري - أول يوم من كل شهر الساعة 4:00 صباحاً
   const monthlyJob = new CronJob('0 4 1 * *', runMonthlyBackup);
   monthlyJob.start();
-  console.log('✅ Monthly backup job scheduled: 0 4 1 * *');
+  logger.info('Monthly backup job scheduled: 0 4 1 * *');
 
-  console.log('✅ All backup cron jobs started');
+  logger.info('All backup cron jobs started');
 }
 
 /**
  * إيقاف Cron Jobs
  */
 export function stopBackupCronJobs(): void {
-  console.log('🛑 Stopping backup cron jobs...');
+  logger.info('Stopping backup cron jobs...');
   // سيتم إيقاف جميع Cron Jobs تلقائياً عند إيقاف العملية
-  console.log('✅ Backup cron jobs stopped');
+  logger.info('Backup cron jobs stopped');
 }
 
 /**
@@ -124,7 +127,7 @@ export function stopBackupCronJobs(): void {
  */
 export async function runManualBackup(type: BackupType = 'manual'): Promise<void> {
   try {
-    console.log(`📅 Running manual backup (${type})...`);
+    logger.info(`Running manual backup (${type})...`);
     const backupName = generateBackupName(type);
     const config: BackupConfig = {
       backupType: type,
@@ -134,9 +137,9 @@ export async function runManualBackup(type: BackupType = 'manual'): Promise<void
       compress: true,
     };
     await createBackup(backupName, config);
-    console.log('✅ Manual backup completed');
+    logger.info('Manual backup completed');
   } catch (error) {
-    console.error('❌ Manual backup failed:', error);
+    logger.error('Manual backup failed:', error);
     throw error;
   }
 }
