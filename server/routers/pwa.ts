@@ -4,8 +4,7 @@
  */
 
 import { z } from 'zod';
-import { TRPCError } from '@trpc/server';
-import { getDb } from '../database/db';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { pwaInstalls } from '../../drizzle/schema';
 import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
 import { desc, eq, count, sql, asc, gte } from 'drizzle-orm';
@@ -24,9 +23,7 @@ export const pwaRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const ipAddress =
         (ctx.req.headers['x-forwarded-for'] as string) || ctx.req.socket?.remoteAddress || null;
@@ -46,8 +43,7 @@ export const pwaRouter = router({
    * جلب إحصائيات التثبيت (للمشرفين فقط)
    */
   getStats: protectedProcedure.query(async () => {
-    const db = await getDb();
-    if (!db) return { total: 0, public: 0, admin: 0, recentInstalls: [] };
+    const db = await ensureDatabaseAvailable();
 
     const [totalResult, publicResult, adminResult, recentInstalls] = await Promise.all([
       db.select({ count: count() }).from(pwaInstalls),

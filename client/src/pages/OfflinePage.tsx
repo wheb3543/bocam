@@ -33,8 +33,8 @@ export default function OfflinePage() {
       if (lastSyncTime) {
         setLastSync(formatDate(lastSyncTime));
       }
-    } catch (error) {
-      console.error('Failed to load cached data:', error);
+    } catch {
+      // Silently handle IndexedDB errors
     }
   }, [formatDate]);
 

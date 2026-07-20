@@ -46,7 +46,9 @@ const INSTALL_COUNT_KEY = (appType: PWAAppType) => `sgh-pwa-install-count-${appT
  * الحل: إلغاء أي SW ليس sw-admin.js (أي لا يحتوي على /admin أو /admin في نطاقه)
  */
 async function unregisterPublicSWInAdminPages(): Promise<void> {
-  if (!('serviceWorker' in navigator)) {return;}
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
   try {
     const registrations = await navigator.serviceWorker.getRegistrations();
     for (const registration of registrations) {
@@ -55,12 +57,11 @@ async function unregisterPublicSWInAdminPages(): Promise<void> {
       // هذا يشمل SW العام (scope: /) وأي SW آخر قد يتعارض
       const isAdminSW = scope.includes('/admin') || scope.includes('/admin');
       if (!isAdminSW) {
-        console.log('[PWA-admin] FORCE unregistering conflicting SW at scope:', scope);
         await registration.unregister();
       }
     }
-  } catch (error) {
-    console.warn('[PWA-admin] Failed to unregister public SW:', error);
+  } catch {
+    // Silently handle SW unregister errors
   }
 }
 
@@ -80,7 +81,9 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
 
   useEffect(() => {
     // التحقق من iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
+    const isIOSDevice =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+      !(window as Window & { MSStream?: unknown }).MSStream;
     setIsIOS(isIOSDevice);
 
     // التحقق من دعم PWA
@@ -115,31 +118,30 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
         unregisterPublicSWInAdminPages().then(() => {
           navigator.serviceWorker
             .register('/admin/sw-admin.js', { scope: '/admin/' })
-            .then((registration) => {
-              console.log('[PWA-admin] SW registered at scope:', registration.scope);
+            .then((_registration) => {
+              // SW registered successfully
             })
-            .catch((error) => {
+            .catch((_error) => {
               // Fallback to /admin/ scope for backward compatibility
-              console.warn('[PWA-admin] SW registration at /admin/ failed, trying /admin/:', error);
               navigator.serviceWorker
                 .register('/admin/sw-admin.js', { scope: '/admin/' })
-                .then((reg) =>
-                  console.log('[PWA-admin] SW registered at fallback scope:', reg.scope)
-                )
-                .catch((err) =>
-                  console.warn('[PWA-admin] SW registration failed completely:', err)
-                );
+                .then((_reg) => {
+                  // SW registered at fallback scope
+                })
+                .catch((_err) => {
+                  // SW registration failed completely
+                });
             });
         });
       } else if (appType === 'public' && !isAdminPath) {
         // تسجيل SW العام فقط في الصفحات العامة
         navigator.serviceWorker
           .register('/sw.js', { scope: '/' })
-          .then((registration) => {
-            console.log('[PWA-public] SW registered at scope:', registration.scope);
+          .then((_registration) => {
+            // SW registered successfully
           })
-          .catch((error) => {
-            console.warn('[PWA-public] SW registration failed:', error);
+          .catch((_error) => {
+            // SW registration failed
           });
       }
     }
@@ -150,12 +152,10 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
       deferredPromptRef.current = e as BeforeInstallPromptEvent;
       promptUsedRef.current = false;
       setCanInstall(true);
-      console.log(`[PWA-${appType}] Install prompt available`);
     };
 
     // الاستماع لحدث appinstalled
     const handleAppInstalled = () => {
-      console.log(`[PWA-${appType}] App installed successfully!`);
       setIsInstalled(true);
       setCanInstall(false);
       deferredPromptRef.current = null;
@@ -175,7 +175,6 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
 
   const installApp = useCallback(async (): Promise<'accepted' | 'dismissed' | 'unavailable'> => {
     if (!deferredPromptRef.current || promptUsedRef.current) {
-      console.warn(`[PWA-${appType}] No install prompt available`);
       return 'unavailable';
     }
 
@@ -187,8 +186,6 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
       await prompt.prompt();
       const { outcome } = await prompt.userChoice;
 
-      console.log(`[PWA-${appType}] Install outcome:`, outcome);
-
       deferredPromptRef.current = null;
 
       if (outcome === 'accepted') {
@@ -198,8 +195,8 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
             userAgent: navigator.userAgent,
             platform: navigator.platform || 'unknown',
           });
-        } catch (trackError) {
-          console.warn(`[PWA-${appType}] Failed to track install:`, trackError);
+        } catch {
+          // Silently handle track install errors
         }
 
         setIsInstalled(true);
@@ -210,8 +207,7 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
         setCanInstall(false);
         return 'dismissed';
       }
-    } catch (error) {
-      console.error(`[PWA-${appType}] Install error:`, error);
+    } catch {
       deferredPromptRef.current = null;
       setCanInstall(false);
       return 'unavailable';
@@ -225,7 +221,6 @@ export function usePWAInstall(appType: PWAAppType): PWAInstallState {
     localStorage.setItem(DISMISS_STORAGE_KEY(appType), String(Date.now()));
     setIsDismissed(true);
     setCanInstall(false);
-    console.log(`[PWA-${appType}] Prompt explicitly dismissed for 7 days`);
   }, [appType]);
 
   return {

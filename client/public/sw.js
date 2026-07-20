@@ -17,16 +17,14 @@ const PRECACHE_URLS = [
 
 // ===== Install Event =====
 self.addEventListener('install', (event) => {
-  console.log('[SW-Public] Installing public service worker...');
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW-Public] Precaching public app shell');
         return Promise.allSettled(
           PRECACHE_URLS.map((url) =>
-            cache.add(url).catch((err) => {
-              console.warn('[SW-Public] Could not cache:', url, err.message);
+            cache.add(url).catch(() => {
+              // Silently handle cache errors
             })
           )
         );
@@ -37,7 +35,6 @@ self.addEventListener('install', (event) => {
 
 // ===== Activate Event =====
 self.addEventListener('activate', (event) => {
-  console.log('[SW-Public] Activating public service worker...');
   const currentCaches = [CACHE_NAME, RUNTIME_CACHE];
   event.waitUntil(
     caches
@@ -51,7 +48,6 @@ self.addEventListener('activate', (event) => {
       .then((cachesToDelete) => {
         return Promise.all(
           cachesToDelete.map((cacheToDelete) => {
-            console.log('[SW-Public] Deleting old cache:', cacheToDelete);
             return caches.delete(cacheToDelete);
           })
         );
@@ -98,7 +94,9 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => {
           return caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) return cachedResponse;
+            if (cachedResponse) {
+              return cachedResponse;
+            }
             return caches.match(OFFLINE_URL);
           });
         })
@@ -109,7 +107,9 @@ self.addEventListener('fetch', (event) => {
   // Cache-first for static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
+      if (cachedResponse) {
+        return cachedResponse;
+      }
       return fetch(event.request).then((response) => {
         if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
@@ -126,8 +126,6 @@ self.addEventListener('fetch', (event) => {
 
 // ===== Push Notifications (Public App) =====
 self.addEventListener('push', (event) => {
-  console.log('[SW-Public] Push notification received');
-
   let data = { title: 'المستشفى السعودي الألماني', body: 'إشعار جديد', url: '/', type: 'general' };
   try {
     if (event.data) {
@@ -158,7 +156,6 @@ self.addEventListener('push', (event) => {
 
 // ===== Notification Click =====
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW-Public] Notification clicked:', event.action);
   event.notification.close();
 
   if (event.action === 'open' || !event.action) {
@@ -183,7 +180,6 @@ self.addEventListener('notificationclick', (event) => {
 
 // ===== Background Sync =====
 self.addEventListener('sync', (event) => {
-  console.log('[SW-Public] Background sync triggered:', event.tag);
   if (event.tag === 'sync-appointments') {
     event.waitUntil(syncAppointments());
   }
@@ -191,22 +187,19 @@ self.addEventListener('sync', (event) => {
 
 async function syncAppointments() {
   try {
-    console.log('[SW-Public] Syncing appointments...');
     const clientList = await clients.matchAll({ type: 'window' });
     clientList.forEach((client) => {
       if (!client.url.includes('/admin') && !client.url.includes('/admin')) {
         client.postMessage({ type: 'SYNC_COMPLETE' });
       }
     });
-  } catch (error) {
-    console.error('[SW-Public] Sync failed:', error);
+  } catch {
+    // Silently handle sync errors
   }
 }
 
 // ===== Message Event =====
 self.addEventListener('message', (event) => {
-  console.log('[SW-Public] Message received:', event.data);
-
   if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
