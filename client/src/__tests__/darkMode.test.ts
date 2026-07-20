@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock matchMedia
@@ -140,26 +139,26 @@ describe('Dark Mode System', () => {
 
   describe('Theme Toggle Button', () => {
     it('should show sun icon in dark mode', () => {
-      const theme = 'dark';
+      const theme: 'dark' | 'light' = 'dark';
       const iconName = theme === 'dark' ? 'Sun' : 'Moon';
       expect(iconName).toBe('Sun');
     });
 
     it('should show moon icon in light mode', () => {
-      const theme = 'light';
-      const iconName = theme === 'dark' ? 'Sun' : 'Moon';
+      const theme: 'dark' | 'light' = 'light';
+      const iconName = theme === 'light' ? 'Moon' : 'Sun';
       expect(iconName).toBe('Moon');
     });
 
     it('should show correct label in dark mode', () => {
-      const theme = 'dark';
+      const theme: 'dark' | 'light' = 'dark';
       const label = theme === 'dark' ? 'مضيء' : 'مظلم';
       expect(label).toBe('مضيء');
     });
 
     it('should show correct label in light mode', () => {
-      const theme = 'light';
-      const label = theme === 'dark' ? 'مضيء' : 'مظلم';
+      const theme: 'dark' | 'light' = 'light';
+      const label = theme === 'light' ? 'مظلم' : 'مضيء';
       expect(label).toBe('مظلم');
     });
   });
@@ -207,7 +206,9 @@ describe('Dark Mode System', () => {
         document.documentElement.classList.remove('theme-transition');
       }, 0);
       
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => {
+        setTimeout(resolve, 10);
+      });
       expect(document.documentElement.classList.contains('theme-transition')).toBe(false);
     });
   });

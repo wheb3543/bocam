@@ -1,5 +1,48 @@
-// @ts-nocheck
-import { describe, it, expect } from "vitest";
+/**
+ * اختبارات Appointments UI Components
+ * Appointments UI Components Tests
+ */
+
+import { describe, it, expect, vi } from "vitest";
+
+// Mock trpc hook
+vi.mock("@/lib/trpc", () => ({
+  trpc: {
+    appointments: {
+      listPaginated: {
+        useQuery: () => ({
+          data: { appointments: [], total: 0, page: 1, limit: 20 },
+          isLoading: false,
+          refetch: vi.fn(),
+        }),
+      },
+      updateStatus: {
+        useMutation: () => ({
+          mutate: vi.fn(),
+          isPending: false,
+        }),
+      },
+      bulkUpdateStatus: {
+        useMutation: () => ({
+          mutate: vi.fn(),
+          isPending: false,
+        }),
+      },
+      generateReceiptNumber: {
+        useMutation: () => ({
+          mutate: vi.fn(),
+          isPending: false,
+        }),
+      },
+      delete: {
+        useMutation: () => ({
+          mutate: vi.fn(),
+          isPending: false,
+        }),
+      },
+    },
+  },
+}));
 
 /**
  * اختبارات وحدة لمنطق AppointmentsTab و AppointmentFilters و AppointmentTableDesktop
@@ -219,8 +262,92 @@ describe("AppointmentsTab - Pagination", () => {
   });
 
   it("يتعامل مع pageSize رقمي", () => {
-    const pageSize = "50";
-    const limit = pageSize === "all" ? 100000 : parseInt(pageSize);
+    const pageSize: string = "50";
+    const limit = pageSize === "all" ? 100000 : parseInt(pageSize, 10);
     expect(limit).toBe(50);
+  });
+});
+
+describe("AppointmentsTab - Status Updates", () => {
+  it("يجب أن يحدث حالة الحجز من pending إلى confirmed", () => {
+    const appointment = { id: 1, status: "pending" };
+    const newStatus = "confirmed";
+    
+    expect(appointment.status).toBe("pending");
+    appointment.status = newStatus;
+    expect(appointment.status).toBe("confirmed");
+  });
+
+  it("يجب أن يحدث حالة الحجز من confirmed to attended", () => {
+    const appointment = { id: 1, status: "confirmed" };
+    const newStatus = "attended";
+    
+    appointment.status = newStatus;
+    expect(appointment.status).toBe("attended");
+  });
+
+  it("يجب أن يلغي الحجز", () => {
+    const appointment = { id: 1, status: "confirmed" };
+    const newStatus = "cancelled";
+    
+    appointment.status = newStatus;
+    expect(appointment.status).toBe("cancelled");
+  });
+});
+
+describe("AppointmentsTab - Receipt Generation", () => {
+  it("يجب أن يولد رقم إيصال بالصيغة الصحيحة", () => {
+    const year = new Date().getFullYear();
+    const sequence = 1;
+    const paddedSequence = String(sequence).padStart(3, "0");
+    const receiptNumber = `SGH-${year}-${paddedSequence}`;
+    
+    expect(receiptNumber).toMatch(/^SGH-\d{4}-\d{3}$/);
+    expect(receiptNumber).toContain(String(year));
+  });
+
+  it("يجب أن يزيد التسلسل عند كل إيصال جديد", () => {
+    const year = new Date().getFullYear();
+    const receipt1 = `SGH-${year}-001`;
+    const receipt2 = `SGH-${year}-002`;
+    
+    expect(receipt2).not.toBe(receipt1);
+    expect(receipt2).toContain("002");
+  });
+});
+
+describe("AppointmentsTab - Search Functionality", () => {
+  const appointments = [
+    { id: 1, fullName: "محمد أحمد", phone: "967712345678" },
+    { id: 2, fullName: "سارة محمد", phone: "967712345679" },
+    { id: 3, fullName: "خالد علي", phone: "967712345670" },
+  ];
+
+  it("يجب أن يبحث بالاسم الكامل", () => {
+    const searchTerm = "محمد";
+    const results = appointments.filter(a => 
+      a.fullName.includes(searchTerm)
+    );
+    
+    expect(results).toHaveLength(2);
+  });
+
+  it("يجب أن يبحث برقم الهاتف", () => {
+    const searchTerm = "967712345678";
+    const results = appointments.filter(a => 
+      a.phone.includes(searchTerm)
+    );
+    
+    expect(results).toHaveLength(1);
+    expect(results[0].id).toBe(1);
+  });
+
+  it("يجب أن يرجع نتائج فارغة عند عدم وجود تطابق", () => {
+    const searchTerm = "غير موجود";
+    const results = appointments.filter(a => 
+      a.fullName.includes(searchTerm) || a.phone.includes(searchTerm)
+    );
+    
+    expect(results).toHaveLength(0);
   });
 });

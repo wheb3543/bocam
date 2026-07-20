@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import {
@@ -54,8 +53,8 @@ describe("useStatusLabels hook", () => {
     it("يجب أن يُرجع جميع الحالات كقائمة", () => {
       const statuses = result.current.getAllStatuses();
       expect(statuses.length).toBeGreaterThan(0);
-      expect(statuses.find(s => s.value === "pending")).toBeDefined();
-      expect(statuses.find(s => s.value === "pending")?.label).toBe("قيد الانتظار");
+      expect(statuses.find((s: { value: string }) => s.value === "pending")).toBeDefined();
+      expect(statuses.find((s: { value: string }) => s.value === "pending")?.label).toBe("قيد الانتظار");
     });
 
     it("يجب أن يُصدر labels و colors", () => {

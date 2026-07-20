@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { describe, it, expect } from "vitest";
 
 /**
@@ -87,8 +86,8 @@ describe("ConfirmDeleteDialog - القيم الافتراضية", () => {
   });
 
   it("يدعم variant warning", () => {
-    const variant = "warning";
+    const variant: "default" | "destructive" | "warning" = "warning";
     expect(variant).toBe("warning");
-    expect(variant !== "destructive").toBe(true);
+    expect(variant === "warning").toBe(true);
   });
 });
