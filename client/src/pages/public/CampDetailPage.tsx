@@ -70,10 +70,7 @@ export default function CampDetailPage() {
 }
 
 function CampDetailContent({ slug }: { slug: string }) {
-  const {
-    validateYemeniPhone,
-    processPhoneInput,
-  } = usePhoneFormat();
+  const { validateYemeniPhone, processPhoneInput } = usePhoneFormat();
   const { getSavedPatientInfo, savePatientInfo } = usePatientStorage();
   const { formatDate } = useFormatDate();
   const [, setLocation] = useLocation();
@@ -126,10 +123,14 @@ function CampDetailContent({ slug }: { slug: string }) {
 
   // Get available procedures from camp data
   const availableProcedures = useMemo(() => {
-    if (!camp?.availableProcedures) {return [];}
+    if (!camp?.availableProcedures) {
+      return [];
+    }
     try {
       const parsed = JSON.parse(camp.availableProcedures);
-      if (Array.isArray(parsed)) {return parsed;}
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
       return camp.availableProcedures.split('\n').filter((p: string) => p.trim());
     } catch {
       return camp.availableProcedures.split('\n').filter((p: string) => p.trim());
@@ -138,12 +139,15 @@ function CampDetailContent({ slug }: { slug: string }) {
 
   // Calculate camp statistics
   const campStats = useMemo(() => {
-    if (!camp || !registrations) {return null;}
+    if (!camp || !registrations) {
+      return null;
+    }
 
     const campRegistrations = registrations.filter((r: CampRegistration) => r.campId === camp.id);
     const total = campRegistrations.length;
     const confirmed = campRegistrations.filter(
-      (r: CampRegistration) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
+      (r: CampRegistration) =>
+        r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
     ).length;
     const attended = campRegistrations.filter(
       (r: CampRegistration) => r.status === 'attended' || r.status === 'completed'
@@ -194,13 +198,16 @@ function CampDetailContent({ slug }: { slug: string }) {
       return;
     }
 
-    if (!camp) {return;}
+    if (!camp) {
+      return;
+    }
 
     try {
       const trackingData = getCompleteTrackingData();
 
       // Advanced Matching: تحديث بيانات المستخدم في Pixel لرفع EMQ
       updatePixelUserData({ phone: formData.phone, email: formData.email || undefined }).catch(
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op error handler
         () => {}
       );
       // Pixel CompleteRegistration event (جانب العميل) — يُرسَل مع eventId لتجنب التكرار مع CAPI
@@ -585,7 +592,9 @@ function CampDetailContent({ slug }: { slug: string }) {
             images = camp.galleryImages.split('\n').filter((url: string) => url.trim());
           }
 
-          if (images.length === 0) {return null;}
+          if (images.length === 0) {
+            return null;
+          }
 
           return (
             <section className="pb-6 sm:pb-10 md:pb-14">
@@ -886,7 +895,9 @@ function CampDetailContent({ slug }: { slug: string }) {
                               selectedDay?.morningAvailable && availableDates.morningTime;
                             const hasEvening =
                               selectedDay?.eveningAvailable && availableDates.eveningTime;
-                            if (!hasMorning && !hasEvening) {return null;}
+                            if (!hasMorning && !hasEvening) {
+                              return null;
+                            }
                             return (
                               <div>
                                 <Label className="text-xs text-muted-foreground mb-1 block">

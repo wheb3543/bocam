@@ -19,14 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { trpc } from '@/lib/api/trpc';
-import {
-  Loader2,
-  CheckCircle2,
-  Phone,
-  Mail,
-  MapPin,
-  Stethoscope,
-} from 'lucide-react';
+import { Loader2, CheckCircle2, Phone, Mail, MapPin, Stethoscope } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { getCompanySlogan, COMPANY_ARABIC_NAME } from '@/const';
@@ -47,10 +40,7 @@ export default function DoctorAppointments() {
 }
 
 function DoctorAppointmentsContent() {
-  const {
-    validateYemeniPhone,
-    processPhoneInput,
-  } = usePhoneFormat();
+  const { validateYemeniPhone, processPhoneInput } = usePhoneFormat();
   const [, setLocation] = useLocation();
   const [phoneError, setPhoneError] = useState('');
   const [formData, setFormData] = useState({
@@ -96,7 +86,6 @@ function DoctorAppointmentsContent() {
       } else {
         toast.error('حدث خطأ أثناء حجز الموعد. يرجى المحاولة مرة أخرى.');
       }
-      console.error(error);
     },
   });
 
@@ -119,6 +108,7 @@ function DoctorAppointmentsContent() {
 
     // Advanced Matching: تحديث بيانات المستخدم في Pixel لرفع EMQ
     updatePixelUserData({ phone: formData.phone, email: formData.email || undefined }).catch(
+      // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op error handler
       () => {}
     );
     // Track Meta Lead
@@ -204,12 +194,16 @@ function DoctorAppointmentsContent() {
                         ? 'ring-2 ring-primary shadow-lg'
                         : ''
                     }`}
-                    onClick={() => setFormData({ ...formData, doctorId: doctor.id?.toString() || '' })}
+                    onClick={() =>
+                      setFormData({ ...formData, doctorId: doctor.id?.toString() || '' })
+                    }
                   >
                     <CardContent className="p-4">
                       <div className="aspect-square rounded-lg overflow-hidden mb-3">
                         <img
-                          src={typeof doctor.image === 'string' ? doctor.image : '/assets/new-logo.png'}
+                          src={
+                            typeof doctor.image === 'string' ? doctor.image : '/assets/new-logo.png'
+                          }
                           alt={doctor.name || 'طبيب'}
                           className="w-full h-full object-cover"
                         />
@@ -273,7 +267,10 @@ function DoctorAppointmentsContent() {
                         </SelectTrigger>
                         <SelectContent>
                           {doctors?.map((doctor: Doctor) => (
-                            <SelectItem key={doctor.id || doctor.name} value={doctor.id?.toString() || ''}>
+                            <SelectItem
+                              key={doctor.id || doctor.name}
+                              value={doctor.id?.toString() || ''}
+                            >
                               {doctor.name} - {doctor.specialty}
                             </SelectItem>
                           ))}

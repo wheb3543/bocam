@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import CampRegistrationsManagement from '@/components/camp/CampRegistrationsManagement';
@@ -21,7 +20,9 @@ import {
 } from 'recharts';
 
 function inDateRange(createdAt: unknown, from: Date, to: Date): boolean {
-  if (!createdAt) {return false;}
+  if (!createdAt) {
+    return false;
+  }
   const t = new Date(createdAt as string | Date).getTime();
   return t >= from.getTime() && t <= to.getTime();
 }
@@ -37,7 +38,9 @@ export default function CampRegistrationsPage() {
   const { data: registrations } = trpc.campRegistrations.list.useQuery();
 
   const rangeRegistrations = useMemo(() => {
-    if (!registrations) {return [];}
+    if (!registrations) {
+      return [];
+    }
     return registrations.filter((r) => inDateRange(r.createdAt, dateRange.from, dateRange.to));
   }, [registrations, dateRange.from, dateRange.to]);
 
@@ -57,7 +60,9 @@ export default function CampRegistrationsPage() {
 
   // Status distribution for pie chart
   const statusData = useMemo(() => {
-    if (!rangeRegistrations.length) {return [];}
+    if (!rangeRegistrations.length) {
+      return [];
+    }
 
     const statusCounts = {
       pending: rangeRegistrations.filter((r) => r.status === 'pending').length,
@@ -82,7 +87,9 @@ export default function CampRegistrationsPage() {
 
   // Daily registrations within selected range (cap display buckets)
   const dailyRegistrations = useMemo(() => {
-    if (!rangeRegistrations.length) {return [];}
+    if (!rangeRegistrations.length) {
+      return [];
+    }
 
     const dateMap = new Map<string, number>();
     rangeRegistrations.forEach((r) => {
@@ -235,6 +242,7 @@ export default function CampRegistrationsPage() {
         </div>
 
         <CampRegistrationsManagement
+          // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op
           onPendingCountChange={() => {}}
           dateRange={dateRange}
           onDateRangeChange={setDateRange}

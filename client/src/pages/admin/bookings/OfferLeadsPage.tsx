@@ -18,6 +18,7 @@ export default function OfferLeadsPage() {
     >
       <div className="space-y-4" dir="rtl">
         <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
+        {/* eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op */}
         <OfferLeadsManagement onPendingCountChange={() => {}} dateRange={dateRange} />
       </div>
     </DashboardLayout>

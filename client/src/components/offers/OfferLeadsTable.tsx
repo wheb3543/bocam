@@ -1,8 +1,4 @@
-import {
-  TableBody,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { TableBody, TableHeader, TableRow } from '@/components/ui/table';
 import {
   ResizableTable,
   ResizableHeaderCell,
@@ -76,7 +72,9 @@ export default function OfferLeadsTable({
               .filter((key) => visibleColumns[key])
               .map((colKey) => {
                 const col = columns.find((c) => c.key === colKey);
-                if (!col) {return null;}
+                if (!col) {
+                  return null;
+                }
 
                 if (colKey === 'checkbox') {
                   return (
@@ -86,6 +84,7 @@ export default function OfferLeadsTable({
                       width={40}
                       minWidth={40}
                       maxWidth={40}
+                      // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op
                       onResize={() => {}}
                     >
                       <input

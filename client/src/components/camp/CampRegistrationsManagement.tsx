@@ -1,212 +1,18 @@
-
- // @ts-nocheck
-import { useFormatDate } from '@/hooks/export/useFormatDate';
-import { useState, useMemo, useEffect, useCallback } from 'react';
-
-interface CampRegistration {
-  id?: number;
-  receiptNumber?: string | null;
-  fullName?: string;
-  phone?: string;
-  campId?: number;
-  campName?: string | null;
-  campSlug?: string | null;
-  status?: CampStatus | string;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  age?: number | null;
-  gender?: 'male' | 'female' | null;
-  email?: string | null;
-  attendanceDate?: string | Date | null;
-  commentCount?: number;
-  taskCount?: number;
-  [key: string]: unknown;
-}
-
-interface Camp {
-  id?: number;
-  name?: string;
-  [key: string]: unknown;
-}
-
-interface AvailableDate {
-  date?: string;
-  [key: string]: unknown;
-}
-
-type CampStatus = 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
-type TimeSlot = 'morning' | 'evening' | '';
-
-interface CampStatusUpdateData {
-  id: number;
-  status: CampStatus;
-  fullName?: string;
-  phone?: string;
-  attendanceDate?: Date;
-  preferredDate?: string;
-  preferredTimeSlot?: TimeSlot;
-  notes?: string;
-}
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { trpc } from '@/lib/api/trpc';
-import { useFilterUtils } from '@/hooks/table/useFilterUtils';
-import { Button } from '@/components/ui/button';
-import ActionButtons from '@/components/ActionButtons';
-import EmptyState from '@/components/EmptyState';
-import MultiSelect from '@/components/form/MultiSelect';
-import {
-  ColumnVisibility,
-  getColumnWidth,
-  type ColumnConfig,
-} from '@/components/table/ColumnVisibility';
-import {
-  ResizableTable,
-  ResizableHeaderCell,
-  FrozenTableCell,
-} from '@/components/table/ResizableTable';
-import { useTableFeatures } from '@/hooks/table/useTableFeatures';
-import TableSkeleton from '@/components/table/TableSkeleton';
-import InlineStatusEditor from '@/components/InlineStatusEditor';
-import CommentsSection from '@/components/CommentsSection';
-import CommentCount from '@/components/notification/CommentCount';
-import TaskCount from '@/components/TaskCount';
-import WhatsAppStatusBadge from '@/components/whatsapp/WhatsAppStatusBadge';
-import TasksSection from '@/components/TasksSection';
-import AuditLogSection from '@/components/AuditLogSection';
-import SavedFilters from '@/components/SavedFilters';
-import FilterPresets from '@/components/FilterPresets';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import {
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import ResponsiveDialog from '@/components/ResponsiveDialog';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Users,
-  UserCheck,
-  Search,
-  Clock,
-  Phone,
-  Mail,
-  Loader2,
-  Tent,
-  Calendar,
-  Download,
-  Printer,
-  Settings,
-  TentTree,
-  Trash2,
-} from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { toast } from 'sonner';
-import { useExportUtils } from '@/hooks/export/useExportUtils';
-import { printReceipt } from '@/components/booking/PrintReceipt';
 import { useAuth } from '@/_core/hooks/useAuth';
-import { SOURCE_OPTIONS, SOURCE_LABELS, SOURCE_COLORS } from '@shared/sources';
-import CampRegistrationCard from '@/components/camp/CampRegistrationCard';
-import _CardSkeleton from '@/components/CardSkeleton'; // Reserved for future card view implementation
-import SourceBadge from '@/components/SourceBadge';
-import { Checkbox } from '@/components/ui/checkbox';
+import { printReceipt } from '@/components/booking/PrintReceipt';
+import { toast } from 'sonner';
+import FilterPresets from '@/components/FilterPresets';
+import EmptyState from '@/components/EmptyState';
 import BulkActionsManager from '@/components/BulkActionsManager';
-import Pagination, { type PageSizeValue } from '@/components/table/Pagination';
-import { RotateCcw } from 'lucide-react';
-import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
-
-const statusLabels: Record<string, string> = {
-  pending: 'قيد الانتظار',
-  contacted: 'تم التواصل',
-  no_answer: 'لم يرد',
-  confirmed: 'مؤكد',
-  attended: 'حضر',
-  completed: 'مكتمل',
-  cancelled: 'ملغي',
-};
-
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-500',
-  contacted: 'bg-orange-500',
-  no_answer: 'bg-gray-500',
-  confirmed: 'bg-green-500',
-  attended: 'bg-blue-500',
-  completed: 'bg-teal-500',
-  cancelled: 'bg-red-500',
-};
-
-function formatStatusTime(val: string | Date | unknown): string {
-  if (!val) {return '-';}
-  try {
-    const d = new Date(val);
-    const h = d.getHours();
-    const m = d.getMinutes().toString().padStart(2, '0');
-    const ampm = h >= 12 ? 'م' : 'ص';
-    const h12 = h % 12 || 12;
-    const dd = d.getDate().toString().padStart(2, '0');
-    const mm = (d.getMonth() + 1).toString().padStart(2, '0');
-    const yyyy = d.getFullYear();
-    return `${h12}:${m} ${ampm}, ${dd}-${mm}-${yyyy}`;
-  } catch {
-    return '-';
-  }
-}
-
-/** Align quick presets / saved filters with the page DateRangePicker */
-function campPresetDateRange(
-  preset: string,
-  fallbackRange: { from: Date; to: Date }
-): { from: Date; to: Date } {
-  const now = new Date();
-  if (preset === 'today') {
-    return {
-      from: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-      to: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999),
-    };
-  }
-  if (preset === 'week') {
-    return {
-      from: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-      to: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999),
-    };
-  }
-  if (preset === 'month') {
-    return {
-      from: new Date(now.getFullYear(), now.getMonth(), 1),
-      to: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999),
-    };
-  }
-  if (preset === 'all') {
-    return { from: new Date(2000, 0, 1), to: new Date(2099, 11, 31, 23, 59, 59, 999) };
-  }
-  return fallbackRange;
-}
+import Pagination from '@/components/table/Pagination';
+import { Loader2, TentTree, Trash2 } from 'lucide-react';
+import CampRegistrationCard from '@/components/camp/CampRegistrationCard';
+import { useCampRegistrations } from '@/hooks/camp/useCampRegistrations';
+import CampStatisticsCards from '@/components/camp/CampStatisticsCards';
+import EntityFilters from '@/components/common/EntityFilters';
+import CampRegistrationTable from '@/components/camp/CampRegistrationTable';
+import CampStatusUpdateDialog from '@/components/camp/CampStatusUpdateDialog';
+import type { CampRegistration } from '@/types/camp';
 
 export default function CampRegistrationsManagement({
   onPendingCountChange,
@@ -217,474 +23,42 @@ export default function CampRegistrationsManagement({
   dateRange: { from: Date; to: Date };
   onDateRangeChange?: (range: { from: Date; to: Date }) => void;
 }) {
-  const { formatPhoneDisplay } = usePhoneFormat();
-  const { formatDate, formatRegistrationDate } = useFormatDate();
   const { user } = useAuth();
-  const utils = trpc.useUtils();
-  const generateReceiptNumberMutation = trpc.campRegistrations.generateReceiptNumber.useMutation();
-  const deleteRegMutation = trpc.campRegistrations.delete.useMutation({
-    onSuccess: () => {
-      toast.success('تم حذف التسجيل بنجاح');
-      utils.campRegistrations.listPaginated.invalidate();
-      utils.campRegistrations.stats.invalidate();
-    },
-    onError: () => toast.error('فشل في حذف التسجيل'),
-  });
-  const [selectedRegistration, setSelectedRegistration] = useState<CampRegistration | null>(null);
-  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState('');
-  const [editedName, setEditedName] = useState('');
-  const [editedPhone, setEditedPhone] = useState('');
-  const [attendanceDate, setAttendanceDate] = useState('');
-  const [preferredDate, setPreferredDate] = useState('');
-  const [preferredTimeSlot, setPreferredTimeSlot] = useState<TimeSlot>('');
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-
-  // Query لجلب المواعيد المتاحة للمخيم المحدد
-  const { data: availableDates } = trpc.camps.getAvailableDates.useQuery(
-    selectedRegistration ? { slug: selectedRegistration.campSlug || '' } : undefined,
-    { enabled: !!selectedRegistration?.campSlug && statusDialogOpen }
-  );
-
-  // Pagination state
-  const [campPage, setCampPage] = useState(1);
-  const [campPageSize, setCampPageSize] = useState<PageSizeValue>('100');
-
-  // === Unified filter state via useFilterUtils ===
-  const campFilter = useFilterUtils<CampRegistration>();
-
-  // Aliases for backward compatibility
-  const searchTerm = campFilter.filters.searchTerm;
-  const setSearchTerm = campFilter.filters.setSearchTerm;
-  const selectedCamp = campFilter.filters.categoryFilter;
-  const setSelectedCamp = campFilter.filters.setCategoryFilter;
-  const statusFilter = campFilter.filters.statusFilter;
-  const setStatusFilter = campFilter.filters.setStatusFilter;
-  const sourceFilter = campFilter.filters.sourceFilter;
-  const setSourceFilter = campFilter.filters.setSourceFilter;
-  const dateFilter = campFilter.filters.dateFilter;
-  const setDateFilter = campFilter.filters.setDateFilter;
-  const campRegistrationsSearchTerm = campFilter.filters.searchTerm;
-  const setCampRegistrationsSearchTerm = campFilter.filters.setSearchTerm;
-
-  // Sorting state
-  // Sort state is now managed by campTable.sortState via useTableFeatures
-
-  // Column visibility state for CampRegistrations - جميع الأعمدة من قاعدة البيانات
-  const campRegColumns: ColumnConfig[] = [
-    { key: 'checkbox', label: 'تحديد', defaultVisible: true, sortable: false },
-    { key: 'receiptNumber', label: 'رقم السند', defaultVisible: true, sortType: 'string' },
-    { key: 'name', label: 'الاسم الكامل', defaultVisible: true, sortType: 'string' },
-    { key: 'phone', label: 'رقم الهاتف', defaultVisible: true, sortType: 'string' },
-    { key: 'email', label: 'البريد الإلكتروني', defaultVisible: true, sortType: 'string' },
-    { key: 'age', label: 'العمر', defaultVisible: true, sortType: 'number' },
-    { key: 'gender', label: 'الجنس', defaultVisible: false, sortType: 'string' },
-    { key: 'camp', label: 'المخيم', defaultVisible: true, sortType: 'string' },
-    { key: 'procedures', label: 'الإجراءات المختارة', defaultVisible: false, sortable: false },
-    { key: 'medicalCondition', label: 'الحالة الصحية', defaultVisible: false, sortable: false },
-    { key: 'patientMessage', label: 'رسالة المريض', defaultVisible: false, sortable: false },
-    { key: 'notes', label: 'ملاحظات المسجل', defaultVisible: false, sortable: false },
-    { key: 'status', label: 'الحالة', defaultVisible: true, sortType: 'string' },
-    { key: 'statusNotes', label: 'ملاحظات الحالة', defaultVisible: false, sortable: false },
-    { key: 'contactedAt', label: 'وقت التواصل', defaultVisible: false, sortType: 'date' },
-    { key: 'confirmedAt', label: 'وقت التأكيد', defaultVisible: false, sortType: 'date' },
-    { key: 'attendedAt', label: 'وقت الحضور', defaultVisible: false, sortType: 'date' },
-    { key: 'completedAt', label: 'وقت الاكتمال', defaultVisible: false, sortType: 'date' },
-    { key: 'cancelledAt', label: 'وقت الإلغاء', defaultVisible: false, sortType: 'date' },
-    { key: 'attendanceDate', label: 'تاريخ الحضور', defaultVisible: false, sortType: 'date' },
-    { key: 'preferredDate', label: 'موعد الحضور', defaultVisible: true, sortType: 'string' },
-    { key: 'source', label: 'المصدر', defaultVisible: true, sortType: 'string' },
-    { key: 'utmSource', label: 'UTM Source', defaultVisible: false, sortType: 'string' },
-    { key: 'utmMedium', label: 'UTM Medium', defaultVisible: false, sortType: 'string' },
-    { key: 'utmCampaign', label: 'UTM Campaign', defaultVisible: false, sortType: 'string' },
-    { key: 'utmTerm', label: 'UTM Term', defaultVisible: false, sortType: 'string' },
-    { key: 'utmContent', label: 'UTM Content', defaultVisible: false, sortType: 'string' },
-    { key: 'utmPlacement', label: 'UTM Placement', defaultVisible: false, sortType: 'string' },
-    { key: 'referrer', label: 'المحيل', defaultVisible: false, sortType: 'string' },
-    { key: 'fbclid', label: 'Facebook Click ID', defaultVisible: false, sortType: 'string' },
-    { key: 'gclid', label: 'Google Click ID', defaultVisible: false, sortType: 'string' },
-    { key: 'date', label: 'تاريخ التسجيل', defaultVisible: true, sortType: 'date' },
-    { key: 'comments', label: 'التعليقات', defaultVisible: true, sortable: false },
-    { key: 'tasks', label: 'المهام', defaultVisible: true, sortable: false },
-    { key: 'whatsapp', label: 'WhatsApp', defaultVisible: true, sortable: false },
-    { key: 'actions', label: 'الإجراءات', defaultVisible: true, sortable: false },
-  ];
-
-  // === استخدام useTableFeatures الموحد لإدارة جميع ميزات الجدول ===
-  const campTable = useTableFeatures({
-    tableKey: 'campRegistrations',
-    columns: campRegColumns,
-  });
-
-  // Debounced search - now managed by useFilterUtils
-  const debouncedSearch = campFilter.filters.debouncedSearch;
-
-  // Quick presets for FilterPresets component
-  const quickPresets = [
-    {
-      id: 'today-new',
-      name: 'تسجيلات اليوم - جديدة',
-      filters: { dateFilter: 'today', status: ['pending'] },
-    },
-    {
-      id: 'week-confirmed',
-      name: 'تسجيلات الأسبوع - مؤكدة',
-      filters: { dateFilter: 'week', status: ['confirmed'] },
-    },
-    {
-      id: 'month-attended',
-      name: 'تسجيلات الشهر - حضروا',
-      filters: { dateFilter: 'month', status: ['attended'] },
-    },
-    {
-      id: 'all-cancelled',
-      name: 'جميع التسجيلات - ملغاة',
-      filters: { dateFilter: 'all', status: ['cancelled'] },
-    },
-  ];
-
-  const handleApplyPreset = (filters: Record<string, unknown>) => {
-    if (filters.dateFilter) {
-      setDateFilter(filters.dateFilter);
-      onDateRangeChange?.(campPresetDateRange(filters.dateFilter, dateRange));
-    }
-    if (filters.status) {setStatusFilter(filters.status);}
-    if (filters.source) {setSourceFilter(filters.source);}
-    if (filters.searchTerm !== undefined) {setSearchTerm(filters.searchTerm);}
-    if (filters.camp) {setSelectedCamp(filters.camp);}
-  };
-
-  const currentFilters = {
-    dateFilter,
-    status: statusFilter,
-    source: sourceFilter,
-    searchTerm,
-    camp: selectedCamp,
-  };
-
-  // Reset page when filters change
-  useEffect(() => {
-    setCampPage(1);
-  }, [
-    debouncedSearch,
-    dateRange.from,
-    dateRange.to,
-    statusFilter,
-    sourceFilter,
-    selectedCamp,
-    dateFilter,
-  ]);
-
-  const campLimit = campPageSize === 'all' ? 100000 : parseInt(campPageSize);
-  const listPaginatedInput = useMemo(
-    () => ({
-      page: campPageSize === 'all' ? 1 : campPage,
-      limit: campLimit,
-      searchTerm: debouncedSearch,
-      dateFrom: dateRange.from.toISOString(),
-      dateTo: dateRange.to.toISOString(),
-      ...(dateFilter !== 'all' ? { dateFilter: dateFilter as 'today' | 'week' | 'month' } : {}),
-      campIds: selectedCamp && selectedCamp.length > 0 ? selectedCamp.map(Number) : undefined,
-      sources: sourceFilter && sourceFilter.length > 0 ? sourceFilter : undefined,
-      statuses: statusFilter && statusFilter.length > 0 ? statusFilter : undefined,
-    }),
-    [
-      campPage,
-      campPageSize,
-      campLimit,
-      debouncedSearch,
-      dateRange.from,
-      dateRange.to,
-      dateFilter,
-      selectedCamp,
-      sourceFilter,
-      statusFilter,
-    ]
-  );
-  const {
-    data: registrationsData,
-    isLoading,
-    refetch,
-  } = trpc.campRegistrations.listPaginated.useQuery(listPaginatedInput);
-  const registrations = useMemo(() => registrationsData?.data || [], [registrationsData?.data]);
-  const { data: stats } = trpc.campRegistrations.stats.useQuery();
-
-  // Removed pagination reset effect
-
-  // Count pending registrations (status = 'pending')
-  const pendingCount = useMemo(() => {
-    return registrations?.filter((r) => r.status === 'pending').length || 0;
-  }, [registrations]);
-
-  // Notify parent of pending count changes
-  useEffect(() => {
-    if (onPendingCountChange) {
-      onPendingCountChange(pendingCount);
-    }
-  }, [pendingCount, onPendingCountChange]);
-
-  const bulkUpdateMutation = trpc.campRegistrations.bulkUpdateStatus.useMutation({
-    onSuccess: () => {
-      toast.success(`تم تحديث حالة ${selectedIds.length} تسجيل بنجاح`);
-      refetch();
-      setSelectedIds([]);
-    },
-    onError: () => {
-      toast.error('حدث خطأ أثناء تحديث الحالات');
-    },
-  });
-
-  const updateStatusMutation = trpc.campRegistrations.updateStatus.useMutation({
-    onMutate: async (variables) => {
-      await utils.campRegistrations.listPaginated.cancel();
-      const previousData = utils.campRegistrations.listPaginated.getData(listPaginatedInput);
-
-      utils.campRegistrations.listPaginated.setData(listPaginatedInput, (old) => {
-        if (!old) {return old;}
-        return {
-          ...old,
-          data: old.data.map((reg: CampRegistration) =>
-            reg.id === variables.id ? { ...reg, status: variables.status } : reg
-          ),
-        };
-      });
-
-      return { previousData };
-    },
-    onSuccess: () => {
-      toast.success('تم تحديث حالة التسجيل بنجاح');
-      setStatusDialogOpen(false);
-      setSelectedRegistration(null);
-      setNewStatus('');
-    },
-    onError: (error, variables, context) => {
-      if (context?.previousData) {
-        utils.campRegistrations.listPaginated.setData(listPaginatedInput, context.previousData);
-      }
-      toast.error('حدث خطأ أثناء تحديث الحالة');
-    },
-    onSettled: () => {
-      utils.campRegistrations.listPaginated.invalidate();
-    },
-  });
-
-  // Get all camps for filter from database
-  const { data: allCamps } = trpc.camps.getAll.useQuery();
-
-  // Apply sorting to camp registrations (filtering is now done server-side)
-  const filteredRegistrations = useMemo(() => {
-    if (!registrations) {return [];}
-
-    const filtered = [...registrations];
-
-    // Apply sorting using useTableFeatures
-    const sorted = campTable.sortData(filtered, (item: CampRegistration, key: string) => {
-      switch (key) {
-        case 'date':
-          return item.createdAt;
-        case 'name':
-          return item.fullName;
-        case 'phone':
-          return item.phone;
-        case 'email':
-          return item.email;
-        case 'age':
-          return item.age;
-        case 'gender':
-          return item.gender;
-        case 'camp':
-          return item.campName;
-        case 'source':
-          return item.source;
-        case 'receiptNumber':
-          return item.receiptNumber;
-        case 'status':
-          return item.status;
-        case 'attendanceDate':
-          return item.attendanceDate;
-        case 'utmSource':
-          return item.utmSource;
-        case 'utmMedium':
-          return item.utmMedium;
-        case 'utmCampaign':
-          return item.utmCampaign;
-        case 'utmTerm':
-          return item.utmTerm;
-        case 'utmContent':
-          return item.utmContent;
-        case 'utmPlacement':
-          return item.utmPlacement;
-        case 'referrer':
-          return item.referrer;
-        case 'fbclid':
-          return item.fbclid;
-        case 'gclid':
-          return item.gclid;
-        case 'preferredDate':
-          return item.preferredDate;
-        case 'patientMessage':
-          return item.patientMessage;
-        default:
-          return item[key];
-      }
-    });
-
-    // Default sort: newest first if no sort is active
-    if (!campTable.sortState.direction) {
-      sorted.sort((a: CampRegistration, b: CampRegistration) => {
-        const aDate = new Date(a.createdAt).getTime();
-        const bDate = new Date(b.createdAt).getTime();
-        return bDate - aDate;
-      });
-    }
-
-    return sorted;
-  }, [registrations, campTable]);
-
-  // useExportUtils hook لتسجيلات المخيمات
-  const campExport = useExportUtils({
-    tableName: 'تسجيلات المخيمات',
-    filenamePrefix: 'تسجيلات_المخيمات',
-    exportColumns: [
-      { key: 'receiptNumber', label: 'رقم السند' },
-      { key: 'name', label: 'الاسم الكامل' },
-      { key: 'phone', label: 'رقم الهاتف' },
-      { key: 'email', label: 'البريد الإلكتروني' },
-      { key: 'age', label: 'العمر' },
-      { key: 'camp', label: 'المخيم' },
-      { key: 'source', label: 'المصدر' },
-      { key: 'status', label: 'الحالة' },
-      { key: 'date', label: 'تاريخ التسجيل' },
-    ],
-    printColumns: [
-      { key: 'checkbox', label: 'تحديد' },
-      { key: 'receiptNumber', label: 'رقم السند' },
-      { key: 'name', label: 'الاسم الكامل' },
-      { key: 'phone', label: 'رقم الهاتف' },
-      { key: 'email', label: 'البريد الإلكتروني' },
-      { key: 'age', label: 'العمر' },
-      { key: 'camp', label: 'المخيم' },
-      { key: 'source', label: 'المصدر' },
-      { key: 'status', label: 'الحالة' },
-      { key: 'date', label: 'تاريخ التسجيل' },
-      { key: 'comments', label: 'التعليقات' },
-      { key: 'tasks', label: 'المهام' },
-      { key: 'actions', label: 'الإجراءات' },
-    ],
-    mapToExportRow: (reg: CampRegistration) => ({
-      receiptNumber: reg.receiptNumber || '-',
-      name: reg.fullName,
-      phone: reg.phone,
-      email: reg.email || '-',
-      age: reg.age || '-',
-      camp: reg.campName || '-',
-      source: SOURCE_LABELS[reg.source] || reg.source || '-',
-      status: statusLabels[reg.status as keyof typeof statusLabels] || reg.status,
-      date: formatDate(reg.createdAt),
-    }),
-    mapToPrintRow: (reg: CampRegistration) => ({
-      checkbox: '-',
-      receiptNumber: reg.receiptNumber || '-',
-      name: reg.fullName,
-      phone: reg.phone,
-      email: reg.email || '-',
-      age: reg.age || '-',
-      camp: reg.campName || '-',
-      source: SOURCE_LABELS[reg.source] || reg.source || '-',
-      status: statusLabels[reg.status as keyof typeof statusLabels] || reg.status,
-      date: formatDate(reg.createdAt),
-      comments: reg.commentCount > 0 ? `${reg.commentCount} تعليق` : '-',
-      tasks: reg.taskCount > 0 ? `${reg.taskCount} مهمة` : '-',
-      actions: '-',
-    }),
-  });
-
-  const getCampExportOptions = useCallback(() => {
-    const activeFilters = campExport.buildActiveFilters([
-      { label: 'البحث', value: debouncedSearch || undefined },
-      {
-        label: 'الحالة',
-        value:
-          statusFilter.length > 0
-            ? statusFilter.map((s) => statusLabels[s as keyof typeof statusLabels]).join(', ')
-            : undefined,
-      },
-      {
-        label: 'المصدر',
-        value:
-          sourceFilter.length > 0
-            ? sourceFilter.map((s) => SOURCE_LABELS[s] || s).join(', ')
-            : undefined,
-      },
-      { label: 'المخيم', value: selectedCamp.length > 0 ? selectedCamp.join(', ') : undefined },
-    ]);
-    return {
-      data: filteredRegistrations,
-      activeFilters,
-      dateRangeStr: campExport.formatDateRange(dateRange.from, dateRange.to),
-      visibleColumns: campTable.visibleColumns,
-    };
-  }, [
-    filteredRegistrations,
-    debouncedSearch,
-    statusFilter,
-    sourceFilter,
-    selectedCamp,
+  const campHook = useCampRegistrations({
     dateRange,
-    campTable.visibleColumns,
-    campExport,
-  ]);
+    onDateRangeChange,
+    onPendingCountChange,
+  });
 
-  const handleExportCampRegistrations = useCallback(
-    async (format: 'excel' | 'csv' | 'pdf') => {
-      await campExport.handleExport(format, getCampExportOptions());
-    },
-    [campExport, getCampExportOptions]
-  );
-
-  const handlePrintCampRegistrations = useCallback(() => {
-    campExport.handlePrint(getCampExportOptions());
-  }, [campExport, getCampExportOptions]);
-  const handleSelectAll = () => {
-    if (selectedIds.length === filteredRegistrations.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(filteredRegistrations.map((reg: CampRegistration) => reg.id));
+  const handlePrint = async (reg: CampRegistration) => {
+    try {
+      if (!reg.id) {
+        return;
+      }
+      const result = await campHook.generateReceiptNumberMutation.mutateAsync({ id: reg.id });
+      const campName = reg.campName || `مخيم #${reg.campId}`;
+      printReceipt(
+        {
+          fullName: reg.fullName ?? '',
+          phone: reg.phone ?? '',
+          age: reg.age ?? undefined,
+          registrationDate: new Date(reg.createdAt || new Date()),
+          type: 'camp',
+          typeName: campName,
+          receiptNumber: result.receiptNumber,
+        },
+        user?.name || 'مستخدم'
+      );
+    } catch {
+      toast.error('فشل في توليد رقم السند');
     }
   };
 
-  const handleSelectOne = (id: number) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
+  const handleDelete = (id: number) => {
+    campHook.deleteRegMutation.mutate({ id });
   };
 
-  const handleStatusUpdate = () => {
-    if (!selectedRegistration || !newStatus) {return;}
-
-    const updateData: CampStatusUpdateData = {
-      id: selectedRegistration.id,
-      status: newStatus as CampStatus,
-    };
-
-    // إضافة البيانات المعدلة إذا كانت الحالة مؤكد أو حضر
-    if (newStatus === 'confirmed' || newStatus === 'attended') {
-      if (editedName) {updateData.fullName = editedName;}
-      if (editedPhone) {updateData.phone = editedPhone;}
-      if (attendanceDate) {updateData.attendanceDate = new Date(attendanceDate);}
-    }
-
-    // إضافة موعد الحضور المفضل إذا تم تحديده
-    if (preferredDate) {updateData.preferredDate = preferredDate;}
-    if (preferredTimeSlot) {updateData.preferredTimeSlot = preferredTimeSlot;}
-
-    updateStatusMutation.mutate(updateData);
-  };
-
-  if (isLoading) {
+  if (campHook.isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -695,1289 +69,264 @@ export default function CampRegistrationsManagement({
   return (
     <div className="space-y-6">
       {/* Statistics Cards */}
-      <div className="grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4">
-        {[
-          {
-            label: 'إجمالي التسجيلات',
-            sub: null as string | null,
-            value: stats?.total || 0,
-            icon: Users,
-            color: 'text-slate-600',
-            bg: 'bg-slate-50',
-          },
-          {
-            label: 'قيد الانتظار',
-            sub: null,
-            value: stats?.pending || 0,
-            icon: Clock,
-            color: 'text-amber-600',
-            bg: 'bg-amber-50',
-          },
-          {
-            label: 'مؤكد (مسار)',
-            sub: 'مؤكد + حضر + مكتمل',
-            value: stats?.confirmed || 0,
-            icon: UserCheck,
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50',
-          },
-          {
-            label: 'حضر',
-            sub: null,
-            value: stats?.attended || 0,
-            icon: Calendar,
-            color: 'text-blue-600',
-            bg: 'bg-blue-50',
-          },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-lg border bg-card p-3 sm:p-4 flex items-start gap-2 sm:gap-3"
-          >
-            <div className={`rounded-lg p-1.5 sm:p-2 ${stat.bg}`}>
-              <stat.icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${stat.color}`} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-bold leading-none">{stat.value}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 truncate">
-                {stat.label}
-              </p>
-              {stat.sub && (
-                <p className="text-[9px] text-muted-foreground leading-tight mt-0.5">{stat.sub}</p>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      <CampStatisticsCards stats={campHook.stats || {}} />
 
       {/* Filter Presets */}
       <FilterPresets
         pageKey="campRegistrations"
-        currentFilters={currentFilters}
-        onApplyFilters={handleApplyPreset}
-        quickPresets={quickPresets}
+        currentFilters={campHook.currentFilters}
+        onApplyFilters={campHook.handleApplyPreset}
+        quickPresets={campHook.quickPresets}
         isAdmin={user?.role === 'admin'}
       />
 
-      {/* Quick Actions + Filters */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex-1" />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePrintCampRegistrations}
-            className="gap-2 h-9"
-          >
-            <Printer className="h-4 w-4" />
-            <span className="hidden sm:inline">طباعة</span>
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 h-9">
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">تصدير</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleExportCampRegistrations('excel')}>
-                تصدير Excel
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExportCampRegistrations('csv')}>
-                تصدير CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExportCampRegistrations('pdf')}>
-                تصدير PDF
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <ColumnVisibility
-            columns={campRegColumns}
-            visibleColumns={campTable.visibleColumns}
-            columnOrder={campTable.columnOrder}
-            onVisibilityChange={campTable.handleColumnVisibilityChange}
-            onColumnOrderChange={campTable.handleColumnOrderChange}
-            onReset={campTable.handleResetAll}
-            templates={campTable.allTemplates}
-            activeTemplateId={campTable.activeTemplateId}
-            onApplyTemplate={campTable.handleApplyTemplate}
-            onSaveTemplate={campTable.handleSaveTemplate}
-            onDeleteTemplate={campTable.handleDeleteTemplate}
-            tableKey="campRegistrations"
-            columnWidths={campTable.columnWidths.columnWidths}
-            frozenColumns={campTable.frozenColumns.frozenColumns}
-            onToggleFrozen={campTable.frozenColumns.toggleFrozen}
-            isAdmin={user?.role === 'admin'}
-            sharedTemplates={campTable.sharedTemplates}
-            onSaveSharedTemplate={campTable.handleSaveSharedTemplate}
-            onDeleteSharedTemplate={campTable.handleDeleteSharedTemplate}
-          />
-          <SavedFilters
-            pageKey="campRegistrations"
-            currentFilters={{
-              statusFilter: campFilter.filters.statusFilter,
-              sourceFilter: campFilter.filters.sourceFilter,
-              categoryFilter: campFilter.filters.categoryFilter,
-              dateFilter: campFilter.filters.dateFilter,
-              searchTerm: campFilter.filters.searchTerm,
-            }}
-            onApplyFilter={(filters) => {
-              if (filters.statusFilter) {campFilter.filters.setStatusFilter(filters.statusFilter);}
-              else {campFilter.filters.setStatusFilter([]);}
-              if (filters.sourceFilter) {campFilter.filters.setSourceFilter(filters.sourceFilter);}
-              else {campFilter.filters.setSourceFilter([]);}
-              if (filters.categoryFilter)
-                {campFilter.filters.setCategoryFilter(filters.categoryFilter);}
-              else {campFilter.filters.setCategoryFilter([]);}
-              if (filters.dateFilter) {
-                campFilter.filters.setDateFilter(filters.dateFilter);
-                onDateRangeChange?.(campPresetDateRange(filters.dateFilter, dateRange));
-              } else {
-                campFilter.filters.setDateFilter('all');
-              }
-              if (filters.searchTerm) {campFilter.filters.setSearchTerm(filters.searchTerm);}
-              else {campFilter.filters.setSearchTerm('');}
-            }}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          <div className="relative sm:col-span-2 lg:col-span-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="البحث بالاسم أو الهاتف..."
-              value={campRegistrationsSearchTerm}
-              onChange={(e) => setCampRegistrationsSearchTerm(e.target.value)}
-              className="pr-10 h-9"
-            />
-          </div>
-          <MultiSelect
-            options={(allCamps || []).map((camp: Camp) => ({
-              value: camp.id.toString(),
-              label: camp.name,
-            }))}
-            selected={selectedCamp}
-            onChange={setSelectedCamp}
-            placeholder="جميع المخيمات"
-            className="h-9"
-          />
-          <MultiSelect
-            options={[
-              { value: 'pending', label: 'قيد الانتظار' },
-              { value: 'contacted', label: 'تم التواصل' },
-              { value: 'no_answer', label: 'لم يرد' },
-              { value: 'confirmed', label: 'مؤكد' },
-              { value: 'attended', label: 'حضر' },
-              { value: 'completed', label: 'مكتمل' },
-              { value: 'cancelled', label: 'ملغي' },
-            ]}
-            selected={statusFilter}
-            onChange={setStatusFilter}
-            placeholder="كل الحالات"
-            className="h-9"
-          />
-          <MultiSelect
-            options={SOURCE_OPTIONS}
-            selected={sourceFilter}
-            onChange={setSourceFilter}
-            placeholder="كل المصادر"
-            className="h-9"
-          />
-        </div>
-      </div>
-
-      {/* Reset Filters Button */}
-      {campFilter.filters.activeFilterCount > 0 && (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              campFilter.filters.resetAll();
-              setCampPage(1);
-              setSelectedIds([]);
-            }}
-            className="gap-1 text-muted-foreground hover:text-foreground h-8"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            إعادة تعيين الفلاتر ({campFilter.filters.activeFilterCount})
-          </Button>
-        </div>
-      )}
+      {/* Filters */}
+      <EntityFilters
+        searchTerm={campHook.searchTerm}
+        onSearchChange={campHook.setSearchTerm}
+        searchPlaceholder="البحث بالاسم أو الهاتف..."
+        categoryOptions={(campHook.allCamps || []).map((camp: { id?: number; name?: string }) => ({
+          value: camp.id?.toString() || '',
+          label: camp.name || '',
+        }))}
+        selectedCategory={campHook.selectedCamp}
+        onCategoryChange={campHook.setSelectedCamp}
+        categoryPlaceholder="جميع المخيمات"
+        dateFilter={campHook.dateFilter}
+        onDateFilterChange={(value: 'all' | 'today' | 'week' | 'month' | 'custom') =>
+          campHook.setDateFilter(value)
+        }
+        statusFilter={campHook.statusFilter}
+        onStatusFilterChange={campHook.setStatusFilter}
+        sourceFilter={campHook.sourceFilter}
+        onSourceFilterChange={campHook.setSourceFilter}
+        activeFilterCount={campHook.campFilter.filters.activeFilterCount}
+        onResetAll={campHook.resetFilters}
+        columns={campHook.campRegColumns}
+        visibleColumns={campHook.campTable.visibleColumns}
+        columnOrder={campHook.campTable.columnOrder}
+        onVisibilityChange={campHook.campTable.handleColumnVisibilityChange}
+        onColumnOrderChange={campHook.campTable.handleColumnOrderChange}
+        onResetColumns={campHook.campTable.handleResetAll}
+        allTemplates={campHook.campTable.allTemplates}
+        activeTemplateId={campHook.campTable.activeTemplateId}
+        onApplyTemplate={campHook.campTable.handleApplyTemplate}
+        onSaveTemplate={campHook.campTable.handleSaveTemplate}
+        onDeleteTemplate={campHook.campTable.handleDeleteTemplate}
+        columnWidths={campHook.campTable.columnWidths.columnWidths}
+        frozenColumns={campHook.campTable.frozenColumns.frozenColumns}
+        onToggleFrozen={campHook.campTable.frozenColumns.toggleFrozen}
+        isAdmin={user?.role === 'admin'}
+        sharedTemplates={campHook.campTable.sharedTemplates}
+        onSaveSharedTemplate={campHook.campTable.handleSaveSharedTemplate}
+        onDeleteSharedTemplate={campHook.campTable.handleDeleteSharedTemplate}
+        pageKey="campRegistrations"
+        currentFilters={{
+          statusFilter: campHook.campFilter.filters.statusFilter,
+          sourceFilter: campHook.campFilter.filters.sourceFilter,
+          categoryFilter: campHook.campFilter.filters.categoryFilter,
+          dateFilter: campHook.campFilter.filters.dateFilter,
+          searchTerm: campHook.campFilter.filters.searchTerm,
+        }}
+        onApplyFilter={(filters) => {
+          if (filters.statusFilter) {
+            campHook.campFilter.filters.setStatusFilter(filters.statusFilter as string[]);
+          } else {
+            campHook.campFilter.filters.setStatusFilter([]);
+          }
+          if (filters.sourceFilter) {
+            campHook.campFilter.filters.setSourceFilter(filters.sourceFilter as string[]);
+          } else {
+            campHook.campFilter.filters.setSourceFilter([]);
+          }
+          if (filters.categoryFilter) {
+            campHook.campFilter.filters.setCategoryFilter(filters.categoryFilter as string[]);
+          } else {
+            campHook.campFilter.filters.setCategoryFilter([]);
+          }
+          if (filters.dateFilter) {
+            campHook.campFilter.filters.setDateFilter(
+              filters.dateFilter as 'all' | 'today' | 'week' | 'month' | 'custom'
+            );
+            onDateRangeChange?.(
+              campHook.campPresetDateRange(
+                filters.dateFilter as 'all' | 'today' | 'week' | 'month' | 'custom',
+                dateRange
+              )
+            );
+          } else {
+            campHook.campFilter.filters.setDateFilter('all');
+          }
+          if (filters.searchTerm) {
+            campHook.campFilter.filters.setSearchTerm(filters.searchTerm as string);
+          } else {
+            campHook.campFilter.filters.setSearchTerm('');
+          }
+        }}
+        onExport={campHook.handleExportCampRegistrations}
+        onPrint={campHook.handlePrintCampRegistrations}
+      />
 
       {/* Mobile Cards View */}
       <div className="md:hidden space-y-3">
-        {isLoading ? (
-          <TableSkeleton rows={3} columns={4} />
-        ) : filteredRegistrations.length === 0 ? (
+        {campHook.filteredRegistrations.length === 0 ? (
           <EmptyState
             icon={TentTree}
             title="لا توجد تسجيلات"
             description="لم يتم العثور على أي تسجيلات للمخيمات في الفترة المحددة. جرب تغيير الفلاتر."
           />
         ) : (
-          filteredRegistrations.map((reg: CampRegistration) => (
+          campHook.filteredRegistrations.map((reg: CampRegistration) => (
             <CampRegistrationCard
               key={reg.id}
               registration={{
-                id: reg.id,
-                fullName: reg.fullName,
-                phone: reg.phone,
-                email: reg.email,
-                age: reg.age,
-                status: reg.status,
-                campName: reg.campName,
-                createdAt: reg.createdAt,
+                id: reg.id ?? 0,
+                fullName: reg.fullName ?? '',
+                phone: reg.phone ?? '',
+                email: reg.email ?? '',
+                age: reg.age ?? 0,
+                status: reg.status ?? 'pending',
+                campName: reg.campName ?? '',
+                createdAt:
+                  typeof reg.createdAt === 'string'
+                    ? new Date(reg.createdAt)
+                    : (reg.createdAt ?? new Date()),
               }}
-              onEdit={() => {
-                setSelectedRegistration(reg);
-                setNewStatus(reg.status);
-                setEditedName(reg.fullName);
-                setEditedPhone(reg.phone);
-                setAttendanceDate(
-                  reg.attendanceDate ? new Date(reg.attendanceDate).toISOString().slice(0, 16) : ''
-                );
-                setPreferredDate(reg.preferredDate || '');
-                setPreferredTimeSlot(reg.preferredTimeSlot || '');
-                setStatusDialogOpen(true);
-              }}
-              onViewDetails={() => {
-                setSelectedRegistration(reg);
-                setDetailsDialogOpen(true);
-              }}
-              onPrint={async () => {
-                try {
-                  const result = await generateReceiptNumberMutation.mutateAsync({ id: reg.id });
-                  printReceipt(
-                    {
-                      fullName: reg.fullName,
-                      phone: reg.phone,
-                      age: reg.age,
-                      registrationDate: reg.createdAt ? new Date(reg.createdAt) : new Date(),
-                      type: 'camp',
-                      typeName: reg.campName || 'غير محدد',
-                      receiptNumber: result.receiptNumber,
-                    },
-                    user?.name || 'غير معروف'
-                  );
-                } catch (error) {
-                  console.error('Error generating receipt number:', error);
-                  toast.error('فشل في توليد رقم السند');
-                }
-              }}
+              onEdit={() => campHook.handleEditRegistration(reg)}
+              onViewDetails={() => campHook.handleViewDetails(reg)}
+              onPrint={() => handlePrint(reg)}
             />
           ))
         )}
       </div>
 
       {/* Bulk Update Button */}
-      {selectedIds.length > 0 && (
+      {campHook.selectedIds.length > 0 && (
         <div className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg">
           <div className="flex items-center gap-2">
-            <Checkbox
-              checked={selectedIds.length === filteredRegistrations.length}
-              onCheckedChange={handleSelectAll}
-            />
             <span className="text-sm font-medium">
-              تم تحديد {selectedIds.length} من {filteredRegistrations.length}
+              تم تحديد {campHook.selectedIds.length} من {campHook.filteredRegistrations.length}
             </span>
           </div>
+          <BulkActionsManager
+            selectedCount={campHook.selectedIds.length}
+            onClear={() => campHook.setSelectedIds([])}
+            actions={[
+              {
+                type: 'status-update',
+                label: 'تحديث الحالة',
+                statusOptions: [
+                  { value: 'confirmed', label: 'مؤكد' },
+                  { value: 'attended', label: 'حضر' },
+                  { value: 'completed', label: 'مكتمل' },
+                  { value: 'cancelled', label: 'ملغي' },
+                ],
+                onStatusConfirm: async (newStatus) => {
+                  await campHook.bulkUpdateMutation.mutateAsync({
+                    ids: campHook.selectedIds,
+                    status: newStatus as 'confirmed' | 'attended' | 'completed' | 'cancelled',
+                  });
+                  campHook.setSelectedIds([]);
+                  campHook.refetch();
+                },
+              },
+              {
+                type: 'delete',
+                label: 'حذف',
+                variant: 'destructive',
+                icon: <Trash2 className="h-4 w-4" />,
+                onConfirm: async () => {
+                  await Promise.all(
+                    campHook.selectedIds.map((id) => campHook.deleteRegMutation.mutateAsync({ id }))
+                  );
+                  campHook.setSelectedIds([]);
+                  campHook.refetch();
+                },
+                confirmTitle: 'تأكيد الحذف',
+                confirmDescription: `هل أنت متأكد من حذف ${campHook.selectedIds.length} تسجيل؟`,
+              },
+            ]}
+          />
         </div>
       )}
 
       {/* Desktop Table View */}
-      <div className="hidden md:block rounded-lg border bg-card">
-        <ResizableTable
-          frozenColumns={campTable.frozenColumns.frozenColumns}
-          columnWidths={campTable.columnWidths.columnWidths}
-          visibleColumnOrder={campTable.columnOrder.filter((key) => campTable.visibleColumns[key])}
-        >
-          <TableHeader>
-            <TableRow>
-              {campTable.columnOrder
-                .filter((key) => campTable.visibleColumns[key])
-                .map((colKey) => {
-                  const col = campRegColumns.find((c) => c.key === colKey);
-                  if (!col) {return null;}
-                  if (colKey === 'checkbox') {
-                    return (
-                      <ResizableHeaderCell
-                        key={colKey}
-                        columnKey={colKey}
-                        width={40}
-                        minWidth={40}
-                        maxWidth={40}
-                        onResize={() => {}}
-                      >
-                        <Checkbox
-                          checked={
-                            selectedIds.length === filteredRegistrations.length &&
-                            filteredRegistrations.length > 0
-                          }
-                          onCheckedChange={handleSelectAll}
-                        />
-                      </ResizableHeaderCell>
-                    );
-                  }
-                  const widthConfig = getColumnWidth(colKey, col);
-                  return (
-                    <ResizableHeaderCell
-                      key={colKey}
-                      columnKey={colKey}
-                      width={campTable.columnWidths.getWidth(colKey)}
-                      minWidth={widthConfig.min}
-                      maxWidth={widthConfig.max}
-                      onResize={campTable.columnWidths.handleResize}
-                      {...campTable.getSortProps(colKey)}
-                    >
-                      {col.label}
-                    </ResizableHeaderCell>
-                  );
-                })}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={
-                    campTable.columnOrder.filter((k) => campTable.visibleColumns[k]).length || 1
-                  }
-                  className="p-0"
-                >
-                  <TableSkeleton
-                    rows={5}
-                    columns={
-                      campTable.columnOrder.filter((k) => campTable.visibleColumns[k]).length || 11
-                    }
-                  />
-                </TableCell>
-              </TableRow>
-            ) : filteredRegistrations.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={
-                    campTable.columnOrder.filter((k) => campTable.visibleColumns[k]).length || 1
-                  }
-                  className="py-12"
-                >
-                  <EmptyState
-                    icon={TentTree}
-                    title="لا توجد تسجيلات"
-                    description="لم يتم العثور على أي تسجيلات للمخيمات في الفترة المحددة. جرب تغيير الفلاتر."
-                  />
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredRegistrations.map((reg: CampRegistration) => (
-                <TableRow
-                  key={reg.id}
-                  className={reg.status === 'pending' ? 'bg-red-50 hover:bg-red-100' : ''}
-                >
-                  {campTable.columnOrder
-                    .filter((key) => campTable.visibleColumns[key])
-                    .map((colKey) => {
-                      switch (colKey) {
-                        case 'checkbox':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              <Checkbox
-                                checked={selectedIds.includes(reg.id)}
-                                onCheckedChange={() => handleSelectOne(reg.id)}
-                              />
-                            </FrozenTableCell>
-                          );
-                        case 'receiptNumber':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-sm text-muted-foreground font-mono"
-                            >
-                              {reg.receiptNumber || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'name':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="font-medium"
-                            >
-                              {reg.fullName}
-                            </FrozenTableCell>
-                          );
-                        case 'phone':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono">{formatPhoneDisplay(reg.phone)}</span>
-                                <ActionButtons
-                                  phoneNumber={formatPhoneDisplay(reg.phone)}
-                                  showWhatsApp={true}
-                                  whatsAppMessage={`مرحباً ${reg.fullName}، شكراً لتسجيلك في مخيمنا الطبي. نتطلع لرؤيتك.`}
-                                  size="sm"
-                                  variant="ghost"
-                                />
-                              </div>
-                            </FrozenTableCell>
-                          );
-                        case 'email':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              {reg.email ? (
-                                <div className="flex items-center gap-2">
-                                  <Mail className="h-4 w-4 text-muted-foreground" />
-                                  <a
-                                    href={`mailto:${reg.email}`}
-                                    className="hover:text-primary text-sm"
-                                  >
-                                    {reg.email}
-                                  </a>
-                                </div>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </FrozenTableCell>
-                          );
-                        case 'age':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              {reg.age ? (
-                                <span className="text-sm">{reg.age} سنة</span>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </FrozenTableCell>
-                          );
-                        case 'gender':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              {reg.gender === 'male'
-                                ? 'ذكر'
-                                : reg.gender === 'female'
-                                  ? 'أنثى'
-                                  : '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'camp':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              <div className="flex items-center gap-2">
-                                <Tent className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm">{reg.campName || 'غير محدد'}</span>
-                              </div>
-                            </FrozenTableCell>
-                          );
-                        case 'source':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              {reg.source ? (
-                                <SourceBadge
-                                  source={reg.source}
-                                  utmSource={reg.utmSource}
-                                  utmMedium={reg.utmMedium}
-                                  utmCampaign={reg.utmCampaign}
-                                  referrer={reg.referrer}
-                                  fbclid={reg.fbclid}
-                                  gclid={reg.gclid}
-                                  size="sm"
-                                />
-                              ) : (
-                                <Badge variant="outline" className="text-xs">
-                                  غير محدد
-                                </Badge>
-                              )}
-                            </FrozenTableCell>
-                          );
-                        case 'status':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              <InlineStatusEditor
-                                currentStatus={reg.status}
-                                statusOptions={[
-                                  {
-                                    value: 'pending',
-                                    label: 'قيد الانتظار',
-                                    color: 'bg-yellow-500',
-                                  },
-                                  {
-                                    value: 'contacted',
-                                    label: 'تم التواصل',
-                                    color: 'bg-orange-500',
-                                  },
-                                  { value: 'no_answer', label: 'لم يرد', color: 'bg-gray-500' },
-                                  { value: 'confirmed', label: 'مؤكد', color: 'bg-green-500' },
-                                  { value: 'attended', label: 'حضر', color: 'bg-blue-500' },
-                                  { value: 'completed', label: 'مكتمل', color: 'bg-teal-500' },
-                                  { value: 'cancelled', label: 'ملغي', color: 'bg-red-500' },
-                                ]}
-                                onSave={async (newStatus) => {
-                                  await updateStatusMutation.mutateAsync({
-                                    id: reg.id,
-                                    status: newStatus as CampStatus,
-                                    notes: '',
-                                  });
-                                }}
-                              />
-                            </FrozenTableCell>
-                          );
-                        case 'statusNotes':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              wrap
-                              title={reg.statusNotes}
-                            >
-                              {reg.statusNotes || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'procedures':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm">
-                              {reg.procedures || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'medicalCondition':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm">
-                              {reg.medicalCondition || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'patientMessage':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-sm max-w-[200px] truncate"
-                              title={reg.patientMessage || undefined}
-                            >
-                              {reg.patientMessage || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'contactedAt':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-xs text-muted-foreground"
-                            >
-                              {formatStatusTime(reg.contactedAt)}
-                            </FrozenTableCell>
-                          );
-                        case 'confirmedAt':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-xs text-muted-foreground"
-                            >
-                              {formatStatusTime(reg.confirmedAt)}
-                            </FrozenTableCell>
-                          );
-                        case 'attendedAt':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-xs text-muted-foreground"
-                            >
-                              {formatStatusTime(reg.attendedAt)}
-                            </FrozenTableCell>
-                          );
-                        case 'completedAt':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-xs text-muted-foreground"
-                            >
-                              {formatStatusTime(reg.completedAt)}
-                            </FrozenTableCell>
-                          );
-                        case 'cancelledAt':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-xs text-muted-foreground"
-                            >
-                              {formatStatusTime(reg.cancelledAt)}
-                            </FrozenTableCell>
-                          );
-                        case 'attendanceDate':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm">
-                              {formatRegistrationDate(reg.attendanceDate)}
-                            </FrozenTableCell>
-                          );
-                        case 'preferredDate':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-sm">
-                              {reg.preferredDate ? (
-                                <div className="flex flex-col gap-0.5">
-                                  <span>{reg.preferredDate}</span>
-                                  {reg.preferredTimeSlot && (
-                                    <Badge variant="outline" className="text-xs w-fit">
-                                      {reg.preferredTimeSlot === 'morning'
-                                        ? '🌅 صباحي'
-                                        : '🌆 مسائي'}
-                                    </Badge>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </FrozenTableCell>
-                          );
-                        case 'date':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-sm text-muted-foreground"
-                            >
-                              {formatRegistrationDate(reg.createdAt)}
-                            </FrozenTableCell>
-                          );
-                        case 'utmSource':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
-                              {reg.utmSource || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'utmMedium':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
-                              {reg.utmMedium || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'utmCampaign':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
-                              {reg.utmCampaign || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'utmTerm':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
-                              {reg.utmTerm || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'utmContent':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
-                              {reg.utmContent || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'utmPlacement':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
-                              {reg.utmPlacement || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'referrer':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
-                              {reg.referrer || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'fbclid':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-xs font-mono"
-                            >
-                              {reg.fbclid || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'gclid':
-                          return (
-                            <FrozenTableCell
-                              key={colKey}
-                              columnKey={colKey}
-                              className="text-xs font-mono"
-                            >
-                              {reg.gclid || '-'}
-                            </FrozenTableCell>
-                          );
-                        case 'comments':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              <CommentCount entityType="campRegistration" entityId={reg.id} />
-                            </FrozenTableCell>
-                          );
-                        case 'tasks':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              <TaskCount entityType="campRegistration" entityId={reg.id} />
-                            </FrozenTableCell>
-                          );
-                        case 'whatsapp':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              <WhatsAppStatusBadge
-                                entityType="camp_registration"
-                                entityId={reg.id}
-                              />
-                            </FrozenTableCell>
-                          );
-                        case 'actions':
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              <div className="flex gap-1">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        setSelectedRegistration(reg);
-                                        setNewStatus(reg.status);
-                                        setEditedName(reg.fullName);
-                                        setEditedPhone(reg.phone);
-                                        setAttendanceDate(
-                                          reg.attendanceDate
-                                            ? new Date(reg.attendanceDate)
-                                                .toISOString()
-                                                .slice(0, 16)
-                                            : ''
-                                        );
-                                        setPreferredDate(reg.preferredDate || '');
-                                        setPreferredTimeSlot(reg.preferredTimeSlot || '');
-                                        setStatusDialogOpen(true);
-                                      }}
-                                    >
-                                      <Settings className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>تحديث الحالة</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                      onClick={async () => {
-                                        try {
-                                          const result =
-                                            await generateReceiptNumberMutation.mutateAsync({
-                                              id: reg.id,
-                                            });
-                                          const campName = reg.campName || `مخيم #${reg.campId}`;
-                                          printReceipt(
-                                            {
-                                              fullName: reg.fullName,
-                                              phone: reg.phone,
-                                              age: reg.age ?? undefined,
-                                              registrationDate: new Date(reg.createdAt),
-                                              type: 'camp',
-                                              typeName: campName,
-                                              receiptNumber: result.receiptNumber,
-                                            },
-                                            user?.name || 'مستخدم'
-                                          );
-                                        } catch (error) {
-                                          console.error('Error generating receipt number:', error);
-                                          toast.error('فشل في توليد رقم السند');
-                                        }
-                                      }}
-                                    >
-                                      <Printer className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>طباعة السند</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        هل أنت متأكد من حذف هذا التسجيل؟ لا يمكن التراجع عن هذا
-                                        الإجراء.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        className="bg-red-600 hover:bg-red-700"
-                                        onClick={() => deleteRegMutation.mutate({ id: reg.id })}
-                                      >
-                                        {deleteRegMutation.isPending ? (
-                                          <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                          'حذف'
-                                        )}
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            </FrozenTableCell>
-                          );
-                        default:
-                          return (
-                            <FrozenTableCell key={colKey} columnKey={colKey}>
-                              -
-                            </FrozenTableCell>
-                          );
-                      }
-                    })}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </ResizableTable>
+      <CampRegistrationTable
+        registrations={campHook.filteredRegistrations}
+        isLoading={campHook.isLoading}
+        selectedIds={campHook.selectedIds}
+        onSelectAll={campHook.handleSelectAll}
+        onSelectOne={campHook.handleSelectOne}
+        onEdit={campHook.handleEditRegistration}
+        onPrint={handlePrint}
+        onDelete={handleDelete}
+        _onUpdateStatus={(
+          id: number,
+          status:
+            | 'pending'
+            | 'contacted'
+            | 'no_answer'
+            | 'confirmed'
+            | 'attended'
+            | 'completed'
+            | 'cancelled'
+        ) => {
+          campHook.updateStatusMutation.mutateAsync({ id, status, notes: '' });
+        }}
+        campTable={{
+          columnOrder: campHook.campTable.columnOrder,
+          visibleColumns: campHook.campTable.visibleColumns,
+          columnWidths: campHook.campTable.columnWidths.columnWidths,
+          frozenColumns: campHook.campTable.frozenColumns,
+          getSortProps: campHook.campTable.getSortProps,
+        }}
+        campRegColumns={campHook.campRegColumns}
+        formatPhoneDisplay={campHook.formatPhoneDisplay}
+        formatRegistrationDate={campHook.formatRegistrationDate}
+        formatStatusTime={campHook.formatStatusTime}
+        _deleteRegMutation={campHook.deleteRegMutation}
+        _updateStatusMutation={campHook.updateStatusMutation}
+      />
 
-        <Pagination
-          currentPage={campPage}
-          totalPages={registrationsData?.totalPages || 1}
-          onPageChange={(page) => {
-            setCampPage(page);
-            setSelectedIds([]);
-          }}
-          totalItems={registrationsData?.total || 0}
-          itemsPerPage={campLimit}
-          pageSize={campPageSize}
-          onPageSizeChange={(size) => {
-            setCampPageSize(size);
-            setCampPage(1);
-            setSelectedIds([]);
-          }}
-        />
-      </div>
+      {/* Pagination */}
+      <Pagination
+        currentPage={campHook.campPage}
+        totalPages={campHook.registrationsData?.totalPages || 1}
+        onPageChange={(page) => {
+          campHook.setCampPage(page);
+          campHook.setSelectedIds([]);
+        }}
+        totalItems={campHook.registrationsData?.total || 0}
+        itemsPerPage={campHook.campLimit}
+        pageSize={campHook.campPageSize}
+        onPageSizeChange={(size) => {
+          campHook.setCampPageSize(size);
+          campHook.setCampPage(1);
+          campHook.setSelectedIds([]);
+        }}
+      />
 
       {/* Status Update Dialog */}
-      <ResponsiveDialog
-        open={statusDialogOpen}
-        onOpenChange={setStatusDialogOpen}
-        title="تحديث حالة التسجيل"
-        description={`قم بتحديث حالة تسجيل المخيم لـ ${selectedRegistration?.fullName}`}
-        className="max-w-3xl"
-      >
-        {selectedRegistration && (
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <Tabs defaultValue="info" className="flex-1 overflow-hidden flex flex-col">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-                <TabsTrigger value="info">معلومات التسجيل</TabsTrigger>
-                <TabsTrigger value="comments">التعليقات</TabsTrigger>
-                <TabsTrigger value="tasks">المهام</TabsTrigger>
-                <TabsTrigger value="history">سجل التغييرات</TabsTrigger>
-              </TabsList>
-
-              <div className="flex-1 overflow-y-auto mt-4">
-                <TabsContent value="info" className="space-y-4 mt-0">
-                    <div className="space-y-2">
-                      <Label>معلومات المسجل</Label>
-                      <div className="bg-muted p-3 rounded-lg space-y-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span>{formatPhoneDisplay(selectedRegistration.phone)}</span>
-                        </div>
-                        {selectedRegistration.email && (
-                          <div className="flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-muted-foreground" />
-                            <span>{selectedRegistration.email}</span>
-                          </div>
-                        )}
-                        {selectedRegistration.age && (
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span>العمر: {selectedRegistration.age} سنة</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Tent className="h-4 w-4 text-muted-foreground" />
-                          <span>{selectedRegistration.campName || 'غير محدد'}</span>
-                        </div>
-                        {selectedRegistration.medicalCondition && (
-                          <div className="pt-2 border-t">
-                            <p className="text-xs text-muted-foreground mb-1">الحالة الطبية:</p>
-                            <p>{selectedRegistration.medicalCondition}</p>
-                          </div>
-                        )}
-                        {selectedRegistration.notes && (
-                          <div className="pt-2 border-t">
-                            <p className="text-xs text-muted-foreground mb-1">ملاحظات:</p>
-                            <p>{selectedRegistration.notes}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>الحالة الجديدة</Label>
-                      <Select value={newStatus} onValueChange={setNewStatus}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الحالة" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">قيد الانتظار</SelectItem>
-                          <SelectItem value="contacted">تم التواصل</SelectItem>
-                          <SelectItem value="no_answer">لم يرد</SelectItem>
-                          <SelectItem value="confirmed">مؤكد</SelectItem>
-                          <SelectItem value="attended">حضر</SelectItem>
-                          <SelectItem value="completed">مكتمل</SelectItem>
-                          <SelectItem value="cancelled">ملغي</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {(newStatus === 'confirmed' || newStatus === 'attended') && (
-                      <>
-                        <div className="space-y-2">
-                          <Label>الاسم الكامل</Label>
-                          <Input
-                            value={editedName}
-                            onChange={(e) => setEditedName(e.target.value)}
-                            placeholder="الاسم الكامل"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>رقم الهاتف</Label>
-                          <Input
-                            value={editedPhone}
-                            onChange={(e) => setEditedPhone(e.target.value)}
-                            placeholder="رقم الهاتف"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>موعد الحضور (تاريخ ووقت)</Label>
-                          <Input
-                            type="datetime-local"
-                            value={attendanceDate}
-                            onChange={(e) => setAttendanceDate(e.target.value)}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>الموعد المفضل للحضور</Label>
-                          {availableDates?.dates && availableDates.dates.length > 0 ? (
-                            <>
-                              <Select
-                                value={preferredDate}
-                                onValueChange={(v) => {
-                                  setPreferredDate(v);
-                                  setPreferredTimeSlot('');
-                                }}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="اختر التاريخ" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {availableDates.dates.map((d: AvailableDate) => (
-                                    <SelectItem key={d.date} value={d.date}>
-                                      {d.date}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              {preferredDate && (
-                                <Select
-                                  value={preferredTimeSlot}
-                                  onValueChange={(v) => setPreferredTimeSlot(v as TimeSlot)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="اختر الوقت" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {availableDates.morningTime && (
-                                      <SelectItem value="morning">
-                                        🌅 صباحي - {availableDates.morningTime}
-                                      </SelectItem>
-                                    )}
-                                    {availableDates.eveningTime && (
-                                      <SelectItem value="evening">
-                                        🌆 مسائي - {availableDates.eveningTime}
-                                      </SelectItem>
-                                    )}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                            </>
-                          ) : (
-                            <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
-                              {selectedRegistration?.campSlug
-                                ? 'جاري تحميل المواعيد...'
-                                : 'لا توجد مواعيد متاحة لهذا المخيم'}
-                            </div>
-                          )}
-                          {preferredDate && preferredTimeSlot && (
-                            <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
-                              ✅ الموعد المختار: {preferredDate} -{' '}
-                              {preferredTimeSlot === 'morning' ? 'صباحي' : 'مسائي'}
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </TabsContent>
-
-                  <TabsContent value="comments" className="mt-0">
-                    <CommentsSection
-                      entityType="campRegistration"
-                      entityId={selectedRegistration.id}
-                    />
-                  </TabsContent>
-
-                  <TabsContent value="tasks" className="mt-0">
-                    <TasksSection
-                      entityType="campRegistration"
-                      entityId={selectedRegistration.id}
-                    />
-                  </TabsContent>
-
-                  <TabsContent value="history" className="mt-0">
-                    <AuditLogSection
-                      entityType="campRegistration"
-                      entityId={selectedRegistration.id}
-                    />
-                  </TabsContent>
-                </div>
-              </Tabs>
-
-              <div className="flex gap-2 justify-end mt-4 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setStatusDialogOpen(false);
-                    setSelectedRegistration(null);
-                    setNewStatus('');
-                  }}
-                >
-                  إلغاء
-                </Button>
-                <Button
-                  onClick={handleStatusUpdate}
-                  disabled={!newStatus || updateStatusMutation.isPending}
-                >
-                  {updateStatusMutation.isPending ? (
-                    <>
-                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      جاري التحديث...
-                    </>
-                  ) : (
-                    'تحديث الحالة'
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
-        </ResponsiveDialog>
-
-      {/* Details Dialog */}
-      <ResponsiveDialog
-        open={detailsDialogOpen}
-        onOpenChange={setDetailsDialogOpen}
-        title="تفاصيل التسجيل"
-        className="max-w-2xl"
-      >
-        {selectedRegistration && (
-          <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">الاسم الكامل</p>
-                  <p className="text-base font-semibold">{selectedRegistration.fullName}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">رقم الهاتف</p>
-                  <p className="text-base font-semibold" dir="ltr">
-                    {formatPhoneDisplay(selectedRegistration.phone)}
-                  </p>
-                </div>
-                {selectedRegistration.email && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</p>
-                    <p className="text-base">{selectedRegistration.email}</p>
-                  </div>
-                )}
-                {selectedRegistration.age && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">العمر</p>
-                    <p className="text-base">{selectedRegistration.age} سنة</p>
-                  </div>
-                )}
-                {selectedRegistration.gender && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">الجنس</p>
-                    <p className="text-base">
-                      {selectedRegistration.gender === 'male' ? 'ذكر' : 'أنثى'}
-                    </p>
-                  </div>
-                )}
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">المخيم</p>
-                  <p className="text-base font-semibold">{selectedRegistration.campName || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">الحالة</p>
-                  <Badge
-                    className={`${statusColors[selectedRegistration.status as keyof typeof statusColors] || 'bg-muted text-foreground'}`}
-                  >
-                    {statusLabels[selectedRegistration.status as keyof typeof statusLabels] ||
-                      selectedRegistration.status}
-                  </Badge>
-                </div>
-                {selectedRegistration.source && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">المصدر</p>
-                    <Badge
-                      variant="outline"
-                      className="text-xs font-medium mt-1"
-                      style={{
-                        backgroundColor: SOURCE_COLORS[selectedRegistration.source]
-                          ? `${SOURCE_COLORS[selectedRegistration.source]}15`
-                          : undefined,
-                        borderColor: SOURCE_COLORS[selectedRegistration.source] || undefined,
-                        color: SOURCE_COLORS[selectedRegistration.source] || undefined,
-                      }}
-                    >
-                      {SOURCE_LABELS[selectedRegistration.source] || selectedRegistration.source}
-                    </Badge>
-                  </div>
-                )}
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">تاريخ التسجيل</p>
-                  <p className="text-base">{formatDate(selectedRegistration.createdAt)}</p>
-                </div>
-              </div>
-              {selectedRegistration.procedures && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">
-                    الإجراءات المختارة
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {(typeof selectedRegistration.procedures === 'string' &&
-                    selectedRegistration.procedures.trim() !== ''
-                      ? (() => {
-                          try {
-                            return JSON.parse(selectedRegistration.procedures);
-                          } catch {
-                            return [];
-                          }
-                        })()
-                      : Array.isArray(selectedRegistration.procedures)
-                        ? selectedRegistration.procedures
-                        : []
-                    ).map((proc: string, idx: number) => (
-                      <Badge key={idx} variant="secondary" className="text-sm">
-                        {proc}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {selectedRegistration.patientMessage && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">رسالة المريض</p>
-                  <p className="text-base bg-muted p-3 rounded-md whitespace-pre-wrap">
-                    {selectedRegistration.patientMessage}
-                  </p>
-                </div>
-              )}
-              {selectedRegistration.notes && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">ملاحظات</p>
-                  <p className="text-base bg-muted p-3 rounded-md">{selectedRegistration.notes}</p>
-                </div>
-              )}
-            </div>
-          )}
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
-              إغلاق
-            </Button>
-          </div>
-        </ResponsiveDialog>
-
-      {/* Bulk Actions Manager */}
-      <BulkActionsManager
-        selectedCount={selectedIds.length}
-        onClear={() => setSelectedIds([])}
-        showBar={true}
-        position="bottom"
-        size="normal"
-        barClassName="bg-gradient-to-r from-purple-600 to-pink-600"
-        actions={[
-          {
-            type: 'status-update',
-            label: 'تحديث الحالة',
-            variant: 'secondary',
-            statusOptions: [
-              { value: 'pending', label: 'قيد الانتظار' },
-              { value: 'contacted', label: 'تم التواصل' },
-              { value: 'no_answer', label: 'لم يرد' },
-              { value: 'confirmed', label: 'مؤكد' },
-              { value: 'attended', label: 'حضر' },
-              { value: 'completed', label: 'مكتمل' },
-              { value: 'cancelled', label: 'ملغي' },
-            ],
-            onStatusConfirm: (newStatus: string) => {
-              bulkUpdateMutation.mutate({
-                ids: selectedIds,
-                status: newStatus as
-                  | 'pending'
-                  | 'contacted'
-                  | 'no_answer'
-                  | 'confirmed'
-                  | 'attended'
-                  | 'completed'
-                  | 'cancelled',
-              });
-            },
-            isLoading: bulkUpdateMutation.isPending,
-          },
-          {
-            type: 'delete',
-            label: 'حذف الكل',
-            variant: 'destructive',
-            confirmTitle: 'تأكيد الحذف الجماعي',
-            confirmDescription: `هل أنت متأكد من حذف ${selectedIds.length} تسجيل؟ هذا الإجراء لا يمكن التراجع عنه.`,
-            onConfirm: async () => {
-              // Delete each registration one by one
-              for (const id of selectedIds) {
-                await deleteRegMutation.mutateAsync({ id });
-              }
-              setSelectedIds([]);
-              toast.success(`تم حذف ${selectedIds.length} تسجيل بنجاح`);
-            },
-            isLoading: deleteRegMutation.isPending,
-          },
-          {
-            type: 'export',
-            label: 'تصدير',
-            variant: 'outline',
-            exportFormats: [
-              { value: 'csv', label: 'CSV' },
-              { value: 'excel', label: 'Excel' },
-            ],
-            onExport: () => {
-              const _selectedRegistrations = filteredRegistrations.filter((reg) =>
-                selectedIds.includes(reg.id)
-              );
-              // Export logic here
-              toast.success('تم تصدير البيانات بنجاح');
-            },
-          },
-        ]}
+      <CampStatusUpdateDialog
+        open={campHook.statusDialogOpen}
+        onOpenChange={campHook.setStatusDialogOpen}
+        registration={campHook.selectedRegistration}
+        newStatus={campHook.newStatus}
+        onStatusChange={campHook.setNewStatus}
+        editedName={campHook.editedName}
+        onNameChange={campHook.setEditedName}
+        editedPhone={campHook.editedPhone}
+        onPhoneChange={campHook.setEditedPhone}
+        attendanceDate={campHook.attendanceDate}
+        onAttendanceDateChange={campHook.setAttendanceDate}
+        preferredDate={campHook.preferredDate}
+        onPreferredDateChange={campHook.setPreferredDate}
+        preferredTimeSlot={campHook.preferredTimeSlot}
+        onPreferredTimeSlotChange={campHook.setPreferredTimeSlot}
+        availableDates={campHook.availableDates}
+        onUpdate={campHook.handleStatusUpdate}
+        isUpdating={campHook.updateStatusMutation.isPending}
+        formatPhoneDisplay={campHook.formatPhoneDisplay}
       />
     </div>
   );

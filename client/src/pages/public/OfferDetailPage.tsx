@@ -50,11 +50,7 @@ export default function OfferDetailPage() {
 }
 
 function OfferDetailContent({ slug }: { slug: string }) {
-  const {
-    getCallLink,
-    validateYemeniPhone,
-    processPhoneInput,
-  } = usePhoneFormat();
+  const { getCallLink, validateYemeniPhone, processPhoneInput } = usePhoneFormat();
   const { getSavedPatientInfo, savePatientInfo } = usePatientStorage();
   const { formatDate } = useFormatDate();
   const [, setLocation] = useLocation();
@@ -144,13 +140,16 @@ function OfferDetailContent({ slug }: { slug: string }) {
     }
     setPhoneError('');
 
-    if (!offer) {return;}
+    if (!offer) {
+      return;
+    }
 
     try {
       const trackingData = getCompleteTrackingData();
 
       // Advanced Matching: تحديث بيانات المستخدم في Pixel لرفع EMQ
       updatePixelUserData({ phone: formData.phone, email: formData.email || undefined }).catch(
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op error handler
         () => {}
       );
       // Pixel Lead event (جانب العميل) — يُرسَل مع eventId لتجنب التكرار مع CAPI
