@@ -4,7 +4,9 @@ import { followUpTasks, InsertFollowUpTask } from '../../drizzle/schema';
 
 export async function createFollowUpTask(task: InsertFollowUpTask) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const result = await db.insert(followUpTasks).values(task);
   return result;
@@ -15,7 +17,9 @@ export async function getFollowUpTasksByEntity(
   entityId: number
 ) {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
 
   const tasks = await db
     .select()
@@ -31,7 +35,9 @@ export async function getFollowUpTaskCount(
   entityId: number
 ) {
   const db = await getDb();
-  if (!db) return 0;
+  if (!db) {
+    return 0;
+  }
 
   const tasks = await db
     .select()
@@ -48,7 +54,9 @@ export async function updateFollowUpTaskStatus(
   completedByName?: string
 ) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   const updateData: {
     status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -63,8 +71,12 @@ export async function updateFollowUpTaskStatus(
 
   if (status === 'completed') {
     updateData.completedAt = new Date();
-    if (completedById) updateData.completedById = completedById;
-    if (completedByName) updateData.completedByName = completedByName;
+    if (completedById) {
+      updateData.completedById = completedById;
+    }
+    if (completedByName) {
+      updateData.completedByName = completedByName;
+    }
   }
 
   await db.update(followUpTasks).set(updateData).where(eq(followUpTasks.id, taskId));
@@ -72,7 +84,9 @@ export async function updateFollowUpTaskStatus(
 
 export async function deleteFollowUpTask(taskId: number) {
   const db = await getDb();
-  if (!db) throw new Error('Database not available');
+  if (!db) {
+    throw new Error('Database not available');
+  }
 
   await db.delete(followUpTasks).where(eq(followUpTasks.id, taskId));
 }

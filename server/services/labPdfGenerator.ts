@@ -10,13 +10,17 @@ const AMIRI_BOLD = path.join(process.cwd(), 'server', 'fonts', 'Amiri-Bold.ttf')
 
 export async function generateLabResultPDF(orderId: number): Promise<Buffer> {
   const hospitalDb = await getHospitalDb();
-  if (!hospitalDb) throw new Error('Hospital database not available');
+  if (!hospitalDb) {
+    throw new Error('Hospital database not available');
+  }
 
   // جلب البيانات من قاعدة بيانات المستشفى
   const [order] = await hospitalDb.execute(
     sql`SELECT * FROM lab_orders WHERE ORDER_ID = ${orderId} LIMIT 1`
   );
-  if (!order) throw new Error('Order not found');
+  if (!order) {
+    throw new Error('Order not found');
+  }
 
   const details = await hospitalDb.execute(
     sql`SELECT * FROM lab_results_details WHERE ORDER_ID = ${orderId}`
@@ -35,9 +39,36 @@ export async function generateLabResultPDF(orderId: number): Promise<Buffer> {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
-      addLabHeader(doc, order as unknown as { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date });
-      addLabResultsTable(doc, details as unknown as Array<{ TEST_NAME: string; RESULT_VALUE: string; NORMAL_RANGE: string; UNIT: string; PARAMETER_NAME?: string }>);
-      addLabFooter(doc, order as unknown as { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date });
+      addLabHeader(
+        doc,
+        order as unknown as {
+          PATIENT_NAME: string;
+          PHONE_NO: string;
+          DOCTOR_NAME: string;
+          MAIN_TEST_NAME: string;
+          RESULT_DATE: string | Date;
+        }
+      );
+      addLabResultsTable(
+        doc,
+        details as unknown as Array<{
+          TEST_NAME: string;
+          RESULT_VALUE: string;
+          NORMAL_RANGE: string;
+          UNIT: string;
+          PARAMETER_NAME?: string;
+        }>
+      );
+      addLabFooter(
+        doc,
+        order as unknown as {
+          PATIENT_NAME: string;
+          PHONE_NO: string;
+          DOCTOR_NAME: string;
+          MAIN_TEST_NAME: string;
+          RESULT_DATE: string | Date;
+        }
+      );
 
       doc.end();
     } catch (error) {
@@ -46,7 +77,16 @@ export async function generateLabResultPDF(orderId: number): Promise<Buffer> {
   });
 }
 
-function addLabHeader(doc: PDFDocumentInstance, order: { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date }) {
+function addLabHeader(
+  doc: PDFDocumentInstance,
+  order: {
+    PATIENT_NAME: string;
+    PHONE_NO: string;
+    DOCTOR_NAME: string;
+    MAIN_TEST_NAME: string;
+    RESULT_DATE: string | Date;
+  }
+) {
   const logoPath = path.join(process.cwd(), 'client', 'public', 'SGHHospitalColorBilingual.png');
   try {
     doc.image(logoPath, doc.page.width - 200, 30, { width: 150 });
@@ -85,7 +125,16 @@ function addLabHeader(doc: PDFDocumentInstance, order: { PATIENT_NAME: string; P
   });
 }
 
-function addLabResultsTable(doc: PDFDocumentInstance, details: Array<{ TEST_NAME: string; RESULT_VALUE: string; NORMAL_RANGE: string; UNIT: string; PARAMETER_NAME?: string }>) {
+function addLabResultsTable(
+  doc: PDFDocumentInstance,
+  details: Array<{
+    TEST_NAME: string;
+    RESULT_VALUE: string;
+    NORMAL_RANGE: string;
+    UNIT: string;
+    PARAMETER_NAME?: string;
+  }>
+) {
   const tableTop = 250;
   const tableLeft = 50;
   const tableWidth = doc.page.width - 100;
@@ -135,7 +184,16 @@ function addLabResultsTable(doc: PDFDocumentInstance, details: Array<{ TEST_NAME
   });
 }
 
-function addLabFooter(doc: PDFDocumentInstance, order: { PATIENT_NAME: string; PHONE_NO: string; DOCTOR_NAME: string; MAIN_TEST_NAME: string; RESULT_DATE: string | Date }) {
+function addLabFooter(
+  doc: PDFDocumentInstance,
+  order: {
+    PATIENT_NAME: string;
+    PHONE_NO: string;
+    DOCTOR_NAME: string;
+    MAIN_TEST_NAME: string;
+    RESULT_DATE: string | Date;
+  }
+) {
   const pageHeight = doc.page.height;
   const footerY = pageHeight - 50;
 
@@ -147,7 +205,9 @@ function addLabFooter(doc: PDFDocumentInstance, order: { PATIENT_NAME: string; P
   doc
     .fontSize(9)
     .font(AMIRI_REGULAR)
-    .text(`رقم الطلب: ${(order as { ORDER_ID?: string }).ORDER_ID || 'N/A'}`, 50, footerY, { align: 'left' })
+    .text(`رقم الطلب: ${(order as { ORDER_ID?: string }).ORDER_ID || 'N/A'}`, 50, footerY, {
+      align: 'left',
+    })
     .text('نرعاكم كأهالينا', 0, footerY, { align: 'center', width: doc.page.width })
     .text(new Date().toLocaleDateString('ar-SA'), doc.page.width - 200, footerY, {
       align: 'right',

@@ -4,13 +4,16 @@
  */
 import { runDeactivationJobs } from './deactivateExpired';
 import { pollLabResults } from './labResultsPoller';
+import { createLogger } from '../../_core/logger';
+
+const logger = createLogger('scheduler');
 
 /**
  * Initialize cron scheduler
  * تهيئة جدولة المهام
  */
 export function initCronScheduler() {
-  console.log('[Cron] Initializing scheduler...');
+  logger.info('Initializing scheduler...');
 
   // Run lab results polling immediately and every 60 seconds
   pollLabResults();
@@ -18,7 +21,7 @@ export function initCronScheduler() {
 
   // Run immediately on startup (for testing)
   runDeactivationJobs().then(() => {
-    console.log('[Cron] Initial deactivation job completed');
+    logger.info('Initial deactivation job completed');
   });
 
   // Schedule daily job at midnight
@@ -41,8 +44,8 @@ export function initCronScheduler() {
     ); // 24 hours in milliseconds
   }, msUntilMidnight);
 
-  console.log(
-    `[Cron] Scheduler initialized. Lab results polling every 60 seconds. Next deactivation run in ${Math.round(msUntilMidnight / 1000 / 60)} minutes`
+  logger.info(
+    `Scheduler initialized. Lab results polling every 60 seconds. Next deactivation run in ${Math.round(msUntilMidnight / 1000 / 60)} minutes`
   );
 }
 
@@ -51,7 +54,7 @@ export function initCronScheduler() {
  * بديل: جدولة بسيطة بناءً على الفترة الزمنية (كل 24 ساعة من وقت التشغيل)
  */
 export function initSimpleCronScheduler() {
-  console.log('[Cron] Initializing simple scheduler (24h interval)...');
+  logger.info('Initializing simple scheduler (24h interval)...');
 
   // Run immediately on startup
   runDeactivationJobs();
@@ -64,5 +67,5 @@ export function initSimpleCronScheduler() {
     24 * 60 * 60 * 1000
   ); // 24 hours in milliseconds
 
-  console.log('[Cron] Simple scheduler initialized. Running every 24 hours.');
+  logger.info('Simple scheduler initialized. Running every 24 hours.');
 }

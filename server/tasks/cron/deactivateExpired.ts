@@ -5,6 +5,9 @@
 import { eq, and, lte } from 'drizzle-orm';
 import { getDb } from '../../database/db';
 import { offers, camps } from '../../../drizzle/schema';
+import { createLogger } from '../../_core/logger';
+
+const logger = createLogger('deactivateExpired');
 
 /**
  * Deactivate expired offers
@@ -13,7 +16,7 @@ import { offers, camps } from '../../../drizzle/schema';
 export async function deactivateExpiredOffers() {
   const db = await getDb();
   if (!db) {
-    console.warn('[Cron] Database not available for deactivateExpiredOffers');
+    logger.warn('Database not available for deactivateExpiredOffers');
     return { success: false, deactivated: 0 };
   }
 
@@ -27,7 +30,7 @@ export async function deactivateExpiredOffers() {
       .where(and(eq(offers.isActive, true), lte(offers.endDate, now)));
 
     if (expiredOffers.length === 0) {
-      console.log('[Cron] No expired offers found');
+      logger.info('No expired offers found');
       return { success: true, deactivated: 0 };
     }
 
@@ -35,13 +38,13 @@ export async function deactivateExpiredOffers() {
     for (const offer of expiredOffers) {
       await db.update(offers).set({ isActive: false }).where(eq(offers.id, offer.id));
 
-      console.log(`[Cron] Deactivated expired offer: ${offer.title} (ID: ${offer.id})`);
+      logger.info(`Deactivated expired offer: ${offer.title} (ID: ${offer.id})`);
     }
 
-    console.log(`[Cron] Deactivated ${expiredOffers.length} expired offer(s)`);
+    logger.info(`Deactivated ${expiredOffers.length} expired offer(s)`);
     return { success: true, deactivated: expiredOffers.length };
   } catch (error) {
-    console.error('[Cron] Error deactivating expired offers:', error);
+    logger.error('Error deactivating expired offers:', error);
     return { success: false, deactivated: 0, error };
   }
 }
@@ -53,7 +56,7 @@ export async function deactivateExpiredOffers() {
 export async function deactivateExpiredCamps() {
   const db = await getDb();
   if (!db) {
-    console.warn('[Cron] Database not available for deactivateExpiredCamps');
+    logger.warn('Database not available for deactivateExpiredCamps');
     return { success: false, deactivated: 0 };
   }
 
@@ -67,7 +70,7 @@ export async function deactivateExpiredCamps() {
       .where(and(eq(camps.isActive, true), lte(camps.endDate, now)));
 
     if (expiredCamps.length === 0) {
-      console.log('[Cron] No expired camps found');
+      logger.info('No expired camps found');
       return { success: true, deactivated: 0 };
     }
 
@@ -75,13 +78,13 @@ export async function deactivateExpiredCamps() {
     for (const camp of expiredCamps) {
       await db.update(camps).set({ isActive: false }).where(eq(camps.id, camp.id));
 
-      console.log(`[Cron] Deactivated expired camp: ${camp.name} (ID: ${camp.id})`);
+      logger.info(`Deactivated expired camp: ${camp.name} (ID: ${camp.id})`);
     }
 
-    console.log(`[Cron] Deactivated ${expiredCamps.length} expired camp(s)`);
+    logger.info(`Deactivated ${expiredCamps.length} expired camp(s)`);
     return { success: true, deactivated: expiredCamps.length };
   } catch (error) {
-    console.error('[Cron] Error deactivating expired camps:', error);
+    logger.error('Error deactivating expired camps:', error);
     return { success: false, deactivated: 0, error };
   }
 }
@@ -91,14 +94,14 @@ export async function deactivateExpiredCamps() {
  * تشغيل جميع مهام إلغاء التنشيط
  */
 export async function runDeactivationJobs() {
-  console.log('[Cron] Running deactivation jobs...');
+  logger.info('Running deactivation jobs...');
 
   const offersResult = await deactivateExpiredOffers();
   const campsResult = await deactivateExpiredCamps();
 
   const totalDeactivated = offersResult.deactivated + campsResult.deactivated;
 
-  console.log(`[Cron] Deactivation jobs completed. Total deactivated: ${totalDeactivated}`);
+  logger.info(`Deactivation jobs completed. Total deactivated: ${totalDeactivated}`);
 
   return {
     success: offersResult.success && campsResult.success,
