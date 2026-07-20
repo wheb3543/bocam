@@ -1,0 +1,18 @@
+allowBuilds:
+  '@scarf/scarf': true
+  bcrypt: true
+  core-js: true
+  cwebp-bin: set this to true or false
+  esbuild: true
+  gifsicle: set this to true or false
+  jpegtran-bin: set this to true or false
+  mozjpeg: set this to true or false
+  msgpackr-extract: true
+  msw: true
+  optipng-bin: set this to true or false
+  pngquant-bin: set this to true or false
+  puppeteer: true
+minimumReleaseAgeExclude:
+  - baseline-browser-mapping@2.10.43
+  - bullmq@5.80.2
+  - postcss@8.5.17

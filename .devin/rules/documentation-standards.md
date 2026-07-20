@@ -1,5 +1,5 @@
 ---
-trigger: manual
+trigger: always_on
 description: Maintain high-standard documentation and ensure automatic updates upon codebase changes
 ---
 # Continuous & High-Standard Documentation

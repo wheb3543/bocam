@@ -1,5 +1,5 @@
 ---
-trigger: manual
+trigger: always_on
 description: Enforce strict ESLint configuration, architectural design patterns, and code quality standards
 ---
 # Global Quality & Engineering Standards

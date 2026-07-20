@@ -1,5 +1,5 @@
 ---
-trigger: manual
+trigger: always_on
 description: Enforce ISO/IEC 25010 software quality characteristics including maintainability, portability, and functional suitability
 ---
 # ISO/IEC 25010 Software Quality Standards

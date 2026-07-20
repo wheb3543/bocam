@@ -1,5 +1,5 @@
 ---
-trigger: manual
+trigger: always_on
 description: Enforce OWASP security standards, strict error handling, and runtime reliability
 ---
 # Security Standards (OWASP Top 10)
