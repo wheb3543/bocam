@@ -1,5 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { subscribe, channelForConversation, channelForUser } from '../_core/pubsub';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsappSse');
 
 const GLOBAL_CHANNEL = 'global:whatsapp';
 
@@ -28,7 +31,9 @@ export function createWhatsAppSseRouter(): Router {
   // ── Conversation-level stream ──────────────────────────────────────────────
   router.get('/api/whatsapp/stream/:conversationId', (req: Request, res: Response) => {
     const conversationId = Number(req.params.conversationId);
-    if (isNaN(conversationId)) return res.status(400).send('Invalid conversation id');
+    if (isNaN(conversationId)) {
+      return res.status(400).send('Invalid conversation id');
+    }
 
     res.set(SSE_HEADERS);
     res.flushHeaders();
@@ -41,8 +46,23 @@ export function createWhatsAppSseRouter(): Router {
     // Keep-alive comment every 15 s (shorter than most proxy 30 s idle timeouts)
     const keepAlive = setInterval(() => {
       try {
-        if (!res.writableEnded) res.write(': ping\n\n');
-      } catch {}
+        if (!res.writableEnded) {
+          res.write(': ping\n\n');
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          switch (error.name) {
+            case 'Error':
+              logger.warn('SSE write error (connection closed):', error.message);
+              break;
+            case 'TypeError':
+              logger.warn('SSE type error:', error.message);
+              break;
+            default:
+              logger.warn('SSE write error:', error.message);
+          }
+        }
+      }
     }, 15000);
 
     req.on('close', () => {
@@ -63,8 +83,12 @@ export function createWhatsAppSseRouter(): Router {
 
     const keepAlive = setInterval(() => {
       try {
-        if (!res.writableEnded) res.write(': ping\n\n');
-      } catch {}
+        if (!res.writableEnded) {
+          res.write(': ping\n\n');
+        }
+      } catch {
+        // Ignore SSE write errors (connection may be closed)
+      }
     }, 15000);
 
     req.on('close', () => {
@@ -85,8 +109,12 @@ export function createWhatsAppSseRouter(): Router {
 
     const keepAlive = setInterval(() => {
       try {
-        if (!res.writableEnded) res.write(': ping\n\n');
-      } catch {}
+        if (!res.writableEnded) {
+          res.write(': ping\n\n');
+        }
+      } catch {
+        // Ignore SSE write errors (connection may be closed)
+      }
     }, 15000);
 
     req.on('close', () => {
@@ -98,7 +126,9 @@ export function createWhatsAppSseRouter(): Router {
   // ── User-level stream (new conversations, counts, etc.) ───────────────────
   router.get('/api/whatsapp/stream/user/:userId', (req: Request, res: Response) => {
     const userId = Number(req.params.userId);
-    if (isNaN(userId)) return res.status(400).send('Invalid user id');
+    if (isNaN(userId)) {
+      return res.status(400).send('Invalid user id');
+    }
 
     res.set(SSE_HEADERS);
     res.flushHeaders();
@@ -109,8 +139,12 @@ export function createWhatsAppSseRouter(): Router {
 
     const keepAlive = setInterval(() => {
       try {
-        if (!res.writableEnded) res.write(': ping\n\n');
-      } catch {}
+        if (!res.writableEnded) {
+          res.write(': ping\n\n');
+        }
+      } catch {
+        // Ignore SSE write errors (connection may be closed)
+      }
     }, 15000);
 
     req.on('close', () => {

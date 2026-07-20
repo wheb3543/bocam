@@ -20,6 +20,9 @@ import {
   updateWhatsAppConversation,
 } from '../database/db';
 import { whatsappAutoReplies, InsertWhatsAppAutoReply } from '../../drizzle/schema';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsappAutoReply');
 import { sendWhatsAppTextMessage } from './whatsappCloudAPI';
 
 export interface AutoReplyRule {
@@ -52,7 +55,9 @@ export async function addAutoReplyRule(params: {
     }
 
     const db = await getDb();
-    if (!db) return { success: false, error: 'Database not available' };
+    if (!db) {
+      return { success: false, error: 'Database not available' };
+    }
 
     const values: InsertWhatsAppAutoReply = {
       name: params.name,
@@ -68,10 +73,10 @@ export async function addAutoReplyRule(params: {
     const [result] = await db.insert(whatsappAutoReplies).values(values);
     const ruleId = (result as unknown as { insertId: number }).insertId;
 
-    console.log(`[WhatsApp AutoReply] ✅ Added rule "${params.name}" (id: ${ruleId})`);
+    logger.info(`Added rule "${params.name}" (id: ${ruleId})`);
     return { success: true, ruleId };
   } catch (error) {
-    console.error('[WhatsApp AutoReply] Failed to add rule:', error);
+    logger.error('Failed to add rule:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
@@ -81,13 +86,15 @@ export async function deleteAutoReplyRule(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: 'Database not available' };
+    if (!db) {
+      return { success: false, error: 'Database not available' };
+    }
 
     await db.delete(whatsappAutoReplies).where(eq(whatsappAutoReplies.id, ruleId));
-    console.log(`[WhatsApp AutoReply] Deleted rule ${ruleId}`);
+    logger.info(`Deleted rule ${ruleId}`);
     return { success: true };
   } catch (error) {
-    console.error('[WhatsApp AutoReply] Failed to delete rule:', error);
+    logger.error('Failed to delete rule:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
@@ -99,7 +106,9 @@ export async function getAutoReplyRules(): Promise<{
 }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: 'Database not available' };
+    if (!db) {
+      return { success: false, error: 'Database not available' };
+    }
 
     const rules = await db
       .select()
@@ -108,7 +117,7 @@ export async function getAutoReplyRules(): Promise<{
 
     return { success: true, rules };
   } catch (error) {
-    console.error('[WhatsApp AutoReply] Failed to get rules:', error);
+    logger.error('Failed to get rules:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
@@ -119,17 +128,19 @@ export async function toggleAutoReplyRule(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const db = await getDb();
-    if (!db) return { success: false, error: 'Database not available' };
+    if (!db) {
+      return { success: false, error: 'Database not available' };
+    }
 
     await db
       .update(whatsappAutoReplies)
       .set({ isActive: enabled ? 1 : 0, updatedAt: new Date() })
       .where(eq(whatsappAutoReplies.id, ruleId));
 
-    console.log(`[WhatsApp AutoReply] Rule ${ruleId} ${enabled ? 'enabled' : 'disabled'}`);
+    logger.info(`Rule ${ruleId} ${enabled ? 'enabled' : 'disabled'}`);
     return { success: true };
   } catch (error) {
-    console.error('[WhatsApp AutoReply] Failed to toggle rule:', error);
+    logger.error('Failed to toggle rule:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
@@ -151,7 +162,9 @@ export async function processIncomingMessage(params: {
     }
 
     const db = await getDb();
-    if (!db) return { success: false, error: 'Database not available' };
+    if (!db) {
+      return { success: false, error: 'Database not available' };
+    }
 
     // جلب القواعد النشطة مرتبة حسب الأولوية
     const rules = await db
@@ -173,11 +186,12 @@ export async function processIncomingMessage(params: {
           // TODO: التحقق من أن هذه أول رسالة من هذا الرقم
           matched = false;
           break;
-        case 'outside_hours':
+        case 'outside_hours': {
           // التحقق من ساعات العمل (8 صباحاً - 8 مساءً بتوقيت صنعاء)
           const hour = new Date().getUTCHours() + 3; // UTC+3
           matched = hour < 8 || hour >= 20;
           break;
+        }
         case 'faq':
           if (rule.triggerValue) {
             matched = params.message.toLowerCase().includes(rule.triggerValue.toLowerCase());
@@ -226,12 +240,10 @@ export async function processIncomingMessage(params: {
             });
           }
 
-          console.log(
-            `[WhatsApp AutoReply] ✅ Sent auto-reply to ${normalizedPhone} using rule "${rule.name}"`
-          );
+          logger.info(`Sent auto-reply to ${normalizedPhone} using rule "${rule.name}"`);
           return { success: true, replied: true };
         } catch (error) {
-          console.error(`[WhatsApp AutoReply] Failed to send auto-reply:`, error);
+          logger.error('Failed to send auto-reply:', error);
           return { success: false, replied: false, error: 'Failed to send auto-reply' };
         }
       }
@@ -239,7 +251,7 @@ export async function processIncomingMessage(params: {
 
     return { success: true, replied: false };
   } catch (error) {
-    console.error('[WhatsApp AutoReply] Failed to process incoming message:', error);
+    logger.error('Failed to process incoming message:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

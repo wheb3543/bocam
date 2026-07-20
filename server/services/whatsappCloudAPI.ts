@@ -8,6 +8,9 @@
  */
 
 import { meta } from '../api/MetaApiService';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsappCloudAPI');
 
 // ─── Phone Formatting ──────────────────────────────────────────────────────────
 
@@ -143,13 +146,21 @@ export function parseWhatsAppError(errorData: Record<string, unknown>): {
   shouldRetry: boolean;
   category: string;
 } {
-  const errorCode = (errorData as { error?: { code?: number }; code?: number })?.error?.code || (errorData as { code?: number }).code || 0;
+  const errorCode =
+    (errorData as { error?: { code?: number }; code?: number })?.error?.code ||
+    (errorData as { code?: number }).code ||
+    0;
   const knownError = WHATSAPP_ERROR_CODES[errorCode];
-  if (knownError) return knownError;
+  if (knownError) {
+    return knownError;
+  }
   return {
     code: errorCode,
     title: 'Unknown error',
-    message: (errorData as { error?: { message?: string }; message?: string })?.error?.message || (errorData as { message?: string }).message || 'Unknown error occurred',
+    message:
+      (errorData as { error?: { message?: string }; message?: string })?.error?.message ||
+      (errorData as { message?: string }).message ||
+      'Unknown error occurred',
     userFriendlyMessage: 'حدث خطأ غير معروف',
     shouldRetry: false,
     category: 'system',
@@ -176,14 +187,14 @@ export async function sendWhatsAppTextMessage(
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending text to ${formattedPhone}:`, message.substring(0, 50) + '...');
+  logger.info(`Sending text to ${formattedPhone}:`, message.substring(0, 50) + '...');
 
   const result = await meta.sendWhatsAppText(phoneNumberId, formattedPhone, message);
 
   if (!result.success) {
-    console.error(`[WhatsApp] Error:`, result.error);
+    logger.error(`Error:`, result.error);
   } else {
-    console.log(`[WhatsApp] Message sent. ID: ${result.messageId}`);
+    logger.info(`Message sent. ID: ${result.messageId}`);
   }
 
   return result;
@@ -219,7 +230,7 @@ export async function sendWhatsAppTemplateMessage(
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending template "${template.templateName}" to ${formattedPhone}`);
+  logger.info(`Sending template "${template.templateName}" to ${formattedPhone}`);
 
   const result = await meta.sendWhatsAppTemplate(
     phoneNumberId,
@@ -230,9 +241,9 @@ export async function sendWhatsAppTemplateMessage(
   );
 
   if (!result.success) {
-    console.error(`[WhatsApp] Template error:`, result.error);
+    logger.error(`Template error:`, result.error);
   } else {
-    console.log(`[WhatsApp] Template sent. ID: ${result.messageId}`);
+    logger.info(`Template sent. ID: ${result.messageId}`);
   }
 
   return result;
@@ -261,14 +272,14 @@ export async function sendWhatsAppTypingIndicator(
     return { success: true };
   }
 
-  console.log(`[WhatsApp] Sending typing indicator to ${formattedPhone} for message ${messageId}`);
+  logger.info(`Sending typing indicator to ${formattedPhone} for message ${messageId}`);
 
   const result = await meta.sendWhatsAppTypingIndicator(phoneNumberId, messageId, typing);
 
   if (!result.success) {
-    console.error(`[WhatsApp] Typing indicator error:`, result.error);
+    logger.error(`Typing indicator error:`, result.error);
   } else {
-    console.log(`[WhatsApp] Typing indicator sent.`);
+    logger.info(`Typing indicator sent.`);
   }
 
   return result;
@@ -321,14 +332,14 @@ export async function sendWhatsAppImageMessage(
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending image to ${formattedPhone}:`, imageRef.substring(0, 50) + '...');
+  logger.info(`Sending image to ${formattedPhone}:`, imageRef.substring(0, 50) + '...');
 
   const result = await meta.sendWhatsAppImage(phoneNumberId, formattedPhone, imageRef, caption);
 
   if (!result.success) {
-    console.error(`[WhatsApp] Error:`, result.error);
+    logger.error(`Error:`, result.error);
   } else {
-    console.log(`[WhatsApp] Image sent. ID: ${result.messageId}`);
+    logger.info(`Image sent. ID: ${result.messageId}`);
   }
 
   return result;
@@ -352,14 +363,14 @@ export async function sendWhatsAppVideoMessage(
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending video to ${formattedPhone}:`, videoRef.substring(0, 50) + '...');
+  logger.info(`Sending video to ${formattedPhone}:`, videoRef.substring(0, 50) + '...');
 
   const result = await meta.sendWhatsAppVideo(phoneNumberId, formattedPhone, videoRef, caption);
 
   if (!result.success) {
-    console.error(`[WhatsApp] Error:`, result.error);
+    logger.error(`Error:`, result.error);
   } else {
-    console.log(`[WhatsApp] Video sent. ID: ${result.messageId}`);
+    logger.info(`Video sent. ID: ${result.messageId}`);
   }
 
   return result;
@@ -382,14 +393,14 @@ export async function sendWhatsAppAudioMessage(
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(`[WhatsApp] Sending audio to ${formattedPhone}:`, audioRef.substring(0, 50) + '...');
+  logger.info(`Sending audio to ${formattedPhone}:`, audioRef.substring(0, 50) + '...');
 
   const result = await meta.sendWhatsAppAudio(phoneNumberId, formattedPhone, audioRef);
 
   if (!result.success) {
-    console.error(`[WhatsApp] Error:`, result.error);
+    logger.error(`Error:`, result.error);
   } else {
-    console.log(`[WhatsApp] Audio sent. ID: ${result.messageId}`);
+    logger.info(`Audio sent. ID: ${result.messageId}`);
   }
 
   return result;
@@ -413,10 +424,7 @@ export async function sendWhatsAppDocumentMessage(
   }
 
   const formattedPhone = formatPhoneNumber(phone);
-  console.log(
-    `[WhatsApp] Sending document to ${formattedPhone}:`,
-    documentRef.substring(0, 50) + '...'
-  );
+  logger.info(`Sending document to ${formattedPhone}:`, documentRef.substring(0, 50) + '...');
 
   const result = await meta.sendWhatsAppDocument(
     phoneNumberId,
@@ -426,9 +434,9 @@ export async function sendWhatsAppDocumentMessage(
   );
 
   if (!result.success) {
-    console.error(`[WhatsApp] Error:`, result.error);
+    logger.error(`Error:`, result.error);
   } else {
-    console.log(`[WhatsApp] Document sent. ID: ${result.messageId}`);
+    logger.info(`Document sent. ID: ${result.messageId}`);
   }
 
   return result;
@@ -450,14 +458,14 @@ export async function uploadWhatsAppMedia(
     };
   }
 
-  console.log(`[WhatsApp] Uploading media (${mimeType})...`);
+  logger.info(`Uploading media (${mimeType})...`);
 
   const result = await meta.uploadWhatsAppMedia(phoneNumberId, fileBuffer, mimeType);
 
   if (!result.success) {
-    console.error(`[WhatsApp] Upload error:`, result.error);
+    logger.error(`Upload error:`, result.error);
   } else {
-    console.log(`[WhatsApp] Media uploaded. ID: ${result.mediaId}`);
+    logger.info(`Media uploaded. ID: ${result.mediaId}`);
   }
 
   return result;

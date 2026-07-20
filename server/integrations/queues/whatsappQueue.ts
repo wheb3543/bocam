@@ -1,21 +1,26 @@
 import { Queue, Worker, Job } from 'bullmq';
 import { getRedisConnection } from '../../services/redis';
 import { sendWhatsAppTemplateMessage } from '../../services/whatsappCloudAPI';
+import { createLogger } from '../../_core/logger';
+
+const logger = createLogger('whatsappQueue');
 
 // Check if Redis is available
 let redisCheckPromise: Promise<boolean> | null = null;
 
 async function checkRedisConnection(): Promise<boolean> {
-  if (redisCheckPromise) return redisCheckPromise;
+  if (redisCheckPromise) {
+    return redisCheckPromise;
+  }
 
   redisCheckPromise = (async () => {
     try {
       const redis = getRedisConnection();
       await redis.ping();
-      console.log('[WhatsApp Queue] Redis connection successful');
+      logger.info('Redis connection successful');
       return true;
     } catch {
-      console.warn('[WhatsApp Queue] Redis not available, will send messages directly');
+      logger.warn('Redis not available, will send messages directly');
       return false;
     }
   })();
@@ -55,13 +60,20 @@ let whatsappQueue: Queue<WhatsAppMessageJob> | null = null;
 let whatsappWorker: Worker<WhatsAppMessageJob, unknown, string> | null = null;
 
 async function initializeQueue() {
-  if (whatsappQueue) return whatsappQueue;
+  if (whatsappQueue) {
+    return whatsappQueue;
+  }
 
   const redisAvailable = await checkRedisConnection();
-  if (!redisAvailable) return null;
+  if (!redisAvailable) {
+    return null;
+  }
 
   whatsappQueue = new Queue<WhatsAppMessageJob>('whatsapp-messages', {
-    connection: getRedisConnection(),
+    // Type assertion required due to BullMQ's strict Redis connection typing
+    // Our Redis implementation is compatible but doesn't match BullMQ's exact type expectations
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    connection: getRedisConnection() as any,
     defaultJobOptions: {
       attempts: 3, // Retry up to 3 times
       backoff: {
@@ -85,10 +97,14 @@ export { whatsappQueue };
 
 // Create the worker (will be initialized only if Redis is available)
 async function initializeWorker() {
-  if (whatsappWorker) return whatsappWorker;
+  if (whatsappWorker) {
+    return whatsappWorker;
+  }
 
   const redisAvailable = await checkRedisConnection();
-  if (!redisAvailable) return null;
+  if (!redisAvailable) {
+    return null;
+  }
 
   whatsappWorker = new Worker<WhatsAppMessageJob, unknown, string>(
     'whatsapp-messages',
@@ -96,7 +112,7 @@ async function initializeWorker() {
       const { to, phone, templateName, language, components, category, metadata } = job.data;
       const phoneNumber = to || phone || '';
 
-      console.log(`[WhatsApp Queue] Processing job ${job.id} for ${phoneNumber}`);
+      logger.info(`Processing job ${job.id} for ${phoneNumber}`);
 
       try {
         const result = await sendWhatsAppTemplateMessage(
@@ -109,7 +125,7 @@ async function initializeWorker() {
           category ? { category } : undefined
         );
 
-        console.log(`[WhatsApp Queue] Job ${job.id} completed successfully`);
+        logger.info(`Job ${job.id} completed successfully`);
 
         return {
           success: true,
@@ -117,12 +133,15 @@ async function initializeWorker() {
           metadata,
         };
       } catch (error) {
-        console.error(`[WhatsApp Queue] Job ${job.id} failed:`, error);
+        logger.error(`Job ${job.id} failed:`, error);
         throw error; // Will trigger retry
       }
     },
     {
-      connection: getRedisConnection(),
+      // Type assertion required due to BullMQ's strict Redis connection typing
+      // Our Redis implementation is compatible but doesn't match BullMQ's exact type expectations
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      connection: getRedisConnection() as any,
       concurrency: 5, // Process up to 5 messages concurrently
     }
   );
@@ -136,15 +155,15 @@ export { whatsappWorker };
 initializeWorker().then((worker) => {
   if (worker) {
     worker.on('completed', (job) => {
-      console.log(`[WhatsApp Queue] Job ${job.id} has been completed`);
+      logger.info(`Job ${job.id} has been completed`);
     });
 
     worker.on('failed', (job, err) => {
-      console.error(`[WhatsApp Queue] Job ${job?.id} has failed with error:`, err.message);
+      logger.error(`Job ${job?.id} has failed with error:`, err.message);
     });
 
     worker.on('error', (err) => {
-      console.error('[WhatsApp Queue] Worker error:', err);
+      logger.error('Worker error:', err);
     });
   }
 });
@@ -157,7 +176,7 @@ export async function queueWhatsAppMessage(data: WhatsAppMessageJob): Promise<st
 
   if (!queue) {
     // Fallback: Send directly without queue
-    console.log('[WhatsApp Queue] Redis unavailable, sending message directly');
+    logger.info('Redis unavailable, sending message directly');
     try {
       const phoneNumber = data.to || data.phone || '';
       const result = await sendWhatsAppTemplateMessage(
@@ -169,10 +188,10 @@ export async function queueWhatsAppMessage(data: WhatsAppMessageJob): Promise<st
         },
         data.category ? { category: data.category } : undefined
       );
-      console.log('[WhatsApp Queue] Message sent directly:', result.messageId);
+      logger.info('Message sent directly:', result.messageId);
       return result.messageId || 'direct-send';
     } catch (error) {
-      console.error('[WhatsApp Queue] Direct send failed:', error);
+      logger.error('Direct send failed:', error);
       throw error;
     }
   }
@@ -181,7 +200,7 @@ export async function queueWhatsAppMessage(data: WhatsAppMessageJob): Promise<st
     priority: data.category === 'authentication' ? 1 : data.category === 'utility' ? 2 : 3,
   });
 
-  console.log(`[WhatsApp Queue] Added job ${job.id} to queue`);
+  logger.info(`Added job ${job.id} to queue`);
   return job.id?.toString() || '';
 }
 
@@ -227,7 +246,9 @@ export async function getQueueStats() {
  */
 export async function retryFailedJobs(): Promise<number> {
   const queue = await initializeQueue();
-  if (!queue) return 0;
+  if (!queue) {
+    return 0;
+  }
 
   const failedJobs = await queue.getFailed();
   let retried = 0;
@@ -237,7 +258,7 @@ export async function retryFailedJobs(): Promise<number> {
     retried++;
   }
 
-  console.log(`[WhatsApp Queue] Retried ${retried} failed jobs`);
+  logger.info(`Retried ${retried} failed jobs`);
   return retried;
 }
 
@@ -246,9 +267,11 @@ export async function retryFailedJobs(): Promise<number> {
  */
 export async function cleanOldJobs(): Promise<void> {
   const queue = await initializeQueue();
-  if (!queue) return;
+  if (!queue) {
+    return;
+  }
 
   await queue.clean(24 * 3600 * 1000, 1000, 'completed'); // Clean completed jobs older than 24h
   await queue.clean(7 * 24 * 3600 * 1000, 0, 'failed'); // Clean failed jobs older than 7 days
-  console.log('[WhatsApp Queue] Old jobs cleaned');
+  logger.info('Old jobs cleaned');
 }

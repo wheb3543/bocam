@@ -6,6 +6,9 @@
 import { createBot } from '@awadoc/whatsapp-cloud-api';
 import { WhatsAppClient } from '@kapso/whatsapp-cloud-api';
 import { ENV } from '../_core/env';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsapp-config');
 
 /**
  * WhatsApp Bot Instance
@@ -14,15 +17,15 @@ import { ENV } from '../_core/env';
 export const whatsappBot = (() => {
   try {
     if (!ENV.whatsappPhoneNumberId || !ENV.metaAccessToken) {
-      console.warn('[WhatsApp] Missing phone number ID or access token');
+      logger.warn('Missing phone number ID or access token');
       return null;
     }
 
     const bot = createBot(ENV.whatsappPhoneNumberId, ENV.metaAccessToken);
-    console.log('[WhatsApp] Bot initialized successfully');
+    logger.info('Bot initialized successfully');
     return bot;
   } catch (error) {
-    console.error('[WhatsApp] Failed to initialize bot:', error);
+    logger.error('Failed to initialize bot:', error);
     return null;
   }
 })();
@@ -34,17 +37,17 @@ export const whatsappBot = (() => {
 export const whatsappClient = (() => {
   try {
     if (!ENV.metaAccessToken) {
-      console.warn('[WhatsApp] Missing access token');
+      logger.warn('Missing access token');
       return null;
     }
 
     const client = new WhatsAppClient({
       accessToken: ENV.metaAccessToken,
     });
-    console.log('[WhatsApp] Client initialized successfully');
+    logger.info('Client initialized successfully');
     return client;
   } catch (error) {
-    console.error('[WhatsApp] Failed to initialize client:', error);
+    logger.error('Failed to initialize client:', error);
     return null;
   }
 })();

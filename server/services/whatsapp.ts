@@ -8,6 +8,9 @@
 
 import { sendWhatsAppTextMessage, formatPhoneNumber } from './whatsappCloudAPI';
 import { COMPANY_SLOGAN_AR } from '@shared/config';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsapp');
 
 interface WhatsAppMessage {
   to: string;
@@ -23,16 +26,14 @@ export async function sendWhatsAppMessage(params: WhatsAppMessage): Promise<bool
     const result = await sendWhatsAppTextMessage(formattedPhone, params.message);
 
     if (result.success) {
-      console.log(
-        `[WhatsApp] Message sent successfully to ${formattedPhone}. ID: ${result.messageId}`
-      );
+      logger.info(`Message sent successfully to ${formattedPhone}. ID: ${result.messageId}`);
       return true;
     } else {
-      console.error(`[WhatsApp] Failed to send to ${formattedPhone}: ${result.error}`);
+      logger.error(`Failed to send to ${formattedPhone}: ${result.error}`);
       return false;
     }
   } catch (error) {
-    console.error('[WhatsApp] Failed to send message:', error);
+    logger.error('Failed to send message:', error);
     return false;
   }
 }

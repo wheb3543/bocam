@@ -10,6 +10,10 @@ export interface AuditLogEntry {
   error?: string;
 }
 
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsappAuditLog');
+
 const auditLogs: AuditLogEntry[] = [];
 
 export async function logMessageSent(params: {
@@ -37,14 +41,14 @@ export async function logMessageSent(params: {
 
     auditLogs.push(entry);
 
-    console.log(`[WhatsApp AuditLog] Logged message sent: ${logId}`);
+    logger.info(`Logged message sent: ${logId}`);
 
     return {
       success: true,
       logId,
     };
   } catch (error) {
-    console.error('[WhatsApp AuditLog] Failed to log message:', error);
+    logger.error('Failed to log message:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -73,14 +77,14 @@ export async function logMessageReceived(params: {
 
     auditLogs.push(entry);
 
-    console.log(`[WhatsApp AuditLog] Logged message received: ${logId}`);
+    logger.info(`Logged message received: ${logId}`);
 
     return {
       success: true,
       logId,
     };
   } catch (error) {
-    console.error('[WhatsApp AuditLog] Failed to log received message:', error);
+    logger.error('Failed to log received message:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -111,14 +115,14 @@ export async function logError(params: {
 
     auditLogs.push(entry);
 
-    console.error(`[WhatsApp AuditLog] Logged error: ${logId} - ${params.error}`);
+    logger.error(`Logged error: ${logId} - ${params.error}`);
 
     return {
       success: true,
       logId,
     };
   } catch (error) {
-    console.error('[WhatsApp AuditLog] Failed to log error:', error);
+    logger.error('Failed to log error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -169,7 +173,7 @@ export async function getAuditLogs(params?: {
       total: filtered.length,
     };
   } catch (error) {
-    console.error('[WhatsApp AuditLog] Failed to get logs:', error);
+    logger.error('Failed to get logs:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -217,7 +221,7 @@ export async function getAuditStats(params?: { startDate?: Date; endDate?: Date 
       stats,
     };
   } catch (error) {
-    console.error('[WhatsApp AuditLog] Failed to get stats:', error);
+    logger.error('Failed to get stats:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -271,7 +275,7 @@ export async function exportAuditLogs(params?: {
       csv,
     };
   } catch (error) {
-    console.error('[WhatsApp AuditLog] Failed to export logs:', error);
+    logger.error('Failed to export logs:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -296,14 +300,14 @@ export async function clearOldLogs(daysOld: number = 30): Promise<{
 
     const deletedCount = initialLength - filtered.length;
 
-    console.log(`[WhatsApp AuditLog] Cleared ${deletedCount} old logs`);
+    logger.info(`Cleared ${deletedCount} old logs`);
 
     return {
       success: true,
       deletedCount,
     };
   } catch (error) {
-    console.error('[WhatsApp AuditLog] Failed to clear old logs:', error);
+    logger.error('Failed to clear old logs:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

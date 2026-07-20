@@ -17,6 +17,9 @@ import { sendWhatsAppTemplateMessage } from './whatsappCloudAPI';
 import { meta } from '../api/MetaApiService';
 import { ENV } from '../_core/env';
 import { whatsappTemplates } from '../../drizzle/schema';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsappTemplates');
 
 export interface TemplateParameter {
   type: 'text' | 'image' | 'document' | 'video';
@@ -66,7 +69,7 @@ export async function sendTemplateMessage(params: {
       error: result.error,
     };
   } catch (error) {
-    console.error('[WhatsApp Templates] Failed to send template:', error);
+    logger.error('Failed to send template:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -100,7 +103,7 @@ export async function syncTemplatesFromMeta(): Promise<{
     });
 
     if (!response.ok) {
-      console.error('[WhatsApp Templates] Meta API error:', response.error);
+      logger.error('Meta API error:', response.error);
       return {
         success: false,
         error: response.error?.message || 'Failed to fetch templates from Meta',
@@ -108,10 +111,9 @@ export async function syncTemplatesFromMeta(): Promise<{
     }
 
     // Meta تُرجع {data: [...]} والمصفوفة تكون response.data.data
-    const templates: Record<string, unknown>[] = (response.data as { data?: Record<string, unknown>[] })?.data ?? [];
-    console.log(
-      `[WhatsApp Templates] Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`
-    );
+    const templates: Record<string, unknown>[] =
+      (response.data as { data?: Record<string, unknown>[] })?.data ?? [];
+    logger.info(`Fetched ${templates.length} templates from Meta (WABA: ${wabaId})`);
 
     if (templates.length === 0) {
       return {
@@ -161,7 +163,8 @@ export async function syncTemplatesFromMeta(): Promise<{
         // تحديد الفئة - استخدام فئة Meta مباشرة
         const validCategories = ['MARKETING', 'UTILITY', 'AUTHENTICATION'];
         const category = validCategories.includes((template.category as string)?.toUpperCase())
-          ? ((template.category as string).toUpperCase() as 'MARKETING' | 'UTILITY' | 'AUTHENTICATION')
+          ? ((template.category as string).toUpperCase() as
+              'MARKETING' | 'UTILITY' | 'AUTHENTICATION')
           : 'UTILITY';
 
         // التحقق من وجود القالب بالاسم
@@ -212,7 +215,7 @@ export async function syncTemplatesFromMeta(): Promise<{
         }
       } catch (err) {
         const errMsg = `فشل معالجة القالب ${template.name}: ${err instanceof Error ? err.message : 'خطأ غير معروف'}`;
-        console.error('[WhatsApp Templates]', errMsg);
+        logger.error(errMsg);
         errors.push(errMsg);
       }
     }
@@ -237,10 +240,10 @@ export async function syncTemplatesFromMeta(): Promise<{
             await db.delete(whatsappTemplates).where(eq(whatsappTemplates.id, t.id));
             deleted++;
           }
-          console.log(`[WhatsApp Templates] Deleted ${deleted} local templates not found in Meta`);
+          logger.info(`Deleted ${deleted} local templates not found in Meta`);
         }
       } catch (delErr) {
-        console.error('[WhatsApp Templates] Failed to delete stale templates:', delErr);
+        logger.error('Failed to delete stale templates:', delErr);
       }
     }
 
@@ -253,7 +256,7 @@ export async function syncTemplatesFromMeta(): Promise<{
       message: `تمت مزامنة ${totalProcessed} قالب من Meta (جديد: ${synced}, محدّث: ${updated}, محذوف: ${deleted})${errors.length > 0 ? ` - ${errors.length} أخطاء` : ''}`,
     };
   } catch (error) {
-    console.error('[WhatsApp Templates] Failed to sync templates:', error);
+    logger.error('Failed to sync templates:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -292,10 +295,11 @@ export async function createTemplate(params: {
 
     return {
       success: true,
-      templateId: ((response.data as Record<string, unknown>)?.id as string) || `template_${Date.now()}`,
+      templateId:
+        ((response.data as Record<string, unknown>)?.id as string) || `template_${Date.now()}`,
     };
   } catch (error) {
-    console.error('[WhatsApp Templates] Failed to create template:', error);
+    logger.error('Failed to create template:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -327,7 +331,7 @@ export async function updateTemplate(
 
     return { success: true };
   } catch (error) {
-    console.error('[WhatsApp Templates] Failed to update template:', error);
+    logger.error('Failed to update template:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -353,7 +357,7 @@ export async function deleteTemplate(
 
     return { success: true };
   } catch (error) {
-    console.error('[WhatsApp Templates] Failed to delete template:', error);
+    logger.error('Failed to delete template:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -385,7 +389,7 @@ export async function getAvailableTemplates(): Promise<{
       templates: (response.data as Record<string, unknown>[]) || [],
     };
   } catch (error) {
-    console.error('[WhatsApp Templates] Failed to get templates:', error);
+    logger.error('Failed to get templates:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -418,7 +422,7 @@ export async function getTemplateStatus(templateName: string): Promise<{
       status: (template?.status as string) || 'UNKNOWN',
     };
   } catch (error) {
-    console.error('[WhatsApp Templates] Failed to get template status:', error);
+    logger.error('Failed to get template status:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -477,10 +481,12 @@ export async function sendMediaMessage(params: {
 
     return {
       success: true,
-      messageId: ((response.data as Record<string, unknown>)?.messages as Record<string, unknown>[])?.[0]?.id as string || 'media_sent',
+      messageId:
+        (((response.data as Record<string, unknown>)?.messages as Record<string, unknown>[])?.[0]
+          ?.id as string) || 'media_sent',
     };
   } catch (error) {
-    console.error('[WhatsApp Templates] Failed to send media message:', error);
+    logger.error('Failed to send media message:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

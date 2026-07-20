@@ -23,6 +23,9 @@ import {
 } from '../database/db';
 import { messageSettings, whatsappTemplates, whatsappNotifications } from '../../drizzle/schema';
 import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from './whatsappCloudAPI';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsappMessageDispatcher');
 
 export type EntityType = 'appointment' | 'camp_registration' | 'offer_lead';
 export type TriggerEvent =
@@ -59,7 +62,9 @@ async function saveDispatchLog(params: {
 }): Promise<void> {
   try {
     const db = await getDb();
-    if (!db) return;
+    if (!db) {
+      return;
+    }
     await db.insert(whatsappNotifications).values({
       entityType: params.entityType,
       entityId: params.entityId,
@@ -76,7 +81,7 @@ async function saveDispatchLog(params: {
       sentAt: params.status === 'sent' ? new Date() : undefined,
     });
   } catch (err) {
-    console.error('[WhatsApp Dispatcher] Failed to save log:', err);
+    logger.error('Failed to save log:', err);
   }
 }
 
@@ -155,17 +160,29 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
       .from(messageSettings)
       .where(
         and(
-          eq(messageSettings.entityType, entityType as 'appointment' | 'camp_registration' | 'offer_lead'),
-          eq(messageSettings.triggerEvent, triggerEvent as 'manual' | 'on_create' | 'on_confirmed' | 'on_arrived' | 'on_completed' | 'on_cancelled' | 'on_reminder_24h' | 'on_reminder_1h'),
+          eq(
+            messageSettings.entityType,
+            entityType as 'appointment' | 'camp_registration' | 'offer_lead'
+          ),
+          eq(
+            messageSettings.triggerEvent,
+            triggerEvent as
+              | 'manual'
+              | 'on_create'
+              | 'on_confirmed'
+              | 'on_arrived'
+              | 'on_completed'
+              | 'on_cancelled'
+              | 'on_reminder_24h'
+              | 'on_reminder_1h'
+          ),
           eq(messageSettings.isEnabled, 1)
         )
       )
       .limit(1);
 
     if (!setting) {
-      console.log(
-        `[WhatsApp Dispatcher] No active setting found for ${entityType}:${triggerEvent}`
-      );
+      logger.info(`No active setting found for ${entityType}:${triggerEvent}`);
       return {
         success: false,
         error: `No active message setting for ${entityType}:${triggerEvent}`,
@@ -178,8 +195,8 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
     // التحقق من صحة المتغيرات المطلوبة في القالب
     const missingVars = validateVariables(setting.messageContent, variables);
     if (missingVars.length > 0) {
-      console.error(
-        `[WhatsApp Dispatcher] Missing required variables for ${entityType}:${triggerEvent}: ${missingVars.join(', ')}`
+      logger.error(
+        `Missing required variables for ${entityType}:${triggerEvent}: ${missingVars.join(', ')}`
       );
       // Log the failure but still send with placeholders (as fallback behavior)
       // Alternatively, could return { success: false, error: `Missing variables: ${missingVars.join(', ')}` };
@@ -198,9 +215,7 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
         .limit(1);
 
       if (!template) {
-        console.error(
-          `[WhatsApp Dispatcher] Template with ID ${setting.whatsappTemplateId} not found in database`
-        );
+        logger.error(`Template with ID ${setting.whatsappTemplateId} not found in database`);
       } else {
         // نُرسل القالب بغض النظر عن metaStatus (APPROVED أو PENDING) لأن Meta قد تقبله
         // بناء مكونات القالب مع دعم نوعين:
@@ -234,8 +249,8 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
         }
 
         const templateNameToSend = template.metaName || template.name;
-        console.log(
-          `[WhatsApp Dispatcher] Sending template "${templateNameToSend}" (metaName: ${template.metaName}) to ${phone}`
+        logger.info(
+          `Sending template "${templateNameToSend}" (metaName: ${template.metaName}) to ${phone}`
         );
 
         // بناء مكونات الأزرار (quick_reply) مع الـ payload الصحيح
@@ -283,14 +298,20 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
               }
             });
           } catch (e) {
-            console.warn(
-              `[WhatsApp Dispatcher] Failed to parse buttons for template ${template.name}:`,
-              e
-            );
+            logger.warn(`Failed to parse buttons for template ${template.name}:`, e);
           }
         }
 
-        const allComponents: Array<{ type: 'body' | 'header' | 'footer' | 'button'; parameters?: Array<{ type: 'text' | 'image' | 'payload'; text?: string; payload?: string }>; sub_type?: 'quick_reply'; index?: number }> = [];
+        const allComponents: Array<{
+          type: 'body' | 'header' | 'footer' | 'button';
+          parameters?: Array<{
+            type: 'text' | 'image' | 'payload';
+            text?: string;
+            payload?: string;
+          }>;
+          sub_type?: 'quick_reply';
+          index?: number;
+        }> = [];
         if (bodyParams.length > 0) {
           allComponents.push({ type: 'body', parameters: bodyParams });
         }
@@ -332,14 +353,14 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
           return { success: true, messageType, channel: 'whatsapp_api' };
         }
         // Fallback إلى نص عادي إذا فشل القالب
-        console.error(`[WhatsApp Dispatcher] Template send failed for "${templateNameToSend}"`);
-        console.error(`[WhatsApp Dispatcher] - Template ID: ${template.id}`);
-        console.error(`[WhatsApp Dispatcher] - Template status: ${template.metaStatus}`);
-        console.error(`[WhatsApp Dispatcher] - Template metaName: ${template.metaName}`);
-        console.error(`[WhatsApp Dispatcher] - Language code: ${template.languageCode}`);
-        console.error(`[WhatsApp Dispatcher] - Variables provided: ${JSON.stringify(variables)}`);
-        console.error(`[WhatsApp Dispatcher] - Error details: ${result.error}`);
-        console.error(`[WhatsApp Dispatcher] - Falling back to text message`);
+        logger.error(`Template send failed for "${templateNameToSend}"`);
+        logger.error(`- Template ID: ${template.id}`);
+        logger.error(`- Template status: ${template.metaStatus}`);
+        logger.error(`- Template metaName: ${template.metaName}`);
+        logger.error(`- Language code: ${template.languageCode}`);
+        logger.error(`- Variables provided: ${JSON.stringify(variables)}`);
+        logger.error(`- Error details: ${result.error}`);
+        logger.error(`- Falling back to text message`);
       }
     }
 
@@ -385,7 +406,7 @@ export async function dispatchWhatsAppMessage(opts: DispatchOptions): Promise<{
 
     return { success: false, error: 'No valid channel configured' };
   } catch (error) {
-    console.error(`[WhatsApp Dispatcher] Error dispatching ${entityType}:${triggerEvent}:`, error);
+    logger.error(`Error dispatching ${entityType}:${triggerEvent}:`, error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
@@ -406,7 +427,9 @@ export async function ensureConversationAndSaveMessage(params: {
 }): Promise<void> {
   try {
     const normalizedPhone = normalizePhoneNumber(params.phone);
-    if (!normalizedPhone) return;
+    if (!normalizedPhone) {
+      return;
+    }
 
     // 1. البحث عن محادثة موجودة أو إنشاء محادثة جديدة
     let conversation = await getWhatsAppConversationByPhone(normalizedPhone);
@@ -456,7 +479,9 @@ export async function ensureConversationAndSaveMessage(params: {
       });
     }
 
-    if (!conversation) return;
+    if (!conversation) {
+      return;
+    }
 
     // 2. حفظ الرسالة في جدول whatsapp_messages
     await createWhatsAppMessage({
@@ -471,6 +496,6 @@ export async function ensureConversationAndSaveMessage(params: {
       mediaUrl: params.mediaUrl || null, // حفظ رابط الملف إذا كان موجوداً
     });
   } catch (err) {
-    console.error('[WhatsApp Dispatcher] Failed to ensure conversation/message:', err);
+    logger.error('Failed to ensure conversation/message:', err);
   }
 }

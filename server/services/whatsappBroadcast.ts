@@ -16,6 +16,9 @@ import { normalizePhoneNumber, getDb } from '../database/db';
 import { sendWhatsAppTextMessage } from './whatsappCloudAPI';
 import { whatsappBroadcasts } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsappBroadcast');
 
 export interface BroadcastJob {
   id: string;
@@ -78,9 +81,7 @@ export async function sendBroadcast(params: {
       throw new Error('Failed to create broadcast job');
     }
 
-    console.log(
-      `[WhatsApp Broadcast] Starting broadcast ${jobId} to ${normalizedRecipients.length} recipients`
-    );
+    logger.info(`Starting broadcast ${jobId} to ${normalizedRecipients.length} recipients`);
 
     // إرسال الرسائل بشكل متسلسل مع تأخير لتجنب Rate Limiting
     // وفق Meta: الحد الأقصى 1000 رسالة/دقيقة لحسابات الأعمال
@@ -95,11 +96,11 @@ export async function sendBroadcast(params: {
         if (result.success) {
           sentCount++;
         } else {
-          console.error(`[WhatsApp Broadcast] Failed to send to ${phone}: ${result.error}`);
+          logger.error(`Failed to send to ${phone}: ${result.error}`);
           failedCount++;
         }
       } catch (error) {
-        console.error(`[WhatsApp Broadcast] Error sending to ${phone}:`, error);
+        logger.error(`Error sending to ${phone}:`, error);
         failedCount++;
       }
 
@@ -113,7 +114,9 @@ export async function sendBroadcast(params: {
 
       // تأخير بين الرسائل
       if (i < normalizedRecipients.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        await new Promise((resolve) => {
+          setTimeout(resolve, delay);
+        });
       }
     }
 
@@ -129,16 +132,14 @@ export async function sendBroadcast(params: {
       })
       .where(eq(whatsappBroadcasts.id, jobId));
 
-    console.log(
-      `[WhatsApp Broadcast] Broadcast ${jobId} completed: ${sentCount} sent, ${failedCount} failed`
-    );
+    logger.info(`Broadcast ${jobId} completed: ${sentCount} sent, ${failedCount} failed`);
 
     return {
       success: true,
       jobId,
     };
   } catch (error) {
-    console.error('[WhatsApp Broadcast] Failed to send broadcast:', error);
+    logger.error('Failed to send broadcast:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -167,7 +168,7 @@ export async function getBroadcastStatus(jobId: number): Promise<{
     }
     return { success: true, status: broadcast };
   } catch (error) {
-    console.error('[WhatsApp Broadcast] Failed to get broadcast status:', error);
+    logger.error('Failed to get broadcast status:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -195,9 +196,13 @@ export async function getBroadcastStats(): Promise<{
     const broadcasts = await db.select().from(whatsappBroadcasts);
     const stats = {
       totalBroadcasts: broadcasts.length,
-      completedBroadcasts: broadcasts.filter((b: { status: string }) => b.status === 'completed').length,
+      completedBroadcasts: broadcasts.filter((b: { status: string }) => b.status === 'completed')
+        .length,
       failedBroadcasts: broadcasts.filter((b: { status: string }) => b.status === 'failed').length,
-      totalMessagesSent: broadcasts.reduce((sum: number, b: { sentCount?: number }) => sum + (b.sentCount || 0), 0),
+      totalMessagesSent: broadcasts.reduce(
+        (sum: number, b: { sentCount?: number }) => sum + (b.sentCount || 0),
+        0
+      ),
       totalMessagesFailed: broadcasts.reduce(
         (sum: number, b: { failedCount?: number }) => sum + (b.failedCount || 0),
         0
@@ -205,7 +210,7 @@ export async function getBroadcastStats(): Promise<{
     };
     return { success: true, stats };
   } catch (error) {
-    console.error('[WhatsApp Broadcast] Failed to get broadcast stats:', error);
+    logger.error('Failed to get broadcast stats:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -233,13 +238,13 @@ export async function scheduleBroadcast(params: {
       });
     }
 
-    console.log(
-      `[WhatsApp Broadcast] Scheduled broadcast ${scheduleId} for ${params.scheduledAt.toISOString()} (in ${Math.round(delay / 1000)}s)`
+    logger.info(
+      `Scheduled broadcast ${scheduleId} for ${params.scheduledAt.toISOString()} (in ${Math.round(delay / 1000)}s)`
     );
 
     // جدولة الإرسال
     setTimeout(async () => {
-      console.log(`[WhatsApp Broadcast] Executing scheduled broadcast ${scheduleId}`);
+      logger.info(`Executing scheduled broadcast ${scheduleId}`);
       await sendBroadcast({
         message: params.message,
         recipients: params.recipients,
@@ -252,7 +257,7 @@ export async function scheduleBroadcast(params: {
       scheduleId,
     };
   } catch (error) {
-    console.error('[WhatsApp Broadcast] Failed to schedule broadcast:', error);
+    logger.error('Failed to schedule broadcast:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

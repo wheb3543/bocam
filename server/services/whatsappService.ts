@@ -132,10 +132,11 @@ export async function verifyWhatsAppHealth(): Promise<{
   const errors: string[] = [];
 
   const cloudApiReady = !!(ENV.whatsappPhoneNumberId && ENV.metaAccessToken);
-  if (!cloudApiReady)
+  if (!cloudApiReady) {
     errors.push(
       'WhatsApp Cloud API not configured (missing WHATSAPP_PHONE_NUMBER_ID or META_ACCESS_TOKEN)'
     );
+  }
 
   const setup = {
     phoneNumberConfigured: !!ENV.whatsappPhoneNumberId,
@@ -158,10 +159,14 @@ export async function verifyWhatsAppHealth(): Promise<{
     if (phoneInfo.success && phoneInfo.phoneNumber) {
       setup.phoneNumberReachable = true;
       setup.phoneNumberRegisteredCheck = true;
-      setup.displayPhoneNumber = (phoneInfo.phoneNumber as { display_phone_number?: string }).display_phone_number || undefined;
-      setup.verifiedName = (phoneInfo.phoneNumber as { verified_name?: string }).verified_name || undefined;
+      setup.displayPhoneNumber =
+        (phoneInfo.phoneNumber as { display_phone_number?: string }).display_phone_number ||
+        undefined;
+      setup.verifiedName =
+        (phoneInfo.phoneNumber as { verified_name?: string }).verified_name || undefined;
       setup.phoneStatus = (phoneInfo.phoneNumber as { status?: string }).status || null;
-      setup.qualityRating = (phoneInfo.phoneNumber as { quality_rating?: string }).quality_rating || null;
+      setup.qualityRating =
+        (phoneInfo.phoneNumber as { quality_rating?: string }).quality_rating || null;
     } else if (phoneInfo.error) {
       errors.push(`Phone number health check failed: ${phoneInfo.error}`);
     }

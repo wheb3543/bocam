@@ -1,11 +1,13 @@
 import { router, protectedProcedure } from '../_core/trpc';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { getDb } from '../database/db';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { eq } from 'drizzle-orm';
 import { whatsappTemplates } from '../../drizzle/schema';
 import * as whatsappTemplatesModule from '../services/whatsappTemplates';
 import { normalizePhoneNumber } from '../database/db';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('whatsappTemplateTest');
 
 /**
  * WhatsApp Template Testing Router
@@ -25,12 +27,7 @@ export const whatsappTemplateTestRouter = router({
     )
     .mutation(async ({ input }) => {
       try {
-        const db = await getDb();
-        if (!db)
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'قاعدة البيانات غير متاحة',
-          });
+        const db = await ensureDatabaseAvailable();
 
         // تطبيع رقم الهاتف
         const normalizedPhone = normalizePhoneNumber(input.phone);
@@ -89,7 +86,7 @@ export const whatsappTemplateTestRouter = router({
           },
         };
       } catch (error) {
-        console.error('[WhatsApp Template Test] Error:', error);
+        logger.error('Error:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'خطأ غير معروف',
@@ -102,9 +99,7 @@ export const whatsappTemplateTestRouter = router({
    */
   listApprovedTemplates: protectedProcedure.query(async () => {
     try {
-      const db = await getDb();
-      if (!db)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
+      const db = await ensureDatabaseAvailable();
 
       const templates = await db
         .select()
@@ -122,11 +117,11 @@ export const whatsappTemplateTestRouter = router({
           languageCode: t.languageCode,
           metaStatus: t.metaStatus,
           metaCategory: t.metaCategory,
-          variables: t.variables ? JSON.parse(t.variables) : [],
+          variables: t.variables ? JSON.parse(t.variables as string) : [],
         })),
       };
     } catch (error) {
-      console.error('[WhatsApp Template Test] Error listing templates:', error);
+      logger.error('Error listing templates:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'خطأ غير معروف',
@@ -147,12 +142,7 @@ export const whatsappTemplateTestRouter = router({
     )
     .mutation(async ({ input }) => {
       try {
-        const db = await getDb();
-        if (!db)
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'قاعدة البيانات غير متاحة',
-          });
+        const db = await ensureDatabaseAvailable();
 
         // تطبيع رقم الهاتف
         const normalizedPhone = normalizePhoneNumber(input.phone);
@@ -221,7 +211,7 @@ export const whatsappTemplateTestRouter = router({
           },
         };
       } catch (error) {
-        console.error('[WhatsApp Template Test] Error sending template:', error);
+        logger.error('Error sending template:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'خطأ غير معروف',
@@ -236,12 +226,7 @@ export const whatsappTemplateTestRouter = router({
     .input(z.object({ templateName: z.string() }))
     .query(async ({ input }) => {
       try {
-        const db = await getDb();
-        if (!db)
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'قاعدة البيانات غير متاحة',
-          });
+        const db = await ensureDatabaseAvailable();
 
         const template = await db
           .select()
@@ -277,7 +262,7 @@ export const whatsappTemplateTestRouter = router({
           },
         };
       } catch (error) {
-        console.error('[WhatsApp Template Test] Error getting template:', error);
+        logger.error('Error getting template:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'خطأ غير معروف',
