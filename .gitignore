@@ -73,3 +73,7 @@ coverage/
 *.pid
 *.seed
 *.pid.lock
+
+# Local editor/backup patterns and temporary legacy files
+*.old.*
+.cursorrules
