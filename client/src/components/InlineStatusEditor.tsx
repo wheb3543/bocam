@@ -53,8 +53,7 @@ export default function InlineStatusEditor({
       await onSave(selectedStatus);
       toast.success('تم تحديث الحالة بنجاح');
       setIsEditing(false);
-    } catch (error) {
-      console.error('Error updating status:', error);
+    } catch {
       toast.error('فشل في تحديث الحالة');
       setSelectedStatus(currentStatus); // Reset to original
     } finally {

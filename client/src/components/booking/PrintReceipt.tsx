@@ -65,6 +65,7 @@ export function printReceipt(data: PrintReceiptProps['data'], userName: string) 
   const printWindow = window.open('', '_blank', 'width=800,height=600');
 
   if (!printWindow) {
+    // eslint-disable-next-line no-alert -- Intentional user notification
     alert('تعذر فتح نافذة الطباعة. الرجاء السماح بالنوافذ المنبثقة.');
     return;
   }

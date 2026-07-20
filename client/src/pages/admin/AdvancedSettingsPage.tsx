@@ -66,22 +66,28 @@ export default function AdvancedSettingsPage() {
         debugMode: false,
       };
       setConfig(mockConfig);
-    } catch (error) {
-      console.error('Failed to fetch system config:', error);
+    } catch {
+      // Silently handle config fetch errors
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSave = async () => {
-    if (!config) {return;}
+    if (!config) {
+      return;
+    }
 
     try {
       setIsSaving(true);
       // In production, this would call an API endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('تم حفظ الإعدادات بنجاح');
     } catch {
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('فشل حفظ الإعدادات');
     } finally {
       setIsSaving(false);

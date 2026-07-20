@@ -1,4 +1,3 @@
- // @ts-nocheck
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { trpc } from '@/lib/api/trpc';
@@ -10,10 +9,22 @@ interface Patient {
   phone?: string;
   email?: string;
   status?: string;
+  age?: number | null;
+  doctorName?: string;
+  offerTitle?: string;
+  campName?: string;
+  appointmentDate?: string | Date | null;
+  preferredDate?: string | Date | null;
+  createdAt?: string | Date | null;
+  source?: string;
+  notes?: string | null;
+  address?: string;
   [key: string]: unknown;
 }
 
-type PatientStatus = 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+type PatientStatus =
+  'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+type LeadStatus = 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -78,13 +89,13 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
 
     if (patient.type === 'appointment') {
       type = 'appointment';
-      typeName = patient.doctorName || 'غير محدد';
+      typeName = patient.doctorName ?? 'غير محدد';
     } else if (patient.type === 'offerLead') {
       type = 'offer';
-      typeName = patient.offerTitle || 'غير محدد';
+      typeName = patient.offerTitle ?? 'غير محدد';
     } else if (patient.type === 'campRegistration') {
       type = 'camp';
-      typeName = patient.campName || 'غير محدد';
+      typeName = patient.campName ?? 'غير محدد';
     }
 
     try {
@@ -93,13 +104,13 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
       // Generate or retrieve receipt number
       let receiptNumber = 'غير متاح';
 
-      if (type === 'appointment') {
+      if (type === 'appointment' && patient.id) {
         const result = await generateAppointmentReceipt.mutateAsync({ id: patient.id });
         receiptNumber = result.receiptNumber;
-      } else if (type === 'offer') {
+      } else if (type === 'offer' && patient.id) {
         const result = await generateOfferReceipt.mutateAsync({ id: patient.id });
         receiptNumber = result.receiptNumber;
-      } else if (type === 'camp') {
+      } else if (type === 'camp' && patient.id) {
         const result = await generateCampReceipt.mutateAsync({ id: patient.id });
         receiptNumber = result.receiptNumber;
       }
@@ -107,9 +118,9 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
       // Print with receipt number
       printReceipt(
         {
-          fullName: patient.fullName,
-          age: patient.age,
-          phone: patient.phone,
+          fullName: patient.fullName ?? 'غير معروف',
+          age: patient.age ?? 0,
+          phone: patient.phone ?? '',
           registrationDate: patient.createdAt ? new Date(patient.createdAt) : new Date(),
           type,
           typeName,
@@ -117,8 +128,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
         },
         user?.name || 'غير معروف'
       );
-    } catch (error) {
-      console.error('Failed to generate receipt number:', error);
+    } catch {
       toast.error('فشل توليد رقم السند');
     } finally {
       _setIsPrinting(false);
@@ -126,7 +136,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
   };
 
   const handleUpdateStatus = () => {
-    if (selectedStatus !== patient.status) {
+    if (selectedStatus !== patient.status && patient.id && selectedStatus) {
       onUpdateStatus(patient.id, selectedStatus);
     }
   };
@@ -165,10 +175,18 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
   const getStatusOptions = () => UNIFIED_STATUS_OPTIONS;
 
   const getTypeLabel = () => {
-    if (patient.type === 'lead') {return 'عميل';}
-    if (patient.type === 'appointment') {return 'موعد طبيب';}
-    if (patient.type === 'offerLead') {return 'حجز عرض';}
-    if (patient.type === 'campRegistration') {return 'تسجيل مخيم';}
+    if (patient.type === 'lead') {
+      return 'عميل';
+    }
+    if (patient.type === 'appointment') {
+      return 'موعد طبيب';
+    }
+    if (patient.type === 'offerLead') {
+      return 'حجز عرض';
+    }
+    if (patient.type === 'campRegistration') {
+      return 'تسجيل مخيم';
+    }
     return 'غير محدد';
   };
 
@@ -194,7 +212,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">رقم الهاتف</p>
               <p className="font-medium text-sm break-all" dir="ltr">
-                {patient.phone || 'غير متوفر'}
+                {patient.phone ?? 'غير متوفر'}
               </p>
             </div>
           </div>
@@ -205,7 +223,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
               <Mail className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">البريد الإلكتروني</p>
-                <p className="font-medium text-sm break-all">{patient.email}</p>
+                <p className="font-medium text-sm break-all">{patient.email ?? ''}</p>
               </div>
             </div>
           )}
@@ -227,7 +245,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
               <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">العنوان</p>
-                <p className="font-medium text-sm">{patient.address}</p>
+                <p className="font-medium text-sm">{patient.address ?? ''}</p>
               </div>
             </div>
           )}
@@ -238,7 +256,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
               <User className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">الطبيب</p>
-                <p className="font-medium text-sm">{patient.doctorName}</p>
+                <p className="font-medium text-sm">{patient.doctorName ?? ''}</p>
               </div>
             </div>
           )}
@@ -249,7 +267,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
               <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">تاريخ الموعد</p>
-                <p className="font-medium text-sm">{formatDate(patient.appointmentDate)}</p>
+                <p className="font-medium text-sm">{formatDate(patient.appointmentDate ?? null)}</p>
               </div>
             </div>
           )}
@@ -260,7 +278,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
               <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">العرض</p>
-                <p className="font-medium text-sm">{patient.offerTitle}</p>
+                <p className="font-medium text-sm">{patient.offerTitle ?? ''}</p>
               </div>
             </div>
           )}
@@ -271,7 +289,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
               <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">المخيم</p>
-                <p className="font-medium text-sm">{patient.campName}</p>
+                <p className="font-medium text-sm">{patient.campName ?? ''}</p>
               </div>
             </div>
           )}
@@ -279,7 +297,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
           {/* Status */}
           <div>
             <p className="text-xs text-muted-foreground mb-1">الحالة</p>
-            <div>{getStatusBadge(patient.status)}</div>
+            <div>{getStatusBadge(patient.status ?? '')}</div>
           </div>
 
           {/* Created At */}
@@ -288,7 +306,7 @@ function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
               <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">تاريخ التسجيل</p>
-                <p className="font-medium text-sm">{formatDate(patient.createdAt)}</p>
+                <p className="font-medium text-sm">{formatDate(patient.createdAt ?? null)}</p>
               </div>
             </div>
           )}
@@ -432,16 +450,18 @@ export default function QuickPatientSearch() {
   // Search when query length >= 3 - show ALL matching results
   useEffect(() => {
     if (searchQuery.length >= 3) {
-      const allPatients = [
-        ...(appointments || []).map((a) => ({ ...a, type: 'appointment' })),
-        ...(offerLeads || []).map((o) => ({ ...o, type: 'offerLead' })),
-        ...(campRegistrations || []).map((c) => ({ ...c, type: 'campRegistration' })),
+      const allPatients: Patient[] = [
+        ...(appointments || []).map((a) => ({ ...a, type: 'appointment' as const }) as Patient),
+        ...(offerLeads || []).map((o) => ({ ...o, type: 'offerLead' as const }) as Patient),
+        ...(campRegistrations || []).map(
+          (c) => ({ ...c, type: 'campRegistration' as const }) as Patient
+        ),
       ];
 
       const results = allPatients.filter(
         (p) =>
-          p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.phone?.includes(searchQuery)
+          (p.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+          (p.phone?.includes(searchQuery) ?? false)
       );
 
       setSearchResults(results);
@@ -467,28 +487,38 @@ export default function QuickPatientSearch() {
 
   const handleUpdateStatus = async (id: number, status: string) => {
     try {
-      if (selectedPatient.type === 'lead') {
-        await updateLeadMutation.mutateAsync({ id, status: status as PatientStatus });
-      } else if (selectedPatient.type === 'appointment') {
+      if (selectedPatient?.type === 'lead') {
+        await updateLeadMutation.mutateAsync({ id, status: status as LeadStatus });
+      } else if (selectedPatient?.type === 'appointment') {
         await updateAppointmentMutation.mutateAsync({ id, status: status as PatientStatus });
-      } else if (selectedPatient.type === 'offerLead') {
+      } else if (selectedPatient?.type === 'offerLead') {
         await updateOfferLeadMutation.mutateAsync({ id, status: status as PatientStatus });
-      } else if (selectedPatient.type === 'campRegistration') {
+      } else if (selectedPatient?.type === 'campRegistration') {
         await updateCampMutation.mutateAsync({ id, status: status as PatientStatus });
       }
       toast.success('تم تحديث الحالة بنجاح');
-      setSelectedPatient({ ...selectedPatient, status });
+      if (selectedPatient) {
+        setSelectedPatient({ ...selectedPatient, status });
+      }
     } catch {
       toast.error('فشل تحديث الحالة');
     }
   };
 
   const getTypeLabel = (type: string) => {
-    if (type === 'lead') {return 'عميل';}
-    if (type === 'appointment') {return 'موعد';}
-    if (type === 'offerLead') {return 'عرض';}
-    if (type === 'campRegistration') {return 'مخيم';}
-    return '';
+    if (type === 'lead') {
+      return 'عميل';
+    }
+    if (type === 'appointment') {
+      return 'موعد';
+    }
+    if (type === 'offerLead') {
+      return 'عرض';
+    }
+    if (type === 'campRegistration') {
+      return 'مخيم';
+    }
+    return type;
   };
 
   return (
@@ -565,7 +595,7 @@ export default function QuickPatientSearch() {
                       </p>
                     </div>
                     <Badge variant="outline" className="shrink-0 ml-2 text-xs">
-                      {getTypeLabel(result.type)}
+                      {getTypeLabel(result.type ?? '')}
                     </Badge>
                   </button>
                 ))}

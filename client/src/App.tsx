@@ -6,7 +6,7 @@ const NotFound = lazy(() => import('@/pages/NotFound'));
 import { Route, Switch, useLocation } from 'wouter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
-import DashboardShell from '@/components/layout/DashboardShell';
+const DashboardShell = lazy(() => import('@/components/layout/DashboardShell'));
 import { UpdateProgressModal } from '@/components/update/UpdateProgressModal';
 import { MandatoryUpdateModal } from '@/components/update/MandatoryUpdateModal';
 import { OptionalUpdateBanner } from '@/components/update/OptionalUpdateBanner';
@@ -71,10 +71,9 @@ const OfferLeadsPage = lazy(() => import('./pages/admin/bookings/OfferLeadsPage'
 const CampRegistrationsPage = lazy(() => import('./pages/admin/bookings/CampRegistrationsPage'));
 const CustomersPage = lazy(() => import('./pages/admin/bookings/CustomersPage'));
 const TasksPage = lazy(() => import('./pages/admin/bookings/TasksPage'));
-// Temporarily disabled PWA components to fix refresh issues
-// import PWAManager from './components/PWAManager';
+import PWAManager from './components/PWAManager';
 import MetaPixel from './components/MetaPixel';
-// import OfflineIndicator from './components/OfflineIndicator';
+import OfflineIndicator from './components/OfflineIndicator';
 import CookieConsentBanner from './components/CookieConsentBanner';
 const MediaTeamPage = lazy(() => import('./pages/admin/teams/MediaTeamPage'));
 const FieldMarketingTeamPage = lazy(() => import('./pages/admin/teams/FieldMarketingTeamPage'));
@@ -115,6 +114,37 @@ const SystemStatusPage = lazy(() => import('./pages/admin/system/SystemStatusPag
 const BackupManagementPage = lazy(() => import('./pages/admin/system/BackupManagementPage'));
 const AdvancedSettingsPage = lazy(() => import('./pages/admin/AdvancedSettingsPage'));
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
+
+// Prefetch critical pages for better performance
+function PrefetchRoutes() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    // Prefetch public pages when on home page
+    if (location === '/') {
+      import('./pages/public/Doctors');
+      import('./pages/public/OffersListPage');
+      import('./pages/public/CampsListPage');
+    }
+
+    // Prefetch admin dashboard when on admin routes
+    if (location.startsWith('/admin')) {
+      import('./pages/admin/AdminDashboard');
+      import('./pages/admin/SettingsPage');
+      import('./pages/admin/bookings/BookingsManagementPage');
+      import('./pages/admin/reports/ReportsPage');
+    }
+
+    // Prefetch patient portal pages when on patient portal
+    if (location.startsWith('/patient-portal')) {
+      import('./pages/patient-portal/PatientHomePage');
+      import('./pages/patient-portal/PatientAppointmentsPage');
+      import('./pages/patient-portal/PatientOffersPage');
+    }
+  }, [location]);
+
+  return null;
+}
 
 function Router() {
   const [location] = useLocation();
@@ -169,171 +199,190 @@ function Router() {
 
         {/* Admin routes with persistent sidebar */}
         <Route path="/admin">
-          <DashboardShell>
-            <AdminDashboard />
-          </DashboardShell>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            }
+          >
+            <DashboardShell>
+              <AdminDashboard />
+            </DashboardShell>
+          </Suspense>
         </Route>
         <Route path="/admin/*">
-          <DashboardShell>
-            <Switch>
-              <Route path={'/admin/offline'} component={OfflinePage} />
-              <Route path={'/admin/profile'} component={ProfilePage} />
-              <Route path={'/admin/management'} component={ManagementPage} />
-              <Route path={'/admin/content/content'} component={ContentManagementPage} />
-              <Route path={'/admin/users/users'} component={UsersManagementPage} />
-              <Route path={'/admin/content/publishing'} component={PublishingPage} />
-              <Route path={'/admin/whatsapp'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/whatsapp-dashboard'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppDashboard />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/templates'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppTemplatesPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/connection'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppConnectionPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/analytics'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppAnalytics />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/broadcast'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppBroadcast />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/auto-reply'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppAutoReply />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/compliance'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppCompliance />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/appointments'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppAppointments />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/integration'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppIntegration />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/account-health'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppAccountHealthPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/phone-quality'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppPhoneQualityPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/subscriptions'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppUserSubscriptionsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/webhook-inspector'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppWebhookInspectorPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/costs'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppCostsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/orders'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppOrdersPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/products'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppProductsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/referrals'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppReferralsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/whatsapp/lab-results'}>
-                <ProtectedRoute feature="whatsapp">
-                  <WhatsAppLabResultsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/communications/messages'} component={MessagesPage} />
-              <Route path={'/admin/message-settings'} component={MessageSettingsPage} />
-              <Route path={'/admin/reports/reports'}>
-                <ProtectedRoute feature="reports">
-                  <ReportsPageNew />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/campaigns/campaigns'} component={CampaignsPage} />
-              <Route path={'/admin/reports/analytics'}>
-                <ProtectedRoute feature="reports">
-                  <AnalyticsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/reports/bi'} component={BIPage} />
-              <Route path={'/admin/tracking-settings'} component={TrackingSettingsPage} />
-              <Route path={'/admin/reports/camp-stats'}>
-                <ProtectedRoute feature="camps">
-                  <CampStatsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/bookings'} component={BookingsManagementPage} />
-              <Route path={'/admin/bookings/leads'} component={LeadsManagementPage} />
-              <Route path={'/admin/bookings/appointments'} component={AppointmentsManagementPage} />
-              <Route path={'/admin/bookings/offer-leads'}>
-                <ProtectedRoute feature="offers">
-                  <OfferLeadsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/bookings/camp-registrations'}>
-                <ProtectedRoute feature="camps">
-                  <CampRegistrationsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/bookings/customers'} component={CustomersPage} />
-              <Route path={'/admin/bookings/patient-results'}>
-                <ProtectedRoute feature="patient_portal">
-                  <PatientResultsAdminPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path={'/admin/bookings/tasks'} component={TasksPage} />
-              <Route
-                path={'/admin/teams/digital-marketing'}
-                component={DigitalMarketingTasksPage}
-              />
-              <Route path={'/admin/teams/media'} component={MediaTeamPage} />
-              <Route path={'/admin/teams/field-marketing'} component={FieldMarketingTeamPage} />
-              <Route path={'/admin/teams/customer-service'} component={CustomerServiceTeamPage} />
-              <Route path={'/admin/campaigns/projects'} component={CampaignsPage} />
-              <Route path={'/admin/campaigns/review-approval'} component={ReviewApprovalPage} />
-              <Route path={'/admin/reports/pwa-stats'} component={PWAStatsPage} />
-              <Route path={'/admin/settings'} component={SettingsPage} />
-              <Route path={'/admin/system/updates'} component={UpdateManagementPage} />
-              <Route path={'/admin/system/status'} component={SystemStatusPage} />
-              <Route path={'/admin/system/backups'} component={BackupManagementPage} />
-              <Route path={'/admin/advanced-settings'} component={AdvancedSettingsPage} />
-            </Switch>
-          </DashboardShell>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            }
+          >
+            <DashboardShell>
+              <Switch>
+                <Route path={'/admin/offline'} component={OfflinePage} />
+                <Route path={'/admin/profile'} component={ProfilePage} />
+                <Route path={'/admin/management'} component={ManagementPage} />
+                <Route path={'/admin/content/content'} component={ContentManagementPage} />
+                <Route path={'/admin/users/users'} component={UsersManagementPage} />
+                <Route path={'/admin/content/publishing'} component={PublishingPage} />
+                <Route path={'/admin/whatsapp'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/whatsapp-dashboard'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppDashboard />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/templates'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppTemplatesPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/connection'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppConnectionPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/analytics'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppAnalytics />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/broadcast'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppBroadcast />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/auto-reply'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppAutoReply />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/compliance'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppCompliance />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/appointments'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppAppointments />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/integration'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppIntegration />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/account-health'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppAccountHealthPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/phone-quality'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppPhoneQualityPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/subscriptions'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppUserSubscriptionsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/webhook-inspector'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppWebhookInspectorPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/costs'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppCostsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/orders'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppOrdersPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/products'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppProductsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/referrals'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppReferralsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/whatsapp/lab-results'}>
+                  <ProtectedRoute feature="whatsapp">
+                    <WhatsAppLabResultsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/communications/messages'} component={MessagesPage} />
+                <Route path={'/admin/message-settings'} component={MessageSettingsPage} />
+                <Route path={'/admin/reports/reports'}>
+                  <ProtectedRoute feature="reports">
+                    <ReportsPageNew />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/campaigns/campaigns'} component={CampaignsPage} />
+                <Route path={'/admin/reports/analytics'}>
+                  <ProtectedRoute feature="reports">
+                    <AnalyticsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/reports/bi'} component={BIPage} />
+                <Route path={'/admin/tracking-settings'} component={TrackingSettingsPage} />
+                <Route path={'/admin/reports/camp-stats'}>
+                  <ProtectedRoute feature="camps">
+                    <CampStatsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/bookings'} component={BookingsManagementPage} />
+                <Route path={'/admin/bookings/leads'} component={LeadsManagementPage} />
+                <Route
+                  path={'/admin/bookings/appointments'}
+                  component={AppointmentsManagementPage}
+                />
+                <Route path={'/admin/bookings/offer-leads'}>
+                  <ProtectedRoute feature="offers">
+                    <OfferLeadsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/bookings/camp-registrations'}>
+                  <ProtectedRoute feature="camps">
+                    <CampRegistrationsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/bookings/customers'} component={CustomersPage} />
+                <Route path={'/admin/bookings/patient-results'}>
+                  <ProtectedRoute feature="patient_portal">
+                    <PatientResultsAdminPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path={'/admin/bookings/tasks'} component={TasksPage} />
+                <Route
+                  path={'/admin/teams/digital-marketing'}
+                  component={DigitalMarketingTasksPage}
+                />
+                <Route path={'/admin/teams/media'} component={MediaTeamPage} />
+                <Route path={'/admin/teams/field-marketing'} component={FieldMarketingTeamPage} />
+                <Route path={'/admin/teams/customer-service'} component={CustomerServiceTeamPage} />
+                <Route path={'/admin/campaigns/projects'} component={CampaignsPage} />
+                <Route path={'/admin/campaigns/review-approval'} component={ReviewApprovalPage} />
+                <Route path={'/admin/reports/pwa-stats'} component={PWAStatsPage} />
+                <Route path={'/admin/settings'} component={SettingsPage} />
+                <Route path={'/admin/system/updates'} component={UpdateManagementPage} />
+                <Route path={'/admin/system/status'} component={SystemStatusPage} />
+                <Route path={'/admin/system/backups'} component={BackupManagementPage} />
+                <Route path={'/admin/advanced-settings'} component={AdvancedSettingsPage} />
+              </Switch>
+            </DashboardShell>
+          </Suspense>
         </Route>
 
         <Route path={'/patient-portal/login'} component={PatientPortalLogin} />
@@ -341,21 +390,29 @@ function Router() {
 
         {/* Patient Portal PWA Routes with Layout */}
         <Route path="/patient-portal">
-          <PatientPortalLayout>
-            <Switch>
-              <Route path="/patient-portal/home" component={PatientHomePage} />
-              <Route path="/patient-portal/appointments" component={PatientAppointmentsPage} />
-              <Route
-                path="/patient-portal/appointments/:id"
-                component={PatientAppointmentDetailsPage}
-              />
-              <Route path="/patient-portal/offers" component={PatientOffersPage} />
-              <Route path="/patient-portal/camps" component={PatientCampsPage} />
-              <Route path="/patient-portal/results" component={PatientResultsPage} />
-              <Route path="/patient-portal/results/:id" component={PatientResultDetailsPage} />
-              <Route path="/patient-portal/profile" component={PatientProfilePage} />
-            </Switch>
-          </PatientPortalLayout>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            }
+          >
+            <PatientPortalLayout>
+              <Switch>
+                <Route path="/patient-portal/home" component={PatientHomePage} />
+                <Route path="/patient-portal/appointments" component={PatientAppointmentsPage} />
+                <Route
+                  path="/patient-portal/appointments/:id"
+                  component={PatientAppointmentDetailsPage}
+                />
+                <Route path="/patient-portal/offers" component={PatientOffersPage} />
+                <Route path="/patient-portal/camps" component={PatientCampsPage} />
+                <Route path="/patient-portal/results" component={PatientResultsPage} />
+                <Route path="/patient-portal/results/:id" component={PatientResultDetailsPage} />
+                <Route path="/patient-portal/profile" component={PatientProfilePage} />
+              </Switch>
+            </PatientPortalLayout>
+          </Suspense>
         </Route>
         <Route path={'/offline'} component={OfflinePage} />
         <Route path={'/admin/settings'} component={SettingsPage} />
@@ -401,13 +458,14 @@ function App() {
       <ThemeProvider defaultTheme="light" switchable>
         <TooltipProvider>
           <Toaster />
-          {/* <PWAManager /> */}
-          {/* <OfflineIndicator /> */}
+          <PWAManager />
+          <OfflineIndicator />
           <CookieConsentBanner />
           <MetaPixel />
           <OptionalUpdateBanner />
           <UpdateProgressModal open={showProgressModal} onOpenChange={setShowProgressModal} />
           <MandatoryUpdateModal open={showMandatoryModal} onOpenChange={setShowMandatoryModal} />
+          <PrefetchRoutes />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

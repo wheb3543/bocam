@@ -60,6 +60,7 @@ export default function CommentsSection({ entityType, entityId }: CommentsSectio
   };
 
   const handleDeleteComment = (commentId: number) => {
+    // eslint-disable-next-line no-alert -- Intentional user confirmation
     if (confirm('هل أنت متأكد من حذف هذا التعليق؟')) {
       deleteCommentMutation.mutate({ commentId });
     }

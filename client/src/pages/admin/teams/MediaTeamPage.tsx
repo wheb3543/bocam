@@ -1,13 +1,9 @@
-
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Dialog,
   DialogContent,
@@ -17,133 +13,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
-import type { RouterOutputs } from '@/types/trpc';
-
-
-import {
-  Plus,
-  Search,
-  LayoutGrid,
-  List,
-  Calendar,
-  MoreVertical,
-  Edit,
-  Trash2,
-  CheckCircle2,
-  Circle,
-  AlertCircle,
-  Timer,
-  Video,
-  Camera,
-  Palette,
-  Film,
-  FileVideo,
-  Clapperboard,
-  RefreshCw,
-  GripVertical,
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
-// أنواع المهام - متوافقة مع schema قاعدة البيانات
-type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled';
-type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
-// التصنيفات المدعومة في قاعدة البيانات
-type TaskCategory = 'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other';
-
-type UserEntity = RouterOutputs['users']['getAll'][number];
-type CampaignEntity = RouterOutputs['campaigns']['list'][number];
-
-interface Task {
-  id: number;
-  title: string;
-  description: string | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  category: TaskCategory;
-  assignedTo: number | null;
-  assignedUser?: { id: number; name: string | null; username: string } | null;
-  campaignId: number | null;
-  campaign?: { id: number; name: string } | null;
-  dueDate: Date | string | null;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-  tags?: string | null;
-}
-
-// تصنيفات الإعلام - مع mapping للتصنيفات المدعومة في قاعدة البيانات
-const mediaCategories: { value: TaskCategory; label: string; icon: React.ReactNode }[] = [
-  { value: 'design', label: 'تصميم جرافيك', icon: <Palette className="w-4 h-4" /> },
-  { value: 'content', label: 'إنتاج محتوى', icon: <Video className="w-4 h-4" /> },
-  { value: 'social_media', label: 'سوشيال ميديا', icon: <Film className="w-4 h-4" /> },
-  { value: 'ads', label: 'إعلانات', icon: <Camera className="w-4 h-4" /> },
-  { value: 'analytics', label: 'تحليلات', icon: <FileVideo className="w-4 h-4" /> },
-  { value: 'other', label: 'أخرى', icon: <Clapperboard className="w-4 h-4" /> },
-];
-
-const statusConfig: Record<
-  TaskStatus,
-  { label: string; color: string; bgColor: string; icon: React.ReactNode }
-> = {
-  todo: {
-    label: 'قيد الانتظار',
-    color: 'text-muted-foreground',
-    bgColor: 'bg-muted',
-    icon: <Circle className="w-4 h-4" />,
-  },
-  in_progress: {
-    label: 'قيد التنفيذ',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
-    icon: <Timer className="w-4 h-4" />,
-  },
-  review: {
-    label: 'مراجعة',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-100',
-    icon: <AlertCircle className="w-4 h-4" />,
-  },
-  completed: {
-    label: 'مكتمل',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
-    icon: <CheckCircle2 className="w-4 h-4" />,
-  },
-  cancelled: {
-    label: 'ملغي',
-    color: 'text-red-600',
-    bgColor: 'bg-red-100',
-    icon: <AlertCircle className="w-4 h-4" />,
-  },
-};
-
-const priorityConfig: Record<TaskPriority, { label: string; color: string; bgColor: string }> = {
-  low: { label: 'منخفضة', color: 'text-muted-foreground', bgColor: 'bg-muted' },
-  medium: { label: 'متوسطة', color: 'text-blue-600', bgColor: 'bg-blue-100' },
-  high: { label: 'عالية', color: 'text-orange-600', bgColor: 'bg-orange-100' },
-  urgent: { label: 'عاجلة', color: 'text-red-600', bgColor: 'bg-red-100' },
-};
-
-const getCategoryInfo = (category: TaskCategory) => {
-  return (
-    mediaCategories.find((c) => c.value === category) || mediaCategories[mediaCategories.length - 1]
-  );
-};
+import { Plus, RefreshCw, Edit, Trash2 } from 'lucide-react';
+import { statusConfig, priorityConfig, getCategoryInfo } from './media/config';
+import type { Task, TaskStatus, TaskPriority, TaskCategory } from './media/types';
+import KanbanColumn from './media/KanbanColumn';
+import TaskForm from './media/TaskForm';
+import MediaStats from './media/MediaStats';
+import MediaFilters from './media/MediaFilters';
 
 export default function MediaTeamPage() {
   const { formatDate } = useFormatDate();
@@ -374,262 +252,11 @@ export default function MediaTeamPage() {
   };
 
   const handleDeleteTask = (taskId: number) => {
+    // eslint-disable-next-line no-alert -- Intentional user confirmation
     if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
       deleteTaskMutation.mutate({ id: taskId });
     }
   };
-
-  // Task Card Component
-  const TaskCard = ({ task }: { task: Task }) => {
-    const categoryInfo = getCategoryInfo(task.category);
-    const isOverdue =
-      task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
-
-    return (
-      <Card
-        className={`cursor-pointer hover:shadow-md transition-shadow ${isOverdue ? 'border-red-300 bg-red-50' : ''}`}
-        draggable
-        onDragStart={(e) => {
-          e.dataTransfer.setData('taskId', task.id.toString());
-          e.dataTransfer.setData('currentStatus', task.status);
-        }}
-      >
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
-              <Badge
-                className={`${priorityConfig[task.priority].bgColor} ${priorityConfig[task.priority].color} text-xs`}
-              >
-                {priorityConfig[task.priority].label}
-              </Badge>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => openEditDialog(task)}>
-                  <Edit className="ml-2 h-4 w-4" />
-                  تعديل
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleDeleteTask(task.id)}
-                  className="text-red-600"
-                >
-                  <Trash2 className="ml-2 h-4 w-4" />
-                  حذف
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <h4 className="font-medium text-sm mb-2 line-clamp-2">{task.title}</h4>
-
-          {task.description && (
-            <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
-          )}
-
-          <div className="flex items-center gap-2 mb-3">
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              {categoryInfo.icon}
-              {categoryInfo.label}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              {task.assignedUser?.name && (
-                <div className="flex items-center gap-1">
-                  <Avatar className="h-5 w-5">
-                    <AvatarFallback className="text-[10px]">
-                      {task.assignedUser.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              )}
-            </div>
-            {task.dueDate && (
-              <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-600' : ''}`}>
-                <Calendar className="h-3 w-3" />
-                {formatDate(task.dueDate)}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  // Kanban Column Component
-  const KanbanColumn = ({ status, tasks }: { status: TaskStatus; tasks: Task[] }) => {
-    const config = statusConfig[status];
-
-    return (
-      <div className="flex-shrink-0 w-[280px] sm:w-[300px]">
-        <div className={`rounded-t-lg p-3 ${config.bgColor}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {config.icon}
-              <span className={`font-medium ${config.color}`}>{config.label}</span>
-            </div>
-            <Badge variant="secondary" className="text-xs">
-              {tasks.length}
-            </Badge>
-          </div>
-        </div>
-        <ScrollArea className="h-[calc(100vh-400px)] bg-muted/30 rounded-b-lg p-2">
-          <div className="space-y-2">
-            {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-            {tasks.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground text-sm">لا توجد مهام</div>
-            )}
-          </div>
-        </ScrollArea>
-      </div>
-    );
-  };
-
-  // Task Form Component
-  const TaskForm = () => (
-    <div className="space-y-4">
-      <div className="grid gap-2">
-        <Label>عنوان المهمة *</Label>
-        <Input
-          placeholder="أدخل عنوان المهمة"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        />
-      </div>
-
-      <div className="grid gap-2">
-        <Label>الوصف</Label>
-        <Textarea
-          placeholder="أدخل وصف المهمة"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          rows={3}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <Label>الحالة</Label>
-          <Select
-            value={formData.status}
-            onValueChange={(value) => setFormData({ ...formData, status: value as TaskStatus })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="اختر الحالة" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todo">قيد الانتظار</SelectItem>
-              <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
-              <SelectItem value="review">مراجعة</SelectItem>
-              <SelectItem value="completed">مكتمل</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="grid gap-2">
-          <Label>الأولوية</Label>
-          <Select
-            value={formData.priority}
-            onValueChange={(value) => setFormData({ ...formData, priority: value as TaskPriority })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="اختر الأولوية" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">منخفضة</SelectItem>
-              <SelectItem value="medium">متوسطة</SelectItem>
-              <SelectItem value="high">عالية</SelectItem>
-              <SelectItem value="urgent">عاجلة</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <Label>التصنيف</Label>
-          <Select
-            value={formData.category}
-            onValueChange={(value) => setFormData({ ...formData, category: value as TaskCategory })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="اختر التصنيف" />
-            </SelectTrigger>
-            <SelectContent>
-              {mediaCategories.map((cat) => (
-                <SelectItem key={cat.value} value={cat.value}>
-                  <span className="flex items-center gap-2">
-                    {cat.icon}
-                    {cat.label}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="grid gap-2">
-          <Label>تاريخ التسليم</Label>
-          <Input
-            type="date"
-            value={formData.dueDate}
-            onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <Label>المعيّن إليه</Label>
-          <Select
-            value={formData.assignedToId}
-            onValueChange={(value) => setFormData({ ...formData, assignedToId: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="اختر عضو الفريق" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">غير محدد</SelectItem>
-              {users.map((user: UserEntity) => (
-                <SelectItem key={user.id} value={user.id.toString()}>
-                  {user.name || user.email}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="grid gap-2">
-          <Label>الحملة المرتبطة</Label>
-          <Select
-            value={formData.campaignId}
-            onValueChange={(value) => setFormData({ ...formData, campaignId: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="اختر الحملة" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">غير محدد</SelectItem>
-              {campaigns.map((campaign: CampaignEntity) => (
-                <SelectItem key={campaign.id} value={campaign.id.toString()}>
-                  {campaign.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <DashboardLayout pageTitle="فريق وحدة الإعلام" pageDescription="إدارة مهام الإنتاج الإعلامي">
@@ -666,7 +293,12 @@ export default function MediaTeamPage() {
                   <DialogTitle>إنشاء مهمة جديدة</DialogTitle>
                   <DialogDescription>أضف مهمة جديدة لفريق وحدة الإعلام</DialogDescription>
                 </DialogHeader>
-                <TaskForm />
+                <TaskForm
+                  formData={formData}
+                  onFormDataChange={setFormData}
+                  users={users}
+                  campaigns={campaigns}
+                />
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                     إلغاء
@@ -681,127 +313,21 @@ export default function MediaTeamPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-4 md:mb-6">
-          <Card>
-            <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
-                {stats.total}
-              </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">إجمالي المهام</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-muted-foreground">
-                {stats.pending}
-              </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">قيد الانتظار</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600">
-                {stats.inProgress}
-              </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">قيد التنفيذ</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-orange-600">
-                {stats.review}
-              </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">مراجعة</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">
-                {stats.completed}
-              </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">مكتمل</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 md:p-4">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-red-600">
-                {stats.overdue}
-              </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">متأخر</div>
-            </CardContent>
-          </Card>
-        </div>
+        <MediaStats stats={stats} />
 
         {/* Filters & View Toggle */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1 flex flex-wrap gap-2">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="بحث في المهام..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-9"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="الحالة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="todo">قيد الانتظار</SelectItem>
-                <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
-                <SelectItem value="review">مراجعة</SelectItem>
-                <SelectItem value="completed">مكتمل</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="الأولوية" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الأولويات</SelectItem>
-                <SelectItem value="low">منخفضة</SelectItem>
-                <SelectItem value="medium">متوسطة</SelectItem>
-                <SelectItem value="high">عالية</SelectItem>
-                <SelectItem value="urgent">عاجلة</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="التصنيف" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع التصنيفات</SelectItem>
-                {mediaCategories.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    <span className="flex items-center gap-2">
-                      {cat.icon}
-                      {cat.label}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant={viewMode === 'kanban' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('kanban')}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-            >
-              <List className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <MediaFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          priorityFilter={priorityFilter}
+          onPriorityFilterChange={setPriorityFilter}
+          categoryFilter={categoryFilter}
+          onCategoryFilterChange={setCategoryFilter}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Content */}
         {tasksLoading ? (
@@ -823,7 +349,13 @@ export default function MediaTeamPage() {
                   }
                 }}
               >
-                <KanbanColumn status={status} tasks={tasksByStatus[status] as Task[]} />
+                <KanbanColumn
+                  status={status}
+                  tasks={tasksByStatus[status] as Task[]}
+                  formatDate={formatDate}
+                  onEditTask={openEditDialog}
+                  onDeleteTask={handleDeleteTask}
+                />
               </div>
             ))}
           </div>
@@ -936,7 +468,12 @@ export default function MediaTeamPage() {
               <DialogTitle>تعديل المهمة</DialogTitle>
               <DialogDescription>تعديل بيانات المهمة</DialogDescription>
             </DialogHeader>
-            <TaskForm />
+            <TaskForm
+              formData={formData}
+              onFormDataChange={setFormData}
+              users={users}
+              campaigns={campaigns}
+            />
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 إلغاء

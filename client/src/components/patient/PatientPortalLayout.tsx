@@ -18,28 +18,56 @@ const NAV_ITEMS = [
 ] as const;
 
 function resolveActiveKey(pathname: string): string {
-  if (pathname.startsWith('/patient-portal/appointments')) {return 'appointments';}
-  if (pathname.startsWith('/patient-portal/offers') || pathname.startsWith('/patient-portal/camps'))
-    {return 'offers';}
-  if (pathname.startsWith('/patient-portal/results')) {return 'results';}
-  if (pathname.startsWith('/patient-portal/profile')) {return 'profile';}
+  if (pathname.startsWith('/patient-portal/appointments')) {
+    return 'appointments';
+  }
+  if (
+    pathname.startsWith('/patient-portal/offers') ||
+    pathname.startsWith('/patient-portal/camps')
+  ) {
+    return 'offers';
+  }
+  if (pathname.startsWith('/patient-portal/results')) {
+    return 'results';
+  }
+  if (pathname.startsWith('/patient-portal/profile')) {
+    return 'profile';
+  }
   return 'home';
 }
 
 function resolveTitle(pathname: string): string {
-  if (pathname.startsWith('/patient-portal/appointments/')) {return 'تفاصيل الموعد';}
-  if (pathname.startsWith('/patient-portal/appointments')) {return 'المواعيد';}
-  if (pathname.startsWith('/patient-portal/offers')) {return 'العروض';}
-  if (pathname.startsWith('/patient-portal/camps')) {return 'المخيمات';}
-  if (pathname.startsWith('/patient-portal/results/')) {return 'تفاصيل النتيجة';}
-  if (pathname.startsWith('/patient-portal/results')) {return 'النتائج الطبية';}
-  if (pathname.startsWith('/patient-portal/profile')) {return 'حسابي';}
+  if (pathname.startsWith('/patient-portal/appointments/')) {
+    return 'تفاصيل الموعد';
+  }
+  if (pathname.startsWith('/patient-portal/appointments')) {
+    return 'المواعيد';
+  }
+  if (pathname.startsWith('/patient-portal/offers')) {
+    return 'العروض';
+  }
+  if (pathname.startsWith('/patient-portal/camps')) {
+    return 'المخيمات';
+  }
+  if (pathname.startsWith('/patient-portal/results/')) {
+    return 'تفاصيل النتيجة';
+  }
+  if (pathname.startsWith('/patient-portal/results')) {
+    return 'النتائج الطبية';
+  }
+  if (pathname.startsWith('/patient-portal/profile')) {
+    return 'حسابي';
+  }
   return 'بوابة المريض';
 }
 
 function resolveBackHref(pathname: string): string | null {
-  if (pathname.startsWith('/patient-portal/appointments/')) {return '/patient-portal/appointments';}
-  if (pathname.startsWith('/patient-portal/results/')) {return '/patient-portal/results';}
+  if (pathname.startsWith('/patient-portal/appointments/')) {
+    return '/patient-portal/appointments';
+  }
+  if (pathname.startsWith('/patient-portal/results/')) {
+    return '/patient-portal/results';
+  }
   return null;
 }
 
@@ -75,7 +103,9 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
     );
   }
 
-  if (!patient) {return null;}
+  if (!patient) {
+    return null;
+  }
 
   const currentOrder = PAGE_ORDER[activeKey] ?? PAGE_ORDER.home;
   const slideFrom = currentOrder >= previousOrder.current ? 28 : -28;
@@ -86,6 +116,15 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
       className="min-h-screen bg-gradient-to-b from-green-50/70 via-white to-green-50/40 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900"
       dir="rtl"
     >
+      {/* Skip to content link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-[100] focus:bg-green-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
+      >
+        تخطى إلى المحتوى الرئيسي
+      </a>
+
+      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-40 border-b bg-white/95 dark:bg-gray-900/90 backdrop-blur safe-top">
         <div className="h-14 px-4 flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
@@ -110,7 +149,8 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
         </div>
       </header>
 
-      <main className="pt-16 pb-24 px-3 sm:px-4">
+      {/* Main Content */}
+      <main id="main-content" className="pt-16 pb-24 px-3 sm:px-4" role="main">
         <AnimatePresence mode="wait">
           <motion.div
             key={location}
@@ -137,7 +177,12 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
         </Link>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 dark:bg-gray-900/95 backdrop-blur safe-bottom">
+      {/* Navigation */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 dark:bg-gray-900/95 backdrop-blur safe-bottom"
+        role="navigation"
+        aria-label="التنقل في بوابة المريض"
+      >
         <div className="grid grid-cols-5 h-16 max-w-4xl mx-auto">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -148,6 +193,7 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
                   className={`h-full w-full flex flex-col items-center justify-center gap-1 transition-colors ${
                     isActive ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
                   }`}
+                  aria-current={isActive ? 'page' : undefined}
                 >
                   <Icon className={`h-4 w-4 ${isActive ? 'scale-110' : ''}`} />
                   <span className="text-[10px] leading-none">{item.label}</span>

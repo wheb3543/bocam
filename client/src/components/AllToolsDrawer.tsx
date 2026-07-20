@@ -3,7 +3,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocation } from 'wouter';
 import { Clock, X, Search } from 'lucide-react';
 import { useRecentlyUsed } from '@/hooks/data/useRecentlyUsed';
-import type { NavItem, NavGroup } from '@/components/layout/DashboardSidebarV2';
+import type { NavItem, NavGroup } from '@/components/layout/sidebarData';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -40,7 +40,7 @@ export default function AllToolsDrawer({
     ? allToolsGroups
         .map((group) => ({
           ...group,
-          items: group.items.filter((item) =>
+          items: group.items.filter((item: NavItem) =>
             item.title.toLowerCase().includes(searchQuery.toLowerCase())
           ),
         }))

@@ -7,7 +7,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { LucideIcon } from 'lucide-react';
 
-interface Activity {
+interface ActivityItem {
   id: number;
   type: string;
   icon: LucideIcon;
@@ -80,7 +80,7 @@ export default function RecentActivity() {
     }
   };
 
-  const getStatusBadge = (activity: Activity) => {
+  const getStatusBadge = (activity: ActivityItem) => {
     const statusMap: Record<
       string,
       { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
@@ -97,10 +97,12 @@ export default function RecentActivity() {
       no_answer: { label: 'لم يرد', variant: 'outline' },
     };
 
-    const status = activity.status ? statusMap[activity.status] : {
-      label: activity.status || 'غير معروف',
-      variant: 'outline' as const,
-    };
+    const status = activity.status
+      ? statusMap[activity.status]
+      : {
+          label: activity.status || 'غير معروف',
+          variant: 'outline' as const,
+        };
     return (
       <Badge variant={status.variant} className="text-xs">
         {status.label}
@@ -125,7 +127,7 @@ export default function RecentActivity() {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentActivities.map((activity: Activity, _index: number) => {
+            {recentActivities.map((activity: ActivityItem, _index: number) => {
               const Icon = activity.icon;
               return (
                 <div
@@ -148,7 +150,13 @@ export default function RecentActivity() {
                     <div className="flex items-center gap-2 mt-2">
                       <Clock className="h-3 w-3 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
-                        {activity.createdAt ? getRelativeTime(typeof activity.createdAt === 'string' ? activity.createdAt : activity.createdAt.toISOString()) : '-'}
+                        {activity.createdAt
+                          ? getRelativeTime(
+                              typeof activity.createdAt === 'string'
+                                ? activity.createdAt
+                                : activity.createdAt.toISOString()
+                            )
+                          : '-'}
                       </span>
                     </div>
                   </div>

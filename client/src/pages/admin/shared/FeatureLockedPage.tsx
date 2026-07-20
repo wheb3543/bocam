@@ -133,7 +133,9 @@ export default function FeatureLockedPage({
 
   // إعادة التوجيه إذا كان الترخيص صالحاً (لمنع التكرار)
   useEffect(() => {
-    if (!featureName) {return;}
+    if (!featureName) {
+      return;
+    }
 
     // التحقق من الميزة
     const checkFeature = async () => {
@@ -145,8 +147,8 @@ export default function FeatureLockedPage({
         if (result.data?.enabled) {
           setLocation('/admin');
         }
-      } catch (error) {
-        console.error('Error checking feature:', error);
+      } catch {
+        // Silently handle feature check errors
       }
     };
 
@@ -159,6 +161,7 @@ export default function FeatureLockedPage({
       window.location.href = `tel:${COMPANY_PHONE}`;
     } else {
       // Fallback: عرض رسالة
+      // eslint-disable-next-line no-alert -- Intentional user notification
       alert('يرجى التواصل مع الدعم الفني لترقية الترخيص');
     }
   };

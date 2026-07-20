@@ -154,7 +154,9 @@ function ChangeIndicator({ change }: { change: number }) {
 
 // Custom tooltip for Arabic RTL
 function CustomTooltip({ active, payload, label }: TooltipProps) {
-  if (!active || !payload?.length) {return null;}
+  if (!active || !payload?.length) {
+    return null;
+  }
   return (
     <div
       className="bg-popover text-popover-foreground border border-border rounded-lg shadow-lg p-3 text-sm"
@@ -174,7 +176,9 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
 }
 
 function CustomPieTooltip({ active, payload }: TooltipProps) {
-  if (!active || !payload?.length) {return null;}
+  if (!active || !payload?.length) {
+    return null;
+  }
   const entry = payload[0];
   return (
     <div
@@ -198,7 +202,9 @@ function RegistrationsTrendChart({ period }: { period: Period }) {
   const { data, isLoading } = trpc.charts.registrationsTrend.useQuery({ period });
 
   const chartData = useMemo(() => {
-    if (!data) {return [];}
+    if (!data) {
+      return [];
+    }
     return data.labels.map((label, i) => ({
       date: label,
       العملاء: data.datasets.leads[i],
@@ -208,13 +214,16 @@ function RegistrationsTrendChart({ period }: { period: Period }) {
     }));
   }, [data]);
 
-  if (isLoading) {return <ChartSkeleton />;}
-  if (!chartData.length)
-    {return (
+  if (isLoading) {
+    return <ChartSkeleton />;
+  }
+  if (!chartData.length) {
+    return (
       <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
         لا توجد بيانات
       </div>
-    );}
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -282,7 +291,9 @@ function LeadStatusPieChart() {
   const { data, isLoading } = trpc.charts.leadStatusDistribution.useQuery();
 
   const chartData = useMemo(() => {
-    if (!data) {return [];}
+    if (!data) {
+      return [];
+    }
     return data.map((d) => ({
       name: STATUS_LABELS[d.status] || d.status,
       value: d.total,
@@ -290,13 +301,16 @@ function LeadStatusPieChart() {
     }));
   }, [data]);
 
-  if (isLoading) {return <ChartSkeleton />;}
-  if (!chartData.length)
-    {return (
+  if (isLoading) {
+    return <ChartSkeleton />;
+  }
+  if (!chartData.length) {
+    return (
       <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
         لا توجد بيانات
       </div>
-    );}
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -309,7 +323,7 @@ function LeadStatusPieChart() {
           outerRadius={90}
           paddingAngle={3}
           dataKey="value"
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
           labelLine={{ strokeWidth: 1 }}
           style={{ fontSize: '11px' }}
         >
@@ -330,7 +344,9 @@ function AppointmentStatusPieChart() {
   const { data, isLoading } = trpc.charts.appointmentStatusDistribution.useQuery();
 
   const chartData = useMemo(() => {
-    if (!data) {return [];}
+    if (!data) {
+      return [];
+    }
     return data.map((d) => ({
       name: STATUS_LABELS[d.status] || d.status,
       value: d.total,
@@ -338,13 +354,16 @@ function AppointmentStatusPieChart() {
     }));
   }, [data]);
 
-  if (isLoading) {return <ChartSkeleton />;}
-  if (!chartData.length)
-    {return (
+  if (isLoading) {
+    return <ChartSkeleton />;
+  }
+  if (!chartData.length) {
+    return (
       <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
         لا توجد بيانات
       </div>
-    );}
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -357,7 +376,7 @@ function AppointmentStatusPieChart() {
           outerRadius={90}
           paddingAngle={3}
           dataKey="value"
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
           labelLine={{ strokeWidth: 1 }}
           style={{ fontSize: '11px' }}
         >
@@ -378,7 +397,9 @@ function SourceBarChart() {
   const { data, isLoading } = trpc.charts.registrationsBySource.useQuery();
 
   const chartData = useMemo(() => {
-    if (!data) {return [];}
+    if (!data) {
+      return [];
+    }
     // Merge all sources
     const sourceMap = new Map<
       string,
@@ -418,13 +439,16 @@ function SourceBarChart() {
       .slice(0, 8);
   }, [data]);
 
-  if (isLoading) {return <ChartSkeleton />;}
-  if (!chartData.length)
-    {return (
+  if (isLoading) {
+    return <ChartSkeleton />;
+  }
+  if (!chartData.length) {
+    return (
       <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
         لا توجد بيانات
       </div>
-    );}
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -456,7 +480,9 @@ function OffersAndCampsChart() {
   const { data, isLoading } = trpc.charts.offersAndCampsPerformance.useQuery();
 
   const chartData = useMemo(() => {
-    if (!data) {return { offers: [] as ChartData[], camps: [] as ChartData[] };}
+    if (!data) {
+      return { offers: [] as ChartData[], camps: [] as ChartData[] };
+    }
     return {
       offers: data.offers.map((o) => ({
         name: o.name.length > 20 ? o.name.slice(0, 20) + '...' : o.name,
@@ -471,18 +497,21 @@ function OffersAndCampsChart() {
     };
   }, [data]);
 
-  if (isLoading) {return <ChartSkeleton />;}
+  if (isLoading) {
+    return <ChartSkeleton />;
+  }
 
   const combined = [
     ...chartData.offers.map((o) => ({ ...o, type: 'عرض' })),
     ...chartData.camps.map((c) => ({ ...c, type: 'مخيم' })),
   ];
-  if (!combined.length)
-    {return (
+  if (!combined.length) {
+    return (
       <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
         لا توجد بيانات
       </div>
-    );}
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -513,7 +542,9 @@ function WhatsAppTrendChart({ period }: { period: Period }) {
   const { data, isLoading } = trpc.charts.whatsappTrend.useQuery({ period });
 
   const chartData = useMemo(() => {
-    if (!data) {return [];}
+    if (!data) {
+      return [];
+    }
     return data.labels.map((label, i) => ({
       date: label,
       واردة: data.datasets.inbound[i],
@@ -521,13 +552,16 @@ function WhatsAppTrendChart({ period }: { period: Period }) {
     }));
   }, [data]);
 
-  if (isLoading) {return <ChartSkeleton />;}
-  if (!chartData.length)
-    {return (
+  if (isLoading) {
+    return <ChartSkeleton />;
+  }
+  if (!chartData.length) {
+    return (
       <div className="flex items-center justify-center h-[280px] sm:h-[300px] text-muted-foreground text-sm">
         لا توجد بيانات
       </div>
-    );}
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -578,7 +612,9 @@ function SummaryCards({ period }: { period: Period }) {
     );
   }
 
-  if (!data) {return null;}
+  if (!data) {
+    return null;
+  }
 
   const items = [
     { label: 'الإجمالي', ...data.total, color: 'text-foreground' },

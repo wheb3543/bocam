@@ -1,8 +1,5 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
-import {
-  unifiedStatusOptions,
-  formatStatusTime,
-} from '@/hooks/data/useStatusLabels';
+import { unifiedStatusOptions, formatStatusTime } from '@/hooks/data/useStatusLabels';
 import {
   ResizableTable,
   ResizableHeaderCell,
@@ -74,7 +71,9 @@ export default function AppointmentTableDesktop({
           <TableRow>
             {visibleColumnKeys.map((colKey) => {
               const col = columns.find((c) => c.key === colKey);
-              if (!col) {return null;}
+              if (!col) {
+                return null;
+              }
               if (colKey === 'checkbox') {
                 return (
                   <ResizableHeaderCell
@@ -83,6 +82,7 @@ export default function AppointmentTableDesktop({
                     width={40}
                     minWidth={40}
                     maxWidth={40}
+                    // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op
                     onResize={() => {}}
                   >
                     <input
@@ -182,9 +182,7 @@ export default function AppointmentTableDesktop({
                     case 'name':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
-                          <span className="font-medium">
-                            {appointment.fullName}
-                          </span>
+                          <span className="font-medium">{appointment.fullName}</span>
                         </FrozenTableCell>
                       );
                     case 'phone':
@@ -374,7 +372,9 @@ export default function AppointmentTableDesktop({
                     case 'referrer':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey} className="text-xs">
-                          {String((appointment as unknown as Record<string, unknown>)[colKey] || '-')}
+                          {String(
+                            (appointment as unknown as Record<string, unknown>)[colKey] || '-'
+                          )}
                         </FrozenTableCell>
                       );
                     case 'fbclid':
@@ -385,7 +385,9 @@ export default function AppointmentTableDesktop({
                           columnKey={colKey}
                           className="text-xs font-mono"
                         >
-                          {String((appointment as unknown as Record<string, unknown>)[colKey] || '-')}
+                          {String(
+                            (appointment as unknown as Record<string, unknown>)[colKey] || '-'
+                          )}
                         </FrozenTableCell>
                       );
                     case 'comments':
@@ -433,7 +435,9 @@ export default function AppointmentTableDesktop({
                                         phone: appointment.phone,
                                         age: appointment.age ?? undefined,
                                         registrationDate: new Date(
-                                          appointment.createdAt || appointment.appointmentDate || new Date()
+                                          appointment.createdAt ||
+                                            appointment.appointmentDate ||
+                                            new Date()
                                         ),
                                         type: 'appointment',
                                         typeName: doctorName,

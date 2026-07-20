@@ -10,6 +10,7 @@ import React, {
 import { cn } from '@/lib/utils';
 import { getColumnWidth, type ColumnConfig } from './ColumnVisibility';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { SafeLocalStorage } from '@/utils/errorHandling';
 
 /** Sort direction type */
 export type SortDirection = 'asc' | 'desc' | null;
@@ -147,7 +148,9 @@ export function ResizableHeaderCell({
   );
 
   useEffect(() => {
-    if (!isResizing) {return;}
+    if (!isResizing) {
+      return;
+    }
 
     const handleMouseMove = (e: MouseEvent) => {
       // RTL: moving mouse to the left (negative diff) increases width
@@ -295,10 +298,13 @@ export function useFrozenColumns(
   dbFrozen?: string[] | null
 ) {
   const [frozenColumns, setFrozenColumns] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(`frozenColumns_${storageKey}`);
-      if (saved) {return JSON.parse(saved);}
-    } catch {}
+    const saved = SafeLocalStorage.getItem(`frozenColumns_${storageKey}`);
+    if (saved) {
+      const parsed = SafeLocalStorage.getJSON<string[]>(`frozenColumns_${storageKey}`);
+      if (parsed) {
+        return parsed;
+      }
+    }
     return defaultFrozen;
   });
 
@@ -306,9 +312,7 @@ export function useFrozenColumns(
   useEffect(() => {
     if (dbFrozen && dbFrozen.length > 0) {
       setFrozenColumns(dbFrozen);
-      try {
-        localStorage.setItem(`frozenColumns_${storageKey}`, JSON.stringify(dbFrozen));
-      } catch {}
+      SafeLocalStorage.setJSON(`frozenColumns_${storageKey}`, dbFrozen);
     }
   }, [dbFrozen, storageKey]);
 
@@ -318,10 +322,10 @@ export function useFrozenColumns(
         const updated = prev.includes(columnKey)
           ? prev.filter((k) => k !== columnKey)
           : [...prev, columnKey];
-        try {
-          localStorage.setItem(`frozenColumns_${storageKey}`, JSON.stringify(updated));
-        } catch {}
-        if (dbSaveFn) {dbSaveFn(updated);}
+        SafeLocalStorage.setJSON(`frozenColumns_${storageKey}`, updated);
+        if (dbSaveFn) {
+          dbSaveFn(updated);
+        }
         return updated;
       });
     },
@@ -331,20 +335,20 @@ export function useFrozenColumns(
   const setFrozen = useCallback(
     (columns: string[]) => {
       setFrozenColumns(columns);
-      try {
-        localStorage.setItem(`frozenColumns_${storageKey}`, JSON.stringify(columns));
-      } catch {}
-      if (dbSaveFn) {dbSaveFn(columns);}
+      SafeLocalStorage.setJSON(`frozenColumns_${storageKey}`, columns);
+      if (dbSaveFn) {
+        dbSaveFn(columns);
+      }
     },
     [storageKey, dbSaveFn]
   );
 
   const resetFrozen = useCallback(() => {
     setFrozenColumns(defaultFrozen);
-    try {
-      localStorage.removeItem(`frozenColumns_${storageKey}`);
-    } catch {}
-    if (dbSaveFn) {dbSaveFn(defaultFrozen);}
+    SafeLocalStorage.removeItem(`frozenColumns_${storageKey}`);
+    if (dbSaveFn) {
+      dbSaveFn(defaultFrozen);
+    }
   }, [defaultFrozen, storageKey, dbSaveFn]);
 
   return {
@@ -366,12 +370,13 @@ export function useColumnWidths(
 ) {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
     // Try to load from localStorage
-    try {
-      const saved = localStorage.getItem(`columnWidths_${storageKey}`);
-      if (saved) {
-        return JSON.parse(saved);
+    const saved = SafeLocalStorage.getItem(`columnWidths_${storageKey}`);
+    if (saved) {
+      const parsed = SafeLocalStorage.getJSON<Record<string, number>>(`columnWidths_${storageKey}`);
+      if (parsed) {
+        return parsed;
       }
-    } catch {}
+    }
 
     // Initialize with smart defaults
     const defaults: Record<string, number> = {};
@@ -387,9 +392,7 @@ export function useColumnWidths(
     if (dbWidths && Object.keys(dbWidths).length > 0) {
       setColumnWidths((prev) => {
         const merged = { ...prev, ...dbWidths };
-        try {
-          localStorage.setItem(`columnWidths_${storageKey}`, JSON.stringify(merged));
-        } catch {}
+        SafeLocalStorage.setJSON(`columnWidths_${storageKey}`, merged);
         return merged;
       });
     }
@@ -403,9 +406,7 @@ export function useColumnWidths(
       setColumnWidths((prev) => {
         const updated = { ...prev, [key]: width };
         // Save to localStorage immediately
-        try {
-          localStorage.setItem(`columnWidths_${storageKey}`, JSON.stringify(updated));
-        } catch {}
+        SafeLocalStorage.setJSON(`columnWidths_${storageKey}`, updated);
         // Debounce database save (save after 500ms of no resizing)
         if (dbSaveFn) {
           if (saveTimerRef.current) {
@@ -428,9 +429,7 @@ export function useColumnWidths(
       defaults[col.key] = preset.width;
     });
     setColumnWidths(defaults);
-    try {
-      localStorage.removeItem(`columnWidths_${storageKey}`);
-    } catch {}
+    SafeLocalStorage.removeItem(`columnWidths_${storageKey}`);
     if (dbSaveFn) {
       dbSaveFn(defaults);
     }
@@ -441,9 +440,7 @@ export function useColumnWidths(
       if (widths && Object.keys(widths).length > 0) {
         setColumnWidths((prev) => {
           const merged = { ...prev, ...widths };
-          try {
-            localStorage.setItem(`columnWidths_${storageKey}`, JSON.stringify(merged));
-          } catch {}
+          SafeLocalStorage.setJSON(`columnWidths_${storageKey}`, merged);
           return merged;
         });
       }
@@ -453,7 +450,9 @@ export function useColumnWidths(
 
   const getWidth = useCallback(
     (key: string) => {
-      if (columnWidths[key]) {return columnWidths[key];}
+      if (columnWidths[key]) {
+        return columnWidths[key];
+      }
       const col = columns.find((c) => c.key === key);
       return getColumnWidth(key, col).width;
     },

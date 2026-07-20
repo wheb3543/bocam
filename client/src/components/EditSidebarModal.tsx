@@ -4,7 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { X, GripVertical } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import type { NavItem, NavGroup } from '@/components/layout/DashboardSidebarV2';
+import type { NavItem, NavGroup } from '@/components/layout/sidebarData';
 import { cn } from '@/lib/utils';
 
 interface EditSidebarModalProps {
@@ -43,7 +43,9 @@ export default function EditSidebarModal({
 
   // Toggle selection
   const toggleItem = (itemId: string) => {
-    if (itemId === 'home') {return;} // Cannot remove home
+    if (itemId === 'home') {
+      return;
+    } // Cannot remove home
 
     if (selectedIds.includes(itemId)) {
       setSelectedIds(selectedIds.filter((id) => id !== itemId));
@@ -56,17 +58,23 @@ export default function EditSidebarModal({
 
   // Remove item from selected
   const removeItem = (itemId: string) => {
-    if (itemId === 'home') {return;}
+    if (itemId === 'home') {
+      return;
+    }
     setSelectedIds(selectedIds.filter((id) => id !== itemId));
   };
 
   // Move item up/down
   const moveItem = (itemId: string, direction: 'up' | 'down') => {
     const index = selectedIds.indexOf(itemId);
-    if (index === -1) {return;}
+    if (index === -1) {
+      return;
+    }
 
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= selectedIds.length) {return;}
+    if (newIndex < 0 || newIndex >= selectedIds.length) {
+      return;
+    }
 
     const newIds = [...selectedIds];
     [newIds[index], newIds[newIndex]] = [newIds[newIndex], newIds[index]];
@@ -203,8 +211,8 @@ export default function EditSidebarModal({
                       {/* Group Items */}
                       <div className="space-y-1">
                         {group.items
-                          .filter((item) => !selectedIds.includes(item.id))
-                          .map((item) => {
+                          .filter((item: NavItem) => !selectedIds.includes(item.id))
+                          .map((item: NavItem) => {
                             const Icon = item.icon;
                             const isHome = item.id === 'home';
                             const canSelect = selectedIds.length < MAX_VISIBLE_ITEMS;

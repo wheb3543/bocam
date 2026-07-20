@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/api/trpc';
+import { safeJSONParse } from '@/utils/errorHandling';
 
 interface Doctor {
   id?: number;
@@ -134,19 +134,22 @@ export default function ManualRegistrationForm() {
   // Get selected camp's procedures
   const selectedCamp = camps?.find((c: Camp) => c.id?.toString() === campId);
   const availableCampProcedures = (() => {
-    if (!selectedCamp?.availableProcedures) {return [];}
+    if (!selectedCamp?.availableProcedures) {
+      return [];
+    }
     const raw = selectedCamp.availableProcedures;
     // Try JSON parse first (array format)
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {return parsed.map((p: string) => p.trim()).filter(Boolean);}
-    } catch {}
+    const parsed = safeJSONParse<string[]>(raw);
+    if (parsed && Array.isArray(parsed)) {
+      return parsed.map((p: string) => p.trim()).filter(Boolean);
+    }
     // Try newline-separated
-    if (raw.includes('\n'))
-      {return raw
+    if (raw.includes('\n')) {
+      return raw
         .split('\n')
         .map((p: string) => p.trim())
-        .filter(Boolean);}
+        .filter(Boolean);
+    }
     // Fallback: comma-separated
     return raw
       .split(',')
@@ -235,8 +238,7 @@ export default function ManualRegistrationForm() {
             },
             user?.name || 'غير معروف'
           );
-        } catch (error) {
-          console.error('Error generating receipt number:', error);
+        } catch {
           toast.error('فشل في توليد رقم السند');
         }
       }
@@ -279,8 +281,7 @@ export default function ManualRegistrationForm() {
             },
             user?.name || 'غير معروف'
           );
-        } catch (error) {
-          console.error('Error generating receipt number:', error);
+        } catch {
           toast.error('فشل في توليد رقم السند');
         }
       }
@@ -323,8 +324,7 @@ export default function ManualRegistrationForm() {
             },
             user?.name || 'غير معروف'
           );
-        } catch (error) {
-          console.error('Error generating receipt number:', error);
+        } catch {
           toast.error('فشل في توليد رقم السند');
         }
       }
@@ -400,7 +400,7 @@ export default function ManualRegistrationForm() {
       case 'lead':
         createLeadMutation.mutate({ ...baseData, campaignSlug: 'manual' });
         break;
-      case 'appointment':
+      case 'appointment': {
         if (!doctorId) {
           toast.error('الرجاء اختيار الطبيب');
           return;
@@ -419,10 +419,18 @@ export default function ManualRegistrationForm() {
           age: appointmentAge ? parseInt(appointmentAge) : undefined,
           procedure: appointmentProcedure || undefined,
           additionalNotes: additionalNotes || undefined,
-          status: (registrationStatus as 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled'),
+          status: registrationStatus as
+            | 'pending'
+            | 'contacted'
+            | 'no_answer'
+            | 'confirmed'
+            | 'attended'
+            | 'completed'
+            | 'cancelled',
         });
         break;
-      case 'offer':
+      }
+      case 'offer': {
         if (!offerId) {
           toast.error('الرجاء اختيار العرض');
           return;
@@ -436,10 +444,18 @@ export default function ManualRegistrationForm() {
           ...baseData,
           offerId: parsedOfferId,
           gender: (gender as 'male' | 'female') || 'male', // default to male if not set
-          status: (registrationStatus as 'pending' | 'completed' | 'cancelled' | 'contacted' | 'no_answer' | 'confirmed' | 'attended'),
+          status: registrationStatus as
+            | 'pending'
+            | 'completed'
+            | 'cancelled'
+            | 'contacted'
+            | 'no_answer'
+            | 'confirmed'
+            | 'attended',
         });
         break;
-      case 'camp':
+      }
+      case 'camp': {
         if (!campId) {
           toast.error('الرجاء اختيار المخيم');
           return;
@@ -454,10 +470,21 @@ export default function ManualRegistrationForm() {
           return;
         }
         // Convert status to match CampRegistration status type
-        const campStatus = (registrationStatus === 'completed' || registrationStatus === 'booked') ? 'attended' : 
-                            registrationStatus === 'new' ? 'pending' : 
-                            registrationStatus === 'not_interested' ? 'cancelled' : 
-                            registrationStatus as 'pending' | 'completed' | 'cancelled' | 'contacted' | 'no_answer' | 'confirmed' | 'attended';
+        const campStatus =
+          registrationStatus === 'completed' || registrationStatus === 'booked'
+            ? 'attended'
+            : registrationStatus === 'new'
+              ? 'pending'
+              : registrationStatus === 'not_interested'
+                ? 'cancelled'
+                : (registrationStatus as
+                    | 'pending'
+                    | 'completed'
+                    | 'cancelled'
+                    | 'contacted'
+                    | 'no_answer'
+                    | 'confirmed'
+                    | 'attended');
         createCampRegistrationMutation.mutate({
           ...baseData,
           status: campStatus,
@@ -469,6 +496,7 @@ export default function ManualRegistrationForm() {
           preferredTimeSlot: campPreferredTimeSlot || undefined,
         });
         break;
+      }
     }
   };
 

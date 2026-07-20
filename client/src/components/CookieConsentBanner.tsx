@@ -23,26 +23,29 @@ export interface CookiePreferences {
   marketing: boolean; // Meta Pixel, WhatsApp tracking
 }
 
+import { SafeLocalStorage } from '../utils/errorHandling';
+
 const COOKIE_CONSENT_KEY = 'sgh_cookie_consent';
 const COOKIE_PREFS_KEY = 'sgh_cookie_preferences';
 
 export function getCookiePreferences(): CookiePreferences {
-  try {
-    const stored = localStorage.getItem(COOKIE_PREFS_KEY);
-    if (stored) {
-      return JSON.parse(stored);
+  const stored = SafeLocalStorage.getItem(COOKIE_PREFS_KEY);
+  if (stored) {
+    const parsed = SafeLocalStorage.getJSON<CookiePreferences>(COOKIE_PREFS_KEY);
+    if (parsed) {
+      return parsed;
     }
-  } catch {}
+  }
   return { essential: true, analytical: false, marketing: false };
 }
 
 export function hasConsentBeenGiven(): boolean {
-  return localStorage.getItem(COOKIE_CONSENT_KEY) === 'true';
+  return SafeLocalStorage.getItem(COOKIE_CONSENT_KEY) === 'true';
 }
 
 export function saveCookiePreferences(prefs: CookiePreferences): void {
-  localStorage.setItem(COOKIE_PREFS_KEY, JSON.stringify({ ...prefs, essential: true }));
-  localStorage.setItem(COOKIE_CONSENT_KEY, 'true');
+  SafeLocalStorage.setJSON(COOKIE_PREFS_KEY, { ...prefs, essential: true });
+  SafeLocalStorage.setItem(COOKIE_CONSENT_KEY, 'true');
   // Dispatch event so other components can react
   window.dispatchEvent(new CustomEvent('cookieConsentUpdated', { detail: prefs }));
 }
@@ -87,7 +90,9 @@ export default function CookieConsentBanner() {
     setVisible(false);
   };
 
-  if (!visible) {return null;}
+  if (!visible) {
+    return null;
+  }
 
   return (
     <div

@@ -6,9 +6,8 @@ import {
   Phone,
   Edit,
   TrendingUp,
-  Facebook,
-  Instagram,
   Send,
+  MessageCircle,
   AlertCircle,
   Loader2,
 } from 'lucide-react';
@@ -29,14 +28,14 @@ const sourceDisplayMap: Record<
     color: 'bg-[#1877F2]',
     lightColor: 'bg-blue-100',
     textColor: 'text-[#1877F2]',
-    icon: Facebook,
+    icon: MessageCircle,
   },
   instagram: {
     name: 'إنستغرام',
     color: 'bg-[#E4405F]',
     lightColor: 'bg-pink-100',
     textColor: 'text-[#E4405F]',
-    icon: Instagram,
+    icon: MessageCircle,
   },
   telegram: {
     name: 'تيليجرام',

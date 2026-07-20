@@ -1,18 +1,4 @@
-import {
-  Facebook,
-  Instagram,
-  Search,
-  MessageCircle,
-  Send,
-  Twitter,
-  Linkedin,
-  Music,
-  Youtube,
-  Globe,
-  Phone,
-  Mail,
-  User,
-} from 'lucide-react';
+import { Search, MessageCircle, Send, Globe, Phone, Mail, User } from 'lucide-react';
 
 interface SourceBadgeProps {
   source: string;
@@ -52,15 +38,23 @@ export default function SourceBadge({
 
   // Get icon and color based on source
   const getSourceConfig = (src: string) => {
-    const configs: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bgColor: string; label: string }> = {
+    const configs: Record<
+      string,
+      {
+        icon: React.ComponentType<{ className?: string }>;
+        color: string;
+        bgColor: string;
+        label: string;
+      }
+    > = {
       facebook: {
-        icon: Facebook,
+        icon: MessageCircle,
         color: 'text-blue-600',
         bgColor: 'bg-blue-100',
         label: 'فيسبوك',
       },
       instagram: {
-        icon: Instagram,
+        icon: MessageCircle,
         color: 'text-pink-600',
         bgColor: 'bg-pink-100',
         label: 'انستجرام',
@@ -84,25 +78,25 @@ export default function SourceBadge({
         label: 'تيليجرام',
       },
       twitter: {
-        icon: Twitter,
+        icon: MessageCircle,
         color: 'text-sky-600',
         bgColor: 'bg-sky-100',
         label: 'تويتر',
       },
       linkedin: {
-        icon: Linkedin,
+        icon: User,
         color: 'text-blue-700',
         bgColor: 'bg-blue-100',
         label: 'لينكد إن',
       },
       tiktok: {
-        icon: Music,
+        icon: MessageCircle,
         color: 'text-foreground',
         bgColor: 'bg-muted',
         label: 'تيك توك',
       },
       youtube: {
-        icon: Youtube,
+        icon: Globe,
         color: 'text-red-600',
         bgColor: 'bg-red-100',
         label: 'يوتيوب',

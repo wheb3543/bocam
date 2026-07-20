@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AnimatedBadgeProps {
@@ -48,7 +48,9 @@ export default function AnimatedBadge({
     previousCountRef.current = count;
   }, [count, pulseOnChange, pulseDuration]);
 
-  if (!showZero && count <= 0) {return null;}
+  if (!showZero && count <= 0) {
+    return null;
+  }
 
   const display = count > maxDisplay ? `${maxDisplay}+` : String(count);
 

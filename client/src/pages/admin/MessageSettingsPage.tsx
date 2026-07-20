@@ -148,7 +148,9 @@ function MessageSettingsContent() {
   const { data: allMessages, isLoading, refetch } = trpc.messageSettings.list.useQuery();
   const { data: metaTemplates } = trpc.whatsapp.getTemplates.useQuery(undefined, {
     select: (data: unknown) =>
-      (data as { templates?: MetaTemplate[] })?.templates?.filter((t: MetaTemplate) => t.metaStatus === 'APPROVED' && t.isActive === 1) || [],
+      (data as { templates?: MetaTemplate[] })?.templates?.filter(
+        (t: MetaTemplate) => t.metaStatus === 'APPROVED' && t.isActive === 1
+      ) || [],
   });
   const { data: auditLogs, isLoading: auditLoading } = trpc.whatsapp.getAuditLogs.useQuery(
     { limit: 50 },
@@ -157,7 +159,7 @@ function MessageSettingsContent() {
   const { data: auditStats } = trpc.whatsapp.getAuditStats.useQuery(undefined, {
     enabled: activeTab === 'stats' || activeTab === 'audit',
   });
-  const { data: scheduledTasks } = trpc.whatsapp.getScheduledTasks.useQuery(undefined, {
+  const { data: scheduledTasks } = trpc.whatsapp.scheduler.getScheduledTasks.useQuery(undefined, {
     enabled: activeTab === 'scheduler',
   });
 
@@ -179,12 +181,12 @@ function MessageSettingsContent() {
     onError: () => toast.error('حدث خطأ أثناء التحديث'),
   });
 
-  const stopTaskMutation = trpc.whatsapp.stopTask.useMutation({
+  const stopTaskMutation = trpc.whatsapp.scheduler.stopTask.useMutation({
     onSuccess: () => toast.success('تم إيقاف المهمة'),
     onError: () => toast.error('فشل إيقاف المهمة'),
   });
 
-  const resumeTaskMutation = trpc.whatsapp.resumeTask.useMutation({
+  const resumeTaskMutation = trpc.whatsapp.scheduler.resumeTask.useMutation({
     onSuccess: () => toast.success('تم استئناف المهمة'),
     onError: () => toast.error('فشل استئناف المهمة'),
   });
@@ -227,7 +229,9 @@ function MessageSettingsContent() {
   };
 
   const handleSave = () => {
-    if (!selectedMessage) {return;}
+    if (!selectedMessage) {
+      return;
+    }
     updateMutation.mutate({
       id: selectedMessage.id || 0,
       messageContent: editedContent,
@@ -269,7 +273,9 @@ function MessageSettingsContent() {
 
   // Stats summary
   const stats = useMemo(() => {
-    if (!allMessages) {return { total: 0, enabled: 0, disabled: 0 };}
+    if (!allMessages) {
+      return { total: 0, enabled: 0, disabled: 0 };
+    }
     return {
       total: allMessages.length,
       enabled: allMessages.filter((m: MessageSetting) => m.isEnabled === 1).length,
@@ -279,9 +285,15 @@ function MessageSettingsContent() {
 
   // Filtered audit logs
   const filteredAuditLogs = useMemo(() => {
-    const auditLogsArray = Array.isArray(auditLogs) ? auditLogs : (auditLogs as { logs?: AuditLog[] })?.logs || [];
-    if (!auditLogsArray.length) {return [];}
-    if (!auditSearch) {return auditLogsArray;}
+    const auditLogsArray = Array.isArray(auditLogs)
+      ? auditLogs
+      : (auditLogs as { logs?: AuditLog[] })?.logs || [];
+    if (!auditLogsArray.length) {
+      return [];
+    }
+    if (!auditSearch) {
+      return auditLogsArray;
+    }
     return auditLogsArray.filter(
       (log: AuditLog) =>
         log.phone?.includes(auditSearch) ||
@@ -397,7 +409,8 @@ function MessageSettingsContent() {
                 ? allMessages.filter((m: MessageSetting) => m.category === key).length
                 : 0;
               const enabled = Array.isArray(allMessages)
-                ? allMessages.filter((m: MessageSetting) => m.category === key && m.isEnabled === 1).length
+                ? allMessages.filter((m: MessageSetting) => m.category === key && m.isEnabled === 1)
+                    .length
                 : 0;
               return (
                 <button
@@ -463,8 +476,8 @@ function MessageSettingsContent() {
                     {/* Message Preview */}
                     <div className="bg-muted/50 p-3 rounded-lg border">
                       <p className="text-xs whitespace-pre-wrap text-muted-foreground">
-                        {(message.messageContent as string || '').substring(0, 180)}
-                        {(message.messageContent as string || '').length > 180 && '...'}
+                        {((message.messageContent as string) || '').substring(0, 180)}
+                        {((message.messageContent as string) || '').length > 180 && '...'}
                       </p>
                     </div>
 
@@ -473,7 +486,7 @@ function MessageSettingsContent() {
                       <Badge variant="outline" className="text-[10px]">
                         {
                           deliveryChannelLabels[
-                            (message.deliveryChannel as string) as keyof typeof deliveryChannelLabels
+                            message.deliveryChannel as string as keyof typeof deliveryChannelLabels
                           ]
                         }
                       </Badge>
@@ -482,7 +495,9 @@ function MessageSettingsContent() {
                           variant="outline"
                           className="text-[10px] text-blue-600 border-blue-300 bg-blue-50 dark:bg-blue-900/20"
                         >
-                          ⚡ {triggerEventLabels[(message.triggerEvent as string)] || (message.triggerEvent as string)}
+                          ⚡{' '}
+                          {triggerEventLabels[message.triggerEvent as string] ||
+                            (message.triggerEvent as string)}
                         </Badge>
                       )}
                       {message.whatsappTemplateId && (
@@ -498,7 +513,8 @@ function MessageSettingsContent() {
                       )}
                       {(message.availableVariables as string) && (
                         <Badge variant="secondary" className="text-[10px]">
-                          {JSON.parse((message.availableVariables as string) || '[]').length} متغيرات
+                          {JSON.parse((message.availableVariables as string) || '[]').length}{' '}
+                          متغيرات
                         </Badge>
                       )}
                       <Badge
@@ -591,37 +607,38 @@ function MessageSettingsContent() {
               </div>
 
               {/* By Type */}
-              {(auditStats as AuditStats).byType && Object.keys((auditStats as AuditStats).byType || {}).length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm">توزيع الرسائل حسب النوع</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {Object.entries((auditStats as AuditStats).byType || {}).map(
-                        ([type, count]: [string, number]) => (
-                          <div key={type} className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">{type}</span>
-                            <div className="flex items-center gap-2">
-                              <div className="w-24 bg-gray-200 rounded-full h-1.5">
-                                <div
-                                  className="bg-purple-500 h-1.5 rounded-full"
-                                  style={{
-                                    width: `${Math.min(100, (count / ((auditStats as AuditStats).total || 1)) * 100)}%`,
-                                  }}
-                                />
+              {(auditStats as AuditStats).byType &&
+                Object.keys((auditStats as AuditStats).byType || {}).length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">توزيع الرسائل حسب النوع</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {Object.entries((auditStats as AuditStats).byType || {}).map(
+                          ([type, count]: [string, number]) => (
+                            <div key={type} className="flex items-center justify-between">
+                              <span className="text-xs text-muted-foreground">{type}</span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-24 bg-gray-200 rounded-full h-1.5">
+                                  <div
+                                    className="bg-purple-500 h-1.5 rounded-full"
+                                    style={{
+                                      width: `${Math.min(100, (count / ((auditStats as AuditStats).total || 1)) * 100)}%`,
+                                    }}
+                                  />
+                                </div>
+                                <Badge variant="secondary" className="text-[10px]">
+                                  {count}
+                                </Badge>
                               </div>
-                              <Badge variant="secondary" className="text-[10px]">
-                                {count}
-                              </Badge>
                             </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                          )
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
             </>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
@@ -691,7 +708,9 @@ function MessageSettingsContent() {
                       {(log.phone as string) || ''}
                     </p>
                     {(log.errorMessage as string) && (
-                      <p className="text-[10px] text-red-500 mt-0.5">{log.errorMessage as string}</p>
+                      <p className="text-[10px] text-red-500 mt-0.5">
+                        {log.errorMessage as string}
+                      </p>
                     )}
                   </div>
                   <Badge
@@ -783,7 +802,9 @@ function MessageSettingsContent() {
                             size="sm"
                             variant="outline"
                             className="h-7 text-xs gap-1 text-red-600 hover:text-red-700"
-                            onClick={() => stopTaskMutation.mutate({ taskId: String(task.id || 0) })}
+                            onClick={() =>
+                              stopTaskMutation.mutate({ taskId: String(task.id || 0) })
+                            }
                             disabled={stopTaskMutation.isPending}
                           >
                             <XCircle className="h-3 w-3" />
@@ -794,7 +815,9 @@ function MessageSettingsContent() {
                             size="sm"
                             variant="outline"
                             className="h-7 text-xs gap-1 text-green-600 hover:text-green-700"
-                            onClick={() => resumeTaskMutation.mutate({ taskId: String(task.id || 0) })}
+                            onClick={() =>
+                              resumeTaskMutation.mutate({ taskId: String(task.id || 0) })
+                            }
                             disabled={resumeTaskMutation.isPending}
                           >
                             <CheckCircle2 className="h-3 w-3" />
@@ -828,7 +851,9 @@ function MessageSettingsContent() {
             <div className="space-y-4 py-4">
               <div className="space-y-1.5">
                 <Label>اسم الرسالة</Label>
-                <p className="text-sm font-medium">{(selectedMessage.displayName as string) || ''}</p>
+                <p className="text-sm font-medium">
+                  {(selectedMessage.displayName as string) || ''}
+                </p>
               </div>
               <div className="space-y-1.5">
                 <Label>قناة الإرسال</Label>
@@ -895,16 +920,18 @@ function MessageSettingsContent() {
                 <div className="space-y-1.5">
                   <Label>المتغيرات المتاحة</Label>
                   <div className="flex flex-wrap gap-1.5">
-                    {JSON.parse((selectedMessage.availableVariables as string) || '[]').map((v: string) => (
-                      <Badge
-                        key={v}
-                        variant="secondary"
-                        className="cursor-pointer text-xs"
-                        onClick={() => setEditedContent((prev) => prev + `{${v}}`)}
-                      >
-                        {`{${v}}`}
-                      </Badge>
-                    ))}
+                    {JSON.parse((selectedMessage.availableVariables as string) || '[]').map(
+                      (v: string) => (
+                        <Badge
+                          key={v}
+                          variant="secondary"
+                          className="cursor-pointer text-xs"
+                          onClick={() => setEditedContent((prev) => prev + `{${v}}`)}
+                        >
+                          {`{${v}}`}
+                        </Badge>
+                      )
+                    )}
                   </div>
                   <p className="text-[10px] text-muted-foreground">
                     انقر على المتغير لإضافته إلى المحتوى
@@ -1013,7 +1040,9 @@ function MessageSettingsContent() {
         open={testDialogOpen}
         onOpenChange={(v) => {
           setTestDialogOpen(v);
-          if (!v) {setTestPhone('');}
+          if (!v) {
+            setTestPhone('');
+          }
         }}
       >
         <DialogContent className="sm:max-w-sm" dir="rtl">

@@ -16,12 +16,10 @@ const PRECACHE_URLS = [
 
 // ===== Install Event =====
 self.addEventListener('install', (event) => {
-  console.log('[SW-Admin] Installing admin service worker...');
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW-Admin] Precaching admin app shell');
         // Try to cache each URL individually to avoid failing on missing files
         return Promise.allSettled(
           PRECACHE_URLS.map((url) =>
@@ -33,8 +31,8 @@ self.addEventListener('install', (event) => {
                 }
                 return cache.put(url, response);
               })
-              .catch((err) => {
-                console.warn('[SW-Admin] Could not cache:', url, err.message);
+              .catch(() => {
+                // Silently handle cache errors
               })
           )
         );
@@ -45,7 +43,6 @@ self.addEventListener('install', (event) => {
 
 // ===== Activate Event =====
 self.addEventListener('activate', (event) => {
-  console.log('[SW-Admin] Activating admin service worker...');
   const currentCaches = [CACHE_NAME, RUNTIME_CACHE];
   event.waitUntil(
     caches
@@ -59,7 +56,6 @@ self.addEventListener('activate', (event) => {
       .then((cachesToDelete) => {
         return Promise.all(
           cachesToDelete.map((cacheToDelete) => {
-            console.log('[SW-Admin] Deleting old cache:', cacheToDelete);
             return caches.delete(cacheToDelete);
           })
         );
@@ -100,7 +96,9 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => {
           return caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) return cachedResponse;
+            if (cachedResponse) {
+              return cachedResponse;
+            }
             return caches.match('/admin');
           });
         })
@@ -111,7 +109,9 @@ self.addEventListener('fetch', (event) => {
   // Cache-first for static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
+      if (cachedResponse) {
+        return cachedResponse;
+      }
       return fetch(event.request).then((response) => {
         if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
@@ -128,8 +128,6 @@ self.addEventListener('fetch', (event) => {
 
 // ===== Push Notifications (Admin-specific) =====
 self.addEventListener('push', (event) => {
-  console.log('[SW-Admin] Admin push notification received');
-
   let data = { title: 'لوحة تحكم SGH', body: 'إشعار جديد', url: '/admin', type: 'general' };
   try {
     if (event.data) {
@@ -158,7 +156,6 @@ self.addEventListener('push', (event) => {
 
 // ===== Notification Click =====
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW-Admin] Admin notification clicked:', event.action);
   event.notification.close();
 
   if (event.action === 'open' || !event.action) {
@@ -184,8 +181,6 @@ self.addEventListener('notificationclick', (event) => {
 
 // ===== Message Event =====
 self.addEventListener('message', (event) => {
-  console.log('[SW-Admin] Message received:', event.data);
-
   if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
@@ -208,7 +203,6 @@ self.addEventListener('message', (event) => {
 
 // ===== Background Sync =====
 self.addEventListener('sync', (event) => {
-  console.log('[SW-Admin] Background sync triggered:', event.tag);
   if (event.tag === 'sync-admin-data') {
     event.waitUntil(syncAdminData());
   }
@@ -216,7 +210,6 @@ self.addEventListener('sync', (event) => {
 
 async function syncAdminData() {
   try {
-    console.log('[SW-Admin] Syncing admin data...');
     // Notify all admin clients that sync is complete
     const clientList = await clients.matchAll({ type: 'window' });
     clientList.forEach((client) => {
@@ -224,7 +217,7 @@ async function syncAdminData() {
         client.postMessage({ type: 'SYNC_COMPLETE' });
       }
     });
-  } catch (error) {
-    console.error('[SW-Admin] Sync failed:', error);
+  } catch {
+    // Silently handle sync errors
   }
 }
