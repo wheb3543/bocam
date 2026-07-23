@@ -434,12 +434,16 @@ export const trackingRouter = router({
         .groupBy(sql`DATE(${visitSessions.createdAt})`)
         .orderBy(asc(sql`DATE(${visitSessions.createdAt})`));
 
-      return results.map((r) => ({
-        date: r.date,
-        sessions: Number(r.sessions),
-        conversions: Number(r.conversions),
-        conversionRate:
-          r.sessions > 0 ? Math.round((Number(r.conversions) / Number(r.sessions)) * 100) : 0,
-      }));
+      return results.map(
+        (r: { date: string; sessions: number | string; conversions: number | string }) => ({
+          date: r.date,
+          sessions: Number(r.sessions),
+          conversions: Number(r.conversions),
+          conversionRate:
+            Number(r.sessions) > 0
+              ? Math.round((Number(r.conversions) / Number(r.sessions)) * 100)
+              : 0,
+        })
+      );
     }),
 });

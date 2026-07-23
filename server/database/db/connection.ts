@@ -9,9 +9,9 @@ import { createLogger } from '../../_core/logger';
 
 const logger = createLogger('database');
 
-let _db: ReturnType<typeof drizzle> | null = null;
-
-export async function getDb() {
+export type Database = ReturnType<typeof drizzle>;
+let _db: Database | null = null;
+export async function getDb(): Promise<Database | null> {
   if (!_db && process.env.DATABASE_URL) {
     try {
       _db = drizzle(process.env.DATABASE_URL, { schema, mode: 'default' });
@@ -25,7 +25,7 @@ export async function getDb() {
 
 let _hospitalDb: ReturnType<typeof drizzle> | null = null;
 
-export async function getHospitalDb() {
+export async function getHospitalDb(): Promise<Database | null> {
   if (!_hospitalDb && process.env.HOSPITAL_DB_URL) {
     try {
       _hospitalDb = drizzle(process.env.HOSPITAL_DB_URL, { schema, mode: 'default' });

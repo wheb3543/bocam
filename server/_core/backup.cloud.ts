@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { createLogger } from './logger';
-import { BackupConfig } from './backup.types';
+import type { BackupConfig } from './backup.types';
 
 const logger = createLogger('backupManager');
 

@@ -58,11 +58,7 @@ export default function DoctorDetailPage() {
 }
 
 function DoctorDetailContent({ slug }: { slug: string }) {
-  const {
-    getCallLink,
-    validateYemeniPhone,
-    processPhoneInput,
-  } = usePhoneFormat();
+  const { getCallLink, validateYemeniPhone, processPhoneInput } = usePhoneFormat();
   const { getSavedPatientInfo, savePatientInfo } = usePatientStorage();
   const [phoneError, setPhoneError] = useState<string>('');
 
@@ -114,7 +110,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
   const availableProcedures = doctor?.procedures
     ? doctor.procedures
         .split(',')
-        .map((p) => p.trim())
+        .map((p: string) => p.trim())
         .filter(Boolean)
     : [];
 
@@ -674,7 +670,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                           <SelectValue placeholder="اختر الإجراء المطلوب" />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableProcedures.map((proc, index) => (
+                          {availableProcedures.map((proc: string, index: number) => (
                             <SelectItem key={index} value={proc}>
                               {proc}
                             </SelectItem>

@@ -180,7 +180,7 @@ export default function CampsManagement() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (c) => c.name.toLowerCase().includes(term) || c.slug.toLowerCase().includes(term)
+        (c: Camp) => c.name.toLowerCase().includes(term) || c.slug.toLowerCase().includes(term)
       );
     }
 
@@ -204,8 +204,8 @@ export default function CampsManagement() {
 
   // Calculate stats
   const totalCamps = camps?.length || 0;
-  const activeCamps = camps?.filter((c) => c.isActive === true).length || 0;
-  const inactiveCamps = camps?.filter((c) => c.isActive === false).length || 0;
+  const activeCamps = camps?.filter((c: Camp) => c.isActive === true).length || 0;
+  const inactiveCamps = camps?.filter((c: Camp) => c.isActive === false).length || 0;
 
   if (isLoading) {
     return (

@@ -109,10 +109,10 @@ export async function fetchWithRetry(
 
   for (let attempt = 0; attempt <= retryConfig.maxRetries; attempt++) {
     try {
-      // eslint-disable-next-line no-undef
+      const timeoutSignal = globalThis.AbortSignal?.timeout(30000);
       const res = await fetch(url, {
         ...options,
-        signal: (AbortSignal as unknown as AbortSignalWithTimeout).timeout(30000),
+        signal: timeoutSignal,
       });
       const body = await res.json();
 

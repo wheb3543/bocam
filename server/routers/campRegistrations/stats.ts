@@ -17,14 +17,15 @@ export const campStatsRouter = router({
       const all = await db.select().from(campRegistrations);
 
       const confirmedPipeline = all.filter(
-        (r) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
+        (r: (typeof all)[number]) =>
+          r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
       ).length;
       return {
         total: all.length,
-        pending: all.filter((r) => r.status === 'pending').length,
+        pending: all.filter((r: (typeof all)[number]) => r.status === 'pending').length,
         confirmed: confirmedPipeline,
-        attended: all.filter((r) => r.status === 'attended').length,
-        cancelled: all.filter((r) => r.status === 'cancelled').length,
+        attended: all.filter((r: (typeof all)[number]) => r.status === 'attended').length,
+        cancelled: all.filter((r: (typeof all)[number]) => r.status === 'cancelled').length,
       };
     });
   }),

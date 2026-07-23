@@ -30,15 +30,25 @@ import { toast } from 'sonner';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
 
+interface SentMessage {
+  type: 'welcome' | 'template';
+  phone: string;
+  recipient?: string;
+  template?: string;
+  parameters?: string[];
+  status: string;
+  sentAt: string;
+}
+
 interface Template {
   id: number;
   name: string;
   metaName: string | null;
-  category: 'MARKETING' | 'UTILITY' | 'AUTHENTICATION';
+  category: string;
   languageCode: string | null;
   metaStatus: string | null;
   metaCategory: string | null;
-  variables: unknown;
+  variables: unknown | null;
 }
 
 export default function WhatsAppIntegration() {
@@ -50,7 +60,7 @@ export default function WhatsAppIntegration() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
-  const [sentMessages, setSentMessages] = useState<Record<string, unknown>[]>([]);
+  const [sentMessages, setSentMessages] = useState<SentMessage[]>([]);
 
   // Queries
   const {
@@ -196,8 +206,8 @@ export default function WhatsAppIntegration() {
 
   // Get unique categories
   const categories = Array.from(
-    new Set(templates?.templates?.map((t: Template) => t.category) || [])
-  );
+    new Set((templates?.templates as Template[] | undefined)?.map((t) => t.category) ?? [])
+  ) as string[];
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -583,7 +593,7 @@ export default function WhatsAppIntegration() {
                                 variant="outline"
                                 className="text-xs bg-green-50 text-green-700"
                               >
-                                {msg.status as ReactNode}
+                                {msg.status}
                               </Badge>
                             </div>
                             {(msg.recipient as string) && (

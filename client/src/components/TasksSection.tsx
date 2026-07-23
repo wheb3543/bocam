@@ -31,6 +31,19 @@ interface TasksSectionProps {
   entityId?: number;
 }
 
+type TaskUser = { id: number; name?: string | null; username?: string | null };
+type FollowUpTask = {
+  id: number;
+  assignedToId: number | null;
+  priority: 'low' | 'medium' | 'high' | string;
+  dueDate?: string | Date | null | undefined;
+  status?: string;
+  title?: string;
+  description?: string;
+  assignedToName?: string;
+  createdByName?: string;
+};
+
 export default function TasksSection({ entityType, entityId }: TasksSectionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [title, setTitle] = useState('');
@@ -123,7 +136,7 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
       return;
     }
 
-    const assignedUser = users.find((u) => u.id === assignedToId);
+    const assignedUser = users.find((u: TaskUser) => u.id === assignedToId);
 
     if (entityType === 'all') {
       toast.error('لا يمكن إضافة مهمة من قسم جميع المهام. يرجى فتح السجل المحدد لإضافة مهمة.');
@@ -142,7 +155,7 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
     });
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status?: string) => {
     switch (status) {
       case 'completed':
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
@@ -190,16 +203,21 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
   }
 
   // Filter tasks
-  const filteredTasks = displayTasks.filter((task) => {
+  const filteredTasks = (displayTasks as FollowUpTask[]).filter((task) => {
     // Filter by assigned user
     if (filterAssignedTo !== 'all') {
-      if (filterAssignedTo === 'unassigned' && task.assignedToId !== null) {return false;}
-      if (typeof filterAssignedTo === 'number' && task.assignedToId !== filterAssignedTo)
-        {return false;}
+      if (filterAssignedTo === 'unassigned' && task.assignedToId !== null) {
+        return false;
+      }
+      if (typeof filterAssignedTo === 'number' && task.assignedToId !== filterAssignedTo) {
+        return false;
+      }
     }
 
     // Filter by priority
-    if (filterPriority !== 'all' && task.priority !== filterPriority) {return false;}
+    if (filterPriority !== 'all' && task.priority !== filterPriority) {
+      return false;
+    }
 
     // Filter by due date
     if (filterDueDate !== 'all' && task.dueDate) {
@@ -211,10 +229,18 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
       const weekFromNow = new Date(today);
       weekFromNow.setDate(weekFromNow.getDate() + 7);
 
-      if (filterDueDate === 'overdue' && due >= today) {return false;}
-      if (filterDueDate === 'today' && (due < today || due >= tomorrow)) {return false;}
-      if (filterDueDate === 'this_week' && (due < today || due > weekFromNow)) {return false;}
-      if (filterDueDate === 'future' && due <= weekFromNow) {return false;}
+      if (filterDueDate === 'overdue' && due >= today) {
+        return false;
+      }
+      if (filterDueDate === 'today' && (due < today || due >= tomorrow)) {
+        return false;
+      }
+      if (filterDueDate === 'this_week' && (due < today || due > weekFromNow)) {
+        return false;
+      }
+      if (filterDueDate === 'future' && due <= weekFromNow) {
+        return false;
+      }
     }
 
     return true;
@@ -266,7 +292,10 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">الأولوية</label>
-                  <Select value={priority} onValueChange={(value: "low" | "medium" | "high") => setPriority(value)}>
+                  <Select
+                    value={priority}
+                    onValueChange={(value: 'low' | 'medium' | 'high') => setPriority(value)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -290,14 +319,16 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
                 <label className="text-sm font-medium">تعيين لـ</label>
                 <Select
                   value={assignedToId?.toString()}
-                  onValueChange={(value) => setAssignedToId(value ? parseInt(value) : undefined)}
+                  onValueChange={(value: string) =>
+                    setAssignedToId(value ? parseInt(value) : undefined)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="اختر مستخدم (اختياري)" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">بدون تعيين</SelectItem>
-                    {users.map((user) => (
+                    {users.map((user: TaskUser) => (
                       <SelectItem key={user.id} value={user.id.toString()}>
                         {user.name || user.username}
                       </SelectItem>
@@ -336,7 +367,7 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
             <SelectContent>
               <SelectItem value="all">الكل</SelectItem>
               <SelectItem value="unassigned">غير معين</SelectItem>
-              {users.map((user) => (
+              {users.map((user: TaskUser) => (
                 <SelectItem key={user.id} value={user.id.toString()}>
                   {user.name || user.username}
                 </SelectItem>
@@ -347,7 +378,10 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">الأولوية</label>
-          <Select value={filterPriority} onValueChange={(value: "low" | "medium" | "high" | "all") => setFilterPriority(value)}>
+          <Select
+            value={filterPriority}
+            onValueChange={(value: 'low' | 'medium' | 'high' | 'all') => setFilterPriority(value)}
+          >
             <SelectTrigger className="h-9">
               <SelectValue />
             </SelectTrigger>
@@ -362,7 +396,12 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">تاريخ الاستحقاق</label>
-          <Select value={filterDueDate} onValueChange={(value: "overdue" | "all" | "today" | "this_week" | "future") => setFilterDueDate(value)}>
+          <Select
+            value={filterDueDate}
+            onValueChange={(value: 'overdue' | 'all' | 'today' | 'this_week' | 'future') =>
+              setFilterDueDate(value)
+            }
+          >
             <SelectTrigger className="h-9">
               <SelectValue />
             </SelectTrigger>
@@ -432,9 +471,9 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
                     </Badge>
                     <Select
                       value={task.status}
-                      onValueChange={(value: "completed" | "cancelled" | "pending" | "in_progress") =>
-                        updateStatusMutation.mutate({ id: task.id, status: value })
-                      }
+                      onValueChange={(
+                        value: 'completed' | 'cancelled' | 'pending' | 'in_progress'
+                      ) => updateStatusMutation.mutate({ id: task.id, status: value })}
                       disabled={updateStatusMutation.isPending}
                     >
                       <SelectTrigger className="h-7 w-auto text-xs">

@@ -107,9 +107,11 @@ export function useUsers({ searchQuery, roleFilter, statusFilter, userTable }: U
 
   // Filter and sort users
   const filteredUsers = useMemo(() => {
-    if (!users) {return [];}
+    if (!users) {
+      return [];
+    }
 
-    const filtered = users.filter((user) => {
+    const filtered = users.filter((user: User) => {
       const matchesSearch =
         user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||

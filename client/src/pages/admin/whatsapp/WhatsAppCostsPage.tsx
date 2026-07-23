@@ -1,10 +1,13 @@
 import { useState, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { trpc } from '@/lib/api/trpc';
+import type { RouterOutputs } from '@/types/trpc';
 
 interface CategoryData {
   [key: string]: number;
 }
+
+type ConversationCost = RouterOutputs['whatsapp']['getConversationCosts'][number];
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -78,7 +81,7 @@ export default function WhatsAppCostsPage() {
 
   // Process data for charts
   const costData =
-    conversationCosts?.map((conv) => ({
+    conversationCosts?.map((conv: ConversationCost) => ({
       date: format(new Date(conv.createdAt || Date.now()), 'dd/MM', { locale: ar }),
       conversationCost: conv.totalCost || 0,
       billable: conv.billable ? 1 : 0,
@@ -87,7 +90,7 @@ export default function WhatsAppCostsPage() {
 
   // Group by pricing category
   const categoryData =
-    conversationCosts?.reduce((acc: CategoryData, conv) => {
+    conversationCosts?.reduce((acc: CategoryData, conv: ConversationCost) => {
       const category = conv.pricingCategory || 'غير محدد';
       if (!acc[category]) {
         acc[category] = 0;
@@ -103,10 +106,13 @@ export default function WhatsAppCostsPage() {
 
   // Calculate totals
   const totalCost = Array.isArray(conversationCosts)
-    ? conversationCosts.reduce((sum: number, conv) => sum + (conv.totalCost || 0), 0)
+    ? conversationCosts.reduce(
+        (sum: number, conv: ConversationCost) => sum + (conv.totalCost || 0),
+        0
+      )
     : 0;
   const billableCount = Array.isArray(conversationCosts)
-    ? conversationCosts.filter((conv) => conv.billable).length
+    ? conversationCosts.filter((conv: ConversationCost) => conv.billable).length
     : 0;
   const totalCount = Array.isArray(conversationCosts) ? conversationCosts.length : 0;
 
@@ -290,7 +296,7 @@ export default function WhatsAppCostsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {conversationCosts?.map((conv) => (
+                  {conversationCosts?.map((conv: ConversationCost) => (
                     <TableRow key={conv.id}>
                       <TableCell dir="ltr">{conv.phoneNumber}</TableCell>
                       <TableCell>{conv.pricingModel || 'غير محدد'}</TableCell>

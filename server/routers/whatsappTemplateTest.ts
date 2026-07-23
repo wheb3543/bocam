@@ -109,16 +109,27 @@ export const whatsappTemplateTestRouter = router({
       return {
         success: true,
         count: templates.length,
-        templates: templates.map((t) => ({
-          id: t.id,
-          name: t.name,
-          metaName: t.metaName,
-          category: t.category,
-          languageCode: t.languageCode,
-          metaStatus: t.metaStatus,
-          metaCategory: t.metaCategory,
-          variables: t.variables ? JSON.parse(t.variables as string) : [],
-        })),
+        templates: templates.map(
+          (t: {
+            id: number;
+            name: string;
+            metaName: string | null;
+            category: string;
+            languageCode: string | null;
+            metaStatus: string | null;
+            metaCategory: string | null;
+            variables: string | null;
+          }) => ({
+            id: t.id,
+            name: t.name,
+            metaName: t.metaName,
+            category: t.category,
+            languageCode: t.languageCode,
+            metaStatus: t.metaStatus,
+            metaCategory: t.metaCategory,
+            variables: t.variables ? JSON.parse(t.variables as string) : [],
+          })
+        ),
       };
     } catch (error) {
       logger.error('Error listing templates:', error);

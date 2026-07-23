@@ -165,7 +165,7 @@ export const chartsRouter = router({
       .from(leads)
       .groupBy(leads.status);
 
-    return result.map((r) => ({
+    return result.map((r: { status: string; total: number }) => ({
       status: r.status,
       total: r.total,
     }));
@@ -305,7 +305,7 @@ export const chartsRouter = router({
       .from(appointments)
       .groupBy(appointments.status);
 
-    return result.map((r) => ({
+    return result.map((r: { status: string; total: number }) => ({
       status: r.status,
       total: r.total,
     }));

@@ -23,6 +23,19 @@ export default function VisitingDoctors() {
   );
 }
 
+type VisitingDoctor = {
+  id: number;
+  slug: string;
+  image?: string | null;
+  name: string;
+  specialty: string;
+  bio?: string | null;
+  isVisiting?: string | null;
+  available?: string | null;
+  experience?: string | null;
+  consultationFee?: number | string | null;
+};
+
 function VisitingDoctorsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('all');
@@ -31,17 +44,20 @@ function VisitingDoctorsContent() {
 
   // Filter only visiting doctors who are available
   const visitingDoctors = useMemo(() => {
-    if (!allDoctors) {return [];}
+    if (!allDoctors) {
+      return [];
+    }
     return allDoctors.filter(
-      (doctor) => doctor.isVisiting === 'yes' && doctor.available === 'yes'
+      (doctor: VisitingDoctor) => doctor.isVisiting === 'yes' && doctor.available === 'yes'
     );
   }, [allDoctors]);
 
   // Get unique specialties from visiting doctors
-  const specialties = useMemo(() => {
-    if (!visitingDoctors) {return [];}
-    const uniqueSpecialties = Array.from(new Set(visitingDoctors.map((doc) => doc.specialty)));
-    return uniqueSpecialties;
+  const specialties = useMemo<string[]>(() => {
+    if (!visitingDoctors) {
+      return [];
+    }
+    return Array.from(new Set(visitingDoctors.map((doc: VisitingDoctor) => doc.specialty)));
   }, [visitingDoctors]);
 
   // Filter doctors based on search and specialty
@@ -50,14 +66,14 @@ function VisitingDoctorsContent() {
 
     // Filter by specialty
     if (selectedSpecialty !== 'all') {
-      filtered = filtered.filter((doc) => doc.specialty === selectedSpecialty);
+      filtered = filtered.filter((doc: VisitingDoctor) => doc.specialty === selectedSpecialty);
     }
 
     // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        (doc) =>
+        (doc: VisitingDoctor) =>
           doc.name.toLowerCase().includes(term) ||
           doc.specialty.toLowerCase().includes(term) ||
           (doc.bio && doc.bio.toLowerCase().includes(term))
@@ -167,7 +183,7 @@ function VisitingDoctorsContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-              {filteredDoctors.map((doctor) => (
+              {filteredDoctors.map((doctor: VisitingDoctor) => (
                 <Link key={doctor.id} href={`/doctors/${doctor.slug}`}>
                   <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-green-500 group">
                     <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4 md:p-6">
@@ -178,7 +194,9 @@ function VisitingDoctorsContent() {
                               src={doctor.image || '/images/default-doctor.jpg'}
                               alt={doctor.name}
                               className="w-full h-full object-cover"
-                              onError={(e) => { e.currentTarget.src = '/images/default-doctor.jpg'; }}
+                              onError={(e) => {
+                                e.currentTarget.src = '/images/default-doctor.jpg';
+                              }}
                             />
                           </div>
                           <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full p-1.5 shadow-lg">

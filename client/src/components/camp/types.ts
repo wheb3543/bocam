@@ -8,7 +8,7 @@ export interface Camp {
   name: string;
   slug: string;
   description: string | null;
-  location: string | null;
+  location?: string | null;
   startDate: Date | null;
   endDate: Date | null;
   discountedOffers: string | null;

@@ -73,12 +73,18 @@ export const reportsRouter = router({
         .groupBy(offerLeads.status);
 
       // Calculate totals
-      const totalAppointments = appointmentsStats.reduce((sum, stat) => sum + stat.total, 0);
-      const totalCampRegistrations = campRegistrationsStats.reduce(
-        (sum, stat) => sum + stat.total,
+      const totalAppointments = appointmentsStats.reduce(
+        (sum: number, stat: { total: number }) => sum + stat.total,
         0
       );
-      const totalOfferLeads = offerLeadsStats.reduce((sum, stat) => sum + stat.total, 0);
+      const totalCampRegistrations = campRegistrationsStats.reduce(
+        (sum: number, stat: { total: number }) => sum + stat.total,
+        0
+      );
+      const totalOfferLeads = offerLeadsStats.reduce(
+        (sum: number, stat: { total: number }) => sum + stat.total,
+        0
+      );
 
       return {
         appointments: {
@@ -183,7 +189,10 @@ export const reportsRouter = router({
         total,
       }));
 
-      const totalLeads = leadsByStatus.reduce((sum, stat) => sum + stat.total, 0);
+      const totalLeads = leadsByStatus.reduce(
+        (sum: number, stat: { total: number }) => sum + stat.total,
+        0
+      );
 
       return {
         totalLeads,

@@ -211,27 +211,27 @@ export const createMockDatabase = (): MockDatabase => {
         if (sqlLower.includes('patients') && params) {
           const id = params[params.length - 1];
           const data = params[0] as Record<string, unknown>;
-          mockDataStore.patients = mockDataStore.patients.map((row: any) =>
-            // eslint-disable-line @typescript-eslint/no-explicit-any
-            row.id === id ? { ...row, ...data } : row
+          mockDataStore.patients = mockDataStore.patients.map(
+            (row: Record<string, unknown> & { id: unknown }) =>
+              row.id === id ? { ...row, ...data } : row
           );
           return { rows: [{ id }], rowCount: 1 };
         }
         if (sqlLower.includes('appointments') && params) {
           const id = params[params.length - 1];
           const data = params[0] as Record<string, unknown>;
-          mockDataStore.appointments = mockDataStore.appointments.map((row: any) =>
-            // eslint-disable-line @typescript-eslint/no-explicit-any
-            row.id === id ? { ...row, ...data } : row
+          mockDataStore.appointments = mockDataStore.appointments.map(
+            (row: Record<string, unknown> & { id: unknown }) =>
+              row.id === id ? { ...row, ...data } : row
           );
           return { rows: [{ id }], rowCount: 1 };
         }
         if (sqlLower.includes('leads') && params) {
           const id = params[params.length - 1];
           const data = params[0] as Record<string, unknown>;
-          mockDataStore.leads = mockDataStore.leads.map((row: any) =>
-            // eslint-disable-line @typescript-eslint/no-explicit-any
-            row.id === id ? { ...row, ...data } : row
+          mockDataStore.leads = mockDataStore.leads.map(
+            (row: Record<string, unknown> & { id: unknown }) =>
+              row.id === id ? { ...row, ...data } : row
           );
           return { rows: [{ id }], rowCount: 1 };
         }
@@ -241,19 +241,23 @@ export const createMockDatabase = (): MockDatabase => {
       if (sqlLower.startsWith('delete')) {
         if (sqlLower.includes('patients') && params) {
           const id = params[0];
-          mockDataStore.patients = mockDataStore.patients.filter((row: any) => row.id !== id); // eslint-disable-line @typescript-eslint/no-explicit-any
+          mockDataStore.patients = mockDataStore.patients.filter(
+            (row: Record<string, unknown> & { id: unknown }) => row.id !== id
+          );
           return { rows: [], rowCount: 1 };
         }
         if (sqlLower.includes('appointments') && params) {
           const id = params[0];
           mockDataStore.appointments = mockDataStore.appointments.filter(
-            (row: any) => row.id !== id
-          ); // eslint-disable-line @typescript-eslint/no-explicit-any
+            (row: Record<string, unknown> & { id: unknown }) => row.id !== id
+          );
           return { rows: [], rowCount: 1 };
         }
         if (sqlLower.includes('leads') && params) {
           const id = params[0];
-          mockDataStore.leads = mockDataStore.leads.filter((row: any) => row.id !== id); // eslint-disable-line @typescript-eslint/no-explicit-any
+          mockDataStore.leads = mockDataStore.leads.filter(
+            (row: Record<string, unknown> & { id: unknown }) => row.id !== id
+          );
           return { rows: [], rowCount: 1 };
         }
       }

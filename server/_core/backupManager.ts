@@ -13,7 +13,13 @@
  * @module backupManager
  */
 
-export { BackupType, BackupStatus, BackupLocation, BackupInfo, BackupConfig } from './backup.types';
+export type {
+  BackupType,
+  BackupStatus,
+  BackupLocation,
+  BackupInfo,
+  BackupConfig,
+} from './backup.types';
 
 export { createBackup, restoreBackup, deleteBackup } from './backup.operations';
 

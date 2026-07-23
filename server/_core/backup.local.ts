@@ -14,7 +14,7 @@ import {
   calculateSize,
   ITEMS_TO_BACKUP,
 } from './backup.helpers';
-import { BackupConfig } from './backup.types';
+import type { BackupConfig } from './backup.types';
 
 const execAsync = promisify(exec);
 const logger = createLogger('backupManager');

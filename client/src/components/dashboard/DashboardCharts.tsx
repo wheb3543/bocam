@@ -34,11 +34,22 @@ interface TooltipProps {
   [key: string]: unknown;
 }
 
+interface StatusDistributionItem {
+  status: string;
+  total: number;
+}
+
 interface ChartData {
   name: string;
   إجمالي: number;
   محول: number;
   [key: string]: unknown;
+}
+
+interface PieChartEntry {
+  name: string;
+  value: number;
+  fill: string;
 }
 
 import {
@@ -294,7 +305,7 @@ function LeadStatusPieChart() {
     if (!data) {
       return [];
     }
-    return data.map((d) => ({
+    return data.map((d: StatusDistributionItem) => ({
       name: STATUS_LABELS[d.status] || d.status,
       value: d.total,
       fill: STATUS_COLORS[d.status] || '#6b7280',
@@ -327,7 +338,7 @@ function LeadStatusPieChart() {
           labelLine={{ strokeWidth: 1 }}
           style={{ fontSize: '11px' }}
         >
-          {chartData.map((entry, index) => (
+          {chartData.map((entry: PieChartEntry, index: number) => (
             <Cell key={index} fill={entry.fill} />
           ))}
         </Pie>
@@ -347,7 +358,7 @@ function AppointmentStatusPieChart() {
     if (!data) {
       return [];
     }
-    return data.map((d) => ({
+    return data.map((d: StatusDistributionItem) => ({
       name: STATUS_LABELS[d.status] || d.status,
       value: d.total,
       fill: STATUS_COLORS[d.status] || '#6b7280',
@@ -380,7 +391,7 @@ function AppointmentStatusPieChart() {
           labelLine={{ strokeWidth: 1 }}
           style={{ fontSize: '11px' }}
         >
-          {chartData.map((entry, index) => (
+          {chartData.map((entry: PieChartEntry, index: number) => (
             <Cell key={index} fill={entry.fill} />
           ))}
         </Pie>

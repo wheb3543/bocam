@@ -13,7 +13,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Phone, RefreshCw, CheckCircle2, Clock, PhoneCall, Globe, MessageCircle, Smartphone, Search } from 'lucide-react';
+import {
+  Phone,
+  RefreshCw,
+  CheckCircle2,
+  Clock,
+  PhoneCall,
+  Globe,
+  MessageCircle,
+  Smartphone,
+  Search,
+} from 'lucide-react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -29,7 +39,9 @@ const SOURCE_ICONS: Record<string, React.ReactNode> = {
 const AbandonedFormsTable = memo(function AbandonedFormsTable() {
   const [page, setPage] = useState(1);
   const [contacted, setContacted] = useState<boolean | undefined>(undefined);
-  const [formType, setFormType] = useState<'appointment' | 'offer' | 'camp' | 'general' | undefined>(undefined);
+  const [formType, setFormType] = useState<
+    'appointment' | 'offer' | 'camp' | 'general' | undefined
+  >(undefined);
 
   const { data, isLoading, refetch } = trpc.tracking.abandonedFormsList.useQuery({
     page,
@@ -117,63 +129,75 @@ const AbandonedFormsTable = memo(function AbandonedFormsTable() {
                 </td>
               </tr>
             )}
-            {data?.items.map((item) => (
-              <tr key={item.id} className="border-t hover:bg-muted/30 transition-colors">
-                <td className="p-3 font-medium">{item.name ?? '—'}</td>
-                <td className="p-3">
-                  {item.phone ? (
-                    <a
-                      href={`tel:${item.phone}`}
-                      className="flex items-center gap-1 text-blue-600 hover:underline"
-                    >
-                      <Phone className="h-3 w-3" />
-                      {item.phone}
-                    </a>
-                  ) : (
-                    '—'
-                  )}
-                </td>
-                <td className="p-3">
-                  <Badge variant="outline">{formTypeLabels[item.formType] ?? item.formType}</Badge>
-                </td>
-                <td className="p-3">
-                  <div className="flex items-center gap-1">
-                    {SOURCE_ICONS[item.source ?? ''] ?? <Globe className="h-3 w-3" />}
-                    <span className="capitalize">{item.source ?? 'مباشر'}</span>
-                  </div>
-                </td>
-                <td className="p-3 text-muted-foreground text-xs">
-                  {item.createdAt ? format(new Date(item.createdAt), 'h:mm a, dd-MM-yyyy') : '—'}
-                </td>
-                <td className="p-3">
-                  {item.contacted ? (
-                    <Badge className="bg-green-100 text-green-700 border-green-200">
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                      تم التواصل
+            {data?.items.map(
+              (item: {
+                id: number;
+                name?: string | null;
+                phone?: string | null;
+                formType?: string | undefined;
+                source?: string | null;
+                createdAt?: string | number | Date;
+                contacted?: boolean | null;
+              }) => (
+                <tr key={item.id} className="border-t hover:bg-muted/30 transition-colors">
+                  <td className="p-3 font-medium">{item.name ?? '—'}</td>
+                  <td className="p-3">
+                    {item.phone ? (
+                      <a
+                        href={`tel:${item.phone}`}
+                        className="flex items-center gap-1 text-blue-600 hover:underline"
+                      >
+                        <Phone className="h-3 w-3" />
+                        {item.phone}
+                      </a>
+                    ) : (
+                      '—'
+                    )}
+                  </td>
+                  <td className="p-3">
+                    <Badge variant="outline">
+                      {formTypeLabels[item.formType ?? 'general'] ?? item.formType ?? 'عام'}
                     </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-orange-600 border-orange-200">
-                      <Clock className="h-3 w-3 mr-1" />
-                      لم يتم التواصل
-                    </Badge>
-                  )}
-                </td>
-                <td className="p-3">
-                  {!item.contacted && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 text-xs"
-                      onClick={() => markContactedMutation.mutate({ id: item.id })}
-                      disabled={markContactedMutation.isPending}
-                    >
-                      <PhoneCall className="h-3 w-3 mr-1" />
-                      تم التواصل
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-1">
+                      {SOURCE_ICONS[item.source ?? ''] ?? <Globe className="h-3 w-3" />}
+                      <span className="capitalize">{item.source ?? 'مباشر'}</span>
+                    </div>
+                  </td>
+                  <td className="p-3 text-muted-foreground text-xs">
+                    {item.createdAt ? format(new Date(item.createdAt), 'h:mm a, dd-MM-yyyy') : '—'}
+                  </td>
+                  <td className="p-3">
+                    {item.contacted ? (
+                      <Badge className="bg-green-100 text-green-700 border-green-200">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        تم التواصل
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-orange-600 border-orange-200">
+                        <Clock className="h-3 w-3 mr-1" />
+                        لم يتم التواصل
+                      </Badge>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {!item.contacted && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs"
+                        onClick={() => markContactedMutation.mutate({ id: item.id })}
+                        disabled={markContactedMutation.isPending}
+                      >
+                        <PhoneCall className="h-3 w-3 mr-1" />
+                        تم التواصل
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              )
+            )}
           </tbody>
         </table>
       </div>

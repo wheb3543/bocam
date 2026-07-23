@@ -3,6 +3,7 @@
  * Camp statistics and reports page
  */
 import { useState } from 'react';
+import type { Camp } from '@/components/camp/types';
 import {
   Select,
   SelectContent,
@@ -83,7 +84,7 @@ export default function CampStatsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">جميع المخيمات</SelectItem>
-                {campStats.camps?.map((camp) => (
+                {campStats.camps?.map((camp: Camp) => (
                   <SelectItem key={camp.id} value={camp.id?.toString() || ''}>
                     {camp.name}
                   </SelectItem>

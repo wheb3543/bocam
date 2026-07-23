@@ -15,7 +15,11 @@ async function checkRedisConnection(): Promise<boolean> {
 
   redisCheckPromise = (async () => {
     try {
-      const redis = getRedisConnection();
+      const redis = await getRedisConnection();
+      if (!redis) {
+        logger.warn('Redis is not configured or unavailable, will send messages directly');
+        return false;
+      }
       await redis.ping();
       logger.info('Redis connection successful');
       return true;
@@ -69,11 +73,16 @@ async function initializeQueue() {
     return null;
   }
 
+  const redis = await getRedisConnection();
+  if (!redis) {
+    return null;
+  }
+
   whatsappQueue = new Queue<WhatsAppMessageJob>('whatsapp-messages', {
     // Type assertion required due to BullMQ's strict Redis connection typing
     // Our Redis implementation is compatible but doesn't match BullMQ's exact type expectations
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    connection: getRedisConnection() as any,
+    connection: redis as any,
     defaultJobOptions: {
       attempts: 3, // Retry up to 3 times
       backoff: {

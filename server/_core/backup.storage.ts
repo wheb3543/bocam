@@ -6,7 +6,7 @@
 import { getDb } from '../database/db';
 import { sql } from 'drizzle-orm';
 import { createLogger } from './logger';
-import { BackupInfo, BackupStatus } from './backup.types';
+import type { BackupInfo, BackupStatus } from './backup.types';
 
 const logger = createLogger('backupManager');
 

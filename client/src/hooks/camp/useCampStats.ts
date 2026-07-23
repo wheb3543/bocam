@@ -250,7 +250,7 @@ export function useCampStats({ selectedCamp = 'all', autoRefresh = false }: Camp
 
     return Array.from(campMap.entries())
       .map(([campId, statusCounts]) => {
-        const camp = camps?.find((c) => c.id === campId);
+        const camp = camps?.find((c: { id: number }) => c.id === campId);
         return {
           campName: camp?.name || `مخيم ${campId}`,
           pending: Number(statusCounts.pending) || 0,

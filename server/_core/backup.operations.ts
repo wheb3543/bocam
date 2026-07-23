@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { createLogger } from './logger';
-import { BackupInfo, BackupConfig } from './backup.types';
+import type { BackupInfo, BackupConfig } from './backup.types';
 import { calculateSize, copyDirectory, BACKUP_DIR, ITEMS_TO_RESTORE } from './backup.helpers';
 import { createLocalBackup } from './backup.local';
 import { createCloudBackup } from './backup.cloud';
