@@ -25,6 +25,9 @@ import { commentsRouter } from './comments';
 import { followUpTasksRouter } from './followUpTasks';
 import { appointmentsRouter } from './appointments';
 import { leadsRouter } from './leads';
+import { contentRouter } from './content';
+import { publicContentRouter } from './public/content';
+import { notificationsRouter } from './notifications';
 
 import { getCombinedSocialMediaStats } from '../api/metaGraphAPI';
 import { runDeactivationJobs } from '../tasks/cron/deactivateExpired';
@@ -60,6 +63,9 @@ export const appRouter = router({
   messageSettings: messageSettingsRouter,
   webhooks: webhooksRouter,
   queue: queueRouter,
+  content: contentRouter,
+  publicContent: publicContentRouter,
+  notifications: notificationsRouter,
 
   // User Preferences
   preferences: router({
