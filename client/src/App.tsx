@@ -6,6 +6,7 @@ const NotFound = lazy(() => import('@/pages/NotFound'));
 import { Route, Switch, useLocation } from 'wouter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 const DashboardShell = lazy(() => import('@/components/layout/DashboardShell'));
 import { UpdateProgressModal } from '@/components/update/UpdateProgressModal';
 import { MandatoryUpdateModal } from '@/components/update/MandatoryUpdateModal';
@@ -14,6 +15,7 @@ import { useUpdateChecker } from '@/hooks/integrations/useUpdateChecker';
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./pages/public/HomePage'));
 const ThankYou = lazy(() => import('./pages/public/ThankYou'));
+const DynamicPage = lazy(() => import('./pages/public/DynamicPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const Doctors = lazy(() => import('./pages/public/Doctors'));
 const Unauthorized = lazy(() => import('./pages/Unauthorized'));
@@ -180,6 +182,7 @@ function Router() {
       <Switch>
         <Route path={'/activation'} component={ActivationPage} />
         <Route path={'/'} component={HomePage} />
+        <Route path={'/page/:slug'} component={DynamicPage} />
         <Route path={'/doctors'} component={Doctors} />
         <Route path={'/visiting-doctors'} component={VisitingDoctors} />
 
@@ -456,18 +459,20 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light" switchable>
-        <TooltipProvider>
-          <Toaster />
-          <PWAManager />
-          <OfflineIndicator />
-          <CookieConsentBanner />
-          <MetaPixel />
-          <OptionalUpdateBanner />
-          <UpdateProgressModal open={showProgressModal} onOpenChange={setShowProgressModal} />
-          <MandatoryUpdateModal open={showMandatoryModal} onOpenChange={setShowMandatoryModal} />
-          <PrefetchRoutes />
-          <Router />
-        </TooltipProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <PWAManager />
+            <OfflineIndicator />
+            <CookieConsentBanner />
+            <MetaPixel />
+            <OptionalUpdateBanner />
+            <UpdateProgressModal open={showProgressModal} onOpenChange={setShowProgressModal} />
+            <MandatoryUpdateModal open={showMandatoryModal} onOpenChange={setShowMandatoryModal} />
+            <PrefetchRoutes />
+            <Router />
+          </TooltipProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
