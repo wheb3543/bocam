@@ -19,6 +19,8 @@ import SectionDivider from '@/components/SectionDivider';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
+import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Doctors() {
   const companyName = getCompanyName('ar');
@@ -38,6 +40,32 @@ function DoctorsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState<string>('all');
 
+  // الحصول على اللغة الحالية
+  const { language } = useLanguage();
+
+  // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
+  const { data: doctorsTitle } = usePublicTextContent({
+    key: `doctors.title.${language}`,
+    section: 'doctors',
+    type: 'title',
+  });
+  const { data: doctorsDescription } = usePublicTextContent({
+    key: `doctors.description.${language}`,
+    section: 'doctors',
+    type: 'description',
+  });
+  const { data: doctorsBadge } = usePublicTextContent({
+    key: `doctors.badge.${language}`,
+    section: 'doctors',
+    type: 'text',
+  });
+
+  // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
+  const title = doctorsTitle?.data?.[0]?.content || 'أطباؤنا المتميزون';
+  const description =
+    doctorsDescription?.data?.[0]?.content || 'فريق طبي متكامل من أفضل الأطباء في مختلف التخصصات';
+  const badgeText = doctorsBadge?.data?.[0]?.content || 'أطباء متخصصون';
+
   // Fetch doctors list (only available doctors)
   const { data: doctors, isLoading } = trpc.doctors.list.useQuery();
 
@@ -45,7 +73,9 @@ function DoctorsContent() {
   const filteredDoctors = Array.isArray(doctors)
     ? doctors.filter((doctor) => {
         // Only show available doctors
-        if (doctor.available !== 'yes') {return false;}
+        if (doctor.available !== 'yes') {
+          return false;
+        }
 
         // Search filter
         const matchesSearch =
@@ -74,9 +104,9 @@ function DoctorsContent() {
 
       {/* Hero Section */}
       <HeroSection
-        title="أطباؤنا المتميزون"
-        description="فريق طبي متكامل من أفضل الأطباء في مختلف التخصصات"
-        badge={{ text: 'أطباء متخصصون', icon: Stethoscope }}
+        title={title}
+        description={description}
+        badge={{ text: badgeText, icon: Stethoscope }}
       />
 
       {/* Search and Filter */}

@@ -86,7 +86,9 @@ function Button({
       aria-label={props['aria-label']}
       aria-describedby={props['aria-describedby']}
       {...props}
-    />
+    >
+      {children}
+    </Comp>
   );
 }
 

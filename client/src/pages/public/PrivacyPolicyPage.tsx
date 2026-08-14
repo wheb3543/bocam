@@ -18,6 +18,8 @@ import SectionDivider from '@/components/SectionDivider';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
+import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PrivacyPolicyPage() {
   const companyName = getCompanyName('ar');
@@ -43,16 +45,35 @@ function PrivacyPolicyContent() {
   const companyName = getCompanyName('ar');
   const appTitle = getAppTitle('ar');
 
+  // الحصول على اللغة الحالية
+  const { language } = useLanguage();
+
+  // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
+  const { data: privacyTitle } = usePublicTextContent({
+    key: `privacy.title.${language}`,
+    section: 'privacy',
+    type: 'title',
+  });
+  const { data: privacyBadge } = usePublicTextContent({
+    key: `privacy.badge.${language}`,
+    section: 'privacy',
+    type: 'text',
+  });
+
+  // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
+  const title = privacyTitle?.data?.[0]?.content || 'سياسة الخصوصية';
+  const badgeText = privacyBadge?.data?.[0]?.content || 'حماية البيانات';
+
   return (
     <div className="space-y-6" dir="rtl">
       <ReadingProgressBar color="green" />
 
       {/* Hero Section */}
       <HeroSection
-        title="سياسة الخصوصية"
+        title={title}
         subtitle={`آخر تحديث: مارس 2026 | ${appTitle}`}
         description={`يلتزم ${companyName} بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL)`}
-        badge={{ text: 'حماية البيانات', icon: Shield }}
+        badge={{ text: badgeText, icon: Shield }}
         backgroundGradient="from-green-800 to-green-600"
       />
 

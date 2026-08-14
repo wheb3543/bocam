@@ -36,6 +36,8 @@ import { toast } from 'sonner';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { usePatientStorage } from '@/hooks/data/usePatientStorage';
 import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking';
+import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function OfferDetailPage() {
   const params = useParams();
@@ -55,6 +57,330 @@ function OfferDetailContent({ slug }: { slug: string }) {
   const { formatDate } = useFormatDate();
   const [, setLocation] = useLocation();
   const [phoneError, setPhoneError] = useState<string>('');
+
+  // Dynamic content from CMS
+  const { language } = useLanguage();
+  const { data: breadcrumbHomeData } = usePublicTextContent({
+    key: `offers.detail.breadcrumb.home.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: breadcrumbOffersData } = usePublicTextContent({
+    key: `offers.detail.breadcrumb.offers.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: heroBadgeData } = usePublicTextContent({
+    key: `offers.detail.hero.badge.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: heroBookNowData } = usePublicTextContent({
+    key: `offers.detail.hero.book.now.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: heroDurationData } = usePublicTextContent({
+    key: `offers.detail.hero.duration.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: heroUntilData } = usePublicTextContent({
+    key: `offers.detail.hero.until.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: heroRemainingData } = usePublicTextContent({
+    key: `offers.detail.hero.remaining.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: heroDayData } = usePublicTextContent({
+    key: `offers.detail.hero.day.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: heroDaysData } = usePublicTextContent({
+    key: `offers.detail.hero.days.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: includedTitleData } = usePublicTextContent({
+    key: `offers.detail.included.title.${language}`,
+    section: 'offers',
+    type: 'title',
+  });
+  const { data: includedCheckupTitleData } = usePublicTextContent({
+    key: `offers.detail.included.checkup.title.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: includedCheckupDescData } = usePublicTextContent({
+    key: `offers.detail.included.checkup.desc.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: includedConsultationTitleData } = usePublicTextContent({
+    key: `offers.detail.included.consultation.title.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: includedConsultationDescData } = usePublicTextContent({
+    key: `offers.detail.included.consultation.desc.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: includedFollowupTitleData } = usePublicTextContent({
+    key: `offers.detail.included.followup.title.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: includedFollowupDescData } = usePublicTextContent({
+    key: `offers.detail.included.followup.desc.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: includedDiscountTitleData } = usePublicTextContent({
+    key: `offers.detail.included.discount.title.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: includedDiscountDescData } = usePublicTextContent({
+    key: `offers.detail.included.discount.desc.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: formUrgencyData } = usePublicTextContent({
+    key: `offers.detail.form.urgency.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formUrgencyBookNowData } = usePublicTextContent({
+    key: `offers.detail.form.urgency.book.now.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: formTitleData } = usePublicTextContent({
+    key: `offers.detail.form.title.${language}`,
+    section: 'offers',
+    type: 'title',
+  });
+  const { data: formDescriptionData } = usePublicTextContent({
+    key: `offers.detail.form.description.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: formFullnameData } = usePublicTextContent({
+    key: `offers.detail.form.fullname.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formFullnamePlaceholderData } = usePublicTextContent({
+    key: `offers.detail.form.fullname.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formPhoneData } = usePublicTextContent({
+    key: `offers.detail.form.phone.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formPhonePlaceholderData } = usePublicTextContent({
+    key: `offers.detail.form.phone.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formEmailData } = usePublicTextContent({
+    key: `offers.detail.form.email.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formEmailPlaceholderData } = usePublicTextContent({
+    key: `offers.detail.form.email.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formAgeData } = usePublicTextContent({
+    key: `offers.detail.form.age.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formAgePlaceholderData } = usePublicTextContent({
+    key: `offers.detail.form.age.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formGenderData } = usePublicTextContent({
+    key: `offers.detail.form.gender.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formGenderMaleData } = usePublicTextContent({
+    key: `offers.detail.form.gender.male.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formGenderFemaleData } = usePublicTextContent({
+    key: `offers.detail.form.gender.female.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formMessageData } = usePublicTextContent({
+    key: `offers.detail.form.message.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formMessagePlaceholderData } = usePublicTextContent({
+    key: `offers.detail.form.message.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formSubmitData } = usePublicTextContent({
+    key: `offers.detail.form.submit.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: formSendingData } = usePublicTextContent({
+    key: `offers.detail.form.sending.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: formTrustSecureData } = usePublicTextContent({
+    key: `offers.detail.form.trust.secure.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formTrustImmediateData } = usePublicTextContent({
+    key: `offers.detail.form.trust.immediate.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formTrustPricesData } = usePublicTextContent({
+    key: `offers.detail.form.trust.prices.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formContactData } = usePublicTextContent({
+    key: `offers.detail.form.contact.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: expiredTitleData } = usePublicTextContent({
+    key: `offers.detail.expired.title.${language}`,
+    section: 'offers',
+    type: 'title',
+  });
+  const { data: expiredDescriptionData } = usePublicTextContent({
+    key: `offers.detail.expired.description.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: expiredButtonData } = usePublicTextContent({
+    key: `offers.detail.expired.button.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: notfoundTitleData } = usePublicTextContent({
+    key: `offers.detail.notfound.title.${language}`,
+    section: 'offers',
+    type: 'title',
+  });
+  const { data: notfoundDescriptionData } = usePublicTextContent({
+    key: `offers.detail.notfound.description.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: notfoundButtonData } = usePublicTextContent({
+    key: `offers.detail.notfound.button.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: contactTitleData } = usePublicTextContent({
+    key: `offers.detail.contact.title.${language}`,
+    section: 'offers',
+    type: 'title',
+  });
+  const { data: contactDescriptionData } = usePublicTextContent({
+    key: `offers.detail.contact.description.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: contactWhatsappData } = usePublicTextContent({
+    key: `offers.detail.contact.whatsapp.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: contactWhatsappMessageData } = usePublicTextContent({
+    key: `offers.detail.contact.whatsapp.message.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+
+  // Extract content from data
+  const breadcrumbHome = breadcrumbHomeData?.data?.[0]?.content || 'الرئيسية';
+  const breadcrumbOffers = breadcrumbOffersData?.data?.[0]?.content || 'العروض';
+  const heroBadge = heroBadgeData?.data?.[0]?.content || 'عرض خاص محدود';
+  const heroBookNow = heroBookNowData?.data?.[0]?.content || 'احجز الآن';
+  const heroDuration = heroDurationData?.data?.[0]?.content || 'مدة العرض';
+  const heroUntil = heroUntilData?.data?.[0]?.content || 'حتى';
+  const heroRemaining = heroRemainingData?.data?.[0]?.content || 'متبقي';
+  const heroDay = heroDayData?.data?.[0]?.content || 'يوم';
+  const heroDays = heroDaysData?.data?.[0]?.content || 'أيام';
+  const includedTitle = includedTitleData?.data?.[0]?.content || 'ماذا يشمل العرض';
+  const includedCheckupTitle = includedCheckupTitleData?.data?.[0]?.content || 'فحص شامل';
+  const includedCheckupDesc =
+    includedCheckupDescData?.data?.[0]?.content || 'فحص طبي كامل مع أحدث الأجهزة';
+  const includedConsultationTitle =
+    includedConsultationTitleData?.data?.[0]?.content || 'استشارة مجانية';
+  const includedConsultationDesc =
+    includedConsultationDescData?.data?.[0]?.content || 'استشارة طبية مع أفضل الأطباء';
+  const includedFollowupTitle = includedFollowupTitleData?.data?.[0]?.content || 'متابعة مجانية';
+  const includedFollowupDesc =
+    includedFollowupDescData?.data?.[0]?.content || 'متابعة لمدة شهر بعد العلاج';
+  const includedDiscountTitle = includedDiscountTitleData?.data?.[0]?.content || 'خصم حصري';
+  const includedDiscountDesc =
+    includedDiscountDescData?.data?.[0]?.content || 'خصم خاص على الخدمات الإضافية';
+  const formUrgency = formUrgencyData?.data?.[0]?.content || 'العرض ينتهي خلال';
+  const formUrgencyBookNow = formUrgencyBookNowData?.data?.[0]?.content || 'احجز الآن!';
+  const formTitle = formTitleData?.data?.[0]?.content || 'احجز العرض الآن';
+  const formDescription =
+    formDescriptionData?.data?.[0]?.content || 'املأ النموذج وسنتواصل معك في أقرب وقت لتأكيد الحجز';
+  const formFullname = formFullnameData?.data?.[0]?.content || 'الاسم الكامل';
+  const formFullnamePlaceholder =
+    formFullnamePlaceholderData?.data?.[0]?.content || 'أدخل اسمك الكامل';
+  const formPhone = formPhoneData?.data?.[0]?.content || 'رقم الهاتف';
+  const formPhonePlaceholder = formPhonePlaceholderData?.data?.[0]?.content || 'مثال: 771234567';
+  const formEmail = formEmailData?.data?.[0]?.content || 'البريد الإلكتروني (اختياري)';
+  const formEmailPlaceholder = formEmailPlaceholderData?.data?.[0]?.content || 'example@email.com';
+  const formAge = formAgeData?.data?.[0]?.content || 'العمر';
+  const formAgePlaceholder = formAgePlaceholderData?.data?.[0]?.content || 'مثال: 35';
+  const formGender = formGenderData?.data?.[0]?.content || 'الجنس';
+  const formGenderMale = formGenderMaleData?.data?.[0]?.content || 'ذكر';
+  const formGenderFemale = formGenderFemaleData?.data?.[0]?.content || 'أنثى';
+  const formMessage = formMessageData?.data?.[0]?.content || 'رسالة أو ملاحظة (اختياري)';
+  const formMessagePlaceholder =
+    formMessagePlaceholderData?.data?.[0]?.content || 'أي معلومات إضافية تودّ إضافتها...';
+  const formSubmit = formSubmitData?.data?.[0]?.content || 'احجز العرض الآن';
+  const formSending = formSendingData?.data?.[0]?.content || 'جاري الإرسال...';
+  const formTrustSecure = formTrustSecureData?.data?.[0]?.content || 'حجز آمن';
+  const formTrustImmediate = formTrustImmediateData?.data?.[0]?.content || 'رد فوري';
+  const formTrustPrices = formTrustPricesData?.data?.[0]?.content || 'أسعار مميزة';
+  const formContact = formContactData?.data?.[0]?.content || 'أو اتصل بنا مباشرة على';
+  const expiredTitle = expiredTitleData?.data?.[0]?.content || 'العرض منتهي';
+  const expiredDescription =
+    expiredDescriptionData?.data?.[0]?.content ||
+    'هذا العرض قد انتهى ولا يمكن الحجز فيه حالياً. تابعنا للحصول على آخر التحديثات عن العروض القادمة.';
+  const expiredButton = expiredButtonData?.data?.[0]?.content || 'تصفح العروض الأخرى';
+  const notfoundTitle = notfoundTitleData?.data?.[0]?.content || 'لم يتم العثور على العرض';
+  const notfoundDescription =
+    notfoundDescriptionData?.data?.[0]?.content ||
+    'عذراً، لم نتمكن من العثور على العرض المطلوب. قد يكون العرض منتهياً أو الرابط غير صحيح.';
+  const notfoundButton = notfoundButtonData?.data?.[0]?.content || 'تصفح العروض المتاحة';
+  const contactTitle = contactTitleData?.data?.[0]?.content || 'هل لديك استفسار؟';
+  const contactDescription = contactDescriptionData?.data?.[0]?.content || 'تواصل معنا الآن';
+  const contactWhatsapp = contactWhatsappData?.data?.[0]?.content || 'واتساب';
+  const contactWhatsappMessage =
+    contactWhatsappMessageData?.data?.[0]?.content || 'مرحباً، أود الاستفسار عن العرض';
 
   const { data: offer, isLoading } = trpc.offers.getBySlug.useQuery(
     { slug },
@@ -261,14 +587,12 @@ function OfferDetailContent({ slug }: { slug: string }) {
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
               <Tag className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-3">لم يتم العثور على العرض</h2>
-            <p className="text-muted-foreground mb-6 text-sm">
-              عذراً، لم نتمكن من العثور على العرض المطلوب. قد يكون العرض منتهياً أو الرابط غير صحيح.
-            </p>
+            <h2 className="text-2xl font-bold text-foreground mb-3">{notfoundTitle}</h2>
+            <p className="text-muted-foreground mb-6 text-sm">{notfoundDescription}</p>
             <Link href="/offers">
               <Button className="bg-green-600 hover:bg-green-700 gap-2">
                 <ArrowRight className="h-4 w-4" />
-                تصفح العروض المتاحة
+                {notfoundButton}
               </Button>
             </Link>
           </div>
@@ -290,11 +614,11 @@ function OfferDetailContent({ slug }: { slug: string }) {
         <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
             <Link href="/" className="hover:text-green-600 transition-colors">
-              الرئيسية
+              {breadcrumbHome}
             </Link>
             <span>/</span>
             <Link href="/offers" className="hover:text-green-600 transition-colors">
-              العروض
+              {breadcrumbOffers}
             </Link>
             <span>/</span>
             <span className="text-foreground font-medium truncate max-w-[120px] sm:max-w-[200px]">
@@ -324,14 +648,14 @@ function OfferDetailContent({ slug }: { slug: string }) {
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-foreground px-3 py-1.5 rounded-full shadow-lg">
                   <Sparkles className="h-4 w-4" />
-                  <span className="text-sm font-bold">عرض خاص محدود</span>
+                  <span className="text-sm font-bold">{heroBadge}</span>
                 </div>
                 <a href="#booking-form">
                   <Button
                     size="sm"
                     className="bg-white dark:bg-card text-green-700 hover:bg-green-50 font-bold text-sm px-4 py-2 shadow-lg"
                   >
-                    احجز الآن
+                    {heroBookNow}
                   </Button>
                 </a>
               </div>
@@ -350,8 +674,10 @@ function OfferDetailContent({ slug }: { slug: string }) {
                   <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
                     <Calendar className="h-5 w-5 flex-shrink-0" />
                     <div className="text-sm">
-                      <div className="font-semibold">مدة العرض</div>
-                      <div className="text-white/90 text-xs">حتى {formatDate(offer.endDate)}</div>
+                      <div className="font-semibold">{heroDuration}</div>
+                      <div className="text-white/90 text-xs">
+                        {heroUntil} {formatDate(offer.endDate)}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -360,9 +686,9 @@ function OfferDetailContent({ slug }: { slug: string }) {
                   <div className="flex items-center gap-3 bg-red-500/20 backdrop-blur-sm p-3 rounded-lg border border-red-400/30">
                     <Clock className="h-5 w-5 flex-shrink-0" />
                     <div className="text-sm">
-                      <div className="font-semibold">متبقي</div>
+                      <div className="font-semibold">{heroRemaining}</div>
                       <div className="text-white/90 text-xs font-bold">
-                        {daysRemaining} {daysRemaining === 1 ? 'يوم' : 'أيام'}
+                        {daysRemaining} {daysRemaining === 1 ? heroDay : heroDays}
                       </div>
                     </div>
                   </div>
@@ -390,33 +716,33 @@ function OfferDetailContent({ slug }: { slug: string }) {
         <div className="container mx-auto px-3 sm:px-4 max-w-5xl">
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
             <h2 className="text-base sm:text-xl md:text-2xl font-bold text-foreground">
-              ماذا يشمل العرض
+              {includedTitle}
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4">
             {[
               {
                 icon: Stethoscope,
-                title: 'فحص شامل',
-                desc: 'فحص طبي كامل مع أحدث الأجهزة',
+                title: includedCheckupTitle,
+                desc: includedCheckupDesc,
                 color: 'green',
               },
               {
                 icon: HeartPulse,
-                title: 'استشارة مجانية',
-                desc: 'استشارة طبية مع أفضل الأطباء',
+                title: includedConsultationTitle,
+                desc: includedConsultationDesc,
                 color: 'blue',
               },
               {
                 icon: Shield,
-                title: 'متابعة مجانية',
-                desc: 'متابعة لمدة شهر بعد العلاج',
+                title: includedFollowupTitle,
+                desc: includedFollowupDesc,
                 color: 'purple',
               },
               {
                 icon: Tag,
-                title: 'خصم حصري',
-                desc: 'خصم خاص على الخدمات الإضافية',
+                title: includedDiscountTitle,
+                desc: includedDiscountDesc,
                 color: 'orange',
               },
             ].map((item, i) => {
@@ -472,8 +798,8 @@ function OfferDetailContent({ slug }: { slug: string }) {
                 <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                   <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
                   <span className="font-bold text-xs sm:text-sm md:text-base">
-                    العرض ينتهي خلال {daysRemaining} {daysRemaining === 1 ? 'يوم' : 'أيام'} - احجز
-                    الآن!
+                    {formUrgency} {daysRemaining} {daysRemaining === 1 ? heroDay : heroDays} -{' '}
+                    {formUrgencyBookNow}
                   </span>
                 </div>
               </div>
@@ -483,17 +809,17 @@ function OfferDetailContent({ slug }: { slug: string }) {
               <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-4 sm:p-5 md:p-6">
                 <CardTitle className="text-base sm:text-lg md:text-xl flex items-center gap-1.5 sm:gap-2">
                   <Tag className="h-4 w-4 sm:h-5 sm:w-5" />
-                  احجز العرض الآن
+                  {formTitle}
                 </CardTitle>
                 <CardDescription className="text-green-100 text-xs sm:text-sm">
-                  املأ النموذج وسنتواصل معك في أقرب وقت لتأكيد الحجز
+                  {formDescription}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-5 md:p-6">
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
-                      الاسم الكامل <span className="text-red-500">*</span>
+                      {formFullname} <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="fullName"
@@ -502,7 +828,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
                       enterKeyHint="next"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      placeholder="أدخل اسمك الكامل"
+                      placeholder={formFullnamePlaceholder}
                       required
                       className="mt-1.5 h-11"
                     />
@@ -510,7 +836,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
 
                   <div>
                     <Label htmlFor="phone" className="text-sm font-medium text-foreground">
-                      رقم الهاتف <span className="text-red-500">*</span>
+                      {formPhone} <span className="text-red-500">*</span>
                     </Label>
                     <div className="relative">
                       <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -535,7 +861,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
                             setPhoneError(v.valid ? '' : v.message || '');
                           }
                         }}
-                        placeholder="مثال: 771234567"
+                        placeholder={formPhonePlaceholder}
                         required
                         className={`mt-1.5 pr-10 h-11 ${phoneError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                         dir="ltr"
@@ -547,7 +873,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
 
                   <div>
                     <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                      البريد الإلكتروني (اختياري)
+                      {formEmail}
                     </Label>
                     <div className="relative">
                       <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -559,7 +885,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
                         enterKeyHint="next"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="example@email.com"
+                        placeholder={formEmailPlaceholder}
                         className="mt-1.5 pr-10 h-11"
                       />
                     </div>
@@ -568,7 +894,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
                   {/* حقل العمر */}
                   <div>
                     <Label htmlFor="age" className="text-sm font-medium text-foreground">
-                      العمر <span className="text-red-500">*</span>
+                      {formAge} <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="age"
@@ -578,7 +904,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
                       enterKeyHint="next"
                       value={formData.age}
                       onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                      placeholder="مثال: 35"
+                      placeholder={formAgePlaceholder}
                       min={1}
                       max={120}
                       required
@@ -591,7 +917,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
                   {/* حقل الجنس - إلزامي */}
                   <div>
                     <Label className="text-sm font-medium text-foreground">
-                      الجنس <span className="text-red-500">*</span>
+                      {formGender} <span className="text-red-500">*</span>
                     </Label>
                     <div className="grid grid-cols-2 gap-3 mt-1.5">
                       <button
@@ -608,7 +934,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
                               : 'border-border bg-background text-foreground hover:border-green-400'
                         }`}
                       >
-                        ذكر
+                        {formGenderMale}
                       </button>
                       <button
                         type="button"
@@ -624,7 +950,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
                               : 'border-border bg-background text-foreground hover:border-pink-400'
                         }`}
                       >
-                        أنثى
+                        {formGenderFemale}
                       </button>
                     </div>
                     {genderError && <p className="text-red-500 text-xs mt-1">{genderError}</p>}
@@ -633,14 +959,14 @@ function OfferDetailContent({ slug }: { slug: string }) {
                   {/* حقل الرسالة الاختياري */}
                   <div>
                     <Label htmlFor="patientMessage" className="text-sm font-medium text-foreground">
-                      رسالة أو ملاحظة (اختياري)
+                      {formMessage}
                     </Label>
                     <textarea
                       id="patientMessage"
                       name="patientMessage"
                       value={formData.patientMessage}
                       onChange={(e) => setFormData({ ...formData, patientMessage: e.target.value })}
-                      placeholder="أي معلومات إضافية تودّ إضافتها..."
+                      placeholder={formMessagePlaceholder}
                       maxLength={500}
                       rows={3}
                       className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
@@ -658,12 +984,12 @@ function OfferDetailContent({ slug }: { slug: string }) {
                     {submitLead.isPending ? (
                       <>
                         <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                        جاري الإرسال...
+                        {formSending}
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="ml-2 h-5 w-5" />
-                        احجز العرض الآن
+                        {formSubmit}
                       </>
                     )}
                   </Button>
@@ -672,20 +998,20 @@ function OfferDetailContent({ slug }: { slug: string }) {
                   <div className="flex flex-wrap items-center justify-center gap-4 pt-3 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                      <span>حجز آمن</span>
+                      <span>{formTrustSecure}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                      <span>رد فوري</span>
+                      <span>{formTrustImmediate}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                      <span>أسعار مميزة</span>
+                      <span>{formTrustPrices}</span>
                     </div>
                   </div>
 
                   <p className="text-xs text-muted-foreground text-center pt-1">
-                    أو اتصل بنا مباشرة على{' '}
+                    {formContact}{' '}
                     <a href="tel:8000018" className="text-green-600 font-semibold hover:underline">
                       8000018
                     </a>
@@ -705,16 +1031,13 @@ function OfferDetailContent({ slug }: { slug: string }) {
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Tag className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3">العرض منتهي</h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                هذا العرض قد انتهى ولا يمكن الحجز فيه حالياً. تابعنا للحصول على آخر التحديثات عن
-                العروض القادمة.
-              </p>
+              <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3">{expiredTitle}</h2>
+              <p className="text-sm text-muted-foreground mb-6">{expiredDescription}</p>
               <Button
                 onClick={() => setLocation('/offers')}
                 className="bg-green-600 hover:bg-green-700 gap-2"
               >
-                تصفح العروض الأخرى
+                {expiredButton}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -726,10 +1049,10 @@ function OfferDetailContent({ slug }: { slug: string }) {
       <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-6 sm:py-8 md:py-10">
         <div className="container mx-auto px-3 sm:px-4 text-center">
           <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">
-            هل لديك استفسار؟
+            {contactTitle}
           </h3>
           <p className="text-xs sm:text-sm md:text-base text-white/90 mb-3 sm:mb-4">
-            تواصل معنا الآن
+            {contactDescription}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
@@ -740,13 +1063,13 @@ function OfferDetailContent({ slug }: { slug: string }) {
               8000018
             </a>
             <a
-              href={`https://wa.me/9678000018?text=${encodeURIComponent('مرحباً، أود الاستفسار عن العرض')}`}
+              href={`https://wa.me/9678000018?text=${encodeURIComponent(contactWhatsappMessage)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-2.5 rounded-full font-bold text-sm hover:bg-white/20 transition-colors"
             >
               <MessageSquare className="h-4 w-4" />
-              واتساب
+              {contactWhatsapp}
             </a>
           </div>
         </div>

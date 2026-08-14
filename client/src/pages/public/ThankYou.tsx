@@ -15,6 +15,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Link, useLocation } from 'wouter';
 import { useEffect, useState } from 'react';
 import { getCompanySlogan, COMPANY_ARABIC_NAME } from '@/const';
+import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BookingInfo {
   type: string;
@@ -32,6 +34,25 @@ export default function ThankYou() {
   const { formatDate } = useFormatDate();
   const [location] = useLocation();
   const [bookingInfo, setBookingInfo] = useState<BookingInfo | null>(null);
+
+  // الحصول على اللغة الحالية
+  const { language } = useLanguage();
+
+  // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
+  const { data: thankYouTitle } = usePublicTextContent({
+    key: `thankyou.title.${language}`,
+    section: 'thankyou',
+    type: 'title',
+  });
+  const { data: thankYouSubtitle } = usePublicTextContent({
+    key: `thankyou.subtitle.${language}`,
+    section: 'thankyou',
+    type: 'subtitle',
+  });
+
+  // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
+  const title = thankYouTitle?.data?.[0]?.content || 'تم التسجيل بنجاح!';
+  thankYouSubtitle?.data?.[0]?.content || 'شكراً لك، تم استلام طلبك بنجاح';
 
   useEffect(() => {
     // Parse URL parameters
@@ -62,18 +83,19 @@ export default function ThankYou() {
   }, [location]);
 
   const getTypeInfo = () => {
-    if (!bookingInfo)
-      {return { title: 'شكراً لتسجيلك!', icon: CheckCircle2, color: 'text-secondary' };}
+    if (!bookingInfo) {
+      return { title: title, icon: CheckCircle2, color: 'text-secondary' };
+    }
 
     switch (bookingInfo.type) {
       case 'appointment':
-        return { title: 'تم حجز موعدك بنجاح!', icon: Stethoscope, color: 'text-blue-600' };
+        return { title: title, icon: Stethoscope, color: 'text-blue-600' };
       case 'offer':
-        return { title: 'تم تسجيل طلب العرض بنجاح!', icon: Gift, color: 'text-purple-600' };
+        return { title: title, icon: Gift, color: 'text-purple-600' };
       case 'camp':
-        return { title: 'تم التسجيل في المخيم بنجاح!', icon: Tent, color: 'text-green-600' };
+        return { title: title, icon: Tent, color: 'text-green-600' };
       default:
-        return { title: 'شكراً لتسجيلك!', icon: CheckCircle2, color: 'text-secondary' };
+        return { title: title, icon: CheckCircle2, color: 'text-secondary' };
     }
   };
 

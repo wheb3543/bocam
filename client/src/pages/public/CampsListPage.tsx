@@ -48,6 +48,8 @@ import SectionDivider from '@/components/SectionDivider';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
+import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function CampsListPage() {
   const companyName = getCompanyName('ar');
@@ -68,6 +70,136 @@ function CampsListContent() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
 
+  // الحصول على اللغة الحالية
+  const { language } = useLanguage();
+
+  // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
+  const { data: campsTitle } = usePublicTextContent({
+    key: `camps.title.${language}`,
+    section: 'camps',
+    type: 'title',
+  });
+  const { data: campsDescription } = usePublicTextContent({
+    key: `camps.description.${language}`,
+    section: 'camps',
+    type: 'description',
+  });
+  const { data: campsBadge } = usePublicTextContent({
+    key: `camps.badge.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+
+  const { data: campsAboutTitle } = usePublicTextContent({
+    key: `camps.about.title.${language}`,
+    section: 'camps',
+    type: 'title',
+  });
+  const { data: campsAboutDescription } = usePublicTextContent({
+    key: `camps.about.description.${language}`,
+    section: 'camps',
+    type: 'description',
+  });
+  const { data: campsSearchPlaceholder } = usePublicTextContent({
+    key: `camps.search.placeholder.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsTabActive } = usePublicTextContent({
+    key: `camps.tab.active.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsTabExpired } = usePublicTextContent({
+    key: `camps.tab.expired.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsEmptyActiveTitle } = usePublicTextContent({
+    key: `camps.empty.active.title.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsEmptyActiveDescription } = usePublicTextContent({
+    key: `camps.empty.active.description.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsEmptyExpiredTitle } = usePublicTextContent({
+    key: `camps.empty.expired.title.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsEmptyExpiredDescription } = usePublicTextContent({
+    key: `camps.empty.expired.description.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardExpiredBadge } = usePublicTextContent({
+    key: `camps.card.expired.badge.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardCharityBadge } = usePublicTextContent({
+    key: `camps.card.charity.badge.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardRegistrations } = usePublicTextContent({
+    key: `camps.card.registrations.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardConfirmed } = usePublicTextContent({
+    key: `camps.card.confirmed.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardAttended } = usePublicTextContent({
+    key: `camps.card.attended.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardViewDetails } = usePublicTextContent({
+    key: `camps.card.view.details.${language}`,
+    section: 'camps',
+    type: 'button',
+  });
+  const { data: campsCardRegister } = usePublicTextContent({
+    key: `camps.card.register.${language}`,
+    section: 'camps',
+    type: 'button',
+  });
+
+  // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
+  const title = campsTitle?.data?.[0]?.content || 'المخيمات الطبية الخيرية';
+  const description =
+    campsDescription?.data?.[0]?.content ||
+    'مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين';
+  const badgeText = campsBadge?.data?.[0]?.content || 'مخيمات خيرية';
+  const aboutTitle = campsAboutTitle?.data?.[0]?.content || 'عن المخيمات الطبية الخيرية';
+  const aboutDescription =
+    campsAboutDescription?.data?.[0]?.content ||
+    `يأتي تنظيم المخيمات الطبية الخيرية ضمن مبادرات ${companyName} في إطار المسؤولية المجتمعية، حيث نسعى لتقديم خدمات طبية عالية الجودة للمحتاجين والمستحقين بأسعار رمزية أو مجاناً. يشرف على المخيمات نخبة من أفضل الأطباء والجراحين المتخصصين، مع توفير أحدث الأجهزة والتقنيات الطبية.`;
+  const searchPlaceholder = campsSearchPlaceholder?.data?.[0]?.content || 'ابحث عن مخيم...';
+  const tabActiveText = campsTabActive?.data?.[0]?.content || 'الجارية';
+  const tabExpiredText = campsTabExpired?.data?.[0]?.content || 'المنتهية';
+  const emptyActiveTitle =
+    campsEmptyActiveTitle?.data?.[0]?.content || 'لا توجد مخيمات جارية حالياً';
+  const emptyActiveDescription =
+    campsEmptyActiveDescription?.data?.[0]?.content ||
+    'تابعنا للحصول على آخر التحديثات عن المخيمات القادمة';
+  const emptyExpiredTitle = campsEmptyExpiredTitle?.data?.[0]?.content || 'لا توجد مخيمات منتهية';
+  const emptyExpiredDescription =
+    campsEmptyExpiredDescription?.data?.[0]?.content || 'سيتم عرض المخيمات المنتهية هنا';
+  const cardExpiredBadge = campsCardExpiredBadge?.data?.[0]?.content || 'منتهي';
+  const cardCharityBadge = campsCardCharityBadge?.data?.[0]?.content || 'مخيم خيري';
+  const cardRegistrations = campsCardRegistrations?.data?.[0]?.content || 'تسجيل';
+  const cardConfirmed = campsCardConfirmed?.data?.[0]?.content || 'مؤكد';
+  const cardAttended = campsCardAttended?.data?.[0]?.content || 'حضر';
+  const cardViewDetails = campsCardViewDetails?.data?.[0]?.content || 'عرض التفاصيل';
+  const cardRegister = campsCardRegister?.data?.[0]?.content || 'سجّل الآن';
+
   const { user } = useAuth();
   const { data: camps, isLoading } = trpc.camps.getAll.useQuery();
   // استعلام محمي - يعمل فقط للمستخدمين المسجلين لتجنب خطأ UNAUTHORIZED
@@ -79,13 +211,17 @@ function CampsListContent() {
   const now = new Date();
   const activeCamps = Array.isArray(camps)
     ? camps.filter((camp) => {
-        if (!camp.endDate) {return true;}
+        if (!camp.endDate) {
+          return true;
+        }
         return new Date(camp.endDate) >= now;
       })
     : [];
   const expiredCamps = Array.isArray(camps)
     ? camps.filter((camp) => {
-        if (!camp.endDate) {return false;}
+        if (!camp.endDate) {
+          return false;
+        }
         return new Date(camp.endDate) < now;
       })
     : [];
@@ -148,12 +284,12 @@ function CampsListContent() {
                   {isExpired ? (
                     <>
                       <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                      منتهي
+                      {cardExpiredBadge}
                     </>
                   ) : (
                     <>
                       <Heart className="h-3 w-3 sm:h-4 sm:w-4 fill-white" />
-                      مخيم خيري
+                      {cardCharityBadge}
                     </>
                   )}
                 </div>
@@ -173,12 +309,12 @@ function CampsListContent() {
                   {isExpired ? (
                     <>
                       <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                      منتهي
+                      {cardExpiredBadge}
                     </>
                   ) : (
                     <>
                       <Heart className="h-3 w-3 sm:h-4 sm:w-4 fill-white" />
-                      مخيم خيري
+                      {cardCharityBadge}
                     </>
                   )}
                 </div>
@@ -204,7 +340,7 @@ function CampsListContent() {
               <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <Users className="h-3 w-3" />
-                  {stats.total} تسجيل
+                  {stats.total} {cardRegistrations}
                 </Badge>
                 {stats.confirmed > 0 && (
                   <Badge
@@ -212,7 +348,7 @@ function CampsListContent() {
                     className="flex items-center gap-1 border-green-500 text-green-600"
                   >
                     <CheckCircle2 className="h-3 w-3" />
-                    {stats.confirmed} مؤكد
+                    {stats.confirmed} {cardConfirmed}
                   </Badge>
                 )}
                 {stats.attended > 0 && (
@@ -221,7 +357,7 @@ function CampsListContent() {
                     className="flex items-center gap-1 border-blue-500 text-blue-600"
                   >
                     <Clock className="h-3 w-3" />
-                    {stats.attended} حضر
+                    {stats.attended} {cardAttended}
                   </Badge>
                 )}
               </div>
@@ -245,7 +381,7 @@ function CampsListContent() {
                 setLocation(`/camps/${camp.slug || camp.id}`);
               }}
             >
-              {isExpired ? 'عرض التفاصيل' : 'سجّل الآن'}
+              {isExpired ? cardViewDetails : cardRegister}
               <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             </Button>
           </div>
@@ -260,9 +396,9 @@ function CampsListContent() {
 
       {/* Hero Section */}
       <HeroSection
-        title="المخيمات الطبية الخيرية"
-        description="مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين"
-        badge={{ text: 'مخيمات خيرية', icon: Heart }}
+        title={title}
+        description={description}
+        badge={{ text: badgeText, icon: Heart }}
         backgroundGradient="from-red-600 via-red-700 to-orange-600"
       />
 
@@ -272,13 +408,10 @@ function CampsListContent() {
           <div className="container mx-auto px-4 sm:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6">
-                عن المخيمات الطبية الخيرية
+                {aboutTitle}
               </h2>
               <p className="text-xs sm:text-sm md:text-base lg:text-lg text-foreground leading-relaxed text-right px-1">
-                يأتي تنظيم المخيمات الطبية الخيرية ضمن مبادرات {companyName}
-                في إطار المسؤولية المجتمعية، حيث نسعى لتقديم خدمات طبية عالية الجودة للمحتاجين
-                والمستحقين بأسعار رمزية أو مجاناً. يشرف على المخيمات نخبة من أفضل الأطباء والجراحين
-                المتخصصين، مع توفير أحدث الأجهزة والتقنيات الطبية.
+                {aboutDescription}
               </p>
             </div>
           </div>
@@ -295,7 +428,7 @@ function CampsListContent() {
               <Search className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="ابحث عن مخيم..."
+                placeholder={searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pr-9 sm:pr-12 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg text-right"
@@ -321,14 +454,18 @@ function CampsListContent() {
                     className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm"
                   >
                     <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span>الجارية ({filteredActiveCamps?.length || 0})</span>
+                    <span>
+                      {tabActiveText} ({filteredActiveCamps?.length || 0})
+                    </span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="expired"
                     className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm"
                   >
                     <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span>المنتهية ({filteredExpiredCamps?.length || 0})</span>
+                    <span>
+                      {tabExpiredText} ({filteredExpiredCamps?.length || 0})
+                    </span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -343,10 +480,10 @@ function CampsListContent() {
                     <div className="text-center py-10 sm:py-16">
                       <Heart className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-gray-300 mb-3 sm:mb-4" />
                       <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">
-                        لا توجد مخيمات جارية حالياً
+                        {emptyActiveTitle}
                       </h3>
                       <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                        تابعنا للحصول على آخر التحديثات عن المخيمات القادمة
+                        {emptyActiveDescription}
                       </p>
                     </div>
                   )}
@@ -363,10 +500,10 @@ function CampsListContent() {
                     <div className="text-center py-10 sm:py-16">
                       <CheckCircle2 className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-gray-300 mb-3 sm:mb-4" />
                       <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">
-                        لا توجد مخيمات منتهية
+                        {emptyExpiredTitle}
                       </h3>
                       <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                        سيتم عرض المخيمات المنتهية هنا
+                        {emptyExpiredDescription}
                       </p>
                     </div>
                   )}

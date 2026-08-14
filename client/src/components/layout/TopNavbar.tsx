@@ -15,6 +15,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useNotificationSound } from '@/hooks/integrations/useNotificationSound';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import GlobalSearch from '@/components/GlobalSearch';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface TopNavbarProps {
   pageTitle?: string;
@@ -54,6 +56,9 @@ export default function TopNavbar({ pageTitle, pageDescription }: TopNavbarProps
           {/* Global Search */}
           <GlobalSearch />
 
+          {/* Notification Center */}
+          <NotificationCenter />
+
           {/* Sound Control */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -77,6 +82,9 @@ export default function TopNavbar({ pageTitle, pageDescription }: TopNavbarProps
               <p>{theme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}</p>
             </TooltipContent>
           </Tooltip>
+
+          {/* Language Switcher */}
+          <LanguageSwitcher />
 
           {/* User Dropdown */}
           <DropdownMenu>

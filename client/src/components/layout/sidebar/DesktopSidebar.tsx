@@ -6,10 +6,11 @@
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Settings as SettingsIcon, Menu, Pencil, HelpCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Menu, Pencil, HelpCircle, Bell } from 'lucide-react';
 import InstallPWAButton from '@/components/InstallPWAButton';
 import type { NavItem } from '../sidebarData';
 import SidebarBadge from './SidebarBadge';
+import { useUnreadCount } from '@/hooks/useNotifications';
 
 interface DesktopSidebarProps {
   shouldShowText: boolean;
@@ -36,6 +37,7 @@ export default function DesktopSidebar({
   onEditClick,
   allToolsOpen,
 }: DesktopSidebarProps) {
+  const { data: unreadCount } = useUnreadCount();
   return (
     <aside
       onMouseEnter={handleMouseEnter}
@@ -188,6 +190,40 @@ export default function DesktopSidebar({
 
       {/* Bottom Actions - الإعدادات والمساعدة */}
       <div className="flex flex-col gap-1 px-2 py-2 border-t border-gray-100 dark:border-gray-700">
+        {/* الإشعارات */}
+        <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => {
+                /* TODO: فتح مركز الإشعارات */
+              }}
+              className={cn(
+                'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                shouldShowText ? 'px-3' : 'px-0 justify-center',
+                'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
+              )}
+            >
+              <div className="relative flex-shrink-0">
+                <Bell
+                  className={cn(
+                    'flex-shrink-0 transition-all duration-200',
+                    shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                  )}
+                />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
+              {shouldShowText && (
+                <span className="text-sm font-medium truncate flex-1 text-right">الإشعارات</span>
+              )}
+            </button>
+          </TooltipTrigger>
+          {!shouldShowText && <TooltipContent side="left">الإشعارات</TooltipContent>}
+        </Tooltip>
+
         {/* الإعدادات */}
         <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
           <TooltipTrigger asChild>

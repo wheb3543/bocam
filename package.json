@@ -1,4 +1,5 @@
 {
+  "$schema": "./package.schema.json",
   "name": "bocam",
   "version": "1.0.0",
   "type": "module",
@@ -25,6 +26,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx server/scripts/seedContentDirect.ts",
+    "db:seed:homepage": "tsx scripts/seed-homepage.ts",
+    "db:seed:homepage:manual": "tsx scripts/add-homepage-content-manually.ts",
     "docker:build": "docker build -t sgh-crm-portal .",
     "docker:run": "docker run -p 3000:3000 sgh-crm-portal",
     "docker:compose:up": "docker-compose up",

@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import Navbar from '@/components/layout/Navbar';
 import { trpc } from '@/lib/api/trpc';
+import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Offer {
   id: number;
@@ -42,17 +44,114 @@ function OffersListContent() {
 
   const { data: offers, isLoading } = trpc.offers.getAll.useQuery();
 
+  // Dynamic content from CMS
+  const { language } = useLanguage();
+  const { data: heroTitleData } = usePublicTextContent({
+    key: `offers.list.hero.title.${language}`,
+    section: 'offers',
+    type: 'title',
+  });
+  const { data: heroDescriptionData } = usePublicTextContent({
+    key: `offers.list.hero.description.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: searchPlaceholderData } = usePublicTextContent({
+    key: `offers.list.search.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: activeTabLabelData } = usePublicTextContent({
+    key: `offers.list.tab.active.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: expiredTabLabelData } = usePublicTextContent({
+    key: `offers.list.tab.expired.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: emptyActiveTitleData } = usePublicTextContent({
+    key: `offers.list.empty.active.title.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: emptyActiveSearchData } = usePublicTextContent({
+    key: `offers.list.empty.active.search.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: emptyExpiredTitleData } = usePublicTextContent({
+    key: `offers.list.empty.expired.title.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: emptyExpiredSearchData } = usePublicTextContent({
+    key: `offers.list.empty.expired.search.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: specialBadgeData } = usePublicTextContent({
+    key: `offers.list.card.special.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: expiredBadgeData } = usePublicTextContent({
+    key: `offers.list.card.expired.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: viewDetailsButtonData } = usePublicTextContent({
+    key: `offers.list.card.view.details.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: requestButtonData } = usePublicTextContent({
+    key: `offers.list.card.request.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: validUntilLabelData } = usePublicTextContent({
+    key: `offers.list.card.valid.until.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+
+  // Extract content from data
+  const heroTitle = heroTitleData?.data?.[0]?.content || 'عروضنا الطبية المميزة';
+  const heroDescription =
+    heroDescriptionData?.data?.[0]?.content ||
+    'استفد من عروضنا الخاصة على مختلف الخدمات الطبية بأسعار تنافسية';
+  const searchPlaceholder = searchPlaceholderData?.data?.[0]?.content || 'ابحث عن عرض...';
+  const activeTabLabel = activeTabLabelData?.data?.[0]?.content || 'العروض الجارية';
+  const expiredTabLabel = expiredTabLabelData?.data?.[0]?.content || 'المنتهية';
+  const emptyActiveTitle = emptyActiveTitleData?.data?.[0]?.content || 'لا توجد عروض جارية حالياً';
+  const emptyActiveSearch =
+    emptyActiveSearchData?.data?.[0]?.content || 'لم يتم العثور على عروض جارية مطابقة للبحث';
+  const emptyExpiredTitle = emptyExpiredTitleData?.data?.[0]?.content || 'لا توجد عروض منتهية';
+  const emptyExpiredSearch =
+    emptyExpiredSearchData?.data?.[0]?.content || 'لم يتم العثور على عروض منتهية مطابقة للبحث';
+  const specialBadge = specialBadgeData?.data?.[0]?.content || 'عرض خاص';
+  const expiredBadge = expiredBadgeData?.data?.[0]?.content || 'منتهي';
+  const viewDetailsButton = viewDetailsButtonData?.data?.[0]?.content || 'عرض التفاصيل';
+  const requestButton = requestButtonData?.data?.[0]?.content || 'اطلب العرض';
+  const validUntilLabel = validUntilLabelData?.data?.[0]?.content || 'صالح حتى';
+
   // Separate active and expired offers based on endDate
   const now = new Date();
   const activeOffers = Array.isArray(offers)
     ? offers.filter((offer) => {
-        if (!offer.endDate) {return true;}
+        if (!offer.endDate) {
+          return true;
+        }
         return new Date(offer.endDate) >= now;
       })
     : [];
   const expiredOffers = Array.isArray(offers)
     ? offers.filter((offer) => {
-        if (!offer.endDate) {return false;}
+        if (!offer.endDate) {
+          return false;
+        }
         return new Date(offer.endDate) < now;
       })
     : [];
@@ -78,7 +177,9 @@ function OffersListContent() {
               src={offer.imageUrl || ''}
               alt={offer.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              onError={(e) => { e.currentTarget.src = '/images/default-offer.jpg'; }}
+              onError={(e) => {
+                e.currentTarget.src = '/images/default-offer.jpg';
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
@@ -88,12 +189,12 @@ function OffersListContent() {
                 {isExpired ? (
                   <>
                     <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    منتهي
+                    {expiredBadge}
                   </>
                 ) : (
                   <>
                     <Gift className="h-3 w-3 sm:h-4 sm:w-4" />
-                    عرض خاص
+                    {specialBadge}
                   </>
                 )}
               </div>
@@ -113,12 +214,12 @@ function OffersListContent() {
                 {isExpired ? (
                   <>
                     <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    منتهي
+                    {expiredBadge}
                   </>
                 ) : (
                   <>
                     <Gift className="h-3 w-3 sm:h-4 sm:w-4" />
-                    عرض خاص
+                    {specialBadge}
                   </>
                 )}
               </div>
@@ -140,7 +241,9 @@ function OffersListContent() {
           {offer.startDate && offer.endDate && (
             <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground text-[10px] sm:text-xs md:text-sm mb-3 sm:mb-4">
               <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span>صالح حتى {formatDate(offer.endDate)}</span>
+              <span>
+                {validUntilLabel} {formatDate(offer.endDate)}
+              </span>
             </div>
           )}
 
@@ -151,7 +254,7 @@ function OffersListContent() {
               setLocation(`/offers/${offer.slug || offer.id}`);
             }}
           >
-            {isExpired ? 'عرض التفاصيل' : 'اطلب العرض'}
+            {isExpired ? viewDetailsButton : requestButton}
             <ArrowLeft className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 rotate-180" />
           </Button>
         </div>
@@ -167,10 +270,10 @@ function OffersListContent() {
           <div className="max-w-3xl mx-auto text-center">
             <Gift className="h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16 mx-auto mb-3 sm:mb-5 md:mb-6" />
             <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">
-              عروضنا الطبية المميزة
+              {heroTitle}
             </h1>
             <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-white/90 px-2">
-              استفد من عروضنا الخاصة على مختلف الخدمات الطبية بأسعار تنافسية
+              {heroDescription}
             </p>
           </div>
         </div>
@@ -183,7 +286,7 @@ function OffersListContent() {
             <Search className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="ابحث عن عرض..."
+              placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pr-9 sm:pr-12 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg text-right"
@@ -203,10 +306,10 @@ function OffersListContent() {
             <Tabs defaultValue="active" className="w-full" dir="rtl">
               <TabsList className="grid w-full max-w-sm sm:max-w-md mx-auto grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
                 <TabsTrigger value="active" className="text-xs sm:text-sm md:text-base">
-                  العروض الجارية ({filteredActiveOffers?.length || 0})
+                  {activeTabLabel} ({filteredActiveOffers?.length || 0})
                 </TabsTrigger>
                 <TabsTrigger value="expired" className="text-xs sm:text-sm md:text-base">
-                  المنتهية ({filteredExpiredOffers?.length || 0})
+                  {expiredTabLabel} ({filteredExpiredOffers?.length || 0})
                 </TabsTrigger>
               </TabsList>
 
@@ -222,9 +325,7 @@ function OffersListContent() {
                   <div className="text-center py-10 sm:py-16">
                     <Gift className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-gray-300 mb-3 sm:mb-4" />
                     <p className="text-sm sm:text-lg md:text-xl text-muted-foreground">
-                      {searchQuery
-                        ? 'لم يتم العثور على عروض جارية مطابقة للبحث'
-                        : 'لا توجد عروض جارية حالياً'}
+                      {searchQuery ? emptyActiveSearch : emptyActiveTitle}
                     </p>
                   </div>
                 )}
@@ -242,9 +343,7 @@ function OffersListContent() {
                   <div className="text-center py-10 sm:py-16">
                     <CheckCircle2 className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-gray-300 mb-3 sm:mb-4" />
                     <p className="text-sm sm:text-lg md:text-xl text-muted-foreground">
-                      {searchQuery
-                        ? 'لم يتم العثور على عروض منتهية مطابقة للبحث'
-                        : 'لا توجد عروض منتهية'}
+                      {searchQuery ? emptyExpiredSearch : emptyExpiredTitle}
                     </p>
                   </div>
                 )}

@@ -9,6 +9,7 @@ import { Phone, Menu, X, ChevronLeft } from 'lucide-react';
 import { APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from '@/const';
 import { Link } from 'wouter';
 import InstallPWAButton from '@/components/InstallPWAButton';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export default function Navbar() {
   const location = window.location.pathname;
@@ -117,6 +118,9 @@ export default function Navbar() {
 
             {/* Contact & Patient Portal Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+              {/* Language Switcher */}
+              <LanguageSwitcher />
+
               {/* Patient Portal Button - Desktop only */}
               <Link href="/patient-portal/login">
                 <span className="hidden md:flex items-center gap-1.5 border border-green-600 text-green-700 dark:text-green-400 dark:border-green-500 px-3 lg:px-4 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors text-sm font-medium cursor-pointer whitespace-nowrap">

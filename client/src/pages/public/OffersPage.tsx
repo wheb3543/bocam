@@ -23,6 +23,8 @@ import SectionDivider from '@/components/SectionDivider';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
+import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface OfferFormData {
   fullName: string;
@@ -58,6 +60,152 @@ function OffersPageContent() {
   const [phoneError, setPhoneError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // الحصول على اللغة الحالية
+  const { language } = useLanguage();
+
+  // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
+  const { data: offersTitle } = usePublicTextContent({
+    key: `offers.title.${language}`,
+    section: 'offers',
+    type: 'title',
+  });
+  const { data: offersDescription } = usePublicTextContent({
+    key: `offers.description.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: offersBadge } = usePublicTextContent({
+    key: `offers.badge.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: emptyTitleData } = usePublicTextContent({
+    key: `offers.page.empty.title.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: cardSelectedData } = usePublicTextContent({
+    key: `offers.page.card.selected.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: cardSelectData } = usePublicTextContent({
+    key: `offers.page.card.select.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: validUntilData } = usePublicTextContent({
+    key: `offers.page.card.valid.until.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formTitleData } = usePublicTextContent({
+    key: `offers.page.form.title.${language}`,
+    section: 'offers',
+    type: 'title',
+  });
+  const { data: formDescriptionData } = usePublicTextContent({
+    key: `offers.page.form.description.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: formFullnameData } = usePublicTextContent({
+    key: `offers.page.form.fullname.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formFullnamePlaceholderData } = usePublicTextContent({
+    key: `offers.page.form.fullname.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formPhoneData } = usePublicTextContent({
+    key: `offers.page.form.phone.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formPhonePlaceholderData } = usePublicTextContent({
+    key: `offers.page.form.phone.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formEmailData } = usePublicTextContent({
+    key: `offers.page.form.email.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formEmailPlaceholderData } = usePublicTextContent({
+    key: `offers.page.form.email.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formNotesData } = usePublicTextContent({
+    key: `offers.page.form.notes.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formNotesPlaceholderData } = usePublicTextContent({
+    key: `offers.page.form.notes.placeholder.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: formSubmitData } = usePublicTextContent({
+    key: `offers.page.form.submit.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: formRegisteringData } = usePublicTextContent({
+    key: `offers.page.form.registering.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+  const { data: successTitleData } = usePublicTextContent({
+    key: `offers.page.success.title.${language}`,
+    section: 'offers',
+    type: 'title',
+  });
+  const { data: successDescriptionData } = usePublicTextContent({
+    key: `offers.page.success.description.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
+  const { data: successButtonData } = usePublicTextContent({
+    key: `offers.page.success.button.${language}`,
+    section: 'offers',
+    type: 'button',
+  });
+
+  // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
+  const title = offersTitle?.data?.[0]?.content || 'العروض الطبية';
+  const description =
+    offersDescription?.data?.[0]?.content ||
+    'استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة';
+  const badgeText = offersBadge?.data?.[0]?.content || 'عروض خاصة';
+  const emptyTitle = emptyTitleData?.data?.[0]?.content || 'لا توجد عروض متاحة حالياً';
+  const cardSelected = cardSelectedData?.data?.[0]?.content || 'تم الاختيار';
+  const cardSelect = cardSelectData?.data?.[0]?.content || 'اختر هذا العرض';
+  const validUntil = validUntilData?.data?.[0]?.content || 'العرض ساري حتى';
+  const formTitle = formTitleData?.data?.[0]?.content || 'سجل الآن';
+  const formDescription =
+    formDescriptionData?.data?.[0]?.content || 'أكمل بياناتك وسنتواصل معك خلال 24 ساعة';
+  const formFullname = formFullnameData?.data?.[0]?.content || 'الاسم الكامل';
+  const formFullnamePlaceholder =
+    formFullnamePlaceholderData?.data?.[0]?.content || 'أدخل اسمك الكامل';
+  const formPhone = formPhoneData?.data?.[0]?.content || 'رقم الهاتف';
+  const formPhonePlaceholder = formPhonePlaceholderData?.data?.[0]?.content || 'مثال: 771234567';
+  const formEmail = formEmailData?.data?.[0]?.content || 'البريد الإلكتروني (اختياري)';
+  const formEmailPlaceholder = formEmailPlaceholderData?.data?.[0]?.content || 'example@email.com';
+  const formNotes = formNotesData?.data?.[0]?.content || 'ملاحظات إضافية';
+  const formNotesPlaceholder =
+    formNotesPlaceholderData?.data?.[0]?.content || 'أي معلومات إضافية تود مشاركتها...';
+  const formSubmit = formSubmitData?.data?.[0]?.content || 'تسجيل الآن';
+  const formRegistering = formRegisteringData?.data?.[0]?.content || 'جاري التسجيل...';
+  const successTitle = successTitleData?.data?.[0]?.content || 'تم التسجيل بنجاح!';
+  const successDescription =
+    successDescriptionData?.data?.[0]?.content ||
+    'شكراً لاهتمامك بعروضنا الطبية. سيتواصل معك فريقنا خلال 24 ساعة.';
+  const successButton = successButtonData?.data?.[0]?.content || 'العودة للعروض';
 
   // Fetch all active offers
   const { data: offers, isLoading } = trpc.offers.getAll.useQuery();
@@ -126,12 +274,10 @@ function OffersPageContent() {
         <Card className="max-w-md mx-4">
           <CardContent className="pt-6 text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-foreground mb-2">تم التسجيل بنجاح!</h2>
-            <p className="text-muted-foreground mb-4">
-              شكراً لاهتمامك بعروضنا الطبية. سيتواصل معك فريقنا خلال 24 ساعة.
-            </p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">{successTitle}</h2>
+            <p className="text-muted-foreground mb-4">{successDescription}</p>
             <Button onClick={() => setSubmitted(false)} variant="outline">
-              العودة للعروض
+              {successButton}
             </Button>
           </CardContent>
         </Card>
@@ -145,9 +291,9 @@ function OffersPageContent() {
 
       {/* Hero Section */}
       <HeroSection
-        title="العروض الطبية الخاصة"
-        description="استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة"
-        badge={{ text: 'عروض مميزة', icon: Gift }}
+        title={title}
+        description={description}
+        badge={{ text: badgeText, icon: Gift }}
         backgroundGradient="from-blue-600 via-blue-700 to-green-600"
       />
 
@@ -183,7 +329,7 @@ function OffersPageContent() {
                       {offer.endDate && (
                         <CardDescription className="flex items-center gap-1 text-orange-600">
                           <Calendar className="h-4 w-4" />
-                          العرض ساري حتى {formatDate(offer.endDate)}
+                          {validUntil} {formatDate(offer.endDate)}
                         </CardDescription>
                       )}
                     </CardHeader>
@@ -193,7 +339,7 @@ function OffersPageContent() {
                         className="w-full mt-4"
                         variant={selectedOffer === offer.id ? 'default' : 'outline'}
                       >
-                        {selectedOffer === offer.id ? 'تم الاختيار' : 'اختر هذا العرض'}
+                        {selectedOffer === offer.id ? cardSelected : cardSelect}
                       </Button>
                     </CardContent>
                   </AnimatedCard>
@@ -203,7 +349,7 @@ function OffersPageContent() {
               <AnimatedCard className="max-w-md mx-auto" delay={0}>
                 <CardContent className="pt-6 text-center">
                   <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">لا توجد عروض متاحة حالياً</p>
+                  <p className="text-muted-foreground">{emptyTitle}</p>
                 </CardContent>
               </AnimatedCard>
             )}
@@ -220,21 +366,21 @@ function OffersPageContent() {
             <div className="container mx-auto px-5 sm:px-6">
               <AnimatedCard className="max-w-lg mx-auto" delay={0.2}>
                 <CardHeader className="text-center">
-                  <CardTitle className="text-xl sm:text-2xl text-blue-900">سجل الآن</CardTitle>
-                  <CardDescription>أكمل بياناتك وسنتواصل معك خلال 24 ساعة</CardDescription>
+                  <CardTitle className="text-xl sm:text-2xl text-blue-900">{formTitle}</CardTitle>
+                  <CardDescription>{formDescription}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="fullName" className="flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        الاسم الكامل *
+                        {formFullname} *
                       </Label>
                       <Input
                         id="fullName"
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                        placeholder="أدخل اسمك الكامل"
+                        placeholder={formFullnamePlaceholder}
                         required
                         dir="rtl"
                       />
@@ -243,7 +389,7 @@ function OffersPageContent() {
                     <div className="space-y-2">
                       <Label htmlFor="phone" className="flex items-center gap-2">
                         <Phone className="h-4 w-4" />
-                        رقم الهاتف *
+                        {formPhone} *
                       </Label>
                       <Input
                         id="phone"
@@ -263,7 +409,7 @@ function OffersPageContent() {
                             setPhoneError(v.valid ? '' : v.message || '');
                           }
                         }}
-                        placeholder="مثال: 771234567"
+                        placeholder={formPhonePlaceholder}
                         required
                         dir="ltr"
                         inputMode="numeric"
@@ -275,25 +421,25 @@ function OffersPageContent() {
                     <div className="space-y-2">
                       <Label htmlFor="email" className="flex items-center gap-2">
                         <Mail className="h-4 w-4" />
-                        البريد الإلكتروني (اختياري)
+                        {formEmail}
                       </Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="example@email.com"
+                        placeholder={formEmailPlaceholder}
                         dir="ltr"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="notes">ملاحظات إضافية</Label>
+                      <Label htmlFor="notes">{formNotes}</Label>
                       <Textarea
                         id="notes"
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        placeholder="أي معلومات إضافية تود مشاركتها..."
+                        placeholder={formNotesPlaceholder}
                         dir="rtl"
                       />
                     </div>
@@ -302,10 +448,10 @@ function OffersPageContent() {
                       {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          جاري التسجيل...
+                          {formRegistering}
                         </>
                       ) : (
-                        'تسجيل الآن'
+                        <span>{formSubmit}</span>
                       )}
                     </Button>
                   </form>

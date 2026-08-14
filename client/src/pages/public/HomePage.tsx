@@ -36,6 +36,8 @@ import {
 } from '@/const';
 import { Link } from 'wouter';
 import { useState, useEffect } from 'react';
+import { usePublicTextContent, usePublicImages } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function HomePage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -45,6 +47,220 @@ export default function HomePage() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const statsRef = useState({ doctors: 22, specialties: 15, patients: 1000 })[0];
+
+  // الحصول على اللغة الحالية
+  const { language } = useLanguage();
+
+  // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
+  const { data: heroTitle } = usePublicTextContent({
+    key: `hero.title.${language}`,
+    section: 'hero',
+    type: 'title',
+  });
+  const { data: heroSubtitle } = usePublicTextContent({
+    key: `hero.subtitle.${language}`,
+    section: 'hero',
+    type: 'subtitle',
+  });
+  const { data: heroDescription } = usePublicTextContent({
+    key: `hero.description.${language}`,
+    section: 'hero',
+    type: 'description',
+  });
+  const { data: heroButtonText } = usePublicTextContent({
+    key: `hero.button.text.${language}`,
+    section: 'hero',
+    type: 'button',
+  });
+
+  // Stats Section
+  const { data: statsDoctorsLabel } = usePublicTextContent({
+    key: `stats.doctors.label.${language}`,
+    section: 'stats',
+    type: 'text',
+  });
+  const { data: statsSpecialtiesLabel } = usePublicTextContent({
+    key: `stats.specialties.label.${language}`,
+    section: 'stats',
+    type: 'text',
+  });
+  const { data: statsPatientsLabel } = usePublicTextContent({
+    key: `stats.patients.label.${language}`,
+    section: 'stats',
+    type: 'text',
+  });
+  const { data: statsServiceLabel } = usePublicTextContent({
+    key: `stats.service.label.${language}`,
+    section: 'stats',
+    type: 'text',
+  });
+
+  // Services Section
+  const { data: servicesTitle } = usePublicTextContent({
+    key: `services.title.${language}`,
+    section: 'services',
+    type: 'title',
+  });
+  const { data: servicesDescription } = usePublicTextContent({
+    key: `services.description.${language}`,
+    section: 'services',
+    type: 'description',
+  });
+  const { data: servicesDoctorsTitle } = usePublicTextContent({
+    key: `services.doctors.title.${language}`,
+    section: 'services',
+    type: 'title',
+  });
+  const { data: servicesDoctorsDescription } = usePublicTextContent({
+    key: `services.doctors.description.${language}`,
+    section: 'services',
+    type: 'description',
+  });
+  const { data: servicesOffersTitle } = usePublicTextContent({
+    key: `services.offers.title.${language}`,
+    section: 'services',
+    type: 'title',
+  });
+  const { data: servicesOffersDescription } = usePublicTextContent({
+    key: `services.offers.description.${language}`,
+    section: 'services',
+    type: 'description',
+  });
+  const { data: servicesCampsTitle } = usePublicTextContent({
+    key: `services.camps.title.${language}`,
+    section: 'services',
+    type: 'title',
+  });
+  const { data: servicesCampsDescription } = usePublicTextContent({
+    key: `services.camps.description.${language}`,
+    section: 'services',
+    type: 'description',
+  });
+  const { data: servicesExploreButton } = usePublicTextContent({
+    key: `services.explore.button.${language}`,
+    section: 'services',
+    type: 'button',
+  });
+
+  // About Section
+  const { data: aboutTitle } = usePublicTextContent({
+    key: `about.title.${language}`,
+    section: 'about',
+    type: 'title',
+  });
+  const { data: aboutDescription } = usePublicTextContent({
+    key: `about.description.${language}`,
+    section: 'about',
+    type: 'description',
+  });
+  const { data: aboutFeaturesGlobalTitle } = usePublicTextContent({
+    key: `about.features.global.title.${language}`,
+    section: 'about',
+    type: 'title',
+  });
+  const { data: aboutFeaturesGlobalDescription } = usePublicTextContent({
+    key: `about.features.global.description.${language}`,
+    section: 'about',
+    type: 'description',
+  });
+  const { data: aboutFeaturesComprehensiveTitle } = usePublicTextContent({
+    key: `about.features.comprehensive.title.${language}`,
+    section: 'about',
+    type: 'title',
+  });
+  const { data: aboutFeaturesComprehensiveDescription } = usePublicTextContent({
+    key: `about.features.comprehensive.description.${language}`,
+    section: 'about',
+    type: 'description',
+  });
+  const { data: aboutFeaturesSpecializedTitle } = usePublicTextContent({
+    key: `about.features.specialized.title.${language}`,
+    section: 'about',
+    type: 'title',
+  });
+  const { data: aboutFeaturesSpecializedDescription } = usePublicTextContent({
+    key: `about.features.specialized.description.${language}`,
+    section: 'about',
+    type: 'description',
+  });
+  const { data: aboutAdditionalText1 } = usePublicTextContent({
+    key: `about.additional.text1.${language}`,
+    section: 'about',
+    type: 'text',
+  });
+  const { data: aboutAdditionalText2 } = usePublicTextContent({
+    key: `about.additional.text2.${language}`,
+    section: 'about',
+    type: 'text',
+  });
+  const { data: aboutImageCaption } = usePublicTextContent({
+    key: `about.image.caption.${language}`,
+    section: 'about',
+    type: 'text',
+  });
+
+  // CTA Section
+  const { data: ctaTitle } = usePublicTextContent({
+    key: `cta.title.${language}`,
+    section: 'cta',
+    type: 'title',
+  });
+  const { data: ctaDescription } = usePublicTextContent({
+    key: `cta.description.${language}`,
+    section: 'cta',
+    type: 'description',
+  });
+  const { data: ctaBookButton } = usePublicTextContent({
+    key: `cta.book.button.${language}`,
+    section: 'cta',
+    type: 'button',
+  });
+  const { data: ctaCallButton } = usePublicTextContent({
+    key: `cta.call.button.${language}`,
+    section: 'cta',
+    type: 'button',
+  });
+
+  // Accessibility
+  const { data: accessibilitySkipLink } = usePublicTextContent({
+    key: `accessibility.skip.link.${language}`,
+    section: 'accessibility',
+    type: 'text',
+  });
+  const { data: accessibilityBackToTop } = usePublicTextContent({
+    key: `accessibility.back.to.top.${language}`,
+    section: 'accessibility',
+    type: 'text',
+  });
+  const { data: accessibilityToggleAnimations } = usePublicTextContent({
+    key: `accessibility.toggle.animations.${language}`,
+    section: 'accessibility',
+    type: 'text',
+  });
+  const { data: accessibilityStartAnimations } = usePublicTextContent({
+    key: `accessibility.start.animations.${language}`,
+    section: 'accessibility',
+    type: 'text',
+  });
+
+  // Images
+  const { data: heroLogo } = usePublicImages({ key: `hero.logo.${language}`, section: 'hero' });
+  const { data: aboutHospitalImage } = usePublicImages({
+    key: `about.hospital.${language}`,
+    section: 'about',
+  });
+
+  // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
+  const title = heroTitle?.data?.[0]?.content || getCompanySlogan();
+  const subtitle = heroSubtitle?.data?.[0]?.content || 'خدمات طبية متميزة بأعلى معايير الجودة';
+  const description = heroDescription?.data?.[0]?.content || 'احجز موعدك مع أفضل الأطباء في صنعاء';
+  const buttonText = heroButtonText?.data?.[0]?.content || 'احجز موعدك الآن';
+
+  // استخدام الصور من قاعدة البيانات أو القيم الافتراضية
+  const logoUrl = heroLogo?.data?.[0]?.url || APP_LOGO;
+  const logoAlt = heroLogo?.data?.[0]?.alt || APP_TITLE;
+  const hospitalImageUrl = aboutHospitalImage?.data?.[0]?.url || APP_LOGO;
+  const hospitalImageAlt = aboutHospitalImage?.data?.[0]?.alt || `صورة ${COMPANY_ARABIC_NAME}`;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,7 +277,9 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (!animationsEnabled) {return;}
+    if (!animationsEnabled) {
+      return;
+    }
 
     const animateStats = () => {
       const duration = 2000;
@@ -97,7 +315,9 @@ export default function HomePage() {
   }, [animationsEnabled, statsRef]);
 
   useEffect(() => {
-    if (!animationsEnabled) {return;}
+    if (!animationsEnabled) {
+      return;
+    }
 
     const observerOptions = {
       threshold: 0.1,
@@ -129,8 +349,10 @@ export default function HomePage() {
   const services = [
     {
       icon: Stethoscope,
-      title: 'حجز مواعيد الأطباء',
-      description: 'احجز موعدك مع أفضل الأطباء والاستشاريين في مختلف التخصصات',
+      title: servicesDoctorsTitle?.data?.[0]?.content || 'حجز مواعيد الأطباء',
+      description:
+        servicesDoctorsDescription?.data?.[0]?.content ||
+        'احجز موعدك مع أفضل الأطباء والاستشاريين في مختلف التخصصات',
       link: '/doctors',
       color: 'text-green-600 dark:text-green-400',
       bgColor: 'bg-green-50 dark:bg-green-900/30',
@@ -139,8 +361,10 @@ export default function HomePage() {
     },
     {
       icon: TrendingUp,
-      title: 'العروض الطبية',
-      description: 'استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات متكاملة',
+      title: servicesOffersTitle?.data?.[0]?.content || 'العروض الطبية',
+      description:
+        servicesOffersDescription?.data?.[0]?.content ||
+        'استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات متكاملة',
       link: '/offers',
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-50 dark:bg-blue-900/30',
@@ -149,8 +373,10 @@ export default function HomePage() {
     },
     {
       icon: Heart,
-      title: 'المخيمات الطبية الخيرية',
-      description: 'خدمات طبية مجانية للمجتمع ضمن مسؤوليتنا الاجتماعية',
+      title: servicesCampsTitle?.data?.[0]?.content || 'المخيمات الطبية الخيرية',
+      description:
+        servicesCampsDescription?.data?.[0]?.content ||
+        'خدمات طبية مجانية للمجتمع ضمن مسؤوليتنا الاجتماعية',
       link: '/camps',
       color: 'text-green-600 dark:text-green-400',
       bgColor: 'bg-green-50 dark:bg-green-900/30',
@@ -162,28 +388,28 @@ export default function HomePage() {
   const stats = [
     {
       number: `${animatedStats.doctors}+`,
-      label: 'طبيب واستشاري',
+      label: statsDoctorsLabel?.data?.[0]?.content || 'طبيب واستشاري',
       icon: Users,
       color: 'text-green-600 dark:text-green-400',
       bg: 'bg-green-50 dark:bg-green-900/30',
     },
     {
       number: `${animatedStats.specialties}+`,
-      label: 'تخصص طبي',
+      label: statsSpecialtiesLabel?.data?.[0]?.content || 'تخصص طبي',
       icon: Activity,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/30',
     },
     {
       number: `${animatedStats.patients}+`,
-      label: 'مريض سعيد',
+      label: statsPatientsLabel?.data?.[0]?.content || 'مريض سعيد',
       icon: Heart,
       color: 'text-green-600 dark:text-green-400',
       bg: 'bg-green-50 dark:bg-green-900/30',
     },
     {
       number: '24/7',
-      label: 'خدمة متواصلة',
+      label: statsServiceLabel?.data?.[0]?.content || 'خدمة متواصلة',
       icon: Clock,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/30',
@@ -191,12 +417,26 @@ export default function HomePage() {
   ];
 
   const features = [
-    { icon: Award, title: 'معايير عالمية', description: 'نقدم خدمات طبية متميزة بمعايير عالمية' },
-    { icon: Shield, title: 'رعاية شاملة', description: 'رعاية صحية متكاملة لجميع المرضى' },
+    {
+      icon: Award,
+      title: aboutFeaturesGlobalTitle?.data?.[0]?.content || 'معايير عالمية',
+      description:
+        aboutFeaturesGlobalDescription?.data?.[0]?.content ||
+        'نقدم خدمات طبية متميزة بمعايير عالمية',
+    },
+    {
+      icon: Shield,
+      title: aboutFeaturesComprehensiveTitle?.data?.[0]?.content || 'رعاية شاملة',
+      description:
+        aboutFeaturesComprehensiveDescription?.data?.[0]?.content ||
+        'رعاية صحية متكاملة لجميع المرضى',
+    },
     {
       icon: Stethoscope,
-      title: 'أطباء متخصصون',
-      description: 'نخبة من الأطباء والاستشاريين المتخصصين',
+      title: aboutFeaturesSpecializedTitle?.data?.[0]?.content || 'أطباء متخصصون',
+      description:
+        aboutFeaturesSpecializedDescription?.data?.[0]?.content ||
+        'نخبة من الأطباء والاستشاريين المتخصصين',
     },
   ];
 
@@ -217,7 +457,7 @@ export default function HomePage() {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-green-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
         >
-          تخطى إلى المحتوى الرئيسي
+          {accessibilitySkipLink?.data?.[0]?.content || 'تخطى إلى المحتوى الرئيسي'}
         </a>
 
         {/* Reading Progress Bar */}
@@ -251,7 +491,11 @@ export default function HomePage() {
         <button
           onClick={toggleAnimations}
           className="fixed top-20 left-4 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border-2 border-gray-200 dark:border-gray-700"
-          aria-label={animationsEnabled ? 'إيقاف الحركات' : 'تشغيل الحركات'}
+          aria-label={
+            animationsEnabled
+              ? accessibilityToggleAnimations?.data?.[0]?.content || 'إيقاف الحركات'
+              : accessibilityStartAnimations?.data?.[0]?.content || 'تشغيل الحركات'
+          }
         >
           {animationsEnabled ? (
             <Pause className="w-5 h-5 text-green-600" />
@@ -340,35 +584,32 @@ export default function HomePage() {
             <div className="max-w-4xl mx-auto text-center">
               <div className="relative inline-block mb-6 sm:mb-8 md:mb-10">
                 <img
-                  src={APP_LOGO}
-                  alt={APP_TITLE}
+                  src={logoUrl}
+                  alt={logoAlt}
                   className="h-20 sm:h-24 md:h-32 lg:h-36 w-auto mx-auto animate-logo-float"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-400 opacity-0 blur-2xl animate-logo-glow" />
               </div>
               <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight px-1 animate-text-shimmer bg-gradient-to-r from-white via-green-100 to-white bg-clip-text text-transparent bg-[length:200%_auto]">
-                {APP_TITLE}
+                {title}
               </h1>
               <p className="text-base sm:text-xl md:text-3xl mb-2 sm:mb-3 text-green-100 font-semibold">
                 {COMPANY_NAME}
               </p>
               <p className="text-sm sm:text-lg md:text-2xl mb-6 sm:mb-8 md:mb-10 text-blue-100 font-medium">
-                {getCompanySlogan()}
+                {subtitle}
               </p>
               <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto px-2 text-white/95 bg-black/20 rounded-lg p-4">
-                منصة الحجز الإلكترونية لـ {COMPANY_ARABIC_NAME}. احجز موعدك مع أفضل الأطباء
-                والاستشاريين في مختلف التخصصات الطبية، استفد من العروض الطبية المميزة والخصومات
-                الخاصة، وشارك في المخيمات الطبية الخيرية المجانية التي ننظمها بشكل دوري لخدمة
-                المجتمع. نوفر لك تجربة حجز سهلة وسريعة من خلال منصتنا الإلكترونية المتكاملة.
+                {description}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-3 sm:px-0">
                 <Link href="/doctors">
                   <Button
                     size="lg"
                     className="w-full sm:w-auto bg-white dark:bg-card text-green-600 hover:bg-green-50 text-base sm:text-lg font-semibold shadow-xl hover:shadow-2xl hover:shadow-green-500/30 hover:scale-105 transition-all h-12 sm:h-14 px-6 sm:px-8"
-                    aria-label="احجز موعدك الآن مع أفضل الأطباء"
+                    aria-label={buttonText}
                   >
-                    احجز موعدك الآن
+                    {buttonText}
                     <ArrowLeft
                       className="mr-2 h-5 w-5 sm:h-6 sm:w-6 rotate-180"
                       aria-hidden="true"
@@ -446,13 +687,11 @@ export default function HomePage() {
           <div className="container mx-auto px-4 sm:px-6">
             <div className="text-center mb-10 sm:mb-14 md:mb-18">
               <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground dark:text-white mb-4 sm:mb-5 md:mb-7 animate-text-shimmer bg-gradient-to-r from-green-600 via-blue-600 to-green-600 bg-clip-text text-transparent bg-[length:200%_auto]">
-                خدماتنا الإلكترونية
+                {servicesTitle?.data?.[0]?.content || 'خدماتنا الإلكترونية'}
               </h2>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground dark:text-muted-foreground max-w-2xl mx-auto px-2 leading-relaxed bg-gray-200/70 dark:bg-gray-800/70 rounded-lg p-4">
-                نوفر لك منصة إلكترونية متكاملة لحجز المواعيد مع الأطباء والاستشاريين في مختلف
-                التخصصات، الاستفادة من العروض الطبية المميزة والخصومات الخاصة، والمشاركة في المخيمات
-                الطبية الخيرية المجانية التي ننظمها بشكل دوري لخدمة المجتمع. تجربة حجز سهلة وسريعة
-                في متناول يدك.
+                {servicesDescription?.data?.[0]?.content ||
+                  'نوفر لك منصة إلكترونية متكاملة لحجز المواعيد مع الأطباء والاستشاريين في مختلف التخصصات، الاستفادة من العروض الطبية المميزة والخصومات الخاصة، والمشاركة في المخيمات الطبية الخيرية المجانية التي ننظمها بشكل دوري لخدمة المجتمع. تجربة حجز سهلة وسريعة في متناول يدك.'}
               </p>
             </div>
 
@@ -487,7 +726,7 @@ export default function HomePage() {
                         className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-base sm:text-lg md:text-xl font-semibold shadow-md hover:shadow-xl hover:shadow-green-500/30 h-11 sm:h-12 md:h-13 transition-all"
                         aria-label={`استكشف ${service.title}`}
                       >
-                        استكشف الآن
+                        {servicesExploreButton?.data?.[0]?.content || 'استكشف الآن'}
                         <ArrowLeft
                           className="mr-2 h-5 w-5 sm:h-6 sm:w-6 rotate-180"
                           aria-hidden="true"
@@ -517,14 +756,11 @@ export default function HomePage() {
           <div className="container mx-auto px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
               <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground dark:text-white mb-6 sm:mb-8 md:mb-10 text-center animate-text-shimmer bg-gradient-to-r from-green-600 via-blue-600 to-green-600 bg-clip-text text-transparent bg-[length:200%_auto]">
-                عن {COMPANY_ARABIC_NAME}
+                {aboutTitle?.data?.[0]?.content || `عن ${COMPANY_ARABIC_NAME}`}
               </h2>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground dark:text-muted-foreground text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16 leading-relaxed px-2 bg-gray-200/70 dark:bg-gray-800/70 rounded-lg p-4">
-                {COMPANY_ARABIC_NAME} هو أحد أبرز المؤسسات الصحية في اليمن، حيث نقدم خدمات طبية
-                متميزة بمعايير عالمية. نحن ملتزمون بتوفير رعاية صحية شاملة ومتكاملة لجميع المرضى، مع
-                نخبة من الأطباء والاستشاريين المتخصصين في مختلف التخصصات الطبية. نؤمن بأهمية
-                المسؤولية المجتمعية، ولذلك نقيم بشكل دوري مخيمات طبية خيرية مجانية لخدمة المجتمع
-                وتقديم الرعاية الصحية للمحتاجين.
+                {aboutDescription?.data?.[0]?.content ||
+                  `${COMPANY_ARABIC_NAME} هو أحد أبرز المؤسسات الصحية في اليمن، حيث نقدم خدمات طبية متميزة بمعايير عالمية. نحن ملتزمون بتوفير رعاية صحية شاملة ومتكاملة لجميع المرضى، مع نخبة من الأطباء والاستشاريين المتخصصين في مختلف التخصصات الطبية. نؤمن بأهمية المسؤولية المجتمعية، ولذلك نقيم بشكل دوري مخيمات طبية خيرية مجانية لخدمة المجتمع وتقديم الرعاية الصحية للمحتاجين.`}
               </p>
 
               {/* Features Grid */}
@@ -553,12 +789,12 @@ export default function HomePage() {
 
               <div className="text-base sm:text-lg md:text-xl text-muted-foreground dark:text-muted-foreground leading-relaxed space-y-4 sm:space-y-5 text-right max-w-3xl mx-auto px-2">
                 <p>
-                  يضم المستشفى نخبة من الأطباء والاستشاريين المتخصصين في مختلف المجالات الطبية، مع
-                  توفير أحدث التقنيات والأجهزة الطبية لضمان أفضل النتائج العلاجية.
+                  {aboutAdditionalText1?.data?.[0]?.content ||
+                    'يضم المستشفى نخبة من الأطباء والاستشاريين المتخصصين في مختلف المجالات الطبية، مع توفير أحدث التقنيات والأجهزة الطبية لضمان أفضل النتائج العلاجية.'}
                 </p>
                 <p>
-                  نؤمن بأهمية المسؤولية المجتمعية، ولذلك نقيم بشكل دوري مخيمات طبية خيرية مجانية
-                  لخدمة المجتمع وتقديم الرعاية الصحية للمحتاجين.
+                  {aboutAdditionalText2?.data?.[0]?.content ||
+                    'نؤمن بأهمية المسؤولية المجتمعية، ولذلك نقيم بشكل دوري مخيمات طبية خيرية مجانية لخدمة المجتمع وتقديم الرعاية الصحية للمحتاجين.'}
                 </p>
               </div>
 
@@ -567,8 +803,8 @@ export default function HomePage() {
                 <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-shadow duration-300">
                   <div className="aspect-video bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 flex items-center justify-center relative overflow-hidden">
                     <img
-                      src={APP_LOGO}
-                      alt={`صورة شعار ${COMPANY_ARABIC_NAME}`}
+                      src={hospitalImageUrl}
+                      alt={hospitalImageAlt}
                       className="w-full h-full object-cover"
                       loading="lazy"
                       style={{ transform: `scale(1.1) translateY(${parallaxOffset}px)` }}
@@ -579,7 +815,8 @@ export default function HomePage() {
                           {COMPANY_ARABIC_NAME}
                         </h3>
                         <p className="text-sm sm:text-base md:text-lg opacity-90">
-                          نقدم خدمات طبية متميزة بمعايير عالمية
+                          {aboutImageCaption?.data?.[0]?.content ||
+                            'نقدم خدمات طبية متميزة بمعايير عالمية'}
                         </p>
                       </div>
                     </div>
@@ -645,11 +882,11 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
           <div className="container mx-auto px-4 sm:px-6 text-center relative">
             <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-5 md:mb-7 leading-tight px-1 animate-text-shimmer bg-gradient-to-r from-white via-green-100 to-white bg-clip-text text-transparent bg-[length:200%_auto]">
-              جاهزون لخدمتك على مدار الساعة
+              {ctaTitle?.data?.[0]?.content || 'جاهزون لخدمتك على مدار الساعة'}
             </h2>
             <p className="text-base sm:text-lg md:text-2xl lg:text-3xl mb-8 sm:mb-10 md:mb-12 max-w-2xl mx-auto text-white/95 px-2 bg-black/20 rounded-lg p-4">
-              فريقنا الطبي المتميز من الأطباء والاستشاريين في انتظارك. احجز موعدك الآن أو اتصل بنا
-              على الرقم المجاني {COMPANY_PHONE} للاستفسار والحصول على المعلومات الطبية التي تحتاجها.
+              {ctaDescription?.data?.[0]?.content ||
+                `فريقنا الطبي المتميز من الأطباء والاستشاريين في انتظارك. احجز موعدك الآن أو اتصل بنا على الرقم المجاني ${COMPANY_PHONE} للاستفسار والحصول على المعلومات الطبية التي تحتاجها.`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center px-3 sm:px-0">
               <Link href="/doctors">
@@ -658,7 +895,7 @@ export default function HomePage() {
                   className="w-full sm:w-auto bg-white dark:bg-card text-green-600 hover:bg-green-50 text-base sm:text-lg md:text-xl font-semibold shadow-xl hover:shadow-2xl hover:shadow-green-500/30 hover:scale-105 transition-all h-12 sm:h-14 px-8 sm:px-10"
                   aria-label="احجز موعدك مع أفضل الأطباء"
                 >
-                  احجز موعدك
+                  {ctaBookButton?.data?.[0]?.content || 'احجز موعدك'}
                   <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 </Button>
               </Link>
@@ -669,7 +906,7 @@ export default function HomePage() {
                   className="w-full sm:w-auto border-2 border-white/90 text-white hover:bg-white/20 text-base sm:text-lg md:text-xl font-medium backdrop-blur-sm h-12 sm:h-14 px-8 sm:px-10 hover:scale-105 transition-all"
                   aria-label={`اتصل بالمستشفى على الرقم ${COMPANY_PHONE}`}
                 >
-                  اتصل: {COMPANY_PHONE}
+                  {ctaCallButton?.data?.[0]?.content || 'اتصل'}: {COMPANY_PHONE}
                 </Button>
               </a>
             </div>
@@ -684,7 +921,7 @@ export default function HomePage() {
           <button
             onClick={scrollToTop}
             className="fixed bottom-8 left-8 z-50 bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 animate-bounce"
-            aria-label="العودة للأعلى"
+            aria-label={accessibilityBackToTop?.data?.[0]?.content || 'العودة للأعلى'}
           >
             <ArrowUp className="w-6 h-6" />
           </button>
