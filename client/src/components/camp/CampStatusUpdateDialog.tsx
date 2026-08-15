@@ -141,9 +141,7 @@ export default function CampStatusUpdateDialog({
                       <Label>الاسم الكامل</Label>
                       <Input
                         value={editedName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          onNameChange(e.target.value)
-                        }
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onNameChange(e.target.value)}
                         placeholder="الاسم الكامل"
                       />
                     </div>
@@ -152,9 +150,7 @@ export default function CampStatusUpdateDialog({
                       <Label>رقم الهاتف</Label>
                       <Input
                         value={editedPhone}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          onPhoneChange(e.target.value)
-                        }
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onPhoneChange(e.target.value)}
                         placeholder="رقم الهاتف"
                       />
                     </div>
@@ -164,9 +160,7 @@ export default function CampStatusUpdateDialog({
                       <Input
                         type="datetime-local"
                         value={attendanceDate}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          onAttendanceDateChange(e.target.value)
-                        }
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onAttendanceDateChange(e.target.value)}
                       />
                     </div>
 
@@ -244,7 +238,7 @@ export default function CampStatusUpdateDialog({
           </Tabs>
         </div>
       )}
-
+      
       <div className="flex justify-end gap-2 mt-4">
         <Button variant="outline" onClick={() => onOpenChange(false)}>
           إلغاء

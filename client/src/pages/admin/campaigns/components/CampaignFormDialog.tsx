@@ -139,10 +139,7 @@ export function CampaignFormDialog({
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) =>
-                    onNameChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => onNameChange?.(e.target.value) || onFormDataChange({ ...formData, name: e.target.value })}
                   onBlur={onNameBlur}
                   required
                 />
@@ -153,10 +150,7 @@ export function CampaignFormDialog({
                   <Input
                     id="slug"
                     value={formData.slug}
-                    onChange={(e) =>
-                      onSlugChange?.(e.target.value) ||
-                      onFormDataChange({ ...formData, slug: e.target.value })
-                    }
+                    onChange={(e) => onSlugChange?.(e.target.value) || onFormDataChange({ ...formData, slug: e.target.value })}
                     required
                     placeholder="campaign-name"
                     dir="ltr"
@@ -170,10 +164,7 @@ export function CampaignFormDialog({
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) =>
-                  onDescriptionChange?.(e.target.value) ||
-                  onFormDataChange({ ...formData, description: e.target.value })
-                }
+                onChange={(e) => onDescriptionChange?.(e.target.value) || onFormDataChange({ ...formData, description: e.target.value })}
                 rows={2}
               />
             </div>
@@ -184,9 +175,7 @@ export function CampaignFormDialog({
                 <Label>النوع *</Label>
                 <Select
                   value={formData.type}
-                  onValueChange={(value) =>
-                    onTypeChange?.(value) || onFormDataChange({ ...formData, type: value })
-                  }
+                  onValueChange={(value) => onTypeChange?.(value) || onFormDataChange({ ...formData, type: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -203,9 +192,7 @@ export function CampaignFormDialog({
                 <Label>الحالة *</Label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value) =>
-                    onStatusChange?.(value) || onFormDataChange({ ...formData, status: value })
-                  }
+                  onValueChange={(value) => onStatusChange?.(value) || onFormDataChange({ ...formData, status: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -229,10 +216,7 @@ export function CampaignFormDialog({
                   id="startDate"
                   type="date"
                   value={formData.startDate}
-                  onChange={(e) =>
-                    onStartDateChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, startDate: e.target.value })
-                  }
+                  onChange={(e) => onStartDateChange?.(e.target.value) || onFormDataChange({ ...formData, startDate: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
@@ -241,10 +225,7 @@ export function CampaignFormDialog({
                   id="endDate"
                   type="date"
                   value={formData.endDate}
-                  onChange={(e) =>
-                    onEndDateChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, endDate: e.target.value })
-                  }
+                  onChange={(e) => onEndDateChange?.(e.target.value) || onFormDataChange({ ...formData, endDate: e.target.value })}
                 />
               </div>
             </div>
@@ -257,10 +238,7 @@ export function CampaignFormDialog({
                   id="plannedBudget"
                   type="number"
                   value={formData.plannedBudget}
-                  onChange={(e) =>
-                    onPlannedBudgetChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, plannedBudget: e.target.value })
-                  }
+                  onChange={(e) => onPlannedBudgetChange?.(e.target.value) || onFormDataChange({ ...formData, plannedBudget: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
@@ -269,10 +247,7 @@ export function CampaignFormDialog({
                   id="actualBudget"
                   type="number"
                   value={formData.actualBudget}
-                  onChange={(e) =>
-                    onActualBudgetChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, actualBudget: e.target.value })
-                  }
+                  onChange={(e) => onActualBudgetChange?.(e.target.value) || onFormDataChange({ ...formData, actualBudget: e.target.value })}
                 />
               </div>
             </div>
@@ -285,10 +260,7 @@ export function CampaignFormDialog({
                   id="targetLeads"
                   type="number"
                   value={formData.targetLeads}
-                  onChange={(e) =>
-                    onTargetLeadsChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, targetLeads: e.target.value })
-                  }
+                  onChange={(e) => onTargetLeadsChange?.(e.target.value) || onFormDataChange({ ...formData, targetLeads: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
@@ -297,10 +269,7 @@ export function CampaignFormDialog({
                   id="targetBookings"
                   type="number"
                   value={formData.targetBookings}
-                  onChange={(e) =>
-                    onTargetBookingsChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, targetBookings: e.target.value })
-                  }
+                  onChange={(e) => onTargetBookingsChange?.(e.target.value) || onFormDataChange({ ...formData, targetBookings: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
@@ -309,10 +278,7 @@ export function CampaignFormDialog({
                   id="targetRevenue"
                   type="number"
                   value={formData.targetRevenue}
-                  onChange={(e) =>
-                    onTargetRevenueChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, targetRevenue: e.target.value })
-                  }
+                  onChange={(e) => onTargetRevenueChange?.(e.target.value) || onFormDataChange({ ...formData, targetRevenue: e.target.value })}
                 />
               </div>
             </div>
@@ -344,10 +310,7 @@ export function CampaignFormDialog({
                 <Input
                   id="teamMembers"
                   value={formData.teamMembers}
-                  onChange={(e) =>
-                    onTeamMembersChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, teamMembers: e.target.value })
-                  }
+                  onChange={(e) => onTeamMembersChange?.(e.target.value) || onFormDataChange({ ...formData, teamMembers: e.target.value })}
                   placeholder="أسماء أعضاء الفريق"
                 />
               </div>
@@ -356,10 +319,7 @@ export function CampaignFormDialog({
                 <Input
                   id="kpis"
                   value={formData.kpis}
-                  onChange={(e) =>
-                    onKpisChange?.(e.target.value) ||
-                    onFormDataChange({ ...formData, kpis: e.target.value })
-                  }
+                  onChange={(e) => onKpisChange?.(e.target.value) || onFormDataChange({ ...formData, kpis: e.target.value })}
                   placeholder="CTR, CPA, ROAS..."
                 />
               </div>
@@ -371,10 +331,7 @@ export function CampaignFormDialog({
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) =>
-                  onNotesChange?.(e.target.value) ||
-                  onFormDataChange({ ...formData, notes: e.target.value })
-                }
+                onChange={(e) => onNotesChange?.(e.target.value) || onFormDataChange({ ...formData, notes: e.target.value })}
                 rows={2}
               />
             </div>
@@ -391,7 +348,11 @@ export function CampaignFormDialog({
             )}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               إلغاء
             </Button>
             <Button type="submit" disabled={isPending}>

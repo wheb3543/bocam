@@ -77,32 +77,20 @@ export function useWhatsAppActions() {
   );
 
   const handleArchiveConversation = useCallback(
-    (
-      conversations: Conversation[] | undefined,
-      id: number,
-      onConfirm: (action: { action: string; id?: number }) => void
-    ) => {
+    (conversations: Conversation[] | undefined, id: number, onConfirm: (action: { action: string; id?: number }) => void) => {
       const conv = conversations?.find((c) => c.id === id);
       onConfirm({ action: conv?.isArchived === 1 ? 'unarchive' : 'archive', id });
     },
     []
   );
 
-  const handleDeleteConversation = useCallback(
-    (id: number, onConfirm: (action: { action: string; id?: number }) => void) => {
-      onConfirm({ action: 'delete', id });
-    },
-    []
-  );
+  const handleDeleteConversation = useCallback((id: number, onConfirm: (action: { action: string; id?: number }) => void) => {
+    onConfirm({ action: 'delete', id });
+  }, []);
 
   const handleBulkArchive = useCallback(
-    (
-      selectedConversations: Set<number>,
-      onConfirm: (action: { action: string; ids?: number[] }) => void
-    ) => {
-      if (selectedConversations.size === 0) {
-        return;
-      }
+    (selectedConversations: Set<number>, onConfirm: (action: { action: string; ids?: number[] }) => void) => {
+      if (selectedConversations.size === 0) {return;}
       const ids = Array.from(selectedConversations);
       onConfirm({ action: 'bulk-archive', ids });
     },
@@ -110,13 +98,8 @@ export function useWhatsAppActions() {
   );
 
   const handleBulkMarkImportant = useCallback(
-    (
-      selectedConversations: Set<number>,
-      onConfirm: (action: { action: string; ids?: number[] }) => void
-    ) => {
-      if (selectedConversations.size === 0) {
-        return;
-      }
+    (selectedConversations: Set<number>, onConfirm: (action: { action: string; ids?: number[] }) => void) => {
+      if (selectedConversations.size === 0) {return;}
       const ids = Array.from(selectedConversations);
       onConfirm({ action: 'bulk-important', ids });
     },
@@ -130,9 +113,7 @@ export function useWhatsAppActions() {
       onClearSelection: () => void,
       setIsSelectionMode: (value: boolean) => void
     ) => {
-      if (!action) {
-        return;
-      }
+      if (!action) {return;}
 
       if (action.action === 'archive' && action.id) {
         updateConversationMutation.mutate(
@@ -201,9 +182,7 @@ export function useWhatsAppActions() {
 
   const handleSaveNotes = useCallback(
     (selectedConv: Conversation | null, notesValue: string, onClose: () => void) => {
-      if (!selectedConv) {
-        return;
-      }
+      if (!selectedConv) {return;}
 
       // Save notes to local storage for now
       const notesData = JSON.parse(localStorage.getItem('conversationNotes') || '{}');

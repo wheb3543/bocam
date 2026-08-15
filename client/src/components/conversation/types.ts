@@ -40,18 +40,16 @@ export interface ConversationInfoProps {
     doctorName: string,
     department: string
   ) => void;
-  entityWhatsAppStatus?:
-    | {
-        status?: string | null | {};
-        lastChecked?: string | Date | null;
-        sentAt?: string | Date | null | {};
-        messageId?: string | number | null | {};
-        hasSent?: boolean;
-        count?: number;
-        notificationsEnabled?: boolean;
-        [key: string]: unknown;
-      }
-    | undefined;
+  entityWhatsAppStatus?: {
+    status?: string | null | {};
+    lastChecked?: string | Date | null;
+    sentAt?: string | Date | null | {};
+    messageId?: string | number | null | {};
+    hasSent?: boolean;
+    count?: number;
+    notificationsEnabled?: boolean;
+    [key: string]: unknown;
+  } | undefined;
   isSendingReminder?: boolean;
   isSendingFollowup?: boolean;
 }

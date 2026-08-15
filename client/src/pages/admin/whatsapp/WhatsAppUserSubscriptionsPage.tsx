@@ -246,9 +246,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                           </td>
                           <td className="py-3 px-4">{sub.source as ReactNode}</td>
                           <td className="py-3 px-4">
-                            {new Date(sub.updatedAt as string | number | Date).toLocaleString(
-                              'ar-SA'
-                            )}
+                            {new Date(sub.updatedAt as string | number | Date).toLocaleString('ar-SA')}
                           </td>
                           <td className="py-3 px-4">
                             {sub.status === 'opted_in' ? (
@@ -256,9 +254,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                                 size="sm"
                                 variant="outline"
                                 className="text-red-600 hover:bg-red-50"
-                                onClick={() =>
-                                  handleUpdateStatus(sub.phoneNumber as string, 'opted_out')
-                                }
+                                onClick={() => handleUpdateStatus(sub.phoneNumber as string, 'opted_out')}
                                 disabled={updateStatusMutation.isPending}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
@@ -269,9 +265,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                                 size="sm"
                                 variant="outline"
                                 className="text-green-600 hover:bg-green-50"
-                                onClick={() =>
-                                  handleUpdateStatus(sub.phoneNumber as string, 'opted_in')
-                                }
+                                onClick={() => handleUpdateStatus(sub.phoneNumber as string, 'opted_in')}
                                 disabled={updateStatusMutation.isPending}
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
@@ -314,19 +308,13 @@ export default function WhatsAppUserSubscriptionsPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-semibold">{event.eventType as ReactNode}</h4>
-                            {(event.subType as string) && (
-                              <Badge variant="outline">{event.subType as string}</Badge>
-                            )}
+                            {(event.subType as string) && <Badge variant="outline">{event.subType as string}</Badge>}
                           </div>
                           {(event.phoneNumber as string) && (
-                            <p className="text-sm text-gray-600 mt-1">
-                              الرقم: {event.phoneNumber as string}
-                            </p>
+                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber as string}</p>
                           )}
                           <p className="text-xs text-gray-500 mt-2">
-                            {new Date(event.createdAt as string | number | Date).toLocaleString(
-                              'ar-SA'
-                            )}
+                            {new Date(event.createdAt as string | number | Date).toLocaleString('ar-SA')}
                           </p>
                         </div>
                         <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>

@@ -84,9 +84,7 @@ export function isValidDate(value: unknown): value is Date {
  * Safe type guard to check if a string can be converted to a date
  */
 export function isDateString(value: unknown): value is string {
-  if (typeof value !== 'string') {
-    return false;
-  }
+  if (typeof value !== 'string') {return false;}
   const date = new Date(value);
   return !isNaN(date.getTime());
 }
@@ -99,25 +97,15 @@ export function isDateString(value: unknown): value is string {
  * Mapper for Lead data - sanitizes and ensures type safety
  */
 export function mapLead(data: unknown): Lead | null {
-  if (!data || typeof data !== 'object') {
-    return null;
-  }
+  if (!data || typeof data !== 'object') {return null;}
 
   const lead = data as Partial<Lead>;
 
   // Validate required fields
-  if (!isNotNull(lead.id) || typeof lead.id !== 'number') {
-    return null;
-  }
-  if (!isNotNull(lead.campaignId) || typeof lead.campaignId !== 'number') {
-    return null;
-  }
-  if (!isNotNull(lead.fullName) || typeof lead.fullName !== 'string') {
-    return null;
-  }
-  if (!isNotNull(lead.phone) || typeof lead.phone !== 'string') {
-    return null;
-  }
+  if (!isNotNull(lead.id) || typeof lead.id !== 'number') {return null;}
+  if (!isNotNull(lead.campaignId) || typeof lead.campaignId !== 'number') {return null;}
+  if (!isNotNull(lead.fullName) || typeof lead.fullName !== 'string') {return null;}
+  if (!isNotNull(lead.phone) || typeof lead.phone !== 'string') {return null;}
 
   // Ensure dates are Date objects
   const createdAt = lead.createdAt
@@ -159,22 +147,14 @@ export function mapLead(data: unknown): Lead | null {
  * Mapper for Camp data - sanitizes and ensures type safety
  */
 export function mapCamp(data: unknown): Camp | null {
-  if (!data || typeof data !== 'object') {
-    return null;
-  }
+  if (!data || typeof data !== 'object') {return null;}
 
   const camp = data as Partial<Camp>;
 
   // Validate required fields
-  if (!isNotNull(camp.id) || typeof camp.id !== 'number') {
-    return null;
-  }
-  if (!isNotNull(camp.name) || typeof camp.name !== 'string') {
-    return null;
-  }
-  if (!isNotNull(camp.slug) || typeof camp.slug !== 'string') {
-    return null;
-  }
+  if (!isNotNull(camp.id) || typeof camp.id !== 'number') {return null;}
+  if (!isNotNull(camp.name) || typeof camp.name !== 'string') {return null;}
+  if (!isNotNull(camp.slug) || typeof camp.slug !== 'string') {return null;}
 
   // Ensure dates are Date objects
   const startDate = camp.startDate
@@ -226,25 +206,15 @@ export function mapCamp(data: unknown): Camp | null {
  * Mapper for CampRegistration data - sanitizes and ensures type safety
  */
 export function mapCampRegistration(data: unknown): CampRegistration | null {
-  if (!data || typeof data !== 'object') {
-    return null;
-  }
+  if (!data || typeof data !== 'object') {return null;}
 
   const registration = data as Partial<CampRegistration>;
 
   // Validate required fields
-  if (!isNotNull(registration.id) || typeof registration.id !== 'number') {
-    return null;
-  }
-  if (!isNotNull(registration.campId) || typeof registration.campId !== 'number') {
-    return null;
-  }
-  if (!isNotNull(registration.fullName) || typeof registration.fullName !== 'string') {
-    return null;
-  }
-  if (!isNotNull(registration.phone) || typeof registration.phone !== 'string') {
-    return null;
-  }
+  if (!isNotNull(registration.id) || typeof registration.id !== 'number') {return null;}
+  if (!isNotNull(registration.campId) || typeof registration.campId !== 'number') {return null;}
+  if (!isNotNull(registration.fullName) || typeof registration.fullName !== 'string') {return null;}
+  if (!isNotNull(registration.phone) || typeof registration.phone !== 'string') {return null;}
 
   // Ensure dates are Date objects
   const attendanceDate = registration.attendanceDate
@@ -338,25 +308,15 @@ export function mapCampRegistration(data: unknown): CampRegistration | null {
  * Mapper for Doctor data - sanitizes and ensures type safety
  */
 export function mapDoctor(data: unknown): Doctor | null {
-  if (!data || typeof data !== 'object') {
-    return null;
-  }
+  if (!data || typeof data !== 'object') {return null;}
 
   const doctor = data as Partial<Doctor>;
 
   // Validate required fields
-  if (!isNotNull(doctor.id) || typeof doctor.id !== 'number') {
-    return null;
-  }
-  if (!isNotNull(doctor.name) || typeof doctor.name !== 'string') {
-    return null;
-  }
-  if (!isNotNull(doctor.slug) || typeof doctor.slug !== 'string') {
-    return null;
-  }
-  if (!isNotNull(doctor.specialty) || typeof doctor.specialty !== 'string') {
-    return null;
-  }
+  if (!isNotNull(doctor.id) || typeof doctor.id !== 'number') {return null;}
+  if (!isNotNull(doctor.name) || typeof doctor.name !== 'string') {return null;}
+  if (!isNotNull(doctor.slug) || typeof doctor.slug !== 'string') {return null;}
+  if (!isNotNull(doctor.specialty) || typeof doctor.specialty !== 'string') {return null;}
 
   // Ensure dates are Date objects
   const createdAt = doctor.createdAt
@@ -393,28 +353,16 @@ export function mapDoctor(data: unknown): Doctor | null {
  * Mapper for Appointment data - sanitizes and ensures type safety
  */
 export function mapAppointment(data: unknown): Appointment | null {
-  if (!data || typeof data !== 'object') {
-    return null;
-  }
+  if (!data || typeof data !== 'object') {return null;}
 
   const appointment = data as Partial<Appointment>;
 
   // Validate required fields
-  if (!isNotNull(appointment.id) || typeof appointment.id !== 'number') {
-    return null;
-  }
-  if (!isNotNull(appointment.campaignId) || typeof appointment.campaignId !== 'number') {
-    return null;
-  }
-  if (!isNotNull(appointment.doctorId) || typeof appointment.doctorId !== 'number') {
-    return null;
-  }
-  if (!isNotNull(appointment.fullName) || typeof appointment.fullName !== 'string') {
-    return null;
-  }
-  if (!isNotNull(appointment.phone) || typeof appointment.phone !== 'string') {
-    return null;
-  }
+  if (!isNotNull(appointment.id) || typeof appointment.id !== 'number') {return null;}
+  if (!isNotNull(appointment.campaignId) || typeof appointment.campaignId !== 'number') {return null;}
+  if (!isNotNull(appointment.doctorId) || typeof appointment.doctorId !== 'number') {return null;}
+  if (!isNotNull(appointment.fullName) || typeof appointment.fullName !== 'string') {return null;}
+  if (!isNotNull(appointment.phone) || typeof appointment.phone !== 'string') {return null;}
 
   // Ensure dates are Date objects
   const appointmentDate = appointment.appointmentDate
@@ -508,22 +456,14 @@ export function mapAppointment(data: unknown): Appointment | null {
  * Mapper for Offer data - sanitizes and ensures type safety
  */
 export function mapOffer(data: unknown): Offer | null {
-  if (!data || typeof data !== 'object') {
-    return null;
-  }
+  if (!data || typeof data !== 'object') {return null;}
 
   const offer = data as Partial<Offer>;
 
   // Validate required fields
-  if (!isNotNull(offer.id) || typeof offer.id !== 'number') {
-    return null;
-  }
-  if (!isNotNull(offer.title) || typeof offer.title !== 'string') {
-    return null;
-  }
-  if (!isNotNull(offer.slug) || typeof offer.slug !== 'string') {
-    return null;
-  }
+  if (!isNotNull(offer.id) || typeof offer.id !== 'number') {return null;}
+  if (!isNotNull(offer.title) || typeof offer.title !== 'string') {return null;}
+  if (!isNotNull(offer.slug) || typeof offer.slug !== 'string') {return null;}
 
   // Ensure dates are Date objects
   const startDate = offer.startDate
@@ -568,28 +508,16 @@ export function mapOffer(data: unknown): Offer | null {
  * Mapper for OfferLead data - sanitizes and ensures type safety
  */
 export function mapOfferLead(data: unknown): OfferLead | null {
-  if (!data || typeof data !== 'object') {
-    return null;
-  }
+  if (!data || typeof data !== 'object') {return null;}
 
   const offerLead = data as Partial<OfferLead>;
 
   // Validate required fields
-  if (!isNotNull(offerLead.id) || typeof offerLead.id !== 'number') {
-    return null;
-  }
-  if (!isNotNull(offerLead.offerId) || typeof offerLead.offerId !== 'number') {
-    return null;
-  }
-  if (!isNotNull(offerLead.fullName) || typeof offerLead.fullName !== 'string') {
-    return null;
-  }
-  if (!isNotNull(offerLead.phone) || typeof offerLead.phone !== 'string') {
-    return null;
-  }
-  if (!isNotNull(offerLead.gender) || typeof offerLead.gender !== 'string') {
-    return null;
-  }
+  if (!isNotNull(offerLead.id) || typeof offerLead.id !== 'number') {return null;}
+  if (!isNotNull(offerLead.offerId) || typeof offerLead.offerId !== 'number') {return null;}
+  if (!isNotNull(offerLead.fullName) || typeof offerLead.fullName !== 'string') {return null;}
+  if (!isNotNull(offerLead.phone) || typeof offerLead.phone !== 'string') {return null;}
+  if (!isNotNull(offerLead.gender) || typeof offerLead.gender !== 'string') {return null;}
 
   // Ensure dates are Date objects
   const contactedAt = offerLead.contactedAt

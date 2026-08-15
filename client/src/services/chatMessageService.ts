@@ -57,30 +57,14 @@ export class ChatMessageService {
    */
   static getFileIcon(filename: string): string {
     const ext = filename.split('.').pop()?.toLowerCase() || '';
-    if (['pdf'].includes(ext)) {
-      return '📄';
-    }
-    if (['doc', 'docx'].includes(ext)) {
-      return '📝';
-    }
-    if (['xls', 'xlsx'].includes(ext)) {
-      return '📊';
-    }
-    if (['ppt', 'pptx'].includes(ext)) {
-      return '📈';
-    }
-    if (['zip', 'rar', '7z'].includes(ext)) {
-      return '📦';
-    }
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-      return '🖼️';
-    }
-    if (['mp4', 'avi', 'mov', 'mkv'].includes(ext)) {
-      return '🎬';
-    }
-    if (['mp3', 'wav', 'ogg'].includes(ext)) {
-      return '🎵';
-    }
+    if (['pdf'].includes(ext)) {return '📄';}
+    if (['doc', 'docx'].includes(ext)) {return '📝';}
+    if (['xls', 'xlsx'].includes(ext)) {return '📊';}
+    if (['ppt', 'pptx'].includes(ext)) {return '📈';}
+    if (['zip', 'rar', '7z'].includes(ext)) {return '📦';}
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {return '🖼️';}
+    if (['mp4', 'avi', 'mov', 'mkv'].includes(ext)) {return '🎬';}
+    if (['mp3', 'wav', 'ogg'].includes(ext)) {return '🎵';}
     return '📄';
   }
 
@@ -88,9 +72,7 @@ export class ChatMessageService {
    * Format file size in human-readable format
    */
   static formatFileSize(bytes: number): string {
-    if (bytes === 0) {
-      return '0 Bytes';
-    }
+    if (bytes === 0) {return '0 Bytes';}
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -101,18 +83,11 @@ export class ChatMessageService {
    * Search messages by query
    */
   static searchMessages(messages: Message[], query: string): Array<string | number> {
-    if (!query.trim()) {
-      return [];
-    }
+    if (!query.trim()) {return [];}
 
     const results: Array<string | number> = [];
     messages.forEach((msg) => {
-      if (
-        msg.content &&
-        msg.content.toLowerCase().includes(query.toLowerCase()) &&
-        msg.id !== null &&
-        msg.id !== undefined
-      ) {
+      if (msg.content && msg.content.toLowerCase().includes(query.toLowerCase()) && msg.id !== null && msg.id !== undefined) {
         results.push(msg.id);
       }
     });
@@ -123,13 +98,8 @@ export class ChatMessageService {
   /**
    * Highlight text with search query - returns parts array for rendering
    */
-  static getHighlightedParts(
-    text: string,
-    query: string
-  ): Array<{ text: string; isMatch: boolean }> {
-    if (!query.trim()) {
-      return [{ text, isMatch: false }];
-    }
+  static getHighlightedParts(text: string, query: string): Array<{ text: string; isMatch: boolean }> {
+    if (!query.trim()) {return [{ text, isMatch: false }];}
     const regex = new RegExp(`(${query})`, 'gi');
     const parts = text.split(regex);
     return parts.map((part) => ({
@@ -142,7 +112,9 @@ export class ChatMessageService {
    * Get media messages (images and videos)
    */
   static getMediaMessages(messages: Message[]): Message[] {
-    return messages.filter((msg) => msg.messageType === 'image' || msg.messageType === 'video');
+    return messages.filter(
+      (msg) => msg.messageType === 'image' || msg.messageType === 'video'
+    );
   }
 
   /**
@@ -190,9 +162,7 @@ export class ChatMessageService {
         }
 
         const direction = msg.direction === 'outbound' ? 'أنت' : 'العميل';
-        const time = new Date(msg.sentAt || msg.createdAt || Date.now()).toLocaleTimeString(
-          'ar-EG'
-        );
+        const time = new Date(msg.sentAt || msg.createdAt || Date.now()).toLocaleTimeString('ar-EG');
         const content = msg.content || '';
 
         doc.setFont('helvetica', 'bold');
@@ -259,86 +229,14 @@ export class ChatMessageService {
    */
   static getCustomStickers(): string[] {
     return [
-      '😀',
-      '😂',
-      '😍',
-      '🥰',
-      '😎',
-      '🤩',
-      '😊',
-      '🥳',
-      '😇',
-      '🤗',
-      '👍',
-      '👎',
-      '👏',
-      '🙌',
-      '🤝',
-      '💪',
-      '❤️',
-      '💔',
-      '💯',
-      '✨',
-      '🎉',
-      '🎊',
-      '🎁',
-      '🏆',
-      '🥇',
-      '🌟',
-      '⭐',
-      '💫',
-      '🔥',
-      '💥',
-      '🌈',
-      '☀️',
-      '🌙',
-      '⭐',
-      '🌸',
-      '🌺',
-      '🌻',
-      '🌹',
-      '🍀',
-      '🍁',
-      '🐱',
-      '🐶',
-      '🐰',
-      '🦊',
-      '🐻',
-      '🐼',
-      '🐨',
-      '🦁',
-      '🐯',
-      '🐮',
-      '🍕',
-      '🍔',
-      '🍟',
-      '🌭',
-      '🍿',
-      '🧁',
-      '🍩',
-      '🍪',
-      '🎂',
-      '🍰',
-      '🚗',
-      '🚕',
-      '🚙',
-      '🚌',
-      '🏎️',
-      '🚂',
-      '🚁',
-      '✈️',
-      '🚀',
-      '🛸',
-      '📱',
-      '💻',
-      '⌨️',
-      '🖥️',
-      '🖨️',
-      '📷',
-      '📸',
-      '📹',
-      '🎥',
-      '📺',
+      '😀', '😂', '😍', '🥰', '😎', '🤩', '😊', '🥳', '😇', '🤗',
+      '👍', '👎', '👏', '🙌', '🤝', '💪', '❤️', '💔', '💯', '✨',
+      '🎉', '🎊', '🎁', '🏆', '🥇', '🌟', '⭐', '💫', '🔥', '💥',
+      '🌈', '☀️', '🌙', '⭐', '🌸', '🌺', '🌻', '🌹', '🍀', '🍁',
+      '🐱', '🐶', '🐰', '🦊', '🐻', '🐼', '🐨', '🦁', '🐯', '🐮',
+      '🍕', '🍔', '🍟', '🌭', '🍿', '🧁', '🍩', '🍪', '🎂', '🍰',
+      '🚗', '🚕', '🚙', '🚌', '🏎️', '🚂', '🚁', '✈️', '🚀', '🛸',
+      '📱', '💻', '⌨️', '🖥️', '🖨️', '📷', '📸', '📹', '🎥', '📺',
     ];
   }
 

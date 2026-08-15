@@ -80,7 +80,13 @@ export interface AutoReplyRule {
 }
 
 export type FilterType =
-  'all' | 'unread' | 'important' | 'archived' | 'unnamed' | 'unreplied' | 'lab_results';
+  | 'all'
+  | 'unread'
+  | 'important'
+  | 'archived'
+  | 'unnamed'
+  | 'unreplied'
+  | 'lab_results';
 
 export type DateFilterType = 'all' | 'today' | 'week' | 'month';
 

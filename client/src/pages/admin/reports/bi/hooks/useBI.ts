@@ -56,9 +56,7 @@ export function useBI({ autoRefresh, start, end, prevStart, prevEnd }: UseBIProp
 
   // Calculate trends
   const trends = useMemo<Trends | null>(() => {
-    if (!funnelData || !prevFunnelData) {
-      return null;
-    }
+    if (!funnelData || !prevFunnelData) {return null;}
 
     return {
       totalSessions: calculateTrend(funnelData.totalSessions, prevFunnelData.totalSessions),

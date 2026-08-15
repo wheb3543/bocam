@@ -1,13 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Calendar,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Users,
-  TrendingUp,
-  TrendingDown,
-} from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, XCircle, Users, TrendingUp, TrendingDown } from 'lucide-react';
 import { AnimatedCounter } from '@/components/animations';
 
 interface CampStatsCardsProps {

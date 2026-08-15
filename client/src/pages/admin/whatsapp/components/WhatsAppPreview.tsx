@@ -27,7 +27,9 @@ export function WhatsAppPreview({ template }: WhatsAppPreviewProps) {
             {template.headerContent || template.headerText}
           </div>
         )}
-        <p className="text-sm whitespace-pre-wrap text-gray-800 dark:text-gray-100">{preview}</p>
+        <p className="text-sm whitespace-pre-wrap text-gray-800 dark:text-gray-100">
+          {preview}
+        </p>
         {(template.footerContent || template.footerText) && (
           <p className="text-[10px] text-gray-400 mt-2 pt-2 border-t">
             {template.footerContent || template.footerText}

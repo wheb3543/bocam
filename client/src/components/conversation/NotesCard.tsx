@@ -66,7 +66,12 @@ export default function NotesCard({
                 >
                   إلغاء
                 </Button>
-                <Button size="sm" onClick={onSaveNotes} disabled={isSaving} className="h-7 text-xs">
+                <Button
+                  size="sm"
+                  onClick={onSaveNotes}
+                  disabled={isSaving}
+                  className="h-7 text-xs"
+                >
                   {isSaving ? 'جاري الحفظ...' : 'حفظ'}
                 </Button>
               </div>
@@ -74,7 +79,9 @@ export default function NotesCard({
           ) : (
             <div className="space-y-2">
               {notes ? (
-                <p className="text-xs text-foreground whitespace-pre-wrap">{notes}</p>
+                <p className="text-xs text-foreground whitespace-pre-wrap">
+                  {notes}
+                </p>
               ) : (
                 <p className="text-xs text-muted-foreground italic">لا توجد ملاحظات</p>
               )}

@@ -1,14 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface TimeLineChartProps {
   data: Array<{ date: string; count: number; [key: string]: unknown }>;
@@ -16,11 +7,7 @@ interface TimeLineChartProps {
   dataKey?: string;
 }
 
-export default function TimeLineChart({
-  data,
-  title = 'التسجيلات بمرور الوقت',
-  dataKey = 'count',
-}: TimeLineChartProps) {
+export default function TimeLineChart({ data, title = 'التسجيلات بمرور الوقت', dataKey = 'count' }: TimeLineChartProps) {
   return (
     <Card>
       <CardHeader>

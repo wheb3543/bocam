@@ -85,8 +85,7 @@ export default function CrmRecordsCard({
                         variant="ghost"
                         className="h-6 w-6 p-0"
                         onClick={() =>
-                          apt.id &&
-                          onSendReminder(
+                          apt.id && onSendReminder(
                             apt.id,
                             phoneNumber,
                             apt.fullName || customerName || '',
@@ -110,8 +109,7 @@ export default function CrmRecordsCard({
                         variant="ghost"
                         className="h-6 w-6 p-0"
                         onClick={() =>
-                          apt.id &&
-                          onSendFollowup(
+                          apt.id && onSendFollowup(
                             apt.id,
                             phoneNumber,
                             apt.fullName || customerName || '',

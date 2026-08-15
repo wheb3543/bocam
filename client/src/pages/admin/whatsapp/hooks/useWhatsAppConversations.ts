@@ -41,7 +41,7 @@ export function useWhatsAppConversations({
         result = result.filter((c) => c.isArchived === 1);
         break;
       case 'unnamed':
-        result = result.filter((c) => !c.customerName || c.customerName.trim() === '');
+        result = result.filter((c)=> !c.customerName || c.customerName.trim() === '');
         break;
       case 'unreplied':
         // Conversations where last message was inbound and no outbound reply
@@ -63,9 +63,7 @@ export function useWhatsAppConversations({
       const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       result = result.filter((c) => {
-        if (!c.lastMessageAt) {
-          return false;
-        }
+        if (!c.lastMessageAt) {return false;}
         const lastMsgDate = new Date(c.lastMessageAt);
         switch (dateFilter) {
           case 'today':

@@ -6,13 +6,7 @@
 import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FilterType, DateFilterType } from '../../types/whatsapp.types';
 
 interface ConversationFiltersProps {
@@ -40,16 +34,10 @@ const ConversationFilters = memo(function ConversationFilters({
       <div className="px-2 pt-2 pb-1 border-b dark:border-gray-800">
         <Tabs value={activeFilter} onValueChange={(v) => onFilterChange(v as FilterType)}>
           <TabsList className="h-7 w-full grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 bg-muted/50">
-            <TabsTrigger
-              value="all"
-              className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs"
-            >
+            <TabsTrigger value="all" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs">
               الكل
             </TabsTrigger>
-            <TabsTrigger
-              value="unread"
-              className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs"
-            >
+            <TabsTrigger value="unread" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs">
               غير مقروءة
               {unreadCount > 0 ? (
                 <Badge
@@ -60,34 +48,19 @@ const ConversationFilters = memo(function ConversationFilters({
                 </Badge>
               ) : null}
             </TabsTrigger>
-            <TabsTrigger
-              value="important"
-              className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs"
-            >
+            <TabsTrigger value="important" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs">
               مهمة
             </TabsTrigger>
-            <TabsTrigger
-              value="lab_results"
-              className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline"
-            >
+            <TabsTrigger value="lab_results" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">
               نتائج مختبر
             </TabsTrigger>
-            <TabsTrigger
-              value="archived"
-              className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline"
-            >
+            <TabsTrigger value="archived" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">
               مؤرشفة
             </TabsTrigger>
-            <TabsTrigger
-              value="unnamed"
-              className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline"
-            >
+            <TabsTrigger value="unnamed" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">
               بدون اسم
             </TabsTrigger>
-            <TabsTrigger
-              value="unreplied"
-              className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline"
-            >
+            <TabsTrigger value="unreplied" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">
               لم يُرد
             </TabsTrigger>
           </TabsList>
@@ -96,7 +69,10 @@ const ConversationFilters = memo(function ConversationFilters({
 
       {/* Advanced Filters */}
       <div className="px-2 pt-1 pb-1 flex gap-2 items-center">
-        <Select value={dateFilter} onValueChange={(v) => onDateFilterChange(v as DateFilterType)}>
+        <Select
+          value={dateFilter}
+          onValueChange={(v) => onDateFilterChange(v as DateFilterType)}
+        >
           <SelectTrigger className="h-6 text-[var(--text-xs)] bg-white/10 border-0 text-white">
             <SelectValue />
           </SelectTrigger>

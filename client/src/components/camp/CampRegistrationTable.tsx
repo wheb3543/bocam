@@ -3,11 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  ResizableTable,
-  ResizableHeaderCell,
-  FrozenTableCell,
-} from '@/components/table/ResizableTable';
+import { ResizableTable, ResizableHeaderCell, FrozenTableCell } from '@/components/table/ResizableTable';
 import ActionButtons from '@/components/ActionButtons';
 import InlineStatusEditor from '@/components/InlineStatusEditor';
 import CommentCount from '@/components/notification/CommentCount';
@@ -33,25 +29,16 @@ interface CampRegistrationTableProps {
     visibleColumns: Record<string, boolean>;
     columnWidths: Record<string, number>;
     frozenColumns: { frozenColumns: string[] };
-    getSortProps: (key: string) => {
-      sortable: boolean;
-      sortDirection: 'asc' | 'desc' | null;
-      onSort: (columnKey: string) => void;
-    };
+    getSortProps: (key: string) => { sortable: boolean; sortDirection: 'asc' | 'desc' | null; onSort: (columnKey: string) => void };
   };
   campRegColumns: ColumnConfig[];
   formatPhoneDisplay: (phone?: string) => string;
   formatRegistrationDate: (date?: string | Date | null) => string;
   formatStatusTime: (val: string | Date | unknown) => string;
   _deleteRegMutation: { isPending: boolean };
-  _updateStatusMutation: {
-    mutateAsync: (data: {
-      id: number;
-      status: CampStatus;
-      notes?: string;
-    }) => Promise<{ success: boolean }>;
-  };
+  _updateStatusMutation: { mutateAsync: (data: { id: number; status: CampStatus; notes?: string }) => Promise<{ success: boolean }> };
 }
+
 
 export default function CampRegistrationTable({
   registrations,
@@ -84,9 +71,7 @@ export default function CampRegistrationTable({
               .filter((key) => campTable.visibleColumns[key])
               .map((colKey) => {
                 const col = campRegColumns.find((c) => c.key === colKey);
-                if (!col) {
-                  return null;
-                }
+                if (!col) {return null;}
                 if (colKey === 'checkbox') {
                   return (
                     <ResizableHeaderCell
@@ -99,16 +84,15 @@ export default function CampRegistrationTable({
                     >
                       <Checkbox
                         checked={
-                          selectedIds.length === registrations.length && registrations.length > 0
+                          selectedIds.length === registrations.length &&
+                          registrations.length > 0
                         }
                         onCheckedChange={onSelectAll}
                       />
                     </ResizableHeaderCell>
                   );
                 }
-                const widthConfig = col.minWidth
-                  ? { min: col.minWidth, max: col.maxWidth }
-                  : { min: 80, max: 500 };
+                const widthConfig = col.minWidth ? { min: col.minWidth, max: col.maxWidth } : { min: 80, max: 500 };
                 return (
                   <ResizableHeaderCell
                     key={colKey}
@@ -185,7 +169,11 @@ export default function CampRegistrationTable({
                         );
                       case 'name':
                         return (
-                          <FrozenTableCell key={colKey} columnKey={colKey} className="font-medium">
+                          <FrozenTableCell
+                            key={colKey}
+                            columnKey={colKey}
+                            className="font-medium"
+                          >
                             {reg.fullName}
                           </FrozenTableCell>
                         );
@@ -235,7 +223,11 @@ export default function CampRegistrationTable({
                       case 'gender':
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
-                            {reg.gender === 'male' ? 'ذكر' : reg.gender === 'female' ? 'أنثى' : '-'}
+                            {reg.gender === 'male'
+                              ? 'ذكر'
+                              : reg.gender === 'female'
+                                ? 'أنثى'
+                                : '-'}
                           </FrozenTableCell>
                         );
                       case 'camp':
@@ -307,7 +299,7 @@ export default function CampRegistrationTable({
                             wrap
                             title={reg.statusNotes as string | undefined}
                           >
-                            {(reg.statusNotes as string | undefined) || '-'}
+                            {reg.statusNotes as string | undefined || '-'}
                           </FrozenTableCell>
                         );
                       case 'procedures':
@@ -397,7 +389,9 @@ export default function CampRegistrationTable({
                                 <span>{reg.preferredDate}</span>
                                 {reg.preferredTimeSlot && (
                                   <Badge variant="outline" className="text-xs w-fit">
-                                    {reg.preferredTimeSlot === 'morning' ? '🌅 صباحي' : '🌆 مسائي'}
+                                    {reg.preferredTimeSlot === 'morning'
+                                      ? '🌅 صباحي'
+                                      : '🌆 مسائي'}
                                   </Badge>
                                 )}
                               </div>
@@ -505,7 +499,11 @@ export default function CampRegistrationTable({
                             <div className="flex gap-1">
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="outline" size="sm" onClick={() => onEdit(reg)}>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onEdit(reg)}
+                                  >
                                     <Settings className="h-4 w-4" />
                                   </Button>
                                 </TooltipTrigger>

@@ -17,17 +17,15 @@ interface CustomerInfoCardProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export default function CustomerInfoCard({
-  customerInfo,
-  isOpen,
-  onOpenChange,
-}: CustomerInfoCardProps) {
+export default function CustomerInfoCard({ customerInfo, isOpen, onOpenChange }: CustomerInfoCardProps) {
   return (
     <Collapsible open={isOpen} onOpenChange={onOpenChange}>
       <Card className="p-3 sm:p-4 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
         <CollapsibleTrigger asChild>
           <div className="flex items-center justify-between cursor-pointer">
-            <p className="text-xs font-semibold text-muted-foreground">معلومات العميل الأساسية</p>
+            <p className="text-xs font-semibold text-muted-foreground">
+              معلومات العميل الأساسية
+            </p>
             {isOpen ? (
               <ChevronUp className="h-4 w-4 text-muted-foreground" />
             ) : (

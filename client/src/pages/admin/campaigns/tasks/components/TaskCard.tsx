@@ -9,13 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { GripVertical, Calendar } from 'lucide-react';
 import type { Task } from '../types/task.types';
-import {
-  getPriorityLabel,
-  getPriorityColor,
-  getCategoryLabel,
-  getCategoryColor,
-  isOverdue,
-} from './TaskHelpers';
+import { getPriorityLabel, getPriorityColor, getCategoryLabel, getCategoryColor, isOverdue } from './TaskHelpers';
 import { formatDateUtil } from '@/hooks/export/useFormatDate';
 
 interface TaskCardProps {

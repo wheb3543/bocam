@@ -13,42 +13,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, Phone, ChevronRight, Star, Archive, MoreVertical, CheckSquare } from 'lucide-react';
+import {
+  User,
+  Phone,
+  ChevronRight,
+  Star,
+  Archive,
+  MoreVertical,
+  CheckSquare,
+} from 'lucide-react';
 import { Conversation, WhatsAppUser } from '../../types/whatsapp.types';
 
 // Helper function to get time elapsed color
 function getTimeElapsedColor(lastMessageAt: string | Date | null): string {
-  if (!lastMessageAt) {
-    return 'text-[var(--whatsapp-gray)]';
-  }
+  if (!lastMessageAt) {return 'text-[var(--whatsapp-gray)]';}
   const hours = (Date.now() - new Date(lastMessageAt).getTime()) / (1000 * 60 * 60);
-  if (hours < 1) {
-    return 'text-[var(--whatsapp-green)]';
-  }
-  if (hours < 24) {
-    return 'text-[var(--whatsapp-blue)]';
-  }
-  if (hours < 168) {
-    return 'text-[var(--whatsapp-orange)]';
-  } // 7 days
+  if (hours < 1) {return 'text-[var(--whatsapp-green)]';}
+  if (hours < 24) {return 'text-[var(--whatsapp-blue)]';}
+  if (hours < 168) {return 'text-[var(--whatsapp-orange)]';} // 7 days
   return 'text-red-600';
 }
 
 // Helper function to get time elapsed text
 function getTimeElapsedText(lastMessageAt: string | Date | null): string {
-  if (!lastMessageAt) {
-    return '';
-  }
+  if (!lastMessageAt) {return '';}
   const hours = (Date.now() - new Date(lastMessageAt).getTime()) / (1000 * 60 * 60);
-  if (hours < 1) {
-    return 'أقل من ساعة';
-  }
-  if (hours < 24) {
-    return `${Math.floor(hours)} ساعة`;
-  }
-  if (hours < 168) {
-    return `${Math.floor(hours / 24)} يوم`;
-  }
+  if (hours < 1) {return 'أقل من ساعة';}
+  if (hours < 24) {return `${Math.floor(hours)} ساعة`;}
+  if (hours < 168) {return `${Math.floor(hours / 24)} يوم`;}
   return `${Math.floor(hours / 168)} أسبوع`;
 }
 
@@ -181,14 +173,21 @@ const ConversationItem = memo(function ConversationItem({
       <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" aria-label="خيارات إضافية">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              aria-label="خيارات إضافية"
+            >
               <MoreVertical className="h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-40">
             <DropdownMenuItem
               onClick={() => onToggleImportant(conv.id)}
-              aria-label={conv.isImportant ? 'إلغاء تعيين المحادثة كمهمة' : 'تعيين المحادثة كمهمة'}
+              aria-label={
+                conv.isImportant ? 'إلغاء تعيين المحادثة كمهمة' : 'تعيين المحادثة كمهمة'
+              }
             >
               <Star className="h-3.5 w-3.5 ml-2" />
               {conv.isImportant ? 'إلغاء المهمة' : 'تعيين كمهمة'}

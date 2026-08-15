@@ -63,9 +63,7 @@ export function useFormValidation(rules: ValidationRules) {
   const validateField = useCallback(
     (fieldName: string, value: unknown, formData: Record<string, unknown> = {}): string | null => {
       const fieldRules = rules[fieldName];
-      if (!fieldRules) {
-        return null;
-      }
+      if (!fieldRules) {return null;}
 
       for (const rule of fieldRules) {
         // التحقق من المطلوب
@@ -81,9 +79,7 @@ export function useFormValidation(rules: ValidationRules) {
         }
 
         // لا نتحقق من القواعد الأخرى إذا كانت القيمة فارغة وغير مطلوبة
-        if (value === undefined || value === null || value === '') {
-          continue;
-        }
+        if (value === undefined || value === null || value === '') {continue;}
 
         // التحقق من الحد الأدنى للطول
         if (

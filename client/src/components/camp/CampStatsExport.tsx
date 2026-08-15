@@ -47,10 +47,7 @@ export default function CampStatsExport({
 
   const handleExport = () => {
     const data = {
-      camp:
-        selectedCamp === 'all'
-          ? 'all'
-          : camps?.find((c) => c.id?.toString() === selectedCamp)?.name,
+      camp: selectedCamp === 'all' ? 'all' : camps?.find((c) => c.id?.toString() === selectedCamp)?.name,
       statistics: {
         total: stats.totalRegistrations,
         pending: stats.pendingCount,

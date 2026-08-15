@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 
-import type { AppointmentWithDoctor } from '@shared/types';
+import type { AppointmentWithDoctor } from "@shared/types";
 
 type AppointmentFilter = 'upcoming' | 'past';
 

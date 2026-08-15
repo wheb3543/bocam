@@ -1,3 +1,4 @@
+
 /**
  * CustomerProfilesTab - تبويب ملفات العملاء الموحد
  * يعرض قائمة بجميع العملاء الفريدين مع إمكانية عرض تفاصيل كل عميل
@@ -161,9 +162,7 @@ const statusColors: Record<string, string> = {
 };
 
 function formatDateOnly(date: string | Date | null | undefined) {
-  if (!date) {
-    return '-';
-  }
+  if (!date) {return '-';}
   try {
     return new Date(date).toLocaleDateString('ar-EG', {
       year: 'numeric',
@@ -176,9 +175,7 @@ function formatDateOnly(date: string | Date | null | undefined) {
 }
 
 function formatDateTime(date: string | Date | null | undefined) {
-  if (!date) {
-    return '-';
-  }
+  if (!date) {return '-';}
   try {
     return new Date(date).toLocaleString('ar-EG', {
       year: 'numeric',
@@ -288,9 +285,7 @@ export default function CustomerProfilesTab() {
 
   // === Apply sorting using useTableFeatures ===
   const sortedCustomers = useMemo(() => {
-    if (!customers || customers.length === 0) {
-      return [];
-    }
+    if (!customers || customers.length === 0) {return [];}
 
     const sorted = customerTable.sortData(customers, (item: Customer, key: string) => {
       switch (key) {
@@ -404,13 +399,13 @@ export default function CustomerProfilesTab() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleExport('excel')}>
+                    <DropdownMenuItem onClick={() => handleExport("excel")}>
                       تصدير Excel
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport('csv')}>
+                    <DropdownMenuItem onClick={() => handleExport("csv")}>
                       تصدير CSV
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                    <DropdownMenuItem onClick={() => handleExport("pdf")}>
                       تصدير PDF
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -446,11 +441,9 @@ export default function CustomerProfilesTab() {
                     searchTerm: customerFilter.filters.searchTerm,
                   }}
                   onApplyFilter={(filters: FilterParams) => {
-                    if (filters && typeof filters.searchTerm === 'string') {
-                      customerFilter.filters.setSearchTerm(filters.searchTerm);
-                    } else {
-                      customerFilter.filters.setSearchTerm('');
-                    }
+                    if (filters && typeof filters.searchTerm === 'string')
+                      {customerFilter.filters.setSearchTerm(filters.searchTerm);}
+                    else {customerFilter.filters.setSearchTerm('');}
                   }}
                 />
               </div>
@@ -499,9 +492,7 @@ export default function CustomerProfilesTab() {
                       .filter((key) => customerTable.visibleColumns[key])
                       .map((colKey) => {
                         const col = customerColumns.find((c) => c.key === colKey);
-                        if (!col) {
-                          return null;
-                        }
+                        if (!col) {return null;}
                         const widthConfig = getColumnWidth(colKey, col);
                         return (
                           <ResizableHeaderCell

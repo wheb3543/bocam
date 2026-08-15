@@ -25,10 +25,7 @@ export default function AdminDashboard() {
     >
       <div className="container px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
         {/* Detailed Stats Cards */}
-        <ErrorBoundary
-          title="تعذر تحميل لوحة الإحصائيات"
-          message="لم نتمكن من تحميل قسم الإحصائيات. يرجى المحاولة مرة أخرى."
-        >
+        <ErrorBoundary title="تعذر تحميل لوحة الإحصائيات" message="لم نتمكن من تحميل قسم الإحصائيات. يرجى المحاولة مرة أخرى.">
           <Suspense fallback={<div className="h-32 rounded-xl bg-muted/30 animate-pulse" />}>
             <DetailedStatsCards />
           </Suspense>
@@ -37,20 +34,14 @@ export default function AdminDashboard() {
         {/* Quick Patient Search & Manual Registration */}
         <div className="flex flex-col lg:flex-row gap-4 mb-6 sm:mb-8">
           <div className="flex-1 w-full">
-            <ErrorBoundary
-              title="تعذر تحميل البحث السريع"
-              message="لم نتمكن من تحميل قسم البحث السريع. يرجى المحاولة مرة أخرى."
-            >
+            <ErrorBoundary title="تعذر تحميل البحث السريع" message="لم نتمكن من تحميل قسم البحث السريع. يرجى المحاولة مرة أخرى.">
               <Suspense fallback={<div className="h-32 rounded-xl bg-muted/30 animate-pulse" />}>
                 <QuickPatientSearch />
               </Suspense>
             </ErrorBoundary>
           </div>
           <div className="flex-shrink-0 w-full lg:w-auto">
-            <ErrorBoundary
-              title="تعذر تحميل نموذج التسجيل اليدوي"
-              message="لم نتمكن من تحميل نموذج التسجيل اليدوي. يرجى المحاولة مرة أخرى."
-            >
+            <ErrorBoundary title="تعذر تحميل نموذج التسجيل اليدوي" message="لم نتمكن من تحميل نموذج التسجيل اليدوي. يرجى المحاولة مرة أخرى.">
               <Suspense fallback={<div className="h-32 rounded-xl bg-muted/30 animate-pulse" />}>
                 <ManualRegistrationForm />
               </Suspense>
@@ -60,10 +51,7 @@ export default function AdminDashboard() {
 
         {/* Notification Center */}
         <div className="mb-6 sm:mb-8">
-          <ErrorBoundary
-            title="تعذر تحميل مركز الإشعارات"
-            message="لم نتمكن من تحميل مركز الإشعارات. يرجى المحاولة مرة أخرى."
-          >
+          <ErrorBoundary title="تعذر تحميل مركز الإشعارات" message="لم نتمكن من تحميل مركز الإشعارات. يرجى المحاولة مرة أخرى.">
             <Suspense fallback={<div className="h-32 rounded-xl bg-muted/30 animate-pulse" />}>
               <NotificationCenter />
             </Suspense>
@@ -72,10 +60,7 @@ export default function AdminDashboard() {
 
         {/* Analytics */}
         <div className="mb-6 sm:mb-8">
-          <ErrorBoundary
-            title="تعذر تحميل التحليلات"
-            message="لم نتمكن من تحميل قسم التحليلات. يرجى المحاولة مرة أخرى."
-          >
+          <ErrorBoundary title="تعذر تحميل التحليلات" message="لم نتمكن من تحميل قسم التحليلات. يرجى المحاولة مرة أخرى.">
             <Suspense fallback={<div className="h-32 rounded-xl bg-muted/30 animate-pulse" />}>
               <SourceAnalytics />
             </Suspense>
@@ -84,16 +69,11 @@ export default function AdminDashboard() {
 
         {/* Charts Dashboard - lazy loaded to reduce initial bundle */}
         <div className="mb-6 sm:mb-8">
-          <ErrorBoundary
-            title="تعذر تحميل الرسوم البيانية"
-            message="لم نتمكن من تحميل الرسوم البيانية. يرجى المحاولة مرة أخرى."
-          >
+          <ErrorBoundary title="تعذر تحميل الرسوم البيانية" message="لم نتمكن من تحميل الرسوم البيانية. يرجى المحاولة مرة أخرى.">
             <Suspense
               fallback={
                 <div className="h-64 sm:h-80 rounded-xl bg-muted/30 animate-pulse flex items-center justify-center">
-                  <span className="text-sm text-muted-foreground">
-                    جاري تحميل الرسوم البيانية...
-                  </span>
+                  <span className="text-sm text-muted-foreground">جاري تحميل الرسوم البيانية...</span>
                 </div>
               }
             >

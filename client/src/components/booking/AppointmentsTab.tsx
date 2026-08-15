@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
@@ -28,6 +29,7 @@ interface Doctor {
   [key: string]: unknown;
 }
 
+
 interface FilterOptions {
   statusFilter?: string[];
   sourceFilter?: string[];
@@ -36,8 +38,7 @@ interface FilterOptions {
   searchTerm?: string;
 }
 
-type AppointmentStatus =
-  'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+type AppointmentStatus = 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
 
 type DateFilterPreset = 'today' | 'week' | 'month' | 'all';
 
@@ -76,30 +77,23 @@ export default function AppointmentsTab({
 
   // Convert dateFilter to string for AppointmentFilters component
   const dateFilterString = useMemo(() => {
-    if (!dateFilter) {
-      return 'all';
-    }
-    if (typeof dateFilter === 'string') {
-      return dateFilter;
-    }
+    if (!dateFilter) {return 'all';}
+    if (typeof dateFilter === 'string') {return dateFilter;}
     return 'custom';
   }, [dateFilter]);
 
-  const handleDateFilterChange = useCallback(
-    (value: string) => {
-      if (value === 'custom') {
-        // Keep existing custom date range or set default
-        if (dateFilter && typeof dateFilter !== 'string') {
-          setDateFilter(dateFilter);
-        } else {
-          setDateFilter({ from: new Date(), to: new Date() } as unknown as DateFilterPreset);
-        }
+  const handleDateFilterChange = useCallback((value: string) => {
+    if (value === 'custom') {
+      // Keep existing custom date range or set default
+      if (dateFilter && typeof dateFilter !== 'string') {
+        setDateFilter(dateFilter);
       } else {
-        setDateFilter(value as DateFilterPreset);
+        setDateFilter({ from: new Date(), to: new Date() } as unknown as DateFilterPreset);
       }
-    },
-    [dateFilter, setDateFilter]
-  );
+    } else {
+      setDateFilter(value as DateFilterPreset);
+    }
+  }, [dateFilter, setDateFilter]);
 
   // Column visibility state
   const appointmentColumns: ColumnConfig[] = [
@@ -178,10 +172,7 @@ export default function AppointmentsTab({
           ? appointmentStatusFilter
           : undefined,
     });
-  const appointments = useMemo(
-    () => (appointmentsData?.data || []) as unknown as AppointmentWithDoctor[],
-    [appointmentsData?.data]
-  );
+  const appointments = useMemo(() => (appointmentsData?.data || []) as unknown as AppointmentWithDoctor[], [appointmentsData?.data]);
   const { data: doctors = [] } = trpc.doctors.list.useQuery();
 
   const updateAppointmentStatusMutation = trpc.appointments.updateStatus.useMutation({
@@ -197,15 +188,11 @@ export default function AppointmentsTab({
           dateTo: dateRange.to.toISOString(),
         },
         (old) => {
-          if (!old) {
-            return old;
-          }
+          if (!old) {return old;}
           return {
             ...old,
             data: old.data.map((apt) =>
-              apt.id === variables.id
-                ? { ...apt, status: variables.status as AppointmentStatus }
-                : apt
+              apt.id === variables.id ? { ...apt, status: variables.status as AppointmentStatus } : apt
             ),
           };
         }
@@ -255,9 +242,7 @@ export default function AppointmentsTab({
   });
 
   const filteredAppointments = useMemo(() => {
-    if (!appointments) {
-      return [];
-    }
+    if (!appointments) {return [];}
     const filtered = [...appointments];
     const sorted = appointmentTable.sortData(filtered, (item, key: string) => {
       switch (key) {
@@ -292,14 +277,16 @@ export default function AppointmentsTab({
       }
     });
     if (!appointmentTable.sortState.direction) {
-      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      sorted.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     }
     return sorted;
   }, [appointments, appointmentTable]);
 
   const appointmentStats = useMemo(() => {
-    if (!appointments) {
-      return {
+    if (!appointments)
+      {return {
         total: 0,
         pending: 0,
         contacted: 0,
@@ -308,8 +295,7 @@ export default function AppointmentsTab({
         attended: 0,
         completed: 0,
         cancelled: 0,
-      };
-    }
+      };}
     return {
       total: appointments.length,
       pending: appointments.filter((a) => a.status === 'pending').length,
@@ -457,7 +443,8 @@ export default function AppointmentsTab({
               <CardTitle>مواعيد الأطباء</CardTitle>
               <CardDescription>إدارة ومتابعة مواعيد الأطباء</CardDescription>
             </div>
-            <div className="flex gap-2"></div>
+            <div className="flex gap-2">
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -506,31 +493,19 @@ export default function AppointmentsTab({
               searchTerm: appointmentFilter.filters.searchTerm,
             }}
             onApplyFilter={(filters: FilterOptions) => {
-              if (filters.statusFilter) {
-                appointmentFilter.filters.setStatusFilter(filters.statusFilter);
-              } else {
-                appointmentFilter.filters.setStatusFilter([]);
-              }
-              if (filters.sourceFilter) {
-                appointmentFilter.filters.setSourceFilter(filters.sourceFilter);
-              } else {
-                appointmentFilter.filters.setSourceFilter([]);
-              }
-              if (filters.categoryFilter) {
-                appointmentFilter.filters.setCategoryFilter(filters.categoryFilter);
-              } else {
-                appointmentFilter.filters.setCategoryFilter([]);
-              }
-              if (filters.dateFilter) {
-                appointmentFilter.filters.setDateFilter(filters.dateFilter as DateFilterPreset);
-              } else {
-                appointmentFilter.filters.setDateFilter('all');
-              }
-              if (filters.searchTerm) {
-                appointmentFilter.filters.setSearchTerm(filters.searchTerm);
-              } else {
-                appointmentFilter.filters.setSearchTerm('');
-              }
+              if (filters.statusFilter)
+                {appointmentFilter.filters.setStatusFilter(filters.statusFilter);}
+              else {appointmentFilter.filters.setStatusFilter([]);}
+              if (filters.sourceFilter)
+                {appointmentFilter.filters.setSourceFilter(filters.sourceFilter);}
+              else {appointmentFilter.filters.setSourceFilter([]);}
+              if (filters.categoryFilter)
+                {appointmentFilter.filters.setCategoryFilter(filters.categoryFilter);}
+              else {appointmentFilter.filters.setCategoryFilter([]);}
+              if (filters.dateFilter) {appointmentFilter.filters.setDateFilter(filters.dateFilter as DateFilterPreset);}
+              else {appointmentFilter.filters.setDateFilter('all');}
+              if (filters.searchTerm) {appointmentFilter.filters.setSearchTerm(filters.searchTerm);}
+              else {appointmentFilter.filters.setSearchTerm('');}
             }}
             onExport={handleExportAppointments}
             onPrint={handlePrintAppointments}

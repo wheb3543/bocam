@@ -41,7 +41,9 @@ const CampaignsTab = memo(function CampaignsTab({ campaignData, isLoading }: Cam
           <Target className="h-5 w-5 text-primary" />
           أداء الحملات الإعلانية
         </CardTitle>
-        <CardDescription>تحليل عائد الاستثمار (ROI) لكل حملة بناءً على معاملات UTM</CardDescription>
+        <CardDescription>
+          تحليل عائد الاستثمار (ROI) لكل حملة بناءً على معاملات UTM
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -51,10 +53,19 @@ const CampaignsTab = memo(function CampaignsTab({ campaignData, isLoading }: Cam
         ) : campaignData && campaignData.length > 0 ? (
           <div className="space-y-4">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={campaignData.slice(0, 10)} layout="vertical" margin={{ right: 30 }}>
+              <BarChart
+                data={campaignData.slice(0, 10)}
+                layout="vertical"
+                margin={{ right: 30 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" />
-                <YAxis type="category" dataKey="campaign" width={120} tick={{ fontSize: 11 }} />
+                <YAxis
+                  type="category"
+                  dataKey="campaign"
+                  width={120}
+                  tick={{ fontSize: 11 }}
+                />
                 <Tooltip />
                 <Legend />
                 <Bar

@@ -20,19 +20,11 @@ import {
 import { COLORS } from '../types/bi.types';
 
 interface DailyStatsTabProps {
-  dailyChartData: Array<{
-    date: string;
-    sessions: number;
-    conversions: number;
-    conversionRate: number;
-  }>;
+  dailyChartData: Array<{ date: string; sessions: number; conversions: number; conversionRate: number }>;
   isLoading: boolean;
 }
 
-const DailyStatsTab = memo(function DailyStatsTab({
-  dailyChartData,
-  isLoading,
-}: DailyStatsTabProps) {
+const DailyStatsTab = memo(function DailyStatsTab({ dailyChartData, isLoading }: DailyStatsTabProps) {
   return (
     <Card>
       <CardHeader>
@@ -40,7 +32,9 @@ const DailyStatsTab = memo(function DailyStatsTab({
           <Calendar className="h-5 w-5 text-primary" />
           الإحصائيات اليومية
         </CardTitle>
-        <CardDescription>تتبع الزيارات والتحويلات يومياً خلال الفترة المحددة</CardDescription>
+        <CardDescription>
+          تتبع الزيارات والتحويلات يومياً خلال الفترة المحددة
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -114,7 +108,9 @@ const DailyStatsTab = memo(function DailyStatsTab({
           <div className="text-center py-12 space-y-3">
             <Calendar className="h-12 w-12 text-muted-foreground/30 mx-auto" />
             <p className="text-muted-foreground">لا توجد بيانات يومية بعد</p>
-            <p className="text-xs text-muted-foreground">ستظهر البيانات عند وجود زيارات وتحويلات</p>
+            <p className="text-xs text-muted-foreground">
+              ستظهر البيانات عند وجود زيارات وتحويلات
+            </p>
           </div>
         )}
       </CardContent>

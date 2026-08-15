@@ -74,8 +74,6 @@ export const getCategoryColor = (category: TaskCategory): string => {
 };
 
 export const isOverdue = (dueDate: Date | null, status: TaskStatus): boolean => {
-  if (!dueDate || status === 'completed' || status === 'cancelled') {
-    return false;
-  }
+  if (!dueDate || status === 'completed' || status === 'cancelled') {return false;}
   return new Date(dueDate) < new Date();
 };

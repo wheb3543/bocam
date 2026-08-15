@@ -42,9 +42,7 @@ export default function PWAStatsPage() {
   const totalInstalls = stats?.total ?? 0;
 
   const platformData = useMemo(() => {
-    if (!stats?.recentInstalls) {
-      return [];
-    }
+    if (!stats?.recentInstalls) {return [];}
     // تجميع المنصات من recentInstalls
     const platformMap = new Map<string, number>();
     stats.recentInstalls.forEach((install: Record<string, unknown>) => {
@@ -56,9 +54,7 @@ export default function PWAStatsPage() {
 
   // Prepare daily stats for chart
   const chartData = useMemo(() => {
-    if (!stats?.dailyStats) {
-      return [];
-    }
+    if (!stats?.dailyStats) {return [];}
     const dailyMap = new Map<string, { public: number; admin: number }>();
 
     stats.dailyStats.forEach((stat: Record<string, unknown>) => {
@@ -69,9 +65,9 @@ export default function PWAStatsPage() {
       const existing = dailyMap.get(date);
       if (existing) {
         if (stat.appType === 'public') {
-          existing.public += stat.count as number;
+          existing.public += (stat.count as number);
         } else {
-          existing.admin += stat.count as number;
+          existing.admin += (stat.count as number);
         }
       }
     });
@@ -403,10 +399,7 @@ export default function PWAStatsPage() {
                   </thead>
                   <tbody>
                     {stats.recentInstalls.map((install: Record<string, unknown>) => (
-                      <tr
-                        key={install.id as string}
-                        className="border-b last:border-0 hover:bg-muted/30"
-                      >
+                      <tr key={install.id as string} className="border-b last:border-0 hover:bg-muted/30">
                         <td className="py-2 px-3">
                           <Badge
                             variant="secondary"
@@ -420,7 +413,7 @@ export default function PWAStatsPage() {
                           </Badge>
                         </td>
                         <td className="py-2 px-3 text-muted-foreground">
-                          {(install.platform as ReactNode) || 'غير معروف'}
+                          {install.platform as ReactNode || 'غير معروف'}
                         </td>
                         <td className="py-2 px-3 text-muted-foreground">
                           {install.installedAt

@@ -19,27 +19,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import {
-  MoreVertical,
-  Edit,
-  Trash2,
-  MessageSquare,
-  Paperclip,
-  Send,
-  File,
-  Upload,
-} from 'lucide-react';
+import { MoreVertical, Edit, Trash2, MessageSquare, Paperclip, Send, File, Upload } from 'lucide-react';
 import { trpc } from '@/lib/api/trpc';
 import type { Task, Comment, Attachment } from '../types/task.types';
-import {
-  getStatusLabel,
-  getStatusColor,
-  getPriorityLabel,
-  getPriorityColor,
-  getCategoryLabel,
-  getCategoryColor,
-  isOverdue,
-} from './TaskHelpers';
+import { getStatusLabel, getStatusColor, getPriorityLabel, getPriorityColor, getCategoryLabel, getCategoryColor, isOverdue } from './TaskHelpers';
 import { formatDateUtil } from '@/hooks/export/useFormatDate';
 
 interface TaskDetailsDialogProps {
@@ -79,17 +62,13 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
   });
 
   const handleAddComment = () => {
-    if (!task || !newComment.trim()) {
-      return;
-    }
+    if (!task || !newComment.trim()) {return;}
     addCommentMutation.mutate({ taskId: task.id, content: newComment });
   };
 
   const formatDate = formatDateUtil;
 
-  if (!task) {
-    return null;
-  }
+  if (!task) {return null;}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

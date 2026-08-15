@@ -73,17 +73,14 @@ export default function DetailedStatsCards() {
     const campRegistrations = campRegsPaged?.data || [];
     const campStats = {
       total: campRegistrations?.length || 0,
-      pending:
-        campRegistrations?.filter((r: CampRegistration) => r.status === 'pending').length || 0,
+      pending: campRegistrations?.filter((r: CampRegistration) => r.status === 'pending').length || 0,
       confirmed:
         campRegistrations?.filter(
           (r: CampRegistration) =>
             r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
         ).length || 0,
-      attended:
-        campRegistrations?.filter((r: CampRegistration) => r.status === 'attended').length || 0,
-      cancelled:
-        campRegistrations?.filter((r: CampRegistration) => r.status === 'cancelled').length || 0,
+      attended: campRegistrations?.filter((r: CampRegistration) => r.status === 'attended').length || 0,
+      cancelled: campRegistrations?.filter((r: CampRegistration) => r.status === 'cancelled').length || 0,
     };
 
     const appointmentStats = {

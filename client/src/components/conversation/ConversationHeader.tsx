@@ -5,7 +5,10 @@
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Phone, MoreVertical } from 'lucide-react';
+import {
+  Phone,
+  MoreVertical,
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,7 +62,12 @@ export default function ConversationHeader({
               <Button size="sm" variant="ghost" onClick={onSaveName} className="h-6 w-6 p-0">
                 <span className="text-green-600">✓</span>
               </Button>
-              <Button size="sm" variant="ghost" onClick={onCancelEditName} className="h-6 w-6 p-0">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onCancelEditName}
+                className="h-6 w-6 p-0"
+              >
                 <span className="text-red-600">✕</span>
               </Button>
             </div>

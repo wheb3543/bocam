@@ -4,14 +4,7 @@
  */
 
 import { memo, useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -87,7 +80,13 @@ const TaskFormDialog = memo(function TaskFormDialog({
       priority: formData.priority as 'low' | 'medium' | 'high' | 'urgent',
       status: formData.status as 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled',
       category: formData.category as
-        'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other',
+        | 'content'
+        | 'design'
+        | 'ads'
+        | 'seo'
+        | 'social_media'
+        | 'analytics'
+        | 'other',
       assignedTo:
         formData.assignedTo && formData.assignedTo !== 'none'
           ? parseInt(formData.assignedTo)
@@ -141,10 +140,7 @@ const TaskFormDialog = memo(function TaskFormDialog({
               <Select
                 value={formData.priority}
                 onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    priority: value as 'low' | 'medium' | 'high' | 'urgent',
-                  })
+                  setFormData({ ...formData, priority: value as 'low' | 'medium' | 'high' | 'urgent' })
                 }
               >
                 <SelectTrigger>
@@ -164,10 +160,7 @@ const TaskFormDialog = memo(function TaskFormDialog({
               <Select
                 value={formData.status}
                 onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    status: value as 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled',
-                  })
+                  setFormData({ ...formData, status: value as 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled' })
                 }
               >
                 <SelectTrigger>
@@ -190,11 +183,7 @@ const TaskFormDialog = memo(function TaskFormDialog({
               <Select
                 value={formData.category}
                 onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    category: value as
-                      'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other',
-                  })
+                  setFormData({ ...formData, category: value as 'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other' })
                 }
               >
                 <SelectTrigger>

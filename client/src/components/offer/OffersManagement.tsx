@@ -258,9 +258,7 @@ export default function OffersManagement() {
   };
 
   const filteredOffers = useMemo(() => {
-    if (!offers) {
-      return [];
-    }
+    if (!offers) {return [];}
     let filtered = [...offers];
 
     if (searchTerm) {
@@ -414,9 +412,7 @@ export default function OffersManagement() {
               <TableRow>
                 {offerTable.visibleColumnOrder.map((colKey) => {
                   const col = offerColumns.find((c) => c.key === colKey);
-                  if (!col || !offerTable.visibleColumns[colKey]) {
-                    return null;
-                  }
+                  if (!col || !offerTable.visibleColumns[colKey]) {return null;}
                   return (
                     <ResizableHeaderCell
                       key={colKey}
@@ -439,9 +435,7 @@ export default function OffersManagement() {
               {filteredOffers.map((offer: Offer) => (
                 <TableRow key={offer.id} className="hover:bg-muted/50/50">
                   {offerTable.visibleColumnOrder.map((colKey) => {
-                    if (!offerTable.visibleColumns[colKey]) {
-                      return null;
-                    }
+                    if (!offerTable.visibleColumns[colKey]) {return null;}
 
                     switch (colKey) {
                       case 'title':

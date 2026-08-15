@@ -12,10 +12,7 @@ interface RelatedItemsBadgeProps {
   entityWhatsAppStatus?: ConversationInfoProps['entityWhatsAppStatus'];
 }
 
-export default function RelatedItemsBadge({
-  conversation,
-  entityWhatsAppStatus,
-}: RelatedItemsBadgeProps) {
+export default function RelatedItemsBadge({ conversation, entityWhatsAppStatus }: RelatedItemsBadgeProps) {
   return (
     <div className="space-y-1.5">
       {conversation.appointmentId && (

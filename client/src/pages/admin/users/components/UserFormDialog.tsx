@@ -56,9 +56,13 @@ const UserFormDialog = memo(function UserFormDialog({
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingUser ? 'تعديل مستخدم' : 'إضافة مستخدم جديد'}</DialogTitle>
+          <DialogTitle>
+            {editingUser ? 'تعديل مستخدم' : 'إضافة مستخدم جديد'}
+          </DialogTitle>
           <DialogDescription>
-            {editingUser ? 'تحديث معلومات المستخدم' : 'إنشاء حساب مستخدم جديد في النظام'}
+            {editingUser
+              ? 'تحديث معلومات المستخدم'
+              : 'إنشاء حساب مستخدم جديد في النظام'}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -67,7 +71,9 @@ const UserFormDialog = memo(function UserFormDialog({
             <Input
               id="username"
               value={formData.username}
-              onChange={(e) => onFormDataChange({ ...formData, username: e.target.value })}
+              onChange={(e) =>
+                onFormDataChange({ ...formData, username: e.target.value })
+              }
               placeholder="أدخل اسم المستخدم"
               disabled={!!editingUser}
             />
@@ -80,7 +86,9 @@ const UserFormDialog = memo(function UserFormDialog({
               id="password"
               type="password"
               value={formData.password}
-              onChange={(e) => onFormDataChange({ ...formData, password: e.target.value })}
+              onChange={(e) =>
+                onFormDataChange({ ...formData, password: e.target.value })
+              }
               placeholder="أدخل كلمة المرور"
             />
           </div>
@@ -152,7 +160,10 @@ const UserFormDialog = memo(function UserFormDialog({
           >
             إلغاء
           </Button>
-          <Button onClick={onSubmit} disabled={isPending}>
+          <Button
+            onClick={onSubmit}
+            disabled={isPending}
+          >
             {isPending && <Loader2 className="w-4 h-4 ml-2 animate-spin" />}
             {editingUser ? 'تحديث' : 'إضافة'}
           </Button>

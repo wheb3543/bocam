@@ -5,46 +5,16 @@
 
 import { memo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  MessageCircle,
-  Plus,
-  Send,
-  LoaderIcon,
-  Wifi,
-  WifiOff,
-  CheckSquare,
-  AlertCircle,
-} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MessageCircle, Plus, Send, LoaderIcon, Wifi, WifiOff, CheckSquare, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { processPhoneInput } from '@/hooks/form/usePhoneFormat';
-import {
-  Conversation,
-  Template,
-  ConnectionStatus,
-  WhatsAppUser,
-  FilterType,
-  DateFilterType,
-} from '../../types/whatsapp.types';
+import { Conversation, Template, ConnectionStatus, WhatsAppUser, FilterType, DateFilterType } from '../../types/whatsapp.types';
 import StatsBar from '../shared/StatsBar';
 import ConversationFilters from './ConversationFilters';
 import ConversationSearchBar from './ConversationSearchBar';

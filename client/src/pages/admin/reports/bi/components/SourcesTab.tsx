@@ -7,7 +7,13 @@ import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, Globe, MessageCircle, Smartphone, Search } from 'lucide-react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import type { SourceData } from '../types/bi.types';
 import { SOURCE_COLORS } from '../types/bi.types';
 
@@ -65,7 +71,9 @@ const SourcesTab = memo(function SourcesTab({ sourceData, isLoading }: SourcesTa
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">لا توجد بيانات مصادر بعد</div>
+            <div className="text-center py-8 text-muted-foreground">
+              لا توجد بيانات مصادر بعد
+            </div>
           )}
         </CardContent>
       </Card>
@@ -95,7 +103,9 @@ const SourcesTab = memo(function SourcesTab({ sourceData, isLoading }: SourcesTa
                       <span className="font-medium capitalize">{source.source}</span>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
                         <span>{source.total} زيارة</span>
-                        <span className="text-green-600 font-medium">{source.conversions} حجز</span>
+                        <span className="text-green-600 font-medium">
+                          {source.conversions} حجز
+                        </span>
                         <Badge variant="outline" className="text-xs">
                           {source.rate}%
                         </Badge>
@@ -115,7 +125,9 @@ const SourcesTab = memo(function SourcesTab({ sourceData, isLoading }: SourcesTa
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">لا توجد بيانات مصادر بعد</div>
+            <div className="text-center py-8 text-muted-foreground">
+              لا توجد بيانات مصادر بعد
+            </div>
           )}
         </CardContent>
       </Card>

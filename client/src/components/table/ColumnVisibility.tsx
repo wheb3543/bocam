@@ -697,9 +697,7 @@ export function ColumnVisibility({
               className="mt-2"
               dir="rtl"
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSaveTemplate();
-                }
+                if (e.key === 'Enter') {handleSaveTemplate();}
               }}
             />
             <p className="text-xs text-muted-foreground mt-2">
@@ -742,9 +740,7 @@ export function ColumnVisibility({
               className="mt-2"
               dir="rtl"
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSaveSharedTemplate();
-                }
+                if (e.key === 'Enter') {handleSaveSharedTemplate();}
               }}
             />
             <p className="text-xs text-muted-foreground mt-2">

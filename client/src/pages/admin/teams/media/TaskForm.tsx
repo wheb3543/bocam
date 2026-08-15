@@ -14,14 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { mediaCategories } from './config';
-import type {
-  TaskFormData,
-  TaskStatus,
-  TaskPriority,
-  TaskCategory,
-  UserEntity,
-  CampaignEntity,
-} from './types';
+import type { TaskFormData, TaskStatus, TaskPriority, TaskCategory, UserEntity, CampaignEntity } from './types';
 
 interface TaskFormProps {
   formData: TaskFormData;
@@ -57,9 +50,7 @@ export default function TaskForm({ formData, onFormDataChange, users, campaigns 
           <Label>الحالة</Label>
           <Select
             value={formData.status}
-            onValueChange={(value) =>
-              onFormDataChange({ ...formData, status: value as TaskStatus })
-            }
+            onValueChange={(value) => onFormDataChange({ ...formData, status: value as TaskStatus })}
           >
             <SelectTrigger>
               <SelectValue placeholder="اختر الحالة" />
@@ -77,9 +68,7 @@ export default function TaskForm({ formData, onFormDataChange, users, campaigns 
           <Label>الأولوية</Label>
           <Select
             value={formData.priority}
-            onValueChange={(value) =>
-              onFormDataChange({ ...formData, priority: value as TaskPriority })
-            }
+            onValueChange={(value) => onFormDataChange({ ...formData, priority: value as TaskPriority })}
           >
             <SelectTrigger>
               <SelectValue placeholder="اختر الأولوية" />
@@ -99,9 +88,7 @@ export default function TaskForm({ formData, onFormDataChange, users, campaigns 
           <Label>التصنيف</Label>
           <Select
             value={formData.category}
-            onValueChange={(value) =>
-              onFormDataChange({ ...formData, category: value as TaskCategory })
-            }
+            onValueChange={(value) => onFormDataChange({ ...formData, category: value as TaskCategory })}
           >
             <SelectTrigger>
               <SelectValue placeholder="اختر التصنيف" />

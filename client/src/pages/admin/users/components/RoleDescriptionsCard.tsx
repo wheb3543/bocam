@@ -25,7 +25,9 @@ const RoleDescriptionsCard = memo(function RoleDescriptionsCard() {
           </div>
           <div className="p-4 border rounded-lg">
             <Badge className={roleColors.manager + ' mb-2 border'}>{roleLabels.manager}</Badge>
-            <p className="text-sm text-muted-foreground">إدارة المحتوى والحجوزات والتقارير</p>
+            <p className="text-sm text-muted-foreground">
+              إدارة المحتوى والحجوزات والتقارير
+            </p>
           </div>
           <div className="p-4 border rounded-lg">
             <Badge className={roleColors.staff + ' mb-2 border'}>{roleLabels.staff}</Badge>
@@ -33,7 +35,9 @@ const RoleDescriptionsCard = memo(function RoleDescriptionsCard() {
           </div>
           <div className="p-4 border rounded-lg">
             <Badge className={roleColors.viewer + ' mb-2 border'}>{roleLabels.viewer}</Badge>
-            <p className="text-sm text-muted-foreground">عرض البيانات والتقارير فقط دون تعديل</p>
+            <p className="text-sm text-muted-foreground">
+              عرض البيانات والتقارير فقط دون تعديل
+            </p>
           </div>
           <div className="p-4 border rounded-lg">
             <Badge className={roleColors.user + ' mb-2 border'}>{roleLabels.user}</Badge>

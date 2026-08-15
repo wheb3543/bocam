@@ -23,12 +23,9 @@ export function formatNumber(num: number): string {
 /**
  * تنسيق التاريخ
  */
-export function formatDate(
-  date: Date | string,
-  format: 'full' | 'short' | 'time' = 'full'
-): string {
+export function formatDate(date: Date | string, format: 'full' | 'short' | 'time' = 'full'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-
+  
   const options: Intl.DateTimeFormatOptions = {
     full: {
       year: 'numeric',
@@ -56,11 +53,11 @@ export function formatDate(
  */
 export function formatPhoneNumber(phone: string): string {
   const cleaned = phone.replace(/\D/g, '');
-
+  
   if (cleaned.length === 10) {
     return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{2})/, '$1 $2 $3 $4');
   }
-
+  
   return phone;
 }
 
@@ -68,9 +65,7 @@ export function formatPhoneNumber(phone: string): string {
  * تنسيق النص المختصر
  */
 export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) {
-    return text;
-  }
+  if (text.length <= maxLength) {return text;}
   return text.slice(0, maxLength) + '...';
 }
 
@@ -78,14 +73,12 @@ export function truncateText(text: string, maxLength: number): string {
  * تنسيق الحجم بالبايت
  */
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) {
-    return '0 Bytes';
-  }
-
+  if (bytes === 0) {return '0 Bytes';}
+  
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-
+  
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
@@ -103,7 +96,7 @@ export function formatDuration(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
-
+  
   if (hours > 0) {
     return `${hours}س ${minutes}د ${remainingSeconds}ث`;
   }
@@ -117,9 +110,7 @@ export function formatDuration(seconds: number): string {
  * تنسيق الاسم الكامل
  */
 export function formatFullName(firstName: string, lastName?: string): string {
-  if (!lastName) {
-    return firstName;
-  }
+  if (!lastName) {return firstName;}
   return `${firstName} ${lastName}`;
 }
 
@@ -140,6 +131,6 @@ export function formatAddress(address: {
     address.country,
     address.postalCode,
   ].filter(Boolean);
-
+  
   return parts.join(', ');
 }

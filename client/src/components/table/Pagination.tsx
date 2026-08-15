@@ -59,13 +59,7 @@ export default function Pagination({
             <Select
               value={pageSize || '100'}
               onValueChange={(val) => {
-                if (
-                  val === '50' ||
-                  val === '100' ||
-                  val === '500' ||
-                  val === '1000' ||
-                  val === 'all'
-                ) {
+                if (val === '50' || val === '100' || val === '500' || val === '1000' || val === 'all') {
                   onPageSizeChange(val);
                 }
               }}

@@ -10,7 +10,11 @@ export function getOptimizedImageUrl(
   originalUrl: string,
   options: ImageOptimizationOptions = {}
 ): string {
-  const { quality = 80, maxWidth = 1200, format = 'webp' } = options;
+  const {
+    quality = 80,
+    maxWidth = 1200,
+    format = 'webp',
+  } = options;
 
   // If it's already an optimized URL, return as is
   if (originalUrl.includes('?')) {
@@ -37,10 +41,8 @@ export function getImageLoadingProps(options: ImageOptimizationOptions = {}) {
 
 // WebP support detection
 export function supportsWebP(): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
+  if (typeof window === 'undefined') {return false;}
+  
   const canvas = document.createElement('canvas');
   canvas.width = 1;
   canvas.height = 1;
@@ -52,21 +54,18 @@ export function createImageIntersectionObserver(
   callback: (img: HTMLImageElement) => void,
   options?: IntersectionObserverInit
 ): IntersectionObserver {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const img = entry.target as HTMLImageElement;
-          callback(img);
-          observer.unobserve(img);
-        }
-      });
-    },
-    {
-      rootMargin: '50px',
-      threshold: 0.01,
-      ...options,
-    }
-  );
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const img = entry.target as HTMLImageElement;
+        callback(img);
+        observer.unobserve(img);
+      }
+    });
+  }, {
+    rootMargin: '50px',
+    threshold: 0.01,
+    ...options
+  });
   return observer;
 }

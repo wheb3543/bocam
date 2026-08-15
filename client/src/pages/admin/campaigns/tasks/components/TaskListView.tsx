@@ -16,15 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
 import type { Task } from '../types/task.types';
-import {
-  getStatusLabel,
-  getStatusColor,
-  getPriorityLabel,
-  getPriorityColor,
-  getCategoryLabel,
-  getCategoryColor,
-  isOverdue,
-} from './TaskHelpers';
+import { getStatusLabel, getStatusColor, getPriorityLabel, getPriorityColor, getCategoryLabel, getCategoryColor, isOverdue } from './TaskHelpers';
 import { formatDateUtil } from '@/hooks/export/useFormatDate';
 
 interface TaskListViewProps {
@@ -107,7 +99,9 @@ const TaskListView = memo(function TaskListView({
                     )}
                   </td>
                   <td className="p-3">
-                    <span className={isOverdue(task.dueDate, task.status) ? 'text-red-500' : ''}>
+                    <span
+                      className={isOverdue(task.dueDate, task.status) ? 'text-red-500' : ''}
+                    >
                       {formatDate(task.dueDate)}
                     </span>
                   </td>

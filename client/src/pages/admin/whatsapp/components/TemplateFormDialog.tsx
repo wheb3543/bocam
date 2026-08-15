@@ -56,7 +56,9 @@ export function TemplateFormDialog({
 }: TemplateFormDialogProps) {
   const title = mode === 'create' ? 'إنشاء قالب جديد' : 'تعديل القالب';
   const description =
-    mode === 'create' ? 'أنشئ قالب رسالة جديد لاستخدامه في الحملات' : 'تعديل تفاصيل القالب';
+    mode === 'create'
+      ? 'أنشئ قالب رسالة جديد لاستخدامه في الحملات'
+      : 'تعديل تفاصيل القالب';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -67,7 +69,9 @@ export function TemplateFormDialog({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label>اسم القالب {mode === 'create' && <span className="text-red-500">*</span>}</Label>
+            <Label>
+              اسم القالب {mode === 'create' && <span className="text-red-500">*</span>}
+            </Label>
             <Input
               value={name}
               onChange={(e) => onNameChange(e.target.value)}

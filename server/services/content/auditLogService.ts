@@ -26,7 +26,7 @@ export class AuditLogService {
   /**
    * تسجيل تغيير في المحتوى
    */
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async logChange(
     db: any,
     params: {

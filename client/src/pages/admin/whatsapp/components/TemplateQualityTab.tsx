@@ -41,7 +41,10 @@ export function TemplateQualityTab({
       <CardContent className="space-y-4">
         <div>
           <label className="text-sm font-medium">اختر قالباً</label>
-          <Select value={selectedTemplateForQuality} onValueChange={onSelectedTemplateChange}>
+          <Select
+            value={selectedTemplateForQuality}
+            onValueChange={onSelectedTemplateChange}
+          >
             <SelectTrigger className="mt-1">
               <SelectValue placeholder="اختر قالباً لعرض جودته" />
             </SelectTrigger>

@@ -3,3 +3,4 @@ import type { AppRouter } from '../../../server/routers/routers';
 
 export type RouterInputs = inferRouterInputs<AppRouter>;
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
+

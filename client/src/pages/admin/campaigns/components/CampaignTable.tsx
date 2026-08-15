@@ -73,8 +73,12 @@ export function CampaignTable({
             <TableHead className="text-right hidden md:table-cell min-w-[100px]">
               الميزانية
             </TableHead>
-            <TableHead className="text-right hidden lg:table-cell min-w-[120px]">التقدم</TableHead>
-            <TableHead className="text-right hidden md:table-cell min-w-[100px]">الفترة</TableHead>
+            <TableHead className="text-right hidden lg:table-cell min-w-[120px]">
+              التقدم
+            </TableHead>
+            <TableHead className="text-right hidden md:table-cell min-w-[100px]">
+              الفترة
+            </TableHead>
             <TableHead className="text-right min-w-[100px]">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>

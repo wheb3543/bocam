@@ -18,9 +18,7 @@ import FilterPresets from '@/components/FilterPresets';
 import type { UnifiedLead } from '@shared/types';
 
 const sanitizeLead = (lead: UnifiedLead) => {
-  if (!lead) {
-    return null;
-  }
+  if (!lead) {return null;}
   const sanitized = { ...lead };
   (Object.keys(sanitized) as Array<keyof UnifiedLead>).forEach((key) => {
     const value = sanitized[key];
@@ -75,18 +73,10 @@ export default function LeadsManagementPage() {
   ];
 
   const handleApplyPreset = (filters: Record<string, unknown>) => {
-    if (filters.dateFilter) {
-      setLeadsDateFilter(filters.dateFilter as DateFilterPreset);
-    }
-    if (filters.status) {
-      setLeadsStatusFilter(filters.status as string[]);
-    }
-    if (filters.source) {
-      setLeadsSourceFilter(filters.source as string[]);
-    }
-    if (filters.searchTerm !== undefined) {
-      setSearchTerm(filters.searchTerm as string);
-    }
+    if (filters.dateFilter) {setLeadsDateFilter(filters.dateFilter as DateFilterPreset);}
+    if (filters.status) {setLeadsStatusFilter(filters.status as string[]);}
+    if (filters.source) {setLeadsSourceFilter(filters.source as string[]);}
+    if (filters.searchTerm !== undefined) {setSearchTerm(filters.searchTerm as string);}
   };
 
   const currentFilters = {
@@ -116,9 +106,7 @@ export default function LeadsManagementPage() {
   });
 
   const filteredLeads = useMemo(() => {
-    if (!unifiedLeads) {
-      return [];
-    }
+    if (!unifiedLeads) {return [];}
     let filtered = unifiedLeads;
 
     if (searchTerm) {
@@ -136,9 +124,7 @@ export default function LeadsManagementPage() {
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       filtered = filtered.filter((lead) => {
         const leadDate = new Date(lead.createdAt);
-        if (leadsDateFilter === 'today') {
-          return leadDate >= today;
-        }
+        if (leadsDateFilter === 'today') {return leadDate >= today;}
         if (leadsDateFilter === 'week') {
           const weekAgo = new Date(today);
           weekAgo.setDate(weekAgo.getDate() - 7);
@@ -191,9 +177,7 @@ export default function LeadsManagementPage() {
 
   const handleStatusUpdate = useCallback(
     (status: string, notes: string) => {
-      if (!selectedLead || !status) {
-        return;
-      }
+      if (!selectedLead || !status) {return;}
       updateStatusMutation.mutate({
         id: selectedLead.id,
         status: status as 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer',
@@ -203,15 +187,18 @@ export default function LeadsManagementPage() {
     [selectedLead, updateStatusMutation]
   );
 
-  const handleExport = useCallback(() => {
-    if (!filteredLeads || filteredLeads.length === 0) {
-      toast.error('لا توجد بيانات للتصدير');
-      return;
-    }
-    const formattedData = formatLeadsForExport(filteredLeads);
-    exportToExcel(formattedData, 'تسجيلات_العملاء');
-    toast.success('تم تصدير البيانات بنجاح');
-  }, [filteredLeads]);
+  const handleExport = useCallback(
+    () => {
+      if (!filteredLeads || filteredLeads.length === 0) {
+        toast.error('لا توجد بيانات للتصدير');
+        return;
+      }
+      const formattedData = formatLeadsForExport(filteredLeads);
+      exportToExcel(formattedData, 'تسجيلات_العملاء');
+      toast.success('تم تصدير البيانات بنجاح');
+    },
+    [filteredLeads]
+  );
 
   const handlePrint = useCallback(() => {
     if (!filteredLeads || filteredLeads.length === 0) {
@@ -259,9 +246,7 @@ export default function LeadsManagementPage() {
   );
 
   const pendingCount = Array.isArray(unifiedLeads)
-    ? unifiedLeads.filter(
-        (l) => l.type !== 'appointment' && l.status === ('new' as UnifiedLead['status'])
-      ).length
+    ? unifiedLeads.filter((l) => l.type !== 'appointment' && l.status === 'new' as UnifiedLead['status']).length
     : 0;
 
   return (

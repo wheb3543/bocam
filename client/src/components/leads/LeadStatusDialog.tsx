@@ -97,9 +97,7 @@ export default function LeadStatusDialog({
   }
 
   const handleSubmit = () => {
-    if (!newStatus) {
-      return;
-    }
+    if (!newStatus) {return;}
     onSubmit(newStatus, statusNotes);
     setNewStatus('');
     setStatusNotes('');
@@ -158,11 +156,7 @@ export default function LeadStatusDialog({
                 <div>
                   <span className="text-muted-foreground">النوع:</span>{' '}
                   <span className="font-medium">
-                    {lead.type === 'appointment'
-                      ? 'موعد طبيب'
-                      : lead.type === 'offer'
-                        ? 'عرض'
-                        : 'مخيم'}
+                    {lead.type === 'appointment' ? 'موعد طبيب' : lead.type === 'offer' ? 'عرض' : 'مخيم'}
                   </span>
                 </div>
                 <div>

@@ -208,9 +208,7 @@ export default function CampFormDialog({
             <Textarea
               id="availableProcedures"
               value={formData.availableProcedures}
-              onChange={(e) =>
-                onFormDataChange({ ...formData, availableProcedures: e.target.value })
-              }
+              onChange={(e) => onFormDataChange({ ...formData, availableProcedures: e.target.value })}
               placeholder="أدخل الإجراءات المتاحة (كل إجراء في سطر جديد)"
               rows={3}
             />

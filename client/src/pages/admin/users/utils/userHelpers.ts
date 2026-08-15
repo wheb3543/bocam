@@ -8,9 +8,7 @@ import type { User } from '../types/user.types';
 import { roleLabels } from '../types/user.types';
 
 export const getInitials = (name: string) => {
-  if (!name) {
-    return '؟';
-  }
+  if (!name) {return '؟';}
   const parts = name.split(' ');
   if (parts.length >= 2) {
     return parts[0][0] + parts[1][0];

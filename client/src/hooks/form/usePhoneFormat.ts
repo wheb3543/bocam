@@ -150,34 +150,26 @@ export function processPhoneInput(raw: string): string {
 export function usePhoneFormat() {
   /** تنسيق للعرض: +967 7XX XXX XXX */
   const formatPhoneDisplay = useCallback((phone: string | null | undefined): string => {
-    if (!phone) {
-      return '-';
-    }
+    if (!phone) {return '-';}
     return formatForDisplay(phone);
   }, []);
 
   /** تنسيق للإرسال: 9677XXXXXXXX */
   const formatPhone = useCallback((phone: string | null | undefined): string => {
-    if (!phone) {
-      return '';
-    }
+    if (!phone) {return '';}
     return formatForSend(phone);
   }, []);
 
   /** رابط واتساب */
   const getWhatsAppLink = useCallback((phone: string | null | undefined): string => {
-    if (!phone) {
-      return '#';
-    }
+    if (!phone) {return '#';}
     const formatted = formatForSend(phone);
     return `https://wa.me/${formatted}`;
   }, []);
 
   /** رابط اتصال */
   const getCallLink = useCallback((phone: string | null | undefined): string => {
-    if (!phone) {
-      return '#';
-    }
+    if (!phone) {return '#';}
     const formatted = formatForSend(phone);
     return `tel:+${formatted}`;
   }, []);

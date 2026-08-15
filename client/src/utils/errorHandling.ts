@@ -138,10 +138,7 @@ export class SafeSSEWriter {
   /**
    * Safely write to SSE response
    */
-  static write(
-    res: { writableEnded: boolean; write: (data: string) => void },
-    data: string
-  ): boolean {
+  static write(res: { writableEnded: boolean; write: (data: string) => void }, data: string): boolean {
     try {
       if (res.writableEnded) {
         return false;

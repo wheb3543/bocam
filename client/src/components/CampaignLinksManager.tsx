@@ -7,7 +7,16 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Loader2, Tag, Tent, Stethoscope, Search, Link2, Save, CheckCircle } from 'lucide-react';
+import {
+  Loader2,
+  Tag,
+  Tent,
+  Stethoscope,
+  Search,
+  Link2,
+  Save,
+  CheckCircle,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -314,8 +323,7 @@ export default function CampaignLinksManager({
                   {allOffers
                     .filter(
                       (o: Record<string, unknown>) =>
-                        !searchQuery ||
-                        (o.title as string)?.toLowerCase().includes(searchQuery.toLowerCase())
+                        !searchQuery || (o.title as string)?.toLowerCase().includes(searchQuery.toLowerCase())
                     )
                     .map((offer: Record<string, unknown>) => (
                       <div
@@ -492,9 +500,7 @@ export default function CampaignLinksManager({
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{doctor.name as string}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {doctor.specialty as string}
-                          </p>
+                          <p className="text-xs text-muted-foreground">{doctor.specialty as string}</p>
                         </div>
                         {selectedDoctorIds.includes(doctor.id as number) && (
                           <CheckCircle className="h-4 w-4 text-blue-600 shrink-0" />

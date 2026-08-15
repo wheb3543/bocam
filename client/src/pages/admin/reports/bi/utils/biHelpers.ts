@@ -29,15 +29,11 @@ export function getDateRange(range: DateRange): DateRangeResult {
 }
 
 export function calculateTrend(current: number, previous: number): number {
-  if (previous === 0) {
-    return current > 0 ? 100 : 0;
-  }
+  if (previous === 0) {return current > 0 ? 100 : 0;}
   return ((current - previous) / previous) * 100;
 }
 
-export function formatDailyChartData(
-  dailyStats: Array<{ date: string; sessions: number; conversions: number; conversionRate: number }>
-) {
+export function formatDailyChartData(dailyStats: Array<{ date: string; sessions: number; conversions: number; conversionRate: number }>) {
   return dailyStats.map((stat) => ({
     date: new Date(stat.date).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' }),
     sessions: stat.sessions,

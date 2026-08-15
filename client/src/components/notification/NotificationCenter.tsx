@@ -223,9 +223,7 @@ export default function NotificationCenter() {
             const Icon = section.icon;
             const isExpanded = expandedSections[section.id];
 
-            if (section.count === 0) {
-              return null;
-            }
+            if (section.count === 0) {return null;}
 
             return (
               <Card

@@ -3,18 +3,7 @@
  * تكوينات صفحة فريق الإعلام
  */
 
-import {
-  Palette,
-  Video,
-  Film,
-  Camera,
-  FileVideo,
-  Clapperboard,
-  Circle,
-  Timer,
-  AlertCircle,
-  CheckCircle2,
-} from 'lucide-react';
+import { Palette, Video, Film, Camera, FileVideo, Clapperboard, Circle, Timer, AlertCircle, CheckCircle2 } from 'lucide-react';
 import type { TaskCategory, TaskStatus, TaskPriority } from './types';
 
 // تصنيفات الإعلام - مع mapping للتصنيفات المدعومة في قاعدة البيانات
@@ -63,10 +52,7 @@ export const statusConfig: Record<
   },
 };
 
-export const priorityConfig: Record<
-  TaskPriority,
-  { label: string; color: string; bgColor: string }
-> = {
+export const priorityConfig: Record<TaskPriority, { label: string; color: string; bgColor: string }> = {
   low: { label: 'منخفضة', color: 'text-muted-foreground', bgColor: 'bg-muted' },
   medium: { label: 'متوسطة', color: 'text-blue-600', bgColor: 'bg-blue-100' },
   high: { label: 'عالية', color: 'text-orange-600', bgColor: 'bg-orange-100' },

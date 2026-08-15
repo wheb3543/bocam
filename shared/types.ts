@@ -62,8 +62,7 @@ export interface CampRegistration {
   medicalCondition: string | null;
   patientMessage: string | null;
   notes: string | null;
-  status:
-    'pending' | 'completed' | 'cancelled' | 'contacted' | 'no_answer' | 'confirmed' | 'attended';
+  status: 'pending' | 'completed' | 'cancelled' | 'contacted' | 'no_answer' | 'confirmed' | 'attended';
   statusNotes: string | null;
   attendanceDate: Date | null;
   preferredDate: string | null;
@@ -122,8 +121,7 @@ export interface Appointment {
   staffNotes: string | null;
   notes: string | null;
   patientMessage: string | null;
-  status:
-    'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+  status: 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
   contactedAt: Date | null;
   confirmedAt: Date | null;
   attendedAt: Date | null;
@@ -175,8 +173,7 @@ export interface OfferLead {
   gender: 'male' | 'female';
   patientMessage: string | null;
   notes: string | null;
-  status:
-    'pending' | 'completed' | 'cancelled' | 'contacted' | 'no_answer' | 'confirmed' | 'attended';
+  status: 'pending' | 'completed' | 'cancelled' | 'contacted' | 'no_answer' | 'confirmed' | 'attended';
   statusNotes: string | null;
   contactedAt: Date | null;
   confirmedAt: Date | null;
@@ -213,28 +210,9 @@ export interface PatientResult {
 }
 
 export type WhatsAppMessageStatus = 'sent' | 'delivered' | 'read' | 'failed' | 'received';
-export type WhatsAppMessageType =
-  | 'text'
-  | 'image'
-  | 'document'
-  | 'audio'
-  | 'video'
-  | 'location'
-  | 'template'
-  | 'interactive'
-  | 'contacts'
-  | 'unknown'
-  | 'button_reply'
-  | 'list_reply'
-  | 'sticker'
-  | 'reaction'
-  | 'order'
-  | 'referral'
-  | 'product_enquiry'
-  | 'unsupported';
+export type WhatsAppMessageType = 'text' | 'image' | 'document' | 'audio' | 'video' | 'location' | 'template' | 'interactive' | 'contacts' | 'unknown' | 'button_reply' | 'list_reply' | 'sticker' | 'reaction' | 'order' | 'referral' | 'product_enquiry' | 'unsupported';
 
-export type AppointmentStatus =
-  'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+export type AppointmentStatus = 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
 
 // WhatsApp types from Drizzle schema
 export type WhatsAppDirection = 'inbound' | 'outbound';
@@ -296,14 +274,7 @@ export interface WhatsappNotification {
   id: number;
   entityType: 'appointment' | 'camp_registration' | 'offer_lead';
   entityId: number;
-  notificationType:
-    | 'booking_confirmation'
-    | 'reminder_24h'
-    | 'reminder_1h'
-    | 'post_visit_followup'
-    | 'cancellation'
-    | 'status_update'
-    | 'custom';
+  notificationType: 'booking_confirmation' | 'reminder_24h' | 'reminder_1h' | 'post_visit_followup' | 'cancellation' | 'status_update' | 'custom';
   phone: string;
   recipientName: string | null;
   templateName: string | null;
@@ -406,17 +377,7 @@ export interface UnifiedLead {
   phone: string;
   email: string | null;
   notes: string | null;
-  status:
-    | 'completed'
-    | 'cancelled'
-    | 'new'
-    | 'contacted'
-    | 'booked'
-    | 'not_interested'
-    | 'no_answer'
-    | 'pending'
-    | 'confirmed'
-    | 'attended';
+  status: 'completed' | 'cancelled' | 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer' | 'pending' | 'confirmed' | 'attended';
   createdAt: Date;
   utmSource: string | null;
   utmMedium: string | null;

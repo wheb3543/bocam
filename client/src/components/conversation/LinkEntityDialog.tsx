@@ -54,12 +54,7 @@ export default function LinkEntityDialog({
             <Select
               value={entityType}
               onValueChange={(value) => {
-                if (
-                  value === 'lead' ||
-                  value === 'appointment' ||
-                  value === 'offer' ||
-                  value === 'camp'
-                ) {
+                if (value === 'lead' || value === 'appointment' || value === 'offer' || value === 'camp') {
                   onEntityTypeChange(value);
                 }
               }}

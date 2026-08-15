@@ -4,14 +4,7 @@
  */
 
 import { memo } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -22,15 +15,13 @@ interface SearchInConversationDialogProps {
   onOpenChange: (open: boolean) => void;
   searchTerm: string;
   onSearchTermChange: (value: string) => void;
-  searchResults:
-    | {
-        id: number;
-        direction: string;
-        messageType: string;
-        createdAt: Date | string;
-        content: string;
-      }[]
-    | undefined;
+  searchResults: {
+    id: number;
+    direction: string;
+    messageType: string;
+    createdAt: Date | string;
+    content: string;
+  }[] | undefined;
   searchLoading: boolean;
 }
 

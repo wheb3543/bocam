@@ -41,7 +41,9 @@ export default function ConversationStatisticsCard({
           <div className="grid grid-cols-2 gap-2">
             <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
               <p className="text-[10px] text-muted-foreground">إجمالي الرسائل</p>
-              <p className="font-bold text-sm text-foreground">{conversationStats.totalMessages}</p>
+              <p className="font-bold text-sm text-foreground">
+                {conversationStats.totalMessages}
+              </p>
             </div>
             <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
               <p className="text-[10px] text-muted-foreground">مرسلة</p>
@@ -51,7 +53,9 @@ export default function ConversationStatisticsCard({
             </div>
             <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
               <p className="text-[10px] text-muted-foreground">مستلمة</p>
-              <p className="font-bold text-sm text-blue-600">{conversationStats.inboundMessages}</p>
+              <p className="font-bold text-sm text-blue-600">
+                {conversationStats.inboundMessages}
+              </p>
             </div>
             <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
               <p className="text-[10px] text-muted-foreground">قوالب</p>

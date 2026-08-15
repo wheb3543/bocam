@@ -10,24 +10,22 @@ import './index.css';
 if (typeof window !== 'undefined') {
   // Unregister any service workers
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      registrations.forEach((registration) => registration.unregister());
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(registration => registration.unregister());
     });
   }
-
+  
   // Clear any caches
   if ('caches' in window) {
-    caches.keys().then((names) => {
-      names.forEach((name) => caches.delete(name));
+    caches.keys().then(names => {
+      names.forEach(name => caches.delete(name));
     });
   }
-
+  
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('reload')) {
     // Clear URL parameter without triggering a reload
-    const newUrl =
-      window.location.pathname +
-      window.location.search.replace(/[?&]reload=true/, '').replace(/^&/, '?');
+    const newUrl = window.location.pathname + window.location.search.replace(/[?&]reload=true/, '').replace(/^&/, '?');
     window.history.replaceState({}, '', newUrl);
   }
 }

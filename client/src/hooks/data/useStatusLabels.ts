@@ -38,13 +38,9 @@ export const unifiedStatusOptions = [
 
 // تنسيق وقت الحالة: h:mm ص/م, dd-MM-yyyy
 export function formatStatusTime(date: Date | string | null | undefined): string {
-  if (!date) {
-    return '-';
-  }
+  if (!date) {return '-';}
   const d = new Date(date);
-  if (isNaN(d.getTime())) {
-    return '-';
-  }
+  if (isNaN(d.getTime())) {return '-';}
   const hours = d.getHours();
   const minutes = d.getMinutes().toString().padStart(2, '0');
   const ampm = hours >= 12 ? 'م' : 'ص';
@@ -90,7 +86,12 @@ export const campRegistrationStatusColors: Record<string, string> = unifiedStatu
 
 // === أنواع الحالات المدعومة ===
 type StatusType =
-  'lead' | 'offerLead' | 'campaign' | 'campaignType' | 'appointment' | 'campRegistration';
+  | 'lead'
+  | 'offerLead'
+  | 'campaign'
+  | 'campaignType'
+  | 'appointment'
+  | 'campRegistration';
 
 const statusMaps: Record<
   StatusType,

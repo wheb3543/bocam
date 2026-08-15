@@ -9,7 +9,7 @@ interface AppointmentCardProps {
   statusBadge: (status: string) => ReactNode;
   formatDate: (value: string | Date) => string;
   onOpenDetails?: () => void;
-}
+};
 
 export default function AppointmentCard({
   appointment,

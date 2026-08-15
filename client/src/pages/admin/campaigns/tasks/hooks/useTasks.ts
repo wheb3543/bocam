@@ -13,12 +13,7 @@ interface UseTasksProps {
   searchQuery: string;
 }
 
-export function useTasks({
-  statusFilter,
-  priorityFilter,
-  categoryFilter,
-  searchQuery,
-}: UseTasksProps) {
+export function useTasks({ statusFilter, priorityFilter, categoryFilter, searchQuery }: UseTasksProps) {
   const {
     data: tasks,
     isLoading,
@@ -44,10 +39,7 @@ export function useTasks({
     },
   });
 
-  const handleStatusChange = (
-    taskId: number,
-    newStatus: 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled'
-  ) => {
+  const handleStatusChange = (taskId: number, newStatus: 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled') => {
     updateStatusMutation.mutate({ id: taskId, status: newStatus });
   };
 

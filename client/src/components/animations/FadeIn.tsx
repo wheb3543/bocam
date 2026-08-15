@@ -35,9 +35,7 @@ export default function FadeIn<T extends React.ElementType = 'div'>({
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) {
-      return;
-    }
+    if (!element) {return;}
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -61,9 +59,7 @@ export default function FadeIn<T extends React.ElementType = 'div'>({
   }, [once, threshold]);
 
   const getTransform = (): string => {
-    if (isVisible) {
-      return 'translate3d(0, 0, 0)';
-    }
+    if (isVisible) {return 'translate3d(0, 0, 0)';}
     switch (direction) {
       case 'up':
         return `translate3d(0, ${distance}px, 0)`;

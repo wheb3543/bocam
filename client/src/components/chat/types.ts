@@ -1,7 +1,4 @@
-import type {
-  WhatsAppMessage as DBWhatsAppMessage,
-  WhatsAppTemplate as DBWhatsAppTemplate,
-} from '@shared/types';
+import type { WhatsAppMessage as DBWhatsAppMessage, WhatsAppTemplate as DBWhatsAppTemplate } from '@shared/types';
 
 // Re-export database types with local aliases for convenience
 export type WhatsAppTemplate = DBWhatsAppTemplate;
@@ -58,31 +55,19 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function isMessage(value: unknown): value is Message {
-  if (!isRecord(value)) {
-    return false;
-  }
+  if (!isRecord(value)) {return false;}
   if ('direction' in value && value.direction !== null) {
-    if (value.direction !== 'inbound' && value.direction !== 'outbound') {
-      return false;
-    }
+    if (value.direction !== 'inbound' && value.direction !== 'outbound') {return false;}
   }
   if ('id' in value && value.id !== null) {
-    if (typeof value.id !== 'string' && typeof value.id !== 'number') {
-      return false;
-    }
+    if (typeof value.id !== 'string' && typeof value.id !== 'number') {return false;}
   }
-  if ('content' in value && value.content !== null && typeof value.content !== 'string') {
-    return false;
-  }
+  if ('content' in value && value.content !== null && typeof value.content !== 'string') {return false;}
   if ('sentAt' in value && value.sentAt !== null) {
-    if (typeof value.sentAt !== 'string' && !(value.sentAt instanceof Date)) {
-      return false;
-    }
+    if (typeof value.sentAt !== 'string' && !(value.sentAt instanceof Date)) {return false;}
   }
   if ('createdAt' in value && value.createdAt !== null) {
-    if (typeof value.createdAt !== 'string' && !(value.createdAt instanceof Date)) {
-      return false;
-    }
+    if (typeof value.createdAt !== 'string' && !(value.createdAt instanceof Date)) {return false;}
   }
   return true;
 }
@@ -129,9 +114,7 @@ export function getMessageTimestamp(msg: Message): number {
 }
 
 export function isOutsideWindow(lastMessageAt?: string | Date | null): boolean {
-  if (!lastMessageAt) {
-    return true;
-  }
+  if (!lastMessageAt) {return true;}
   const last = new Date(lastMessageAt).getTime();
   return Date.now() - last > 24 * 60 * 60 * 1000;
 }
@@ -162,9 +145,7 @@ export function mergeMessages(dbMsgs: Message[], localMsgs: Message[]): Message[
   const map = new Map<string | number, Message>();
   // DB messages first (authoritative)
   for (const m of dbMsgs) {
-    if (m.id !== null && m.id !== undefined) {
-      map.set(m.id, m);
-    }
+    if (m.id !== null && m.id !== undefined) {map.set(m.id, m);}
   }
   // Local messages: only add those not in DB (new SSE arrivals or optimistic)
   for (const m of localMsgs) {

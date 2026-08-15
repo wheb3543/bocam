@@ -1,5 +1,4 @@
-export type CampStatus =
-  'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+export type CampStatus = 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
 export type TimeSlot = 'morning' | 'evening' | '';
 export type TimeSlotForMutation = 'morning' | 'evening';
 

@@ -29,10 +29,9 @@ export function CampaignOverviewCards({
     ? campaigns.filter((c: Campaign) => c.status === 'paused').length
     : 0;
 
-  const totalTargets =
-    campaigns
-      ?.reduce((sum: number, c: Campaign) => sum + (c.targetLeads || 0), 0)
-      .toLocaleString() || 0;
+  const totalTargets = campaigns
+    ?.reduce((sum: number, c: Campaign) => sum + (c.targetLeads || 0), 0)
+    .toLocaleString() || 0;
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">

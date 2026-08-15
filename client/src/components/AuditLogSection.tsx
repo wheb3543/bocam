@@ -88,7 +88,7 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
-                      {log.action ? actionLabels[log.action] || log.action : '-'}
+                      {log.action ? (actionLabels[log.action] || log.action) : '-'}
                     </Badge>
                     {log.userName && (
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -108,12 +108,12 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
                   <div className="flex items-center gap-2 mt-1">
                     {log.oldValue && (
                       <Badge variant="secondary" className="text-xs">
-                        {log.oldValue ? statusLabels[log.oldValue] || log.oldValue : '-'}
+                        {log.oldValue ? (statusLabels[log.oldValue] || log.oldValue) : '-'}
                       </Badge>
                     )}
                     <ArrowRight className="h-3 w-3 text-muted-foreground" />
                     <Badge className="text-xs bg-primary/10 text-primary">
-                      {log.newValue ? statusLabels[log.newValue] || log.newValue : '-'}
+                      {log.newValue ? (statusLabels[log.newValue] || log.newValue) : '-'}
                     </Badge>
                   </div>
                 )}

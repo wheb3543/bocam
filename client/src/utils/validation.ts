@@ -70,7 +70,7 @@ export function isValidAge(birthDate: string | Date, minAge = 18, maxAge = 120):
   const birth = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
   const today = new Date();
   const age = today.getFullYear() - birth.getFullYear();
-
+  
   return age >= minAge && age <= maxAge;
 }
 
@@ -82,27 +82,27 @@ export function isStrongPassword(password: string): {
   errors: string[];
 } {
   const errors: string[] = [];
-
+  
   if (password.length < 8) {
     errors.push('كلمة المرور يجب أن تكون 8 أحرف على الأقل');
   }
-
+  
   if (!/[a-z]/.test(password)) {
     errors.push('كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل');
   }
-
+  
   if (!/[A-Z]/.test(password)) {
     errors.push('كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل');
   }
-
+  
   if (!/[0-9]/.test(password)) {
     errors.push('كلمة المرور يجب أن تحتوي على رقم واحد على الأقل');
   }
-
+  
   if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
     errors.push('كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل');
   }
-
+  
   return {
     isValid: errors.length === 0,
     errors,
@@ -144,17 +144,9 @@ export function isInRange(value: number, min: number, max: number): boolean {
  * التحقق من أن القيمة موجودة وليست فارغة
  */
 export function isNotEmpty(value: unknown): boolean {
-  if (value === null || value === undefined) {
-    return false;
-  }
-  if (typeof value === 'string') {
-    return value.trim().length > 0;
-  }
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-  if (typeof value === 'object') {
-    return Object.keys(value as object).length > 0;
-  }
+  if (value === null || value === undefined) {return false;}
+  if (typeof value === 'string') {return value.trim().length > 0;}
+  if (Array.isArray(value)) {return value.length > 0;}
+  if (typeof value === 'object') {return Object.keys(value as object).length > 0;}
   return true;
 }

@@ -38,7 +38,9 @@ export function DoctorStatsCards({ stats }: DoctorStatsCardsProps) {
             <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
           </div>
         </div>
-        <div className="text-lg sm:text-2xl font-bold text-emerald-600">{stats.available}</div>
+        <div className="text-lg sm:text-2xl font-bold text-emerald-600">
+          {stats.available}
+        </div>
         <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">متاحون للحجز</p>
       </div>
 
@@ -52,8 +54,12 @@ export function DoctorStatsCards({ stats }: DoctorStatsCardsProps) {
             <UserX className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500" />
           </div>
         </div>
-        <div className="text-lg sm:text-2xl font-bold text-red-500">{stats.unavailable}</div>
-        <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">غير متاحين حالياً</p>
+        <div className="text-lg sm:text-2xl font-bold text-red-500">
+          {stats.unavailable}
+        </div>
+        <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
+          غير متاحين حالياً
+        </p>
       </div>
 
       {/* أطباء زائرون */}
@@ -64,7 +70,9 @@ export function DoctorStatsCards({ stats }: DoctorStatsCardsProps) {
             <Plane className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
           </div>
         </div>
-        <div className="text-lg sm:text-2xl font-bold text-purple-700">{stats.visiting}</div>
+        <div className="text-lg sm:text-2xl font-bold text-purple-700">
+          {stats.visiting}
+        </div>
         <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">إجمالي الزائرين</p>
       </div>
 
@@ -97,7 +105,9 @@ export function DoctorStatsCards({ stats }: DoctorStatsCardsProps) {
         <div className="text-lg sm:text-2xl font-bold text-orange-500">
           {stats.visitingUnavailable}
         </div>
-        <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">زائرون غير متاحين</p>
+        <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
+          زائرون غير متاحين
+        </p>
       </div>
     </div>
   );

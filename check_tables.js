@@ -3,15 +3,7 @@ dotenv.config();
 import { connect } from '@planetscale/database';
 import * as schema from './drizzle/schema.ts';
 
-const expectedTables = Object.keys(schema)
-  .filter(
-    (key) =>
-      key.endsWith('s') &&
-      typeof schema[key] === 'object' &&
-      schema[key] !== null &&
-      'get\[tablename\]' in schema[key]
-  )
-  .map((key) => schema[key]['get\[tablename\]']);
+const expectedTables = Object.keys(schema).filter(key => key.endsWith('s') && typeof schema[key] === 'object' && schema[key] !== null && 'get\[tablename\]' in schema[key]).map(key => schema[key]['get\[tablename\]']);
 
 async function checkTables() {
   const connection = connect({
@@ -22,12 +14,12 @@ async function checkTables() {
 
   try {
     const [rows] = await connection.execute('SHOW TABLES;');
-    const existingTables = rows.map((row) => Object.values(row)[0]);
+    const existingTables = rows.map(row => Object.values(row)[0]);
 
     console.log('الجداول المتوقعة:', expectedTables);
     console.log('الجداول الموجودة:', existingTables);
 
-    const missingTables = expectedTables.filter((table) => !existingTables.includes(table));
+    const missingTables = expectedTables.filter(table => !existingTables.includes(table));
 
     if (missingTables.length === 0) {
       console.log('✅ جميع الجداول المتوقعة موجودة في قاعدة البيانات.');

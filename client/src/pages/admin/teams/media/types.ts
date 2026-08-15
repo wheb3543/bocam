@@ -9,8 +9,7 @@ import type { RouterOutputs } from '@/types/trpc';
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 // التصنيفات المدعومة في قاعدة البيانات
-export type TaskCategory =
-  'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other';
+export type TaskCategory = 'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other';
 
 export type UserEntity = RouterOutputs['users']['getAll'][number];
 export type CampaignEntity = RouterOutputs['campaigns']['list'][number];

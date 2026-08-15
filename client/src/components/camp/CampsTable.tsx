@@ -43,9 +43,7 @@ export default function CampsTable({
           <TableRow>
             {campTable.visibleColumnOrder.map((colKey) => {
               const col = campColumns.find((c) => c.key === colKey);
-              if (!col || !campTable.visibleColumns[colKey]) {
-                return null;
-              }
+              if (!col || !campTable.visibleColumns[colKey]) {return null;}
               return (
                 <ResizableHeaderCell
                   key={colKey}
@@ -66,9 +64,7 @@ export default function CampsTable({
           {camps.map((camp: Camp) => (
             <TableRow key={camp.id} className="hover:bg-muted/50/50">
               {campTable.visibleColumnOrder.map((colKey) => {
-                if (!campTable.visibleColumns[colKey]) {
-                  return null;
-                }
+                if (!campTable.visibleColumns[colKey]) {return null;}
 
                 switch (colKey) {
                   case 'name':

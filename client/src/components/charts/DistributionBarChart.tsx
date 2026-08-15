@@ -1,14 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface DistributionBarChartProps {
   data: Array<{ name: string; value: number; color?: string; [key: string]: unknown }>;
@@ -16,11 +7,7 @@ interface DistributionBarChartProps {
   dataKey?: string;
 }
 
-export default function DistributionBarChart({
-  data,
-  title = 'التوزيع',
-  dataKey = 'value',
-}: DistributionBarChartProps) {
+export default function DistributionBarChart({ data, title = 'التوزيع', dataKey = 'value' }: DistributionBarChartProps) {
   return (
     <Card>
       <CardHeader>

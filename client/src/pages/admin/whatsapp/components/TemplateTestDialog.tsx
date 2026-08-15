@@ -71,8 +71,9 @@ export function TemplateTestDialog({
           </div>
           {template && (
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg p-2.5 text-xs text-amber-800 dark:text-amber-300">
-              <strong>ملاحظة:</strong> سيتم إرسال القالب "{template.metaName || template.name}"
-              باللغة {template.languageCode || 'ar'}
+              <strong>ملاحظة:</strong> سيتم إرسال القالب "
+              {template.metaName || template.name}" باللغة{' '}
+              {template.languageCode || 'ar'}
             </div>
           )}
         </div>

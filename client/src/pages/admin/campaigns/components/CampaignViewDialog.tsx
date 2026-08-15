@@ -6,7 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Megaphone, Edit } from 'lucide-react';
 import { format } from 'date-fns';
@@ -111,11 +116,15 @@ export function CampaignViewDialog({
             </div>
             <div className="space-y-1">
               <Label className="text-muted-foreground">الميزانية المخططة</Label>
-              <p className="font-medium">{campaign.plannedBudget?.toLocaleString() || 0} ريال</p>
+              <p className="font-medium">
+                {campaign.plannedBudget?.toLocaleString() || 0} ريال
+              </p>
             </div>
             <div className="space-y-1">
               <Label className="text-muted-foreground">الميزانية الفعلية</Label>
-              <p className="font-medium">{campaign.actualBudget?.toLocaleString() || 0} ريال</p>
+              <p className="font-medium">
+                {campaign.actualBudget?.toLocaleString() || 0} ريال
+              </p>
             </div>
             <div className="space-y-1">
               <Label className="text-muted-foreground">هدف الحجوزات</Label>
@@ -123,7 +132,9 @@ export function CampaignViewDialog({
             </div>
             <div className="space-y-1">
               <Label className="text-muted-foreground">هدف الإيرادات</Label>
-              <p className="font-medium">{campaign.targetRevenue?.toLocaleString() || 0} ريال</p>
+              <p className="font-medium">
+                {campaign.targetRevenue?.toLocaleString() || 0} ريال
+              </p>
             </div>
           </div>
 
@@ -134,9 +145,7 @@ export function CampaignViewDialog({
               <div className="flex flex-wrap gap-2">
                 {campaign.platforms.split(',').map((platform: string) => (
                   <Badge key={platform} variant="outline">
-                    {platformOptions.find(
-                      (p: { value: string; label: string }) => p.value === platform
-                    )?.label || platform}
+                    {platformOptions.find((p: { value: string; label: string }) => p.value === platform)?.label || platform}
                   </Badge>
                 ))}
               </div>
@@ -190,7 +199,11 @@ export function CampaignViewDialog({
               <Edit className="h-4 w-4 ml-2" />
               تعديل
             </Button>
-            <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
               إغلاق
             </Button>
           </div>

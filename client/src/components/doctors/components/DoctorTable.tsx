@@ -225,7 +225,9 @@ export function DoctorTable({
               <ResizableHeaderCell
                 key={colKey}
                 columnKey={colKey}
-                width={doctorTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150}
+                width={
+                  doctorTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150
+                }
                 minWidth={col.minWidth || 80}
                 maxWidth={col.maxWidth || 500}
                 onResize={doctorTable.columnWidths.handleResize}
@@ -277,7 +279,9 @@ export function DoctorTable({
                 case 'specialty':
                   return (
                     <FrozenTableCell key={colKey} columnKey={colKey}>
-                      <span className="truncate text-sm text-foreground">{doctor.specialty}</span>
+                      <span className="truncate text-sm text-foreground">
+                        {doctor.specialty}
+                      </span>
                     </FrozenTableCell>
                   );
                 case 'experience':
@@ -338,7 +342,9 @@ export function DoctorTable({
                       columnKey={colKey}
                       className="text-sm text-muted-foreground"
                     >
-                      <span className="truncate block max-w-[200px]">{doctor.bio || '-'}</span>
+                      <span className="truncate block max-w-[200px]">
+                        {doctor.bio || '-'}
+                      </span>
                     </FrozenTableCell>
                   );
                 case 'image':
@@ -439,3 +445,4 @@ export function DoctorTable({
     </ResizableTable>
   );
 }
+

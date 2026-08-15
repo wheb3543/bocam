@@ -27,9 +27,7 @@ export default function PendingRequestsNotification() {
 
   // Get last 5 pending requests
   const pendingRequests = useMemo(() => {
-    if (!unifiedLeads) {
-      return [];
-    }
+    if (!unifiedLeads) {return [];}
 
     const pending = unifiedLeads.filter((lead) => lead.status === 'pending');
 
@@ -40,9 +38,7 @@ export default function PendingRequestsNotification() {
   }, [unifiedLeads]);
 
   const totalPending = useMemo(() => {
-    if (!unifiedLeads) {
-      return 0;
-    }
+    if (!unifiedLeads) {return 0;}
     return unifiedLeads.filter((lead) => lead.status === 'pending').length;
   }, [unifiedLeads]);
 

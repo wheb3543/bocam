@@ -30,7 +30,9 @@ const BulkActionsToolbar = memo(function BulkActionsToolbar({
 
   return (
     <div className="px-2 pt-2 pb-1 flex gap-2 items-center bg-white/10">
-      <span className="text-[var(--text-sm)] text-white font-medium">تم تحديد {selectedCount}</span>
+      <span className="text-[var(--text-sm)] text-white font-medium">
+        تم تحديد {selectedCount}
+      </span>
       <Button
         size="sm"
         variant="secondary"

@@ -49,14 +49,16 @@ const AccessRequestsTable = memo(function AccessRequestsTable({
           <TableRow>
             {requestTable.visibleColumnOrder.map((colKey) => {
               const col = requestColumns.find((c) => c.key === colKey);
-              if (!col || !requestTable.visibleColumns[colKey]) {
-                return null;
-              }
+              if (!col || !requestTable.visibleColumns[colKey]) {return null;}
               return (
                 <ResizableHeaderCell
                   key={colKey}
                   columnKey={colKey}
-                  width={requestTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150}
+                  width={
+                    requestTable.columnWidths.columnWidths[colKey] ||
+                    col.defaultWidth ||
+                    150
+                  }
                   minWidth={col.minWidth || 80}
                   maxWidth={col.maxWidth || 500}
                   onResize={requestTable.columnWidths.handleResize}
@@ -72,14 +74,16 @@ const AccessRequestsTable = memo(function AccessRequestsTable({
           {sortedRequests.map((request) => (
             <TableRow key={request.id}>
               {requestTable.visibleColumnOrder.map((colKey) => {
-                if (!requestTable.visibleColumns[colKey]) {
-                  return null;
-                }
+                if (!requestTable.visibleColumns[colKey]) {return null;}
 
                 switch (colKey) {
                   case 'name':
                     return (
-                      <FrozenTableCell key={colKey} columnKey={colKey} className="font-medium">
+                      <FrozenTableCell
+                        key={colKey}
+                        columnKey={colKey}
+                        className="font-medium"
+                      >
                         {request.name}
                       </FrozenTableCell>
                     );
@@ -160,7 +164,9 @@ const AccessRequestsTable = memo(function AccessRequestsTable({
       </ResizableTable>
 
       {/* Results Count */}
-      <div className="text-sm text-muted-foreground">عرض {sortedRequests.length} طلب معلق</div>
+      <div className="text-sm text-muted-foreground">
+        عرض {sortedRequests.length} طلب معلق
+      </div>
     </>
   );
 });
