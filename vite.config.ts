@@ -1,4 +1,14 @@
-import { jsxLocPlugin } from "@builder.io/vite-plugin-jsx-loc";
+// Optional dev plugin for JSX location
+let jsxLocPlugin = () => ({ name: 'empty-jsx-loc' });
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const mod = require("@builder.io/vite-plugin-jsx-loc");
+  if (mod && mod.jsxLocPlugin) {
+    jsxLocPlugin = mod.jsxLocPlugin;
+  }
+} catch {
+  // Ignored in production
+}
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
@@ -11,7 +21,7 @@ import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 const plugins = [
   react(),
   tailwindcss(),
-  jsxLocPlugin(),
+  typeof jsxLocPlugin === 'function' ? jsxLocPlugin() : null,
   vitePluginManusRuntime(),
   visualizer({ open: false, gzipSize: true, brotliSize: true }),
   ViteImageOptimizer({
