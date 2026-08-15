@@ -28,3 +28,35 @@
 [2026-06-07T18:22:58.713Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
 [2026-06-07T18:22:58.713Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
 [2026-06-07T18:22:58.713Z] Node.js v22.13.0
+[2026-08-15T21:24:01.952Z] Starting dev server with command: pnpm run dev
+[2026-08-15T21:24:03.320Z] $ node scripts/check-env.mjs
+[2026-08-15T21:24:03.370Z] 🔍 Checking environment variables...
+[2026-08-15T21:24:03.371Z] ❌ Error: .env file not found!
+[2026-08-15T21:24:03.371Z] 💡 Please create .env file from .env.example:
+[2026-08-15T21:24:03.371Z] cp .env.example .env
+[2026-08-15T21:24:03.403Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-15T21:24:03.436Z] Dev server exited with code 1
+[2026-08-15T21:24:10.089Z] Starting dev server with command: pnpm run dev
+[2026-08-15T21:24:11.389Z] $ node scripts/check-env.mjs
+[2026-08-15T21:24:11.440Z] 🔍 Checking environment variables...
+[2026-08-15T21:24:11.440Z] ❌ Error: .env file not found!
+[2026-08-15T21:24:11.441Z] 💡 Please create .env file from .env.example:
+[2026-08-15T21:24:11.441Z] cp .env.example .env
+[2026-08-15T21:24:11.475Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-15T21:24:11.505Z] Dev server exited with code 1
+[2026-08-15T23:26:53.730Z] Starting dev server with command: pnpm run dev
+[2026-08-15T23:26:55.060Z] $ node scripts/check-env.mjs
+[2026-08-15T23:26:55.107Z] 🔍 Checking environment variables...
+[2026-08-15T23:26:55.108Z] ❌ Error: .env file not found!
+[2026-08-15T23:26:55.108Z] 💡 Please create .env file from .env.example:
+[2026-08-15T23:26:55.108Z] cp .env.example .env
+[2026-08-15T23:26:55.137Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-15T23:26:55.169Z] Dev server exited with code 1
+[2026-08-15T23:31:02.744Z] Starting dev server with command: pnpm run dev
+[2026-08-15T23:31:04.187Z] $ node scripts/check-env.mjs
+[2026-08-15T23:31:04.238Z] 🔍 Checking environment variables...
+[2026-08-15T23:31:04.238Z] ❌ Error: .env file not found!
+[2026-08-15T23:31:04.238Z] 💡 Please create .env file from .env.example:
+[2026-08-15T23:31:04.238Z] cp .env.example .env
+[2026-08-15T23:31:04.267Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-15T23:31:04.295Z] Dev server exited with code 1
