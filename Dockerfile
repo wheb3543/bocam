@@ -39,6 +39,8 @@ COPY --from=builder /app/dist ./dist
 COPY server ./server
 COPY shared ./shared
 COPY drizzle ./drizzle
+COPY license.json ./license.json
+COPY license-keys/public-key.pem ./license-keys/public-key.pem
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs

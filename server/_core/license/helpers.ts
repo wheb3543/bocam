@@ -23,6 +23,13 @@ const logger = createLogger('license');
  */
 export function getHardwareId(): string {
   try {
+    const configuredHardwareId = process.env.LICENSE_HARDWARE_ID?.trim();
+    if (configuredHardwareId) {
+      const normalizedHardwareId = configuredHardwareId.replace(/:/g, '').toUpperCase();
+      logger.info('Using configured License Hardware ID');
+      return normalizedHardwareId;
+    }
+
     const networkInterfaces = os.networkInterfaces();
 
     // Iterate through all network interfaces
