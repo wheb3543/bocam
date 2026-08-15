@@ -9,8 +9,8 @@ RUN npm install -g pnpm@10
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies with ignore-scripts to avoid Husky and build script failures in container
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Copy source code
 COPY . .
