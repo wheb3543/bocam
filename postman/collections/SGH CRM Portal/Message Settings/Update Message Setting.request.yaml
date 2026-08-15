@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Message Setting
+method: POST
+url: '{{baseUrl}}/api/trpc/messageSettings.update'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1,"isEnabled":1}}

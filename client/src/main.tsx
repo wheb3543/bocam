@@ -1,61 +1,68 @@
-import { trpc } from "@/lib/trpc";
-import { UNAUTHED_ERR_MSG } from '@shared/const';
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink, TRPCClientError } from "@trpc/client";
-import { createRoot } from "react-dom/client";
-import superjson from "superjson";
-import App from "./App";
-import { getLoginUrl } from "./const";
-import "./index.css";
+import { trpc } from '@/lib/api/trpc';
+import { QueryClient } from '@tanstack/react-query';
+import { httpBatchLink } from '@trpc/client';
+import { createRoot } from 'react-dom/client';
+import superjson from 'superjson';
+import App from './App';
+import './index.css';
 
-const queryClient = new QueryClient();
-
-const redirectToLoginIfUnauthorized = (error: unknown) => {
-  if (!(error instanceof TRPCClientError)) return;
-  if (typeof window === "undefined") return;
-
-  const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
-
-  if (!isUnauthorized) return;
-
-  window.location.href = getLoginUrl();
-};
-
-queryClient.getQueryCache().subscribe(event => {
-  if (event.type === "updated" && event.action.type === "error") {
-    const error = event.query.state.error;
-    redirectToLoginIfUnauthorized(error);
-    console.error("[API Query Error]", error);
+// Clear cache and service workers on reload to prevent stale content
+if (typeof window !== 'undefined') {
+  // Unregister any service workers
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.unregister());
+    });
   }
-});
 
-queryClient.getMutationCache().subscribe(event => {
-  if (event.type === "updated" && event.action.type === "error") {
-    const error = event.mutation.state.error;
-    redirectToLoginIfUnauthorized(error);
-    console.error("[API Mutation Error]", error);
+  // Clear any caches
+  if ('caches' in window) {
+    caches.keys().then((names) => {
+      names.forEach((name) => caches.delete(name));
+    });
   }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('reload')) {
+    // Clear URL parameter without triggering a reload
+    const newUrl =
+      window.location.pathname +
+      window.location.search.replace(/[?&]reload=true/, '').replace(/^&/, '?');
+    window.history.replaceState({}, '', newUrl);
+  }
+}
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 0,
+      gcTime: 0,
+    },
+  },
 });
 
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: "/api/trpc",
+      url: '/api/trpc',
       transformer: superjson,
-      fetch(input, init) {
-        return globalThis.fetch(input, {
-          ...(init ?? {}),
-          credentials: "include",
-        });
+      headers: () => {
+        const cookie = typeof window !== 'undefined' ? document.cookie : '';
+        return {
+          cookie,
+        };
       },
     }),
   ],
 });
 
-createRoot(document.getElementById("root")!).render(
-  <trpc.Provider client={trpcClient} queryClient={queryClient}>
-    <QueryClientProvider client={queryClient}>
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  createRoot(rootElement).render(
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <App />
-    </QueryClientProvider>
-  </trpc.Provider>
-);
+    </trpc.Provider>
+  );
+}

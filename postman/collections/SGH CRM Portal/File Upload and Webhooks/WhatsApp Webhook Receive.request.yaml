@@ -1,0 +1,53 @@
+$kind: http-request
+name: WhatsApp Webhook Receive
+method: POST
+url: '{{baseUrl}}/api/webhooks/whatsapp'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: X-Hub-Signature-256
+    value: '{{webhookSignature}}'
+body:
+  type: json
+  content: |-
+    {
+      "object": "whatsapp_business_account",
+      "entry": [
+        {
+          "id": "{{wabaId}}",
+          "changes": [
+            {
+              "value": {
+                "messaging_product": "whatsapp",
+                "metadata": {
+                  "display_phone_number": "{{displayPhoneNumber}}",
+                  "phone_number_id": "{{phoneNumberId}}"
+                },
+                "contacts": [
+                  {
+                    "profile": {
+                      "name": "John Doe"
+                    },
+                    "wa_id": "966500000001"
+                  }
+                ],
+                "messages": [
+                  {
+                    "from": "966500000001",
+                    "id": "wamid.HBgLNTU1MjEyMzQ1NjcVAgARGBI1RjQyNUE3NEYxMzAzMzQ1AA==",
+                    "timestamp": "1700000000",
+                    "type": "text",
+                    "text": {
+                      "body": "Hello, I need help with my appointment."
+                    }
+                  }
+                ]
+              },
+              "field": "messages"
+            }
+          ]
+        }
+      ]
+    }
+examples: './.resources/WhatsApp Webhook Receive.resources/examples'

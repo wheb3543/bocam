@@ -1,8 +1,16 @@
-import { z } from "zod";
-import { router, protectedProcedure } from "../_core/trpc";
-import { getDb } from "../db";
-import { appointments, campRegistrations, offerLeads, leads, camps, offers, doctors } from "../../drizzle/schema";
-import { and, between, count, eq, gte, lte, sql } from "drizzle-orm";
+import { z } from 'zod';
+import { router, protectedProcedure, requireReportsFeature } from '../_core/trpc';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import {
+  appointments,
+  campRegistrations,
+  offerLeads,
+  leads,
+  camps,
+  offers,
+  doctors,
+} from '../../drizzle/schema';
+import { and, count, eq, gte, lte, sql } from 'drizzle-orm';
 
 /**
  * Reports Router
@@ -20,20 +28,19 @@ export const reportsRouter = router({
    * Returns statistics for appointments, camp registrations, and offer leads
    */
   getBookingsReport: protectedProcedure
+    // @ts-expect-error - tRPC middleware type compatibility issue
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
       const { startDate, endDate } = input;
 
       // Build date filter
-      const dateFilter = startDate && endDate
-        ? and(
-            gte(sql`createdAt`, new Date(startDate)),
-            lte(sql`createdAt`, new Date(endDate))
-          )
-        : undefined;
+      const dateFilter =
+        startDate && endDate
+          ? and(gte(sql`createdAt`, new Date(startDate)), lte(sql`createdAt`, new Date(endDate)))
+          : undefined;
 
       // Get appointments statistics
       const appointmentsStats = await db
@@ -66,9 +73,18 @@ export const reportsRouter = router({
         .groupBy(offerLeads.status);
 
       // Calculate totals
-      const totalAppointments = appointmentsStats.reduce((sum, stat) => sum + stat.total, 0);
-      const totalCampRegistrations = campRegistrationsStats.reduce((sum, stat) => sum + stat.total, 0);
-      const totalOfferLeads = offerLeadsStats.reduce((sum, stat) => sum + stat.total, 0);
+      const totalAppointments = appointmentsStats.reduce(
+        (sum: number, stat: { total: number }) => sum + stat.total,
+        0
+      );
+      const totalCampRegistrations = campRegistrationsStats.reduce(
+        (sum: number, stat: { total: number }) => sum + stat.total,
+        0
+      );
+      const totalOfferLeads = offerLeadsStats.reduce(
+        (sum: number, stat: { total: number }) => sum + stat.total,
+        0
+      );
 
       return {
         appointments: {
@@ -92,19 +108,18 @@ export const reportsRouter = router({
    * Returns statistics for new customer registrations
    */
   getNewLeadsReport: protectedProcedure
+    // @ts-expect-error - tRPC middleware type compatibility issue
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
       const { startDate, endDate } = input;
 
-      const dateFilter = startDate && endDate
-        ? and(
-            gte(sql`createdAt`, new Date(startDate)),
-            lte(sql`createdAt`, new Date(endDate))
-          )
-        : undefined;
+      const dateFilter =
+        startDate && endDate
+          ? and(gte(sql`createdAt`, new Date(startDate)), lte(sql`createdAt`, new Date(endDate)))
+          : undefined;
 
       // Get leads by source
       const leadsBySource = await db
@@ -158,9 +173,14 @@ export const reportsRouter = router({
 
       // Combine all sources
       const allSources = new Map<string, number>();
-      
-      [...leadsBySource, ...appointmentsBySource, ...campRegistrationsBySource, ...offerLeadsBySource].forEach(item => {
-        const source = item.source || "direct";
+
+      [
+        ...leadsBySource,
+        ...appointmentsBySource,
+        ...campRegistrationsBySource,
+        ...offerLeadsBySource,
+      ].forEach((item) => {
+        const source = item.source || 'direct';
         allSources.set(source, (allSources.get(source) || 0) + item.total);
       });
 
@@ -169,7 +189,10 @@ export const reportsRouter = router({
         total,
       }));
 
-      const totalLeads = leadsByStatus.reduce((sum, stat) => sum + stat.total, 0);
+      const totalLeads = leadsByStatus.reduce(
+        (sum: number, stat: { total: number }) => sum + stat.total,
+        0
+      );
 
       return {
         totalLeads,
@@ -183,34 +206,28 @@ export const reportsRouter = router({
    * Returns conversion statistics from leads to bookings
    */
   getConversionRatesReport: protectedProcedure
+    // @ts-expect-error - tRPC middleware type compatibility issue
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
       const { startDate, endDate } = input;
 
-      const dateFilter = startDate && endDate
-        ? and(
-            gte(sql`createdAt`, new Date(startDate)),
-            lte(sql`createdAt`, new Date(endDate))
-          )
-        : undefined;
+      const dateFilter =
+        startDate && endDate
+          ? and(gte(sql`createdAt`, new Date(startDate)), lte(sql`createdAt`, new Date(endDate)))
+          : undefined;
 
       // Get total leads
-      const [totalLeadsResult] = await db
-        .select({ count: count() })
-        .from(leads)
-        .where(dateFilter);
+      const [totalLeadsResult] = await db.select({ count: count() }).from(leads).where(dateFilter);
 
       // Get booked leads
       const [bookedLeadsResult] = await db
         .select({ count: count() })
         .from(leads)
         .where(
-          dateFilter
-            ? and(dateFilter, eq(leads.status, "booked"))
-            : eq(leads.status, "booked")
+          dateFilter ? and(dateFilter, eq(leads.status, 'booked')) : eq(leads.status, 'booked')
         );
 
       // Get total appointments
@@ -225,10 +242,7 @@ export const reportsRouter = router({
         .from(appointments)
         .where(
           dateFilter
-            ? and(
-                dateFilter,
-                sql`${appointments.status} IN ('confirmed', 'completed')`
-              )
+            ? and(dateFilter, sql`${appointments.status} IN ('confirmed', 'completed')`)
             : sql`${appointments.status} IN ('confirmed', 'completed')`
         );
 
@@ -238,14 +252,14 @@ export const reportsRouter = router({
         .from(offerLeads)
         .where(dateFilter);
 
-      // Get booked offer leads
+      // Get confirmed offer leads
       const [bookedOfferLeadsResult] = await db
         .select({ count: count() })
         .from(offerLeads)
         .where(
           dateFilter
-            ? and(dateFilter, eq(offerLeads.status, "booked"))
-            : eq(offerLeads.status, "booked")
+            ? and(dateFilter, eq(offerLeads.status, 'confirmed'))
+            : eq(offerLeads.status, 'confirmed')
         );
 
       // Get total camp registrations
@@ -260,10 +274,7 @@ export const reportsRouter = router({
         .from(campRegistrations)
         .where(
           dateFilter
-            ? and(
-                dateFilter,
-                sql`${campRegistrations.status} IN ('confirmed', 'attended')`
-              )
+            ? and(dateFilter, sql`${campRegistrations.status} IN ('confirmed', 'attended')`)
             : sql`${campRegistrations.status} IN ('confirmed', 'attended')`
         );
 
@@ -278,13 +289,20 @@ export const reportsRouter = router({
 
       // Calculate conversion rates
       const leadsConversionRate = totalLeads > 0 ? (bookedLeads / totalLeads) * 100 : 0;
-      const appointmentsConversionRate = totalAppointments > 0 ? (confirmedAppointments / totalAppointments) * 100 : 0;
-      const offerLeadsConversionRate = totalOfferLeads > 0 ? (bookedOfferLeads / totalOfferLeads) * 100 : 0;
-      const campRegistrationsConversionRate = totalCampRegistrations > 0 ? (confirmedCampRegistrations / totalCampRegistrations) * 100 : 0;
+      const appointmentsConversionRate =
+        totalAppointments > 0 ? (confirmedAppointments / totalAppointments) * 100 : 0;
+      const offerLeadsConversionRate =
+        totalOfferLeads > 0 ? (bookedOfferLeads / totalOfferLeads) * 100 : 0;
+      const campRegistrationsConversionRate =
+        totalCampRegistrations > 0
+          ? (confirmedCampRegistrations / totalCampRegistrations) * 100
+          : 0;
 
       // Overall conversion rate
-      const totalRequests = totalLeads + totalAppointments + totalOfferLeads + totalCampRegistrations;
-      const totalConverted = bookedLeads + confirmedAppointments + bookedOfferLeads + confirmedCampRegistrations;
+      const totalRequests =
+        totalLeads + totalAppointments + totalOfferLeads + totalCampRegistrations;
+      const totalConverted =
+        bookedLeads + confirmedAppointments + bookedOfferLeads + confirmedCampRegistrations;
       const overallConversionRate = totalRequests > 0 ? (totalConverted / totalRequests) * 100 : 0;
 
       return {
@@ -321,8 +339,10 @@ export const reportsRouter = router({
    * Returns revenue and profit statistics
    */
   getRevenueReport: protectedProcedure
+    // @ts-expect-error - tRPC middleware type compatibility issue
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
-    .query(async ({ input }) => {
+    .query(async () => {
       // This is a placeholder for future revenue tracking
       // Will be implemented when payment integration is added
       return {
@@ -330,7 +350,7 @@ export const reportsRouter = router({
         totalProfit: 0,
         byService: [],
         byMonth: [],
-        note: "Revenue tracking will be available after payment integration",
+        note: 'Revenue tracking will be available after payment integration',
       };
     }),
 
@@ -338,19 +358,18 @@ export const reportsRouter = router({
    * Get detailed bookings list for export
    */
   getDetailedBookingsList: protectedProcedure
+    // @ts-expect-error - tRPC middleware type compatibility issue
+    .use(requireReportsFeature())
     .input(dateRangeSchema)
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
       const { startDate, endDate } = input;
 
-      const dateFilter = startDate && endDate
-        ? and(
-            gte(sql`createdAt`, new Date(startDate)),
-            lte(sql`createdAt`, new Date(endDate))
-          )
-        : undefined;
+      const dateFilter =
+        startDate && endDate
+          ? and(gte(sql`createdAt`, new Date(startDate)), lte(sql`createdAt`, new Date(endDate)))
+          : undefined;
 
       // Get appointments with doctor names
       const appointmentsList = await db
@@ -404,11 +423,9 @@ export const reportsRouter = router({
         .where(dateFilter);
 
       // Combine all lists
-      const allBookings = [
-        ...appointmentsList,
-        ...campRegistrationsList,
-        ...offerLeadsList,
-      ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      const allBookings = [...appointmentsList, ...campRegistrationsList, ...offerLeadsList].sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
 
       return allBookings;
     }),

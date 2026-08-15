@@ -1,0 +1,68 @@
+$kind: http-example
+name: 'Incoming Image Message'
+request:
+  url: '{{baseUrl}}/api/webhooks/whatsapp'
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: X-Hub-Signature-256
+      value: 'sha256=def456examplesignature'
+  body:
+    type: json
+    content: |-
+      {
+        "object": "whatsapp_business_account",
+        "entry": [
+          {
+            "id": "123456789",
+            "changes": [
+              {
+                "value": {
+                  "messaging_product": "whatsapp",
+                  "metadata": {
+                    "display_phone_number": "15550000001",
+                    "phone_number_id": "987654321"
+                  },
+                  "contacts": [
+                    {
+                      "profile": {
+                        "name": "Sara Mohammed"
+                      },
+                      "wa_id": "966500000002"
+                    }
+                  ],
+                  "messages": [
+                    {
+                      "from": "966500000002",
+                      "id": "wamid.HBgLNTU1MjEyMzQ1NjcVAgARGBIyRjQyNUE3NEYxMzAzMzQ1AA==",
+                      "timestamp": "1700000100",
+                      "type": "image",
+                      "image": {
+                        "caption": "Please check this image",
+                        "mime_type": "image/jpeg",
+                        "sha256": "examplesha256hashvalue",
+                        "id": "media_id_123456"
+                      }
+                    }
+                  ]
+                },
+                "field": "messages"
+              }
+            ]
+          }
+        ]
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Type
+      value: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true
+      }
+order: 2000

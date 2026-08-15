@@ -1,36 +1,40 @@
 /**
  * Camps Router
  * جهاز التوجيه الخاص بالمخيمات الطبية
- * 
+ *
  * Handles all tRPC procedures related to medical camps management
  * يتعامل مع جميع إجراءات tRPC المتعلقة بإدارة المخيمات الطبية
  */
 
 import { z } from 'zod';
-import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
-import { getDb } from '../db';
-import { camps } from '../../drizzle/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
+import { publicProcedure, protectedProcedure, router, requireCampsFeature } from '../_core/trpc';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { camps, campRegistrations } from '../../drizzle/schema';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { generateSlug, isValidSlug } from '../../shared/_core/utils/slug';
-import { serverCache, CacheKeys, CacheTTL } from '../cache';
+import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
 
 /**
  * Validation schema for creating/updating camps
  * مخطط التحقق من صحة البيانات لإنشاء/تحديث المخيمات
  */
 const campInputSchema = z.object({
-  name: z.string().min(1, "اسم المخيم مطلوب"),
+  name: z.string().min(1, 'اسم المخيم مطلوب'),
   slug: z.string().optional(),
   description: z.string().optional(),
-  imageUrl: z.string().optional(),
+  imageUrl: z.string().url().optional().or(z.literal('')), // Allow empty string
   startDate: z.date().optional(),
   endDate: z.date().optional(),
-  isActive: z.boolean().default(true),
+  isActive: z.boolean().optional().default(true),
   // New fields for advanced camp management
   freeOffers: z.string().optional(), // Free offers (one per line)
   discountedOffers: z.string().optional(), // Discounted offers (one per line)
   availableProcedures: z.string().optional(), // JSON string
   galleryImages: z.string().optional(), // JSON string
+  morningTime: z.string().optional(), // وقت الجلسة الصباحية HH:MM
+  eveningTime: z.string().optional(), // وقت الجلسة المسائية HH:MM
+  dailyCapacity: z.number().int().positive().optional(), // الطاقة الاستيعابية اليومية لكل وقت
 });
 
 export const campsRouter = router({
@@ -39,22 +43,17 @@ export const campsRouter = router({
    * الحصول على جميع المخيمات (عام)
    */
   getAll: publicProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      "camps:active",
-      CacheTTL.LIST,
-      async () => {
-        const db = await getDb();
-        if (!db) return [];
-        
-        const result = await db
-          .select()
-          .from(camps)
-          .where(eq(camps.isActive, true))
-          .orderBy(desc(camps.createdAt));
-        
-        return result;
-      }
-    );
+    return serverCache.getOrCompute('camps:active', CacheTTL.LONG, async () => {
+      const db = await ensureDatabaseAvailable();
+
+      const result = await db
+        .select()
+        .from(camps)
+        .where(eq(camps.isActive, true))
+        .orderBy(desc(camps.createdAt));
+
+      return result;
+    });
   }),
 
   /**
@@ -62,62 +61,150 @@ export const campsRouter = router({
    * الحصول على جميع المخيمات للإدارة (يشمل غير النشطة)
    */
   getAllAdmin: publicProcedure.query(async () => {
-    return serverCache.getOrCompute(
-      CacheKeys.campsList(),
-      CacheTTL.LIST,
-      async () => {
-        const db = await getDb();
-        if (!db) return [];
-        
-        const result = await db
-          .select()
-          .from(camps)
-          .orderBy(desc(camps.createdAt));
-        
-        return result;
-      }
-    );
+    return serverCache.getOrCompute(CacheKeys.campsList(), CacheTTL.LONG, async () => {
+      const db = await ensureDatabaseAvailable();
+
+      const result = await db.select().from(camps).orderBy(desc(camps.createdAt));
+
+      return result;
+    });
   }),
 
   /**
    * Get camp by ID
    * الحصول على مخيم بواسطة المعرف
    */
-  getById: publicProcedure
-    .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) return null;
-      
-      const result = await db
-        .select()
-        .from(camps)
-        .where(eq(camps.id, input.id))
-        .limit(1);
-      
-      return result[0] || null;
-    }),
+  getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+    const db = await ensureDatabaseAvailable();
+
+    const result = await db.select().from(camps).where(eq(camps.id, input.id)).limit(1);
+
+    return result[0] || null;
+  }),
 
   /**
    * Get camp by slug
    * الحصول على مخيم بواسطة الرابط
    */
-  getBySlug: publicProcedure
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
+    const db = await ensureDatabaseAvailable();
+
+    const result = await db
+      .select()
+      .from(camps)
+      .where(and(eq(camps.slug, input.slug), eq(camps.isActive, true)))
+      .limit(1);
+
+    return result[0] || null;
+  }),
+
+  /**
+   * Get available dates for a camp with remaining capacity per day/slot
+   * الحصول على الأيام المتاحة مع الطاقة المتبقية لكل يوم/وقت
+   */
+  getAvailableDates: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) return null;
-      
-      const result = await db
+      const db = await ensureDatabaseAvailable();
+
+      // Get camp info
+      const [camp] = await db
         .select()
         .from(camps)
-        .where(and(
-          eq(camps.slug, input.slug),
-          eq(camps.isActive, true)
-        ))
+        .where(and(eq(camps.slug, input.slug), eq(camps.isActive, true)))
         .limit(1);
-      
-      return result[0] || null;
+      if (!camp || !camp.startDate || !camp.endDate) {
+        return { dates: [], morningTime: null, eveningTime: null, dailyCapacity: null };
+      }
+
+      const morningTime = (camp as { morningTime?: string | null }).morningTime as string | null;
+      const eveningTime = (camp as { eveningTime?: string | null }).eveningTime as string | null;
+      const dailyCapacity = (camp as { dailyCapacity?: number | null }).dailyCapacity as
+        number | null;
+
+      // Build list of all days in camp period
+      const start = new Date(camp.startDate);
+      const end = new Date(camp.endDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const allDays: string[] = [];
+      const d = new Date(start);
+      while (d <= end) {
+        if (d >= today) {
+          allDays.push(d.toISOString().split('T')[0]);
+        }
+        d.setDate(d.getDate() + 1);
+      }
+
+      if (!dailyCapacity || allDays.length === 0) {
+        // No capacity limit - all days available
+        return {
+          dates: allDays.map((date) => ({
+            date,
+            morningAvailable: !!morningTime,
+            eveningAvailable: !!eveningTime,
+            morningRemaining: null,
+            eveningRemaining: null,
+          })),
+          morningTime,
+          eveningTime,
+          dailyCapacity,
+        };
+      }
+
+      // Count confirmed registrations per date and time slot
+      const confirmedRegs = await db
+        .select({
+          preferredDate: campRegistrations.preferredDate,
+          preferredTimeSlot: campRegistrations.preferredTimeSlot,
+          count: sql<number>`count(*)`,
+        })
+        .from(campRegistrations)
+        .where(
+          and(
+            eq(campRegistrations.campId, camp.id),
+            sql`status IN ('confirmed', 'attended', 'completed')`,
+            sql`preferredDate IS NOT NULL`
+          )
+        )
+        .groupBy(campRegistrations.preferredDate, campRegistrations.preferredTimeSlot);
+
+      // Build a map: date -> { morning: count, evening: count }
+      const countMap: Record<string, { morning: number; evening: number }> = {};
+      for (const row of confirmedRegs) {
+        const dateKey = row.preferredDate
+          ? new Date(row.preferredDate).toISOString().split('T')[0]
+          : null;
+        if (!dateKey) {
+          continue;
+        }
+        if (!countMap[dateKey]) {
+          countMap[dateKey] = { morning: 0, evening: 0 };
+        }
+        if (row.preferredTimeSlot === 'morning') {
+          countMap[dateKey].morning += Number(row.count);
+        } else if (row.preferredTimeSlot === 'evening') {
+          countMap[dateKey].evening += Number(row.count);
+        }
+      }
+
+      const dates = allDays
+        .map((date) => {
+          const counts = countMap[date] || { morning: 0, evening: 0 };
+          const morningRemaining = morningTime ? Math.max(0, dailyCapacity - counts.morning) : null;
+          const eveningRemaining = eveningTime ? Math.max(0, dailyCapacity - counts.evening) : null;
+          return {
+            date,
+            morningAvailable: morningTime ? (morningRemaining ?? 0) > 0 : false,
+            eveningAvailable: eveningTime ? (eveningRemaining ?? 0) > 0 : false,
+            morningRemaining,
+            eveningRemaining,
+          };
+        })
+        .filter((d) => d.morningAvailable || d.eveningAvailable || (!morningTime && !eveningTime));
+
+      return { dates, morningTime, eveningTime, dailyCapacity };
     }),
 
   /**
@@ -125,47 +212,57 @@ export const campsRouter = router({
    * إنشاء مخيم جديد (للإدارة فقط)
    */
   create: protectedProcedure
+    // @ts-expect-error - tRPC middleware type compatibility issue
+    .use(requireCampsFeature())
     .input(campInputSchema)
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-      
-      // Generate slug if not provided
-      const slug = input.slug || generateSlug(input.name);
-      
-      // Validate slug format
+      const db = await ensureDatabaseAvailable();
+
+      // Generate slug if not provided (normalize to lowercase)
+      let slug =
+        input.slug && input.slug.trim()
+          ? input.slug.trim().toLowerCase().replace(/\s+/g, '-')
+          : generateSlug(input.name);
+
+      // Clean up slug if invalid
       if (!isValidSlug(slug)) {
-        throw new Error("صيغة الرابط غير صالحة");
+        const cleaned = slug
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+        slug = cleaned.length > 0 ? cleaned : generateSlug(input.name);
       }
-      
-      // Check for duplicate slug
-      const existing = await db
-        .select()
-        .from(camps)
-        .where(eq(camps.slug, slug))
-        .limit(1);
-      
+
+      // Check for duplicate slug, add suffix if needed
+      const existing = await db.select().from(camps).where(eq(camps.slug, slug)).limit(1);
+
       if (existing.length > 0) {
-        throw new Error("هذا الرابط مستخدم بالفعل");
+        slug = `${slug}-${Date.now()}`;
       }
-      
+
+      // Normalize imageUrl: treat empty string as undefined
+      const imageUrl = input.imageUrl && input.imageUrl.trim() !== '' ? input.imageUrl : undefined;
+
       await db.insert(camps).values({
         name: input.name,
         slug,
         description: input.description,
-        imageUrl: input.imageUrl,
+        imageUrl,
         startDate: input.startDate,
         endDate: input.endDate,
-        isActive: input.isActive,
+        isActive: input.isActive ?? true,
         freeOffers: input.freeOffers,
         discountedOffers: input.discountedOffers,
         availableProcedures: input.availableProcedures,
         galleryImages: input.galleryImages,
+        morningTime: input.morningTime,
+        eveningTime: input.eveningTime,
+        dailyCapacity: input.dailyCapacity,
       });
-      
+
       // Invalidate camps cache
       serverCache.invalidate(CacheKeys.campsList());
-      serverCache.invalidate("camps:active");
+      serverCache.invalidate('camps:active');
 
       return { success: true, slug };
     }),
@@ -175,56 +272,76 @@ export const campsRouter = router({
    * تحديث مخيم (للإدارة فقط)
    */
   update: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      ...campInputSchema.shape,
-    }))
+    // @ts-expect-error - tRPC middleware type compatibility issue
+    .use(requireCampsFeature())
+    .input(
+      z.object({
+        id: z.number(),
+        ...campInputSchema.shape,
+      })
+    )
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-      
+      const db = await ensureDatabaseAvailable();
+
       const { id, ...data } = input;
-      
-      // If slug is being changed, validate and check for duplicates
-      if (data.slug) {
-        if (!isValidSlug(data.slug)) {
-          throw new Error("صيغة الرابط غير صالحة");
-        }
-        
-        const existing = await db
-          .select()
-          .from(camps)
-          .where(and(
-            eq(camps.slug, data.slug),
-            // Exclude current camp from duplicate check
-          ))
-          .limit(1);
-        
-        if (existing.length > 0 && existing[0].id !== id) {
-          throw new Error("هذا الرابط مستخدم بالفعل");
-        }
+
+      // Use provided slug (convert to lowercase) or keep existing from DB
+      let slug: string;
+      if (data.slug && data.slug.trim()) {
+        // Normalize: lowercase and replace spaces with hyphens
+        slug = data.slug.trim().toLowerCase().replace(/\s+/g, '-');
+      } else {
+        // Fallback: get current slug from DB to avoid overwriting with empty
+        const currentCamp = await db.select().from(camps).where(eq(camps.id, id)).limit(1);
+        slug = currentCamp[0]?.slug || generateSlug(data.name);
       }
-      
+
+      // Only validate if slug doesn't look valid (allow existing slugs)
+      if (slug && !isValidSlug(slug)) {
+        // Try to clean it up instead of replacing entirely
+        const cleaned = slug
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+        if (cleaned.length > 0) {
+          slug = cleaned;
+        }
+        // If still invalid, keep the original (don't overwrite with broken value)
+      }
+
+      // Check for duplicate slug (exclude current camp)
+      const existing = await db.select().from(camps).where(eq(camps.slug, slug)).limit(1);
+
+      if (existing.length > 0 && existing[0].id !== id) {
+        throw new TRPCError({ code: 'CONFLICT', message: 'هذا الرابط مستخدم بالفعل' });
+      }
+
+      // Normalize imageUrl: treat empty string as undefined
+      const imageUrl = data.imageUrl && data.imageUrl.trim() !== '' ? data.imageUrl : undefined;
+
       await db
         .update(camps)
         .set({
           name: data.name,
-          slug: data.slug,
+          slug,
           description: data.description,
-          imageUrl: data.imageUrl,
+          imageUrl,
           startDate: data.startDate,
           endDate: data.endDate,
-          isActive: data.isActive,
+          isActive: data.isActive ?? true,
           freeOffers: data.freeOffers,
           discountedOffers: data.discountedOffers,
           availableProcedures: data.availableProcedures,
           galleryImages: data.galleryImages,
+          morningTime: data.morningTime,
+          eveningTime: data.eveningTime,
+          dailyCapacity: data.dailyCapacity,
         })
         .where(eq(camps.id, id));
-      
+
       // Invalidate camps cache
       serverCache.invalidate(CacheKeys.campsList());
-      serverCache.invalidate("camps:active");
+      serverCache.invalidate('camps:active');
 
       return { success: true };
     }),
@@ -233,16 +350,17 @@ export const campsRouter = router({
    * حذف مخيم (للإدارة فقط)
    */
   delete: protectedProcedure
+    // @ts-expect-error - tRPC middleware type compatibility issue
+    .use(requireCampsFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-      
+      const db = await ensureDatabaseAvailable();
+
       await db.delete(camps).where(eq(camps.id, input.id));
-      
+
       // Invalidate camps cache
       serverCache.invalidate(CacheKeys.campsList());
-      serverCache.invalidate("camps:active");
+      serverCache.invalidate('camps:active');
 
       return { success: true };
     }),
@@ -252,31 +370,25 @@ export const campsRouter = router({
    * تبديل حالة نشاط المخيم (للإدارة فقط)
    */
   toggleActive: protectedProcedure
+    // @ts-expect-error - tRPC middleware type compatibility issue
+    .use(requireCampsFeature())
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-      
+      const db = await ensureDatabaseAvailable();
+
       // Get current status
-      const current = await db
-        .select()
-        .from(camps)
-        .where(eq(camps.id, input.id))
-        .limit(1);
-      
+      const current = await db.select().from(camps).where(eq(camps.id, input.id)).limit(1);
+
       if (current.length === 0) {
-        throw new Error("المخيم غير موجود");
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'المخيم غير موجود' });
       }
-      
+
       // Toggle status
-      await db
-        .update(camps)
-        .set({ isActive: !current[0].isActive })
-        .where(eq(camps.id, input.id));
-      
+      await db.update(camps).set({ isActive: !current[0].isActive }).where(eq(camps.id, input.id));
+
       // Invalidate camps cache
       serverCache.invalidate(CacheKeys.campsList());
-      serverCache.invalidate("camps:active");
+      serverCache.invalidate('camps:active');
 
       return { success: true, isActive: !current[0].isActive };
     }),

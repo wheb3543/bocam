@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Create Offer (Admin)'
+method: POST
+url: '{{baseUrl}}/api/trpc/offers.create'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"title":"عرض خاص","slug":"special-offer","description":"وصف العرض","isActive":true}}

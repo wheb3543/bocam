@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Submit Appointment (Public)'
+method: POST
+url: '{{baseUrl}}/api/trpc/appointments.submit'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"fullName":"سارة علي","phone":"771234567","doctorId":1,"appointmentDate":"2026-06-01","appointmentTime":"10:00","serviceName":"استشارة"}}

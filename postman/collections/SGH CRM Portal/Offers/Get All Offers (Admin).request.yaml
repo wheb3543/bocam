@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'Get All Offers (Admin)'
+method: GET
+url: '{{baseUrl}}/api/trpc/offers.getAllAdmin'
+order: 2000

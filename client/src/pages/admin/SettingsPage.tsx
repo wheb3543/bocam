@@ -1,0 +1,24 @@
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
+import { Settings } from 'lucide-react';
+
+export default function SettingsPage() {
+  return (
+    <DashboardLayout pageTitle="الإعدادات" pageDescription="إدارة إعدادات النظام">
+      <UnderDevelopmentPage
+        title="الإعدادات"
+        description="إدارة إعدادات النظام"
+        icon={Settings}
+        currentPath="/admin/settings"
+        features={[
+          'إدارة الملف الشخصي',
+          'إعدادات النظام العامة',
+          'إدارة التكاملات',
+          'إعدادات الإشعارات',
+          'إدارة الصلاحيات',
+          'إعدادات الأمان',
+        ]}
+      />
+    </DashboardLayout>
+  );
+}

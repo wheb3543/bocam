@@ -1,0 +1,5 @@
+$kind: http-request
+name: List All Shared Templates
+method: GET
+url: '{{baseUrl}}/api/trpc/sharedTemplates.listAll'
+order: 2000

@@ -34,7 +34,7 @@
 - `CampRegistrationsManagement` - إدارة تسجيلات المخيمات
 - `LeadsManagementPage` - إدارة العملاء المحتملين
 
-**المسار**: `client/src/components/DataTableWrapper.tsx`
+**المسار**: `client/src/components/table/DataTableWrapper.tsx`
 
 ---
 
@@ -52,7 +52,7 @@
 - `DataTableWrapper` - يُستخدم داخلياً
 - جميع صفحات الإدارة التي تستخدم DataTableWrapper
 
-**المسار**: `client/src/components/DataTableToolbar.tsx`
+**المسار**: `client/src/components/table/DataTableToolbar.tsx`
 
 ---
 
@@ -92,7 +92,7 @@
 - `CampRegistrationsManagement`
 - `LeadsManagementPage`
 
-**المسار**: `client/src/components/ColumnVisibility.tsx`
+**المسار**: `client/src/components/table/ColumnVisibility.tsx`
 
 ---
 
@@ -126,7 +126,7 @@
 - `CampRegistrationsManagement`
 - جميع الجداول التي تستخدم useTableFeatures
 
-**المسار**: `client/src/components/ResizableTable.tsx`
+**المسار**: `client/src/components/table/ResizableTable.tsx`
 
 ---
 
@@ -143,7 +143,7 @@
 - `DataTableWrapper` - يُستخدم داخلياً
 - جميع صفحات الإدارة
 
-**المسار**: `client/src/components/Pagination.tsx`
+**المسار**: `client/src/components/table/Pagination.tsx`
 
 ---
 
@@ -174,7 +174,7 @@
 - `DataTableWrapper`
 - جميع الجداول أثناء التحميل
 
-**المسار**: `client/src/components/TableSkeleton.tsx`
+**المسار**: `client/src/components/table/TableSkeleton.tsx`
 
 ---
 
@@ -191,6 +191,231 @@
 - `AppointmentsManagementPage`
 
 **المسار**: `client/src/components/QuickFilters.tsx`
+
+---
+
+### HeroSection
+**الوصف**: قسم رئيسي موحد مع تدرج لوني، جزيئات متحركة، وشارة اختيارية
+
+**المحتوى**:
+- عنوان ووصف قابل للتخصيص
+- شارة (badge) اختيارية مع أيقونة
+- جزيئات خلفية متحركة
+- تدرج لوني قابل للتخصيص
+- تأثير لمعان النص (text shimmer)
+- دعم RTL
+
+**أماكن التطبيق**:
+- `NotFound.tsx` - صفحة الخطأ
+- `Doctors.tsx` - صفحة الأطباء
+- `OffersPage.tsx` - صفحة العروض
+- `CampsListPage.tsx` - صفحة المخيمات
+- `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
+
+**المسار**: `client/src/components/layout/HeroSection.tsx`
+
+---
+
+### PageLayout
+**الوصف**: تخطيط صفحة موحد يشمل SEO، Navbar، Footer، و Skip Links
+
+**المحتوى**:
+- SEO Component (meta tags ديناميكية)
+- Navbar للواجهة العامة
+- Footer للواجهة العامة
+- Skip Links للوصولية
+- InstallPWAButton اختياري
+- دعم RTL
+
+**أماكن التطبيق**:
+- `NotFound.tsx` - صفحة الخطأ
+- `Doctors.tsx` - صفحة الأطباء
+- `OffersPage.tsx` - صفحة العروض
+- `CampsListPage.tsx` - صفحة المخيمات
+- `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
+
+**المسار**: `client/src/components/layout/PageLayout.tsx`
+
+---
+
+### AnimatedCard
+**الوصف**: بطاقة متحركة موحدة مع تأثيرات hover وتأخير في الأنيميشن
+
+**المحتوى**:
+- تأثيرات hover (scale, shadow)
+- تأخير في الأنيميشن (delay)
+- إمكانية تعطيل hover effect
+- دعم RTL
+- تصميم responsive
+
+**أماكن التطبيق**:
+- `PatientHomePage.tsx` - بطاقات الصفحة الرئيسية
+- `Doctors.tsx` - بطاقات الأطباء
+- `OffersPage.tsx` - بطاقات العروض
+- `CampsListPage.tsx` - بطاقات المخيمات
+- `PrivacyPolicyPage.tsx` - بطاقات المحتوى
+
+**المسار**: `client/src/components/layout/AnimatedCard.tsx`
+
+---
+
+### SectionDivider
+**الوصف**: فاصل أقسام موحد مع تدرج لوني
+
+**المحتوى**:
+- تدرج لوني قابل للتخصيص (gray, green, blue, purple)
+- ارتفاع قابل للتخصيص
+- تصميم responsive
+
+**أماكن التطبيق**:
+- `Doctors.tsx` - فصل الأقسام
+- `OffersPage.tsx` - فصل الأقسام
+- `CampsListPage.tsx` - فصل الأقسام
+- `PrivacyPolicyPage.tsx` - فصل الأقسام
+
+**المسار**: `client/src/components/layout/SectionDivider.tsx`
+
+---
+
+### BackToTopButton
+**الوصف**: زر العودة للأعلى مع تمرير سلس
+
+**المحتوى**:
+- ظهور عند التمرير (threshold قابل للتخصيص)
+- تمرير سلس للأعلى
+- أيقونة ArrowUp
+- تصميم responsive
+- دعم RTL
+
+**أماكن التطبيق**:
+- `Doctors.tsx` - صفحة الأطباء
+- `OffersPage.tsx` - صفحة العروض
+- `CampsListPage.tsx` - صفحة المخيمات
+- `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
+
+**المسار**: `client/src/components/layout/BackToTopButton.tsx`
+
+---
+
+### AnimationToggle
+**الوصف**: زر التحكم في الحركات مع أيقونات Pause/Play
+
+**المحتوى**:
+- تبديل حالة الحركات (enabled/disabled)
+- أيقونات Pause/Play
+- callback عند تغيير الحالة
+- تصميم responsive
+- دعم RTL
+
+**أماكن التطبيق**:
+- (قيد التطبيق) جميع الصفحات التي تحتوي أنيميشن
+
+**المسار**: `client/src/components/layout/AnimationToggle.tsx`
+
+---
+
+### ReadingProgressBar
+**الوصف**: شريط تقدم القراءة مع تدرج لوني
+
+**المحتوى**:
+- تتبع نسبة التمرير
+- تدرج لوني قابل للتخصيص (green, blue, purple)
+- ارتفاع قابل للتخصيص
+- تحديث في الوقت الفعلي
+
+**أماكن التطبيق**:
+- `Doctors.tsx` - صفحة الأطباء
+- `OffersPage.tsx` - صفحة العروض
+- `CampsListPage.tsx` - صفحة المخيمات
+- `PrivacyPolicyPage.tsx` - صفحة سياسة الخصوصية
+
+**المسار**: `client/src/components/layout/ReadingProgressBar.tsx`
+
+---
+
+### ScrollReveal
+**الوصف**: مكون يضيف تأثير ظهور العناصر عند التمرير باستخدام Intersection Observer
+
+**المحتوى**:
+- تأثير ظهور عند التمرير (opacity + translateY)
+- دعم تأخير في الظهور (delay)
+- إمكانية تعطيل التأثير
+- threshold قابل للتخصيص
+- دعم RTL
+
+**أماكن التطبيق**:
+- `Doctors.tsx` - الأقسام المختلفة
+- `OffersPage.tsx` - الأقسام المختلفة
+- `CampsListPage.tsx` - الأقسام المختلفة
+- `PrivacyPolicyPage.tsx` - المحتوى الرئيسي
+
+**المسار**: `client/src/components/layout/ScrollReveal.tsx`
+
+---
+
+### AnimatedBackgroundParticles
+**الوصف**: مكون يضيف جزيئات خلفية متحركة بألوان مختلفة
+
+**المحتوى**:
+- جزيئات متحركة بألوان قابلة للتخصيص
+- عدد الجزيئات قابل للتخصيص
+- سرعة وحركة عشوائية
+- إمكانية تعطيل الحركات
+- دعم RTL
+
+**أماكن التطبيق**:
+- (قيد التطبيق) Hero Sections في الصفحات العامة
+
+**المسار**: `client/src/components/layout/AnimatedBackgroundParticles.tsx`
+
+---
+
+### AnimatedStatsCounter
+**الوصف**: مكون يضيف تأثير العد المتحرك للأرقام
+
+**المحتوى**:
+- عداد متحرك من 0 إلى القيمة المستهدفة
+- مدة العد قابلة للتخصيص
+- إمكانية تعطيل الحركات
+- دعم RTL
+
+**أماكن التطبيق**:
+- (قيد التطبيق) صفحات الإحصائيات
+
+**المسار**: `client/src/components/layout/AnimatedStatsCounter.tsx`
+
+---
+
+### TextShimmer
+**الوصف**: مكون يضيف تأثير لمعان النص مع تدرج لوني متحرك
+
+**المحتوى**:
+- تأثير لمعان النص (text shimmer)
+- تدرج لوني قابل للتخصيص
+- إمكانية تعطيل الحركات
+- دعم RTL
+
+**أماكن التطبيق**:
+- (قيد التطبيق) العناوين الرئيسية في الصفحات العامة
+
+**المسار**: `client/src/components/layout/TextShimmer.tsx`
+
+---
+
+### AnimatedRibbonEffect
+**الوصف**: مكون يضيف تأثير شريط متحرك في الخلفية
+
+**المحتوى**:
+- شريط أخضر متحرك (ribbonGreen)
+- شريط أزرق متحرك (ribbonBlue)
+- أيقونة قلب متحركة (heart pulse)
+- إمكانية تعطيل الحركات
+- دعم RTL
+
+**أماكن التطبيق**:
+- (قيد التطبيق) Hero Sections و CTA Sections
+
+**المسار**: `client/src/components/layout/AnimatedRibbonEffect.tsx`
 
 ---
 
@@ -219,21 +444,19 @@
 2. `OfferLeadsTable` - جدول حجوزات العروض
 3. `OfferLeadsCards` - بطاقات الجوال
 
-**المسار**: `client/src/components/OfferLeadsManagement.tsx`
+**المسار**: `client/src/components/offer/OfferLeadsManagement.tsx`
 **المكونات الفرعية**: `client/src/components/offers/`
 
 ---
 
 ### CampRegistrationsManagement
-**الوصف**: إدارة تسجيلات المخيمات (تم تطبيق DataTableWrapper)
+**الوصف**: إدارة تسجيلات المخيمات (جدول قابل للتخصيص، فلاتر، تصدير، تحديث جماعي)
 
 **المكونات الفرعية**:
-1. `CampRegistrationsFilters` - فلاتر تسجيلات المخيمات
-2. `CampRegistrationsTable` - جدول تسجيلات المخيمات
-3. `CampRegistrationsCards` - بطاقات الجوال
+1. `CampRegistrationCard` - بطاقات الجوال
+2. مكونات مشتركة: `FilterPresets`, `SavedFilters`, `ColumnVisibility`, `Pagination`, إلخ.
 
-**المسار**: `client/src/components/CampRegistrationsManagement.tsx`
-**المكونات الفرعية**: `client/src/components/camps/`
+**المسار**: `client/src/components/camp/CampRegistrationsManagement.tsx`
 
 ---
 
@@ -270,7 +493,7 @@
 - بطاقات إحصائيات (إجمالي، نشطة، غير نشطة)
 - فلترة وبحث
 
-**المسار**: `client/src/components/OffersManagement.tsx`
+**المسار**: `client/src/components/offer/OffersManagement.tsx`
 
 ---
 
@@ -282,7 +505,7 @@
 - بطاقات إحصائيات (إجمالي، نشطة، غير نشطة)
 - فلترة وبحث
 
-**المسار**: `client/src/components/CampsManagement.tsx`
+**المسار**: `client/src/components/camp/CampsManagement.tsx`
 
 ---
 
@@ -300,7 +523,7 @@
 **أماكن التطبيق**:
 - جميع صفحات لوحة التحكم
 
-**المسار**: `client/src/components/DashboardLayout.tsx`
+**المسار**: `client/src/components/layout/DashboardLayout.tsx`
 
 ---
 
@@ -320,7 +543,7 @@
 - `Camps`
 - جميع الصفحات العامة
 
-**المسار**: `client/src/components/Navbar.tsx`
+**المسار**: `client/src/components/layout/Navbar.tsx`
 
 ---
 
@@ -335,7 +558,7 @@
 **أماكن التطبيق**:
 - جميع الصفحات العامة
 
-**المسار**: `client/src/components/Footer.tsx`
+**المسار**: `client/src/components/layout/Footer.tsx`
 
 ---
 
@@ -371,7 +594,7 @@
 **أماكن التطبيق**:
 - `LeadsManagementPage` (عرض الجوال)
 
-**المسار**: `client/src/components/LeadCard.tsx`
+**المسار**: `client/src/components/lead/LeadCard.tsx`
 
 ---
 
@@ -387,7 +610,7 @@
 **أماكن التطبيق**:
 - `AppointmentsManagementPage` (عرض الجوال)
 
-**المسار**: `client/src/components/AppointmentCard.tsx`
+**المسار**: `client/src/components/booking/AppointmentCard.tsx`
 
 ---
 
@@ -403,7 +626,7 @@
 **أماكن التطبيق**:
 - `OfferLeadsManagement` (عرض الجوال)
 
-**المسار**: `client/src/components/OfferLeadCard.tsx`
+**المسار**: `client/src/components/offer/OfferLeadCard.tsx`
 
 ---
 
@@ -419,7 +642,7 @@
 **أماكن التطبيق**:
 - `CampRegistrationsManagement` (عرض الجوال)
 
-**المسار**: `client/src/components/CampRegistrationCard.tsx`
+**المسار**: `client/src/components/camp/CampRegistrationCard.tsx`
 
 ---
 
@@ -435,7 +658,7 @@
 **أماكن التطبيق**:
 - `LeadsManagementPage`
 
-**المسار**: `client/src/components/LeadStatsCards.tsx`
+**المسار**: `client/src/components/lead/LeadStatsCards.tsx`
 
 ---
 
@@ -450,16 +673,93 @@
 ---
 
 ### SourceBadge
-**الوصف**: badge لعرض مصدر التسجيل
+**الوصف**: badge لعرض مصدر التسجيل مع دعم UTM parameters
 
 **المحتوى**:
 - ألوان مختلفة حسب المصدر
-- أيقونات مخصصة
+- أيقونات مخصصة لكل مصدر (فيسبوك، جوجل، واتساب، تيليجرام، إلخ)
+- دعم UTM parameters (utmSource, utmMedium, utmCampaign)
+- دعم fbclid و gclid للكشف التلقائي عن المصدر
+- أحجام مختلفة (sm, md, lg)
+- عرض تفاصيل إضافية اختياري
 
 **أماكن التطبيق**:
-- جميع الجداول والبطاقات
+- `AppointmentTableDesktop` - جدول المواعيد
+- `OfferLeadsManagement` - جدول حجوزات العروض
+- `CampRegistrationsManagement` - جدول تسجيلات المخيمات
+- `AppointmentsManagementPage` - صفحة إدارة المواعيد
 
 **المسار**: `client/src/components/SourceBadge.tsx`
+
+---
+
+### FeatureGate
+**الوصف**: مكون لحماية الميزات المدفوعة بناءً على الترخيص
+
+**المحتوى**:
+- التحقق من تفعيل الميزة في الترخيص
+- عرض واجهة احتياطية (fallback) عند عدم تفعيل الميزة
+- أنواع مختلفة من الفولباك (card, minimal, inline)
+- زر الترقية المخصص
+- دعم RTL
+
+**أماكن التطبيق**:
+- `WhatsAppAnalytics` - حماية صفحة تحليلات واتساب
+- `WhatsAppOrdersPage` - حماية صفحة طلبات واتساب
+
+**المسار**: `client/src/components/FeatureGate.tsx`
+
+---
+
+### GlobalSearch
+**الوصف**: بحث عام في جميع البيانات مع اختصار لوحة المفاتيح
+
+**المحتوى**:
+- بحث في العملاء، المواعيد، الحجوزات، تسجيلات المخيمات
+- نتائج مصنفة حسب النوع
+- اختصار Ctrl+K لفتح البحث
+- عرض تفاصيل النتائج
+- التنقل المباشر للنتائج
+
+**أماكن التطبيق**:
+- `TopNavbar` - شريط التنقل العلوي في لوحة التحكم
+
+**المسار**: `client/src/components/GlobalSearch.tsx`
+
+---
+
+### ResponsiveDialog
+**الوصف**: dialog responsive يتحول إلى sheet على الجوال
+
+**المحتوى**:
+- dialog قياسي على سطح المكتب
+- sheet كامل الشاشة على الجوال
+- تبديل تلقائي حسب حجم الشاشة
+- دعم RTL
+- header و footer مخصصين
+
+**أماكن التطبيق**:
+- `CampRegistrationsManagement` - حوارات تحديث الحالة والتفاصيل
+
+**المسار**: `client/src/components/ResponsiveDialog.tsx`
+
+---
+
+### DashboardLayoutSkeleton
+**الوصف**: skeleton loader موحد لصفحات لوحة التحكم
+
+**المحتوى**:
+- هيكل skeleton يطبع تخطيط لوحة التحكم
+- حالة التحميل الموحدة
+- دعم RTL
+
+**أماكن التطبيق**:
+- `UsersManagementPage` - صفحة إدارة المستخدمين
+- `AdvancedSettingsPage` - صفحة الإعدادات المتقدمة
+- `SystemStatusPage` - صفحة حالة النظام
+- `BackupManagementPage` - صفحة إدارة النسخ الاحتياطية
+
+**المسار**: `client/src/components/layout/DashboardLayoutSkeleton.tsx`
 
 ---
 
@@ -506,7 +806,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/ManualRegistrationForm.tsx`
+**المسار**: `client/src/components/form/ManualRegistrationForm.tsx`
 
 ---
 
@@ -522,7 +822,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout` header
 
-**المسار**: `client/src/components/GlobalSearch.tsx`
+**المسار**: `client/src/components/layout/GlobalSearch.tsx`
 
 ---
 
@@ -537,7 +837,7 @@
 **أماكن التطبيق**:
 - `ManualRegistrationForm`
 
-**المسار**: `client/src/components/QuickPatientSearch.tsx`
+**المسار**: `client/src/components/dashboard/QuickPatientSearch.tsx`
 
 ---
 
@@ -555,7 +855,7 @@
 - `OffersManagement`
 - `CampsManagement`
 
-**المسار**: `client/src/components/ImageUpload.tsx`
+**المسار**: `client/src/components/form/ImageUpload.tsx`
 
 ---
 
@@ -570,7 +870,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout` header
 
-**المسار**: `client/src/components/NotificationCenter.tsx`
+**المسار**: `client/src/components/notification/NotificationCenter.tsx`
 
 ---
 
@@ -585,25 +885,38 @@
 **أماكن التطبيق**:
 - `App.tsx` (لوحة التحكم فقط)
 
-**المسار**: `client/src/components/PWAManager.tsx`
+**المسار**: `client/src/components/layout/PWAManager.tsx`
 
 ---
 
 ### InstallPWAButton
-**الوصف**: زر تثبيت PWA للواجهة العامة
+**الوصف**: زر تثبيت PWA موحد يدعم كلا التطبيقين (العام والإدارة)
 
 **المحتوى**:
-- beforeinstallprompt handling
-- زر عائم مع أيقونة
-- إخفاء بعد التثبيت
+- دعم `appType: 'public' | 'admin'` لتحديد التطبيق
+- ثلاثة أوضاع: `compact` (Navbar) | `sidebar` (شريط جانبي) | `banner` (بانر كامل)
+- دعم iOS بتعليمات يدوية
+- تتبع عمليات التثبيت في قاعدة البيانات
+- إخفاء ذكي بعد التثبيت أو الرفض
+
+**الاستخدام**:
+```tsx
+// في Navbar الواجهة العامة
+<InstallPWAButton appType="public" variant="compact" />
+
+// في TopNavbar لوحة التحكم
+<InstallPWAButton appType="admin" variant="compact" />
+
+// في الشريط الجانبي
+<InstallPWAButton appType="admin" variant="sidebar" />
+```
 
 **أماكن التطبيق**:
-- `HomePage`
-- `Doctors`
-- `Offers`
-- `Camps`
+- `Navbar` (الواجهة العامة) - `appType="public"`
+- `TopNavbar` (لوحة التحكم) - `appType="admin"`
+- `DashboardSidebarV2` (شريط جانبي) - `appType="admin"`
 
-**المسار**: `client/src/components/InstallPWAButton.tsx`
+**المسار**: `client/src/components/layout/InstallPWAButton.tsx`
 
 ---
 
@@ -617,7 +930,7 @@
 **أماكن التطبيق**:
 - `App.tsx`
 
-**المسار**: `client/src/components/OfflineIndicator.tsx`
+**المسار**: `client/src/components/layout/OfflineIndicator.tsx`
 
 ---
 
@@ -631,7 +944,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout`
 
-**المسار**: `client/src/components/PendingRequestsNotification.tsx`
+**المسار**: `client/src/components/notification/PendingRequestsNotification.tsx`
 
 ---
 
@@ -645,7 +958,7 @@
 **أماكن التطبيق**:
 - `App.tsx`
 
-**المسار**: `client/src/components/MetaPixel.tsx`
+**المسار**: `client/src/components/layout/MetaPixel.tsx`
 
 ---
 
@@ -660,7 +973,7 @@
 **أماكن التطبيق**:
 - جميع صفحات الإدارة
 
-**المسار**: `client/src/components/PrintReceipt.tsx`
+**المسار**: `client/src/components/booking/PrintReceipt.tsx`
 
 ---
 
@@ -674,7 +987,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/SourceAnalytics.tsx`
+**المسار**: `client/src/components/dashboard/SourceAnalytics.tsx`
 
 ---
 
@@ -689,7 +1002,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/RecentActivity.tsx`
+**المسار**: `client/src/components/dashboard/RecentActivity.tsx`
 
 ---
 
@@ -704,7 +1017,7 @@
 **أماكن التطبيق**:
 - `AdminDashboard`
 
-**المسار**: `client/src/components/TasksSection.tsx`
+**المسار**: `client/src/components/layout/TasksSection.tsx`
 
 ---
 
@@ -718,7 +1031,7 @@
 **أماكن التطبيق**:
 - `DashboardLayout` sidebar
 
-**المسار**: `client/src/components/TaskCount.tsx`
+**المسار**: `client/src/components/layout/TaskCount.tsx`
 
 ---
 
@@ -733,7 +1046,7 @@
 **أماكن التطبيق**:
 - `DoctorsManagement` (procedures)
 
-**المسار**: `client/src/components/MultiSelect.tsx`
+**المسار**: `client/src/components/form/MultiSelect.tsx`
 
 ---
 
@@ -748,7 +1061,7 @@
 **أماكن التطبيق**:
 - جميع الحوارات
 
-**المسار**: `client/src/components/ResponsiveDialog.tsx`
+**المسار**: `client/src/components/layout/ResponsiveDialog.tsx`
 
 ---
 
@@ -763,7 +1076,7 @@
 **أماكن التطبيق**:
 - جميع الحوارات
 
-**المسار**: `client/src/components/ManusDialog.tsx`
+**المسار**: `client/src/components/layout/ManusDialog.tsx`
 
 ---
 
@@ -778,7 +1091,7 @@
 **أماكن التطبيق**:
 - `App.tsx` (يغلف التطبيق بالكامل)
 
-**المسار**: `client/src/components/ErrorBoundary.tsx`
+**المسار**: `client/src/components/layout/ErrorBoundary.tsx`
 
 ---
 
@@ -793,7 +1106,7 @@
 **أماكن التطبيق**:
 - الصفحات قيد التطوير
 
-**المسار**: `client/src/components/UnderDevelopmentPage.tsx`
+**المسار**: `client/src/components/layout/UnderDevelopmentPage.tsx`
 
 ---
 
@@ -1159,6 +1472,39 @@ const persistedFn = usePersistFn(fn);
 
 ---
 
+### usePWAInstall
+**الوصف**: Hook موحد لإدارة تثبيت PWA لكلا التطبيقين (العام والإدارة)
+
+**المحتوى**:
+```typescript
+export type PWAAppType = 'public' | 'admin';
+
+const {
+  canInstall,      // هل يمكن تثبيت التطبيق
+  isInstalled,     // هل التطبيق مثبت بالفعل (standalone mode)
+  isIOS,           // هل الجهاز iOS (يحتاج تعليمات يدوية)
+  isPWASupported,  // هل يدعم المتصفح PWA
+  isInstalling,    // هل عملية التثبيت جارية
+  isDismissed,     // هل تم رفض الطلب من قبل
+  installApp,      // دالة: تشغيل عملية التثبيت
+  dismissPrompt,   // دالة: إخفاء زر التثبيت مؤقتاً (7 أيام)
+} = usePWAInstall('public'); // أو 'admin'
+```
+
+**الميزات**:
+- تسجيل Service Worker المناسب (`/sw.js` للعام، `/sw-admin.js` للإدارة)
+- تتبع عمليات التثبيت في قاعدة البيانات عبر `trpc.pwa.trackInstall`
+- دعم iOS بتعليمات يدوية
+- إعادة عرض الزر بعد 7 أيام من الرفض
+- مفتاح تخزين مستقل لكل تطبيق
+
+**أماكن الاستخدام**:
+- `InstallPWAButton` - مكون زر التثبيت
+
+**المسار**: `client/src/hooks/usePWAInstall.ts`
+
+---
+
 ## دليل الاستخدام
 
 ### كيفية استخدام DataTableWrapper
@@ -1304,6 +1650,6 @@ function MyTable() {
 
 ---
 
-**آخر تحديث**: 2026-02-24
-**عدد المكونات**: 120+
+**آخر تحديث**: 2026-05-26
+**عدد المكونات**: 132+
 **عدد الـ Hooks**: 15+

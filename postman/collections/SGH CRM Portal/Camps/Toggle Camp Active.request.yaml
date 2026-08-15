@@ -1,0 +1,12 @@
+$kind: http-request
+name: Toggle Camp Active
+method: POST
+url: '{{baseUrl}}/api/trpc/camps.toggleActive'
+order: 9000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1}}

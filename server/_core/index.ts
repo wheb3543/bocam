@@ -1,75 +1,127 @@
-import "dotenv/config";
-import express from "express";
-import { createServer } from "http";
-import net from "net";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
-import { createUploadRouter } from "../uploadRoute";
-import { createWebhookRouter } from "../webhookRoutes";
-import { appRouter } from "../routers";
-import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
-// import { initSimpleCronScheduler } from "../cron/scheduler";
+import 'dotenv/config';
+import express from 'express';
+import { createServer } from 'http';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import { registerOAuthRoutes } from './oauth';
+import { createUploadRouter } from '../api/uploadRoute';
+import { createWebhookRouter } from '../api/webhookRoutes';
+import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
+import { appRouter } from '../routers/routers';
+import { createContext } from './context';
+import { serveStatic, setupVite } from './vite';
+import { initializeLicense } from './license';
+import { createLogger } from './logger';
+import { initSentry } from './sentry';
+import { setupHealthCheckRoutes } from './health';
+import { setupSwaggerDocs } from './swagger';
+import { findAvailablePort } from './utils/portUtils';
+import {
+  setupSecurityMiddleware,
+  setupCompressionMiddleware,
+  setupBodyParser,
+  setupAuthRateLimiting,
+  createApiLimiter,
+  createSensitiveApiLimiter,
+} from './middleware';
+import { setupUpdateRoutes } from './routes/updateRoutes';
+import { setupBackupRoutes } from './routes/backupRoutes';
+import { setupConfigRoutes } from './routes/configRoutes';
 
-function isPortAvailable(port: number): Promise<boolean> {
-  return new Promise(resolve => {
-    const server = net.createServer();
-    server.listen(port, () => {
-      server.close(() => resolve(true));
-    });
-    server.on("error", () => resolve(false));
-  });
-}
+// Initialize Sentry for error tracking
+initSentry();
 
-async function findAvailablePort(startPort: number = 3000): Promise<number> {
-  for (let port = startPort; port < startPort + 20; port++) {
-    if (await isPortAvailable(port)) {
-      return port;
-    }
-  }
-  throw new Error(`No available port found starting from ${startPort}`);
-}
+const logger = createLogger('server');
 
 async function startServer() {
+  // Initialize license validation (Kill Switch)
+  // Allow server to start in activation mode if license is missing
+  const _licenseInfo = initializeLicense(true);
+
+  // TEMPORARY: Disable heartbeat, update checker, and backup cron jobs for deployment
+  // Initialize heartbeat system (Anti-Clock-Tampering) - only if license is valid
+  // if (licenseInfo) {
+  //   initializeHeartbeat();
+  //   // Initialize update checker system - only if license is valid
+  //   initializeUpdateChecker();
+  //   // Initialize backup cron jobs - only if license is valid
+  //   startBackupCronJobs();
+  // }
+
   const app = express();
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // Setup middleware
+  setupSecurityMiddleware(app);
+  setupCompressionMiddleware(app);
+  setupBodyParser(app);
+  setupAuthRateLimiting(app);
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // File upload route
   app.use(createUploadRouter());
   // WhatsApp Webhook routes (direct Express, not tRPC - Meta requirement)
   app.use(createWebhookRouter());
+  // WhatsApp SSE endpoints for realtime chat updates
+  app.use(createWhatsAppSseRouter());
+  // Health check and metrics endpoints
+  setupHealthCheckRoutes(app);
+  // API documentation with Swagger
+  setupSwaggerDocs(app);
+
+  // Setup rate limiters
+  const apiLimiter = createApiLimiter();
+  const sensitiveApiLimiter = createSensitiveApiLimiter();
+
+  // Setup API routes
+  setupUpdateRoutes(app, apiLimiter, sensitiveApiLimiter);
+  setupBackupRoutes(app, apiLimiter, sensitiveApiLimiter);
+  setupConfigRoutes(app, apiLimiter, sensitiveApiLimiter);
+
   // tRPC API
   app.use(
-    "/api/trpc",
+    '/api/trpc',
     createExpressMiddleware({
       router: appRouter,
       createContext,
     })
   );
   // development mode uses Vite, production mode uses static files
-  if (process.env.NODE_ENV === "development") {
+  // NOTE: SW routes and manifest routes are handled inside serveStatic/setupVite
+  if (process.env.NODE_ENV === 'development') {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  const preferredPort = parseInt(process.env.PORT || "3000");
+  const preferredPort = parseInt(process.env.PORT || '3000');
   const port = await findAvailablePort(preferredPort);
 
   if (port !== preferredPort) {
-    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+    logger.info(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
   server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
-    
+    logger.info(`Server running on http://localhost:${port}/`);
+
     // Initialize cron scheduler for automatic deactivation
     // initSimpleCronScheduler(); // Disabled: Auto-deactivation feature removed per user request
+
+    // Initialize WhatsApp appointment reminders scheduler (every 30 minutes)
+    import('../tasks/cron/appointmentReminders')
+      .then(({ initAppointmentRemindersScheduler }) => {
+        try {
+          initAppointmentRemindersScheduler();
+        } catch (error) {
+          logger.error('[AppointmentReminders] Failed to initialize scheduler:', error);
+        }
+      })
+      .catch((error) => {
+        logger.error('[AppointmentReminders] Failed to load appointment reminders module:', error);
+      });
   });
 }
 
-startServer().catch(console.error);
+startServer().catch((error) => {
+  logger.error('Server failed to start:', error);
+});

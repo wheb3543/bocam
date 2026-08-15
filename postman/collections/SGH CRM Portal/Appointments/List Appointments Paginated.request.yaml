@@ -1,0 +1,8 @@
+$kind: http-request
+name: List Appointments Paginated
+method: GET
+url: '{{baseUrl}}/api/trpc/appointments.listPaginated'
+order: 3000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22page%22%3A1%2C%22limit%22%3A20%7D%7D'

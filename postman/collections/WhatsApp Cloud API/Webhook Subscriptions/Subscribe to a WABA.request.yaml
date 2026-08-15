@@ -1,0 +1,6 @@
+$kind: http-request
+description: Subscribe an app to a WhatsApp Business Account. For more information about subscribing to a WhatsApp Business Account, see [Subscribe to a WhatsApp Business Account](https://developers.facebook.com/docs/whatsapp/embedded-signup/webhooks#subscribe-to-a-whatsapp-business-account).
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/subscribed_apps
+method: POST
+examples: ./.resources/Subscribe to a WABA.resources/examples
+order: 2000

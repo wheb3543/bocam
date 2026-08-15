@@ -1,15 +1,15 @@
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import MultiSelect from "@/components/MultiSelect";
-import { Search, RotateCcw } from "lucide-react";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import MultiSelect from '@/components/form/MultiSelect';
+import { Search, RotateCcw } from 'lucide-react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { SOURCE_OPTIONS } from "@shared/sources";
+} from '@/components/ui/select';
+import { SOURCE_OPTIONS } from '@shared/sources';
 
 interface OfferLeadsFiltersProps {
   searchTerm: string;
@@ -18,7 +18,7 @@ interface OfferLeadsFiltersProps {
   onOfferChange: (value: string[]) => void;
   uniqueOffers: Array<{ id: number; title: string }>;
   dateFilter: string;
-  onDateFilterChange: (value: any) => void;
+  onDateFilterChange: (value: string) => void;
   statusFilter: string[];
   onStatusFilterChange: (value: string[]) => void;
   sourceFilter: string[];
@@ -56,7 +56,10 @@ export default function OfferLeadsFilters({
           />
         </div>
         <MultiSelect
-          options={uniqueOffers.map((offer) => ({ value: offer.id.toString(), label: offer.title }))}
+          options={uniqueOffers.map((offer) => ({
+            value: offer.id.toString(),
+            label: offer.title,
+          }))}
           selected={selectedOffer}
           onChange={onOfferChange}
           placeholder="جميع العروض"
@@ -75,11 +78,13 @@ export default function OfferLeadsFilters({
         </Select>
         <MultiSelect
           options={[
-            { value: 'new', label: 'جديد' },
+            { value: 'pending', label: 'قيد الانتظار' },
             { value: 'contacted', label: 'تم التواصل' },
-            { value: 'booked', label: 'تم الحجز' },
-            { value: 'not_interested', label: 'غير مهتم' },
             { value: 'no_answer', label: 'لم يرد' },
+            { value: 'confirmed', label: 'مؤكد' },
+            { value: 'attended', label: 'حضر' },
+            { value: 'completed', label: 'مكتمل' },
+            { value: 'cancelled', label: 'ملغي' },
           ]}
           selected={statusFilter}
           onChange={onStatusFilterChange}

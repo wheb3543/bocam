@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Active Users
+method: GET
+url: '{{baseUrl}}/api/trpc/users.getActiveUsers'
+order: 1000

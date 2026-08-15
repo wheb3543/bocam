@@ -1,0 +1,22 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: <NEW_FLOW_NAME>
+    - type: text
+      key: categories
+      value: '["OTHER"]'
+      description: |-
+        A list of Flow categories. Multiple values are possible, but at least one is required. Choose the values which represent your business use case. 
+
+        Allowed values: "SIGN_UP", "SIGN_IN", "APPOINTMENT_BOOKING", "LEAD_GENERATION", "CONTACT_US", "CUSTOMER_SUPPORT", "SURVEY", "OTHER"
+    - type: text
+      key: endpoint_uri
+      value: https://example.com
+      description: Endpoint URI for the Flow
+examples: ./.resources/Update Flow Metadata.resources/examples
+order: 3000

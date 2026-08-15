@@ -5,9 +5,12 @@
 
 import { z } from 'zod';
 import { protectedProcedure, router } from '../_core/trpc';
-import { getDb } from '../db';
+import { getDb } from '../database/db';
 import { auditLogs } from '../../drizzle/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('auditLogs');
 
 /**
  * Helper function to create an audit log entry
@@ -24,7 +27,9 @@ export async function createAuditLog(params: {
   notes?: string | null;
 }) {
   const db = await getDb();
-  if (!db) return;
+  if (!db) {
+    return;
+  }
 
   try {
     await db.insert(auditLogs).values({
@@ -38,7 +43,7 @@ export async function createAuditLog(params: {
       notes: params.notes || null,
     });
   } catch (error) {
-    console.error('[AuditLog] Failed to create audit log:', error);
+    logger.error('Failed to create audit log:', error);
   }
 }
 
@@ -48,20 +53,24 @@ export const auditLogsRouter = router({
    * جلب سجل التغييرات لكيان محدد
    */
   getByEntity: protectedProcedure
-    .input(z.object({
-      entityType: z.string(),
-      entityId: z.number(),
-    }))
+    .input(
+      z.object({
+        entityType: z.string(),
+        entityId: z.number(),
+      })
+    )
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) return [];
+      if (!db) {
+        return [];
+      }
 
-      return db.select()
+      return db
+        .select()
         .from(auditLogs)
-        .where(and(
-          eq(auditLogs.entityType, input.entityType),
-          eq(auditLogs.entityId, input.entityId),
-        ))
+        .where(
+          and(eq(auditLogs.entityType, input.entityType), eq(auditLogs.entityId, input.entityId))
+        )
         .orderBy(desc(auditLogs.createdAt));
     }),
 
@@ -70,35 +79,47 @@ export const auditLogsRouter = router({
    * جلب سجل التغييرات مع pagination وفلاتر
    */
   listPaginated: protectedProcedure
-    .input(z.object({
-      page: z.number().min(1).default(1),
-      limit: z.number().min(1).max(500).default(50),
-      entityType: z.string().optional(),
-      action: z.string().optional(),
-      userId: z.number().optional(),
-    }))
+    .input(
+      z.object({
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(500).default(50),
+        entityType: z.string().optional(),
+        action: z.string().optional(),
+        userId: z.number().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) return { logs: [], total: 0 };
+      if (!db) {
+        return { logs: [], total: 0 };
+      }
 
       const { page, limit, entityType, action, userId } = input;
       const offset = (page - 1) * limit;
 
       const conditions = [];
-      if (entityType) conditions.push(eq(auditLogs.entityType, entityType));
-      if (action) conditions.push(eq(auditLogs.action, action));
-      if (userId) conditions.push(eq(auditLogs.userId, userId));
+      if (entityType) {
+        conditions.push(eq(auditLogs.entityType, entityType));
+      }
+      if (action) {
+        conditions.push(eq(auditLogs.action, action));
+      }
+      if (userId) {
+        conditions.push(eq(auditLogs.userId, userId));
+      }
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
       const [logs, countResult] = await Promise.all([
-        db.select()
+        db
+          .select()
           .from(auditLogs)
           .where(whereClause)
           .orderBy(desc(auditLogs.createdAt))
           .limit(limit)
           .offset(offset),
-        db.select({ count: sql<number>`COUNT(*)` })
+        db
+          .select({ count: sql<number>`COUNT(*)` })
           .from(auditLogs)
           .where(whereClause),
       ]);

@@ -1,0 +1,13 @@
+$kind: http-request
+description: This request uploads an audio as .ogg. The parameters are specified as **form-data** in the request **body**.
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/media
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "file": "@/local/path/file.ogg;type=audio/ogg",
+        "messaging_product": "whatsapp"
+    }
+examples: ./.resources/Upload Audio.resources/examples
+order: 3000

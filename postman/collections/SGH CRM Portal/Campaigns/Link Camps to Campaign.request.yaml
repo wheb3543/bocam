@@ -1,0 +1,12 @@
+$kind: http-request
+name: Link Camps to Campaign
+method: POST
+url: '{{baseUrl}}/api/trpc/campaigns.linkCamps'
+order: 11000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"campaignId":1,"campIds":[1]}}

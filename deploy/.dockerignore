@@ -1,0 +1,58 @@
+# Node modules
+node_modules/
+.pnpm-store/
+
+# Build artifacts
+client/dist/
+server/dist/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# License files (should be mounted as volumes)
+license.json
+license-keys/
+.last-successful-run
+.heartbeat-log
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in production image)
+docs/
+*.md
+!README.md
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test files
+test/
+tests/
+*.test.ts
+*.test.js
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Scripts (not needed in production)
+scripts/

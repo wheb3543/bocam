@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
-type Direction = "up" | "down" | "left" | "right" | "none";
+type Direction = 'up' | 'down' | 'left' | 'right' | 'none';
 
-interface FadeInProps {
+interface FadeInProps<T extends React.ElementType> {
   children: ReactNode;
   direction?: Direction;
   delay?: number; // ms
@@ -12,30 +12,32 @@ interface FadeInProps {
   className?: string;
   once?: boolean; // animate only once (default true)
   threshold?: number; // intersection observer threshold
-  as?: React.ElementType;
+  as?: T;
 }
 
 /**
  * FadeIn - مكون ظهور تدريجي مع اتجاه الحركة
  * يدعم IntersectionObserver للتفعيل عند الظهور في viewport
  */
-export default function FadeIn({
+export default function FadeIn<T extends React.ElementType = 'div'>({
   children,
-  direction = "up",
+  direction = 'up',
   delay = 0,
   duration = 500,
   distance = 20,
   className,
   once = true,
   threshold = 0.1,
-  as: Component = "div",
-}: FadeInProps) {
+  as: Component = 'div' as T,
+}: FadeInProps<T>) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -59,22 +61,24 @@ export default function FadeIn({
   }, [once, threshold]);
 
   const getTransform = (): string => {
-    if (isVisible) return "translate3d(0, 0, 0)";
+    if (isVisible) {
+      return 'translate3d(0, 0, 0)';
+    }
     switch (direction) {
-      case "up":
+      case 'up':
         return `translate3d(0, ${distance}px, 0)`;
-      case "down":
+      case 'down':
         return `translate3d(0, -${distance}px, 0)`;
-      case "left":
+      case 'left':
         return `translate3d(${distance}px, 0, 0)`;
-      case "right":
+      case 'right':
         return `translate3d(-${distance}px, 0, 0)`;
-      case "none":
-        return "translate3d(0, 0, 0)";
+      case 'none':
+        return 'translate3d(0, 0, 0)';
     }
   };
 
-  const Tag = Component as any;
+  const Tag = Component as React.ElementType;
 
   return (
     <Tag
@@ -84,7 +88,7 @@ export default function FadeIn({
         opacity: isVisible ? 1 : 0,
         transform: getTransform(),
         transition: `opacity ${duration}ms ease-out ${delay}ms, transform ${duration}ms ease-out ${delay}ms`,
-        willChange: "opacity, transform",
+        willChange: 'opacity, transform',
       }}
     >
       {children}
@@ -108,7 +112,7 @@ interface StaggeredListProps {
 export function StaggeredList({
   children,
   staggerDelay = 80,
-  direction = "up",
+  direction = 'up',
   duration = 400,
   distance = 15,
   className,

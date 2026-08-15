@@ -1,0 +1,12 @@
+$kind: http-request
+name: Bulk Update Status
+method: POST
+url: '{{baseUrl}}/api/trpc/appointments.bulkUpdateStatus'
+order: 7000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"ids":[1,2,3],"status":"confirmed"}}

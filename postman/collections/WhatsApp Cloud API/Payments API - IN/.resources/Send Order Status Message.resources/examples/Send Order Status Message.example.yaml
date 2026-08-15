@@ -1,0 +1,52 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "recipient_type": "individual",
+          "to": "{{Recipient-WA-Phone-Number}}",
+          "type": "interactive",
+          "interactive": {
+              "type": "order_status",
+              "body": {
+                  "text": "your-text-body-content"
+              },
+              "action": {
+                  "name": "review_order",
+                  "parameters": {
+                      "reference_id": "unique-reference-id-from-order-details-msg",
+                      "order": {
+                          "status": "processing",
+                          "description": "optional-text"
+                      }
+                  }
+              }
+          }
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "contacts": [
+              {
+                  "input": "+1-631-555-5555",
+                  "wa_id": "16315555555"
+              }
+          ],
+          "messages": [
+              {
+                  "id": "wamid.gBGGFlaCGg0xcvAdgmZ9plHrf2Mh-o"
+              }
+          ]
+      }
+order: 1000

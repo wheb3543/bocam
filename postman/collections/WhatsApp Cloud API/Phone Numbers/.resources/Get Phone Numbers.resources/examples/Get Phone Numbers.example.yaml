@@ -1,0 +1,31 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/phone_numbers
+  method: GET
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "data": [
+              {
+                  "verified_name": "Jasper's Market",
+                  "display_phone_number": "+1 631-555-5555",
+                  "id": "1906385232743451",
+                  "quality_rating": "GREEN"
+              },
+              {
+                  "verified_name": "Jasper's Ice Cream",
+                  "display_phone_number": "+1 631-555-5556",
+                  "id": "1913623884432103",
+                  "quality_rating": "NA"
+              }
+          ]
+      }
+order: 1000

@@ -1,0 +1,20 @@
+$kind: http-request
+description: |-
+  - Guide: [Block Users](https://developers.facebook.com/docs/whatsapp/cloud-api/block-users)
+      
+  - Endpoint reference: [POST WhatsApp Buiness Phone Number &gt; block_users](https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account-to-number-current-status/block_users/#Creating)
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/block_users
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "messaging_product": "whatsapp",
+        "block_users": [
+            {
+                "user": "{{Recipient-Phone-Number}}"
+            }
+        ]
+    }
+examples: ./.resources/Block user(s).resources/examples
+order: 2000

@@ -1,0 +1,7 @@
+$kind: collection
+description: |-
+  | Name                    | Description                      |
+  |-------------------------|----------------------------------|
+  | **`display_phone_number`** | The phone number of the business account that is receiving the Webhooks. |
+  | **`phone_number_id`** | The ID of the phone number receiving the Webhooks. You can use this **`phone_number_id`** to send messages back to customers. |
+order: 3000

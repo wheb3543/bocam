@@ -1,0 +1,21 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}
+  method: GET
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "verified_name": "Jasper's Market",
+          "display_phone_number": "+1 631-555-5555",
+          "id": "1906385232743451",
+          "quality_rating": "GREEN"
+      }
+order: 1000

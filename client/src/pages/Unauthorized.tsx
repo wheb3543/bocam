@@ -1,21 +1,22 @@
-import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Home } from "lucide-react";
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, Home } from 'lucide-react';
+import { COMPANY_ARABIC_NAME, getCompanySlogan } from '@/const';
 
 export default function Unauthorized() {
   const [, setLocation] = useLocation();
-  
+
   // Get reason from URL params
   const params = new URLSearchParams(window.location.search);
   const reason = params.get('reason');
-  
-  let message = "عذراً، ليس لديك صلاحية للوصول إلى لوحة التحكم.";
-  
+
+  let message = 'عذراً، ليس لديك صلاحية للوصول إلى لوحة التحكم.';
+
   if (reason === 'no_email') {
-    message = "لم يتم العثور على بريد إلكتروني في حسابك.";
+    message = 'لم يتم العثور على بريد إلكتروني في حسابك.';
   } else if (reason === 'not_allowed') {
-    message = "حسابك غير مصرح له بالوصول إلى هذا النظام.";
+    message = 'حسابك غير مصرح له بالوصول إلى هذا النظام.';
   }
 
   return (
@@ -28,15 +29,11 @@ export default function Unauthorized() {
             </div>
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-foreground">
-              غير مصرح بالدخول
-            </CardTitle>
-            <CardDescription className="text-base mt-2">
-              {message}
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold text-foreground">غير مصرح بالدخول</CardTitle>
+            <CardDescription className="text-base mt-2">{message}</CardDescription>
           </div>
         </CardHeader>
-        
+
         <CardContent className="space-y-4">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <p className="text-sm text-foreground text-center">
@@ -45,7 +42,7 @@ export default function Unauthorized() {
           </div>
 
           <Button
-            onClick={() => setLocation("/")}
+            onClick={() => setLocation('/')}
             className="w-full bg-gradient-to-r from-[#0EA5E9] to-[#10B981] hover:from-[#0284C7] hover:to-[#059669]"
           >
             <Home className="mr-2 h-4 w-4" />
@@ -53,8 +50,8 @@ export default function Unauthorized() {
           </Button>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>المستشفى السعودي الألماني - صنعاء</p>
-            <p className="mt-1">نرعاكم كأهالينا</p>
+            <p>{COMPANY_ARABIC_NAME}</p>
+            <p className="mt-1">{getCompanySlogan()}</p>
           </div>
         </CardContent>
       </Card>

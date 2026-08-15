@@ -1,0 +1,12 @@
+$kind: http-request
+name: Create Shared Template
+method: POST
+url: '{{baseUrl}}/api/trpc/sharedTemplates.create'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"name":"قالب ترحيب","content":"مرحباً {{name}}"}}

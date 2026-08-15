@@ -1,0 +1,9 @@
+$kind: http-request
+description: |-
+  - Guide: [Sell Products & Services](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/sell-products-and-services) (Cloud API)
+  - Guide: [Sell Products & Services](https://developers.facebook.com/docs/whatsapp/on-premises/guides/commerce-guides) (On-Premises API)
+  - Endpoint reference: [WhatsApp Business Phone Number > WhatsApp Commerce Settings](https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account-to-number-current-status/whatsapp_commerce_settings)
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/whatsapp_commerce_settings
+method: GET
+examples: ./.resources/Get commerce settings.resources/examples
+order: 1000

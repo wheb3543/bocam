@@ -1,0 +1,77 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+  method: POST
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "recipient_type": "individual",
+          "to": "16315555555",
+          "type": "template",
+          "template": {
+              "name": "template-name",
+              "language": {
+                  "code": "language-and-locale-code"
+              },
+              "components": [
+                  {
+                      "type": "body",
+                      "parameters": [
+                          {
+                              "type": "text",
+                              "text": "text-string"
+                          },
+                          {
+                              "type": "currency",
+                              "currency": {
+                                  "fallback_value": "$100.99",
+                                  "code": "USD",
+                                  "amount_1000": 100990
+                              }
+                          },
+                          {
+                              "type": "date_time",
+                              "date_time": {
+                                  "fallback_value": "February 25, 1977",
+                                  "day_of_week": 5,
+                                  "year": 1977,
+                                  "month": 2,
+                                  "day_of_month": 25,
+                                  "hour": 15,
+                                  "minute": 33,
+                                  "calendar": "GREGORIAN"
+                              }
+                          }
+                      ]
+                  }
+              ]
+          }
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "contacts": [
+              {
+                  "input": "48XXXXXXXXX",
+                  "wa_id": "48XXXXXXXXX "
+              }
+          ],
+          "messages": [
+              {
+                  "id": "wamid.gBGGSFcCNEOPAgkO_KJ55r4w_ww"
+              }
+          ]
+      }
+order: 1000

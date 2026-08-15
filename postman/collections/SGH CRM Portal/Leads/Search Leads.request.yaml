@@ -1,0 +1,8 @@
+$kind: http-request
+name: Search Leads
+method: GET
+url: '{{baseUrl}}/api/trpc/leads.search'
+order: 5000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22query%22%3A%22%D8%A3%D8%AD%D9%85%D8%AF%22%7D%7D'

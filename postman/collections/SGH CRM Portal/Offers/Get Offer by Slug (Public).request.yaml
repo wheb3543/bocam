@@ -1,0 +1,8 @@
+$kind: http-request
+name: 'Get Offer by Slug (Public)'
+method: GET
+url: '{{baseUrl}}/api/trpc/offers.getBySlug'
+order: 3000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22slug%22%3A%22offer-slug%22%7D%7D'

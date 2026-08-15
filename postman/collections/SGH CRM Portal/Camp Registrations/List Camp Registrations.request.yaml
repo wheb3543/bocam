@@ -1,0 +1,5 @@
+$kind: http-request
+name: List Camp Registrations
+method: GET
+url: '{{baseUrl}}/api/trpc/campRegistrations.list'
+order: 2000

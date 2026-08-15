@@ -1,0 +1,360 @@
+/**
+ * Image Upload Dialog Component
+ * مكون حوار رفع الصور
+ */
+
+import { useState, useRef } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import type { ImageFormData } from '../../types/content.types';
+import { sectionOptions, imageFormatOptions } from '../../types/content.types';
+
+interface ImageUploadDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mode: 'create' | 'edit';
+  formData: ImageFormData;
+  onFormDataChange: (data: ImageFormData) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  isPending: boolean;
+  onSaveVersion?: () => void;
+}
+
+/**
+ * ImageUploadDialog - مكون حوار رفع الصور
+ */
+export function ImageUploadDialog({
+  open,
+  onOpenChange,
+  mode,
+  formData,
+  onFormDataChange,
+  onSubmit,
+  isPending,
+  onSaveVersion,
+}: ImageUploadDialogProps) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(formData.url || null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (file: File) => {
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+      onFormDataChange({ ...formData, url: reader.result as string });
+    };
+    reader.readAsDataURL(file);
+
+    // Compress image
+    const img = document.createElement('img');
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Calculate new dimensions (max 1920px width/height)
+      const maxDimension = 1920;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx?.drawImage(img, 0, 0, width, height);
+
+      // Compress to JPEG with 0.8 quality
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+      // Calculate file size
+      const base64Length = compressedDataUrl.length - (compressedDataUrl.indexOf(',') + 1);
+      const padding =
+        compressedDataUrl.charAt(compressedDataUrl.length - 2) === '='
+          ? 2
+          : compressedDataUrl.charAt(compressedDataUrl.length - 1) === '='
+            ? 1
+            : 0;
+      const size = base64Length * 0.75 - padding;
+
+      onFormDataChange({
+        ...formData,
+        width: width.toString(),
+        height: height.toString(),
+        size: Math.round(size).toString(),
+        format: 'jpg',
+        url: compressedDataUrl,
+      });
+
+      setPreviewUrl(compressedDataUrl);
+    };
+    img.src = URL.createObjectURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const clearPreview = () => {
+    setPreviewUrl(null);
+    onFormDataChange({ ...formData, url: '' });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px]" dir="rtl">
+        <DialogHeader>
+          <DialogTitle>{mode === 'create' ? 'إضافة صورة جديدة' : 'تعديل الصورة'}</DialogTitle>
+          <DialogDescription>
+            {mode === 'create' ? 'أضف صورة جديدة للمنصة' : 'عدل الصورة الموجودة'}
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={onSubmit}>
+          <div className="grid gap-4 py-4">
+            {/* Key */}
+            <div className="grid gap-2">
+              <Label htmlFor="key">المفتاح *</Label>
+              <Input
+                id="key"
+                value={formData.key}
+                onChange={(e) => onFormDataChange({ ...formData, key: e.target.value })}
+                placeholder="مثال: hero.banner"
+                disabled={mode === 'edit'}
+                required
+              />
+            </div>
+
+            {/* Image Upload Area */}
+            <div className="grid gap-2">
+              <Label>رفع الصورة *</Label>
+              <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                  isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                {previewUrl ? (
+                  <div className="relative">
+                    <img src={previewUrl} alt="معاينة" className="max-h-48 mx-auto rounded" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={clearPreview}
+                      aria-label="حذف الصورة"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      اسحب الصورة هنا أو انقر للاختيار
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="h-4 w-4 ml-2" />
+                      اختيار ملف
+                    </Button>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* URL (hidden if file uploaded) */}
+            {!previewUrl && (
+              <div className="grid gap-2">
+                <Label htmlFor="url">رابط الصورة *</Label>
+                <Input
+                  id="url"
+                  value={formData.url}
+                  onChange={(e) => onFormDataChange({ ...formData, url: e.target.value })}
+                  placeholder="https://example.com/image.jpg"
+                  required
+                />
+              </div>
+            )}
+
+            {/* Alt Text */}
+            <div className="grid gap-2">
+              <Label htmlFor="alt">النص البديل (للوصولية)</Label>
+              <Input
+                id="alt"
+                value={formData.alt}
+                onChange={(e) => onFormDataChange({ ...formData, alt: e.target.value })}
+                placeholder="وصف الصورة للوصولية"
+              />
+            </div>
+
+            {/* Section */}
+            <div className="grid gap-2">
+              <Label htmlFor="section">القسم</Label>
+              <Select
+                value={formData.section}
+                onValueChange={(value) => onFormDataChange({ ...formData, section: value })}
+              >
+                <SelectTrigger id="section">
+                  <SelectValue placeholder="اختر القسم" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sectionOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Width */}
+            <div className="grid gap-2">
+              <Label htmlFor="width">العرض (بكسل)</Label>
+              <Input
+                id="width"
+                type="number"
+                value={formData.width}
+                onChange={(e) => onFormDataChange({ ...formData, width: e.target.value })}
+                placeholder="1920"
+              />
+            </div>
+
+            {/* Height */}
+            <div className="grid gap-2">
+              <Label htmlFor="height">الارتفاع (بكسل)</Label>
+              <Input
+                id="height"
+                type="number"
+                value={formData.height}
+                onChange={(e) => onFormDataChange({ ...formData, height: e.target.value })}
+                placeholder="1080"
+              />
+            </div>
+
+            {/* Format */}
+            <div className="grid gap-2">
+              <Label htmlFor="format">الصيغة</Label>
+              <Select
+                value={formData.format}
+                onValueChange={(value) => onFormDataChange({ ...formData, format: value })}
+              >
+                <SelectTrigger id="format">
+                  <SelectValue placeholder="اختر الصيغة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {imageFormatOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Size */}
+            <div className="grid gap-2">
+              <Label htmlFor="size">الحجم (بايت)</Label>
+              <Input
+                id="size"
+                type="number"
+                value={formData.size}
+                onChange={(e) => onFormDataChange({ ...formData, size: e.target.value })}
+                placeholder="102400"
+              />
+            </div>
+
+            {/* Active */}
+            <div className="flex items-center gap-2">
+              <Switch
+                id="isActive"
+                checked={formData.isActive === 'yes'}
+                onCheckedChange={(checked) =>
+                  onFormDataChange({ ...formData, isActive: checked ? 'yes' : 'no' })
+                }
+              />
+              <Label htmlFor="isActive">نشط</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <div className="flex gap-2">
+              {mode === 'edit' && onSaveVersion && (
+                <Button type="button" variant="outline" onClick={onSaveVersion}>
+                  حفظ نسخة
+                </Button>
+              )}
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                إلغاء
+              </Button>
+            </div>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? 'جاري الحفظ...' : mode === 'create' ? 'إضافة' : 'حفظ التغييرات'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

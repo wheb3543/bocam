@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Create User (Admin)'
+method: POST
+url: '{{baseUrl}}/api/trpc/users.create'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"name":"موظف جديد","email":"staff@sgh.com","password":"SecurePass123","role":"staff"}}

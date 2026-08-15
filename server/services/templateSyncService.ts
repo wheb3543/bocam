@@ -1,0 +1,219 @@
+/**
+ * Template Sync Service
+ * خدمة مزامنة حالة القوالب مع Meta API
+ */
+
+import { meta } from '../api/MetaApiService';
+import { getDb } from '../database/db';
+import { messageTemplates, whatsappTemplates } from '../../drizzle/schema';
+import { eq } from 'drizzle-orm';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('templateSyncService');
+
+/**
+ * مزامنة حالة قوالب messageTemplates مع Meta
+ */
+export async function syncMessageTemplatesStatus(phoneNumberId: string): Promise<{
+  success: boolean;
+  synced: number;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+  let synced = 0;
+
+  try {
+    const db = await getDb();
+    if (!db) {
+      throw new Error('Database not available');
+    }
+
+    // الحصول على WABA ID من Phone Number ID
+    const wabaResult = await meta.getWabaIdFromPhoneNumberId(phoneNumberId);
+    if (!wabaResult.success) {
+      throw new Error(`Failed to get WABA ID: ${wabaResult.error}`);
+    }
+
+    // جلب القوالب من Meta
+    const templatesResult = await meta.getWhatsAppTemplates(wabaResult.wabaId ?? '');
+    if (!templatesResult.success) {
+      throw new Error(`Failed to fetch templates from Meta: ${templatesResult.error}`);
+    }
+
+    const metaTemplates = templatesResult.templates || [];
+    logger.info(`Fetched ${metaTemplates.length} templates from Meta`);
+
+    // إنشاء خريطة للقوالب من Meta
+    const metaTemplateMap = new Map(metaTemplates.map((t: Record<string, unknown>) => [t.name, t]));
+
+    // جلب القوالب من قاعدة البيانات
+    const dbTemplates = await db.select().from(messageTemplates);
+    logger.info(`Found ${dbTemplates.length} templates in database`);
+
+    // تحديث حالة كل قالب
+    for (const dbTemplate of dbTemplates) {
+      const metaTemplate = metaTemplateMap.get(dbTemplate.templateName);
+
+      if (!metaTemplate) {
+        logger.warn(`Template "${dbTemplate.templateName}" not found in Meta`);
+        errors.push(`Template "${dbTemplate.templateName}" not found in Meta`);
+        continue;
+      }
+
+      // تحديث الحالة إذا تغيرت
+      if (metaTemplate.status !== dbTemplate.status) {
+        logger.info(
+          `Updating status of "${dbTemplate.templateName}" from ${dbTemplate.status} to ${metaTemplate.status}`
+        );
+
+        await db
+          .update(messageTemplates)
+          .set({
+            status: metaTemplate.status as 'PENDING' | 'APPROVED' | 'REJECTED' | 'DISABLED',
+            metaTemplateId: metaTemplate.id as string,
+            updatedAt: new Date(),
+          })
+          .where(eq(messageTemplates.id, dbTemplate.id));
+
+        synced++;
+      }
+
+      // تحديث معرف القالب من Meta إذا لم يكن موجوداً
+      if (!dbTemplate.metaTemplateId && metaTemplate.id) {
+        await db
+          .update(messageTemplates)
+          .set({
+            metaTemplateId: metaTemplate.id as string,
+            updatedAt: new Date(),
+          })
+          .where(eq(messageTemplates.id, dbTemplate.id));
+
+        synced++;
+      }
+    }
+
+    logger.info(`Synced ${synced} templates`);
+    return { success: true, synced, errors };
+  } catch (error) {
+    logger.error('Failed:', error);
+    return {
+      success: false,
+      synced,
+      errors: [error instanceof Error ? error.message : 'خطأ غير معروف'],
+    };
+  }
+}
+
+/**
+ * مزامنة حالة قوالب whatsappTemplates مع Meta
+ */
+export async function syncWhatsAppTemplatesStatus(phoneNumberId: string): Promise<{
+  success: boolean;
+  synced: number;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+  let synced = 0;
+
+  try {
+    const db = await getDb();
+    if (!db) {
+      throw new Error('Database not available');
+    }
+
+    // الحصول على WABA ID من Phone Number ID
+    const wabaResult = await meta.getWabaIdFromPhoneNumberId(phoneNumberId);
+    if (!wabaResult.success) {
+      throw new Error(`Failed to get WABA ID: ${wabaResult.error}`);
+    }
+
+    // جلب القوالب من Meta
+    const templatesResult = await meta.getWhatsAppTemplates(wabaResult.wabaId ?? '');
+    if (!templatesResult.success) {
+      throw new Error(`Failed to fetch templates from Meta: ${templatesResult.error}`);
+    }
+
+    const metaTemplates = templatesResult.templates || [];
+    logger.info(`Fetched ${metaTemplates.length} templates from Meta`);
+
+    // إنشاء خريطة للقوالب من Meta
+    const metaTemplateMap = new Map(metaTemplates.map((t: Record<string, unknown>) => [t.name, t]));
+
+    // جلب القوالب من قاعدة البيانات
+    const dbTemplates = await db.select().from(whatsappTemplates);
+    logger.info(`Found ${dbTemplates.length} templates in database`);
+
+    // تحديث حالة كل قالب
+    for (const dbTemplate of dbTemplates) {
+      const metaName = dbTemplate.metaName || dbTemplate.name;
+      const metaTemplate = metaTemplateMap.get(metaName);
+
+      if (!metaTemplate) {
+        logger.warn(`Template "${metaName}" not found in Meta`);
+        errors.push(`Template "${metaName}" not found in Meta`);
+        continue;
+      }
+
+      // تحديث الحالة إذا تغيرت
+      if (metaTemplate.status !== dbTemplate.metaStatus) {
+        logger.info(
+          `Updating status of "${metaName}" from ${dbTemplate.metaStatus} to ${metaTemplate.status}`
+        );
+
+        await db
+          .update(whatsappTemplates)
+          .set({
+            metaStatus: metaTemplate.status as 'PENDING' | 'APPROVED' | 'REJECTED' | 'DISABLED',
+            metaTemplateId: metaTemplate.id as string,
+            updatedAt: new Date(),
+          })
+          .where(eq(whatsappTemplates.id, dbTemplate.id));
+
+        synced++;
+      }
+
+      // تحديث معرف القالب من Meta إذا لم يكن موجوداً
+      if (!dbTemplate.metaTemplateId && metaTemplate.id) {
+        await db
+          .update(whatsappTemplates)
+          .set({
+            metaTemplateId: metaTemplate.id as string,
+            updatedAt: new Date(),
+          })
+          .where(eq(whatsappTemplates.id, dbTemplate.id));
+
+        synced++;
+      }
+    }
+
+    logger.info(`Synced ${synced} templates`);
+    return { success: true, synced, errors };
+  } catch (error) {
+    logger.error('Failed:', error);
+    return {
+      success: false,
+      synced,
+      errors: [error instanceof Error ? error.message : 'خطأ غير معروف'],
+    };
+  }
+}
+
+/**
+ * مزامنة جميع القوالب (كلا الجدولين)
+ */
+export async function syncAllTemplates(phoneNumberId: string): Promise<{
+  success: boolean;
+  messageTemplates: { synced: number; errors: string[] };
+  whatsappTemplates: { synced: number; errors: string[] };
+}> {
+  logger.info('Starting full template sync...');
+
+  const messageResult = await syncMessageTemplatesStatus(phoneNumberId);
+  const whatsappResult = await syncWhatsAppTemplatesStatus(phoneNumberId);
+
+  return {
+    success: messageResult.success && whatsappResult.success,
+    messageTemplates: { synced: messageResult.synced, errors: messageResult.errors },
+    whatsappTemplates: { synced: whatsappResult.synced, errors: whatsappResult.errors },
+  };
+}

@@ -1,0 +1,26 @@
+{
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "theme",
+          "custom-variant",
+          "layer",
+          "utilities",
+          "components",
+          "keyframes"
+        ]
+      }
+    ],
+    "selector-class-pattern": null,
+    "custom-property-pattern": null,
+    "declaration-block-no-redundant-longhand-properties": null,
+    "alpha-value-notation": null,
+    "property-no-vendor-prefix": null,
+    "value-no-vendor-prefix": null
+  }
+}

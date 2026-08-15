@@ -51,7 +51,7 @@ describe('DoctorsManagement التحسينات', () => {
 });
 
 describe('OffersManagement التحسينات', () => {
-  const code = readComponent('OffersManagement');
+  const code = readComponent('offer/OffersManagement');
 
   it('يجب أن يحتوي على بطاقات إحصائيات محسنة بأيقونات', () => {
     expect(code).toContain('Tag');
@@ -88,7 +88,7 @@ describe('OffersManagement التحسينات', () => {
 });
 
 describe('CampsManagement التحسينات', () => {
-  const code = readComponent('CampsManagement');
+  const code = readComponent('camp/CampsManagement');
 
   it('يجب أن يحتوي على بطاقات إحصائيات محسنة بأيقونات', () => {
     expect(code).toContain('Tent');
@@ -134,8 +134,8 @@ describe('CampsManagement التحسينات', () => {
 
 describe('التناسق بين الصفحات الثلاث', () => {
   const doctors = readComponent('DoctorsManagement');
-  const offers = readComponent('OffersManagement');
-  const camps = readComponent('CampsManagement');
+  const offers = readComponent('offer/OffersManagement');
+  const camps = readComponent('camp/CampsManagement');
 
   it('جميع الصفحات تستخدم EmptyState', () => {
     expect(doctors).toContain('EmptyState');

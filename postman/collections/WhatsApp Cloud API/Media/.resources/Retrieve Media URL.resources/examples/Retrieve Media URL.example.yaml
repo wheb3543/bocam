@@ -1,0 +1,25 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Media-ID}}?phone_number_id=<PHONE_NUMBER_ID>
+  method: GET
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+  queryParams:
+    phone_number_id: <PHONE_NUMBER_ID>
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "url": "<URL>",
+          "mime_type": "image/jpeg",
+          "sha256": "<HASH>",
+          "file_size": "303833",
+          "id": "2621233374848975"
+      }
+order: 1000

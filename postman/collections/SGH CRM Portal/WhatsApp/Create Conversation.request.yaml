@@ -1,0 +1,12 @@
+$kind: http-request
+name: Create Conversation
+method: POST
+url: '{{baseUrl}}/api/trpc/whatsapp.conversations.create'
+order: 6000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"phoneNumber":"771234567","customerName":"عميل جديد"}}

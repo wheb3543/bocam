@@ -1,0 +1,25 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/business_compliance_info
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "messaging_product": "whatsapp",
+        "entity_name": "<ENTITY_NAME>",
+        "entity_type": "<ENTITY_TYPE>",
+        "is_registered": <IS_REGISTERED>,
+        "grievance_officer_details": {
+            "name": "<GRIEVANCE_OFFER_NAME>",
+            "email": "<GRIEVANCE_OFFER_EMAIL>",
+            "landline_number": "<GRIEVANCE_OFFER_LANDLINE_NUMBER>",
+            "mobile_number": "<GRIEVANCE_OFFER_MOBILE_NUMBER>"
+        },
+        "customer_care_details": {
+            "email": "<CUSTOMER_CARE_EMAIL>",
+            "landline_number": "<CUSTOMER_CARE_LANDLINE_NUMBER>",
+            "mobile_number": "<CUSTOMER_CARE_MOBILE_NUMBER>"
+        }
+    }
+examples: ./.resources/Add India-based business compliance info.resources/examples
+order: 2000

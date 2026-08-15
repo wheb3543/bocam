@@ -1,0 +1,65 @@
+$kind: http-example
+name: 'Message Status Update'
+request:
+  url: '{{baseUrl}}/api/webhooks/whatsapp'
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: X-Hub-Signature-256
+      value: 'sha256=pqr678examplesignature'
+  body:
+    type: json
+    content: |-
+      {
+        "object": "whatsapp_business_account",
+        "entry": [
+          {
+            "id": "123456789",
+            "changes": [
+              {
+                "value": {
+                  "messaging_product": "whatsapp",
+                  "metadata": {
+                    "display_phone_number": "15550000001",
+                    "phone_number_id": "987654321"
+                  },
+                  "statuses": [
+                    {
+                      "id": "wamid.HBgLNTU1MjEyMzQ1NjcVAgARGBI2RjQyNUE3NEYxMzAzMzQ1AA==",
+                      "status": "delivered",
+                      "timestamp": "1700000500",
+                      "recipient_id": "966500000001",
+                      "conversation": {
+                        "id": "conv_id_abc123",
+                        "origin": {
+                          "type": "service"
+                        }
+                      },
+                      "pricing": {
+                        "billable": true,
+                        "pricing_model": "CBP",
+                        "category": "service"
+                      }
+                    }
+                  ]
+                },
+                "field": "messages"
+              }
+            ]
+          }
+        ]
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Type
+      value: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true
+      }
+order: 6000

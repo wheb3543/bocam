@@ -1,0 +1,53 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/whatsapp_business_profile
+  method: POST
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "address": "<business-address>",
+          "description": "<business-description>",
+          "vertical": "<business-industry>",
+          "about": "<profile-about-text>",
+          "email": "<business-email>",
+          "websites": [
+              "<https://website-1>",
+              "<https://website-2>"
+          ],
+          "profile_picture_handle": "4:VGVzdC5wbmc=:aW1hZ2UvanBlZw==:ARat4Mt-L09JON3f30SmDkdyPSuyBkDDYiB4TFXuXISjdgHoNp2b7j882_9Jzr2tPrdKxi92UygyVzTivJiOvmebMpZ6MIjTik3gTyI3ZCQAgQ:e:1659995302:2022308451254161:636685196:ARZf1ftR5N6-qSLtklU"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "data": [
+              {
+                  "business_profile": {
+                      "messaging_product": "whatsapp",
+                      "address": "<business-address>",
+                      "description": "<business-description>",
+                      "vertical": "<business-industry>",
+                      "about": "<profile-about-text>",
+                      "email": "<business-email>",
+                      "websites": [
+                          "https://website-1",
+                          "https://website-2"
+                      ],
+                      "profile_picture_url": "https://pps.whatsapp.net/...",
+                      "id": "<business-profile-id>"
+                  },
+                  "id": "<phone-number-id>"
+              }
+          ]
+      }
+order: 1000

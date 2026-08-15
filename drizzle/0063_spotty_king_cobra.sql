@@ -1,0 +1,1 @@
+ALTER TABLE `whatsapp_messages` ADD `mediaId` varchar(255);

@@ -1,0 +1,12 @@
+$kind: http-request
+name: Notify Owner
+method: POST
+url: '{{baseUrl}}/api/trpc/system.notifyOwner'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"message":"Test notification"}}

@@ -1,15 +1,15 @@
-import { z } from "zod";
-import { router, protectedProcedure } from "../_core/trpc";
-import { getDb } from "../db";
-import { leads, appointments, offerLeads, campRegistrations, whatsappConversations, whatsappMessages } from "../../drizzle/schema";
-import { sql, count, eq, gte, lte, and } from "drizzle-orm";
+import { z } from 'zod';
+import { router, protectedProcedure } from '../_core/trpc';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { leads, appointments } from '../../drizzle/schema';
+import { sql, count } from 'drizzle-orm';
 
 /**
  * Charts Router - يوفر بيانات الرسوم البيانية للوحة التحكم
  * Provides chart data for the admin dashboard
  */
 
-const periodSchema = z.enum(["7d", "30d", "90d", "12m"]).default("30d");
+const periodSchema = z.enum(['7d', '30d', '90d', '12m']).default('30d');
 
 function getDateRange(period: string): { startDate: Date; groupBy: string; dateFormat: string } {
   const now = new Date();
@@ -18,30 +18,30 @@ function getDateRange(period: string): { startDate: Date; groupBy: string; dateF
   let dateFormat: string;
 
   switch (period) {
-    case "7d":
+    case '7d':
       startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      groupBy = "DATE(createdAt)";
-      dateFormat = "%Y-%m-%d";
+      groupBy = 'DATE(createdAt)';
+      dateFormat = '%Y-%m-%d';
       break;
-    case "30d":
+    case '30d':
       startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      groupBy = "DATE(createdAt)";
-      dateFormat = "%Y-%m-%d";
+      groupBy = 'DATE(createdAt)';
+      dateFormat = '%Y-%m-%d';
       break;
-    case "90d":
+    case '90d':
       startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-      groupBy = "YEARWEEK(createdAt, 1)";
-      dateFormat = "%x-W%v";
+      groupBy = 'YEARWEEK(createdAt, 1)';
+      dateFormat = '%x-W%v';
       break;
-    case "12m":
+    case '12m':
       startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
       groupBy = "DATE_FORMAT(createdAt, '%Y-%m')";
-      dateFormat = "%Y-%m";
+      dateFormat = '%Y-%m';
       break;
     default:
       startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      groupBy = "DATE(createdAt)";
-      dateFormat = "%Y-%m-%d";
+      groupBy = 'DATE(createdAt)';
+      dateFormat = '%Y-%m-%d';
   }
 
   return { startDate, groupBy, dateFormat };
@@ -55,8 +55,7 @@ export const chartsRouter = router({
   registrationsTrend: protectedProcedure
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
       const { startDate, groupBy, dateFormat } = getDateRange(input.period);
 
@@ -98,12 +97,24 @@ export const chartsRouter = router({
 
       // Merge all dates into a unified timeline
       const allDates = new Set<string>();
-      const extractRows = (result: any): Array<{ date_label: string; total: number }> => {
-        const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-        return rows.map((r: any) => ({
-          date_label: String(r.date_label),
-          total: Number(r.total),
-        }));
+      const extractRows = (result: unknown): Array<{ date_label: string; total: number }> => {
+        let rows: unknown[] = [];
+        if (Array.isArray(result)) {
+          rows = result;
+        } else if (
+          result &&
+          typeof result === 'object' &&
+          Array.isArray((result as { [key: string]: unknown })?.[0])
+        ) {
+          rows = (result as { [key: string]: unknown })?.[0] as unknown[];
+        }
+        return rows.map((r: unknown) => {
+          const row = r as { date_label: string; total: number };
+          return {
+            date_label: String(row.date_label),
+            total: Number(row.total),
+          };
+        });
       };
 
       const leadsRows = extractRows(leadsTrend);
@@ -111,15 +122,15 @@ export const chartsRouter = router({
       const offerLeadsRows = extractRows(offerLeadsTrend);
       const campRegsRows = extractRows(campRegsTrend);
 
-      [leadsRows, appointmentsRows, offerLeadsRows, campRegsRows].forEach(rows => {
-        rows.forEach(r => allDates.add(r.date_label));
+      [leadsRows, appointmentsRows, offerLeadsRows, campRegsRows].forEach((rows) => {
+        rows.forEach((r) => allDates.add(r.date_label));
       });
 
       const sortedDates = Array.from(allDates).sort();
 
       const toMap = (rows: Array<{ date_label: string; total: number }>) => {
         const map = new Map<string, number>();
-        rows.forEach(r => map.set(r.date_label, r.total));
+        rows.forEach((r) => map.set(r.date_label, r.total));
         return map;
       };
 
@@ -131,10 +142,10 @@ export const chartsRouter = router({
       return {
         labels: sortedDates,
         datasets: {
-          leads: sortedDates.map(d => leadsMap.get(d) || 0),
-          appointments: sortedDates.map(d => appointmentsMap.get(d) || 0),
-          offerLeads: sortedDates.map(d => offerLeadsMap.get(d) || 0),
-          campRegistrations: sortedDates.map(d => campRegsMap.get(d) || 0),
+          leads: sortedDates.map((d) => leadsMap.get(d) || 0),
+          appointments: sortedDates.map((d) => appointmentsMap.get(d) || 0),
+          offerLeads: sortedDates.map((d) => offerLeadsMap.get(d) || 0),
+          campRegistrations: sortedDates.map((d) => campRegsMap.get(d) || 0),
         },
       };
     }),
@@ -143,36 +154,32 @@ export const chartsRouter = router({
    * توزيع حالات العملاء (دائري)
    * Lead status distribution
    */
-  leadStatusDistribution: protectedProcedure
-    .query(async () => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+  leadStatusDistribution: protectedProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
 
-      const result = await db
-        .select({
-          status: leads.status,
-          total: count(),
-        })
-        .from(leads)
-        .groupBy(leads.status);
+    const result = await db
+      .select({
+        status: leads.status,
+        total: count(),
+      })
+      .from(leads)
+      .groupBy(leads.status);
 
-      return result.map(r => ({
-        status: r.status,
-        total: r.total,
-      }));
-    }),
+    return result.map((r: { status: string; total: number }) => ({
+      status: r.status,
+      total: r.total,
+    }));
+  }),
 
   /**
    * التسجيلات حسب المصدر (شريطي)
    * Registrations by source
    */
-  registrationsBySource: protectedProcedure
-    .query(async () => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+  registrationsBySource: protectedProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
 
-      // Leads by source
-      const leadsResult = await db.execute(sql`
+    // Leads by source
+    const leadsResult = await db.execute(sql`
         SELECT COALESCE(source, 'غير محدد') as source_name, COUNT(*) as total
         FROM leads
         GROUP BY source_name
@@ -180,8 +187,8 @@ export const chartsRouter = router({
         LIMIT 10
       `);
 
-      // Appointments by source
-      const appointmentsResult = await db.execute(sql`
+    // Appointments by source
+    const appointmentsResult = await db.execute(sql`
         SELECT COALESCE(source, 'غير محدد') as source_name, COUNT(*) as total
         FROM appointments
         GROUP BY source_name
@@ -189,8 +196,8 @@ export const chartsRouter = router({
         LIMIT 10
       `);
 
-      // Offer leads by source
-      const offerLeadsResult = await db.execute(sql`
+    // Offer leads by source
+    const offerLeadsResult = await db.execute(sql`
         SELECT COALESCE(source, 'غير محدد') as source_name, COUNT(*) as total
         FROM offerLeads
         GROUP BY source_name
@@ -198,32 +205,42 @@ export const chartsRouter = router({
         LIMIT 10
       `);
 
-      const extractRows = (result: any): Array<{ source_name: string; total: number }> => {
-        const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-        return rows.map((r: any) => ({
-          source_name: String(r.source_name),
-          total: Number(r.total),
-        }));
-      };
+    const extractRows = (result: unknown): Array<{ source_name: string; total: number }> => {
+      let rows: unknown[] = [];
+      if (Array.isArray(result)) {
+        rows = result;
+      } else if (
+        result &&
+        typeof result === 'object' &&
+        Array.isArray((result as { [key: string]: unknown })?.[0])
+      ) {
+        rows = (result as { [key: string]: unknown })?.[0] as unknown[];
+      }
+      return rows.map((r: unknown) => {
+        const row = r as { source_name: string; total: number };
+        return {
+          source_name: String(row.source_name),
+          total: Number(row.total),
+        };
+      });
+    };
 
-      return {
-        leads: extractRows(leadsResult),
-        appointments: extractRows(appointmentsResult),
-        offerLeads: extractRows(offerLeadsResult),
-      };
-    }),
+    return {
+      leads: extractRows(leadsResult),
+      appointments: extractRows(appointmentsResult),
+      offerLeads: extractRows(offerLeadsResult),
+    };
+  }),
 
   /**
    * أداء العروض والمخيمات (شريطي)
    * Offers and camps performance
    */
-  offersAndCampsPerformance: protectedProcedure
-    .query(async () => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+  offersAndCampsPerformance: protectedProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
 
-      // Offer leads count per offer
-      const offersPerformance = await db.execute(sql`
+    // Offer leads count per offer
+    const offersPerformance = await db.execute(sql`
         SELECT o.title as name, COUNT(ol.id) as total,
           SUM(CASE WHEN ol.status IN ('confirmed', 'completed', 'booked') THEN 1 ELSE 0 END) as converted
         FROM offers o
@@ -233,8 +250,8 @@ export const chartsRouter = router({
         LIMIT 8
       `);
 
-      // Camp registrations count per camp
-      const campsPerformance = await db.execute(sql`
+    // Camp registrations count per camp
+    const campsPerformance = await db.execute(sql`
         SELECT c.name, COUNT(cr.id) as total,
           SUM(CASE WHEN cr.status IN ('confirmed', 'attended') THEN 1 ELSE 0 END) as converted
         FROM camps c
@@ -244,43 +261,55 @@ export const chartsRouter = router({
         LIMIT 8
       `);
 
-      const extractRows = (result: any): Array<{ name: string; total: number; converted: number }> => {
-        const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-        return rows.map((r: any) => ({
-          name: String(r.name),
-          total: Number(r.total),
-          converted: Number(r.converted || 0),
-        }));
-      };
+    const extractRows = (
+      result: unknown
+    ): Array<{ name: string; total: number; converted: number }> => {
+      let rows: unknown[] = [];
+      if (Array.isArray(result)) {
+        rows = result;
+      } else if (
+        result &&
+        typeof result === 'object' &&
+        Array.isArray((result as { [key: string]: unknown })?.[0])
+      ) {
+        rows = (result as { [key: string]: unknown })?.[0] as unknown[];
+      }
+      return rows.map((r: unknown) => {
+        const row = r as { name: string; total: number; converted?: number };
+        return {
+          name: String(row.name),
+          total: Number(row.total),
+          converted: Number(row.converted || 0),
+        };
+      });
+    };
 
-      return {
-        offers: extractRows(offersPerformance),
-        camps: extractRows(campsPerformance),
-      };
-    }),
+    return {
+      offers: extractRows(offersPerformance),
+      camps: extractRows(campsPerformance),
+    };
+  }),
 
   /**
    * إحصائيات المواعيد حسب الحالة (دائري)
    * Appointments by status
    */
-  appointmentStatusDistribution: protectedProcedure
-    .query(async () => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+  appointmentStatusDistribution: protectedProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
 
-      const result = await db
-        .select({
-          status: appointments.status,
-          total: count(),
-        })
-        .from(appointments)
-        .groupBy(appointments.status);
+    const result = await db
+      .select({
+        status: appointments.status,
+        total: count(),
+      })
+      .from(appointments)
+      .groupBy(appointments.status);
 
-      return result.map(r => ({
-        status: r.status,
-        total: r.total,
-      }));
-    }),
+    return result.map((r: { status: string; total: number }) => ({
+      status: r.status,
+      total: r.total,
+    }));
+  }),
 
   /**
    * إحصائيات واتساب (خطي)
@@ -289,8 +318,7 @@ export const chartsRouter = router({
   whatsappTrend: protectedProcedure
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
       const { startDate, groupBy, dateFormat } = getDateRange(input.period);
 
@@ -310,32 +338,46 @@ export const chartsRouter = router({
         ORDER BY date_group ASC
       `);
 
-      const extractRows = (result: any): Array<{ date_label: string; total: number }> => {
-        const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-        return rows.map((r: any) => ({
-          date_label: String(r.date_label),
-          total: Number(r.total),
-        }));
+      const extractRows = (result: unknown): Array<{ date_label: string; total: number }> => {
+        let rows: unknown[] = [];
+        if (Array.isArray(result)) {
+          rows = result;
+        } else if (
+          result &&
+          typeof result === 'object' &&
+          Array.isArray((result as { [key: string]: unknown })?.[0])
+        ) {
+          rows = (result as { [key: string]: unknown })?.[0] as unknown[];
+        }
+        return rows.map((r: unknown) => {
+          const row = r as { date_label: string; total: number };
+          return {
+            date_label: String(row.date_label),
+            total: Number(row.total),
+          };
+        });
       };
 
       const inboundRows = extractRows(inboundTrend);
       const outboundRows = extractRows(outboundTrend);
 
       const allDates = new Set<string>();
-      [inboundRows, outboundRows].forEach(rows => rows.forEach(r => allDates.add(r.date_label)));
+      [inboundRows, outboundRows].forEach((rows) =>
+        rows.forEach((r) => allDates.add(r.date_label))
+      );
       const sortedDates = Array.from(allDates).sort();
 
       const toMap = (rows: Array<{ date_label: string; total: number }>) => {
         const map = new Map<string, number>();
-        rows.forEach(r => map.set(r.date_label, r.total));
+        rows.forEach((r) => map.set(r.date_label, r.total));
         return map;
       };
 
       return {
         labels: sortedDates,
         datasets: {
-          inbound: sortedDates.map(d => toMap(inboundRows).get(d) || 0),
-          outbound: sortedDates.map(d => toMap(outboundRows).get(d) || 0),
+          inbound: sortedDates.map((d) => toMap(inboundRows).get(d) || 0),
+          outbound: sortedDates.map((d) => toMap(outboundRows).get(d) || 0),
         },
       };
     }),
@@ -347,57 +389,89 @@ export const chartsRouter = router({
   summaryComparison: protectedProcedure
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
       const now = new Date();
       let periodDays: number;
       switch (input.period) {
-        case "7d": periodDays = 7; break;
-        case "30d": periodDays = 30; break;
-        case "90d": periodDays = 90; break;
-        case "12m": periodDays = 365; break;
-        default: periodDays = 30;
+        case '7d':
+          periodDays = 7;
+          break;
+        case '30d':
+          periodDays = 30;
+          break;
+        case '90d':
+          periodDays = 90;
+          break;
+        case '12m':
+          periodDays = 365;
+          break;
+        default:
+          periodDays = 30;
       }
 
       const currentStart = new Date(now.getTime() - periodDays * 24 * 60 * 60 * 1000);
       const previousStart = new Date(currentStart.getTime() - periodDays * 24 * 60 * 60 * 1000);
 
-      const getCount = async (table: any, start: Date, end: Date) => {
+      const getCount = async (table: string, start: Date, end: Date) => {
         const result = await db.execute(sql`
-          SELECT COUNT(*) as total FROM ${table}
+          SELECT COUNT(*) as total FROM ${sql.raw(table)}
           WHERE createdAt >= ${start} AND createdAt < ${end}
         `);
-        const rows = Array.isArray(result) ? result : (result as any)?.[0] || [];
-        return Number(rows[0]?.total || 0);
+        const rows = Array.isArray(result)
+          ? result
+          : ((result as unknown as { [key: string]: unknown })?.[0] as unknown[]) || [];
+        return Number((rows[0] as { total?: number })?.total || 0);
       };
 
       const [
-        currentLeads, previousLeads,
-        currentAppointments, previousAppointments,
-        currentOfferLeads, previousOfferLeads,
-        currentCampRegs, previousCampRegs,
+        currentLeads,
+        previousLeads,
+        currentAppointments,
+        previousAppointments,
+        currentOfferLeads,
+        previousOfferLeads,
+        currentCampRegs,
+        previousCampRegs,
       ] = await Promise.all([
-        getCount(leads, currentStart, now),
-        getCount(leads, previousStart, currentStart),
-        getCount(appointments, currentStart, now),
-        getCount(appointments, previousStart, currentStart),
-        getCount(offerLeads, currentStart, now),
-        getCount(offerLeads, previousStart, currentStart),
-        getCount(campRegistrations, currentStart, now),
-        getCount(campRegistrations, previousStart, currentStart),
+        getCount('leads', currentStart, now),
+        getCount('leads', previousStart, currentStart),
+        getCount('appointments', currentStart, now),
+        getCount('appointments', previousStart, currentStart),
+        getCount('offerLeads', currentStart, now),
+        getCount('offerLeads', previousStart, currentStart),
+        getCount('campRegistrations', currentStart, now),
+        getCount('campRegistrations', previousStart, currentStart),
       ]);
 
       const calcChange = (current: number, previous: number) => {
-        if (previous === 0) return current > 0 ? 100 : 0;
+        if (previous === 0) {
+          return current > 0 ? 100 : 0;
+        }
         return Math.round(((current - previous) / previous) * 100);
       };
 
       return {
-        leads: { current: currentLeads, previous: previousLeads, change: calcChange(currentLeads, previousLeads) },
-        appointments: { current: currentAppointments, previous: previousAppointments, change: calcChange(currentAppointments, previousAppointments) },
-        offerLeads: { current: currentOfferLeads, previous: previousOfferLeads, change: calcChange(currentOfferLeads, previousOfferLeads) },
-        campRegistrations: { current: currentCampRegs, previous: previousCampRegs, change: calcChange(currentCampRegs, previousCampRegs) },
+        leads: {
+          current: currentLeads,
+          previous: previousLeads,
+          change: calcChange(currentLeads, previousLeads),
+        },
+        appointments: {
+          current: currentAppointments,
+          previous: previousAppointments,
+          change: calcChange(currentAppointments, previousAppointments),
+        },
+        offerLeads: {
+          current: currentOfferLeads,
+          previous: previousOfferLeads,
+          change: calcChange(currentOfferLeads, previousOfferLeads),
+        },
+        campRegistrations: {
+          current: currentCampRegs,
+          previous: previousCampRegs,
+          change: calcChange(currentCampRegs, previousCampRegs),
+        },
         total: {
           current: currentLeads + currentAppointments + currentOfferLeads + currentCampRegs,
           previous: previousLeads + previousAppointments + previousOfferLeads + previousCampRegs,

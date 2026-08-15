@@ -15,7 +15,7 @@ function getDialogDescription(
   itemName?: string | null,
   itemType: string = "العنصر"
 ): string {
-  if (description) return description;
+  if (description) {return description;}
   return itemName
     ? `هل أنت متأكد من حذف ${itemType} "${itemName}"؟ لا يمكن التراجع عن هذا الإجراء.`
     : `هل أنت متأكد من حذف هذا ${itemType}؟ لا يمكن التراجع عن هذا الإجراء.`;
@@ -86,8 +86,8 @@ describe("ConfirmDeleteDialog - القيم الافتراضية", () => {
   });
 
   it("يدعم variant warning", () => {
-    const variant = "warning";
+    const variant: "default" | "destructive" | "warning" = "warning";
     expect(variant).toBe("warning");
-    expect(variant !== "destructive").toBe(true);
+    expect(variant === "warning").toBe(true);
   });
 });

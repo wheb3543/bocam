@@ -1,0 +1,5 @@
+$kind: http-request
+name: List Conversations
+method: GET
+url: '{{baseUrl}}/api/trpc/whatsapp.conversations.list'
+order: 2000

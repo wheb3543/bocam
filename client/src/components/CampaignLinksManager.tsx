@@ -1,24 +1,13 @@
-import { useState, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import {
-  Loader2,
-  Tag,
-  Tent,
-  Stethoscope,
-  Search,
-  Link2,
-  Unlink,
-  Save,
-  CheckCircle,
-  X,
-} from "lucide-react";
+import { useState, useEffect } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import { Loader2, Tag, Tent, Stethoscope, Search, Link2, Save, CheckCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -26,8 +15,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+interface LinkedOffer {
+  offerId: number;
+  offerTitle?: string;
+  offerIsActive?: boolean;
+}
+
+interface LinkedCamp {
+  campId: number;
+  campName?: string;
+  campIsActive?: boolean;
+}
+
+interface LinkedDoctor {
+  doctorId: number;
+  doctorName?: string;
+  doctorSpecialty?: string;
+}
 
 interface CampaignLinksManagerProps {
   campaignId: number;
@@ -50,19 +57,26 @@ export default function CampaignLinksManager({
   readOnly = false,
   inline = false,
 }: CampaignLinksManagerProps) {
-  const [activeDialog, setActiveDialog] = useState<"offers" | "camps" | "doctors" | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeDialog, setActiveDialog] = useState<'offers' | 'camps' | 'doctors' | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch current links
-  const { data: links, isLoading: loadingLinks, refetch: refetchLinks } = trpc.campaigns.getLinks.useQuery(
-    { campaignId },
-    { enabled: !!campaignId }
-  );
+  const {
+    data: links,
+    isLoading: loadingLinks,
+    refetch: refetchLinks,
+  } = trpc.campaigns.getLinks.useQuery({ campaignId }, { enabled: !!campaignId });
 
   // Fetch all available items
-  const { data: allOffers } = trpc.offers.getAll.useQuery(undefined, { enabled: activeDialog === "offers" });
-  const { data: allCamps } = trpc.camps.getAll.useQuery(undefined, { enabled: activeDialog === "camps" });
-  const { data: allDoctors } = trpc.doctors.list.useQuery(undefined, { enabled: activeDialog === "doctors" });
+  const { data: allOffers } = trpc.offers.getAll.useQuery(undefined, {
+    enabled: activeDialog === 'offers',
+  });
+  const { data: allCamps } = trpc.camps.getAll.useQuery(undefined, {
+    enabled: activeDialog === 'camps',
+  });
+  const { data: allDoctors } = trpc.doctors.list.useQuery(undefined, {
+    enabled: activeDialog === 'doctors',
+  });
 
   // Selection state
   const [selectedOfferIds, setSelectedOfferIds] = useState<number[]>([]);
@@ -71,20 +85,20 @@ export default function CampaignLinksManager({
 
   // Initialize selections when dialog opens
   useEffect(() => {
-    if (activeDialog === "offers" && links?.linkedOffers) {
-      setSelectedOfferIds(links.linkedOffers.map((o: any) => o.offerId));
-    } else if (activeDialog === "camps" && links?.linkedCamps) {
-      setSelectedCampIds(links.linkedCamps.map((c: any) => c.campId));
-    } else if (activeDialog === "doctors" && links?.linkedDoctors) {
-      setSelectedDoctorIds(links.linkedDoctors.map((d: any) => d.doctorId));
+    if (activeDialog === 'offers' && links?.linkedOffers) {
+      setSelectedOfferIds(links.linkedOffers.map((o: LinkedOffer) => o.offerId));
+    } else if (activeDialog === 'camps' && links?.linkedCamps) {
+      setSelectedCampIds(links.linkedCamps.map((c: LinkedCamp) => c.campId));
+    } else if (activeDialog === 'doctors' && links?.linkedDoctors) {
+      setSelectedDoctorIds(links.linkedDoctors.map((d: LinkedDoctor) => d.doctorId));
     }
-    setSearchQuery("");
+    setSearchQuery('');
   }, [activeDialog, links]);
 
   // Mutations
   const linkOffersMutation = trpc.campaigns.linkOffers.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث العروض المرتبطة بنجاح");
+      toast.success('تم تحديث العروض المرتبطة بنجاح');
       refetchLinks();
       setActiveDialog(null);
     },
@@ -93,7 +107,7 @@ export default function CampaignLinksManager({
 
   const linkCampsMutation = trpc.campaigns.linkCamps.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث المخيمات المرتبطة بنجاح");
+      toast.success('تم تحديث المخيمات المرتبطة بنجاح');
       refetchLinks();
       setActiveDialog(null);
     },
@@ -102,7 +116,7 @@ export default function CampaignLinksManager({
 
   const linkDoctorsMutation = trpc.campaigns.linkDoctors.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث الأطباء المرتبطين بنجاح");
+      toast.success('تم تحديث الأطباء المرتبطين بنجاح');
       refetchLinks();
       setActiveDialog(null);
     },
@@ -122,20 +136,20 @@ export default function CampaignLinksManager({
   };
 
   const toggleOffer = (id: number) => {
-    setSelectedOfferIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    setSelectedOfferIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
   const toggleCamp = (id: number) => {
-    setSelectedCampIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    setSelectedCampIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
   const toggleDoctor = (id: number) => {
-    setSelectedDoctorIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    setSelectedDoctorIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
@@ -159,10 +173,12 @@ export default function CampaignLinksManager({
           <Label className="flex items-center gap-2 text-sm font-semibold">
             <Tag className="h-4 w-4 text-orange-600" />
             العروض المرتبطة
-            <Badge variant="secondary" className="text-xs">{linkedOffers.length}</Badge>
+            <Badge variant="secondary" className="text-xs">
+              {linkedOffers.length}
+            </Badge>
           </Label>
           {!readOnly && (
-            <Button variant="outline" size="sm" onClick={() => setActiveDialog("offers")}>
+            <Button variant="outline" size="sm" onClick={() => setActiveDialog('offers')}>
               <Link2 className="h-3.5 w-3.5 ml-1.5" />
               إدارة
             </Button>
@@ -170,7 +186,7 @@ export default function CampaignLinksManager({
         </div>
         {linkedOffers.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {linkedOffers.map((offer: any) => (
+            {linkedOffers.map((offer: LinkedOffer) => (
               <Badge
                 key={offer.offerId}
                 variant="outline"
@@ -195,10 +211,12 @@ export default function CampaignLinksManager({
           <Label className="flex items-center gap-2 text-sm font-semibold">
             <Tent className="h-4 w-4 text-green-600" />
             المخيمات المرتبطة
-            <Badge variant="secondary" className="text-xs">{linkedCamps.length}</Badge>
+            <Badge variant="secondary" className="text-xs">
+              {linkedCamps.length}
+            </Badge>
           </Label>
           {!readOnly && (
-            <Button variant="outline" size="sm" onClick={() => setActiveDialog("camps")}>
+            <Button variant="outline" size="sm" onClick={() => setActiveDialog('camps')}>
               <Link2 className="h-3.5 w-3.5 ml-1.5" />
               إدارة
             </Button>
@@ -206,7 +224,7 @@ export default function CampaignLinksManager({
         </div>
         {linkedCamps.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {linkedCamps.map((camp: any) => (
+            {linkedCamps.map((camp: LinkedCamp) => (
               <Badge
                 key={camp.campId}
                 variant="outline"
@@ -231,10 +249,12 @@ export default function CampaignLinksManager({
           <Label className="flex items-center gap-2 text-sm font-semibold">
             <Stethoscope className="h-4 w-4 text-blue-600" />
             الأطباء المرتبطون
-            <Badge variant="secondary" className="text-xs">{linkedDoctors.length}</Badge>
+            <Badge variant="secondary" className="text-xs">
+              {linkedDoctors.length}
+            </Badge>
           </Label>
           {!readOnly && (
-            <Button variant="outline" size="sm" onClick={() => setActiveDialog("doctors")}>
+            <Button variant="outline" size="sm" onClick={() => setActiveDialog('doctors')}>
               <Link2 className="h-3.5 w-3.5 ml-1.5" />
               إدارة
             </Button>
@@ -242,7 +262,7 @@ export default function CampaignLinksManager({
         </div>
         {linkedDoctors.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {linkedDoctors.map((doctor: any) => (
+            {linkedDoctors.map((doctor: LinkedDoctor) => (
               <Badge
                 key={doctor.doctorId}
                 variant="outline"
@@ -250,7 +270,9 @@ export default function CampaignLinksManager({
               >
                 <Stethoscope className="h-3 w-3 ml-1" />
                 {doctor.doctorName}
-                <span className="text-[10px] text-muted-foreground mr-1">({doctor.doctorSpecialty})</span>
+                <span className="text-[10px] text-muted-foreground mr-1">
+                  ({doctor.doctorSpecialty})
+                </span>
               </Badge>
             ))}
           </div>
@@ -262,7 +284,10 @@ export default function CampaignLinksManager({
       {/* === Selection Dialogs === */}
 
       {/* Offers Selection Dialog */}
-      <Dialog open={activeDialog === "offers"} onOpenChange={(open) => !open && setActiveDialog(null)}>
+      <Dialog
+        open={activeDialog === 'offers'}
+        onOpenChange={(open) => !open && setActiveDialog(null)}
+      >
         <DialogContent className="max-w-lg max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -287,30 +312,30 @@ export default function CampaignLinksManager({
               {allOffers && allOffers.length > 0 ? (
                 <div className="space-y-2">
                   {allOffers
-                    .filter((o: any) =>
-                      !searchQuery || o.title?.toLowerCase().includes(searchQuery.toLowerCase())
+                    .filter(
+                      (o: Record<string, unknown>) =>
+                        !searchQuery ||
+                        (o.title as string)?.toLowerCase().includes(searchQuery.toLowerCase())
                     )
-                    .map((offer: any) => (
+                    .map((offer: Record<string, unknown>) => (
                       <div
-                        key={offer.id}
+                        key={offer.id as number}
                         className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
-                          selectedOfferIds.includes(offer.id)
-                            ? "bg-orange-50 border border-orange-200"
-                            : "hover:bg-muted/50 border border-transparent"
+                          selectedOfferIds.includes(offer.id as number)
+                            ? 'bg-orange-50 border border-orange-200'
+                            : 'hover:bg-muted/50 border border-transparent'
                         }`}
-                        onClick={() => toggleOffer(offer.id)}
+                        onClick={() => toggleOffer(offer.id as number)}
                       >
                         <Checkbox
-                          checked={selectedOfferIds.includes(offer.id)}
-                          onCheckedChange={() => toggleOffer(offer.id)}
+                          checked={selectedOfferIds.includes(offer.id as number)}
+                          onCheckedChange={() => toggleOffer(offer.id as number)}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{offer.title}</p>
-                          {!offer.isActive && (
-                            <span className="text-xs text-red-500">غير نشط</span>
-                          )}
+                          <p className="text-sm font-medium truncate">{offer.title as string}</p>
+                          {!offer.isActive && <span className="text-xs text-red-500">غير نشط</span>}
                         </div>
-                        {selectedOfferIds.includes(offer.id) && (
+                        {selectedOfferIds.includes(offer.id as number) && (
                           <CheckCircle className="h-4 w-4 text-orange-600 shrink-0" />
                         )}
                       </div>
@@ -325,7 +350,9 @@ export default function CampaignLinksManager({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setActiveDialog(null)}>إلغاء</Button>
+            <Button variant="outline" onClick={() => setActiveDialog(null)}>
+              إلغاء
+            </Button>
             <Button onClick={handleSaveOffers} disabled={linkOffersMutation.isPending}>
               {linkOffersMutation.isPending && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
               <Save className="h-4 w-4 ml-2" />
@@ -336,7 +363,10 @@ export default function CampaignLinksManager({
       </Dialog>
 
       {/* Camps Selection Dialog */}
-      <Dialog open={activeDialog === "camps"} onOpenChange={(open) => !open && setActiveDialog(null)}>
+      <Dialog
+        open={activeDialog === 'camps'}
+        onOpenChange={(open) => !open && setActiveDialog(null)}
+      >
         <DialogContent className="max-w-lg max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -361,30 +391,30 @@ export default function CampaignLinksManager({
               {allCamps && allCamps.length > 0 ? (
                 <div className="space-y-2">
                   {allCamps
-                    .filter((c: any) =>
-                      !searchQuery || c.name?.toLowerCase().includes(searchQuery.toLowerCase())
+                    .filter(
+                      (c: Record<string, unknown>) =>
+                        !searchQuery ||
+                        (c.name as string)?.toLowerCase().includes(searchQuery.toLowerCase())
                     )
-                    .map((camp: any) => (
+                    .map((camp: Record<string, unknown>) => (
                       <div
-                        key={camp.id}
+                        key={camp.id as number}
                         className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
-                          selectedCampIds.includes(camp.id)
-                            ? "bg-green-50 border border-green-200"
-                            : "hover:bg-muted/50 border border-transparent"
+                          selectedCampIds.includes(camp.id as number)
+                            ? 'bg-green-50 border border-green-200'
+                            : 'hover:bg-muted/50 border border-transparent'
                         }`}
-                        onClick={() => toggleCamp(camp.id)}
+                        onClick={() => toggleCamp(camp.id as number)}
                       >
                         <Checkbox
-                          checked={selectedCampIds.includes(camp.id)}
-                          onCheckedChange={() => toggleCamp(camp.id)}
+                          checked={selectedCampIds.includes(camp.id as number)}
+                          onCheckedChange={() => toggleCamp(camp.id as number)}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{camp.name}</p>
-                          {!camp.isActive && (
-                            <span className="text-xs text-red-500">غير نشط</span>
-                          )}
+                          <p className="text-sm font-medium truncate">{camp.name as string}</p>
+                          {!camp.isActive && <span className="text-xs text-red-500">غير نشط</span>}
                         </div>
-                        {selectedCampIds.includes(camp.id) && (
+                        {selectedCampIds.includes(camp.id as number) && (
                           <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
                         )}
                       </div>
@@ -399,7 +429,9 @@ export default function CampaignLinksManager({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setActiveDialog(null)}>إلغاء</Button>
+            <Button variant="outline" onClick={() => setActiveDialog(null)}>
+              إلغاء
+            </Button>
             <Button onClick={handleSaveCamps} disabled={linkCampsMutation.isPending}>
               {linkCampsMutation.isPending && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
               <Save className="h-4 w-4 ml-2" />
@@ -410,7 +442,10 @@ export default function CampaignLinksManager({
       </Dialog>
 
       {/* Doctors Selection Dialog */}
-      <Dialog open={activeDialog === "doctors"} onOpenChange={(open) => !open && setActiveDialog(null)}>
+      <Dialog
+        open={activeDialog === 'doctors'}
+        onOpenChange={(open) => !open && setActiveDialog(null)}
+      >
         <DialogContent className="max-w-lg max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -435,30 +470,33 @@ export default function CampaignLinksManager({
               {allDoctors && allDoctors.length > 0 ? (
                 <div className="space-y-2">
                   {allDoctors
-                    .filter((d: any) =>
-                      !searchQuery ||
-                      d.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      d.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
+                    .filter(
+                      (d: Record<string, unknown>) =>
+                        !searchQuery ||
+                        (d.name as string)?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (d.specialty as string)?.toLowerCase().includes(searchQuery.toLowerCase())
                     )
-                    .map((doctor: any) => (
+                    .map((doctor: Record<string, unknown>) => (
                       <div
-                        key={doctor.id}
+                        key={doctor.id as number}
                         className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
-                          selectedDoctorIds.includes(doctor.id)
-                            ? "bg-blue-50 border border-blue-200"
-                            : "hover:bg-muted/50 border border-transparent"
+                          selectedDoctorIds.includes(doctor.id as number)
+                            ? 'bg-blue-50 border border-blue-200'
+                            : 'hover:bg-muted/50 border border-transparent'
                         }`}
-                        onClick={() => toggleDoctor(doctor.id)}
+                        onClick={() => toggleDoctor(doctor.id as number)}
                       >
                         <Checkbox
-                          checked={selectedDoctorIds.includes(doctor.id)}
-                          onCheckedChange={() => toggleDoctor(doctor.id)}
+                          checked={selectedDoctorIds.includes(doctor.id as number)}
+                          onCheckedChange={() => toggleDoctor(doctor.id as number)}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{doctor.name}</p>
-                          <p className="text-xs text-muted-foreground">{doctor.specialty}</p>
+                          <p className="text-sm font-medium truncate">{doctor.name as string}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {doctor.specialty as string}
+                          </p>
                         </div>
-                        {selectedDoctorIds.includes(doctor.id) && (
+                        {selectedDoctorIds.includes(doctor.id as number) && (
                           <CheckCircle className="h-4 w-4 text-blue-600 shrink-0" />
                         )}
                       </div>
@@ -473,7 +511,9 @@ export default function CampaignLinksManager({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setActiveDialog(null)}>إلغاء</Button>
+            <Button variant="outline" onClick={() => setActiveDialog(null)}>
+              إلغاء
+            </Button>
             <Button onClick={handleSaveDoctors} disabled={linkDoctorsMutation.isPending}>
               {linkDoctorsMutation.isPending && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
               <Save className="h-4 w-4 ml-2" />

@@ -1,0 +1,44 @@
+$kind: http-request
+description: Flow messages won't be delivered to unsupported WhatsApp versions
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "messaging_product": "whatsapp",
+        "to": "{{Recipient-Phone-Number}}",
+        "recipient_type": "individual",
+        "type": "interactive",
+        "interactive": {
+            "type": "flow",
+            "header": {
+                "type": "text",
+                "text": "<HEADER_TEXT>"
+            },
+            "body": {
+                "text": "<BODY_TEXT>"
+            },
+            "footer": {
+                "text": "<FOOTER_TEXT>"
+            },
+            "action": {
+                "name": "flow",
+                "parameters": {
+                    "flow_message_version": "3",
+                    "flow_action": "navigate",
+                    "flow_token": "<FLOW_TOKEN>",
+                    "flow_name": "{{Flow-Name}}",
+                    "flow_cta": "Open Flow!",
+                    "flow_action_payload": {
+                        "screen": "<SCREEN_ID>",
+                        "data": {
+                            "<CUSTOM_KEY>": "<CUSTOM_VALUE>"
+                        }
+                    }
+                }
+            }
+        }
+    }
+examples: ./.resources/Send Published Flow by Name.resources/examples
+order: 3000

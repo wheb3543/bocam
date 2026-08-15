@@ -1,0 +1,8 @@
+$kind: http-request
+name: Get by Type
+method: GET
+url: '{{baseUrl}}/api/trpc/messageSettings.getByType'
+order: 3000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22messageType%22%3A%22appointment_confirmed%22%7D%7D'

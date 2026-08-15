@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Shared Template
+method: POST
+url: '{{baseUrl}}/api/trpc/sharedTemplates.update'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1,"name":"قالب ترحيب محدث"}}

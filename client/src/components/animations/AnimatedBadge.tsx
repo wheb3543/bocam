@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import React, { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface AnimatedBadgeProps {
   count: number;
@@ -48,12 +48,14 @@ export default function AnimatedBadge({
     previousCountRef.current = count;
   }, [count, pulseOnChange, pulseDuration]);
 
-  if (!showZero && count <= 0) return null;
+  if (!showZero && count <= 0) {
+    return null;
+  }
 
   const display = count > maxDisplay ? `${maxDisplay}+` : String(count);
 
   return (
-    <span className={cn("relative inline-flex", className)}>
+    <span className={cn('relative inline-flex', className)}>
       {/* Pulse ring */}
       {isPulsing && (
         <span
@@ -64,12 +66,12 @@ export default function AnimatedBadge({
       {/* Badge */}
       <span
         className={cn(
-          "relative inline-flex items-center justify-center",
-          "min-w-[18px] h-[18px] px-1",
-          "text-[10px] font-bold text-white",
-          "bg-red-500 rounded-full",
-          "transition-transform duration-300 ease-out",
-          isScaling && "scale-125"
+          'relative inline-flex items-center justify-center',
+          'min-w-[18px] h-[18px] px-1',
+          'text-[10px] font-bold text-white',
+          'bg-red-500 rounded-full',
+          'transition-transform duration-300 ease-out',
+          isScaling && 'scale-125'
         )}
       >
         {display}

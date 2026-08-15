@@ -1,5 +1,8 @@
-import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { z } from 'zod';
+import { protectedProcedure, router } from '../_core/trpc';
+import { createLogger } from '../_core/logger';
+
+const logger = createLogger('queue');
 
 export const queueRouter = router({
   /**
@@ -7,11 +10,11 @@ export const queueRouter = router({
    */
   getStats: protectedProcedure.query(async () => {
     try {
-      const { getQueueStats } = await import("../queues/whatsappQueue");
+      const { getQueueStats } = await import('../integrations/queues/whatsappQueue');
       const stats = await getQueueStats();
       return stats;
     } catch (error) {
-      console.error("[Queue Router] Failed to get stats:", error);
+      logger.error('Failed to get stats:', error);
       return {
         waiting: 0,
         active: 0,
@@ -35,27 +38,27 @@ export const queueRouter = router({
     )
     .query(async ({ input }) => {
       try {
-        const { getQueueStats } = await import("../queues/whatsappQueue");
+        const { getQueueStats } = await import('../integrations/queues/whatsappQueue');
         const stats = await getQueueStats();
-        
+
         // If Redis is not available, return empty array
         if (!stats.redisAvailable) {
           return [];
         }
-        
-        const { whatsappQueue } = await import("../queues/whatsappQueue");
-        
+
+        const { whatsappQueue } = await import('../integrations/queues/whatsappQueue');
+
         // Check if queue is initialized
         if (!whatsappQueue) {
           return [];
         }
-        
+
         // Get jobs from different states
         const [completed, failed, active, waiting] = await Promise.all([
-          whatsappQueue.getJobs(["completed"], 0, Math.floor(input.limit / 4)),
-          whatsappQueue.getJobs(["failed"], 0, Math.floor(input.limit / 4)),
-          whatsappQueue.getJobs(["active"], 0, Math.floor(input.limit / 4)),
-          whatsappQueue.getJobs(["waiting"], 0, Math.floor(input.limit / 4)),
+          whatsappQueue.getJobs(['completed'], 0, Math.floor(input.limit / 4)),
+          whatsappQueue.getJobs(['failed'], 0, Math.floor(input.limit / 4)),
+          whatsappQueue.getJobs(['active'], 0, Math.floor(input.limit / 4)),
+          whatsappQueue.getJobs(['waiting'], 0, Math.floor(input.limit / 4)),
         ]);
 
         const allJobs = [...completed, ...failed, ...active, ...waiting];
@@ -80,7 +83,7 @@ export const queueRouter = router({
 
         return formattedJobs;
       } catch (error) {
-        console.error("[Queue Router] Failed to get recent jobs:", error);
+        logger.error('Failed to get recent jobs:', error);
         return [];
       }
     }),

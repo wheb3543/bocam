@@ -1,10 +1,57 @@
-export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import {
+  COMPANY_NAME,
+  COMPANY_LOGO,
+  COMPANY_ARABIC_NAME,
+  COMPANY_ENGLISH_NAME,
+  COMPANY_SLOGAN,
+  COMPANY_PHONE,
+  COMPANY_EMAIL,
+  FACEBOOK_URL,
+  INSTAGRAM_URL,
+  TWITTER_URL,
+  LINKEDIN_URL,
+  getCompanyName,
+  getAppTitle,
+  getContactInfo,
+  getSocialMediaUrl,
+  getSocialMediaUrls,
+  getCompanySlogan,
+} from './config';
 
-export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "App";
+// Constants that should remain shared (copied from shared/const.ts)
+export const COOKIE_NAME = 'app_session_id';
+export const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;
+export const AXIOS_TIMEOUT_MS = 30_000;
+export const UNAUTHED_ERR_MSG = 'Please login (10001)';
+export const NOT_ADMIN_ERR_MSG = 'You do not have required permission (10002)';
 
-export const APP_LOGO =
-  import.meta.env.VITE_APP_LOGO ||
-  "https://placehold.co/128x128/E1E7EF/1F2937?text=App";
+// Use centralized configuration
+export const APP_TITLE = getAppTitle('ar');
+export const APP_LOGO = COMPANY_LOGO;
+
+// Re-export company info for easy access
+export {
+  COMPANY_NAME,
+  COMPANY_ARABIC_NAME,
+  COMPANY_ENGLISH_NAME,
+  COMPANY_SLOGAN,
+  COMPANY_PHONE,
+  COMPANY_EMAIL,
+  FACEBOOK_URL,
+  INSTAGRAM_URL,
+  TWITTER_URL,
+  LINKEDIN_URL,
+};
+
+// Re-export helper functions
+export {
+  getCompanyName,
+  getAppTitle,
+  getContactInfo,
+  getSocialMediaUrl,
+  getSocialMediaUrls,
+  getCompanySlogan,
+};
 
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
@@ -13,11 +60,16 @@ export const getLoginUrl = () => {
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
   const state = btoa(redirectUri);
 
-  const url = new URL(`${oauthPortalUrl}/app-auth`);
-  url.searchParams.set("appId", appId);
-  url.searchParams.set("redirectUri", redirectUri);
-  url.searchParams.set("state", state);
-  url.searchParams.set("type", "signIn");
+  const url = new URL(`${oauthPortalUrl}/oauth/app-auth`);
+  url.searchParams.set('appId', appId);
+  url.searchParams.set('redirectUri', redirectUri);
+  url.searchParams.set('state', state);
+  url.searchParams.set('type', 'signIn');
 
   return url.toString();
+};
+
+// Local authentication login URL
+export const getLocalLoginUrl = () => {
+  return '/admin-login';
 };

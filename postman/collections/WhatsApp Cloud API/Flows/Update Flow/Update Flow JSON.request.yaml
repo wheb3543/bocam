@@ -1,0 +1,21 @@
+$kind: http-request
+description: |-
+  Used to upload a flow JSON file with the flow content. Refer to flow JSON documentation here [https://developers.facebook.com/docs/whatsapp/flows/reference/flowjson](https://developers.facebook.com/docs/whatsapp/flows/reference/flowjson)
+
+  The file must be attached as from data. The response will include any validation errors in the JSON file
+url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}/assets
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src: []
+    - type: text
+      key: name
+      value: flow.json
+    - type: text
+      key: asset_type
+      value: FLOW_JSON
+examples: ./.resources/Update Flow JSON.resources/examples
+order: 1000

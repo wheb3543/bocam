@@ -1,0 +1,69 @@
+$kind: http-example
+name: 'Incoming Document Message'
+request:
+  url: '{{baseUrl}}/api/webhooks/whatsapp'
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: X-Hub-Signature-256
+      value: 'sha256=ghi789examplesignature'
+  body:
+    type: json
+    content: |-
+      {
+        "object": "whatsapp_business_account",
+        "entry": [
+          {
+            "id": "123456789",
+            "changes": [
+              {
+                "value": {
+                  "messaging_product": "whatsapp",
+                  "metadata": {
+                    "display_phone_number": "15550000001",
+                    "phone_number_id": "987654321"
+                  },
+                  "contacts": [
+                    {
+                      "profile": {
+                        "name": "Khalid Ibrahim"
+                      },
+                      "wa_id": "966500000003"
+                    }
+                  ],
+                  "messages": [
+                    {
+                      "from": "966500000003",
+                      "id": "wamid.HBgLNTU1MjEyMzQ1NjcVAgARGBIzRjQyNUE3NEYxMzAzMzQ1AA==",
+                      "timestamp": "1700000200",
+                      "type": "document",
+                      "document": {
+                        "caption": "Medical report",
+                        "filename": "medical_report.pdf",
+                        "mime_type": "application/pdf",
+                        "sha256": "examplesha256hashvalue",
+                        "id": "media_id_789012"
+                      }
+                    }
+                  ]
+                },
+                "field": "messages"
+              }
+            ]
+          }
+        ]
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Type
+      value: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true
+      }
+order: 3000

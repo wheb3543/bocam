@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Campaign Overview
+method: GET
+url: '{{baseUrl}}/api/trpc/campaigns.getOverview'
+order: 8000

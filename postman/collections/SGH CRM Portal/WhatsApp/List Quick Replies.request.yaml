@@ -1,0 +1,5 @@
+$kind: http-request
+name: List Quick Replies
+method: GET
+url: '{{baseUrl}}/api/trpc/whatsapp.quickReplies.list'
+order: 9000

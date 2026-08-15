@@ -1,202 +1,303 @@
-import { useFormatDate } from "@/hooks/useFormatDate";
-import { useState, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Users, Calendar, TrendingUp, UserCheck } from "lucide-react";
-import { useLocation } from "wouter";
+/**
+ * Notification Center Component
+ * مركز الإشعارات - يعرض جميع الإشعارات للمستخدم
+ */
 
-export default function NotificationCenter() {
-  const { formatDate, formatDateTime } = useFormatDate();
-  const [, setLocation] = useLocation();
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    campRegistrations: false,
-    appointments: false,
-    offerLeads: false,
-  });
+import { useState } from 'react';
+import {
+  Bell,
+  Check,
+  Trash2,
+  X,
+  AlertCircle,
+  Info,
+  CheckCircle,
+  AlertTriangle,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  useNotifications,
+  useUnreadCount,
+  useMarkAsRead,
+  useMarkAllAsRead,
+  useDeleteNotification,
+  useDeleteReadNotifications,
+} from '@/hooks/useNotifications';
+import { formatDistanceToNow } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
-  // Fetch all pending bookings
-  const { data: appointments } = trpc.appointments.list.useQuery();
-  const { data: offerLeads } = trpc.offerLeads.list.useQuery();
-  const { data: campRegistrations } = trpc.campRegistrations.list.useQuery();
+interface NotificationData {
+  id: number;
+  type:
+    | 'approval_requested'
+    | 'approval_approved'
+    | 'approval_rejected'
+    | 'content_updated'
+    | 'content_deleted'
+    | 'content_published'
+    | 'system';
+  title: string;
+  message: string;
+  isRead: 'yes' | 'no';
+  actionUrl: string | null;
+  actionLabel: string | null;
+  priority: 'low' | 'medium' | 'high';
+  createdAt: Date;
+}
 
-  // Get last 5 pending items for each type
-  const pendingItems = useMemo(() => {
-    const pendingAppointments = (appointments || [])
-      .filter(a => a.status === 'pending')
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 5);
-    
-    const pendingOfferLeads = (offerLeads || [])
-      .filter(o => o.status === 'new')
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 5);
-    
-    const pendingCampRegistrations = (campRegistrations || [])
-      .filter(c => c.status === 'pending')
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 5);
+/**
+ * الحصول على أيقونة حسب نوع الإشعار
+ */
+function getNotificationIcon(type: string) {
+  switch (type) {
+    case 'approval_requested':
+      return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+    case 'approval_approved':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'approval_rejected':
+      return <X className="h-4 w-4 text-red-500" />;
+    case 'content_updated':
+      return <Info className="h-4 w-4 text-blue-500" />;
+    case 'content_deleted':
+      return <Trash2 className="h-4 w-4 text-red-500" />;
+    case 'content_published':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'system':
+      return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+    default:
+      return <Bell className="h-4 w-4 text-gray-500" />;
+  }
+}
 
-    return {
-      appointments: pendingAppointments,
-      offerLeads: pendingOfferLeads,
-      campRegistrations: pendingCampRegistrations,
-    };
-  }, [appointments, offerLeads, campRegistrations]);
+/**
+ * الحصول على لون الأولوية
+ */
+function getPriorityColor(priority: string) {
+  switch (priority) {
+    case 'high':
+      return 'bg-red-500';
+    case 'medium':
+      return 'bg-yellow-500';
+    case 'low':
+      return 'bg-green-500';
+    default:
+      return 'bg-gray-500';
+  }
+}
 
-  // Count pending items
-  const counts = useMemo(() => ({
-    appointments: appointments?.filter(a => a.status === 'pending').length || 0,
-    offerLeads: offerLeads?.filter(o => o.status === 'new').length || 0,
-    campRegistrations: campRegistrations?.filter(c => c.status === 'pending').length || 0,
-  }), [appointments, offerLeads, campRegistrations]);
-
-  const totalCount = counts.appointments + counts.offerLeads + counts.campRegistrations;
-
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  const handleItemClick = (type: string) => {
-    // Navigate to bookings management page with the appropriate tab
-    setLocation(`/dashboard/bookings?tab=${type}`);
-  };
-
-  const sections = [
-    {
-      id: 'campRegistrations',
-      title: 'تسجيلات المخيمات',
-      count: counts.campRegistrations,
-      items: pendingItems.campRegistrations,
-      icon: UserCheck,
-      color: 'text-teal-600',
-      bgColor: 'bg-teal-50',
-      borderColor: 'border-teal-200',
-      type: 'campRegistrations',
-    },
-    {
-      id: 'appointments',
-      title: 'مواعيد الأطباء',
-      count: counts.appointments,
-      items: pendingItems.appointments,
-      icon: Calendar,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      type: 'appointments',
-    },
-    {
-      id: 'offerLeads',
-      title: 'حجوزات العروض',
-      count: counts.offerLeads,
-      items: pendingItems.offerLeads,
-      icon: TrendingUp,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200',
-      type: 'offerLeads',
-    },
-  ];
+/**
+ * Notification Item Component
+ */
+function NotificationItem({
+  notification,
+  onMarkAsRead,
+  onDelete,
+}: {
+  notification: NotificationData;
+  onMarkAsRead: (id: number) => void;
+  onDelete: (id: number) => void;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="space-y-3">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">طلبات قيد الانتظار</h2>
-        {totalCount > 0 && (
-          <Badge variant="destructive" className="text-sm">
-            {totalCount} إشعار
-          </Badge>
+    <div
+      className={cn(
+        'relative p-4 border-b last:border-b-0 transition-colors',
+        notification.isRead === 'no' ? 'bg-muted/50' : 'bg-background',
+        'hover:bg-muted/80'
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 mt-1">{getNotificationIcon(notification.type)}</div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <p
+              className={cn(
+                'text-sm font-medium',
+                notification.isRead === 'no' ? 'text-foreground' : 'text-muted-foreground'
+              )}
+            >
+              {notification.title}
+            </p>
+            {notification.priority === 'high' && (
+              <div
+                className={cn('w-2 h-2 rounded-full', getPriorityColor(notification.priority))}
+              />
+            )}
+          </div>
+
+          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{notification.message}</p>
+
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>
+              {formatDistanceToNow(new Date(notification.createdAt), {
+                addSuffix: true,
+                locale: ar,
+              })}
+            </span>
+            {notification.actionUrl && notification.actionLabel && (
+              <a
+                href={notification.actionUrl}
+                className="text-primary hover:underline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMarkAsRead(notification.id);
+                }}
+              >
+                {notification.actionLabel}
+              </a>
+            )}
+          </div>
+        </div>
+
+        {isHovered && (
+          <div className="flex items-center gap-1">
+            {notification.isRead === 'no' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onMarkAsRead(notification.id)}
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              onClick={() => onDelete(notification.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         )}
       </div>
-
-      {/* Notification Sections */}
-      {totalCount === 0 ? (
-        <Card>
-          <CardContent className="p-6 text-center text-muted-foreground">
-            <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-            <p>لا توجد طلبات قيد الانتظار</p>
-            <p className="text-sm mt-1">جميع الحجوزات محدثة</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-2">
-          {sections.map((section) => {
-            const Icon = section.icon;
-            const isExpanded = expandedSections[section.id];
-            
-            if (section.count === 0) return null;
-
-            return (
-              <Card 
-                key={section.id}
-                className={`border-2 ${section.borderColor} ${section.bgColor} transition-all`}
-              >
-                <CardContent className="p-0">
-                  {/* Section Header */}
-                  <button
-                    onClick={() => toggleSection(section.id)}
-                    className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 ${section.bgColor} rounded-full flex items-center justify-center border-2 ${section.borderColor}`}>
-                        <Icon className={`h-5 w-5 ${section.color}`} />
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{section.title}</p>
-                        <p className="text-sm text-muted-foreground">
-                          هناك {section.count} {section.count === 1 ? 'طلب' : 'طلبات'} قيد الانتظار
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="destructive" className="font-bold">
-                        {section.count}
-                      </Badge>
-                      {isExpanded ? (
-                        <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Expanded Content - Show last 5 requests */}
-                  {isExpanded && (
-                    <div className="border-t bg-white dark:bg-card">
-                      {section.items.length > 0 ? (
-                        <div className="divide-y">
-                          {section.items.map((item: any, index: number) => (
-                            <button
-                              key={index}
-                              onClick={() => handleItemClick(section.type)}
-                              className="w-full p-3 text-right hover:bg-muted/50 transition-colors flex items-center justify-between group"
-                            >
-                              <span className="font-medium group-hover:text-primary transition-colors">
-                                {item.fullName || item.name}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatDate(item.createdAt)}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="p-4 text-center text-sm text-muted-foreground">
-                          لا توجد طلبات
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
     </div>
+  );
+}
+
+/**
+ * Notification Center Component
+ */
+export function NotificationCenter() {
+  const [isOpen, setIsOpen] = useState(false);
+  const { data: notificationsData } = useNotifications({ limit: 20 });
+  const { data: unreadCount } = useUnreadCount();
+  const markAsRead = useMarkAsRead();
+  const markAllAsRead = useMarkAllAsRead();
+  const deleteNotification = useDeleteNotification();
+  const deleteReadNotifications = useDeleteReadNotifications();
+
+  const notifications = notificationsData?.data || [];
+
+  const handleMarkAsRead = (id: number) => {
+    markAsRead.mutate({ id });
+  };
+
+  const handleDelete = (id: number) => {
+    deleteNotification.mutate({ id });
+  };
+
+  const handleMarkAllAsRead = () => {
+    markAllAsRead.mutate();
+  };
+
+  const handleDeleteRead = () => {
+    deleteReadNotifications.mutate();
+  };
+
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
+          {unreadCount && unreadCount > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end" className="w-96 p-0">
+        <DropdownMenuLabel className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold">الإشعارات</span>
+            <div className="flex items-center gap-2">
+              {unreadCount && unreadCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleMarkAllAsRead}
+                  disabled={markAllAsRead.isPending}
+                >
+                  <Check className="h-4 w-4 mr-1" />
+                  تحديد الكل كمقروء
+                </Button>
+              )}
+              {notifications.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDeleteRead}
+                  disabled={deleteReadNotifications.isPending}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  حذف المقروءة
+                </Button>
+              )}
+            </div>
+          </div>
+        </DropdownMenuLabel>
+
+        <DropdownMenuSeparator />
+
+        <ScrollArea className="h-96">
+          {notifications.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>لا توجد إشعارات</p>
+            </div>
+          ) : (
+            notifications.map((notification) => (
+              <NotificationItem
+                key={notification.id}
+                notification={notification}
+                onMarkAsRead={handleMarkAsRead}
+                onDelete={handleDelete}
+              />
+            ))
+          )}
+        </ScrollArea>
+
+        {notifications.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <div className="p-2">
+              <Button variant="ghost" size="sm" className="w-full" onClick={() => setIsOpen(false)}>
+                عرض جميع الإشعارات
+              </Button>
+            </div>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

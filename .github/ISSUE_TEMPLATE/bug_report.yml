@@ -1,0 +1,71 @@
+name: "🐛 تقرير عن خطأ (Bug Report)"
+description: "الإبلاغ عن خلل أو مشكلة تقنية في نظام BOCAM CRM"
+title: "[BUG]: "
+labels: ["bug", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        شكرًا لك على رغبتك في الإبلاغ عن مشكلة في نظام BOCAM CRM! يرجى ملء هذا النموذج لمساعدتنا في تشخيص المشكلة وإصلاحها بأسرع وقت ممكن.
+  - type: dropdown
+    id: module
+    attributes:
+      label: "📁 الوحدة المتأثرة (Affected Module)"
+      description: "ما هو القسم أو الموديول الذي واجهت فيه المشكلة؟"
+      options:
+        - "💬 تكامل واتساب (WhatsApp Integration)"
+        - "📅 المواعيد والحجوزات (Appointments & Bookings)"
+        - "👥 إدارة العملاء والمهام (Leads & Tasks)"
+        - "📱 بوابة المريض (Patient Portal)"
+        - "📊 التقارير والإحصائيات (Reports & Analytics)"
+        - "🔐 نظام الترخيص والأمان (License & Security)"
+        - "🛠️ قاعدة البيانات والـ Migrations"
+        - "⚙️ الإعدادات العامة وخادم الويب"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "📝 وصف المشكلة (Description)"
+      description: "اشرح المشكلة بوضوح واختصار."
+      placeholder: "ماذا حدث؟ وكيف تؤثر المشكلة على تجربة الاستخدام؟"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "👣 خطوات إعادة إنتاج المشكلة (Steps to Reproduce)"
+      description: "ما هي الخطوات الدقيقة التي قمت بها لتظهر هذه المشكلة؟"
+      placeholder: |
+        1. انتقل إلى صفحة '...'
+        2. اضغط على زر '...'
+        3. أدخل البيانات التالية '...'
+        4. شاهد الخطأ يظهر...
+    validations:
+      required: true
+  - type: textarea
+    id: expected-actual
+    attributes:
+      label: "🎯 السلوك المتوقع مقارنة بالفعلي"
+      description: "ما الذي كان ينبغي حدوثه؟ وما الذي حدث بالفعل؟"
+      placeholder: |
+        السلوك المتوقع: ينبغي إرسال رسالة واتساب بنجاح وتحديث الحالة إلى 'مكتمل'.
+        السلوك الفعلي: يفشل الإرسال وتظهر رسالة خطأ في الـ Webhook.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: "📋 سجلات الأخطاء أو البيانات البرمجية (Logs / Stack Trace)"
+      description: "انسخ هنا أي سجلات أخطاء من متصفح الويب (Console) أو السيرفر إذا كانت متوفرة."
+      render: bash
+      placeholder: "مثال: Error: Connection refused at..."
+  - type: input
+    id: environment
+    attributes:
+      label: "💻 بيئة التشغيل (Environment Details)"
+      description: "مثال: Chrome v120, Node.js v22.13, macOS, MySQL 8.0"
+      placeholder: "Browser, OS, Node Version, etc."
+    validations:
+      required: false

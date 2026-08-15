@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'Submit Offer Lead (Public)'
+method: POST
+url: '{{baseUrl}}/api/trpc/offerLeads.submit'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"offerId":1,"fullName":"فاطمة أحمد","phone":"771234567","gender":"female"}}

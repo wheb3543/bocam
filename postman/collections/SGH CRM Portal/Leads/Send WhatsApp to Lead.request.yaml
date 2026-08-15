@@ -1,0 +1,12 @@
+$kind: http-request
+name: Send WhatsApp to Lead
+method: POST
+url: '{{baseUrl}}/api/trpc/leads.sendWhatsApp'
+order: 10000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"leadId":1,"message":"مرحباً"}}

@@ -7,16 +7,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+} from '@/components/ui/alert-dialog';
+import { Loader2 } from 'lucide-react';
 
 /**
  * ConfirmDeleteDialog - مكون حوار تأكيد الحذف الموحد
  * يمنع تكرار كود حوار التأكيد في كل صفحة
- * 
+ *
  * الاستخدام:
  * const deleteConfirm = useConfirmDialog<Offer>();
- * 
+ *
  * <ConfirmDeleteDialog
  *   open={deleteConfirm.isOpen}
  *   onOpenChange={deleteConfirm.closeConfirm}
@@ -38,28 +38,28 @@ interface ConfirmDeleteDialogProps {
   isLoading?: boolean;
   confirmText?: string;
   cancelText?: string;
-  variant?: "destructive" | "warning";
+  variant?: 'destructive' | 'warning';
 }
 
 export function ConfirmDeleteDialog({
   open,
   onOpenChange,
   itemName,
-  itemType = "العنصر",
+  itemType = 'العنصر',
   title,
   description,
   onConfirm,
   isLoading = false,
-  confirmText = "حذف",
-  cancelText = "إلغاء",
-  variant = "destructive",
+  confirmText = 'حذف',
+  cancelText = 'إلغاء',
+  variant = 'destructive',
 }: ConfirmDeleteDialogProps) {
-  const dialogTitle = title || "تأكيد الحذف";
-  const dialogDescription = description || (
-    itemName
+  const dialogTitle = title || 'تأكيد الحذف';
+  const dialogDescription =
+    description ||
+    (itemName
       ? `هل أنت متأكد من حذف ${itemType} "${itemName}"؟ لا يمكن التراجع عن هذا الإجراء.`
-      : `هل أنت متأكد من حذف هذا ${itemType}؟ لا يمكن التراجع عن هذا الإجراء.`
-  );
+      : `هل أنت متأكد من حذف هذا ${itemType}؟ لا يمكن التراجع عن هذا الإجراء.`);
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -76,7 +76,11 @@ export function ConfirmDeleteDialog({
               onConfirm();
             }}
             disabled={isLoading}
-            className={variant === "destructive" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+            className={
+              variant === 'destructive'
+                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                : ''
+            }
           >
             {isLoading ? (
               <>

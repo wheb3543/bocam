@@ -1,0 +1,27 @@
+$kind: http-request
+description: |-
+  To send a reply to an image message, make a **POST** call to **`/{{Phone-Number-ID}}/messages`** and attach a message object with type = `image`. Then add a corresponding `image object`.
+
+  Send an image message to your customers using link or media ID uploaded from media endpoint.
+
+  ## Response
+
+  A successful response includes an object with an identifier prefixed with **`wamid`**. Use the ID listed after **`wamid`** to track your message status.
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": "{{Recipient-Phone-Number}}",
+        "type": "image",
+        "image": {
+            "id": "<IMAGE_OBJECT_ID>"
+        }
+    }
+examples: ./.resources/Send Image Message by ID.resources/examples
+order: 6000

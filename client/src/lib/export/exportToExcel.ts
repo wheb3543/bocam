@@ -1,0 +1,147 @@
+/**
+ * تصدير البيانات إلى Excel
+ * يستخدم dynamic import لتأجيل تحميل exceljs حتى الحاجة الفعلية
+ */
+export async function exportToExcel(
+  data: Record<string, unknown>[],
+  filename: string,
+  sheetName: string = 'Sheet1'
+) {
+  // Dynamic import - يُحمَّل فقط عند الضغط على زر التصدير
+  const ExcelJS = await import('exceljs');
+
+  // Create a new workbook
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'BOCAM CRM';
+  workbook.created = new Date();
+
+  // Create worksheet
+  const worksheet = workbook.addWorksheet(sheetName);
+
+  // Add headers
+  if (data.length > 0) {
+    const headers = Object.keys(data[0]);
+    worksheet.addRow(headers);
+
+    // Style header row
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF3498DB' },
+    };
+    headerRow.eachCell((cell) => {
+      cell.alignment = { horizontal: 'center' };
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    });
+
+    // Add data
+    data.forEach((row) => {
+      worksheet.addRow(headers.map((header) => row[header] || ''));
+    });
+
+    // Auto-fit columns
+    headers.forEach((_, index) => {
+      worksheet.getColumn(index + 1).width = 20;
+    });
+  }
+
+  // Generate file and trigger download
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${filename}.xlsx`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+export function formatLeadsForExport(leads: Record<string, unknown>[]) {
+  return leads.map((lead) => ({
+    'الاسم الكامل': lead.fullName as string,
+    'رقم الهاتف': lead.phone as string,
+    'البريد الإلكتروني': (lead.email as string | null) || '-',
+    الحالة: getStatusLabel(lead.status as string),
+    المصدر: (lead.source as string | null) || '-',
+    'تاريخ التسجيل': new Date(lead.createdAt as Date | string).toLocaleDateString('ar-SA'),
+    ملاحظات: (lead.notes as string | null) || '-',
+  }));
+}
+
+export function formatAppointmentsForExport(appointments: Record<string, unknown>[]) {
+  return appointments.map((apt) => ({
+    'الاسم الكامل': apt.fullName as string,
+    'رقم الهاتف': apt.phone as string,
+    'البريد الإلكتروني': (apt.email as string | null) || '-',
+    الطبيب: (apt.doctorName as string | null) || `طبيب #${apt.doctorId as number}`,
+    التخصص: (apt.doctorSpecialty as string | null) || '-',
+    'التاريخ المفضل': (apt.preferredDate as string | null) || '-',
+    'الوقت المفضل': (apt.preferredTime as string | null) || '-',
+    الحالة: getAppointmentStatusLabel(apt.status as string),
+    'تاريخ التسجيل': new Date(apt.createdAt as Date | string).toLocaleDateString('ar-SA'),
+    ملاحظات: (apt.notes as string | null) || '-',
+  }));
+}
+
+export function formatOfferLeadsForExport(offerLeads: Record<string, unknown>[]) {
+  return offerLeads.map((lead) => ({
+    'الاسم الكامل': lead.fullName as string,
+    'رقم الهاتف': lead.phone as string,
+    'البريد الإلكتروني': (lead.email as string | null) || '-',
+    العرض: (lead.offerTitle as string | null) || 'غير محدد',
+    الحالة: getStatusLabel(lead.status as string),
+    المصدر: (lead.source as string | null) || '-',
+    'تاريخ التسجيل': new Date(lead.createdAt as Date | string).toLocaleDateString('ar-SA'),
+    ملاحظات: (lead.notes as string | null) || '-',
+  }));
+}
+
+export function formatCampRegistrationsForExport(registrations: Record<string, unknown>[]) {
+  return registrations.map((reg) => ({
+    'الاسم الكامل': reg.fullName as string,
+    'رقم الهاتف': reg.phone as string,
+    'البريد الإلكتروني': (reg.email as string | null) || '-',
+    المخيم: (reg.campTitle as string | null) || 'غير محدد',
+    العمر: (reg.age as number | null) || '-',
+    'الحالة الطبية': (reg.medicalCondition as string | null) || '-',
+    الحالة: getCampStatusLabel(reg.status as string),
+    المصدر: (reg.source as string | null) || '-',
+    'تاريخ التسجيل': new Date(reg.createdAt as Date | string).toLocaleDateString('ar-SA'),
+    ملاحظات: (reg.notes as string | null) || '-',
+  }));
+}
+
+function getStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    new: 'جديد',
+    contacted: 'تم التواصل',
+    booked: 'تم الحجز',
+    not_interested: 'غير مهتم',
+    no_answer: 'لم يرد',
+  };
+  return labels[status] || status;
+}
+
+function getAppointmentStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    pending: 'قيد الانتظار',
+    confirmed: 'مؤكد',
+    cancelled: 'ملغي',
+    completed: 'مكتمل',
+  };
+  return labels[status] || status;
+}
+
+function getCampStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    pending: 'قيد الانتظار',
+    confirmed: 'مؤكد',
+    attended: 'حضر',
+    cancelled: 'ملغي',
+  };
+  return labels[status] || status;
+}

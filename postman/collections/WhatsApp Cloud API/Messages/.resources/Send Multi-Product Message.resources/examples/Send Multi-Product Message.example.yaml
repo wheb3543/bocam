@@ -1,0 +1,79 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+  method: POST
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer {{User-Access-Token}}
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "recipient_type": "individual",
+          "to": "{{Recipient-Phone-Number}}",
+          "type": "interactive",
+          "interactive": {
+              "type": "product_list",
+              "header": {
+                  "type": "<HEADER_TYPE>",
+                  "text": "<YOUR_TEXT_HEADER_CONTENT>"
+              },
+              "body": {
+                  "text": "<YOUR_TEXT_BODY_CONTENT>"
+              },
+              "footer": {
+                  "text": "<YOUR_TEXT_FOOTER_CONTENT>"
+              },
+              "action": {
+                  "catalog_id": "146265584024623",
+                  "sections": [
+                      {
+                          "title": "<SECTION1_TITLE>",
+                          "product_items": [
+                              {
+                                  "product_retailer_id": "<YOUR_PRODUCT1_SKU_IN_CATALOG>"
+                              },
+                              {
+                                  "product_retailer_id": "<YOUR_SECOND_PRODUCT1_SKU_IN_CATALOG>"
+                              }
+                          ]
+                      },
+                      {
+                          "title": "<SECTION2_TITLE>",
+                          "product_items": [
+                              {
+                                  "product_retailer_id": "<YOUR_PRODUCT2_SKU_IN_CATALOG>"
+                              },
+                              {
+                                  "product_retailer_id": "<YOUR_SECOND_PRODUCT2_SKU_IN_CATALOG>"
+                              }
+                          ]
+                      }
+                  ]
+              }
+          }
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "messaging_product": "whatsapp",
+          "contacts": [
+              {
+                  "input": "+1-631-555-5555",
+                  "wa_id": "16315555555"
+              }
+          ],
+          "messages": [
+              {
+                  "id": "wamid.gBGGFlaCGg0xcvAdgmZ9plHrf2Mh-o"
+              }
+          ]
+      }
+order: 1000

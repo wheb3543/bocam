@@ -1,0 +1,42 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}?fields=metric.name(ENDPOINT_REQUEST_COUNT).granularity(DAY).since(2024-01-28).until(2024-01-30)
+  method: GET
+  queryParams:
+    - key: fields
+      value: metric.name(ENDPOINT_REQUEST_COUNT).granularity(DAY).since(2024-01-28).until(2024-01-30)
+      description: Return specific fields in the response
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: json
+    content: |-
+      {
+          "id": "flow-1",
+          "metric": {
+              "granularity": "DAY",
+              "name": "ENDPOINT_REQUEST_COUNT",
+              "data_points": [
+                  {
+                      "timestamp": "2024-01-28T08:00:00+0000",
+                      "data": [
+                          {
+                              "key": "value",
+                              "value": 138
+                          }
+                      ]
+                  },
+                  {
+                      "timestamp": "2024-01-29T08:00:00+0000",
+                      "data": [
+                          {
+                              "key": "value",
+                              "value": 361
+                          }
+                      ]
+                  }
+              ]
+          }
+      }
+order: 1000

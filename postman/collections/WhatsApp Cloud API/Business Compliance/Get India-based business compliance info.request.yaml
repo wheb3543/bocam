@@ -1,0 +1,5 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/business_compliance_info
+method: GET
+examples: ./.resources/Get India-based business compliance info.resources/examples
+order: 1000

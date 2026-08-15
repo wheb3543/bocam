@@ -1,142 +1,119 @@
-# سياسة الأمان | Security Policy
+# Security Policy
 
-## الإصدارات المدعومة | Supported Versions
+## Supported Versions
 
-نحن نقدم تحديثات الأمان للإصدارات التالية:
+| Version | Supported          |
+| ------- | ------------------ |
+| 1.0.0   | :white_check_mark: |
 
-We currently provide security updates for the following versions:
+## Reporting a Vulnerability
 
-| النسخة | Version | مدعومة | Supported          |
-| ------ | ------- | ------ | ------------------ |
-| 1.0.x  | 1.0.x   | ✅     | :white_check_mark: |
+If you discover a security vulnerability in this project, please report it responsibly.
 
-## الإبلاغ عن ثغرة أمنية | Reporting a Vulnerability
+### How to Report
 
-إذا اكتشفت ثغرة أمنية، يرجى عدم الإبلاغ عنها علناً. بدلاً من ذلك، يرجى إرسال بريد إلكتروني إلى:
+1. **Email**: Send an email to security@sgh-portal.com
+2. **Subject**: Use the prefix `[SECURITY]` in your email subject
+3. **Details**: Include as much detail as possible about the vulnerability
 
-If you discover a security vulnerability, please do not report it publicly. Instead, please email:
+### What to Include
 
-**البريد الإلكتروني | Email:** abood22828@gmail.com
+- Description of the vulnerability
+- Steps to reproduce the issue
+- Potential impact
+- Suggested fix (if available)
 
-### ما يجب تضمينه | What to Include
+### Response Timeline
 
-عند الإبلاغ عن ثغرة أمنية، يرجى تضمين:
+- **Initial Response**: Within 48 hours
+- **Investigation**: Within 7 business days
+- **Resolution**: Based on severity and complexity
 
-When reporting a vulnerability, please include:
+### Security Best Practices
 
-1. **الوصف | Description**
-   - وصف مفصل للثغرة
-   - Detailed description of the vulnerability
+#### For Developers
 
-2. **خطوات إعادة الإنتاج | Steps to Reproduce**
-   - خطوات واضحة لإعادة إنتاج المشكلة
-   - Clear steps to reproduce the issue
+- Never commit secrets or API keys to the repository
+- Use environment variables for sensitive data
+- Keep dependencies updated
+- Follow the principle of least privilege
+- Implement proper input validation and sanitization
+- Use HTTPS for all communications
+- Implement rate limiting on public endpoints
+- Regular security audits and penetration testing
 
-3. **التأثير المحتمل | Potential Impact**
-   - ما هو التأثير المحتمل لهذه الثغرة؟
-   - What is the potential impact of this vulnerability?
+#### For Users
 
-4. **الإصدار المتأثر | Affected Version**
-   - ما هو إصدار النظام المتأثر؟
-   - Which version of the system is affected?
+- Use strong, unique passwords
+- Enable two-factor authentication when available
+- Keep your software updated
+- Be cautious of phishing attempts
+- Report suspicious activity immediately
 
-5. **الحل المقترح | Suggested Fix**
-   - إذا كان لديك اقتراح للحل (اختياري)
-   - If you have a suggested fix (optional)
+## Security Features
 
-### ما يمكن توقعه | What to Expect
+### Implemented
 
-- **الاستجابة الأولية | Initial Response:** سنرد خلال 48 ساعة | We will respond within 48 hours
-- **التحديثات | Updates:** سنبقيك على اطلاع بالتقدم | We will keep you updated on progress
-- **الإصلاح | Fix:** سنعمل على إصلاح الثغرة في أقرب وقت ممكن | We will work to fix the vulnerability as soon as possible
-- **الإفصاح | Disclosure:** سنقوم بالإفصاح المنسق معك | We will coordinate disclosure with you
+- **Authentication**: OAuth 2.0 with JWT tokens
+- **Authorization**: Role-based access control (RBAC)
+- **Data Encryption**: TLS/SSL for data in transit
+- **Input Validation**: Zod schemas for type-safe validation
+- **Rate Limiting**: Express rate limiting middleware
+- **Security Headers**: Helmet.js for security headers
+- **SQL Injection Prevention**: Drizzle ORM with parameterized queries
+- **XSS Protection**: Content Security Policy (CSP)
+- **CSRF Protection**: Token-based CSRF protection
 
-## أفضل الممارسات الأمنية | Security Best Practices
+### Planned
 
-### للمطورين | For Developers
+- [ ] Two-factor authentication (2FA)
+- [ ] Security audit logging
+- [ ] Automated security scanning in CI/CD
+- [ ] Dependency vulnerability scanning
+- [ ] Session timeout configuration
+- [ ] IP whitelisting for admin access
 
-1. **لا تقم بتضمين بيانات حساسة في الكود | Don't commit sensitive data**
-   - لا تضع مفاتيح API أو كلمات المرور في الكود
-   - Don't put API keys or passwords in code
-   - استخدم متغيرات البيئة
-   - Use environment variables
+## Dependency Management
 
-2. **حافظ على تحديث الحزم | Keep packages updated**
-   - قم بتحديث الحزم بانتظام
-   - Update packages regularly
-   - راقب الثغرات الأمنية
-   - Monitor for security vulnerabilities
+### Regular Updates
 
-3. **راجع الكود | Review code**
-   - راجع جميع Pull Requests بعناية
-   - Review all Pull Requests carefully
-   - استخدم أدوات فحص الأمان
-   - Use security scanning tools
+- Dependencies are updated regularly
+- Security patches are applied immediately
+- Automated dependency scanning is planned
 
-### للمستخدمين | For Users
+### Vulnerability Scanning
 
-1. **استخدم كلمات مرور قوية | Use strong passwords**
-   - استخدم كلمات مرور فريدة وقوية
-   - Use unique and strong passwords
-   - فعّل المصادقة الثنائية إذا كانت متاحة
-   - Enable two-factor authentication if available
+- Use `npm audit` to check for vulnerabilities
+- Review security advisories regularly
+- Monitor Common Vulnerabilities and Exposures (CVE)
 
-2. **حافظ على تحديث النظام | Keep system updated**
-   - قم بتحديث النظام إلى أحدث إصدار
-   - Update to the latest version
-   - راقب الإشعارات الأمنية
-   - Monitor security notifications
+## Incident Response
 
-3. **كن حذراً | Be cautious**
-   - لا تشارك بيانات الدخول
-   - Don't share login credentials
-   - راجع الأذونات بانتظام
-   - Review permissions regularly
+### Severity Levels
 
-## الثغرات المعروفة | Known Vulnerabilities
+- **Critical**: Immediate action required (within 24 hours)
+- **High**: Action required within 48 hours
+- **Medium**: Action required within 7 days
+- **Low**: Action required in next release cycle
 
-لا توجد ثغرات أمنية معروفة حالياً.
+### Incident Response Plan
 
-There are currently no known security vulnerabilities.
+1. **Identification**: Detect and confirm the incident
+2. **Containment**: Limit the impact of the incident
+3. **Eradication**: Remove the threat
+4. **Recovery**: Restore normal operations
+5. **Lessons Learned**: Document and improve processes
 
-## سجل الأمان | Security Changelog
+## Legal and Compliance
 
-### 2025-01-06
-- ✅ تنفيذ OAuth للمصادقة الآمنة | Implemented OAuth for secure authentication
-- ✅ إضافة نظام الصلاحيات | Added permission system
-- ✅ تشفير البيانات الحساسة | Encrypted sensitive data
-- ✅ حماية CSRF | CSRF protection
-- ✅ اتصالات HTTPS | HTTPS connections
+This project follows:
 
-## الامتثال | Compliance
+- GDPR (General Data Protection Regulation)
+- HIPAA (Health Insurance Portability and Accountability Act) where applicable
+- Local data protection laws
 
-هذا المشروع يلتزم بـ:
+## Contact
 
-This project complies with:
-
-- ✅ OWASP Top 10 Security Risks
-- ✅ GDPR (General Data Protection Regulation)
-- ✅ Best practices for healthcare data security
-
-## الاتصال | Contact
-
-للاستفسارات الأمنية العامة:
-
-For general security inquiries:
-
-- **البريد الإلكتروني | Email:** abood22828@gmail.com
-- **GitHub Issues:** [إنشاء issue](https://github.com/abood22828/sgh-crm-portal/issues) (للمشاكل غير الحساسة فقط | for non-sensitive issues only)
-
-## الشكر | Acknowledgments
-
-نشكر جميع الباحثين الأمنيين الذين يساعدون في تحسين أمان هذا المشروع.
-
-We thank all security researchers who help improve the security of this project.
-
----
-
-<div align="center">
-
-**الأمان أولوية | Security is a Priority**
-
-</div>
+For security-related inquiries:
+- **Email**: security@sgh-portal.com
+- **GitHub Security**: Use GitHub's private vulnerability reporting feature

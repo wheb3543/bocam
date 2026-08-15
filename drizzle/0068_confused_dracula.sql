@@ -1,0 +1,25 @@
+CREATE INDEX `images_section_idx` ON `images` (`section`);--> statement-breakpoint
+CREATE INDEX `images_sectionId_idx` ON `images` (`sectionId`);--> statement-breakpoint
+CREATE INDEX `images_pageId_idx` ON `images` (`pageId`);--> statement-breakpoint
+CREATE INDEX `images_isActive_idx` ON `images` (`isActive`);--> statement-breakpoint
+CREATE INDEX `images_pageSection_idx` ON `images` (`pageId`,`section`);--> statement-breakpoint
+CREATE INDEX `pages_slug_idx` ON `pages` (`slug`);--> statement-breakpoint
+CREATE INDEX `pages_type_idx` ON `pages` (`type`);--> statement-breakpoint
+CREATE INDEX `pages_parentId_idx` ON `pages` (`parentId`);--> statement-breakpoint
+CREATE INDEX `pages_isActive_idx` ON `pages` (`isActive`);--> statement-breakpoint
+CREATE INDEX `pages_sortOrder_idx` ON `pages` (`sortOrder`);--> statement-breakpoint
+CREATE INDEX `pages_typeParent_idx` ON `pages` (`type`,`parentId`);--> statement-breakpoint
+CREATE INDEX `sections_pageId_idx` ON `sections` (`pageId`);--> statement-breakpoint
+CREATE INDEX `sections_type_idx` ON `sections` (`type`);--> statement-breakpoint
+CREATE INDEX `sections_isActive_idx` ON `sections` (`isActive`);--> statement-breakpoint
+CREATE INDEX `sections_sortOrder_idx` ON `sections` (`sortOrder`);--> statement-breakpoint
+CREATE INDEX `sections_pageType_idx` ON `sections` (`pageId`,`type`);--> statement-breakpoint
+CREATE INDEX `sections_pageActive_idx` ON `sections` (`pageId`,`isActive`);--> statement-breakpoint
+CREATE INDEX `textContent_language_idx` ON `textContent` (`language`);--> statement-breakpoint
+CREATE INDEX `textContent_section_idx` ON `textContent` (`section`);--> statement-breakpoint
+CREATE INDEX `textContent_sectionId_idx` ON `textContent` (`sectionId`);--> statement-breakpoint
+CREATE INDEX `textContent_pageId_idx` ON `textContent` (`pageId`);--> statement-breakpoint
+CREATE INDEX `textContent_type_idx` ON `textContent` (`type`);--> statement-breakpoint
+CREATE INDEX `textContent_isActive_idx` ON `textContent` (`isActive`);--> statement-breakpoint
+CREATE INDEX `textContent_pageLanguage_idx` ON `textContent` (`pageId`,`language`);--> statement-breakpoint
+CREATE INDEX `textContent_sectionLanguage_idx` ON `textContent` (`section`,`language`);

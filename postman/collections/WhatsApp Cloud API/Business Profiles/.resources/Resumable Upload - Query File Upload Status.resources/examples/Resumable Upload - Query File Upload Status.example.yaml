@@ -1,0 +1,18 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Upload-ID}}
+  method: GET
+  headers:
+    Cache-Control: no-cache
+    Authorization: OAuth {{User-Access-Token}}
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: json
+    content: |-
+      { 
+          "id": "upload:MTphdHRhY2htZW50Ojlk2mJiZxUwLWV6MDUtNDIwMy05yTA3LWQ4ZDPmZGFkNTM0NT8=?sig=ARZqkGCA_uQMxC8nHKI", 
+          "file_offset": 0 
+      }
+order: 1000

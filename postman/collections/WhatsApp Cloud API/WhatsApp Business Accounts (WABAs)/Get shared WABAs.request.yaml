@@ -1,0 +1,5 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{Business-ID}}/client_whatsapp_business_accounts
+method: GET
+examples: ./.resources/Get shared WABAs.resources/examples
+order: 3000

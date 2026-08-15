@@ -1,0 +1,8 @@
+$kind: collection
+description: |-
+  To complete the following API calls, you need to get a business profile ID. To do that, make a **GET** call to the **`/{{Phone-Number-ID}}`** endpoint and add `business_profile` as a URL field. Within the **`business_profile`** request, you can specify what you want to know from your business.
+
+  #### Reminders
+
+  * To use this endpoint, you need to authenticate yourself with a system user access token with the **`whatsapp_business_management`** permission.
+order: 11000

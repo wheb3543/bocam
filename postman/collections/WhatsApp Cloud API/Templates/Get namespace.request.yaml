@@ -1,0 +1,11 @@
+$kind: http-request
+description: |-
+  - Guide: [Message Templates](https://developers.facebook.com/docs/whatsapp/business-management-api/message-templates)
+  - Guide: [How To Monitor Quality Signals](https://developers.facebook.com/docs/whatsapp/guides/how-to-monitor-quality-signals)
+  - Endpoint reference: [WhatsApp Business Account > Message Templates](https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account/message_templates/)
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}?fields=message_template_namespace
+method: GET
+queryParams:
+  fields: message_template_namespace
+examples: ./.resources/Get namespace.resources/examples
+order: 4000

@@ -1,0 +1,5 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/flows
+method: GET
+examples: ./.resources/List Flows.resources/examples
+order: 5000

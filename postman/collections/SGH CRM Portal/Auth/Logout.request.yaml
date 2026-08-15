@@ -1,0 +1,12 @@
+$kind: http-request
+name: Logout
+method: POST
+url: '{{baseUrl}}/api/trpc/auth.logout'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{}}

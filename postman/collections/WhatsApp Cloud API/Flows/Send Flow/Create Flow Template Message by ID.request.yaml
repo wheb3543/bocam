@@ -1,0 +1,31 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/message_templates
+method: POST
+body:
+  type: json
+  content: |
+    {
+        "name": "<TEMPLATE_NAME>",
+        "language": "en_US",
+        "category": "MARKETING",
+        "components": [
+            {
+                "type": "body",
+                "text": "Check out this new offer"
+            },
+            {
+                "type": "BUTTONS",
+                "buttons": [
+                    {
+                        "type": "FLOW",
+                        "text": "Check out this offer!",
+                        "flow_id": "{{Flow-ID}}",
+                        "navigate_screen": "<SCREEN_ID>",
+                        "flow_action": "navigate"
+                    }
+                ]
+            }
+        ]
+    }
+examples: ./.resources/Create Flow Template Message by ID.resources/examples
+order: 7000

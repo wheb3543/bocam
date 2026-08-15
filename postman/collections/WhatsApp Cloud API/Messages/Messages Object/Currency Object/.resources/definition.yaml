@@ -1,0 +1,12 @@
+$kind: collection
+description: |-
+  The `Currency Object` contains the following fields:
+
+  #### Fields
+
+  | Name                 | Description              |
+  |----------------------|--------------------------|
+  | **`fallback_value`** |**Required**. <br/> The default text if localization fails. <br/> |
+  | **`code`**           |**Required**. <br/> The currency code as defined in [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217#Active_codes). <br/> |
+  | **`amount_1000`**           |**Required**. <br/> The amount multiplied by 1000. <br/> |
+order: 8000

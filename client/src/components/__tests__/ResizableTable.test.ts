@@ -1,5 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+interface TableTemplate {
+  id: string;
+  name: string;
+  columns: Record<string, boolean>;
+  columnOrder: string[];
+  columnWidths?: Record<string, number>;
+  isDefault: boolean;
+  [key: string]: unknown;
+}
+
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
@@ -81,7 +91,7 @@ function getColumnWidth(key: string, config?: ColumnConfig): { width: number; mi
 // Test COLUMN_WIDTH_PRESETS
 describe('COLUMN_WIDTH_PRESETS', () => {
   it('should have correct structure for all presets', () => {
-    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([key, preset]) => {
+    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([_key, preset]) => {
       expect(preset).toHaveProperty('width');
       expect(preset).toHaveProperty('min');
       expect(preset).toHaveProperty('max');
@@ -92,13 +102,13 @@ describe('COLUMN_WIDTH_PRESETS', () => {
   });
 
   it('should have reasonable min values (>= 40)', () => {
-    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([key, preset]) => {
+    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([_key, preset]) => {
       expect(preset.min).toBeGreaterThanOrEqual(40);
     });
   });
 
   it('should have reasonable max values allowing flexibility', () => {
-    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([key, preset]) => {
+    Object.entries(COLUMN_WIDTH_PRESETS).forEach(([_key, preset]) => {
       expect(preset.max).toBeGreaterThanOrEqual(preset.width);
     });
   });
@@ -169,7 +179,7 @@ describe('ColumnTemplate with columnWidths', () => {
   });
 
   it('should work without columnWidths (backward compatible)', () => {
-    const template: any = {
+    const template: TableTemplate = {
       id: 'test_template_no_widths',
       name: 'Test Template No Widths',
       columns: { name: true, phone: true } as Record<string, boolean>,
@@ -193,7 +203,7 @@ describe('Column widths localStorage persistence', () => {
     
     const saved = localStorage.getItem('columnWidths_appointments');
     expect(saved).toBeTruthy();
-    expect(JSON.parse(saved!)).toEqual(widths);
+    expect(JSON.parse(saved ?? '{}')).toEqual(widths);
   });
 
   it('should handle empty localStorage gracefully', () => {
@@ -208,7 +218,7 @@ describe('Column widths localStorage persistence', () => {
     };
     localStorage.setItem('columnWidths_test', JSON.stringify(widths));
     
-    const saved = JSON.parse(localStorage.getItem('columnWidths_test')!);
+    const saved = JSON.parse(localStorage.getItem('columnWidths_test') ?? '{}');
     expect(Object.keys(saved)).toHaveLength(6);
     expect(saved.name).toBe(200);
     expect(saved.notes).toBe(300);
@@ -219,11 +229,11 @@ describe('Column widths localStorage persistence', () => {
     localStorage.setItem('columnWidths_test', JSON.stringify(initialWidths));
     
     // Simulate updating a single column width
-    const saved = JSON.parse(localStorage.getItem('columnWidths_test')!);
+    const saved = JSON.parse(localStorage.getItem('columnWidths_test') ?? '{}');
     saved.name = 250;
     localStorage.setItem('columnWidths_test', JSON.stringify(saved));
-    
-    const updated = JSON.parse(localStorage.getItem('columnWidths_test')!);
+
+    const updated = JSON.parse(localStorage.getItem('columnWidths_test') ?? '{}');
     expect(updated.name).toBe(250);
     expect(updated.phone).toBe(140); // unchanged
   });

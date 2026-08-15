@@ -1,0 +1,7 @@
+ALTER TABLE `images` ADD CONSTRAINT `images_sectionId_sections_id_fk` FOREIGN KEY (`sectionId`) REFERENCES `sections`(`id`) ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE `images` ADD CONSTRAINT `images_pageId_pages_id_fk` FOREIGN KEY (`pageId`) REFERENCES `pages`(`id`) ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE `pages` ADD CONSTRAINT `pages_parentId_pages_id_fk` FOREIGN KEY (`parentId`) REFERENCES `pages`(`id`) ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE `sectionButtons` ADD CONSTRAINT `sectionButtons_sectionId_sections_id_fk` FOREIGN KEY (`sectionId`) REFERENCES `sections`(`id`) ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE `sections` ADD CONSTRAINT `sections_pageId_pages_id_fk` FOREIGN KEY (`pageId`) REFERENCES `pages`(`id`) ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE `textContent` ADD CONSTRAINT `textContent_sectionId_sections_id_fk` FOREIGN KEY (`sectionId`) REFERENCES `sections`(`id`) ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE `textContent` ADD CONSTRAINT `textContent_pageId_pages_id_fk` FOREIGN KEY (`pageId`) REFERENCES `pages`(`id`) ON DELETE set null ON UPDATE cascade;

@@ -1,59 +1,75 @@
-import { z } from "zod";
-import { router, protectedProcedure } from "../_core/trpc";
-import * as db from "../db";
+import { z } from 'zod';
+import { router, protectedProcedure } from '../_core/trpc';
+import * as db from '../database/db';
 
 export const messageSettingsRouter = router({
   // Get all message settings
   list: protectedProcedure.query(async () => {
-    return await db.getAllMessageSettings();
+    return db.getAllMessageSettings();
   }),
 
   // Get message settings by category
   listByCategory: protectedProcedure
-    .input(z.object({
-      category: z.enum(["patient_journey", "executive_reports", "task_management", "doctor_notifications"]),
-    }))
+    .input(
+      z.object({
+        category: z.enum([
+          'patient_journey',
+          'executive_reports',
+          'task_management',
+          'doctor_notifications',
+        ]),
+      })
+    )
     .query(async ({ input }) => {
-      return await db.getMessageSettingsByCategory(input.category);
+      return db.getMessageSettingsByCategory(input.category);
     }),
 
   // Get a single message setting by type
   getByType: protectedProcedure
-    .input(z.object({
-      messageType: z.string(),
-    }))
+    .input(
+      z.object({
+        messageType: z.string(),
+      })
+    )
     .query(async ({ input }) => {
-      return await db.getMessageSettingByType(input.messageType);
+      return db.getMessageSettingByType(input.messageType);
     }),
 
   // Update message setting
   update: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      displayName: z.string().optional(),
-      messageContent: z.string().optional(),
-      isEnabled: z.number().min(0).max(1).optional(),
-      deliveryChannel: z.enum(["whatsapp_api", "whatsapp_integration", "both"]).optional(),
-      description: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+        displayName: z.string().optional(),
+        messageContent: z.string().optional(),
+        isEnabled: z.number().min(0).max(1).optional(),
+        deliveryChannel: z.enum(['whatsapp_api', 'whatsapp_integration', 'both']).optional(),
+        description: z.string().optional(),
+        whatsappTemplateId: z.number().nullable().optional(),
+      })
+    )
     .mutation(async ({ input }) => {
-      return await db.updateMessageSetting(input);
+      return db.updateMessageSettingCompat(input);
     }),
 
   // Toggle message enabled/disabled
   toggleEnabled: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
-      return await db.toggleMessageSettingEnabled(input.id);
+      return db.toggleMessageSettingEnabled(input.id);
     }),
 
   // Get enabled message setting by type (for sending messages)
   getEnabledByType: protectedProcedure
-    .input(z.object({
-      messageType: z.string(),
-    }))
+    .input(
+      z.object({
+        messageType: z.string(),
+      })
+    )
     .query(async ({ input }) => {
       const setting = await db.getMessageSettingByType(input.messageType);
       if (!setting || setting.isEnabled === 0) {

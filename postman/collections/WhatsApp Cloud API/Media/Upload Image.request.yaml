@@ -1,0 +1,15 @@
+$kind: http-request
+description: This request uploads an image as .jpeg. The parameters are specified as **form-data** in the request **body**.
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/media
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: messaging_product
+      value: whatsapp
+    - type: file
+      key: file
+      src: /Users/Sample.jpg
+examples: ./.resources/Upload Image.resources/examples
+order: 1000

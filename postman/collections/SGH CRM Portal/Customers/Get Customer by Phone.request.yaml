@@ -1,0 +1,8 @@
+$kind: http-request
+name: Get Customer by Phone
+method: GET
+url: '{{baseUrl}}/api/trpc/customers.getByPhone'
+order: 2000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22phone%22%3A%22771234567%22%7D%7D'

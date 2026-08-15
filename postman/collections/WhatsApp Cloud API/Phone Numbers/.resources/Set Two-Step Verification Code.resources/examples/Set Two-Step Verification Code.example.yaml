@@ -1,0 +1,25 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}
+  method: POST
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+          "pin": "123456"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true
+      }
+order: 1000

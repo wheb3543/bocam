@@ -1,0 +1,12 @@
+$kind: http-request
+name: Link Offers to Campaign
+method: POST
+url: '{{baseUrl}}/api/trpc/campaigns.linkOffers'
+order: 10000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"campaignId":1,"offerIds":[1,2]}}

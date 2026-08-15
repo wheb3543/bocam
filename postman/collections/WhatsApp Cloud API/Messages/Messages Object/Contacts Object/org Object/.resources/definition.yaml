@@ -1,0 +1,8 @@
+$kind: collection
+description: |-
+  | Name | Description |
+  | --- | --- |
+  | **`company`** | **Optional.**  <br>Name of the contact's company. |
+  | **`department`** | **Optional.**  <br>Name of the contact's department. |
+  | **`title`** | **Optional.**  <br>The contact's business title. |
+order: 4000

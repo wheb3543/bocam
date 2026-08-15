@@ -1,0 +1,11 @@
+$kind: http-request
+description: |-
+  To make sure you receive notifications for your account you need to subscribe your app to your WABA.
+
+  #### Response
+
+  If your request is successful, all Webhook events for the phone numbers under this account are sent to your configured Webhooks endpoint.
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/subscribed_apps
+method: POST
+examples: ./.resources/Subscribe to your WABA.resources/examples
+order: 1000

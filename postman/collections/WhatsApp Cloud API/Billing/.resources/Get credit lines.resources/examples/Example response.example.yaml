@@ -1,0 +1,25 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Business-ID}}/extendedcredits?fields=id,legal_entity_name
+  method: GET
+  headers:
+    Authorization: Bearer {{User-Access-Token}}
+  queryParams:
+    fields: id,legal_entity_name
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: |
+      {
+        "data": [
+          {
+            "id": "1972385232742146",    
+            "legal_entity_name": "Lucky Shrub"
+          }
+        ]
+      }
+order: 1000

@@ -1,0 +1,5 @@
+$kind: http-request
+name: Unified List
+method: GET
+url: '{{baseUrl}}/api/trpc/leads.unifiedList'
+order: 3000

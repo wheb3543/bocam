@@ -1,0 +1,23 @@
+$kind: http-request
+description: |-
+  When you receive an incoming message from Webhooks, you could use messages endpoint to change the status of it to read.  
+  We recommend marking incoming messages as read within 30 days of receipt.  
+  **Note**: you cannot mark outgoing messages you sent as read.
+
+  You need to obtain the **`message_id`** of the incoming message from Webhooks.
+
+  For a more in depth guide for marking messages as read, see [Guide: Mark Messages as Read](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/mark-message-as-read).
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "messaging_product": "whatsapp",
+        "status": "read",
+        "message_id": "<INCOMING_MSG_ID>"
+    }
+examples: ./.resources/Mark Message As Read.resources/examples
+order: 36000

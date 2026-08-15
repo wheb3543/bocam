@@ -69,9 +69,7 @@ describe('Image Upload - URL Handling', () => {
   });
 
   it('should clear URL when remove is called', () => {
-    let value = 'https://storage.example.com/offers/image.jpg';
-    // Simulate remove
-    value = '';
+    const value = '';
     expect(value).toBe('');
   });
 });

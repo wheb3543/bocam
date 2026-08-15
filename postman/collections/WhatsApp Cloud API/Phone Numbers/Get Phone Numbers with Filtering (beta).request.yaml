@@ -1,0 +1,10 @@
+$kind: http-request
+description: |-
+  - Guide: [Filter Phone Numbers](https://developers.facebook.com/docs/whatsapp/business-management-api/manage-phone-numbers#filter-phone-numbers)
+  - Endpoint reference: [WhatsApp Business Account > Phone Numbers](https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account/phone_numbers/)
+url: https://graph.facebook.com/{{Version}}/{{WABA-ID}}/phone_numbers?fields=id,is_official_business_account,display_phone_number,verified_name&filtering=[{'field':'account_mode','operator':'EQUAL','value':'SANDBOX'}]
+method: GET
+queryParams:
+  fields: id,is_official_business_account,display_phone_number,verified_name
+  filtering: "[{'field':'account_mode','operator':'EQUAL','value':'SANDBOX'}]"
+order: 4000

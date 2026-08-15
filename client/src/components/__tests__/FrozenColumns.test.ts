@@ -144,7 +144,7 @@ describe('Frozen Columns System', () => {
     ): number {
       const frozenInOrder = visibleColumnOrder.filter(k => frozenColumns.includes(k));
       const frozenIndex = frozenInOrder.indexOf(columnKey);
-      if (frozenIndex === -1) return 0;
+      if (frozenIndex === -1) {return 0;}
       return 20 + (frozenInOrder.length - frozenIndex);
     }
 

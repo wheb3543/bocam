@@ -1,0 +1,53 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^mailto:"
+    },
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^https://localhost"
+    },
+    {
+      "pattern": "^https://api.manus"
+    },
+    {
+      "pattern": "^https://portal.manus"
+    },
+    {
+      "pattern": "^https://ideahub"
+    },
+    {
+      "pattern": "^http://go"
+    },
+    {
+      "pattern": "^https://goto.google.com"
+    },
+    {
+      "pattern": "^http://goto.google.com"
+    },
+    {
+      "pattern": "^https://sites.google.com"
+    },
+    {
+      "pattern": "^https://drive.google.com"
+    },
+    {
+      "pattern": "^https://groups.google.com"
+    },
+    {
+      "pattern": "^https://rawgit.com"
+    },
+    {
+      "pattern": "^https://img.shields.io"
+    },
+    {
+      "pattern": "^https://opensource.org"
+    }
+  ],
+  "timeout": "10s",
+  "retryOn429": true,
+  "retryCount": 2,
+  "fallbackToGet": true
+}

@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import { protectedProcedure, router } from '../_core/trpc';
-import { getDb } from '../db';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { savedFilters } from '../../drizzle/schema';
 import { eq, and, desc } from 'drizzle-orm';
 
@@ -15,19 +15,18 @@ export const savedFiltersRouter = router({
    * جلب الفلاتر المحفوظة لنوع صفحة محدد
    */
   list: protectedProcedure
-    .input(z.object({
-      pageType: z.string(),
-    }))
+    .input(
+      z.object({
+        pageType: z.string(),
+      })
+    )
     .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) return [];
+      const db = await ensureDatabaseAvailable();
 
-      return db.select()
+      return db
+        .select()
         .from(savedFilters)
-        .where(and(
-          eq(savedFilters.userId, ctx.user.id),
-          eq(savedFilters.pageType, input.pageType),
-        ))
+        .where(and(eq(savedFilters.userId, ctx.user.id), eq(savedFilters.pageType, input.pageType)))
         .orderBy(desc(savedFilters.updatedAt));
     }),
 
@@ -36,24 +35,25 @@ export const savedFiltersRouter = router({
    * حفظ فلتر جديد
    */
   create: protectedProcedure
-    .input(z.object({
-      name: z.string().min(1, "اسم الفلتر مطلوب"),
-      pageType: z.string(),
-      filterConfig: z.string(), // JSON string
-      isDefault: z.boolean().default(false),
-    }))
+    .input(
+      z.object({
+        name: z.string().min(1, 'اسم الفلتر مطلوب'),
+        pageType: z.string(),
+        filterConfig: z.string(), // JSON string
+        isDefault: z.boolean().default(false),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
       // If setting as default, unset other defaults for this page
       if (input.isDefault) {
-        await db.update(savedFilters)
+        await db
+          .update(savedFilters)
           .set({ isDefault: false })
-          .where(and(
-            eq(savedFilters.userId, ctx.user.id),
-            eq(savedFilters.pageType, input.pageType),
-          ));
+          .where(
+            and(eq(savedFilters.userId, ctx.user.id), eq(savedFilters.pageType, input.pageType))
+          );
       }
 
       const result = await db.insert(savedFilters).values({
@@ -72,45 +72,45 @@ export const savedFiltersRouter = router({
    * تحديث فلتر محفوظ
    */
   update: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-      name: z.string().min(1).optional(),
-      filterConfig: z.string().optional(),
-      isDefault: z.boolean().optional(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        filterConfig: z.string().optional(),
+        isDefault: z.boolean().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
       const { id, ...updateData } = input;
 
       // If setting as default, unset other defaults
       if (updateData.isDefault) {
         // Get the filter to know its pageType
-        const filter = await db.select()
+        const filter = await db
+          .select()
           .from(savedFilters)
-          .where(and(
-            eq(savedFilters.id, id),
-            eq(savedFilters.userId, ctx.user.id),
-          ))
+          .where(and(eq(savedFilters.id, id), eq(savedFilters.userId, ctx.user.id)))
           .limit(1);
 
         if (filter.length > 0) {
-          await db.update(savedFilters)
+          await db
+            .update(savedFilters)
             .set({ isDefault: false })
-            .where(and(
-              eq(savedFilters.userId, ctx.user.id),
-              eq(savedFilters.pageType, filter[0].pageType),
-            ));
+            .where(
+              and(
+                eq(savedFilters.userId, ctx.user.id),
+                eq(savedFilters.pageType, filter[0].pageType)
+              )
+            );
         }
       }
 
-      await db.update(savedFilters)
+      await db
+        .update(savedFilters)
         .set(updateData)
-        .where(and(
-          eq(savedFilters.id, id),
-          eq(savedFilters.userId, ctx.user.id),
-        ));
+        .where(and(eq(savedFilters.id, id), eq(savedFilters.userId, ctx.user.id)));
 
       return { success: true };
     }),
@@ -120,18 +120,17 @@ export const savedFiltersRouter = router({
    * حذف فلتر محفوظ
    */
   delete: protectedProcedure
-    .input(z.object({
-      id: z.number(),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      const db = await ensureDatabaseAvailable();
 
-      await db.delete(savedFilters)
-        .where(and(
-          eq(savedFilters.id, input.id),
-          eq(savedFilters.userId, ctx.user.id),
-        ));
+      await db
+        .delete(savedFilters)
+        .where(and(eq(savedFilters.id, input.id), eq(savedFilters.userId, ctx.user.id)));
 
       return { success: true };
     }),

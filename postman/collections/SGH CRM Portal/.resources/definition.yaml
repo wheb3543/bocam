@@ -1,0 +1,12 @@
+$kind: collection
+name: SGH CRM Portal
+variables:
+  - key: baseUrl
+    value: 'http://localhost:3000'
+  - key: authToken
+    value: ''
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'

@@ -1,0 +1,31 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "messaging_product": "whatsapp",
+        "to": "{{Recipient-Phone-Number}}",
+        "type": "template",
+        "template": {
+           "name": "sample_shipping_confirmation",
+           "language": {
+               "code": "en_US",
+               "policy": "deterministic"
+           },
+           "components": [
+             {
+               "type": "body",
+               "parameters": [
+                   {
+                       "type": "text",
+                       "text": "2"
+                   }
+               ]
+             }
+           ]
+        }
+    }
+examples: ./.resources/Send Sample Shipping Confirmation Template.resources/examples
+order: 2000

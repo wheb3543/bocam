@@ -1,0 +1,18 @@
+$kind: http-request
+url: https://graph.facebook.com/{{Version}}/{{Phone-Number-ID}}/messages
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+        "messaging_product": "whatsapp",
+        "to": "{{Recipient-Phone-Number}}",
+        "text": {
+            "preview_url": true,
+            "body": "Please visit https://youtu.be/hpltvTEiRrY to inspire your day!"
+        }
+    }
+examples: ./.resources/Send Text Message with Preview URL.resources/examples
+order: 4000

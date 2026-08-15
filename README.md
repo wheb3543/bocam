@@ -1,18 +1,19 @@
-# بوابة إدارة حملات التسويق - المستشفى السعودي الألماني - صنعاء
-# Saudi German Hospital - Sana'a Marketing Portal
+# SGH CRM Portal | بوابة إدارة علاقات العملاء - المستشفى السعودي الألماني
 
 <div align="center">
 
 ![Saudi German Hospital](client/public/SGHHospitalColorBilingual.png)
 
-**نظام إلكتروني متكامل لإدارة حملات التسويق وعلاقات العملاء**
+**منصة CRM طبية متكاملة لإدارة الحملات التسويقية وحجوزات المرضى وتكامل WhatsApp**
 
-**Integrated Digital Portal for Marketing Campaign Management and Customer Relations**
+**Comprehensive Medical CRM Platform for Marketing Campaigns, Patient Appointments & WhatsApp Integration**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+[![License: Dual](https://img.shields.io/badge/License-MIT%20%26%20Proprietary-orange.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D22.13.0-brightgreen)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)]()
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [العربية](#arabic) | [English](#english)
 
@@ -24,66 +25,143 @@
 
 ## 📋 نظرة عامة
 
-نظام إلكتروني متكامل تم تطويره خصيصاً للمستشفى السعودي الألماني - صنعاء لإدارة حملات التسويق الطبية وعلاقات العملاء. يوفر النظام صفحات هبوط احترافية، نظام حجز مواعيد الأطباء، ولوحة تحكم إدارية شاملة (Mini-CRM) مع تكاملات متقدمة.
+منصة CRM طبية متكاملة تم تطويرها خصيصاً للمستشفى السعودي الألماني - صنعاء. توفر النظام إدارة شاملة للحملات التسويقية، حجوزات المرضى، تكامل WhatsApp Business API، بوابة المريض الإلكترونية، ونظام متكامل لإدارة المهام والفرق.
 
 ### ✨ الميزات الرئيسية
 
-#### 🎯 صفحات الهبوط
-- **صفحة المخيم الطبي الخيري**: نموذج تسجيل احترافي مع تتبع UTM parameters
-- **صفحة حجز مواعيد الأطباء**: عرض 22 طبيب مع صورهم وتخصصاتهم ونظام حجز متكامل
-- **تصميم متجاوب**: يعمل بشكل مثالي على جميع الأجهزة (هواتف، أجهزة لوحية، أجهزة مكتبية)
-- **هوية بصرية متكاملة**: تصميم احترافي يتماشى مع دليل الهوية البصرية للمستشفى
+#### 🎯 إدارة الحملات التسويقية
+- **إنشاء وإدارة الحملات** بأنواع مختلفة (رقمية، ميدانية، توعوية، مختلطة)
+- **تتبع UTM Parameters** لتحليل مصادر الزيارات
+- **إدارة الميزانيات** (المخططة والفعلية)
+- **تحديد الأهداف ومؤشرات الأداء** (KPIs)
+- **ربط الحملات بالعروض والمخيمات والأطباء**
 
-#### 🎛️ لوحة التحكم الإدارية (Mini-CRM)
-- **إدارة العملاء المسجلين**: عرض وتتبع جميع العملاء المسجلين في الحملات
-- **إدارة مواعيد الأطباء**: عرض وإدارة جميع حجوزات المواعيد
-- **تتبع الحالات**: نظام متقدم لتتبع حالة العملاء (جديد، تم التواصل، تم الحجز، غير مهتم، لم يرد)
-- **إحصائيات شاملة**: بطاقات إحصائية لجميع البيانات مع رسوم بيانية
-- **بحث وفلترة متقدمة**: إمكانية البحث والتصفية حسب معايير متعددة
-- **نظام صلاحيات**: OAuth authentication مع نظام طلبات التصريح للمستخدمين الجدد
+#### 🏥 إدارة المواعيد والحجوزات
+- **حجز مواعيد الأطباء** مع عرض 22+ طبيب متخصص
+- **نظام حالات المواعيد** (قيد الانتظار، مؤكد، حضر، مكتمل، ملغي)
+- **إدارة قوائم الانتظار** والتذكيرات التلقائية
+- **تتبع مصادر الحجوزات** (ويب، هاتف، يدوي)
+
+#### 💼 لوحة التحكم الإدارية (Mini-CRM)
+- **إدارة العملاء** (Leads) مع تتبع حالة كل عميل
+- **إدارة العروض الطبية** والعروض الخاصة
+- **إدارة المخيمات الطبية** الخيرية
+- **نظام الفلاتر المحفوظة** وتخصيص الأعمدة
+- **بطاقات إحصائية شاملة** ورسوم بيانية
+- **سجل التدقيق** (Audit Log) لتتبع جميع التغييرات
+
+#### 📱 بوابة المريض
+- **تسجيل دخول آمن** برقم الهاتف وOTP
+- **عرض المواعيد** والحجوزات القادمة
+- **عرض النتائج الطبية** (تحاليل، أشعة، تقارير)
+- **إدارة الملف الشخصي**
+- **تطبيق PWA** للتثبيت على الجوال مع دعم عدم الاتصال
+
+#### 💬 تكامل WhatsApp Business API
+- **إرسال الرسائل التلقائية** (تأكيد الحجز، تذكيرات، متابعة)
+- **لوحة محادثات متكاملة** مع فريق خدمة العملاء
+- **الردود التلقائية** على الكلمات المفتاحية
+- **البث الجماعي** للحملات التسويقية
+- **إدارة القوالب** المعتمدة من Meta
+- **تتبع جودة المحادثات** والتكاليف
+- **جدولة الرسائل** التلقائية
+
+#### 📊 نظام إدارة المهام والمشاريع
+- **إنشاء المشاريع** وربطها بالحملات
+- **إدارة المهام** مع تحديد الأولويات والمواعيد النهائية
+- **تسليم المهام** ومراجعتها
+- **نظام التعليقات** على المهام
+- **تتبع الوقت** المقدر والفعلي
+
+#### 👥 إدارة الفرق والمستخدمين
+- **نظام الصلاحيات** (Admin, Manager, Team Leader, Staff, Viewer)
+- **إدارة الفرق** (التسويق الرقمي، التسويق الميداني، خدمة العملاء، الإعلام)
+- **طلبات التصريح** للمستخدمين الجدد
+- **تخصيص الواجهات** حسب تفضيلات كل مستخدم
 
 #### 🔗 التكاملات
-- **Meta Pixel & Conversion API**: تتبع دقيق للتحويلات والإعلانات على Facebook
-- **WhatsApp Business API**: رسائل ترحيب تلقائية ورسائل تأكيد الحجز
-- **Email Notifications**: إشعارات بريد إلكتروني فورية للإدارة والعملاء
-- **UTM Tracking**: تتبع مصادر الحملات التسويقية
+- **Meta Pixel & Conversion API** - تتبع التحويلات والإعلانات
+- **WhatsApp Cloud API** - رسائل WhatsApp التلقائية
+- **Email Notifications** - إشعارات البريد الإلكتروني
+- **Google Analytics** - تحليلات الزيارات
+- **PWA** - تطبيق ويب تقدمي مع دعم عدم الاتصال
+
+---
 
 ### 🛠️ التقنيات المستخدمة
 
 #### Frontend
-- **React 19** - مكتبة واجهة المستخدم
-- **TypeScript** - لغة البرمجة
-- **Tailwind CSS 4** - إطار عمل التصميم
-- **TanStack Query** - إدارة حالة البيانات
-- **Wouter** - التوجيه (Routing)
-- **Lucide React** - الأيقونات
-- **shadcn/ui** - مكونات واجهة المستخدم
+| التقنية | الوصف |
+|---------|-------|
+| **React 19** | مكتبة واجهة المستخدم |
+| **TypeScript 5.9** | لغة البرمجة |
+| **Tailwind CSS 4** | إطار عمل التصميم |
+| **TanStack Query** | إدارة حالة البيانات |
+| **Wouter** | التوجيه (Routing) |
+| **Lucide React** | الأيقونات |
+| **shadcn/ui** | مكونات واجهة المستخدم |
+| **React Hook Form** | إدارة النماذج |
+| **Zod** | التحقق من البيانات |
+| **Recharts** | الرسوم البيانية |
+| **Framer Motion** | الرسوم المتحركة |
 
 #### Backend
-- **Node.js** - بيئة التشغيل
-- **Express.js** - إطار عمل الخادم
-- **tRPC** - Type-safe API
-- **Drizzle ORM** - إدارة قاعدة البيانات
+| التقنية | الوصف |
+|---------|-------|
+| **Node.js** | بيئة التشغيل |
+| **Express.js** | إطار عمل الخادم |
+| **tRPC 11** | Type-safe API |
+| **Drizzle ORM** | إدارة قاعدة البيانات |
+| **BullMQ** | نظام الطوابير |
+| **Redis** | التخزين المؤقت |
+| **Axios** | عميل HTTP |
 
 #### Database
 - **MySQL/TiDB** - قاعدة البيانات الرئيسية
+- **40+ جدول** يغطي جميع جوانب النظام
 
-#### Authentication
+#### Ops & Backup
+- **Backup & Updater Orchestration** - نسخ احتياطي موحد وتحديثات خادم مُنسقة عبر `server/_core` وعمليات `pm2/systemd` المدعومة
+
+#### Authentication & Security
 - **Manus OAuth** - نظام المصادقة
+- **JWT** - الرموز الأمنية
+- **bcrypt** - تشفير كلمات المرور
+- **RSA-2048** - نظام الترخيص العتادي المشفر
+
+#### DevOps & Tools
+- **Vite** - أداة البناء
+- **Vitest** - إطار الاختبار
+- **Playwright** - اختبارات E2E
+- **Prettier** - تنسيق الكود
+- **ESLint** - فحص الكود
+- **Drizzle Kit** - إدارة الترحيل
+- **Docker** - حاويات التطبيق
+- **Backup & Updater Orchestration** - نظام النسخ الاحتياطي الموحد وتحديثات الخادم المدمج
+- **GitHub Actions** - CI/CD
+
+---
 
 ### 📦 المتطلبات
 
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
-- MySQL/TiDB database
+- **Node.js** >= 22.13.0
+- **pnpm** >= 10.4.0
+- **MySQL** >= 8.0 أو **TiDB**
+- **Redis** (اختياري - للطوابير)
+- **Docker** (اختياري - للحاويات)
 
-### 🚀 التثبيت والتشغيل
+---
+
+### 🚀 التثبيت والتشغيل السريع
+
+للحصول على دليل تثبيت وتشغيل مفصل لبيئات التطوير والإنتاج، يرجى مراجعة:
+👉 **[دليل التثبيت والتشغيل الشامل (docs/installation/INSTALLATION_GUIDE.md)](docs/installation/INSTALLATION_GUIDE.md)**
 
 #### 1. استنساخ المستودع
 
 ```bash
-git clone https://github.com/abood22828/sgh-crm-portal.git
-cd sgh-crm-portal
+git clone https://github.com/wheb3543/bocam.git
+cd bocam
 ```
 
 #### 2. تثبيت الحزم
@@ -94,31 +172,10 @@ pnpm install
 
 #### 3. إعداد متغيرات البيئة
 
-قم بإنشاء ملف `.env` في المجلد الرئيسي وأضف المتغيرات التالية:
+قم بنسخ ملف `.env.example` إلى `.env` وتعبئة المتغيرات المطلوبة:
 
-```env
-# Database
-DATABASE_URL=mysql://user:password@host:port/database
-
-# OAuth
-JWT_SECRET=your-jwt-secret
-OAUTH_SERVER_URL=https://api.manus.im
-VITE_OAUTH_PORTAL_URL=https://portal.manus.im
-VITE_APP_ID=your-app-id
-OWNER_OPEN_ID=your-owner-openid
-OWNER_NAME=your-name
-
-# Meta Pixel & Conversion API
-VITE_META_PIXEL_ID=2008380493273171
-META_ACCESS_TOKEN=your-meta-access-token
-
-# WhatsApp Business API
-WHATSAPP_ACCESS_TOKEN=your-whatsapp-token
-WHATSAPP_PHONE_NUMBER_ID=your-phone-number-id
-
-# App Configuration
-VITE_APP_TITLE=المستشفى السعودي الألماني - صنعاء
-VITE_APP_LOGO=/SGHHospitalColorBilingual.png
+```bash
+cp .env.example .env
 ```
 
 #### 4. إعداد قاعدة البيانات
@@ -144,105 +201,97 @@ pnpm start
 
 سيعمل التطبيق على `http://localhost:3000`
 
+---
+
 ### 📁 هيكل المشروع
 
 ```
 sgh-crm-portal/
-├── client/                 # Frontend application
-│   ├── public/            # Static assets
-│   └── src/
-│       ├── pages/         # Page components
-│       ├── components/    # Reusable components
-│       ├── lib/           # Utilities and configurations
-│       └── App.tsx        # Main app component
-├── server/                # Backend application
-│   ├── routers.ts         # tRPC routers
-│   ├── db.ts              # Database functions
-│   ├── email.ts           # Email service
-│   ├── whatsapp.ts        # WhatsApp service
-│   └── facebookConversion.ts  # Facebook Conversion API
-├── drizzle/               # Database schema and migrations
-│   └── schema.ts          # Database schema
-├── shared/                # Shared types and constants
-└── docs/                  # Documentation
+├── client/                     # تطبيق الواجهة الأمامية (React, TypeScript)
+│   ├── public/                 # الملفات الثابتة (PWA Manifest, Service Workers)
+│   └── src/                    # كود مصدر الواجهة الأمامية
+│       ├── pages/              # مكونات الصفحات (50+ صفحة)
+│       │   ├── public/         # الصفحات العامة
+│       │   └── admin/          # الصفحات الإدارية
+│       │       ├── bookings/   # إدارة الحجوزات والمواعيد
+│       │       ├── whatsapp/   # إدارة WhatsApp
+│       │       └── campaigns/  # إدارة الحملات والمشاريع
+│       ├── components/         # المكونات المشتركة
+│       ├── hooks/              # Hooks المخصصة
+│       └── lib/                # المكتبات المساعدة
+├── server/                     # الخادم الخلفي (Node.js, Express, tRPC)
+│   ├── api/                    # واجهات Meta APIs و Webhooks
+│   ├── database/               # إعدادات قاعدة البيانات و Drizzle ORM
+│   ├── routers/                # مسارات tRPC (Auth, WhatsApp, Patients, Reports)
+│   ├── services/               # خدمات العمليات (WhatsApp, Email, Telegram, PDF)
+│   ├── integrations/           # تكاملات خارجية (Webhooks, SSE, Queues)
+│   └── tasks/                  # المهام المجدولة (Cron Jobs)
+├── docs/                       # وثائق المشروع (الهيكلة الجديدة الموحدة)
+│   ├── introduction/           # مقدمة عن النظام
+│   ├── architecture/           # البنية الهندسية (ERD, PWA Offline, Caching)
+│   ├── installation/           # أدلة التثبيت والتهيئة
+│   ├── api/                    # مراجع واجهات التطبيق البرمجية (API Reference)
+│   ├── licensing/              # وثائق نظام الترخيص والأمان
+│   ├── saas/                   # وثائق بيئة الـ SaaS
+│   ├── guides/                 # أدلة المستخدم النهائي والصيانة
+│   ├── development/            # معايير وأدوات التطوير
+│   ├── maintenance/            # السجلات والتقارير الدورية
+│   └── archive/                # الأرشيف التاريخي القديم
+├── deploy/                     # حزمة النشر والإنتاج
+│   ├── scripts/                # سكريبتات التثبيت الآلي
+│   ├── nginx/                  # إعدادات Nginx و SSL
+│   ├── monitoring/             # إعدادات المراقبة (Prometheus, Grafana)
+│   └── backup/                 # سكريبتات النسخ الاحتياطي
+├── drizzle/                    # ترحيلات قاعدة البيانات (Drizzle Migrations)
+├── e2e/                        # اختبارات E2E (Playwright)
+├── mocks/                      # بيانات وهمية للاختبارات
+└── scripts/                    # سكريبتات CLI مساعدة
 ```
 
-### 🎨 الصفحات الرئيسية
+---
 
-#### صفحات عامة
-- `/` - الصفحة الرئيسية (صفحة هبوط المخيم الطبي)
-- `/thank-you` - صفحة الشكر بعد التسجيل
-- `/doctors` - صفحة حجز مواعيد الأطباء
-- `/doctors/thank-you` - صفحة الشكر بعد حجز الموعد
+## 📚 دليل الوثائق الشامل
 
-#### صفحات إدارية (تتطلب تسجيل دخول)
-- `/admin` - لوحة التحكم الرئيسية
-  - **العملاء المسجلين**: إدارة جميع العملاء
-  - **مواعيد الأطباء**: إدارة جميع المواعيد
-  - **طلبات التصريح**: الموافقة أو رفض طلبات المستخدمين الجدد
+تم تنظيم وثائق المشروع بشكل احترافي لتسهيل الوصول إلى المعلومات المطلوبة. للاطلاع على الفهرس الكامل:
 
-### 🔐 نظام الصلاحيات
+👉 **[فهرس الوثائق (docs/README.md)](docs/README.md)**
 
-#### المستخدمون المصرح لهم
-- يتم التحقق من المستخدمين عبر OAuth
-- يجب أن يكون البريد الإلكتروني موجوداً في قاعدة البيانات
-- يمكن للمسؤولين الموافقة على طلبات التصريح الجديدة
+### الأقسام الرئيسية للتوثيق:
 
-#### الأدوار
-- **Admin**: صلاحيات كاملة لإدارة النظام
-- **User**: صلاحيات محدودة للعرض فقط
+| القسم | الوصف | الرابط |
+|-------|-------|--------|
+| **مقدمة عن النظام** | نظرة عامة وسياسات المشروع | [docs/introduction/](docs/introduction/) |
+| **البنية الهندسية** | مخطط ERD، معمارية PWA، التخزين المؤقت | [docs/architecture/](docs/architecture/) |
+| **دليل التثبيت** | تثبيت بيئة التطوير والإنتاج | [docs/installation/](docs/installation/) |
+| **مرجع API** | توثيق واجهات tRPC و REST | [docs/api/](docs/api/) |
+| **نظام الترخيص** | التراخيص المزدوجة والأمان | [docs/licensing/](docs/licensing/) |
+| **أدلة المستخدم** | دليل الاستخدام الشامل والصيانة | [docs/guides/](docs/guides/) |
+| **معايير التطوير** | دليل المساهمة ومعايير الكود | [docs/development/](docs/development/) |
 
-### 📊 قاعدة البيانات
+---
 
-#### الجداول الرئيسية
-- `users` - المستخدمين المصرح لهم
-- `campaigns` - الحملات التسويقية
-- `leads` - العملاء المسجلين
-- `appointments` - مواعيد الأطباء
-- `doctors` - بيانات الأطباء
-- `accessRequests` - طلبات التصريح
-- `leadStatusHistory` - سجل تغييرات حالة العملاء
+## ⚖️ الفصل القانوني ونظام التراخيص
 
-### 🔧 الأوامر المتاحة
+يعتمد هذا المشروع على نموذج **ترخيص مزدوج (Dual-Licensing)** للفصل الواضح والقانوني بين أجزاء المشروع المفتوحة والمحمية:
 
-```bash
-# Development
-pnpm dev              # تشغيل وضع التطوير
-pnpm build            # بناء للإنتاج
-pnpm start            # تشغيل الإنتاج
+1. **القسم المفتوح المصدر (MIT License):** يشمل الهيكل الأساسي للواجهات العامة، صفحات الأطباء، العروض العامة، وإعدادات المشروع الأساسية. التفاصيل موجودة في ملف `LICENSE`.
+2. **القسم المحمي والتجاري (Proprietary License):** يشمل الأنظمة المتقدمة مثل **نظام WhatsApp المتكامل (14 صفحة)**، **نظام التقارير والإحصائيات (4 صفحات)**، و**بوابة المرضى المتقدمة (10 صفحات)**. هذا القسم مرخص تجارياً ومحمي بموجب حقوق شركة **IdeaHub**، ومزود بنظام حماية برمجية وربط عتادي (Hardware ID).
 
-# Database
-pnpm db:push          # دفع التغييرات إلى قاعدة البيانات
-pnpm db:studio        # فتح Drizzle Studio
+لمزيد من التفاصيل القانونية والتقنية حول كيفية إعداد وتوليد تراخيص التشغيل، يرجى مراجعة الدليل التفصيلي:
+👉 **[دليل التراخيص والأمان المخصص (docs/licensing/LICENSE_GUIDE.md)](docs/licensing/LICENSE_GUIDE.md)**
 
-# Code Quality
-pnpm lint             # فحص الكود
-pnpm type-check       # فحص الأنواع
-```
+---
 
-### 🤝 المساهمة
+## 🤝 المساهمة
 
-نرحب بجميع المساهمات! يرجى قراءة [دليل المساهمة](CONTRIBUTING.md) قبل البدء.
+نرحب بجميع المساهمات! يرجى الاطلاع على دليل المساهمة للمزيد من التفاصيل:
+👉 **[دليل المساهمة (docs/development/CONTRIBUTING.md)](docs/development/CONTRIBUTING.md)**
 
-### 📝 الترخيص
+---
 
-هذا المشروع مرخص تحت [MIT License](LICENSE).
+## 📄 الترخيص
 
-### 👥 الفريق
-
-- **التطوير**: Abdullkwy Alhatef
-- **العميل**: المستشفى السعودي الألماني - صنعاء
-
-### 📞 الدعم
-
-للحصول على الدعم، يرجى التواصل عبر:
-- البريد الإلكتروني: abood22828@gmail.com
-- GitHub Issues: [إنشاء مشكلة جديدة](https://github.com/abood22828/sgh-crm-portal/issues)
-
-### 🙏 شكر وتقدير
-
-- شكراً لفريق المستشفى السعودي الألماني - صنعاء على الثقة والتعاون
-- شكراً لجميع المساهمين في المشاريع مفتوحة المصدر المستخدمة
+هذا المشروع مرخص بموجب **ترخيص مزدوج** - راجع ملف [LICENSE](LICENSE) للتفاصيل.
 
 ---
 
@@ -250,232 +299,47 @@ pnpm type-check       # فحص الأنواع
 
 ## 📋 Overview
 
-An integrated digital portal developed specifically for Saudi German Hospital - Sana'a to manage medical marketing campaigns and customer relations. The system provides professional landing pages, doctor appointment booking system, and a comprehensive admin dashboard (Mini-CRM) with advanced integrations.
+**SGH CRM Portal** is a comprehensive medical CRM platform developed specifically for Saudi German Hospital - Sana'a. It provides integrated management for marketing campaigns, patient appointments, WhatsApp Business API integration, patient portal, and a complete task and team management system.
 
-### ✨ Key Features
+### Key Features
 
-#### 🎯 Landing Pages
-- **Charitable Medical Camp Page**: Professional registration form with UTM tracking
-- **Doctor Appointment Booking Page**: Display of 22 doctors with photos, specializations, and integrated booking system
-- **Responsive Design**: Works perfectly on all devices (mobile, tablet, desktop)
-- **Complete Brand Identity**: Professional design aligned with hospital's brand guidelines
+- **Campaign Management:** Create and manage digital, field, awareness, and mixed campaigns with UTM tracking, budget management, KPIs, and integration with offers, camps, and doctors.
+- **Appointments & Bookings:** Doctor appointment booking (22+ specialists), status tracking, waitlist management, automatic reminders, and source tracking.
+- **Admin Dashboard (Mini-CRM):** Lead management, medical offers, charity camps, saved filters, statistical dashboards, and audit logging.
+- **Patient Portal:** Secure OTP login, appointment viewing, medical results (lab, radiology, reports), profile management, and PWA with offline support.
+- **WhatsApp Business API:** Automatic messages, integrated chat dashboard, auto-replies, broadcasts, template management, cost tracking, and message scheduling.
+- **Task & Project Management:** Projects linked to campaigns, task management with priorities and deadlines, deliverables review, comments, and time tracking.
+- **Team & User Management:** Role-based access control (Admin, Manager, Team Leader, Staff, Viewer), team management, access requests, and UI customization.
+- **Integrations:** Meta Pixel & Conversion API, WhatsApp Cloud API, Email Notifications, Google Analytics, PWA.
 
-#### 🎛️ Admin Dashboard (Mini-CRM)
-- **Customer Management**: View and track all registered customers
-- **Appointment Management**: View and manage all doctor appointments
-- **Status Tracking**: Advanced system for tracking customer status (new, contacted, booked, not interested, no answer)
-- **Comprehensive Statistics**: Statistical cards for all data with charts
-- **Advanced Search & Filtering**: Search and filter by multiple criteria
-- **Permission System**: OAuth authentication with access request system for new users
+### Tech Stack
 
-#### 🔗 Integrations
-- **Meta Pixel & Conversion API**: Accurate tracking for conversions and Facebook ads
-- **WhatsApp Business API**: Automatic welcome messages and booking confirmations
-- **Email Notifications**: Instant email notifications for admin and customers
-- **UTM Tracking**: Track marketing campaign sources
+- **Frontend:** React 19, TypeScript 5.9, Tailwind CSS 4, TanStack Query, Wouter, shadcn/ui, Zod, Recharts, Framer Motion
+- **Backend:** Node.js, Express.js, tRPC 11, Drizzle ORM, BullMQ, Redis
+- **Database:** MySQL/TiDB (40+ tables)
+- **Auth & Security:** Manus OAuth, JWT, bcrypt, RSA-2048 hardware-bound licensing
+- **DevOps:** Vite, Vitest, Playwright, Docker, GitHub Actions
 
-### 🛠️ Tech Stack
-
-#### Frontend
-- **React 19** - UI library
-- **TypeScript** - Programming language
-- **Tailwind CSS 4** - Styling framework
-- **TanStack Query** - Data state management
-- **Wouter** - Routing
-- **Lucide React** - Icons
-- **shadcn/ui** - UI components
-
-#### Backend
-- **Node.js** - Runtime environment
-- **Express.js** - Server framework
-- **tRPC** - Type-safe API
-- **Drizzle ORM** - Database management
-
-#### Database
-- **MySQL/TiDB** - Primary database
-
-#### Authentication
-- **Manus OAuth** - Authentication system
-
-### 📦 Requirements
-
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
-- MySQL/TiDB database
-
-### 🚀 Installation & Setup
-
-#### 1. Clone Repository
+### Quick Start
 
 ```bash
-git clone https://github.com/abood22828/sgh-crm-portal.git
-cd sgh-crm-portal
-```
-
-#### 2. Install Dependencies
-
-```bash
+git clone https://github.com/wheb3543/bocam.git
+cd bocam
 pnpm install
-```
-
-#### 3. Configure Environment Variables
-
-Create a `.env` file in the root directory and add the following variables:
-
-```env
-# Database
-DATABASE_URL=mysql://user:password@host:port/database
-
-# OAuth
-JWT_SECRET=your-jwt-secret
-OAUTH_SERVER_URL=https://api.manus.im
-VITE_OAUTH_PORTAL_URL=https://portal.manus.im
-VITE_APP_ID=your-app-id
-OWNER_OPEN_ID=your-owner-openid
-OWNER_NAME=your-name
-
-# Meta Pixel & Conversion API
-VITE_META_PIXEL_ID=2008380493273171
-META_ACCESS_TOKEN=your-meta-access-token
-
-# WhatsApp Business API
-WHATSAPP_ACCESS_TOKEN=your-whatsapp-token
-WHATSAPP_PHONE_NUMBER_ID=your-phone-number-id
-
-# App Configuration
-VITE_APP_TITLE=Saudi German Hospital - Sana'a
-VITE_APP_LOGO=/SGHHospitalColorBilingual.png
-```
-
-#### 4. Setup Database
-
-```bash
-# Create tables
+cp .env.example .env
 pnpm db:push
-
-# (Optional) Seed initial data
-pnpm db:seed
-```
-
-#### 5. Run Project
-
-```bash
-# Development mode
 pnpm dev
-
-# Production mode
-pnpm build
-pnpm start
 ```
 
-The application will run on `http://localhost:3000`
+The application will be available at `http://localhost:3000`
 
-### 📁 Project Structure
+### Documentation
 
-```
-sgh-crm-portal/
-├── client/                 # Frontend application
-│   ├── public/            # Static assets
-│   └── src/
-│       ├── pages/         # Page components
-│       ├── components/    # Reusable components
-│       ├── lib/           # Utilities and configurations
-│       └── App.tsx        # Main app component
-├── server/                # Backend application
-│   ├── routers.ts         # tRPC routers
-│   ├── db.ts              # Database functions
-│   ├── email.ts           # Email service
-│   ├── whatsapp.ts        # WhatsApp service
-│   └── facebookConversion.ts  # Facebook Conversion API
-├── drizzle/               # Database schema and migrations
-│   └── schema.ts          # Database schema
-├── shared/                # Shared types and constants
-└── docs/                  # Documentation
-```
+For comprehensive documentation, please visit:
+👉 **[Documentation Index (docs/README.md)](docs/README.md)**
 
-### 🎨 Main Pages
+> Note: Some advanced user guides are currently planned or under construction and may be added to `docs/guides/` later, including campaign management, appointment scheduling, task/project management, team management, WhatsApp broadcast/auto-replies, and patient portal usage.
 
-#### Public Pages
-- `/` - Home page (Medical camp landing page)
-- `/thank-you` - Thank you page after registration
-- `/doctors` - Doctor appointment booking page
-- `/doctors/thank-you` - Thank you page after booking
+### License
 
-#### Admin Pages (Login required)
-- `/admin` - Main dashboard
-  - **Registered Customers**: Manage all customers
-  - **Doctor Appointments**: Manage all appointments
-  - **Access Requests**: Approve or reject new user requests
-
-### 🔐 Permission System
-
-#### Authorized Users
-- Users are verified via OAuth
-- Email must exist in database
-- Admins can approve new access requests
-
-#### Roles
-- **Admin**: Full system management permissions
-- **User**: Limited view-only permissions
-
-### 📊 Database
-
-#### Main Tables
-- `users` - Authorized users
-- `campaigns` - Marketing campaigns
-- `leads` - Registered customers
-- `appointments` - Doctor appointments
-- `doctors` - Doctor data
-- `accessRequests` - Access requests
-- `leadStatusHistory` - Customer status change history
-
-### 🔧 Available Commands
-
-```bash
-# Development
-pnpm dev              # Run development mode
-pnpm build            # Build for production
-pnpm start            # Run production
-
-# Database
-pnpm db:push          # Push changes to database
-pnpm db:studio        # Open Drizzle Studio
-
-# Code Quality
-pnpm lint             # Lint code
-pnpm type-check       # Type check
-```
-
-### 🤝 Contributing
-
-We welcome all contributions! Please read the [Contributing Guide](CONTRIBUTING.md) before starting.
-
-### 📝 License
-
-This project is licensed under the [MIT License](LICENSE).
-
-### 👥 Team
-
-- **Development**: Manus AI
-- **Client**: Saudi German Hospital - Sana'a
-
-### 📞 Support
-
-For support, please contact:
-- Email: abood22828@gmail.com
-- GitHub Issues: [Create new issue](https://github.com/abood22828/sgh-crm-portal/issues)
-
-### 🙏 Acknowledgments
-
-- Thanks to Saudi German Hospital - Sana'a team for their trust and cooperation
-- Thanks to all contributors of open-source projects used
-
----
-
-<div align="center">
-
-**نرعاكم كأهالينا - Caring like family**
-
-Made with ❤️ by Abdullkwy Alhatef
-
-</div>
+This project is **dual-licensed** - see the [LICENSE](LICENSE) file for details.

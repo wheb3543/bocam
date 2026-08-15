@@ -1,0 +1,8 @@
+$kind: http-request
+name: Registrations Trend
+method: GET
+url: '{{baseUrl}}/api/trpc/charts.registrationsTrend'
+order: 1000
+queryParams:
+  - key: input
+    value: '%7B%22json%22%3A%7B%22period%22%3A%2230d%22%7D%7D'

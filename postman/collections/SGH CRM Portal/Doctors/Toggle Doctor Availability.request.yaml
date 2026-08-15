@@ -1,0 +1,12 @@
+$kind: http-request
+name: Toggle Doctor Availability
+method: POST
+url: '{{baseUrl}}/api/trpc/doctors.toggleAvailability'
+order: 7000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1}}

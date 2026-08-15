@@ -1,0 +1,12 @@
+$kind: http-request
+name: Create Campaign
+method: POST
+url: '{{baseUrl}}/api/trpc/campaigns.create'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"name":"حملة صيف 2026","slug":"summer-2026","isActive":true}}

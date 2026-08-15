@@ -1,0 +1,6 @@
+$kind: http-request
+description: Updates the status of the flow as "DEPRECATED". This action is not reversible. Only a published flow can be deprecated to prevent sending or opening it.
+url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}/deprecate
+method: POST
+examples: ./.resources/Deprecate Flow.resources/examples
+order: 5000

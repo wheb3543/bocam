@@ -1,0 +1,19 @@
+$kind: http-request
+description: |-
+  Returns link to web page with preview of the flow. The link has an expiry time which is returned in the response. The same link will be returned as long as it's still valid, a new link will be generated when it expires.
+
+  To generate a new link and invalidate the existing link, set
+
+  `fields=preview.invalidate(true)`
+url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}?fields=preview.invalidate(false)
+method: GET
+queryParams:
+  - key: fields
+    value: preview.invalidate(false)
+    description: Set to true to generate a new preview link and expire old link
+  - key: date_format
+    value: U
+    disabled: true
+    description: Returns date as unix timestamp in seconds
+examples: ./.resources/Get Preview URL.resources/examples
+order: 4000

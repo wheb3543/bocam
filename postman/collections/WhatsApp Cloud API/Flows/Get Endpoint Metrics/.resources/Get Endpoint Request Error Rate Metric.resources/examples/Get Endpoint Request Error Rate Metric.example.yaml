@@ -1,0 +1,33 @@
+$kind: http-example
+request:
+  url: https://graph.facebook.com/{{Version}}/{{Flow-ID}}?fields=metric.name(ENDPOINT_REQUEST_ERROR_RATE).granularity(LIFETIME).since(2024-01-28).until(2024-01-30)
+  method: GET
+  queryParams:
+    - key: fields
+      value: metric.name(ENDPOINT_REQUEST_ERROR_RATE).granularity(LIFETIME).since(2024-01-28).until(2024-01-30)
+      description: Return specific fields in the response
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: json
+    content: |-
+      {
+          "id": "flow-1",
+          "metric": {
+              "granularity": "LIFETIME",
+              "name": "ENDPOINT_REQUEST_ERROR_RATE",
+              "data_points": [
+                  {
+                      "timestamp": "2024-01-28T08:00:00+0000",
+                      "data": [
+                          {
+                              "key": "value",
+                              "value": 0.12625250501002
+                          }
+                      ]
+                  }
+              ]
+          }
+      }
+order: 1000

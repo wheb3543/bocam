@@ -8,14 +8,14 @@ const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
 
 vi.mock('@/lib/advancedExport', () => ({
-  exportData: (...args: any[]) => mockExportData(...args),
-  printTable: (...args: any[]) => mockPrintTable(...args),
+  exportData: (...args: unknown[]) => mockExportData(...args),
+  printTable: (...args: unknown[]) => mockPrintTable(...args),
 }));
 
 vi.mock('sonner', () => ({
   toast: {
-    success: (...args: any[]) => mockToastSuccess(...args),
-    error: (...args: any[]) => mockToastError(...args),
+    success: (...args: unknown[]) => mockToastSuccess(...args),
+    error: (...args: unknown[]) => mockToastError(...args),
   },
 }));
 
@@ -23,7 +23,7 @@ vi.mock('@/_core/hooks/useAuth', () => ({
   useAuth: () => ({ user: { name: 'Test User' } }),
 }));
 
-import { useExportUtils, type ExportConfig } from '../useExportUtils';
+import { useExportUtils, type ExportConfig } from '../export/useExportUtils';
 
 const sampleConfig: ExportConfig<{ id: number; name: string; status: string }> = {
   tableName: 'اختبار الجدول',

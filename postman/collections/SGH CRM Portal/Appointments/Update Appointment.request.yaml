@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Appointment
+method: POST
+url: '{{baseUrl}}/api/trpc/appointments.updateAppointment'
+order: 5000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"json":{"id":1,"appointmentDate":"2026-06-02"}}
