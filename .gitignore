@@ -78,3 +78,4 @@ coverage/
 # Local editor/backup patterns and temporary legacy files
 *.old.*
 .cursorrules
+.project-config.json
