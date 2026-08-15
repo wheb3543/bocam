@@ -16,9 +16,7 @@ export async function setupVite(app: Express, server: Server) {
   };
 
   const { createServer: createViteServer } = await import('vite');
-  const viteConfigModule = await import('../../vite.config');
   const vite = await createViteServer({
-    ...viteConfigModule.default,
     configFile: false,
     server: serverOptions,
     appType: 'custom',
