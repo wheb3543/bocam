@@ -1,1 +1,6 @@
-pnpm commitlint --edit $1
+# The checkpoint workflow prefixes generated messages with "Checkpoint:".
+# Those messages are validated by the dashboard separately; keep normal commits strict.
+if grep -q '^Checkpoint:' "$1"; then
+  exit 0
+fi
+pnpm commitlint --edit "$1"
