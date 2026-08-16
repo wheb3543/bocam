@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { createMediaPreview } from './mediaPreview';
 import {
   CheckSquare,
   ChevronDown,
@@ -680,29 +681,12 @@ export default function MediaLibraryPage() {
                               <Square className="h-4 w-4 text-slate-500" />
                             )}
                           </button>
-                          {item.type === 'image' ? (
-                            <img
-                              src={item.url}
-                              alt={item.altAr || item.fileName || 'صورة'}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : item.type === 'video' ? (
-                            <video src={item.url} controls className="h-full w-full object-cover" />
-                          ) : item.type === 'audio' ? (
-                            <div className="flex h-full flex-col items-center justify-center gap-3 p-4">
-                              <Music2 className="h-10 w-10 text-violet-600" />
-                              <audio src={item.url} controls className="w-full" />
-                            </div>
-                          ) : (
-                            <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-500">
-                              {item.type === 'document' ? (
-                                <FileText className="h-12 w-12 text-red-500" />
-                              ) : (
-                                <FileArchive className="h-12 w-12 text-amber-600" />
-                              )}
-                              <span className="text-xs">{typeLabel(item.type)}</span>
-                            </div>
-                          )}
+                          {createMediaPreview({
+                            type: item.type,
+                            url: item.url,
+                            alt: item.altAr || item.fileName || 'وسيط',
+                            label: typeLabel(item.type),
+                          })}
                         </div>
                         <div className="space-y-2 p-3">
                           <p

@@ -14,9 +14,9 @@ import {
   createStorageName,
   decodeFileName,
   getMediaKind,
-  getOriginalExtension,
   type MediaKind,
 } from '../services/mediaFiles';
+import { prepareMediaUpload } from '../services/mediaUploadPreparation';
 
 type MulterFile = {
   originalname: string;
@@ -219,25 +219,14 @@ async function indexLegacyImage({
   return Number(created.id);
 }
 
-async function uploadAndIndexMedia(file: MulterFile, folderId?: number) {
+export async function uploadAndIndexMedia(file: MulterFile, folderId?: number) {
   const originalName = decodeFileName(file.originalname);
   const type = getMediaKind(file.mimetype);
   const folder = await getFolder(folderId);
-
-  let buffer = file.buffer;
-  let mimeType = file.mimetype;
-  let extension = getOriginalExtension(originalName, file.mimetype);
-  let width: number | undefined;
-  let height: number | undefined;
-
-  if (type === 'image') {
-    const processed = await processImageToAvif(file.buffer, file.mimetype);
-    buffer = processed.buffer;
-    mimeType = processed.mimeType;
-    extension = processed.extension;
-    width = processed.width;
-    height = processed.height;
-  }
+  const { buffer, mimeType, extension, width, height } = await prepareMediaUpload(
+    file,
+    processImageToAvif
+  );
 
   const storageKey = `media/folder-${folder.id}/${createStorageName(type, extension)}`;
   const { key, url } = await storagePut(storageKey, buffer, mimeType);
