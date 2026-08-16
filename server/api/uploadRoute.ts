@@ -68,9 +68,22 @@ const upload = multer({
 });
 
 function createStorageName(originalName: string, extension: string) {
-  const baseName = originalName.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '_');
+  // فك ترميز الأسماء وتوليد اسم آمن للتخزين مع الحفاظ على الأحرف العربية أو تحويلها لبديل آمن
+  let cleanName = 'image';
+  try {
+    const decoded = decodeURIComponent(escape(originalName));
+    cleanName = decoded
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[\s\/\?<>\\:\*\|":\+]+/g, '_')
+      .replace(/[^a-zA-Z0-9-_؀-ۿ]/g, '_');
+    if (!cleanName || cleanName === '_') {
+      cleanName = 'image';
+    }
+  } catch {
+    cleanName = 'image';
+  }
   const randomSuffix = crypto.randomBytes(6).toString('hex');
-  return `${baseName}-${Date.now()}-${randomSuffix}.${extension}`;
+  return `${cleanName.substring(0, 40)}-${Date.now()}-${randomSuffix}.${extension}`;
 }
 
 async function indexUploadedImage({
