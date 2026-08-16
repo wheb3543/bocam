@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { protectedProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
-import { eq, and, like, or } from 'drizzle-orm';
+import { eq, and, like, or, isNull } from 'drizzle-orm';
 import { images } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
 
@@ -50,7 +50,7 @@ export const imagesRouter = router({
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
 
-      const conditions = [];
+      const conditions = [isNull(images.deletedAt)];
 
       if (input.section) {
         conditions.push(eq(images.section, input.section));
@@ -68,13 +68,14 @@ export const imagesRouter = router({
         conditions.push(eq(images.isActive, input.isActive));
       }
       if (input.search) {
-        conditions.push(
-          or(
-            like(images.key, `%${input.search}%`),
-            like(images.altAr || '', `%${input.search}%`),
-            like(images.altEn || '', `%${input.search}%`)
-          )
+        const textSearch = or(
+          like(images.key, `%${input.search}%`),
+          like(images.altAr || '', `%${input.search}%`),
+          like(images.altEn || '', `%${input.search}%`)
         );
+        if (textSearch) {
+          conditions.push(textSearch);
+        }
       }
 
       const result = await db
@@ -92,7 +93,11 @@ export const imagesRouter = router({
   getByKey: protectedProcedure.input(z.object({ key: z.string() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
-    const result = await db.select().from(images).where(eq(images.key, input.key)).limit(1);
+    const result = await db
+      .select()
+      .from(images)
+      .where(and(eq(images.key, input.key), isNull(images.deletedAt)))
+      .limit(1);
 
     return result[0] || null;
   }),
@@ -103,7 +108,11 @@ export const imagesRouter = router({
   getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
-    const result = await db.select().from(images).where(eq(images.id, input.id)).limit(1);
+    const result = await db
+      .select()
+      .from(images)
+      .where(and(eq(images.id, input.id), isNull(images.deletedAt)))
+      .limit(1);
 
     return result[0] || null;
   }),
@@ -195,7 +204,7 @@ export const imagesRouter = router({
   getOverview: protectedProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
-    const allImages = await db.select().from(images);
+    const allImages = await db.select().from(images).where(isNull(images.deletedAt));
 
     const total = allImages.length;
     const active = allImages.filter((i) => i.isActive === 'yes').length;

@@ -31,6 +31,7 @@ const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/admin/ProfilePage'));
 const ManagementPage = lazy(() => import('./pages/admin/ManagementPage'));
 const ContentManagementPage = lazy(() => import('./pages/admin/content/ContentManagementPage'));
+const MediaLibraryPage = lazy(() => import('./pages/admin/media/MediaLibraryPage'));
 const UsersManagementPage = lazy(() => import('./pages/admin/users/UsersManagementPage'));
 const PublishingPage = lazy(() => import('./pages/admin/content/PublishingPage'));
 const WhatsAppPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppPage'));
@@ -228,6 +229,7 @@ function Router() {
                 <Route path={'/admin/profile'} component={ProfilePage} />
                 <Route path={'/admin/management'} component={ManagementPage} />
                 <Route path={'/admin/content/content'} component={ContentManagementPage} />
+                <Route path={'/admin/content/media-library'} component={MediaLibraryPage} />
                 <Route path={'/admin/users/users'} component={UsersManagementPage} />
                 <Route path={'/admin/content/publishing'} component={PublishingPage} />
                 <Route path={'/admin/whatsapp'}>

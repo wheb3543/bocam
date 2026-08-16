@@ -36,13 +36,24 @@ interface UseImageUploadOptions {
 interface UploadResult {
   url: string;
   key: string;
+  format?: string;
+  size?: number;
+  width?: number;
+  height?: number;
 }
 
 export function useImageUpload(options: UseImageUploadOptions = {}) {
   const {
     folder = 'uploads',
     maxSize = 5 * 1024 * 1024, // 5MB
-    acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
+    acceptedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/avif',
+      'image/gif',
+      'image/svg+xml',
+    ],
     onSuccess,
     onError,
   } = options;
@@ -56,7 +67,9 @@ export function useImageUpload(options: UseImageUploadOptions = {}) {
    */
   const validateFile = useCallback(
     (file: File): string | null => {
-      if (!file) {return 'لم يتم اختيار ملف';}
+      if (!file) {
+        return 'لم يتم اختيار ملف';
+      }
 
       if (file.size > maxSize) {
         const maxSizeMB = (maxSize / (1024 * 1024)).toFixed(1);

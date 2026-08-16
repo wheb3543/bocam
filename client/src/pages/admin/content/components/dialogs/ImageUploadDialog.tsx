@@ -26,6 +26,8 @@ import { Switch } from '@/components/ui/switch';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import type { ImageFormData } from '../../types/content.types';
 import { sectionOptions, imageFormatOptions } from '../../types/content.types';
+import { useImageUpload } from '@/hooks/form/useImageUpload';
+import MediaPicker from '@/components/form/MediaPicker';
 
 interface ImageUploadDialogProps {
   open: boolean;
@@ -53,68 +55,30 @@ export function ImageUploadDialog({
 }: ImageUploadDialogProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(formData.url || null);
   const [isDragging, setIsDragging] = useState(false);
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploading, uploadImage } = useImageUpload({ folder: 'uploads' });
 
-  const handleFileSelect = (file: File) => {
-    // Create preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewUrl(reader.result as string);
-      onFormDataChange({ ...formData, url: reader.result as string });
-    };
-    reader.readAsDataURL(file);
+  const applyMedia = (
+    url: string,
+    details?: { width?: number; height?: number; size?: number; format?: string }
+  ) => {
+    setPreviewUrl(url);
+    onFormDataChange({
+      ...formData,
+      url,
+      width: details?.width?.toString() || formData.width,
+      height: details?.height?.toString() || formData.height,
+      size: details?.size?.toString() || formData.size,
+      format: details?.format || formData.format,
+    });
+  };
 
-    // Compress image
-    const img = document.createElement('img');
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      // Calculate new dimensions (max 1920px width/height)
-      const maxDimension = 1920;
-      let width = img.width;
-      let height = img.height;
-
-      if (width > maxDimension || height > maxDimension) {
-        if (width > height) {
-          height = Math.round((height * maxDimension) / width);
-          width = maxDimension;
-        } else {
-          width = Math.round((width * maxDimension) / height);
-          height = maxDimension;
-        }
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      ctx?.drawImage(img, 0, 0, width, height);
-
-      // Compress to JPEG with 0.8 quality
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-
-      // Calculate file size
-      const base64Length = compressedDataUrl.length - (compressedDataUrl.indexOf(',') + 1);
-      const padding =
-        compressedDataUrl.charAt(compressedDataUrl.length - 2) === '='
-          ? 2
-          : compressedDataUrl.charAt(compressedDataUrl.length - 1) === '='
-            ? 1
-            : 0;
-      const size = base64Length * 0.75 - padding;
-
-      onFormDataChange({
-        ...formData,
-        width: width.toString(),
-        height: height.toString(),
-        size: Math.round(size).toString(),
-        format: 'jpg',
-        url: compressedDataUrl,
-      });
-
-      setPreviewUrl(compressedDataUrl);
-    };
-    img.src = URL.createObjectURL(file);
+  const handleFileSelect = async (file: File) => {
+    const result = await uploadImage(file);
+    if (result) {
+      applyMedia(result.url, result);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -197,6 +161,26 @@ export function ImageUploadDialog({
                     >
                       <X className="h-4 w-4" />
                     </Button>
+                    <div className="absolute bottom-2 left-2 flex gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        <Upload className="ml-1.5 h-4 w-4" /> رفع ملف
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setMediaPickerOpen(true)}
+                        disabled={uploading}
+                      >
+                        <ImageIcon className="ml-1.5 h-4 w-4" /> من المكتبة
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -209,9 +193,20 @@ export function ImageUploadDialog({
                       variant="outline"
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
                     >
                       <Upload className="h-4 w-4 ml-2" />
-                      اختيار ملف
+                      {uploading ? 'جاري الرفع...' : 'رفع ملف'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMediaPickerOpen(true)}
+                      disabled={uploading}
+                    >
+                      <ImageIcon className="h-4 w-4 ml-2" />
+                      اختيار من مكتبة الوسائط
                     </Button>
                   </div>
                 )}
@@ -221,6 +216,7 @@ export function ImageUploadDialog({
                   accept="image/*"
                   onChange={handleFileInputChange}
                   className="hidden"
+                  disabled={uploading}
                 />
               </div>
             </div>
@@ -354,6 +350,12 @@ export function ImageUploadDialog({
             </Button>
           </DialogFooter>
         </form>
+        <MediaPicker
+          open={mediaPickerOpen}
+          onOpenChange={setMediaPickerOpen}
+          onSelect={(url) => applyMedia(url)}
+          folder="uploads"
+        />
       </DialogContent>
     </Dialog>
   );

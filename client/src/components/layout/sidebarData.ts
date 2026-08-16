@@ -40,6 +40,7 @@ import {
   Database,
   ShoppingCart,
   Package,
+  Images,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -182,6 +183,12 @@ export const allNavItems: NavItem[] = [
   },
   { id: 'management', title: 'الإدارة', href: '/admin/management', icon: SettingsIcon },
   { id: 'content', title: 'المحتوى', href: '/admin/content/content', icon: FileEdit },
+  {
+    id: 'media-library',
+    title: 'مكتبة الوسائط',
+    href: '/admin/content/media-library',
+    icon: Images,
+  },
   { id: 'publishing', title: 'النشر', href: '/admin/content/publishing', icon: Send },
   {
     id: 'digital-marketing',
@@ -246,6 +253,12 @@ export const allToolsGroups: NavGroup[] = [
     items: [
       { id: 'management', title: 'الإدارة', href: '/admin/management', icon: SettingsIcon },
       { id: 'content', title: 'المحتوى', href: '/admin/content/content', icon: FileEdit },
+      {
+        id: 'media-library',
+        title: 'مكتبة الوسائط',
+        href: '/admin/content/media-library',
+        icon: Images,
+      },
       { id: 'publishing', title: 'النشر', href: '/admin/content/publishing', icon: Send },
     ],
   },

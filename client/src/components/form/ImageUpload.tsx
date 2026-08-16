@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useImageUpload } from '@/hooks/form/useImageUpload';
 import { cn } from '@/lib/utils';
+import MediaPicker from '@/components/form/MediaPicker';
 
 /**
  * ImageUpload - مكون رفع الصور مع Drag & Drop ومعاينة
@@ -52,6 +53,7 @@ export default function ImageUpload({
   const [dragActive, setDragActive] = useState(false);
   const [showManualUrl, setShowManualUrl] = useState(false);
   const [manualUrl, setManualUrl] = useState('');
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { uploading, uploadImage } = useImageUpload({
@@ -62,7 +64,9 @@ export default function ImageUpload({
 
   const handleFile = useCallback(
     async (file: File) => {
-      if (disabled || uploading) {return;}
+      if (disabled || uploading) {
+        return;
+      }
       await uploadImage(file);
     },
     [disabled, uploading, uploadImage]
@@ -152,7 +156,17 @@ export default function ImageUpload({
               ) : (
                 <Upload className="h-4 w-4" />
               )}
-              <span className="mr-1">تغيير</span>
+              <span className="mr-1">رفع ملف</span>
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setMediaPickerOpen(true)}
+              disabled={disabled || uploading}
+            >
+              <ImageIcon className="h-4 w-4" />
+              <span className="mr-1">اختيار من المكتبة</span>
             </Button>
             <Button
               type="button"
@@ -213,6 +227,22 @@ export default function ImageUpload({
                 <p className="text-xs text-muted-foreground/70">
                   الحد الأقصى: {maxSizeMB}MB | الأنواع: JPG, PNG, WebP, GIF
                 </p>
+                <div
+                  className="mt-2 flex flex-wrap justify-center gap-2"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <Button type="button" size="sm" onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="ml-1.5 h-4 w-4" /> رفع ملف
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setMediaPickerOpen(true)}
+                  >
+                    <ImageIcon className="ml-1.5 h-4 w-4" /> اختيار من مكتبة الوسائط
+                  </Button>
+                </div>
               </>
             )}
           </div>
@@ -266,6 +296,13 @@ export default function ImageUpload({
           )}
         </div>
       )}
+
+      <MediaPicker
+        open={mediaPickerOpen}
+        onOpenChange={setMediaPickerOpen}
+        folder={folder}
+        onSelect={(url) => onChange(url)}
+      />
     </div>
   );
 }

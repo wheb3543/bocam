@@ -14,7 +14,6 @@ interface UploadFile {
   preview: string;
   status: 'pending' | 'uploading' | 'success' | 'error';
   error?: string;
-  optimized?: boolean;
 }
 
 interface BulkImageUploadProps {
@@ -25,67 +24,27 @@ interface BulkImageUploadProps {
 }
 
 /**
- * دالة تحسين الصور
- */
-const optimizeImage = (file: File, maxWidth = 1920, quality = 0.85): Promise<Blob> => {
-  return new Promise((resolve, reject) => {
-    const img = new window.Image();
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    img.onload = () => {
-      let width = img.width;
-      let height = img.height;
-
-      // تغيير الحجم إذا كانت الصورة كبيرة جداً
-      if (width > maxWidth) {
-        height = Math.round((height * maxWidth) / width);
-        width = maxWidth;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      if (ctx) {
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              resolve(blob);
-            } else {
-              reject(new Error('فشل في تحسين الصورة'));
-            }
-          },
-          'image/jpeg',
-          quality
-        );
-      } else {
-        reject(new Error('فشل في الحصول على سياق الرسم'));
-      }
-    };
-
-    img.onerror = () => reject(new Error('فشل في تحميل الصورة'));
-    img.src = URL.createObjectURL(file);
-  });
-};
-
-/**
- * BulkImageUpload - مكون رفع الصور الجماعي مع تحسين
+ * BulkImageUpload - مكون رفع الصور الجماعي مع معالجة خادمية
  */
 export function BulkImageUpload({
   onUpload,
-  maxFileSize = 5 * 1024 * 1024, // 5MB
+  maxFileSize = 10 * 1024 * 1024,
   maxFiles = 20,
-  acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+  acceptedTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/avif',
+    'image/gif',
+    'image/svg+xml',
+  ],
 }: BulkImageUploadProps) {
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [isOptimizing, setIsOptimizing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const handleFiles = useCallback(
-    async (newFiles: File[]) => {
+    (newFiles: File[]) => {
       const validateFile = (file: File): string | null => {
         if (!acceptedTypes.includes(file.type)) {
           return 'نوع الملف غير مدعوم';
@@ -100,52 +59,18 @@ export function BulkImageUpload({
         return;
       }
 
-      const uploadFiles: UploadFile[] = [];
-      const filesArray = Array.from(newFiles);
-
-      for (const file of filesArray) {
+      const uploadFiles: UploadFile[] = newFiles.map((file) => {
         const error = validateFile(file);
         if (error) {
-          uploadFiles.push({
+          return {
             file,
             preview: '',
             status: 'error',
             error,
-          });
-          continue;
+          };
         }
-
-        try {
-          setIsOptimizing(true);
-
-          // تحسين الصورة
-          const optimizedBlob = await optimizeImage(file);
-          const optimizedFile = new File([optimizedBlob], file.name, {
-            type: 'image/jpeg',
-            lastModified: Date.now(),
-          });
-
-          const preview = URL.createObjectURL(optimizedFile);
-
-          uploadFiles.push({
-            file: optimizedFile,
-            preview,
-            status: 'pending',
-            optimized: true,
-          });
-        } catch {
-          // إذا فشل التحسين، استخدم الصورة الأصلية
-          const preview = URL.createObjectURL(file);
-          uploadFiles.push({
-            file,
-            preview,
-            status: 'pending',
-            optimized: false,
-          });
-        } finally {
-          setIsOptimizing(false);
-        }
-      }
+        return { file, preview: URL.createObjectURL(file), status: 'pending' };
+      });
 
       setFiles((prev) => [...prev, ...uploadFiles]);
     },
@@ -203,7 +128,7 @@ export function BulkImageUpload({
         prev.map((f) => (f.status === 'pending' ? { ...f, status: 'success' } : f))
       );
 
-      toast.success(`تم رفع ${pendingFiles.length} صورة بنجاح`);
+      toast.success(`تم رفع ${pendingFiles.length} صورة وتحويلها إلى AVIF`);
     } catch {
       setFiles((prev) =>
         prev.map((f) =>
@@ -219,7 +144,6 @@ export function BulkImageUpload({
   const pendingCount = files.filter((f) => f.status === 'pending').length;
   const successCount = files.filter((f) => f.status === 'success').length;
   const errorCount = files.filter((f) => f.status === 'error').length;
-  const optimizedCount = files.filter((f) => f.optimized).length;
 
   return (
     <Card>
@@ -251,32 +175,23 @@ export function BulkImageUpload({
               accept={acceptedTypes.join(',')}
               onChange={handleInputChange}
               className="hidden"
-              disabled={isUploading || isOptimizing}
+              disabled={isUploading}
             />
-            <Button type="button" variant="outline" disabled={isUploading || isOptimizing}>
+            <Button type="button" variant="outline" disabled={isUploading}>
               اختر الملفات
             </Button>
           </label>
           <p className="text-xs text-muted-foreground mt-2">
-            الحد الأقصى: {maxFiles} ملف، {Math.round(maxFileSize / 1024 / 1024)}MB لكل ملف
+            الحد الأقصى: {maxFiles} ملف، {Math.round(maxFileSize / 1024 / 1024)}MB لكل ملف. تتم
+            المعالجة والتحويل إلى AVIF على الخادم.
           </p>
         </div>
-
-        {/* معلومات التحسين */}
-        {isOptimizing && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            جاري تحسين الصور...
-          </div>
-        )}
 
         {/* قائمة الملفات */}
         {files.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                {files.length} ملف • {optimizedCount} محسّن
-              </span>
+              <span className="text-muted-foreground">{files.length} ملف في قائمة الرفع</span>
               <Button
                 type="button"
                 variant="ghost"
@@ -302,7 +217,6 @@ export function BulkImageUpload({
                     <p className="text-sm font-medium truncate">{file.file.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {Math.round(file.file.size / 1024)}KB
-                      {file.optimized && ' • محسّن'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

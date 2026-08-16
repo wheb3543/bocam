@@ -206,8 +206,18 @@ export default function ContentManagementPage() {
             <div className="space-y-4">
               <BulkImageUpload
                 onUpload={async (files) => {
-                  // سيتم تنفيذ رفع الصور هنا
-                  console.warn('Uploading files:', files);
+                  const formData = new FormData();
+                  files.forEach((file) => formData.append('files', file));
+                  formData.append('folder', 'uploads');
+                  const response = await fetch('/api/upload/batch', {
+                    method: 'POST',
+                    body: formData,
+                  });
+                  const result = await response.json().catch(() => null);
+                  if (!response.ok) {
+                    throw new Error(result?.error || 'فشل رفع الصور');
+                  }
+                  await images.refetch();
                 }}
               />
               <ImageList
