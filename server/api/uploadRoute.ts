@@ -1,21 +1,59 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
+import { Router } from 'express';
 import multer, { FileFilterCallback } from 'multer';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
+import { and, eq, isNull } from 'drizzle-orm';
 import { storagePut } from '../services/storage';
 import { processImageToAvif } from '../services/imageProcessor';
 import { createLogger } from '../_core/logger';
 import { asMulterMiddleware } from '../_core/expressCompatibility';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
-import { images } from '../../drizzle/schema';
+import { images, media, mediaFolders } from '../../drizzle/schema';
+import { createFolderZipBuffer } from '../services/zipService';
+import {
+  createStorageName,
+  decodeFileName,
+  getMediaKind,
+  getOriginalExtension,
+  type MediaKind,
+} from '../services/mediaFiles';
 
 type MulterFile = {
   originalname: string;
   mimetype: string;
   buffer: Buffer;
+  size: number;
 };
 
 const logger = createLogger('upload');
+const MAX_MEDIA_FILE_SIZE = 100 * 1024 * 1024;
+
+const allowedTypes = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+  'image/gif',
+  'image/svg+xml',
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'audio/mpeg',
+  'audio/wav',
+  'audio/ogg',
+  'audio/mp4',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain',
+  'text/csv',
+  'application/zip',
+  'application/x-zip-compressed',
+]);
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   const cookieHeader = req.headers.cookie;
@@ -49,48 +87,60 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: MAX_MEDIA_FILE_SIZE },
   fileFilter: (_req: unknown, file: MulterFile, callback: FileFilterCallback) => {
-    const allowedTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'image/avif',
-      'image/gif',
-      'image/svg+xml',
-    ];
-    if (allowedTypes.includes(file.mimetype)) {
+    if (allowedTypes.has(file.mimetype)) {
       callback(null, true);
       return;
     }
-    callback(new Error(`نوع الملف غير مدعوم: ${file.mimetype}`));
+    callback(new Error(`نوع الوسائط غير مدعوم: ${file.mimetype}`));
   },
 });
 
-function createStorageName(originalName: string, extension: string) {
-  // فك ترميز الأسماء وتوليد اسم آمن للتخزين مع الحفاظ على الأحرف العربية أو تحويلها لبديل آمن
-  let cleanName = 'image';
-  try {
-    const decoded = decodeURIComponent(escape(originalName));
-    cleanName = decoded
-      .replace(/\.[^/.]+$/, '')
-      .replace(/[\s\/\?<>\\:\*\|":\+]+/g, '_')
-      .replace(/[^a-zA-Z0-9-_؀-ۿ]/g, '_');
-    if (!cleanName || cleanName === '_') {
-      cleanName = 'image';
+async function getFolder(folderId?: number) {
+  const db = await ensureDatabaseAvailable();
+  if (folderId) {
+    const [folder] = await db
+      .select()
+      .from(mediaFolders)
+      .where(eq(mediaFolders.id, folderId))
+      .limit(1);
+    if (folder) {
+      return folder;
     }
-  } catch {
-    cleanName = 'image';
   }
-  const randomSuffix = crypto.randomBytes(6).toString('hex');
-  return `${cleanName.substring(0, 40)}-${Date.now()}-${randomSuffix}.${extension}`;
+
+  const [general] = await db
+    .select()
+    .from(mediaFolders)
+    .where(eq(mediaFolders.path, '/general'))
+    .limit(1);
+  if (general) {
+    return general;
+  }
+
+  const [created] = await db
+    .insert(mediaFolders)
+    .values({ name: 'عام', path: '/general', parentId: null })
+    .$returningId();
+  const [folder] = await db
+    .select()
+    .from(mediaFolders)
+    .where(eq(mediaFolders.id, Number(created.id)))
+    .limit(1);
+  if (!folder) {
+    throw new Error('تعذّر إعداد المجلد العام للوسائط');
+  }
+  return folder;
 }
 
-async function indexUploadedImage({
+async function indexUploadedMedia({
   key,
   url,
-  originalName,
-  folder,
+  fileName,
+  type,
+  mimeType,
+  folderId,
   format,
   size,
   width,
@@ -98,8 +148,52 @@ async function indexUploadedImage({
 }: {
   key: string;
   url: string;
-  originalName: string;
-  folder: string;
+  fileName: string;
+  type: MediaKind;
+  mimeType: string;
+  folderId: number;
+  format: string;
+  size: number;
+  width?: number;
+  height?: number;
+}) {
+  const db = await ensureDatabaseAvailable();
+  const [created] = await db
+    .insert(media)
+    .values({
+      key,
+      url,
+      type,
+      mimeType,
+      fileName,
+      altAr: type === 'image' ? fileName : undefined,
+      folderId,
+      format,
+      size,
+      width,
+      height,
+      status: 'published',
+      isActive: 'yes',
+      publishedAt: new Date(),
+    })
+    .$returningId();
+  return Number(created.id);
+}
+
+async function indexLegacyImage({
+  key,
+  url,
+  fileName,
+  folderName,
+  format,
+  size,
+  width,
+  height,
+}: {
+  key: string;
+  url: string;
+  fileName: string;
+  folderName: string;
   format: string;
   size: number;
   width?: number;
@@ -111,8 +205,8 @@ async function indexUploadedImage({
     .values({
       key: `upload:${key}`,
       url,
-      altAr: originalName,
-      section: folder,
+      altAr: fileName,
+      section: folderName,
       width,
       height,
       format,
@@ -122,33 +216,71 @@ async function indexUploadedImage({
       publishedAt: new Date(),
     })
     .$returningId();
-
   return Number(created.id);
 }
 
-async function uploadAndIndexImage(file: MulterFile, folder: string) {
-  const processed = await processImageToAvif(file.buffer, file.mimetype);
-  const storageKey = `${folder}/${createStorageName(file.originalname, processed.extension)}`;
-  const { key, url } = await storagePut(storageKey, processed.buffer, processed.mimeType);
-  const id = await indexUploadedImage({
+async function uploadAndIndexMedia(file: MulterFile, folderId?: number) {
+  const originalName = decodeFileName(file.originalname);
+  const type = getMediaKind(file.mimetype);
+  const folder = await getFolder(folderId);
+
+  let buffer = file.buffer;
+  let mimeType = file.mimetype;
+  let extension = getOriginalExtension(originalName, file.mimetype);
+  let width: number | undefined;
+  let height: number | undefined;
+
+  if (type === 'image') {
+    const processed = await processImageToAvif(file.buffer, file.mimetype);
+    buffer = processed.buffer;
+    mimeType = processed.mimeType;
+    extension = processed.extension;
+    width = processed.width;
+    height = processed.height;
+  }
+
+  const storageKey = `media/folder-${folder.id}/${createStorageName(type, extension)}`;
+  const { key, url } = await storagePut(storageKey, buffer, mimeType);
+  const mediaId = await indexUploadedMedia({
     key,
     url,
-    originalName: file.originalname,
-    folder,
-    format: processed.extension,
-    size: processed.buffer.length,
-    width: processed.width,
-    height: processed.height,
+    fileName: originalName,
+    type,
+    mimeType,
+    folderId: folder.id,
+    format: extension,
+    size: buffer.length,
+    width,
+    height,
   });
 
+  const imageId =
+    type === 'image'
+      ? await indexLegacyImage({
+          key,
+          url,
+          fileName: originalName,
+          folderName: folder.name,
+          format: extension,
+          size: buffer.length,
+          width,
+          height,
+        })
+      : undefined;
+
   return {
-    id,
+    mediaId,
+    imageId,
     key,
     url,
-    format: processed.extension,
-    size: processed.buffer.length,
-    width: processed.width,
-    height: processed.height,
+    type,
+    mimeType,
+    fileName: originalName,
+    format: extension,
+    size: buffer.length,
+    width,
+    height,
+    folderId: folder.id,
   };
 }
 
@@ -165,10 +297,10 @@ export function createUploadRouter(): Router {
         if (!file) {
           return res.status(400).json({ error: 'لم يتم إرسال ملف' });
         }
-        const folder = (req.body?.folder as string) || 'uploads';
-        return res.status(201).json(await uploadAndIndexImage(file, folder));
+        const folderId = Number(req.body?.folderId) || undefined;
+        return res.status(201).json(await uploadAndIndexMedia(file, folderId));
       } catch (error) {
-        logger.error('Single upload error:', error);
+        logger.error('Single media upload error:', error);
         return res.status(500).json({ error: 'حدث خطأ أثناء رفع الملف' });
       }
     }
@@ -181,22 +313,71 @@ export function createUploadRouter(): Router {
     async (req: Request, res: Response) => {
       try {
         const files = (req.files || []) as MulterFile[];
-        if (files.length === 0) {
+        if (!files.length) {
           return res.status(400).json({ error: 'لم يتم إرسال ملفات' });
         }
-        const folder = (req.body?.folder as string) || 'uploads';
-        const uploaded = await Promise.all(files.map((file) => uploadAndIndexImage(file, folder)));
+        const folderId = Number(req.body?.folderId) || undefined;
+        const uploaded = await Promise.all(
+          files.map((file) => uploadAndIndexMedia(file, folderId))
+        );
         return res.status(201).json({ files: uploaded });
       } catch (error) {
-        logger.error('Batch upload error:', error);
+        logger.error('Batch media upload error:', error);
         return res.status(500).json({ error: 'حدث خطأ أثناء رفع الملفات' });
+      }
+    }
+  );
+
+  router.get(
+    '/api/media/folders/:folderId/download',
+    requireAuth,
+    async (req: Request, res: Response) => {
+      try {
+        const folderId = Number(req.params.folderId);
+        if (!Number.isInteger(folderId) || folderId < 1) {
+          return res.status(400).json({ error: 'معرف المجلد غير صالح' });
+        }
+
+        const db = await ensureDatabaseAvailable();
+        const [folder] = await db
+          .select()
+          .from(mediaFolders)
+          .where(eq(mediaFolders.id, folderId))
+          .limit(1);
+        if (!folder) {
+          return res.status(404).json({ error: 'المجلد غير موجود' });
+        }
+
+        const files = await db
+          .select({ fileName: media.fileName, key: media.key, url: media.url })
+          .from(media)
+          .where(and(eq(media.folderId, folderId), isNull(media.deletedAt)));
+        if (!files.length) {
+          return res.status(404).json({ error: 'المجلد فارغ' });
+        }
+
+        const zip = await createFolderZipBuffer(
+          files.map((file) => ({
+            name: file.fileName || file.key.split('/').pop() || 'media-file',
+            url: file.url,
+          }))
+        );
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${encodeURIComponent(folder.name)}.zip"`
+        );
+        return res.status(200).send(zip);
+      } catch (error) {
+        logger.error('Folder ZIP download error:', error);
+        return res.status(500).json({ error: 'تعذّر تجهيز ملف ZIP للمجلد' });
       }
     }
   );
 
   router.use((error: unknown, _req: Request, res: Response, next: NextFunction) => {
     if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'حجم الملف يتجاوز الحد المسموح (10MB)' });
+      return res.status(400).json({ error: 'حجم الملف يتجاوز الحد المسموح (100MB)' });
     }
     if (error instanceof Error) {
       return res.status(400).json({ error: error.message });

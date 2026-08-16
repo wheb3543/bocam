@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,20 +6,28 @@ import { Input } from '@/components/ui/input';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import {
+  CheckSquare,
+  ChevronDown,
+  ChevronLeft,
   Copy,
-  FolderPlus,
+  Download,
+  FileArchive,
+  FileText,
   Folder,
   FolderOpen,
-  Images,
+  FolderPlus,
   Loader2,
+  Music2,
   RefreshCw,
   Search,
+  Square,
   Trash2,
   Upload,
-  Download,
-  CheckSquare,
-  Square,
+  X,
 } from 'lucide-react';
+
+type MediaTypeFilter = 'all' | 'image' | 'video' | 'audio' | 'document' | 'other';
+type UploadableFiles = Array<File> | { length: number; [index: number]: File };
 
 function formatBytes(value: number | null | undefined) {
   if (!value) {
@@ -30,228 +38,354 @@ function formatBytes(value: number | null | undefined) {
   return `${(value / 1024 ** index).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
 }
 
+function typeLabel(type: Exclude<MediaTypeFilter, 'all'>) {
+  const labels = {
+    image: 'صور',
+    video: 'فيديو',
+    audio: 'صوت',
+    document: 'مستندات',
+    other: 'ملفات أخرى',
+  };
+  return labels[type];
+}
+
+function toUploadArray(files: UploadableFiles) {
+  return Array.from(files as ArrayLike<File>);
+}
+
 export default function MediaLibraryPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const folderInputRef = useRef<HTMLInputElement>(null);
-
+  const directoryInputRef = useRef<HTMLInputElement>(null);
+  const folderPathCache = useRef<Map<string, number>>(new Map());
   const [search, setSearch] = useState('');
-  const [selectedFolder, setSelectedFolder] = useState<string>('عام');
-  const [newFolderName, setNewFolderName] = useState('');
-  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<MediaTypeFilter>('all');
+  const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [targetMoveFolder, setTargetMoveFolder] = useState<string>('');
-  const [isMoving, setIsMoving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [folderName, setFolderName] = useState('');
+  const [expandedFolders, setExpandedFolders] = useState<number[]>([]);
+  const [draggedMediaId, setDraggedMediaId] = useState<number | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<number[]>([]);
+
+  const utils = trpc.useUtils();
+  const { data: folders = [], isLoading: foldersLoading } =
+    trpc.content.media.folders.list.useQuery();
+  const generalFolder = folders.find((folder) => folder.path === '/general');
+  const effectiveFolderId = selectedFolderId ?? generalFolder?.id;
+
+  useEffect(() => {
+    folderPathCache.current = new Map(folders.map((folder) => [folder.path, folder.id]));
+  }, [folders]);
+
+  useEffect(() => {
+    if (!selectedFolderId && generalFolder?.id) {
+      setSelectedFolderId(generalFolder.id);
+    }
+  }, [generalFolder?.id, selectedFolderId]);
 
   const {
-    data: images = [],
+    data: items = [],
     isLoading,
+    isError,
+    error,
     refetch,
-  } = trpc.content.images.list.useQuery({
+  } = trpc.content.media.list.useQuery({
+    folderId: effectiveFolderId,
+    type: typeFilter === 'all' ? undefined : typeFilter,
     search: search.trim() || undefined,
   });
 
-  const deleteMutation = trpc.content.images.delete.useMutation({
-    onSuccess: () => {
-      toast.success('تم حذف الصور المحددة بنجاح');
+  const createFolderMutation = trpc.content.media.folders.create.useMutation({
+    onSuccess: async (folder) => {
+      await utils.content.media.folders.list.invalidate();
+      setSelectedFolderId(folder.id);
+      setFolderName('');
+      setIsCreatingFolder(false);
+      toast.success(`تم إنشاء مجلد «${folder.name}»`);
+    },
+    onError: (mutationError) => toast.error(`تعذّر إنشاء المجلد: ${mutationError.message}`),
+  });
+
+  const moveManyMutation = trpc.content.media.moveMany.useMutation({
+    onSuccess: async ({ moved }) => {
+      await utils.content.media.list.invalidate();
       setSelectedIds([]);
-      refetch();
+      toast.success(`تم نقل ${moved} عنصر بنجاح`);
     },
-    onError: (err) => toast.error(`تعذّر الحذف: ${err.message}`),
+    onError: (mutationError) => toast.error(`تعذّر نقل العناصر: ${mutationError.message}`),
   });
 
-  const updateFolderMutation = trpc.content.images.update.useMutation({
-    onSuccess: () => {
-      refetch();
+  const deleteManyMutation = trpc.content.media.deleteMany.useMutation({
+    onSuccess: async ({ deleted }) => {
+      await utils.content.media.list.invalidate();
+      setSelectedIds([]);
+      setPendingDelete([]);
+      toast.success(`تم حذف ${deleted} عنصر من المكتبة`);
     },
+    onError: (mutationError) => toast.error(`تعذّر حذف العناصر: ${mutationError.message}`),
   });
 
-  // قائمة المجلدات الفريدة
-  const folders = useMemo(() => {
-    const set = new Set<string>(['عام']);
-    images.forEach((img) => {
-      if (img.section) {
-        set.add(img.section);
+  const childrenByParent = useMemo(() => {
+    const grouped = new Map<number | null, typeof folders>();
+    folders.forEach((folder) => {
+      const parent = folder.parentId ?? null;
+      grouped.set(parent, [...(grouped.get(parent) || []), folder]);
+    });
+    return grouped;
+  }, [folders]);
+
+  const folderCounts = useMemo(() => {
+    const counts = new Map<number, number>();
+    items.forEach((item) => {
+      if (item.folderId) {
+        counts.set(item.folderId, (counts.get(item.folderId) || 0) + 1);
       }
     });
-    return Array.from(set).sort();
-  }, [images]);
+    return counts;
+  }, [items]);
 
-  // الصور المفلترة بالمجلد الحالي
-  const filteredImages = useMemo(() => {
-    return images.filter((img) => {
-      const folderName = img.section || 'عام';
-      return folderName === selectedFolder;
-    });
-  }, [images, selectedFolder]);
+  const selectedFolder = folders.find((folder) => folder.id === effectiveFolderId);
 
   const handleCopy = async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
-      toast.success('تم نسخ رابط الصورة');
+      toast.success('تم نسخ رابط الوسيط');
     } catch {
       toast.error('تعذّر نسخ الرابط');
     }
   };
 
-  const handleCreateFolder = (e: React.FormEvent) => {
-    e.preventDefault();
-    const name = newFolderName.trim();
-    if (!name) {
-      return;
+  const uploadChunk = async (files: File[], folderId: number) => {
+    const body = new FormData();
+    files.forEach((file) => body.append('files', file));
+    body.append('folderId', String(folderId));
+    const response = await fetch('/api/upload/batch', { method: 'POST', body });
+    const result = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(result?.error || 'فشل رفع الملفات');
     }
-    if (folders.includes(name)) {
-      toast.error('المجلد موجود بالفعل');
-      return;
-    }
-    setSelectedFolder(name);
-    setNewFolderName('');
-    setIsCreatingFolder(false);
-    toast.success(`تم إنشاء المجلد "${name}" بنجاح`);
+    return result.files?.length || files.length;
   };
 
-  const handleUploadFiles = async (
-    fileList: Array<File> | { length: number; [index: number]: File }
-  ) => {
-    const filesArray = Array.from(fileList as ArrayLike<File>);
-    if (!filesArray.length) {
+  const uploadFiles = async (input: UploadableFiles, targetFolderId = effectiveFolderId) => {
+    const files = toUploadArray(input);
+    if (!files.length || !targetFolderId) {
       return;
     }
-
     setIsUploading(true);
     try {
-      const body = new FormData();
-      filesArray.forEach((file) => body.append('files', file));
-      body.append('folder', selectedFolder);
-
-      const res = await fetch('/api/upload/batch', { method: 'POST', body });
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        throw new Error(data?.error || 'فشل رفع الملفات');
+      let uploadedCount = 0;
+      for (let index = 0; index < files.length; index += 20) {
+        uploadedCount += await uploadChunk(files.slice(index, index + 20), targetFolderId);
       }
-
-      toast.success(
-        `تم رفع ${data.files?.length || filesArray.length} ملف بنجاح وتحويل الصور إلى AVIF`
-      );
-      await refetch();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'فشل رفع الملفات');
+      await utils.content.media.list.invalidate();
+      toast.success(`تم رفع وفهرسة ${uploadedCount} ملف في «${selectedFolder?.name || 'المجلد'}»`);
+    } catch (uploadError) {
+      toast.error(uploadError instanceof Error ? uploadError.message : 'فشل رفع الملفات');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-      if (folderInputRef.current) {
-        folderInputRef.current.value = '';
+      if (directoryInputRef.current) {
+        directoryInputRef.current.value = '';
       }
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleUploadFiles(e.dataTransfer.files);
+  const ensureFolderPath = async (segments: string[]) => {
+    let parentId: number | null = null;
+    let currentPath = '';
+    for (const rawSegment of segments) {
+      const segment = rawSegment.trim();
+      if (!segment) {
+        continue;
+      }
+      currentPath = `${currentPath}/${segment}`;
+      const existingId = folderPathCache.current.get(currentPath);
+      if (existingId) {
+        parentId = existingId;
+      } else {
+        const created = await createFolderMutation.mutateAsync({ name: segment, parentId });
+        parentId = created.id;
+        folderPathCache.current.set(currentPath, created.id);
+      }
     }
+    return parentId || effectiveFolderId;
+  };
+
+  const uploadDirectory = async (input: UploadableFiles) => {
+    const files = toUploadArray(input) as Array<File & { webkitRelativePath?: string }>;
+    if (!files.length) {
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const groups = new Map<string, File[]>();
+      files.forEach((file) => {
+        const relativePath = file.webkitRelativePath || file.name;
+        const directory = relativePath.split('/').slice(0, -1).join('/');
+        groups.set(directory, [...(groups.get(directory) || []), file]);
+      });
+
+      let uploadedCount = 0;
+      for (const [directory, group] of Array.from(groups.entries())) {
+        const folderId = await ensureFolderPath(directory.split('/'));
+        if (!folderId) {
+          throw new Error('تعذّر تجهيز مجلد الرفع');
+        }
+        for (let index = 0; index < group.length; index += 20) {
+          uploadedCount += await uploadChunk(group.slice(index, index + 20), folderId);
+        }
+      }
+      await Promise.all([
+        utils.content.media.folders.list.invalidate(),
+        utils.content.media.list.invalidate(),
+      ]);
+      toast.success(`تم رفع ${uploadedCount} ملف مع الحفاظ على هيكل المجلدات`);
+    } catch (uploadError) {
+      toast.error(uploadError instanceof Error ? uploadError.message : 'فشل رفع المجلد');
+    } finally {
+      setIsUploading(false);
+      if (directoryInputRef.current) {
+        directoryInputRef.current.value = '';
+      }
+    }
+  };
+
+  const toggleSelection = (id: number) => {
+    setSelectedIds((current) =>
+      current.includes(id) ? current.filter((value) => value !== id) : [...current, id]
+    );
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === filteredImages.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(filteredImages.map((i) => i.id));
-    }
+    setSelectedIds(selectedIds.length === items.length ? [] : items.map((item) => item.id));
   };
 
-  const toggleSelectOne = (id: number) => {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
-  };
-
-  const handleBulkDelete = () => {
+  const moveSelection = (folderId: number) => {
     if (!selectedIds.length) {
       return;
     }
-    // eslint-disable-next-line no-alert
-    if (window.confirm(`هل أنت متأكد من حذف ${selectedIds.length} عنصر من مكتبة الوسائط؟`)) {
-      selectedIds.forEach((id) => deleteMutation.mutate({ id }));
+    moveManyMutation.mutate({ ids: selectedIds, folderId });
+  };
+
+  const handleFolderDrop = (event: React.DragEvent, folderId: number) => {
+    event.preventDefault();
+    const mediaId = Number(event.dataTransfer.getData('application/x-sgh-media-id'));
+    if (mediaId) {
+      moveManyMutation.mutate({ ids: [mediaId], folderId });
+      setDraggedMediaId(null);
+      return;
+    }
+    if (event.dataTransfer.files.length) {
+      void uploadFiles(event.dataTransfer.files, folderId);
     }
   };
 
-  const handleBulkMove = async (newFolder: string) => {
-    if (!selectedIds.length || !newFolder) {
+  const downloadFolderZip = () => {
+    if (!effectiveFolderId) {
       return;
     }
-    setIsMoving(true);
-    try {
-      for (const id of selectedIds) {
-        const item = images.find((i) => i.id === id);
-        if (item) {
-          await updateFolderMutation.mutateAsync({
-            id: item.id,
-            key: item.key,
-            url: item.url,
-            altAr: item.altAr || '',
-            section: newFolder,
-            format: item.format || 'avif',
-            status: item.status || 'published',
-            isActive: item.isActive || 'yes',
-          });
-        }
-      }
-      toast.success(`تم نقل ${selectedIds.length} عنصر إلى المجلد "${newFolder}"`);
-      setSelectedIds([]);
-      setTargetMoveFolder('');
-      await refetch();
-    } catch {
-      toast.error('حدث خطأ أثناء نقل العناصر');
-    } finally {
-      setIsMoving(false);
-    }
+    const anchor = document.createElement('a');
+    anchor.href = `/api/media/folders/${effectiveFolderId}/download`;
+    anchor.download = `${selectedFolder?.name || 'media'}.zip`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
   };
 
-  const handleDownloadZip = async () => {
-    if (!filteredImages.length) {
-      toast.error('المجلد فارغ');
-      return;
-    }
-    toast.info('جاري تجهيز وتنزيل ملفات المجلد...');
-    filteredImages.forEach((img, idx) => {
-      setTimeout(() => {
-        const a = document.createElement('a');
-        a.href = img.url;
-        a.download = img.key.split('/').pop() || `media-${img.id}`;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }, idx * 300);
-    });
-    toast.success('تم بدء تنزيل عناصر المجلد');
+  const renderFolder = (folder: (typeof folders)[number], depth = 0): React.ReactNode => {
+    const children = childrenByParent.get(folder.id) || [];
+    const expanded = expandedFolders.includes(folder.id);
+    const active = folder.id === effectiveFolderId;
+    const count = folderCounts.get(folder.id) || 0;
+    return (
+      <React.Fragment key={folder.id}>
+        <button
+          type="button"
+          draggable={false}
+          onClick={() => setSelectedFolderId(folder.id)}
+          onDragOver={(event) => event.preventDefault()}
+          onDrop={(event) => handleFolderDrop(event, folder.id)}
+          className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-right text-sm transition-colors ${
+            active ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100'
+          } ${draggedMediaId ? 'ring-1 ring-transparent hover:ring-blue-300' : ''}`}
+          style={{ paddingRight: `${10 + depth * 18}px` }}
+        >
+          {children.length ? (
+            <span
+              role="button"
+              tabIndex={0}
+              className="rounded p-0.5 hover:bg-black/10"
+              onClick={(event) => {
+                event.stopPropagation();
+                setExpandedFolders((current) =>
+                  current.includes(folder.id)
+                    ? current.filter((id) => id !== folder.id)
+                    : [...current, folder.id]
+                );
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setExpandedFolders((current) =>
+                    current.includes(folder.id)
+                      ? current.filter((id) => id !== folder.id)
+                      : [...current, folder.id]
+                  );
+                }
+              }}
+            >
+              {expanded ? (
+                <ChevronDown className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronLeft className="h-3.5 w-3.5" />
+              )}
+            </span>
+          ) : (
+            <span className="w-4" />
+          )}
+          {active ? (
+            <FolderOpen className="h-4 w-4 shrink-0" />
+          ) : (
+            <Folder className="h-4 w-4 shrink-0 text-amber-500" />
+          )}
+          <span className="min-w-0 flex-1 truncate">{folder.name}</span>
+          <span
+            className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-600'}`}
+          >
+            {count}
+          </span>
+        </button>
+        {expanded && children.map((child) => renderFolder(child, depth + 1))}
+      </React.Fragment>
+    );
   };
+
+  const rootFolders = childrenByParent.get(null) || [];
 
   return (
     <DashboardLayout
-      pageTitle="مكتبة الوسائط المتقدمة"
-      pageDescription="إدارة المجلدات، الرفع المتعدد، النقل، السحب والإفلات، والتنزيل"
+      pageTitle="مكتبة الوسائط"
+      pageDescription="مكتبة موحّدة للصور والفيديو والصوت والمستندات"
     >
-      <div className="space-y-6" dir="rtl">
-        {/* رأس الصفحة */}
+      <div dir="rtl" className="space-y-6">
         <section className="rounded-2xl bg-gradient-to-l from-blue-700 via-blue-600 to-cyan-600 p-6 text-white shadow-sm">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-blue-100">
-                <Images className="h-5 w-5" />
-                <span className="text-sm font-medium">مكتبة الوسائط الذكية</span>
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <div className="mb-2 flex items-center gap-2 text-blue-100">
+                <FileArchive className="h-5 w-5" /> مركز الوسائط الشامل
               </div>
-              <h1 className="text-2xl font-bold">إدارة المجلدات والملفات</h1>
-              <p className="max-w-2xl text-sm leading-6 text-blue-100">
-                رفع مجلدات كاملة، تنظيم الملفات في مجلدات، السحب والإفلات، نقل العناصر، وتحويل الصور
-                إلى AVIF تلقائياً.
+              <h1 className="text-2xl font-bold">كل ملفات المشروع في مكان واحد</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-100">
+                الصور تُضغط إلى AVIF تلقائياً، أما الفيديو والصوت والمستندات فتبقى بصيغها الأصلية مع
+                فهرسة كاملة.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="secondary"
                 className="bg-white text-blue-700 hover:bg-blue-50"
@@ -266,310 +400,356 @@ export default function MediaLibraryPage() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
               >
-                {isUploading ? (
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Upload className="ml-2 h-4 w-4" />
-                )}
+                <Upload className="ml-2 h-4 w-4" />
                 رفع ملفات
               </Button>
               <Button
                 variant="secondary"
                 className="bg-white text-blue-700 hover:bg-blue-50"
-                onClick={() => folderInputRef.current?.click()}
+                onClick={() => directoryInputRef.current?.click()}
                 disabled={isUploading}
               >
                 <FolderOpen className="ml-2 h-4 w-4" />
-                رفع مجلد كامل
+                رفع مجلد
               </Button>
             </div>
           </div>
         </section>
 
-        {/* مخفي للرفع */}
         <input
-          type="file"
           ref={fileInputRef}
+          type="file"
           className="hidden"
           multiple
-          accept="image/*"
-          onChange={(e) => e.target.files && handleUploadFiles(e.target.files)}
+          onChange={(event) => {
+            if (event.target.files) {
+              void uploadFiles(event.target.files);
+            }
+          }}
         />
         <input
+          ref={directoryInputRef}
           type="file"
-          ref={folderInputRef}
           className="hidden"
-          // @ts-expect-error webkitdirectory is supported in modern browsers
-          webkitdirectory="true"
-          directory=""
-          multiple
-          onChange={(e) => e.target.files && handleUploadFiles(e.target.files)}
+          multiple // @ts-expect-error Browser directory upload attribute
+          webkitdirectory=""
+          onChange={(event) => {
+            if (event.target.files) {
+              void uploadDirectory(event.target.files);
+            }
+          }}
         />
 
-        {/* حوار إنشاء مجلد */}
         {isCreatingFolder && (
-          <Card className="border-blue-200 bg-blue-50/50">
-            <CardContent className="p-4 flex items-center gap-3">
-              <FolderPlus className="h-5 w-5 text-blue-600" />
+          <Card className="border-blue-200 bg-blue-50/60">
+            <CardContent className="flex flex-wrap items-center gap-3 p-4">
+              <FolderPlus className="h-5 w-5 text-blue-700" />
               <Input
-                placeholder="اسم المجلد الجديد..."
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
+                value={folderName}
+                onChange={(event) => setFolderName(event.target.value)}
+                placeholder="اسم المجلد الجديد"
                 className="max-w-sm bg-white"
               />
-              <Button onClick={handleCreateFolder} size="sm">
+              <Button
+                onClick={() =>
+                  createFolderMutation.mutate({
+                    name: folderName,
+                    parentId: effectiveFolderId ?? null,
+                  })
+                }
+                disabled={!folderName.trim() || createFolderMutation.isPending}
+              >
                 إنشاء
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => setIsCreatingFolder(false)}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setFolderName('');
+                  setIsCreatingFolder(false);
+                }}
+              >
                 إلغاء
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {/* المحتوى الرئيسي: شجرة المجلدات يميناً والعرض يساراً */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* شجرة المجلدات الجانبية */}
-          <Card className="lg:col-span-1 shadow-sm">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b">
-                <span className="font-semibold text-gray-700 flex items-center gap-2">
-                  <Folder className="h-4 w-4 text-blue-600" />
-                  المجلدات
-                </span>
-                <span className="text-xs text-gray-500">{folders.length} مجلد</span>
-              </div>
-              <div className="space-y-1">
-                {folders.map((folder) => {
-                  const count = images.filter((i) => (i.section || 'عام') === folder).length;
-                  const isSelected = selectedFolder === folder;
-                  return (
-                    <button
-                      key={folder}
-                      onClick={() => setSelectedFolder(folder)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-                        isSelected
-                          ? 'bg-blue-600 text-white font-medium shadow-sm'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2 truncate">
-                        {isSelected ? (
-                          <FolderOpen className="h-4 w-4" />
-                        ) : (
-                          <Folder className="h-4 w-4" />
-                        )}
-                        {folder}
-                      </span>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${isSelected ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-600'}`}
-                      >
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="pt-4 border-t space-y-2">
+        {pendingDelete.length > 0 && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
+              <span className="font-medium text-red-800">
+                هل تريد حذف {pendingDelete.length} عنصر من المكتبة؟ سيُنفّذ الحذف الناعم فقط.
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setPendingDelete([])}>
+                  إلغاء
+                </Button>
                 <Button
-                  variant="outline"
+                  variant="destructive"
                   size="sm"
-                  className="w-full justify-start text-gray-700"
-                  onClick={handleDownloadZip}
+                  onClick={() => deleteManyMutation.mutate({ ids: pendingDelete })}
                 >
-                  <Download className="ml-2 h-4 w-4 text-blue-600" />
-                  تنزيل ملفات المجلد (ZIP)
+                  تأكيد الحذف
                 </Button>
               </div>
             </CardContent>
           </Card>
+        )}
 
-          {/* منطقة العرض وسحب وإفلات الملفات */}
-          <div className="lg:col-span-3 space-y-4">
-            {/* شريط البحث والإجراءات الجماعية */}
-            <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-4 rounded-xl border shadow-sm">
-              <div className="relative w-full sm:w-72">
-                <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="بحث في الملفات..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pr-9"
-                />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[270px_minmax(0,1fr)]">
+          <Card className="h-fit shadow-sm">
+            <CardContent className="p-3">
+              <div className="mb-3 flex items-center justify-between border-b px-1 pb-3">
+                <span className="font-semibold text-slate-800">شجرة المجلدات</span>
+                <span className="text-xs text-slate-500">{folders.length} مجلد</span>
               </div>
-
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                {selectedIds.length > 0 && (
-                  <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200">
-                    <span className="text-xs font-medium text-blue-700">
-                      محدد: {selectedIds.length}
-                    </span>
-                    <select
-                      className="text-xs border rounded px-2 py-1 bg-white"
-                      value={targetMoveFolder}
-                      onChange={(e) => handleBulkMove(e.target.value)}
-                      disabled={isMoving}
-                    >
-                      <option value="">نقل إلى مجلد...</option>
-                      {folders
-                        .filter((f) => f !== selectedFolder)
-                        .map((f) => (
-                          <option key={f} value={f}>
-                            {f}
-                          </option>
-                        ))}
-                    </select>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={handleBulkDelete}
-                    >
-                      حذف
-                    </Button>
-                  </div>
+              <div className="space-y-1">
+                {foldersLoading ? (
+                  <Loader2 className="m-4 h-5 w-5 animate-spin text-blue-600" />
+                ) : (
+                  rootFolders.map((folder) => renderFolder(folder))
                 )}
-
-                <Button variant="outline" size="sm" onClick={() => refetch()} title="تحديث">
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
               </div>
-            </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4 w-full justify-start"
+                onClick={downloadFolderZip}
+                disabled={!effectiveFolderId}
+              >
+                <Download className="ml-2 h-4 w-4 text-blue-600" />
+                تنزيل المجلد ZIP
+              </Button>
+            </CardContent>
+          </Card>
 
-            {/* منطقة السحب والإفلات */}
-            <div
-              onDragOver={(e) => {
-                e.preventDefault();
-                setIsDraggingOver(true);
-              }}
-              onDragLeave={() => setIsDraggingOver(false)}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
-                isDraggingOver
-                  ? 'border-blue-600 bg-blue-50/80 scale-[1.01]'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
-            >
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-full">
-                  <Upload className="h-6 w-6" />
+          <div className="space-y-4">
+            <Card className="shadow-sm">
+              <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
+                <div className="relative w-full md:max-w-sm">
+                  <Search className="absolute right-3 top-2.5 h-4 w-4 text-slate-400" />
+                  <Input
+                    className="pr-9"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="ابحث بالاسم أو الوصف"
+                  />
                 </div>
-                <h3 className="font-semibold text-gray-800">
-                  اسحب وأفلت الملفات هنا للرفع إلى مجلد "{selectedFolder}"
-                </h3>
-                <p className="text-xs text-gray-500">أو انقر على زر "رفع ملفات" في الأعلى</p>
-              </div>
+                <div className="flex flex-wrap gap-2">
+                  <select
+                    value={typeFilter}
+                    onChange={(event) => setTypeFilter(event.target.value as MediaTypeFilter)}
+                    className="h-9 rounded-md border bg-white px-2 text-sm"
+                  >
+                    <option value="all">كل الأنواع</option>
+                    {(['image', 'video', 'audio', 'document', 'other'] as const).map((type) => (
+                      <option key={type} value={type}>
+                        {typeLabel(type)}
+                      </option>
+                    ))}
+                  </select>
+                  <Button variant="outline" size="icon" onClick={() => refetch()}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {selectedIds.length > 0 && (
+              <Card className="border-blue-200 bg-blue-50">
+                <CardContent className="flex flex-wrap items-center gap-3 p-3">
+                  <span className="text-sm font-semibold text-blue-800">
+                    تم تحديد {selectedIds.length} عنصر
+                  </span>
+                  <select
+                    className="h-8 rounded border bg-white px-2 text-xs"
+                    defaultValue=""
+                    onChange={(event) => {
+                      const folderId = Number(event.target.value);
+                      if (folderId) {
+                        moveSelection(folderId);
+                      }
+                      event.currentTarget.value = '';
+                    }}
+                    disabled={moveManyMutation.isPending}
+                  >
+                    <option value="">نقل إلى مجلد...</option>
+                    {folders
+                      .filter((folder) => folder.id !== effectiveFolderId)
+                      .map((folder) => (
+                        <option key={folder.id} value={folder.id}>
+                          {folder.path}
+                        </option>
+                      ))}
+                  </select>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="h-8"
+                    onClick={() => setPendingDelete(selectedIds)}
+                  >
+                    حذف المحدد
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8"
+                    onClick={() => setSelectedIds([])}
+                  >
+                    <X className="ml-1 h-4 w-4" />
+                    إلغاء التحديد
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            <div
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                if (event.dataTransfer.files.length) {
+                  void uploadFiles(event.dataTransfer.files);
+                }
+              }}
+              className="rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/40 p-4 text-center text-sm text-blue-800"
+            >
+              <Upload className="mx-auto mb-1 h-5 w-5" />
+              اسحب ملفاتك هنا لرفعها إلى «{selectedFolder?.name || 'المجلد'}»
             </div>
 
-            {/* قائمة الملفات */}
             {isLoading ? (
               <div className="flex justify-center py-16">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
               </div>
-            ) : filteredImages.length === 0 ? (
-              <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                  <Images className="h-12 w-12 text-gray-300 mb-3" />
-                  <h3 className="font-semibold text-gray-700">المجلد فارغ</h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    لا توجد ملفات في مجلد "{selectedFolder}" حالياً
+            ) : isError ? (
+              <Card>
+                <CardContent className="p-10 text-center text-red-600">
+                  تعذّر تحميل الوسائط: {error.message}
+                </CardContent>
+              </Card>
+            ) : items.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <FileArchive className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+                  <p className="font-semibold text-slate-700">لا توجد وسائط في هذا المجلد</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    ارفع صورة أو فيديو أو ملفاً صوتياً أو مستنداً للبدء.
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between px-2 text-xs text-gray-500">
+              <>
+                <div className="flex items-center justify-between px-1 text-xs text-slate-500">
                   <button
+                    type="button"
                     onClick={toggleSelectAll}
-                    className="flex items-center gap-1.5 hover:text-gray-800 font-medium"
+                    className="flex items-center gap-1.5 font-medium hover:text-slate-800"
                   >
-                    {selectedIds.length === filteredImages.length ? (
+                    {selectedIds.length === items.length ? (
                       <CheckSquare className="h-4 w-4 text-blue-600" />
                     ) : (
                       <Square className="h-4 w-4" />
                     )}
-                    تحديد الكل ({filteredImages.length})
+                    تحديد الكل ({items.length})
                   </button>
-                  <span>عرض مجلد: {selectedFolder}</span>
+                  <span>{selectedFolder?.path}</span>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {filteredImages.map((image) => {
-                    const isSelected = selectedIds.includes(image.id);
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {items.map((item) => {
+                    const selected = selectedIds.includes(item.id);
                     return (
-                      <div
-                        key={image.id}
-                        className={`group relative bg-white border rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md ${
-                          isSelected ? 'ring-2 ring-blue-600 border-blue-600' : 'border-gray-200'
-                        }`}
+                      <article
+                        key={item.id}
+                        draggable
+                        onDragStart={(event) => {
+                          event.dataTransfer.setData('application/x-sgh-media-id', String(item.id));
+                          setDraggedMediaId(item.id);
+                        }}
+                        onDragEnd={() => setDraggedMediaId(null)}
+                        className={`group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md ${selected ? 'border-blue-500 ring-2 ring-blue-500' : 'border-slate-200'}`}
                       >
-                        <div className="absolute top-2 right-2 z-10">
+                        <div className="relative aspect-video overflow-hidden bg-slate-100">
                           <button
-                            onClick={() => toggleSelectOne(image.id)}
-                            className="p-1 bg-white/90 rounded shadow hover:bg-white text-gray-700"
+                            type="button"
+                            className="absolute right-2 top-2 z-10 rounded bg-white/95 p-1 shadow"
+                            onClick={() => toggleSelection(item.id)}
                           >
-                            {isSelected ? (
+                            {selected ? (
                               <CheckSquare className="h-4 w-4 text-blue-600" />
                             ) : (
-                              <Square className="h-4 w-4 text-gray-400" />
+                              <Square className="h-4 w-4 text-slate-500" />
                             )}
                           </button>
+                          {item.type === 'image' ? (
+                            <img
+                              src={item.url}
+                              alt={item.altAr || item.fileName || 'صورة'}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : item.type === 'video' ? (
+                            <video src={item.url} controls className="h-full w-full object-cover" />
+                          ) : item.type === 'audio' ? (
+                            <div className="flex h-full flex-col items-center justify-center gap-3 p-4">
+                              <Music2 className="h-10 w-10 text-violet-600" />
+                              <audio src={item.url} controls className="w-full" />
+                            </div>
+                          ) : (
+                            <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-500">
+                              {item.type === 'document' ? (
+                                <FileText className="h-12 w-12 text-red-500" />
+                              ) : (
+                                <FileArchive className="h-12 w-12 text-amber-600" />
+                              )}
+                              <span className="text-xs">{typeLabel(item.type)}</span>
+                            </div>
+                          )}
                         </div>
-
-                        <div className="aspect-video w-full bg-gray-100 relative overflow-hidden">
-                          <img
-                            src={image.url}
-                            alt={image.altAr || 'صورة'}
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                          />
-                        </div>
-
-                        <div className="p-3 space-y-2">
+                        <div className="space-y-2 p-3">
                           <p
-                            className="text-xs font-medium text-gray-800 truncate"
-                            title={image.altAr || image.key}
+                            className="truncate text-sm font-semibold text-slate-800"
+                            title={item.fileName || item.key}
                           >
-                            {image.altAr || image.key.split('/').pop()}
+                            {item.fileName || item.key.split('/').pop()}
                           </p>
-                          <div className="flex items-center justify-between text-[11px] text-gray-500">
-                            <span className="uppercase bg-gray-100 px-1.5 py-0.5 rounded font-bold text-gray-600">
-                              {image.format || 'avif'}
+                          <div className="flex items-center justify-between text-[11px] text-slate-500">
+                            <span className="rounded bg-slate-100 px-1.5 py-0.5 uppercase">
+                              {item.format || item.type}
                             </span>
-                            <span>{formatBytes(image.size)}</span>
-                            <span>
-                              {image.width && image.height ? `${image.width}×${image.height}` : ''}
-                            </span>
+                            <span>{formatBytes(item.size)}</span>
+                            {item.width && item.height ? (
+                              <span>
+                                {item.width}×{item.height}
+                              </span>
+                            ) : (
+                              <span>{item.mimeType?.split('/').pop()}</span>
+                            )}
                           </div>
-                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                          <div className="flex items-center justify-between border-t pt-2">
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 text-xs text-blue-600 hover:text-blue-700 px-2"
-                              onClick={() => handleCopy(image.url)}
+                              className="h-7 px-2 text-xs text-blue-700"
+                              onClick={() => handleCopy(item.url)}
                             >
-                              <Copy className="ml-1 h-3 w-3" /> نسخ الرابط
+                              <Copy className="ml-1 h-3 w-3" />
+                              رابط
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 text-xs text-red-600 hover:text-red-700 px-2"
-                              onClick={() => {
-                                // eslint-disable-next-line no-alert
-                                if (window.confirm('هل تريد حذف هذه الصورة؟')) {
-                                  deleteMutation.mutate({ id: image.id });
-                                }
-                              }}
+                              className="h-7 px-2 text-xs text-red-700"
+                              onClick={() => setPendingDelete([item.id])}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="ml-1 h-3 w-3" />
+                              حذف
                             </Button>
                           </div>
                         </div>
-                      </div>
+                      </article>
                     );
                   })}
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>

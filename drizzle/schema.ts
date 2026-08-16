@@ -1859,8 +1859,29 @@ export type Image = typeof images.$inferSelect;
 export type InsertImage = typeof images.$inferInsert;
 
 /**
- * Media Table - جدول الميديا العام
- * يخزّن جميع أنواع الميديا (صور، فيديو، ملفات) في المنصة
+ * Media folders table - شجرة مجلدات مكتبة الوسائط
+ */
+export const mediaFolders = mysqlTable(
+  'media_folders',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    name: varchar('name', { length: 120 }).notNull(),
+    parentId: int('parentId'),
+    path: varchar('path', { length: 500 }).notNull().unique(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    parentIdx: index('media_folders_parent_idx').on(table.parentId),
+  })
+);
+
+export type MediaFolder = typeof mediaFolders.$inferSelect;
+export type InsertMediaFolder = typeof mediaFolders.$inferInsert;
+
+/**
+ * Media Table - جدول الوسائط العام
+ * يخزّن جميع أنواع الوسائط: الصور والفيديو والصوت والمستندات.
  */
 export const media = mysqlTable(
   'media',
@@ -1878,6 +1899,7 @@ export const media = mysqlTable(
     descriptionAr: text('descriptionAr'), // وصف بالعربية
     descriptionEn: text('descriptionEn'), // وصف بالإنجليزية
     section: varchar('section', { length: 100 }),
+    folderId: int('folderId'),
     sectionId: int('sectionId').references(() => sections.id, {
       onDelete: 'set null',
       onUpdate: 'cascade',
@@ -1899,6 +1921,7 @@ export const media = mysqlTable(
   (table) => ({
     typeIdx: index('media_type_idx').on(table.type),
     sectionIdx: index('media_section_idx').on(table.section),
+    folderIdx: index('media_folder_idx').on(table.folderId),
     sectionIdIdx: index('media_sectionId_idx').on(table.sectionId),
     pageIdIdx: index('media_pageId_idx').on(table.pageId),
     statusIdx: index('media_status_idx').on(table.status),

@@ -6,6 +6,7 @@
 import { router } from '../_core/trpc';
 import { textContentRouter } from './content/textContent';
 import { imagesRouter } from './content/images';
+import { mediaLibraryRouter } from './content/media';
 import { colorSchemeRouter } from './content/colorScheme';
 import { seoSettingsRouter } from './content/seo';
 import { auditLogRouter } from './content/auditLog';
@@ -23,6 +24,7 @@ import { approvalsRouter } from './content/approvals';
 export const contentRouter = router({
   textContent: textContentRouter,
   images: imagesRouter,
+  media: mediaLibraryRouter,
   colorScheme: colorSchemeRouter,
   seoSettings: seoSettingsRouter,
   auditLog: auditLogRouter,
