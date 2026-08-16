@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import multer, { FileFilterCallback } from 'multer';
 import jwt from 'jsonwebtoken';
 import { storagePut } from '../services/storage';
+import { processImageToAvif } from '../services/imageProcessor';
 import crypto from 'crypto';
 import { createLogger } from '../_core/logger';
 import { asMulterMiddleware } from '../_core/expressCompatibility';
@@ -109,12 +110,19 @@ export function createUploadRouter(): Router {
         }
 
         const folder = (req.body?.folder as string) || 'uploads';
-        const uniqueFileName = generateUniqueFileName(file.originalname);
+
+        // معالجة وضغط الصورة وتحويلها إلى AVIF تلقائياً
+        const processed = await processImageToAvif(file.buffer, file.mimetype);
+
+        const baseName = file.originalname.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '_');
+        const randomSuffix = crypto.randomBytes(6).toString('hex');
+        const timestamp = Date.now();
+        const uniqueFileName = `${baseName}-${timestamp}-${randomSuffix}.${processed.extension}`;
         const fileKey = `${folder}/${uniqueFileName}`;
 
-        const { url, key } = await storagePut(fileKey, file.buffer, file.mimetype);
+        const { url, key } = await storagePut(fileKey, processed.buffer, processed.mimeType);
 
-        return res.json({ url, key });
+        return res.json({ url, key, format: processed.extension });
       } catch (error) {
         logger.error('Error:', error);
         const message = error instanceof Error ? error.message : 'حدث خطأ أثناء رفع الملف';
