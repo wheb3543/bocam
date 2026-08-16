@@ -81,6 +81,7 @@ export default function Footer() {
                 <a
                   href={`tel:${COMPANY_PHONE}`}
                   className="hover:text-white transition-colors font-medium"
+                  aria-label={`اتصال بخدمة العملاء والمواعيد على الرقم ${COMPANY_PHONE}`}
                 >
                   {COMPANY_PHONE}
                 </a>

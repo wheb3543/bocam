@@ -122,7 +122,10 @@ export default function Navbar() {
               <LanguageSwitcher />
 
               {/* Patient Portal Button - Desktop only */}
-              <Link href="/patient-portal/login">
+              <Link
+                href="/patient-portal/login"
+                aria-label="تسجيل الدخول إلى بوابة المريض والملفات الطبية"
+              >
                 <span className="hidden md:flex items-center gap-1.5 border border-green-600 text-green-700 dark:text-green-400 dark:border-green-500 px-3 lg:px-4 py-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors text-sm font-medium cursor-pointer whitespace-nowrap">
                   بوابة المريض
                 </span>
@@ -134,6 +137,7 @@ export default function Navbar() {
               <a
                 href={`tel:${COMPANY_PHONE}`}
                 className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-green-600 text-white px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm md:text-base"
+                aria-label={`اتصال مباشر بخدمة العملاء والمواعيد على الرقم ${COMPANY_PHONE}`}
               >
                 <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="font-semibold">{COMPANY_PHONE}</span>

@@ -38,6 +38,7 @@ export default function ActionButtons({
             size={size}
             onClick={handleCall}
             className="text-green-600 hover:text-green-700 hover:bg-green-50"
+            aria-label={`اتصال مباشر بالرقم ${phoneNumber}`}
           >
             <Phone className="h-4 w-4" />
           </Button>
@@ -55,6 +56,7 @@ export default function ActionButtons({
               size={size}
               onClick={handleWhatsApp}
               className="text-green-600 hover:text-green-700 hover:bg-green-50"
+              aria-label={`إرسال رسالة واتساب للرقم ${phoneNumber}`}
             >
               <MessageCircle className="h-4 w-4" />
             </Button>
