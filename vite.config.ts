@@ -135,6 +135,10 @@ export default defineConfig({
           if (id.includes("node_modules/wouter")) {
             return "vendor-router";
           }
+          // Tables & Excel utilities
+          if (id.includes("node_modules/@tanstack/react-table") || id.includes("node_modules/xlsx") || id.includes("node_modules/jspdf")) {
+            return "vendor-tables-export";
+          }
           // Web Vitals
           if (id.includes("node_modules/web-vitals")) {
             return "vendor-web-vitals";
