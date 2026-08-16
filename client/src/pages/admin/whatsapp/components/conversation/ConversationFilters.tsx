@@ -6,7 +6,13 @@
 import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { FilterType, DateFilterType } from '../../types/whatsapp.types';
 
 interface ConversationFiltersProps {
@@ -31,36 +37,57 @@ const ConversationFilters = memo(function ConversationFilters({
   return (
     <>
       {/* Filter Tabs */}
-      <div className="px-2 pt-2 pb-1 border-b dark:border-gray-800">
+      <div className="px-3 py-2 border-b dark:border-gray-800 bg-white dark:bg-gray-800/80 shadow-xs">
         <Tabs value={activeFilter} onValueChange={(v) => onFilterChange(v as FilterType)}>
-          <TabsList className="h-7 w-full grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 bg-muted/50">
-            <TabsTrigger value="all" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs">
+          <TabsList className="h-8 w-full grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 bg-gray-100/80 dark:bg-gray-900/80 p-0.5 gap-0.5">
+            <TabsTrigger
+              value="all"
+              className="text-[11px] h-7 px-1 font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+            >
               الكل
             </TabsTrigger>
-            <TabsTrigger value="unread" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs">
+            <TabsTrigger
+              value="unread"
+              className="text-[11px] h-7 px-1 font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+            >
               غير مقروءة
               {unreadCount > 0 ? (
                 <Badge
                   variant="destructive"
-                  className="mr-1 h-3 px-0.5 text-[8px] sm:h-3.5 sm:px-1 sm:text-[var(--text-xs)] rounded-full"
+                  className="mr-1 h-3.5 px-1 text-[9px] rounded-full font-semibold animate-pulse"
                 >
                   {unreadCount}
                 </Badge>
               ) : null}
             </TabsTrigger>
-            <TabsTrigger value="important" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs">
+            <TabsTrigger
+              value="important"
+              className="text-[11px] h-7 px-1 font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+            >
               مهمة
             </TabsTrigger>
-            <TabsTrigger value="lab_results" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">
-              نتائج مختبر
+            <TabsTrigger
+              value="lab_results"
+              className="text-[11px] h-7 px-1 font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+            >
+              مختبر
             </TabsTrigger>
-            <TabsTrigger value="archived" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">
+            <TabsTrigger
+              value="archived"
+              className="text-[11px] h-7 px-1 font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+            >
               مؤرشفة
             </TabsTrigger>
-            <TabsTrigger value="unnamed" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">
+            <TabsTrigger
+              value="unnamed"
+              className="text-[11px] h-7 px-1 font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+            >
               بدون اسم
             </TabsTrigger>
-            <TabsTrigger value="unreplied" className="text-[10px] sm:text-[var(--text-xs)] h-6 px-1 text-xs md:inline">
+            <TabsTrigger
+              value="unreplied"
+              className="text-[11px] h-7 px-1 font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+            >
               لم يُرد
             </TabsTrigger>
           </TabsList>
@@ -68,15 +95,13 @@ const ConversationFilters = memo(function ConversationFilters({
       </div>
 
       {/* Advanced Filters */}
-      <div className="px-2 pt-1 pb-1 flex gap-2 items-center">
-        <Select
-          value={dateFilter}
-          onValueChange={(v) => onDateFilterChange(v as DateFilterType)}
-        >
-          <SelectTrigger className="h-6 text-[var(--text-xs)] bg-white/10 border-0 text-white">
-            <SelectValue />
+      <div className="px-3 py-1.5 flex justify-between items-center bg-gray-50/80 dark:bg-gray-900/50 border-b dark:border-gray-800">
+        <span className="text-xs text-muted-foreground font-medium">تصفية زمنية:</span>
+        <Select value={dateFilter} onValueChange={(v) => onDateFilterChange(v as DateFilterType)}>
+          <SelectTrigger className="h-7 w-32 text-xs bg-white dark:bg-gray-800 border shadow-sm">
+            <SelectValue placeholder="اختر الفترة" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent dir="rtl">
             <SelectItem value="all">كل التواريخ</SelectItem>
             <SelectItem value="today">اليوم</SelectItem>
             <SelectItem value="week">آخر أسبوع</SelectItem>
