@@ -188,3 +188,19 @@
 [2026-08-16T17:17:06.566Z] cp .env.example .env
 [2026-08-16T17:17:06.595Z] [ELIFECYCLE] Command failed with exit code 1.
 [2026-08-16T17:17:06.627Z] Dev server exited with code 1
+[2026-08-16T17:21:53.663Z] Starting dev server with command: pnpm run dev
+[2026-08-16T17:21:55.020Z] $ node scripts/check-env.mjs
+[2026-08-16T17:21:55.072Z] 🔍 Checking environment variables...
+[2026-08-16T17:21:55.072Z] ❌ Error: .env file not found!
+[2026-08-16T17:21:55.072Z] 💡 Please create .env file from .env.example:
+[2026-08-16T17:21:55.072Z] cp .env.example .env
+[2026-08-16T17:21:55.102Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-16T17:21:55.133Z] Dev server exited with code 1
+[2026-08-16T17:23:03.738Z] Starting dev server with command: pnpm run dev
+[2026-08-16T17:23:05.093Z] $ node scripts/check-env.mjs
+[2026-08-16T17:23:05.140Z] 🔍 Checking environment variables...
+[2026-08-16T17:23:05.141Z] ❌ Error: .env file not found!
+[2026-08-16T17:23:05.141Z] 💡 Please create .env file from .env.example:
+[2026-08-16T17:23:05.141Z] cp .env.example .env
+[2026-08-16T17:23:05.170Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-16T17:23:05.198Z] Dev server exited with code 1
