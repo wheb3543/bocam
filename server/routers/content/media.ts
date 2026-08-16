@@ -119,6 +119,14 @@ export const mediaLibraryRouter = router({
       return { success: true, deleted: input.ids.length };
     }),
 
+  rename: protectedProcedure
+    .input(z.object({ id: z.number(), fileName: z.string().min(1).max(255) }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
+      await db.update(media).set({ fileName: input.fileName }).where(eq(media.id, input.id));
+      return { success: true };
+    }),
+
   folders: router({
     list: protectedProcedure.query(async () => {
       const db = await ensureDatabaseAvailable();
@@ -150,6 +158,35 @@ export const mediaLibraryRouter = router({
           .values({ name, parentId: input.parentId ?? null, path })
           .$returningId();
         return { id: Number(inserted.id), name, path };
+      }),
+
+    rename: protectedProcedure
+      .input(z.object({ id: z.number(), name: z.string().min(1).max(120) }))
+      .mutation(async ({ input }) => {
+        const db = await ensureDatabaseAvailable();
+        const name = normalizeFolderName(input.name);
+        const [folder] = await db
+          .select()
+          .from(mediaFolders)
+          .where(eq(mediaFolders.id, input.id))
+          .limit(1);
+        if (!folder) {
+          throw new Error('المجلد غير موجود');
+        }
+        let parentPath = '';
+        if (folder.parentId) {
+          const [parent] = await db
+            .select()
+            .from(mediaFolders)
+            .where(eq(mediaFolders.id, folder.parentId))
+            .limit(1);
+          if (parent) {
+            parentPath = parent.path;
+          }
+        }
+        const path = `${parentPath}/${name}`.replace(/\/+/g, '/');
+        await db.update(mediaFolders).set({ name, path }).where(eq(mediaFolders.id, input.id));
+        return { success: true, name, path };
       }),
   }),
 });
