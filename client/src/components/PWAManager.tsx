@@ -70,8 +70,12 @@ function PWAInstallSystem({ appType }: { appType: PWAAppType }) {
 
   // Show banner after 10 seconds - only when canInstall=true
   useEffect(() => {
-    if (isInstalled || bannerDismissed || isDismissed) {return;}
-    if (!canInstall && !isIOS) {return;}
+    if (isInstalled || bannerDismissed || isDismissed) {
+      return;
+    }
+    if (!canInstall && !isIOS) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       setShowBanner(true);
@@ -84,14 +88,18 @@ function PWAInstallSystem({ appType }: { appType: PWAAppType }) {
   // - For admin: always show after 2 seconds if PWA is supported and not installed
   // - For public: only show when canInstall=true
   useEffect(() => {
-    if (isInstalled || isDismissed) {return;}
+    if (isInstalled || isDismissed) {
+      return;
+    }
 
     // Check if float was dismissed
     const floatDismissed = localStorage.getItem(FLOAT_DISMISS_KEY);
     if (floatDismissed) {
       const dismissedAt = parseInt(floatDismissed, 10);
       const daysSince = (Date.now() - dismissedAt) / (1000 * 60 * 60 * 24);
-      if (daysSince < 7) {return;}
+      if (daysSince < 7) {
+        return;
+      }
       localStorage.removeItem(FLOAT_DISMISS_KEY);
     }
 
@@ -99,7 +107,9 @@ function PWAInstallSystem({ appType }: { appType: PWAAppType }) {
     // Public: only show when canInstall=true
     const shouldShow = isAdmin ? isPWASupported || isIOS : canInstall || isIOS;
 
-    if (!shouldShow) {return;}
+    if (!shouldShow) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       setShowFloatingButton(true);
@@ -143,13 +153,19 @@ function PWAInstallSystem({ appType }: { appType: PWAAppType }) {
   }, [handleDismissBanner, handleDismissFloat, dismissPrompt]);
 
   // Don't show anything if already installed
-  if (isInstalled) {return null;}
+  if (isInstalled) {
+    return null;
+  }
 
   // For public: don't show if no install capability
-  if (!isAdmin && !canInstall && !isIOS) {return null;}
+  if (!isAdmin && !canInstall && !isIOS) {
+    return null;
+  }
 
   // For admin: don't show if PWA not supported at all
-  if (isAdmin && !isPWASupported && !isIOS) {return null;}
+  if (isAdmin && !isPWASupported && !isIOS) {
+    return null;
+  }
 
   return (
     <>
@@ -246,12 +262,16 @@ function PWAInstallBanner({
               <img
                 src={isAdmin ? '/icon-admin-72x72.png' : '/icon-72x72.png'}
                 alt={isAdmin ? 'لوحة تحكم SGH' : 'المستشفى السعودي الألماني'}
+                width={44}
+                height={44}
                 className="h-11 w-11 object-contain rounded-xl"
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
                   img.style.display = 'none';
                   const parent = img.parentElement;
-                  if (parent) {parent.innerHTML = '<span class="text-3xl">🏥</span>';}
+                  if (parent) {
+                    parent.innerHTML = '<span class="text-3xl">🏥</span>';
+                  }
                 }}
               />
             </div>
