@@ -233,6 +233,7 @@ export default function MessagesPage() {
         </section>
 
         <Tabs
+          dir="rtl"
           value={activeTab}
           onValueChange={(value) => {
             setActiveTab(value as InboxTabId);
@@ -241,7 +242,8 @@ export default function MessagesPage() {
         >
           <TabsList
             aria-label="تبويبات صندوق البريد"
-            className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl border border-border bg-white p-1 shadow-sm"
+            dir="rtl"
+            className="h-auto w-full flex-row justify-start gap-1 overflow-x-auto rounded-xl border border-border bg-white p-1 shadow-sm"
           >
             {inboxTabs.map((tab) => {
               const Icon = tab.icon;

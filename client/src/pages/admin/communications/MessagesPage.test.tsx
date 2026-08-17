@@ -89,6 +89,7 @@ describe('MessagesPage', () => {
     expect(screen.getByRole('tab', { name: 'كل الرسائل' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Messenger' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'تعليقات فيسبوك' })).toBeInTheDocument();
+    expect(screen.getByRole('tablist', { name: 'تبويبات صندوق البريد' })).toHaveAttribute('dir', 'rtl');
     expect(screen.getByText('سارة أحمد')).toBeInTheDocument();
     expect(screen.getByText('أرغب في معرفة مواعيد العيادة.')).toBeInTheDocument();
   });

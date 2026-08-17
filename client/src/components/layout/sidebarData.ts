@@ -42,6 +42,7 @@ import {
   Package,
   Images,
 } from 'lucide-react';
+import { SOCIAL_INBOX_ALLOWED_ROLES } from '@shared/socialInboxAccess';
 
 export interface NavItem {
   title: string;
@@ -50,6 +51,7 @@ export interface NavItem {
   badge?: number;
   hasDot?: boolean;
   id: string;
+  allowedRoles?: readonly string[];
 }
 
 export interface NavGroup {
@@ -174,7 +176,13 @@ export const allNavItems: NavItem[] = [
     href: '/admin/whatsapp/webhook-inspector',
     icon: Terminal,
   },
-  { id: 'messages', title: 'الرسائل', href: '/admin/communications/messages', icon: MessageSquare },
+  {
+    id: 'messages',
+    title: 'صندوق البريد الموحد',
+    href: '/admin/communications/messages',
+    icon: MessageSquare,
+    allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
+  },
   {
     id: 'message-settings',
     title: 'إعدادات الرسائل',
@@ -377,9 +385,10 @@ export const allToolsGroups: NavGroup[] = [
       },
       {
         id: 'messages',
-        title: 'الرسائل',
+        title: 'صندوق البريد الموحد',
         href: '/admin/communications/messages',
         icon: MessageSquare,
+        allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
       },
       {
         id: 'message-settings',
@@ -505,5 +514,5 @@ export const defaultVisibleItemIds: string[] = [
   'tasks',
   'reports',
   'whatsapp',
-  'management',
+  'messages',
 ];

@@ -7,6 +7,7 @@ import EditSidebarModal from '@/components/EditSidebarModal';
 import DesktopSidebar from './sidebar/DesktopSidebar';
 import MobileBottomNav from './sidebar/MobileBottomNav';
 import { useSidebarNotifications } from '@/hooks/layout/useSidebarNotifications';
+import { canAccessSocialInbox } from '@shared/socialInboxAccess';
 import {
   allNavItems,
   allToolsGroups,
@@ -16,13 +17,30 @@ import {
 } from './sidebarData';
 
 export default function DashboardSidebarV2({ currentPath }: { currentPath: string }) {
-  const { user: _user } = useAuth();
+  const { user } = useAuth();
   const { shouldShowText, handleMouseEnter, handleMouseLeave, closeMobile } = useSidebarState();
 
   const { addRecentlyUsed } = useRecentlyUsed();
-  const { whatsappUnreadCount } = useSidebarNotifications(currentPath);
+  const canAccessInbox = canAccessSocialInbox(user?.role);
+  const { whatsappUnreadCount, socialInboxUnreadCount } = useSidebarNotifications(
+    currentPath,
+    canAccessInbox
+  );
   const [allToolsOpen, setAllToolsOpen] = useState(false);
   const [editSidebarOpen, setEditSidebarOpen] = useState(false);
+
+  const canAccessNavItem = useCallback(
+    (item: NavItem) => {
+      if (!item.allowedRoles?.length) {
+        return true;
+      }
+      if (item.id === 'messages') {
+        return canAccessInbox;
+      }
+      return Boolean(user?.role && item.allowedRoles.includes(user.role));
+    },
+    [canAccessInbox, user?.role]
+  );
 
   // تحديد العناصر المرئية في الشريط (أول 10 عناصر)
   const [visibleItemIds, setVisibleItemIds] = useState<string[]>(() => {
@@ -52,12 +70,43 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
     }
   }, [visibleItemIds]);
 
+  useEffect(() => {
+    if (!user?.role) {
+      return;
+    }
+
+    setVisibleItemIds((currentIds) => {
+      const withoutInbox = currentIds.filter((id) => id !== 'messages');
+      if (!canAccessInbox) {
+        return withoutInbox;
+      }
+      if (currentIds.includes('messages')) {
+        return currentIds;
+      }
+      return [...withoutInbox.slice(0, 9), 'messages'];
+    });
+  }, [canAccessInbox, user?.role]);
+
   // الحصول على العناصر المرئية
   const primaryNavItems = useMemo(() => {
     return visibleItemIds
       .map((id) => allNavItems.find((item) => item.id === id))
-      .filter((item): item is NavItem => item !== undefined);
-  }, [visibleItemIds]);
+      .filter((item): item is NavItem => item !== undefined)
+      .filter(canAccessNavItem);
+  }, [canAccessNavItem, visibleItemIds]);
+
+  const permittedAllNavItems = useMemo(
+    () => allNavItems.filter(canAccessNavItem),
+    [canAccessNavItem]
+  );
+
+  const permittedToolsGroups = useMemo(
+    () =>
+      allToolsGroups
+        .map((group) => ({ ...group, items: group.items.filter(canAccessNavItem) }))
+        .filter((group) => group.items.length > 0),
+    [canAccessNavItem]
+  );
 
   // التحقق من أن العنصر نشط
   const isItemActive = useCallback(
@@ -76,11 +125,13 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
       switch (itemId) {
         case 'whatsapp':
           return whatsappUnreadCount;
+        case 'messages':
+          return socialInboxUnreadCount;
         default:
           return 0;
       }
     },
-    [whatsappUnreadCount]
+    [socialInboxUnreadCount, whatsappUnreadCount]
   );
 
   // معالج النقر على عنصر التنقل
@@ -140,13 +191,13 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
       <AllToolsDrawer
         isOpen={allToolsOpen}
         onClose={() => setAllToolsOpen(false)}
-        allToolsGroups={allToolsGroups}
-        allNavItems={allNavItems}
+        allToolsGroups={permittedToolsGroups}
+        allNavItems={permittedAllNavItems}
       />
       <EditSidebarModal
         isOpen={editSidebarOpen}
         onClose={() => setEditSidebarOpen(false)}
-        allToolsGroups={allToolsGroups}
+        allToolsGroups={permittedToolsGroups}
         visibleItemIds={visibleItemIds}
         onSave={handleSaveVisibleItems}
       />

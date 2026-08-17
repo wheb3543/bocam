@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import { canAccessSocialInbox } from '../../shared/socialInboxAccess';
 import { protectedProcedure, router } from '../_core/trpc';
 import {
   assignSocialInboxThread,
@@ -14,11 +16,21 @@ import {
 
 const platformSchema = z.enum(['messenger', 'instagram', 'facebook', 'x', 'linkedin', 'youtube']);
 const channelTypeSchema = z.enum(['message', 'comment']);
+const socialInboxProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  if (!canAccessSocialInbox(ctx.user.role)) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'ليس لديك صلاحية الوصول إلى صندوق البريد الموحد',
+    });
+  }
+
+  return next();
+});
 
 export const socialInboxRouter = router({
-  accounts: protectedProcedure.query(() => listSocialInboxAccounts()),
+  accounts: socialInboxProcedure.query(() => listSocialInboxAccounts()),
 
-  createAccount: protectedProcedure
+  createAccount: socialInboxProcedure
     .input(
       z.object({
         platform: platformSchema,
@@ -36,7 +48,7 @@ export const socialInboxRouter = router({
       })
     ),
 
-  updateAccount: protectedProcedure
+  updateAccount: socialInboxProcedure
     .input(
       z.object({
         id: z.number().int().positive(),
@@ -57,9 +69,9 @@ export const socialInboxRouter = router({
       });
     }),
 
-  stats: protectedProcedure.query(() => getSocialInboxStats()),
+  stats: socialInboxProcedure.query(() => getSocialInboxStats()),
 
-  threads: protectedProcedure
+  threads: socialInboxProcedure
     .input(
       z
         .object({
@@ -72,19 +84,19 @@ export const socialInboxRouter = router({
     )
     .query(({ input }) => listSocialInboxThreads(input ?? {})),
 
-  thread: protectedProcedure
+  thread: socialInboxProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .query(({ input }) => getSocialInboxThreadById(input.id)),
 
-  markRead: protectedProcedure
+  markRead: socialInboxProcedure
     .input(z.object({ id: z.number().int().positive(), isRead: z.boolean() }))
     .mutation(({ input }) => markSocialInboxThreadRead(input.id, input.isRead)),
 
-  setStarred: protectedProcedure
+  setStarred: socialInboxProcedure
     .input(z.object({ id: z.number().int().positive(), isStarred: z.boolean() }))
     .mutation(({ input }) => setSocialInboxThreadStarred(input.id, input.isStarred)),
 
-  assign: protectedProcedure
+  assign: socialInboxProcedure
     .input(
       z.object({
         id: z.number().int().positive(),

@@ -16,7 +16,11 @@ interface MessageEventWithType extends MessageEvent {
   type: string;
 }
 
-export function useSidebarNotifications(currentPath: string) {
+export function getSocialInboxUnreadCount(stats: { unread: number } | null | undefined) {
+  return stats?.unread ?? 0;
+}
+
+export function useSidebarNotifications(currentPath: string, includeSocialInbox = false) {
   const [whatsappUnreadCount, setWhatsappUnreadCount] = useState(0);
   const currentPathRef = useRef(currentPath);
 
@@ -27,6 +31,10 @@ export function useSidebarNotifications(currentPath: string) {
   // Fetch initial unread count
   const { data: initialUnreadData } = trpc.whatsapp.conversations.unreadCount.useQuery(undefined, {
     refetchInterval: 60000, // refresh every minute as fallback
+  });
+  const { data: socialInboxStats } = trpc.socialInbox.stats.useQuery(undefined, {
+    enabled: includeSocialInbox,
+    refetchInterval: 60000,
   });
 
   useEffect(() => {
@@ -87,5 +95,6 @@ export function useSidebarNotifications(currentPath: string) {
 
   return {
     whatsappUnreadCount,
+    socialInboxUnreadCount: getSocialInboxUnreadCount(socialInboxStats),
   };
 }

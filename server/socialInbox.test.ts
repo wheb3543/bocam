@@ -28,11 +28,15 @@ import {
 } from './database/db/socialInbox';
 import { socialInboxRouter } from './routers/socialInbox';
 
-const caller = socialInboxRouter.createCaller({
-  user: { role: 'admin' },
-  req: {},
-  res: {},
-} as unknown as import('./_core/context').TrpcContext);
+function createCaller(role: 'admin' | 'manager' | 'team_leader' | 'staff' | 'viewer' | 'user') {
+  return socialInboxRouter.createCaller({
+    user: { role },
+    req: {},
+    res: {},
+  } as unknown as import('./_core/context').TrpcContext);
+}
+
+const caller = createCaller('admin');
 
 describe('social inbox database helpers', () => {
   it('returns a safe empty list when the database is unavailable', async () => {
@@ -137,5 +141,10 @@ describe('social inbox tRPC contract', () => {
     expect(routerDbMocks.markSocialInboxThreadRead).toHaveBeenCalledWith(7, true);
     expect(routerDbMocks.setSocialInboxThreadStarred).toHaveBeenCalledWith(7, true);
     expect(routerDbMocks.assignSocialInboxThread).toHaveBeenCalledWith(7, 9);
+  });
+
+  it('forbids a viewer from accessing the unified inbox procedures', async () => {
+    await expect(createCaller('viewer').stats()).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(routerDbMocks.getSocialInboxStats).not.toHaveBeenCalled();
   });
 });
