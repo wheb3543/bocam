@@ -59,6 +59,18 @@ function PlatformBadge({ platform }: { platform: Platform }) {
   );
 }
 
+function isMetaTestAccount(metadata: string | null | undefined) {
+  if (!metadata) {
+    return false;
+  }
+
+  try {
+    return JSON.parse(metadata).testData === true;
+  } catch {
+    return false;
+  }
+}
+
 function EmptyPanel({
   title,
   description,
@@ -122,8 +134,17 @@ export default function MessagesPage() {
   const selectedThread = threadQuery.data?.thread;
   const selectedItems = threadQuery.data?.items ?? [];
   const selectedAccount = selectedThread
-    ? (accountsQuery.data ?? []).find((account) => account.platform === selectedThread.platform)
+    ? (accountsQuery.data ?? []).find((account) => account.id === selectedThread.accountId)
     : undefined;
+  const testAccountIds = useMemo(
+    () =>
+      new Set(
+        (accountsQuery.data ?? [])
+          .filter((account) => isMetaTestAccount(account.metadata))
+          .map((account) => account.id)
+      ),
+    [accountsQuery.data]
+  );
   const connectedAccounts = (accountsQuery.data ?? []).filter(
     (account) => account.status === 'connected'
   ).length;
@@ -308,6 +329,7 @@ export default function MessagesPage() {
                     <div className="divide-y divide-border/70">
                       {threads.map((thread) => {
                         const isSelected = thread.id === selectedThreadId;
+                        const isTestThread = testAccountIds.has(thread.accountId);
                         return (
                           <button
                             key={thread.id}
@@ -351,6 +373,14 @@ export default function MessagesPage() {
                                   <span className="text-[11px] text-muted-foreground">
                                     {thread.channelType === 'comment' ? 'تعليق' : 'رسالة'}
                                   </span>
+                                  {isTestThread && (
+                                    <Badge
+                                      variant="outline"
+                                      className="border-amber-300 bg-amber-50 text-[10px] text-amber-800"
+                                    >
+                                      بيانات اختبار
+                                    </Badge>
+                                  )}
                                 </div>
                                 <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">
                                   {thread.preview || 'لا يوجد محتوى نصي'}
@@ -401,6 +431,14 @@ export default function MessagesPage() {
                             <span className="text-xs text-muted-foreground">
                               {selectedThread.channelType === 'comment' ? 'تعليق' : 'رسالة'}
                             </span>
+                            {isMetaTestAccount(selectedAccount?.metadata) && (
+                              <Badge
+                                variant="outline"
+                                className="border-amber-300 bg-amber-50 text-[10px] text-amber-800"
+                              >
+                                بيانات اختبار قابلة للحذف
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -470,6 +508,21 @@ export default function MessagesPage() {
                                 <p className="whitespace-pre-wrap text-sm leading-6">
                                   {item.content || 'مرفق أو محتوى غير نصي'}
                                 </p>
+                                {item.parentExternalId && (
+                                  <p className="mt-2 text-xs opacity-70">
+                                    رد على {item.parentExternalId}
+                                  </p>
+                                )}
+                                {item.mediaUrl && (
+                                  <a
+                                    href={item.mediaUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="mt-2 inline-flex text-xs font-medium underline underline-offset-4 opacity-80 hover:opacity-100"
+                                  >
+                                    فتح المرفق
+                                  </a>
+                                )}
                                 <div className="mt-2 flex items-center justify-end gap-1 text-[11px] opacity-70">
                                   {item.isRead ? (
                                     <CheckCheck className="h-3.5 w-3.5" />

@@ -14,6 +14,7 @@ export type MetaSocialInboxEvent = {
   authorName?: string;
   content?: string;
   mediaUrl?: string;
+  postUrl?: string;
   parentExternalId?: string;
   occurredAt: Date;
   rawPayload: string;
@@ -164,6 +165,7 @@ function normalizeFacebookComment(
     authorExternalId: author ? asString(author.id) : undefined,
     authorName: author ? asString(author.name) : undefined,
     content: asString(value.message),
+    postUrl: asString(value.permalink_url),
     parentExternalId: asString(value.parent_id),
     occurredAt: eventDate(value.created_time, fallbackTime),
     rawPayload,

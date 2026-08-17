@@ -121,4 +121,66 @@ describe('MessagesPage', () => {
 
     expect(mocks.markReadMutate).toHaveBeenCalledWith({ id: 1, isRead: true });
   });
+
+  it('identifies Meta test data and renders its reply context and attachment link in the inbox', () => {
+    const testThread = {
+      ...mocks.thread,
+      platform: 'messenger',
+      participantName: 'مستخدم اختبار Meta',
+      preview: 'مرفق: image',
+    };
+    mocks.accountsQuery.mockImplementation(() => ({
+      data: [
+        {
+          id: 1,
+          platform: 'messenger',
+          status: 'connected',
+          metadata: JSON.stringify({ testData: true }),
+        },
+      ],
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    }) as never);
+    mocks.threadsQuery.mockImplementation(() => ({
+      data: [testThread],
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    }));
+    mocks.threadDetailQuery.mockImplementation(() => ({
+      data: {
+        thread: testThread,
+        items: [
+          {
+            id: 200,
+            direction: 'inbound',
+            authorName: 'مستخدم اختبار Meta',
+            content: 'مرفق: image',
+            mediaUrl: 'https://example.invalid/meta-test/image.avif',
+            parentExternalId: 'm_sgh_test_parent_001',
+            externalPublishedAt: new Date('2026-08-18T08:00:00.000Z'),
+            createdAt: new Date('2026-08-18T08:00:00.000Z'),
+            isRead: false,
+            status: 'received',
+          },
+        ],
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    }) as never);
+
+    render(React.createElement(MessagesPage));
+    expect(screen.getByText('بيانات اختبار')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /مستخدم اختبار Meta/ }));
+
+    expect(screen.getByText('بيانات اختبار قابلة للحذف')).toBeInTheDocument();
+    expect(screen.getByText('رد على m_sgh_test_parent_001')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'فتح المرفق' })).toHaveAttribute(
+      'href',
+      'https://example.invalid/meta-test/image.avif'
+    );
+  });
 });

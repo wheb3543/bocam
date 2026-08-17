@@ -180,6 +180,7 @@ export {
   setSocialInboxThreadStarred,
   assignSocialInboxThread,
   getSocialInboxStats,
+  clearMetaSocialInboxTestData,
 } from './socialInbox';
 
 // Meta Integration Settings

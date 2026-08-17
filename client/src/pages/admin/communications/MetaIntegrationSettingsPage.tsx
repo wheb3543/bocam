@@ -10,11 +10,13 @@ import { trpc } from '@/lib/api/trpc';
 import {
   CheckCircle2,
   Clipboard,
+  DatabaseZap,
   ExternalLink,
   KeyRound,
   Loader2,
   LockKeyhole,
   ShieldAlert,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -26,6 +28,19 @@ type MetaForm = {
   verifyToken: string;
   pageAccessToken: string;
   isEnabled: boolean;
+};
+
+type MetaTestSeedResult = {
+  normalized: number;
+  processed: number;
+};
+
+type MetaTestClearResult = {
+  items?: number;
+};
+
+type MutationError = {
+  message: string;
 };
 
 const initialForm: MetaForm = {
@@ -52,6 +67,28 @@ export default function MetaIntegrationSettingsPage() {
       toast.success('تم حفظ إعدادات Meta بصورة مشفّرة');
     },
     onError: (error) => toast.error(error.message),
+  });
+  const seedTestDataMutation = trpc.socialInbox.seedMetaTestData.useMutation({
+    onSuccess: async (result: MetaTestSeedResult) => {
+      await Promise.all([
+        utils.socialInbox.accounts.invalidate(),
+        utils.socialInbox.stats.invalidate(),
+        utils.socialInbox.threads.invalidate(),
+      ]);
+      toast.success(`تمت معالجة ${result.normalized} حمولة اختبارية؛ الناجح: ${result.processed}`);
+    },
+    onError: (error: MutationError) => toast.error(error.message),
+  });
+  const clearTestDataMutation = trpc.socialInbox.clearMetaTestData.useMutation({
+    onSuccess: async (result: MetaTestClearResult) => {
+      await Promise.all([
+        utils.socialInbox.accounts.invalidate(),
+        utils.socialInbox.stats.invalidate(),
+        utils.socialInbox.threads.invalidate(),
+      ]);
+      toast.success(`تم تنظيف بيانات اختبار Meta: ${result.items ?? 0} عنصر`);
+    },
+    onError: (error: MutationError) => toast.error(error.message),
   });
 
   useEffect(() => {
@@ -99,6 +136,16 @@ export default function MetaIntegrationSettingsPage() {
       pageAccessToken: form.pageAccessToken || undefined,
       isEnabled: form.isEnabled,
     });
+  };
+
+  const clearTestData = () => {
+    if (
+      window.confirm(
+        'سيُحذف فقط كل ما يحمل بادئة sgh-meta-test- من حسابات وعناصر اختبار Meta. هل تريد المتابعة؟'
+      )
+    ) {
+      clearTestDataMutation.mutate();
+    }
   };
 
   if (loading) {
@@ -159,6 +206,49 @@ export default function MetaIntegrationSettingsPage() {
             على الخادم، ويمكنك استبدالها بإدخال قيمة جديدة.
           </AlertDescription>
         </Alert>
+
+        <Card className="border-amber-200 bg-amber-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base text-amber-950">
+              <DatabaseZap className="h-5 w-5 text-amber-700" />
+              تجربة حمولات Meta الرسمية
+            </CardTitle>
+            <CardDescription>
+              تُنشئ رسائل Messenger وInstagram وتعليقات Facebook وInstagram اصطناعية وموسومة
+              <strong className="mx-1">بيانات اختبار Meta — قابلة للحذف</strong>
+              داخل صندوق البريد، ثم تُشغّل عليها منطق التطبيع والتخزين نفسه المستخدم في Webhook.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 sm:flex-row">
+            <Button
+              type="button"
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => seedTestDataMutation.mutate()}
+              disabled={seedTestDataMutation.isPending}
+            >
+              {seedTestDataMutation.isPending ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <DatabaseZap className="ml-2 h-4 w-4" />
+              )}
+              إدخال بيانات الاختبار
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+              onClick={clearTestData}
+              disabled={clearTestDataMutation.isPending}
+            >
+              {clearTestDataMutation.isPending ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="ml-2 h-4 w-4" />
+              )}
+              تنظيف بيانات الاختبار
+            </Button>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-5 lg:grid-cols-[1.4fr_0.9fr]">
           <Card>

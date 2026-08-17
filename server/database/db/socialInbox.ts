@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, like, or } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, like, or } from 'drizzle-orm';
 import {
   InsertSocialInboxAccount,
   InsertSocialInboxItem,
@@ -277,6 +277,7 @@ export async function ingestMetaSocialInboxEvent(
               participantExternalId: event.authorExternalId ?? null,
               participantName: event.authorName ?? null,
               preview: event.content ?? null,
+              postUrl: event.postUrl ?? null,
               lastActivityAt: event.occurredAt,
               unreadCount: event.direction === 'inbound' ? 1 : 0,
               isRead: event.direction !== 'inbound',
@@ -332,6 +333,7 @@ export async function ingestMetaSocialInboxEvent(
         participantExternalId:
           event.authorExternalId ?? existingThread?.participantExternalId ?? null,
         participantName: event.authorName ?? existingThread?.participantName ?? null,
+        postUrl: event.postUrl ?? existingThread?.postUrl ?? null,
         lastActivityAt: event.occurredAt,
         unreadCount:
           event.direction === 'inbound'
@@ -413,5 +415,50 @@ export async function getSocialInboxStats() {
       .length,
     comments: threads.filter((thread: SocialInboxThread) => thread.channelType === 'comment')
       .length,
+  };
+}
+
+export async function clearMetaSocialInboxTestData() {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+
+  const testAccounts = await db
+    .select({ id: socialInboxAccounts.id })
+    .from(socialInboxAccounts)
+    .where(like(socialInboxAccounts.externalAccountId, 'sgh-meta-test-%'));
+  const accountIds = testAccounts.map((account) => account.id);
+  const testEvents = await db
+    .select({ id: socialInboxWebhookEvents.id })
+    .from(socialInboxWebhookEvents)
+    .where(like(socialInboxWebhookEvents.accountExternalId, 'sgh-meta-test-%'));
+
+  if (accountIds.length === 0) {
+    return { success: true, accounts: 0, events: testEvents.length };
+  }
+
+  const testThreads = await db
+    .select({ id: socialInboxThreads.id })
+    .from(socialInboxThreads)
+    .where(inArray(socialInboxThreads.accountId, accountIds));
+  const testItems = await db
+    .select({ id: socialInboxItems.id })
+    .from(socialInboxItems)
+    .where(inArray(socialInboxItems.accountId, accountIds));
+
+  await db.delete(socialInboxItems).where(inArray(socialInboxItems.accountId, accountIds));
+  await db.delete(socialInboxThreads).where(inArray(socialInboxThreads.accountId, accountIds));
+  await db
+    .delete(socialInboxWebhookEvents)
+    .where(like(socialInboxWebhookEvents.accountExternalId, 'sgh-meta-test-%'));
+  await db.delete(socialInboxAccounts).where(inArray(socialInboxAccounts.id, accountIds));
+
+  return {
+    success: true,
+    accounts: accountIds.length,
+    threads: testThreads.length,
+    items: testItems.length,
+    events: testEvents.length,
   };
 }

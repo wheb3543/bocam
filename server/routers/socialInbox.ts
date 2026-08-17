@@ -13,6 +13,8 @@ import {
   setSocialInboxThreadStarred,
   updateSocialInboxAccount,
 } from '../database/db';
+import { clearMetaSocialInboxTestData } from '../database/db/socialInbox';
+import { seedMetaSocialInboxTestData } from '../integrations/meta/seedMetaSocialInboxTestData';
 
 const platformSchema = z.enum(['messenger', 'instagram', 'facebook', 'x', 'linkedin', 'youtube']);
 const channelTypeSchema = z.enum(['message', 'comment']);
@@ -21,6 +23,17 @@ const socialInboxProcedure = protectedProcedure.use(async ({ ctx, next }) => {
     throw new TRPCError({
       code: 'FORBIDDEN',
       message: 'ليس لديك صلاحية الوصول إلى صندوق البريد الموحد',
+    });
+  }
+
+  return next();
+});
+
+const socialInboxAdminProcedure = socialInboxProcedure.use(async ({ ctx, next }) => {
+  if (ctx.user.role !== 'admin') {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'إدارة بيانات اختبار Meta متاحة للمسؤول فقط',
     });
   }
 
@@ -104,4 +117,8 @@ export const socialInboxRouter = router({
       })
     )
     .mutation(({ input }) => assignSocialInboxThread(input.id, input.assignedToUserId)),
+
+  seedMetaTestData: socialInboxAdminProcedure.mutation(() => seedMetaSocialInboxTestData()),
+
+  clearMetaTestData: socialInboxAdminProcedure.mutation(() => clearMetaSocialInboxTestData()),
 });
