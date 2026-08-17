@@ -2258,3 +2258,165 @@ export const notifications = mysqlTable(
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+/**
+ * Social Inbox Accounts - حسابات المنصات الاجتماعية المرتبطة بصندوق البريد الموحد
+ */
+export const socialInboxAccounts = mysqlTable(
+  'social_inbox_accounts',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    platform: mysqlEnum('platform', [
+      'messenger',
+      'instagram',
+      'facebook',
+      'x',
+      'linkedin',
+      'youtube',
+    ]).notNull(),
+    accountType: mysqlEnum('accountType', ['page', 'profile', 'business', 'channel'])
+      .default('profile')
+      .notNull(),
+    displayName: varchar('displayName', { length: 255 }).notNull(),
+    externalAccountId: varchar('externalAccountId', { length: 255 }).notNull(),
+    status: mysqlEnum('status', ['disconnected', 'pending', 'connected', 'error'])
+      .default('disconnected')
+      .notNull(),
+    lastSyncedAt: timestamp('lastSyncedAt'),
+    lastError: text('lastError'),
+    metadata: text('metadata'),
+    isActive: boolean('isActive').default(true).notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    platformIdx: index('socialInboxAccounts_platform_idx').on(table.platform),
+    statusIdx: index('socialInboxAccounts_status_idx').on(table.status),
+    externalAccountIdx: index('socialInboxAccounts_externalAccount_idx').on(
+      table.platform,
+      table.externalAccountId
+    ),
+  })
+);
+
+export type SocialInboxAccount = typeof socialInboxAccounts.$inferSelect;
+export type InsertSocialInboxAccount = typeof socialInboxAccounts.$inferInsert;
+
+/**
+ * Social Inbox Threads - سياق المحادثة أو سلسلة التعليقات
+ */
+export const socialInboxThreads = mysqlTable(
+  'social_inbox_threads',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    accountId: int('accountId')
+      .notNull()
+      .references(() => socialInboxAccounts.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    platform: mysqlEnum('platform', [
+      'messenger',
+      'instagram',
+      'facebook',
+      'x',
+      'linkedin',
+      'youtube',
+    ]).notNull(),
+    channelType: mysqlEnum('channelType', ['message', 'comment']).notNull(),
+    externalThreadId: varchar('externalThreadId', { length: 255 }).notNull(),
+    title: varchar('title', { length: 255 }),
+    participantExternalId: varchar('participantExternalId', { length: 255 }),
+    participantName: varchar('participantName', { length: 255 }),
+    participantAvatarUrl: varchar('participantAvatarUrl', { length: 500 }),
+    preview: text('preview'),
+    postUrl: varchar('postUrl', { length: 500 }),
+    unreadCount: int('unreadCount').default(0).notNull(),
+    isRead: boolean('isRead').default(false).notNull(),
+    isArchived: boolean('isArchived').default(false).notNull(),
+    isStarred: boolean('isStarred').default(false).notNull(),
+    assignedToUserId: int('assignedToUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    lastActivityAt: timestamp('lastActivityAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    accountIdx: index('socialInboxThreads_account_idx').on(table.accountId),
+    platformChannelIdx: index('socialInboxThreads_platformChannel_idx').on(
+      table.platform,
+      table.channelType
+    ),
+    externalThreadIdx: index('socialInboxThreads_externalThread_idx').on(
+      table.platform,
+      table.externalThreadId
+    ),
+    activityIdx: index('socialInboxThreads_activity_idx').on(table.lastActivityAt),
+    assignedUserIdx: index('socialInboxThreads_assignedUser_idx').on(table.assignedToUserId),
+  })
+);
+
+export type SocialInboxThread = typeof socialInboxThreads.$inferSelect;
+export type InsertSocialInboxThread = typeof socialInboxThreads.$inferInsert;
+
+/**
+ * Social Inbox Items - رسالة أو تعليق موحّد قابل للبحث والتعيين والرد
+ */
+export const socialInboxItems = mysqlTable(
+  'social_inbox_items',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    threadId: int('threadId')
+      .notNull()
+      .references(() => socialInboxThreads.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    accountId: int('accountId')
+      .notNull()
+      .references(() => socialInboxAccounts.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    platform: mysqlEnum('platform', [
+      'messenger',
+      'instagram',
+      'facebook',
+      'x',
+      'linkedin',
+      'youtube',
+    ]).notNull(),
+    channelType: mysqlEnum('channelType', ['message', 'comment']).notNull(),
+    direction: mysqlEnum('direction', ['inbound', 'outbound', 'system'])
+      .default('inbound')
+      .notNull(),
+    externalItemId: varchar('externalItemId', { length: 255 }).notNull(),
+    authorExternalId: varchar('authorExternalId', { length: 255 }),
+    authorName: varchar('authorName', { length: 255 }),
+    authorAvatarUrl: varchar('authorAvatarUrl', { length: 500 }),
+    content: text('content'),
+    mediaUrl: varchar('mediaUrl', { length: 500 }),
+    parentExternalId: varchar('parentExternalId', { length: 255 }),
+    externalPublishedAt: timestamp('externalPublishedAt'),
+    isRead: boolean('isRead').default(false).notNull(),
+    status: mysqlEnum('status', ['received', 'sent', 'pending', 'failed', 'deleted'])
+      .default('received')
+      .notNull(),
+    rawPayload: text('rawPayload'),
+    sentByUserId: int('sentByUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    threadIdx: index('socialInboxItems_thread_idx').on(table.threadId, table.createdAt),
+    accountIdx: index('socialInboxItems_account_idx').on(table.accountId),
+    platformChannelIdx: index('socialInboxItems_platformChannel_idx').on(
+      table.platform,
+      table.channelType
+    ),
+    externalItemIdx: index('socialInboxItems_externalItem_idx').on(
+      table.platform,
+      table.externalItemId
+    ),
+    statusIdx: index('socialInboxItems_status_idx').on(table.status),
+  })
+);
+
+export type SocialInboxItem = typeof socialInboxItems.$inferSelect;
+export type InsertSocialInboxItem = typeof socialInboxItems.$inferInsert;

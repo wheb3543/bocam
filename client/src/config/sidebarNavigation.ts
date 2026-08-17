@@ -148,7 +148,7 @@ export const allNavItems: NavItem[] = [
   },
   {
     id: 'messages',
-    title: 'الرسائل',
+    title: 'صندوق البريد الموحد',
     href: '/admin/communications/messages',
     icon: MessageSquare,
   },
@@ -313,7 +313,7 @@ export const allToolsGroups: NavGroup[] = [
       },
       {
         id: 'messages',
-        title: 'الرسائل',
+        title: 'صندوق البريد الموحد',
         href: '/admin/communications/messages',
         icon: MessageSquare,
       },

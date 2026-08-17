@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 12,
-  "numPassedTestSuites": 12,
+  "numTotalTestSuites": 7,
+  "numPassedTestSuites": 7,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 14,
-  "numPassedTests": 14,
+  "numTotalTests": 16,
+  "numPassedTests": 16,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,216 +24,211 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1786911639272,
+  "startTime": 1786975968485,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["uploadAndIndexMedia"],
-          "fullName": "uploadAndIndexMedia indexes video/mp4 as فيديو تعريفي.mp4 without image conversion",
+          "ancestorTitles": ["social inbox database helpers"],
+          "fullName": "social inbox database helpers returns a safe empty list when the database is unavailable",
           "status": "passed",
-          "title": "indexes video/mp4 as فيديو تعريفي.mp4 without image conversion",
-          "duration": 411.66341799999987,
+          "title": "returns a safe empty list when the database is unavailable",
+          "duration": 3.260690000000068,
           "failureMessages": [],
-          "location": { "line": 58, "column": 14 },
+          "location": { "line": 38, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["uploadAndIndexMedia"],
-          "fullName": "uploadAndIndexMedia indexes audio/mpeg as رسالة صوتية.mp3 without image conversion",
+          "ancestorTitles": ["social inbox database helpers"],
+          "fullName": "social inbox database helpers returns zeroed stats when the database is unavailable",
           "status": "passed",
-          "title": "indexes audio/mpeg as رسالة صوتية.mp3 without image conversion",
-          "duration": 1.2603240000000824,
+          "title": "returns zeroed stats when the database is unavailable",
+          "duration": 0.7303190000000086,
           "failureMessages": [],
-          "location": { "line": 58, "column": 14 },
+          "location": { "line": 42, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["uploadAndIndexMedia"],
-          "fullName": "uploadAndIndexMedia indexes application/pdf as تقرير طبي.pdf without image conversion",
+          "ancestorTitles": ["social inbox database helpers"],
+          "fullName": "social inbox database helpers returns null for a missing thread when the database is unavailable",
           "status": "passed",
-          "title": "indexes application/pdf as تقرير طبي.pdf without image conversion",
-          "duration": 1.0703380000002198,
+          "title": "returns null for a missing thread when the database is unavailable",
+          "duration": 0.47128799999995863,
           "failureMessages": [],
-          "location": { "line": 58, "column": 14 },
+          "location": { "line": 51, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["social inbox tRPC contract"],
+          "fullName": "social inbox tRPC contract exposes account management and conversation actions",
+          "status": "passed",
+          "title": "exposes account management and conversation actions",
+          "duration": 0.9692700000000514,
+          "failureMessages": [],
+          "location": { "line": 61, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["social inbox tRPC contract"],
+          "fullName": "social inbox tRPC contract validates and persists a Facebook account with metadata",
+          "status": "passed",
+          "title": "validates and persists a Facebook account with metadata",
+          "duration": 3.375238999999965,
+          "failureMessages": [],
+          "location": { "line": 78, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["social inbox tRPC contract"],
+          "fullName": "social inbox tRPC contract rejects unsupported platform values before touching the database",
+          "status": "passed",
+          "title": "rejects unsupported platform values before touching the database",
+          "duration": 2.0218130000000656,
+          "failureMessages": [],
+          "location": { "line": 100, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["social inbox tRPC contract"],
+          "fullName": "social inbox tRPC contract updates account synchronization state and serializes metadata",
+          "status": "passed",
+          "title": "updates account synchronization state and serializes metadata",
+          "duration": 2.562196999999969,
+          "failureMessages": [],
+          "location": { "line": 112, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["social inbox tRPC contract"],
+          "fullName": "social inbox tRPC contract routes read, star, and assignment mutations to their database helpers",
+          "status": "passed",
+          "title": "routes read, star, and assignment mutations to their database helpers",
+          "duration": 1.109222999999929,
+          "failureMessages": [],
+          "location": { "line": 132, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1786911641025,
-      "endTime": 1786911641439.0703,
+      "startTime": 1786975970610,
+      "endTime": 1786975970625.1091,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/api/uploadRoute.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/socialInbox.test.ts"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["processImageToAvif"],
-          "fullName": "processImageToAvif converts a raster image to AVIF and preserves its dimensions",
+          "ancestorTitles": ["MessagesPage"],
+          "fullName": "MessagesPage renders the required tabs and the empty-state-free conversation list",
           "status": "passed",
-          "title": "converts a raster image to AVIF and preserves its dimensions",
-          "duration": 15.67262299999993,
+          "title": "renders the required tabs and the empty-state-free conversation list",
+          "duration": 283.1753900000001,
           "failureMessages": [],
-          "location": { "line": 6, "column": 3 },
+          "location": { "line": 85, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["processImageToAvif"],
-          "fullName": "processImageToAvif does not rasterize SVG files",
+          "ancestorTitles": ["MessagesPage"],
+          "fullName": "MessagesPage updates the query filters when a platform tab or search term changes",
           "status": "passed",
-          "title": "does not rasterize SVG files",
-          "duration": 1.637418999999909,
+          "title": "updates the query filters when a platform tab or search term changes",
+          "duration": 81.42349600000034,
           "failureMessages": [],
-          "location": { "line": 30, "column": 3 },
+          "location": { "line": 96, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["MessagesPage"],
+          "fullName": "MessagesPage shows the no-results state when the selected filter has no threads",
+          "status": "passed",
+          "title": "shows the no-results state when the selected filter has no threads",
+          "duration": 28.15501200000017,
+          "failureMessages": [],
+          "location": { "line": 109, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["MessagesPage"],
+          "fullName": "MessagesPage marks a selected conversation as read",
+          "status": "passed",
+          "title": "marks a selected conversation as read",
+          "duration": 51.47664599999962,
+          "failureMessages": [],
+          "location": { "line": 117, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1786911641106,
-      "endTime": 1786911641123.6375,
+      "startTime": 1786975970651,
+      "endTime": 1786975971094.4766,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/services/imageProcessor.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/MessagesPage.test.tsx"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["media file helpers"],
-          "fullName": "media file helpers classifies the supported media families",
+          "ancestorTitles": ["social inbox configuration"],
+          "fullName": "social inbox configuration contains the requested message and comment tabs",
           "status": "passed",
-          "title": "classifies the supported media families",
-          "duration": 2.318234000000075,
+          "title": "contains the requested message and comment tabs",
+          "duration": 3.5323319999999967,
           "failureMessages": [],
           "location": { "line": 5, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["media file helpers"],
-          "fullName": "media file helpers keeps Arabic file names readable and selects a safe extension",
+          "ancestorTitles": ["social inbox configuration"],
+          "fullName": "social inbox configuration maps every supported platform to a branded display config",
           "status": "passed",
-          "title": "keeps Arabic file names readable and selects a safe extension",
-          "duration": 0.5290389999998979,
+          "title": "maps every supported platform to a branded display config",
+          "duration": 1.1393760000000839,
           "failureMessages": [],
-          "location": { "line": 13, "column": 3 },
+          "location": { "line": 20, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["media file helpers"],
-          "fullName": "media file helpers uses a neutral storage key that does not depend on the uploaded name",
+          "ancestorTitles": ["social inbox configuration"],
+          "fullName": "social inbox configuration builds message filters with a trimmed search value",
           "status": "passed",
-          "title": "uses a neutral storage key that does not depend on the uploaded name",
-          "duration": 0.7916410000000269,
+          "title": "builds message filters with a trimmed search value",
+          "duration": 0.5707380000001194,
           "failureMessages": [],
-          "location": { "line": 18, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1786911641973,
-      "endTime": 1786911641976.7917,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/services/mediaFiles.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["prepareMediaUpload"],
-          "fullName": "prepareMediaUpload converts only image uploads to AVIF",
-          "status": "passed",
-          "title": "converts only image uploads to AVIF",
-          "duration": 3.0736279999998715,
-          "failureMessages": [],
-          "location": { "line": 5, "column": 3 },
+          "location": { "line": 29, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["prepareMediaUpload"],
-          "fullName": "prepareMediaUpload keeps video/mp4 uploads in their original format",
+          "ancestorTitles": ["social inbox configuration"],
+          "fullName": "social inbox configuration builds a Facebook-specific comment filter",
           "status": "passed",
-          "title": "keeps video/mp4 uploads in their original format",
-          "duration": 1.394270000000006,
+          "title": "builds a Facebook-specific comment filter",
+          "duration": 0.7203830000000835,
           "failureMessages": [],
-          "location": { "line": 26, "column": 14 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["prepareMediaUpload"],
-          "fullName": "prepareMediaUpload keeps audio/mpeg uploads in their original format",
-          "status": "passed",
-          "title": "keeps audio/mpeg uploads in their original format",
-          "duration": 0.6202649999997902,
-          "failureMessages": [],
-          "location": { "line": 26, "column": 14 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["prepareMediaUpload"],
-          "fullName": "prepareMediaUpload keeps application/pdf uploads in their original format",
-          "status": "passed",
-          "title": "keeps application/pdf uploads in their original format",
-          "duration": 0.4983279999999013,
-          "failureMessages": [],
-          "location": { "line": 26, "column": 14 },
+          "location": { "line": 41, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1786911641065,
-      "endTime": 1786911641070.6204,
+      "startTime": 1786975970292,
+      "endTime": 1786975970297.7205,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/services/mediaUploadPreparation.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["getMediaPresentation"],
-          "fullName": "getMediaPresentation returns an appropriate display mode for every media type",
-          "status": "passed",
-          "title": "returns an appropriate display mode for every media type",
-          "duration": 1.995094999999992,
-          "failureMessages": [],
-          "location": { "line": 5, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1786911641040,
-      "endTime": 1786911641041.995,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/media/mediaPresentation.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["createMediaPreview"],
-          "fullName": "createMediaPreview renders image, video, audio, and document interface elements for their respective types",
-          "status": "passed",
-          "title": "renders image, video, audio, and document interface elements for their respective types",
-          "duration": 13.971736999999848,
-          "failureMessages": [],
-          "location": { "line": 12, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1786911641174,
-      "endTime": 1786911641187.9717,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/media/mediaPreview.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/socialInboxConfig.test.ts"
     }
   ]
 }

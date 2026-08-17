@@ -1,0 +1,3 @@
+ALTER TABLE `social_inbox_accounts` MODIFY COLUMN `platform` enum('messenger','instagram','facebook','x','linkedin','youtube') NOT NULL;--> statement-breakpoint
+ALTER TABLE `social_inbox_items` MODIFY COLUMN `platform` enum('messenger','instagram','facebook','x','linkedin','youtube') NOT NULL;--> statement-breakpoint
+ALTER TABLE `social_inbox_threads` MODIFY COLUMN `platform` enum('messenger','instagram','facebook','x','linkedin','youtube') NOT NULL;

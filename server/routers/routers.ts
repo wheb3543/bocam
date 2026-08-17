@@ -20,6 +20,7 @@ import { tasksRouter } from './tasks';
 import { whatsappRouter } from './whatsapp';
 import { whatsappTemplateTestRouter } from './whatsappTemplateTest';
 import { messageSettingsRouter } from './messageSettings';
+import { socialInboxRouter } from './socialInbox';
 import { webhooksRouter } from './webhooks';
 import { commentsRouter } from './comments';
 import { followUpTasksRouter } from './followUpTasks';
@@ -61,6 +62,7 @@ export const appRouter = router({
   whatsappTemplateTest: whatsappTemplateTestRouter,
   metaSync: metaSyncRouter,
   messageSettings: messageSettingsRouter,
+  socialInbox: socialInboxRouter,
   webhooks: webhooksRouter,
   queue: queueRouter,
   content: contentRouter,

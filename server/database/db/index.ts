@@ -165,6 +165,21 @@ export {
 // User Preferences
 export { getUserPreference, setUserPreference, getAllUserPreferences } from './userPreferences';
 
+// Unified Social Inbox
+export {
+  listSocialInboxAccounts,
+  listSocialInboxThreads,
+  getSocialInboxThreadById,
+  createSocialInboxAccount,
+  updateSocialInboxAccount,
+  createSocialInboxThread,
+  createSocialInboxItem,
+  markSocialInboxThreadRead,
+  setSocialInboxThreadStarred,
+  assignSocialInboxThread,
+  getSocialInboxStats,
+} from './socialInbox';
+
 // Shared Templates
 export {
   getSharedTemplate,
