@@ -380,3 +380,35 @@
 [2026-08-17T19:53:46.054Z] cp .env.example .env
 [2026-08-17T19:53:46.084Z] [ELIFECYCLE] Command failed with exit code 1.
 [2026-08-17T19:53:46.117Z] Dev server exited with code 1
+[2026-08-17T20:51:34.870Z] Starting dev server with command: pnpm run dev
+[2026-08-17T20:51:36.216Z] $ node scripts/check-env.mjs
+[2026-08-17T20:51:36.263Z] 🔍 Checking environment variables...
+[2026-08-17T20:51:36.263Z] ❌ Error: .env file not found!
+[2026-08-17T20:51:36.263Z] 💡 Please create .env file from .env.example:
+[2026-08-17T20:51:36.263Z] cp .env.example .env
+[2026-08-17T20:51:36.291Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-17T20:51:36.321Z] Dev server exited with code 1
+[2026-08-17T20:57:47.288Z] Starting dev server with command: pnpm run dev
+[2026-08-17T20:57:48.708Z] $ node scripts/check-env.mjs
+[2026-08-17T20:57:48.754Z] 🔍 Checking environment variables...
+[2026-08-17T20:57:48.754Z] ❌ Error: .env file not found!
+[2026-08-17T20:57:48.754Z] 💡 Please create .env file from .env.example:
+[2026-08-17T20:57:48.754Z] cp .env.example .env
+[2026-08-17T20:57:48.781Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-17T20:57:48.807Z] Dev server exited with code 1
+[2026-08-17T21:11:36.933Z] Starting dev server with command: pnpm run dev
+[2026-08-17T21:11:38.338Z] $ node scripts/check-env.mjs
+[2026-08-17T21:11:38.387Z] 🔍 Checking environment variables...
+[2026-08-17T21:11:38.388Z] ❌ Error: .env file not found!
+[2026-08-17T21:11:38.388Z] 💡 Please create .env file from .env.example:
+[2026-08-17T21:11:38.388Z] cp .env.example .env
+[2026-08-17T21:11:38.420Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-17T21:11:38.451Z] Dev server exited with code 1
+[2026-08-17T21:14:57.058Z] Starting dev server with command: pnpm run dev
+[2026-08-17T21:14:58.446Z] $ node scripts/check-env.mjs
+[2026-08-17T21:14:58.494Z] 🔍 Checking environment variables...
+[2026-08-17T21:14:58.494Z] ❌ Error: .env file not found!
+[2026-08-17T21:14:58.494Z] 💡 Please create .env file from .env.example:
+[2026-08-17T21:14:58.494Z] cp .env.example .env
+[2026-08-17T21:14:58.521Z] [ELIFECYCLE] Command failed with exit code 1.
+[2026-08-17T21:14:58.557Z] Dev server exited with code 1

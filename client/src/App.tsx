@@ -62,6 +62,9 @@ const WhatsAppProductsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppP
 const WhatsAppReferralsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppReferralsPage'));
 const WhatsAppLabResultsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppLabResultsPage'));
 const MessagesPage = lazy(() => import('./pages/admin/communications/MessagesPage'));
+const MetaIntegrationSettingsPage = lazy(
+  () => import('./pages/admin/communications/MetaIntegrationSettingsPage')
+);
 const ReportsPageNew = lazy(() => import('./pages/admin/reports/ReportsPage'));
 const AnalyticsPage = lazy(() => import('./pages/admin/reports/AnalyticsPage'));
 const CampStatsPage = lazy(() => import('./pages/admin/reports/CampStatsPage'));
@@ -328,6 +331,10 @@ function Router() {
                   </ProtectedRoute>
                 </Route>
                 <Route path={'/admin/communications/messages'} component={MessagesPage} />
+                <Route
+                  path={'/admin/communications/meta-settings'}
+                  component={MetaIntegrationSettingsPage}
+                />
                 <Route path={'/admin/message-settings'} component={MessageSettingsPage} />
                 <Route path={'/admin/reports/reports'}>
                   <ProtectedRoute feature="reports">

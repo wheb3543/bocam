@@ -6,9 +6,11 @@ import {
   socialInboxAccounts,
   socialInboxItems,
   socialInboxThreads,
+  socialInboxWebhookEvents,
   SocialInboxThread,
 } from '../../../drizzle/schema';
 import { getDb } from './connection';
+import type { MetaSocialInboxEvent } from '../../integrations/meta/socialInboxMetaWebhook';
 
 type SocialInboxFilters = {
   platform?: 'messenger' | 'instagram' | 'facebook' | 'x' | 'linkedin' | 'youtube';
@@ -111,6 +113,51 @@ export async function updateSocialInboxAccount(
   return { success: true };
 }
 
+export async function ensureSocialInboxAccount({
+  platform,
+  externalAccountId,
+  displayName,
+  accountType = 'page',
+}: {
+  platform: 'messenger' | 'instagram' | 'facebook';
+  externalAccountId: string;
+  displayName: string;
+  accountType?: 'page' | 'profile' | 'business' | 'channel';
+}) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+
+  const [existing] = await db
+    .select()
+    .from(socialInboxAccounts)
+    .where(
+      and(
+        eq(socialInboxAccounts.platform, platform),
+        eq(socialInboxAccounts.externalAccountId, externalAccountId)
+      )
+    )
+    .limit(1);
+
+  if (existing) {
+    await db
+      .update(socialInboxAccounts)
+      .set({ displayName, accountType, status: 'pending', isActive: true, lastError: null })
+      .where(eq(socialInboxAccounts.id, existing.id));
+    return existing.id;
+  }
+
+  return createSocialInboxAccount({
+    platform,
+    accountType,
+    displayName,
+    externalAccountId,
+    status: 'pending',
+    isActive: true,
+  });
+}
+
 export async function createSocialInboxThread(thread: InsertSocialInboxThread) {
   const db = await getDb();
   if (!db) {
@@ -129,6 +176,183 @@ export async function createSocialInboxItem(item: InsertSocialInboxItem) {
 
   const result = await db.insert(socialInboxItems).values(item);
   return Number(result[0].insertId);
+}
+
+type MetaWebhookProcessingResult = {
+  status: 'processed' | 'duplicate' | 'ignored';
+  threadId?: number;
+  itemId?: number;
+  reason?: string;
+};
+
+function isDuplicateKeyError(error: unknown) {
+  return (
+    typeof error === 'object' && error !== null && 'code' in error && error.code === 'ER_DUP_ENTRY'
+  );
+}
+
+async function updateMetaWebhookEventStatus(
+  id: number,
+  processingStatus: 'processed' | 'ignored' | 'failed',
+  processingError?: string
+) {
+  const db = await getDb();
+  if (!db) {
+    return;
+  }
+
+  await db
+    .update(socialInboxWebhookEvents)
+    .set({ processingStatus, processingError, processedAt: new Date() })
+    .where(eq(socialInboxWebhookEvents.id, id));
+}
+
+export async function ingestMetaSocialInboxEvent(
+  event: MetaSocialInboxEvent
+): Promise<MetaWebhookProcessingResult> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+
+  let webhookEventId: number;
+  try {
+    const result = await db.insert(socialInboxWebhookEvents).values({
+      provider: 'meta',
+      platform: event.platform,
+      accountExternalId: event.accountExternalId,
+      eventType: event.eventType,
+      eventKey: event.eventKey,
+      rawPayload: event.rawPayload,
+    });
+    webhookEventId = Number(result[0].insertId);
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      return { status: 'duplicate', reason: 'تم استلام الحدث نفسه سابقاً' };
+    }
+    throw error;
+  }
+
+  try {
+    const [account] = await db
+      .select()
+      .from(socialInboxAccounts)
+      .where(
+        and(
+          eq(socialInboxAccounts.platform, event.platform),
+          eq(socialInboxAccounts.externalAccountId, event.accountExternalId)
+        )
+      )
+      .limit(1);
+
+    if (!account) {
+      const reason = 'الحساب المرتبط غير مسجل أو غير مفعل في صندوق البريد';
+      await updateMetaWebhookEventStatus(webhookEventId, 'ignored', reason);
+      return { status: 'ignored', reason };
+    }
+
+    const [existingThread] = await db
+      .select()
+      .from(socialInboxThreads)
+      .where(
+        and(
+          eq(socialInboxThreads.accountId, account.id),
+          eq(socialInboxThreads.platform, event.platform),
+          eq(socialInboxThreads.channelType, event.channelType),
+          eq(socialInboxThreads.externalThreadId, event.externalThreadId)
+        )
+      )
+      .limit(1);
+
+    const threadId = existingThread
+      ? existingThread.id
+      : Number(
+          (
+            await db.insert(socialInboxThreads).values({
+              accountId: account.id,
+              platform: event.platform,
+              channelType: event.channelType,
+              externalThreadId: event.externalThreadId,
+              title: event.channelType === 'comment' ? 'تعليقات منشور' : (event.authorName ?? null),
+              participantExternalId: event.authorExternalId ?? null,
+              participantName: event.authorName ?? null,
+              preview: event.content ?? null,
+              lastActivityAt: event.occurredAt,
+              unreadCount: event.direction === 'inbound' ? 1 : 0,
+              isRead: event.direction !== 'inbound',
+            })
+          )[0].insertId
+        );
+
+    const [existingItem] = await db
+      .select({ id: socialInboxItems.id })
+      .from(socialInboxItems)
+      .where(
+        and(
+          eq(socialInboxItems.accountId, account.id),
+          eq(socialInboxItems.platform, event.platform),
+          eq(socialInboxItems.externalItemId, event.externalItemId)
+        )
+      )
+      .limit(1);
+
+    if (existingItem) {
+      await updateMetaWebhookEventStatus(webhookEventId, 'processed');
+      return {
+        status: 'duplicate',
+        threadId,
+        itemId: existingItem.id,
+        reason: 'العنصر موجود مسبقاً',
+      };
+    }
+
+    const itemResult = await db.insert(socialInboxItems).values({
+      threadId,
+      accountId: account.id,
+      platform: event.platform,
+      channelType: event.channelType,
+      direction: event.direction,
+      externalItemId: event.externalItemId,
+      authorExternalId: event.authorExternalId ?? null,
+      authorName: event.authorName ?? null,
+      content: event.content ?? null,
+      mediaUrl: event.mediaUrl ?? null,
+      parentExternalId: event.parentExternalId ?? null,
+      externalPublishedAt: event.occurredAt,
+      isRead: event.direction !== 'inbound',
+      status: event.direction === 'outbound' ? 'sent' : 'received',
+      rawPayload: event.rawPayload,
+    });
+    const itemId = Number(itemResult[0].insertId);
+
+    await db
+      .update(socialInboxThreads)
+      .set({
+        preview: event.content ?? existingThread?.preview ?? null,
+        participantExternalId:
+          event.authorExternalId ?? existingThread?.participantExternalId ?? null,
+        participantName: event.authorName ?? existingThread?.participantName ?? null,
+        lastActivityAt: event.occurredAt,
+        unreadCount:
+          event.direction === 'inbound'
+            ? (existingThread?.unreadCount ?? 0) + 1
+            : (existingThread?.unreadCount ?? 0),
+        isRead: event.direction === 'inbound' ? false : (existingThread?.isRead ?? true),
+      })
+      .where(eq(socialInboxThreads.id, threadId));
+
+    await db
+      .update(socialInboxAccounts)
+      .set({ status: 'connected', lastSyncedAt: new Date(), lastError: null })
+      .where(eq(socialInboxAccounts.id, account.id));
+    await updateMetaWebhookEventStatus(webhookEventId, 'processed');
+
+    return { status: 'processed', threadId, itemId };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'تعذر تطبيع حدث Meta';
+    await updateMetaWebhookEventStatus(webhookEventId, 'failed', message);
+    throw error;
+  }
 }
 
 export async function markSocialInboxThreadRead(id: number, isRead: boolean) {

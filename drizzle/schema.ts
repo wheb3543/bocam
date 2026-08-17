@@ -9,6 +9,7 @@ import {
   index,
   decimal,
   primaryKey,
+  uniqueIndex,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
@@ -2420,3 +2421,61 @@ export const socialInboxItems = mysqlTable(
 
 export type SocialInboxItem = typeof socialInboxItems.$inferSelect;
 export type InsertSocialInboxItem = typeof socialInboxItems.$inferInsert;
+
+/**
+ * Social Inbox Webhook Events - سجل تدقيقي لأحداث المنصات الواردة
+ * يحفظ الحمولة الخام ويمنع تكرار تسليم Meta قبل بدء التطبيع.
+ */
+export const socialInboxWebhookEvents = mysqlTable(
+  'social_inbox_webhook_events',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    provider: mysqlEnum('provider', ['meta']).default('meta').notNull(),
+    platform: mysqlEnum('platform', ['messenger', 'instagram', 'facebook']).notNull(),
+    accountExternalId: varchar('accountExternalId', { length: 255 }).notNull(),
+    eventType: varchar('eventType', { length: 100 }).notNull(),
+    eventKey: varchar('eventKey', { length: 512 }).notNull(),
+    rawPayload: text('rawPayload').notNull(),
+    processingStatus: mysqlEnum('processingStatus', ['received', 'processed', 'ignored', 'failed'])
+      .default('received')
+      .notNull(),
+    processingError: text('processingError'),
+    processedAt: timestamp('processedAt'),
+    receivedAt: timestamp('receivedAt').defaultNow().notNull(),
+  },
+  (table) => ({
+    eventKeyUnique: uniqueIndex('socialInboxWebhookEvents_eventKey_unique').on(table.eventKey),
+    accountIdx: index('socialInboxWebhookEvents_account_idx').on(
+      table.platform,
+      table.accountExternalId
+    ),
+    statusIdx: index('socialInboxWebhookEvents_status_idx').on(table.processingStatus),
+  })
+);
+
+export type SocialInboxWebhookEvent = typeof socialInboxWebhookEvents.$inferSelect;
+export type InsertSocialInboxWebhookEvent = typeof socialInboxWebhookEvents.$inferInsert;
+
+/**
+ * Meta Integration Settings - بيانات ربط Meta المشفّرة لصندوق البريد
+ * لا تُعاد الحقول المشفّرة مطلقاً إلى الواجهة؛ تستخدمها نقطة Webhook على الخادم فقط.
+ */
+export const metaIntegrationSettings = mysqlTable('meta_integration_settings', {
+  id: int('id').autoincrement().primaryKey(),
+  appId: varchar('appId', { length: 255 }),
+  facebookPageId: varchar('facebookPageId', { length: 255 }),
+  instagramAccountId: varchar('instagramAccountId', { length: 255 }),
+  appSecretEncrypted: text('appSecretEncrypted'),
+  verifyTokenEncrypted: text('verifyTokenEncrypted'),
+  pageAccessTokenEncrypted: text('pageAccessTokenEncrypted'),
+  isEnabled: boolean('isEnabled').default(false).notNull(),
+  updatedByUserId: int('updatedByUserId').references(() => users.id, {
+    onDelete: 'set null',
+    onUpdate: 'cascade',
+  }),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+
+export type MetaIntegrationSettings = typeof metaIntegrationSettings.$inferSelect;
+export type InsertMetaIntegrationSettings = typeof metaIntegrationSettings.$inferInsert;

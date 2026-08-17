@@ -21,6 +21,7 @@ import { whatsappRouter } from './whatsapp';
 import { whatsappTemplateTestRouter } from './whatsappTemplateTest';
 import { messageSettingsRouter } from './messageSettings';
 import { socialInboxRouter } from './socialInbox';
+import { metaIntegrationRouter } from './metaIntegration';
 import { webhooksRouter } from './webhooks';
 import { commentsRouter } from './comments';
 import { followUpTasksRouter } from './followUpTasks';
@@ -63,6 +64,7 @@ export const appRouter = router({
   metaSync: metaSyncRouter,
   messageSettings: messageSettingsRouter,
   socialInbox: socialInboxRouter,
+  metaIntegration: metaIntegrationRouter,
   webhooks: webhooksRouter,
   queue: queueRouter,
   content: contentRouter,

@@ -184,6 +184,13 @@ export const allNavItems: NavItem[] = [
     allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
   },
   {
+    id: 'meta-integration-settings',
+    title: 'ربط Meta',
+    href: '/admin/communications/meta-settings',
+    icon: Shield,
+    allowedRoles: ['admin'],
+  },
+  {
     id: 'message-settings',
     title: 'إعدادات الرسائل',
     href: '/admin/message-settings',
@@ -389,6 +396,13 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/communications/messages',
         icon: MessageSquare,
         allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
+      },
+      {
+        id: 'meta-integration-settings',
+        title: 'ربط Meta',
+        href: '/admin/communications/meta-settings',
+        icon: Shield,
+        allowedRoles: ['admin'],
       },
       {
         id: 'message-settings',

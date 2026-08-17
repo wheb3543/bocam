@@ -5,6 +5,7 @@ import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { registerOAuthRoutes } from './oauth';
 import { createUploadRouter } from '../api/uploadRoute';
 import { createWebhookRouter } from '../api/webhookRoutes';
+import { createMetaSocialWebhookRouter } from '../api/metaSocialWebhookRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
 import { createContext } from './context';
@@ -62,6 +63,8 @@ async function startServer() {
   app.use(createUploadRouter());
   // WhatsApp Webhook routes (direct Express, not tRPC - Meta requirement)
   app.use(createWebhookRouter());
+  // Meta Social Webhook routes for Messenger, Instagram, and Facebook Page events
+  app.use(createMetaSocialWebhookRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
   // Health check and metrics endpoints

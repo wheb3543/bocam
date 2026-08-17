@@ -174,11 +174,21 @@ export {
   updateSocialInboxAccount,
   createSocialInboxThread,
   createSocialInboxItem,
+  ensureSocialInboxAccount,
+  ingestMetaSocialInboxEvent,
   markSocialInboxThreadRead,
   setSocialInboxThreadStarred,
   assignSocialInboxThread,
   getSocialInboxStats,
 } from './socialInbox';
+
+// Meta Integration Settings
+export {
+  getMetaIntegrationSettingsStatus,
+  getMetaWebhookCredentials,
+  saveMetaIntegrationSettings,
+  type SaveMetaIntegrationSettingsInput,
+} from './metaIntegrationSettings';
 
 // Shared Templates
 export {

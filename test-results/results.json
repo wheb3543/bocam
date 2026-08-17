@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 9,
-  "numPassedTestSuites": 9,
+  "numTotalTestSuites": 10,
+  "numPassedTestSuites": 10,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 16,
-  "numPassedTests": 16,
+  "numTotalTests": 10,
+  "numPassedTests": 10,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,220 +24,163 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1786996310960,
+  "startTime": 1787001110273,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["social inbox database helpers"],
-          "fullName": "social inbox database helpers returns a safe empty list when the database is unavailable",
+          "ancestorTitles": ["Meta social webhook verification"],
+          "fullName": "Meta social webhook verification accepts only the configured verification token and subscribe mode",
           "status": "passed",
-          "title": "returns a safe empty list when the database is unavailable",
-          "duration": 4.115767000000005,
+          "title": "accepts only the configured verification token and subscribe mode",
+          "duration": 1.9479260000000522,
           "failureMessages": [],
-          "location": { "line": 42, "column": 3 },
+          "location": { "line": 10, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["social inbox database helpers"],
-          "fullName": "social inbox database helpers returns zeroed stats when the database is unavailable",
+          "ancestorTitles": ["Meta social webhook verification"],
+          "fullName": "Meta social webhook verification verifies the Meta SHA-256 signature against the raw body",
           "status": "passed",
-          "title": "returns zeroed stats when the database is unavailable",
-          "duration": 0.8303480000001855,
+          "title": "verifies the Meta SHA-256 signature against the raw body",
+          "duration": 0.778438000000051,
           "failureMessages": [],
-          "location": { "line": 46, "column": 3 },
+          "location": { "line": 25, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["social inbox database helpers"],
-          "fullName": "social inbox database helpers returns null for a missing thread when the database is unavailable",
+          "ancestorTitles": ["Meta social webhook verification"],
+          "fullName": "Meta social webhook verification processes deliveries without throwing when one normalized event fails",
           "status": "passed",
-          "title": "returns null for a missing thread when the database is unavailable",
-          "duration": 0.6474770000002081,
+          "title": "processes deliveries without throwing when one normalized event fails",
+          "duration": 3.616852999999992,
           "failureMessages": [],
-          "location": { "line": 55, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract exposes account management and conversation actions",
-          "status": "passed",
-          "title": "exposes account management and conversation actions",
-          "duration": 1.6492430000000695,
-          "failureMessages": [],
-          "location": { "line": 65, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract validates and persists a Facebook account with metadata",
-          "status": "passed",
-          "title": "validates and persists a Facebook account with metadata",
-          "duration": 3.1997529999998733,
-          "failureMessages": [],
-          "location": { "line": 82, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract rejects unsupported platform values before touching the database",
-          "status": "passed",
-          "title": "rejects unsupported platform values before touching the database",
-          "duration": 2.2548719999999776,
-          "failureMessages": [],
-          "location": { "line": 104, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract updates account synchronization state and serializes metadata",
-          "status": "passed",
-          "title": "updates account synchronization state and serializes metadata",
-          "duration": 2.6302270000001045,
-          "failureMessages": [],
-          "location": { "line": 116, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract routes read, star, and assignment mutations to their database helpers",
-          "status": "passed",
-          "title": "routes read, star, and assignment mutations to their database helpers",
-          "duration": 1.1081400000000485,
-          "failureMessages": [],
-          "location": { "line": 136, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract forbids a viewer from accessing the unified inbox procedures",
-          "status": "passed",
-          "title": "forbids a viewer from accessing the unified inbox procedures",
-          "duration": 0.8713700000000699,
-          "failureMessages": [],
-          "location": { "line": 146, "column": 3 },
+          "location": { "line": 34, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1786996313050,
-      "endTime": 1786996313067.8713,
+      "startTime": 1787001112432,
+      "endTime": 1787001112437.617,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/socialInbox.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/api/metaSocialWebhookRoute.test.ts"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["sidebar data for the unified inbox"],
-          "fullName": "sidebar data for the unified inbox shows the inbox by default and attaches the authorized roles policy",
+          "ancestorTitles": ["Meta integration settings persistence"],
+          "fullName": "Meta integration settings persistence encrypts supplied secrets and returns only their configuration state",
           "status": "passed",
-          "title": "shows the inbox by default and attaches the authorized roles policy",
-          "duration": 4.0079339999999775,
+          "title": "encrypts supplied secrets and returns only their configuration state",
+          "duration": 5.564931999999999,
           "failureMessages": [],
-          "location": { "line": 6, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["sidebar data for the unified inbox"],
-          "fullName": "sidebar data for the unified inbox keeps the same guarded inbox item inside the communications tools group",
-          "status": "passed",
-          "title": "keeps the same guarded inbox item inside the communications tools group",
-          "duration": 0.6222780000000512,
-          "failureMessages": [],
-          "location": { "line": 17, "column": 3 },
+          "location": { "line": 19, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1786996312753,
-      "endTime": 1786996312757.6223,
+      "startTime": 1787001112154,
+      "endTime": 1787001112159.565,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/components/layout/sidebarData.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/database/db/metaIntegrationSettings.test.ts"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["getSocialInboxUnreadCount"],
-          "fullName": "getSocialInboxUnreadCount returns the unread social inbox count and defaults safely to zero",
+          "ancestorTitles": ["Meta event ingestion idempotency"],
+          "fullName": "Meta event ingestion idempotency does not create a second thread or item when a webhook event key already exists",
           "status": "passed",
-          "title": "returns the unread social inbox count and defaults safely to zero",
-          "duration": 2.686871999999994,
+          "title": "does not create a second thread or item when a webhook event key already exists",
+          "duration": 3.678053000000091,
+          "failureMessages": [],
+          "location": { "line": 10, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787001112162,
+      "endTime": 1787001112165.678,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/database/db/socialInboxIngestion.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Meta settings encryption"],
+          "fullName": "Meta settings encryption encrypts and decrypts a secret without persisting plaintext",
+          "status": "passed",
+          "title": "encrypts and decrypts a secret without persisting plaintext",
+          "duration": 4.195126000000073,
+          "failureMessages": [],
+          "location": { "line": 7, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Meta settings encryption"],
+          "fullName": "Meta settings encryption rejects a ciphertext that is malformed or has been modified",
+          "status": "passed",
+          "title": "rejects a ciphertext that is malformed or has been modified",
+          "duration": 1.883585999999923,
+          "failureMessages": [],
+          "location": { "line": 14, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787001111899,
+      "endTime": 1787001111904.8835,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/metaSettingsCrypto.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Meta social inbox payload normalization"],
+          "fullName": "Meta social inbox payload normalization normalizes an inbound Messenger text message",
+          "status": "passed",
+          "title": "normalizes an inbound Messenger text message",
+          "duration": 2.6790169999999307,
           "failureMessages": [],
           "location": { "line": 5, "column": 3 },
           "meta": {},
           "tags": []
-        }
-      ],
-      "startTime": 1786996312822,
-      "endTime": 1786996312824.6868,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/hooks/layout/useSidebarNotifications.test.ts"
-    },
-    {
-      "assertionResults": [
+        },
         {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage renders the required tabs and the empty-state-free conversation list",
+          "ancestorTitles": ["Meta social inbox payload normalization"],
+          "fullName": "Meta social inbox payload normalization normalizes an Instagram comment and preserves its parent relationship",
           "status": "passed",
-          "title": "renders the required tabs and the empty-state-free conversation list",
-          "duration": 282.3668560000003,
+          "title": "normalizes an Instagram comment and preserves its parent relationship",
+          "duration": 1.2175730000001295,
           "failureMessages": [],
-          "location": { "line": 85, "column": 3 },
+          "location": { "line": 32, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage updates the query filters when a platform tab or search term changes",
+          "ancestorTitles": ["Meta social inbox payload normalization"],
+          "fullName": "Meta social inbox payload normalization normalizes a Facebook Page feed comment and ignores unrelated feed changes",
           "status": "passed",
-          "title": "updates the query filters when a platform tab or search term changes",
-          "duration": 85.70208000000002,
+          "title": "normalizes a Facebook Page feed comment and ignores unrelated feed changes",
+          "duration": 1.4576870000000781,
           "failureMessages": [],
-          "location": { "line": 97, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage shows the no-results state when the selected filter has no threads",
-          "status": "passed",
-          "title": "shows the no-results state when the selected filter has no threads",
-          "duration": 27.02339000000029,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage marks a selected conversation as read",
-          "status": "passed",
-          "title": "marks a selected conversation as read",
-          "duration": 51.88752000000022,
-          "failureMessages": [],
-          "location": { "line": 118, "column": 3 },
+          "location": { "line": 61, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1786996313076,
-      "endTime": 1786996313523.8875,
+      "startTime": 1787001111894,
+      "endTime": 1787001111899.4578,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/MessagesPage.test.tsx"
+      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/socialInboxMetaWebhook.test.ts"
     }
   ]
 }
