@@ -64,6 +64,7 @@ export const DEFAULT_VISIBLE_IDS = [
   'tasks',
   'reports',
   'whatsapp',
+  'messages',
 ];
 
 export const STORAGE_KEY = 'sgh-sidebar-visible-items';

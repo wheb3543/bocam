@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 7,
-  "numPassedTestSuites": 7,
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 16,
-  "numPassedTests": 16,
+  "numTotalTests": 2,
+  "numPassedTests": 2,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,211 +24,39 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1786975968485,
+  "startTime": 1786981535770,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["social inbox database helpers"],
-          "fullName": "social inbox database helpers returns a safe empty list when the database is unavailable",
+          "ancestorTitles": ["sidebar navigation"],
+          "fullName": "sidebar navigation shows the unified social inbox by default",
           "status": "passed",
-          "title": "returns a safe empty list when the database is unavailable",
-          "duration": 3.260690000000068,
-          "failureMessages": [],
-          "location": { "line": 38, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox database helpers"],
-          "fullName": "social inbox database helpers returns zeroed stats when the database is unavailable",
-          "status": "passed",
-          "title": "returns zeroed stats when the database is unavailable",
-          "duration": 0.7303190000000086,
-          "failureMessages": [],
-          "location": { "line": 42, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox database helpers"],
-          "fullName": "social inbox database helpers returns null for a missing thread when the database is unavailable",
-          "status": "passed",
-          "title": "returns null for a missing thread when the database is unavailable",
-          "duration": 0.47128799999995863,
-          "failureMessages": [],
-          "location": { "line": 51, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract exposes account management and conversation actions",
-          "status": "passed",
-          "title": "exposes account management and conversation actions",
-          "duration": 0.9692700000000514,
-          "failureMessages": [],
-          "location": { "line": 61, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract validates and persists a Facebook account with metadata",
-          "status": "passed",
-          "title": "validates and persists a Facebook account with metadata",
-          "duration": 3.375238999999965,
-          "failureMessages": [],
-          "location": { "line": 78, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract rejects unsupported platform values before touching the database",
-          "status": "passed",
-          "title": "rejects unsupported platform values before touching the database",
-          "duration": 2.0218130000000656,
-          "failureMessages": [],
-          "location": { "line": 100, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract updates account synchronization state and serializes metadata",
-          "status": "passed",
-          "title": "updates account synchronization state and serializes metadata",
-          "duration": 2.562196999999969,
-          "failureMessages": [],
-          "location": { "line": 112, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox tRPC contract"],
-          "fullName": "social inbox tRPC contract routes read, star, and assignment mutations to their database helpers",
-          "status": "passed",
-          "title": "routes read, star, and assignment mutations to their database helpers",
-          "duration": 1.109222999999929,
-          "failureMessages": [],
-          "location": { "line": 132, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1786975970610,
-      "endTime": 1786975970625.1091,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/socialInbox.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage renders the required tabs and the empty-state-free conversation list",
-          "status": "passed",
-          "title": "renders the required tabs and the empty-state-free conversation list",
-          "duration": 283.1753900000001,
-          "failureMessages": [],
-          "location": { "line": 85, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage updates the query filters when a platform tab or search term changes",
-          "status": "passed",
-          "title": "updates the query filters when a platform tab or search term changes",
-          "duration": 81.42349600000034,
-          "failureMessages": [],
-          "location": { "line": 96, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage shows the no-results state when the selected filter has no threads",
-          "status": "passed",
-          "title": "shows the no-results state when the selected filter has no threads",
-          "duration": 28.15501200000017,
-          "failureMessages": [],
-          "location": { "line": 109, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage marks a selected conversation as read",
-          "status": "passed",
-          "title": "marks a selected conversation as read",
-          "duration": 51.47664599999962,
-          "failureMessages": [],
-          "location": { "line": 117, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1786975970651,
-      "endTime": 1786975971094.4766,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/MessagesPage.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["social inbox configuration"],
-          "fullName": "social inbox configuration contains the requested message and comment tabs",
-          "status": "passed",
-          "title": "contains the requested message and comment tabs",
-          "duration": 3.5323319999999967,
+          "title": "shows the unified social inbox by default",
+          "duration": 3.611061999999947,
           "failureMessages": [],
           "location": { "line": 5, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["social inbox configuration"],
-          "fullName": "social inbox configuration maps every supported platform to a branded display config",
+          "ancestorTitles": ["sidebar navigation"],
+          "fullName": "sidebar navigation keeps the inbox link in the communications tools group",
           "status": "passed",
-          "title": "maps every supported platform to a branded display config",
-          "duration": 1.1393760000000839,
+          "title": "keeps the inbox link in the communications tools group",
+          "duration": 0.8222920000000613,
           "failureMessages": [],
-          "location": { "line": 20, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox configuration"],
-          "fullName": "social inbox configuration builds message filters with a trimmed search value",
-          "status": "passed",
-          "title": "builds message filters with a trimmed search value",
-          "duration": 0.5707380000001194,
-          "failureMessages": [],
-          "location": { "line": 29, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["social inbox configuration"],
-          "fullName": "social inbox configuration builds a Facebook-specific comment filter",
-          "status": "passed",
-          "title": "builds a Facebook-specific comment filter",
-          "duration": 0.7203830000000835,
-          "failureMessages": [],
-          "location": { "line": 41, "column": 3 },
+          "location": { "line": 15, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1786975970292,
-      "endTime": 1786975970297.7205,
+      "startTime": 1786981537459,
+      "endTime": 1786981537463.8223,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/socialInboxConfig.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/config/sidebarNavigation.test.ts"
     }
   ]
 }
