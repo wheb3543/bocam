@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
+import React, { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import MessagesPage from './MessagesPage';
 
@@ -32,9 +32,15 @@ const mocks = vi.hoisted(() => {
     accountsQuery: vi.fn(() => ({ data: [], isLoading: false, isFetching: false, refetch: vi.fn() })),
     statsQuery: vi.fn(() => ({ data: { total: 1, unread: 1, messages: 1, comments: 0 }, isLoading: false, isFetching: false, refetch: vi.fn() })),
     commentContextsQuery: vi.fn(() => ({ data: [], isLoading: false, isFetching: false, refetch: vi.fn() })),
+    activeUsersQuery: vi.fn(() => ({ data: [{ id: 7, name: 'مسؤول التعليقات', username: 'moderator' }], isLoading: false, isFetching: false, refetch: vi.fn() })),
     threadDetailQuery: vi.fn(() => ({ data: undefined, isLoading: false, isFetching: false, refetch: vi.fn() })),
     markReadMutate: vi.fn(),
     starMutate: vi.fn(),
+    workflowMutateAsync: vi.fn().mockResolvedValue({ success: true }),
+    replyMutateAsync: vi.fn().mockResolvedValue({ externalItemId: 'reply-1' }),
+    privateReplyMutateAsync: vi.fn().mockResolvedValue({ externalMessageId: 'message-1' }),
+    hiddenMutateAsync: vi.fn().mockResolvedValue({ success: true }),
+    enrichMutateAsync: vi.fn().mockResolvedValue({ success: true }),
   };
 });
 
@@ -47,6 +53,7 @@ vi.mock('@/lib/api/trpc', () => ({
     useUtils: () => ({
       socialInbox: {
         threads: { invalidate: vi.fn() },
+        commentContexts: { invalidate: vi.fn() },
         stats: { invalidate: vi.fn() },
         thread: { invalidate: vi.fn() },
       },
@@ -59,7 +66,13 @@ vi.mock('@/lib/api/trpc', () => ({
       thread: { useQuery: mocks.threadDetailQuery },
       markRead: { useMutation: () => ({ mutate: mocks.markReadMutate }) },
       setStarred: { useMutation: () => ({ mutate: mocks.starMutate }) },
+      updateCommentWorkflow: { useMutation: () => ({ mutateAsync: mocks.workflowMutateAsync, isPending: false }) },
+      replyToComment: { useMutation: () => ({ mutateAsync: mocks.replyMutateAsync, isPending: false }) },
+      sendCommentPrivateReply: { useMutation: () => ({ mutateAsync: mocks.privateReplyMutateAsync, isPending: false }) },
+      setCommentHidden: { useMutation: () => ({ mutateAsync: mocks.hiddenMutateAsync, isPending: false }) },
+      enrichCommentContext: { useMutation: () => ({ mutateAsync: mocks.enrichMutateAsync, isPending: false }) },
     },
+    users: { getActiveUsers: { useQuery: mocks.activeUsersQuery } },
   },
 }));
 
@@ -80,10 +93,17 @@ describe('MessagesPage', () => {
     mocks.statsQuery.mockImplementation(() => ({ data: { total: 1, unread: 1, messages: 1, comments: 0 }, isLoading: false, isFetching: false, refetch: vi.fn() }));
     mocks.commentContextsQuery.mockReset();
     mocks.commentContextsQuery.mockImplementation(() => ({ data: [], isLoading: false, isFetching: false, refetch: vi.fn() }));
+    mocks.activeUsersQuery.mockReset();
+    mocks.activeUsersQuery.mockImplementation(() => ({ data: [{ id: 7, name: 'مسؤول التعليقات', username: 'moderator' }], isLoading: false, isFetching: false, refetch: vi.fn() }));
     mocks.threadDetailQuery.mockReset();
     mocks.threadDetailQuery.mockImplementation(() => ({ data: undefined, isLoading: false, isFetching: false, refetch: vi.fn() }));
     mocks.markReadMutate.mockClear();
     mocks.starMutate.mockClear();
+    mocks.workflowMutateAsync.mockClear();
+    mocks.replyMutateAsync.mockClear();
+    mocks.privateReplyMutateAsync.mockClear();
+    mocks.hiddenMutateAsync.mockClear();
+    mocks.enrichMutateAsync.mockClear();
   });
 
   it('renders the required tabs and the empty-state-free conversation list', () => {
@@ -317,5 +337,81 @@ describe('MessagesPage', () => {
     expect(screen.getAllByText('تعليق Instagram رئيسي.')).toHaveLength(2);
     expect(screen.getByText('رد Instagram متداخل.')).toBeInTheDocument();
     expect(screen.getByText('12')).toBeInTheDocument();
+  });
+
+  it('routes comment reply, follow-up, assignment, and enrichment actions through the protected mutations', async () => {
+    mocks.commentContextsQuery.mockImplementation(() => ({
+      data: [
+        {
+          id: 92,
+          platform: 'instagram',
+          title: 'وسيط فعلي لإدارة التعليقات.',
+          preview: 'هل يوجد موعد متاح؟',
+          postUrl: 'https://www.instagram.com/p/live-context/',
+          unreadCount: 0,
+          isRead: true,
+          isStarred: false,
+          isFollowUpRequired: false,
+          assignedToUserId: null,
+          lastActivityAt: new Date('2026-08-18T09:00:00.000Z'),
+          commentContext: {
+            sourceType: 'instagram_media',
+            sourceExternalId: 'media-live-1',
+            title: 'وسيط فعلي لإدارة التعليقات.',
+            previewType: 'IMAGE',
+          },
+          items: [
+            {
+              id: 921,
+              externalItemId: 'ig-live-comment-1',
+              authorName: 'ig_customer',
+              content: 'هل يوجد موعد متاح؟',
+              parentExternalId: 'media-live-1',
+              externalPublishedAt: new Date(),
+              createdAt: new Date(),
+              isRead: true,
+              direction: 'inbound',
+              commentMetadata: { canComment: true, likeCount: 1, isHidden: false },
+            },
+          ],
+        },
+      ],
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    }) as never);
+
+    render(React.createElement(MessagesPage));
+    fireEvent.keyDown(screen.getByRole('tab', { name: 'تعليقات Instagram' }), { key: 'Enter', code: 'Enter' });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'متابعة' }));
+      await Promise.resolve();
+    });
+    expect(mocks.workflowMutateAsync).toHaveBeenCalledWith({ id: 92, isFollowUpRequired: true });
+
+    await act(async () => {
+      fireEvent.change(screen.getByRole('combobox', { name: 'تعيين مسؤول للسياق' }), { target: { value: '7' } });
+      await Promise.resolve();
+    });
+    expect(mocks.workflowMutateAsync).toHaveBeenCalledWith({ id: 92, assignedToUserId: 7 });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /إثراء/ }));
+      await Promise.resolve();
+    });
+    expect(mocks.enrichMutateAsync).toHaveBeenCalledWith({ threadId: 92, itemId: 921 });
+
+    fireEvent.click(screen.getByRole('button', { name: 'رد' }));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'نعم، يوجد موعد صباحي.' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'إرسال' }));
+      await Promise.resolve();
+    });
+    expect(mocks.replyMutateAsync).toHaveBeenCalledWith({
+      threadId: 92,
+      itemId: 921,
+      message: 'نعم، يوجد موعد صباحي.',
+    });
   });
 });

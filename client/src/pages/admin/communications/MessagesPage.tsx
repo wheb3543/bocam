@@ -107,6 +107,9 @@ export default function MessagesPage() {
 
   const utils = trpc.useUtils();
   const accountsQuery = trpc.socialInbox.accounts.useQuery();
+  const activeUsersQuery = trpc.users.getActiveUsers.useQuery(undefined, {
+    enabled: isMetaCommentTab,
+  });
   const statsQuery = trpc.socialInbox.stats.useQuery();
   const threadsQuery = trpc.socialInbox.threads.useQuery(filters, {
     placeholderData: (previous) => previous,
@@ -127,6 +130,7 @@ export default function MessagesPage() {
     onSuccess: async () => {
       await Promise.all([
         utils.socialInbox.threads.invalidate(),
+        utils.socialInbox.commentContexts.invalidate(),
         utils.socialInbox.stats.invalidate(),
       ]);
     },
@@ -138,6 +142,41 @@ export default function MessagesPage() {
       await utils.socialInbox.thread.invalidate();
     },
     onError: (error) => toast.error(`تعذّر تحديث التمييز: ${error.message}`),
+  });
+  const workflowMutation = trpc.socialInbox.updateCommentWorkflow.useMutation({
+    onSuccess: async () => {
+      await utils.socialInbox.commentContexts.invalidate();
+      toast.success('تم تحديث المتابعة أو التعيين');
+    },
+    onError: (error) => toast.error(`تعذّر تحديث سياق التعليق: ${error.message}`),
+  });
+  const replyCommentMutation = trpc.socialInbox.replyToComment.useMutation({
+    onSuccess: async () => {
+      await utils.socialInbox.commentContexts.invalidate();
+      toast.success('تم إرسال الرد إلى Meta');
+    },
+    onError: (error) => toast.error(`تعذّر إرسال الرد: ${error.message}`),
+  });
+  const privateReplyMutation = trpc.socialInbox.sendCommentPrivateReply.useMutation({
+    onSuccess: async () => {
+      await utils.socialInbox.commentContexts.invalidate();
+      toast.success('تم إرسال الرد الخاص إلى Meta');
+    },
+    onError: (error) => toast.error(`تعذّر إرسال الرد الخاص: ${error.message}`),
+  });
+  const hiddenMutation = trpc.socialInbox.setCommentHidden.useMutation({
+    onSuccess: async () => {
+      await utils.socialInbox.commentContexts.invalidate();
+      toast.success('تم تحديث حالة إخفاء التعليق');
+    },
+    onError: (error) => toast.error(`تعذّر تحديث الإخفاء: ${error.message}`),
+  });
+  const enrichMutation = trpc.socialInbox.enrichCommentContext.useMutation({
+    onSuccess: async () => {
+      await utils.socialInbox.commentContexts.invalidate();
+      toast.success('تم إثراء سياق المنشور أو الوسيط');
+    },
+    onError: (error) => toast.error(`تعذّر إثراء السياق: ${error.message}`),
   });
 
   const threads = threadsQuery.data ?? [];
@@ -179,6 +218,13 @@ export default function MessagesPage() {
       markReadMutation.mutate({ id: context.id, isRead: true });
     }
   };
+
+  const isCommentActionPending =
+    workflowMutation.isPending ||
+    replyCommentMutation.isPending ||
+    privateReplyMutation.isPending ||
+    hiddenMutation.isPending ||
+    enrichMutation.isPending;
 
   return (
     <DashboardLayout
@@ -311,6 +357,23 @@ export default function MessagesPage() {
                 isLoading={commentContextsQuery.isLoading}
                 platform={activeTabConfig.platform as 'facebook' | 'instagram'}
                 onSelectContext={handleSelectCommentContext}
+                activeUsers={activeUsersQuery.data ?? []}
+                onSubmitReply={async (threadId, itemId, message) => {
+                  await replyCommentMutation.mutateAsync({ threadId, itemId, message });
+                }}
+                onSubmitPrivateReply={async (threadId, itemId, message) => {
+                  await privateReplyMutation.mutateAsync({ threadId, itemId, message });
+                }}
+                onHiddenChange={async (threadId, itemId, isHidden) => {
+                  await hiddenMutation.mutateAsync({ threadId, itemId, isHidden });
+                }}
+                onWorkflowChange={async (id, patch) => {
+                  await workflowMutation.mutateAsync({ id, ...patch });
+                }}
+                onEnrich={async (threadId, itemId) => {
+                  await enrichMutation.mutateAsync({ threadId, itemId });
+                }}
+                isActionPending={isCommentActionPending}
               />
             ) : (
               <div className="grid min-h-[620px] lg:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">

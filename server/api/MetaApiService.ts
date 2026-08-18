@@ -104,6 +104,30 @@ class MetaApiService {
     }
   }
 
+  /** طلب GET باستخدام توكن مخزن خادميّاً لإعدادات Meta دون كشفه للواجهة. */
+  async getWithAccessToken<T = unknown>(
+    endpoint: string,
+    accessToken: string,
+    params: Record<string, string> = {}
+  ): Promise<MetaApiResponse<T>> {
+    assertToken(accessToken);
+    const url = buildUrl(endpoint, params);
+    try {
+      const { res, body } = await fetchWithRetry(
+        url,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        },
+        endpoint,
+        RETRY_CONFIG
+      );
+      return handleMetaResponse<T>(res, body);
+    } catch (err) {
+      return handleMetaError(err, endpoint, 'GET');
+    }
+  }
+
   /**
    * طلب POST عام (JSON body)
    * @param endpoint  مسار نقطة النهاية
@@ -124,6 +148,31 @@ class MetaApiService {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${this.accessToken}`,
           },
+          body: JSON.stringify(payload),
+        },
+        endpoint,
+        RETRY_CONFIG
+      );
+      return handleMetaResponse<T>(res, body);
+    } catch (err) {
+      return handleMetaError(err, endpoint, 'POST');
+    }
+  }
+
+  /** طلب POST باستخدام توكن مخزن خادميّاً لإعدادات Meta دون كشفه للواجهة. */
+  async postWithAccessToken<T = unknown>(
+    endpoint: string,
+    accessToken: string,
+    payload: Record<string, unknown> = {}
+  ): Promise<MetaApiResponse<T>> {
+    assertToken(accessToken);
+    const url = `${GRAPH_API_BASE}/${endpoint.replace(/^\//, '')}`;
+    try {
+      const { res, body } = await fetchWithRetry(
+        url,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
           body: JSON.stringify(payload),
         },
         endpoint,

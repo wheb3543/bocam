@@ -2334,6 +2334,7 @@ export const socialInboxThreads = mysqlTable(
     isRead: boolean('isRead').default(false).notNull(),
     isArchived: boolean('isArchived').default(false).notNull(),
     isStarred: boolean('isStarred').default(false).notNull(),
+    isFollowUpRequired: boolean('isFollowUpRequired').default(false).notNull(),
     assignedToUserId: int('assignedToUserId').references(() => users.id, {
       onDelete: 'set null',
       onUpdate: 'cascade',
@@ -2353,6 +2354,7 @@ export const socialInboxThreads = mysqlTable(
       table.externalThreadId
     ),
     activityIdx: index('socialInboxThreads_activity_idx').on(table.lastActivityAt),
+    followUpIdx: index('socialInboxThreads_followUp_idx').on(table.isFollowUpRequired),
     assignedUserIdx: index('socialInboxThreads_assignedUser_idx').on(table.assignedToUserId),
   })
 );

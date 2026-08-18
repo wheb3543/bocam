@@ -180,6 +180,10 @@ export {
   markSocialInboxThreadRead,
   setSocialInboxThreadStarred,
   assignSocialInboxThread,
+  updateSocialInboxCommentWorkflow,
+  getSocialInboxCommentActionTarget,
+  updateSocialInboxCommentEnrichment,
+  updateSocialInboxCommentMetadata,
   getSocialInboxStats,
   clearMetaSocialInboxTestData,
 } from './socialInbox';

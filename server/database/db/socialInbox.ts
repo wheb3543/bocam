@@ -17,6 +17,7 @@ type SocialInboxFilters = {
   channelType?: 'message' | 'comment';
   search?: string;
   unreadOnly?: boolean;
+  followUpOnly?: boolean;
 };
 
 export async function listSocialInboxAccounts() {
@@ -43,6 +44,9 @@ export async function listSocialInboxThreads(filters: SocialInboxFilters = {}) {
   }
   if (filters.unreadOnly) {
     conditions.push(eq(socialInboxThreads.isRead, false));
+  }
+  if (filters.followUpOnly) {
+    conditions.push(eq(socialInboxThreads.isFollowUpRequired, true));
   }
   if (filters.search?.trim()) {
     const search = `%${filters.search.trim()}%`;
@@ -445,6 +449,110 @@ export async function assignSocialInboxThread(id: number, assignedToUserId: numb
     .update(socialInboxThreads)
     .set({ assignedToUserId })
     .where(eq(socialInboxThreads.id, id));
+  return { success: true };
+}
+
+export async function updateSocialInboxCommentWorkflow(
+  id: number,
+  patch: { isFollowUpRequired?: boolean; assignedToUserId?: number | null }
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+
+  const [thread] = await db
+    .select({ id: socialInboxThreads.id, channelType: socialInboxThreads.channelType })
+    .from(socialInboxThreads)
+    .where(eq(socialInboxThreads.id, id))
+    .limit(1);
+  if (!thread || thread.channelType !== 'comment') {
+    throw new Error('سياق التعليق المطلوب غير موجود');
+  }
+
+  await db.update(socialInboxThreads).set(patch).where(eq(socialInboxThreads.id, id));
+  return { success: true };
+}
+
+export async function getSocialInboxCommentActionTarget(threadId: number, itemId: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+
+  const [thread] = await db
+    .select()
+    .from(socialInboxThreads)
+    .where(and(eq(socialInboxThreads.id, threadId), eq(socialInboxThreads.channelType, 'comment')))
+    .limit(1);
+  if (!thread) {
+    throw new Error('سياق التعليق المطلوب غير موجود');
+  }
+
+  const [item] = await db
+    .select()
+    .from(socialInboxItems)
+    .where(and(eq(socialInboxItems.id, itemId), eq(socialInboxItems.threadId, threadId)))
+    .limit(1);
+  if (!item) {
+    throw new Error('التعليق المطلوب غير موجود داخل السياق');
+  }
+
+  const [account] = await db
+    .select()
+    .from(socialInboxAccounts)
+    .where(eq(socialInboxAccounts.id, thread.accountId))
+    .limit(1);
+  if (!account) {
+    throw new Error('الحساب المرتبط غير موجود');
+  }
+
+  const metadata = parseStoredJson(account.metadata) as { testData?: boolean } | null;
+  if (metadata?.testData) {
+    throw new Error('لا يمكن تنفيذ عملية خارجية على بيانات Meta التجريبية');
+  }
+
+  return {
+    thread,
+    item,
+    account,
+    commentContext: parseStoredJson(thread.commentContext),
+    commentMetadata: parseStoredJson(item.commentMetadata),
+  };
+}
+
+export async function updateSocialInboxCommentEnrichment(
+  threadId: number,
+  patch: { postUrl?: string | null; commentContext?: Record<string, unknown> | null }
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+
+  await db
+    .update(socialInboxThreads)
+    .set({
+      postUrl: patch.postUrl,
+      commentContext: patch.commentContext ? JSON.stringify(patch.commentContext) : null,
+    })
+    .where(eq(socialInboxThreads.id, threadId));
+  return { success: true };
+}
+
+export async function updateSocialInboxCommentMetadata(
+  itemId: number,
+  commentMetadata: Record<string, unknown>
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+
+  await db
+    .update(socialInboxItems)
+    .set({ commentMetadata: JSON.stringify(commentMetadata) })
+    .where(eq(socialInboxItems.id, itemId));
   return { success: true };
 }
 

@@ -13,7 +13,9 @@ import {
   MessageCircleMore,
   MessageSquareReply,
   Send,
+  Sparkles,
   Star,
+  UserRoundCheck,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -63,6 +65,8 @@ export type MetaCommentContext = {
   unreadCount: number;
   isRead: boolean;
   isStarred: boolean;
+  isFollowUpRequired: boolean;
+  assignedToUserId: number | null;
   lastActivityAt: Date | string | null;
   commentContext: CommentContextMetadata;
   items: MetaCommentContextItem[];
@@ -135,13 +139,18 @@ function CommentActions({
   item,
   platform,
   onReply,
+  onPrivateReply,
+  onHiddenChange,
+  isTestData,
 }: {
   item: MetaCommentContextItem;
   platform: Platform;
   onReply: (item: MetaCommentContextItem) => void;
+  onPrivateReply: (item: MetaCommentContextItem) => void;
+  onHiddenChange: (item: MetaCommentContextItem, isHidden: boolean) => void;
+  isTestData: boolean;
 }) {
   const metadata = item.commentMetadata;
-  const unavailableMessage = 'سيُربط هذا الإجراء بموصل Meta الرسمي بعد تفعيل الإرسال والتعليقات.';
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-1 border-t border-slate-100 pt-2 text-xs">
@@ -151,28 +160,31 @@ function CommentActions({
           size="sm"
           className="h-7 gap-1 px-2 text-slate-600"
           onClick={() => onReply(item)}
+          disabled={isTestData}
         >
           <MessageSquareReply className="h-3.5 w-3.5" />
           رد
         </Button>
       )}
-      {metadata?.canReplyPrivately && (
+      {(metadata?.canReplyPrivately || platform === 'instagram') && (
         <Button
           variant="ghost"
           size="sm"
           className="h-7 gap-1 px-2 text-slate-600"
-          onClick={() => toast.info(unavailableMessage)}
+          onClick={() => onPrivateReply(item)}
+          disabled={isTestData}
         >
           <MessageCircleMore className="h-3.5 w-3.5" />
           رسالة خاصة
         </Button>
       )}
-      {platform === 'facebook' && typeof metadata?.isHidden === 'boolean' && (
+      {typeof metadata?.isHidden === 'boolean' && (
         <Button
           variant="ghost"
           size="sm"
           className="h-7 gap-1 px-2 text-slate-600"
-          onClick={() => toast.info(unavailableMessage)}
+          onClick={() => onHiddenChange(item, !metadata.isHidden)}
+          disabled={isTestData}
         >
           <EyeOff className="h-3.5 w-3.5" />
           {metadata.isHidden ? 'إظهار' : 'إخفاء'}
@@ -187,11 +199,17 @@ function CommentTreeNode({
   platform,
   depth,
   onReply,
+  onPrivateReply,
+  onHiddenChange,
+  isTestData,
 }: {
   node: CommentNode;
   platform: Platform;
   depth: number;
   onReply: (item: MetaCommentContextItem) => void;
+  onPrivateReply: (item: MetaCommentContextItem) => void;
+  onHiddenChange: (item: MetaCommentContextItem, isHidden: boolean) => void;
+  isTestData: boolean;
 }) {
   const metadata = node.item.commentMetadata;
   return (
@@ -234,7 +252,14 @@ function CommentTreeNode({
             </span>
           )}
         </div>
-        <CommentActions item={node.item} platform={platform} onReply={onReply} />
+        <CommentActions
+          item={node.item}
+          platform={platform}
+          onReply={onReply}
+          onPrivateReply={onPrivateReply}
+          onHiddenChange={onHiddenChange}
+          isTestData={isTestData}
+        />
       </div>
       {node.children.length > 0 && (
         <div className="mt-3 space-y-3">
@@ -245,6 +270,9 @@ function CommentTreeNode({
               platform={platform}
               depth={depth + 1}
               onReply={onReply}
+              onPrivateReply={onPrivateReply}
+              onHiddenChange={onHiddenChange}
+              isTestData={isTestData}
             />
           ))}
         </div>
@@ -258,15 +286,34 @@ export default function MetaCommentContextsPanel({
   isLoading,
   platform,
   onSelectContext,
+  activeUsers,
+  onSubmitReply,
+  onSubmitPrivateReply,
+  onHiddenChange,
+  onWorkflowChange,
+  onEnrich,
+  isActionPending,
 }: {
   contexts: MetaCommentContext[];
   isLoading: boolean;
   platform: 'facebook' | 'instagram';
   onSelectContext: (context: MetaCommentContext) => void;
+  activeUsers: Array<{ id: number; name: string | null; username: string | null }>;
+  onSubmitReply: (threadId: number, itemId: number, message: string) => Promise<void>;
+  onSubmitPrivateReply: (threadId: number, itemId: number, message: string) => Promise<void>;
+  onHiddenChange: (threadId: number, itemId: number, isHidden: boolean) => Promise<void>;
+  onWorkflowChange: (
+    threadId: number,
+    patch: { isFollowUpRequired?: boolean; assignedToUserId?: number | null }
+  ) => Promise<void>;
+  onEnrich: (threadId: number, itemId: number) => Promise<void>;
+  isActionPending: boolean;
 }) {
   const [selectedContextId, setSelectedContextId] = useState<number | null>(null);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'followed'>('all');
+  const [filter, setFilter] = useState<'all' | 'unread' | 'followUp'>('all');
   const [replyTarget, setReplyTarget] = useState<MetaCommentContextItem | null>(null);
+  const [replyMode, setReplyMode] = useState<'public' | 'private'>('public');
+  const [replyText, setReplyText] = useState('');
   const selectedContext =
     contexts.find((context) => context.id === selectedContextId) ?? contexts[0];
   const filteredContexts = useMemo(
@@ -275,8 +322,8 @@ export default function MetaCommentContextsPanel({
         if (filter === 'unread') {
           return !context.isRead;
         }
-        if (filter === 'followed') {
-          return context.isStarred;
+        if (filter === 'followUp') {
+          return context.isFollowUpRequired;
         }
         return true;
       }),
@@ -295,6 +342,21 @@ export default function MetaCommentContextsPanel({
   const chooseContext = (context: MetaCommentContext) => {
     setSelectedContextId(context.id);
     onSelectContext(context);
+  };
+
+  const openComposer = (item: MetaCommentContextItem, mode: 'public' | 'private') => {
+    setReplyTarget(item);
+    setReplyMode(mode);
+    setReplyText('');
+  };
+
+  const submitComposer = async () => {
+    if (!selectedContext || !replyTarget || !replyText.trim()) {
+      return;
+    }
+    const submit = replyMode === 'public' ? onSubmitReply : onSubmitPrivateReply;
+    await submit(selectedContext.id, replyTarget.id, replyText.trim());
+    setReplyText('');
   };
 
   const SourceIcon = selectedContext ? sourceIcon(selectedContext) : Inbox;
@@ -322,7 +384,7 @@ export default function MetaCommentContextsPanel({
             {[
               { id: 'all', label: 'الكل' },
               { id: 'unread', label: 'غير مقروء' },
-              { id: 'followed', label: 'متابعة' },
+              { id: 'followUp', label: 'يتطلب متابعة' },
             ].map((option) => (
               <Button
                 key={option.id}
@@ -392,6 +454,11 @@ export default function MetaCommentContextsPanel({
                               {context.unreadCount} جديد
                             </span>
                           )}
+                          {context.isFollowUpRequired && (
+                            <span className="rounded-full bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800">
+                              متابعة
+                            </span>
+                          )}
                           {testContext && <TestDataBadge />}
                         </div>
                       </div>
@@ -431,6 +498,22 @@ export default function MetaCommentContextsPanel({
                 </div>
                 <div className="flex items-center gap-2">
                   {isTestContext && <TestDataBadge />}
+                  <Button
+                    variant={selectedContext.isFollowUpRequired ? 'default' : 'outline'}
+                    size="sm"
+                    className="h-8 gap-1.5"
+                    disabled={isTestContext || isActionPending}
+                    onClick={() =>
+                      void onWorkflowChange(selectedContext.id, {
+                        isFollowUpRequired: !selectedContext.isFollowUpRequired,
+                      })
+                    }
+                  >
+                    <Star
+                      className={`h-3.5 w-3.5 ${selectedContext.isFollowUpRequired ? 'fill-current' : ''}`}
+                    />
+                    متابعة
+                  </Button>
                   {(selectedContext.commentContext?.sourceUrl || selectedContext.postUrl) && (
                     <Button variant="outline" size="sm" className="h-8 gap-1.5" asChild>
                       <a
@@ -479,6 +562,49 @@ export default function MetaCommentContextsPanel({
                         <span>المعرّف: {selectedContext.commentContext.sourceExternalId}</span>
                       )}
                     </div>
+                    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+                      <UserRoundCheck className="h-4 w-4 text-slate-500" />
+                      <label
+                        className="text-xs font-medium text-slate-600"
+                        htmlFor={`assign-${selectedContext.id}`}
+                      >
+                        المسؤول
+                      </label>
+                      <select
+                        id={`assign-${selectedContext.id}`}
+                        aria-label="تعيين مسؤول للسياق"
+                        className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700"
+                        value={selectedContext.assignedToUserId ?? ''}
+                        disabled={isTestContext || isActionPending}
+                        onChange={(event) =>
+                          void onWorkflowChange(selectedContext.id, {
+                            assignedToUserId: event.target.value
+                              ? Number(event.target.value)
+                              : null,
+                          })
+                        }
+                      >
+                        <option value="">غير معيّن</option>
+                        {activeUsers.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.name || user.username || `مستخدم #${user.id}`}
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 gap-1.5"
+                        disabled={
+                          isTestContext || isActionPending || selectedContext.items.length === 0
+                        }
+                        onClick={() =>
+                          void onEnrich(selectedContext.id, selectedContext.items[0]!.id)
+                        }
+                      >
+                        <Sparkles className="h-3.5 w-3.5" /> إثراء
+                      </Button>
+                    </div>
                   </div>
                 </article>
 
@@ -493,7 +619,12 @@ export default function MetaCommentContextsPanel({
                       node={node}
                       platform={platform}
                       depth={0}
-                      onReply={setReplyTarget}
+                      onReply={(item) => openComposer(item, 'public')}
+                      onPrivateReply={(item) => openComposer(item, 'private')}
+                      onHiddenChange={(item, isHidden) =>
+                        void onHiddenChange(selectedContext.id, item.id, isHidden)
+                      }
+                      isTestData={Boolean(isTestContext)}
                     />
                   ))}
                 </section>
@@ -505,7 +636,7 @@ export default function MetaCommentContextsPanel({
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-blue-950">
                     {replyTarget
-                      ? `رد عام على ${replyTarget.authorName || 'التعليق المحدد'}`
+                      ? `${replyMode === 'private' ? 'رسالة خاصة إلى' : 'رد عام على'} ${replyTarget.authorName || 'التعليق المحدد'}`
                       : 'إضافة تعليق عام'}
                   </p>
                   {replyTarget && (
@@ -516,11 +647,19 @@ export default function MetaCommentContextsPanel({
                 </div>
                 <div className="mt-3 flex gap-2">
                   <Input
-                    disabled
-                    placeholder="يتطلب النشر تفعيل موصل Meta الرسمي."
+                    value={replyText}
+                    onChange={(event) => setReplyText(event.target.value)}
+                    disabled={!replyTarget || isTestContext || isActionPending}
+                    placeholder={
+                      replyTarget ? 'اكتب الرد ثم أرسله عبر Meta.' : 'اختر تعليقاً للرد عليه.'
+                    }
                     className="bg-white"
                   />
-                  <Button disabled className="gap-1.5">
+                  <Button
+                    disabled={!replyTarget || !replyText.trim() || isTestContext || isActionPending}
+                    onClick={() => void submitComposer()}
+                    className="gap-1.5"
+                  >
                     <Send className="h-4 w-4" />
                     إرسال
                   </Button>

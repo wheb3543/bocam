@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 6,
-  "numPassedTestSuites": 6,
+  "numTotalTestSuites": 10,
+  "numPassedTestSuites": 10,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 16,
-  "numPassedTests": 16,
+  "numTotalTests": 24,
+  "numPassedTests": 24,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,9 +24,126 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787026722773,
+  "startTime": 1787027957382,
   "success": true,
   "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Meta social webhook verification"],
+          "fullName": "Meta social webhook verification accepts only the configured verification token and subscribe mode",
+          "status": "passed",
+          "title": "accepts only the configured verification token and subscribe mode",
+          "duration": 2.0552719999998317,
+          "failureMessages": [],
+          "location": { "line": 10, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Meta social webhook verification"],
+          "fullName": "Meta social webhook verification verifies the Meta SHA-256 signature against the raw body",
+          "status": "passed",
+          "title": "verifies the Meta SHA-256 signature against the raw body",
+          "duration": 1.2928000000001703,
+          "failureMessages": [],
+          "location": { "line": 25, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Meta social webhook verification"],
+          "fullName": "Meta social webhook verification processes deliveries without throwing when one normalized event fails",
+          "status": "passed",
+          "title": "processes deliveries without throwing when one normalized event fails",
+          "duration": 3.9423349999999573,
+          "failureMessages": [],
+          "location": { "line": 34, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787027959479,
+      "endTime": 1787027959486.9424,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/api/metaSocialWebhookRoute.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["socialInbox Meta comment action procedures"],
+          "fullName": "socialInbox Meta comment action procedures updates follow-up and assignee using the comment-only workflow procedure",
+          "status": "passed",
+          "title": "updates follow-up and assignee using the comment-only workflow procedure",
+          "duration": 5.56931899999995,
+          "failureMessages": [],
+          "location": { "line": 78, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["socialInbox Meta comment action procedures"],
+          "fullName": "socialInbox Meta comment action procedures rejects a live public reply when the Page Access Token is unavailable",
+          "status": "passed",
+          "title": "rejects a live public reply when the Page Access Token is unavailable",
+          "duration": 2.1281289999999444,
+          "failureMessages": [],
+          "location": { "line": 83, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["socialInbox Meta comment action procedures"],
+          "fullName": "socialInbox Meta comment action procedures maps an authorised public reply to the official action target without exposing the token",
+          "status": "passed",
+          "title": "maps an authorised public reply to the official action target without exposing the token",
+          "duration": 2.153299000000061,
+          "failureMessages": [],
+          "location": { "line": 89, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["socialInbox Meta comment action procedures"],
+          "fullName": "socialInbox Meta comment action procedures blocks a private reply when Meta marks the comment as ineligible",
+          "status": "passed",
+          "title": "blocks a private reply when Meta marks the comment as ineligible",
+          "duration": 1.4220450000000255,
+          "failureMessages": [],
+          "location": { "line": 98, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["socialInbox Meta comment action procedures"],
+          "fullName": "socialInbox Meta comment action procedures persists the hide state only after the Meta action succeeds",
+          "status": "passed",
+          "title": "persists the hide state only after the Meta action succeeds",
+          "duration": 1.455686999999898,
+          "failureMessages": [],
+          "location": { "line": 104, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["socialInbox Meta comment action procedures"],
+          "fullName": "socialInbox Meta comment action procedures stores enriched source context and comment capabilities after Graph API enrichment",
+          "status": "passed",
+          "title": "stores enriched source context and comment capabilities after Graph API enrichment",
+          "duration": 0.9150069999998323,
+          "failureMessages": [],
+          "location": { "line": 110, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787027959046,
+      "endTime": 1787027959059.915,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/socialInbox.actions.test.ts"
+    },
     {
       "assertionResults": [
         {
@@ -34,7 +151,7 @@
           "fullName": "Meta event ingestion idempotency does not create a second thread or item when a webhook event key already exists",
           "status": "passed",
           "title": "does not create a second thread or item when a webhook event key already exists",
-          "duration": 3.703561000000036,
+          "duration": 5.572169000000031,
           "failureMessages": [],
           "location": { "line": 14, "column": 3 },
           "meta": {},
@@ -45,7 +162,7 @@
           "fullName": "Meta event ingestion idempotency stores a normalized event in an existing test account with item details and post context",
           "status": "passed",
           "title": "stores a normalized event in an existing test account with item details and post context",
-          "duration": 2.6010479999999916,
+          "duration": 3.6614730000001146,
           "failureMessages": [],
           "location": { "line": 44, "column": 3 },
           "meta": {},
@@ -56,15 +173,15 @@
           "fullName": "Meta event ingestion idempotency cleans only records with the reserved Meta test account prefix",
           "status": "passed",
           "title": "cleans only records with the reserved Meta test account prefix",
-          "duration": 1.6179429999999684,
+          "duration": 1.4727069999999003,
           "failureMessages": [],
           "location": { "line": 111, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787026724581,
-      "endTime": 1787026724588.618,
+      "startTime": 1787027959152,
+      "endTime": 1787027959162.4727,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/server/database/db/socialInboxIngestion.test.ts"
@@ -72,77 +189,55 @@
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["Meta payload fixtures"],
-          "fullName": "Meta payload fixtures matches the declared official-shape fixture coverage",
+          "ancestorTitles": ["Meta social inbox comment actions"],
+          "fullName": "Meta social inbox comment actions uses the official Facebook and Instagram public-reply endpoints",
           "status": "passed",
-          "title": "matches the declared official-shape fixture coverage",
-          "duration": 4.717236999999841,
+          "title": "uses the official Facebook and Instagram public-reply endpoints",
+          "duration": 4.3368789999999535,
           "failureMessages": [],
-          "location": { "line": 14, "column": 3 },
+          "location": { "line": 40, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["Meta payload fixtures"],
-          "fullName": "Meta payload fixtures normalizes an inbound Messenger text message with sender, recipient and timestamp",
+          "ancestorTitles": ["Meta social inbox comment actions"],
+          "fullName": "Meta social inbox comment actions uses the platform-specific fields to hide or unhide comments",
           "status": "passed",
-          "title": "normalizes an inbound Messenger text message with sender, recipient and timestamp",
-          "duration": 1.5765850000000228,
+          "title": "uses the platform-specific fields to hide or unhide comments",
+          "duration": 0.8532629999999699,
           "failureMessages": [],
-          "location": { "line": 20, "column": 3 },
+          "location": { "line": 50, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["Meta payload fixtures"],
-          "fullName": "Meta payload fixtures keeps the first attachment URL while exposing the documented multiple-attachments gap",
+          "ancestorTitles": ["Meta social inbox comment actions"],
+          "fullName": "Meta social inbox comment actions uses the current private-reply payloads and enforces Instagram seven-day window",
           "status": "passed",
-          "title": "keeps the first attachment URL while exposing the documented multiple-attachments gap",
-          "duration": 0.6154380000000401,
+          "title": "uses the current private-reply payloads and enforces Instagram seven-day window",
+          "duration": 1.768440000000055,
           "failureMessages": [],
-          "location": { "line": 32, "column": 3 },
+          "location": { "line": 60, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["Meta payload fixtures"],
-          "fullName": "Meta payload fixtures normalizes Instagram Direct reply context and nested Instagram comment context",
+          "ancestorTitles": ["Meta social inbox comment actions"],
+          "fullName": "Meta social inbox comment actions enriches Facebook post context and comment capabilities from Graph API fields",
           "status": "passed",
-          "title": "normalizes Instagram Direct reply context and nested Instagram comment context",
-          "duration": 0.6187310000000252,
+          "title": "enriches Facebook post context and comment capabilities from Graph API fields",
+          "duration": 1.382772000000159,
           "failureMessages": [],
-          "location": { "line": 42, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["Meta payload fixtures"],
-          "fullName": "Meta payload fixtures normalizes Facebook comment add events and retains the original post URL",
-          "status": "passed",
-          "title": "normalizes Facebook comment add events and retains the original post URL",
-          "duration": 0.4314790000000812,
-          "failureMessages": [],
-          "location": { "line": 65, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["Meta payload fixtures"],
-          "fullName": "Meta payload fixtures records the current edit-event coverage gap and accepts Messenger batches",
-          "status": "passed",
-          "title": "records the current edit-event coverage gap and accepts Messenger batches",
-          "duration": 0.5253709999999501,
-          "failureMessages": [],
-          "location": { "line": 88, "column": 3 },
+          "location": { "line": 79, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787026724345,
-      "endTime": 1787026724354.5254,
+      "startTime": 1787027959229,
+      "endTime": 1787027959237.3828,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/metaPayloadFixtures.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/socialInboxMetaActions.test.ts"
     },
     {
       "assertionResults": [
@@ -151,9 +246,9 @@
           "fullName": "MessagesPage renders the required tabs and the empty-state-free conversation list",
           "status": "passed",
           "title": "renders the required tabs and the empty-state-free conversation list",
-          "duration": 254.04512599999998,
+          "duration": 262.4304169999998,
           "failureMessages": [],
-          "location": { "line": 89, "column": 3 },
+          "location": { "line": 109, "column": 3 },
           "meta": {},
           "tags": []
         },
@@ -162,9 +257,9 @@
           "fullName": "MessagesPage updates the query filters when a platform tab or search term changes",
           "status": "passed",
           "title": "updates the query filters when a platform tab or search term changes",
-          "duration": 77.46147700000006,
+          "duration": 83.00464199999988,
           "failureMessages": [],
-          "location": { "line": 101, "column": 3 },
+          "location": { "line": 121, "column": 3 },
           "meta": {},
           "tags": []
         },
@@ -173,9 +268,9 @@
           "fullName": "MessagesPage shows the no-results state when the selected filter has no threads",
           "status": "passed",
           "title": "shows the no-results state when the selected filter has no threads",
-          "duration": 23.527521999999863,
+          "duration": 25.528627000000142,
           "failureMessages": [],
-          "location": { "line": 114, "column": 3 },
+          "location": { "line": 134, "column": 3 },
           "meta": {},
           "tags": []
         },
@@ -184,9 +279,9 @@
           "fullName": "MessagesPage marks a selected conversation as read",
           "status": "passed",
           "title": "marks a selected conversation as read",
-          "duration": 46.7184500000003,
+          "duration": 47.98134500000015,
           "failureMessages": [],
-          "location": { "line": 122, "column": 3 },
+          "location": { "line": 142, "column": 3 },
           "meta": {},
           "tags": []
         },
@@ -195,9 +290,9 @@
           "fullName": "MessagesPage identifies Meta test data and renders its reply context and attachment link in the inbox",
           "status": "passed",
           "title": "identifies Meta test data and renders its reply context and attachment link in the inbox",
-          "duration": 75.51918400000022,
+          "duration": 73.57001999999966,
           "failureMessages": [],
-          "location": { "line": 129, "column": 3 },
+          "location": { "line": 149, "column": 3 },
           "meta": {},
           "tags": []
         },
@@ -206,9 +301,9 @@
           "fullName": "MessagesPage renders Facebook comments as a post context with a nested comment tree instead of a conversation",
           "status": "passed",
           "title": "renders Facebook comments as a post context with a nested comment tree instead of a conversation",
-          "duration": 79.33819799999992,
+          "duration": 89.07081500000004,
           "failureMessages": [],
-          "location": { "line": 191, "column": 3 },
+          "location": { "line": 211, "column": 3 },
           "meta": {},
           "tags": []
         },
@@ -217,15 +312,26 @@
           "fullName": "MessagesPage renders Instagram comments as media contexts with replies nested by parent_id",
           "status": "passed",
           "title": "renders Instagram comments as media contexts with replies nested by parent_id",
-          "duration": 86.16590600000018,
+          "duration": 81.01836800000001,
           "failureMessages": [],
-          "location": { "line": 258, "column": 3 },
+          "location": { "line": 278, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["MessagesPage"],
+          "fullName": "MessagesPage routes comment reply, follow-up, assignment, and enrichment actions through the protected mutations",
+          "status": "passed",
+          "title": "routes comment reply, follow-up, assignment, and enrichment actions through the protected mutations",
+          "duration": 152.6794829999999,
+          "failureMessages": [],
+          "location": { "line": 342, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787026724747,
-      "endTime": 1787026725390.166,
+      "startTime": 1787027959362,
+      "endTime": 1787027960177.6794,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/MessagesPage.test.tsx"

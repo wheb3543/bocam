@@ -3,6 +3,7 @@ import { Router, type Request, type Response } from 'express';
 import { getMetaWebhookCredentials, ingestMetaSocialInboxEvent } from '../database/db';
 import { createLogger } from '../_core/logger';
 import { normalizeMetaSocialInboxPayload } from '../integrations/meta/socialInboxMetaWebhook';
+import { enrichStoredMetaCommentContext } from '../integrations/meta/socialInboxMetaActions';
 
 const logger = createLogger('meta-social-webhook');
 
@@ -40,14 +41,31 @@ export function validateMetaWebhookChallenge(
 type MetaWebhookDependencies = {
   getCredentials?: typeof getMetaWebhookCredentials;
   ingest?: typeof ingestMetaSocialInboxEvent;
+  enrichCommentContext?: typeof enrichStoredMetaCommentContext;
 };
 
 export async function processMetaSocialWebhookPayload(
   payload: unknown,
-  ingest: typeof ingestMetaSocialInboxEvent
+  ingest: typeof ingestMetaSocialInboxEvent,
+  enrichCommentContext: typeof enrichStoredMetaCommentContext = enrichStoredMetaCommentContext
 ) {
   const events = normalizeMetaSocialInboxPayload(payload);
-  const results = await Promise.allSettled(events.map((event) => ingest(event)));
+  const results = await Promise.allSettled(
+    events.map(async (event) => {
+      const result = await ingest(event);
+      if (
+        event.channelType === 'comment' &&
+        result.status === 'processed' &&
+        result.threadId &&
+        result.itemId
+      ) {
+        void enrichCommentContext(result.threadId, result.itemId).catch((error) => {
+          logger.warn('تعذر إثراء سياق تعليق Meta بعد التخزين:', error);
+        });
+      }
+      return result;
+    })
+  );
   const failures = results.filter((result) => result.status === 'rejected');
 
   for (const failure of failures) {
@@ -65,6 +83,7 @@ export function createMetaSocialWebhookRouter(dependencies: MetaWebhookDependenc
   const router = Router();
   const getCredentials = dependencies.getCredentials ?? getMetaWebhookCredentials;
   const ingest = dependencies.ingest ?? ingestMetaSocialInboxEvent;
+  const enrichCommentContext = dependencies.enrichCommentContext ?? enrichStoredMetaCommentContext;
 
   router.get('/api/webhooks/meta-social-inbox', async (req: Request, res: Response) => {
     try {
@@ -108,7 +127,7 @@ export function createMetaSocialWebhookRouter(dependencies: MetaWebhookDependenc
       // Meta retries non-200 responses. Acknowledge the verified delivery first,
       // then normalize and persist it without blocking the callback request.
       void Promise.resolve()
-        .then(() => processMetaSocialWebhookPayload(req.body, ingest))
+        .then(() => processMetaSocialWebhookPayload(req.body, ingest, enrichCommentContext))
         .catch((error) => {
           logger.error('تعذر بدء معالجة Meta Webhook بعد الإقرار:', error);
         });

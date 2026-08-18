@@ -5,6 +5,7 @@ import { protectedProcedure, router } from '../_core/trpc';
 import {
   assignSocialInboxThread,
   createSocialInboxAccount,
+  getSocialInboxCommentActionTarget,
   getSocialInboxStats,
   listSocialInboxCommentContexts,
   getSocialInboxThreadById,
@@ -12,13 +13,27 @@ import {
   listSocialInboxThreads,
   markSocialInboxThreadRead,
   setSocialInboxThreadStarred,
+  updateSocialInboxCommentEnrichment,
+  updateSocialInboxCommentMetadata,
+  updateSocialInboxCommentWorkflow,
   updateSocialInboxAccount,
 } from '../database/db';
+import { getMetaWebhookCredentials } from '../database/db/metaIntegrationSettings';
 import { clearMetaSocialInboxTestData } from '../database/db/socialInbox';
+import {
+  enrichMetaCommentContext,
+  replyToMetaComment,
+  sendMetaCommentPrivateReply,
+  setMetaCommentHidden,
+} from '../integrations/meta/socialInboxMetaActions';
 import { seedMetaSocialInboxTestData } from '../integrations/meta/seedMetaSocialInboxTestData';
 
 const platformSchema = z.enum(['messenger', 'instagram', 'facebook', 'x', 'linkedin', 'youtube']);
 const channelTypeSchema = z.enum(['message', 'comment']);
+const commentActionInput = z.object({
+  threadId: z.number().int().positive(),
+  itemId: z.number().int().positive(),
+});
 const socialInboxProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   if (!canAccessSocialInbox(ctx.user.role)) {
     throw new TRPCError({
@@ -105,6 +120,7 @@ export const socialInboxRouter = router({
           platform: z.enum(['facebook', 'instagram']).optional(),
           search: z.string().trim().max(100).optional(),
           unreadOnly: z.boolean().optional(),
+          followUpOnly: z.boolean().optional(),
         })
         .optional()
     )
@@ -130,6 +146,142 @@ export const socialInboxRouter = router({
       })
     )
     .mutation(({ input }) => assignSocialInboxThread(input.id, input.assignedToUserId)),
+
+  updateCommentWorkflow: socialInboxProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        isFollowUpRequired: z.boolean().optional(),
+        assignedToUserId: z.number().int().positive().nullable().optional(),
+      })
+    )
+    .mutation(({ input }) => {
+      const { id, ...patch } = input;
+      return updateSocialInboxCommentWorkflow(id, patch);
+    }),
+
+  replyToComment: socialInboxProcedure
+    .input(commentActionInput.extend({ message: z.string().trim().min(1).max(1000) }))
+    .mutation(async ({ input }) => {
+      const target = await getSocialInboxCommentActionTarget(input.threadId, input.itemId);
+      const credentials = await getMetaWebhookCredentials();
+      if (!credentials?.pageAccessToken) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'يلزم تفعيل Page Access Token في إعدادات Meta',
+        });
+      }
+      return replyToMetaComment(
+        {
+          platform: target.thread.platform as 'facebook' | 'instagram',
+          accountExternalId: target.account.externalAccountId,
+          commentExternalId: target.item.externalItemId,
+          sourceExternalId:
+            (target.commentContext as { sourceExternalId?: string } | null)?.sourceExternalId ??
+            target.thread.externalThreadId,
+          occurredAt: target.item.externalPublishedAt,
+        },
+        input.message,
+        credentials.pageAccessToken
+      );
+    }),
+
+  setCommentHidden: socialInboxProcedure
+    .input(commentActionInput.extend({ isHidden: z.boolean() }))
+    .mutation(async ({ input }) => {
+      const target = await getSocialInboxCommentActionTarget(input.threadId, input.itemId);
+      const credentials = await getMetaWebhookCredentials();
+      if (!credentials?.pageAccessToken) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'يلزم تفعيل Page Access Token في إعدادات Meta',
+        });
+      }
+      const result = await setMetaCommentHidden(
+        {
+          platform: target.thread.platform as 'facebook' | 'instagram',
+          accountExternalId: target.account.externalAccountId,
+          commentExternalId: target.item.externalItemId,
+          sourceExternalId:
+            (target.commentContext as { sourceExternalId?: string } | null)?.sourceExternalId ??
+            target.thread.externalThreadId,
+          occurredAt: target.item.externalPublishedAt,
+        },
+        input.isHidden,
+        credentials.pageAccessToken
+      );
+      await updateSocialInboxCommentMetadata(input.itemId, {
+        ...(target.commentMetadata as Record<string, unknown> | null),
+        isHidden: input.isHidden,
+      });
+      return result;
+    }),
+
+  sendCommentPrivateReply: socialInboxProcedure
+    .input(commentActionInput.extend({ message: z.string().trim().min(1).max(1000) }))
+    .mutation(async ({ input }) => {
+      const target = await getSocialInboxCommentActionTarget(input.threadId, input.itemId);
+      const capabilities = target.commentMetadata as { canReplyPrivately?: boolean } | null;
+      if (capabilities?.canReplyPrivately === false) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Meta لا تسمح برد خاص على هذا التعليق',
+        });
+      }
+      const credentials = await getMetaWebhookCredentials();
+      if (!credentials?.pageAccessToken) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'يلزم تفعيل Page Access Token في إعدادات Meta',
+        });
+      }
+      return sendMetaCommentPrivateReply(
+        {
+          platform: target.thread.platform as 'facebook' | 'instagram',
+          accountExternalId: target.account.externalAccountId,
+          commentExternalId: target.item.externalItemId,
+          sourceExternalId:
+            (target.commentContext as { sourceExternalId?: string } | null)?.sourceExternalId ??
+            target.thread.externalThreadId,
+          occurredAt: target.item.externalPublishedAt,
+        },
+        input.message,
+        credentials.pageAccessToken
+      );
+    }),
+
+  enrichCommentContext: socialInboxProcedure
+    .input(commentActionInput)
+    .mutation(async ({ input }) => {
+      const target = await getSocialInboxCommentActionTarget(input.threadId, input.itemId);
+      const credentials = await getMetaWebhookCredentials();
+      if (!credentials?.pageAccessToken) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'يلزم تفعيل Page Access Token في إعدادات Meta',
+        });
+      }
+      const result = await enrichMetaCommentContext(
+        {
+          platform: target.thread.platform as 'facebook' | 'instagram',
+          accountExternalId: target.account.externalAccountId,
+          commentExternalId: target.item.externalItemId,
+          sourceExternalId:
+            (target.commentContext as { sourceExternalId?: string } | null)?.sourceExternalId ??
+            target.thread.externalThreadId,
+          occurredAt: target.item.externalPublishedAt,
+        },
+        credentials.pageAccessToken
+      );
+      await Promise.all([
+        updateSocialInboxCommentEnrichment(input.threadId, {
+          postUrl: result.context.sourceUrl,
+          commentContext: result.context,
+        }),
+        updateSocialInboxCommentMetadata(input.itemId, result.commentMetadata),
+      ]);
+      return { success: true, context: result.context };
+    }),
 
   seedMetaTestData: socialInboxAdminProcedure.mutation(() => seedMetaSocialInboxTestData()),
 
