@@ -196,6 +196,23 @@ export {
   type SaveMetaIntegrationSettingsInput,
 } from './metaIntegrationSettings';
 
+// Social Publishing
+export {
+  listSocialPublishAccounts,
+  getSocialPublishPost,
+  listSocialPublishPosts,
+  getSocialPublishingOverview,
+  createSocialPublishDraft,
+  updateSocialPublishDraft,
+  submitSocialPublishPostForReview,
+  reviewSocialPublishPost,
+  scheduleSocialPublishPost,
+  cancelSocialPublishSchedule,
+  dispatchDueSocialPublishPosts,
+  type SocialPublishPlatform,
+  type SocialPublishContentType,
+} from './socialPublishing';
+
 // Shared Templates
 export {
   getSharedTemplate,

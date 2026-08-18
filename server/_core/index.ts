@@ -6,6 +6,7 @@ import { registerOAuthRoutes } from './oauth';
 import { createUploadRouter } from '../api/uploadRoute';
 import { createWebhookRouter } from '../api/webhookRoutes';
 import { createMetaSocialWebhookRouter } from '../api/metaSocialWebhookRoute';
+import { createSocialPublishingScheduledRouter } from '../api/socialPublishingScheduledRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
 import { createContext } from './context';
@@ -65,6 +66,8 @@ async function startServer() {
   app.use(createWebhookRouter());
   // Meta Social Webhook routes for Messenger, Instagram, and Facebook Page events
   app.use(createMetaSocialWebhookRouter());
+  // Heartbeat callback for social publishing schedules. It is activated after deployment.
+  app.use(createSocialPublishingScheduledRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
   // Health check and metrics endpoints

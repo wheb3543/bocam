@@ -2483,3 +2483,263 @@ export const metaIntegrationSettings = mysqlTable('meta_integration_settings', {
 
 export type MetaIntegrationSettings = typeof metaIntegrationSettings.$inferSelect;
 export type InsertMetaIntegrationSettings = typeof metaIntegrationSettings.$inferInsert;
+
+/**
+ * Social Publishing Accounts - حسابات النشر المتصلة لكل منصة
+ * لا تُخزن الأسرار هنا بصيغة مكشوفة؛ تحفظ بيانات OAuth المشفرة لاحقاً في خدمة الاتصال.
+ */
+export const socialPublishAccounts = mysqlTable(
+  'social_publish_accounts',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    platform: mysqlEnum('platform', [
+      'facebook',
+      'instagram',
+      'x',
+      'linkedin',
+      'youtube',
+      'tiktok',
+    ]).notNull(),
+    accountType: mysqlEnum('accountType', [
+      'page',
+      'profile',
+      'business',
+      'channel',
+      'organization',
+    ])
+      .default('profile')
+      .notNull(),
+    displayName: varchar('displayName', { length: 255 }).notNull(),
+    externalAccountId: varchar('externalAccountId', { length: 255 }).notNull(),
+    avatarUrl: varchar('avatarUrl', { length: 500 }),
+    connectionStatus: mysqlEnum('connectionStatus', [
+      'disconnected',
+      'pending',
+      'connected',
+      'error',
+      'expired',
+    ])
+      .default('disconnected')
+      .notNull(),
+    capabilities: text('capabilities'),
+    lastValidatedAt: timestamp('lastValidatedAt'),
+    lastError: text('lastError'),
+    isActive: boolean('isActive').default(true).notNull(),
+    createdByUserId: int('createdByUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    platformStatusIdx: index('socialPublishAccounts_platform_status_idx').on(
+      table.platform,
+      table.connectionStatus
+    ),
+    externalAccountIdx: uniqueIndex('socialPublishAccounts_external_unique').on(
+      table.platform,
+      table.externalAccountId
+    ),
+  })
+);
+
+export type SocialPublishAccount = typeof socialPublishAccounts.$inferSelect;
+export type InsertSocialPublishAccount = typeof socialPublishAccounts.$inferInsert;
+
+/**
+ * Social Publishing Posts - المسودة المركزية وسير الموافقة والجدولة
+ */
+export const socialPublishPosts = mysqlTable(
+  'social_publish_posts',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    title: varchar('title', { length: 255 }).notNull(),
+    baseCaption: text('baseCaption'),
+    contentType: mysqlEnum('contentType', ['post', 'image', 'video', 'reel', 'story', 'short'])
+      .default('post')
+      .notNull(),
+    status: mysqlEnum('status', [
+      'draft',
+      'in_review',
+      'approved',
+      'scheduled',
+      'publishing',
+      'published',
+      'partial_failed',
+      'failed',
+      'cancelled',
+    ])
+      .default('draft')
+      .notNull(),
+    campaignId: int('campaignId'),
+    scheduledAt: timestamp('scheduledAt'),
+    timezone: varchar('timezone', { length: 64 }).default('Asia/Aden').notNull(),
+    scheduleCronTaskUid: varchar('scheduleCronTaskUid', { length: 65 }),
+    metadata: text('metadata'),
+    approvalNotes: text('approvalNotes'),
+    createdByUserId: int('createdByUserId')
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+    approvedByUserId: int('approvedByUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    approvedAt: timestamp('approvedAt'),
+    rejectedByUserId: int('rejectedByUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    rejectedAt: timestamp('rejectedAt'),
+    publishedAt: timestamp('publishedAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    statusScheduleIdx: index('socialPublishPosts_status_schedule_idx').on(
+      table.status,
+      table.scheduledAt
+    ),
+    campaignIdx: index('socialPublishPosts_campaign_idx').on(table.campaignId),
+    createdByIdx: index('socialPublishPosts_createdBy_idx').on(table.createdByUserId),
+    scheduleTaskIdx: index('socialPublishPosts_schedule_task_idx').on(table.scheduleCronTaskUid),
+  })
+);
+
+export type SocialPublishPost = typeof socialPublishPosts.$inferSelect;
+export type InsertSocialPublishPost = typeof socialPublishPosts.$inferInsert;
+
+/**
+ * Social Publishing Post Media - مراجع مرتبة لأصول مكتبة الوسائط داخل المسودة.
+ */
+export const socialPublishPostMedia = mysqlTable(
+  'social_publish_post_media',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    postId: int('postId')
+      .notNull()
+      .references(() => socialPublishPosts.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    mediaId: int('mediaId')
+      .notNull()
+      .references(() => media.id, { onDelete: 'restrict', onUpdate: 'cascade' }),
+    role: mysqlEnum('role', ['primary', 'cover', 'supplementary']).default('primary').notNull(),
+    sortOrder: int('sortOrder').default(0).notNull(),
+    altText: text('altText'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+  },
+  (table) => ({
+    postOrderIdx: index('socialPublishPostMedia_post_order_idx').on(table.postId, table.sortOrder),
+    mediaIdx: index('socialPublishPostMedia_media_idx').on(table.mediaId),
+  })
+);
+
+export type SocialPublishPostMedia = typeof socialPublishPostMedia.$inferSelect;
+export type InsertSocialPublishPostMedia = typeof socialPublishPostMedia.$inferInsert;
+
+/**
+ * Social Publishing Destinations - نسخة وناتج كل منصة مستقلان عن بقية الوجهات.
+ */
+export const socialPublishDestinations = mysqlTable(
+  'social_publish_destinations',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    postId: int('postId')
+      .notNull()
+      .references(() => socialPublishPosts.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    accountId: int('accountId').references(() => socialPublishAccounts.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    platform: mysqlEnum('platform', [
+      'facebook',
+      'instagram',
+      'x',
+      'linkedin',
+      'youtube',
+      'tiktok',
+    ]).notNull(),
+    captionOverride: text('captionOverride'),
+    settings: text('settings'),
+    publicationStatus: mysqlEnum('publicationStatus', [
+      'not_ready',
+      'pending',
+      'queued',
+      'uploading',
+      'processing',
+      'published',
+      'failed',
+      'skipped',
+      'cancelled',
+    ])
+      .default('not_ready')
+      .notNull(),
+    externalPostId: varchar('externalPostId', { length: 255 }),
+    externalUrl: varchar('externalUrl', { length: 500 }),
+    lastAttemptAt: timestamp('lastAttemptAt'),
+    publishedAt: timestamp('publishedAt'),
+    retryCount: int('retryCount').default(0).notNull(),
+    lastError: text('lastError'),
+    idempotencyKey: varchar('idempotencyKey', { length: 128 }).notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    postIdx: index('socialPublishDestinations_post_idx').on(table.postId),
+    accountIdx: index('socialPublishDestinations_account_idx').on(table.accountId),
+    platformStatusIdx: index('socialPublishDestinations_platform_status_idx').on(
+      table.platform,
+      table.publicationStatus
+    ),
+    idempotencyUnique: uniqueIndex('socialPublishDestinations_idempotency_unique').on(
+      table.idempotencyKey
+    ),
+  })
+);
+
+export type SocialPublishDestination = typeof socialPublishDestinations.$inferSelect;
+export type InsertSocialPublishDestination = typeof socialPublishDestinations.$inferInsert;
+
+/**
+ * Social Publishing Attempts - سجل تدقيق منفصل للمحاولات والنتائج من دون أسرار.
+ */
+export const socialPublishAttempts = mysqlTable(
+  'social_publish_attempts',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    destinationId: int('destinationId')
+      .notNull()
+      .references(() => socialPublishDestinations.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    operation: mysqlEnum('operation', [
+      'validate',
+      'upload',
+      'publish',
+      'status',
+      'retry',
+      'cancel',
+    ]).notNull(),
+    status: mysqlEnum('status', ['started', 'succeeded', 'failed', 'skipped']).notNull(),
+    httpStatus: int('httpStatus'),
+    correlationId: varchar('correlationId', { length: 255 }),
+    requestSummary: text('requestSummary'),
+    responseSummary: text('responseSummary'),
+    errorMessage: text('errorMessage'),
+    performedByUserId: int('performedByUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+  },
+  (table) => ({
+    destinationCreatedIdx: index('socialPublishAttempts_destination_created_idx').on(
+      table.destinationId,
+      table.createdAt
+    ),
+    operationStatusIdx: index('socialPublishAttempts_operation_status_idx').on(
+      table.operation,
+      table.status
+    ),
+  })
+);
+
+export type SocialPublishAttempt = typeof socialPublishAttempts.$inferSelect;
+export type InsertSocialPublishAttempt = typeof socialPublishAttempts.$inferInsert;

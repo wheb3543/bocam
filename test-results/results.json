@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 10,
-  "numPassedTestSuites": 10,
+  "numTotalTestSuites": 6,
+  "numPassedTestSuites": 6,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 24,
-  "numPassedTests": 24,
+  "numTotalTests": 8,
+  "numPassedTests": 8,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,317 +24,123 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787027957382,
+  "startTime": 1787040900500,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["Meta social webhook verification"],
-          "fullName": "Meta social webhook verification accepts only the configured verification token and subscribe mode",
+          "ancestorTitles": ["social publishing scheduled route"],
+          "fullName": "social publishing scheduled route ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
           "status": "passed",
-          "title": "accepts only the configured verification token and subscribe mode",
-          "duration": 2.0552719999998317,
+          "title": "ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
+          "duration": 5.615775999999869,
           "failureMessages": [],
-          "location": { "line": 10, "column": 3 },
+          "location": { "line": 31, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["Meta social webhook verification"],
-          "fullName": "Meta social webhook verification verifies the Meta SHA-256 signature against the raw body",
+          "ancestorTitles": ["social publishing scheduled route"],
+          "fullName": "social publishing scheduled route يرفض أي طلب لا يحمل هوية مهمة مجدولة",
           "status": "passed",
-          "title": "verifies the Meta SHA-256 signature against the raw body",
-          "duration": 1.2928000000001703,
+          "title": "يرفض أي طلب لا يحمل هوية مهمة مجدولة",
+          "duration": 1.2382239999999456,
           "failureMessages": [],
-          "location": { "line": 25, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["Meta social webhook verification"],
-          "fullName": "Meta social webhook verification processes deliveries without throwing when one normalized event fails",
-          "status": "passed",
-          "title": "processes deliveries without throwing when one normalized event fails",
-          "duration": 3.9423349999999573,
-          "failureMessages": [],
-          "location": { "line": 34, "column": 3 },
+          "location": { "line": 43, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787027959479,
-      "endTime": 1787027959486.9424,
+      "startTime": 1787040902082,
+      "endTime": 1787040902089.2383,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/api/metaSocialWebhookRoute.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/api/socialPublishingScheduledRoute.test.ts"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["socialInbox Meta comment action procedures"],
-          "fullName": "socialInbox Meta comment action procedures updates follow-up and assignee using the comment-only workflow procedure",
+          "ancestorTitles": ["publishingRouter"],
+          "fullName": "publishingRouter يرفض الوصول إلى صفحة النشر للدور غير المخول",
           "status": "passed",
-          "title": "updates follow-up and assignee using the comment-only workflow procedure",
-          "duration": 5.56931899999995,
+          "title": "يرفض الوصول إلى صفحة النشر للدور غير المخول",
+          "duration": 4.486329999999953,
           "failureMessages": [],
-          "location": { "line": 78, "column": 3 },
+          "location": { "line": 31, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["socialInbox Meta comment action procedures"],
-          "fullName": "socialInbox Meta comment action procedures rejects a live public reply when the Page Access Token is unavailable",
+          "ancestorTitles": ["publishingRouter"],
+          "fullName": "publishingRouter يمرر منشئ المسودة وخيارات المنصات والوسائط إلى طبقة البيانات",
           "status": "passed",
-          "title": "rejects a live public reply when the Page Access Token is unavailable",
-          "duration": 2.1281289999999444,
+          "title": "يمرر منشئ المسودة وخيارات المنصات والوسائط إلى طبقة البيانات",
+          "duration": 4.365029999999933,
           "failureMessages": [],
-          "location": { "line": 83, "column": 3 },
+          "location": { "line": 35, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["socialInbox Meta comment action procedures"],
-          "fullName": "socialInbox Meta comment action procedures maps an authorised public reply to the official action target without exposing the token",
+          "ancestorTitles": ["publishingRouter"],
+          "fullName": "publishingRouter يقصر قرار الموافقة على الدور الإشرافي ويحتفظ بمعرّف المراجع",
           "status": "passed",
-          "title": "maps an authorised public reply to the official action target without exposing the token",
-          "duration": 2.153299000000061,
+          "title": "يقصر قرار الموافقة على الدور الإشرافي ويحتفظ بمعرّف المراجع",
+          "duration": 1.329635000000053,
           "failureMessages": [],
-          "location": { "line": 89, "column": 3 },
+          "location": { "line": 53, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["socialInbox Meta comment action procedures"],
-          "fullName": "socialInbox Meta comment action procedures blocks a private reply when Meta marks the comment as ineligible",
+          "ancestorTitles": ["publishingRouter"],
+          "fullName": "publishingRouter يتحقق من وقت الجدولة عبر مخطط الإدخال قبل استدعاء طبقة البيانات",
           "status": "passed",
-          "title": "blocks a private reply when Meta marks the comment as ineligible",
-          "duration": 1.4220450000000255,
+          "title": "يتحقق من وقت الجدولة عبر مخطط الإدخال قبل استدعاء طبقة البيانات",
+          "duration": 1.360834000000068,
           "failureMessages": [],
-          "location": { "line": 98, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["socialInbox Meta comment action procedures"],
-          "fullName": "socialInbox Meta comment action procedures persists the hide state only after the Meta action succeeds",
-          "status": "passed",
-          "title": "persists the hide state only after the Meta action succeeds",
-          "duration": 1.455686999999898,
-          "failureMessages": [],
-          "location": { "line": 104, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["socialInbox Meta comment action procedures"],
-          "fullName": "socialInbox Meta comment action procedures stores enriched source context and comment capabilities after Graph API enrichment",
-          "status": "passed",
-          "title": "stores enriched source context and comment capabilities after Graph API enrichment",
-          "duration": 0.9150069999998323,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 3 },
+          "location": { "line": 58, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787027959046,
-      "endTime": 1787027959059.915,
+      "startTime": 1787040902146,
+      "endTime": 1787040902158.3608,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/routers/socialInbox.actions.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/publishing.test.ts"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["Meta event ingestion idempotency"],
-          "fullName": "Meta event ingestion idempotency does not create a second thread or item when a webhook event key already exists",
+          "ancestorTitles": ["PublishingPage"],
+          "fullName": "PublishingPage يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
           "status": "passed",
-          "title": "does not create a second thread or item when a webhook event key already exists",
-          "duration": 5.572169000000031,
+          "title": "يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
+          "duration": 227.40320700000007,
           "failureMessages": [],
-          "location": { "line": 14, "column": 3 },
+          "location": { "line": 59, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["Meta event ingestion idempotency"],
-          "fullName": "Meta event ingestion idempotency stores a normalized event in an existing test account with item details and post context",
+          "ancestorTitles": ["PublishingPage"],
+          "fullName": "PublishingPage ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
           "status": "passed",
-          "title": "stores a normalized event in an existing test account with item details and post context",
-          "duration": 3.6614730000001146,
+          "title": "ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
+          "duration": 99.88316800000007,
           "failureMessages": [],
-          "location": { "line": 44, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["Meta event ingestion idempotency"],
-          "fullName": "Meta event ingestion idempotency cleans only records with the reserved Meta test account prefix",
-          "status": "passed",
-          "title": "cleans only records with the reserved Meta test account prefix",
-          "duration": 1.4727069999999003,
-          "failureMessages": [],
-          "location": { "line": 111, "column": 3 },
+          "location": { "line": 70, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787027959152,
-      "endTime": 1787027959162.4727,
+      "startTime": 1787040902369,
+      "endTime": 1787040902695.883,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/database/db/socialInboxIngestion.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["Meta social inbox comment actions"],
-          "fullName": "Meta social inbox comment actions uses the official Facebook and Instagram public-reply endpoints",
-          "status": "passed",
-          "title": "uses the official Facebook and Instagram public-reply endpoints",
-          "duration": 4.3368789999999535,
-          "failureMessages": [],
-          "location": { "line": 40, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["Meta social inbox comment actions"],
-          "fullName": "Meta social inbox comment actions uses the platform-specific fields to hide or unhide comments",
-          "status": "passed",
-          "title": "uses the platform-specific fields to hide or unhide comments",
-          "duration": 0.8532629999999699,
-          "failureMessages": [],
-          "location": { "line": 50, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["Meta social inbox comment actions"],
-          "fullName": "Meta social inbox comment actions uses the current private-reply payloads and enforces Instagram seven-day window",
-          "status": "passed",
-          "title": "uses the current private-reply payloads and enforces Instagram seven-day window",
-          "duration": 1.768440000000055,
-          "failureMessages": [],
-          "location": { "line": 60, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["Meta social inbox comment actions"],
-          "fullName": "Meta social inbox comment actions enriches Facebook post context and comment capabilities from Graph API fields",
-          "status": "passed",
-          "title": "enriches Facebook post context and comment capabilities from Graph API fields",
-          "duration": 1.382772000000159,
-          "failureMessages": [],
-          "location": { "line": 79, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787027959229,
-      "endTime": 1787027959237.3828,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/socialInboxMetaActions.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage renders the required tabs and the empty-state-free conversation list",
-          "status": "passed",
-          "title": "renders the required tabs and the empty-state-free conversation list",
-          "duration": 262.4304169999998,
-          "failureMessages": [],
-          "location": { "line": 109, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage updates the query filters when a platform tab or search term changes",
-          "status": "passed",
-          "title": "updates the query filters when a platform tab or search term changes",
-          "duration": 83.00464199999988,
-          "failureMessages": [],
-          "location": { "line": 121, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage shows the no-results state when the selected filter has no threads",
-          "status": "passed",
-          "title": "shows the no-results state when the selected filter has no threads",
-          "duration": 25.528627000000142,
-          "failureMessages": [],
-          "location": { "line": 134, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage marks a selected conversation as read",
-          "status": "passed",
-          "title": "marks a selected conversation as read",
-          "duration": 47.98134500000015,
-          "failureMessages": [],
-          "location": { "line": 142, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage identifies Meta test data and renders its reply context and attachment link in the inbox",
-          "status": "passed",
-          "title": "identifies Meta test data and renders its reply context and attachment link in the inbox",
-          "duration": 73.57001999999966,
-          "failureMessages": [],
-          "location": { "line": 149, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage renders Facebook comments as a post context with a nested comment tree instead of a conversation",
-          "status": "passed",
-          "title": "renders Facebook comments as a post context with a nested comment tree instead of a conversation",
-          "duration": 89.07081500000004,
-          "failureMessages": [],
-          "location": { "line": 211, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage renders Instagram comments as media contexts with replies nested by parent_id",
-          "status": "passed",
-          "title": "renders Instagram comments as media contexts with replies nested by parent_id",
-          "duration": 81.01836800000001,
-          "failureMessages": [],
-          "location": { "line": 278, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["MessagesPage"],
-          "fullName": "MessagesPage routes comment reply, follow-up, assignment, and enrichment actions through the protected mutations",
-          "status": "passed",
-          "title": "routes comment reply, follow-up, assignment, and enrichment actions through the protected mutations",
-          "duration": 152.6794829999999,
-          "failureMessages": [],
-          "location": { "line": 342, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787027959362,
-      "endTime": 1787027960177.6794,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/MessagesPage.test.tsx"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/PublishingPage.test.tsx"
     }
   ]
 }

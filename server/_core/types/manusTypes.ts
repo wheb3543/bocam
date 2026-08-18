@@ -66,4 +66,6 @@ export interface GetUserInfoWithJwtResponse {
   email?: string | null;
   platform?: string | null;
   loginMethod?: string | null;
+  /** معرّف مهمة Heartbeat؛ لا يظهر إلا لطلبات المهام المجدولة. */
+  taskUid?: string | null;
 }
