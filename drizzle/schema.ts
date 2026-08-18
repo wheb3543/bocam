@@ -2329,6 +2329,7 @@ export const socialInboxThreads = mysqlTable(
     participantAvatarUrl: varchar('participantAvatarUrl', { length: 500 }),
     preview: text('preview'),
     postUrl: varchar('postUrl', { length: 500 }),
+    commentContext: text('commentContext'),
     unreadCount: int('unreadCount').default(0).notNull(),
     isRead: boolean('isRead').default(false).notNull(),
     isArchived: boolean('isArchived').default(false).notNull(),
@@ -2391,6 +2392,7 @@ export const socialInboxItems = mysqlTable(
     content: text('content'),
     mediaUrl: varchar('mediaUrl', { length: 500 }),
     parentExternalId: varchar('parentExternalId', { length: 255 }),
+    commentMetadata: text('commentMetadata'),
     externalPublishedAt: timestamp('externalPublishedAt'),
     isRead: boolean('isRead').default(false).notNull(),
     status: mysqlEnum('status', ['received', 'sent', 'pending', 'failed', 'deleted'])

@@ -51,6 +51,14 @@ describe('Meta payload fixtures', () => {
       authorName: 'meta_test_ig_user',
       parentExternalId: '17890000000000001',
       externalThreadId: 'instagram:sgh-meta-test-instagram-200:media:17900000000010001',
+      postUrl: 'https://www.instagram.com/p/SGHMetaTest/',
+      commentContext: {
+        sourceType: 'instagram_media',
+        sourceExternalId: '17900000000010001',
+        title: 'فيديو اختبار لاختبار سياق وسيط Instagram.',
+        previewType: 'VIDEO',
+      },
+      commentMetadata: { likeCount: 12, replyCount: 2, isHidden: false },
     });
   });
 
@@ -61,6 +69,19 @@ describe('Meta payload fixtures', () => {
       eventType: 'comment',
       authorName: 'مستخدم اختبار Facebook',
       postUrl: 'https://www.facebook.com/sgh-meta-test/posts/001',
+      commentContext: {
+        sourceType: 'facebook_post',
+        sourceExternalId: 'sgh-meta-test-page-100_sgh-meta-test-post-001',
+        title: 'منشور Facebook تجريبي لعرض سياق التعليقات.',
+        previewType: 'photo',
+      },
+      commentMetadata: {
+        likeCount: 4,
+        replyCount: 2,
+        canComment: true,
+        canReplyPrivately: true,
+        isHidden: false,
+      },
     });
   });
 

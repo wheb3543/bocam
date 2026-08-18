@@ -90,6 +90,48 @@ export async function getSocialInboxThreadById(id: number) {
   return { thread, items };
 }
 
+function parseStoredJson(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    return typeof parsed === 'object' && parsed !== null ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function listSocialInboxCommentContexts(
+  filters: Omit<SocialInboxFilters, 'channelType'> = {}
+) {
+  const threads = await listSocialInboxThreads({ ...filters, channelType: 'comment' });
+  if (threads.length === 0) {
+    return [];
+  }
+
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+
+  const threadIds = threads.map((thread) => thread.id);
+  const items = await db
+    .select()
+    .from(socialInboxItems)
+    .where(inArray(socialInboxItems.threadId, threadIds))
+    .orderBy(asc(socialInboxItems.externalPublishedAt), asc(socialInboxItems.createdAt));
+
+  return threads.map((thread) => ({
+    ...thread,
+    commentContext: parseStoredJson(thread.commentContext),
+    items: items
+      .filter((item) => item.threadId === thread.id)
+      .map((item) => ({ ...item, commentMetadata: parseStoredJson(item.commentMetadata) })),
+  }));
+}
+
 export async function createSocialInboxAccount(account: InsertSocialInboxAccount) {
   const db = await getDb();
   if (!db) {
@@ -278,6 +320,7 @@ export async function ingestMetaSocialInboxEvent(
               participantName: event.authorName ?? null,
               preview: event.content ?? null,
               postUrl: event.postUrl ?? null,
+              commentContext: event.commentContext ? JSON.stringify(event.commentContext) : null,
               lastActivityAt: event.occurredAt,
               unreadCount: event.direction === 'inbound' ? 1 : 0,
               isRead: event.direction !== 'inbound',
@@ -319,6 +362,7 @@ export async function ingestMetaSocialInboxEvent(
       content: event.content ?? null,
       mediaUrl: event.mediaUrl ?? null,
       parentExternalId: event.parentExternalId ?? null,
+      commentMetadata: event.commentMetadata ? JSON.stringify(event.commentMetadata) : null,
       externalPublishedAt: event.occurredAt,
       isRead: event.direction !== 'inbound',
       status: event.direction === 'outbound' ? 'sent' : 'received',
@@ -334,6 +378,9 @@ export async function ingestMetaSocialInboxEvent(
           event.authorExternalId ?? existingThread?.participantExternalId ?? null,
         participantName: event.authorName ?? existingThread?.participantName ?? null,
         postUrl: event.postUrl ?? existingThread?.postUrl ?? null,
+        commentContext: event.commentContext
+          ? JSON.stringify(event.commentContext)
+          : (existingThread?.commentContext ?? null),
         lastActivityAt: event.occurredAt,
         unreadCount:
           event.direction === 'inbound'

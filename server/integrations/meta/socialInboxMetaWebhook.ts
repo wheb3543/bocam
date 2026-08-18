@@ -1,6 +1,28 @@
 export type MetaSocialPlatform = 'messenger' | 'instagram' | 'facebook';
 export type MetaSocialChannel = 'message' | 'comment';
 
+export type MetaCommentContext = {
+  sourceType: 'facebook_post' | 'instagram_media';
+  sourceExternalId: string;
+  title?: string;
+  sourceUrl?: string;
+  previewUrl?: string;
+  previewType?: string;
+};
+
+export type MetaCommentMetadata = {
+  likeCount?: number;
+  replyCount?: number;
+  canComment?: boolean;
+  canReplyPrivately?: boolean;
+  isHidden?: boolean;
+  isPrivate?: boolean;
+  mediaProductType?: string;
+  adId?: string;
+  adTitle?: string;
+  originalMediaId?: string;
+};
+
 export type MetaSocialInboxEvent = {
   platform: MetaSocialPlatform;
   channelType: MetaSocialChannel;
@@ -16,6 +38,8 @@ export type MetaSocialInboxEvent = {
   mediaUrl?: string;
   postUrl?: string;
   parentExternalId?: string;
+  commentContext?: MetaCommentContext;
+  commentMetadata?: MetaCommentMetadata;
   occurredAt: Date;
   rawPayload: string;
 };
@@ -36,12 +60,34 @@ function asString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value : undefined;
 }
 
-function eventDate(value: unknown, fallback: Date): Date {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    return fallback;
+function asBoolean(value: unknown): boolean | undefined {
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+function asNumber(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
   }
 
-  return new Date(value < 10_000_000_000 ? value * 1000 : value);
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+}
+
+function eventDate(value: unknown, fallback: Date): Date {
+  if (typeof value === 'string') {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? fallback : parsed;
+  }
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return new Date(value < 10_000_000_000 ? value * 1000 : value);
+  }
+
+  return fallback;
 }
 
 function attachmentDetails(message: UnknownRecord) {
@@ -118,6 +164,10 @@ function normalizeInstagramComment(
   }
 
   const parentExternalId = asString(value.parent_id);
+  const sourceUrl = asString(media?.permalink) ?? asString(value.permalink);
+  const previewUrl =
+    asString(media?.thumbnail_url) ?? asString(media?.media_url) ?? asString(value.media_url);
+  const previewType = asString(media?.media_type) ?? asString(media?.media_product_type);
   return {
     platform: 'instagram',
     channelType: 'comment',
@@ -130,8 +180,27 @@ function normalizeInstagramComment(
     authorExternalId,
     authorName: author ? asString(author.username) : undefined,
     content: asString(value.text),
+    mediaUrl: previewUrl,
+    postUrl: sourceUrl,
     parentExternalId,
-    occurredAt: fallbackTime,
+    commentContext: {
+      sourceType: 'instagram_media',
+      sourceExternalId: mediaId,
+      title: asString(media?.caption) ?? asString(value.media_caption),
+      sourceUrl,
+      previewUrl,
+      previewType,
+    },
+    commentMetadata: {
+      likeCount: asNumber(value.like_count),
+      replyCount: asNumber(value.reply_count),
+      isHidden: asBoolean(value.hidden),
+      mediaProductType: asString(media?.media_product_type),
+      adId: asString(media?.ad_id),
+      adTitle: asString(media?.ad_title),
+      originalMediaId: asString(media?.original_media_id),
+    },
+    occurredAt: eventDate(value.timestamp, fallbackTime),
     rawPayload,
   };
 }
@@ -153,6 +222,9 @@ function normalizeFacebookComment(
     return null;
   }
 
+  const post = asRecord(value.post);
+  const sourceUrl = asString(value.permalink_url) ?? asString(post?.permalink_url);
+  const previewUrl = asString(post?.full_picture) ?? asString(value.full_picture);
   return {
     platform: 'facebook',
     channelType: 'comment',
@@ -165,8 +237,24 @@ function normalizeFacebookComment(
     authorExternalId: author ? asString(author.id) : undefined,
     authorName: author ? asString(author.name) : undefined,
     content: asString(value.message),
-    postUrl: asString(value.permalink_url),
+    postUrl: sourceUrl,
     parentExternalId: asString(value.parent_id),
+    commentContext: {
+      sourceType: 'facebook_post',
+      sourceExternalId: postId,
+      title: asString(post?.message) ?? asString(value.post_message),
+      sourceUrl,
+      previewUrl,
+      previewType: asString(post?.type) ?? asString(value.post_type),
+    },
+    commentMetadata: {
+      likeCount: asNumber(value.like_count),
+      replyCount: asNumber(value.comment_count),
+      canComment: asBoolean(value.can_comment),
+      canReplyPrivately: asBoolean(value.can_reply_privately),
+      isHidden: asBoolean(value.is_hidden),
+      isPrivate: asBoolean(value.is_private),
+    },
     occurredAt: eventDate(value.created_time, fallbackTime),
     rawPayload,
   };

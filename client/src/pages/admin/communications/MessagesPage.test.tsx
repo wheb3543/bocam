@@ -31,6 +31,7 @@ const mocks = vi.hoisted(() => {
     threadsQuery: vi.fn(() => ({ data: [thread], isLoading: false, isFetching: false, refetch: vi.fn() })),
     accountsQuery: vi.fn(() => ({ data: [], isLoading: false, isFetching: false, refetch: vi.fn() })),
     statsQuery: vi.fn(() => ({ data: { total: 1, unread: 1, messages: 1, comments: 0 }, isLoading: false, isFetching: false, refetch: vi.fn() })),
+    commentContextsQuery: vi.fn(() => ({ data: [], isLoading: false, isFetching: false, refetch: vi.fn() })),
     threadDetailQuery: vi.fn(() => ({ data: undefined, isLoading: false, isFetching: false, refetch: vi.fn() })),
     markReadMutate: vi.fn(),
     starMutate: vi.fn(),
@@ -54,6 +55,7 @@ vi.mock('@/lib/api/trpc', () => ({
       accounts: { useQuery: mocks.accountsQuery },
       stats: { useQuery: mocks.statsQuery },
       threads: { useQuery: mocks.threadsQuery },
+      commentContexts: { useQuery: mocks.commentContextsQuery },
       thread: { useQuery: mocks.threadDetailQuery },
       markRead: { useMutation: () => ({ mutate: mocks.markReadMutate }) },
       setStarred: { useMutation: () => ({ mutate: mocks.starMutate }) },
@@ -76,6 +78,8 @@ describe('MessagesPage', () => {
     mocks.accountsQuery.mockImplementation(() => ({ data: [], isLoading: false, isFetching: false, refetch: vi.fn() }));
     mocks.statsQuery.mockReset();
     mocks.statsQuery.mockImplementation(() => ({ data: { total: 1, unread: 1, messages: 1, comments: 0 }, isLoading: false, isFetching: false, refetch: vi.fn() }));
+    mocks.commentContextsQuery.mockReset();
+    mocks.commentContextsQuery.mockImplementation(() => ({ data: [], isLoading: false, isFetching: false, refetch: vi.fn() }));
     mocks.threadDetailQuery.mockReset();
     mocks.threadDetailQuery.mockImplementation(() => ({ data: undefined, isLoading: false, isFetching: false, refetch: vi.fn() }));
     mocks.markReadMutate.mockClear();
@@ -182,5 +186,136 @@ describe('MessagesPage', () => {
       'href',
       'https://example.invalid/meta-test/image.avif'
     );
+  });
+
+  it('renders Facebook comments as a post context with a nested comment tree instead of a conversation', () => {
+    mocks.commentContextsQuery.mockImplementation(() => ({
+      data: [
+        {
+          id: 90,
+          platform: 'facebook',
+          title: 'منشور Facebook تجريبي لعرض سياق التعليقات.',
+          preview: 'تعليق رئيسي على المنشور.',
+          postUrl: 'https://www.facebook.com/sgh-meta-test/posts/001',
+          unreadCount: 1,
+          isRead: false,
+          isStarred: false,
+          lastActivityAt: new Date('2026-08-18T08:00:00.000Z'),
+          commentContext: {
+            sourceType: 'facebook_post',
+            sourceExternalId: 'post-001',
+            title: 'منشور Facebook تجريبي لعرض سياق التعليقات.',
+            sourceUrl: 'https://www.facebook.com/sgh-meta-test/posts/001',
+            previewType: 'photo',
+          },
+          items: [
+            {
+              id: 901,
+              externalItemId: 'comment-001',
+              authorName: 'مستخدم Facebook',
+              content: 'تعليق رئيسي على المنشور.',
+              parentExternalId: 'post-001',
+              externalPublishedAt: new Date('2026-08-18T08:00:00.000Z'),
+              createdAt: new Date('2026-08-18T08:00:00.000Z'),
+              isRead: false,
+              direction: 'inbound',
+              commentMetadata: { likeCount: 4, replyCount: 1, canComment: true, canReplyPrivately: true, isHidden: false },
+            },
+            {
+              id: 902,
+              externalItemId: 'comment-002',
+              authorName: 'فريق الصفحة',
+              content: 'رد متداخل من فريق الصفحة.',
+              parentExternalId: 'comment-001',
+              externalPublishedAt: new Date('2026-08-18T08:05:00.000Z'),
+              createdAt: new Date('2026-08-18T08:05:00.000Z'),
+              isRead: true,
+              direction: 'outbound',
+              commentMetadata: { likeCount: 0, replyCount: 0, canComment: true, isHidden: false },
+            },
+          ],
+        },
+      ],
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    }) as never);
+
+    render(React.createElement(MessagesPage));
+    fireEvent.keyDown(screen.getByRole('tab', { name: 'تعليقات فيسبوك' }), { key: 'Enter', code: 'Enter' });
+
+    expect(screen.getByText('سياقات منشورات Facebook')).toBeInTheDocument();
+    expect(screen.getAllByText('منشور Facebook تجريبي لعرض سياق التعليقات.')).toHaveLength(2);
+    expect(screen.getByRole('region', { name: 'سلسلة التعليقات' })).toBeInTheDocument();
+    expect(screen.getAllByText('تعليق رئيسي على المنشور.')).toHaveLength(2);
+    expect(screen.getByText('رد متداخل من فريق الصفحة.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /فتح الأصل/ })).toHaveAttribute(
+      'href',
+      'https://www.facebook.com/sgh-meta-test/posts/001'
+    );
+  });
+
+  it('renders Instagram comments as media contexts with replies nested by parent_id', () => {
+    mocks.commentContextsQuery.mockImplementation(() => ({
+      data: [
+        {
+          id: 91,
+          platform: 'instagram',
+          title: 'Reel تجريبي لعرض تعليقات Instagram.',
+          preview: 'تعليق Instagram رئيسي.',
+          postUrl: 'https://www.instagram.com/p/SGHMetaTest/',
+          unreadCount: 1,
+          isRead: false,
+          isStarred: true,
+          lastActivityAt: new Date('2026-08-18T08:10:00.000Z'),
+          commentContext: {
+            sourceType: 'instagram_media',
+            sourceExternalId: '17900000000010001',
+            title: 'Reel تجريبي لعرض تعليقات Instagram.',
+            sourceUrl: 'https://www.instagram.com/p/SGHMetaTest/',
+            previewType: 'VIDEO',
+          },
+          items: [
+            {
+              id: 911,
+              externalItemId: 'ig-comment-001',
+              authorName: 'ig_user_1',
+              content: 'تعليق Instagram رئيسي.',
+              parentExternalId: '17900000000010001',
+              externalPublishedAt: new Date('2026-08-18T08:10:00.000Z'),
+              createdAt: new Date('2026-08-18T08:10:00.000Z'),
+              isRead: false,
+              direction: 'inbound',
+              commentMetadata: { likeCount: 12, replyCount: 1, isHidden: false },
+            },
+            {
+              id: 912,
+              externalItemId: 'ig-comment-002',
+              authorName: 'ig_user_2',
+              content: 'رد Instagram متداخل.',
+              parentExternalId: 'ig-comment-001',
+              externalPublishedAt: new Date('2026-08-18T08:12:00.000Z'),
+              createdAt: new Date('2026-08-18T08:12:00.000Z'),
+              isRead: true,
+              direction: 'inbound',
+              commentMetadata: { likeCount: 2, replyCount: 0, isHidden: false },
+            },
+          ],
+        },
+      ],
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    }) as never);
+
+    render(React.createElement(MessagesPage));
+    fireEvent.keyDown(screen.getByRole('tab', { name: 'تعليقات Instagram' }), { key: 'Enter', code: 'Enter' });
+
+    expect(screen.getByText('سياقات وسائط Instagram')).toBeInTheDocument();
+    expect(screen.getAllByText('Reel تجريبي لعرض تعليقات Instagram.')).toHaveLength(2);
+    expect(screen.getAllByText('Reel أو فيديو Instagram')).toHaveLength(2);
+    expect(screen.getAllByText('تعليق Instagram رئيسي.')).toHaveLength(2);
+    expect(screen.getByText('رد Instagram متداخل.')).toBeInTheDocument();
+    expect(screen.getByText('12')).toBeInTheDocument();
   });
 });

@@ -169,6 +169,7 @@ export { getUserPreference, setUserPreference, getAllUserPreferences } from './u
 export {
   listSocialInboxAccounts,
   listSocialInboxThreads,
+  listSocialInboxCommentContexts,
   getSocialInboxThreadById,
   createSocialInboxAccount,
   updateSocialInboxAccount,

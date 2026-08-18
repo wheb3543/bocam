@@ -81,6 +81,12 @@ describe('Meta event ingestion idempotency', () => {
         content: 'تعليق اختبار Facebook وارد إلى صندوق البريد.',
         postUrl: 'https://www.facebook.com/sgh-meta-test/posts/001',
         parentExternalId: 'sgh-meta-test-page-100_sgh-meta-test-post-001',
+        commentContext: {
+          sourceType: 'facebook_post',
+          sourceExternalId: 'sgh-meta-test-page-100_sgh-meta-test-post-001',
+          title: 'منشور اختبار',
+        },
+        commentMetadata: { likeCount: 4, canReplyPrivately: true },
         occurredAt: new Date('2026-08-18T08:00:00.000Z'),
         rawPayload: '{"object":"page"}',
       })
@@ -89,10 +95,16 @@ describe('Meta event ingestion idempotency', () => {
     expect(values.mock.calls[1]?.[0]).toMatchObject({
       accountId: 77,
       postUrl: 'https://www.facebook.com/sgh-meta-test/posts/001',
+      commentContext: JSON.stringify({
+        sourceType: 'facebook_post',
+        sourceExternalId: 'sgh-meta-test-page-100_sgh-meta-test-post-001',
+        title: 'منشور اختبار',
+      }),
     });
     expect(values.mock.calls[2]?.[0]).toMatchObject({
       mediaUrl: null,
       parentExternalId: 'sgh-meta-test-page-100_sgh-meta-test-post-001',
+      commentMetadata: JSON.stringify({ likeCount: 4, canReplyPrivately: true }),
     });
   });
 

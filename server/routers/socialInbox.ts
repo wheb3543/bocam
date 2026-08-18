@@ -6,6 +6,7 @@ import {
   assignSocialInboxThread,
   createSocialInboxAccount,
   getSocialInboxStats,
+  listSocialInboxCommentContexts,
   getSocialInboxThreadById,
   listSocialInboxAccounts,
   listSocialInboxThreads,
@@ -96,6 +97,18 @@ export const socialInboxRouter = router({
         .optional()
     )
     .query(({ input }) => listSocialInboxThreads(input ?? {})),
+
+  commentContexts: socialInboxProcedure
+    .input(
+      z
+        .object({
+          platform: z.enum(['facebook', 'instagram']).optional(),
+          search: z.string().trim().max(100).optional(),
+          unreadOnly: z.boolean().optional(),
+        })
+        .optional()
+    )
+    .query(({ input }) => listSocialInboxCommentContexts(input ?? {})),
 
   thread: socialInboxProcedure
     .input(z.object({ id: z.number().int().positive() }))
