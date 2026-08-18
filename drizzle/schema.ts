@@ -2485,6 +2485,37 @@ export type MetaIntegrationSettings = typeof metaIntegrationSettings.$inferSelec
 export type InsertMetaIntegrationSettings = typeof metaIntegrationSettings.$inferInsert;
 
 /**
+ * إعدادات تطبيقات النشر الخارجية. لا يُعاد clientSecretEncrypted إلى الواجهة مطلقاً.
+ * تحفظ توكنات الحسابات المنفصلة لاحقاً في طبقة OAuth عند اكتمال ربط كل منصة.
+ */
+export const socialPlatformIntegrationSettings = mysqlTable(
+  'social_platform_integration_settings',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    platform: mysqlEnum('platform', ['x', 'linkedin', 'youtube', 'tiktok']).notNull(),
+    clientId: varchar('clientId', { length: 255 }),
+    clientSecretEncrypted: text('clientSecretEncrypted'),
+    requestedScopes: text('requestedScopes'),
+    isEnabled: boolean('isEnabled').default(false).notNull(),
+    lastError: text('lastError'),
+    updatedByUserId: int('updatedByUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    platformUnique: uniqueIndex('socialPlatformIntegrations_platform_unique').on(table.platform),
+  })
+);
+
+export type SocialPlatformIntegrationSettings =
+  typeof socialPlatformIntegrationSettings.$inferSelect;
+export type InsertSocialPlatformIntegrationSettings =
+  typeof socialPlatformIntegrationSettings.$inferInsert;
+
+/**
  * Social Publishing Accounts - حسابات النشر المتصلة لكل منصة
  * لا تُخزن الأسرار هنا بصيغة مكشوفة؛ تحفظ بيانات OAuth المشفرة لاحقاً في خدمة الاتصال.
  */

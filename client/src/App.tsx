@@ -332,6 +332,10 @@ function Router() {
                 </Route>
                 <Route path={'/admin/communications/messages'} component={MessagesPage} />
                 <Route
+                  path={'/admin/communications/integration-settings'}
+                  component={MetaIntegrationSettingsPage}
+                />
+                <Route
                   path={'/admin/communications/meta-settings'}
                   component={MetaIntegrationSettingsPage}
                 />

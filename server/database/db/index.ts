@@ -196,6 +196,14 @@ export {
   type SaveMetaIntegrationSettingsInput,
 } from './metaIntegrationSettings';
 
+// General Platform Integration Settings
+export {
+  getSocialPlatformIntegrationStatuses,
+  saveSocialPlatformIntegrationSettings,
+  type ExternalPublishingPlatform,
+  type SaveSocialPlatformIntegrationInput,
+} from './socialPlatformIntegrationSettings';
+
 // Social Publishing
 export {
   listSocialPublishAccounts,

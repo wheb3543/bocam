@@ -15,8 +15,11 @@ import {
   KeyRound,
   Loader2,
   LockKeyhole,
+  Music2,
+  Save,
   ShieldAlert,
   Trash2,
+  Video,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -43,6 +46,21 @@ type MutationError = {
   message: string;
 };
 
+type ExternalPlatform = 'x' | 'linkedin' | 'youtube' | 'tiktok';
+
+type ExternalPlatformStatus = {
+  platform: ExternalPlatform;
+  label: string;
+  clientId: string | null;
+  requestedScopes: string;
+  isEnabled: boolean;
+  configured: boolean;
+  hasClientSecret: boolean;
+  connectionStatus: string;
+  lastError: string | null;
+  updatedAt: Date | string | null;
+};
+
 const initialForm: MetaForm = {
   appId: '',
   facebookPageId: '',
@@ -60,6 +78,9 @@ export default function MetaIntegrationSettingsPage() {
   const [callbackUrl, setCallbackUrl] = useState('');
   const isAdmin = user?.role === 'admin';
   const statusQuery = trpc.metaIntegration.status.useQuery(undefined, { enabled: isAdmin });
+  const generalStatusQuery = trpc.generalIntegrations.status.useQuery(undefined, {
+    enabled: isAdmin,
+  });
   const saveMutation = trpc.metaIntegration.save.useMutation({
     onSuccess: async () => {
       setForm((current) => ({ ...current, appSecret: '', verifyToken: '', pageAccessToken: '' }));
@@ -159,8 +180,8 @@ export default function MetaIntegrationSettingsPage() {
   if (!isAdmin) {
     return (
       <DashboardLayout
-        pageTitle="إعدادات ربط Meta"
-        pageDescription="إدارة اتصال صندوق البريد مع Meta"
+        pageTitle="إعدادات الربط العامة"
+        pageDescription="إدارة اتصالات منصات التواصل بأمان"
       >
         <Alert dir="rtl" className="mx-auto mt-8 max-w-2xl border-amber-200 bg-amber-50">
           <ShieldAlert className="h-4 w-4 text-amber-700" />
@@ -175,8 +196,8 @@ export default function MetaIntegrationSettingsPage() {
 
   return (
     <DashboardLayout
-      pageTitle="إعدادات ربط Meta"
-      pageDescription="ربط Messenger وInstagram وتعليقات Facebook بصندوق البريد الموحد"
+      pageTitle="إعدادات الربط العامة"
+      pageDescription="إدارة ربط Meta وX وLinkedIn وYouTube وTikTok من مكان واحد"
     >
       <main dir="rtl" className="container max-w-5xl space-y-5 py-5 sm:py-8">
         <section className="flex flex-col gap-3 rounded-2xl border border-blue-100 bg-gradient-to-l from-blue-50 to-white p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -185,16 +206,16 @@ export default function MetaIntegrationSettingsPage() {
               <KeyRound className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-900 sm:text-xl">
-                ربط Meta لصندوق البريد الموحد
-              </h1>
+              <h1 className="text-lg font-bold text-slate-900 sm:text-xl">إعدادات الربط العامة</h1>
               <p className="mt-1 text-sm text-slate-600">
-                Messenger وInstagram وتعليقات Facebook وفق Webhooks الرسمية.
+                بيانات تطبيقات Meta وX وLinkedIn وYouTube وTikTok تُدار مركزياً وبصلاحيات المسؤول.
               </p>
             </div>
           </div>
           <Badge className={statusQuery.data?.isEnabled ? 'bg-emerald-600' : 'bg-slate-500'}>
-            {statusQuery.data?.isEnabled ? 'التكامل مفعل' : 'التكامل غير مفعل'}
+            {statusQuery.data?.isEnabled || generalStatusQuery.data?.some((item) => item.isEnabled)
+              ? 'توجد تكاملات مفعّلة'
+              : 'لا توجد تكاملات مفعّلة'}
           </Badge>
         </section>
 
@@ -206,6 +227,33 @@ export default function MetaIntegrationSettingsPage() {
             على الخادم، ويمكنك استبدالها بإدخال قيمة جديدة.
           </AlertDescription>
         </Alert>
+
+        <Card className="border-blue-100">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base text-slate-900">
+              <KeyRound className="h-5 w-5 text-blue-700" />
+              ربط منصات النشر الخارجية
+            </CardTitle>
+            <CardDescription>
+              احفظ Client ID وClient Secret لكل منصة. يُشفّر Client Secret على الخادم ولا يعاد إلى
+              المتصفح بعد الحفظ. عند اكتمال الحقول وتفعيل المنصة تصبح جاهزة لبدء OAuth.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {generalStatusQuery.isLoading ? (
+              <div className="flex min-h-32 items-center justify-center text-sm text-slate-500">
+                <Loader2 className="ml-2 h-4 w-4 animate-spin text-blue-600" />
+                جارٍ تحميل حالات المنصات...
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {(generalStatusQuery.data ?? []).map((platform) => (
+                  <ExternalIntegrationCard key={platform.platform} status={platform} />
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <Card className="border-amber-200 bg-amber-50/50">
           <CardHeader>
@@ -425,5 +473,152 @@ function FormField({
         dir="ltr"
       />
     </label>
+  );
+}
+
+const externalPlatformPresentation: Record<
+  ExternalPlatform,
+  { description: string; docsUrl: string; Icon: typeof KeyRound }
+> = {
+  x: {
+    description: 'النشر على X وإدارة وسائط المنشورات عبر واجهة X API v2.',
+    docsUrl: 'https://docs.x.com/x-api',
+    Icon: ExternalLink,
+  },
+  linkedin: {
+    description: 'نشر محتوى الأعضاء والمنظمات عبر LinkedIn Marketing APIs.',
+    docsUrl: 'https://learn.microsoft.com/linkedin/',
+    Icon: KeyRound,
+  },
+  youtube: {
+    description: 'رفع الفيديوهات وإدارة القنوات عبر YouTube Data API.',
+    docsUrl: 'https://developers.google.com/youtube/v3',
+    Icon: Video,
+  },
+  tiktok: {
+    description: 'نشر الفيديوهات وإدارة الصلاحيات عبر TikTok for Developers.',
+    docsUrl: 'https://developers.tiktok.com/doc/content-posting-api-get-started/',
+    Icon: Music2,
+  },
+};
+
+function ExternalIntegrationCard({ status }: { status: ExternalPlatformStatus }) {
+  const utils = trpc.useUtils();
+  const [clientId, setClientId] = useState(status.clientId ?? '');
+  const [clientSecret, setClientSecret] = useState('');
+  const [requestedScopes, setRequestedScopes] = useState(status.requestedScopes);
+  const [isEnabled, setIsEnabled] = useState(status.isEnabled);
+  const presentation = externalPlatformPresentation[status.platform];
+  const Icon = presentation.Icon;
+  const saveMutation = trpc.generalIntegrations.save.useMutation({
+    onSuccess: async () => {
+      setClientSecret('');
+      await utils.generalIntegrations.status.invalidate();
+      toast.success(`تم حفظ إعدادات ${status.label} بصورة آمنة`);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  useEffect(() => {
+    setClientId(status.clientId ?? '');
+    setRequestedScopes(status.requestedScopes);
+    setIsEnabled(status.isEnabled);
+  }, [status.clientId, status.isEnabled, status.requestedScopes]);
+
+  const savePlatform = () => {
+    saveMutation.mutate({
+      platform: status.platform,
+      clientId: clientId || undefined,
+      clientSecret: clientSecret || undefined,
+      requestedScopes: requestedScopes || undefined,
+      isEnabled,
+    });
+  };
+
+  return (
+    <section className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex gap-3">
+          <div className="rounded-lg bg-blue-600 p-2 text-white">
+            <Icon className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="font-bold text-slate-900">{status.label}</h2>
+            <p className="mt-1 text-xs leading-5 text-slate-600">{presentation.description}</p>
+          </div>
+        </div>
+        <Badge
+          className={
+            status.connectionStatus === 'ready_for_oauth' ? 'bg-emerald-600' : 'bg-slate-500'
+          }
+        >
+          {status.connectionStatus === 'ready_for_oauth' ? 'جاهز لـ OAuth' : 'غير مهيأ'}
+        </Badge>
+      </div>
+
+      <div className="space-y-3">
+        <FormField
+          label="Client ID"
+          value={clientId}
+          onChange={setClientId}
+          placeholder="المعرّف من لوحة المطورين"
+        />
+        <FormField
+          label="Client Secret"
+          value={clientSecret}
+          onChange={setClientSecret}
+          placeholder={
+            status.hasClientSecret
+              ? 'محفوظ ومشفّر؛ اتركه فارغاً للاحتفاظ به'
+              : 'ألصق السر مرة واحدة'
+          }
+          secret
+        />
+        <FormField
+          label="OAuth Scopes المطلوبة"
+          value={requestedScopes}
+          onChange={setRequestedScopes}
+          placeholder="الصلاحيات المطلوبة، مفصولة بمسافات"
+        />
+        <label className="flex items-center justify-between rounded-lg border bg-white px-3 py-2.5 text-sm">
+          <span>
+            <strong className="block text-slate-900">تفعيل المنصة</strong>
+            <span className="text-xs text-slate-500">
+              يلزم Client ID وClient Secret لتصبح جاهزة للربط.
+            </span>
+          </span>
+          <input
+            aria-label={`تفعيل ${status.label}`}
+            type="checkbox"
+            checked={isEnabled}
+            onChange={(event) => setIsEnabled(event.target.checked)}
+            className="h-4 w-4 accent-blue-600"
+          />
+        </label>
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            onClick={savePlatform}
+            disabled={saveMutation.isPending}
+            className="flex-1 bg-blue-600 hover:bg-blue-700"
+          >
+            {saveMutation.isPending ? (
+              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="ml-2 h-4 w-4" />
+            )}
+            حفظ
+          </Button>
+          <a
+            href={presentation.docsUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-medium text-blue-700 hover:underline"
+          >
+            الوثائق الرسمية
+          </a>
+        </div>
+      </div>
+    </section>
   );
 }

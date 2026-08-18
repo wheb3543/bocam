@@ -23,4 +23,17 @@ describe('sidebar data for the unified inbox', () => {
       allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
     });
   });
+
+  it('links administrators to the general integration settings from both navigation variants', () => {
+    const generalItem = allNavItems.find((item) => item.id === 'integration-settings');
+    const communications = allToolsGroups.find((group) => group.label === 'التواصل');
+    const toolItem = communications?.items.find((item) => item.id === 'integration-settings');
+
+    expect(generalItem).toMatchObject({
+      title: 'إعدادات الربط',
+      href: '/admin/communications/integration-settings',
+      allowedRoles: ['admin'],
+    });
+    expect(toolItem).toMatchObject({ href: '/admin/communications/integration-settings' });
+  });
 });

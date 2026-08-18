@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 6,
-  "numPassedTestSuites": 6,
+  "numTotalTestSuites": 8,
+  "numPassedTestSuites": 8,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 8,
-  "numPassedTests": 8,
+  "numTotalTests": 7,
+  "numPassedTests": 7,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,123 +24,121 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787040900500,
+  "startTime": 1787097203612,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["social publishing scheduled route"],
-          "fullName": "social publishing scheduled route ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
+          "ancestorTitles": ["generalIntegrationsRouter"],
+          "fullName": "generalIntegrationsRouter allows an administrator to retrieve and save platform credentials",
           "status": "passed",
-          "title": "ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
-          "duration": 5.615775999999869,
+          "title": "allows an administrator to retrieve and save platform credentials",
+          "duration": 5.589743999999882,
           "failureMessages": [],
-          "location": { "line": 31, "column": 3 },
+          "location": { "line": 21, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["social publishing scheduled route"],
-          "fullName": "social publishing scheduled route يرفض أي طلب لا يحمل هوية مهمة مجدولة",
+          "ancestorTitles": ["generalIntegrationsRouter"],
+          "fullName": "generalIntegrationsRouter rejects access by a non-administrator",
           "status": "passed",
-          "title": "يرفض أي طلب لا يحمل هوية مهمة مجدولة",
-          "duration": 1.2382239999999456,
+          "title": "rejects access by a non-administrator",
+          "duration": 1.6093200000000252,
           "failureMessages": [],
           "location": { "line": 43, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787040902082,
-      "endTime": 1787040902089.2383,
+      "startTime": 1787097205266,
+      "endTime": 1787097205273.6094,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/api/socialPublishingScheduledRoute.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/generalIntegrations.test.ts"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["publishingRouter"],
-          "fullName": "publishingRouter يرفض الوصول إلى صفحة النشر للدور غير المخول",
+          "ancestorTitles": ["general platform integration settings persistence"],
+          "fullName": "general platform integration settings persistence encrypts a platform Client Secret and returns configuration status without exposing it",
           "status": "passed",
-          "title": "يرفض الوصول إلى صفحة النشر للدور غير المخول",
-          "duration": 4.486329999999953,
+          "title": "encrypts a platform Client Secret and returns configuration status without exposing it",
+          "duration": 5.304053999999951,
           "failureMessages": [],
-          "location": { "line": 31, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["publishingRouter"],
-          "fullName": "publishingRouter يمرر منشئ المسودة وخيارات المنصات والوسائط إلى طبقة البيانات",
-          "status": "passed",
-          "title": "يمرر منشئ المسودة وخيارات المنصات والوسائط إلى طبقة البيانات",
-          "duration": 4.365029999999933,
-          "failureMessages": [],
-          "location": { "line": 35, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["publishingRouter"],
-          "fullName": "publishingRouter يقصر قرار الموافقة على الدور الإشرافي ويحتفظ بمعرّف المراجع",
-          "status": "passed",
-          "title": "يقصر قرار الموافقة على الدور الإشرافي ويحتفظ بمعرّف المراجع",
-          "duration": 1.329635000000053,
-          "failureMessages": [],
-          "location": { "line": 53, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["publishingRouter"],
-          "fullName": "publishingRouter يتحقق من وقت الجدولة عبر مخطط الإدخال قبل استدعاء طبقة البيانات",
-          "status": "passed",
-          "title": "يتحقق من وقت الجدولة عبر مخطط الإدخال قبل استدعاء طبقة البيانات",
-          "duration": 1.360834000000068,
-          "failureMessages": [],
-          "location": { "line": 58, "column": 3 },
+          "location": { "line": 15, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787040902146,
-      "endTime": 1787040902158.3608,
+      "startTime": 1787097205326,
+      "endTime": 1787097205331.304,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/publishing.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/database/db/socialPlatformIntegrationSettings.test.ts"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["PublishingPage"],
-          "fullName": "PublishingPage يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
+          "ancestorTitles": ["sidebar data for the unified inbox"],
+          "fullName": "sidebar data for the unified inbox shows the inbox by default and attaches the authorized roles policy",
           "status": "passed",
-          "title": "يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
-          "duration": 227.40320700000007,
+          "title": "shows the inbox by default and attaches the authorized roles policy",
+          "duration": 3.4213300000001254,
           "failureMessages": [],
-          "location": { "line": 59, "column": 3 },
+          "location": { "line": 6, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["PublishingPage"],
-          "fullName": "PublishingPage ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
+          "ancestorTitles": ["sidebar data for the unified inbox"],
+          "fullName": "sidebar data for the unified inbox keeps the same guarded inbox item inside the communications tools group",
           "status": "passed",
-          "title": "ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
-          "duration": 99.88316800000007,
+          "title": "keeps the same guarded inbox item inside the communications tools group",
+          "duration": 0.5287049999999454,
           "failureMessages": [],
-          "location": { "line": 70, "column": 3 },
+          "location": { "line": 17, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["sidebar data for the unified inbox"],
+          "fullName": "sidebar data for the unified inbox links administrators to the general integration settings from both navigation variants",
+          "status": "passed",
+          "title": "links administrators to the general integration settings from both navigation variants",
+          "duration": 0.7035789999999906,
+          "failureMessages": [],
+          "location": { "line": 27, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787040902369,
-      "endTime": 1787040902695.883,
+      "startTime": 1787097205206,
+      "endTime": 1787097205210.7036,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/PublishingPage.test.tsx"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/components/layout/sidebarData.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["MetaIntegrationSettingsPage as general integration settings"],
+          "fullName": "MetaIntegrationSettingsPage as general integration settings renders all four external platform configuration sections without rendering any saved secret",
+          "status": "passed",
+          "title": "renders all four external platform configuration sections without rendering any saved secret",
+          "duration": 245.80714399999988,
+          "failureMessages": [],
+          "location": { "line": 79, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787097205410,
+      "endTime": 1787097205655.8071,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/MetaIntegrationSettingsPage.test.tsx"
     }
   ]
 }
