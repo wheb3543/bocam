@@ -6,6 +6,7 @@ import { registerOAuthRoutes } from './oauth';
 import { createUploadRouter } from '../api/uploadRoute';
 import { createWebhookRouter } from '../api/webhookRoutes';
 import { createMetaSocialWebhookRouter } from '../api/metaSocialWebhookRoute';
+import { createMetaBusinessOAuthCallbackRouter } from '../api/metaBusinessOAuthRoute';
 import { createSocialPublishingScheduledRouter } from '../api/socialPublishingScheduledRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
@@ -60,6 +61,8 @@ async function startServer() {
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Meta Business OAuth callback runs before tRPC and static fallthrough.
+  app.use(createMetaBusinessOAuthCallbackRouter());
   // File upload route
   app.use(createUploadRouter());
   // WhatsApp Webhook routes (direct Express, not tRPC - Meta requirement)

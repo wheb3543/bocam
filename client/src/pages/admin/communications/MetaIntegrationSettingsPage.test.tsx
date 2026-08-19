@@ -6,6 +6,7 @@ import MetaIntegrationSettingsPage from './MetaIntegrationSettingsPage';
 const mocks = vi.hoisted(() => ({
   generalStatusQuery: vi.fn(),
   metaStatusQuery: vi.fn(),
+  connectionsOverviewQuery: vi.fn(),
   mutate: vi.fn(),
   invalidate: vi.fn(),
 }));
@@ -23,6 +24,7 @@ vi.mock('@/lib/api/trpc', () => ({
     useUtils: () => ({
       metaIntegration: { status: { invalidate: mocks.invalidate } },
       generalIntegrations: { status: { invalidate: mocks.invalidate } },
+      integrationConnections: { overview: { invalidate: mocks.invalidate } },
       socialInbox: {
         accounts: { invalidate: mocks.invalidate },
         stats: { invalidate: mocks.invalidate },
@@ -36,6 +38,14 @@ vi.mock('@/lib/api/trpc', () => ({
     generalIntegrations: {
       status: { useQuery: mocks.generalStatusQuery },
       save: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
+    },
+    integrationConnections: {
+      overview: { useQuery: mocks.connectionsOverviewQuery },
+      startMetaBusiness: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
+      startWhatsAppEmbeddedSignup: { useMutation: () => ({ mutateAsync: mocks.mutate, isPending: false }) },
+      completeWhatsAppEmbeddedSignup: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
+      setAssetSelected: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
+      disconnect: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
     },
     socialInbox: {
       seedMetaTestData: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
@@ -74,6 +84,12 @@ describe('MetaIntegrationSettingsPage as general integration settings', () => {
       isLoading: false,
     });
     mocks.generalStatusQuery.mockReturnValue({ data: generalPlatforms, isLoading: false });
+    mocks.connectionsOverviewQuery.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
   });
 
   it('renders all four external platform configuration sections without rendering any saved secret', () => {
@@ -87,5 +103,17 @@ describe('MetaIntegrationSettingsPage as general integration settings', () => {
       expect(within(heading.closest('section') as HTMLElement).getByText('غير مهيأ')).toBeInTheDocument();
     });
     expect(screen.queryByDisplayValue(/secret/i)).not.toBeInTheDocument();
+  });
+
+  it('renders the Meta and WhatsApp authorized connection controls without rendering stored access tokens', () => {
+    render(<MetaIntegrationSettingsPage />);
+
+    expect(screen.getByText('الحسابات والأصول المتصلة')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'ربط Meta Business والأصول' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'ربط WhatsApp Business' })).toBeInTheDocument();
+    expect(screen.getByText('Facebook Login for Business Configuration ID')).toBeInTheDocument();
+    expect(screen.getByText('WhatsApp Embedded Signup Configuration ID')).toBeInTheDocument();
+    expect(screen.getByText('OAuth Redirect URI')).toBeInTheDocument();
+    expect(screen.queryByText('sample-access-token-never-rendered')).not.toBeInTheDocument();
   });
 });

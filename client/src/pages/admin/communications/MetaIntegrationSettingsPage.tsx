@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { trpc } from '@/lib/api/trpc';
+import { IntegrationConnectionsPanel } from './IntegrationConnectionsPanel';
 import {
   CheckCircle2,
   Clipboard,
@@ -25,6 +26,8 @@ import { toast } from 'sonner';
 
 type MetaForm = {
   appId: string;
+  facebookLoginConfigId: string;
+  whatsappEmbeddedSignupConfigId: string;
   facebookPageId: string;
   instagramAccountId: string;
   appSecret: string;
@@ -63,6 +66,8 @@ type ExternalPlatformStatus = {
 
 const initialForm: MetaForm = {
   appId: '',
+  facebookLoginConfigId: '',
+  whatsappEmbeddedSignupConfigId: '',
   facebookPageId: '',
   instagramAccountId: '',
   appSecret: '',
@@ -76,6 +81,7 @@ export default function MetaIntegrationSettingsPage() {
   const utils = trpc.useUtils();
   const [form, setForm] = useState<MetaForm>(initialForm);
   const [callbackUrl, setCallbackUrl] = useState('');
+  const [oauthCallbackUrl, setOauthCallbackUrl] = useState('');
   const isAdmin = user?.role === 'admin';
   const statusQuery = trpc.metaIntegration.status.useQuery(undefined, { enabled: isAdmin });
   const generalStatusQuery = trpc.generalIntegrations.status.useQuery(undefined, {
@@ -114,6 +120,7 @@ export default function MetaIntegrationSettingsPage() {
 
   useEffect(() => {
     setCallbackUrl(`${window.location.origin}/api/webhooks/meta-social-inbox`);
+    setOauthCallbackUrl(`${window.location.origin}/api/integrations/meta/callback`);
   }, []);
 
   useEffect(() => {
@@ -123,6 +130,8 @@ export default function MetaIntegrationSettingsPage() {
     setForm((current) => ({
       ...current,
       appId: statusQuery.data.appId ?? '',
+      facebookLoginConfigId: statusQuery.data.facebookLoginConfigId ?? '',
+      whatsappEmbeddedSignupConfigId: statusQuery.data.whatsappEmbeddedSignupConfigId ?? '',
       facebookPageId: statusQuery.data.facebookPageId ?? '',
       instagramAccountId: statusQuery.data.instagramAccountId ?? '',
       isEnabled: statusQuery.data.isEnabled,
@@ -150,6 +159,8 @@ export default function MetaIntegrationSettingsPage() {
   const save = () => {
     saveMutation.mutate({
       appId: form.appId || undefined,
+      facebookLoginConfigId: form.facebookLoginConfigId || undefined,
+      whatsappEmbeddedSignupConfigId: form.whatsappEmbeddedSignupConfigId || undefined,
       facebookPageId: form.facebookPageId || undefined,
       instagramAccountId: form.instagramAccountId || undefined,
       appSecret: form.appSecret || undefined,
@@ -227,6 +238,8 @@ export default function MetaIntegrationSettingsPage() {
             على الخادم، ويمكنك استبدالها بإدخال قيمة جديدة.
           </AlertDescription>
         </Alert>
+
+        <IntegrationConnectionsPanel />
 
         <Card className="border-blue-100">
           <CardHeader>
@@ -312,6 +325,18 @@ export default function MetaIntegrationSettingsPage() {
                 value={form.appId}
                 onChange={(value) => update('appId', value)}
                 placeholder="معرف تطبيق Meta"
+              />
+              <FormField
+                label="Facebook Login for Business Configuration ID"
+                value={form.facebookLoginConfigId}
+                onChange={(value) => update('facebookLoginConfigId', value)}
+                placeholder="Configuration ID لتفويض أصول Meta"
+              />
+              <FormField
+                label="WhatsApp Embedded Signup Configuration ID"
+                value={form.whatsappEmbeddedSignupConfigId}
+                onChange={(value) => update('whatsappEmbeddedSignupConfigId', value)}
+                placeholder="Configuration ID لتسجيل WhatsApp المضمن"
               />
               <FormField
                 label="Facebook Page ID"
@@ -410,10 +435,13 @@ export default function MetaIntegrationSettingsPage() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Callback URL</CardTitle>
-                <CardDescription>ضعه في إعدادات Webhooks بتطبيق Meta.</CardDescription>
+                <CardTitle className="text-base">روابط Meta المطلوبة</CardTitle>
+                <CardDescription>
+                  سجل كل رابط في المكان المناسب داخل إعدادات تطبيق Meta.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
+                <p className="text-xs font-semibold text-slate-700">Webhook Callback URL</p>
                 <code
                   className="block break-all rounded-lg bg-slate-950 p-3 text-xs text-slate-100"
                   dir="ltr"
@@ -429,6 +457,26 @@ export default function MetaIntegrationSettingsPage() {
                 >
                   <Clipboard className="ml-2 h-4 w-4" />
                   نسخ الرابط
+                </Button>
+                <p className="pt-2 text-xs font-semibold text-slate-700">OAuth Redirect URI</p>
+                <code
+                  className="block break-all rounded-lg bg-slate-950 p-3 text-xs text-slate-100"
+                  dir="ltr"
+                >
+                  {oauthCallbackUrl || 'جارٍ تحضير الرابط...'}
+                </code>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(oauthCallbackUrl);
+                    toast.success('تم نسخ OAuth Redirect URI');
+                  }}
+                  disabled={!oauthCallbackUrl}
+                >
+                  <Clipboard className="ml-2 h-4 w-4" />
+                  نسخ رابط OAuth
                 </Button>
                 <a
                   href="https://developers.facebook.com/docs/graph-api/webhooks/"

@@ -6,6 +6,8 @@ import { getDb } from './connection';
 
 export type SaveMetaIntegrationSettingsInput = {
   appId?: string;
+  facebookLoginConfigId?: string;
+  whatsappEmbeddedSignupConfigId?: string;
   facebookPageId?: string;
   instagramAccountId?: string;
   appSecret?: string;
@@ -40,6 +42,8 @@ export async function getMetaIntegrationSettingsStatus() {
       configured: false,
       isEnabled: false,
       appId: null,
+      facebookLoginConfigId: null,
+      whatsappEmbeddedSignupConfigId: null,
       facebookPageId: null,
       instagramAccountId: null,
       hasAppSecret: false,
@@ -53,6 +57,8 @@ export async function getMetaIntegrationSettingsStatus() {
     configured: Boolean(settings.appSecretEncrypted && settings.verifyTokenEncrypted),
     isEnabled: settings.isEnabled,
     appId: settings.appId,
+    facebookLoginConfigId: settings.facebookLoginConfigId,
+    whatsappEmbeddedSignupConfigId: settings.whatsappEmbeddedSignupConfigId,
     facebookPageId: settings.facebookPageId,
     instagramAccountId: settings.instagramAccountId,
     hasAppSecret: Boolean(settings.appSecretEncrypted),
@@ -89,6 +95,12 @@ export async function saveMetaIntegrationSettings(
 
   const patch = {
     appId: optionalValue(input.appId) ?? existing?.appId ?? null,
+    facebookLoginConfigId:
+      optionalValue(input.facebookLoginConfigId) ?? existing?.facebookLoginConfigId ?? null,
+    whatsappEmbeddedSignupConfigId:
+      optionalValue(input.whatsappEmbeddedSignupConfigId) ??
+      existing?.whatsappEmbeddedSignupConfigId ??
+      null,
     facebookPageId: optionalValue(input.facebookPageId) ?? existing?.facebookPageId ?? null,
     instagramAccountId:
       optionalValue(input.instagramAccountId) ?? existing?.instagramAccountId ?? null,
@@ -134,6 +146,21 @@ export async function saveMetaIntegrationSettings(
   return getMetaIntegrationSettingsStatus();
 }
 
+/** بيانات OAuth خادمية فقط؛ لا تستدعى من أي راوتر يرد مباشرة إلى الواجهة. */
+export async function getMetaOAuthAppCredentials() {
+  const settings = await getLatestMetaIntegrationSettingsRow();
+  if (!settings?.appId || !settings.appSecretEncrypted) {
+    return null;
+  }
+
+  return {
+    appId: settings.appId,
+    appSecret: decryptMetaSetting(settings.appSecretEncrypted),
+    facebookLoginConfigId: settings.facebookLoginConfigId,
+    whatsappEmbeddedSignupConfigId: settings.whatsappEmbeddedSignupConfigId,
+  };
+}
+
 export async function getMetaWebhookCredentials() {
   const settings = await getLatestMetaIntegrationSettingsRow();
   if (!settings?.isEnabled || !settings.appSecretEncrypted || !settings.verifyTokenEncrypted) {
@@ -147,6 +174,8 @@ export async function getMetaWebhookCredentials() {
       ? decryptMetaSetting(settings.pageAccessTokenEncrypted)
       : null,
     appId: settings.appId,
+    facebookLoginConfigId: settings.facebookLoginConfigId,
+    whatsappEmbeddedSignupConfigId: settings.whatsappEmbeddedSignupConfigId,
     facebookPageId: settings.facebookPageId,
     instagramAccountId: settings.instagramAccountId,
   };

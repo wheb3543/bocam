@@ -11,6 +11,8 @@ export const metaIntegrationRouter = router({
     .input(
       z.object({
         appId: z.string().trim().max(255).optional(),
+        facebookLoginConfigId: z.string().trim().max(255).optional(),
+        whatsappEmbeddedSignupConfigId: z.string().trim().max(255).optional(),
         facebookPageId: z.string().trim().max(255).optional(),
         instagramAccountId: z.string().trim().max(255).optional(),
         appSecret: optionalText,

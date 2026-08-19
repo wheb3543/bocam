@@ -2467,6 +2467,8 @@ export type InsertSocialInboxWebhookEvent = typeof socialInboxWebhookEvents.$inf
 export const metaIntegrationSettings = mysqlTable('meta_integration_settings', {
   id: int('id').autoincrement().primaryKey(),
   appId: varchar('appId', { length: 255 }),
+  facebookLoginConfigId: varchar('facebookLoginConfigId', { length: 255 }),
+  whatsappEmbeddedSignupConfigId: varchar('whatsappEmbeddedSignupConfigId', { length: 255 }),
   facebookPageId: varchar('facebookPageId', { length: 255 }),
   instagramAccountId: varchar('instagramAccountId', { length: 255 }),
   appSecretEncrypted: text('appSecretEncrypted'),
@@ -2514,6 +2516,342 @@ export type SocialPlatformIntegrationSettings =
   typeof socialPlatformIntegrationSettings.$inferSelect;
 export type InsertSocialPlatformIntegrationSettings =
   typeof socialPlatformIntegrationSettings.$inferInsert;
+
+/**
+ * Integration Connections - اتصال مفوض مع مزود خارجي أو حساب أعمال.
+ * يفصل تعريف الاتصال عن التوكنات والأصول لكي يمكن تجديد وإبطال التوكنات بأمان.
+ */
+export const integrationConnections = mysqlTable(
+  'integration_connections',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    provider: mysqlEnum('provider', [
+      'meta',
+      'whatsapp',
+      'x',
+      'linkedin',
+      'youtube',
+      'tiktok',
+    ]).notNull(),
+    connectionType: mysqlEnum('connectionType', [
+      'meta_business',
+      'whatsapp_embedded_signup',
+      'social_oauth',
+    ]).notNull(),
+    status: mysqlEnum('status', [
+      'draft',
+      'authorization_pending',
+      'connected',
+      'reauthorization_required',
+      'expired',
+      'revoked',
+      'error',
+      'disconnected',
+    ])
+      .default('draft')
+      .notNull(),
+    displayName: varchar('displayName', { length: 255 }),
+    externalBusinessId: varchar('externalBusinessId', { length: 255 }),
+    grantedScopes: text('grantedScopes'),
+    authorizationMethod: varchar('authorizationMethod', { length: 80 }),
+    expiresAt: timestamp('expiresAt'),
+    lastValidatedAt: timestamp('lastValidatedAt'),
+    lastError: text('lastError'),
+    disconnectedAt: timestamp('disconnectedAt'),
+    initiatedByUserId: int('initiatedByUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    providerStatusIdx: index('integrationConnections_provider_status_idx').on(
+      table.provider,
+      table.status
+    ),
+    initiatorIdx: index('integrationConnections_initiator_idx').on(table.initiatedByUserId),
+    externalBusinessIdx: index('integrationConnections_external_business_idx').on(
+      table.provider,
+      table.externalBusinessId
+    ),
+  })
+);
+
+export type IntegrationConnection = typeof integrationConnections.$inferSelect;
+export type InsertIntegrationConnection = typeof integrationConnections.$inferInsert;
+
+/**
+ * Integration Connection Tokens - أسرار OAuth المشفرة؛ لا تعاد إلى الواجهة أو سجل التدقيق.
+ */
+export const integrationConnectionTokens = mysqlTable(
+  'integration_connection_tokens',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    connectionId: int('connectionId')
+      .notNull()
+      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    tokenType: mysqlEnum('tokenType', ['access', 'refresh', 'business', 'system']).notNull(),
+    tokenEncrypted: text('tokenEncrypted').notNull(),
+    tokenExpiresAt: timestamp('tokenExpiresAt'),
+    scopes: text('scopes'),
+    encryptionKeyVersion: varchar('encryptionKeyVersion', { length: 32 }).default('v1').notNull(),
+    lastRefreshedAt: timestamp('lastRefreshedAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    connectionTokenUnique: uniqueIndex('integrationConnectionTokens_connection_token_unique').on(
+      table.connectionId,
+      table.tokenType
+    ),
+    expiryIdx: index('integrationConnectionTokens_expiry_idx').on(table.tokenExpiresAt),
+  })
+);
+
+export type IntegrationConnectionToken = typeof integrationConnectionTokens.$inferSelect;
+export type InsertIntegrationConnectionToken = typeof integrationConnectionTokens.$inferInsert;
+
+/**
+ * Integration External Assets - Page أو Instagram Account أو WABA أو رقم هاتف أو Ad Account.
+ */
+export const integrationExternalAssets = mysqlTable(
+  'integration_external_assets',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    connectionId: int('connectionId')
+      .notNull()
+      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    provider: mysqlEnum('provider', [
+      'meta',
+      'whatsapp',
+      'x',
+      'linkedin',
+      'youtube',
+      'tiktok',
+    ]).notNull(),
+    assetType: mysqlEnum('assetType', [
+      'business_portfolio',
+      'page',
+      'instagram_account',
+      'whatsapp_business_account',
+      'whatsapp_phone_number',
+      'ad_account',
+      'pixel',
+      'dataset',
+      'profile',
+      'organization',
+      'channel',
+    ]).notNull(),
+    externalAssetId: varchar('externalAssetId', { length: 255 }).notNull(),
+    parentExternalAssetId: varchar('parentExternalAssetId', { length: 255 }),
+    displayName: varchar('displayName', { length: 255 }),
+    avatarUrl: varchar('avatarUrl', { length: 500 }),
+    capabilities: text('capabilities'),
+    metadata: text('metadata'),
+    isSelected: boolean('isSelected').default(false).notNull(),
+    isActive: boolean('isActive').default(true).notNull(),
+    lastSyncedAt: timestamp('lastSyncedAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    providerAssetUnique: uniqueIndex('integrationExternalAssets_provider_asset_unique').on(
+      table.provider,
+      table.externalAssetId
+    ),
+    connectionTypeIdx: index('integrationExternalAssets_connection_type_idx').on(
+      table.connectionId,
+      table.assetType
+    ),
+    selectedIdx: index('integrationExternalAssets_selected_idx').on(table.isSelected),
+  })
+);
+
+export type IntegrationExternalAsset = typeof integrationExternalAssets.$inferSelect;
+export type InsertIntegrationExternalAsset = typeof integrationExternalAssets.$inferInsert;
+
+/**
+ * Integration OAuth States - state عشوائي مخزّن كهاش وPKCE verifier مشفّر حتى وصول callback.
+ */
+export const integrationOauthStates = mysqlTable(
+  'integration_oauth_states',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    provider: mysqlEnum('provider', [
+      'meta',
+      'whatsapp',
+      'x',
+      'linkedin',
+      'youtube',
+      'tiktok',
+    ]).notNull(),
+    flow: mysqlEnum('flow', [
+      'meta_business',
+      'whatsapp_embedded_signup',
+      'social_oauth',
+    ]).notNull(),
+    stateHash: varchar('stateHash', { length: 128 }).notNull(),
+    codeVerifierEncrypted: text('codeVerifierEncrypted'),
+    redirectUri: varchar('redirectUri', { length: 500 }).notNull(),
+    requestedScopes: text('requestedScopes'),
+    initiatedByUserId: int('initiatedByUserId')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    connectionId: int('connectionId').references(() => integrationConnections.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    expiresAt: timestamp('expiresAt').notNull(),
+    consumedAt: timestamp('consumedAt'),
+    failureReason: text('failureReason'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+  },
+  (table) => ({
+    stateUnique: uniqueIndex('integrationOauthStates_state_unique').on(table.stateHash),
+    expirationIdx: index('integrationOauthStates_expiration_idx').on(table.expiresAt),
+    actorIdx: index('integrationOauthStates_actor_idx').on(table.initiatedByUserId),
+  })
+);
+
+export type IntegrationOauthState = typeof integrationOauthStates.$inferSelect;
+export type InsertIntegrationOauthState = typeof integrationOauthStates.$inferInsert;
+
+/**
+ * Integration Webhook Subscriptions - حالة اشتراك كل أصل خارجي في أحداث Webhook.
+ */
+export const integrationWebhookSubscriptions = mysqlTable(
+  'integration_webhook_subscriptions',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    connectionId: int('connectionId')
+      .notNull()
+      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    assetId: int('assetId').references(() => integrationExternalAssets.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    provider: mysqlEnum('provider', [
+      'meta',
+      'whatsapp',
+      'x',
+      'linkedin',
+      'youtube',
+      'tiktok',
+    ]).notNull(),
+    callbackPath: varchar('callbackPath', { length: 500 }).notNull(),
+    subscribedFields: text('subscribedFields'),
+    externalSubscriptionId: varchar('externalSubscriptionId', { length: 255 }),
+    status: mysqlEnum('status', ['pending', 'active', 'failed', 'disabled'])
+      .default('pending')
+      .notNull(),
+    verifiedAt: timestamp('verifiedAt'),
+    lastEventAt: timestamp('lastEventAt'),
+    lastError: text('lastError'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    connectionAssetIdx: index('integrationWebhookSubscriptions_connection_asset_idx').on(
+      table.connectionId,
+      table.assetId
+    ),
+    statusIdx: index('integrationWebhookSubscriptions_status_idx').on(table.status),
+  })
+);
+
+export type IntegrationWebhookSubscription = typeof integrationWebhookSubscriptions.$inferSelect;
+export type InsertIntegrationWebhookSubscription =
+  typeof integrationWebhookSubscriptions.$inferInsert;
+
+/**
+ * Integration Delivery Jobs - outbox موثوق للنشر الخارجي، مستقل عن دقات Heartbeat.
+ */
+export const integrationDeliveryJobs = mysqlTable(
+  'integration_delivery_jobs',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    destinationId: int('destinationId')
+      .notNull()
+      .references(() => socialPublishDestinations.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    connectionId: int('connectionId').references(() => integrationConnections.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    status: mysqlEnum('status', ['queued', 'processing', 'succeeded', 'failed', 'cancelled'])
+      .default('queued')
+      .notNull(),
+    runAfter: timestamp('runAfter').defaultNow().notNull(),
+    leasedUntil: timestamp('leasedUntil'),
+    attemptCount: int('attemptCount').default(0).notNull(),
+    maxAttempts: int('maxAttempts').default(5).notNull(),
+    lastError: text('lastError'),
+    providerRequestId: varchar('providerRequestId', { length: 255 }),
+    idempotencyKey: varchar('idempotencyKey', { length: 128 }).notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    destinationUnique: uniqueIndex('integrationDeliveryJobs_destination_unique').on(
+      table.destinationId
+    ),
+    dispatchIdx: index('integrationDeliveryJobs_dispatch_idx').on(table.status, table.runAfter),
+    leaseIdx: index('integrationDeliveryJobs_lease_idx').on(table.leasedUntil),
+    idempotencyUnique: uniqueIndex('integrationDeliveryJobs_idempotency_unique').on(
+      table.idempotencyKey
+    ),
+  })
+);
+
+export type IntegrationDeliveryJob = typeof integrationDeliveryJobs.$inferSelect;
+export type InsertIntegrationDeliveryJob = typeof integrationDeliveryJobs.$inferInsert;
+
+/**
+ * Integration Audit Events - سجل عمليات منقى من الأسرار للاتصالات والأصول والتوزيع.
+ */
+export const integrationAuditEvents = mysqlTable(
+  'integration_audit_events',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    provider: mysqlEnum('provider', [
+      'meta',
+      'whatsapp',
+      'x',
+      'linkedin',
+      'youtube',
+      'tiktok',
+    ]).notNull(),
+    connectionId: int('connectionId').references(() => integrationConnections.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    assetId: int('assetId').references(() => integrationExternalAssets.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    action: varchar('action', { length: 120 }).notNull(),
+    status: mysqlEnum('status', ['started', 'succeeded', 'failed', 'skipped']).notNull(),
+    correlationId: varchar('correlationId', { length: 255 }),
+    summary: text('summary'),
+    errorMessage: text('errorMessage'),
+    performedByUserId: int('performedByUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+  },
+  (table) => ({
+    providerActionIdx: index('integrationAuditEvents_provider_action_idx').on(
+      table.provider,
+      table.action
+    ),
+    connectionIdx: index('integrationAuditEvents_connection_idx').on(table.connectionId),
+    createdIdx: index('integrationAuditEvents_created_idx').on(table.createdAt),
+  })
+);
+
+export type IntegrationAuditEvent = typeof integrationAuditEvents.$inferSelect;
+export type InsertIntegrationAuditEvent = typeof integrationAuditEvents.$inferInsert;
 
 /**
  * Social Publishing Accounts - حسابات النشر المتصلة لكل منصة

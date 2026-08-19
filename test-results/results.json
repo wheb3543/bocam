@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 4,
-  "numPassedTestSuites": 4,
+  "numTotalTestSuites": 8,
+  "numPassedTestSuites": 8,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 3,
-  "numPassedTests": 3,
+  "numTotalTests": 7,
+  "numPassedTests": 7,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,59 +24,121 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787097589238,
+  "startTime": 1787110395230,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["SDK cookie parsing"],
-          "fullName": "SDK cookie parsing parses the session cookie used by scheduled Heartbeat callbacks",
+          "ancestorTitles": ["integrationConnectionsRouter"],
+          "fullName": "integrationConnectionsRouter starts Meta Business OAuth only for an administrator using the fixed callback path",
           "status": "passed",
-          "title": "parses the session cookie used by scheduled Heartbeat callbacks",
-          "duration": 2.224474999999984,
+          "title": "starts Meta Business OAuth only for an administrator using the fixed callback path",
+          "duration": 5.605330999999978,
           "failureMessages": [],
-          "location": { "line": 5, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787097591348,
-      "endTime": 1787097591350.2244,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/_core/sdk.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["social publishing scheduled route"],
-          "fullName": "social publishing scheduled route ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
-          "status": "passed",
-          "title": "ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
-          "duration": 5.184461000000056,
-          "failureMessages": [],
-          "location": { "line": 31, "column": 3 },
+          "location": { "line": 33, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["social publishing scheduled route"],
-          "fullName": "social publishing scheduled route يرفض أي طلب لا يحمل هوية مهمة مجدولة",
+          "ancestorTitles": ["integrationConnectionsRouter"],
+          "fullName": "integrationConnectionsRouter rejects a viewer before exposing connection information",
           "status": "passed",
-          "title": "يرفض أي طلب لا يحمل هوية مهمة مجدولة",
-          "duration": 1.2467900000001464,
+          "title": "rejects a viewer before exposing connection information",
+          "duration": 2.8825600000000122,
           "failureMessages": [],
-          "location": { "line": 43, "column": 3 },
+          "location": { "line": 48, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787097590885,
-      "endTime": 1787097590891.2468,
+      "startTime": 1787110397007,
+      "endTime": 1787110397015.8826,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/api/socialPublishingScheduledRoute.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/integrationConnections.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Meta Business OAuth service"],
+          "fullName": "Meta Business OAuth service creates a short-lived hashed state and a Meta authorization URL without exposing the app secret",
+          "status": "passed",
+          "title": "creates a short-lived hashed state and a Meta authorization URL without exposing the app secret",
+          "duration": 6.725865999999996,
+          "failureMessages": [],
+          "location": { "line": 51, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Meta Business OAuth service"],
+          "fullName": "Meta Business OAuth service exchanges the callback code on the server and saves the received token only through encrypted persistence",
+          "status": "passed",
+          "title": "exchanges the callback code on the server and saves the received token only through encrypted persistence",
+          "duration": 2.9851779999999053,
+          "failureMessages": [],
+          "location": { "line": 73, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787110396813,
+      "endTime": 1787110396821.985,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/metaBusinessOAuth.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["MetaIntegrationSettingsPage as general integration settings"],
+          "fullName": "MetaIntegrationSettingsPage as general integration settings renders all four external platform configuration sections without rendering any saved secret",
+          "status": "passed",
+          "title": "renders all four external platform configuration sections without rendering any saved secret",
+          "duration": 266.4924589999998,
+          "failureMessages": [],
+          "location": { "line": 95, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["MetaIntegrationSettingsPage as general integration settings"],
+          "fullName": "MetaIntegrationSettingsPage as general integration settings renders the Meta and WhatsApp authorized connection controls without rendering stored access tokens",
+          "status": "passed",
+          "title": "renders the Meta and WhatsApp authorized connection controls without rendering stored access tokens",
+          "duration": 114.17189600000006,
+          "failureMessages": [],
+          "location": { "line": 108, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787110397186,
+      "endTime": 1787110397567.1719,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/MetaIntegrationSettingsPage.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["WhatsAppConnectionPage"],
+          "fullName": "WhatsAppConnectionPage guides an unconfigured account to the secure integration settings flow",
+          "status": "passed",
+          "title": "guides an unconfigured account to the secure integration settings flow",
+          "duration": 172.7432970000002,
+          "failureMessages": [],
+          "location": { "line": 35, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787110397160,
+      "endTime": 1787110397332.7434,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/whatsapp/WhatsAppConnectionPage.test.tsx"
     }
   ]
 }

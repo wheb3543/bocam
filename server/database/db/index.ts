@@ -192,6 +192,7 @@ export {
 export {
   getMetaIntegrationSettingsStatus,
   getMetaWebhookCredentials,
+  getMetaOAuthAppCredentials,
   saveMetaIntegrationSettings,
   type SaveMetaIntegrationSettingsInput,
 } from './metaIntegrationSettings';
@@ -203,6 +204,27 @@ export {
   type ExternalPublishingPlatform,
   type SaveSocialPlatformIntegrationInput,
 } from './socialPlatformIntegrationSettings';
+
+// Authorized External Connections (OAuth, assets, tokens, and webhook state)
+export {
+  createIntegrationConnection,
+  createIntegrationOauthState,
+  consumeIntegrationOauthState,
+  failIntegrationOauthState,
+  storeIntegrationTokens,
+  getIntegrationToken,
+  completeIntegrationConnection,
+  markIntegrationConnectionError,
+  disconnectIntegrationConnection,
+  upsertIntegrationExternalAsset,
+  setIntegrationAssetSelected,
+  upsertIntegrationWebhookSubscription,
+  createIntegrationAuditEvent,
+  getIntegrationConnectionsOverview,
+  type IntegrationProvider,
+  type IntegrationConnectionType,
+  type IntegrationAssetType,
+} from './integrationConnections';
 
 // Social Publishing
 export {

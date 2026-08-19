@@ -554,6 +554,20 @@
       "when": 1787096898287,
       "tag": "0081_rich_maestro",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "5",
+      "when": 1787109347286,
+      "tag": "0082_cute_eddie_brock",
+      "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "5",
+      "when": 1787109657309,
+      "tag": "0083_gorgeous_clea",
+      "breakpoints": true
     }
   ]
 }

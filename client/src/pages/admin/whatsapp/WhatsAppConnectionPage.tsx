@@ -229,20 +229,20 @@ function WhatsAppConnectionContent() {
               <Alert className="bg-amber-50 border-amber-200 shadow-lg">
                 <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
                 <AlertTitle className="text-amber-900 text-sm sm:text-lg">
-                  Cloud API غير مُعد
+                  يلزم إكمال ربط WhatsApp Business
                 </AlertTitle>
                 <AlertDescription className="text-amber-800 text-xs sm:text-sm">
-                  يرجى التأكد من تعيين المتغيرات البيئية التالية:
-                  <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>
-                      <code className="bg-amber-100 px-1 rounded">WHATSAPP_PHONE_NUMBER_ID</code> -
-                      معرف رقم الهاتف
-                    </li>
-                    <li>
-                      <code className="bg-amber-100 px-1 rounded">META_ACCESS_TOKEN</code> - رمز
-                      الوصول من Meta
-                    </li>
-                  </ul>
+                  استخدم تدفق <strong>WhatsApp Embedded Signup</strong> من إعدادات الربط العامة
+                  لإضافة حساب الأعمال والرقم والتوكن بطريقة مشفرة وقابلة للتدقيق. تبقى فحوص الصحة
+                  الحالية متوافقة مع الإعدادات القديمة إلى أن يكتمل تفعيل الربط الحي.
+                  <div className="mt-3">
+                    <Link href="/admin/communications/integration-settings">
+                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+                        <Shield className="ml-2 h-4 w-4" />
+                        فتح إعدادات الربط الآمن
+                      </Button>
+                    </Link>
+                  </div>
                 </AlertDescription>
               </Alert>
             )}
