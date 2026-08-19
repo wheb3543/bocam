@@ -265,13 +265,16 @@ export default function MessagesPage() {
             }
           />
 
-          <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div
+            className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4"
+            aria-label="ملخص صندوق البريد"
+          >
             {[
               {
                 label: 'كل المحادثات',
                 value: statsQuery.data?.total ?? 0,
                 icon: Inbox,
-                className: 'bg-blue-50 text-blue-700',
+                className: 'bg-primary/10 text-primary',
               },
               {
                 label: 'غير مقروءة',
@@ -283,20 +286,21 @@ export default function MessagesPage() {
                 label: 'رسائل',
                 value: statsQuery.data?.messages ?? 0,
                 icon: Send,
-                className: 'bg-sky-50 text-sky-700',
+                className: 'bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-300',
               },
               {
                 label: 'تعليقات',
                 value: statsQuery.data?.comments ?? 0,
                 icon: MessageSquare,
-                className: 'bg-violet-50 text-violet-700',
+                className:
+                  'bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300',
               },
             ].map((stat) => {
               const Icon = stat.icon;
               return (
                 <div
                   key={stat.label}
-                  className="rounded-xl border border-border/70 bg-slate-50/70 p-3 md:p-4"
+                  className="rounded-xl border border-border/70 bg-muted/30 p-3 md:p-4"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs text-muted-foreground">{stat.label}</span>
@@ -306,7 +310,9 @@ export default function MessagesPage() {
                       <Icon className="h-4 w-4" />
                     </span>
                   </div>
-                  <div className="mt-2 text-xl font-bold text-foreground">{stat.value}</div>
+                  <div className="mt-2 text-xl font-bold tabular-nums text-foreground">
+                    {stat.value}
+                  </div>
                 </div>
               );
             })}
@@ -324,21 +330,36 @@ export default function MessagesPage() {
           <TabsList
             aria-label="تبويبات صندوق البريد"
             dir="rtl"
-            className="h-auto w-full flex-row justify-start gap-1 overflow-x-auto rounded-xl border border-border bg-white p-1 shadow-sm"
+            className="h-auto w-full flex-col items-stretch gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm"
           >
-            {inboxTabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className="min-h-10 shrink-0 gap-1.5 rounded-lg px-3 text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm md:text-sm"
-                >
-                  <Icon className="h-4 w-4" />
-                  {tab.label}
-                </TabsTrigger>
-              );
-            })}
+            {(
+              [
+                ['الرسائل', inboxTabs.filter((tab) => tab.channelType === 'message')],
+                ['التعليقات', inboxTabs.filter((tab) => tab.channelType === 'comment')],
+              ] as const
+            ).map(([groupLabel, tabs]) => (
+              <div key={groupLabel} className="flex min-w-0 items-center gap-2">
+                <span className="w-14 shrink-0 text-[11px] font-semibold text-muted-foreground sm:w-16 sm:text-xs">
+                  {groupLabel}
+                </span>
+                <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto pb-0.5">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <TabsTrigger
+                        key={tab.id}
+                        value={tab.id}
+                        aria-label={`فتح ${tab.label}`}
+                        className="min-h-11 shrink-0 gap-1.5 rounded-xl px-3 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm md:text-sm"
+                      >
+                        <Icon className="h-4 w-4" />
+                        {tab.label}
+                      </TabsTrigger>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </TabsList>
         </Tabs>
 
@@ -402,8 +423,15 @@ export default function MessagesPage() {
 
                   <div className="min-h-0 flex-1 overflow-y-auto">
                     {threadsQuery.isLoading ? (
-                      <div className="flex min-h-[320px] items-center justify-center">
-                        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                      <div
+                        className="space-y-3 p-3"
+                        role="status"
+                        aria-label="جاري تحميل المحادثات"
+                      >
+                        {Array.from({ length: 6 }).map((_, index) => (
+                          <div key={index} className="h-20 animate-pulse rounded-xl bg-muted/60" />
+                        ))}
+                        <span className="sr-only">جاري تحميل المحادثات</span>
                       </div>
                     ) : threads.length === 0 ? (
                       <EmptyPanel
@@ -420,7 +448,7 @@ export default function MessagesPage() {
                               key={thread.id}
                               type="button"
                               onClick={() => handleSelectThread(thread.id)}
-                              className={`w-full p-3 text-right transition-colors hover:bg-blue-50/60 md:p-4 ${isSelected ? 'bg-blue-50 ring-inset ring-2 ring-blue-100' : ''}`}
+                              className={`w-full p-3 text-right transition-colors hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:p-4 ${isSelected ? 'bg-primary/10 ring-2 ring-inset ring-primary/20' : ''}`}
                             >
                               <div className="flex items-start gap-3">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
@@ -444,7 +472,7 @@ export default function MessagesPage() {
                                       </span>
                                       {!thread.isRead && (
                                         <span
-                                          className="h-2 w-2 shrink-0 rounded-full bg-blue-600"
+                                          className="h-2 w-2 shrink-0 rounded-full bg-primary"
                                           aria-label="غير مقروء"
                                         />
                                       )}
@@ -483,7 +511,18 @@ export default function MessagesPage() {
                 <section
                   className={`${selectedThreadId ? 'flex' : 'hidden lg:flex'} min-w-0 flex-col bg-slate-50/60`}
                 >
-                  {!selectedThread ? (
+                  {threadQuery.isLoading && selectedThreadId ? (
+                    <div
+                      className="space-y-5 p-4 md:p-6"
+                      role="status"
+                      aria-label="جاري تحميل تفاصيل المحادثة"
+                    >
+                      <div className="h-16 animate-pulse rounded-xl bg-card" />
+                      <div className="mr-auto h-24 w-4/5 animate-pulse rounded-2xl bg-card" />
+                      <div className="h-20 w-3/5 animate-pulse rounded-2xl bg-card" />
+                      <span className="sr-only">جاري تحميل تفاصيل المحادثة</span>
+                    </div>
+                  ) : !selectedThread ? (
                     <EmptyPanel
                       title="اختر محادثة أو تعليقاً"
                       description="حدد عنصراً من القائمة لعرض التفاصيل. ستظهر حالة الحساب والربط هنا عند تفعيل المنصة."
@@ -502,7 +541,7 @@ export default function MessagesPage() {
                           >
                             <ChevronLeft className="h-5 w-5" />
                           </Button>
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                             <UserRound className="h-5 w-5" />
                           </div>
                           <div className="min-w-0">
@@ -589,7 +628,7 @@ export default function MessagesPage() {
                                   className={`flex ${item.direction === 'outbound' ? 'justify-start' : 'justify-end'}`}
                                 >
                                   <div
-                                    className={`max-w-[90%] rounded-2xl px-4 py-3 shadow-sm ${item.direction === 'outbound' ? 'bg-blue-600 text-white' : 'border border-border bg-white text-foreground'}`}
+                                    className={`max-w-[90%] rounded-2xl px-4 py-3 shadow-sm sm:max-w-[82%] ${item.direction === 'outbound' ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-foreground'}`}
                                   >
                                     <div className="mb-1 flex items-center justify-between gap-3 text-[11px] opacity-75">
                                       <span>
@@ -637,11 +676,11 @@ export default function MessagesPage() {
                       </div>
 
                       <div className="border-t border-border bg-white p-3 md:p-4">
-                        <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-3 text-sm text-blue-900">
-                          <Send className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
+                        <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-3 text-sm text-foreground">
+                          <Send className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                           <div>
                             <p className="font-semibold">الرد المباشر من داخل الصندوق</p>
-                            <p className="mt-1 text-xs leading-5 text-blue-800/80">
+                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
                               {selectedAccount?.status === 'connected'
                                 ? 'الحساب متصل. يلزم الآن تفعيل موصل الإرسال الرسمي للمنصة قبل إرسال ردود حقيقية.'
                                 : 'لا يوجد حساب موصل لهذه المنصة بعد؛ ستبقى الرسائل والتعليقات للعرض والمتابعة حتى تكتمل بيانات الربط.'}

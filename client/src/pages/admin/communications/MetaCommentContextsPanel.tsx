@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   EyeOff,
+  ChevronRight,
   ExternalLink,
   FileImage,
   Film,
@@ -158,7 +159,7 @@ function CommentActions({
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 gap-1 px-2 text-slate-600"
+          className="min-h-9 gap-1 px-2 text-slate-600"
           onClick={() => onReply(item)}
           disabled={isTestData}
         >
@@ -170,7 +171,7 @@ function CommentActions({
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 gap-1 px-2 text-slate-600"
+          className="min-h-9 gap-1 px-2 text-slate-600"
           onClick={() => onPrivateReply(item)}
           disabled={isTestData}
         >
@@ -182,7 +183,7 @@ function CommentActions({
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 gap-1 px-2 text-slate-600"
+          className="min-h-9 gap-1 px-2 text-slate-600"
           onClick={() => onHiddenChange(item, !metadata.isHidden)}
           disabled={isTestData}
         >
@@ -390,7 +391,7 @@ export default function MetaCommentContextsPanel({
                 key={option.id}
                 variant={filter === option.id ? 'default' : 'outline'}
                 size="sm"
-                className="h-8 shrink-0 text-xs"
+                className="min-h-9 shrink-0 text-xs"
                 onClick={() => setFilter(option.id as typeof filter)}
               >
                 {option.label}
@@ -472,7 +473,7 @@ export default function MetaCommentContextsPanel({
       </aside>
 
       <section
-        className={`${selectedContextId || selectedContext ? 'flex' : 'hidden lg:flex'} min-w-0 flex-col bg-slate-50/70`}
+        className={`${selectedContextId ? 'flex' : 'hidden lg:flex'} min-w-0 flex-col bg-slate-50/70`}
       >
         {!selectedContext ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
@@ -484,6 +485,15 @@ export default function MetaCommentContextsPanel({
             <div className="border-b border-border bg-white p-3 md:p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 shrink-0 lg:hidden"
+                    onClick={() => setSelectedContextId(null)}
+                    aria-label="العودة إلى قائمة السياقات"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </Button>
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
                     <SourceIcon className="h-5 w-5" />
                   </div>
@@ -501,7 +511,7 @@ export default function MetaCommentContextsPanel({
                   <Button
                     variant={selectedContext.isFollowUpRequired ? 'default' : 'outline'}
                     size="sm"
-                    className="h-8 gap-1.5"
+                    className="min-h-9 gap-1.5"
                     disabled={isTestContext || isActionPending}
                     onClick={() =>
                       void onWorkflowChange(selectedContext.id, {
@@ -515,7 +525,7 @@ export default function MetaCommentContextsPanel({
                     متابعة
                   </Button>
                   {(selectedContext.commentContext?.sourceUrl || selectedContext.postUrl) && (
-                    <Button variant="outline" size="sm" className="h-8 gap-1.5" asChild>
+                    <Button variant="outline" size="sm" className="min-h-9 gap-1.5" asChild>
                       <a
                         href={
                           selectedContext.commentContext?.sourceUrl ||
@@ -573,7 +583,7 @@ export default function MetaCommentContextsPanel({
                       <select
                         id={`assign-${selectedContext.id}`}
                         aria-label="تعيين مسؤول للسياق"
-                        className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700"
+                        className="min-h-9 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700"
                         value={selectedContext.assignedToUserId ?? ''}
                         disabled={isTestContext || isActionPending}
                         onChange={(event) =>
@@ -594,7 +604,7 @@ export default function MetaCommentContextsPanel({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 gap-1.5"
+                        className="min-h-9 gap-1.5"
                         disabled={
                           isTestContext || isActionPending || selectedContext.items.length === 0
                         }
