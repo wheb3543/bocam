@@ -1,7 +1,7 @@
 import { AXIOS_TIMEOUT_MS, COOKIE_NAME, ONE_YEAR_MS } from '@shared/const';
 import { ForbiddenError } from '@shared/_core/errors';
 import axios, { type AxiosInstance } from 'axios';
-import * as cookie from 'cookie';
+import * as cookieModule from 'cookie';
 import type { Request } from 'express';
 import { SignJWT, jwtVerify } from 'jose';
 import type { User } from '../../drizzle/schema';
@@ -154,7 +154,16 @@ class SDKServer {
       return new Map<string, string>();
     }
 
-    const parsed = cookie.parse(cookieHeader);
+    type CookieParser = (value: string) => Record<string, string>;
+    const cookieExports = cookieModule as unknown as {
+      parseCookie?: CookieParser;
+      default?: { parseCookie?: CookieParser };
+    };
+    const parseCookie = cookieExports.parseCookie ?? cookieExports.default?.parseCookie;
+    if (typeof parseCookie !== 'function') {
+      throw new Error('Cookie parser is unavailable');
+    }
+    const parsed = parseCookie(cookieHeader);
     return new Map(Object.entries(parsed));
   }
 
