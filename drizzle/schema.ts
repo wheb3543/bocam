@@ -2853,6 +2853,106 @@ export const integrationAuditEvents = mysqlTable(
 export type IntegrationAuditEvent = typeof integrationAuditEvents.$inferSelect;
 export type InsertIntegrationAuditEvent = typeof integrationAuditEvents.$inferInsert;
 
+/** نماذج Lead Ads المختارة وربطها الاختياري بحملات CRM. */
+export const metaLeadForms = mysqlTable(
+  'meta_lead_forms',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    connectionId: int('connectionId')
+      .notNull()
+      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    pageAssetId: int('pageAssetId').references(() => integrationExternalAssets.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    externalFormId: varchar('externalFormId', { length: 255 }).notNull(),
+    externalPageId: varchar('externalPageId', { length: 255 }).notNull(),
+    displayName: varchar('displayName', { length: 255 }),
+    campaignId: int('campaignId').references(() => campaigns.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    fieldMapping: text('fieldMapping'),
+    isActive: boolean('isActive').default(true).notNull(),
+    lastSyncedAt: timestamp('lastSyncedAt'),
+    lastError: text('lastError'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    formUnique: uniqueIndex('metaLeadForms_external_form_unique').on(table.externalFormId),
+    connectionIdx: index('metaLeadForms_connection_idx').on(table.connectionId),
+  })
+);
+
+/** إشعارات Lead Ads؛ تحفظ الحقول المستلمة مشفرة حتى يتم إدخالها إلى CRM مع منع التكرار. */
+export const metaLeadEvents = mysqlTable(
+  'meta_lead_events',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    connectionId: int('connectionId')
+      .notNull()
+      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    leadFormId: int('leadFormId').references(() => metaLeadForms.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    externalLeadId: varchar('externalLeadId', { length: 255 }).notNull(),
+    eventKey: varchar('eventKey', { length: 255 }).notNull(),
+    payloadEncrypted: text('payloadEncrypted'),
+    status: mysqlEnum('status', ['received', 'processing', 'ingested', 'failed', 'ignored'])
+      .default('received')
+      .notNull(),
+    crmLeadId: int('crmLeadId').references(() => leads.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    lastError: text('lastError'),
+    receivedAt: timestamp('receivedAt').defaultNow().notNull(),
+    processedAt: timestamp('processedAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    leadUnique: uniqueIndex('metaLeadEvents_external_lead_unique').on(table.externalLeadId),
+    eventUnique: uniqueIndex('metaLeadEvents_event_key_unique').on(table.eventKey),
+    statusIdx: index('metaLeadEvents_status_idx').on(table.status, table.receivedAt),
+  })
+);
+
+/** Outbox مشفر لأحداث Conversions API؛ لا يحمل تشخيصات أو محتوى علاجي. */
+export const metaConversionEvents = mysqlTable(
+  'meta_conversion_events',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    connectionId: int('connectionId')
+      .notNull()
+      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    datasetAssetId: int('datasetAssetId').references(() => integrationExternalAssets.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    eventName: varchar('eventName', { length: 100 }).notNull(),
+    eventId: varchar('eventId', { length: 255 }).notNull(),
+    payloadEncrypted: text('payloadEncrypted').notNull(),
+    status: mysqlEnum('status', ['queued', 'sending', 'succeeded', 'failed', 'cancelled'])
+      .default('queued')
+      .notNull(),
+    runAfter: timestamp('runAfter').defaultNow().notNull(),
+    attemptCount: int('attemptCount').default(0).notNull(),
+    maxAttempts: int('maxAttempts').default(5).notNull(),
+    lastError: text('lastError'),
+    responseSummary: text('responseSummary'),
+    sentAt: timestamp('sentAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    eventUnique: uniqueIndex('metaConversionEvents_event_unique').on(table.eventId),
+    dispatchIdx: index('metaConversionEvents_dispatch_idx').on(table.status, table.runAfter),
+  })
+);
+
 /**
  * Social Publishing Accounts - حسابات النشر المتصلة لكل منصة
  * لا تُخزن الأسرار هنا بصيغة مكشوفة؛ تحفظ بيانات OAuth المشفرة لاحقاً في خدمة الاتصال.
@@ -2861,6 +2961,14 @@ export const socialPublishAccounts = mysqlTable(
   'social_publish_accounts',
   {
     id: int('id').autoincrement().primaryKey(),
+    connectionId: int('connectionId').references(() => integrationConnections.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    integrationAssetId: int('integrationAssetId').references(() => integrationExternalAssets.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
     platform: mysqlEnum('platform', [
       'facebook',
       'instagram',
@@ -2906,6 +3014,8 @@ export const socialPublishAccounts = mysqlTable(
       table.platform,
       table.connectionStatus
     ),
+    connectionIdx: index('socialPublishAccounts_connection_idx').on(table.connectionId),
+    integrationAssetIdx: index('socialPublishAccounts_asset_idx').on(table.integrationAssetId),
     externalAccountIdx: uniqueIndex('socialPublishAccounts_external_unique').on(
       table.platform,
       table.externalAccountId
@@ -3044,6 +3154,7 @@ export const socialPublishDestinations = mysqlTable(
       .notNull(),
     externalPostId: varchar('externalPostId', { length: 255 }),
     externalUrl: varchar('externalUrl', { length: 500 }),
+    providerState: text('providerState'),
     lastAttemptAt: timestamp('lastAttemptAt'),
     publishedAt: timestamp('publishedAt'),
     retryCount: int('retryCount').default(0).notNull(),

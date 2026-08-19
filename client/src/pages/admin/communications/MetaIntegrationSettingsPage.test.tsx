@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   generalStatusQuery: vi.fn(),
   metaStatusQuery: vi.fn(),
   connectionsOverviewQuery: vi.fn(),
+  metaOperationsQuery: vi.fn(),
   mutate: vi.fn(),
   invalidate: vi.fn(),
 }));
@@ -25,6 +26,7 @@ vi.mock('@/lib/api/trpc', () => ({
       metaIntegration: { status: { invalidate: mocks.invalidate } },
       generalIntegrations: { status: { invalidate: mocks.invalidate } },
       integrationConnections: { overview: { invalidate: mocks.invalidate } },
+      metaOperations: { overview: { invalidate: mocks.invalidate } },
       socialInbox: {
         accounts: { invalidate: mocks.invalidate },
         stats: { invalidate: mocks.invalidate },
@@ -46,6 +48,9 @@ vi.mock('@/lib/api/trpc', () => ({
       completeWhatsAppEmbeddedSignup: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
       setAssetSelected: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
       disconnect: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
+    },
+    metaOperations: {
+      overview: { useQuery: mocks.metaOperationsQuery },
     },
     socialInbox: {
       seedMetaTestData: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
@@ -90,6 +95,10 @@ describe('MetaIntegrationSettingsPage as general integration settings', () => {
       isFetching: false,
       refetch: vi.fn(),
     });
+    mocks.metaOperationsQuery.mockReturnValue({
+      data: { totals: { activeForms: 0, pendingLeads: 0, queuedConversions: 0, selectedDatasets: 0 } },
+      isLoading: false,
+    });
   });
 
   it('renders all four external platform configuration sections without rendering any saved secret', () => {
@@ -114,6 +123,8 @@ describe('MetaIntegrationSettingsPage as general integration settings', () => {
     expect(screen.getByText('Facebook Login for Business Configuration ID')).toBeInTheDocument();
     expect(screen.getByText('WhatsApp Embedded Signup Configuration ID')).toBeInTheDocument();
     expect(screen.getByText('OAuth Redirect URI')).toBeInTheDocument();
+    expect(screen.getByText('نماذج Lead Ads المفعلة')).toBeInTheDocument();
+    expect(screen.getByText('أحداث تحويل بانتظار التسليم')).toBeInTheDocument();
     expect(screen.queryByText('sample-access-token-never-rendered')).not.toBeInTheDocument();
   });
 });

@@ -5,6 +5,7 @@ import {
   integrationExternalAssets,
   integrationOauthStates,
   integrationWebhookSubscriptions,
+  socialPublishAccounts,
 } from '../../../drizzle/schema';
 import { and, desc, eq, isNull } from 'drizzle-orm';
 import { decryptMetaSetting, encryptMetaSetting } from '../../integrations/meta/metaSettingsCrypto';
@@ -274,10 +275,53 @@ export async function upsertIntegrationExternalAsset(input: {
 
 export async function setIntegrationAssetSelected(assetId: number, isSelected: boolean) {
   const db = await requireDb();
+  const [asset] = await db
+    .select()
+    .from(integrationExternalAssets)
+    .where(eq(integrationExternalAssets.id, assetId))
+    .limit(1);
+  if (!asset) {
+    throw new Error('الأصل الخارجي غير موجود.');
+  }
   await db
     .update(integrationExternalAssets)
     .set({ isSelected })
     .where(eq(integrationExternalAssets.id, assetId));
+
+  const publishAccount =
+    asset.provider === 'meta' && asset.assetType === 'page'
+      ? { platform: 'facebook' as const, accountType: 'page' as const }
+      : asset.provider === 'meta' && asset.assetType === 'instagram_account'
+        ? { platform: 'instagram' as const, accountType: 'business' as const }
+        : null;
+  if (!publishAccount) {
+    return;
+  }
+
+  if (!isSelected) {
+    await db
+      .update(socialPublishAccounts)
+      .set({ connectionStatus: 'disconnected', isActive: false })
+      .where(eq(socialPublishAccounts.integrationAssetId, asset.id));
+    return;
+  }
+
+  const values = {
+    connectionId: asset.connectionId,
+    integrationAssetId: asset.id,
+    platform: publishAccount.platform,
+    accountType: publishAccount.accountType,
+    displayName: asset.displayName ?? asset.externalAssetId,
+    externalAccountId: asset.externalAssetId,
+    avatarUrl: asset.avatarUrl,
+    connectionStatus: 'connected' as const,
+    capabilities: asset.capabilities,
+    lastValidatedAt: new Date(),
+    lastError: null,
+    isActive: true,
+    createdByUserId: null,
+  };
+  await db.insert(socialPublishAccounts).values(values).onDuplicateKeyUpdate({ set: values });
 }
 
 export async function upsertIntegrationWebhookSubscription(input: {

@@ -238,6 +238,7 @@ export {
   reviewSocialPublishPost,
   scheduleSocialPublishPost,
   cancelSocialPublishSchedule,
+  retrySocialPublishDelivery,
   dispatchDueSocialPublishPosts,
   type SocialPublishPlatform,
   type SocialPublishContentType,
@@ -261,3 +262,13 @@ export { getCampRegistrationsPaginated } from './campRegistrations';
 
 // Unified Leads
 export { getAllUnifiedLeads } from './unifiedLeads';
+
+// Meta Lead Ads & Conversions API operations
+export {
+  dispatchQueuedMetaConversionEvents,
+  getMetaOperationsOverview,
+  queueMetaConversionEvent,
+  recordMetaLeadEvent,
+  recordMetaLeadgenNotification,
+  upsertMetaLeadForm,
+} from './metaOperations';

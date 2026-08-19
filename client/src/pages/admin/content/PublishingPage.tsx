@@ -51,6 +51,8 @@ const statusLabels: Record<string, string> = {
   not_ready: 'غير جاهز',
   pending: 'بانتظار الربط',
   queued: 'في قائمة الجدولة',
+  uploading: 'جارٍ رفع الوسيط',
+  processing: 'تعالج Meta الوسيط',
 };
 
 function formatDate(value: Date | string | null | undefined) {
@@ -129,6 +131,13 @@ export default function PublishingPage() {
   const cancelSchedule = trpc.content.publishing.cancelSchedule.useMutation({
     onSuccess: () => {
       toast.success('تم إلغاء جدولة المنشور');
+      invalidateWorkspace();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const retryDestination = trpc.content.publishing.retryDestination.useMutation({
+    onSuccess: () => {
+      toast.success('أُعيدت الوجهة إلى قائمة التسليم. ستنفذ في دورة Heartbeat التالية.');
       invalidateWorkspace();
     },
     onError: (error) => toast.error(error.message),
@@ -452,13 +461,26 @@ export default function PublishingPage() {
                             {entry.destinations.map(({ destination }) => (
                               <div
                                 key={destination.id}
-                                className="rounded-lg border border-slate-100 px-2 py-1 dark:border-slate-800"
+                                className="flex items-center gap-1 rounded-lg border border-slate-100 px-2 py-1 dark:border-slate-800"
                               >
                                 <PlatformMark platform={destination.platform as Platform} compact />
                                 <span className="mr-1 text-[10px] text-slate-500">
                                   {statusLabels[destination.publicationStatus] ||
                                     destination.publicationStatus}
                                 </span>
+                                {destination.publicationStatus === 'failed' && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 px-1.5 text-[10px] text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                                    onClick={() =>
+                                      retryDestination.mutate({ destinationId: destination.id })
+                                    }
+                                    disabled={retryDestination.isPending}
+                                  >
+                                    إعادة المحاولة
+                                  </Button>
+                                )}
                               </div>
                             ))}
                           </div>

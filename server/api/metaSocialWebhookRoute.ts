@@ -1,9 +1,14 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { Router, type Request, type Response } from 'express';
-import { getMetaWebhookCredentials, ingestMetaSocialInboxEvent } from '../database/db';
+import {
+  getMetaWebhookCredentials,
+  ingestMetaSocialInboxEvent,
+  recordMetaLeadgenNotification,
+} from '../database/db';
 import { createLogger } from '../_core/logger';
 import { normalizeMetaSocialInboxPayload } from '../integrations/meta/socialInboxMetaWebhook';
 import { enrichStoredMetaCommentContext } from '../integrations/meta/socialInboxMetaActions';
+import { extractMetaLeadgenNotifications } from '../integrations/meta/metaLeadAdsWebhook';
 
 const logger = createLogger('meta-social-webhook');
 
@@ -42,6 +47,7 @@ type MetaWebhookDependencies = {
   getCredentials?: typeof getMetaWebhookCredentials;
   ingest?: typeof ingestMetaSocialInboxEvent;
   enrichCommentContext?: typeof enrichStoredMetaCommentContext;
+  recordLeadNotification?: typeof recordMetaLeadgenNotification;
 };
 
 export async function processMetaSocialWebhookPayload(
@@ -50,6 +56,7 @@ export async function processMetaSocialWebhookPayload(
   enrichCommentContext: typeof enrichStoredMetaCommentContext = enrichStoredMetaCommentContext
 ) {
   const events = normalizeMetaSocialInboxPayload(payload);
+  const leadNotifications = extractMetaLeadgenNotifications(payload);
   const results = await Promise.allSettled(
     events.map(async (event) => {
       const result = await ingest(event);
@@ -72,7 +79,11 @@ export async function processMetaSocialWebhookPayload(
     logger.error('تعذر تخزين حدث Meta بعد الإقرار:', failure.reason);
   }
 
-  return { received: events.length, failed: failures.length };
+  return {
+    received: events.length,
+    leadNotifications: leadNotifications.length,
+    failed: failures.length,
+  };
 }
 
 /**
@@ -84,6 +95,8 @@ export function createMetaSocialWebhookRouter(dependencies: MetaWebhookDependenc
   const getCredentials = dependencies.getCredentials ?? getMetaWebhookCredentials;
   const ingest = dependencies.ingest ?? ingestMetaSocialInboxEvent;
   const enrichCommentContext = dependencies.enrichCommentContext ?? enrichStoredMetaCommentContext;
+  const recordLeadNotification =
+    dependencies.recordLeadNotification ?? recordMetaLeadgenNotification;
 
   router.get('/api/webhooks/meta-social-inbox', async (req: Request, res: Response) => {
     try {
@@ -127,7 +140,18 @@ export function createMetaSocialWebhookRouter(dependencies: MetaWebhookDependenc
       // Meta retries non-200 responses. Acknowledge the verified delivery first,
       // then normalize and persist it without blocking the callback request.
       void Promise.resolve()
-        .then(() => processMetaSocialWebhookPayload(req.body, ingest, enrichCommentContext))
+        .then(async () => {
+          const result = await processMetaSocialWebhookPayload(
+            req.body,
+            ingest,
+            enrichCommentContext
+          );
+          const leadNotifications = extractMetaLeadgenNotifications(req.body);
+          await Promise.allSettled(
+            leadNotifications.map((notification) => recordLeadNotification(notification))
+          );
+          return result;
+        })
         .catch((error) => {
           logger.error('تعذر بدء معالجة Meta Webhook بعد الإقرار:', error);
         });

@@ -7,6 +7,7 @@ import {
   getSocialPublishPost,
   getSocialPublishingOverview,
   reviewSocialPublishPost,
+  retrySocialPublishDelivery,
   scheduleSocialPublishPost,
   submitSocialPublishPostForReview,
   updateSocialPublishDraft,
@@ -105,4 +106,8 @@ export const publishingRouter = router({
   cancelSchedule: reviewerProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(({ input }) => cancelSocialPublishSchedule(input.id)),
+
+  retryDestination: reviewerProcedure
+    .input(z.object({ destinationId: z.number().int().positive() }))
+    .mutation(({ input }) => retrySocialPublishDelivery(input.destinationId)),
 });

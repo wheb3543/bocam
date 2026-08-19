@@ -24,6 +24,7 @@ import { socialInboxRouter } from './socialInbox';
 import { metaIntegrationRouter } from './metaIntegration';
 import { generalIntegrationsRouter } from './generalIntegrations';
 import { integrationConnectionsRouter } from './integrationConnections';
+import { metaOperationsRouter } from './metaOperations';
 import { webhooksRouter } from './webhooks';
 import { commentsRouter } from './comments';
 import { followUpTasksRouter } from './followUpTasks';
@@ -69,6 +70,7 @@ export const appRouter = router({
   metaIntegration: metaIntegrationRouter,
   generalIntegrations: generalIntegrationsRouter,
   integrationConnections: integrationConnectionsRouter,
+  metaOperations: metaOperationsRouter,
   webhooks: webhooksRouter,
   queue: queueRouter,
   content: contentRouter,

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { dispatchDueSocialPublishPosts } from '../database/db/socialPublishing';
+import { dispatchQueuedMetaConversionEvents } from '../database/db/metaOperations';
 import { sdk } from '../_core/sdk';
 
 /**
@@ -15,8 +16,11 @@ export function createSocialPublishingScheduledRouter() {
       if (!user.isCron || !user.taskUid) {
         return res.status(403).json({ error: 'cron-only' });
       }
-      const result = await dispatchDueSocialPublishPosts(user.taskUid);
-      return res.json({ ok: true, taskUid: user.taskUid, ...result });
+      const [publishing, conversions] = await Promise.all([
+        dispatchDueSocialPublishPosts(user.taskUid),
+        dispatchQueuedMetaConversionEvents(),
+      ]);
+      return res.json({ ok: true, taskUid: user.taskUid, publishing, conversions });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       return res.status(500).json({

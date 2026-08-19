@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, lte } from 'drizzle-orm';
 import {
   media,
+  integrationDeliveryJobs,
   socialPublishAccounts,
   socialPublishAttempts,
   socialPublishDestinations,
@@ -10,6 +11,11 @@ import {
   users,
 } from '../../../drizzle/schema';
 import { getDb } from './connection';
+import {
+  dispatchQueuedSocialPublishDeliveries,
+  enqueueSocialPublishDeliveryJobs,
+  retrySocialPublishDelivery,
+} from './socialPublishingDelivery';
 
 export type SocialPublishPlatform =
   'facebook' | 'instagram' | 'x' | 'linkedin' | 'youtube' | 'tiktok';
@@ -62,7 +68,7 @@ export async function getSocialPublishPost(postId: number) {
     return null;
   }
 
-  const [destinations, linkedMedia, attempts] = await Promise.all([
+  const [destinations, linkedMedia, attempts, deliveryJobs] = await Promise.all([
     db
       .select({
         destination: socialPublishDestinations,
@@ -94,9 +100,18 @@ export async function getSocialPublishPost(postId: number) {
       .where(eq(socialPublishDestinations.postId, postId))
       .orderBy(desc(socialPublishAttempts.createdAt))
       .limit(30),
+    db
+      .select()
+      .from(integrationDeliveryJobs)
+      .innerJoin(
+        socialPublishDestinations,
+        eq(integrationDeliveryJobs.destinationId, socialPublishDestinations.id)
+      )
+      .where(eq(socialPublishDestinations.postId, postId))
+      .orderBy(desc(integrationDeliveryJobs.updatedAt)),
   ]);
 
-  return { ...post, destinations, media: linkedMedia, attempts };
+  return { ...post, destinations, media: linkedMedia, attempts, deliveryJobs };
 }
 
 export async function listSocialPublishPosts(limit = 40) {
@@ -320,6 +335,7 @@ export async function scheduleSocialPublishPost(
     .update(socialPublishDestinations)
     .set({ publicationStatus: 'queued' })
     .where(eq(socialPublishDestinations.postId, postId));
+  await enqueueSocialPublishDeliveryJobs(postId, scheduledAt);
   return getSocialPublishPost(postId);
 }
 
@@ -338,7 +354,7 @@ export async function dispatchDueSocialPublishPosts(taskUid: string) {
     )
     .limit(25);
 
-  const result = { inspected: duePosts.length, locked: 0, skipped: 0 };
+  const result = { inspected: duePosts.length, locked: 0, queued: 0, skipped: 0 };
   for (const post of duePosts) {
     const updateResult = await db
       .update(socialPublishPosts)
@@ -348,13 +364,18 @@ export async function dispatchDueSocialPublishPosts(taskUid: string) {
       continue;
     }
     result.locked += 1;
+    const queued = await enqueueSocialPublishDeliveryJobs(post.id, now);
+    result.queued += queued;
     await db
       .update(socialPublishPosts)
-      .set({ status: 'scheduled' })
+      .set({ status: queued > 0 ? 'publishing' : 'scheduled' })
       .where(eq(socialPublishPosts.id, post.id));
-    result.skipped += 1;
+    if (queued === 0) {
+      result.skipped += 1;
+    }
   }
-  return result;
+  const deliveries = await dispatchQueuedSocialPublishDeliveries(25);
+  return { ...result, ...deliveries };
 }
 
 export async function cancelSocialPublishSchedule(postId: number) {
@@ -374,3 +395,5 @@ export async function cancelSocialPublishSchedule(postId: number) {
     );
   return getSocialPublishPost(postId);
 }
+
+export { retrySocialPublishDelivery };

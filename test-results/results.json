@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 8,
-  "numPassedTestSuites": 8,
+  "numTotalTestSuites": 10,
+  "numPassedTestSuites": 10,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 7,
-  "numPassedTests": 7,
+  "numTotalTests": 12,
+  "numPassedTests": 12,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,70 +24,112 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787110395230,
+  "startTime": 1787167566551,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["integrationConnectionsRouter"],
-          "fullName": "integrationConnectionsRouter starts Meta Business OAuth only for an administrator using the fixed callback path",
+          "ancestorTitles": ["social publishing scheduled route"],
+          "fullName": "social publishing scheduled route ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
           "status": "passed",
-          "title": "starts Meta Business OAuth only for an administrator using the fixed callback path",
-          "duration": 5.605330999999978,
+          "title": "ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
+          "duration": 5.511211000000003,
           "failureMessages": [],
-          "location": { "line": 33, "column": 3 },
+          "location": { "line": 35, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["integrationConnectionsRouter"],
-          "fullName": "integrationConnectionsRouter rejects a viewer before exposing connection information",
+          "ancestorTitles": ["social publishing scheduled route"],
+          "fullName": "social publishing scheduled route يرفض أي طلب لا يحمل هوية مهمة مجدولة",
           "status": "passed",
-          "title": "rejects a viewer before exposing connection information",
-          "duration": 2.8825600000000122,
+          "title": "يرفض أي طلب لا يحمل هوية مهمة مجدولة",
+          "duration": 1.1862989999999627,
           "failureMessages": [],
-          "location": { "line": 48, "column": 3 },
+          "location": { "line": 56, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787110397007,
-      "endTime": 1787110397015.8826,
+      "startTime": 1787167568335,
+      "endTime": 1787167568342.1863,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/routers/integrationConnections.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/api/socialPublishingScheduledRoute.test.ts"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["Meta Business OAuth service"],
-          "fullName": "Meta Business OAuth service creates a short-lived hashed state and a Meta authorization URL without exposing the app secret",
+          "ancestorTitles": ["Meta Lead Ads webhook extraction"],
+          "fullName": "Meta Lead Ads webhook extraction extracts leadgen identifiers without exposing or resolving form fields inside the callback",
           "status": "passed",
-          "title": "creates a short-lived hashed state and a Meta authorization URL without exposing the app secret",
-          "duration": 6.725865999999996,
+          "title": "extracts leadgen identifiers without exposing or resolving form fields inside the callback",
+          "duration": 2.7208310000000893,
           "failureMessages": [],
-          "location": { "line": 51, "column": 3 },
+          "location": { "line": 5, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["Meta Business OAuth service"],
-          "fullName": "Meta Business OAuth service exchanges the callback code on the server and saves the received token only through encrypted persistence",
+          "ancestorTitles": ["Meta Lead Ads webhook extraction"],
+          "fullName": "Meta Lead Ads webhook extraction ignores message and comment change notifications",
           "status": "passed",
-          "title": "exchanges the callback code on the server and saves the received token only through encrypted persistence",
-          "duration": 2.9851779999999053,
+          "title": "ignores message and comment change notifications",
+          "duration": 0.33558099999982005,
           "failureMessages": [],
-          "location": { "line": 73, "column": 3 },
+          "location": { "line": 32, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787110396813,
-      "endTime": 1787110396821.985,
+      "startTime": 1787167568188,
+      "endTime": 1787167568191.3357,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/metaBusinessOAuth.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/metaLeadAdsWebhook.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Meta social publishing connector"],
+          "fullName": "Meta social publishing connector publishes a single Facebook image using the Page photos endpoint and returns the external post id",
+          "status": "passed",
+          "title": "publishes a single Facebook image using the Page photos endpoint and returns the external post id",
+          "duration": 3.6762670000000526,
+          "failureMessages": [],
+          "location": { "line": 11, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Meta social publishing connector"],
+          "fullName": "Meta social publishing connector stores a new Instagram container as processing before its media is ready to publish",
+          "status": "passed",
+          "title": "stores a new Instagram container as processing before its media is ready to publish",
+          "duration": 1.8646630000000641,
+          "failureMessages": [],
+          "location": { "line": 36, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Meta social publishing connector"],
+          "fullName": "Meta social publishing connector publishes an Instagram container only after Meta reports that it is finished",
+          "status": "passed",
+          "title": "publishes an Instagram container only after Meta reports that it is finished",
+          "duration": 0.6909989999999198,
+          "failureMessages": [],
+          "location": { "line": 64, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787167568185,
+      "endTime": 1787167568191.691,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/metaPublishingConnector.test.ts"
     },
     {
       "assertionResults": [
@@ -96,9 +138,9 @@
           "fullName": "MetaIntegrationSettingsPage as general integration settings renders all four external platform configuration sections without rendering any saved secret",
           "status": "passed",
           "title": "renders all four external platform configuration sections without rendering any saved secret",
-          "duration": 266.4924589999998,
+          "duration": 268.6019309999999,
           "failureMessages": [],
-          "location": { "line": 95, "column": 3 },
+          "location": { "line": 104, "column": 3 },
           "meta": {},
           "tags": []
         },
@@ -107,15 +149,15 @@
           "fullName": "MetaIntegrationSettingsPage as general integration settings renders the Meta and WhatsApp authorized connection controls without rendering stored access tokens",
           "status": "passed",
           "title": "renders the Meta and WhatsApp authorized connection controls without rendering stored access tokens",
-          "duration": 114.17189600000006,
+          "duration": 126.18988000000036,
           "failureMessages": [],
-          "location": { "line": 108, "column": 3 },
+          "location": { "line": 117, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787110397186,
-      "endTime": 1787110397567.1719,
+      "startTime": 1787167568689,
+      "endTime": 1787167569083.19,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/MetaIntegrationSettingsPage.test.tsx"
@@ -123,22 +165,44 @@
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["WhatsAppConnectionPage"],
-          "fullName": "WhatsAppConnectionPage guides an unconfigured account to the secure integration settings flow",
+          "ancestorTitles": ["PublishingPage"],
+          "fullName": "PublishingPage يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
           "status": "passed",
-          "title": "guides an unconfigured account to the secure integration settings flow",
-          "duration": 172.7432970000002,
+          "title": "يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
+          "duration": 221.48121600000013,
           "failureMessages": [],
-          "location": { "line": 35, "column": 3 },
+          "location": { "line": 62, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["PublishingPage"],
+          "fullName": "PublishingPage ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
+          "status": "passed",
+          "title": "ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
+          "duration": 92.11346100000037,
+          "failureMessages": [],
+          "location": { "line": 73, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["PublishingPage"],
+          "fullName": "PublishingPage يعرض إعادة المحاولة لوجهة فاشلة ويرسل معرفها إلى راوتر التسليم",
+          "status": "passed",
+          "title": "يعرض إعادة المحاولة لوجهة فاشلة ويرسل معرفها إلى راوتر التسليم",
+          "duration": 51.04886000000033,
+          "failureMessages": [],
+          "location": { "line": 90, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787110397160,
-      "endTime": 1787110397332.7434,
+      "startTime": 1787167568675,
+      "endTime": 1787167569039.0488,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/whatsapp/WhatsAppConnectionPage.test.tsx"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/PublishingPage.test.tsx"
     }
   ]
 }

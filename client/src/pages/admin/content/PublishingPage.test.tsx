@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   review: vi.fn(),
   schedule: vi.fn(),
   cancelSchedule: vi.fn(),
+  retryDestination: vi.fn(),
   invalidate: vi.fn(),
 }));
 
@@ -29,6 +30,7 @@ vi.mock('@/lib/api/trpc', () => ({
         review: { useMutation: () => ({ mutate: mocks.review, isPending: false }) },
         schedule: { useMutation: () => ({ mutate: mocks.schedule, isPending: false }) },
         cancelSchedule: { useMutation: () => ({ mutate: mocks.cancelSchedule, isPending: false }) },
+        retryDestination: { useMutation: () => ({ mutate: mocks.retryDestination, isPending: false }) },
       },
       media: { list: { useQuery: mocks.mediaQuery } },
     },
@@ -54,6 +56,7 @@ describe('PublishingPage', () => {
       isLoading: false,
     });
     mocks.createDraft.mockClear();
+    mocks.retryDestination.mockClear();
   });
 
   it('يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة', () => {
@@ -82,5 +85,33 @@ describe('PublishingPage', () => {
       mediaIds: [7],
       timezone: 'Asia/Aden',
     });
+  });
+
+  it('يعرض إعادة المحاولة لوجهة فاشلة ويرسل معرفها إلى راوتر التسليم', () => {
+    mocks.overviewQuery.mockReturnValue({
+      data: {
+        accounts: [],
+        posts: [
+          {
+            post: { id: 45, title: 'منشور قيد المعالجة', status: 'partial_failed', contentType: 'image', baseCaption: 'نص', scheduledAt: null },
+            destinations: [
+              { destination: { id: 99, platform: 'instagram', publicationStatus: 'failed' } },
+            ],
+            media: [],
+            attempts: [],
+            deliveryJobs: [],
+          },
+        ],
+        totals: { connectedAccounts: 0, draft: 0, awaitingReview: 0, scheduled: 0 },
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
+
+    render(React.createElement(PublishingPage));
+    fireEvent.click(screen.getByRole('button', { name: 'إعادة المحاولة' }));
+
+    expect(mocks.retryDestination).toHaveBeenCalledWith({ destinationId: 99 });
   });
 });

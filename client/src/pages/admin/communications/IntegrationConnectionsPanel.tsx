@@ -101,6 +101,7 @@ function assetLabel(type: string) {
 export function IntegrationConnectionsPanel() {
   const utils = trpc.useUtils();
   const overviewQuery = trpc.integrationConnections.overview.useQuery();
+  const metaOperationsQuery = trpc.metaOperations.overview.useQuery();
   const startMetaMutation = trpc.integrationConnections.startMetaBusiness.useMutation({
     onSuccess: ({ authorizationUrl }) => window.location.assign(authorizationUrl),
     onError: (error) => toast.error(error.message),
@@ -267,6 +268,25 @@ export function IntegrationConnectionsPanel() {
             رسمية.
           </AlertDescription>
         </Alert>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            ['نماذج Lead Ads المفعلة', metaOperationsQuery.data?.totals.activeForms ?? 0],
+            ['عملاء محتملون بانتظار الإدخال', metaOperationsQuery.data?.totals.pendingLeads ?? 0],
+            [
+              'أحداث تحويل بانتظار التسليم',
+              metaOperationsQuery.data?.totals.queuedConversions ?? 0,
+            ],
+            ['Pixels / Datasets مختارة', metaOperationsQuery.data?.totals.selectedDatasets ?? 0],
+          ].map(([label, value]) => (
+            <div key={String(label)} className="rounded-xl border border-slate-200 bg-white p-3">
+              <p className="text-[11px] font-medium text-slate-500">{label}</p>
+              <p className="mt-1 text-xl font-bold text-slate-900">
+                {metaOperationsQuery.isLoading ? '—' : value}
+              </p>
+            </div>
+          ))}
+        </div>
 
         {overviewQuery.isLoading ? (
           <div className="flex min-h-32 items-center justify-center text-sm text-slate-500">
