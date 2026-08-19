@@ -17,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import GlobalSearch from '@/components/GlobalSearch';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { NotificationCenter } from '@/components/NotificationCenter';
+import { APP_LOGO, APP_TITLE } from '@/const';
 
 interface TopNavbarProps {
   pageTitle?: string;
@@ -35,8 +36,8 @@ export default function TopNavbar({ pageTitle, pageDescription }: TopNavbarProps
         {/* Page Title */}
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <img
-            src="/icon-72x72.png"
-            alt="المستشفى السعودي الألماني"
+            src={APP_LOGO}
+            alt={APP_TITLE}
             className="h-9 md:h-10 w-auto object-contain flex-shrink-0 lg:hidden"
           />
           <div className="min-w-0 flex-1">

@@ -2,6 +2,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { useEffect, lazy, Suspense, useState } from 'react';
 import { initializeTracking } from './lib/tracking/tracking';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import AdminContentSkeleton from '@/components/layout/AdminContentSkeleton';
 const NotFound = lazy(() => import('@/pages/NotFound'));
 import { Route, Switch, useLocation } from 'wouter';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -206,26 +207,14 @@ function Router() {
 
         {/* Admin routes with persistent sidebar */}
         <Route path="/admin">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              </div>
-            }
-          >
+          <Suspense fallback={<AdminContentSkeleton />}>
             <DashboardShell>
               <AdminDashboard />
             </DashboardShell>
           </Suspense>
         </Route>
         <Route path="/admin/*">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              </div>
-            }
-          >
+          <Suspense fallback={<AdminContentSkeleton variant="workspace" />}>
             <DashboardShell>
               <Switch>
                 <Route path={'/admin/offline'} component={OfflinePage} />

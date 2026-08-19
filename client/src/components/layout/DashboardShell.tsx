@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
-import { APP_TITLE, getLocalLoginUrl } from '@/const';
+import { APP_LOGO, APP_TITLE, getLocalLoginUrl } from '@/const';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 
@@ -27,7 +27,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5">
         <div className="flex flex-col items-center gap-6 p-8 max-w-sm w-full">
-          <img src="/icon-72x72.png" alt={APP_TITLE} className="h-20 w-auto object-contain" />
+          <img src={APP_LOGO} alt={APP_TITLE} className="h-20 w-auto object-contain" />
           <div className="text-center space-y-1.5">
             <h1 className="text-xl font-bold tracking-tight">{APP_TITLE}</h1>
             <p className="text-sm text-muted-foreground">

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -232,29 +233,21 @@ export default function MessagesPage() {
       pageDescription="إدارة الرسائل والتعليقات من المنصات الاجتماعية في مكان واحد"
     >
       <div dir="rtl" className="container space-y-5 py-4 md:space-y-6 md:py-6">
-        <section className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm md:p-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0">
-              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-blue-700">
-                <MessageSquare className="h-4 w-4" />
-                التواصل الاجتماعي
-              </div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
-                صندوق البريد الموحد
-              </h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                اجمع الرسائل والتعليقات الواردة من قنواتك الاجتماعية في شاشة واحدة، مع الاحتفاظ
-                بمصدر كل تفاعل وحالته.
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
+        <div className="space-y-3">
+          <AdminPageHeader
+            eyebrow="التواصل الاجتماعي"
+            title="صندوق البريد الموحد"
+            description="اجمع الرسائل والتعليقات الواردة من قنواتك الاجتماعية في شاشة واحدة، مع الاحتفاظ بمصدر كل تفاعل وحالته."
+            status={
               <Badge
                 variant="outline"
-                className="h-9 gap-1.5 rounded-lg border-blue-200 bg-blue-50 px-3 text-blue-700"
+                className="h-9 gap-1.5 rounded-lg border-primary/20 bg-primary/5 px-3 text-primary"
               >
                 <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" />
                 {connectedAccounts} حساب متصل
               </Badge>
+            }
+            actions={
               <Button
                 variant="outline"
                 size="icon"
@@ -269,8 +262,8 @@ export default function MessagesPage() {
                   <RefreshCw className="h-4 w-4" />
                 )}
               </Button>
-            </div>
-          </div>
+            }
+          />
 
           <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
             {[
@@ -318,7 +311,7 @@ export default function MessagesPage() {
               );
             })}
           </div>
-        </section>
+        </div>
 
         <Tabs
           dir="rtl"

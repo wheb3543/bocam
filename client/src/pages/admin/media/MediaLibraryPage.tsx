@@ -17,7 +17,6 @@ import {
   Folder,
   FolderOpen,
   FolderPlus,
-  Loader2,
   Music2,
   RefreshCw,
   Search,
@@ -506,7 +505,11 @@ export default function MediaLibraryPage() {
               </div>
               <div className="space-y-1">
                 {foldersLoading ? (
-                  <Loader2 className="m-4 h-5 w-5 animate-spin text-blue-600" />
+                  <div className="space-y-2 p-2" role="status" aria-label="جاري تحميل المجلدات">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={index} className="h-8 animate-pulse rounded-lg bg-muted" />
+                    ))}
+                  </div>
                 ) : (
                   rootFolders.map((folder) => renderFolder(folder))
                 )}
@@ -619,8 +622,18 @@ export default function MediaLibraryPage() {
             </div>
 
             {isLoading ? (
-              <div className="flex justify-center py-16">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <div
+                className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4"
+                role="status"
+                aria-label="جاري تحميل الوسائط"
+              >
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="aspect-square animate-pulse rounded-2xl border border-border/70 bg-card"
+                  />
+                ))}
+                <span className="sr-only">جاري تحميل الوسائط</span>
               </div>
             ) : isError ? (
               <Card>

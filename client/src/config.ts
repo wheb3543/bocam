@@ -14,22 +14,24 @@
 /**
  * Company name (English)
  */
-export const COMPANY_NAME = import.meta.env.VITE_COMPANY_NAME || 'App';
+export const COMPANY_NAME = import.meta.env.VITE_COMPANY_NAME || 'Saudi German Hospital – Sana’a';
 
 /**
  * Company name (Arabic)
  */
-export const COMPANY_ARABIC_NAME = import.meta.env.VITE_COMPANY_ARABIC_NAME || 'تطبيق';
+export const COMPANY_ARABIC_NAME =
+  import.meta.env.VITE_COMPANY_ARABIC_NAME || 'المستشفى السعودي الألماني - صنعاء';
 
 /**
  * Company name (English) - preferred for international contexts
  */
-export const COMPANY_ENGLISH_NAME = import.meta.env.VITE_COMPANY_ENGLISH_NAME || 'App';
+export const COMPANY_ENGLISH_NAME =
+  import.meta.env.VITE_COMPANY_ENGLISH_NAME || 'Saudi German Hospital – Sana’a';
 
 /**
  * Company logo path
  */
-export const COMPANY_LOGO = import.meta.env.VITE_COMPANY_LOGO || '/logos/default.png';
+export const COMPANY_LOGO = import.meta.env.VITE_COMPANY_LOGO || '/assets/logo-color.png';
 
 /**
  * Company phone number
