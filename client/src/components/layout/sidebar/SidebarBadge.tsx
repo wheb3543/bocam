@@ -8,7 +8,10 @@ function SidebarBadge({ count }: { count: number }) {
     return null;
   }
   return (
-    <span className="absolute -top-1 -left-1 h-4 w-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+    <span
+      className="absolute -top-1 -left-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white"
+      aria-hidden="true"
+    >
       {count > 9 ? '9+' : count}
     </span>
   );

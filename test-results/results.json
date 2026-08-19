@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 2,
-  "numPassedTestSuites": 2,
+  "numTotalTestSuites": 4,
+  "numPassedTestSuites": 4,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 3,
-  "numPassedTests": 3,
+  "numTotalTests": 5,
+  "numPassedTests": 5,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,9 +24,40 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787181879091,
+  "startTime": 1787182545556,
   "success": true,
   "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["P1 navigation structure"],
+          "fullName": "P1 navigation structure groups administrative tools around the revised user tasks",
+          "status": "passed",
+          "title": "groups administrative tools around the revised user tasks",
+          "duration": 2.7020169999998416,
+          "failureMessages": [],
+          "location": { "line": 11, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["P1 navigation structure"],
+          "fullName": "P1 navigation structure renders a mobile navigation state with accessible unread counts and touch-friendly actions",
+          "status": "passed",
+          "title": "renders a mobile navigation state with accessible unread counts and touch-friendly actions",
+          "duration": 164.63410599999997,
+          "failureMessages": [],
+          "location": { "line": 32, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787182547358,
+      "endTime": 1787182547524.634,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/navigationP1.test.tsx"
+    },
     {
       "assertionResults": [
         {
@@ -34,7 +65,7 @@
           "fullName": "P0 interface foundation provides SGH branding fallbacks when company environment values are absent",
           "status": "passed",
           "title": "provides SGH branding fallbacks when company environment values are absent",
-          "duration": 1.5253899999997884,
+          "duration": 1.5842489999999998,
           "failureMessages": [],
           "location": { "line": 12, "column": 3 },
           "meta": {},
@@ -45,7 +76,7 @@
           "fullName": "P0 interface foundation renders the unified administrative page hierarchy with optional status and actions",
           "status": "passed",
           "title": "renders the unified administrative page hierarchy with optional status and actions",
-          "duration": 154.1152920000004,
+          "duration": 152.00471700000003,
           "failureMessages": [],
           "location": { "line": 18, "column": 3 },
           "meta": {},
@@ -56,15 +87,15 @@
           "fullName": "P0 interface foundation renders accessible dashboard and workspace loading skeletons",
           "status": "passed",
           "title": "renders accessible dashboard and workspace loading skeletons",
-          "duration": 17.532572999999502,
+          "duration": 16.72618699999998,
           "failureMessages": [],
           "location": { "line": 35, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787181883562,
-      "endTime": 1787181883735.5325,
+      "startTime": 1787182547271,
+      "endTime": 1787182547441.726,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/uiP0.test.tsx"

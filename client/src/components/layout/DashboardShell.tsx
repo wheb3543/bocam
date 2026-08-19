@@ -60,7 +60,9 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       </Suspense>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:pb-0 pb-16">{children}</div>
+      <div className="flex flex-1 flex-col pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+        {children}
+      </div>
     </div>
   );
 }

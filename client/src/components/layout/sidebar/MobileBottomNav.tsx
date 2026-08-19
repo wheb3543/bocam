@@ -25,10 +25,10 @@ export default function MobileBottomNav({
 }: MobileBottomNavProps) {
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-border dark:border-gray-700 z-40 safe-area-inset-bottom"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_18px_-14px_rgba(15,23,42,0.45)]"
       dir="rtl"
     >
-      <div className="h-full flex items-center justify-around px-2">
+      <div className="flex h-[4.5rem] items-center justify-around gap-1 px-2">
         {bottomNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = isItemActive(item.href);
@@ -36,25 +36,33 @@ export default function MobileBottomNav({
 
           return (
             <button
+              type="button"
               key={item.href}
               onClick={() => handleNavClick(item.href)}
+              aria-current={isActive ? 'page' : undefined}
+              aria-label={
+                badgeCount > 0
+                  ? `${item.title}، ${badgeCount > 9 ? 'أكثر من 9' : badgeCount} إشعارات غير مقروءة`
+                  : item.title
+              }
               className={cn(
-                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 min-w-[60px]',
-                isActive
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-muted-foreground dark:text-gray-400'
+                'flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-center transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/70'
               )}
             >
               <div className="relative">
                 <Icon className={cn('h-6 w-6', isActive && 'stroke-[2.5]')} />
                 <SidebarBadge count={badgeCount} />
                 {!badgeCount && item.hasDot && (
-                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
+                  <span
+                    className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500 motion-safe:animate-pulse"
+                    aria-hidden="true"
+                  />
                 )}
               </div>
               <span
                 className={cn(
-                  'text-[10px] truncate max-w-[60px]',
+                  'max-w-full truncate text-[11px] leading-none',
                   isActive ? 'font-semibold' : 'font-medium'
                 )}
               >
@@ -66,11 +74,13 @@ export default function MobileBottomNav({
 
         {/* زر المزيد */}
         <button
+          type="button"
           onClick={onMoreClick}
-          className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 text-muted-foreground dark:text-gray-400 min-w-[60px]"
+          aria-label="المزيد من الأدوات"
+          className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] leading-none text-muted-foreground transition-colors duration-200 hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <MoreHorizontal className="h-6 w-6" />
-          <span className="text-[10px] font-medium">المزيد</span>
+          <span className="font-medium">المزيد</span>
         </button>
       </div>
     </nav>

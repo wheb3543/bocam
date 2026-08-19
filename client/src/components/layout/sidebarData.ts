@@ -102,10 +102,10 @@ export const allNavItems: NavItem[] = [
     href: '/admin/tracking-settings',
     icon: SettingsIcon,
   },
-  { id: 'whatsapp', title: 'الرسائل والمحادثات', href: '/admin/whatsapp', icon: MessageCircle },
+  { id: 'whatsapp', title: 'صندوق وارد WhatsApp', href: '/admin/whatsapp', icon: MessageCircle },
   {
     id: 'whatsapp-dashboard',
-    title: 'لوحة تحكم واتساب',
+    title: 'أداء WhatsApp',
     href: '/admin/whatsapp/whatsapp-dashboard',
     icon: BarChart3,
   },
@@ -136,19 +136,19 @@ export const allNavItems: NavItem[] = [
   },
   {
     id: 'whatsapp-appointments',
-    title: 'سجل الإشعارات',
+    title: 'سجل تنبيهات WhatsApp',
     href: '/admin/whatsapp/appointments',
     icon: Calendar,
   },
   {
     id: 'whatsapp-connection',
-    title: 'إعدادات الاتصال',
+    title: 'ربط حساب WhatsApp',
     href: '/admin/whatsapp/connection',
     icon: SettingsIcon,
   },
   {
     id: 'whatsapp-integration',
-    title: 'التكامل',
+    title: 'تكاملات الحساب',
     href: '/admin/whatsapp/integration',
     icon: Smartphone,
   },
@@ -166,13 +166,13 @@ export const allNavItems: NavItem[] = [
   },
   {
     id: 'whatsapp-subscriptions',
-    title: 'الاشتراكات',
+    title: 'اشتراكات Webhooks',
     href: '/admin/whatsapp/subscriptions',
     icon: Users,
   },
   {
     id: 'whatsapp-webhook-inspector',
-    title: 'فاحص الأحداث',
+    title: 'سجل أحداث Webhooks',
     href: '/admin/whatsapp/webhook-inspector',
     icon: Terminal,
   },
@@ -185,7 +185,7 @@ export const allNavItems: NavItem[] = [
   },
   {
     id: 'integration-settings',
-    title: 'إعدادات الربط',
+    title: 'ربط المنصات الاجتماعية',
     href: '/admin/communications/integration-settings',
     icon: Shield,
     allowedRoles: ['admin'],
@@ -240,7 +240,7 @@ export const allNavItems: NavItem[] = [
 // المجموعات لعرضها في لوحة كل الأدوات
 export const allToolsGroups: NavGroup[] = [
   {
-    label: 'إدارة الحجوزات',
+    label: 'تشغيل المرضى والحجوزات',
     icon: ClipboardList,
     items: [
       { id: 'bookings', title: 'إدارة الحجوزات', href: '/admin/bookings', icon: ClipboardList },
@@ -263,7 +263,7 @@ export const allToolsGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'إدارة المحتوى',
+    label: 'المحتوى والنشر',
     icon: FileEdit,
     items: [
       { id: 'management', title: 'الإدارة', href: '/admin/management', icon: SettingsIcon },
@@ -278,13 +278,25 @@ export const allToolsGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'التواصل',
+    label: 'التواصل والقنوات',
     icon: MessageCircle,
     items: [
-      { id: 'whatsapp', title: 'الرسائل والمحادثات', href: '/admin/whatsapp', icon: MessageCircle },
+      {
+        id: 'messages',
+        title: 'صندوق البريد الموحد',
+        href: '/admin/communications/messages',
+        icon: MessageSquare,
+        allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
+      },
+      {
+        id: 'whatsapp',
+        title: 'صندوق وارد WhatsApp',
+        href: '/admin/whatsapp',
+        icon: MessageCircle,
+      },
       {
         id: 'whatsapp-dashboard',
-        title: 'لوحة تحكم واتساب',
+        title: 'أداء WhatsApp',
         href: '/admin/whatsapp/whatsapp-dashboard',
         icon: BarChart3,
       },
@@ -320,19 +332,19 @@ export const allToolsGroups: NavGroup[] = [
       },
       {
         id: 'whatsapp-appointments',
-        title: 'سجل الإشعارات',
+        title: 'سجل تنبيهات WhatsApp',
         href: '/admin/whatsapp/appointments',
         icon: Calendar,
       },
       {
         id: 'whatsapp-connection',
-        title: 'إعدادات الاتصال',
+        title: 'ربط حساب WhatsApp',
         href: '/admin/whatsapp/connection',
         icon: SettingsIcon,
       },
       {
         id: 'whatsapp-integration',
-        title: 'التكامل',
+        title: 'تكاملات الحساب',
         href: '/admin/whatsapp/integration',
         icon: Smartphone,
       },
@@ -350,13 +362,13 @@ export const allToolsGroups: NavGroup[] = [
       },
       {
         id: 'whatsapp-subscriptions',
-        title: 'الاشتراكات',
+        title: 'اشتراكات Webhooks',
         href: '/admin/whatsapp/subscriptions',
         icon: Users,
       },
       {
         id: 'whatsapp-webhook-inspector',
-        title: 'فاحص الأحداث',
+        title: 'سجل أحداث Webhooks',
         href: '/admin/whatsapp/webhook-inspector',
         icon: Terminal,
       },
@@ -391,15 +403,8 @@ export const allToolsGroups: NavGroup[] = [
         icon: FileText,
       },
       {
-        id: 'messages',
-        title: 'صندوق البريد الموحد',
-        href: '/admin/communications/messages',
-        icon: MessageSquare,
-        allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
-      },
-      {
         id: 'integration-settings',
-        title: 'إعدادات الربط',
+        title: 'ربط المنصات الاجتماعية',
         href: '/admin/communications/integration-settings',
         icon: Shield,
         allowedRoles: ['admin'],
@@ -413,7 +418,7 @@ export const allToolsGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'الفرق',
+    label: 'فرق التنفيذ',
     icon: Users,
     items: [
       {
@@ -438,7 +443,7 @@ export const allToolsGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'التقارير والتحليلات',
+    label: 'القياس والتقارير',
     icon: BarChart3,
     items: [
       { id: 'reports', title: 'التقارير', href: '/admin/reports/reports', icon: FileText },
@@ -460,7 +465,7 @@ export const allToolsGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'الإدارة العامة',
+    label: 'الإدارة والنظام',
     icon: SettingsIcon,
     items: [
       { id: 'profile', title: 'الملف الشخصي', href: '/admin/profile', icon: User },
@@ -522,11 +527,11 @@ export const defaultVisibleItemIds: string[] = [
   'home',
   'leads',
   'appointments',
-  'offer-leads',
-  'camp-registrations',
   'customers',
   'tasks',
-  'reports',
-  'whatsapp',
   'messages',
+  'whatsapp',
+  'publishing',
+  'media-library',
+  'reports',
 ];
