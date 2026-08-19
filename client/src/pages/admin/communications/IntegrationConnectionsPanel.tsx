@@ -102,6 +102,7 @@ export function IntegrationConnectionsPanel() {
   const utils = trpc.useUtils();
   const overviewQuery = trpc.integrationConnections.overview.useQuery();
   const metaOperationsQuery = trpc.metaOperations.overview.useQuery();
+  const externalPlatformsQuery = trpc.generalIntegrations.status.useQuery();
   const startMetaMutation = trpc.integrationConnections.startMetaBusiness.useMutation({
     onSuccess: ({ authorizationUrl }) => window.location.assign(authorizationUrl),
     onError: (error) => toast.error(error.message),
@@ -119,6 +120,10 @@ export function IntegrationConnectionsPanel() {
       onError: (error) => toast.error(error.message),
     }
   );
+  const startExternalMutation = trpc.integrationConnections.startExternalOAuth.useMutation({
+    onSuccess: ({ authorizationUrl }) => window.location.assign(authorizationUrl),
+    onError: (error) => toast.error(error.message),
+  });
   const selectAssetMutation = trpc.integrationConnections.setAssetSelected.useMutation({
     onSuccess: () => utils.integrationConnections.overview.invalidate(),
     onError: (error) => toast.error(error.message),
@@ -258,6 +263,43 @@ export function IntegrationConnectionsPanel() {
             ربط WhatsApp Business
           </Button>
         </div>
+
+        <section className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="mb-3">
+            <h3 className="font-semibold text-slate-900">ربط المنصات الخارجية</h3>
+            <p className="mt-1 text-xs leading-5 text-slate-600">
+              تبدأ عملية الربط من نافذة التفويض الرسمية بعد حفظ بيانات التطبيق وتفعيل المنصة. لا
+              تنتقل الأسرار أو التوكنات إلى المتصفح أو رابط التفويض.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {(externalPlatformsQuery.data ?? []).map((platform) => {
+              const enabled = platform.connectionStatus === 'ready_for_oauth';
+              return (
+                <Button
+                  key={platform.platform}
+                  type="button"
+                  variant="outline"
+                  className="h-auto min-h-16 justify-between whitespace-normal border-slate-300 bg-white px-3 py-2 text-right hover:bg-slate-100"
+                  disabled={!enabled || startExternalMutation.isPending}
+                  onClick={() => startExternalMutation.mutate({ provider: platform.platform })}
+                >
+                  <span className="flex flex-col items-start gap-1">
+                    <span className="font-semibold text-slate-900">{platform.label}</span>
+                    <span
+                      className={
+                        enabled ? 'text-[11px] text-emerald-700' : 'text-[11px] text-amber-700'
+                      }
+                    >
+                      {enabled ? 'جاهز لبدء OAuth' : 'أضف بيانات التطبيق أولاً'}
+                    </span>
+                  </span>
+                  <ExternalLink className="h-4 w-4 shrink-0 text-blue-700" />
+                </Button>
+              );
+            })}
+          </div>
+        </section>
 
         <Alert className="border-slate-200 bg-slate-50">
           <ShieldCheck className="h-4 w-4 text-blue-700" />

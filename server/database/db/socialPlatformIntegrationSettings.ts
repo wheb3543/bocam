@@ -1,6 +1,6 @@
 import { desc, eq } from 'drizzle-orm';
 import { socialPlatformIntegrationSettings } from '../../../drizzle/schema';
-import { encryptMetaSetting } from '../../integrations/meta/metaSettingsCrypto';
+import { decryptMetaSetting, encryptMetaSetting } from '../../integrations/meta/metaSettingsCrypto';
 import { getDb } from './connection';
 
 export type ExternalPublishingPlatform = 'x' | 'linkedin' | 'youtube' | 'tiktok';
@@ -52,6 +52,27 @@ export async function getSocialPlatformIntegrationStatuses() {
       updatedAt: row?.updatedAt ?? null,
     };
   });
+}
+
+/** بيانات تطبيق OAuth للاستخدام الخادمي فقط. لا يعيد هذا الاستدعاء أي سر إلى واجهة الإدارة. */
+export async function getSocialPlatformOAuthCredentials(platform: ExternalPublishingPlatform) {
+  const db = await getDb();
+  if (!db) {
+    return null;
+  }
+  const [row] = await db
+    .select()
+    .from(socialPlatformIntegrationSettings)
+    .where(eq(socialPlatformIntegrationSettings.platform, platform))
+    .limit(1);
+  if (!row?.isEnabled || !row.clientId || !row.clientSecretEncrypted) {
+    return null;
+  }
+  return {
+    clientId: row.clientId,
+    clientSecret: decryptMetaSetting(row.clientSecretEncrypted),
+    requestedScopes: row.requestedScopes || platformDefaults[platform].scopes,
+  };
 }
 
 export async function saveSocialPlatformIntegrationSettings(

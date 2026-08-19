@@ -199,6 +199,7 @@ export {
 
 // General Platform Integration Settings
 export {
+  getSocialPlatformOAuthCredentials,
   getSocialPlatformIntegrationStatuses,
   saveSocialPlatformIntegrationSettings,
   type ExternalPublishingPlatform,

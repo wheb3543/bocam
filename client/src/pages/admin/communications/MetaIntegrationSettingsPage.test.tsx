@@ -44,6 +44,7 @@ vi.mock('@/lib/api/trpc', () => ({
     integrationConnections: {
       overview: { useQuery: mocks.connectionsOverviewQuery },
       startMetaBusiness: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
+      startExternalOAuth: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
       startWhatsAppEmbeddedSignup: { useMutation: () => ({ mutateAsync: mocks.mutate, isPending: false }) },
       completeWhatsAppEmbeddedSignup: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
       setAssetSelected: { useMutation: () => ({ mutate: mocks.mutate, isPending: false }) },
@@ -125,6 +126,7 @@ describe('MetaIntegrationSettingsPage as general integration settings', () => {
     expect(screen.getByText('OAuth Redirect URI')).toBeInTheDocument();
     expect(screen.getByText('نماذج Lead Ads المفعلة')).toBeInTheDocument();
     expect(screen.getByText('أحداث تحويل بانتظار التسليم')).toBeInTheDocument();
+    expect(screen.getByText('ربط المنصات الخارجية')).toBeInTheDocument();
     expect(screen.queryByText('sample-access-token-never-rendered')).not.toBeInTheDocument();
   });
 });

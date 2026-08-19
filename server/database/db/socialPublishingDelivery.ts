@@ -10,6 +10,7 @@ import {
 import { and, eq, lte } from 'drizzle-orm';
 import { meta } from '../../api/MetaApiService';
 import { publishToMeta } from '../../integrations/meta/metaPublishingConnector';
+import { publishToExternalPlatform } from '../../integrations/external/externalPublishingConnector';
 import { getIntegrationToken } from './integrationConnections';
 import { getDb } from './connection';
 
@@ -56,7 +57,7 @@ async function writeAttempt(input: {
     status: input.status,
     correlationId: input.correlationId,
     requestSummary:
-      'تمت المعالجة عبر موصل Meta الخادمي؛ لا تحفظ التوكنات أو الأسرار في سجل المحاولة.',
+      'تمت المعالجة عبر موصل النشر الخادمي؛ لا تحفظ التوكنات أو الأسرار في سجل المحاولة.',
     responseSummary: input.responseSummary?.slice(0, 4000) ?? null,
     errorMessage: input.errorMessage?.slice(0, 4000) ?? null,
   });
@@ -76,7 +77,9 @@ export async function enqueueSocialPublishDeliveryJobs(postId: number, runAfter 
   let queued = 0;
   for (const { destination, account } of rows) {
     const eligible =
-      (destination.platform === 'facebook' || destination.platform === 'instagram') &&
+      ['facebook', 'instagram', 'x', 'linkedin', 'youtube', 'tiktok'].includes(
+        destination.platform
+      ) &&
       account?.connectionStatus === 'connected' &&
       Boolean(account.connectionId) &&
       Boolean(account.isActive);
@@ -251,16 +254,6 @@ async function dispatchDeliveryJob(jobId: number) {
   }
   const correlationId = `delivery-${delivery.job.id}-${crypto.randomUUID()}`;
   const platform = delivery.destination.platform;
-  if (platform !== 'facebook' && platform !== 'instagram') {
-    return failOrRetryDelivery({
-      job: delivery.job,
-      destinationId: delivery.destination.id,
-      postId: delivery.post.id,
-      message: `موصل ${platform} لم يجهز بعد.`,
-      retryable: false,
-      correlationId,
-    });
-  }
   if (delivery.destination.externalPostId) {
     const db = await requireDb();
     await db
@@ -289,22 +282,28 @@ async function dispatchDeliveryJob(jobId: number) {
     status: 'started',
     correlationId,
   });
-  const result = await publishToMeta(
-    {
-      platform,
-      targetId: delivery.account.externalAccountId,
-      accessToken,
-      caption: delivery.destination.captionOverride ?? delivery.post.baseCaption ?? '',
-      contentType: delivery.post.contentType,
-      media: delivery.media.map((item) => ({
-        url: item.url,
-        type: item.type,
-        altText: item.altAr ?? item.altEn,
-      })),
-      providerState: parseObject(delivery.destination.providerState),
-    },
-    meta
-  );
+  const publishRequest = {
+    targetId: delivery.account.externalAccountId,
+    accessToken,
+    caption: delivery.destination.captionOverride ?? delivery.post.baseCaption ?? '',
+    contentType: delivery.post.contentType,
+    media: delivery.media.map((item) => ({
+      url: item.url,
+      type: item.type,
+      altText: item.altAr ?? item.altEn,
+    })),
+  };
+  const result =
+    platform === 'facebook' || platform === 'instagram'
+      ? await publishToMeta(
+          {
+            ...publishRequest,
+            platform,
+            providerState: parseObject(delivery.destination.providerState),
+          },
+          meta
+        )
+      : await publishToExternalPlatform({ ...publishRequest, platform });
 
   const db = await requireDb();
   if (result.kind === 'published') {

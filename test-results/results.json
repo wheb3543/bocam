@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 10,
-  "numPassedTestSuites": 10,
+  "numTotalTestSuites": 6,
+  "numPassedTestSuites": 6,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 12,
-  "numPassedTests": 12,
+  "numTotalTests": 7,
+  "numPassedTests": 7,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,112 +24,81 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787167566551,
+  "startTime": 1787169074778,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["social publishing scheduled route"],
-          "fullName": "social publishing scheduled route ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
+          "ancestorTitles": ["external platform OAuth"],
+          "fullName": "external platform OAuth creates an X authorization URL with PKCE and never includes a client secret",
           "status": "passed",
-          "title": "ينفذ فقط عبر هوية Heartbeat ويستدعي المعالج بمعرف المهمة الموثوق",
-          "duration": 5.511211000000003,
+          "title": "creates an X authorization URL with PKCE and never includes a client secret",
+          "duration": 10.309049000000186,
           "failureMessages": [],
-          "location": { "line": 35, "column": 3 },
+          "location": { "line": 32, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["social publishing scheduled route"],
-          "fullName": "social publishing scheduled route يرفض أي طلب لا يحمل هوية مهمة مجدولة",
+          "ancestorTitles": ["external platform OAuth"],
+          "fullName": "external platform OAuth refuses to start an external OAuth flow before the platform is configured and enabled",
           "status": "passed",
-          "title": "يرفض أي طلب لا يحمل هوية مهمة مجدولة",
-          "duration": 1.1862989999999627,
+          "title": "refuses to start an external OAuth flow before the platform is configured and enabled",
+          "duration": 3.204078999999865,
           "failureMessages": [],
-          "location": { "line": 56, "column": 3 },
+          "location": { "line": 59, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787167568335,
-      "endTime": 1787167568342.1863,
+      "startTime": 1787169076850,
+      "endTime": 1787169076864.204,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/api/socialPublishingScheduledRoute.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/external/externalPlatformOAuth.test.ts"
     },
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["Meta Lead Ads webhook extraction"],
-          "fullName": "Meta Lead Ads webhook extraction extracts leadgen identifiers without exposing or resolving form fields inside the callback",
+          "ancestorTitles": ["external publishing connector"],
+          "fullName": "external publishing connector publishes a text post to X and returns its external id without exposing the token",
           "status": "passed",
-          "title": "extracts leadgen identifiers without exposing or resolving form fields inside the callback",
-          "duration": 2.7208310000000893,
+          "title": "publishes a text post to X and returns its external id without exposing the token",
+          "duration": 9.825119000000086,
           "failureMessages": [],
           "location": { "line": 5, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["Meta Lead Ads webhook extraction"],
-          "fullName": "Meta Lead Ads webhook extraction ignores message and comment change notifications",
+          "ancestorTitles": ["external publishing connector"],
+          "fullName": "external publishing connector uses the current LinkedIn Posts API contract for an organization author",
           "status": "passed",
-          "title": "ignores message and comment change notifications",
-          "duration": 0.33558099999982005,
+          "title": "uses the current LinkedIn Posts API contract for an organization author",
+          "duration": 2.104536000000053,
           "failureMessages": [],
           "location": { "line": 32, "column": 3 },
           "meta": {},
           "tags": []
-        }
-      ],
-      "startTime": 1787167568188,
-      "endTime": 1787167568191.3357,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/metaLeadAdsWebhook.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["Meta social publishing connector"],
-          "fullName": "Meta social publishing connector publishes a single Facebook image using the Page photos endpoint and returns the external post id",
-          "status": "passed",
-          "title": "publishes a single Facebook image using the Page photos endpoint and returns the external post id",
-          "duration": 3.6762670000000526,
-          "failureMessages": [],
-          "location": { "line": 11, "column": 3 },
-          "meta": {},
-          "tags": []
         },
         {
-          "ancestorTitles": ["Meta social publishing connector"],
-          "fullName": "Meta social publishing connector stores a new Instagram container as processing before its media is ready to publish",
+          "ancestorTitles": ["external publishing connector"],
+          "fullName": "external publishing connector does not try to send a YouTube or TikTok post without the required video transfer session",
           "status": "passed",
-          "title": "stores a new Instagram container as processing before its media is ready to publish",
-          "duration": 1.8646630000000641,
+          "title": "does not try to send a YouTube or TikTok post without the required video transfer session",
+          "duration": 1.445607000000109,
           "failureMessages": [],
-          "location": { "line": 36, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["Meta social publishing connector"],
-          "fullName": "Meta social publishing connector publishes an Instagram container only after Meta reports that it is finished",
-          "status": "passed",
-          "title": "publishes an Instagram container only after Meta reports that it is finished",
-          "duration": 0.6909989999999198,
-          "failureMessages": [],
-          "location": { "line": 64, "column": 3 },
+          "location": { "line": 56, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787167568185,
-      "endTime": 1787167568191.691,
+      "startTime": 1787169076847,
+      "endTime": 1787169076860.4456,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/meta/metaPublishingConnector.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/integrations/external/externalPublishingConnector.test.ts"
     },
     {
       "assertionResults": [
@@ -138,9 +107,9 @@
           "fullName": "MetaIntegrationSettingsPage as general integration settings renders all four external platform configuration sections without rendering any saved secret",
           "status": "passed",
           "title": "renders all four external platform configuration sections without rendering any saved secret",
-          "duration": 268.6019309999999,
+          "duration": 302.0663870000003,
           "failureMessages": [],
-          "location": { "line": 104, "column": 3 },
+          "location": { "line": 105, "column": 3 },
           "meta": {},
           "tags": []
         },
@@ -149,60 +118,18 @@
           "fullName": "MetaIntegrationSettingsPage as general integration settings renders the Meta and WhatsApp authorized connection controls without rendering stored access tokens",
           "status": "passed",
           "title": "renders the Meta and WhatsApp authorized connection controls without rendering stored access tokens",
-          "duration": 126.18988000000036,
+          "duration": 161.2048920000002,
           "failureMessages": [],
-          "location": { "line": 117, "column": 3 },
+          "location": { "line": 118, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787167568689,
-      "endTime": 1787167569083.19,
+      "startTime": 1787169077349,
+      "endTime": 1787169077813.2048,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/communications/MetaIntegrationSettingsPage.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["PublishingPage"],
-          "fullName": "PublishingPage يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
-          "status": "passed",
-          "title": "يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
-          "duration": 221.48121600000013,
-          "failureMessages": [],
-          "location": { "line": 62, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["PublishingPage"],
-          "fullName": "PublishingPage ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
-          "status": "passed",
-          "title": "ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
-          "duration": 92.11346100000037,
-          "failureMessages": [],
-          "location": { "line": 73, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["PublishingPage"],
-          "fullName": "PublishingPage يعرض إعادة المحاولة لوجهة فاشلة ويرسل معرفها إلى راوتر التسليم",
-          "status": "passed",
-          "title": "يعرض إعادة المحاولة لوجهة فاشلة ويرسل معرفها إلى راوتر التسليم",
-          "duration": 51.04886000000033,
-          "failureMessages": [],
-          "location": { "line": 90, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787167568675,
-      "endTime": 1787167569039.0488,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/PublishingPage.test.tsx"
     }
   ]
 }

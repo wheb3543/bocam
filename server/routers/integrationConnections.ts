@@ -10,6 +10,7 @@ import {
   startMetaBusinessOAuth,
   startWhatsAppEmbeddedSignup,
 } from '../integrations/meta/metaBusinessOAuth';
+import { startExternalPlatformOAuth } from '../integrations/external/externalPlatformOAuth';
 
 function callbackUri(req: { protocol?: string; get: (header: string) => string | undefined }) {
   const host = req.get('host');
@@ -18,6 +19,18 @@ function callbackUri(req: { protocol?: string; get: (header: string) => string |
   }
   const protocol = req.protocol === 'http' ? 'http' : 'https';
   return `${protocol}://${host}/api/integrations/meta/callback`;
+}
+
+function externalCallbackUri(
+  req: { protocol?: string; get: (header: string) => string | undefined },
+  provider: 'x' | 'linkedin' | 'youtube' | 'tiktok'
+) {
+  const host = req.get('host');
+  if (!host || !/^[a-z0-9.-]+(?::\d+)?$/i.test(host)) {
+    throw new Error('تعذر تحديد عنوان callback الآمن للتكامل.');
+  }
+  const protocol = req.protocol === 'http' ? 'http' : 'https';
+  return `${protocol}://${host}/api/integrations/external/${provider}/callback`;
 }
 
 export const integrationConnectionsRouter = router({
@@ -36,6 +49,16 @@ export const integrationConnectionsRouter = router({
       redirectUri: callbackUri(ctx.req),
     });
   }),
+
+  startExternalOAuth: adminProcedure
+    .input(z.object({ provider: z.enum(['x', 'linkedin', 'youtube', 'tiktok']) }))
+    .mutation(({ ctx, input }) =>
+      startExternalPlatformOAuth({
+        provider: input.provider,
+        initiatedByUserId: ctx.user.id,
+        redirectUri: externalCallbackUri(ctx.req, input.provider),
+      })
+    ),
 
   completeWhatsAppEmbeddedSignup: adminProcedure
     .input(
