@@ -52,7 +52,7 @@ const statusLabels: Record<string, string> = {
   pending: 'بانتظار الربط',
   queued: 'في قائمة الجدولة',
   uploading: 'جارٍ رفع الوسيط',
-  processing: 'تعالج Meta الوسيط',
+  processing: 'قيد معالجة المنصة',
 };
 
 function formatDate(value: Date | string | null | undefined) {
@@ -458,7 +458,7 @@ export default function PublishingPage() {
                             {post.baseCaption || 'لا يوجد نص أساسي بعد'}
                           </p>
                           <div className="mt-3 flex flex-wrap items-center gap-2">
-                            {entry.destinations.map(({ destination }) => (
+                            {entry.destinations.map(({ destination, videoTransfer }) => (
                               <div
                                 key={destination.id}
                                 className="flex items-center gap-1 rounded-lg border border-slate-100 px-2 py-1 dark:border-slate-800"
@@ -468,6 +468,15 @@ export default function PublishingPage() {
                                   {statusLabels[destination.publicationStatus] ||
                                     destination.publicationStatus}
                                 </span>
+                                {videoTransfer && (
+                                  <span className="mr-1 text-[10px] font-semibold text-sky-700 dark:text-sky-300">
+                                    {videoTransfer.phase === 'uploading'
+                                      ? `رفع ${videoTransfer.progressPercent}٪`
+                                      : videoTransfer.mode === 'upload'
+                                        ? 'بانتظار إكمال المسودة'
+                                        : 'تعالج المنصة الفيديو'}
+                                  </span>
+                                )}
                                 {destination.publicationStatus === 'failed' && (
                                   <Button
                                     size="sm"

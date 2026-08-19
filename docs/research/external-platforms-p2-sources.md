@@ -27,9 +27,15 @@
 
 يرفع الفيديو عبر جلسة Resumable: يبدأ الخادم جلسة `videos.insert` ويحفظ URI العائد من `Location` مشفراً، ثم يرفع الثنائيات عبر `PUT`. يستعلم عن التقدم بعد الانقطاع ويستأنف من Range الذي تعيده استجابة `308`، بينما تعالج 5xx بتراجع أسي. [6]
 
+تفرض وثائق YouTube أن يكون حجم الكتل، عند استخدامها، مضاعفاً لـ 256 كيلوبايت باستثناء الكتلة الأخيرة. تتطلب حالة الانقطاع طلب `PUT` فارغاً بـ `Content-Range: bytes */TOTAL`؛ ثم يبدأ الاستئناف من البايت التالي للقيمة العليا في `Range`. وتؤدي جلسة منتهية إلى `404` وتتطلب بدء جلسة جديدة بدلاً من إعادة استخدام رابط ميت. [6]
+
 ## TikTok
 
 يقدم TikTok Content Posting API مسارين: Direct Post للنشر بعد التفويض، وUpload لإرسال مسودة إلى حساب المستخدم. يتطلب التدفق User Access Token وإذن نشر مناسب ومراجعة التطبيق عند استخدام ميزات الإنتاج. ستُبنى البوابة على Direct Post مع تخزين التوكن وحالة النشر، وتبقي وضع المسودة خياراً عند عدم تأهيل التطبيق للنشر المباشر. [7] [8]
+
+في Direct Post يبدأ الخادم بـ `POST /v2/post/publish/video/init/` بعد جلب إعدادات المنشئ وموافقته الصريحة. يرجع TikTok `publish_id` لتتبع العملية و`upload_url` لملفات `FILE_UPLOAD`، ويظل رابط الرفع صالحاً لمدة ساعة. تحفظ البوابة المعرّف والرابط والتقدم في حالة الوجهة، ثم تستعلم من `POST /v2/post/publish/status/fetch/`. تعني `PUBLISH_COMPLETE` اكتمال النشر، و`SEND_TO_USER_INBOX` مسودة تنتظر إكمال المستخدم، و`FAILED` فشلاً نهائياً، فيما تشير حالات المعالجة إلى استمرار النقل أو التحميل من رابط. لا يتجاوز التطبيق غير المدقق وضع الرؤية الخاصة حتى اجتياز تدقيق TikTok. [9] [10]
+
+قبل Direct Post تستدعي البوابة `POST /v2/post/publish/creator_info/query/` ضمن `video.publish` لتتأكد من أن مستوى الخصوصية المراد استخدامه مسموح للحساب، وتلتزم بالقيود التي يعيدها الحساب لتعطيل التعليقات أو Duet أو Stitch. يبدأ التدفق في وضع `SELF_ONLY` الآمن، ولا يختار مستوى أوسع من دون إعداد صريح ومراجعة حية. [11]
 
 ## المراجع الإضافية
 
@@ -37,3 +43,6 @@
 [6]: https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol "YouTube Resumable Upload Protocol"
 [7]: https://developers.tiktok.com/doc/content-posting-api-get-started "TikTok Content Posting API"
 [8]: https://developers.tiktok.com/doc/oauth-user-access-token-management "TikTok User Access Token Management"
+[9]: https://developers.tiktok.com/doc/content-posting-api-reference-direct-post "TikTok Direct Post"
+[10]: https://developers.tiktok.com/doc/content-posting-api-reference-get-video-status "TikTok Get Post Status"
+[11]: https://developers.tiktok.com/doc/content-posting-api-reference-query-creator-info "TikTok Query Creator Info"

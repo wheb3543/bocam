@@ -16,6 +16,7 @@ import {
   enqueueSocialPublishDeliveryJobs,
   retrySocialPublishDelivery,
 } from './socialPublishingDelivery';
+import { decryptMetaSetting } from '../../integrations/meta/metaSettingsCrypto';
 
 export type SocialPublishPlatform =
   'facebook' | 'instagram' | 'x' | 'linkedin' | 'youtube' | 'tiktok';
@@ -42,6 +43,32 @@ async function ensureDb() {
     throw new Error('قاعدة البيانات غير متاحة حالياً');
   }
   return db;
+}
+
+function safeVideoTransferDiagnostics(providerState: string | null) {
+  if (!providerState) {
+    return null;
+  }
+  try {
+    const state = JSON.parse(decryptMetaSetting(providerState)) as Record<string, unknown>;
+    const totalBytes = typeof state.totalBytes === 'number' ? state.totalBytes : null;
+    const nextByte = typeof state.nextByte === 'number' ? state.nextByte : null;
+    if (
+      !totalBytes ||
+      nextByte === null ||
+      !['youtube-resumable', 'tiktok-file-upload'].includes(String(state.protocol))
+    ) {
+      return null;
+    }
+    return {
+      protocol: state.protocol,
+      mode: state.mode === 'direct' || state.mode === 'upload' ? state.mode : null,
+      progressPercent: Math.max(0, Math.min(100, Math.floor((nextByte / totalBytes) * 100))),
+      phase: nextByte >= totalBytes ? 'processing' : 'uploading',
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function listSocialPublishAccounts() {
@@ -111,7 +138,13 @@ export async function getSocialPublishPost(postId: number) {
       .orderBy(desc(integrationDeliveryJobs.updatedAt)),
   ]);
 
-  return { ...post, destinations, media: linkedMedia, attempts, deliveryJobs };
+  const safeDestinations = destinations.map(({ destination, account }) => {
+    const videoTransfer = safeVideoTransferDiagnostics(destination.providerState);
+    const { providerState: _providerState, ...safeDestination } = destination;
+    return { destination: safeDestination, account, videoTransfer };
+  });
+
+  return { ...post, destinations: safeDestinations, media: linkedMedia, attempts, deliveryJobs };
 }
 
 export async function listSocialPublishPosts(limit = 40) {

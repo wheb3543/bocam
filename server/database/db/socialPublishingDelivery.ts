@@ -11,6 +11,7 @@ import { and, eq, lte } from 'drizzle-orm';
 import { meta } from '../../api/MetaApiService';
 import { publishToMeta } from '../../integrations/meta/metaPublishingConnector';
 import { publishToExternalPlatform } from '../../integrations/external/externalPublishingConnector';
+import { decryptMetaSetting, encryptMetaSetting } from '../../integrations/meta/metaSettingsCrypto';
 import { getIntegrationToken } from './integrationConnections';
 import { getDb } from './connection';
 
@@ -36,6 +37,38 @@ function parseObject(value: string | null) {
   } catch {
     return null;
   }
+}
+
+function parseExternalVideoState(value: string | null) {
+  if (!value) {
+    return null;
+  }
+  try {
+    return parseObject(decryptMetaSetting(value));
+  } catch {
+    return parseObject(value);
+  }
+}
+
+function serializeProviderState(
+  platform: string,
+  providerState: Record<string, unknown> | undefined
+) {
+  if (!providerState) {
+    return null;
+  }
+  const serialized = JSON.stringify(providerState);
+  return ['youtube', 'tiktok'].includes(platform) ? encryptMetaSetting(serialized) : serialized;
+}
+
+function videoProgress(providerState: Record<string, unknown> | undefined) {
+  const nextByte = typeof providerState?.nextByte === 'number' ? providerState.nextByte : null;
+  const totalBytes =
+    typeof providerState?.totalBytes === 'number' ? providerState.totalBytes : null;
+  if (nextByte === null || !totalBytes || totalBytes <= 0) {
+    return null;
+  }
+  return Math.max(0, Math.min(100, Math.floor((nextByte / totalBytes) * 100)));
 }
 
 function delayMinutes(attemptCount: number) {
@@ -285,10 +318,14 @@ async function dispatchDeliveryJob(jobId: number) {
   const publishRequest = {
     targetId: delivery.account.externalAccountId,
     accessToken,
+    title: delivery.post.title,
     caption: delivery.destination.captionOverride ?? delivery.post.baseCaption ?? '',
     contentType: delivery.post.contentType,
     media: delivery.media.map((item) => ({
       url: item.url,
+      key: item.key,
+      size: item.size,
+      mimeType: item.mimeType,
       type: item.type,
       altText: item.altAr ?? item.altEn,
     })),
@@ -303,7 +340,12 @@ async function dispatchDeliveryJob(jobId: number) {
           },
           meta
         )
-      : await publishToExternalPlatform({ ...publishRequest, platform });
+      : await publishToExternalPlatform({
+          ...publishRequest,
+          platform,
+          providerState: parseExternalVideoState(delivery.destination.providerState),
+          providerSettings: parseObject(delivery.destination.settings),
+        });
 
   const db = await requireDb();
   if (result.kind === 'published') {
@@ -322,7 +364,7 @@ async function dispatchDeliveryJob(jobId: number) {
         publicationStatus: 'published',
         externalPostId: result.externalPostId,
         externalUrl: result.externalUrl,
-        providerState: result.providerState ? JSON.stringify(result.providerState) : null,
+        providerState: serializeProviderState(platform, result.providerState),
         lastAttemptAt: new Date(),
         publishedAt: new Date(),
         lastError: null,
@@ -339,6 +381,12 @@ async function dispatchDeliveryJob(jobId: number) {
     return 'published';
   }
   if (result.kind === 'processing') {
+    const progress = videoProgress(result.providerState);
+    const publicationStatus = progress !== null && progress < 100 ? 'uploading' : 'processing';
+    const summary =
+      progress === null
+        ? `بانتظار اكتمال معالجة محتوى ${platform}.`
+        : `تقدم نقل فيديو ${platform}: ${progress}٪.`;
     await db
       .update(integrationDeliveryJobs)
       .set({
@@ -350,17 +398,17 @@ async function dispatchDeliveryJob(jobId: number) {
     await db
       .update(socialPublishDestinations)
       .set({
-        publicationStatus: 'processing',
-        providerState: JSON.stringify(result.providerState),
+        publicationStatus,
+        providerState: serializeProviderState(platform, result.providerState),
         lastAttemptAt: new Date(),
       })
       .where(eq(socialPublishDestinations.id, delivery.destination.id));
     await writeAttempt({
       destinationId: delivery.destination.id,
-      operation: 'status',
+      operation: progress === null ? 'status' : 'upload',
       status: 'started',
       correlationId,
-      responseSummary: 'بانتظار اكتمال معالجة حاوية Instagram.',
+      responseSummary: summary,
     });
     return 'processing';
   }

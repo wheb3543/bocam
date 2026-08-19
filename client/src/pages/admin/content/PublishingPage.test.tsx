@@ -114,4 +114,35 @@ describe('PublishingPage', () => {
 
     expect(mocks.retryDestination).toHaveBeenCalledWith({ destinationId: 99 });
   });
+
+  it('يعرض تقدم رفع فيديو YouTube من التشخيص الآمن للوجهة', () => {
+    mocks.overviewQuery.mockReturnValue({
+      data: {
+        accounts: [],
+        posts: [
+          {
+            post: { id: 77, title: 'فيديو توعوي', status: 'publishing', contentType: 'video', baseCaption: 'وصف', scheduledAt: null },
+            destinations: [
+              {
+                destination: { id: 101, platform: 'youtube', publicationStatus: 'uploading' },
+                videoTransfer: { protocol: 'youtube-resumable', mode: null, progressPercent: 50, phase: 'uploading' },
+              },
+            ],
+            media: [],
+            attempts: [],
+            deliveryJobs: [],
+          },
+        ],
+        totals: { connectedAccounts: 0, draft: 0, awaitingReview: 0, scheduled: 0 },
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
+
+    render(React.createElement(PublishingPage));
+
+    expect(screen.getByText('رفع 50٪')).toBeInTheDocument();
+    expect(screen.queryByText(/upload\.youtube\.test/)).not.toBeInTheDocument();
+  });
 });
