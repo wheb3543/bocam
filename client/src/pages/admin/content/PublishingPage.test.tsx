@@ -62,12 +62,18 @@ describe('PublishingPage', () => {
   it('يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة', () => {
     render(React.createElement(PublishingPage));
 
-    expect(screen.getByRole('heading', { name: 'من غرفة التحرير إلى كل منصة' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'النشر متعدد المنصات' })).toBeInTheDocument();
+    expect(screen.getByText('1. أنشئ المسودة')).toBeInTheDocument();
+    expect(screen.getByText('4. راقب التوزيع')).toBeInTheDocument();
     expect(screen.getAllByText('فيسبوك').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Instagram').length).toBeGreaterThan(0);
     expect(screen.getAllByText('YouTube').length).toBeGreaterThan(0);
     expect(screen.getAllByText('TikTok').length).toBeGreaterThan(0);
     expect(screen.getAllByText('يتطلب OAuth').length).toBe(6);
+    expect(screen.getByRole('button', { name: /فيسبوك/ })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
   });
 
   it('ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار', () => {

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -193,44 +194,84 @@ export default function PublishingPage() {
       pageDescription="تخطيط المحتوى ومراجعته وتوزيعه بأمان"
     >
       <div dir="rtl" className="space-y-6 pb-10">
-        <section className="overflow-hidden rounded-3xl border border-sky-100 bg-gradient-to-l from-sky-50 via-white to-indigo-50 p-6 shadow-sm dark:border-slate-800 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800 dark:bg-sky-950 dark:text-sky-200">
-                <ShieldCheck className="h-3.5 w-3.5" /> تحكم مركزي مع موافقة قبل التنفيذ
-              </div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950 dark:text-white">
-                من غرفة التحرير إلى كل منصة
-              </h1>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                أنشئ مسودة واحدة، خصّص وجهاتها، واختر توقيت النشر. لا يتم إرسال أي محتوى خارجي قبل
-                اتصال الحسابات والموافقة المطلوبة.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {[
-                ['حسابات متصلة', totals?.connectedAccounts ?? 0],
-                ['مسودات', totals?.draft ?? 0],
-                ['للمراجعة', totals?.awaitingReview ?? 0],
-                ['مجدولة', totals?.scheduled ?? 0],
-              ].map(([label, value]) => (
-                <div
-                  key={String(label)}
-                  className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900/80"
-                >
-                  <div className="text-xl font-black text-slate-950 dark:text-white">{value}</div>
-                  <div className="mt-1 text-[11px] font-medium text-slate-500">{label}</div>
+        <AdminPageHeader
+          eyebrow="غرفة التحرير والنشر"
+          title="النشر متعدد المنصات"
+          description="أنشئ مسودة واحدة، جهّز وجهاتها، ثم أرسلها للموافقة أو الجدولة. يبقى النشر الخارجي محمياً حتى يكتمل ربط الحسابات والصلاحيات."
+          status={
+            <>
+              <Badge variant="outline" className="h-9 border-primary/20 bg-primary/5 text-primary">
+                {totals?.connectedAccounts ?? 0} حساب متصل
+              </Badge>
+              <Badge variant="outline" className="h-9 border-amber-200 bg-amber-50 text-amber-800">
+                {totals?.awaitingReview ?? 0} للمراجعة
+              </Badge>
+              <Badge
+                variant="outline"
+                className="h-9 border-border bg-muted/40 text-muted-foreground"
+              >
+                {totals?.scheduled ?? 0} مجدول
+              </Badge>
+            </>
+          }
+          actions={
+            <Button
+              variant="outline"
+              className="min-h-10"
+              onClick={() => workspaceQuery.refetch()}
+              disabled={workspaceQuery.isFetching}
+            >
+              {workspaceQuery.isFetching ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : null}
+              تحديث الحالة
+            </Button>
+          }
+        />
+
+        <section aria-label="مراحل سير النشر" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            {
+              icon: FileText,
+              label: '1. أنشئ المسودة',
+              detail: `${totals?.draft ?? 0} مسودة مفتوحة`,
+            },
+            {
+              icon: ShieldCheck,
+              label: '2. أرسل للموافقة',
+              detail: `${totals?.awaitingReview ?? 0} بانتظار القرار`,
+            },
+            {
+              icon: CalendarClock,
+              label: '3. حدد الموعد',
+              detail: `${totals?.scheduled ?? 0} منشور مجدول`,
+            },
+            { icon: Send, label: '4. راقب التوزيع', detail: 'يبدأ بعد اكتمال الربط' },
+          ].map((step) => {
+            const StepIcon = step.icon;
+            return (
+              <div
+                key={step.label}
+                className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <StepIcon className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{step.label}</p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">{step.detail}</p>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            );
+          })}
         </section>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]">
           <Card className="border-slate-200 shadow-sm dark:border-slate-800">
             <CardHeader className="border-b border-slate-100 pb-4 dark:border-slate-800">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Send className="h-5 w-5 text-sky-600" /> إنشاء مسودة جديدة
+                <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+                  1
+                </span>
+                <Send className="h-5 w-5 text-primary" /> إنشاء مسودة جديدة
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
@@ -249,7 +290,7 @@ export default function PublishingPage() {
                   <select
                     value={contentType}
                     onChange={(event) => setContentType(event.target.value as ContentType)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm"
+                    className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <option value="post">منشور نصي</option>
                     <option value="image">منشور صور</option>
@@ -267,10 +308,13 @@ export default function PublishingPage() {
                   value={caption}
                   onChange={(event) => setCaption(event.target.value)}
                   placeholder="اكتب الرسالة الأساسية. ستُنشأ منها نسخة قابلة للتخصيص لكل منصة."
-                  className="min-h-32 resize-y leading-7"
+                  className="min-h-36 resize-y leading-7"
                   maxLength={10000}
                 />
-                <span className="block text-left text-xs font-normal text-slate-400">
+                <span
+                  className="block text-left text-xs font-normal tabular-nums text-muted-foreground"
+                  aria-live="polite"
+                >
                   {caption.length.toLocaleString('ar-SA')} / 10,000
                 </span>
               </label>
@@ -280,7 +324,7 @@ export default function PublishingPage() {
                   <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">
                     المنصات والوجهات
                   </h2>
-                  <span className="text-xs text-slate-500">
+                  <span className="hidden text-xs text-muted-foreground sm:inline">
                     يتحقق الخادم من اتصال الحساب قبل النشر الحي
                   </span>
                 </div>
@@ -293,33 +337,42 @@ export default function PublishingPage() {
                         type="button"
                         key={platform.id}
                         onClick={() => togglePlatform(platform.id)}
-                        className={`flex items-center justify-between rounded-2xl border p-3 text-right transition ${selected ? 'border-sky-500 bg-sky-50 ring-1 ring-sky-500 dark:bg-sky-950/40' : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950'}`}
+                        aria-pressed={selected}
+                        className={`flex min-h-14 items-center justify-between rounded-2xl border p-3 text-right transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? 'border-primary bg-primary/5 ring-1 ring-primary dark:bg-primary/10' : 'border-border bg-card hover:border-primary/40'}`}
                       >
                         <PlatformMark platform={platform.id} />
-                        <span
-                          className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-500' : 'bg-amber-400'}`}
-                          aria-label={connected ? 'متصل' : 'بانتظار الربط'}
-                        />
+                        <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                          <span
+                            className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-500' : 'bg-amber-400'}`}
+                            aria-hidden="true"
+                          />
+                          {connected ? 'متصل' : 'بانتظار الربط'}
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="space-y-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+              <div className="space-y-3 rounded-2xl border border-dashed border-primary/20 bg-primary/5 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <ImagePlus className="h-4 w-4 text-sky-600" />
+                    <ImagePlus className="h-4 w-4 text-primary" />
                     <h2 className="text-sm font-bold">اختيار من مكتبة الوسائط</h2>
                   </div>
-                  <span className="text-xs text-slate-500">{selectedMediaIds.length} أصل محدد</span>
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    {selectedMediaIds.length} أصل محدد
+                  </span>
                 </div>
                 {mediaQuery.isLoading ? (
-                  <div className="flex items-center gap-2 py-3 text-sm text-slate-500">
+                  <div
+                    className="flex items-center gap-2 py-3 text-sm text-muted-foreground"
+                    role="status"
+                  >
                     <Loader2 className="h-4 w-4 animate-spin" /> جارِ تحميل الوسائط…
                   </div>
                 ) : (
-                  <div className="grid max-h-44 grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-4">
+                  <div className="grid max-h-56 grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-4">
                     {(mediaQuery.data ?? []).slice(-16).map((asset) => {
                       const selected = selectedMediaIds.includes(asset.id);
                       return (
@@ -327,7 +380,8 @@ export default function PublishingPage() {
                           type="button"
                           key={asset.id}
                           onClick={() => toggleMedia(asset.id)}
-                          className={`overflow-hidden rounded-xl border text-right transition ${selected ? 'border-sky-500 ring-2 ring-sky-200' : 'border-slate-200 dark:border-slate-700'}`}
+                          aria-pressed={selected}
+                          className={`overflow-hidden rounded-xl border text-right transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? 'border-primary ring-2 ring-primary/30' : 'border-border bg-card hover:border-primary/40'}`}
                         >
                           <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800">
                             {asset.type === 'image' ? (
@@ -342,7 +396,7 @@ export default function PublishingPage() {
                               </div>
                             )}
                           </div>
-                          <p className="truncate px-2 py-1.5 text-[11px] text-slate-600 dark:text-slate-300">
+                          <p className="truncate px-2 py-2 text-[11px] text-muted-foreground">
                             {asset.fileName || asset.type}
                           </p>
                         </button>
@@ -357,11 +411,11 @@ export default function PublishingPage() {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-100 pt-5 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-5">
                 <Button
                   onClick={submitDraft}
                   disabled={createDraft.isPending}
-                  className="gap-2 bg-sky-600 hover:bg-sky-700"
+                  className="min-h-10 w-full gap-2 sm:w-auto"
                 >
                   {createDraft.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -441,7 +495,7 @@ export default function PublishingPage() {
                   return (
                     <div
                       key={post.id}
-                      className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"
+                      className="rounded-2xl border border-border bg-card p-3 sm:p-4"
                     >
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div className="min-w-0">
@@ -454,14 +508,14 @@ export default function PublishingPage() {
                             </Badge>
                             <Badge variant="outline">{post.contentType}</Badge>
                           </div>
-                          <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                          <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
                             {post.baseCaption || 'لا يوجد نص أساسي بعد'}
                           </p>
                           <div className="mt-3 flex flex-wrap items-center gap-2">
                             {entry.destinations.map(({ destination, videoTransfer }) => (
                               <div
                                 key={destination.id}
-                                className="flex items-center gap-1 rounded-lg border border-slate-100 px-2 py-1 dark:border-slate-800"
+                                className="flex items-center gap-1 rounded-lg border border-border bg-muted/20 px-2 py-1"
                               >
                                 <PlatformMark platform={destination.platform as Platform} compact />
                                 <span className="mr-1 text-[10px] text-slate-500">
@@ -481,7 +535,7 @@ export default function PublishingPage() {
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="h-6 px-1.5 text-[10px] text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                                    className="min-h-9 px-2 text-[10px] text-destructive hover:bg-destructive/10 hover:text-destructive"
                                     onClick={() =>
                                       retryDestination.mutate({ destinationId: destination.id })
                                     }
@@ -532,11 +586,12 @@ export default function PublishingPage() {
                                 type="datetime-local"
                                 value={scheduleValue}
                                 onChange={(event) => setScheduleValue(event.target.value)}
-                                className="h-8 w-48 text-xs"
+                                className="min-h-10 w-full text-xs sm:w-48"
                               />
                               <Button
                                 size="sm"
                                 variant="outline"
+                                className="min-h-10"
                                 disabled={!scheduleValue || schedule.isPending}
                                 onClick={() =>
                                   schedule.mutate({
