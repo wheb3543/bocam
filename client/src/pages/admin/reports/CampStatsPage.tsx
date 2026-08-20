@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { toast } from 'sonner';
 import { useCampStats } from '@/hooks/camp/useCampStats';
 import CampStatsCards from '@/components/camp/CampStatsCards';
@@ -37,7 +38,11 @@ export default function CampStatsPage() {
 
   if (campStats.isLoading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout
+        pageTitle="إحصائيات المخيمات"
+        pageDescription="تقارير وإحصائيات شاملة لتسجيلات المخيمات"
+        pageHeader="none"
+      >
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -46,33 +51,37 @@ export default function CampStatsPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      pageTitle="إحصائيات المخيمات"
+      pageDescription="تقارير وإحصائيات شاملة لتسجيلات المخيمات"
+      pageHeader="none"
+    >
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">إحصائيات المخيمات</h1>
-            <p className="text-muted-foreground">تقارير وإحصائيات شاملة لتسجيلات المخيمات</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleRefresh}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              تحديث
-            </Button>
-            <CampStatsExport
-              selectedCamp={selectedCamp}
-              camps={campStats.camps}
-              stats={campStats.stats}
-              statusData={campStats.statusData}
-              ageData={campStats.ageData}
-              genderData={campStats.genderData}
-              sourceData={campStats.sourceData}
-              procedureData={campStats.procedureData}
-              registrations={campStats.registrations}
-              timeMetrics={timeMetrics}
-            />
-          </div>
-        </div>
+        <AdminPageHeader
+          eyebrow="تقارير التسجيل"
+          title="إحصائيات المخيمات"
+          description="تقارير وإحصائيات شاملة لتسجيلات المخيمات."
+          actions={
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={handleRefresh}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                تحديث
+              </Button>
+              <CampStatsExport
+                selectedCamp={selectedCamp}
+                camps={campStats.camps}
+                stats={campStats.stats}
+                statusData={campStats.statusData}
+                ageData={campStats.ageData}
+                genderData={campStats.genderData}
+                sourceData={campStats.sourceData}
+                procedureData={campStats.procedureData}
+                registrations={campStats.registrations}
+                timeMetrics={timeMetrics}
+              />
+            </div>
+          }
+        />
 
         {/* Filters */}
         <div className="flex gap-4 items-center">

@@ -1,4 +1,5 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { trpc } from '@/lib/api/trpc';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +43,9 @@ export default function PWAStatsPage() {
   const totalInstalls = stats?.total ?? 0;
 
   const platformData = useMemo(() => {
-    if (!stats?.recentInstalls) {return [];}
+    if (!stats?.recentInstalls) {
+      return [];
+    }
     // تجميع المنصات من recentInstalls
     const platformMap = new Map<string, number>();
     stats.recentInstalls.forEach((install: Record<string, unknown>) => {
@@ -54,7 +57,9 @@ export default function PWAStatsPage() {
 
   // Prepare daily stats for chart
   const chartData = useMemo(() => {
-    if (!stats?.dailyStats) {return [];}
+    if (!stats?.dailyStats) {
+      return [];
+    }
     const dailyMap = new Map<string, { public: number; admin: number }>();
 
     stats.dailyStats.forEach((stat: Record<string, unknown>) => {
@@ -65,9 +70,9 @@ export default function PWAStatsPage() {
       const existing = dailyMap.get(date);
       if (existing) {
         if (stat.appType === 'public') {
-          existing.public += (stat.count as number);
+          existing.public += stat.count as number;
         } else {
-          existing.admin += (stat.count as number);
+          existing.admin += stat.count as number;
         }
       }
     });
@@ -114,36 +119,35 @@ export default function PWAStatsPage() {
     <DashboardLayout
       pageTitle="إحصائيات PWA"
       pageDescription="تتبع عمليات تثبيت تطبيقات الويب التقدمية"
+      pageHeader="none"
     >
       <div className="p-6 space-y-6">
-        {/* Header with Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">إحصائيات PWA</h1>
-            <p className="text-muted-foreground text-sm">
-              تتبع عمليات تثبيت تطبيقات الويب التقدمية
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={autoRefresh ? 'bg-green-50 border-green-200' : ''}
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
-              {autoRefresh ? 'إيقاف التحديث' : 'تحديث تلقائي'}
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleRefresh}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              تحديث
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" />
-              تصدير
-            </Button>
-          </div>
-        </div>
+        <AdminPageHeader
+          eyebrow="تحليلات المنصة"
+          title="إحصائيات PWA"
+          description="تتبع عمليات تثبيت تطبيقات الويب التقدمية."
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={autoRefresh ? 'bg-green-50 border-green-200' : ''}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+                {autoRefresh ? 'إيقاف التحديث' : 'تحديث تلقائي'}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleRefresh}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                تحديث
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                <Download className="w-4 h-4 mr-2" />
+                تصدير
+              </Button>
+            </div>
+          }
+        />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -399,7 +403,10 @@ export default function PWAStatsPage() {
                   </thead>
                   <tbody>
                     {stats.recentInstalls.map((install: Record<string, unknown>) => (
-                      <tr key={install.id as string} className="border-b last:border-0 hover:bg-muted/30">
+                      <tr
+                        key={install.id as string}
+                        className="border-b last:border-0 hover:bg-muted/30"
+                      >
                         <td className="py-2 px-3">
                           <Badge
                             variant="secondary"
@@ -413,7 +420,7 @@ export default function PWAStatsPage() {
                           </Badge>
                         </td>
                         <td className="py-2 px-3 text-muted-foreground">
-                          {install.platform as ReactNode || 'غير معروف'}
+                          {(install.platform as ReactNode) || 'غير معروف'}
                         </td>
                         <td className="py-2 px-3 text-muted-foreground">
                           {install.installedAt

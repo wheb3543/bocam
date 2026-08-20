@@ -30,6 +30,11 @@ describe('تعميم رأس صفحة SGH الإداري', () => {
     'client/src/pages/admin/content/PublishingPage.tsx',
     'client/src/pages/admin/media/MediaLibraryPage.tsx',
     'client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx',
+    'client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx',
+    'client/src/pages/admin/reports/BIPage.tsx',
+    'client/src/pages/admin/reports/CampStatsPage.tsx',
+    'client/src/pages/admin/reports/PWAStatsPage.tsx',
+    'client/src/pages/admin/teams/MediaTeamPage.tsx',
   ])('يحافظ على الرأس المتخصص في %s', (pagePath) => {
     expect(readSource(pagePath)).toContain('pageHeader="none"');
   });

@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Loader2, Plus, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -65,25 +66,27 @@ export default function DigitalMarketingTasksPage() {
     <DashboardLayout
       pageTitle="مهام التسويق الرقمي"
       pageDescription="إدارة مهام فريق التسويق الرقمي"
+      pageHeader="none"
     >
       <div className="space-y-4 md:space-y-6" dir="rtl">
-        {/* Header */}
-        <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">إدارة مهام فريق التسويق الرقمي</h1>
-            <p className="text-sm text-muted-foreground">إنشاء وتوزيع ومتابعة المهام</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9">
-              <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </Button>
-            <Button onClick={handleCreateNew} className="h-9 text-sm">
-              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1.5 sm:me-2" />
-              <span className="hidden sm:inline">مهمة جديدة</span>
-              <span className="sm:hidden">جديد</span>
-            </Button>
-          </div>
-        </div>
+        <AdminPageHeader
+          eyebrow="التسويق الرقمي"
+          title="إدارة مهام فريق التسويق الرقمي"
+          description="إنشاء وتوزيع ومتابعة مهام الفريق من لوحة عمل واحدة."
+          actions={
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9">
+                <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="sr-only">تحديث المهام</span>
+              </Button>
+              <Button onClick={handleCreateNew} className="h-9 text-sm">
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1.5 sm:me-2" />
+                <span className="hidden sm:inline">مهمة جديدة</span>
+                <span className="sm:hidden">جديد</span>
+              </Button>
+            </div>
+          }
+        />
 
         {/* Stats Cards */}
         <TaskStatsCards stats={stats} />
