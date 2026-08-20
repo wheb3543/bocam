@@ -28,7 +28,6 @@ import {
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
 
 interface SentMessage {
@@ -218,28 +217,22 @@ export default function WhatsAppIntegration() {
   return (
     <DashboardLayout
       pageTitle="تكامل WhatsApp Cloud API"
-      pageDescription="إدارة وإرسال رسائل WhatsApp المعتمدة"
-      pageHeader="none"
+      pageDescription="إرسال رسائل WhatsApp المعتمدة من Meta وإدارة القوالب الجاهزة"
     >
       <div className="container px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6">
         <div className="mb-6 md:mb-8">
-          <AdminPageHeader
-            eyebrow="قنوات التواصل"
-            title="تكامل WhatsApp Cloud API"
-            description="إرسال رسائل WhatsApp المعتمدة من Meta إلى عملائك."
-            actions={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetchTemplates()}
-                disabled={templatesLoading}
-                className="gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                تحديث
-              </Button>
-            }
-          />
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetchTemplates()}
+              disabled={templatesLoading}
+              className="gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              تحديث
+            </Button>
+          </div>
 
           {/* Status Alert */}
           <Alert className="mt-4 border-green-200 bg-green-50">

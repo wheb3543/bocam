@@ -1,5 +1,4 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { trpc } from '@/lib/api/trpc';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -119,35 +118,27 @@ export default function PWAStatsPage() {
     <DashboardLayout
       pageTitle="إحصائيات PWA"
       pageDescription="تتبع عمليات تثبيت تطبيقات الويب التقدمية"
-      pageHeader="none"
     >
       <div className="p-6 space-y-6">
-        <AdminPageHeader
-          eyebrow="تحليلات المنصة"
-          title="إحصائيات PWA"
-          description="تتبع عمليات تثبيت تطبيقات الويب التقدمية."
-          actions={
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setAutoRefresh(!autoRefresh)}
-                className={autoRefresh ? 'bg-green-50 border-green-200' : ''}
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
-                {autoRefresh ? 'إيقاف التحديث' : 'تحديث تلقائي'}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleRefresh}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                تحديث
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="w-4 h-4 mr-2" />
-                تصدير
-              </Button>
-            </div>
-          }
-        />
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            className={autoRefresh ? 'bg-green-50 border-green-200' : ''}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+            {autoRefresh ? 'إيقاف التحديث' : 'تحديث تلقائي'}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            تحديث
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="w-4 h-4 mr-2" />
+            تصدير
+          </Button>
+        </div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

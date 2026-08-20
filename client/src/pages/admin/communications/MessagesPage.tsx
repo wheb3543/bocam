@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -230,41 +229,33 @@ export default function MessagesPage() {
   return (
     <DashboardLayout
       pageTitle="صندوق البريد الموحد"
-      pageDescription="إدارة الرسائل والتعليقات من المنصات الاجتماعية في مكان واحد"
-      pageHeader="none"
+      pageDescription="اجمع الرسائل والتعليقات الواردة من قنواتك الاجتماعية في شاشة واحدة"
     >
       <div dir="rtl" className="container space-y-5 py-4 md:space-y-6 md:py-6">
         <div className="space-y-3">
-          <AdminPageHeader
-            eyebrow="التواصل الاجتماعي"
-            title="صندوق البريد الموحد"
-            description="اجمع الرسائل والتعليقات الواردة من قنواتك الاجتماعية في شاشة واحدة، مع الاحتفاظ بمصدر كل تفاعل وحالته."
-            status={
-              <Badge
-                variant="outline"
-                className="h-9 gap-1.5 rounded-lg border-primary/20 bg-primary/5 px-3 text-primary"
-              >
-                <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" />
-                {connectedAccounts} حساب متصل
-              </Badge>
-            }
-            actions={
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9"
-                onClick={handleRefresh}
-                disabled={threadsQuery.isFetching}
-                aria-label="تحديث صندوق البريد"
-              >
-                {threadsQuery.isFetching ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-              </Button>
-            }
-          />
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Badge
+              variant="outline"
+              className="h-9 gap-1.5 rounded-lg border-primary/20 bg-primary/5 px-3 text-primary"
+            >
+              <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" />
+              {connectedAccounts} حساب متصل
+            </Badge>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9"
+              onClick={handleRefresh}
+              disabled={threadsQuery.isFetching}
+              aria-label="تحديث صندوق البريد"
+            >
+              {threadsQuery.isFetching ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
 
           <div
             className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4"

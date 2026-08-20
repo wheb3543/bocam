@@ -15,7 +15,6 @@ interface BlockedPhone {
 type BlockReason = 'manual' | 'opt_out' | 'spam' | 'invalid';
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -321,26 +320,18 @@ export default function WhatsAppCompliance() {
     <DashboardLayout
       pageTitle="الامتثال والأمان"
       pageDescription="إدارة الامتثال مع معايير Meta والأمان"
-      pageHeader="none"
     >
       <div className="space-y-6">
-        <AdminPageHeader
-          eyebrow="قنوات التواصل"
-          title="الامتثال والأمان"
-          description="إدارة الامتثال مع معايير Meta والأمان."
-          actions={
-            <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-                <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
-                تحديث
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExportData}>
-                <Download className="w-4 h-4 ml-2" />
-                تصدير
-              </Button>
-            </div>
-          }
-        />
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+            <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
+            تحديث
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportData}>
+            <Download className="w-4 h-4 ml-2" />
+            تصدير
+          </Button>
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { trpc } from '@/lib/api/trpc';
 import { IntegrationConnectionsPanel } from './IntegrationConnectionsPanel';
@@ -193,20 +192,14 @@ export default function MetaIntegrationSettingsPage() {
     return (
       <DashboardLayout
         pageTitle="إعدادات الربط العامة"
-        pageDescription="إدارة اتصالات منصات التواصل بأمان"
-        pageHeader="none"
+        pageDescription="تتطلب هذه المساحة صلاحية المسؤول لحماية الحسابات والأسرار المرتبطة بالمنصات"
       >
         <main dir="rtl" className="container max-w-5xl space-y-5 py-5 sm:py-8">
-          <AdminPageHeader
-            eyebrow="إدارة الاتصالات"
-            title="إعدادات الربط العامة"
-            description="تتطلب هذه المساحة صلاحية المسؤول لحماية الحسابات والأسرار المرتبطة بالمنصات."
-            status={
-              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
-                وصول مقيّد
-              </Badge>
-            }
-          />
+          <div className="flex justify-end">
+            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
+              وصول مقيّد
+            </Badge>
+          </div>
           <Alert className="border-amber-200 bg-amber-50">
             <ShieldAlert className="h-4 w-4 text-amber-700" />
             <AlertTitle>صلاحية المسؤول مطلوبة</AlertTitle>
@@ -222,39 +215,29 @@ export default function MetaIntegrationSettingsPage() {
   return (
     <DashboardLayout
       pageTitle="إعدادات الربط العامة"
-      pageDescription="إدارة ربط Meta وX وLinkedIn وYouTube وTikTok من مكان واحد"
-      pageHeader="none"
+      pageDescription="إدارة ربط Meta وX وLinkedIn وYouTube وTikTok بأمان من مكان واحد"
     >
       <main dir="rtl" className="container max-w-5xl space-y-5 py-5 sm:py-8">
-        <AdminPageHeader
-          eyebrow="إدارة الاتصالات"
-          title="إعدادات الربط العامة"
-          description="أدر تطبيقات Meta وX وLinkedIn وYouTube وTikTok من مساحة واحدة. تبقى الأسرار مشفّرة ولا تعود إلى المتصفح بعد الحفظ."
-          status={
-            <Badge
-              variant="outline"
-              className={
-                statusQuery.data?.isEnabled ||
-                generalStatusQuery.data?.some((item) => item.isEnabled)
-                  ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                  : 'border-muted-foreground/20 bg-muted text-muted-foreground'
-              }
-            >
-              {statusQuery.data?.isEnabled ||
-              generalStatusQuery.data?.some((item) => item.isEnabled)
-                ? 'توجد تكاملات مفعّلة'
-                : 'لم يبدأ الربط بعد'}
-            </Badge>
-          }
-          actions={
-            <Button asChild className="min-h-10">
-              <a href="#platform-connections">
-                <KeyRound className="ml-2 h-4 w-4" />
-                تجهيز منصة
-              </a>
-            </Button>
-          }
-        />
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Badge
+            variant="outline"
+            className={
+              statusQuery.data?.isEnabled || generalStatusQuery.data?.some((item) => item.isEnabled)
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                : 'border-muted-foreground/20 bg-muted text-muted-foreground'
+            }
+          >
+            {statusQuery.data?.isEnabled || generalStatusQuery.data?.some((item) => item.isEnabled)
+              ? 'توجد تكاملات مفعّلة'
+              : 'لم يبدأ الربط بعد'}
+          </Badge>
+          <Button asChild className="min-h-10">
+            <a href="#platform-connections">
+              <KeyRound className="ml-2 h-4 w-4" />
+              تجهيز منصة
+            </a>
+          </Button>
+        </div>
 
         <Alert className="border-blue-200 bg-blue-50/70">
           <LockKeyhole className="h-4 w-4 text-blue-700" />

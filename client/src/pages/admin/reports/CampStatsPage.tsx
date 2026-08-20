@@ -14,7 +14,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { toast } from 'sonner';
 import { useCampStats } from '@/hooks/camp/useCampStats';
 import CampStatsCards from '@/components/camp/CampStatsCards';
@@ -41,7 +40,6 @@ export default function CampStatsPage() {
       <DashboardLayout
         pageTitle="إحصائيات المخيمات"
         pageDescription="تقارير وإحصائيات شاملة لتسجيلات المخيمات"
-        pageHeader="none"
       >
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -54,34 +52,26 @@ export default function CampStatsPage() {
     <DashboardLayout
       pageTitle="إحصائيات المخيمات"
       pageDescription="تقارير وإحصائيات شاملة لتسجيلات المخيمات"
-      pageHeader="none"
     >
       <div className="space-y-6">
-        <AdminPageHeader
-          eyebrow="تقارير التسجيل"
-          title="إحصائيات المخيمات"
-          description="تقارير وإحصائيات شاملة لتسجيلات المخيمات."
-          actions={
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={handleRefresh}>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                تحديث
-              </Button>
-              <CampStatsExport
-                selectedCamp={selectedCamp}
-                camps={campStats.camps}
-                stats={campStats.stats}
-                statusData={campStats.statusData}
-                ageData={campStats.ageData}
-                genderData={campStats.genderData}
-                sourceData={campStats.sourceData}
-                procedureData={campStats.procedureData}
-                registrations={campStats.registrations}
-                timeMetrics={timeMetrics}
-              />
-            </div>
-          }
-        />
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button variant="outline" onClick={handleRefresh}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            تحديث
+          </Button>
+          <CampStatsExport
+            selectedCamp={selectedCamp}
+            camps={campStats.camps}
+            stats={campStats.stats}
+            statusData={campStats.statusData}
+            ageData={campStats.ageData}
+            genderData={campStats.genderData}
+            sourceData={campStats.sourceData}
+            procedureData={campStats.procedureData}
+            registrations={campStats.registrations}
+            timeMetrics={timeMetrics}
+          />
+        </div>
 
         {/* Filters */}
         <div className="flex gap-4 items-center">

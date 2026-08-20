@@ -1,7 +1,6 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -262,56 +261,44 @@ export default function MediaTeamPage() {
   return (
     <DashboardLayout
       pageTitle="فريق وحدة الإعلام"
-      pageDescription="إدارة مهام الإنتاج الإعلامي"
-      pageHeader="none"
+      pageDescription="إدارة مهام الإنتاج الإعلامي للفيديو والتصميم والتصوير والمونتاج"
     >
       <div className="container py-4 md:py-6 lg:py-8" dir="rtl">
-        <AdminPageHeader
-          eyebrow="فرق العمل"
-          title="فريق وحدة الإعلام"
-          description="إدارة مهام الإنتاج الإعلامي، بما يشمل الفيديو والتصميم والتصوير والمونتاج."
-          actions={
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => refetchTasks()}
-                className="h-9 w-9"
-              >
-                <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button variant="outline" size="icon" onClick={() => refetchTasks()} className="h-9 w-9">
+            <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="sr-only">تحديث المهام</span>
+          </Button>
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="h-9 text-sm">
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-1.5 sm:ml-2" />
+                <span className="hidden sm:inline">مهمة جديدة</span>
+                <span className="sm:hidden">جديد</span>
               </Button>
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="h-9 text-sm">
-                    <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-1.5 sm:ml-2" />
-                    <span className="hidden sm:inline">مهمة جديدة</span>
-                    <span className="sm:hidden">جديد</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>إنشاء مهمة جديدة</DialogTitle>
-                    <DialogDescription>أضف مهمة جديدة لفريق وحدة الإعلام</DialogDescription>
-                  </DialogHeader>
-                  <TaskForm
-                    formData={formData}
-                    onFormDataChange={setFormData}
-                    users={users}
-                    campaigns={campaigns}
-                  />
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                      إلغاء
-                    </Button>
-                    <Button onClick={handleCreateTask} disabled={createTaskMutation.isPending}>
-                      {createTaskMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء المهمة'}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          }
-        />
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>إنشاء مهمة جديدة</DialogTitle>
+                <DialogDescription>أضف مهمة جديدة لفريق وحدة الإعلام</DialogDescription>
+              </DialogHeader>
+              <TaskForm
+                formData={formData}
+                onFormDataChange={setFormData}
+                users={users}
+                campaigns={campaigns}
+              />
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                  إلغاء
+                </Button>
+                <Button onClick={handleCreateTask} disabled={createTaskMutation.isPending}>
+                  {createTaskMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء المهمة'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
 
         {/* Stats Cards */}
         <MediaStats stats={stats} />

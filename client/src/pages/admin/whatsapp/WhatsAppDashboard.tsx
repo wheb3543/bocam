@@ -6,7 +6,6 @@
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -33,9 +32,8 @@ import {
 export default function WhatsAppDashboard() {
   return (
     <DashboardLayout
-      pageTitle="الرسائل والمحادثات"
-      pageDescription="إدارة الرسائل والمحادثات عبر واتساب"
-      pageHeader="none"
+      pageTitle="لوحة تحكم WhatsApp"
+      pageDescription="إدارة وإرسال الرسائل عبر WhatsApp ومراقبة جاهزية الخدمة"
     >
       <WhatsAppDashboardContent />
     </DashboardLayout>
@@ -150,12 +148,6 @@ function WhatsAppDashboardContent() {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <AdminPageHeader
-        eyebrow="قنوات التواصل"
-        title="لوحة تحكم WhatsApp"
-        description="إدارة وإرسال الرسائل عبر WhatsApp ومراقبة جاهزية الخدمة."
-      />
-
       {/* Health Status */}
       <Card>
         <CardHeader>

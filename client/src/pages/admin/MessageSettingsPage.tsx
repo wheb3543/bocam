@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -127,9 +126,8 @@ const triggerEventLabels: Record<string, string> = {
 export default function MessageSettingsPage() {
   return (
     <DashboardLayout
-      pageTitle="إعدادات الرسائل"
-      pageDescription="تكوين إعدادات الرسائل والإشعارات"
-      pageHeader="none"
+      pageTitle="إعدادات الرسائل التلقائية"
+      pageDescription="إدارة وتخصيص الرسائل التلقائية وقوالب الإشعارات"
     >
       <MessageSettingsContent />
     </DashboardLayout>
@@ -317,31 +315,24 @@ function MessageSettingsContent() {
 
   return (
     <div className="space-y-4 md:space-y-6" dir="rtl">
-      <AdminPageHeader
-        eyebrow="إدارة الاتصالات"
-        title="إعدادات الرسائل التلقائية"
-        description="إدارة وتخصيص جميع الرسائل التلقائية وقوالب الإشعارات."
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => syncTemplatesMutation.mutate()}
-              disabled={syncTemplatesMutation.isPending}
-              className="gap-1.5"
-            >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${syncTemplatesMutation.isPending ? 'animate-spin' : ''}`}
-              />
-              مزامنة القوالب
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
-              <RefreshCw className="h-3.5 w-3.5" />
-              تحديث
-            </Button>
-          </div>
-        }
-      />
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => syncTemplatesMutation.mutate()}
+          disabled={syncTemplatesMutation.isPending}
+          className="gap-1.5"
+        >
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${syncTemplatesMutation.isPending ? 'animate-spin' : ''}`}
+          />
+          مزامنة القوالب
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
+          <RefreshCw className="h-3.5 w-3.5" />
+          تحديث
+        </Button>
+      </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-3 gap-3">
