@@ -363,7 +363,7 @@ export default function MetaCommentContextsPanel({
   const SourceIcon = selectedContext ? sourceIcon(selectedContext) : Inbox;
 
   return (
-    <div className="grid min-h-[620px] lg:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]" dir="rtl">
+    <div className="grid h-full min-h-0 lg:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]" dir="rtl">
       <aside
         className={`${selectedContextId ? 'hidden lg:flex' : 'flex'} min-w-0 flex-col border-l border-border bg-white`}
       >

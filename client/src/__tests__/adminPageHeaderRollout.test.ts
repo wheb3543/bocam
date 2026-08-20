@@ -8,6 +8,9 @@ const readSource = (relativePath: string) =>
 const dashboardLayoutSource = readSource('client/src/components/layout/DashboardLayout.tsx');
 const topNavbarSource = readSource('client/src/components/layout/TopNavbar.tsx');
 const messagesPageSource = readSource('client/src/pages/admin/communications/MessagesPage.tsx');
+const commentContextsSource = readSource(
+  'client/src/pages/admin/communications/MetaCommentContextsPanel.tsx'
+);
 
 describe('مساحات العمل الإدارية دون بطاقة عنوان مكررة', () => {
   it('لا يرسم رأس عنوان مركزياً فوق محتوى الصفحة', () => {
@@ -23,12 +26,19 @@ describe('مساحات العمل الإدارية دون بطاقة عنوان 
     expect(topNavbarSource).toContain('{showPageTitle ? (');
   });
 
-  it('يستبدل رأس صندوق البريد المكرر بشريط حالة وعمليات مدمج', () => {
+  it('يستبدل رأس صندوق البريد المكرر بتبويبات موحدة وإجراءات مضمنة', () => {
     expect(messagesPageSource).not.toContain("import AdminPageHeader from '@/components/layout/AdminPageHeader';");
-    expect(messagesPageSource).toContain('aria-label="حالة وإجراءات صندوق البريد"');
+    expect(messagesPageSource).not.toContain('aria-label="حالة وإجراءات صندوق البريد"');
+    expect(messagesPageSource).toContain('function AccountStatusDots');
+    expect(messagesPageSource).toContain('bg-emerald-500');
+    expect(messagesPageSource).toContain('bg-amber-500');
     expect(messagesPageSource).toContain('تحديث الصندوق');
     expect(messagesPageSource).toContain('id="inbox-tabs"');
-    expect(messagesPageSource).toContain('min-h-[clamp(34rem,calc(100dvh-18rem),46rem)]');
+    expect(messagesPageSource).toContain('DropdownMenuCheckboxItem');
+    expect(messagesPageSource).toContain('sgh-inbox-show-stats');
+    expect(messagesPageSource).toContain('h-[calc(100dvh-4.25rem)]');
+    expect(messagesPageSource).toContain('grid h-full min-h-0');
+    expect(commentContextsSource).toContain('grid h-full min-h-0');
   });
 
   it.each([
