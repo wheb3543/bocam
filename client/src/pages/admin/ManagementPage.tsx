@@ -40,23 +40,27 @@ export default function ManagementPage() {
   return (
     <DashboardLayout pageTitle="الإدارة" pageDescription="إدارة العروض والمخيمات والأطباء">
       {/* Main Content */}
-      <main className="flex-1 container py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto">
+      <main className="container h-[calc(100dvh-4.25rem)] min-h-0 overflow-hidden py-3 sm:py-4">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex h-full min-h-0 flex-col gap-3"
+        >
+          <TabsList className="mx-auto grid w-full max-w-2xl shrink-0 grid-cols-3">
             <TabsTrigger value="offers">إدارة العروض</TabsTrigger>
             <TabsTrigger value="camps">إدارة المخيمات</TabsTrigger>
             <TabsTrigger value="doctors">إدارة الأطباء</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="offers" className="space-y-6">
+          <TabsContent value="offers" className="mt-0 min-h-0 flex-1">
             <OffersManagement />
           </TabsContent>
 
-          <TabsContent value="camps" className="space-y-6">
+          <TabsContent value="camps" className="mt-0 min-h-0 flex-1">
             <CampsManagement />
           </TabsContent>
 
-          <TabsContent value="doctors" className="space-y-6">
+          <TabsContent value="doctors" className="mt-0 min-h-0 flex-1">
             <DoctorsManagement />
           </TabsContent>
         </Tabs>

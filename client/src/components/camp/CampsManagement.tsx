@@ -235,53 +235,63 @@ export default function CampsManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       {/* Stats Cards */}
-      <CampsStats totalCamps={totalCamps} activeCamps={activeCamps} inactiveCamps={inactiveCamps} />
+      <div className="shrink-0">
+        <CampsStats
+          totalCamps={totalCamps}
+          activeCamps={activeCamps}
+          inactiveCamps={inactiveCamps}
+        />
+      </div>
 
       {/* Toolbar */}
-      <CampsToolbar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onAddClick={() => {
-          resetForm();
-          setShowAddDialog(true);
-        }}
-        columnVisibilityProps={campTable.columnVisibilityProps}
-      />
+      <div className="shrink-0">
+        <CampsToolbar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onAddClick={() => {
+            resetForm();
+            setShowAddDialog(true);
+          }}
+          columnVisibilityProps={campTable.columnVisibilityProps}
+        />
+      </div>
 
       {/* Table */}
-      {filteredCamps.length === 0 ? (
-        <div className="bg-white dark:bg-card rounded-xl border border-gray-100 overflow-hidden">
-          <EmptyState
-            icon={Tent}
-            title={searchTerm ? 'لا توجد نتائج مطابقة' : 'لا توجد مخيمات بعد'}
-            description={
-              searchTerm ? 'جرّب تغيير كلمات البحث' : 'ابدأ بإضافة أول مخيم طبي إلى النظام'
-            }
-            action={
-              !searchTerm
-                ? {
-                    label: 'إضافة مخيم جديد',
-                    onClick: () => {
-                      resetForm();
-                      setShowAddDialog(true);
-                    },
-                  }
-                : undefined
-            }
+      <div className="min-h-0 flex-1 overflow-auto rounded-xl">
+        {filteredCamps.length === 0 ? (
+          <div className="overflow-hidden rounded-xl border border-gray-100 bg-white dark:bg-card">
+            <EmptyState
+              icon={Tent}
+              title={searchTerm ? 'لا توجد نتائج مطابقة' : 'لا توجد مخيمات بعد'}
+              description={
+                searchTerm ? 'جرّب تغيير كلمات البحث' : 'ابدأ بإضافة أول مخيم طبي إلى النظام'
+              }
+              action={
+                !searchTerm
+                  ? {
+                      label: 'إضافة مخيم جديد',
+                      onClick: () => {
+                        resetForm();
+                        setShowAddDialog(true);
+                      },
+                    }
+                  : undefined
+              }
+            />
+          </div>
+        ) : (
+          <CampsTable
+            camps={filteredCamps}
+            tableFeatures={{ campTable }}
+            formatDate={formatDate}
+            onEdit={handleEdit}
+            onDuplicate={handleDuplicate}
+            onDelete={(camp) => deleteConfirm.openConfirm(camp)}
           />
-        </div>
-      ) : (
-        <CampsTable
-          camps={filteredCamps}
-          tableFeatures={{ campTable }}
-          formatDate={formatDate}
-          onEdit={handleEdit}
-          onDuplicate={handleDuplicate}
-          onDelete={(camp) => deleteConfirm.openConfirm(camp)}
-        />
-      )}
+        )}
+      </div>
 
       {/* Add/Edit Dialog */}
       <CampFormDialog

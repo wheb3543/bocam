@@ -58,12 +58,14 @@ export default function DoctorsManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       {/* Stats Cards */}
-      <DoctorStatsCards stats={doctorManagement.doctorStats} />
+      <div className="shrink-0">
+        <DoctorStatsCards stats={doctorManagement.doctorStats} />
+      </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <div className="flex shrink-0 flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-1 w-full">
           <div className="relative flex-1 w-full max-w-md">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -83,7 +85,7 @@ export default function DoctorsManagement() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-card rounded-xl border border-gray-100 overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-gray-100 bg-white dark:bg-card">
         <DoctorTable
           doctors={doctorManagement.doctors}
           searchTerm={doctorManagement.searchTerm}

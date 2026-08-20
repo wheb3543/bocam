@@ -258,7 +258,9 @@ export default function OffersManagement() {
   };
 
   const filteredOffers = useMemo(() => {
-    if (!offers) {return [];}
+    if (!offers) {
+      return [];
+    }
     let filtered = [...offers];
 
     if (searchTerm) {
@@ -319,48 +321,48 @@ export default function OffersManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
+      <div className="grid shrink-0 grid-cols-2 gap-2 md:grid-cols-3">
         {/* إجمالي العروض */}
-        <div className="bg-white dark:bg-card rounded-xl border border-gray-100 p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
+        <div className="rounded-lg border border-gray-100 bg-white p-2.5 transition-shadow hover:shadow-md dark:bg-card">
+          <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">إجمالي العروض</span>
             <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
               <Tag className="h-4 w-4 text-blue-600" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-foreground">{totalOffers}</div>
+          <div className="text-lg font-bold text-foreground">{totalOffers}</div>
           <p className="text-[11px] text-muted-foreground mt-0.5">جميع العروض</p>
         </div>
 
         {/* عروض نشطة */}
-        <div className="bg-white dark:bg-card rounded-xl border border-gray-100 p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
+        <div className="rounded-lg border border-gray-100 bg-white p-2.5 transition-shadow hover:shadow-md dark:bg-card">
+          <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">عروض نشطة</span>
             <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
               <CheckCircle2 className="h-4 w-4 text-emerald-600" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-emerald-600">{activeOffers}</div>
+          <div className="text-lg font-bold text-emerald-600">{activeOffers}</div>
           <p className="text-[11px] text-muted-foreground mt-0.5">نشطة حالياً</p>
         </div>
 
         {/* عروض غير نشطة */}
-        <div className="bg-white dark:bg-card rounded-xl border border-gray-100 p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
+        <div className="rounded-lg border border-gray-100 bg-white p-2.5 transition-shadow hover:shadow-md dark:bg-card">
+          <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">غير نشطة</span>
             <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
               <XCircle className="h-4 w-4 text-muted-foreground" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-muted-foreground">{inactiveOffers}</div>
+          <div className="text-lg font-bold text-muted-foreground">{inactiveOffers}</div>
           <p className="text-[11px] text-muted-foreground mt-0.5">معطلة</p>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <div className="flex shrink-0 flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-1 w-full">
           <div className="relative flex-1 w-full max-w-md">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -386,7 +388,7 @@ export default function OffersManagement() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-card rounded-xl border border-gray-100 overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-gray-100 bg-white dark:bg-card">
         {filteredOffers.length === 0 ? (
           <EmptyState
             icon={Tag}
@@ -412,7 +414,9 @@ export default function OffersManagement() {
               <TableRow>
                 {offerTable.visibleColumnOrder.map((colKey) => {
                   const col = offerColumns.find((c) => c.key === colKey);
-                  if (!col || !offerTable.visibleColumns[colKey]) {return null;}
+                  if (!col || !offerTable.visibleColumns[colKey]) {
+                    return null;
+                  }
                   return (
                     <ResizableHeaderCell
                       key={colKey}
@@ -435,7 +439,9 @@ export default function OffersManagement() {
               {filteredOffers.map((offer: Offer) => (
                 <TableRow key={offer.id} className="hover:bg-muted/50/50">
                   {offerTable.visibleColumnOrder.map((colKey) => {
-                    if (!offerTable.visibleColumns[colKey]) {return null;}
+                    if (!offerTable.visibleColumns[colKey]) {
+                      return null;
+                    }
 
                     switch (colKey) {
                       case 'title':

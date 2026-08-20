@@ -167,3 +167,34 @@ describe('التناسق بين الصفحات الثلاث', () => {
     expect(camps).toContain('rounded-xl');
   });
 });
+
+describe('مساحة العمل الداخلية لتبويبات الإدارة', () => {
+  const managementPage = readFileSync(
+    resolve(__dirname, '../../pages/admin/ManagementPage.tsx'),
+    'utf-8'
+  );
+  const doctors = readComponent('DoctorsManagement');
+  const offers = readComponent('offer/OffersManagement');
+  const camps = readComponent('camp/CampsManagement');
+
+  it('تُبقي صفحة الإدارة شريط التبويبات ثابتاً ضمن ارتفاع الشاشة', () => {
+    expect(managementPage).toContain('h-[calc(100dvh-4.25rem)]');
+    expect(managementPage).toContain('flex h-full min-h-0 flex-col');
+    expect(managementPage).toContain('min-h-0 flex-1');
+  });
+
+  it('تحصر تمرير كل تبويب في حاوية سجلاته الداخلية', () => {
+    [doctors, offers, camps].forEach((component) => {
+      expect(component).toContain('flex h-full min-h-0 flex-col');
+      expect(component).toContain('min-h-0 flex-1 overflow-auto');
+    });
+  });
+
+  it('يستخدم تبويب العروض والمخيمات ملخصات أكثر كثافة', () => {
+    expect(offers).toContain('p-2.5');
+    expect(offers).toContain('text-lg font-bold');
+    const campStats = readComponent('camp/CampsStats');
+    expect(campStats).toContain('p-2.5');
+    expect(campStats).toContain('text-lg font-bold');
+  });
+});
