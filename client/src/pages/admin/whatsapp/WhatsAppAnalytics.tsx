@@ -6,6 +6,7 @@
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import FeatureGate from '@/components/FeatureGate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -131,46 +132,50 @@ export default function WhatsAppAnalytics() {
   };
 
   return (
-    <DashboardLayout pageTitle="تحليلات WhatsApp" pageDescription="مراقبة الإحصائيات والأداء">
+    <DashboardLayout
+      pageTitle="تحليلات WhatsApp"
+      pageDescription="مراقبة الإحصائيات والأداء"
+      pageHeader="none"
+    >
       <FeatureGate feature="whatsapp">
         <div className="space-y-6">
-          {/* Header with Actions */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">تحليلات WhatsApp</h1>
-              <p className="text-muted-foreground text-sm">مراقبة الإحصائيات والأداء</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={dateRange}
-                onValueChange={(value: '7d' | '30d' | '90d') => setDateRange(value)}
-              >
-                <SelectTrigger className="w-[140px]">
-                  <Calendar className="h-4 w-4 ml-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="7d">آخر 7 أيام</SelectItem>
-                  <SelectItem value="30d">آخر 30 يوم</SelectItem>
-                  <SelectItem value="90d">آخر 90 يوم</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={messageStatsQuery.isLoading}
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${messageStatsQuery.isLoading ? 'animate-spin' : ''}`}
-                />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="h-4 w-4 ml-2" />
-                تصدير
-              </Button>
-            </div>
-          </div>
+          <AdminPageHeader
+            eyebrow="قنوات التواصل"
+            title="تحليلات WhatsApp"
+            description="مراقبة الإحصائيات والأداء عبر قنوات WhatsApp المتصلة."
+            actions={
+              <div className="flex flex-wrap items-center gap-2">
+                <Select
+                  value={dateRange}
+                  onValueChange={(value: '7d' | '30d' | '90d') => setDateRange(value)}
+                >
+                  <SelectTrigger className="w-[140px]">
+                    <Calendar className="h-4 w-4 ml-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">آخر 7 أيام</SelectItem>
+                    <SelectItem value="30d">آخر 30 يوم</SelectItem>
+                    <SelectItem value="90d">آخر 90 يوم</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={messageStatsQuery.isLoading}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${messageStatsQuery.isLoading ? 'animate-spin' : ''}`}
+                  />
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExport}>
+                  <Download className="h-4 w-4 ml-2" />
+                  تصدير
+                </Button>
+              </div>
+            }
+          />
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
