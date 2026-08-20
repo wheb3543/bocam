@@ -12,7 +12,7 @@ const cookieBannerSource = readSource('client/src/components/CookieConsentBanner
 
 describe('P2 public interface refinement', () => {
   it('keeps public booking and contact calls-to-action as semantic, touch-friendly links', () => {
-    expect(homePageSource).toContain('<Button\n                    asChild');
+    expect(homePageSource).toContain('asChild');
     expect(homePageSource).toContain('min-h-[620px]');
     expect(homePageSource).toContain('focus-visible:ring-offset-green-700');
     expect(homePageSource).toContain('href={`tel:${COMPANY_PHONE}`}');

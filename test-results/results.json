@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 2,
-  "numPassedTestSuites": 2,
+  "numTotalTestSuites": 6,
+  "numPassedTestSuites": 6,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 3,
-  "numPassedTests": 3,
+  "numTotalTests": 9,
+  "numPassedTests": 9,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,9 +24,51 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787195050800,
+  "startTime": 1787195377084,
   "success": true,
   "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["P3 SGH design-system foundation"],
+          "fullName": "P3 SGH design-system foundation defines semantic brand, surface, status, focus, and touch-target tokens",
+          "status": "passed",
+          "title": "defines semantic brand, surface, status, focus, and touch-target tokens",
+          "duration": 2.1573490000000675,
+          "failureMessages": [],
+          "location": { "line": 15, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["P3 SGH design-system foundation"],
+          "fullName": "P3 SGH design-system foundation documents semantic-color and accessible interaction rules",
+          "status": "passed",
+          "title": "documents semantic-color and accessible interaction rules",
+          "duration": 0.4078500000000531,
+          "failureMessages": [],
+          "location": { "line": 24, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["P3 SGH design-system foundation"],
+          "fullName": "P3 SGH design-system foundation uses semantic tokens in shared headers, navigation, and consent controls",
+          "status": "passed",
+          "title": "uses semantic tokens in shared headers, navigation, and consent controls",
+          "duration": 0.3223489999998037,
+          "failureMessages": [],
+          "location": { "line": 30, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787195378495,
+      "endTime": 1787195378497.408,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/designSystemP3.test.tsx"
+    },
     {
       "assertionResults": [
         {
@@ -34,7 +76,7 @@
           "fullName": "P2 public interface refinement keeps public booking and contact calls-to-action as semantic, touch-friendly links",
           "status": "passed",
           "title": "keeps public booking and contact calls-to-action as semantic, touch-friendly links",
-          "duration": 2.1180460000000494,
+          "duration": 2.0445810000001075,
           "failureMessages": [],
           "location": { "line": 14, "column": 3 },
           "meta": {},
@@ -45,7 +87,7 @@
           "fullName": "P2 public interface refinement uses accessible public navigation and footer targets that preserve SGH identity",
           "status": "passed",
           "title": "uses accessible public navigation and footer targets that preserve SGH identity",
-          "duration": 0.4894849999998314,
+          "duration": 0.4706119999998464,
           "failureMessages": [],
           "location": { "line": 21, "column": 3 },
           "meta": {},
@@ -56,18 +98,60 @@
           "fullName": "P2 public interface refinement provides a mobile-friendly cookie-preference dialog with explicit controls",
           "status": "passed",
           "title": "provides a mobile-friendly cookie-preference dialog with explicit controls",
-          "duration": 0.31980799999996634,
+          "duration": 0.35503399999993235,
           "failureMessages": [],
           "location": { "line": 29, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787195052177,
-      "endTime": 1787195052180.3198,
+      "startTime": 1787195378494,
+      "endTime": 1787195378497.4707,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/publicInterfaceP2.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["P0 interface foundation"],
+          "fullName": "P0 interface foundation provides SGH branding fallbacks when company environment values are absent",
+          "status": "passed",
+          "title": "provides SGH branding fallbacks when company environment values are absent",
+          "duration": 1.63102200000003,
+          "failureMessages": [],
+          "location": { "line": 12, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["P0 interface foundation"],
+          "fullName": "P0 interface foundation renders the unified administrative page hierarchy with optional status and actions",
+          "status": "passed",
+          "title": "renders the unified administrative page hierarchy with optional status and actions",
+          "duration": 153.71675600000003,
+          "failureMessages": [],
+          "location": { "line": 18, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["P0 interface foundation"],
+          "fullName": "P0 interface foundation renders accessible dashboard and workspace loading skeletons",
+          "status": "passed",
+          "title": "renders accessible dashboard and workspace loading skeletons",
+          "duration": 16.565585000000056,
+          "failureMessages": [],
+          "location": { "line": 35, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787195378669,
+      "endTime": 1787195378840.5657,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/uiP0.test.tsx"
     }
   ]
 }

@@ -54,14 +54,14 @@ export default function AllToolsDrawer({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-[900px] h-[85vh] p-0 gap-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-gray-200 dark:border-gray-700"
+        className="max-w-[900px] h-[85vh] p-0 gap-0 bg-surface-raised/95 dark:bg-surface-raised/95 backdrop-blur-md border-border"
         dir="rtl"
       >
         <DialogHeader className="sr-only">
           <DialogTitle>كل الأدوات</DialogTitle>
         </DialogHeader>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-l from-blue-50/50 to-transparent dark:from-blue-900/20">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-gradient-to-l from-status-info-subtle/70 to-transparent">
           <button
             onClick={onClose}
             className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-gray-800"
@@ -81,7 +81,7 @@ export default function AllToolsDrawer({
               placeholder="ابحث في كل الأدوات عن كلمات أساسية..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="min-h-11 w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800"
+              className="min-h-11 w-full rounded-lg border border-border bg-surface-subtle py-2 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             />
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function AllToolsDrawer({
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2 px-2">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-blue-500" />
+                    <Clock className="h-4 w-4 text-status-info" />
                     <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">
                       المستخدمة مؤخراً
                     </h3>
@@ -119,7 +119,7 @@ export default function AllToolsDrawer({
                         className={cn(
                           'flex min-h-12 items-center gap-3 rounded-lg p-3 text-right transition-all',
                           isActive
-                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                            ? 'bg-status-info-subtle text-status-info'
                             : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                         )}
                       >
@@ -157,7 +157,7 @@ export default function AllToolsDrawer({
                           className={cn(
                             'flex min-h-12 items-center gap-3 rounded-lg p-3 text-right transition-all',
                             isActive
-                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                              ? 'bg-status-info-subtle text-status-info'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                           )}
                         >

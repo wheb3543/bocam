@@ -25,14 +25,14 @@ export default function AdminPageHeader({
   return (
     <section
       className={cn(
-        'rounded-2xl border border-border/80 bg-card px-4 py-5 shadow-sm sm:px-6 sm:py-6',
+        'rounded-2xl border border-border/80 bg-surface-raised px-4 py-5 shadow-sm sm:px-6 sm:py-6',
         className
       )}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-2">
           {eyebrow && (
-            <p className="text-sm font-semibold text-primary" aria-label="سياق الصفحة">
+            <p className="text-sm font-semibold text-brand" aria-label="سياق الصفحة">
               {eyebrow}
             </p>
           )}
