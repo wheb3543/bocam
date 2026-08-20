@@ -8,17 +8,15 @@ const readSource = (relativePath: string) =>
 const dashboardLayoutSource = readSource('client/src/components/layout/DashboardLayout.tsx');
 const topNavbarSource = readSource('client/src/components/layout/TopNavbar.tsx');
 
-describe('تعميم رأس صفحة SGH الإداري', () => {
-  it('يعرض الرأس الموحد تلقائياً لكل صفحة قياسية تحمل عنواناً ووصفاً', () => {
-    expect(dashboardLayoutSource).toContain("import AdminPageHeader from './AdminPageHeader';");
+describe('مساحات العمل الإدارية دون بطاقة عنوان مكررة', () => {
+  it('لا يرسم رأس عنوان مركزياً فوق محتوى الصفحة', () => {
     expect(dashboardLayoutSource).toContain("pageHeader?: 'standard' | 'none';");
-    expect(dashboardLayoutSource).toContain("pageHeader === 'standard' && pageTitle");
-    expect(dashboardLayoutSource).toContain(
-      '<AdminPageHeader title={pageTitle} description={pageDescription} eyebrow="إدارة SGH" />'
-    );
+    expect(dashboardLayoutSource).not.toContain("import AdminPageHeader from './AdminPageHeader';");
+    expect(dashboardLayoutSource).not.toContain("pageHeader === 'standard' && pageTitle");
+    expect(dashboardLayoutSource).toContain('{children}');
   });
 
-  it('يمنع تكرار العنوان بين الرأس الموحد وشريط الإدارة العلوي', () => {
+  it('يحافظ على خيار العنوان في شريط الإدارة العلوي للمساحات المتخصصة فقط', () => {
     expect(dashboardLayoutSource).toContain("showPageTitle={pageHeader === 'none'}");
     expect(topNavbarSource).toContain('showPageTitle?: boolean;');
     expect(topNavbarSource).toContain('{showPageTitle ? (');

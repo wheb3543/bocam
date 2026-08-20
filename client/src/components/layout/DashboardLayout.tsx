@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import TopNavbar from './TopNavbar';
-import AdminPageHeader from './AdminPageHeader';
 
 export default function DashboardLayout({
   children,
@@ -12,8 +11,8 @@ export default function DashboardLayout({
   pageTitle?: string;
   pageDescription?: string;
   /**
-   * الرأس القياسي هو الخيار الافتراضي لصفحات الإدارة. تستخدم الصفحات ذات
-   * سياق تشغيلي مخصص هذا الخيار لإبقاء رأسها الوظيفي دون تكرار بصري.
+   * يحتفظ الخيار بتوافق الصفحات ذات المساحات الوظيفية الخاصة، ويحدد فقط
+   * ظهور العنوان داخل الشريط العلوي دون رسم بطاقة عنوان إضافية في المحتوى.
    */
   pageHeader?: 'standard' | 'none';
 }) {
@@ -52,11 +51,6 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main id="main-content" className="flex-1 overflow-x-hidden" role="main">
-        {pageHeader === 'standard' && pageTitle && (
-          <div className="container px-3 pt-4 sm:px-4 sm:pt-6 md:px-6" dir="rtl">
-            <AdminPageHeader title={pageTitle} description={pageDescription} eyebrow="إدارة SGH" />
-          </div>
-        )}
         {children}
       </main>
     </>
