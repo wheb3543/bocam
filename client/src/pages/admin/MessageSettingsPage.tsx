@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -126,11 +125,7 @@ const triggerEventLabels: Record<string, string> = {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function MessageSettingsPage() {
   return (
-    <DashboardLayout
-      pageTitle="إعدادات الرسائل"
-      pageDescription="تكوين إعدادات الرسائل والإشعارات"
-      pageHeader="none"
-    >
+    <DashboardLayout pageTitle="إعدادات الرسائل" pageDescription="تكوين إعدادات الرسائل والإشعارات">
       <MessageSettingsContent />
     </DashboardLayout>
   );
@@ -317,31 +312,36 @@ function MessageSettingsContent() {
 
   return (
     <div className="space-y-4 md:space-y-6" dir="rtl">
-      <AdminPageHeader
-        eyebrow="إدارة الاتصالات"
-        title="إعدادات الرسائل التلقائية"
-        description="إدارة وتخصيص جميع الرسائل التلقائية وقوالب الإشعارات."
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => syncTemplatesMutation.mutate()}
-              disabled={syncTemplatesMutation.isPending}
-              className="gap-1.5"
-            >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${syncTemplatesMutation.isPending ? 'animate-spin' : ''}`}
-              />
-              مزامنة القوالب
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
-              <RefreshCw className="h-3.5 w-3.5" />
-              تحديث
-            </Button>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+            <MessageSquare className="h-6 w-6 text-white" />
           </div>
-        }
-      />
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold">إعدادات الرسائل التلقائية</h1>
+            <p className="text-sm text-muted-foreground">إدارة وتخصيص جميع الرسائل التلقائية</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => syncTemplatesMutation.mutate()}
+            disabled={syncTemplatesMutation.isPending}
+            className="gap-1.5"
+          >
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${syncTemplatesMutation.isPending ? 'animate-spin' : ''}`}
+            />
+            مزامنة القوالب
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
+            <RefreshCw className="h-3.5 w-3.5" />
+            تحديث
+          </Button>
+        </div>
+      </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-3 gap-3">
