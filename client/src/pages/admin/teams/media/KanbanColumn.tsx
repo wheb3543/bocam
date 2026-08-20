@@ -27,7 +27,7 @@ export default function KanbanColumn({
   const config = statusConfig[status];
 
   return (
-    <div className="flex-shrink-0 w-[280px] sm:w-[300px]">
+    <div className="flex h-full w-[280px] flex-shrink-0 flex-col sm:w-[300px]">
       <div className={`rounded-t-lg p-3 ${config.bgColor}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -39,7 +39,7 @@ export default function KanbanColumn({
           </Badge>
         </div>
       </div>
-      <ScrollArea className="h-[calc(100vh-400px)] bg-muted/30 rounded-b-lg p-2">
+      <ScrollArea className="min-h-0 flex-1 rounded-b-lg bg-muted/30 p-2">
         <div className="space-y-2">
           {tasks.map((task) => (
             <TaskCard

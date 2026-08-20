@@ -350,3 +350,31 @@ describe('TeamsPage - مساحة عمل التسويق الرقمي المدمج
     expect(underDevelopmentSource).toContain('h-[calc(100dvh-4.25rem)]');
   });
 });
+
+describe('TeamsPage - مساحة عمل فريق الميديا', () => {
+  const mediaTeamSource = readFileSync(
+    resolve(__dirname, '../pages/admin/teams/MediaTeamPage.tsx'),
+    'utf-8'
+  );
+  const mediaStatsSource = readFileSync(
+    resolve(__dirname, '../pages/admin/teams/media/MediaStats.tsx'),
+    'utf-8'
+  );
+  const kanbanColumnSource = readFileSync(
+    resolve(__dirname, '../pages/admin/teams/media/KanbanColumn.tsx'),
+    'utf-8'
+  );
+
+  it('يزيل رأس المحتوى ويثبت مساحة العمل وينقل الإجراءات إلى شريط المرشحات', () => {
+    expect(mediaTeamSource).not.toContain('AdminPageHeader');
+    expect(mediaTeamSource).toContain('h-[calc(100dvh-4.25rem)]');
+    expect(mediaTeamSource).toContain('aria-label="تحديث المهام"');
+    expect(mediaTeamSource).toContain('min-h-0 flex-1 overflow-hidden');
+  });
+
+  it('يصغّر الإحصاءات ويجعل تمرير مهام كانبان داخلياً', () => {
+    expect(mediaStatsSource).toContain('grid grid-cols-2 gap-2');
+    expect(kanbanColumnSource).toContain('flex h-full w-[280px]');
+    expect(kanbanColumnSource).toContain('min-h-0 flex-1 rounded-b-lg');
+  });
+});

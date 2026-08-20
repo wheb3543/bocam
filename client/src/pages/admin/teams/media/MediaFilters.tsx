@@ -41,8 +41,8 @@ export default function MediaFilters({
   onViewModeChange,
 }: MediaFiltersProps) {
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-6">
-      <div className="flex-1 flex flex-wrap gap-2">
+    <div className="flex min-w-0 flex-1 flex-col gap-2 xl:flex-row xl:items-center">
+      <div className="flex flex-1 flex-wrap gap-2">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input

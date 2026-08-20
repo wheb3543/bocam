@@ -18,7 +18,7 @@ interface MediaStatsProps {
 
 export default function MediaStats({ stats }: MediaStatsProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-4 md:mb-6">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 [&_[data-slot=card-content]]:p-2.5">
       <Card>
         <CardContent className="p-3 md:p-4">
           <div className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">

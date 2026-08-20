@@ -1,7 +1,6 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -265,18 +264,35 @@ export default function MediaTeamPage() {
       pageDescription="إدارة مهام الإنتاج الإعلامي"
       pageHeader="none"
     >
-      <div className="container py-4 md:py-6 lg:py-8" dir="rtl">
-        <AdminPageHeader
-          eyebrow="فرق العمل"
-          title="فريق وحدة الإعلام"
-          description="إدارة مهام الإنتاج الإعلامي، بما يشمل الفيديو والتصميم والتصوير والمونتاج."
-          actions={
-            <div className="flex items-center gap-2">
+      <div
+        className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden py-3 sm:py-4"
+        dir="rtl"
+      >
+        <div className="shrink-0">
+          <MediaStats stats={stats} />
+        </div>
+
+        <Card className="shrink-0 shadow-sm">
+          <CardContent className="flex flex-col gap-2 p-3 xl:flex-row xl:items-center xl:justify-between">
+            <MediaFilters
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              priorityFilter={priorityFilter}
+              onPriorityFilterChange={setPriorityFilter}
+              categoryFilter={categoryFilter}
+              onCategoryFilterChange={setCategoryFilter}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
+            <div className="flex shrink-0 items-center gap-2">
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => refetchTasks()}
                 className="h-9 w-9"
+                aria-label="تحديث المهام"
               >
                 <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
@@ -310,157 +326,143 @@ export default function MediaTeamPage() {
                 </DialogContent>
               </Dialog>
             </div>
-          }
-        />
-
-        {/* Stats Cards */}
-        <MediaStats stats={stats} />
-
-        {/* Filters & View Toggle */}
-        <MediaFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          priorityFilter={priorityFilter}
-          onPriorityFilterChange={setPriorityFilter}
-          categoryFilter={categoryFilter}
-          onCategoryFilterChange={setCategoryFilter}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
+          </CardContent>
+        </Card>
 
         {/* Content */}
-        {tasksLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : viewMode === 'kanban' ? (
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {(['todo', 'in_progress', 'review', 'completed'] as const).map((status) => (
-              <div
-                key={status}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const taskId = parseInt(e.dataTransfer.getData('taskId'));
-                  const currentStatus = e.dataTransfer.getData('currentStatus');
-                  if (currentStatus !== status) {
-                    handleStatusChange(taskId, status);
-                  }
-                }}
-              >
-                <KanbanColumn
-                  status={status}
-                  tasks={tasksByStatus[status] as Task[]}
-                  formatDate={formatDate}
-                  onEditTask={openEditDialog}
-                  onDeleteTask={handleDeleteTask}
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="text-right p-4 font-medium">المهمة</th>
-                      <th className="text-right p-4 font-medium">التصنيف</th>
-                      <th className="text-right p-4 font-medium">الحالة</th>
-                      <th className="text-right p-4 font-medium">الأولوية</th>
-                      <th className="text-right p-4 font-medium">المعيّن إليه</th>
-                      <th className="text-right p-4 font-medium">تاريخ التسليم</th>
-                      <th className="text-right p-4 font-medium">إجراءات</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tasks.map((task: Task) => {
-                      const categoryInfo = getCategoryInfo(task.category as TaskCategory);
-                      const isOverdue =
-                        task.dueDate &&
-                        new Date(task.dueDate) < new Date() &&
-                        task.status !== 'completed';
-                      return (
-                        <tr
-                          key={task.id}
-                          className={`border-b hover:bg-muted/30 ${isOverdue ? 'bg-red-50' : ''}`}
-                        >
-                          <td className="p-4">
-                            <div className="font-medium">{task.title}</div>
-                            {task.description && (
-                              <div className="text-sm text-muted-foreground line-clamp-1">
-                                {task.description}
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <span className="flex items-center gap-1 text-sm">
-                              {categoryInfo.icon}
-                              {categoryInfo.label}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <Badge
-                              className={`${statusConfig[task.status as TaskStatus].bgColor} ${statusConfig[task.status as TaskStatus].color}`}
-                            >
-                              {statusConfig[task.status as TaskStatus].label}
-                            </Badge>
-                          </td>
-                          <td className="p-4">
-                            <Badge
-                              className={`${priorityConfig[task.priority as TaskPriority].bgColor} ${priorityConfig[task.priority as TaskPriority].color}`}
-                            >
-                              {priorityConfig[task.priority as TaskPriority].label}
-                            </Badge>
-                          </td>
-                          <td className="p-4">{task.assignedUser?.name || '-'}</td>
-                          <td className="p-4">
-                            {task.dueDate ? (
-                              <span className={isOverdue ? 'text-red-600' : ''}>
-                                {formatDate(task.dueDate)}
+        <div className="min-h-0 flex-1 overflow-hidden">
+          {tasksLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : viewMode === 'kanban' ? (
+            <div className="flex h-full min-w-max gap-4 overflow-x-auto pb-2">
+              {(['todo', 'in_progress', 'review', 'completed'] as const).map((status) => (
+                <div
+                  key={status}
+                  className="h-full"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const taskId = parseInt(e.dataTransfer.getData('taskId'));
+                    const currentStatus = e.dataTransfer.getData('currentStatus');
+                    if (currentStatus !== status) {
+                      handleStatusChange(taskId, status);
+                    }
+                  }}
+                >
+                  <KanbanColumn
+                    status={status}
+                    tasks={tasksByStatus[status] as Task[]}
+                    formatDate={formatDate}
+                    onEditTask={openEditDialog}
+                    onDeleteTask={handleDeleteTask}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Card className="h-full">
+              <CardContent className="h-full p-0">
+                <div className="h-full overflow-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-right p-4 font-medium">المهمة</th>
+                        <th className="text-right p-4 font-medium">التصنيف</th>
+                        <th className="text-right p-4 font-medium">الحالة</th>
+                        <th className="text-right p-4 font-medium">الأولوية</th>
+                        <th className="text-right p-4 font-medium">المعيّن إليه</th>
+                        <th className="text-right p-4 font-medium">تاريخ التسليم</th>
+                        <th className="text-right p-4 font-medium">إجراءات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tasks.map((task: Task) => {
+                        const categoryInfo = getCategoryInfo(task.category as TaskCategory);
+                        const isOverdue =
+                          task.dueDate &&
+                          new Date(task.dueDate) < new Date() &&
+                          task.status !== 'completed';
+                        return (
+                          <tr
+                            key={task.id}
+                            className={`border-b hover:bg-muted/30 ${isOverdue ? 'bg-red-50' : ''}`}
+                          >
+                            <td className="p-4">
+                              <div className="font-medium">{task.title}</div>
+                              {task.description && (
+                                <div className="text-sm text-muted-foreground line-clamp-1">
+                                  {task.description}
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-4">
+                              <span className="flex items-center gap-1 text-sm">
+                                {categoryInfo.icon}
+                                {categoryInfo.label}
                               </span>
-                            ) : (
-                              '-'
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => openEditDialog(task)}
+                            </td>
+                            <td className="p-4">
+                              <Badge
+                                className={`${statusConfig[task.status as TaskStatus].bgColor} ${statusConfig[task.status as TaskStatus].color}`}
                               >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteTask(task.id)}
-                                className="text-red-600"
+                                {statusConfig[task.status as TaskStatus].label}
+                              </Badge>
+                            </td>
+                            <td className="p-4">
+                              <Badge
+                                className={`${priorityConfig[task.priority as TaskPriority].bgColor} ${priorityConfig[task.priority as TaskPriority].color}`}
                               >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
+                                {priorityConfig[task.priority as TaskPriority].label}
+                              </Badge>
+                            </td>
+                            <td className="p-4">{task.assignedUser?.name || '-'}</td>
+                            <td className="p-4">
+                              {task.dueDate ? (
+                                <span className={isOverdue ? 'text-red-600' : ''}>
+                                  {formatDate(task.dueDate)}
+                                </span>
+                              ) : (
+                                '-'
+                              )}
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => openEditDialog(task)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteTask(task.id)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {tasks.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                            لا توجد مهام
                           </td>
                         </tr>
-                      );
-                    })}
-                    {tasks.length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="p-8 text-center text-muted-foreground">
-                          لا توجد مهام
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {/* Edit Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
