@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { trpc } from '@/lib/api/trpc';
 import { IntegrationConnectionsPanel } from './IntegrationConnectionsPanel';
@@ -194,13 +195,25 @@ export default function MetaIntegrationSettingsPage() {
         pageTitle="إعدادات الربط العامة"
         pageDescription="إدارة اتصالات منصات التواصل بأمان"
       >
-        <Alert dir="rtl" className="mx-auto mt-8 max-w-2xl border-amber-200 bg-amber-50">
-          <ShieldAlert className="h-4 w-4 text-amber-700" />
-          <AlertTitle>صلاحية المسؤول مطلوبة</AlertTitle>
-          <AlertDescription>
-            تُدار أسرار Meta من قبل المسؤول فقط لحماية حسابات المؤسسة.
-          </AlertDescription>
-        </Alert>
+        <main dir="rtl" className="container max-w-5xl space-y-5 py-5 sm:py-8">
+          <AdminPageHeader
+            eyebrow="إدارة الاتصالات"
+            title="إعدادات الربط العامة"
+            description="تتطلب هذه المساحة صلاحية المسؤول لحماية الحسابات والأسرار المرتبطة بالمنصات."
+            status={
+              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
+                وصول مقيّد
+              </Badge>
+            }
+          />
+          <Alert className="border-amber-200 bg-amber-50">
+            <ShieldAlert className="h-4 w-4 text-amber-700" />
+            <AlertTitle>صلاحية المسؤول مطلوبة</AlertTitle>
+            <AlertDescription>
+              تُدار أسرار Meta والمنصات الخارجية من قبل المسؤول فقط لحماية حسابات المؤسسة.
+            </AlertDescription>
+          </Alert>
+        </main>
       </DashboardLayout>
     );
   }
@@ -211,24 +224,35 @@ export default function MetaIntegrationSettingsPage() {
       pageDescription="إدارة ربط Meta وX وLinkedIn وYouTube وTikTok من مكان واحد"
     >
       <main dir="rtl" className="container max-w-5xl space-y-5 py-5 sm:py-8">
-        <section className="flex flex-col gap-3 rounded-2xl border border-blue-100 bg-gradient-to-l from-blue-50 to-white p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-blue-600 p-3 text-white">
-              <KeyRound className="h-6 w-6" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-slate-900 sm:text-xl">إعدادات الربط العامة</h1>
-              <p className="mt-1 text-sm text-slate-600">
-                بيانات تطبيقات Meta وX وLinkedIn وYouTube وTikTok تُدار مركزياً وبصلاحيات المسؤول.
-              </p>
-            </div>
-          </div>
-          <Badge className={statusQuery.data?.isEnabled ? 'bg-emerald-600' : 'bg-slate-500'}>
-            {statusQuery.data?.isEnabled || generalStatusQuery.data?.some((item) => item.isEnabled)
-              ? 'توجد تكاملات مفعّلة'
-              : 'لا توجد تكاملات مفعّلة'}
-          </Badge>
-        </section>
+        <AdminPageHeader
+          eyebrow="إدارة الاتصالات"
+          title="إعدادات الربط العامة"
+          description="أدر تطبيقات Meta وX وLinkedIn وYouTube وTikTok من مساحة واحدة. تبقى الأسرار مشفّرة ولا تعود إلى المتصفح بعد الحفظ."
+          status={
+            <Badge
+              variant="outline"
+              className={
+                statusQuery.data?.isEnabled ||
+                generalStatusQuery.data?.some((item) => item.isEnabled)
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                  : 'border-muted-foreground/20 bg-muted text-muted-foreground'
+              }
+            >
+              {statusQuery.data?.isEnabled ||
+              generalStatusQuery.data?.some((item) => item.isEnabled)
+                ? 'توجد تكاملات مفعّلة'
+                : 'لم يبدأ الربط بعد'}
+            </Badge>
+          }
+          actions={
+            <Button asChild className="min-h-10">
+              <a href="#platform-connections">
+                <KeyRound className="ml-2 h-4 w-4" />
+                تجهيز منصة
+              </a>
+            </Button>
+          }
+        />
 
         <Alert className="border-blue-200 bg-blue-50/70">
           <LockKeyhole className="h-4 w-4 text-blue-700" />
@@ -241,7 +265,7 @@ export default function MetaIntegrationSettingsPage() {
 
         <IntegrationConnectionsPanel />
 
-        <Card className="border-blue-100">
+        <Card id="platform-connections" className="border-blue-100">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base text-slate-900">
               <KeyRound className="h-5 w-5 text-blue-700" />
@@ -254,7 +278,10 @@ export default function MetaIntegrationSettingsPage() {
           </CardHeader>
           <CardContent>
             {generalStatusQuery.isLoading ? (
-              <div className="flex min-h-32 items-center justify-center text-sm text-slate-500">
+              <div
+                className="flex min-h-32 items-center justify-center text-sm text-slate-500"
+                role="status"
+              >
                 <Loader2 className="ml-2 h-4 w-4 animate-spin text-blue-600" />
                 جارٍ تحميل حالات المنصات...
               </div>

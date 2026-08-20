@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 8,
-  "numPassedTestSuites": 8,
+  "numTotalTestSuites": 6,
+  "numPassedTestSuites": 6,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 7,
-  "numPassedTests": 7,
+  "numTotalTests": 6,
+  "numPassedTests": 6,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,9 +24,40 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787185196971,
+  "startTime": 1787190134044,
   "success": true,
   "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["P0 brand and page-shell completion"],
+          "fullName": "P0 brand and page-shell completion uses SGH branding fallbacks instead of a generic app identity",
+          "status": "passed",
+          "title": "uses SGH branding fallbacks instead of a generic app identity",
+          "duration": 2.193418999999949,
+          "failureMessages": [],
+          "location": { "line": 12, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["P0 brand and page-shell completion"],
+          "fullName": "P0 brand and page-shell completion applies the shared SGH page header and a clear unconfigured connection state",
+          "status": "passed",
+          "title": "applies the shared SGH page header and a clear unconfigured connection state",
+          "duration": 0.6123529999999846,
+          "failureMessages": [],
+          "location": { "line": 17, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787190135509,
+      "endTime": 1787190135511.6123,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/brandingP0Completion.test.tsx"
+    },
     {
       "assertionResults": [
         {
@@ -34,15 +65,15 @@
           "fullName": "Dashboard operational workspace prioritizes daily operations and remains useful when analytics are unavailable",
           "status": "passed",
           "title": "prioritizes daily operations and remains useful when analytics are unavailable",
-          "duration": 378.64592400000015,
+          "duration": 366.248789,
           "failureMessages": [],
           "location": { "line": 27, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787185198978,
-      "endTime": 1787185199356.646,
+      "startTime": 1787190135765,
+      "endTime": 1787190136131.2488,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/dashboardWorkspace.test.tsx"
@@ -50,95 +81,44 @@
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["Unified inbox workspace"],
-          "fullName": "Unified inbox workspace keeps the comments workflow usable on compact screens with a return control",
+          "ancestorTitles": ["P0 interface foundation"],
+          "fullName": "P0 interface foundation provides SGH branding fallbacks when company environment values are absent",
           "status": "passed",
-          "title": "keeps the comments workflow usable on compact screens with a return control",
-          "duration": 362.17643699999985,
+          "title": "provides SGH branding fallbacks when company environment values are absent",
+          "duration": 1.9746299999999337,
           "failureMessages": [],
-          "location": { "line": 40, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787185199100,
-      "endTime": 1787185199462.1765,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/inboxWorkspace.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["Media library workspace"],
-          "fullName": "Media library workspace renders the unified workspace header, an accessible upload action, and collapsible folders",
-          "status": "passed",
-          "title": "renders the unified workspace header, an accessible upload action, and collapsible folders",
-          "duration": 339.9262410000001,
-          "failureMessages": [],
-          "location": { "line": 53, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787185199203,
-      "endTime": 1787185199542.9263,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/mediaWorkspace.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["PublishingPage"],
-          "fullName": "PublishingPage يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
-          "status": "passed",
-          "title": "يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
-          "duration": 337.79138999999986,
-          "failureMessages": [],
-          "location": { "line": 62, "column": 3 },
+          "location": { "line": 12, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["PublishingPage"],
-          "fullName": "PublishingPage ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
+          "ancestorTitles": ["P0 interface foundation"],
+          "fullName": "P0 interface foundation renders the unified administrative page hierarchy with optional status and actions",
           "status": "passed",
-          "title": "ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
-          "duration": 95.35510699999986,
+          "title": "renders the unified administrative page hierarchy with optional status and actions",
+          "duration": 165.442638,
           "failureMessages": [],
-          "location": { "line": 79, "column": 3 },
+          "location": { "line": 18, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["PublishingPage"],
-          "fullName": "PublishingPage يعرض إعادة المحاولة لوجهة فاشلة ويرسل معرفها إلى راوتر التسليم",
+          "ancestorTitles": ["P0 interface foundation"],
+          "fullName": "P0 interface foundation renders accessible dashboard and workspace loading skeletons",
           "status": "passed",
-          "title": "يعرض إعادة المحاولة لوجهة فاشلة ويرسل معرفها إلى راوتر التسليم",
-          "duration": 54.40502000000015,
+          "title": "renders accessible dashboard and workspace loading skeletons",
+          "duration": 18.44777399999998,
           "failureMessages": [],
-          "location": { "line": 96, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["PublishingPage"],
-          "fullName": "PublishingPage يعرض تقدم رفع فيديو YouTube من التشخيص الآمن للوجهة",
-          "status": "passed",
-          "title": "يعرض تقدم رفع فيديو YouTube من التشخيص الآمن للوجهة",
-          "duration": 26.36380999999983,
-          "failureMessages": [],
-          "location": { "line": 124, "column": 3 },
+          "location": { "line": 35, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787185199102,
-      "endTime": 1787185199616.3638,
+      "startTime": 1787190135659,
+      "endTime": 1787190135844.4478,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/PublishingPage.test.tsx"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/uiP0.test.tsx"
     }
   ]
 }
