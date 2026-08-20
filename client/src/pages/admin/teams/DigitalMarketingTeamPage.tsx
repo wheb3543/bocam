@@ -10,6 +10,7 @@ export default function DigitalMarketingTeamPage() {
         description="إدارة فريق التسويق الرقمي"
         icon={Users}
         currentPath="/admin/teams/digital-marketing"
+        compactWorkspace
         features={[
           'إدارة مهام التسويق الرقمي',
           'تتبع الحملات الإعلانية',

@@ -4,6 +4,8 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 // Mock trpc hook
 vi.mock("@/lib/trpc", () => ({
@@ -324,5 +326,27 @@ describe("TeamsPage - Team Types", () => {
   it("يجب أن يصنف الفريق حسب النوع", () => {
     const team = { name: "فريق خدمة العملاء", type: "customer_service" };
     expect(team.type).toBe("customer_service");
+  });
+});
+
+describe('TeamsPage - مساحة عمل التسويق الرقمي المدمجة', () => {
+  const digitalMarketingSource = readFileSync(
+    resolve(__dirname, '../pages/admin/teams/DigitalMarketingTeamPage.tsx'),
+    'utf-8'
+  );
+  const underDevelopmentSource = readFileSync(
+    resolve(__dirname, '../components/UnderDevelopmentPage.tsx'),
+    'utf-8'
+  );
+
+  it('يفعّل التخطيط المدمج الخاص بفريق التسويق الرقمي', () => {
+    expect(digitalMarketingSource).toContain('compactWorkspace');
+    expect(underDevelopmentSource).toContain('if (compactWorkspace)');
+  });
+
+  it('يضع الإجراء بعد بطاقات الميزات دون رأس محتوى مكرر', () => {
+    expect(underDevelopmentSource).toContain('grid shrink-0 grid-cols-1');
+    expect(underDevelopmentSource).toContain('تجهيز مساحة عمل فريق التسويق الرقمي قيد التطوير.');
+    expect(underDevelopmentSource).toContain('h-[calc(100dvh-4.25rem)]');
   });
 });

@@ -10,6 +10,7 @@ interface UnderDevelopmentPageProps {
   icon: React.ComponentType<{ className?: string }>;
   features: string[];
   currentPath: string;
+  compactWorkspace?: boolean;
 }
 
 export default function UnderDevelopmentPage({
@@ -18,8 +19,43 @@ export default function UnderDevelopmentPage({
   icon: Icon,
   features,
   currentPath: _currentPath,
+  compactWorkspace = false,
 }: UnderDevelopmentPageProps) {
   const [, setLocation] = useLocation();
+
+  if (compactWorkspace) {
+    return (
+      <DashboardLayout pageTitle={title} pageDescription={description}>
+        <main className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden py-3 sm:py-4">
+          <section className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            {features.map((feature) => (
+              <Card key={feature} className="border-border/80 shadow-sm">
+                <CardContent className="flex min-h-16 items-center gap-3 p-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <p className="text-sm font-medium text-foreground">{feature}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+
+          <Card className="shrink-0 border-dashed">
+            <CardContent className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Construction className="h-4 w-4 text-orange-500" />
+                <span>تجهيز مساحة عمل فريق التسويق الرقمي قيد التطوير.</span>
+              </div>
+              <Button size="sm" onClick={() => setLocation('/admin')} className="w-full sm:w-auto">
+                <ArrowRight className="ml-2 h-4 w-4" />
+                العودة للوحة التحكم
+              </Button>
+            </CardContent>
+          </Card>
+        </main>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout pageTitle={title} pageDescription={description}>
