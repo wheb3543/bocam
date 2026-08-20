@@ -40,6 +40,7 @@ describe('تعميم رأس صفحة SGH الإداري', () => {
     'client/src/pages/admin/whatsapp/WhatsAppCompliance.tsx',
     'client/src/pages/admin/whatsapp/WhatsAppDashboard.tsx',
     'client/src/pages/admin/whatsapp/WhatsAppIntegration.tsx',
+    'client/src/pages/admin/whatsapp/WhatsAppTemplatesPage.tsx',
     'client/src/pages/admin/MessageSettingsPage.tsx',
   ])('يحافظ على الرأس المتخصص في %s', (pagePath) => {
     expect(readSource(pagePath)).toContain('pageHeader="none"');

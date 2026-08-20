@@ -1,4 +1,5 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -24,7 +25,11 @@ import { TemplateQualityTab } from './components/TemplateQualityTab';
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function WhatsAppTemplatesPage() {
   return (
-    <DashboardLayout pageTitle="قوالب واتساب" pageDescription="إدارة قوالب رسائل واتساب">
+    <DashboardLayout
+      pageTitle="قوالب واتساب"
+      pageDescription="إدارة قوالب رسائل واتساب"
+      pageHeader="none"
+    >
       <WhatsAppTemplatesContent />
     </DashboardLayout>
   );
@@ -58,65 +63,60 @@ function WhatsAppTemplatesContent() {
 
   return (
     <div className="space-y-4 md:space-y-6" dir="rtl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-            <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 rounded-lg">
-              <FileText className="h-5 w-5 text-white" />
-            </div>
-            قوالب الرسائل
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">إدارة قوالب واتساب المعتمدة من Meta</p>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            onClick={() => templateManagement.syncFromMetaMutation.mutate()}
-            variant="outline"
-            size="sm"
-            disabled={templateManagement.syncFromMetaMutation.isPending}
-            className="gap-1.5"
-          >
-            {templateManagement.syncFromMetaMutation.isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="h-3.5 w-3.5" />
-            )}
-            مزامنة Meta
-          </Button>
-          <Dialog
-            open={templateManagement.isCreateOpen}
-            onOpenChange={(v) => {
-              templateManagement.setIsCreateOpen(v);
-              if (!v) {
-                templateManagement.resetForm();
-              }
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button size="sm" className="gap-1.5 bg-green-600 hover:bg-green-700">
-                <Plus className="h-3.5 w-3.5" />
-                قالب جديد
-              </Button>
-            </DialogTrigger>
-            <TemplateFormDialog
+      <AdminPageHeader
+        eyebrow="قنوات التواصل"
+        title="قوالب الرسائل"
+        description="إدارة قوالب WhatsApp المعتمدة من Meta ومراقبة جودتها."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => templateManagement.syncFromMetaMutation.mutate()}
+              variant="outline"
+              size="sm"
+              disabled={templateManagement.syncFromMetaMutation.isPending}
+              className="gap-1.5"
+            >
+              {templateManagement.syncFromMetaMutation.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5" />
+              )}
+              مزامنة Meta
+            </Button>
+            <Dialog
               open={templateManagement.isCreateOpen}
-              onOpenChange={templateManagement.setIsCreateOpen}
-              mode="create"
-              name={templateManagement.name}
-              content={templateManagement.content}
-              category={templateManagement.category}
-              language={templateManagement.language}
-              onNameChange={templateManagement.setName}
-              onContentChange={templateManagement.setContent}
-              onCategoryChange={templateManagement.setCategory}
-              onLanguageChange={templateManagement.setLanguage}
-              onSubmit={templateManagement.handleCreate}
-              isPending={templateManagement.createMutation.isPending}
-            />
-          </Dialog>
-        </div>
-      </div>
+              onOpenChange={(v) => {
+                templateManagement.setIsCreateOpen(v);
+                if (!v) {
+                  templateManagement.resetForm();
+                }
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button size="sm" className="gap-1.5 bg-green-600 hover:bg-green-700">
+                  <Plus className="h-3.5 w-3.5" />
+                  قالب جديد
+                </Button>
+              </DialogTrigger>
+              <TemplateFormDialog
+                open={templateManagement.isCreateOpen}
+                onOpenChange={templateManagement.setIsCreateOpen}
+                mode="create"
+                name={templateManagement.name}
+                content={templateManagement.content}
+                category={templateManagement.category}
+                language={templateManagement.language}
+                onNameChange={templateManagement.setName}
+                onContentChange={templateManagement.setContent}
+                onCategoryChange={templateManagement.setCategory}
+                onLanguageChange={templateManagement.setLanguage}
+                onSubmit={templateManagement.handleCreate}
+                isPending={templateManagement.createMutation.isPending}
+              />
+            </Dialog>
+          </div>
+        }
+      />
 
       {/* Tabs */}
       <Tabs value={templateManagement.activeTab} onValueChange={templateManagement.setActiveTab}>
