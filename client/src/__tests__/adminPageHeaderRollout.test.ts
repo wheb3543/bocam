@@ -16,8 +16,8 @@ describe('مساحات العمل الإدارية دون بطاقة عنوان 
     expect(dashboardLayoutSource).toContain('{children}');
   });
 
-  it('يحافظ على خيار العنوان في شريط الإدارة العلوي للمساحات المتخصصة فقط', () => {
-    expect(dashboardLayoutSource).toContain("showPageTitle={pageHeader === 'none'}");
+  it('يعرض اسم الصفحة في الشريط الإداري العلوي عند توفره', () => {
+    expect(dashboardLayoutSource).toContain('showPageTitle={Boolean(pageTitle)}');
     expect(topNavbarSource).toContain('showPageTitle?: boolean;');
     expect(topNavbarSource).toContain('{showPageTitle ? (');
   });

@@ -45,7 +45,7 @@ export default function DashboardLayout({
         <TopNavbar
           pageTitle={pageTitle}
           pageDescription={pageDescription}
-          showPageTitle={pageHeader === 'none'}
+          showPageTitle={Boolean(pageTitle)}
         />
       </header>
 
