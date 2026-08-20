@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 4,
-  "numPassedTestSuites": 4,
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 4,
-  "numPassedTests": 4,
+  "numTotalTests": 3,
+  "numPassedTests": 3,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,70 +24,50 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787194535719,
+  "startTime": 1787195050800,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["P1 navigation structure"],
-          "fullName": "P1 navigation structure groups administrative tools around the revised user tasks",
+          "ancestorTitles": ["P2 public interface refinement"],
+          "fullName": "P2 public interface refinement keeps public booking and contact calls-to-action as semantic, touch-friendly links",
           "status": "passed",
-          "title": "groups administrative tools around the revised user tasks",
-          "duration": 2.397748999999976,
+          "title": "keeps public booking and contact calls-to-action as semantic, touch-friendly links",
+          "duration": 2.1180460000000494,
           "failureMessages": [],
-          "location": { "line": 22, "column": 3 },
+          "location": { "line": 14, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["P1 navigation structure"],
-          "fullName": "P1 navigation structure renders a mobile navigation state with accessible unread counts and touch-friendly actions",
+          "ancestorTitles": ["P2 public interface refinement"],
+          "fullName": "P2 public interface refinement uses accessible public navigation and footer targets that preserve SGH identity",
           "status": "passed",
-          "title": "renders a mobile navigation state with accessible unread counts and touch-friendly actions",
-          "duration": 166.09596399999987,
+          "title": "uses accessible public navigation and footer targets that preserve SGH identity",
+          "duration": 0.4894849999998314,
           "failureMessages": [],
-          "location": { "line": 43, "column": 3 },
+          "location": { "line": 21, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["P1 navigation structure"],
-          "fullName": "P1 navigation structure tracks recently used pages for direct and drawer-based navigation",
+          "ancestorTitles": ["P2 public interface refinement"],
+          "fullName": "P2 public interface refinement provides a mobile-friendly cookie-preference dialog with explicit controls",
           "status": "passed",
-          "title": "tracks recently used pages for direct and drawer-based navigation",
-          "duration": 0.38023999999995794,
+          "title": "provides a mobile-friendly cookie-preference dialog with explicit controls",
+          "duration": 0.31980799999996634,
           "failureMessages": [],
-          "location": { "line": 66, "column": 3 },
+          "location": { "line": 29, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787194537436,
-      "endTime": 1787194537605.3801,
+      "startTime": 1787195052177,
+      "endTime": 1787195052180.3198,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/navigationP1.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["useRecentlyUsed"],
-          "fullName": "useRecentlyUsed orders the latest destination first, de-duplicates entries, and clears local storage",
-          "status": "passed",
-          "title": "orders the latest destination first, de-duplicates entries, and clears local storage",
-          "duration": 17.125406999999996,
-          "failureMessages": [],
-          "location": { "line": 10, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787194537308,
-      "endTime": 1787194537325.1255,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/recentlyUsed.test.tsx"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/publicInterfaceP2.test.tsx"
     }
   ]
 }

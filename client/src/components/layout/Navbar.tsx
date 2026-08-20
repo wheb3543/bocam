@@ -66,14 +66,14 @@ export default function Navbar() {
       </a>
 
       <header
-        className="bg-white dark:bg-card dark:bg-gray-900 shadow-sm sticky top-0 z-50"
+        className="sticky top-0 z-50 border-b border-border/70 bg-white/95 shadow-sm backdrop-blur dark:bg-gray-900/95"
         id="navigation"
       >
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="flex items-center justify-between py-2.5 sm:py-3 md:py-4">
             {/* Mobile: Hamburger Button */}
             <button
-              className="md:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-foreground dark:text-gray-200 hover:bg-muted dark:hover:bg-gray-800 transition-colors"
+              className="md:hidden flex min-h-11 min-w-11 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:text-gray-200 dark:hover:bg-gray-800"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="القائمة"
             >
@@ -87,12 +87,12 @@ export default function Navbar() {
             {/* Logo and Title */}
             <Link href="/">
               <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 hover:opacity-80 transition-opacity cursor-pointer">
-                <img src="/icon-72x72.png" alt={APP_TITLE} className="h-6 w-auto" />
+                <img src="/icon-72x72.png" alt={APP_TITLE} className="h-8 w-auto" />
                 <div className="hidden xs:block sm:block">
-                  <h1 className="text-[11px] sm:text-sm md:text-lg font-bold text-green-900 dark:text-green-400 leading-tight line-clamp-1">
+                  <p className="text-xs sm:text-sm md:text-lg font-bold text-green-900 dark:text-green-400 leading-tight line-clamp-1">
                     {APP_TITLE}
-                  </h1>
-                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground dark:text-muted-foreground">
+                  </p>
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                     {getCompanySlogan()}
                   </p>
                 </div>
@@ -136,7 +136,7 @@ export default function Navbar() {
               {/* Contact Button */}
               <a
                 href={`tel:${COMPANY_PHONE}`}
-                className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-green-600 text-white px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm md:text-base"
+                className="flex min-h-11 items-center gap-1 rounded-lg bg-green-600 px-3 text-xs text-white transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 sm:gap-1.5 sm:text-sm md:gap-2 md:px-4 md:text-base"
                 aria-label={`اتصال مباشر بخدمة العملاء والمواعيد على الرقم ${COMPANY_PHONE}`}
               >
                 <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -174,7 +174,7 @@ export default function Navbar() {
           </div>
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-gray-800"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-muted-foreground dark:hover:bg-gray-800"
             aria-label="إغلاق القائمة"
           >
             <X className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -204,13 +204,13 @@ export default function Navbar() {
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 border-t border-border dark:border-gray-700">
           <a
             href={`tel:${COMPANY_PHONE}`}
-            className="flex items-center justify-center gap-2 w-full bg-green-600 text-white py-2.5 sm:py-3 rounded-lg sm:rounded-xl hover:bg-green-700 transition-colors font-semibold text-sm sm:text-base"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-green-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 sm:rounded-xl sm:py-3 sm:text-base"
           >
             <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>اتصل بنا: {COMPANY_PHONE}</span>
           </a>
           <Link href="/patient-portal/login">
-            <div className="flex items-center justify-center gap-2 w-full mt-2 border border-green-600 dark:border-green-500 text-green-700 dark:text-green-400 py-2.5 sm:py-3 rounded-lg sm:rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors font-medium cursor-pointer text-xs sm:text-sm">
+            <div className="mt-2 flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-green-600 py-2.5 text-xs font-medium text-green-700 transition-colors hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20 sm:rounded-xl sm:py-3 sm:text-sm">
               بوابة المريض
             </div>
           </Link>

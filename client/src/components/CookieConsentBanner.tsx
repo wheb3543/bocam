@@ -96,21 +96,21 @@ export default function CookieConsentBanner() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4"
+      className="fixed bottom-0 left-0 right-0 z-50 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
       dir="rtl"
       role="dialog"
       aria-label="إعدادات ملفات تعريف الارتباط"
     >
-      <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+      <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-green-100 bg-white shadow-2xl ring-1 ring-black/5 dark:border-green-900/50 dark:bg-gray-900">
         {/* Header */}
-        <div className="bg-green-700 text-white px-4 sm:px-5 py-3 flex items-center justify-between">
+        <div className="flex items-center justify-between bg-gradient-to-l from-green-800 to-emerald-700 px-4 py-3 text-white sm:px-5">
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
             <span className="font-semibold text-sm sm:text-base">تفضيلات ملفات تعريف الارتباط</span>
           </div>
           <button
             onClick={handleRejectAll}
-            className="text-green-200 hover:text-white transition-colors p-1"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-green-100 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             aria-label="رفض الكل وإغلاق"
           >
             <X className="w-4 h-4" />
@@ -119,11 +119,11 @@ export default function CookieConsentBanner() {
 
         {/* Body */}
         <div className="px-4 sm:px-5 py-3 sm:py-4">
-          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+          <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
             نستخدم ملفات تعريف الارتباط لتحسين تجربتك وقياس أداء خدماتنا. اختر ما تسمح به، أو اقبل
             الكل للحصول على أفضل تجربة.{' '}
             <Link href="/privacy-policy">
-              <span className="text-green-700 underline cursor-pointer hover:text-green-800">
+              <span className="cursor-pointer font-medium text-green-700 underline transition-colors hover:text-green-800 dark:text-green-400">
                 سياسة الخصوصية
               </span>
             </Link>
@@ -132,7 +132,9 @@ export default function CookieConsentBanner() {
           {/* Toggle detailed settings */}
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-xs text-green-700 mt-2 hover:text-green-800 transition-colors"
+            className="mt-2 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm font-medium text-green-700 transition-colors hover:bg-green-50 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 dark:text-green-400 dark:hover:bg-green-950/30"
+            aria-expanded={expanded}
+            aria-controls="cookie-preferences-details"
           >
             {expanded ? (
               <ChevronUp className="w-3.5 h-3.5" />
@@ -144,16 +146,21 @@ export default function CookieConsentBanner() {
 
           {/* Detailed settings */}
           {expanded && (
-            <div className="mt-3 space-y-2.5 border-t border-gray-100 pt-3">
+            <div
+              id="cookie-preferences-details"
+              className="mt-3 space-y-3 border-t border-gray-100 pt-3 dark:border-gray-800"
+            >
               {/* Essential */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                  <p className="text-xs font-semibold text-gray-800">الأساسية (مطلوبة دائماً)</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                    الأساسية (مطلوبة دائماً)
+                  </p>
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                     تشغيل الموقع، الجلسات، الأمان. لا يمكن تعطيلها.
                   </p>
                 </div>
-                <div className="flex items-center justify-center w-10 h-5 bg-green-600 rounded-full shrink-0 mt-0.5">
+                <div className="mt-0.5 flex h-11 w-12 items-center justify-center rounded-full bg-green-600 shrink-0">
                   <Check className="w-3 h-3 text-white" />
                 </div>
               </div>
@@ -161,22 +168,24 @@ export default function CookieConsentBanner() {
               {/* Analytical */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                  <p className="text-xs font-semibold text-gray-800">التحليلية</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                    التحليلية
+                  </p>
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                     قياس حركة المرور وتحسين الموقع (Google Analytics).
                   </p>
                 </div>
                 <button
                   onClick={() => setPrefs((p) => ({ ...p, analytical: !p.analytical }))}
-                  className={`relative w-10 h-5 rounded-full transition-colors shrink-0 mt-0.5 ${
+                  className={`relative mt-0.5 h-11 w-12 rounded-full transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 ${
                     prefs.analytical ? 'bg-green-500' : 'bg-gray-300'
                   }`}
                   role="switch"
                   aria-checked={prefs.analytical}
                 >
                   <span
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${
-                      prefs.analytical ? 'right-0.5' : 'left-0.5'
+                    className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow transition-all ${
+                      prefs.analytical ? 'right-1.5' : 'left-1.5'
                     }`}
                   />
                 </button>
@@ -185,22 +194,24 @@ export default function CookieConsentBanner() {
               {/* Marketing */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                  <p className="text-xs font-semibold text-gray-800">التسويقية</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                    التسويقية
+                  </p>
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                     الإعلانات وإعادة الاستهداف (Meta Pixel، واتساب).
                   </p>
                 </div>
                 <button
                   onClick={() => setPrefs((p) => ({ ...p, marketing: !p.marketing }))}
-                  className={`relative w-10 h-5 rounded-full transition-colors shrink-0 mt-0.5 ${
+                  className={`relative mt-0.5 h-11 w-12 rounded-full transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 ${
                     prefs.marketing ? 'bg-green-500' : 'bg-gray-300'
                   }`}
                   role="switch"
                   aria-checked={prefs.marketing}
                 >
                   <span
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${
-                      prefs.marketing ? 'right-0.5' : 'left-0.5'
+                    className={`absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow transition-all ${
+                      prefs.marketing ? 'right-1.5' : 'left-1.5'
                     }`}
                   />
                 </button>
@@ -213,7 +224,7 @@ export default function CookieConsentBanner() {
         <div className="px-4 sm:px-5 pb-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Button
             onClick={handleAcceptAll}
-            className="flex-1 bg-green-700 hover:bg-green-800 text-white text-xs sm:text-sm h-8 sm:h-9"
+            className="min-h-11 flex-1 bg-green-700 text-sm text-white hover:bg-green-800"
           >
             قبول الكل
           </Button>
@@ -221,7 +232,7 @@ export default function CookieConsentBanner() {
             <Button
               onClick={handleSaveSelection}
               variant="outline"
-              className="flex-1 border-green-700 text-green-700 hover:bg-green-50 text-xs sm:text-sm h-8 sm:h-9"
+              className="min-h-11 flex-1 border-green-700 text-sm text-green-700 hover:bg-green-50 dark:text-green-400"
             >
               حفظ الاختيار
             </Button>
@@ -229,7 +240,7 @@ export default function CookieConsentBanner() {
           <Button
             onClick={handleRejectAll}
             variant="outline"
-            className="flex-1 border-gray-300 text-gray-600 hover:bg-gray-50 text-xs sm:text-sm h-8 sm:h-9"
+            className="min-h-11 flex-1 border-gray-300 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             الأساسية فقط
           </Button>
