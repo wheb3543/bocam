@@ -231,6 +231,7 @@ export default function MessagesPage() {
     <DashboardLayout
       pageTitle="صندوق البريد الموحد"
       pageDescription="إدارة الرسائل والتعليقات من المنصات الاجتماعية في مكان واحد"
+      pageHeader="none"
     >
       <div dir="rtl" className="container space-y-5 py-4 md:space-y-6 md:py-6">
         <div className="space-y-3">

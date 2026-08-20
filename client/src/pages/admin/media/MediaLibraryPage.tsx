@@ -375,6 +375,7 @@ export default function MediaLibraryPage() {
     <DashboardLayout
       pageTitle="مكتبة الوسائط"
       pageDescription="مكتبة موحّدة للصور والفيديو والصوت والمستندات"
+      pageHeader="none"
     >
       <div dir="rtl" className="space-y-6">
         <AdminPageHeader

@@ -3,8 +3,8 @@
   "numPassedTestSuites": 6,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 6,
-  "numPassedTests": 6,
+  "numTotalTests": 12,
+  "numPassedTests": 12,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,9 +24,95 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787190134044,
+  "startTime": 1787190921125,
   "success": true,
   "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يعرض الرأس الموحد تلقائياً لكل صفحة قياسية تحمل عنواناً ووصفاً",
+          "status": "passed",
+          "title": "يعرض الرأس الموحد تلقائياً لكل صفحة قياسية تحمل عنواناً ووصفاً",
+          "duration": 2.4618820000000596,
+          "failureMessages": [],
+          "location": { "line": 12, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يمنع تكرار العنوان بين الرأس الموحد وشريط الإدارة العلوي",
+          "status": "passed",
+          "title": "يمنع تكرار العنوان بين الرأس الموحد وشريط الإدارة العلوي",
+          "duration": 0.3314599999998791,
+          "failureMessages": [],
+          "location": { "line": 21, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/AdminDashboard.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/AdminDashboard.tsx",
+          "duration": 0.6063840000001619,
+          "failureMessages": [],
+          "location": { "line": 33, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MessagesPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MessagesPage.tsx",
+          "duration": 1.8258480000001782,
+          "failureMessages": [],
+          "location": { "line": 33, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/content/PublishingPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/content/PublishingPage.tsx",
+          "duration": 0.9277700000000095,
+          "failureMessages": [],
+          "location": { "line": 33, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/media/MediaLibraryPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/media/MediaLibraryPage.tsx",
+          "duration": 0.6378630000001522,
+          "failureMessages": [],
+          "location": { "line": 33, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx",
+          "duration": 0.5322250000001532,
+          "failureMessages": [],
+          "location": { "line": 33, "column": 5 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787190922693,
+      "endTime": 1787190922700.638,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/adminPageHeaderRollout.test.ts"
+    },
     {
       "assertionResults": [
         {
@@ -34,7 +120,7 @@
           "fullName": "P0 brand and page-shell completion uses SGH branding fallbacks instead of a generic app identity",
           "status": "passed",
           "title": "uses SGH branding fallbacks instead of a generic app identity",
-          "duration": 2.193418999999949,
+          "duration": 2.116400999999996,
           "failureMessages": [],
           "location": { "line": 12, "column": 3 },
           "meta": {},
@@ -45,38 +131,18 @@
           "fullName": "P0 brand and page-shell completion applies the shared SGH page header and a clear unconfigured connection state",
           "status": "passed",
           "title": "applies the shared SGH page header and a clear unconfigured connection state",
-          "duration": 0.6123529999999846,
+          "duration": 0.5571139999999559,
           "failureMessages": [],
           "location": { "line": 17, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787190135509,
-      "endTime": 1787190135511.6123,
+      "startTime": 1787190922734,
+      "endTime": 1787190922736.5571,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/brandingP0Completion.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["Dashboard operational workspace"],
-          "fullName": "Dashboard operational workspace prioritizes daily operations and remains useful when analytics are unavailable",
-          "status": "passed",
-          "title": "prioritizes daily operations and remains useful when analytics are unavailable",
-          "duration": 366.248789,
-          "failureMessages": [],
-          "location": { "line": 27, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787190135765,
-      "endTime": 1787190136131.2488,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/dashboardWorkspace.test.tsx"
     },
     {
       "assertionResults": [
@@ -85,7 +151,7 @@
           "fullName": "P0 interface foundation provides SGH branding fallbacks when company environment values are absent",
           "status": "passed",
           "title": "provides SGH branding fallbacks when company environment values are absent",
-          "duration": 1.9746299999999337,
+          "duration": 1.845833999999968,
           "failureMessages": [],
           "location": { "line": 12, "column": 3 },
           "meta": {},
@@ -96,7 +162,7 @@
           "fullName": "P0 interface foundation renders the unified administrative page hierarchy with optional status and actions",
           "status": "passed",
           "title": "renders the unified administrative page hierarchy with optional status and actions",
-          "duration": 165.442638,
+          "duration": 162.29811300000006,
           "failureMessages": [],
           "location": { "line": 18, "column": 3 },
           "meta": {},
@@ -107,15 +173,15 @@
           "fullName": "P0 interface foundation renders accessible dashboard and workspace loading skeletons",
           "status": "passed",
           "title": "renders accessible dashboard and workspace loading skeletons",
-          "duration": 18.44777399999998,
+          "duration": 18.903114000000187,
           "failureMessages": [],
           "location": { "line": 35, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787190135659,
-      "endTime": 1787190135844.4478,
+      "startTime": 1787190922877,
+      "endTime": 1787190923059.903,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/uiP0.test.tsx"

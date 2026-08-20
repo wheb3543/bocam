@@ -22,9 +22,14 @@ import { APP_LOGO, APP_TITLE } from '@/const';
 interface TopNavbarProps {
   pageTitle?: string;
   pageDescription?: string;
+  showPageTitle?: boolean;
 }
 
-export default function TopNavbar({ pageTitle, pageDescription }: TopNavbarProps) {
+export default function TopNavbar({
+  pageTitle,
+  pageDescription,
+  showPageTitle = true,
+}: TopNavbarProps) {
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
   const { theme, toggleTheme } = useTheme();
@@ -40,16 +45,22 @@ export default function TopNavbar({ pageTitle, pageDescription }: TopNavbarProps
             alt={APP_TITLE}
             className="h-9 md:h-10 w-auto object-contain flex-shrink-0 lg:hidden"
           />
-          <div className="min-w-0 flex-1">
-            <h1 className="text-sm sm:text-base md:text-lg font-bold text-foreground dark:text-gray-100 truncate">
-              {pageTitle || 'لوحة التحكم'}
-            </h1>
-            {pageDescription && (
-              <p className="text-xs text-muted-foreground dark:text-muted-foreground hidden sm:block truncate">
-                {pageDescription}
-              </p>
-            )}
-          </div>
+          {showPageTitle ? (
+            <div className="min-w-0 flex-1">
+              <h1 className="text-sm sm:text-base md:text-lg font-bold text-foreground dark:text-gray-100 truncate">
+                {pageTitle || 'لوحة التحكم'}
+              </h1>
+              {pageDescription && (
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground hidden sm:block truncate">
+                  {pageDescription}
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="hidden text-sm font-medium text-muted-foreground sm:block">
+              بوابة SGH CRM
+            </p>
+          )}
         </div>
 
         {/* Left Actions: Global Search + Sound + Theme + User */}

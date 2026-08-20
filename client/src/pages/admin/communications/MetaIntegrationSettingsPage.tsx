@@ -194,6 +194,7 @@ export default function MetaIntegrationSettingsPage() {
       <DashboardLayout
         pageTitle="إعدادات الربط العامة"
         pageDescription="إدارة اتصالات منصات التواصل بأمان"
+        pageHeader="none"
       >
         <main dir="rtl" className="container max-w-5xl space-y-5 py-5 sm:py-8">
           <AdminPageHeader
@@ -222,6 +223,7 @@ export default function MetaIntegrationSettingsPage() {
     <DashboardLayout
       pageTitle="إعدادات الربط العامة"
       pageDescription="إدارة ربط Meta وX وLinkedIn وYouTube وTikTok من مكان واحد"
+      pageHeader="none"
     >
       <main dir="rtl" className="container max-w-5xl space-y-5 py-5 sm:py-8">
         <AdminPageHeader

@@ -57,6 +57,7 @@ export default function AdminDashboard() {
     <DashboardLayout
       pageTitle="لوحة التحكم الإدارية"
       pageDescription="إدارة حملات التسويق والعملاء"
+      pageHeader="none"
     >
       <div className="container space-y-6 px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8" dir="rtl">
         <AdminPageHeader

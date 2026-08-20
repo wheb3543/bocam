@@ -192,6 +192,7 @@ export default function PublishingPage() {
     <DashboardLayout
       pageTitle="النشر متعدد المنصات"
       pageDescription="تخطيط المحتوى ومراجعته وتوزيعه بأمان"
+      pageHeader="none"
     >
       <div dir="rtl" className="space-y-6 pb-10">
         <AdminPageHeader
