@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -310,8 +312,10 @@ export default function MediaLibraryPage() {
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => handleFolderDrop(event, folder.id)}
           className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-right text-sm transition-colors ${
-            active ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100'
-          } ${draggedMediaId ? 'ring-1 ring-transparent hover:ring-blue-300' : ''}`}
+            active
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-slate-700 hover:bg-muted'
+          } ${draggedMediaId ? 'ring-1 ring-transparent hover:ring-primary/40' : ''}`}
           style={{ paddingRight: `${10 + depth * 18}px` }}
         >
           {children.length ? (
@@ -355,7 +359,7 @@ export default function MediaLibraryPage() {
           )}
           <span className="min-w-0 flex-1 truncate">{folder.name}</span>
           <span
-            className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-600'}`}
+            className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
           >
             {count}
           </span>
@@ -373,30 +377,35 @@ export default function MediaLibraryPage() {
       pageDescription="مكتبة موحّدة للصور والفيديو والصوت والمستندات"
     >
       <div dir="rtl" className="space-y-6">
-        <section className="rounded-2xl bg-gradient-to-l from-blue-700 via-blue-600 to-cyan-600 p-6 text-white shadow-sm">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-              <div className="mb-2 flex items-center gap-2 text-blue-100">
-                <FileArchive className="h-5 w-5" /> مركز الوسائط الشامل
-              </div>
-              <h1 className="text-2xl font-bold">كل ملفات المشروع في مكان واحد</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-100">
-                الصور تُضغط إلى AVIF تلقائياً، أما الفيديو والصوت والمستندات فتبقى بصيغها الأصلية مع
-                فهرسة كاملة.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
+        <AdminPageHeader
+          eyebrow="مركز الوسائط"
+          title="مكتبة الوسائط"
+          description="ارفع ونظّم الصور والفيديو والصوت والمستندات من مكان واحد. تُضغط الصور إلى AVIF تلقائياً وتبقى بقية الملفات بصيغها الأصلية مع فهرسة كاملة."
+          status={
+            <>
+              <Badge variant="outline" className="h-9 border-primary/20 bg-primary/5 text-primary">
+                {items.length} عنصر ظاهر
+              </Badge>
+              <Badge
+                variant="outline"
+                className="h-9 border-border bg-muted/40 text-muted-foreground"
+              >
+                {selectedFolder?.name || 'المجلد العام'}
+              </Badge>
+            </>
+          }
+          actions={
+            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
               <Button
-                variant="secondary"
-                className="bg-white text-blue-700 hover:bg-blue-50"
+                variant="outline"
+                className="min-h-10"
                 onClick={() => setIsCreatingFolder(true)}
               >
                 <FolderPlus className="ml-2 h-4 w-4" />
                 مجلد جديد
               </Button>
               <Button
-                variant="secondary"
-                className="bg-white text-blue-700 hover:bg-blue-50"
+                className="min-h-10"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
               >
@@ -404,8 +413,8 @@ export default function MediaLibraryPage() {
                 رفع ملفات
               </Button>
               <Button
-                variant="secondary"
-                className="bg-white text-blue-700 hover:bg-blue-50"
+                variant="outline"
+                className="min-h-10"
                 onClick={() => directoryInputRef.current?.click()}
                 disabled={isUploading}
               >
@@ -413,8 +422,8 @@ export default function MediaLibraryPage() {
                 رفع مجلد
               </Button>
             </div>
-          </div>
-        </section>
+          }
+        />
 
         <input
           ref={fileInputRef}
@@ -500,10 +509,22 @@ export default function MediaLibraryPage() {
           <Card className="h-fit shadow-sm">
             <CardContent className="p-3">
               <div className="mb-3 flex items-center justify-between border-b px-1 pb-3">
-                <span className="font-semibold text-slate-800">شجرة المجلدات</span>
-                <span className="text-xs text-slate-500">{folders.length} مجلد</span>
+                <div>
+                  <p className="font-semibold text-foreground">شجرة المجلدات</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{folders.length} مجلد</p>
+                </div>
+                {expandedFolders.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="min-h-9 px-2 text-xs"
+                    onClick={() => setExpandedFolders([])}
+                  >
+                    طي الكل
+                  </Button>
+                )}
               </div>
-              <div className="space-y-1">
+              <div className="max-h-56 space-y-1 overflow-y-auto pr-1 lg:max-h-[calc(100vh-20rem)]">
                 {foldersLoading ? (
                   <div className="space-y-2 p-2" role="status" aria-label="جاري تحميل المجلدات">
                     {Array.from({ length: 6 }).map((_, index) => (
@@ -560,9 +581,9 @@ export default function MediaLibraryPage() {
             </Card>
 
             {selectedIds.length > 0 && (
-              <Card className="border-blue-200 bg-blue-50">
-                <CardContent className="flex flex-wrap items-center gap-3 p-3">
-                  <span className="text-sm font-semibold text-blue-800">
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="flex flex-wrap items-center gap-3 p-3" aria-live="polite">
+                  <span className="text-sm font-semibold text-foreground">
                     تم تحديد {selectedIds.length} عنصر
                   </span>
                   <select
@@ -589,7 +610,7 @@ export default function MediaLibraryPage() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="h-8"
+                    className="min-h-9"
                     onClick={() => setPendingDelete(selectedIds)}
                   >
                     حذف المحدد
@@ -597,7 +618,7 @@ export default function MediaLibraryPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8"
+                    className="min-h-9"
                     onClick={() => setSelectedIds([])}
                   >
                     <X className="ml-1 h-4 w-4" />
@@ -615,10 +636,21 @@ export default function MediaLibraryPage() {
                   void uploadFiles(event.dataTransfer.files);
                 }
               }}
-              className="rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/40 p-4 text-center text-sm text-blue-800"
+              className="rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5 p-4 text-center text-sm text-foreground"
             >
-              <Upload className="mx-auto mb-1 h-5 w-5" />
-              اسحب ملفاتك هنا لرفعها إلى «{selectedFolder?.name || 'المجلد'}»
+              <Upload className="mx-auto mb-1 h-5 w-5 text-primary" />
+              <p>اسحب ملفاتك هنا لرفعها إلى «{selectedFolder?.name || 'المجلد'}»</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3 min-h-9 bg-card"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                <Upload className="ml-1.5 h-4 w-4" />
+                اختيار ملفات
+              </Button>
             </div>
 
             {isLoading ? (
@@ -653,14 +685,14 @@ export default function MediaLibraryPage() {
               </Card>
             ) : (
               <>
-                <div className="flex items-center justify-between px-1 text-xs text-slate-500">
+                <div className="flex flex-col gap-2 px-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                   <button
                     type="button"
                     onClick={toggleSelectAll}
-                    className="flex items-center gap-1.5 font-medium hover:text-slate-800"
+                    className="flex min-h-9 items-center gap-1.5 rounded-lg px-2 font-medium hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {selectedIds.length === items.length ? (
-                      <CheckSquare className="h-4 w-4 text-blue-600" />
+                      <CheckSquare className="h-4 w-4 text-primary" />
                     ) : (
                       <Square className="h-4 w-4" />
                     )}
@@ -668,7 +700,7 @@ export default function MediaLibraryPage() {
                   </button>
                   <span>{selectedFolder?.path}</span>
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
                   {items.map((item) => {
                     const selected = selectedIds.includes(item.id);
                     return (
@@ -680,16 +712,21 @@ export default function MediaLibraryPage() {
                           setDraggedMediaId(item.id);
                         }}
                         onDragEnd={() => setDraggedMediaId(null)}
-                        className={`group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md ${selected ? 'border-blue-500 ring-2 ring-blue-500' : 'border-slate-200'}`}
+                        className={`group overflow-hidden rounded-xl border bg-card shadow-sm transition hover:shadow-md ${selected ? 'border-primary ring-2 ring-primary/40' : 'border-border'}`}
                       >
                         <div className="relative aspect-video overflow-hidden bg-slate-100">
                           <button
                             type="button"
-                            className="absolute right-2 top-2 z-10 rounded bg-white/95 p-1 shadow"
+                            className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-card/95 shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             onClick={() => toggleSelection(item.id)}
+                            aria-label={
+                              selected
+                                ? `إلغاء تحديد ${item.fileName || 'الوسيط'}`
+                                : `تحديد ${item.fileName || 'الوسيط'}`
+                            }
                           >
                             {selected ? (
-                              <CheckSquare className="h-4 w-4 text-blue-600" />
+                              <CheckSquare className="h-4 w-4 text-primary" />
                             ) : (
                               <Square className="h-4 w-4 text-slate-500" />
                             )}
@@ -701,15 +738,15 @@ export default function MediaLibraryPage() {
                             label: typeLabel(item.type),
                           })}
                         </div>
-                        <div className="space-y-2 p-3">
+                        <div className="space-y-2 p-2.5 sm:p-3">
                           <p
-                            className="truncate text-sm font-semibold text-slate-800"
+                            className="truncate text-sm font-semibold text-foreground"
                             title={item.fileName || item.key}
                           >
                             {item.fileName || item.key.split('/').pop()}
                           </p>
-                          <div className="flex items-center justify-between text-[11px] text-slate-500">
-                            <span className="rounded bg-slate-100 px-1.5 py-0.5 uppercase">
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                            <span className="rounded bg-muted px-1.5 py-0.5 uppercase">
                               {item.format || item.type}
                             </span>
                             <span>{formatBytes(item.size)}</span>
@@ -725,7 +762,7 @@ export default function MediaLibraryPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 px-2 text-xs text-blue-700"
+                              className="min-h-9 px-2 text-xs text-primary"
                               onClick={() => handleCopy(item.url)}
                             >
                               <Copy className="ml-1 h-3 w-3" />
@@ -734,7 +771,7 @@ export default function MediaLibraryPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 px-2 text-xs text-red-700"
+                              className="min-h-9 px-2 text-xs text-destructive"
                               onClick={() => setPendingDelete([item.id])}
                             >
                               <Trash2 className="ml-1 h-3 w-3" />
