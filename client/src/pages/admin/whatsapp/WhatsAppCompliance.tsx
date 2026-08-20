@@ -15,6 +15,7 @@ interface BlockedPhone {
 type BlockReason = 'manual' | 'opt_out' | 'spam' | 'invalid';
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -320,25 +321,26 @@ export default function WhatsAppCompliance() {
     <DashboardLayout
       pageTitle="الامتثال والأمان"
       pageDescription="إدارة الامتثال مع معايير Meta والأمان"
+      pageHeader="none"
     >
       <div className="space-y-6">
-        {/* Header with Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">الامتثال والأمان</h1>
-            <p className="text-muted-foreground text-sm">إدارة الامتثال مع معايير Meta والأمان</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-              <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
-              تحديث
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportData}>
-              <Download className="w-4 h-4 ml-2" />
-              تصدير
-            </Button>
-          </div>
-        </div>
+        <AdminPageHeader
+          eyebrow="قنوات التواصل"
+          title="الامتثال والأمان"
+          description="إدارة الامتثال مع معايير Meta والأمان."
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+                <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
+                تحديث
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportData}>
+                <Download className="w-4 h-4 ml-2" />
+                تصدير
+              </Button>
+            </div>
+          }
+        />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
