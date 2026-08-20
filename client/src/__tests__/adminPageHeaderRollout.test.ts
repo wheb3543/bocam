@@ -7,6 +7,7 @@ const readSource = (relativePath: string) =>
 
 const dashboardLayoutSource = readSource('client/src/components/layout/DashboardLayout.tsx');
 const topNavbarSource = readSource('client/src/components/layout/TopNavbar.tsx');
+const messagesPageSource = readSource('client/src/pages/admin/communications/MessagesPage.tsx');
 
 describe('مساحات العمل الإدارية دون بطاقة عنوان مكررة', () => {
   it('لا يرسم رأس عنوان مركزياً فوق محتوى الصفحة', () => {
@@ -20,6 +21,14 @@ describe('مساحات العمل الإدارية دون بطاقة عنوان 
     expect(dashboardLayoutSource).toContain('showPageTitle={Boolean(pageTitle)}');
     expect(topNavbarSource).toContain('showPageTitle?: boolean;');
     expect(topNavbarSource).toContain('{showPageTitle ? (');
+  });
+
+  it('يستبدل رأس صندوق البريد المكرر بشريط حالة وعمليات مدمج', () => {
+    expect(messagesPageSource).not.toContain("import AdminPageHeader from '@/components/layout/AdminPageHeader';");
+    expect(messagesPageSource).toContain('aria-label="حالة وإجراءات صندوق البريد"');
+    expect(messagesPageSource).toContain('تحديث الصندوق');
+    expect(messagesPageSource).toContain('id="inbox-tabs"');
+    expect(messagesPageSource).toContain('min-h-[clamp(34rem,calc(100dvh-18rem),46rem)]');
   });
 
   it.each([

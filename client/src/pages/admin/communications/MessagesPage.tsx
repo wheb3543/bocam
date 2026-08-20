@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -233,92 +232,94 @@ export default function MessagesPage() {
       pageDescription="إدارة الرسائل والتعليقات من المنصات الاجتماعية في مكان واحد"
       pageHeader="none"
     >
-      <div dir="rtl" className="container space-y-5 py-4 md:space-y-6 md:py-6">
-        <div className="space-y-3">
-          <AdminPageHeader
-            eyebrow="التواصل الاجتماعي"
-            title="صندوق البريد الموحد"
-            description="اجمع الرسائل والتعليقات الواردة من قنواتك الاجتماعية في شاشة واحدة، مع الاحتفاظ بمصدر كل تفاعل وحالته."
-            status={
-              <Badge
-                variant="outline"
-                className="h-9 gap-1.5 rounded-lg border-primary/20 bg-primary/5 px-3 text-primary"
-              >
-                <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" />
-                {connectedAccounts} حساب متصل
-              </Badge>
-            }
-            actions={
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9"
-                onClick={handleRefresh}
-                disabled={threadsQuery.isFetching}
-                aria-label="تحديث صندوق البريد"
-              >
-                {threadsQuery.isFetching ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-              </Button>
-            }
-          />
-
-          <div
-            className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4"
-            aria-label="ملخص صندوق البريد"
-          >
-            {[
-              {
-                label: 'كل المحادثات',
-                value: statsQuery.data?.total ?? 0,
-                icon: Inbox,
-                className: 'bg-primary/10 text-primary',
-              },
-              {
-                label: 'غير مقروءة',
-                value: statsQuery.data?.unread ?? 0,
-                icon: MessageCircle,
-                className: 'bg-amber-50 text-amber-700',
-              },
-              {
-                label: 'رسائل',
-                value: statsQuery.data?.messages ?? 0,
-                icon: Send,
-                className: 'bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-300',
-              },
-              {
-                label: 'تعليقات',
-                value: statsQuery.data?.comments ?? 0,
-                icon: MessageSquare,
-                className:
-                  'bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300',
-              },
-            ].map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div
-                  key={stat.label}
-                  className="rounded-xl border border-border/70 bg-muted/30 p-3 md:p-4"
+      <div dir="rtl" className="container space-y-4 py-3 md:space-y-5 md:py-4">
+        <section
+          className="flex flex-col gap-3 rounded-xl border border-border/80 bg-card/95 px-3 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-4"
+          aria-label="حالة وإجراءات صندوق البريد"
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Inbox className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-semibold text-foreground">حالة القنوات</span>
+                <Badge
+                  variant="outline"
+                  className="h-7 gap-1.5 rounded-lg border-primary/20 bg-primary/5 px-2.5 text-primary"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-muted-foreground">{stat.label}</span>
-                    <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${stat.className}`}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </span>
-                  </div>
-                  <div className="mt-2 text-xl font-bold tabular-nums text-foreground">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" />
+                  {connectedAccounts} حساب متصل
+                </Badge>
+              </div>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                تُحدَّث الرسائل والتعليقات من الحسابات المرتبطة في مساحة عمل واحدة.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            className="h-11 shrink-0 gap-2 self-start sm:self-auto"
+            onClick={handleRefresh}
+            disabled={threadsQuery.isFetching}
+          >
+            {threadsQuery.isFetching ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            تحديث الصندوق
+          </Button>
+        </section>
+
+        <section className="grid grid-cols-2 gap-2 md:grid-cols-4" aria-label="ملخص صندوق البريد">
+          {[
+            {
+              label: 'كل المحادثات',
+              value: statsQuery.data?.total ?? 0,
+              icon: Inbox,
+              className: 'bg-primary/10 text-primary',
+            },
+            {
+              label: 'غير مقروءة',
+              value: statsQuery.data?.unread ?? 0,
+              icon: MessageCircle,
+              className: 'bg-amber-50 text-amber-700',
+            },
+            {
+              label: 'رسائل',
+              value: statsQuery.data?.messages ?? 0,
+              icon: Send,
+              className: 'bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-300',
+            },
+            {
+              label: 'تعليقات',
+              value: statsQuery.data?.comments ?? 0,
+              icon: MessageSquare,
+              className: 'bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300',
+            },
+          ].map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.label}
+                className="flex min-h-16 items-center justify-between gap-2 rounded-xl border border-border/70 bg-muted/20 px-3 py-2.5"
+              >
+                <div>
+                  <span className="text-xs text-muted-foreground">{stat.label}</span>
+                  <div className="mt-0.5 text-lg font-bold tabular-nums text-foreground">
                     {stat.value}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+                <span
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${stat.className}`}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+              </div>
+            );
+          })}
+        </section>
 
         <Tabs
           dir="rtl"
@@ -329,9 +330,10 @@ export default function MessagesPage() {
           }}
         >
           <TabsList
+            id="inbox-tabs"
             aria-label="تبويبات صندوق البريد"
             dir="rtl"
-            className="h-auto w-full flex-col items-stretch gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm"
+            className="h-auto w-full flex-col items-stretch gap-3 rounded-xl border border-border bg-card p-3 shadow-sm"
           >
             {(
               [
@@ -339,11 +341,14 @@ export default function MessagesPage() {
                 ['التعليقات', inboxTabs.filter((tab) => tab.channelType === 'comment')],
               ] as const
             ).map(([groupLabel, tabs]) => (
-              <div key={groupLabel} className="flex min-w-0 items-center gap-2">
-                <span className="w-14 shrink-0 text-[11px] font-semibold text-muted-foreground sm:w-16 sm:text-xs">
+              <div
+                key={groupLabel}
+                className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center"
+              >
+                <span className="inline-flex h-8 w-fit shrink-0 items-center rounded-lg bg-muted px-2.5 text-[11px] font-semibold text-muted-foreground sm:w-16 sm:justify-center sm:text-xs">
                   {groupLabel}
                 </span>
-                <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto pb-0.5">
+                <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto pb-1">
                   {tabs.map((tab) => {
                     const Icon = tab.icon;
                     return (
@@ -364,7 +369,7 @@ export default function MessagesPage() {
           </TabsList>
         </Tabs>
 
-        <Card className="overflow-hidden rounded-2xl border-border/80 shadow-sm">
+        <Card className="overflow-hidden rounded-xl border-border/80 shadow-sm">
           <CardContent className="p-0">
             {isMetaCommentTab ? (
               <MetaCommentContextsPanel
@@ -391,7 +396,7 @@ export default function MessagesPage() {
                 isActionPending={isCommentActionPending}
               />
             ) : (
-              <div className="grid min-h-[620px] lg:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">
+              <div className="grid min-h-[clamp(34rem,calc(100dvh-18rem),46rem)] lg:grid-cols-[minmax(300px,360px)_minmax(0,1fr)]">
                 <section
                   className={`${selectedThreadId ? 'hidden lg:flex' : 'flex'} min-w-0 flex-col border-l border-border bg-white`}
                 >
@@ -416,7 +421,7 @@ export default function MessagesPage() {
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
                         placeholder="ابحث في الاسم أو المحتوى"
-                        className="h-10 bg-slate-50 pr-9 text-sm"
+                        className="h-11 bg-slate-50 pr-9 text-sm"
                         aria-label="البحث في صندوق البريد"
                       />
                     </div>
