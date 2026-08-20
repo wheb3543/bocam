@@ -117,12 +117,18 @@ export default function WhatsAppLabResultsPage() {
   };
 
   return (
-    <DashboardLayout
-      pageTitle="إدارة نتائج المختبر"
-      pageDescription="متابعة وإرسال نتائج فحوصات المختبر عبر واتساب"
-    >
+    <DashboardLayout>
       <div className="p-4 sm:p-6 space-y-6">
-        <div className="flex justify-end">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
+              إدارة نتائج المختبر
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              متابعة وإرسال نتائج فحوصات المختبر عبر واتساب
+            </p>
+          </div>
           <Button onClick={() => refetch()} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             تحديث

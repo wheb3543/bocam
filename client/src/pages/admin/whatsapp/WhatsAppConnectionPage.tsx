@@ -26,10 +26,7 @@ import { toast } from 'sonner';
 
 export default function WhatsAppConnectionPage() {
   return (
-    <DashboardLayout
-      pageTitle="اتصال WhatsApp Cloud API"
-      pageDescription="إعداد وإدارة حالة الاتصال بـ WhatsApp Business Cloud API"
-    >
+    <DashboardLayout pageTitle="اتصال واتساب" pageDescription="إعداد وإدارة اتصال واتساب">
       <WhatsAppConnectionContent />
     </DashboardLayout>
   );
@@ -98,7 +95,25 @@ function WhatsAppConnectionContent() {
       dir="rtl"
     >
       <div className="container mx-auto p-3 sm:p-4 md:p-6 max-w-4xl">
-        <div className="mb-4 flex justify-end sm:mb-6">{getStatusBadge()}</div>
+        {/* Header */}
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 sm:p-3 rounded-xl shadow-lg flex-shrink-0">
+                <Cloud className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground truncate">
+                  اتصال WhatsApp Cloud API
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  حالة الاتصال بـ WhatsApp Business Cloud API
+                </p>
+              </div>
+            </div>
+            {getStatusBadge()}
+          </div>
+        </div>
 
         <div className="space-y-4 sm:space-y-6">
           {/* Status Card */}

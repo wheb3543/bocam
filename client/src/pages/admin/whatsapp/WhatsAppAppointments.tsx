@@ -13,6 +13,7 @@ type NotificationStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
 type NotificationLog = WhatsappNotificationWithDetails;
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -225,36 +226,46 @@ export default function WhatsAppAppointments() {
     <DashboardLayout
       pageTitle="سجل إشعارات WhatsApp"
       pageDescription="تتبع جميع الإشعارات المرسلة للمواعيد والتسجيلات والعروض"
+      pageHeader="none"
     >
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={logsQuery.isFetching}
-          >
-            <RefreshCw className={`w-4 h-4 ml-2 ${logsQuery.isFetching ? 'animate-spin' : ''}`} />
-            تحديث
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleCheckReminders} disabled={false}>
-            <Bell className="w-4 h-4 ml-2" />
-            فحص التذكيرات
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRunJobs}
-            disabled={runJobsMutation.isPending}
-          >
-            <Play className="w-4 h-4 ml-2" />
-            تشغيل الوظائف
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="w-4 h-4 ml-2" />
-            تصدير
-          </Button>
-        </div>
+        <AdminPageHeader
+          eyebrow="قنوات التواصل"
+          title="سجل إشعارات WhatsApp"
+          description="تتبع جميع الإشعارات المرسلة للمواعيد والتسجيلات والعروض."
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={logsQuery.isFetching}
+              >
+                <RefreshCw
+                  className={`w-4 h-4 ml-2 ${logsQuery.isFetching ? 'animate-spin' : ''}`}
+                />
+                تحديث
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleCheckReminders} disabled={false}>
+                <Bell className="w-4 h-4 ml-2" />
+                فحص التذكيرات
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRunJobs}
+                disabled={runJobsMutation.isPending}
+              >
+                <Play className="w-4 h-4 ml-2" />
+                تشغيل الوظائف
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                <Download className="w-4 h-4 ml-2" />
+                تصدير
+              </Button>
+            </div>
+          }
+        />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

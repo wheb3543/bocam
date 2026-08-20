@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 6,
-  "numPassedTestSuites": 6,
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 9,
-  "numPassedTests": 9,
+  "numTotalTests": 15,
+  "numPassedTests": 15,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,134 +24,182 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787195377084,
+  "startTime": 1787191541341,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["P3 SGH design-system foundation"],
-          "fullName": "P3 SGH design-system foundation defines semantic brand, surface, status, focus, and touch-target tokens",
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يعرض الرأس الموحد تلقائياً لكل صفحة قياسية تحمل عنواناً ووصفاً",
           "status": "passed",
-          "title": "defines semantic brand, surface, status, focus, and touch-target tokens",
-          "duration": 2.1573490000000675,
-          "failureMessages": [],
-          "location": { "line": 15, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["P3 SGH design-system foundation"],
-          "fullName": "P3 SGH design-system foundation documents semantic-color and accessible interaction rules",
-          "status": "passed",
-          "title": "documents semantic-color and accessible interaction rules",
-          "duration": 0.4078500000000531,
-          "failureMessages": [],
-          "location": { "line": 24, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["P3 SGH design-system foundation"],
-          "fullName": "P3 SGH design-system foundation uses semantic tokens in shared headers, navigation, and consent controls",
-          "status": "passed",
-          "title": "uses semantic tokens in shared headers, navigation, and consent controls",
-          "duration": 0.3223489999998037,
-          "failureMessages": [],
-          "location": { "line": 30, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787195378495,
-      "endTime": 1787195378497.408,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/designSystemP3.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["P2 public interface refinement"],
-          "fullName": "P2 public interface refinement keeps public booking and contact calls-to-action as semantic, touch-friendly links",
-          "status": "passed",
-          "title": "keeps public booking and contact calls-to-action as semantic, touch-friendly links",
-          "duration": 2.0445810000001075,
-          "failureMessages": [],
-          "location": { "line": 14, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["P2 public interface refinement"],
-          "fullName": "P2 public interface refinement uses accessible public navigation and footer targets that preserve SGH identity",
-          "status": "passed",
-          "title": "uses accessible public navigation and footer targets that preserve SGH identity",
-          "duration": 0.4706119999998464,
-          "failureMessages": [],
-          "location": { "line": 21, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["P2 public interface refinement"],
-          "fullName": "P2 public interface refinement provides a mobile-friendly cookie-preference dialog with explicit controls",
-          "status": "passed",
-          "title": "provides a mobile-friendly cookie-preference dialog with explicit controls",
-          "duration": 0.35503399999993235,
-          "failureMessages": [],
-          "location": { "line": 29, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787195378494,
-      "endTime": 1787195378497.4707,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/publicInterfaceP2.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["P0 interface foundation"],
-          "fullName": "P0 interface foundation provides SGH branding fallbacks when company environment values are absent",
-          "status": "passed",
-          "title": "provides SGH branding fallbacks when company environment values are absent",
-          "duration": 1.63102200000003,
+          "title": "يعرض الرأس الموحد تلقائياً لكل صفحة قياسية تحمل عنواناً ووصفاً",
+          "duration": 2.095438999999942,
           "failureMessages": [],
           "location": { "line": 12, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["P0 interface foundation"],
-          "fullName": "P0 interface foundation renders the unified administrative page hierarchy with optional status and actions",
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يمنع تكرار العنوان بين الرأس الموحد وشريط الإدارة العلوي",
           "status": "passed",
-          "title": "renders the unified administrative page hierarchy with optional status and actions",
-          "duration": 153.71675600000003,
+          "title": "يمنع تكرار العنوان بين الرأس الموحد وشريط الإدارة العلوي",
+          "duration": 0.32901399999991554,
           "failureMessages": [],
-          "location": { "line": 18, "column": 3 },
+          "location": { "line": 21, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["P0 interface foundation"],
-          "fullName": "P0 interface foundation renders accessible dashboard and workspace loading skeletons",
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/AdminDashboard.tsx",
           "status": "passed",
-          "title": "renders accessible dashboard and workspace loading skeletons",
-          "duration": 16.565585000000056,
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/AdminDashboard.tsx",
+          "duration": 0.6241700000000492,
           "failureMessages": [],
-          "location": { "line": 35, "column": 3 },
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MessagesPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MessagesPage.tsx",
+          "duration": 1.3818679999999404,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/content/PublishingPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/content/PublishingPage.tsx",
+          "duration": 0.7601709999999002,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/media/MediaLibraryPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/media/MediaLibraryPage.tsx",
+          "duration": 0.5077719999999317,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx",
+          "duration": 0.3829200000000128,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx",
+          "duration": 0.29701999999997497,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/reports/BIPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/reports/BIPage.tsx",
+          "duration": 0.6139760000000933,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/reports/CampStatsPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/reports/CampStatsPage.tsx",
+          "duration": 0.4325189999999566,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/reports/PWAStatsPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/reports/PWAStatsPage.tsx",
+          "duration": 0.4672330000000784,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/teams/MediaTeamPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/teams/MediaTeamPage.tsx",
+          "duration": 0.37541200000009667,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/whatsapp/WhatsAppAnalytics.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/whatsapp/WhatsAppAnalytics.tsx",
+          "duration": 0.33792399999992995,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/whatsapp/WhatsAppAppointments.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/whatsapp/WhatsAppAppointments.tsx",
+          "duration": 0.3123729999999796,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تعميم رأس صفحة SGH الإداري"],
+          "fullName": "تعميم رأس صفحة SGH الإداري يحافظ على الرأس المتخصص في client/src/pages/admin/MessageSettingsPage.tsx",
+          "status": "passed",
+          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/MessageSettingsPage.tsx",
+          "duration": 0.21960500000000138,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787195378669,
-      "endTime": 1787195378840.5657,
+      "startTime": 1787191542868,
+      "endTime": 1787191542878.2197,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/uiP0.test.tsx"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/adminPageHeaderRollout.test.ts"
     }
   ]
 }

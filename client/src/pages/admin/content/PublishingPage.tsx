@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -190,29 +191,42 @@ export default function PublishingPage() {
   return (
     <DashboardLayout
       pageTitle="النشر متعدد المنصات"
-      pageDescription="أنشئ مسودة واحدة وجهّز وجهاتها للموافقة أو الجدولة والتوزيع الآمن"
+      pageDescription="تخطيط المحتوى ومراجعته وتوزيعه بأمان"
+      pageHeader="none"
     >
       <div dir="rtl" className="space-y-6 pb-10">
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <Badge variant="outline" className="h-9 border-primary/20 bg-primary/5 text-primary">
-            {totals?.connectedAccounts ?? 0} حساب متصل
-          </Badge>
-          <Badge variant="outline" className="h-9 border-amber-200 bg-amber-50 text-amber-800">
-            {totals?.awaitingReview ?? 0} للمراجعة
-          </Badge>
-          <Badge variant="outline" className="h-9 border-border bg-muted/40 text-muted-foreground">
-            {totals?.scheduled ?? 0} مجدول
-          </Badge>
-          <Button
-            variant="outline"
-            className="min-h-10"
-            onClick={() => workspaceQuery.refetch()}
-            disabled={workspaceQuery.isFetching}
-          >
-            {workspaceQuery.isFetching ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : null}
-            تحديث الحالة
-          </Button>
-        </div>
+        <AdminPageHeader
+          eyebrow="غرفة التحرير والنشر"
+          title="النشر متعدد المنصات"
+          description="أنشئ مسودة واحدة، جهّز وجهاتها، ثم أرسلها للموافقة أو الجدولة. يبقى النشر الخارجي محمياً حتى يكتمل ربط الحسابات والصلاحيات."
+          status={
+            <>
+              <Badge variant="outline" className="h-9 border-primary/20 bg-primary/5 text-primary">
+                {totals?.connectedAccounts ?? 0} حساب متصل
+              </Badge>
+              <Badge variant="outline" className="h-9 border-amber-200 bg-amber-50 text-amber-800">
+                {totals?.awaitingReview ?? 0} للمراجعة
+              </Badge>
+              <Badge
+                variant="outline"
+                className="h-9 border-border bg-muted/40 text-muted-foreground"
+              >
+                {totals?.scheduled ?? 0} مجدول
+              </Badge>
+            </>
+          }
+          actions={
+            <Button
+              variant="outline"
+              className="min-h-10"
+              onClick={() => workspaceQuery.refetch()}
+              disabled={workspaceQuery.isFetching}
+            >
+              {workspaceQuery.isFetching ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : null}
+              تحديث الحالة
+            </Button>
+          }
+        />
 
         <section aria-label="مراحل سير النشر" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[

@@ -10,6 +10,7 @@ const QuickPatientSearch = lazy(() => import('@/components/dashboard/QuickPatien
 const DetailedStatsCards = lazy(() => import('@/components/dashboard/DetailedStatsCards'));
 const DashboardCharts = lazy(() => import('@/components/dashboard/DashboardCharts'));
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { useLicense } from '@/hooks/integrations/useLicense';
 import {
   Bell,
@@ -54,34 +55,44 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout
-      pageTitle="لوحة التحكم"
-      pageDescription="ابدأ بالبحث أو التسجيل، ثم تابع الرسائل والنشر والتحليلات من مساحات العمل المخصصة"
+      pageTitle="لوحة التحكم الإدارية"
+      pageDescription="إدارة حملات التسويق والعملاء"
+      pageHeader="none"
     >
       <div className="container space-y-6 px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8" dir="rtl">
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <Badge
-            variant="outline"
-            className={
-              analyticsAvailable
-                ? 'h-9 border-emerald-200 bg-emerald-50 text-emerald-800'
-                : 'h-9 border-amber-200 bg-amber-50 text-amber-800'
-            }
-          >
-            {analyticsAvailable ? 'المؤشرات متاحة' : 'وضع التشغيل الأساسي'}
-          </Badge>
-          <Button asChild variant="outline" className="min-h-10">
-            <a href="/admin/communications/messages">
-              <MessageSquare className="ml-2 h-4 w-4" />
-              صندوق البريد
-            </a>
-          </Button>
-          <Button asChild className="min-h-10">
-            <a href="/admin/content/publishing">
-              <Send className="ml-2 h-4 w-4" />
-              إنشاء منشور
-            </a>
-          </Button>
-        </div>
+        <AdminPageHeader
+          eyebrow="مركز العمليات"
+          title="لوحة التحكم"
+          description="ابدأ بالبحث أو التسجيل، ثم تابع صندوق البريد والنشر من مساحات العمل المخصصة. تظهر التحليلات المتقدمة عند تفعيلها."
+          status={
+            <Badge
+              variant="outline"
+              className={
+                analyticsAvailable
+                  ? 'h-9 border-emerald-200 bg-emerald-50 text-emerald-800'
+                  : 'h-9 border-amber-200 bg-amber-50 text-amber-800'
+              }
+            >
+              {analyticsAvailable ? 'المؤشرات متاحة' : 'وضع التشغيل الأساسي'}
+            </Badge>
+          }
+          actions={
+            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+              <Button asChild variant="outline" className="min-h-10 flex-1 sm:flex-none">
+                <a href="/admin/communications/messages">
+                  <MessageSquare className="ml-2 h-4 w-4" />
+                  صندوق البريد
+                </a>
+              </Button>
+              <Button asChild className="min-h-10 flex-1 sm:flex-none">
+                <a href="/admin/content/publishing">
+                  <Send className="ml-2 h-4 w-4" />
+                  إنشاء منشور
+                </a>
+              </Button>
+            </div>
+          }
+        />
 
         <section
           aria-label="اختصارات العمل اليومي"

@@ -124,13 +124,15 @@ export default function WhatsAppOrdersPage() {
   };
 
   return (
-    <DashboardLayout
-      pageTitle="طلبات WhatsApp"
-      pageDescription="عرض وإدارة الطلبات الواردة عبر WhatsApp"
-    >
+    <DashboardLayout>
       <FeatureGate feature="whatsapp">
         <div className="space-y-6 p-6">
-          <div className="flex justify-end">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">طلبات WhatsApp</h1>
+              <p className="text-muted-foreground">عرض وإدارة الطلبات الواردة عبر WhatsApp</p>
+            </div>
             <Button onClick={handleExport} className="gap-2">
               <Download className="h-4 w-4" />
               تصدير التقرير

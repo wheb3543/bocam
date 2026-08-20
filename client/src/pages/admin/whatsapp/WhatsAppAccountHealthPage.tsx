@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -283,482 +282,479 @@ export default function WhatsAppAccountHealthPage() {
   };
 
   return (
-    <DashboardLayout
-      pageTitle="صحة حساب WhatsApp والأمان"
-      pageDescription="مراقبة تنبيهات الحساب وأحداث الأمان الواردة من Meta"
-    >
-      <div className="container mx-auto py-6 px-4" dir="rtl">
-        <div className="flex flex-wrap items-center justify-end gap-2 mb-6">
-          <div className="flex items-center gap-2">
-            <Button onClick={handleRefresh} variant="outline" className="gap-2">
-              <RefreshCw className="h-4 w-4" />
-              تحديث
-            </Button>
-            {hasNewCritical && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg animate-pulse">
-                <BellRing className="h-4 w-4 text-red-600" />
-                <span className="text-sm font-medium text-red-700">تنبيه حرج جديد!</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0 text-red-600"
-                  onClick={() => setHasNewCritical(false)}
-                >
-                  ×
-                </Button>
-              </div>
-            )}
-            {liveAlerts.length > 0 && (
-              <Badge className="bg-green-500 text-white gap-1">
-                <Zap className="h-3 w-3" />
-                {liveAlerts.length} مباشر
-              </Badge>
-            )}
-          </div>
+    <div className="container mx-auto py-6 px-4" dir="rtl">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">صحة الحساب والأمان</h1>
+          <p className="text-gray-600 mt-1">مراقبة تنبيهات الحساب وأحداث الأمان من Meta</p>
         </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">تنبيهات حرجة</p>
-                  <p className="text-2xl font-bold text-red-600">0</p>
-                </div>
-                <AlertTriangle className="h-8 w-8 text-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">تنبيهات عالية</p>
-                  <p className="text-2xl font-bold text-orange-600">0</p>
-                </div>
-                <AlertCircle className="h-8 w-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">أحداث أمان</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {securityWebhookEvents?.length || 0}
-                  </p>
-                </div>
-                <Shield className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">تم حلها</p>
-                  <p className="text-2xl font-bold text-green-600">0</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Smart Alerts Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <Card className="border-amber-200 bg-amber-50 dark:bg-amber-900/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">نافذة 24 ساعة منتهية</p>
-                  <p className="text-2xl font-bold text-amber-600">
-                    {windowExpiredConversations.length}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">محادثة خارج النافذة</p>
-                </div>
-                <Clock className="h-8 w-8 text-amber-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">تكاليف مرتفعة</p>
-                  <p className="text-2xl font-bold text-red-600">
-                    ${typeof totalHighCost === 'number' ? totalHighCost.toFixed(2) : '0.00'}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {highCostConversations.length} محادثة مكلفة
-                  </p>
-                </div>
-                <DollarSign className="h-8 w-8 text-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-2 mb-4">
-          <Button
-            variant={severityFilter === null ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSeverityFilter(null)}
-          >
-            الكل
+        <div className="flex items-center gap-2">
+          <Button onClick={handleRefresh} variant="outline" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            تحديث
           </Button>
-          <Button
-            variant={severityFilter === 'critical' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSeverityFilter('critical')}
-            className="bg-red-100 hover:bg-red-200 text-red-700"
-          >
-            حرجة
-          </Button>
-          <Button
-            variant={severityFilter === 'high' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSeverityFilter('high')}
-            className="bg-orange-100 hover:bg-orange-200 text-orange-700"
-          >
-            عالية
-          </Button>
-          <Button
-            variant={severityFilter === 'medium' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSeverityFilter('medium')}
-            className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700"
-          >
-            متوسطة
-          </Button>
-          <Button
-            variant={severityFilter === 'low' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSeverityFilter('low')}
-            className="bg-blue-100 hover:bg-blue-200 text-blue-700"
-          >
-            منخفضة
-          </Button>
-        </div>
-
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="alerts">تنبيهات الحساب</TabsTrigger>
-            <TabsTrigger value="smart-alerts">تنبيهات ذكية</TabsTrigger>
-            <TabsTrigger value="security">أحداث الأمان</TabsTrigger>
-            <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="alerts">
-            <Card>
-              <CardHeader>
-                <CardTitle>تنبيهات الحساب</CardTitle>
-                <CardDescription>تنبيهات مهمة من Meta حول حالة الحساب</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* تنبيهات مباشرة عبر SSE */}
-                {liveAlerts.length > 0 && (
-                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Zap className="h-4 w-4 text-amber-600" />
-                      <span className="text-sm font-semibold text-amber-700">
-                        تنبيهات مباشرة ({liveAlerts.length})
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 text-xs text-amber-600 mr-auto"
-                        onClick={() => setLiveAlerts([])}
-                      >
-                        مسح
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      {liveAlerts.map((alert, i) => (
-                        <div
-                          key={i}
-                          className={`flex items-center gap-2 text-sm p-2 rounded ${
-                            alert.severity === 'critical'
-                              ? 'bg-red-100 text-red-800'
-                              : alert.severity === 'high'
-                                ? 'bg-orange-100 text-orange-800'
-                                : alert.severity === 'medium'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-blue-100 text-blue-800'
-                          }`}
-                        >
-                          {getSeverityIcon(alert.severity)}
-                          <span className="font-medium">{alert.alertType}</span>
-                          <Badge className={`text-xs ${getSeverityColor(alert.severity)}`}>
-                            {alert.severity}
-                          </Badge>
-                          <span className="text-xs opacity-70 mr-auto">
-                            {new Date(alert.timestamp).toLocaleTimeString('ar-SA')}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="text-center py-8 text-muted-foreground">
-                  ميزة تنبيهات الحساب غير متوفرة في الإصدار الحالي
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="smart-alerts">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* 24-Hour Window Alerts */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-amber-500" />
-                    تنبيهات نافذة 24 ساعة
-                  </CardTitle>
-                  <CardDescription>محادثات خارج نافذة الـ 24 ساعة تحتاج إلى قالب</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {windowExpiredConversations.length > 0 ? (
-                    <div className="space-y-3">
-                      {windowExpiredConversations.slice(0, 5).map((conv: Conversation) => (
-                        <div
-                          key={conv.id}
-                          className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-semibold text-sm">
-                                {conv.customerName ?? 'عميل جديد'}
-                              </p>
-                              <p className="text-xs text-gray-600" dir="ltr">
-                                {conv.phoneNumber ?? ''}
-                              </p>
-                            </div>
-                            <Badge className="bg-amber-100 text-amber-800">
-                              {conv.lastMessageAt
-                                ? Math.floor(
-                                    (Date.now() - new Date(conv.lastMessageAt).getTime()) /
-                                      (1000 * 60 * 60)
-                                  )
-                                : 0}{' '}
-                              ساعة
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                      {windowExpiredConversations.length > 5 && (
-                        <p className="text-xs text-center text-gray-500">
-                          +{windowExpiredConversations.length - 5} محادثة أخرى
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
-                      <p>جميع المحادثات ضمن نافذة الـ 24 ساعة</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* High Cost Alerts */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-red-500" />
-                    تنبيهات التكاليف المرتفعة
-                  </CardTitle>
-                  <CardDescription>محادثات بتكاليف مرتفعة تحتاج إلى مراجعة</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {highCostConversations.length > 0 ? (
-                    <div className="space-y-3">
-                      {highCostConversations.slice(0, 5).map((conv) => (
-                        <div
-                          key={conv.id}
-                          className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-lg"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-semibold text-sm">{conv.phoneNumber ?? ''}</p>
-                              <p className="text-xs text-gray-600">
-                                {conv.pricingModel ?? 'غير محدد'}
-                              </p>
-                            </div>
-                            <Badge className="bg-red-100 text-red-800">
-                              ${(conv.totalCost || 0).toFixed(2)}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                      {highCostConversations.length > 5 && (
-                        <p className="text-xs text-center text-gray-500">
-                          +{highCostConversations.length - 5} محادثة أخرى
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
-                      <p>لا توجد تكاليف مرتفعة</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+          {hasNewCritical && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg animate-pulse">
+              <BellRing className="h-4 w-4 text-red-600" />
+              <span className="text-sm font-medium text-red-700">تنبيه حرج جديد!</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 w-6 p-0 text-red-600"
+                onClick={() => setHasNewCritical(false)}
+              >
+                ×
+              </Button>
             </div>
-          </TabsContent>
+          )}
+          {liveAlerts.length > 0 && (
+            <Badge className="bg-green-500 text-white gap-1">
+              <Zap className="h-3 w-3" />
+              {liveAlerts.length} مباشر
+            </Badge>
+          )}
+        </div>
+      </div>
 
-          <TabsContent value="security">
-            <Card>
-              <CardHeader>
-                <CardTitle>أحداث الأمان</CardTitle>
-                <CardDescription>أحداث أمان متعلقة بحساب WhatsApp</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {securityWebhookLoading ? (
-                  <div className="text-center py-8">جاري التحميل...</div>
-                ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
-                  <div className="space-y-4">
-                    {securityWebhookEvents.map((event: WebhookEvent) => (
-                      <div key={event.id} className="p-4 border rounded-lg bg-white">
-                        <div className="flex items-start gap-3">
-                          <Shield className="h-5 w-5 text-blue-500" />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-semibold">{event.eventType}</h4>
-                              <Badge className={getSeverityColor(String(event.severity))}>
-                                {String(event.severity)}
-                              </Badge>
-                            </div>
-                            {event.phoneNumber && (
-                              <p className="text-sm text-gray-600 mt-1">
-                                الرقم: {event.phoneNumber}
-                              </p>
-                            )}
-                            <p className="text-sm text-gray-600 mt-1">
-                              {event.details
-                                ? (() => {
-                                    try {
-                                      const parsed = JSON.parse(String(event.details));
-                                      if (
-                                        typeof parsed === 'object' &&
-                                        parsed !== null &&
-                                        'message' in parsed
-                                      ) {
-                                        return String(
-                                          (parsed as { message?: unknown }).message || event.details
-                                        );
-                                      }
-                                      return String(event.details);
-                                    } catch {
-                                      return String(event.details);
-                                    }
-                                  })()
-                                : ''}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-2">
-                              {new Date(event.createdAt).toLocaleString('ar-SA')}
-                            </p>
-                          </div>
-                        </div>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">تنبيهات حرجة</p>
+                <p className="text-2xl font-bold text-red-600">0</p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-red-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">تنبيهات عالية</p>
+                <p className="text-2xl font-bold text-orange-600">0</p>
+              </div>
+              <AlertCircle className="h-8 w-8 text-orange-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">أحداث أمان</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {securityWebhookEvents?.length || 0}
+                </p>
+              </div>
+              <Shield className="h-8 w-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">تم حلها</p>
+                <p className="text-2xl font-bold text-green-600">0</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Smart Alerts Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Card className="border-amber-200 bg-amber-50 dark:bg-amber-900/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">نافذة 24 ساعة منتهية</p>
+                <p className="text-2xl font-bold text-amber-600">
+                  {windowExpiredConversations.length}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">محادثة خارج النافذة</p>
+              </div>
+              <Clock className="h-8 w-8 text-amber-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">تكاليف مرتفعة</p>
+                <p className="text-2xl font-bold text-red-600">
+                  ${typeof totalHighCost === 'number' ? totalHighCost.toFixed(2) : '0.00'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {highCostConversations.length} محادثة مكلفة
+                </p>
+              </div>
+              <DollarSign className="h-8 w-8 text-red-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-2 mb-4">
+        <Button
+          variant={severityFilter === null ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setSeverityFilter(null)}
+        >
+          الكل
+        </Button>
+        <Button
+          variant={severityFilter === 'critical' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setSeverityFilter('critical')}
+          className="bg-red-100 hover:bg-red-200 text-red-700"
+        >
+          حرجة
+        </Button>
+        <Button
+          variant={severityFilter === 'high' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setSeverityFilter('high')}
+          className="bg-orange-100 hover:bg-orange-200 text-orange-700"
+        >
+          عالية
+        </Button>
+        <Button
+          variant={severityFilter === 'medium' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setSeverityFilter('medium')}
+          className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700"
+        >
+          متوسطة
+        </Button>
+        <Button
+          variant={severityFilter === 'low' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setSeverityFilter('low')}
+          className="bg-blue-100 hover:bg-blue-200 text-blue-700"
+        >
+          منخفضة
+        </Button>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="alerts">تنبيهات الحساب</TabsTrigger>
+          <TabsTrigger value="smart-alerts">تنبيهات ذكية</TabsTrigger>
+          <TabsTrigger value="security">أحداث الأمان</TabsTrigger>
+          <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="alerts">
+          <Card>
+            <CardHeader>
+              <CardTitle>تنبيهات الحساب</CardTitle>
+              <CardDescription>تنبيهات مهمة من Meta حول حالة الحساب</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* تنبيهات مباشرة عبر SSE */}
+              {liveAlerts.length > 0 && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm font-semibold text-amber-700">
+                      تنبيهات مباشرة ({liveAlerts.length})
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 text-xs text-amber-600 mr-auto"
+                      onClick={() => setLiveAlerts([])}
+                    >
+                      مسح
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {liveAlerts.map((alert, i) => (
+                      <div
+                        key={i}
+                        className={`flex items-center gap-2 text-sm p-2 rounded ${
+                          alert.severity === 'critical'
+                            ? 'bg-red-100 text-red-800'
+                            : alert.severity === 'high'
+                              ? 'bg-orange-100 text-orange-800'
+                              : alert.severity === 'medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
+                        {getSeverityIcon(alert.severity)}
+                        <span className="font-medium">{alert.alertType}</span>
+                        <Badge className={`text-xs ${getSeverityColor(alert.severity)}`}>
+                          {alert.severity}
+                        </Badge>
+                        <span className="text-xs opacity-70 mr-auto">
+                          {new Date(alert.timestamp).toLocaleTimeString('ar-SA')}
+                        </span>
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+              <div className="text-center py-8 text-muted-foreground">
+                ميزة تنبيهات الحساب غير متوفرة في الإصدار الحالي
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="smart-alerts">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 24-Hour Window Alerts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-amber-500" />
+                  تنبيهات نافذة 24 ساعة
+                </CardTitle>
+                <CardDescription>محادثات خارج نافذة الـ 24 ساعة تحتاج إلى قالب</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {windowExpiredConversations.length > 0 ? (
+                  <div className="space-y-3">
+                    {windowExpiredConversations.slice(0, 5).map((conv: Conversation) => (
+                      <div
+                        key={conv.id}
+                        className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-sm">
+                              {conv.customerName ?? 'عميل جديد'}
+                            </p>
+                            <p className="text-xs text-gray-600" dir="ltr">
+                              {conv.phoneNumber ?? ''}
+                            </p>
+                          </div>
+                          <Badge className="bg-amber-100 text-amber-800">
+                            {conv.lastMessageAt
+                              ? Math.floor(
+                                  (Date.now() - new Date(conv.lastMessageAt).getTime()) /
+                                    (1000 * 60 * 60)
+                                )
+                              : 0}{' '}
+                            ساعة
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                    {windowExpiredConversations.length > 5 && (
+                      <p className="text-xs text-center text-gray-500">
+                        +{windowExpiredConversations.length - 5} محادثة أخرى
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    <Shield className="h-12 w-12 mx-auto mb-2 text-green-500" />
-                    <p>لا توجد أحداث أمان حالياً</p>
+                    <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                    <p>جميع المحادثات ضمن نافذة الـ 24 ساعة</p>
                   </div>
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
 
-          <TabsContent value="webhook-events">
+            {/* High Cost Alerts */}
             <Card>
               <CardHeader>
-                <CardTitle>أحداث Webhook الخام</CardTitle>
-                <CardDescription>أحداث الحساب والأمان الواردة مباشرة من Meta</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-red-500" />
+                  تنبيهات التكاليف المرتفعة
+                </CardTitle>
+                <CardDescription>محادثات بتكاليف مرتفعة تحتاج إلى مراجعة</CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="account">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="account">أحداث الحساب</TabsTrigger>
-                    <TabsTrigger value="security">أحداث الأمان</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="account">
-                    {webhookLoading ? (
-                      <div className="text-center py-8">جاري التحميل...</div>
-                    ) : accountWebhookEvents && accountWebhookEvents.length > 0 ? (
-                      <div className="space-y-3">
-                        {accountWebhookEvents.map((event: WebhookEvent) => (
-                          <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4 className="font-semibold text-sm">{event.eventType}</h4>
-                                {event.subType && (
-                                  <Badge variant="outline" className="text-xs mt-1">
-                                    {event.subType}
-                                  </Badge>
-                                )}
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
-                              </span>
-                            </div>
+                {highCostConversations.length > 0 ? (
+                  <div className="space-y-3">
+                    {highCostConversations.slice(0, 5).map((conv) => (
+                      <div
+                        key={conv.id}
+                        className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-lg"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-sm">{conv.phoneNumber ?? ''}</p>
+                            <p className="text-xs text-gray-600">
+                              {conv.pricingModel ?? 'غير محدد'}
+                            </p>
                           </div>
-                        ))}
+                          <Badge className="bg-red-100 text-red-800">
+                            ${(conv.totalCost || 0).toFixed(2)}
+                          </Badge>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <p>لا توجد أحداث حساب حالياً</p>
-                      </div>
+                    ))}
+                    {highCostConversations.length > 5 && (
+                      <p className="text-xs text-center text-gray-500">
+                        +{highCostConversations.length - 5} محادثة أخرى
+                      </p>
                     )}
-                  </TabsContent>
-                  <TabsContent value="security">
-                    {securityWebhookLoading ? (
-                      <div className="text-center py-8">جاري التحميل...</div>
-                    ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
-                      <div className="space-y-3">
-                        {securityWebhookEvents.map((event: WebhookEvent) => (
-                          <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4 className="font-semibold text-sm">{event.eventType}</h4>
-                                {event.subType && (
-                                  <Badge variant="outline" className="text-xs mt-1">
-                                    {event.subType}
-                                  </Badge>
-                                )}
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <p>لا توجد أحداث أمان حالياً</p>
-                      </div>
-                    )}
-                  </TabsContent>
-                </Tabs>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                    <p>لا توجد تكاليف مرتفعة</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </DashboardLayout>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="security">
+          <Card>
+            <CardHeader>
+              <CardTitle>أحداث الأمان</CardTitle>
+              <CardDescription>أحداث أمان متعلقة بحساب WhatsApp</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {securityWebhookLoading ? (
+                <div className="text-center py-8">جاري التحميل...</div>
+              ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
+                <div className="space-y-4">
+                  {securityWebhookEvents.map((event: WebhookEvent) => (
+                    <div key={event.id} className="p-4 border rounded-lg bg-white">
+                      <div className="flex items-start gap-3">
+                        <Shield className="h-5 w-5 text-blue-500" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{event.eventType}</h4>
+                            <Badge className={getSeverityColor(String(event.severity))}>
+                              {String(event.severity)}
+                            </Badge>
+                          </div>
+                          {event.phoneNumber && (
+                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber}</p>
+                          )}
+                          <p className="text-sm text-gray-600 mt-1">
+                            {event.details
+                              ? (() => {
+                                  try {
+                                    const parsed = JSON.parse(String(event.details));
+                                    if (
+                                      typeof parsed === 'object' &&
+                                      parsed !== null &&
+                                      'message' in parsed
+                                    ) {
+                                      return String(
+                                        (parsed as { message?: unknown }).message || event.details
+                                      );
+                                    }
+                                    return String(event.details);
+                                  } catch {
+                                    return String(event.details);
+                                  }
+                                })()
+                              : ''}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            {new Date(event.createdAt).toLocaleString('ar-SA')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Shield className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                  <p>لا توجد أحداث أمان حالياً</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="webhook-events">
+          <Card>
+            <CardHeader>
+              <CardTitle>أحداث Webhook الخام</CardTitle>
+              <CardDescription>أحداث الحساب والأمان الواردة مباشرة من Meta</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="account">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="account">أحداث الحساب</TabsTrigger>
+                  <TabsTrigger value="security">أحداث الأمان</TabsTrigger>
+                </TabsList>
+                <TabsContent value="account">
+                  {webhookLoading ? (
+                    <div className="text-center py-8">جاري التحميل...</div>
+                  ) : accountWebhookEvents && accountWebhookEvents.length > 0 ? (
+                    <div className="space-y-3">
+                      {accountWebhookEvents.map((event: WebhookEvent) => (
+                        <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-semibold text-sm">{event.eventType}</h4>
+                              {event.subType && (
+                                <Badge variant="outline" className="text-xs mt-1">
+                                  {event.subType}
+                                </Badge>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>لا توجد أحداث حساب حالياً</p>
+                    </div>
+                  )}
+                </TabsContent>
+                <TabsContent value="security">
+                  {securityWebhookLoading ? (
+                    <div className="text-center py-8">جاري التحميل...</div>
+                  ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
+                    <div className="space-y-3">
+                      {securityWebhookEvents.map((event: WebhookEvent) => (
+                        <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-semibold text-sm">{event.eventType}</h4>
+                              {event.subType && (
+                                <Badge variant="outline" className="text-xs mt-1">
+                                  {event.subType}
+                                </Badge>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>لا توجد أحداث أمان حالياً</p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

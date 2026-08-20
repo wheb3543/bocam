@@ -32,8 +32,8 @@ import {
 export default function WhatsAppDashboard() {
   return (
     <DashboardLayout
-      pageTitle="لوحة تحكم WhatsApp"
-      pageDescription="إدارة وإرسال الرسائل عبر WhatsApp ومراقبة جاهزية الخدمة"
+      pageTitle="الرسائل والمحادثات"
+      pageDescription="إدارة الرسائل والمحادثات عبر واتساب"
     >
       <WhatsAppDashboardContent />
     </DashboardLayout>
@@ -148,6 +148,12 @@ function WhatsAppDashboardContent() {
 
   return (
     <div className="space-y-6" dir="rtl">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold">لوحة تحكم WhatsApp</h1>
+        <p className="text-muted-foreground">إدارة وإرسال الرسائل عبر WhatsApp</p>
+      </div>
+
       {/* Health Status */}
       <Card>
         <CardHeader>

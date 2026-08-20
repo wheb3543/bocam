@@ -490,7 +490,7 @@ export default function HomePage() {
         {/* Animation Toggle Button */}
         <button
           onClick={toggleAnimations}
-          className="fixed top-20 left-4 z-50 inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border-2 border-gray-200 bg-white/90 p-2 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-800/90"
+          className="fixed top-20 left-4 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border-2 border-gray-200 dark:border-gray-700"
           aria-label={
             animationsEnabled
               ? accessibilityToggleAnimations?.data?.[0]?.content || 'إيقاف الحركات'
@@ -507,7 +507,7 @@ export default function HomePage() {
         {/* Hero Section */}
         <section
           id="main-content"
-          className="relative min-h-[620px] overflow-hidden bg-gradient-to-br from-green-600 via-green-700 to-blue-600 py-12 text-white sm:min-h-[650px] sm:py-16 md:min-h-[700px] md:py-24"
+          className="py-12 sm:py-16 md:py-24 bg-gradient-to-br from-green-600 via-green-700 to-blue-600 text-white overflow-hidden relative min-h-[700px]"
         >
           {/* Animated Images Background */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -603,32 +603,29 @@ export default function HomePage() {
                 {description}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-3 sm:px-0">
-                <Button
-                  asChild
-                  size="lg"
-                  className="h-12 w-full bg-white px-6 text-base font-semibold text-green-600 shadow-xl transition-all hover:bg-green-50 hover:shadow-2xl hover:shadow-green-500/30 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-green-700 sm:h-14 sm:w-auto sm:px-8 sm:text-lg"
-                >
-                  <Link href="/doctors" aria-label={buttonText}>
+                <Link href="/doctors">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto bg-white dark:bg-card text-green-600 hover:bg-green-50 text-base sm:text-lg font-semibold shadow-xl hover:shadow-2xl hover:shadow-green-500/30 hover:scale-105 transition-all h-12 sm:h-14 px-6 sm:px-8"
+                    aria-label={buttonText}
+                  >
                     {buttonText}
                     <ArrowLeft
                       className="mr-2 h-5 w-5 sm:h-6 sm:w-6 rotate-180"
                       aria-hidden="true"
                     />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="h-12 w-full border-2 border-white/90 px-6 text-base font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-green-700 sm:h-14 sm:w-auto sm:px-8 sm:text-lg"
-                >
-                  <a
-                    href={`tel:${COMPANY_PHONE}`}
+                  </Button>
+                </Link>
+                <a href={`tel:${COMPANY_PHONE}`} className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto border-2 border-white/90 text-white hover:bg-white/20 text-base sm:text-lg font-medium backdrop-blur-sm h-12 sm:h-14 px-6 sm:px-8 hover:scale-105 transition-all"
                     aria-label={`اتصل بالمستشفى على الرقم ${COMPANY_PHONE}`}
                   >
                     اتصل بنا: {COMPANY_PHONE}
-                  </a>
-                </Button>
+                  </Button>
+                </a>
               </div>
             </div>
           </div>
@@ -892,29 +889,26 @@ export default function HomePage() {
                 `فريقنا الطبي المتميز من الأطباء والاستشاريين في انتظارك. احجز موعدك الآن أو اتصل بنا على الرقم المجاني ${COMPANY_PHONE} للاستفسار والحصول على المعلومات الطبية التي تحتاجها.`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center px-3 sm:px-0">
-              <Button
-                asChild
-                size="lg"
-                className="h-12 w-full bg-white px-8 text-base font-semibold text-green-600 shadow-xl transition-all hover:bg-green-50 hover:shadow-2xl hover:shadow-green-500/30 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-green-700 sm:h-14 sm:w-auto sm:px-10 sm:text-lg md:text-xl"
-              >
-                <Link href="/doctors" aria-label="احجز موعدك مع أفضل الأطباء">
+              <Link href="/doctors">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto bg-white dark:bg-card text-green-600 hover:bg-green-50 text-base sm:text-lg md:text-xl font-semibold shadow-xl hover:shadow-2xl hover:shadow-green-500/30 hover:scale-105 transition-all h-12 sm:h-14 px-8 sm:px-10"
+                  aria-label="احجز موعدك مع أفضل الأطباء"
+                >
                   {ctaBookButton?.data?.[0]?.content || 'احجز موعدك'}
                   <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="h-12 w-full border-2 border-white/90 px-8 text-base font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-green-700 sm:h-14 sm:w-auto sm:px-10 sm:text-lg md:text-xl"
-              >
-                <a
-                  href={`tel:${COMPANY_PHONE}`}
+                </Button>
+              </Link>
+              <a href={`tel:${COMPANY_PHONE}`} className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto border-2 border-white/90 text-white hover:bg-white/20 text-base sm:text-lg md:text-xl font-medium backdrop-blur-sm h-12 sm:h-14 px-8 sm:px-10 hover:scale-105 transition-all"
                   aria-label={`اتصل بالمستشفى على الرقم ${COMPANY_PHONE}`}
                 >
                   {ctaCallButton?.data?.[0]?.content || 'اتصل'}: {COMPANY_PHONE}
-                </a>
-              </Button>
+                </Button>
+              </a>
             </div>
           </div>
         </section>

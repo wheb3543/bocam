@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocation } from 'wouter';
-import { Clock, X, Search, Trash2 } from 'lucide-react';
+import { Clock, X, Search } from 'lucide-react';
 import { useRecentlyUsed } from '@/hooks/data/useRecentlyUsed';
 import type { NavItem, NavGroup } from '@/components/layout/sidebarData';
 import { cn } from '@/lib/utils';
@@ -21,14 +21,10 @@ export default function AllToolsDrawer({
   allNavItems,
 }: AllToolsDrawerProps) {
   const [location, setLocation] = useLocation();
-  const { recentlyUsed, addRecentlyUsed, clearRecentlyUsed } = useRecentlyUsed();
+  const { recentlyUsed } = useRecentlyUsed();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleNavigate = (href: string) => {
-    const item = allNavItems.find((navItem) => navItem.href === href);
-    if (item) {
-      addRecentlyUsed({ id: item.id, title: item.title, href: item.href });
-    }
     setLocation(href);
     onClose();
   };
@@ -54,17 +50,17 @@ export default function AllToolsDrawer({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-[900px] h-[85vh] p-0 gap-0 bg-surface-raised/95 dark:bg-surface-raised/95 backdrop-blur-md border-border"
+        className="max-w-[900px] h-[85vh] p-0 gap-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-gray-200 dark:border-gray-700"
         dir="rtl"
       >
         <DialogHeader className="sr-only">
           <DialogTitle>كل الأدوات</DialogTitle>
         </DialogHeader>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-gradient-to-l from-status-info-subtle/70 to-transparent">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-l from-blue-50/50 to-transparent dark:from-blue-900/20">
           <button
             onClick={onClose}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-gray-800"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             <X className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </button>
@@ -81,7 +77,7 @@ export default function AllToolsDrawer({
               placeholder="ابحث في كل الأدوات عن كلمات أساسية..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="min-h-11 w-full rounded-lg border border-border bg-surface-subtle py-2 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+              className="w-full pr-10 pl-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -91,22 +87,11 @@ export default function AllToolsDrawer({
             {/* Recently Used Section */}
             {!searchQuery && recentItems.length > 0 && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2 px-2">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-status-info" />
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                      المستخدمة مؤخراً
-                    </h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={clearRecentlyUsed}
-                    className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    aria-label="مسح الأدوات المستخدمة مؤخراً"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    مسح
-                  </button>
+                <div className="flex items-center gap-2 px-2">
+                  <Clock className="h-4 w-4 text-blue-500" />
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    المستخدمة مؤخراً
+                  </h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {recentItems.map((item) => {
@@ -117,9 +102,9 @@ export default function AllToolsDrawer({
                         key={item.id}
                         onClick={() => handleNavigate(item.href)}
                         className={cn(
-                          'flex min-h-12 items-center gap-3 rounded-lg p-3 text-right transition-all',
+                          'flex items-center gap-3 p-3 rounded-lg text-right transition-all',
                           isActive
-                            ? 'bg-status-info-subtle text-status-info'
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
                             : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                         )}
                       >
@@ -155,9 +140,9 @@ export default function AllToolsDrawer({
                           key={item.id}
                           onClick={() => handleNavigate(item.href)}
                           className={cn(
-                            'flex min-h-12 items-center gap-3 rounded-lg p-3 text-right transition-all',
+                            'flex items-center gap-3 p-3 rounded-lg text-right transition-all',
                             isActive
-                              ? 'bg-status-info-subtle text-status-info'
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                           )}
                         >

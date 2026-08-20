@@ -44,20 +44,6 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --color-brand: var(--brand);
-  --color-brand-foreground: var(--brand-foreground);
-  --color-brand-green: var(--brand-green);
-  --color-brand-green-foreground: var(--brand-green-foreground);
-  --color-surface-subtle: var(--surface-subtle);
-  --color-surface-raised: var(--surface-raised);
-  --color-status-info: var(--status-info);
-  --color-status-info-subtle: var(--status-info-subtle);
-  --color-status-success: var(--status-success);
-  --color-status-success-subtle: var(--status-success-subtle);
-  --color-status-warning: var(--status-warning);
-  --color-status-warning-subtle: var(--status-warning-subtle);
-  --color-status-danger: var(--status-danger);
-  --color-status-danger-subtle: var(--status-danger-subtle);
 }
 
 :root {
@@ -66,22 +52,7 @@
   --sgh-green: oklch(0.623 0.15 145);
   --primary: var(--sgh-blue);
   --primary-foreground: oklch(0.99 0 0); /* White - improved contrast */
-  --brand: var(--sgh-blue);
-  --brand-foreground: oklch(0.99 0 0);
   --brand-green: var(--sgh-green);
-  --brand-green-foreground: oklch(0.99 0 0);
-  --surface-subtle: oklch(0.975 0.008 220);
-  --surface-raised: oklch(1 0 0);
-  --status-info: var(--sgh-blue);
-  --status-info-subtle: oklch(0.95 0.025 220);
-  --status-success: var(--sgh-green);
-  --status-success-subtle: oklch(0.95 0.03 145);
-  --status-warning: oklch(0.7 0.14 75);
-  --status-warning-subtle: oklch(0.96 0.04 75);
-  --status-danger: var(--destructive);
-  --status-danger-subtle: oklch(0.96 0.025 27);
-  --focus-ring: var(--sgh-blue);
-  --touch-target-min: 2.75rem;
   --sidebar-primary: oklch(0.623 0.15 220);
   --sidebar-primary-foreground: oklch(0.99 0 0); /* Improved contrast */
   --chart-1: var(--sgh-blue);
@@ -185,20 +156,6 @@
   --sidebar-accent-foreground: oklch(0.99 0 0); /* Improved contrast */
   --sidebar-border: oklch(1 0 0 / 15%); /* More visible border */
   --sidebar-ring: oklch(0.488 0.243 264.376);
-  --brand: oklch(0.723 0.15 220);
-  --brand-foreground: oklch(0.12 0.01 220);
-  --brand-green: oklch(0.723 0.15 145);
-  --brand-green-foreground: oklch(0.12 0.01 145);
-  --surface-subtle: oklch(0.24 0.01 220);
-  --surface-raised: oklch(0.21 0.006 285.885);
-  --status-info: oklch(0.75 0.13 220);
-  --status-info-subtle: oklch(0.3 0.04 220);
-  --status-success: oklch(0.75 0.13 145);
-  --status-success-subtle: oklch(0.3 0.04 145);
-  --status-warning: oklch(0.8 0.13 75);
-  --status-warning-subtle: oklch(0.32 0.04 75);
-  --status-danger: oklch(0.72 0.17 27);
-  --status-danger-subtle: oklch(0.3 0.04 27);
 }
 
 @layer base {
@@ -264,15 +221,6 @@
   .flex {
     min-height: 0;
     min-width: 0;
-  }
-
-  .sgh-focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
-  }
-
-  .sgh-touch-target {
-    min-height: var(--touch-target-min);
-    min-width: var(--touch-target-min);
   }
 
   @media (min-width: 640px) {

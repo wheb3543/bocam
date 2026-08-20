@@ -62,7 +62,7 @@ export default function MobileBottomNav({
               </div>
               <span
                 className={cn(
-                  'max-w-full truncate text-xs leading-none',
+                  'max-w-full truncate text-[11px] leading-none',
                   isActive ? 'font-semibold' : 'font-medium'
                 )}
               >
@@ -77,7 +77,7 @@ export default function MobileBottomNav({
           type="button"
           onClick={onMoreClick}
           aria-label="المزيد من الأدوات"
-          className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs leading-none text-muted-foreground transition-colors duration-200 hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] leading-none text-muted-foreground transition-colors duration-200 hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <MoreHorizontal className="h-6 w-6" />
           <span className="font-medium">المزيد</span>

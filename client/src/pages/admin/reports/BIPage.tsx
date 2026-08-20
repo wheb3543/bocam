@@ -5,6 +5,7 @@
 
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -155,43 +156,51 @@ export default function BIPage() {
 
   return (
     <DashboardLayout
-      pageTitle="ذكاء الأعمال (Business Intelligence)"
-      pageDescription="تحليل مصادر الزيارات وقمع التحويل وقائمة الفرص الضائعة"
+      pageTitle="ذكاء الأعمال (BI)"
+      pageDescription="تحليلات شاملة لمصادر الزيارات والتحويلات والفرص الضائعة"
+      pageHeader="none"
     >
       <div className="p-6 space-y-6" dir="rtl">
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={autoRefresh ? 'bg-green-50 border-green-200' : ''}
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
-            {autoRefresh ? 'إيقاف التحديث' : 'تحديث تلقائي'}
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleRefresh}>
-            <RefreshCw className="w-4 h-4 mr-2" />
-            تحديث
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportCSV}>
-            <Download className="w-4 h-4 mr-2" />
-            CSV
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="w-4 h-4 mr-2" />
-            JSON
-          </Button>
-          <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
-            <SelectTrigger className="w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">آخر 7 أيام</SelectItem>
-              <SelectItem value="30d">آخر 30 يوم</SelectItem>
-              <SelectItem value="90d">آخر 90 يوم</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <AdminPageHeader
+          eyebrow="التقارير والتحليلات"
+          title="ذكاء الأعمال (Business Intelligence)"
+          description="تحليل مصادر الزيارات، قمع التحويل، وقائمة الفرص الضائعة."
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={autoRefresh ? 'bg-green-50 border-green-200' : ''}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+                {autoRefresh ? 'إيقاف التحديث' : 'تحديث تلقائي'}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleRefresh}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                تحديث
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportCSV}>
+                <Download className="w-4 h-4 mr-2" />
+                CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                <Download className="w-4 h-4 mr-2" />
+                JSON
+              </Button>
+              <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
+                <SelectTrigger className="w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7d">آخر 7 أيام</SelectItem>
+                  <SelectItem value="30d">آخر 30 يوم</SelectItem>
+                  <SelectItem value="90d">آخر 90 يوم</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          }
+        />
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

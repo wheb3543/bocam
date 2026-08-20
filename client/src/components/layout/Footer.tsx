@@ -9,7 +9,7 @@ import { Link } from 'wouter';
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t border-green-800/70 bg-green-900 py-8 text-white sm:py-10 md:py-12">
+    <footer className="bg-green-900 text-white py-8 sm:py-10 md:py-12 mt-auto">
       <div className="container mx-auto px-4 sm:px-5 md:px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
           {/* Logo and Description */}
@@ -20,8 +20,10 @@ export default function Footer() {
               className="h-8 sm:h-10 w-auto mx-auto sm:mx-0 mb-2 sm:mb-3"
             />
             <p className="text-green-100 text-xs sm:text-sm font-medium">{APP_TITLE}</p>
-            <p className="mt-1 text-xs text-green-300 sm:mt-1.5">{getCompanySlogan()}</p>
-            <p className="mt-2 max-w-xs mx-auto text-xs leading-relaxed text-green-400/70 sm:mx-0 sm:mt-3">
+            <p className="text-green-300 text-[10px] sm:text-xs mt-1 sm:mt-1.5">
+              {getCompanySlogan()}
+            </p>
+            <p className="text-green-400/70 text-[10px] sm:text-xs mt-2 sm:mt-3 leading-relaxed max-w-xs mx-auto sm:mx-0">
               منصة الحجز الإلكترونية لـ {COMPANY_ARABIC_NAME}
             </p>
           </div>
@@ -34,35 +36,33 @@ export default function Footer() {
             <ul className="space-y-2 sm:space-y-2.5 text-green-200 text-xs sm:text-sm">
               <li>
                 <Link href="/">
-                  <span className="inline-flex min-h-11 items-center cursor-pointer transition-colors hover:text-white">
+                  <span className="hover:text-white transition-colors cursor-pointer">
                     الرئيسية
                   </span>
                 </Link>
               </li>
               <li>
                 <Link href="/doctors">
-                  <span className="inline-flex min-h-11 items-center cursor-pointer transition-colors hover:text-white">
-                    الأطباء
-                  </span>
+                  <span className="hover:text-white transition-colors cursor-pointer">الأطباء</span>
                 </Link>
               </li>
               <li>
                 <Link href="/visiting-doctors">
-                  <span className="inline-flex min-h-11 items-center cursor-pointer transition-colors hover:text-white">
+                  <span className="hover:text-white transition-colors cursor-pointer">
                     الأطباء الزائرين
                   </span>
                 </Link>
               </li>
               <li>
                 <Link href="/offers">
-                  <span className="inline-flex min-h-11 items-center cursor-pointer transition-colors hover:text-white">
+                  <span className="hover:text-white transition-colors cursor-pointer">
                     العروض الطبية
                   </span>
                 </Link>
               </li>
               <li>
                 <Link href="/camps">
-                  <span className="inline-flex min-h-11 items-center cursor-pointer transition-colors hover:text-white">
+                  <span className="hover:text-white transition-colors cursor-pointer">
                     المخيمات الطبية
                   </span>
                 </Link>
@@ -80,7 +80,7 @@ export default function Footer() {
                 <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 shrink-0" />
                 <a
                   href={`tel:${COMPANY_PHONE}`}
-                  className="inline-flex min-h-11 items-center font-medium transition-colors hover:text-white"
+                  className="hover:text-white transition-colors font-medium"
                   aria-label={`اتصال بخدمة العملاء والمواعيد على الرقم ${COMPANY_PHONE}`}
                 >
                   {COMPANY_PHONE}

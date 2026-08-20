@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -373,38 +374,57 @@ export default function MediaLibraryPage() {
   return (
     <DashboardLayout
       pageTitle="مكتبة الوسائط"
-      pageDescription="ارفع ونظّم الصور والفيديو والصوت والمستندات في مكتبة موحّدة"
+      pageDescription="مكتبة موحّدة للصور والفيديو والصوت والمستندات"
+      pageHeader="none"
     >
       <div dir="rtl" className="space-y-6">
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <Badge variant="outline" className="h-9 border-primary/20 bg-primary/5 text-primary">
-            {items.length} عنصر ظاهر
-          </Badge>
-          <Badge variant="outline" className="h-9 border-border bg-muted/40 text-muted-foreground">
-            {selectedFolder?.name || 'المجلد العام'}
-          </Badge>
-          <Button variant="outline" className="min-h-10" onClick={() => setIsCreatingFolder(true)}>
-            <FolderPlus className="ml-2 h-4 w-4" />
-            مجلد جديد
-          </Button>
-          <Button
-            className="min-h-10"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-          >
-            <Upload className="ml-2 h-4 w-4" />
-            رفع ملفات
-          </Button>
-          <Button
-            variant="outline"
-            className="min-h-10"
-            onClick={() => directoryInputRef.current?.click()}
-            disabled={isUploading}
-          >
-            <FolderOpen className="ml-2 h-4 w-4" />
-            رفع مجلد
-          </Button>
-        </div>
+        <AdminPageHeader
+          eyebrow="مركز الوسائط"
+          title="مكتبة الوسائط"
+          description="ارفع ونظّم الصور والفيديو والصوت والمستندات من مكان واحد. تُضغط الصور إلى AVIF تلقائياً وتبقى بقية الملفات بصيغها الأصلية مع فهرسة كاملة."
+          status={
+            <>
+              <Badge variant="outline" className="h-9 border-primary/20 bg-primary/5 text-primary">
+                {items.length} عنصر ظاهر
+              </Badge>
+              <Badge
+                variant="outline"
+                className="h-9 border-border bg-muted/40 text-muted-foreground"
+              >
+                {selectedFolder?.name || 'المجلد العام'}
+              </Badge>
+            </>
+          }
+          actions={
+            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+              <Button
+                variant="outline"
+                className="min-h-10"
+                onClick={() => setIsCreatingFolder(true)}
+              >
+                <FolderPlus className="ml-2 h-4 w-4" />
+                مجلد جديد
+              </Button>
+              <Button
+                className="min-h-10"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                <Upload className="ml-2 h-4 w-4" />
+                رفع ملفات
+              </Button>
+              <Button
+                variant="outline"
+                className="min-h-10"
+                onClick={() => directoryInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                <FolderOpen className="ml-2 h-4 w-4" />
+                رفع مجلد
+              </Button>
+            </div>
+          }
+        />
 
         <input
           ref={fileInputRef}

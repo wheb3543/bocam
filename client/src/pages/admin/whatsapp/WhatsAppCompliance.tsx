@@ -322,15 +322,22 @@ export default function WhatsAppCompliance() {
       pageDescription="إدارة الامتثال مع معايير Meta والأمان"
     >
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-            <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
-            تحديث
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportData}>
-            <Download className="w-4 h-4 ml-2" />
-            تصدير
-          </Button>
+        {/* Header with Actions */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">الامتثال والأمان</h1>
+            <p className="text-muted-foreground text-sm">إدارة الامتثال مع معايير Meta والأمان</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+              <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
+              تحديث
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportData}>
+              <Download className="w-4 h-4 ml-2" />
+              تصدير
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}

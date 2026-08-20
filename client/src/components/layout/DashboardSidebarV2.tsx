@@ -100,25 +100,6 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
     [canAccessNavItem]
   );
 
-  useEffect(() => {
-    const activeItem = [...permittedAllNavItems]
-      .filter((item) => {
-        if (item.href === '/admin') {
-          return currentPath === '/admin' || currentPath === '/admin/';
-        }
-        return currentPath === item.href || currentPath.startsWith(`${item.href}/`);
-      })
-      .sort((left, right) => right.href.length - left.href.length)[0];
-
-    if (activeItem) {
-      addRecentlyUsed({
-        id: activeItem.id,
-        title: activeItem.title,
-        href: activeItem.href,
-      });
-    }
-  }, [addRecentlyUsed, currentPath, permittedAllNavItems]);
-
   const permittedToolsGroups = useMemo(
     () =>
       allToolsGroups
