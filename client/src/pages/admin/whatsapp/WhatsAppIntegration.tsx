@@ -28,6 +28,7 @@ import {
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
 
 interface SentMessage {
@@ -218,36 +219,30 @@ export default function WhatsAppIntegration() {
     <DashboardLayout
       pageTitle="تكامل WhatsApp Cloud API"
       pageDescription="إدارة وإرسال رسائل WhatsApp المعتمدة"
+      pageHeader="none"
     >
       <div className="container px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6">
-        {/* Header Section */}
         <div className="mb-6 md:mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                  تكامل WhatsApp Cloud API
-                </h1>
-                <p className="text-sm text-gray-600 mt-1">إرسال رسائل معتمدة من Meta إلى عملائك</p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetchTemplates()}
-              disabled={templatesLoading}
-              className="gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              تحديث
-            </Button>
-          </div>
+          <AdminPageHeader
+            eyebrow="قنوات التواصل"
+            title="تكامل WhatsApp Cloud API"
+            description="إرسال رسائل WhatsApp المعتمدة من Meta إلى عملائك."
+            actions={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetchTemplates()}
+                disabled={templatesLoading}
+                className="gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                تحديث
+              </Button>
+            }
+          />
 
           {/* Status Alert */}
-          <Alert className="border-green-200 bg-green-50">
+          <Alert className="mt-4 border-green-200 bg-green-50">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
               ✅ {templates?.count || 0} قالب معتمد من Meta وجاهز للاستخدام
