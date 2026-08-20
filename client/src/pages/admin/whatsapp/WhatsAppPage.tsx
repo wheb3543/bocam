@@ -365,12 +365,12 @@ function WhatsAppContent() {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-[var(--whatsapp-green-light)] via-white to-[var(--whatsapp-emerald-light)] dark:from-gray-950 dark:via-gray-900 dark:to-gray-950"
+      className="h-[calc(100dvh-4.25rem)] overflow-hidden bg-gradient-to-br from-[var(--whatsapp-green-light)] via-white to-[var(--whatsapp-emerald-light)] dark:from-gray-950 dark:via-gray-900 dark:to-gray-950"
       dir="rtl"
     >
-      <div className="container mx-auto p-2 sm:p-4 md:p-6 max-w-7xl">
+      <div className="container mx-auto flex h-full min-h-0 max-w-7xl flex-col p-2 sm:p-4 md:p-6">
         {/* Page Header */}
-        <div className="mb-3 sm:mb-4 md:mb-6">
+        <div className="mb-3 shrink-0 sm:mb-4 md:mb-6">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="bg-gradient-to-br from-[var(--whatsapp-green)] to-[var(--whatsapp-emerald)] p-1.5 sm:p-2 md:p-3 rounded-xl shadow-lg flex-shrink-0">
               <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-7 md:w-7 text-white" />
@@ -509,17 +509,10 @@ function WhatsAppContent() {
         />
 
         {/* Main Chat Layout */}
-        <div
-          className="bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden border dark:border-gray-800"
-          style={{
-            height: 'calc(100vh - 8.75rem)',
-            minHeight: '300px',
-            maxHeight: 'calc(100vh - 5rem)',
-          }}
-        >
+        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border bg-white shadow-xl dark:border-gray-800 dark:bg-gray-900">
           {/* Desktop */}
           <div
-            className={`hidden lg:grid h-full transition-all duration-300 ${isSplitView ? 'lg:grid-cols-[340px_1fr_1fr]' : isDetailsCollapsed ? 'lg:grid-cols-[340px_1fr_0px]' : 'lg:grid-cols-[340px_1fr_280px]'}`}
+            className={`hidden h-full min-h-0 lg:grid ${isSplitView ? 'lg:grid-cols-[340px_1fr_1fr]' : isDetailsCollapsed ? 'lg:grid-cols-[340px_1fr_0px]' : 'lg:grid-cols-[340px_1fr_280px]'}`}
           >
             <div className="border-l dark:border-gray-800 h-full overflow-hidden flex flex-col">
               <ConversationList
@@ -592,7 +585,7 @@ function WhatsAppContent() {
                     onOpenSearchInConversation={handleOpenSearchInConversation}
                     onOpenExportConversation={handleOpenExportConversation}
                   />
-                  <div className="flex-1 overflow-hidden">
+                  <div className="min-h-0 flex-1 overflow-hidden">
                     <ChatWindow
                       conversationId={selectedConversation}
                       lastMessageAt={selectedConv?.lastMessageAt}
@@ -628,7 +621,7 @@ function WhatsAppContent() {
                       onOpenSearchInConversation={handleOpenSearchInConversation}
                       onOpenExportConversation={handleOpenExportConversation}
                     />
-                    <div className="flex-1 overflow-hidden">
+                    <div className="min-h-0 flex-1 overflow-hidden">
                       <ChatWindow
                         conversationId={secondConversationId}
                         lastMessageAt={
@@ -671,7 +664,7 @@ function WhatsAppContent() {
           </div>
 
           {/* Mobile */}
-          <div className="lg:hidden h-full flex flex-col">
+          <div className="flex h-full min-h-0 flex-col lg:hidden">
             {mobileShowChat && selectedConversation ? (
               <>
                 <ChatAreaHeader
@@ -691,7 +684,7 @@ function WhatsAppContent() {
                   onOpenSearchInConversation={handleOpenSearchInConversation}
                   onOpenExportConversation={handleOpenExportConversation}
                 />
-                <div className="flex-1 overflow-hidden">
+                <div className="min-h-0 flex-1 overflow-hidden">
                   <ChatWindow
                     conversationId={selectedConversation}
                     lastMessageAt={selectedConv?.lastMessageAt}

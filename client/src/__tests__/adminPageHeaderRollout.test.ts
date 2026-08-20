@@ -11,6 +11,7 @@ const messagesPageSource = readSource('client/src/pages/admin/communications/Mes
 const commentContextsSource = readSource(
   'client/src/pages/admin/communications/MetaCommentContextsPanel.tsx'
 );
+const whatsAppPageSource = readSource('client/src/pages/admin/whatsapp/WhatsAppPage.tsx');
 
 describe('مساحات العمل الإدارية دون بطاقة عنوان مكررة', () => {
   it('لا يرسم رأس عنوان مركزياً فوق محتوى الصفحة', () => {
@@ -39,6 +40,14 @@ describe('مساحات العمل الإدارية دون بطاقة عنوان 
     expect(messagesPageSource).toContain('h-[calc(100dvh-4.25rem)]');
     expect(messagesPageSource).toContain('grid h-full min-h-0');
     expect(commentContextsSource).toContain('grid h-full min-h-0');
+  });
+
+  it('يحصر تمرير WhatsApp في منطقة المحادثات الداخلية', () => {
+    expect(whatsAppPageSource).toContain('h-[calc(100dvh-4.25rem)] overflow-hidden');
+    expect(whatsAppPageSource).toContain('flex h-full min-h-0 max-w-7xl flex-col');
+    expect(whatsAppPageSource).toContain('min-h-0 flex-1 overflow-hidden');
+    expect(whatsAppPageSource).not.toContain('min-h-screen bg-gradient-to-br');
+    expect(whatsAppPageSource).not.toContain("height: 'calc(100vh - 8.75rem)'");
   });
 
   it.each([
