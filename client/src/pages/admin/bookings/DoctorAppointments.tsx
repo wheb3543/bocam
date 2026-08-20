@@ -33,7 +33,10 @@ interface Doctor {
 
 export default function DoctorAppointments() {
   return (
-    <DashboardLayout pageTitle="حجز موعد" pageDescription="حجز موعد مع الطبيب">
+    <DashboardLayout
+      pageTitle="حجز موعد مع الطبيب"
+      pageDescription="اختر الطبيب والتاريخ المناسبين لإتمام حجزك"
+    >
       <DoctorAppointmentsContent />
     </DashboardLayout>
   );
@@ -163,9 +166,9 @@ function DoctorAppointmentsContent() {
                 <Stethoscope className="w-5 h-5" />
                 <span className="font-semibold">احجز موعدك الآن</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+              <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
                 احجز موعدك مع أفضل الأطباء
-              </h1>
+              </p>
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 px-4">
                 فريق طبي متميز من الاستشاريين والأخصائيين في مختلف التخصصات
               </p>

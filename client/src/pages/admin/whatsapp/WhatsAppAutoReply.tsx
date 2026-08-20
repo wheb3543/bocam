@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,107 +82,106 @@ export default function WhatsAppAutoReply() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">قواعد الرد التلقائي</h1>
-        <p className="text-muted-foreground">إضافة قواعد للرد التلقائي على الرسائل الواردة</p>
-      </div>
-
-      {/* Stats Card */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">قواعد الرد التلقائي</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{autoReplyRulesQuery.data?.rules?.length || 0}</div>
-          <p className="text-xs text-muted-foreground">قاعدة نشطة</p>
-        </CardContent>
-      </Card>
-
-      {/* Add Rule Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            إضافة قاعدة جديدة
-          </CardTitle>
-          <CardDescription>إضافة قاعدة للرد التلقائي على الرسائل الواردة</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">المحفز (الكلمة المفتاحية)</label>
-              <Input
-                placeholder="مثال: مرحبا"
-                value={autoReplyTrigger}
-                onChange={(e) => setAutoReplyTrigger(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">الرد</label>
-              <Input
-                placeholder="مثال: أهلا وسهلا"
-                value={autoReplyResponse}
-                onChange={(e) => setAutoReplyResponse(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-          </div>
-
-          <Button onClick={handleAddAutoReply} disabled={isLoading} className="w-full">
-            {isLoading ? 'جاري الإضافة...' : 'إضافة قاعدة'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Rules List */}
-      {autoReplyRulesQuery.data?.rules && autoReplyRulesQuery.data.rules.length > 0 && (
+    <DashboardLayout
+      pageTitle="قواعد الرد التلقائي"
+      pageDescription="إضافة قواعد للرد التلقائي على الرسائل الواردة وإدارتها"
+    >
+      <div className="space-y-6">
+        {/* Stats Card */}
         <Card>
-          <CardHeader>
-            <CardTitle>القواعد النشطة</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">قواعد الرد التلقائي</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {autoReplyRulesQuery.data.rules.map((rule) => (
-                <div
-                  key={rule.id}
-                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium text-sm">{rule.triggerValue || rule.triggerType}</p>
-                    <p className="text-xs text-muted-foreground">{rule.replyMessage}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={rule.isActive ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() =>
-                        toggleAutoReplyMutation.mutate({
-                          ruleId: rule.id,
-                          enabled: !rule.isActive,
-                        })
-                      }
-                      disabled={toggleAutoReplyMutation.isPending}
-                    >
-                      {rule.isActive ? 'تعطيل' : 'تفعيل'}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteAutoReply(rule.id)}
-                    >
-                      حذف
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="text-2xl font-bold">{autoReplyRulesQuery.data?.rules?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">قاعدة نشطة</p>
           </CardContent>
         </Card>
-      )}
-    </div>
+
+        {/* Add Rule Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              إضافة قاعدة جديدة
+            </CardTitle>
+            <CardDescription>إضافة قاعدة للرد التلقائي على الرسائل الواردة</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">المحفز (الكلمة المفتاحية)</label>
+                <Input
+                  placeholder="مثال: مرحبا"
+                  value={autoReplyTrigger}
+                  onChange={(e) => setAutoReplyTrigger(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">الرد</label>
+                <Input
+                  placeholder="مثال: أهلا وسهلا"
+                  value={autoReplyResponse}
+                  onChange={(e) => setAutoReplyResponse(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <Button onClick={handleAddAutoReply} disabled={isLoading} className="w-full">
+              {isLoading ? 'جاري الإضافة...' : 'إضافة قاعدة'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Rules List */}
+        {autoReplyRulesQuery.data?.rules && autoReplyRulesQuery.data.rules.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>القواعد النشطة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {autoReplyRulesQuery.data.rules.map((rule) => (
+                  <div
+                    key={rule.id}
+                    className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{rule.triggerValue || rule.triggerType}</p>
+                      <p className="text-xs text-muted-foreground">{rule.replyMessage}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={rule.isActive ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() =>
+                          toggleAutoReplyMutation.mutate({
+                            ruleId: rule.id,
+                            enabled: !rule.isActive,
+                          })
+                        }
+                        disabled={toggleAutoReplyMutation.isPending}
+                      >
+                        {rule.isActive ? 'تعطيل' : 'تفعيل'}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteAutoReply(rule.id)}
+                      >
+                        حذف
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </DashboardLayout>
   );
 }

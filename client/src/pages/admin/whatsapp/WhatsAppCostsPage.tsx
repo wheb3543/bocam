@@ -121,14 +121,12 @@ export default function WhatsAppCostsPage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      pageTitle="تكاليف محادثات WhatsApp"
+      pageDescription="عرض وتحليل تكاليف محادثات WhatsApp حسب الفترة وفئة التسعير"
+    >
       <div className="space-y-6 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">تكاليف المحادثات</h1>
-            <p className="text-muted-foreground">عرض وتحليل تكاليف محادثات WhatsApp</p>
-          </div>
+        <div className="flex justify-end">
           <Button onClick={handleExport} className="gap-2">
             <Download className="h-4 w-4" />
             تصدير التقرير

@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -102,142 +103,141 @@ export default function WhatsAppBroadcast() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">البث الجماعي</h1>
-        <p className="text-muted-foreground">إرسال رسالة إلى عدة مستقبلين في نفس الوقت</p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي البث</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {broadcastStatsQuery.data?.stats?.totalBroadcasts || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">حملات بث</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">الرسائل المرسلة</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {broadcastStatsQuery.data?.stats?.totalMessagesSent || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">رسالة</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">معدل النجاح</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {broadcastStatsQuery.data?.stats?.totalMessagesSent
-                ? Math.round(
-                    ((broadcastStatsQuery.data.stats.totalMessagesSent -
-                      broadcastStatsQuery.data.stats.totalMessagesFailed) /
-                      broadcastStatsQuery.data.stats.totalMessagesSent) *
-                      100
-                  )
-                : 0}
-              %
-            </div>
-            <p className="text-xs text-muted-foreground">نسبة النجاح</p>
-          </CardContent>
-        </Card>
-
-        {broadcastStatusQuery.data && (
+    <DashboardLayout
+      pageTitle="البث الجماعي"
+      pageDescription="إرسال رسالة إلى عدة مستقبلين في نفس الوقت وجدولة حملات البث"
+    >
+      <div className="space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">حالة البث الأخير</CardTitle>
+              <CardTitle className="text-sm font-medium">إجمالي البث</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {(broadcastStatusQuery.data.status as unknown as string) || 'غير متوفر'}
+                {broadcastStatsQuery.data?.stats?.totalBroadcasts || 0}
               </div>
+              <p className="text-xs text-muted-foreground">حملات بث</p>
             </CardContent>
           </Card>
-        )}
-      </div>
 
-      {/* Broadcast Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Send className="w-5 h-5" />
-            إرسال بث جماعي
-          </CardTitle>
-          <CardDescription>إرسال رسالة إلى عدة مستقبلين في نفس الوقت</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Button
-              variant={isScheduleMode ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setIsScheduleMode(!isScheduleMode)}
-            >
-              {isScheduleMode ? 'إرسال الآن' : 'جدولة'}
-            </Button>
-          </div>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">الرسائل المرسلة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {broadcastStatsQuery.data?.stats?.totalMessagesSent || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">رسالة</p>
+            </CardContent>
+          </Card>
 
-          <div>
-            <label className="text-sm font-medium">الرسالة</label>
-            <Textarea
-              placeholder="أدخل الرسالة..."
-              value={broadcastMessage}
-              onChange={(e) => setBroadcastMessage(e.target.value)}
-              className="mt-1"
-              rows={3}
-            />
-          </div>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">معدل النجاح</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {broadcastStatsQuery.data?.stats?.totalMessagesSent
+                  ? Math.round(
+                      ((broadcastStatsQuery.data.stats.totalMessagesSent -
+                        broadcastStatsQuery.data.stats.totalMessagesFailed) /
+                        broadcastStatsQuery.data.stats.totalMessagesSent) *
+                        100
+                    )
+                  : 0}
+                %
+              </div>
+              <p className="text-xs text-muted-foreground">نسبة النجاح</p>
+            </CardContent>
+          </Card>
 
-          <div>
-            <label className="text-sm font-medium">المستقبلون (واحد في كل سطر)</label>
-            <Textarea
-              placeholder="967777165305&#10;967777165306&#10;967777165307"
-              value={broadcastRecipients}
-              onChange={(e) => setBroadcastRecipients(e.target.value)}
-              className="mt-1"
-              rows={4}
-            />
-          </div>
+          {broadcastStatusQuery.data && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">حالة البث الأخير</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {(broadcastStatusQuery.data.status as unknown as string) || 'غير متوفر'}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-          {isScheduleMode && (
+        {/* Broadcast Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5" />
+              إرسال بث جماعي
+            </CardTitle>
+            <CardDescription>إرسال رسالة إلى عدة مستقبلين في نفس الوقت</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Button
+                variant={isScheduleMode ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setIsScheduleMode(!isScheduleMode)}
+              >
+                {isScheduleMode ? 'إرسال الآن' : 'جدولة'}
+              </Button>
+            </div>
+
             <div>
-              <label className="text-sm font-medium">وقت الإرسال</label>
-              <Input
-                type="datetime-local"
-                value={scheduledAt}
-                onChange={(e) => setScheduledAt(e.target.value)}
+              <label className="text-sm font-medium">الرسالة</label>
+              <Textarea
+                placeholder="أدخل الرسالة..."
+                value={broadcastMessage}
+                onChange={(e) => setBroadcastMessage(e.target.value)}
                 className="mt-1"
+                rows={3}
               />
             </div>
-          )}
 
-          <Button
-            onClick={isScheduleMode ? handleScheduleBroadcast : handleSendBroadcast}
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading
-              ? isScheduleMode
-                ? 'جاري الجدولة...'
-                : 'جاري الإرسال...'
-              : isScheduleMode
-                ? 'جدولة البث'
-                : 'إرسال البث'}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+            <div>
+              <label className="text-sm font-medium">المستقبلون (واحد في كل سطر)</label>
+              <Textarea
+                placeholder="967777165305&#10;967777165306&#10;967777165307"
+                value={broadcastRecipients}
+                onChange={(e) => setBroadcastRecipients(e.target.value)}
+                className="mt-1"
+                rows={4}
+              />
+            </div>
+
+            {isScheduleMode && (
+              <div>
+                <label className="text-sm font-medium">وقت الإرسال</label>
+                <Input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(e) => setScheduledAt(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            )}
+
+            <Button
+              onClick={isScheduleMode ? handleScheduleBroadcast : handleSendBroadcast}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading
+                ? isScheduleMode
+                  ? 'جاري الجدولة...'
+                  : 'جاري الإرسال...'
+                : isScheduleMode
+                  ? 'جدولة البث'
+                  : 'إرسال البث'}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }

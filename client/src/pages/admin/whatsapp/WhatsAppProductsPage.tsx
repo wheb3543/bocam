@@ -122,14 +122,12 @@ export default function WhatsAppProductsPage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      pageTitle="منتجات WhatsApp"
+      pageDescription="عرض وإدارة المنتجات من كتالوج WhatsApp"
+    >
       <div className="space-y-6 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">منتجات WhatsApp</h1>
-            <p className="text-muted-foreground">عرض وإدارة المنتجات من كتالوج WhatsApp</p>
-          </div>
+        <div className="flex justify-end">
           <Button onClick={handleExport} className="gap-2">
             <Download className="h-4 w-4" />
             تصدير التقرير

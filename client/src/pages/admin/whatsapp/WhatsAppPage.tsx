@@ -49,7 +49,10 @@ import { useWhatsAppSelection } from './hooks/useWhatsAppSelection';
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function WhatsAppPage() {
   return (
-    <DashboardLayout pageTitle="واتساب" pageDescription="إدارة رسائل واتساب">
+    <DashboardLayout
+      pageTitle="إدارة محادثات WhatsApp"
+      pageDescription="تواصل مع العملاء عبر WhatsApp Business وأدر المحادثات والقوالب"
+    >
       <WhatsAppContent />
     </DashboardLayout>
   );
@@ -370,81 +373,66 @@ function WhatsAppContent() {
     >
       <div className="container mx-auto p-2 sm:p-4 md:p-6 max-w-7xl">
         {/* Page Header */}
-        <div className="mb-3 sm:mb-4 md:mb-6">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="bg-gradient-to-br from-[var(--whatsapp-green)] to-[var(--whatsapp-emerald)] p-1.5 sm:p-2 md:p-3 rounded-xl shadow-lg flex-shrink-0">
-              <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-7 md:w-7 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-[var(--text-sm)] sm:text-[var(--text-base)] md:text-[var(--text-xl)] lg:text-[var(--text-2xl)] font-bold text-foreground truncate">
-                إدارة محادثات واتساب
-              </h1>
-              <p className="text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] text-muted-foreground hidden sm:block">
-                تواصل مع العملاء عبر واتساب بيزنس
-              </p>
-            </div>
-            <div className="flex gap-0.5 sm:gap-1 md:gap-2 items-center flex-shrink-0">
+        <div className="mb-3 flex justify-end sm:mb-4 md:mb-6">
+          <div className="flex gap-0.5 sm:gap-1 md:gap-2 items-center flex-shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5"
+              onClick={() => setIsDetailsCollapsed(!isDetailsCollapsed)}
+            >
+              <StickyNote className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span className="hidden lg:inline">{isDetailsCollapsed ? 'التفاصيل' : 'إخفاء'}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5"
+              onClick={() => setIsSplitView(!isSplitView)}
+              disabled={!selectedConversation}
+            >
+              <LayoutGrid className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span className="hidden lg:inline">{isSplitView ? 'إلغاء التقسيم' : 'تقسيم'}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5"
+              onClick={() => refetchConversations()}
+            >
+              <RefreshCw className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span className="hidden lg:inline">تحديث</span>
+            </Button>
+            <Link href="/admin/whatsapp/connection">
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5"
-                onClick={() => setIsDetailsCollapsed(!isDetailsCollapsed)}
+                className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden sm:flex"
               >
-                <StickyNote className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden lg:inline">
-                  {isDetailsCollapsed ? 'التفاصيل' : 'إخفاء'}
-                </span>
+                <Smartphone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="hidden lg:inline">الاتصال</span>
               </Button>
+            </Link>
+            <Link href="/admin/whatsapp/templates">
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5"
-                onClick={() => setIsSplitView(!isSplitView)}
-                disabled={!selectedConversation}
+                className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden md:flex"
               >
-                <LayoutGrid className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden lg:inline">{isSplitView ? 'إلغاء التقسيم' : 'تقسيم'}</span>
+                <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="hidden lg:inline">القوالب</span>
               </Button>
+            </Link>
+            <Link href="/admin/whatsapp/analytics">
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5"
-                onClick={() => refetchConversations()}
+                className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden md:flex"
               >
-                <RefreshCw className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden lg:inline">تحديث</span>
+                <BarChart2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="hidden lg:inline">التحليلات</span>
               </Button>
-              <Link href="/admin/whatsapp/connection">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden sm:flex"
-                >
-                  <Smartphone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  <span className="hidden lg:inline">الاتصال</span>
-                </Button>
-              </Link>
-              <Link href="/admin/whatsapp/templates">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden md:flex"
-                >
-                  <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  <span className="hidden lg:inline">القوالب</span>
-                </Button>
-              </Link>
-              <Link href="/admin/whatsapp/analytics">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 text-[10px] sm:text-[var(--text-xs)] md:text-[var(--text-sm)] h-6 sm:h-7 md:h-8 px-1 sm:px-1.5 md:px-2.5 hidden md:flex"
-                >
-                  <BarChart2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  <span className="hidden lg:inline">التحليلات</span>
-                </Button>
-              </Link>
-            </div>
+            </Link>
           </div>
         </div>
 
