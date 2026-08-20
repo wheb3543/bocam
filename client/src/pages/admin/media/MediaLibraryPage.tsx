@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -377,55 +376,10 @@ export default function MediaLibraryPage() {
       pageDescription="مكتبة موحّدة للصور والفيديو والصوت والمستندات"
       pageHeader="none"
     >
-      <div dir="rtl" className="space-y-6">
-        <AdminPageHeader
-          eyebrow="مركز الوسائط"
-          title="مكتبة الوسائط"
-          description="ارفع ونظّم الصور والفيديو والصوت والمستندات من مكان واحد. تُضغط الصور إلى AVIF تلقائياً وتبقى بقية الملفات بصيغها الأصلية مع فهرسة كاملة."
-          status={
-            <>
-              <Badge variant="outline" className="h-9 border-primary/20 bg-primary/5 text-primary">
-                {items.length} عنصر ظاهر
-              </Badge>
-              <Badge
-                variant="outline"
-                className="h-9 border-border bg-muted/40 text-muted-foreground"
-              >
-                {selectedFolder?.name || 'المجلد العام'}
-              </Badge>
-            </>
-          }
-          actions={
-            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-              <Button
-                variant="outline"
-                className="min-h-10"
-                onClick={() => setIsCreatingFolder(true)}
-              >
-                <FolderPlus className="ml-2 h-4 w-4" />
-                مجلد جديد
-              </Button>
-              <Button
-                className="min-h-10"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-              >
-                <Upload className="ml-2 h-4 w-4" />
-                رفع ملفات
-              </Button>
-              <Button
-                variant="outline"
-                className="min-h-10"
-                onClick={() => directoryInputRef.current?.click()}
-                disabled={isUploading}
-              >
-                <FolderOpen className="ml-2 h-4 w-4" />
-                رفع مجلد
-              </Button>
-            </div>
-          }
-        />
-
+      <div
+        dir="rtl"
+        className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden py-3 sm:py-4"
+      >
         <input
           ref={fileInputRef}
           type="file"
@@ -449,6 +403,80 @@ export default function MediaLibraryPage() {
             }
           }}
         />
+
+        <Card className="shrink-0 shadow-sm">
+          <CardContent className="flex flex-col gap-2 p-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="relative w-full xl:max-w-md">
+              <Search className="absolute right-3 top-2.5 h-4 w-4 text-slate-400" />
+              <Input
+                className="pr-9"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="ابحث بالاسم أو الوصف"
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge
+                variant="outline"
+                className="hidden h-9 border-primary/20 bg-primary/5 text-primary sm:inline-flex"
+              >
+                {items.length} عنصر ظاهر
+              </Badge>
+              <Badge
+                variant="outline"
+                className="hidden h-9 border-border bg-muted/40 text-muted-foreground md:inline-flex"
+              >
+                {selectedFolder?.name || 'المجلد العام'}
+              </Badge>
+              <select
+                value={typeFilter}
+                onChange={(event) => setTypeFilter(event.target.value as MediaTypeFilter)}
+                className="h-9 rounded-md border bg-white px-2 text-sm"
+                aria-label="تصفية نوع الوسائط"
+              >
+                <option value="all">كل الأنواع</option>
+                {(['image', 'video', 'audio', 'document', 'other'] as const).map((type) => (
+                  <option key={type} value={type}>
+                    {typeLabel(type)}
+                  </option>
+                ))}
+              </select>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => refetch()}
+                aria-label="تحديث المكتبة"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="min-h-9"
+                onClick={() => setIsCreatingFolder(true)}
+              >
+                <FolderPlus className="ml-1.5 h-4 w-4" />
+                مجلد جديد
+              </Button>
+              <Button
+                className="min-h-9"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                <Upload className="ml-1.5 h-4 w-4" />
+                رفع ملفات
+              </Button>
+              <Button
+                variant="outline"
+                className="min-h-9"
+                onClick={() => directoryInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                <FolderOpen className="ml-1.5 h-4 w-4" />
+                رفع مجلد
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {isCreatingFolder && (
           <Card className="border-blue-200 bg-blue-50/60">
@@ -506,10 +534,10 @@ export default function MediaLibraryPage() {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[270px_minmax(0,1fr)]">
-          <Card className="h-fit shadow-sm">
-            <CardContent className="p-3">
-              <div className="mb-3 flex items-center justify-between border-b px-1 pb-3">
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[270px_minmax(0,1fr)]">
+          <Card className="min-h-0 shadow-sm">
+            <CardContent className="flex h-full min-h-0 flex-col p-3">
+              <div className="mb-3 flex shrink-0 items-center justify-between border-b px-1 pb-3">
                 <div>
                   <p className="font-semibold text-foreground">شجرة المجلدات</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">{folders.length} مجلد</p>
@@ -525,7 +553,7 @@ export default function MediaLibraryPage() {
                   </Button>
                 )}
               </div>
-              <div className="max-h-56 space-y-1 overflow-y-auto pr-1 lg:max-h-[calc(100vh-20rem)]">
+              <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
                 {foldersLoading ? (
                   <div className="space-y-2 p-2" role="status" aria-label="جاري تحميل المجلدات">
                     {Array.from({ length: 6 }).map((_, index) => (
@@ -539,7 +567,7 @@ export default function MediaLibraryPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-4 w-full justify-start"
+                className="mt-4 w-full shrink-0 justify-start"
                 onClick={downloadFolderZip}
                 disabled={!effectiveFolderId}
               >
@@ -549,40 +577,9 @@ export default function MediaLibraryPage() {
             </CardContent>
           </Card>
 
-          <div className="space-y-4">
-            <Card className="shadow-sm">
-              <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
-                <div className="relative w-full md:max-w-sm">
-                  <Search className="absolute right-3 top-2.5 h-4 w-4 text-slate-400" />
-                  <Input
-                    className="pr-9"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="ابحث بالاسم أو الوصف"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <select
-                    value={typeFilter}
-                    onChange={(event) => setTypeFilter(event.target.value as MediaTypeFilter)}
-                    className="h-9 rounded-md border bg-white px-2 text-sm"
-                  >
-                    <option value="all">كل الأنواع</option>
-                    {(['image', 'video', 'audio', 'document', 'other'] as const).map((type) => (
-                      <option key={type} value={type}>
-                        {typeLabel(type)}
-                      </option>
-                    ))}
-                  </select>
-                  <Button variant="outline" size="icon" onClick={() => refetch()}>
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
+          <div className="flex min-h-0 flex-col gap-3">
             {selectedIds.length > 0 && (
-              <Card className="border-primary/20 bg-primary/5">
+              <Card className="shrink-0 border-primary/20 bg-primary/5">
                 <CardContent className="flex flex-wrap items-center gap-3 p-3" aria-live="polite">
                   <span className="text-sm font-semibold text-foreground">
                     تم تحديد {selectedIds.length} عنصر
@@ -637,7 +634,7 @@ export default function MediaLibraryPage() {
                   void uploadFiles(event.dataTransfer.files);
                 }
               }}
-              className="rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5 p-4 text-center text-sm text-foreground"
+              className="shrink-0 rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5 p-4 text-center text-sm text-foreground"
             >
               <Upload className="mx-auto mb-1 h-5 w-5 text-primary" />
               <p>اسحب ملفاتك هنا لرفعها إلى «{selectedFolder?.name || 'المجلد'}»</p>
@@ -654,138 +651,143 @@ export default function MediaLibraryPage() {
               </Button>
             </div>
 
-            {isLoading ? (
-              <div
-                className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4"
-                role="status"
-                aria-label="جاري تحميل الوسائط"
-              >
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="aspect-square animate-pulse rounded-2xl border border-border/70 bg-card"
-                  />
-                ))}
-                <span className="sr-only">جاري تحميل الوسائط</span>
-              </div>
-            ) : isError ? (
-              <Card>
-                <CardContent className="p-10 text-center text-red-600">
-                  تعذّر تحميل الوسائط: {error.message}
-                </CardContent>
-              </Card>
-            ) : items.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <FileArchive className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-                  <p className="font-semibold text-slate-700">لا توجد وسائط في هذا المجلد</p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    ارفع صورة أو فيديو أو ملفاً صوتياً أو مستنداً للبدء.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                <div className="flex flex-col gap-2 px-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-                  <button
-                    type="button"
-                    onClick={toggleSelectAll}
-                    className="flex min-h-9 items-center gap-1.5 rounded-lg px-2 font-medium hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {selectedIds.length === items.length ? (
-                      <CheckSquare className="h-4 w-4 text-primary" />
-                    ) : (
-                      <Square className="h-4 w-4" />
-                    )}
-                    تحديد الكل ({items.length})
-                  </button>
-                  <span>{selectedFolder?.path}</span>
+            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+              {isLoading ? (
+                <div
+                  className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4"
+                  role="status"
+                  aria-label="جاري تحميل الوسائط"
+                >
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="aspect-square animate-pulse rounded-2xl border border-border/70 bg-card"
+                    />
+                  ))}
+                  <span className="sr-only">جاري تحميل الوسائط</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
-                  {items.map((item) => {
-                    const selected = selectedIds.includes(item.id);
-                    return (
-                      <article
-                        key={item.id}
-                        draggable
-                        onDragStart={(event) => {
-                          event.dataTransfer.setData('application/x-sgh-media-id', String(item.id));
-                          setDraggedMediaId(item.id);
-                        }}
-                        onDragEnd={() => setDraggedMediaId(null)}
-                        className={`group overflow-hidden rounded-xl border bg-card shadow-sm transition hover:shadow-md ${selected ? 'border-primary ring-2 ring-primary/40' : 'border-border'}`}
-                      >
-                        <div className="relative aspect-video overflow-hidden bg-slate-100">
-                          <button
-                            type="button"
-                            className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-card/95 shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            onClick={() => toggleSelection(item.id)}
-                            aria-label={
-                              selected
-                                ? `إلغاء تحديد ${item.fileName || 'الوسيط'}`
-                                : `تحديد ${item.fileName || 'الوسيط'}`
-                            }
-                          >
-                            {selected ? (
-                              <CheckSquare className="h-4 w-4 text-primary" />
-                            ) : (
-                              <Square className="h-4 w-4 text-slate-500" />
-                            )}
-                          </button>
-                          {createMediaPreview({
-                            type: item.type,
-                            url: item.url,
-                            alt: item.altAr || item.fileName || 'وسيط',
-                            label: typeLabel(item.type),
-                          })}
-                        </div>
-                        <div className="space-y-2 p-2.5 sm:p-3">
-                          <p
-                            className="truncate text-sm font-semibold text-foreground"
-                            title={item.fileName || item.key}
-                          >
-                            {item.fileName || item.key.split('/').pop()}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-                            <span className="rounded bg-muted px-1.5 py-0.5 uppercase">
-                              {item.format || item.type}
-                            </span>
-                            <span>{formatBytes(item.size)}</span>
-                            {item.width && item.height ? (
-                              <span>
-                                {item.width}×{item.height}
+              ) : isError ? (
+                <Card>
+                  <CardContent className="p-10 text-center text-red-600">
+                    تعذّر تحميل الوسائط: {error.message}
+                  </CardContent>
+                </Card>
+              ) : items.length === 0 ? (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <FileArchive className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+                    <p className="font-semibold text-slate-700">لا توجد وسائط في هذا المجلد</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      ارفع صورة أو فيديو أو ملفاً صوتياً أو مستنداً للبدء.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-2 px-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      type="button"
+                      onClick={toggleSelectAll}
+                      className="flex min-h-9 items-center gap-1.5 rounded-lg px-2 font-medium hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {selectedIds.length === items.length ? (
+                        <CheckSquare className="h-4 w-4 text-primary" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                      تحديد الكل ({items.length})
+                    </button>
+                    <span>{selectedFolder?.path}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
+                    {items.map((item) => {
+                      const selected = selectedIds.includes(item.id);
+                      return (
+                        <article
+                          key={item.id}
+                          draggable
+                          onDragStart={(event) => {
+                            event.dataTransfer.setData(
+                              'application/x-sgh-media-id',
+                              String(item.id)
+                            );
+                            setDraggedMediaId(item.id);
+                          }}
+                          onDragEnd={() => setDraggedMediaId(null)}
+                          className={`group overflow-hidden rounded-xl border bg-card shadow-sm transition hover:shadow-md ${selected ? 'border-primary ring-2 ring-primary/40' : 'border-border'}`}
+                        >
+                          <div className="relative aspect-video overflow-hidden bg-slate-100">
+                            <button
+                              type="button"
+                              className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-card/95 shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              onClick={() => toggleSelection(item.id)}
+                              aria-label={
+                                selected
+                                  ? `إلغاء تحديد ${item.fileName || 'الوسيط'}`
+                                  : `تحديد ${item.fileName || 'الوسيط'}`
+                              }
+                            >
+                              {selected ? (
+                                <CheckSquare className="h-4 w-4 text-primary" />
+                              ) : (
+                                <Square className="h-4 w-4 text-slate-500" />
+                              )}
+                            </button>
+                            {createMediaPreview({
+                              type: item.type,
+                              url: item.url,
+                              alt: item.altAr || item.fileName || 'وسيط',
+                              label: typeLabel(item.type),
+                            })}
+                          </div>
+                          <div className="space-y-2 p-2.5 sm:p-3">
+                            <p
+                              className="truncate text-sm font-semibold text-foreground"
+                              title={item.fileName || item.key}
+                            >
+                              {item.fileName || item.key.split('/').pop()}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                              <span className="rounded bg-muted px-1.5 py-0.5 uppercase">
+                                {item.format || item.type}
                               </span>
-                            ) : (
-                              <span>{item.mimeType?.split('/').pop()}</span>
-                            )}
+                              <span>{formatBytes(item.size)}</span>
+                              {item.width && item.height ? (
+                                <span>
+                                  {item.width}×{item.height}
+                                </span>
+                              ) : (
+                                <span>{item.mimeType?.split('/').pop()}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between border-t pt-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="min-h-9 px-2 text-xs text-primary"
+                                onClick={() => handleCopy(item.url)}
+                              >
+                                <Copy className="ml-1 h-3 w-3" />
+                                رابط
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="min-h-9 px-2 text-xs text-destructive"
+                                onClick={() => setPendingDelete([item.id])}
+                              >
+                                <Trash2 className="ml-1 h-3 w-3" />
+                                حذف
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center justify-between border-t pt-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="min-h-9 px-2 text-xs text-primary"
-                              onClick={() => handleCopy(item.url)}
-                            >
-                              <Copy className="ml-1 h-3 w-3" />
-                              رابط
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="min-h-9 px-2 text-xs text-destructive"
-                              onClick={() => setPendingDelete([item.id])}
-                            >
-                              <Trash2 className="ml-1 h-3 w-3" />
-                              حذف
-                            </Button>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </>
-            )}
+                        </article>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

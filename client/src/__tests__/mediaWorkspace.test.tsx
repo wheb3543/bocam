@@ -50,12 +50,16 @@ vi.mock('@/lib/api/trpc', () => ({
 import MediaLibraryPage from '@/pages/admin/media/MediaLibraryPage';
 
 describe('Media library workspace', () => {
-  it('renders the unified workspace header, an accessible upload action, and collapsible folders', () => {
+  it('renders the compact toolbar, internal scroll areas, and collapsible folders', () => {
     const { container } = render(<MediaLibraryPage />);
 
-    expect(screen.getByRole('heading', { name: 'مكتبة الوسائط' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'مجلد جديد' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'رفع ملفات' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'رفع مجلد' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'تحديث المكتبة' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'اختيار ملفات' })).toBeTruthy();
     expect(container.querySelectorAll('input[type="file"]')).toHaveLength(2);
+    expect(container.querySelectorAll('.overflow-y-auto').length).toBeGreaterThanOrEqual(2);
 
     const treeExpander = container.querySelector('[role="button"]');
     expect(treeExpander).toBeTruthy();
