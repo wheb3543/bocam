@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
@@ -29,7 +28,6 @@ interface Doctor {
   [key: string]: unknown;
 }
 
-
 interface FilterOptions {
   statusFilter?: string[];
   sourceFilter?: string[];
@@ -38,7 +36,8 @@ interface FilterOptions {
   searchTerm?: string;
 }
 
-type AppointmentStatus = 'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+type AppointmentStatus =
+  'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
 
 type DateFilterPreset = 'today' | 'week' | 'month' | 'all';
 
@@ -77,23 +76,30 @@ export default function AppointmentsTab({
 
   // Convert dateFilter to string for AppointmentFilters component
   const dateFilterString = useMemo(() => {
-    if (!dateFilter) {return 'all';}
-    if (typeof dateFilter === 'string') {return dateFilter;}
+    if (!dateFilter) {
+      return 'all';
+    }
+    if (typeof dateFilter === 'string') {
+      return dateFilter;
+    }
     return 'custom';
   }, [dateFilter]);
 
-  const handleDateFilterChange = useCallback((value: string) => {
-    if (value === 'custom') {
-      // Keep existing custom date range or set default
-      if (dateFilter && typeof dateFilter !== 'string') {
-        setDateFilter(dateFilter);
+  const handleDateFilterChange = useCallback(
+    (value: string) => {
+      if (value === 'custom') {
+        // Keep existing custom date range or set default
+        if (dateFilter && typeof dateFilter !== 'string') {
+          setDateFilter(dateFilter);
+        } else {
+          setDateFilter({ from: new Date(), to: new Date() } as unknown as DateFilterPreset);
+        }
       } else {
-        setDateFilter({ from: new Date(), to: new Date() } as unknown as DateFilterPreset);
+        setDateFilter(value as DateFilterPreset);
       }
-    } else {
-      setDateFilter(value as DateFilterPreset);
-    }
-  }, [dateFilter, setDateFilter]);
+    },
+    [dateFilter, setDateFilter]
+  );
 
   // Column visibility state
   const appointmentColumns: ColumnConfig[] = [
@@ -172,7 +178,10 @@ export default function AppointmentsTab({
           ? appointmentStatusFilter
           : undefined,
     });
-  const appointments = useMemo(() => (appointmentsData?.data || []) as unknown as AppointmentWithDoctor[], [appointmentsData?.data]);
+  const appointments = useMemo(
+    () => (appointmentsData?.data || []) as unknown as AppointmentWithDoctor[],
+    [appointmentsData?.data]
+  );
   const { data: doctors = [] } = trpc.doctors.list.useQuery();
 
   const updateAppointmentStatusMutation = trpc.appointments.updateStatus.useMutation({
@@ -188,11 +197,15 @@ export default function AppointmentsTab({
           dateTo: dateRange.to.toISOString(),
         },
         (old) => {
-          if (!old) {return old;}
+          if (!old) {
+            return old;
+          }
           return {
             ...old,
             data: old.data.map((apt) =>
-              apt.id === variables.id ? { ...apt, status: variables.status as AppointmentStatus } : apt
+              apt.id === variables.id
+                ? { ...apt, status: variables.status as AppointmentStatus }
+                : apt
             ),
           };
         }
@@ -242,7 +255,9 @@ export default function AppointmentsTab({
   });
 
   const filteredAppointments = useMemo(() => {
-    if (!appointments) {return [];}
+    if (!appointments) {
+      return [];
+    }
     const filtered = [...appointments];
     const sorted = appointmentTable.sortData(filtered, (item, key: string) => {
       switch (key) {
@@ -277,16 +292,14 @@ export default function AppointmentsTab({
       }
     });
     if (!appointmentTable.sortState.direction) {
-      sorted.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     return sorted;
   }, [appointments, appointmentTable]);
 
   const appointmentStats = useMemo(() => {
-    if (!appointments)
-      {return {
+    if (!appointments) {
+      return {
         total: 0,
         pending: 0,
         contacted: 0,
@@ -295,7 +308,8 @@ export default function AppointmentsTab({
         attended: 0,
         completed: 0,
         cancelled: 0,
-      };}
+      };
+    }
     return {
       total: appointments.length,
       pending: appointments.filter((a) => a.status === 'pending').length,
@@ -433,86 +447,101 @@ export default function AppointmentsTab({
   );
 
   return (
-    <div className="space-y-4">
-      <AppointmentStatsCards stats={appointmentStats} />
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="shrink-0">
+        <AppointmentStatsCards stats={appointmentStats} />
+      </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="min-h-0 flex-1 flex flex-col">
+        <CardHeader className="shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>مواعيد الأطباء</CardTitle>
               <CardDescription>إدارة ومتابعة مواعيد الأطباء</CardDescription>
             </div>
-            <div className="flex gap-2">
-            </div>
+            <div className="flex gap-2"></div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-3">
           {/* Filters */}
-          <AppointmentFilters
-            searchTerm={appointmentSearchTerm}
-            onSearchChange={setAppointmentSearchTerm}
-            doctors={doctors}
-            selectedDoctor={selectedDoctor}
-            onDoctorChange={setSelectedDoctor}
-            dateFilter={dateFilterString}
-            onDateFilterChange={handleDateFilterChange}
-            statusFilter={appointmentStatusFilter}
-            onStatusFilterChange={setAppointmentStatusFilter}
-            sourceFilter={appointmentSourceFilter}
-            onSourceFilterChange={setAppointmentSourceFilter}
-            activeFilterCount={appointmentFilter.filters.activeFilterCount}
-            onResetAll={() => {
-              appointmentFilter.filters.resetAll();
-              setAppointmentPage(1);
-              setSelectedAppointmentIds([]);
-            }}
-            columns={appointmentColumns}
-            visibleColumns={appointmentTable.visibleColumns}
-            columnOrder={appointmentTable.columnOrder}
-            onVisibilityChange={appointmentTable.handleColumnVisibilityChange}
-            onColumnOrderChange={appointmentTable.handleColumnOrderChange}
-            onResetColumns={appointmentTable.handleResetAll}
-            allTemplates={appointmentTable.allTemplates}
-            activeTemplateId={appointmentTable.activeTemplateId}
-            onApplyTemplate={appointmentTable.handleApplyTemplate}
-            onSaveTemplate={appointmentTable.handleSaveTemplate}
-            onDeleteTemplate={appointmentTable.handleDeleteTemplate}
-            columnWidths={appointmentTable.columnWidths.columnWidths}
-            frozenColumns={appointmentTable.frozenColumns.frozenColumns}
-            onToggleFrozen={appointmentTable.frozenColumns.toggleFrozen}
-            isAdmin={user?.role === 'admin'}
-            sharedTemplates={appointmentTable.sharedTemplates}
-            onSaveSharedTemplate={appointmentTable.handleSaveSharedTemplate}
-            onDeleteSharedTemplate={appointmentTable.handleDeleteSharedTemplate}
-            currentFilters={{
-              statusFilter: appointmentFilter.filters.statusFilter,
-              sourceFilter: appointmentFilter.filters.sourceFilter,
-              categoryFilter: appointmentFilter.filters.categoryFilter,
-              dateFilter: appointmentFilter.filters.dateFilter,
-              searchTerm: appointmentFilter.filters.searchTerm,
-            }}
-            onApplyFilter={(filters: FilterOptions) => {
-              if (filters.statusFilter)
-                {appointmentFilter.filters.setStatusFilter(filters.statusFilter);}
-              else {appointmentFilter.filters.setStatusFilter([]);}
-              if (filters.sourceFilter)
-                {appointmentFilter.filters.setSourceFilter(filters.sourceFilter);}
-              else {appointmentFilter.filters.setSourceFilter([]);}
-              if (filters.categoryFilter)
-                {appointmentFilter.filters.setCategoryFilter(filters.categoryFilter);}
-              else {appointmentFilter.filters.setCategoryFilter([]);}
-              if (filters.dateFilter) {appointmentFilter.filters.setDateFilter(filters.dateFilter as DateFilterPreset);}
-              else {appointmentFilter.filters.setDateFilter('all');}
-              if (filters.searchTerm) {appointmentFilter.filters.setSearchTerm(filters.searchTerm);}
-              else {appointmentFilter.filters.setSearchTerm('');}
-            }}
-            onExport={handleExportAppointments}
-            onPrint={handlePrintAppointments}
-          />
+          <div className="shrink-0">
+            <AppointmentFilters
+              searchTerm={appointmentSearchTerm}
+              onSearchChange={setAppointmentSearchTerm}
+              doctors={doctors}
+              selectedDoctor={selectedDoctor}
+              onDoctorChange={setSelectedDoctor}
+              dateFilter={dateFilterString}
+              onDateFilterChange={handleDateFilterChange}
+              statusFilter={appointmentStatusFilter}
+              onStatusFilterChange={setAppointmentStatusFilter}
+              sourceFilter={appointmentSourceFilter}
+              onSourceFilterChange={setAppointmentSourceFilter}
+              activeFilterCount={appointmentFilter.filters.activeFilterCount}
+              onResetAll={() => {
+                appointmentFilter.filters.resetAll();
+                setAppointmentPage(1);
+                setSelectedAppointmentIds([]);
+              }}
+              columns={appointmentColumns}
+              visibleColumns={appointmentTable.visibleColumns}
+              columnOrder={appointmentTable.columnOrder}
+              onVisibilityChange={appointmentTable.handleColumnVisibilityChange}
+              onColumnOrderChange={appointmentTable.handleColumnOrderChange}
+              onResetColumns={appointmentTable.handleResetAll}
+              allTemplates={appointmentTable.allTemplates}
+              activeTemplateId={appointmentTable.activeTemplateId}
+              onApplyTemplate={appointmentTable.handleApplyTemplate}
+              onSaveTemplate={appointmentTable.handleSaveTemplate}
+              onDeleteTemplate={appointmentTable.handleDeleteTemplate}
+              columnWidths={appointmentTable.columnWidths.columnWidths}
+              frozenColumns={appointmentTable.frozenColumns.frozenColumns}
+              onToggleFrozen={appointmentTable.frozenColumns.toggleFrozen}
+              isAdmin={user?.role === 'admin'}
+              sharedTemplates={appointmentTable.sharedTemplates}
+              onSaveSharedTemplate={appointmentTable.handleSaveSharedTemplate}
+              onDeleteSharedTemplate={appointmentTable.handleDeleteSharedTemplate}
+              currentFilters={{
+                statusFilter: appointmentFilter.filters.statusFilter,
+                sourceFilter: appointmentFilter.filters.sourceFilter,
+                categoryFilter: appointmentFilter.filters.categoryFilter,
+                dateFilter: appointmentFilter.filters.dateFilter,
+                searchTerm: appointmentFilter.filters.searchTerm,
+              }}
+              onApplyFilter={(filters: FilterOptions) => {
+                if (filters.statusFilter) {
+                  appointmentFilter.filters.setStatusFilter(filters.statusFilter);
+                } else {
+                  appointmentFilter.filters.setStatusFilter([]);
+                }
+                if (filters.sourceFilter) {
+                  appointmentFilter.filters.setSourceFilter(filters.sourceFilter);
+                } else {
+                  appointmentFilter.filters.setSourceFilter([]);
+                }
+                if (filters.categoryFilter) {
+                  appointmentFilter.filters.setCategoryFilter(filters.categoryFilter);
+                } else {
+                  appointmentFilter.filters.setCategoryFilter([]);
+                }
+                if (filters.dateFilter) {
+                  appointmentFilter.filters.setDateFilter(filters.dateFilter as DateFilterPreset);
+                } else {
+                  appointmentFilter.filters.setDateFilter('all');
+                }
+                if (filters.searchTerm) {
+                  appointmentFilter.filters.setSearchTerm(filters.searchTerm);
+                } else {
+                  appointmentFilter.filters.setSearchTerm('');
+                }
+              }}
+              onExport={handleExportAppointments}
+              onPrint={handlePrintAppointments}
+            />
+          </div>
 
           {/* Mobile Cards View */}
-          <div className="md:hidden space-y-4">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1 md:hidden">
             {appointmentsLoading ? (
               <TableSkeleton rows={3} columns={4} />
             ) : filteredAppointments.length === 0 ? (
@@ -547,39 +576,43 @@ export default function AppointmentsTab({
           </div>
 
           {/* Desktop Table View */}
-          <AppointmentTableDesktop
-            appointments={filteredAppointments}
-            isLoading={appointmentsLoading}
-            columns={appointmentColumns}
-            visibleColumns={appointmentTable.visibleColumns}
-            columnOrder={appointmentTable.columnOrder}
-            frozenColumns={appointmentTable.frozenColumns.frozenColumns}
-            columnWidths={appointmentTable.columnWidths}
-            getSortProps={appointmentTable.getSortProps}
-            selectedIds={selectedAppointmentIds}
-            onSelectionChange={setSelectedAppointmentIds}
-            onOpenDialog={onOpenAppointmentDialog}
-            onUpdateStatus={handleUpdateStatus}
-            userName={user?.name || 'مستخدم'}
-          />
+          <div className="hidden min-h-0 flex-1 overflow-auto md:block">
+            <AppointmentTableDesktop
+              appointments={filteredAppointments}
+              isLoading={appointmentsLoading}
+              columns={appointmentColumns}
+              visibleColumns={appointmentTable.visibleColumns}
+              columnOrder={appointmentTable.columnOrder}
+              frozenColumns={appointmentTable.frozenColumns.frozenColumns}
+              columnWidths={appointmentTable.columnWidths}
+              getSortProps={appointmentTable.getSortProps}
+              selectedIds={selectedAppointmentIds}
+              onSelectionChange={setSelectedAppointmentIds}
+              onOpenDialog={onOpenAppointmentDialog}
+              onUpdateStatus={handleUpdateStatus}
+              userName={user?.name || 'مستخدم'}
+            />
+          </div>
 
           {/* Pagination */}
-          <Pagination
-            currentPage={appointmentPage}
-            totalPages={appointmentsData?.totalPages || 1}
-            onPageChange={(page) => {
-              setAppointmentPage(page);
-              setSelectedAppointmentIds([]);
-            }}
-            totalItems={appointmentsData?.total || 0}
-            itemsPerPage={appointmentLimit}
-            pageSize={appointmentPageSize}
-            onPageSizeChange={(size) => {
-              setAppointmentPageSize(size);
-              setAppointmentPage(1);
-              setSelectedAppointmentIds([]);
-            }}
-          />
+          <div className="shrink-0">
+            <Pagination
+              currentPage={appointmentPage}
+              totalPages={appointmentsData?.totalPages || 1}
+              onPageChange={(page) => {
+                setAppointmentPage(page);
+                setSelectedAppointmentIds([]);
+              }}
+              totalItems={appointmentsData?.total || 0}
+              itemsPerPage={appointmentLimit}
+              pageSize={appointmentPageSize}
+              onPageSizeChange={(size) => {
+                setAppointmentPageSize(size);
+                setAppointmentPage(1);
+                setSelectedAppointmentIds([]);
+              }}
+            />
+          </div>
         </CardContent>
       </Card>
 

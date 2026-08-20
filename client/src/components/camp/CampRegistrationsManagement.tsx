@@ -67,108 +67,116 @@ export default function CampRegistrationsManagement({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       {/* Statistics Cards */}
-      <CampStatisticsCards stats={campHook.stats || {}} />
+      <div className="shrink-0">
+        <CampStatisticsCards stats={campHook.stats || {}} />
+      </div>
 
       {/* Filter Presets */}
-      <FilterPresets
-        pageKey="campRegistrations"
-        currentFilters={campHook.currentFilters}
-        onApplyFilters={campHook.handleApplyPreset}
-        quickPresets={campHook.quickPresets}
-        isAdmin={user?.role === 'admin'}
-      />
+      <div className="shrink-0">
+        <FilterPresets
+          pageKey="campRegistrations"
+          currentFilters={campHook.currentFilters}
+          onApplyFilters={campHook.handleApplyPreset}
+          quickPresets={campHook.quickPresets}
+          isAdmin={user?.role === 'admin'}
+        />
+      </div>
 
       {/* Filters */}
-      <EntityFilters
-        searchTerm={campHook.searchTerm}
-        onSearchChange={campHook.setSearchTerm}
-        searchPlaceholder="البحث بالاسم أو الهاتف..."
-        categoryOptions={(campHook.allCamps || []).map((camp: { id?: number; name?: string }) => ({
-          value: camp.id?.toString() || '',
-          label: camp.name || '',
-        }))}
-        selectedCategory={campHook.selectedCamp}
-        onCategoryChange={campHook.setSelectedCamp}
-        categoryPlaceholder="جميع المخيمات"
-        dateFilter={campHook.dateFilter}
-        onDateFilterChange={(value: 'all' | 'today' | 'week' | 'month' | 'custom') =>
-          campHook.setDateFilter(value)
-        }
-        statusFilter={campHook.statusFilter}
-        onStatusFilterChange={campHook.setStatusFilter}
-        sourceFilter={campHook.sourceFilter}
-        onSourceFilterChange={campHook.setSourceFilter}
-        activeFilterCount={campHook.campFilter.filters.activeFilterCount}
-        onResetAll={campHook.resetFilters}
-        columns={campHook.campRegColumns}
-        visibleColumns={campHook.campTable.visibleColumns}
-        columnOrder={campHook.campTable.columnOrder}
-        onVisibilityChange={campHook.campTable.handleColumnVisibilityChange}
-        onColumnOrderChange={campHook.campTable.handleColumnOrderChange}
-        onResetColumns={campHook.campTable.handleResetAll}
-        allTemplates={campHook.campTable.allTemplates}
-        activeTemplateId={campHook.campTable.activeTemplateId}
-        onApplyTemplate={campHook.campTable.handleApplyTemplate}
-        onSaveTemplate={campHook.campTable.handleSaveTemplate}
-        onDeleteTemplate={campHook.campTable.handleDeleteTemplate}
-        columnWidths={campHook.campTable.columnWidths.columnWidths}
-        frozenColumns={campHook.campTable.frozenColumns.frozenColumns}
-        onToggleFrozen={campHook.campTable.frozenColumns.toggleFrozen}
-        isAdmin={user?.role === 'admin'}
-        sharedTemplates={campHook.campTable.sharedTemplates}
-        onSaveSharedTemplate={campHook.campTable.handleSaveSharedTemplate}
-        onDeleteSharedTemplate={campHook.campTable.handleDeleteSharedTemplate}
-        pageKey="campRegistrations"
-        currentFilters={{
-          statusFilter: campHook.campFilter.filters.statusFilter,
-          sourceFilter: campHook.campFilter.filters.sourceFilter,
-          categoryFilter: campHook.campFilter.filters.categoryFilter,
-          dateFilter: campHook.campFilter.filters.dateFilter,
-          searchTerm: campHook.campFilter.filters.searchTerm,
-        }}
-        onApplyFilter={(filters) => {
-          if (filters.statusFilter) {
-            campHook.campFilter.filters.setStatusFilter(filters.statusFilter as string[]);
-          } else {
-            campHook.campFilter.filters.setStatusFilter([]);
+      <div className="shrink-0">
+        <EntityFilters
+          searchTerm={campHook.searchTerm}
+          onSearchChange={campHook.setSearchTerm}
+          searchPlaceholder="البحث بالاسم أو الهاتف..."
+          categoryOptions={(campHook.allCamps || []).map(
+            (camp: { id?: number; name?: string }) => ({
+              value: camp.id?.toString() || '',
+              label: camp.name || '',
+            })
+          )}
+          selectedCategory={campHook.selectedCamp}
+          onCategoryChange={campHook.setSelectedCamp}
+          categoryPlaceholder="جميع المخيمات"
+          dateFilter={campHook.dateFilter}
+          onDateFilterChange={(value: 'all' | 'today' | 'week' | 'month' | 'custom') =>
+            campHook.setDateFilter(value)
           }
-          if (filters.sourceFilter) {
-            campHook.campFilter.filters.setSourceFilter(filters.sourceFilter as string[]);
-          } else {
-            campHook.campFilter.filters.setSourceFilter([]);
-          }
-          if (filters.categoryFilter) {
-            campHook.campFilter.filters.setCategoryFilter(filters.categoryFilter as string[]);
-          } else {
-            campHook.campFilter.filters.setCategoryFilter([]);
-          }
-          if (filters.dateFilter) {
-            campHook.campFilter.filters.setDateFilter(
-              filters.dateFilter as 'all' | 'today' | 'week' | 'month' | 'custom'
-            );
-            onDateRangeChange?.(
-              campHook.campPresetDateRange(
-                filters.dateFilter as 'all' | 'today' | 'week' | 'month' | 'custom',
-                dateRange
-              )
-            );
-          } else {
-            campHook.campFilter.filters.setDateFilter('all');
-          }
-          if (filters.searchTerm) {
-            campHook.campFilter.filters.setSearchTerm(filters.searchTerm as string);
-          } else {
-            campHook.campFilter.filters.setSearchTerm('');
-          }
-        }}
-        onExport={campHook.handleExportCampRegistrations}
-        onPrint={campHook.handlePrintCampRegistrations}
-      />
+          statusFilter={campHook.statusFilter}
+          onStatusFilterChange={campHook.setStatusFilter}
+          sourceFilter={campHook.sourceFilter}
+          onSourceFilterChange={campHook.setSourceFilter}
+          activeFilterCount={campHook.campFilter.filters.activeFilterCount}
+          onResetAll={campHook.resetFilters}
+          columns={campHook.campRegColumns}
+          visibleColumns={campHook.campTable.visibleColumns}
+          columnOrder={campHook.campTable.columnOrder}
+          onVisibilityChange={campHook.campTable.handleColumnVisibilityChange}
+          onColumnOrderChange={campHook.campTable.handleColumnOrderChange}
+          onResetColumns={campHook.campTable.handleResetAll}
+          allTemplates={campHook.campTable.allTemplates}
+          activeTemplateId={campHook.campTable.activeTemplateId}
+          onApplyTemplate={campHook.campTable.handleApplyTemplate}
+          onSaveTemplate={campHook.campTable.handleSaveTemplate}
+          onDeleteTemplate={campHook.campTable.handleDeleteTemplate}
+          columnWidths={campHook.campTable.columnWidths.columnWidths}
+          frozenColumns={campHook.campTable.frozenColumns.frozenColumns}
+          onToggleFrozen={campHook.campTable.frozenColumns.toggleFrozen}
+          isAdmin={user?.role === 'admin'}
+          sharedTemplates={campHook.campTable.sharedTemplates}
+          onSaveSharedTemplate={campHook.campTable.handleSaveSharedTemplate}
+          onDeleteSharedTemplate={campHook.campTable.handleDeleteSharedTemplate}
+          pageKey="campRegistrations"
+          currentFilters={{
+            statusFilter: campHook.campFilter.filters.statusFilter,
+            sourceFilter: campHook.campFilter.filters.sourceFilter,
+            categoryFilter: campHook.campFilter.filters.categoryFilter,
+            dateFilter: campHook.campFilter.filters.dateFilter,
+            searchTerm: campHook.campFilter.filters.searchTerm,
+          }}
+          onApplyFilter={(filters) => {
+            if (filters.statusFilter) {
+              campHook.campFilter.filters.setStatusFilter(filters.statusFilter as string[]);
+            } else {
+              campHook.campFilter.filters.setStatusFilter([]);
+            }
+            if (filters.sourceFilter) {
+              campHook.campFilter.filters.setSourceFilter(filters.sourceFilter as string[]);
+            } else {
+              campHook.campFilter.filters.setSourceFilter([]);
+            }
+            if (filters.categoryFilter) {
+              campHook.campFilter.filters.setCategoryFilter(filters.categoryFilter as string[]);
+            } else {
+              campHook.campFilter.filters.setCategoryFilter([]);
+            }
+            if (filters.dateFilter) {
+              campHook.campFilter.filters.setDateFilter(
+                filters.dateFilter as 'all' | 'today' | 'week' | 'month' | 'custom'
+              );
+              onDateRangeChange?.(
+                campHook.campPresetDateRange(
+                  filters.dateFilter as 'all' | 'today' | 'week' | 'month' | 'custom',
+                  dateRange
+                )
+              );
+            } else {
+              campHook.campFilter.filters.setDateFilter('all');
+            }
+            if (filters.searchTerm) {
+              campHook.campFilter.filters.setSearchTerm(filters.searchTerm as string);
+            } else {
+              campHook.campFilter.filters.setSearchTerm('');
+            }
+          }}
+          onExport={campHook.handleExportCampRegistrations}
+          onPrint={campHook.handlePrintCampRegistrations}
+        />
+      </div>
 
       {/* Mobile Cards View */}
-      <div className="md:hidden space-y-3">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 md:hidden">
         {campHook.filteredRegistrations.length === 0 ? (
           <EmptyState
             icon={TentTree}
@@ -202,7 +210,7 @@ export default function CampRegistrationsManagement({
 
       {/* Bulk Update Button */}
       {campHook.selectedIds.length > 0 && (
-        <div className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg">
+        <div className="flex shrink-0 items-center justify-between rounded-lg border border-purple-200 bg-purple-50 p-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">
               تم تحديد {campHook.selectedIds.length} من {campHook.filteredRegistrations.length}
@@ -251,60 +259,64 @@ export default function CampRegistrationsManagement({
       )}
 
       {/* Desktop Table View */}
-      <CampRegistrationTable
-        registrations={campHook.filteredRegistrations}
-        isLoading={campHook.isLoading}
-        selectedIds={campHook.selectedIds}
-        onSelectAll={campHook.handleSelectAll}
-        onSelectOne={campHook.handleSelectOne}
-        onEdit={campHook.handleEditRegistration}
-        onPrint={handlePrint}
-        onDelete={handleDelete}
-        _onUpdateStatus={(
-          id: number,
-          status:
-            | 'pending'
-            | 'contacted'
-            | 'no_answer'
-            | 'confirmed'
-            | 'attended'
-            | 'completed'
-            | 'cancelled'
-        ) => {
-          campHook.updateStatusMutation.mutateAsync({ id, status, notes: '' });
-        }}
-        campTable={{
-          columnOrder: campHook.campTable.columnOrder,
-          visibleColumns: campHook.campTable.visibleColumns,
-          columnWidths: campHook.campTable.columnWidths.columnWidths,
-          frozenColumns: campHook.campTable.frozenColumns,
-          getSortProps: campHook.campTable.getSortProps,
-        }}
-        campRegColumns={campHook.campRegColumns}
-        formatPhoneDisplay={campHook.formatPhoneDisplay}
-        formatRegistrationDate={campHook.formatRegistrationDate}
-        formatStatusTime={campHook.formatStatusTime}
-        _deleteRegMutation={campHook.deleteRegMutation}
-        _updateStatusMutation={campHook.updateStatusMutation}
-      />
+      <div className="hidden min-h-0 flex-1 overflow-auto md:block">
+        <CampRegistrationTable
+          registrations={campHook.filteredRegistrations}
+          isLoading={campHook.isLoading}
+          selectedIds={campHook.selectedIds}
+          onSelectAll={campHook.handleSelectAll}
+          onSelectOne={campHook.handleSelectOne}
+          onEdit={campHook.handleEditRegistration}
+          onPrint={handlePrint}
+          onDelete={handleDelete}
+          _onUpdateStatus={(
+            id: number,
+            status:
+              | 'pending'
+              | 'contacted'
+              | 'no_answer'
+              | 'confirmed'
+              | 'attended'
+              | 'completed'
+              | 'cancelled'
+          ) => {
+            campHook.updateStatusMutation.mutateAsync({ id, status, notes: '' });
+          }}
+          campTable={{
+            columnOrder: campHook.campTable.columnOrder,
+            visibleColumns: campHook.campTable.visibleColumns,
+            columnWidths: campHook.campTable.columnWidths.columnWidths,
+            frozenColumns: campHook.campTable.frozenColumns,
+            getSortProps: campHook.campTable.getSortProps,
+          }}
+          campRegColumns={campHook.campRegColumns}
+          formatPhoneDisplay={campHook.formatPhoneDisplay}
+          formatRegistrationDate={campHook.formatRegistrationDate}
+          formatStatusTime={campHook.formatStatusTime}
+          _deleteRegMutation={campHook.deleteRegMutation}
+          _updateStatusMutation={campHook.updateStatusMutation}
+        />
+      </div>
 
       {/* Pagination */}
-      <Pagination
-        currentPage={campHook.campPage}
-        totalPages={campHook.registrationsData?.totalPages || 1}
-        onPageChange={(page) => {
-          campHook.setCampPage(page);
-          campHook.setSelectedIds([]);
-        }}
-        totalItems={campHook.registrationsData?.total || 0}
-        itemsPerPage={campHook.campLimit}
-        pageSize={campHook.campPageSize}
-        onPageSizeChange={(size) => {
-          campHook.setCampPageSize(size);
-          campHook.setCampPage(1);
-          campHook.setSelectedIds([]);
-        }}
-      />
+      <div className="shrink-0">
+        <Pagination
+          currentPage={campHook.campPage}
+          totalPages={campHook.registrationsData?.totalPages || 1}
+          onPageChange={(page) => {
+            campHook.setCampPage(page);
+            campHook.setSelectedIds([]);
+          }}
+          totalItems={campHook.registrationsData?.total || 0}
+          itemsPerPage={campHook.campLimit}
+          pageSize={campHook.campPageSize}
+          onPageSizeChange={(size) => {
+            campHook.setCampPageSize(size);
+            campHook.setCampPage(1);
+            campHook.setSelectedIds([]);
+          }}
+        />
+      </div>
 
       {/* Status Update Dialog */}
       <CampStatusUpdateDialog

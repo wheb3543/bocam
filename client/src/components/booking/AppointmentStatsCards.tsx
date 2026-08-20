@@ -54,7 +54,7 @@ export default function AppointmentStatsCards({ stats }: AppointmentStatsCardsPr
   const total = stats?.total || 0;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 stagger-cards">
+    <div className="grid grid-cols-2 gap-1.5 sm:gap-2 lg:grid-cols-4 stagger-cards">
       {statConfig.map((config) => {
         const Icon = config.icon;
         const value = stats?.[config.key] || 0;
@@ -64,22 +64,22 @@ export default function AppointmentStatsCards({ stats }: AppointmentStatsCardsPr
         return (
           <Card
             key={config.key}
-            className="group relative overflow-hidden border-0 shadow-sm stat-card-animated"
+            className="group relative overflow-hidden rounded-lg border-0 shadow-sm stat-card-animated"
           >
             {/* Top gradient bar */}
             <div className={`absolute top-0 inset-x-0 h-1 bg-gradient-to-r ${config.gradient}`} />
 
-            <CardContent className="p-3 sm:p-4 md:p-5">
+            <CardContent className="p-2.5 sm:p-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground mb-1 truncate">
+                  <p className="mb-0.5 text-[11px] font-medium text-muted-foreground sm:text-xs truncate">
                     {config.label}
                   </p>
-                  <p className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight">
+                  <p className="text-lg font-bold tracking-tight sm:text-xl">
                     <AnimatedCounter value={value} duration={900} />
                   </p>
                   {percentage !== null && (
-                    <div className="flex items-center gap-1 mt-2">
+                    <div className="mt-1 flex items-center gap-1">
                       <div
                         className={`flex items-center gap-0.5 text-xs font-medium ${config.textColor}`}
                       >
@@ -90,14 +90,16 @@ export default function AppointmentStatsCards({ stats }: AppointmentStatsCardsPr
                         )}
                         <span>{percentage}%</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">من الإجمالي</span>
+                      <span className="hidden text-xs text-muted-foreground sm:inline">
+                        من الإجمالي
+                      </span>
                     </div>
                   )}
                 </div>
                 <div
-                  className={`${config.iconBg} p-2 sm:p-2.5 md:p-3 rounded-xl group-hover:scale-110 transition-transform duration-300`}
+                  className={`${config.iconBg} rounded-lg p-1.5 sm:p-2 group-hover:scale-110 transition-transform duration-300`}
                 >
-                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 ${config.textColor}`} />
+                  <Icon className={`h-4 w-4 sm:h-4.5 sm:w-4.5 ${config.textColor}`} />
                 </div>
               </div>
             </CardContent>

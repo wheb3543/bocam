@@ -59,7 +59,9 @@ export default function BookingsManagementPage() {
   const [statusNotes, setStatusNotes] = useState('');
 
   // === Appointment Status Dialog State ===
-  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithDoctor | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithDoctor | null>(
+    null
+  );
   const [appointmentStatusDialogOpen, setAppointmentStatusDialogOpen] = useState(false);
   const [newAppointmentStatus, setNewAppointmentStatus] = useState('');
   const [appointmentStatusNotes, setAppointmentStatusNotes] = useState('');
@@ -104,9 +106,13 @@ export default function BookingsManagementPage() {
     const tab = params.get('tab');
 
     if (id && type) {
-      if (type === 'appointment') {setActiveTab('appointments');}
-      else if (type === 'offer') {setActiveTab('offerLeads');}
-      else if (type === 'camp') {setActiveTab('campRegistrations');}
+      if (type === 'appointment') {
+        setActiveTab('appointments');
+      } else if (type === 'offer') {
+        setActiveTab('offerLeads');
+      } else if (type === 'camp') {
+        setActiveTab('campRegistrations');
+      }
       window.history.replaceState({}, '', '/admin/bookings');
     } else if (tab) {
       if (
@@ -115,7 +121,10 @@ export default function BookingsManagementPage() {
         tab === 'campRegistrations' ||
         tab === 'leads'
       ) {
-        setActiveTab(tab as 'leads' | 'appointments' | 'offerLeads' | 'campRegistrations' | 'tasks' | 'customers');
+        setActiveTab(
+          tab as
+            'leads' | 'appointments' | 'offerLeads' | 'campRegistrations' | 'tasks' | 'customers'
+        );
       }
       window.history.replaceState({}, '', '/admin/bookings');
     }
@@ -179,7 +188,9 @@ export default function BookingsManagementPage() {
   });
 
   const handleStatusUpdate = () => {
-    if (!selectedLead || !newStatus) {return;}
+    if (!selectedLead || !newStatus) {
+      return;
+    }
     updateStatusMutation.mutate({
       id: selectedLead.id,
       status: newStatus as 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer',
@@ -188,7 +199,9 @@ export default function BookingsManagementPage() {
   };
 
   const handleAppointmentStatusUpdate = () => {
-    if (!selectedAppointment || !newAppointmentStatus) {return;}
+    if (!selectedAppointment || !newAppointmentStatus) {
+      return;
+    }
     updateAppointmentStatusMutation.mutate({
       id: selectedAppointment.id,
       status: newAppointmentStatus,
@@ -216,11 +229,11 @@ export default function BookingsManagementPage() {
       pageDescription="إدارة ومتابعة جميع الحجوزات والمواعيد"
     >
       <div
-        className="container mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 space-y-4 sm:space-y-6"
+        className="container mx-auto flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden px-3 py-3 sm:px-4 sm:py-4"
         dir="rtl"
       >
         {/* Quick Actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="flex shrink-0 flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
           <div className="flex gap-2">
             <Button
@@ -240,7 +253,7 @@ export default function BookingsManagementPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 overflow-x-auto pt-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="-mx-4 flex shrink-0 gap-2 overflow-x-auto px-4 pb-2 pt-1 sm:mx-0 sm:px-0">
           <Button
             variant={activeTab === 'leads' ? 'default' : 'outline'}
             onClick={() => setActiveTab('leads')}
@@ -316,55 +329,57 @@ export default function BookingsManagementPage() {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'leads' && (
-          <LeadsTab
-            leadsFilter={leadsFilter}
-            onOpenStatusDialog={openLeadStatusDialog}
-            pendingCount={pendingCounts.leads}
-          />
-        )}
+        <div className="min-h-0 flex-1">
+          {activeTab === 'leads' && (
+            <LeadsTab
+              leadsFilter={leadsFilter}
+              onOpenStatusDialog={openLeadStatusDialog}
+              pendingCount={pendingCounts.leads}
+            />
+          )}
 
-        {activeTab === 'appointments' && (
-          <AppointmentsTab
-            appointmentFilter={appointmentFilter}
-            dateRange={dateRange}
-            onOpenAppointmentDialog={openAppointmentDialog}
-          />
-        )}
+          {activeTab === 'appointments' && (
+            <AppointmentsTab
+              appointmentFilter={appointmentFilter}
+              dateRange={dateRange}
+              onOpenAppointmentDialog={openAppointmentDialog}
+            />
+          )}
 
-        {activeTab === 'offerLeads' && (
-          <OfferLeadsManagement
-            onPendingCountChange={setOfferLeadsPendingCount}
-            dateRange={dateRange}
-          />
-        )}
+          {activeTab === 'offerLeads' && (
+            <OfferLeadsManagement
+              onPendingCountChange={setOfferLeadsPendingCount}
+              dateRange={dateRange}
+            />
+          )}
 
-        {activeTab === 'campRegistrations' && (
-          <CampRegistrationsManagement
-            onPendingCountChange={setCampRegistrationsPendingCount}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-          />
-        )}
+          {activeTab === 'campRegistrations' && (
+            <CampRegistrationsManagement
+              onPendingCountChange={setCampRegistrationsPendingCount}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+            />
+          )}
 
-        {activeTab === 'customers' && <CustomerProfilesTab />}
+          {activeTab === 'customers' && <CustomerProfilesTab />}
 
-        {activeTab === 'tasks' && (
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckSquare className="h-5 w-5" />
-                  جميع المهام
-                </CardTitle>
-                <CardDescription>عرض وإدارة جميع المهام من كل الأقسام</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TasksSection entityType="all" entityId={0} />
-              </CardContent>
-            </Card>
-          </div>
-        )}
+          {activeTab === 'tasks' && (
+            <div className="h-full overflow-y-auto pr-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckSquare className="h-5 w-5" />
+                    جميع المهام
+                  </CardTitle>
+                  <CardDescription>عرض وإدارة جميع المهام من كل الأقسام</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <TasksSection entityType="all" entityId={0} />
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
 
         {/* Update Lead Status Dialog */}
         <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
@@ -391,8 +406,7 @@ export default function BookingsManagementPage() {
                     </p>
                   )}
                   <p className="text-sm">
-                    <span className="font-medium">النوع:</span>{' '}
-                    {'عام'}
+                    <span className="font-medium">النوع:</span> {'عام'}
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">المصدر:</span>{' '}
@@ -503,12 +517,10 @@ export default function BookingsManagementPage() {
                         </div>
                         <div className="space-y-2">
                           <p className="text-sm">
-                            <span className="font-medium">الطبيب:</span>{' '}
-                            {'-'}
+                            <span className="font-medium">الطبيب:</span> {'-'}
                           </p>
                           <p className="text-sm">
-                            <span className="font-medium">التخصص:</span>{' '}
-                            {''}
+                            <span className="font-medium">التخصص:</span> {''}
                           </p>
                           {selectedAppointment.procedure && (
                             <p className="text-sm">

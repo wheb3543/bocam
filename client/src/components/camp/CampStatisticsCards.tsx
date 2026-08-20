@@ -46,22 +46,22 @@ export default function CampStatisticsCards({ stats }: CampStatisticsCardsProps)
   ];
 
   return (
-    <div className="grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-1.5 sm:gap-2 md:grid-cols-4">
       {cards.map((stat) => (
         <div
           key={stat.label}
-          className="rounded-lg border bg-card p-3 sm:p-4 flex items-start gap-2 sm:gap-3"
+          className="flex items-start gap-2 rounded-lg border bg-card p-2 sm:p-2.5"
         >
-          <div className={`rounded-lg p-1.5 sm:p-2 ${stat.bg}`}>
+          <div className={`rounded-lg p-1.5 ${stat.bg}`}>
             <stat.icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${stat.color}`} />
           </div>
           <div className="min-w-0">
-            <p className="text-lg sm:text-2xl font-bold leading-none">{stat.value}</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 truncate">
-              {stat.label}
-            </p>
+            <p className="text-base font-bold leading-none sm:text-lg">{stat.value}</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground truncate">{stat.label}</p>
             {stat.sub && (
-              <p className="text-[9px] text-muted-foreground leading-tight mt-0.5">{stat.sub}</p>
+              <p className="mt-0.5 hidden text-[9px] leading-tight text-muted-foreground sm:block">
+                {stat.sub}
+              </p>
             )}
           </div>
         </div>

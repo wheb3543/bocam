@@ -237,3 +237,45 @@ describe('CampRegistrationsManagement Improvements', () => {
     expect(content).toContain('Search');
   });
 });
+
+describe('Fixed booking table workspaces', () => {
+  const appointmentsPage = readFile(
+    path.join(pagesDir, 'admin/bookings/AppointmentsManagementPage.tsx')
+  );
+  const campPage = readFile(path.join(pagesDir, 'admin/bookings/CampRegistrationsPage.tsx'));
+  const offerPage = readFile(path.join(pagesDir, 'admin/bookings/OfferLeadsPage.tsx'));
+  const bookingsPage = readFile(path.join(pagesDir, 'admin/bookings/BookingsManagementPage.tsx'));
+  const leadsPage = readFile(path.join(pagesDir, 'admin/bookings/LeadsManagementPage.tsx'));
+  const leadsTab = readFile(path.join(componentsDir, 'lead/LeadsTab.tsx'));
+  const appointmentsTab = readFile(path.join(componentsDir, 'booking/AppointmentsTab.tsx'));
+  const offerManagement = readFile(path.join(componentsDir, 'offer/OfferLeadsManagement.tsx'));
+  const campManagement = readFile(path.join(componentsDir, 'camp/CampRegistrationsManagement.tsx'));
+
+  it('keeps each targeted workspace within the available viewport height', () => {
+    [appointmentsPage, campPage, offerPage, bookingsPage, leadsPage].forEach((content) => {
+      expect(content).toContain('h-[calc(100dvh-4.25rem)]');
+      expect(content).toContain('overflow-hidden');
+    });
+  });
+
+  it('places vertical scrolling on the table or mobile-record region instead of the page shell', () => {
+    [leadsTab, appointmentsTab, offerManagement, campManagement].forEach((content) => {
+      expect(content).toContain('min-h-0 flex-1');
+      expect(content).toMatch(/overflow-(auto|y-auto)/);
+    });
+    expect(appointmentsPage).toContain('min-h-0 flex-1 overflow-auto');
+    expect(leadsPage).toContain('hidden min-h-0 flex-1 overflow-auto md:block');
+  });
+
+  it('uses compact visual scales for the reusable summary cards', () => {
+    [
+      readFile(path.join(componentsDir, 'booking/AppointmentStatsCards.tsx')),
+      readFile(path.join(componentsDir, 'lead/LeadStatsCards.tsx')),
+      readFile(path.join(componentsDir, 'offer/OfferStatsCards.tsx')),
+      readFile(path.join(componentsDir, 'camp/CampStatisticsCards.tsx')),
+    ].forEach((content) => {
+      expect(content).toMatch(/p-(2|2\.5|3)/);
+      expect(content).toMatch(/text-(base|lg|xl)/);
+    });
+  });
+});

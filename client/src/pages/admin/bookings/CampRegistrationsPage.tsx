@@ -113,74 +113,81 @@ export default function CampRegistrationsPage() {
       pageTitle="تسجيلات المخيمات"
       pageDescription="إدارة ومتابعة تسجيلات المخيمات الطبية"
     >
-      <div className="space-y-4" dir="rtl">
-        <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
+      <div
+        className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden"
+        dir="rtl"
+      >
+        <div className="shrink-0">
+          <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
+        </div>
 
         {/* Stats Cards — scoped to النطاق الزمني */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+        <div className="grid shrink-0 grid-cols-2 gap-2 md:grid-cols-4">
+          <Card className="rounded-lg">
+            <CardHeader className="p-2 pb-0">
+              <CardTitle className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <Users className="w-4 h-4" />
                 إجمالي التسجيلات
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
+            <CardContent className="p-2 pt-1">
+              <div className="text-lg font-bold">{stats.total}</div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+          <Card className="rounded-lg">
+            <CardHeader className="p-2 pb-0">
+              <CardTitle className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <Clock className="w-4 h-4" />
                 قيد الانتظار
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+            <CardContent className="p-2 pt-1">
+              <div className="text-lg font-bold text-yellow-600">{stats.pending}</div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+          <Card className="rounded-lg">
+            <CardHeader className="p-2 pb-0">
+              <CardTitle className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <CheckCircle2 className="w-4 h-4" />
                 مؤكد وفقاً للمسار
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.confirmed}</div>
-              <p className="text-xs text-muted-foreground mt-1">مؤكد + حضر + مكتمل</p>
+            <CardContent className="p-2 pt-1">
+              <div className="text-lg font-bold text-green-600">{stats.confirmed}</div>
+              <p className="mt-0.5 hidden text-[10px] text-muted-foreground sm:block">
+                مؤكد + حضر + مكتمل
+              </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+          <Card className="rounded-lg">
+            <CardHeader className="p-2 pb-0">
+              <CardTitle className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <XCircle className="w-4 h-4" />
                 ملغي
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.cancelled}</div>
+            <CardContent className="p-2 pt-1">
+              <div className="text-lg font-bold text-red-600">{stats.cancelled}</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Summary Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid shrink-0 grid-cols-1 gap-2 md:grid-cols-2">
           {statusData.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <Card className="rounded-lg">
+              <CardHeader className="p-2 pb-0">
+                <CardTitle className="flex items-center gap-1.5 text-sm">
                   <PieChartIcon className="w-5 h-5" />
                   توزيع الحالات
                 </CardTitle>
-                <CardDescription>حسب النطاق الزمني المحدد</CardDescription>
+                <CardDescription className="text-[11px]">حسب النطاق الزمني المحدد</CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+              <CardContent className="p-2">
+                <ResponsiveContainer width="100%" height={140}>
                   <PieChart>
                     <Pie
                       data={statusData}
@@ -205,16 +212,18 @@ export default function CampRegistrationsPage() {
           )}
 
           {dailyRegistrations.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <Card className="rounded-lg">
+              <CardHeader className="p-2 pb-0">
+                <CardTitle className="flex items-center gap-1.5 text-sm">
                   <Clock className="w-5 h-5" />
                   التسجيلات اليومية
                 </CardTitle>
-                <CardDescription>ضمن النطاق الزمني (حتى 30 نقطة)</CardDescription>
+                <CardDescription className="text-[11px]">
+                  ضمن النطاق الزمني (حتى 30 نقطة)
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+              <CardContent className="p-2">
+                <ResponsiveContainer width="100%" height={140}>
                   <BarChart data={dailyRegistrations}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                     <XAxis dataKey="date" tick={{ fill: '#6B7280' }} />
@@ -241,12 +250,14 @@ export default function CampRegistrationsPage() {
           )}
         </div>
 
-        <CampRegistrationsManagement
-          // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op
-          onPendingCountChange={() => {}}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-        />
+        <div className="min-h-0 flex-1">
+          <CampRegistrationsManagement
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op
+            onPendingCountChange={() => {}}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );

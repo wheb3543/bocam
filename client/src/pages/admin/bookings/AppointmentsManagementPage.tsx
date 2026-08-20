@@ -113,16 +113,23 @@ export default function AppointmentsManagementPage() {
 
   return (
     <DashboardLayout pageTitle="مواعيد الأطباء" pageDescription="إدارة ومتابعة مواعيد الأطباء">
-      <div className="space-y-4 sm:space-y-5 px-3 sm:px-4 md:px-6 py-3 sm:py-4" dir="rtl">
-        <DateRangePicker
-          dateRange={appointmentsHook.dateRange}
-          onDateRangeChange={appointmentsHook.setDateRange}
-        />
+      <div
+        className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden px-3 py-3 sm:px-4 sm:py-4"
+        dir="rtl"
+      >
+        <div className="shrink-0">
+          <DateRangePicker
+            dateRange={appointmentsHook.dateRange}
+            onDateRangeChange={appointmentsHook.setDateRange}
+          />
+        </div>
 
-        <AppointmentStatsCards stats={appointmentsHook.appointmentStats} />
+        <div className="shrink-0">
+          <AppointmentStatsCards stats={appointmentsHook.appointmentStats} />
+        </div>
 
         {/* Filters Section */}
-        <div className="space-y-3">
+        <div className="shrink-0 space-y-3">
           {/* Quick actions row */}
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex-1" />
@@ -229,7 +236,7 @@ export default function AppointmentsManagementPage() {
         </div>
 
         {/* Mobile Cards View */}
-        <div className="md:hidden space-y-3">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 md:hidden">
           {appointmentsHook.filteredAppointments.length === 0 ? (
             <EmptyState
               icon={CalendarOff}
@@ -249,326 +256,341 @@ export default function AppointmentsManagementPage() {
         </div>
 
         {/* Desktop Table View */}
-        <div className="hidden md:block rounded-lg border bg-card">
-          <div className="table-responsive">
-            <ResizableTable
-              frozenColumns={appointmentsHook.appointmentTable.frozenColumns.frozenColumns}
-              columnWidths={appointmentsHook.appointmentTable.columnWidths.columnWidths}
-              visibleColumnOrder={appointmentsHook.appointmentTable.columnOrder.filter(
-                (key) => appointmentsHook.appointmentTable.visibleColumns[key]
-              )}
-            >
-              <TableHeader>
-                <TableRow>
-                  {appointmentsHook.appointmentTable.columnOrder
-                    .filter((key) => appointmentsHook.appointmentTable.visibleColumns[key])
-                    .map((colKey) => {
-                      const col = appointmentsHook.appointmentColumns.find((c) => c.key === colKey);
-                      if (!col) {
-                        return null;
-                      }
-                      if (colKey === 'checkbox') {
+        <div className="hidden min-h-0 flex-1 flex-col overflow-hidden rounded-lg border bg-card md:flex">
+          <div className="min-h-0 flex-1 overflow-auto">
+            <div className="table-responsive">
+              <ResizableTable
+                frozenColumns={appointmentsHook.appointmentTable.frozenColumns.frozenColumns}
+                columnWidths={appointmentsHook.appointmentTable.columnWidths.columnWidths}
+                visibleColumnOrder={appointmentsHook.appointmentTable.columnOrder.filter(
+                  (key) => appointmentsHook.appointmentTable.visibleColumns[key]
+                )}
+              >
+                <TableHeader>
+                  <TableRow>
+                    {appointmentsHook.appointmentTable.columnOrder
+                      .filter((key) => appointmentsHook.appointmentTable.visibleColumns[key])
+                      .map((colKey) => {
+                        const col = appointmentsHook.appointmentColumns.find(
+                          (c) => c.key === colKey
+                        );
+                        if (!col) {
+                          return null;
+                        }
+                        if (colKey === 'checkbox') {
+                          return (
+                            <ResizableHeaderCell
+                              key={colKey}
+                              columnKey={colKey}
+                              width={40}
+                              minWidth={40}
+                              maxWidth={40}
+                              onResize={() => {
+                                // Intentional no-op for checkbox column
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  appointmentsHook.selectedAppointmentIds.length ===
+                                    appointmentsHook.filteredAppointments.length &&
+                                  appointmentsHook.filteredAppointments.length > 0
+                                }
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    appointmentsHook.setSelectedAppointmentIds(
+                                      appointmentsHook.filteredAppointments.map((a) => a.id)
+                                    );
+                                  } else {
+                                    appointmentsHook.setSelectedAppointmentIds([]);
+                                  }
+                                }}
+                                className="rounded border-border"
+                              />
+                            </ResizableHeaderCell>
+                          );
+                        }
+                        const widthConfig = getColumnWidth(colKey, col);
                         return (
                           <ResizableHeaderCell
                             key={colKey}
                             columnKey={colKey}
-                            width={40}
-                            minWidth={40}
-                            maxWidth={40}
-                            onResize={() => {
-                              // Intentional no-op for checkbox column
-                            }}
+                            width={
+                              appointmentsHook.appointmentTable.columnWidths.columnWidths[colKey] ||
+                              widthConfig.width
+                            }
+                            minWidth={widthConfig.min}
+                            maxWidth={widthConfig.max}
+                            onResize={appointmentsHook.appointmentTable.columnWidths.handleResize}
+                            sortDirection={
+                              appointmentsHook.appointmentTable.sortState.columnKey === colKey
+                                ? appointmentsHook.appointmentTable.sortState.direction
+                                : undefined
+                            }
+                            onSort={
+                              col.sortable !== false
+                                ? () => appointmentsHook.appointmentTable.handleSort(colKey)
+                                : undefined
+                            }
                           >
-                            <input
-                              type="checkbox"
-                              checked={
-                                appointmentsHook.selectedAppointmentIds.length ===
-                                  appointmentsHook.filteredAppointments.length &&
-                                appointmentsHook.filteredAppointments.length > 0
-                              }
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  appointmentsHook.setSelectedAppointmentIds(
-                                    appointmentsHook.filteredAppointments.map((a) => a.id)
-                                  );
-                                } else {
-                                  appointmentsHook.setSelectedAppointmentIds([]);
-                                }
-                              }}
-                              className="rounded border-border"
-                            />
+                            {col.label}
                           </ResizableHeaderCell>
                         );
-                      }
-                      const widthConfig = getColumnWidth(colKey, col);
-                      return (
-                        <ResizableHeaderCell
-                          key={colKey}
-                          columnKey={colKey}
-                          width={
-                            appointmentsHook.appointmentTable.columnWidths.columnWidths[colKey] ||
-                            widthConfig.width
-                          }
-                          minWidth={widthConfig.min}
-                          maxWidth={widthConfig.max}
-                          onResize={appointmentsHook.appointmentTable.columnWidths.handleResize}
-                          sortDirection={
-                            appointmentsHook.appointmentTable.sortState.columnKey === colKey
-                              ? appointmentsHook.appointmentTable.sortState.direction
-                              : undefined
-                          }
-                          onSort={
-                            col.sortable !== false
-                              ? () => appointmentsHook.appointmentTable.handleSort(colKey)
-                              : undefined
-                          }
-                        >
-                          {col.label}
-                        </ResizableHeaderCell>
-                      );
-                    })}
-                </TableRow>
-              </TableHeader>
-              <TableBody
-                className={
-                  !appointmentsHook.appointmentsLoading &&
-                  appointmentsHook.filteredAppointments.length > 0
-                    ? 'stagger-rows'
-                    : ''
-                }
-              >
-                {appointmentsHook.filteredAppointments.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={
-                        appointmentsHook.appointmentTable.columnOrder.filter(
-                          (key) => appointmentsHook.appointmentTable.visibleColumns[key]
-                        ).length
-                      }
-                      className="text-center py-8"
-                    >
-                      <EmptyState
-                        icon={CalendarOff}
-                        title="لا توجد مواعيد"
-                        description="لم يتم العثور على أي مواعيد في الفترة المحددة."
-                      />
-                    </TableCell>
+                      })}
                   </TableRow>
-                ) : (
-                  appointmentsHook.filteredAppointments.map((appointment) => (
-                    <TableRow key={appointment.id}>
-                      {appointmentsHook.appointmentTable.columnOrder
-                        .filter((key) => appointmentsHook.appointmentTable.visibleColumns[key])
-                        .map((colKey) => {
-                          if (colKey === 'checkbox') {
-                            return (
-                              <TableCell key={colKey}>
-                                <input
-                                  type="checkbox"
-                                  checked={appointmentsHook.selectedAppointmentIds.includes(
-                                    appointment.id
-                                  )}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      appointmentsHook.setSelectedAppointmentIds([
-                                        ...appointmentsHook.selectedAppointmentIds,
-                                        appointment.id,
-                                      ]);
-                                    } else {
-                                      appointmentsHook.setSelectedAppointmentIds(
-                                        appointmentsHook.selectedAppointmentIds.filter(
-                                          (id) => id !== appointment.id
-                                        )
-                                      );
-                                    }
-                                  }}
-                                  className="rounded border-border"
-                                />
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'receiptNumber') {
-                            return (
-                              <TableCell key={colKey}>
-                                <span className="text-sm font-mono">
-                                  {appointment.receiptNumber || '-'}
-                                </span>
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'date') {
-                            return (
-                              <TableCell key={colKey}>
-                                <span className="text-sm">
-                                  {formatRegistrationDate(appointment.createdAt)}
-                                </span>
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'name') {
-                            return (
-                              <TableCell key={colKey}>
-                                <span className="text-sm font-medium">
-                                  {appointment.fullName || '-'}
-                                </span>
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'phone') {
-                            return (
-                              <TableCell key={colKey}>
-                                <span className="text-sm">
-                                  {formatPhoneDisplay(appointment.phone)}
-                                </span>
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'doctor') {
-                            return (
-                              <TableCell key={colKey}>
-                                <span className="text-sm">{appointment.doctorName || '-'}</span>
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'specialty') {
-                            return (
-                              <TableCell key={colKey}>
-                                <span className="text-sm">
-                                  {appointment.doctorSpecialty || '-'}
-                                </span>
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'status') {
-                            return (
-                              <TableCell key={colKey}>
-                                <InlineStatusEditor
-                                  currentStatus={appointment.status}
-                                  statusOptions={[
-                                    {
-                                      value: 'pending',
-                                      label: 'قيد الانتظار',
-                                      color: 'bg-blue-500',
-                                    },
-                                    { value: 'confirmed', label: 'مؤكد', color: 'bg-emerald-500' },
-                                    { value: 'completed', label: 'مكتمل', color: 'bg-green-600' },
-                                    { value: 'cancelled', label: 'ملغي', color: 'bg-red-500' },
-                                  ]}
-                                  onSave={async (newStatus: string) => {
-                                    await appointmentsHook.updateAppointmentStatusMutation.mutateAsync(
-                                      {
-                                        id: appointment.id,
-                                        status: newStatus as
-                                          'pending' | 'confirmed' | 'completed' | 'cancelled',
-                                      }
-                                    );
-                                  }}
-                                />
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'source') {
-                            return (
-                              <TableCell key={colKey}>
-                                {appointment.source && <SourceBadge source={appointment.source} />}
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'comments') {
-                            return (
-                              <TableCell key={colKey}>
-                                <CommentCount entityId={appointment.id} entityType="appointment" />
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'tasks') {
-                            return (
-                              <TableCell key={colKey}>
-                                <TaskCount entityId={appointment.id} entityType="appointment" />
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'whatsapp') {
-                            return (
-                              <TableCell key={colKey}>
-                                <WhatsAppStatusBadge
-                                  entityId={appointment.id}
-                                  entityType="appointment"
-                                />
-                              </TableCell>
-                            );
-                          }
-                          if (colKey === 'actions') {
-                            return (
-                              <TableCell key={colKey}>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => appointmentsHook.handleViewDetails(appointment)}
-                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                >
-                                  عرض التفاصيل
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>حذف الموعد</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        هل أنت متأكد من حذف هذا الموعد؟ لا يمكن التراجع عن هذا
-                                        الإجراء.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() =>
-                                          appointmentsHook.handleDeleteAppointment(appointment.id)
-                                        }
-                                        className="bg-red-600 hover:bg-red-700"
-                                      >
-                                        حذف
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </TableCell>
-                            );
-                          }
-                          return (
-                            <TableCell key={colKey}>
-                              {((appointment as Record<string, string | number | Date | null>)[
-                                colKey
-                              ] as string) || '-'}
-                            </TableCell>
-                          );
-                        })}
+                </TableHeader>
+                <TableBody
+                  className={
+                    !appointmentsHook.appointmentsLoading &&
+                    appointmentsHook.filteredAppointments.length > 0
+                      ? 'stagger-rows'
+                      : ''
+                  }
+                >
+                  {appointmentsHook.filteredAppointments.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={
+                          appointmentsHook.appointmentTable.columnOrder.filter(
+                            (key) => appointmentsHook.appointmentTable.visibleColumns[key]
+                          ).length
+                        }
+                        className="text-center py-8"
+                      >
+                        <EmptyState
+                          icon={CalendarOff}
+                          title="لا توجد مواعيد"
+                          description="لم يتم العثور على أي مواعيد في الفترة المحددة."
+                        />
+                      </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </ResizableTable>
+                  ) : (
+                    appointmentsHook.filteredAppointments.map((appointment) => (
+                      <TableRow key={appointment.id}>
+                        {appointmentsHook.appointmentTable.columnOrder
+                          .filter((key) => appointmentsHook.appointmentTable.visibleColumns[key])
+                          .map((colKey) => {
+                            if (colKey === 'checkbox') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <input
+                                    type="checkbox"
+                                    checked={appointmentsHook.selectedAppointmentIds.includes(
+                                      appointment.id
+                                    )}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        appointmentsHook.setSelectedAppointmentIds([
+                                          ...appointmentsHook.selectedAppointmentIds,
+                                          appointment.id,
+                                        ]);
+                                      } else {
+                                        appointmentsHook.setSelectedAppointmentIds(
+                                          appointmentsHook.selectedAppointmentIds.filter(
+                                            (id) => id !== appointment.id
+                                          )
+                                        );
+                                      }
+                                    }}
+                                    className="rounded border-border"
+                                  />
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'receiptNumber') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <span className="text-sm font-mono">
+                                    {appointment.receiptNumber || '-'}
+                                  </span>
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'date') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <span className="text-sm">
+                                    {formatRegistrationDate(appointment.createdAt)}
+                                  </span>
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'name') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <span className="text-sm font-medium">
+                                    {appointment.fullName || '-'}
+                                  </span>
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'phone') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <span className="text-sm">
+                                    {formatPhoneDisplay(appointment.phone)}
+                                  </span>
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'doctor') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <span className="text-sm">{appointment.doctorName || '-'}</span>
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'specialty') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <span className="text-sm">
+                                    {appointment.doctorSpecialty || '-'}
+                                  </span>
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'status') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <InlineStatusEditor
+                                    currentStatus={appointment.status}
+                                    statusOptions={[
+                                      {
+                                        value: 'pending',
+                                        label: 'قيد الانتظار',
+                                        color: 'bg-blue-500',
+                                      },
+                                      {
+                                        value: 'confirmed',
+                                        label: 'مؤكد',
+                                        color: 'bg-emerald-500',
+                                      },
+                                      { value: 'completed', label: 'مكتمل', color: 'bg-green-600' },
+                                      { value: 'cancelled', label: 'ملغي', color: 'bg-red-500' },
+                                    ]}
+                                    onSave={async (newStatus: string) => {
+                                      await appointmentsHook.updateAppointmentStatusMutation.mutateAsync(
+                                        {
+                                          id: appointment.id,
+                                          status: newStatus as
+                                            'pending' | 'confirmed' | 'completed' | 'cancelled',
+                                        }
+                                      );
+                                    }}
+                                  />
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'source') {
+                              return (
+                                <TableCell key={colKey}>
+                                  {appointment.source && (
+                                    <SourceBadge source={appointment.source} />
+                                  )}
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'comments') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <CommentCount
+                                    entityId={appointment.id}
+                                    entityType="appointment"
+                                  />
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'tasks') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <TaskCount entityId={appointment.id} entityType="appointment" />
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'whatsapp') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <WhatsAppStatusBadge
+                                    entityId={appointment.id}
+                                    entityType="appointment"
+                                  />
+                                </TableCell>
+                              );
+                            }
+                            if (colKey === 'actions') {
+                              return (
+                                <TableCell key={colKey}>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => appointmentsHook.handleViewDetails(appointment)}
+                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                  >
+                                    عرض التفاصيل
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>حذف الموعد</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          هل أنت متأكد من حذف هذا الموعد؟ لا يمكن التراجع عن هذا
+                                          الإجراء.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() =>
+                                            appointmentsHook.handleDeleteAppointment(appointment.id)
+                                          }
+                                          className="bg-red-600 hover:bg-red-700"
+                                        >
+                                          حذف
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </TableCell>
+                              );
+                            }
+                            return (
+                              <TableCell key={colKey}>
+                                {((appointment as Record<string, string | number | Date | null>)[
+                                  colKey
+                                ] as string) || '-'}
+                              </TableCell>
+                            );
+                          })}
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </ResizableTable>
+            </div>
           </div>
         </div>
 
         {/* Pagination */}
-        <Pagination
-          currentPage={appointmentsHook.appointmentPage}
-          totalPages={appointmentsHook.appointmentsData?.totalPages || 1}
-          onPageChange={(page) => {
-            appointmentsHook.setAppointmentPage(page);
-          }}
-          pageSize={appointmentsHook.appointmentPageSize}
-          onPageSizeChange={appointmentsHook.setAppointmentPageSize}
-        />
+        <div className="shrink-0">
+          <Pagination
+            currentPage={appointmentsHook.appointmentPage}
+            totalPages={appointmentsHook.appointmentsData?.totalPages || 1}
+            onPageChange={(page) => {
+              appointmentsHook.setAppointmentPage(page);
+            }}
+            pageSize={appointmentsHook.appointmentPageSize}
+            onPageSizeChange={appointmentsHook.setAppointmentPageSize}
+          />
+        </div>
 
         {/* Status Update Dialog */}
         <Dialog

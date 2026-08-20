@@ -140,23 +140,25 @@ export default function OfferLeadsManagement({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       {/* Statistics Cards */}
-      <OfferStatsCards
-        stats={
-          offerHook.stats
-            ? {
-                total: offerHook.stats.total || 0,
-                new: offerHook.stats.pending || 0,
-                contacted: offerHook.stats.contacted || 0,
-                booked: offerHook.stats.confirmed || 0,
-              }
-            : null
-        }
-      />
+      <div className="shrink-0">
+        <OfferStatsCards
+          stats={
+            offerHook.stats
+              ? {
+                  total: offerHook.stats.total || 0,
+                  new: offerHook.stats.pending || 0,
+                  contacted: offerHook.stats.contacted || 0,
+                  booked: offerHook.stats.confirmed || 0,
+                }
+              : null
+          }
+        />
+      </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 items-center">
+      <div className="flex shrink-0 flex-wrap items-center gap-3">
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -218,7 +220,7 @@ export default function OfferLeadsManagement({
 
       {/* Bulk Actions */}
       {offerHook.selectedIds.length > 0 && (
-        <div className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg">
+        <div className="flex shrink-0 items-center justify-between rounded-lg border border-purple-200 bg-purple-50 p-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">
               تم تحديد {offerHook.selectedIds.length} من {offerHook.offerLeads.length}
@@ -276,236 +278,245 @@ export default function OfferLeadsManagement({
       )}
 
       {/* Table */}
-      <div className="hidden md:block rounded-lg border bg-card">
-        <ResizableTable
-          frozenColumns={offerHook.offerTable.frozenColumns.frozenColumns}
-          columnWidths={offerHook.offerTable.columnWidths.columnWidths}
-          visibleColumnOrder={offerHook.offerTable.columnOrder.filter(
-            (key) => offerHook.offerTable.visibleColumns[key]
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              {offerHook.offerTable.columnOrder
-                .filter((colKey) => offerHook.offerTable.visibleColumns[colKey])
-                .map((colKey) => {
-                  const col = offerHook.offerLeadColumns.find((c) => c.key === colKey);
-                  if (!col) {
-                    return null;
-                  }
-                  if (colKey === 'checkbox') {
+      <div className="hidden min-h-0 flex-1 overflow-hidden rounded-lg border bg-card md:block">
+        <div className="h-full overflow-auto">
+          <ResizableTable
+            frozenColumns={offerHook.offerTable.frozenColumns.frozenColumns}
+            columnWidths={offerHook.offerTable.columnWidths.columnWidths}
+            visibleColumnOrder={offerHook.offerTable.columnOrder.filter(
+              (key) => offerHook.offerTable.visibleColumns[key]
+            )}
+          >
+            <TableHeader>
+              <TableRow>
+                {offerHook.offerTable.columnOrder
+                  .filter((colKey) => offerHook.offerTable.visibleColumns[colKey])
+                  .map((colKey) => {
+                    const col = offerHook.offerLeadColumns.find((c) => c.key === colKey);
+                    if (!col) {
+                      return null;
+                    }
+                    if (colKey === 'checkbox') {
+                      return (
+                        <ResizableHeaderCell
+                          key={colKey}
+                          columnKey={colKey}
+                          width={40}
+                          minWidth={40}
+                          maxWidth={40}
+                          onResize={() => undefined}
+                        >
+                          <Checkbox
+                            checked={
+                              offerHook.selectedIds.length === offerHook.offerLeads.length &&
+                              offerHook.offerLeads.length > 0
+                            }
+                            onCheckedChange={offerHook.handleSelectAll}
+                          />
+                        </ResizableHeaderCell>
+                      );
+                    }
+                    const widthConfig = col.minWidth
+                      ? { min: col.minWidth, max: col.maxWidth }
+                      : { min: 80, max: 500 };
                     return (
                       <ResizableHeaderCell
                         key={colKey}
                         columnKey={colKey}
-                        width={40}
-                        minWidth={40}
-                        maxWidth={40}
+                        width={offerHook.offerTable.columnWidths.columnWidths[colKey] || 100}
+                        minWidth={widthConfig.min}
+                        maxWidth={widthConfig.max}
                         onResize={() => undefined}
+                        {...offerHook.offerTable.getSortProps(colKey)}
                       >
-                        <Checkbox
-                          checked={
-                            offerHook.selectedIds.length === offerHook.offerLeads.length &&
-                            offerHook.offerLeads.length > 0
-                          }
-                          onCheckedChange={offerHook.handleSelectAll}
-                        />
+                        {col.label}
                       </ResizableHeaderCell>
                     );
-                  }
-                  const widthConfig = col.minWidth
-                    ? { min: col.minWidth, max: col.maxWidth }
-                    : { min: 80, max: 500 };
-                  return (
-                    <ResizableHeaderCell
-                      key={colKey}
-                      columnKey={colKey}
-                      width={offerHook.offerTable.columnWidths.columnWidths[colKey] || 100}
-                      minWidth={widthConfig.min}
-                      maxWidth={widthConfig.max}
-                      onResize={() => undefined}
-                      {...offerHook.offerTable.getSortProps(colKey)}
-                    >
-                      {col.label}
-                    </ResizableHeaderCell>
-                  );
-                })}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {offerHook.offerLeads.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={offerHook.offerLeadColumns.length} className="text-center py-8">
-                  <EmptyState
-                    icon={Users}
-                    title="لا توجد حجوزات"
-                    description="لم يتم العثور على حجوزات تطابق البحث"
-                  />
-                </TableCell>
+                  })}
               </TableRow>
-            ) : (
-              offerHook.offerLeads.map((lead) => (
-                <TableRow key={lead.id}>
-                  {offerHook.offerTable.columnOrder
-                    .filter((colKey) => offerHook.offerTable.visibleColumns[colKey])
-                    .map((colKey) => {
-                      const col = offerHook.offerLeadColumns.find((c) => c.key === colKey);
-                      if (!col) {
-                        return null;
-                      }
-                      if (colKey === 'checkbox') {
-                        return (
-                          <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <Checkbox
-                              checked={offerHook.selectedIds.includes(lead.id)}
-                              onCheckedChange={() => offerHook.handleSelectOne(lead.id)}
-                            />
-                          </FrozenTableCell>
-                        );
-                      }
-                      if (colKey === 'receiptNumber') {
-                        return (
-                          <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <span className="font-mono text-sm">{lead.receiptNumber || '-'}</span>
-                          </FrozenTableCell>
-                        );
-                      }
-                      if (colKey === 'name') {
-                        return (
-                          <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <div className="font-medium">{lead.fullName}</div>
-                          </FrozenTableCell>
-                        );
-                      }
-                      if (colKey === 'phone') {
-                        return (
-                          <FrozenTableCell key={colKey} columnKey={colKey}>
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <span dir="ltr">{formatPhoneDisplay(lead.phone)}</span>
-                            </div>
-                          </FrozenTableCell>
-                        );
-                      }
-                      if (colKey === 'email') {
-                        return (
-                          <TableCell key={colKey}>
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm">{lead.email || '-'}</span>
-                            </div>
-                          </TableCell>
-                        );
-                      }
-                      if (colKey === 'offer') {
-                        return (
-                          <TableCell key={colKey}>
-                            <div className="flex items-center gap-2">
-                              <Tag className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm">{lead.offerTitle || '-'}</span>
-                            </div>
-                          </TableCell>
-                        );
-                      }
-                      if (colKey === 'status') {
-                        return (
-                          <TableCell key={colKey}>
-                            <InlineStatusEditor
-                              currentStatus={lead.status}
-                              statusOptions={[
-                                { value: 'pending', label: 'قيد الانتظار', color: 'bg-blue-500' },
-                                { value: 'contacted', label: 'تم التواصل', color: 'bg-yellow-500' },
-                                { value: 'no_answer', label: 'لم يرد', color: 'bg-gray-500' },
-                                { value: 'confirmed', label: 'مؤكد', color: 'bg-emerald-500' },
-                                { value: 'attended', label: 'حضر', color: 'bg-teal-500' },
-                                { value: 'completed', label: 'مكتمل', color: 'bg-green-600' },
-                                { value: 'cancelled', label: 'ملغي', color: 'bg-red-500' },
-                              ]}
-                              onSave={async (newStatus: string) => {
-                                await offerHook.updateStatusMutation.mutateAsync({
-                                  id: lead.id,
-                                  status: newStatus as
-                                    | 'pending'
-                                    | 'contacted'
-                                    | 'no_answer'
-                                    | 'confirmed'
-                                    | 'attended'
-                                    | 'completed'
-                                    | 'cancelled',
-                                });
-                              }}
-                            />
-                          </TableCell>
-                        );
-                      }
-                      if (colKey === 'source') {
-                        return (
-                          <TableCell key={colKey}>
-                            {lead.source && <SourceBadge source={lead.source} />}
-                          </TableCell>
-                        );
-                      }
-                      if (colKey === 'date') {
-                        return (
-                          <TableCell key={colKey}>
-                            <span className="text-sm">
-                              {formatRegistrationDate(lead.createdAt)}
-                            </span>
-                          </TableCell>
-                        );
-                      }
-                      if (colKey === 'comments') {
-                        return (
-                          <TableCell key={colKey}>
-                            <CommentCount entityId={lead.id} entityType="offerLead" />
-                          </TableCell>
-                        );
-                      }
-                      if (colKey === 'tasks') {
-                        return (
-                          <TableCell key={colKey}>
-                            <TaskCount entityId={lead.id} entityType="offerLead" />
-                          </TableCell>
-                        );
-                      }
-                      if (colKey === 'whatsapp') {
-                        return (
-                          <TableCell key={colKey}>
-                            <WhatsAppStatusBadge entityId={lead.id} entityType="offer_lead" />
-                          </TableCell>
-                        );
-                      }
-                      if (colKey === 'actions') {
-                        return (
-                          <TableCell key={colKey}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(lead.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        );
-                      }
-                      return (
-                        <TableCell key={colKey}>
-                          {((lead as Record<string, string | number | Date | null>)[
-                            colKey
-                          ] as string) || '-'}
-                        </TableCell>
-                      );
-                    })}
+            </TableHeader>
+            <TableBody>
+              {offerHook.offerLeads.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={offerHook.offerLeadColumns.length}
+                    className="text-center py-8"
+                  >
+                    <EmptyState
+                      icon={Users}
+                      title="لا توجد حجوزات"
+                      description="لم يتم العثور على حجوزات تطابق البحث"
+                    />
+                  </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </ResizableTable>
+              ) : (
+                offerHook.offerLeads.map((lead) => (
+                  <TableRow key={lead.id}>
+                    {offerHook.offerTable.columnOrder
+                      .filter((colKey) => offerHook.offerTable.visibleColumns[colKey])
+                      .map((colKey) => {
+                        const col = offerHook.offerLeadColumns.find((c) => c.key === colKey);
+                        if (!col) {
+                          return null;
+                        }
+                        if (colKey === 'checkbox') {
+                          return (
+                            <FrozenTableCell key={colKey} columnKey={colKey}>
+                              <Checkbox
+                                checked={offerHook.selectedIds.includes(lead.id)}
+                                onCheckedChange={() => offerHook.handleSelectOne(lead.id)}
+                              />
+                            </FrozenTableCell>
+                          );
+                        }
+                        if (colKey === 'receiptNumber') {
+                          return (
+                            <FrozenTableCell key={colKey} columnKey={colKey}>
+                              <span className="font-mono text-sm">{lead.receiptNumber || '-'}</span>
+                            </FrozenTableCell>
+                          );
+                        }
+                        if (colKey === 'name') {
+                          return (
+                            <FrozenTableCell key={colKey} columnKey={colKey}>
+                              <div className="font-medium">{lead.fullName}</div>
+                            </FrozenTableCell>
+                          );
+                        }
+                        if (colKey === 'phone') {
+                          return (
+                            <FrozenTableCell key={colKey} columnKey={colKey}>
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-4 w-4 text-muted-foreground" />
+                                <span dir="ltr">{formatPhoneDisplay(lead.phone)}</span>
+                              </div>
+                            </FrozenTableCell>
+                          );
+                        }
+                        if (colKey === 'email') {
+                          return (
+                            <TableCell key={colKey}>
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm">{lead.email || '-'}</span>
+                              </div>
+                            </TableCell>
+                          );
+                        }
+                        if (colKey === 'offer') {
+                          return (
+                            <TableCell key={colKey}>
+                              <div className="flex items-center gap-2">
+                                <Tag className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm">{lead.offerTitle || '-'}</span>
+                              </div>
+                            </TableCell>
+                          );
+                        }
+                        if (colKey === 'status') {
+                          return (
+                            <TableCell key={colKey}>
+                              <InlineStatusEditor
+                                currentStatus={lead.status}
+                                statusOptions={[
+                                  { value: 'pending', label: 'قيد الانتظار', color: 'bg-blue-500' },
+                                  {
+                                    value: 'contacted',
+                                    label: 'تم التواصل',
+                                    color: 'bg-yellow-500',
+                                  },
+                                  { value: 'no_answer', label: 'لم يرد', color: 'bg-gray-500' },
+                                  { value: 'confirmed', label: 'مؤكد', color: 'bg-emerald-500' },
+                                  { value: 'attended', label: 'حضر', color: 'bg-teal-500' },
+                                  { value: 'completed', label: 'مكتمل', color: 'bg-green-600' },
+                                  { value: 'cancelled', label: 'ملغي', color: 'bg-red-500' },
+                                ]}
+                                onSave={async (newStatus: string) => {
+                                  await offerHook.updateStatusMutation.mutateAsync({
+                                    id: lead.id,
+                                    status: newStatus as
+                                      | 'pending'
+                                      | 'contacted'
+                                      | 'no_answer'
+                                      | 'confirmed'
+                                      | 'attended'
+                                      | 'completed'
+                                      | 'cancelled',
+                                  });
+                                }}
+                              />
+                            </TableCell>
+                          );
+                        }
+                        if (colKey === 'source') {
+                          return (
+                            <TableCell key={colKey}>
+                              {lead.source && <SourceBadge source={lead.source} />}
+                            </TableCell>
+                          );
+                        }
+                        if (colKey === 'date') {
+                          return (
+                            <TableCell key={colKey}>
+                              <span className="text-sm">
+                                {formatRegistrationDate(lead.createdAt)}
+                              </span>
+                            </TableCell>
+                          );
+                        }
+                        if (colKey === 'comments') {
+                          return (
+                            <TableCell key={colKey}>
+                              <CommentCount entityId={lead.id} entityType="offerLead" />
+                            </TableCell>
+                          );
+                        }
+                        if (colKey === 'tasks') {
+                          return (
+                            <TableCell key={colKey}>
+                              <TaskCount entityId={lead.id} entityType="offerLead" />
+                            </TableCell>
+                          );
+                        }
+                        if (colKey === 'whatsapp') {
+                          return (
+                            <TableCell key={colKey}>
+                              <WhatsAppStatusBadge entityId={lead.id} entityType="offer_lead" />
+                            </TableCell>
+                          );
+                        }
+                        if (colKey === 'actions') {
+                          return (
+                            <TableCell key={colKey}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(lead.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          );
+                        }
+                        return (
+                          <TableCell key={colKey}>
+                            {((lead as Record<string, string | number | Date | null>)[
+                              colKey
+                            ] as string) || '-'}
+                          </TableCell>
+                        );
+                      })}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </ResizableTable>
+        </div>
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden space-y-4">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1 md:hidden">
         {offerHook.offerLeads.length === 0 ? (
           <EmptyState
             icon={Users}
@@ -527,16 +538,22 @@ export default function OfferLeadsManagement({
       </div>
 
       {/* Pagination */}
-      <Pagination
-        currentPage={offerHook.offerPage}
-        totalPages={offerHook.offerLeadsData?.totalPages || 1}
-        onPageChange={(page) => {
-          offerHook.setOfferPage(page);
-          offerHook.setSelectedIds([]);
-        }}
-        pageSize={offerHook.offerPageSize}
-        onPageSizeChange={offerHook.setOfferPageSize}
-      />
+      <div className="shrink-0">
+        <Pagination
+          currentPage={offerHook.offerPage}
+          totalPages={offerHook.offerLeadsData?.totalPages || 1}
+          onPageChange={(page) => {
+            offerHook.setOfferPage(page);
+            offerHook.setSelectedIds([]);
+          }}
+          pageSize={offerHook.offerPageSize}
+          onPageSizeChange={(size) => {
+            offerHook.setOfferPageSize(size);
+            offerHook.setOfferPage(1);
+            offerHook.setSelectedIds([]);
+          }}
+        />
+      </div>
 
       {/* Status Update Dialog */}
       <Dialog open={offerHook.statusDialogOpen} onOpenChange={offerHook.setStatusDialogOpen}>

@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
@@ -44,7 +43,9 @@ interface LeadsTabProps {
 
 // Sanitize lead data to prevent JSON parsing errors
 const sanitizeLead = (lead: Lead | unknown): Lead | null => {
-  if (!lead) {return null;}
+  if (!lead) {
+    return null;
+  }
   const sanitized: Lead = { ...lead } as Lead;
   Object.keys(sanitized).forEach((key) => {
     const value = sanitized[key as keyof Lead];
@@ -71,7 +72,9 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
   const setLeadsSourceFilter = leadsFilter.filters.setSourceFilter;
 
   const filteredLeads = useMemo(() => {
-    if (!unifiedLeads) {return [];}
+    if (!unifiedLeads) {
+      return [];
+    }
 
     let filtered = unifiedLeads as unknown as UnifiedLead[];
 
@@ -90,9 +93,13 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       filtered = filtered.filter((lead: UnifiedLead) => {
-        if (!lead?.createdAt) {return false;}
+        if (!lead?.createdAt) {
+          return false;
+        }
         const leadDate = new Date(lead.createdAt);
-        if (leadsDateFilter === 'today') {return leadDate >= today;}
+        if (leadsDateFilter === 'today') {
+          return leadDate >= today;
+        }
         if (leadsDateFilter === 'week') {
           const weekAgo = new Date(today);
           weekAgo.setDate(weekAgo.getDate() - 7);
@@ -108,11 +115,15 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
     }
 
     if (leadsStatusFilter && leadsStatusFilter.length > 0) {
-      filtered = filtered.filter((lead: UnifiedLead) => lead.status && leadsStatusFilter.includes(lead.status));
+      filtered = filtered.filter(
+        (lead: UnifiedLead) => lead.status && leadsStatusFilter.includes(lead.status)
+      );
     }
 
     if (leadsSourceFilter && leadsSourceFilter.length > 0) {
-      filtered = filtered.filter((lead: UnifiedLead) => lead.source && leadsSourceFilter.includes(lead.source));
+      filtered = filtered.filter(
+        (lead: UnifiedLead) => lead.source && leadsSourceFilter.includes(lead.source)
+      );
     }
 
     return filtered;
@@ -123,22 +134,26 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
       toast.error('لا توجد بيانات للتصدير');
       return;
     }
-    const formattedData = formatLeadsForExport(filteredLeads as unknown as Record<string, unknown>[]);
+    const formattedData = formatLeadsForExport(
+      filteredLeads as unknown as Record<string, unknown>[]
+    );
     exportToExcel(formattedData, 'تسجيلات_العملاء');
     toast.success('تم تصدير البيانات بنجاح');
   };
 
   return (
-    <div className="space-y-4">
-      <LeadStatsCards stats={stats} />
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="shrink-0">
+        <LeadStatsCards stats={stats} />
+      </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="min-h-0 flex-1 flex flex-col">
+        <CardHeader className="shrink-0">
           <CardTitle>تسجيلات العملاء</CardTitle>
           <CardDescription>إدارة ومتابعة تسجيلات العملاء</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-3">
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-3">
+          <div className="shrink-0 flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Button
                 variant={
@@ -221,7 +236,7 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
           </div>
 
           {/* Mobile Cards View */}
-          <div className="md:hidden space-y-4">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1 md:hidden">
             {leadsLoading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -235,7 +250,9 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
                   lead={lead}
                   onUpdateStatus={(lead) => {
                     const sanitized = sanitizeLead(lead);
-                    if (sanitized) {onOpenStatusDialog(sanitized);}
+                    if (sanitized) {
+                      onOpenStatusDialog(sanitized);
+                    }
                   }}
                   onWhatsApp={(phone) => {
                     window.open(`https://wa.me/${String(phone).replace(/\D/g, '')}`, '_blank');
@@ -246,113 +263,122 @@ export default function LeadsTab({ leadsFilter, onOpenStatusDialog, pendingCount
           </div>
 
           {/* Desktop Table View */}
-          <div className="table-responsive">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>الاسم</TableHead>
-                  <TableHead>الهاتف</TableHead>
-                  <TableHead>البريد الإلكتروني</TableHead>
-                  <TableHead>المصدر</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>التاريخ</TableHead>
-                  <TableHead>الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody
-                className={!leadsLoading && filteredLeads.length > 0 ? 'stagger-rows' : ''}
-              >
-                {leadsLoading ? (
+          <div className="hidden min-h-0 flex-1 overflow-auto md:block">
+            <div className="table-responsive">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                    </TableCell>
+                    <TableHead>الاسم</TableHead>
+                    <TableHead>الهاتف</TableHead>
+                    <TableHead>البريد الإلكتروني</TableHead>
+                    <TableHead>المصدر</TableHead>
+                    <TableHead>الحالة</TableHead>
+                    <TableHead>التاريخ</TableHead>
+                    <TableHead>الإجراءات</TableHead>
                   </TableRow>
-                ) : filteredLeads.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      لا توجد تسجيلات
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredLeads.map((lead: UnifiedLead) => (
-                    <TableRow
-                      key={`lead-${lead.id}`}
-                      className={lead.status === 'pending' ? 'bg-red-50 hover:bg-red-100' : ''}
-                    >
-                      <TableCell className="font-medium">{lead.fullName}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono">{formatPhoneDisplay(lead.phone)}</span>
-                          <a
-                            href={`tel:${formatPhoneDisplay(lead.phone)}`}
-                            className="text-primary hover:underline"
-                          >
-                            <Phone className="h-4 w-4" />
-                          </a>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {lead.email ? (
-                          <a href={`mailto:${lead.email}`} className="text-primary hover:underline">
-                            {lead.email}
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {lead.source ? (
-                          <Badge
-                            variant="outline"
-                            className="text-xs font-medium"
-                            style={{
-                              backgroundColor: SOURCE_COLORS[lead.source]
-                                ? `${SOURCE_COLORS[lead.source]}15`
-                                : undefined,
-                              borderColor: SOURCE_COLORS[lead.source] || undefined,
-                              color: SOURCE_COLORS[lead.source] || undefined,
-                            }}
-                          >
-                            {SOURCE_LABELS[lead.source] || lead.source}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={(() => {
-                          if (lead.status && lead.status in statusColors) {
-                            return statusColors[lead.status];
-                          }
-                          return '';
-                        })()}>
-                          {(() => {
-                            if (lead.status && lead.status in statusLabels) {
-                              return statusLabels[lead.status];
-                            }
-                            return lead.status;
-                          })()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{formatDate(lead.createdAt)}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const sanitized = sanitizeLead(lead);
-                            if (sanitized) {onOpenStatusDialog(sanitized);}
-                          }}
-                        >
-                          تحديث الحالة
-                        </Button>
+                </TableHeader>
+                <TableBody
+                  className={!leadsLoading && filteredLeads.length > 0 ? 'stagger-rows' : ''}
+                >
+                  {leadsLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : filteredLeads.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        لا توجد تسجيلات
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredLeads.map((lead: UnifiedLead) => (
+                      <TableRow
+                        key={`lead-${lead.id}`}
+                        className={lead.status === 'pending' ? 'bg-red-50 hover:bg-red-100' : ''}
+                      >
+                        <TableCell className="font-medium">{lead.fullName}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono">{formatPhoneDisplay(lead.phone)}</span>
+                            <a
+                              href={`tel:${formatPhoneDisplay(lead.phone)}`}
+                              className="text-primary hover:underline"
+                            >
+                              <Phone className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {lead.email ? (
+                            <a
+                              href={`mailto:${lead.email}`}
+                              className="text-primary hover:underline"
+                            >
+                              {lead.email}
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {lead.source ? (
+                            <Badge
+                              variant="outline"
+                              className="text-xs font-medium"
+                              style={{
+                                backgroundColor: SOURCE_COLORS[lead.source]
+                                  ? `${SOURCE_COLORS[lead.source]}15`
+                                  : undefined,
+                                borderColor: SOURCE_COLORS[lead.source] || undefined,
+                                color: SOURCE_COLORS[lead.source] || undefined,
+                              }}
+                            >
+                              {SOURCE_LABELS[lead.source] || lead.source}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={(() => {
+                              if (lead.status && lead.status in statusColors) {
+                                return statusColors[lead.status];
+                              }
+                              return '';
+                            })()}
+                          >
+                            {(() => {
+                              if (lead.status && lead.status in statusLabels) {
+                                return statusLabels[lead.status];
+                              }
+                              return lead.status;
+                            })()}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatDate(lead.createdAt)}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const sanitized = sanitizeLead(lead);
+                              if (sanitized) {
+                                onOpenStatusDialog(sanitized);
+                              }
+                            }}
+                          >
+                            تحديث الحالة
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>

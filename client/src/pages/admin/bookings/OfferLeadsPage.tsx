@@ -16,10 +16,17 @@ export default function OfferLeadsPage() {
       pageTitle="عروض العملاء"
       pageDescription="إدارة ومتابعة عروض العملاء المحتملين"
     >
-      <div className="space-y-4" dir="rtl">
-        <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
-        {/* eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op */}
-        <OfferLeadsManagement onPendingCountChange={() => {}} dateRange={dateRange} />
+      <div
+        className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden"
+        dir="rtl"
+      >
+        <div className="shrink-0">
+          <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
+        </div>
+        <div className="min-h-0 flex-1">
+          {/* eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentional no-op */}
+          <OfferLeadsManagement onPendingCountChange={() => {}} dateRange={dateRange} />
+        </div>
       </div>
     </DashboardLayout>
   );
