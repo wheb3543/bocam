@@ -17,17 +17,22 @@ export default function CampaignsPage() {
       pageTitle="إدارة الحملات والمشاريع"
       pageDescription="إدارة شاملة للحملات التسويقية والمشاريع"
     >
-      <div className="space-y-4 md:space-y-6" dir="rtl">
+      <div
+        className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden py-3 sm:py-4"
+        dir="rtl"
+      >
         {/* Overview Cards */}
-        <CampaignOverviewCards
-          overview={campaignManagement.overview}
-          isLoading={campaignManagement.loadingOverview}
-          campaigns={campaignManagement.campaigns || []}
-        />
+        <div className="shrink-0">
+          <CampaignOverviewCards
+            overview={campaignManagement.overview}
+            isLoading={campaignManagement.loadingOverview}
+            campaigns={campaignManagement.campaigns || []}
+          />
+        </div>
 
         {/* Filters and Actions */}
-        <Card>
-          <CardHeader>
+        <Card className="flex min-h-0 flex-1 flex-col">
+          <CardHeader className="shrink-0 py-3">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <CardTitle className="flex items-center gap-2">
@@ -59,29 +64,33 @@ export default function CampaignsPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex min-h-0 flex-1 flex-col gap-3 pt-0">
             {/* Filters */}
-            <CampaignFilters
-              searchQuery={campaignManagement.searchQuery}
-              onSearchChange={campaignManagement.setSearchQuery}
-              onStatusFilterChange={campaignManagement.setStatusFilter}
-              onTypeFilterChange={campaignManagement.setTypeFilter}
-              statusFilter={campaignManagement.statusFilter}
-              typeFilter={campaignManagement.typeFilter}
-            />
+            <div className="shrink-0">
+              <CampaignFilters
+                searchQuery={campaignManagement.searchQuery}
+                onSearchChange={campaignManagement.setSearchQuery}
+                onStatusFilterChange={campaignManagement.setStatusFilter}
+                onTypeFilterChange={campaignManagement.setTypeFilter}
+                statusFilter={campaignManagement.statusFilter}
+                typeFilter={campaignManagement.typeFilter}
+              />
+            </div>
 
             {/* Table */}
-            <CampaignTable
-              campaigns={campaignManagement.campaigns}
-              isLoading={campaignManagement.loadingCampaigns}
-              onView={campaignManagement.openViewDialog}
-              onEdit={campaignManagement.openEditDialog}
-              onDelete={campaignManagement.handleDeleteCampaign}
-              onCreate={() => {
-                campaignManagement.resetForm();
-                campaignManagement.setIsCreateDialogOpen(true);
-              }}
-            />
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <CampaignTable
+                campaigns={campaignManagement.campaigns}
+                isLoading={campaignManagement.loadingCampaigns}
+                onView={campaignManagement.openViewDialog}
+                onEdit={campaignManagement.openEditDialog}
+                onDelete={campaignManagement.handleDeleteCampaign}
+                onCreate={() => {
+                  campaignManagement.resetForm();
+                  campaignManagement.setIsCreateDialogOpen(true);
+                }}
+              />
+            </div>
           </CardContent>
         </Card>
 

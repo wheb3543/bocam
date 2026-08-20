@@ -29,14 +29,15 @@ export function CampaignOverviewCards({
     ? campaigns.filter((c: Campaign) => c.status === 'paused').length
     : 0;
 
-  const totalTargets = campaigns
-    ?.reduce((sum: number, c: Campaign) => sum + (c.targetLeads || 0), 0)
-    .toLocaleString() || 0;
+  const totalTargets =
+    campaigns
+      ?.reduce((sum: number, c: Campaign) => sum + (c.targetLeads || 0), 0)
+      .toLocaleString() || 0;
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
       {/* Total Campaigns */}
-      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+      <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 [&_[data-slot=card-content]]:p-2.5 [&_[data-slot=card-content]]:pt-0 [&_[data-slot=card-header]]:p-2.5 [&_[data-slot=card-header]]:pb-1.5">
         <CardHeader className="pb-2 p-3 md:p-4">
           <CardTitle className="text-xs sm:text-sm font-medium text-blue-700 flex items-center gap-1.5">
             <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -55,7 +56,7 @@ export function CampaignOverviewCards({
       </Card>
 
       {/* Active Campaigns */}
-      <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+      <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100 [&_[data-slot=card-content]]:p-2.5 [&_[data-slot=card-content]]:pt-0 [&_[data-slot=card-header]]:p-2.5 [&_[data-slot=card-header]]:pb-1.5">
         <CardHeader className="pb-2 p-3 md:p-4">
           <CardTitle className="text-xs sm:text-sm font-medium text-green-700 flex items-center gap-1.5">
             <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -74,7 +75,7 @@ export function CampaignOverviewCards({
       </Card>
 
       {/* Paused Campaigns */}
-      <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+      <Card className="border-yellow-200 bg-gradient-to-br from-yellow-50 to-yellow-100 [&_[data-slot=card-content]]:p-2.5 [&_[data-slot=card-content]]:pt-0 [&_[data-slot=card-header]]:p-2.5 [&_[data-slot=card-header]]:pb-1.5">
         <CardHeader className="pb-2 p-3 md:p-4">
           <CardTitle className="text-xs sm:text-sm font-medium text-yellow-700 flex items-center gap-1.5">
             <PauseCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -91,7 +92,7 @@ export function CampaignOverviewCards({
       </Card>
 
       {/* Planned Budget */}
-      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100 [&_[data-slot=card-content]]:p-2.5 [&_[data-slot=card-content]]:pt-0 [&_[data-slot=card-header]]:p-2.5 [&_[data-slot=card-header]]:pb-1.5">
         <CardHeader className="pb-2 p-3 md:p-4">
           <CardTitle className="text-xs sm:text-sm font-medium text-purple-700 flex items-center gap-1.5">
             <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -111,7 +112,7 @@ export function CampaignOverviewCards({
       </Card>
 
       {/* Actual Budget */}
-      <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+      <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100 [&_[data-slot=card-content]]:p-2.5 [&_[data-slot=card-content]]:pt-0 [&_[data-slot=card-header]]:p-2.5 [&_[data-slot=card-header]]:pb-1.5">
         <CardHeader className="pb-2 p-3 md:p-4">
           <CardTitle className="text-xs sm:text-sm font-medium text-orange-700 flex items-center gap-1.5">
             <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -131,7 +132,7 @@ export function CampaignOverviewCards({
       </Card>
 
       {/* Total Targets */}
-      <Card className="bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200">
+      <Card className="border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100 [&_[data-slot=card-content]]:p-2.5 [&_[data-slot=card-content]]:pt-0 [&_[data-slot=card-header]]:p-2.5 [&_[data-slot=card-header]]:pb-1.5">
         <CardHeader className="pb-2 p-3 md:p-4">
           <CardTitle className="text-xs sm:text-sm font-medium text-teal-700 flex items-center gap-1.5">
             <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

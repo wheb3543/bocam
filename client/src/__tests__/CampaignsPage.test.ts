@@ -4,6 +4,8 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 // Mock trpc hook
 vi.mock("@/lib/trpc", () => ({
@@ -319,5 +321,27 @@ describe("CampaignsPage - Multi-select", () => {
       selectedIds = [...selectedIds, id];
     }
     expect(selectedIds).toEqual([1, 3, 2]);
+  });
+});
+
+describe('CampaignsPage - مساحة العمل الداخلية', () => {
+  const pageSource = readFileSync(
+    resolve(__dirname, '../pages/admin/campaigns/CampaignsPage.tsx'),
+    'utf-8'
+  );
+  const overviewSource = readFileSync(
+    resolve(__dirname, '../pages/admin/campaigns/components/CampaignOverviewCards.tsx'),
+    'utf-8'
+  );
+
+  it('يثبت مساحة الصفحة ويحصر التمرير في قائمة الحملات', () => {
+    expect(pageSource).toContain('h-[calc(100dvh-4.25rem)]');
+    expect(pageSource).toContain('flex min-h-0 flex-1 flex-col');
+    expect(pageSource).toContain('min-h-0 flex-1 overflow-y-auto');
+  });
+
+  it('يحافظ على ملخص الحملات بكثافة بصرية مناسبة لمساحة العمل', () => {
+    expect(overviewSource).toContain('grid grid-cols-2 gap-2');
+    expect(overviewSource).toContain('[&_[data-slot=card-content]]:p-2.5');
   });
 });
