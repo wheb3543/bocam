@@ -972,3 +972,29 @@
 [2026-08-21T22:47:29.463Z] 2026-08-21T22:47:29.463Z [appointmentReminders] [INFO] No 24h reminders needed
 [2026-08-21T22:47:29.729Z] 2026-08-21T22:47:29.729Z [appointmentReminders] [INFO] No 1h reminders needed
 [2026-08-21T22:47:29.730Z] 2026-08-21T22:47:29.729Z [appointmentReminders] [INFO] Done. 24h: 0 sent, 0 failed. 1h: 0 sent, 0 failed.
+[2026-08-21T23:52:25.338Z] 2026-08-21T23:52:25.337Z [sdk] [WARN] Missing session cookie
+[2026-08-21T23:52:25.338Z] 2026-08-21T23:52:25.338Z [license] [INFO] License Validation Starting...
+[2026-08-21T23:52:25.338Z] 2026-08-21T23:52:25.338Z [license] [INFO]
+[2026-08-21T23:52:25.338Z] 2026-08-21T23:52:25.338Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-21T23:52:25.338Z] 2026-08-21T23:52:25.338Z [license] [INFO] License file loaded successfully
+[2026-08-21T23:52:25.340Z] 2026-08-21T23:52:25.339Z [license] [INFO] Using configured License Hardware ID
+[2026-08-21T23:52:25.849Z] 2026-08-21T23:52:25.849Z [sdk] [WARN] Missing session cookie
+[2026-08-21T23:52:25.849Z] 2026-08-21T23:52:25.849Z [license] [INFO] License Validation Starting...
+[2026-08-21T23:52:25.849Z] 2026-08-21T23:52:25.849Z [license] [INFO]
+[2026-08-21T23:52:25.849Z] 2026-08-21T23:52:25.849Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-21T23:52:25.849Z] 2026-08-21T23:52:25.849Z [license] [INFO] License file loaded successfully
+[2026-08-21T23:52:25.849Z] 2026-08-21T23:52:25.849Z [license] [INFO] Using configured License Hardware ID
+[2026-08-21T23:52:26.086Z] 2026-08-21T23:52:26.086Z [sdk] [WARN] Missing session cookie
+[2026-08-21T23:52:33.351Z] 2026-08-21T23:52:33.351Z [sdk] [WARN] Missing session cookie
+[2026-08-21T23:52:33.351Z] 2026-08-21T23:52:33.351Z [license] [INFO] License Validation Starting...
+[2026-08-21T23:52:33.351Z] 2026-08-21T23:52:33.351Z [license] [INFO]
+[2026-08-21T23:52:33.351Z] 2026-08-21T23:52:33.351Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-21T23:52:33.352Z] 2026-08-21T23:52:33.352Z [license] [INFO] License file loaded successfully
+[2026-08-21T23:52:33.354Z] 2026-08-21T23:52:33.353Z [license] [INFO] Using configured License Hardware ID
+[2026-08-21T23:52:33.877Z] 2026-08-21T23:52:33.876Z [sdk] [WARN] Missing session cookie
+[2026-08-21T23:52:33.878Z] 2026-08-21T23:52:33.877Z [license] [INFO] License Validation Starting...
+[2026-08-21T23:52:33.879Z] 2026-08-21T23:52:33.877Z [license] [INFO]
+[2026-08-21T23:52:33.879Z] 2026-08-21T23:52:33.877Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-21T23:52:33.879Z] 2026-08-21T23:52:33.877Z [license] [INFO] License file loaded successfully
+[2026-08-21T23:52:33.879Z] 2026-08-21T23:52:33.878Z [license] [INFO] Using configured License Hardware ID
+[2026-08-21T23:52:34.117Z] 2026-08-21T23:52:34.116Z [sdk] [WARN] Missing session cookie
