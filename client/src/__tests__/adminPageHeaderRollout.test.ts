@@ -12,6 +12,11 @@ const commentContextsSource = readSource(
   'client/src/pages/admin/communications/MetaCommentContextsPanel.tsx'
 );
 const whatsAppPageSource = readSource('client/src/pages/admin/whatsapp/WhatsAppPage.tsx');
+const chatAreaHeaderSource = readSource(
+  'client/src/pages/admin/whatsapp/components/shared/ChatAreaHeader.tsx'
+);
+const chatInputSource = readSource('client/src/components/chat/ChatInput.tsx');
+const chatHeaderSource = readSource('client/src/components/chat/ChatHeader.tsx');
 const digitalMarketingTasksSource = readSource(
   'client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx'
 );
@@ -57,6 +62,16 @@ describe('مساحات العمل الإدارية دون بطاقة عنوان 
     expect(whatsAppPageSource).toContain('min-h-0 flex-1 overflow-hidden');
     expect(whatsAppPageSource).not.toContain('min-h-screen bg-gradient-to-br');
     expect(whatsAppPageSource).not.toContain("height: 'calc(100vh - 8.75rem)'");
+  });
+
+  it('يضبط رأس ومحرر WhatsApp للهاتف دون تزاحم في الإجراءات', () => {
+    expect(chatAreaHeaderSource).toContain('إجراءات المحادثة');
+    expect(chatAreaHeaderSource).toContain('hidden items-center gap-1 sm:flex');
+    expect(chatAreaHeaderSource).toContain('truncate text-sm font-bold');
+    expect(chatInputSource).toContain('hidden h-10 w-10 shrink-0 sm:inline-flex');
+    expect(chatInputSource).toContain('إجراءات إضافية');
+    expect(chatInputSource).toContain('min-h-[44px]');
+    expect(chatHeaderSource).toContain('hidden items-center justify-between');
   });
 
   it('يصحح مساحة مهام التسويق الرقمي الفعلية دون رأس مكرر', () => {

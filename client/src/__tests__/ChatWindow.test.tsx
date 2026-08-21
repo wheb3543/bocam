@@ -4,10 +4,25 @@
  */
 
 import React from 'react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { render, act, waitFor } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import ChatWindow from '@/components/ChatWindow';
+
+const chatAreaHeaderSource = readFileSync(
+  resolve(process.cwd(), 'client/src/pages/admin/whatsapp/components/shared/ChatAreaHeader.tsx'),
+  'utf8'
+);
+const chatInputSource = readFileSync(
+  resolve(process.cwd(), 'client/src/components/chat/ChatInput.tsx'),
+  'utf8'
+);
+const chatHeaderSource = readFileSync(
+  resolve(process.cwd(), 'client/src/components/chat/ChatHeader.tsx'),
+  'utf8'
+);
 
 interface GlobalWithEventSource {
   EventSource?: typeof MockEventSource;
@@ -159,5 +174,21 @@ describe('ChatWindow Component', () => {
       // يجب ألا يتعطل المكون عند حدوث خطأ
       expect(MockEventSource.instances).toHaveLength(1);
     });
+  });
+});
+
+describe('تخطيط محادثة WhatsApp على الهاتف', () => {
+  it('يجمع إجراءات الرأس الثانوية ويحافظ على عنوان العميل في مساحة مضغوطة', () => {
+    expect(chatAreaHeaderSource).toContain('إجراءات المحادثة');
+    expect(chatAreaHeaderSource).toContain('sm:hidden');
+    expect(chatAreaHeaderSource).toContain('hidden items-center gap-1 sm:flex');
+    expect(chatAreaHeaderSource).toContain('truncate text-sm font-bold');
+  });
+
+  it('يبقي محرر الرسائل صغيراً ويجمع الإرفاق ضمن الإجراءات الإضافية على الهاتف', () => {
+    expect(chatInputSource).toContain('hidden h-10 w-10 shrink-0 sm:inline-flex');
+    expect(chatInputSource).toContain('إجراءات إضافية');
+    expect(chatInputSource).toContain('min-h-[44px]');
+    expect(chatHeaderSource).toContain('hidden items-center justify-between');
   });
 });
