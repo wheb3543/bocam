@@ -26,10 +26,14 @@ export default function ActivationPage() {
   const automaticRequestStarted = useRef(false);
   const automaticCheckScheduled = useRef(false);
 
-  const { data: licenseCheck, isLoading: checkingLicense } =
-    trpc.license.checkLicenseExists.useQuery();
+  const { data: licenseInfo, isLoading: checkingLicense } = trpc.license.getInfo.useQuery(
+    undefined,
+    {
+      retry: false,
+    }
+  );
   const centralState = trpc.license.getCentralRequestState.useQuery(undefined, {
-    enabled: !checkingLicense && !licenseCheck?.exists,
+    enabled: !checkingLicense && !licenseInfo?.isValid,
     retry: false,
   });
 
@@ -94,11 +98,11 @@ export default function ActivationPage() {
     statusMutation;
 
   useEffect(() => {
-    if (licenseCheck?.exists) {
-      toast.success('الترخيص المحلي موجود بالفعل');
+    if (licenseInfo?.isValid) {
+      toast.success('الترخيص المحلي صالح بالفعل');
       navigate('/');
     }
-  }, [licenseCheck?.exists, navigate]);
+  }, [licenseInfo?.isValid, navigate]);
 
   useEffect(() => {
     if (centralState.data?.pendingRequest) {
