@@ -171,26 +171,69 @@ export function loadLicenseFile(licensePath: string): LicenseFile {
  * @returns Public key in PEM format
  * @throws Error if public key is not found
  */
+export function getVerificationPublicKeys(): string[] {
+  const roots = [process.cwd(), path.join(process.cwd(), '..')];
+  const keyNames = ['public-key.pem', 'previous-public-key.pem'];
+  const keys: string[] = [];
+
+  for (const root of roots) {
+    for (const keyName of keyNames) {
+      const keyPath = path.join(root, 'license-keys', keyName);
+      if (fs.existsSync(keyPath)) {
+        const key = fs.readFileSync(keyPath, 'utf-8');
+        if (!keys.includes(key)) {
+          keys.push(key);
+        }
+      }
+    }
+  }
+
+  const legacyPath = path.join(process.cwd(), 'public-key.pem');
+  if (fs.existsSync(legacyPath)) {
+    const key = fs.readFileSync(legacyPath, 'utf-8');
+    if (!keys.includes(key)) {
+      keys.push(key);
+    }
+  }
+
+  if (keys.length === 0) {
+    throw new Error(
+      `Public key not found. Please place the public key at ${path.join(process.cwd(), 'license-keys', 'public-key.pem')}`
+    );
+  }
+  return keys;
+}
+
 export function getPublicKey(): string {
-  // Try to load from file first
-  const publicKeyPath = path.join(process.cwd(), 'license-keys', 'public-key.pem');
-  if (fs.existsSync(publicKeyPath)) {
-    return fs.readFileSync(publicKeyPath, 'utf-8');
+  return getVerificationPublicKeys()[0];
+}
+
+export function verifySignatureWithPublicKeys(
+  licenseKey: string,
+  publicKeys: string[]
+): SignatureVerificationResult {
+  const licenseBuffer = Buffer.from(licenseKey, 'base64');
+  const licenseObject = JSON.parse(licenseBuffer.toString('utf-8'));
+  if (!licenseObject.payload || !licenseObject.signature) {
+    return { valid: false, payload: null };
   }
 
-  // Fallback to root directory
-  const rootPublicKeyPath = path.join(process.cwd(), '..', 'license-keys', 'public-key.pem');
-  if (fs.existsSync(rootPublicKeyPath)) {
-    return fs.readFileSync(rootPublicKeyPath, 'utf-8');
-  }
-
-  // Try loading from default location as last resort
-  const defaultPath = path.join(process.cwd(), 'public-key.pem');
-  if (fs.existsSync(defaultPath)) {
-    return fs.readFileSync(defaultPath, 'utf-8');
-  }
-
-  throw new Error(`Public key not found. Please place the public key at ${publicKeyPath}`);
+  const payload: LicensePayload = licenseObject.payload;
+  const signature = Buffer.from(licenseObject.signature, 'base64');
+  const payloadString = JSON.stringify(payload);
+  const valid = publicKeys.some((publicKey) =>
+    crypto.verify(
+      'sha256',
+      Buffer.from(payloadString),
+      {
+        key: publicKey,
+        padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+        saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST,
+      },
+      signature
+    )
+  );
+  return { valid, payload };
 }
 
 /**
@@ -203,34 +246,7 @@ export function getPublicKey(): string {
  */
 export function verifySignature(licenseKey: string): SignatureVerificationResult {
   try {
-    // Decode license key
-    const licenseBuffer = Buffer.from(licenseKey, 'base64');
-    const licenseObject = JSON.parse(licenseBuffer.toString('utf-8'));
-
-    if (!licenseObject.payload || !licenseObject.signature) {
-      return { valid: false, payload: null };
-    }
-
-    const payload: LicensePayload = licenseObject.payload;
-    const signature = Buffer.from(licenseObject.signature, 'base64');
-
-    // Get public key
-    const publicKey = getPublicKey();
-
-    // Verify signature
-    const payloadString = JSON.stringify(payload);
-    const isValid = crypto.verify(
-      'sha256',
-      Buffer.from(payloadString),
-      {
-        key: publicKey,
-        padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-        saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST,
-      },
-      signature
-    );
-
-    return { valid: isValid, payload };
+    return verifySignatureWithPublicKeys(licenseKey, getVerificationPublicKeys());
   } catch (error) {
     logger.error('Error verifying signature:', error);
     return { valid: false, payload: null };
