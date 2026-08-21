@@ -13,6 +13,7 @@ import { UpdateProgressModal } from '@/components/update/UpdateProgressModal';
 import { MandatoryUpdateModal } from '@/components/update/MandatoryUpdateModal';
 import { OptionalUpdateBanner } from '@/components/update/OptionalUpdateBanner';
 import { useUpdateChecker } from '@/hooks/integrations/useUpdateChecker';
+import { trpc } from '@/lib/api/trpc';
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./pages/public/HomePage'));
 const ThankYou = lazy(() => import('./pages/public/ThankYou'));
@@ -155,25 +156,26 @@ function PrefetchRoutes() {
 
 function Router() {
   const [location] = useLocation();
+  const { data: licenseCheck, isLoading: checkingLicense } =
+    trpc.license.checkLicenseExists.useQuery();
 
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
 
-  // TEMPORARY: Skip activation page for deployment until central server is ready
-  // Show activation page if license doesn't exist (unless on activation page)
-  // if (!checkingLicense && !licenseCheck?.exists && location !== "/activation") {
-  //   return (
-  //     <Suspense fallback={
-  //       <div className="flex items-center justify-center min-h-screen">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-  //       </div>
-  //     }>
-  //       <ActivationPage />
-  //     </Suspense>
-  //   );
-  // }
+  // A locally installed instance without a verified file enters the central activation flow.
+  if (checkingLicense) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (!licenseCheck?.exists && location !== '/activation') {
+    return <ActivationPage />;
+  }
 
   // make sure to consider if you need authentication for certain routes
   return (

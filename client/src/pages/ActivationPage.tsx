@@ -1,90 +1,159 @@
 /**
- * License Activation Page
- * صفحة تفعيل الترخيص
+ * Central license activation for a locally installed bocam instance.
  */
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Key, Shield, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Hourglass,
+  KeyRound,
+  Loader2,
+  RefreshCw,
+  Server,
+} from 'lucide-react';
 import { toast } from 'sonner';
+
+type PendingRequest = { requestId: number; expiresAt: string; status: 'pending' } | null;
 
 export default function ActivationPage() {
   const [, navigate] = useLocation();
-  const [licenseKey, setLicenseKey] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState<PendingRequest>(null);
+  const [statusMessage, setStatusMessage] = useState('يتم تجهيز طلب الترخيص المركزي لهذه النسخة.');
+  const automaticRequestStarted = useRef(false);
+  const automaticCheckScheduled = useRef(false);
 
-  // Check if license already exists
   const { data: licenseCheck, isLoading: checkingLicense } =
     trpc.license.checkLicenseExists.useQuery();
+  const centralState = trpc.license.getCentralRequestState.useQuery(undefined, {
+    enabled: !checkingLicense && !licenseCheck?.exists,
+    retry: false,
+  });
 
-  useEffect(() => {
-    if (licenseCheck?.exists) {
-      toast.success('الترخيص موجود بالفعل');
-      navigate('/');
-    }
-  }, [licenseCheck, navigate]);
-
-  const saveLicenseMutation = trpc.license.saveLicense.useMutation({
+  const requestMutation = trpc.license.requestCentralLicense.useMutation({
     onSuccess: (data) => {
-      if (data.success) {
-        toast.success('تم تفعيل الترخيص بنجاح!');
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+      if (
+        !data.success ||
+        !('requestId' in data) ||
+        !('expiresAt' in data) ||
+        !('reused' in data)
+      ) {
+        const errorMessage = 'error' in data ? data.error : undefined;
+        setStatusMessage(errorMessage || 'تعذر إرسال طلب الترخيص.');
+        toast.error(errorMessage || 'تعذر إرسال طلب الترخيص');
+        return;
       }
+      setPendingRequest({
+        requestId: data.requestId,
+        expiresAt: data.expiresAt,
+        status: 'pending',
+      });
+      setStatusMessage(
+        data.reused
+          ? 'يوجد طلب ترخيص معلق بالفعل لدى إدارة إيديا هب.'
+          : 'تم إرسال طلب الترخيص إلى إدارة إيديا هب بانتظار المراجعة.'
+      );
     },
-    onError: (err) => {
-      toast.error(err.message || 'فشل تفعيل الترخيص');
+    onError: (error) => {
+      setStatusMessage(error.message || 'تعذر الاتصال بخدمة التراخيص المركزية.');
+      toast.error(error.message || 'تعذر الاتصال بخدمة التراخيص المركزية');
     },
   });
 
-  const handleActivation = (e: React.FormEvent) => {
-    e.preventDefault();
+  const statusMutation = trpc.license.checkCentralLicenseStatus.useMutation({
+    onSuccess: (data) => {
+      if (!data.success || !('status' in data) || !('message' in data)) {
+        const errorMessage = 'error' in data ? data.error : undefined;
+        setStatusMessage(errorMessage || 'تعذر التحقق من حالة الطلب.');
+        toast.error(errorMessage || 'تعذر التحقق من حالة الطلب');
+        return;
+      }
+      setStatusMessage(data.message);
+      if (data.status === 'activated') {
+        setPendingRequest(null);
+        toast.success('تم اعتماد الترخيص والتحقق من توقيعه محلياً. سيُعاد تشغيل الواجهة الآن.');
+        window.setTimeout(() => window.location.reload(), 1_500);
+      } else if (
+        data.status === 'rejected' ||
+        data.status === 'expired' ||
+        data.status === 'none'
+      ) {
+        setPendingRequest(null);
+      }
+    },
+    onError: (error) => {
+      setStatusMessage(error.message || 'تعذر التحقق من حالة الطلب.');
+      toast.error(error.message || 'تعذر التحقق من حالة الطلب');
+    },
+  });
+  const { mutate: requestCentralLicense, isPending: isRequestingCentralLicense } = requestMutation;
+  const { mutate: checkCentralLicenseStatus, isPending: isCheckingCentralLicenseStatus } =
+    statusMutation;
 
-    if (!licenseKey || licenseKey.trim().length === 0) {
-      toast.error('يرجى إدخال كود الترخيص');
+  useEffect(() => {
+    if (licenseCheck?.exists) {
+      toast.success('الترخيص المحلي موجود بالفعل');
+      navigate('/');
+    }
+  }, [licenseCheck?.exists, navigate]);
+
+  useEffect(() => {
+    if (centralState.data?.pendingRequest) {
+      setPendingRequest(centralState.data.pendingRequest);
+    }
+  }, [centralState.data?.pendingRequest]);
+
+  const submitCentralRequest = useCallback(() => {
+    requestCentralLicense({
+      instanceName: `bocam – ${window.location.hostname || 'local-instance'}`,
+      serverUrl: window.location.origin,
+    });
+  }, [requestCentralLicense]);
+
+  useEffect(() => {
+    if (
+      automaticRequestStarted.current ||
+      !centralState.data?.configured ||
+      pendingRequest ||
+      isRequestingCentralLicense
+    ) {
       return;
     }
+    automaticRequestStarted.current = true;
+    submitCentralRequest();
+  }, [
+    centralState.data?.configured,
+    isRequestingCentralLicense,
+    pendingRequest,
+    submitCentralRequest,
+  ]);
 
-    setIsSubmitting(true);
-
-    try {
-      // Decode the license key (base64 encoded JSON)
-      const licenseBuffer = Buffer.from(licenseKey, 'base64');
-      const licenseObject = JSON.parse(licenseBuffer.toString('utf-8'));
-
-      if (!licenseObject.payload || !licenseObject.signature) {
-        throw new Error('كود الترخيص غير صالح');
-      }
-
-      const payload = licenseObject.payload;
-
-      // Submit to server
-      saveLicenseMutation.mutate({
-        key: licenseKey,
-        hardwareId: payload.hid,
-        expiryDate: new Date(payload.exp * 1000).toISOString(),
-        features: payload.feat,
-        issuedAt: new Date(payload.iat * 1000).toISOString(),
-        version: payload.ver || '1.0',
-      });
-    } catch {
-      toast.error('كود الترخيص غير صالح');
-      setIsSubmitting(false);
+  useEffect(() => {
+    if (!pendingRequest || automaticCheckScheduled.current) {
+      return;
     }
-  };
+    automaticCheckScheduled.current = true;
+    const timer = window.setTimeout(() => checkCentralLicenseStatus(), 60_000);
+    return () => window.clearTimeout(timer);
+  }, [checkCentralLicenseStatus, pendingRequest]);
 
-  if (checkingLicense) {
+  if (checkingLicense || centralState.isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+      <div
+        className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white"
+        dir="rtl"
+      >
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
+
+  const centralConfigured = centralState.data?.configured === true;
+  const isWaiting = Boolean(pendingRequest);
+  const busy = isRequestingCentralLicense || isCheckingCentralLicenseStatus;
 
   return (
     <div
@@ -92,59 +161,89 @@ export default function ActivationPage() {
       dir="rtl"
     >
       <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center mb-4">
-            <Key className="h-8 w-8 text-white" />
+        <CardHeader className="text-center space-y-3">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-emerald-500 shadow-lg">
+            {isWaiting ? (
+              <Hourglass className="h-8 w-8 text-white" />
+            ) : (
+              <KeyRound className="h-8 w-8 text-white" />
+            )}
           </div>
-          <CardTitle className="text-2xl font-bold">تفعيل الترخيص</CardTitle>
-          <CardDescription className="text-base">أدخل كود الترخيص لتفعيل النظام</CardDescription>
+          <CardTitle className="text-2xl font-bold">تفعيل ترخيص bocam</CardTitle>
+          <CardDescription className="text-base leading-7">
+            تُرسل هذه النسخة طلباً آمناً إلى إيديا هب، ثم يُحفظ الترخيص الموقّع محلياً بعد اعتماده.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleActivation} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="licenseKey" className="text-base">
-                كود الترخيص
-              </Label>
-              <Input
-                id="licenseKey"
-                type="text"
-                placeholder="أدخل كود الترخيص هنا..."
-                value={licenseKey}
-                onChange={(e) => setLicenseKey(e.target.value)}
-                disabled={isSubmitting}
-                className="text-base min-h-[44px]"
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full min-h-[44px] text-base font-semibold"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                  جاري التفعيل...
-                </>
-              ) : (
-                <>
-                  <Shield className="ml-2 h-5 w-5" />
-                  تفعيل الترخيص
-                </>
-              )}
-            </Button>
-
-            <div className="pt-4 border-t">
-              <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <p className="text-xs">
-                  تأكد من أن كود الترخيص صحيح ومخصص لهذا الجهاز. كود الترخيص مرتبط بمعرف الجهاز
-                  (Hardware ID).
-                </p>
+        <CardContent className="space-y-5">
+          {!centralConfigured ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <div className="mb-2 flex items-center gap-2 font-semibold">
+                <AlertCircle className="h-4 w-4" /> اتصال إيديا هب غير مُعد
               </div>
+              على مسؤول النظام ضبط متغيري <code className="font-mono">IDEA_HUB_URL</code> و
+              <code className="font-mono">IDEA_HUB_SYSTEM_ID</code> ثم إعادة تشغيل الخادم المحلي.
             </div>
-          </form>
+          ) : (
+            <>
+              <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950">
+                <div className="mb-2 flex items-center gap-2 font-semibold">
+                  <Server className="h-4 w-4" /> حالة الترخيص المركزي
+                </div>
+                <p className="leading-6">{statusMessage}</p>
+                {pendingRequest && (
+                  <p className="mt-2 text-xs text-blue-800">
+                    رقم الطلب: #{pendingRequest.requestId} — ينتهي الرمز في{' '}
+                    {new Date(pendingRequest.expiresAt).toLocaleString('ar-SA')}
+                  </p>
+                )}
+              </div>
+              {isWaiting ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full min-h-[46px] text-base font-semibold"
+                  disabled={busy}
+                  onClick={() => checkCentralLicenseStatus()}
+                >
+                  {isCheckingCentralLicenseStatus ? (
+                    <>
+                      <Loader2 className="ml-2 h-5 w-5 animate-spin" /> جارٍ التحقق…
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="ml-2 h-5 w-5" /> التحقق من حالة الطلب
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  className="w-full min-h-[46px] text-base font-semibold"
+                  disabled={busy}
+                  onClick={submitCentralRequest}
+                >
+                  {isRequestingCentralLicense ? (
+                    <>
+                      <Loader2 className="ml-2 h-5 w-5 animate-spin" /> جارٍ إرسال الطلب…
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="ml-2 h-5 w-5" /> إرسال طلب الترخيص
+                    </>
+                  )}
+                </Button>
+              )}
+            </>
+          )}
+          <div className="border-t pt-4">
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>
+                يرتبط الترخيص ببصمة هذا الجهاز. لا تُخزّن هذه الصفحة مفتاحاً خاصاً أو بيانات اعتماد
+                إدارية.
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

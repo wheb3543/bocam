@@ -1,0 +1,212 @@
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { createLogger } from './logger';
+import { getHardwareId, getLicenseFilePath } from './license/helpers';
+import { validateLicense } from './license';
+
+const logger = createLogger('centralLicenseRequest');
+const PENDING_REQUEST_FILE = '.idea-hub-license-request.json';
+
+function requestTimeoutSignal() {
+  return globalThis.AbortSignal.timeout(15_000);
+}
+
+type PendingLicenseRequest = {
+  requestId: number;
+  requestToken: string;
+  status: 'pending';
+  expiresAt: string;
+  createdAt: string;
+};
+
+type CentralLicenseFile = {
+  key: string;
+  hardwareId: string;
+  expiryDate: string;
+  features: string[];
+  issuedAt: string;
+  version: string;
+};
+
+function getIdeaHubUrl(): string | null {
+  const value = process.env.IDEA_HUB_URL?.trim();
+  return value ? value.replace(/\/$/, '') : null;
+}
+
+function getSystemId(): number | null {
+  const value = Number(process.env.IDEA_HUB_SYSTEM_ID);
+  return Number.isInteger(value) && value > 0 ? value : null;
+}
+
+function getPendingRequestPath(): string {
+  return path.join(process.cwd(), PENDING_REQUEST_FILE);
+}
+
+function readPendingRequest(): PendingLicenseRequest | null {
+  try {
+    const raw = fs.readFileSync(getPendingRequestPath(), 'utf8');
+    const parsed = JSON.parse(raw) as PendingLicenseRequest;
+    if (!parsed.requestId || !parsed.requestToken || parsed.status !== 'pending') {
+      return null;
+    }
+    if (new Date(parsed.expiresAt).getTime() <= Date.now()) {
+      fs.rmSync(getPendingRequestPath(), { force: true });
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function savePendingRequest(request: PendingLicenseRequest): void {
+  const target = getPendingRequestPath();
+  const temporary = `${target}.tmp`;
+  fs.writeFileSync(temporary, JSON.stringify(request, null, 2), { mode: 0o600 });
+  fs.renameSync(temporary, target);
+}
+
+function clearPendingRequest(): void {
+  fs.rmSync(getPendingRequestPath(), { force: true });
+}
+
+export function getCentralLicenseConfiguration() {
+  const baseUrl = getIdeaHubUrl();
+  const systemId = getSystemId();
+  return { configured: Boolean(baseUrl && systemId), baseUrl, systemId };
+}
+
+export function getPendingCentralLicenseRequest() {
+  const request = readPendingRequest();
+  return request
+    ? { requestId: request.requestId, expiresAt: request.expiresAt, status: request.status }
+    : null;
+}
+
+export async function requestCentralLicense(input: { instanceName: string; serverUrl: string }) {
+  const { configured, baseUrl, systemId } = getCentralLicenseConfiguration();
+  if (!configured || !baseUrl || !systemId) {
+    throw new Error('لم يُضبط IDEA_HUB_URL أو IDEA_HUB_SYSTEM_ID لهذه النسخة');
+  }
+
+  const pending = readPendingRequest();
+  if (pending) {
+    return {
+      status: 'pending' as const,
+      requestId: pending.requestId,
+      expiresAt: pending.expiresAt,
+      reused: true,
+    };
+  }
+
+  const response = await fetch(`${baseUrl}/api/license-requests`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'BOCAM-License-Request/1.0' },
+    body: JSON.stringify({
+      systemId,
+      hardwareId: getHardwareId(),
+      instanceName: input.instanceName.trim(),
+      serverUrl: input.serverUrl.trim(),
+      systemVersion: process.env.npm_package_version || '1.0.0',
+      nonce: crypto.randomBytes(32).toString('base64url'),
+    }),
+    signal: requestTimeoutSignal(),
+  });
+  const body = (await response.json()) as {
+    success?: boolean;
+    error?: string;
+    data?: { requestId: number; requestToken: string; status: 'pending'; expiresAt: string };
+  };
+  if (!response.ok || !body.success || !body.data) {
+    throw new Error(body.error || 'تعذر إرسال طلب الترخيص إلى إيديا هب');
+  }
+
+  const request: PendingLicenseRequest = { ...body.data, createdAt: new Date().toISOString() };
+  savePendingRequest(request);
+  logger.info(`Central license request created: ${request.requestId}`);
+  return {
+    status: 'pending' as const,
+    requestId: request.requestId,
+    expiresAt: request.expiresAt,
+    reused: false,
+  };
+}
+
+function installCentralLicense(license: CentralLicenseFile) {
+  if (
+    !license?.key ||
+    !license.hardwareId ||
+    !license.expiryDate ||
+    !Array.isArray(license.features)
+  ) {
+    throw new Error('صيغة الترخيص المستلم من إيديا هب غير صالحة');
+  }
+  if (license.hardwareId !== getHardwareId()) {
+    throw new Error('الترخيص المعتمد لا يطابق بصمة هذا الجهاز');
+  }
+
+  const licensePath = getLicenseFilePath();
+  const temporaryPath = `${licensePath}.new`;
+  fs.writeFileSync(temporaryPath, JSON.stringify(license, null, 2), { mode: 0o600 });
+  fs.renameSync(temporaryPath, licensePath);
+
+  const validation = validateLicense();
+  if (!validation.isValid) {
+    fs.rmSync(licensePath, { force: true });
+    throw new Error(validation.validationMessage || 'فشل التحقق المحلي من توقيع الترخيص');
+  }
+  return validation;
+}
+
+export async function checkCentralLicenseRequest() {
+  const { configured, baseUrl } = getCentralLicenseConfiguration();
+  if (!configured || !baseUrl) {
+    throw new Error('لم يُضبط اتصال إيديا هب لهذه النسخة');
+  }
+  const pending = readPendingRequest();
+  if (!pending) {
+    return { status: 'none' as const, message: 'لا يوجد طلب ترخيص معلق' };
+  }
+
+  const response = await fetch(`${baseUrl}/api/license-requests/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'BOCAM-License-Request/1.0' },
+    body: JSON.stringify({ requestId: pending.requestId, requestToken: pending.requestToken }),
+    signal: requestTimeoutSignal(),
+  });
+  const body = (await response.json()) as {
+    success?: boolean;
+    error?: string;
+    data?: { status: string; message: string; license?: CentralLicenseFile };
+  };
+  if (!response.ok || !body.success || !body.data) {
+    throw new Error(body.error || 'تعذر قراءة حالة طلب الترخيص');
+  }
+
+  if (body.data.status === 'approved' && body.data.license) {
+    const licenseInfo = installCentralLicense(body.data.license);
+    const confirmation = await fetch(`${baseUrl}/api/license-requests/delivered`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'BOCAM-License-Request/1.0' },
+      body: JSON.stringify({ requestId: pending.requestId, requestToken: pending.requestToken }),
+      signal: requestTimeoutSignal(),
+    });
+    if (!confirmation.ok) {
+      logger.warn(
+        `License was installed but delivery confirmation returned ${confirmation.status}`
+      );
+    }
+    clearPendingRequest();
+    return {
+      status: 'activated' as const,
+      message: 'تم حفظ الترخيص والتحقق من توقيعه محلياً. أعد تشغيل النظام.',
+      licenseInfo,
+    };
+  }
+
+  if (body.data.status === 'rejected' || body.data.status === 'expired') {
+    clearPendingRequest();
+  }
+  return { status: body.data.status, message: body.data.message };
+}

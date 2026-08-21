@@ -17,6 +17,12 @@ import {
   licenseFileExists,
   type LicenseInfo,
 } from '../_core/license';
+import {
+  checkCentralLicenseRequest,
+  getCentralLicenseConfiguration,
+  getPendingCentralLicenseRequest,
+  requestCentralLicense,
+} from '../_core/centralLicenseRequest';
 import fs from 'fs';
 import path from 'path';
 
@@ -196,6 +202,50 @@ export const licenseRouter = router({
         exists: false,
         success: false,
         error: error instanceof Error ? error.message : 'Failed to check license',
+      };
+    }
+  }),
+
+  /**
+   * Read the local state of the centrally managed license request.
+   * Kept public because it is required before an administrator can sign in.
+   */
+  getCentralRequestState: publicProcedure.query(() => ({
+    ...getCentralLicenseConfiguration(),
+    pendingRequest: getPendingCentralLicenseRequest(),
+  })),
+
+  /**
+   * Create one centrally managed activation request for this local instance.
+   */
+  requestCentralLicense: publicProcedure
+    .input(
+      z.object({
+        instanceName: z.string().trim().min(2).max(160),
+        serverUrl: z.string().trim().url().max(500),
+      })
+    )
+    .mutation(async ({ input }) => {
+      try {
+        return { success: true, ...(await requestCentralLicense(input)) };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'تعذر إرسال طلب الترخيص المركزي',
+        };
+      }
+    }),
+
+  /**
+   * Query the decision exactly when the operator chooses to check its state.
+   */
+  checkCentralLicenseStatus: publicProcedure.mutation(async () => {
+    try {
+      return { success: true, ...(await checkCentralLicenseRequest()) };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'تعذر التحقق من حالة طلب الترخيص',
       };
     }
   }),

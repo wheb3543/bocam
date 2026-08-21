@@ -34,6 +34,7 @@ node_modules/
 license-keys/
 license.json
 license-files/
+.idea-hub-license-request.json
 
 # Heartbeat system files - keep for local tracking
 .last-successful-run
