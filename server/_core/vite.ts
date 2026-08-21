@@ -17,7 +17,9 @@ export async function setupVite(app: Express, server: Server) {
 
   const { createServer: createViteServer } = await import('vite');
   const vite = await createViteServer({
-    configFile: false,
+    // استخدم إعداد المشروع الفعلي؛ فهو يحدد client كجذر ويعرّف مسارات alias.
+    // تعطيل configFile يجعل /src/main.tsx يُفسَّر من جذر الخادم ويعيد HTML fallback.
+    configFile: path.resolve(import.meta.dirname, '../..', 'vite.config.ts'),
     server: serverOptions,
     appType: 'custom',
   });

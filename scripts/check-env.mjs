@@ -9,23 +9,22 @@ const optionalVars = ['JWT_SECRET', 'REDIS_URL', 'WHATSAPP_ACCESS_TOKEN'];
 
 console.log('🔍 Checking environment variables...\n');
 
-// Load .env file if it exists
+// Load .env file if it exists. In managed development the required values are
+// injected into process.env and may intentionally have no editable .env file.
+const envVars = { ...process.env };
 let envContent = '';
 try {
   envContent = readFileSync(resolve('.env'), 'utf-8');
 } catch (error) {
-  console.error('❌ Error: .env file not found!');
-  console.log('💡 Please create .env file from .env.example:');
-  console.log('   cp .env.example .env\n');
-  process.exit(1);
+  console.log('ℹ️  لم يُعثر على ملف .env؛ سيُستخدم إعداد بيئة التشغيل المدمج إن كان متاحاً.');
 }
 
 // Parse .env file
-const envVars = {};
 envContent.split('\n').forEach((line) => {
   const [key, ...valueParts] = line.split('=');
   if (key && !key.startsWith('#') && valueParts.length > 0) {
-    envVars[key.trim()] = valueParts.join('=').trim();
+    // لا تتجاوز القيمة المدمجة؛ فهي قد تكون اعتماداً إنتاجياً مخصصاً للمشروع.
+    envVars[key.trim()] = envVars[key.trim()] || valueParts.join('=').trim();
   }
 });
 
