@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { SectionCard, SectionPreview } from './index';
 import { ContentFiltersComponent } from './ContentFilters';
+import Pagination from '@/components/table/Pagination';
 import { Plus, GripVertical } from 'lucide-react';
 import { useState } from 'react';
 import type { Section } from '../hooks/useSections';
 import type { ContentFilters } from '../types/content.types';
+import type { ContentPagination } from '../utils/listResponse';
 import {
   DndContext,
   closestCenter,
@@ -32,6 +34,9 @@ import { CSS } from '@dnd-kit/utilities';
 interface SectionsListProps {
   sections: Section[];
   isLoading: boolean;
+  pagination: ContentPagination | null;
+  currentPage: number;
+  onPageChange: (page: number) => void;
   filters?: ContentFilters;
   onFiltersChange?: (filters: ContentFilters) => void;
   pages?: Array<{ id: number; name: string; titleAr: string; titleEn: string }>;
@@ -97,6 +102,9 @@ function SortableSectionCard({
 export function SectionsList({
   sections,
   isLoading,
+  pagination,
+  currentPage,
+  onPageChange,
   filters,
   onFiltersChange,
   pages = [],
@@ -195,6 +203,17 @@ export function SectionsList({
             </div>
           </SortableContext>
         </DndContext>
+      )}
+
+      {pagination && pagination.total > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.max(pagination.totalPages, 1)}
+          totalItems={pagination.total}
+          itemsPerPage={pagination.limit}
+          onPageChange={onPageChange}
+          showPageSizeSelector={false}
+        />
       )}
 
       {/* Preview Dialog */}

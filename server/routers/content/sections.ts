@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { protectedProcedure, adminProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
-import { eq, and, like, or } from 'drizzle-orm';
+import { eq, and, like, or, isNull, count } from 'drizzle-orm';
 import { sections } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
 import { cacheManager } from '../../services/redis';
@@ -99,7 +99,7 @@ export const sectionsRouter = router({
 
       const db = await ensureDatabaseAvailable();
 
-      const conditions = [];
+      const conditions = [isNull(sections.deletedAt)];
 
       if (input.pageId) {
         conditions.push(eq(sections.pageId, input.pageId));
@@ -115,13 +115,14 @@ export const sectionsRouter = router({
         conditions.push(eq(sections.status, input.status));
       }
       if (input.search) {
-        conditions.push(
-          or(
-            like(sections.name, `%${input.search}%`),
-            like(sections.titleAr, `%${input.search}%`),
-            like(sections.titleEn, `%${input.search}%`)
-          )
+        const searchCondition = or(
+          like(sections.name, `%${input.search}%`),
+          like(sections.titleAr, `%${input.search}%`),
+          like(sections.titleEn, `%${input.search}%`)
         );
+        if (searchCondition) {
+          conditions.push(searchCondition);
+        }
       }
 
       const offset = (input.page - 1) * input.limit;
@@ -136,7 +137,7 @@ export const sectionsRouter = router({
 
       // الحصول على العدد الإجمالي للنتائج
       const totalCount = await db
-        .select({ count: sections.id })
+        .select({ total: count() })
         .from(sections)
         .where(conditions.length > 0 ? and(...conditions) : undefined);
 
@@ -145,8 +146,8 @@ export const sectionsRouter = router({
         pagination: {
           page: input.page,
           limit: input.limit,
-          total: totalCount.length,
-          totalPages: Math.ceil(totalCount.length / input.limit),
+          total: Number(totalCount[0]?.total ?? 0),
+          totalPages: Math.ceil(Number(totalCount[0]?.total ?? 0) / input.limit),
         },
       };
 

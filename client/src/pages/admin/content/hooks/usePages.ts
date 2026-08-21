@@ -8,6 +8,7 @@ import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import type { Section } from './useSections';
 import type { TextContent, Image } from '../types/content.types';
+import { getContentListData, getContentListPagination } from '../utils/listResponse';
 
 export interface Page {
   id: number;
@@ -150,6 +151,7 @@ export function usePages() {
   const [searchQuery, setSearchQuery] = useState('');
   const [type, setType] = useState<'all' | 'main' | 'sub'>('all');
   const [isActive, setIsActive] = useState<'all' | 'yes' | 'no'>('all');
+  const [page, setPage] = useState(1);
 
   // Query
   const {
@@ -160,9 +162,11 @@ export function usePages() {
     type: type !== 'all' ? type : undefined,
     isActive: isActive !== 'all' ? (isActive as 'yes' | 'no') : undefined,
     search: searchQuery || undefined,
+    page,
   });
 
-  const pages = Array.isArray(pagesData) ? pagesData : [];
+  const pages = getContentListData<Page>(pagesData);
+  const pagination = getContentListPagination<Page>(pagesData);
 
   // Query for main pages (for parent selection)
   const { data: mainPages } = trpc.content.pages.getMainPages.useQuery();
@@ -333,7 +337,9 @@ export function usePages() {
     searchQuery,
     type,
     isActive,
+    page,
     pages,
+    pagination,
     mainPages,
     loadingPages,
     createMutation,
@@ -349,6 +355,7 @@ export function usePages() {
     setSearchQuery,
     setType,
     setIsActive,
+    setPage,
 
     // Handlers
     handleCreatePage,

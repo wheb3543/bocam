@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { publicProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
-import { eq, and, count } from 'drizzle-orm';
+import { eq, and, count, inArray, isNull } from 'drizzle-orm';
 import {
   textContent,
   images,
@@ -109,6 +109,8 @@ export const publicContentRouter = router({
       const conditions = [
         eq(textContent.isActive, 'yes'),
         eq(textContent.language, input.language),
+        eq(textContent.status, 'published'),
+        isNull(textContent.deletedAt),
       ];
 
       if (input.key) {
@@ -164,7 +166,11 @@ export const publicContentRouter = router({
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
 
-      const conditions = [eq(images.isActive, 'yes')];
+      const conditions = [
+        eq(images.isActive, 'yes'),
+        eq(images.status, 'published'),
+        isNull(images.deletedAt),
+      ];
 
       if (input.key) {
         conditions.push(eq(images.key, input.key));
@@ -312,13 +318,22 @@ export const publicContentRouter = router({
             and(
               eq(textContent.isActive, 'yes'),
               eq(textContent.language, input.language),
-              eq(textContent.section, input.section)
+              eq(textContent.section, input.section),
+              eq(textContent.status, 'published'),
+              isNull(textContent.deletedAt)
             )
           ),
         db
           .select()
           .from(images)
-          .where(and(eq(images.isActive, 'yes'), eq(images.section, input.section))),
+          .where(
+            and(
+              eq(images.isActive, 'yes'),
+              eq(images.section, input.section),
+              eq(images.status, 'published'),
+              isNull(images.deletedAt)
+            )
+          ),
         db.select().from(colorScheme).where(eq(colorScheme.isActive, 'yes')),
       ]);
 
@@ -348,7 +363,11 @@ export const publicContentRouter = router({
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
 
-      const conditions = [eq(pages.isActive, input.isActive || 'yes')];
+      const conditions = [
+        eq(pages.isActive, input.isActive || 'yes'),
+        eq(pages.status, 'published'),
+        isNull(pages.deletedAt),
+      ];
 
       if (input.type) {
         conditions.push(eq(pages.type, input.type));
@@ -405,7 +424,12 @@ export const publicContentRouter = router({
         .select()
         .from(pages)
         .where(
-          and(eq(pages.slug, input.slug), eq(pages.isActive, 'yes'), eq(pages.status, 'published'))
+          and(
+            eq(pages.slug, input.slug),
+            eq(pages.isActive, 'yes'),
+            eq(pages.status, 'published'),
+            isNull(pages.deletedAt)
+          )
         )
         .limit(1);
 
@@ -429,7 +453,11 @@ export const publicContentRouter = router({
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
 
-      const conditions = [eq(sections.isActive, input.isActive || 'yes')];
+      const conditions = [
+        eq(sections.isActive, input.isActive || 'yes'),
+        eq(sections.status, 'published'),
+        isNull(sections.deletedAt),
+      ];
 
       if (input.pageId) {
         conditions.push(eq(sections.pageId, input.pageId));
@@ -492,7 +520,8 @@ export const publicContentRouter = router({
           and(
             eq(sections.pageId, input.pageId),
             eq(sections.isActive, input.isActive || 'yes'),
-            eq(sections.status, 'published')
+            eq(sections.status, 'published'),
+            isNull(sections.deletedAt)
           )
         )
         .orderBy(sections.sortOrder);
@@ -520,34 +549,60 @@ export const publicContentRouter = router({
 
       const db = await ensureDatabaseAvailable();
 
-      const [textContents, imagesList, colors, sectionsList, sectionButtonsList] =
-        await Promise.all([
-          db
-            .select()
-            .from(textContent)
-            .where(
-              and(
-                eq(textContent.isActive, 'yes'),
-                eq(textContent.language, input.language),
-                eq(textContent.pageId, input.pageId)
+      const [textContents, imagesList, colors, sectionsList] = await Promise.all([
+        db
+          .select()
+          .from(textContent)
+          .where(
+            and(
+              eq(textContent.isActive, 'yes'),
+              eq(textContent.language, input.language),
+              eq(textContent.pageId, input.pageId),
+              eq(textContent.status, 'published'),
+              isNull(textContent.deletedAt)
+            )
+          ),
+        db
+          .select()
+          .from(images)
+          .where(
+            and(
+              eq(images.isActive, 'yes'),
+              eq(images.pageId, input.pageId),
+              eq(images.status, 'published'),
+              isNull(images.deletedAt)
+            )
+          ),
+        db.select().from(colorScheme).where(eq(colorScheme.isActive, 'yes')),
+        db
+          .select()
+          .from(sections)
+          .where(
+            and(
+              eq(sections.pageId, input.pageId),
+              eq(sections.isActive, 'yes'),
+              eq(sections.status, 'published'),
+              isNull(sections.deletedAt)
+            )
+          )
+          .orderBy(sections.sortOrder),
+      ]);
+
+      const sectionIds = sectionsList.map((section) => section.id);
+      const sectionButtonsList =
+        sectionIds.length > 0
+          ? await db
+              .select()
+              .from(sectionButtons)
+              .where(
+                and(
+                  inArray(sectionButtons.sectionId, sectionIds),
+                  eq(sectionButtons.isActive, 'yes'),
+                  isNull(sectionButtons.deletedAt)
+                )
               )
-            ),
-          db
-            .select()
-            .from(images)
-            .where(and(eq(images.isActive, 'yes'), eq(images.pageId, input.pageId))),
-          db.select().from(colorScheme).where(eq(colorScheme.isActive, 'yes')),
-          db
-            .select()
-            .from(sections)
-            .where(and(eq(sections.pageId, input.pageId), eq(sections.isActive, 'yes')))
-            .orderBy(sections.sortOrder),
-          db
-            .select()
-            .from(sectionButtons)
-            .where(and(eq(sectionButtons.isActive, 'yes')))
-            .orderBy(sectionButtons.sortOrder),
-        ]);
+              .orderBy(sectionButtons.sortOrder)
+          : [];
 
       // إنشاء خريطة من sectionId إلى section name
       const sectionIdToNameMap = new Map<number, string>();
@@ -606,7 +661,11 @@ export const publicContentRouter = router({
         .select()
         .from(sectionButtons)
         .where(
-          and(eq(sectionButtons.sectionId, input.sectionId), eq(sectionButtons.isActive, 'yes'))
+          and(
+            eq(sectionButtons.sectionId, input.sectionId),
+            eq(sectionButtons.isActive, 'yes'),
+            isNull(sectionButtons.deletedAt)
+          )
         )
         .orderBy(sectionButtons.sortOrder);
 

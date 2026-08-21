@@ -103,7 +103,7 @@ describe('Content Management System', () => {
 
     it('should validate title length', () => {
       const shortTitle = 'قصير';
-      const validTitle = 'عنوان صفحة مثالي للتحسين';
+      const validTitle = 'ع'.repeat(30);
       const longTitle = 'عنوان صفحة طويل جداً يتجاوز الحد المسموح به للتحسين من محركات البحث';
 
       expect(shortTitle.length).toBeLessThan(30);
@@ -114,8 +114,8 @@ describe('Content Management System', () => {
 
     it('should validate description length', () => {
       const shortDescription = 'وصف قصير';
-      const validDescription = 'وصف صفحة مثالي للتحقق من محركات البحث مع طول مناسب';
-      const longDescription = 'وصف صفحة طويل جداً يتجاوز الحد المسموح به للتحسين من محركات البحث ويحتوي على معلومات زائدة لا داعي لها';
+      const validDescription = 'و'.repeat(120);
+      const longDescription = 'ط'.repeat(161);
 
       expect(shortDescription.length).toBeLessThan(120);
       expect(validDescription.length).toBeGreaterThanOrEqual(120);

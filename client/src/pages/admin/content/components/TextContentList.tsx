@@ -7,14 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ContentCard } from './ContentCard';
 import { ContentFiltersComponent } from './ContentFilters';
+import Pagination from '@/components/table/Pagination';
 import { TextContentDialog } from './dialogs/TextContentDialog';
 import { Plus } from 'lucide-react';
 import type { TextContent, TextContentFormData } from '../types/content.types';
 import type { ContentFilters } from '../types/content.types';
+import type { ContentPagination } from '../utils/listResponse';
 
 interface TextContentListProps {
   textContents: TextContent[];
   isLoading: boolean;
+  pagination: ContentPagination | null;
+  currentPage: number;
+  onPageChange: (page: number) => void;
   filters: ContentFilters;
   onFiltersChange: (filters: ContentFilters) => void;
   pages?: Array<{ id: number; name: string; titleAr: string; titleEn: string }>;
@@ -47,6 +52,9 @@ interface TextContentListProps {
 export function TextContentList({
   textContents,
   isLoading,
+  pagination,
+  currentPage,
+  onPageChange,
   filters,
   onFiltersChange,
   pages = [],
@@ -118,6 +126,17 @@ export function TextContentList({
             />
           ))}
         </div>
+      )}
+
+      {pagination && pagination.total > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.max(pagination.totalPages, 1)}
+          totalItems={pagination.total}
+          itemsPerPage={pagination.limit}
+          onPageChange={onPageChange}
+          showPageSizeSelector={false}
+        />
       )}
 
       {/* Create Dialog */}

@@ -8,14 +8,19 @@ import { Card } from '@/components/ui/card';
 import { PageCard } from './PageCard';
 import { PagePreview } from './PagePreview';
 import { ContentFiltersComponent } from './ContentFilters';
+import Pagination from '@/components/table/Pagination';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import type { Page } from '../hooks/usePages';
 import type { ContentFilters } from '../types/content.types';
+import type { ContentPagination } from '../utils/listResponse';
 
 interface PagesListProps {
   pages: Page[];
   isLoading: boolean;
+  pagination: ContentPagination | null;
+  currentPage: number;
+  onPageChange: (page: number) => void;
   filters?: ContentFilters;
   onFiltersChange?: (filters: ContentFilters) => void;
   openEditDialog: (page: Page) => void;
@@ -45,6 +50,9 @@ interface PagesListProps {
 export function PagesList({
   pages,
   isLoading,
+  pagination,
+  currentPage,
+  onPageChange,
   filters,
   onFiltersChange,
   handlePageSettings,
@@ -116,6 +124,17 @@ export function PagesList({
             />
           ))}
         </div>
+      )}
+
+      {pagination && pagination.total > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.max(pagination.totalPages, 1)}
+          totalItems={pagination.total}
+          itemsPerPage={pagination.limit}
+          onPageChange={onPageChange}
+          showPageSizeSelector={false}
+        />
       )}
 
       {/* Preview Dialog */}

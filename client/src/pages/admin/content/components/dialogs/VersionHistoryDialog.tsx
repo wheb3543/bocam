@@ -35,7 +35,7 @@ interface VersionHistoryDialogProps {
   onOpenChange: (open: boolean) => void;
   entityType: 'text' | 'image' | 'color' | 'seo';
   entityId: number;
-  onRestore: (data: Record<string, unknown>) => void;
+  onRestore: () => void;
 }
 
 /**
@@ -48,14 +48,27 @@ export function VersionHistoryDialog({
   entityId,
   onRestore,
 }: VersionHistoryDialogProps) {
-  const { getVersions, deleteVersion } = useContentVersions();
+  const { getVersions, restoreVersion, deleteVersion } = useContentVersions();
   const { data: versions, isLoading } = getVersions({ entityType, entityId });
   const [compareVersions, setCompareVersions] = useState<{ v1: Version; v2: Version } | null>(null);
 
-  const handleRestore = (version: Version) => {
-    onRestore(version.data);
-    toast.success('تم استعادة النسخة بنجاح');
-    onOpenChange(false);
+  const handleRestore = async (version: Version) => {
+    if (
+      !confirm(
+        `هل تريد استعادة النسخة ${version.versionNumber}؟ ستُنشأ نسخة أمان تلقائية قبل الاستعادة.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await restoreVersion.mutateAsync({ versionId: version.id });
+      onRestore();
+      toast.success('تمت استعادة النسخة وإنشاء نسخة أمان للحالة السابقة');
+      onOpenChange(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'فشلت استعادة النسخة');
+    }
   };
 
   const handleDelete = async (versionId: number) => {
@@ -202,10 +215,11 @@ export function VersionHistoryDialog({
                         size="sm"
                         variant="outline"
                         onClick={() => handleRestore(version)}
+                        disabled={restoreVersion.isPending}
                         className="flex items-center gap-1"
                       >
                         <RotateCcw className="h-4 w-4" />
-                        استعادة
+                        {restoreVersion.isPending ? 'جاري الاستعادة...' : 'استعادة'}
                       </Button>
                       <Button
                         size="sm"

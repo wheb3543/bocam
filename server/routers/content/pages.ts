@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { protectedProcedure, adminProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
-import { eq, and, like, or } from 'drizzle-orm';
+import { eq, and, like, or, isNull, count } from 'drizzle-orm';
 import { pages } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
 import { cacheManager } from '../../services/redis';
@@ -82,7 +82,7 @@ export const pagesRouter = router({
 
       const db = await ensureDatabaseAvailable();
 
-      const conditions = [];
+      const conditions = [isNull(pages.deletedAt)];
 
       if (input.type) {
         conditions.push(eq(pages.type, input.type));
@@ -97,20 +97,21 @@ export const pagesRouter = router({
         conditions.push(eq(pages.status, input.status));
       }
       if (input.search) {
-        conditions.push(
-          or(
-            like(pages.name, `%${input.search}%`),
-            like(pages.slug, `%${input.search}%`),
-            like(pages.titleAr, `%${input.search}%`),
-            like(pages.titleEn, `%${input.search}%`),
-            like(pages.metaTitleAr, `%${input.search}%`),
-            like(pages.metaTitleEn, `%${input.search}%`),
-            like(pages.metaDescriptionAr, `%${input.search}%`),
-            like(pages.metaDescriptionEn, `%${input.search}%`),
-            like(pages.keywordsAr, `%${input.search}%`),
-            like(pages.keywordsEn, `%${input.search}%`)
-          )
+        const searchCondition = or(
+          like(pages.name, `%${input.search}%`),
+          like(pages.slug, `%${input.search}%`),
+          like(pages.titleAr, `%${input.search}%`),
+          like(pages.titleEn, `%${input.search}%`),
+          like(pages.metaTitleAr, `%${input.search}%`),
+          like(pages.metaTitleEn, `%${input.search}%`),
+          like(pages.metaDescriptionAr, `%${input.search}%`),
+          like(pages.metaDescriptionEn, `%${input.search}%`),
+          like(pages.keywordsAr, `%${input.search}%`),
+          like(pages.keywordsEn, `%${input.search}%`)
         );
+        if (searchCondition) {
+          conditions.push(searchCondition);
+        }
       }
 
       const offset = (input.page - 1) * input.limit;
@@ -125,7 +126,7 @@ export const pagesRouter = router({
 
       // الحصول على العدد الإجمالي للنتائج
       const totalCount = await db
-        .select({ count: pages.id })
+        .select({ total: count() })
         .from(pages)
         .where(conditions.length > 0 ? and(...conditions) : undefined);
 
@@ -134,8 +135,8 @@ export const pagesRouter = router({
         pagination: {
           page: input.page,
           limit: input.limit,
-          total: totalCount.length,
-          totalPages: Math.ceil(totalCount.length / input.limit),
+          total: Number(totalCount[0]?.total ?? 0),
+          totalPages: Math.ceil(Number(totalCount[0]?.total ?? 0) / input.limit),
         },
       };
 

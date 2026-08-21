@@ -28,7 +28,8 @@ import { useSectionButtons } from './hooks/useSectionButtons';
 import { useImportExport } from './hooks/useImportExport';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { History, FileText } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle, History, FileText } from 'lucide-react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 
@@ -39,12 +40,15 @@ import { toast } from 'sonner';
 export default function ContentManagementPage() {
   const contentManagement = useContentManagement();
   const textContent = useTextContent();
+  const { data: homepageReadiness, refetch: refetchHomepageReadiness } =
+    trpc.content.textContent.getHomepageReadiness.useQuery();
   const seedHomepageMutation = trpc.content.textContent.seedHomepage.useMutation({
     onSuccess: (result) => {
       toast.success(
         `تم إضافة بيانات الصفحة الرئيسية بنجاح: ${result.addedCount} عنصر جديد، ${result.skippedCount} عنصر موجود`
       );
       textContent.refetch();
+      refetchHomepageReadiness();
     },
     onError: (error) => {
       toast.error('فشل إضافة بيانات الصفحة الرئيسية: ' + error.message);
@@ -126,6 +130,18 @@ export default function ContentManagementPage() {
           </div>
         </div>
 
+        {homepageReadiness && !homepageReadiness.isReady && (
+          <Alert className="border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>الصفحة الرئيسية غير مكتملة في إدارة المحتوى</AlertTitle>
+            <AlertDescription>
+              يوجد {homepageReadiness.missingKeys.length} عنصراً غير منشور من أصل{' '}
+              {homepageReadiness.total}. سيستمر الموقع العام في استخدام القيم الاحتياطية لهذه
+              العناصر إلى أن تُنشَر من هنا.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Overview Cards */}
         <ContentOverviewCards
           overview={contentManagement.overview}
@@ -147,6 +163,9 @@ export default function ContentManagementPage() {
             <TextContentList
               textContents={textContent.textContents || []}
               isLoading={textContent.loadingTextContents}
+              pagination={textContent.pagination}
+              currentPage={textContent.page}
+              onPageChange={textContent.setPage}
               filters={{
                 searchQuery: textContent.searchQuery,
                 language: textContent.language,
@@ -160,6 +179,7 @@ export default function ContentManagementPage() {
                 textContent.setSection(filters.section);
                 textContent.setType(filters.type || 'all');
                 textContent.setIsActive(filters.isActive || 'all');
+                textContent.setPage(1);
               }}
               pages={
                 Array.isArray(pages.pages)
@@ -261,6 +281,9 @@ export default function ContentManagementPage() {
             <PagesList
               pages={Array.isArray(pages.pages) ? pages.pages : []}
               isLoading={pages.loadingPages}
+              pagination={pages.pagination}
+              currentPage={pages.page}
+              onPageChange={pages.setPage}
               filters={{
                 searchQuery: pages.searchQuery || '',
                 language: 'all',
@@ -280,6 +303,7 @@ export default function ContentManagementPage() {
                 ) {
                   pages.setIsActive(filters.isActive);
                 }
+                pages.setPage(1);
               }}
               handlePageSettings={handlePageSettings}
               openEditDialog={pages.openEditDialog}
@@ -293,6 +317,9 @@ export default function ContentManagementPage() {
             <SectionsList
               sections={sections.sections || []}
               isLoading={sections.loadingSections}
+              pagination={sections.pagination}
+              currentPage={sections.page}
+              onPageChange={sections.setPage}
               filters={{
                 searchQuery: sections.searchQuery || '',
                 language: 'all',
@@ -310,6 +337,7 @@ export default function ContentManagementPage() {
                 ) {
                   sections.setIsActive(filters.isActive);
                 }
+                sections.setPage(1);
               }}
               pages={
                 Array.isArray(pages.pages)
@@ -457,10 +485,11 @@ export default function ContentManagementPage() {
         onOpenChange={setIsVersionHistoryOpen}
         entityType={selectedVersionEntityType}
         entityId={selectedVersionEntityId}
-        onRestore={(data) => {
-          // Handle restore based on entity type
-          // eslint-disable-next-line no-console
-          console.log('Restore data:', data);
+        onRestore={() => {
+          textContent.refetch();
+          images.refetch();
+          colorScheme.refetch();
+          seo.refetch();
         }}
       />
 

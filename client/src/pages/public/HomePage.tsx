@@ -68,7 +68,7 @@ export default function HomePage() {
     type: 'description',
   });
   const { data: heroButtonText } = usePublicTextContent({
-    key: `hero.button.text.${language}`,
+    key: `hero.button.${language}`,
     section: 'hero',
     type: 'button',
   });

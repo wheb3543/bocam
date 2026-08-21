@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 2,
-  "numPassedTestSuites": 2,
+  "numTotalTestSuites": 4,
+  "numPassedTestSuites": 4,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 17,
-  "numPassedTests": 17,
+  "numTotalTests": 3,
+  "numPassedTests": 3,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,204 +24,59 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787274759012,
+  "startTime": 1787336367960,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة لا يرسم رأس عنوان مركزياً فوق محتوى الصفحة",
+          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
+          "fullName": "صلاحيات إدارة المحتوى يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم",
           "status": "passed",
-          "title": "لا يرسم رأس عنوان مركزياً فوق محتوى الصفحة",
-          "duration": 2.0223040000000765,
+          "title": "يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم",
+          "duration": 1.9012569999999869,
           "failureMessages": [],
-          "location": { "line": 34, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يعرض اسم الصفحة في الشريط الإداري العلوي عند توفره",
-          "status": "passed",
-          "title": "يعرض اسم الصفحة في الشريط الإداري العلوي عند توفره",
-          "duration": 0.36202400000001944,
-          "failureMessages": [],
-          "location": { "line": 41, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يستبدل رأس صندوق البريد المكرر بتبويبات موحدة وإجراءات مضمنة",
-          "status": "passed",
-          "title": "يستبدل رأس صندوق البريد المكرر بتبويبات موحدة وإجراءات مضمنة",
-          "duration": 0.5075170000000071,
-          "failureMessages": [],
-          "location": { "line": 47, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحصر تمرير WhatsApp في منطقة المحادثات الداخلية",
-          "status": "passed",
-          "title": "يحصر تمرير WhatsApp في منطقة المحادثات الداخلية",
-          "duration": 0.3869529999999486,
-          "failureMessages": [],
-          "location": { "line": 62, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يضبط رأس ومحرر WhatsApp للهاتف دون تزاحم في الإجراءات",
-          "status": "passed",
-          "title": "يضبط رأس ومحرر WhatsApp للهاتف دون تزاحم في الإجراءات",
-          "duration": 0.5956489999998666,
-          "failureMessages": [],
-          "location": { "line": 70, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يطي بطاقات إحصاءات قائمة محادثات WhatsApp افتراضياً على الهاتف",
-          "status": "passed",
-          "title": "يطي بطاقات إحصاءات قائمة محادثات WhatsApp افتراضياً على الهاتف",
-          "duration": 0.3352670000001581,
-          "failureMessages": [],
-          "location": { "line": 82, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يصحح مساحة مهام التسويق الرقمي الفعلية دون رأس مكرر",
-          "status": "passed",
-          "title": "يصحح مساحة مهام التسويق الرقمي الفعلية دون رأس مكرر",
-          "duration": 0.2829110000000128,
-          "failureMessages": [],
-          "location": { "line": 90, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/AdminDashboard.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/AdminDashboard.tsx",
-          "duration": 0.4575880000002144,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MessagesPage.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MessagesPage.tsx",
-          "duration": 0.639500999999882,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/content/PublishingPage.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/content/PublishingPage.tsx",
-          "duration": 0.5725910000001022,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/media/MediaLibraryPage.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/media/MediaLibraryPage.tsx",
-          "duration": 0.583609000000024,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx",
-          "duration": 0.3759059999999863,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx",
-          "duration": 0.1340179999999691,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/reports/BIPage.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/reports/BIPage.tsx",
-          "duration": 0.28455399999984365,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/reports/CampStatsPage.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/reports/CampStatsPage.tsx",
-          "duration": 0.2749949999999899,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/reports/PWAStatsPage.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/reports/PWAStatsPage.tsx",
-          "duration": 0.3778709999999137,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["مساحات العمل الإدارية دون بطاقة عنوان مكررة"],
-          "fullName": "مساحات العمل الإدارية دون بطاقة عنوان مكررة يحافظ على الرأس المتخصص في client/src/pages/admin/teams/MediaTeamPage.tsx",
-          "status": "passed",
-          "title": "يحافظ على الرأس المتخصص في client/src/pages/admin/teams/MediaTeamPage.tsx",
-          "duration": 0.2781489999999849,
-          "failureMessages": [],
-          "location": { "line": 110, "column": 5 },
+          "location": { "line": 11, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787274760285,
-      "endTime": 1787274760293.378,
+      "startTime": 1787336370102,
+      "endTime": 1787336370103.9014,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/client/src/__tests__/adminPageHeaderRollout.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/authorization.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["استعادة نسخ المحتوى"],
+          "fullName": "استعادة نسخ المحتوى ينفذ الاستعادة داخل معاملة ويُنشئ نسخة أمان ويسجل التغيير",
+          "status": "passed",
+          "title": "ينفذ الاستعادة داخل معاملة ويُنشئ نسخة أمان ويسجل التغيير",
+          "duration": 1.725700000000188,
+          "failureMessages": [],
+          "location": { "line": 11, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["استعادة نسخ المحتوى"],
+          "fullName": "استعادة نسخ المحتوى يعيد إبطال cache الملائم لكل نوع محتوى بعد الاستعادة",
+          "status": "passed",
+          "title": "يعيد إبطال cache الملائم لكل نوع محتوى بعد الاستعادة",
+          "duration": 0.3665489999998499,
+          "failureMessages": [],
+          "location": { "line": 18, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787336370101,
+      "endTime": 1787336370103.3665,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/contentVersions.restore.test.ts"
     }
   ]
 }

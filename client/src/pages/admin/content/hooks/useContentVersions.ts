@@ -10,6 +10,7 @@ export function useContentVersions() {
   const getVersions = trpc.content.contentVersions.list.useQuery;
   const getVersion = trpc.content.contentVersions.get.useQuery;
   const getLatestVersion = trpc.content.contentVersions.getLatest.useQuery;
+  const restoreVersion = trpc.content.contentVersions.restore.useMutation();
   const deleteVersion = trpc.content.contentVersions.delete.useMutation();
   const deleteAllVersions = trpc.content.contentVersions.deleteAll.useMutation();
 
@@ -18,6 +19,7 @@ export function useContentVersions() {
     getVersions,
     getVersion,
     getLatestVersion,
+    restoreVersion,
     deleteVersion,
     deleteAllVersions,
   };

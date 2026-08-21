@@ -5,8 +5,14 @@
 
 import { z } from 'zod';
 import { protectedProcedure, adminProcedure, router } from '../../_core/trpc';
+import {
+  contentEditProcedure,
+  contentPublishProcedure,
+  contentReadProcedure,
+  assertContentCapability,
+} from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
-import { eq, and, like, or, sql } from 'drizzle-orm';
+import { eq, and, like, or, sql, inArray, isNull, count } from 'drizzle-orm';
 import { textContent } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
 import { invalidateTextContentCache } from '../public/content';
@@ -70,11 +76,50 @@ const textContentSchema = z.object({
   publishedAt: z.date().optional(),
 });
 
+const homepageRequiredTextKeys = [
+  'hero.title.ar',
+  'hero.subtitle.ar',
+  'hero.description.ar',
+  'hero.button.ar',
+  'stats.doctors.label.ar',
+  'stats.specialties.label.ar',
+  'stats.patients.label.ar',
+  'stats.service.label.ar',
+  'services.title.ar',
+  'services.description.ar',
+  'services.doctors.title.ar',
+  'services.doctors.description.ar',
+  'services.offers.title.ar',
+  'services.offers.description.ar',
+  'services.camps.title.ar',
+  'services.camps.description.ar',
+  'services.explore.button.ar',
+  'about.title.ar',
+  'about.description.ar',
+  'about.features.global.title.ar',
+  'about.features.global.description.ar',
+  'about.features.comprehensive.title.ar',
+  'about.features.comprehensive.description.ar',
+  'about.features.specialized.title.ar',
+  'about.features.specialized.description.ar',
+  'about.additional.text1.ar',
+  'about.additional.text2.ar',
+  'about.image.caption.ar',
+  'cta.title.ar',
+  'cta.description.ar',
+  'cta.book.button.ar',
+  'cta.call.button.ar',
+  'accessibility.skip.link.ar',
+  'accessibility.back.to.top.ar',
+  'accessibility.toggle.animations.ar',
+  'accessibility.start.animations.ar',
+] as const;
+
 export const textContentRouter = router({
   /**
    * الحصول على جميع المحتوى النصي مع دعم البحث والتصفية والترحيل
    */
-  list: protectedProcedure
+  list: contentReadProcedure
     .input(
       z.object({
         language: z.string().optional(),
@@ -98,7 +143,7 @@ export const textContentRouter = router({
 
       const db = await ensureDatabaseAvailable();
 
-      const conditions = [];
+      const conditions = [isNull(textContent.deletedAt)];
 
       if (input.language) {
         conditions.push(eq(textContent.language, input.language));
@@ -123,13 +168,14 @@ export const textContentRouter = router({
         conditions.push(eq(textContent.status, input.status));
       }
       if (input.search) {
-        conditions.push(
-          or(
-            like(textContent.key, `%${input.search}%`),
-            like(textContent.content, `%${input.search}%`),
-            like(textContent.section, `%${input.search}%`)
-          )
+        const searchCondition = or(
+          like(textContent.key, `%${input.search}%`),
+          like(textContent.content, `%${input.search}%`),
+          like(textContent.section, `%${input.search}%`)
         );
+        if (searchCondition) {
+          conditions.push(searchCondition);
+        }
       }
 
       const offset = (input.page - 1) * input.limit;
@@ -144,7 +190,7 @@ export const textContentRouter = router({
 
       // الحصول على العدد الإجمالي للنتائج
       const totalCount = await db
-        .select({ count: textContent.id })
+        .select({ total: count() })
         .from(textContent)
         .where(conditions.length > 0 ? and(...conditions) : undefined);
 
@@ -153,8 +199,8 @@ export const textContentRouter = router({
         pagination: {
           page: input.page,
           limit: input.limit,
-          total: totalCount.length,
-          totalPages: Math.ceil(totalCount.length / input.limit),
+          total: Number(totalCount[0]?.total ?? 0),
+          totalPages: Math.ceil(Number(totalCount[0]?.total ?? 0) / input.limit),
         },
       };
 
@@ -165,7 +211,7 @@ export const textContentRouter = router({
   /**
    * الحصول على محتوى نصي واحد بواسطة المفتاح
    */
-  getByKey: protectedProcedure
+  getByKey: contentReadProcedure
     .input(z.object({ key: z.string(), language: z.string().optional() }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -187,7 +233,7 @@ export const textContentRouter = router({
   /**
    * الحصول على محتوى نصي واحد بواسطة المعرف
    */
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db.select().from(textContent).where(eq(textContent.id, input.id)).limit(1);
@@ -198,8 +244,11 @@ export const textContentRouter = router({
   /**
    * إنشاء محتوى نصي جديد
    */
-  create: protectedProcedure.input(textContentSchema).mutation(async ({ input, ctx }) => {
+  create: contentEditProcedure.input(textContentSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
+    if (input.status === 'published') {
+      assertContentCapability(ctx.user.role, 'publish');
+    }
 
     // التحقق من عدم تكرار key
     const existingKey = await db
@@ -259,7 +308,7 @@ export const textContentRouter = router({
   /**
    * تحديث محتوى نصي موجود
    */
-  update: protectedProcedure
+  update: contentEditProcedure
     .input(
       textContentSchema.extend({
         id: z.number(),
@@ -267,6 +316,9 @@ export const textContentRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      if (input.status === 'published') {
+        assertContentCapability(ctx.user.role, 'publish');
+      }
 
       // الحصول على القيمة القديمة قبل التحديث
       const oldContent = await db
@@ -366,56 +418,60 @@ export const textContentRouter = router({
   /**
    * نشر محتوى نصي - يتطلب صلاحيات admin
    */
-  publish: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
+  publish: contentPublishProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
 
-    // الحصول على المحتوى قبل النشر
-    const existing = await db
-      .select()
-      .from(textContent)
-      .where(eq(textContent.id, input.id))
-      .limit(1);
+      // الحصول على المحتوى قبل النشر
+      const existing = await db
+        .select()
+        .from(textContent)
+        .where(eq(textContent.id, input.id))
+        .limit(1);
 
-    await db
-      .update(textContent)
-      .set({ status: 'published', publishedAt: new Date() })
-      .where(eq(textContent.id, input.id));
+      await db
+        .update(textContent)
+        .set({ status: 'published', publishedAt: new Date() })
+        .where(eq(textContent.id, input.id));
 
-    logger.info(`Text content published: ${input.id}`);
+      logger.info(`Text content published: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية والعامة
-    await invalidateAdminTextContentCache();
-    invalidateTextContentCache();
+      // إبطال Cache للواجهات الإدارية والعامة
+      await invalidateAdminTextContentCache();
+      invalidateTextContentCache();
 
-    // إنشاء إشعار للمستخدم الحالي
-    if (ctx.user?.id && existing && existing.length > 0) {
-      await createContentPublishedNotification(db, {
-        userId: ctx.user.id,
-        entityType: 'textContent',
-        entityId: input.id,
-        entityName: existing[0].key,
-      });
-    }
+      // إنشاء إشعار للمستخدم الحالي
+      if (ctx.user?.id && existing && existing.length > 0) {
+        await createContentPublishedNotification(db, {
+          userId: ctx.user.id,
+          entityType: 'textContent',
+          entityId: input.id,
+          entityName: existing[0].key,
+        });
+      }
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * أرشفة محتوى نصي - يتطلب صلاحيات admin
    */
-  archive: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  archive: contentPublishProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    await db.update(textContent).set({ status: 'archived' }).where(eq(textContent.id, input.id));
+      await db.update(textContent).set({ status: 'archived' }).where(eq(textContent.id, input.id));
 
-    logger.info(`Text content archived: ${input.id}`);
+      logger.info(`Text content archived: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية والعامة
-    await invalidateAdminTextContentCache();
-    invalidateTextContentCache();
+      // إبطال Cache للواجهات الإدارية والعامة
+      await invalidateAdminTextContentCache();
+      invalidateTextContentCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * استعادة محتوى نصي محذوف
@@ -440,52 +496,54 @@ export const textContentRouter = router({
   /**
    * نسخ محتوى نصي
    */
-  duplicate: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  duplicate: contentEditProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    // الحصول على المحتوى الأصلي
-    const originalContent = await db
-      .select()
-      .from(textContent)
-      .where(eq(textContent.id, input.id))
-      .limit(1);
+      // الحصول على المحتوى الأصلي
+      const originalContent = await db
+        .select()
+        .from(textContent)
+        .where(eq(textContent.id, input.id))
+        .limit(1);
 
-    if (!originalContent[0]) {
-      throw new Error('المحتوى النصي غير موجود');
-    }
+      if (!originalContent[0]) {
+        throw new Error('المحتوى النصي غير موجود');
+      }
 
-    const content = originalContent[0];
+      const content = originalContent[0];
 
-    // إنشاء نسخة من المحتوى النصي
-    const insertId = await db
-      .insert(textContent)
-      .values({
-        key: `${content.key}-copy-${Date.now()}`,
-        language: content.language,
-        content: content.content,
-        section: content.section,
-        sectionId: content.sectionId,
-        pageId: content.pageId,
-        type: content.type,
-        status: 'draft', // النسخة تكون مسودة افتراضياً
-        isActive: 'no', // النسخة تكون معطلة افتراضياً
-        publishedAt: null, // النسخة ليس لها تاريخ نشر
-      })
-      .$returningId();
+      // إنشاء نسخة من المحتوى النصي
+      const insertId = await db
+        .insert(textContent)
+        .values({
+          key: `${content.key}-copy-${Date.now()}`,
+          language: content.language,
+          content: content.content,
+          section: content.section,
+          sectionId: content.sectionId,
+          pageId: content.pageId,
+          type: content.type,
+          status: 'draft', // النسخة تكون مسودة افتراضياً
+          isActive: 'no', // النسخة تكون معطلة افتراضياً
+          publishedAt: null, // النسخة ليس لها تاريخ نشر
+        })
+        .$returningId();
 
-    logger.info(`Text content duplicated: ${input.id} -> ${insertId}`);
+      logger.info(`Text content duplicated: ${input.id} -> ${insertId}`);
 
-    // إبطال Cache للواجهات الإدارية والعامة
-    await invalidateAdminTextContentCache();
-    invalidateTextContentCache();
+      // إبطال Cache للواجهات الإدارية والعامة
+      await invalidateAdminTextContentCache();
+      invalidateTextContentCache();
 
-    return { success: true, id: Number(insertId) };
-  }),
+      return { success: true, id: Number(insertId) };
+    }),
 
   /**
    * الحصول على نظرة عامة على المحتوى النصي
    */
-  getOverview: protectedProcedure.query(async () => {
+  getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const allContent = await db.select().from(textContent);
@@ -503,7 +561,7 @@ export const textContentRouter = router({
   /**
    * تصدير المحتوى النصي
    */
-  export: protectedProcedure
+  export: contentReadProcedure
     .input(
       z.object({
         language: z.string().optional(),
@@ -657,7 +715,7 @@ export const textContentRouter = router({
   /**
    * الحصول على المحتوى المحذوف
    */
-  getDeleted: protectedProcedure
+  getDeleted: contentReadProcedure
     .input(
       z.object({
         language: z.string().optional(),
@@ -709,9 +767,34 @@ export const textContentRouter = router({
     }),
 
   /**
+   * يقيس اكتمال النصوص المنشورة التي تستهلكها الصفحة الرئيسية الفعلية.
+   */
+  getHomepageReadiness: contentReadProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
+    const records = await db
+      .select({ key: textContent.key, status: textContent.status, isActive: textContent.isActive })
+      .from(textContent)
+      .where(inArray(textContent.key, [...homepageRequiredTextKeys]));
+
+    const availableKeys = new Set(
+      records
+        .filter((record) => record.status === 'published' && record.isActive === 'yes')
+        .map((record) => record.key)
+    );
+    const missingKeys = homepageRequiredTextKeys.filter((key) => !availableKeys.has(key));
+
+    return {
+      total: homepageRequiredTextKeys.length,
+      published: availableKeys.size,
+      missingKeys,
+      isReady: missingKeys.length === 0,
+    };
+  }),
+
+  /**
    * إضافة بيانات الصفحة الرئيسية
    */
-  seedHomepage: protectedProcedure.mutation(async () => {
+  seedHomepage: contentPublishProcedure.mutation(async () => {
     const db = await ensureDatabaseAvailable();
     const { pages } = await import('../../../drizzle/schema');
     const { eq, and } = await import('drizzle-orm');
@@ -727,19 +810,22 @@ export const textContentRouter = router({
         slug: 'home',
         type: 'main',
         parentId: null,
-        titleAr: 'الصفحة الرئيسية',
-        titleEn: 'Home Page',
-        metaTitleAr: 'مستشفى بوكم - صنعاء | احجز موعدك الآن',
-        metaTitleEn: "Bocam Hospital - Sana'a | Book Your Appointment Now",
+        titleAr: 'المستشفى السعودي الألماني - صنعاء',
+        titleEn: 'Saudi German Hospital – Sana’a',
+        metaTitleAr: 'المستشفى السعودي الألماني - صنعاء | احجز موعدك الآن',
+        metaTitleEn: 'Saudi German Hospital – Sana’a | Book Your Appointment Now',
         metaDescriptionAr:
-          'احجز موعدك مع أفضل الأطباء في مستشفى بوكم بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.',
+          'احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.',
         metaDescriptionEn:
-          "Book your appointment with the best doctors at Bocam Hospital in Sana'a. Excellent medical services, special offers, and free medical camps.",
-        keywordsAr: 'مستشفى بوكم, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية',
+          'Book your appointment with the best doctors at Saudi German Hospital – Sana’a. Excellent medical services, special offers, and free medical camps.',
+        keywordsAr:
+          'المستشفى السعودي الألماني, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية',
         keywordsEn:
-          "Bocam Hospital, Sana'a, book appointment, doctors, medical offers, health camps, medical consultations",
+          'Saudi German Hospital, Sana’a, book appointment, doctors, medical offers, health camps, medical consultations',
         isActive: 'yes',
         sortOrder: 1,
+        status: 'published',
+        publishedAt: new Date(),
       });
 
       homepageId = insertResult[0].insertId;
@@ -755,7 +841,7 @@ export const textContentRouter = router({
       {
         key: 'hero.title.ar',
         language: 'ar',
-        content: 'مستشفى بوكم - رعايتك الصحية الأولى',
+        content: 'نرعاكم كأهالينا',
         section: 'hero',
         pageId: homepageId,
         type: 'title' as const,
@@ -763,7 +849,7 @@ export const textContentRouter = router({
       {
         key: 'hero.title.en',
         language: 'en',
-        content: 'Bocam Hospital - Your First Health Care',
+        content: 'Caring for You Like Family',
         section: 'hero',
         pageId: homepageId,
         type: 'title' as const,
@@ -937,7 +1023,7 @@ export const textContentRouter = router({
       {
         key: 'about.title.ar',
         language: 'ar',
-        content: 'عن مستشفى بوكم',
+        content: 'عن المستشفى السعودي الألماني - صنعاء',
         section: 'about',
         pageId: homepageId,
         type: 'title' as const,
@@ -945,7 +1031,7 @@ export const textContentRouter = router({
       {
         key: 'about.title.en',
         language: 'en',
-        content: 'About Bocam Hospital',
+        content: 'About Saudi German Hospital – Sana’a',
         section: 'about',
         pageId: homepageId,
         type: 'title' as const,
@@ -1000,6 +1086,174 @@ export const textContentRouter = router({
         pageId: homepageId,
         type: 'button' as const,
       },
+      {
+        key: 'services.description.ar',
+        language: 'ar',
+        content: 'منصة إلكترونية متكاملة لحجز المواعيد والاستفادة من العروض والمخيمات الطبية.',
+        section: 'services',
+        pageId: homepageId,
+        type: 'description' as const,
+      },
+      {
+        key: 'services.doctors.description.ar',
+        language: 'ar',
+        content: 'احجز موعدك مع أفضل الأطباء والاستشاريين في مختلف التخصصات.',
+        section: 'services',
+        pageId: homepageId,
+        type: 'description' as const,
+      },
+      {
+        key: 'services.offers.title.ar',
+        language: 'ar',
+        content: 'العروض الطبية',
+        section: 'services',
+        pageId: homepageId,
+        type: 'title' as const,
+      },
+      {
+        key: 'services.offers.description.ar',
+        language: 'ar',
+        content: 'استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات متكاملة.',
+        section: 'services',
+        pageId: homepageId,
+        type: 'description' as const,
+      },
+      {
+        key: 'services.camps.title.ar',
+        language: 'ar',
+        content: 'المخيمات الطبية الخيرية',
+        section: 'services',
+        pageId: homepageId,
+        type: 'title' as const,
+      },
+      {
+        key: 'services.camps.description.ar',
+        language: 'ar',
+        content: 'خدمات طبية مجانية للمجتمع ضمن مسؤوليتنا الاجتماعية.',
+        section: 'services',
+        pageId: homepageId,
+        type: 'description' as const,
+      },
+      {
+        key: 'about.description.ar',
+        language: 'ar',
+        content: 'نقدم رعاية صحية شاملة بمعايير عالمية وبفريق من الأطباء والاستشاريين المتخصصين.',
+        section: 'about',
+        pageId: homepageId,
+        type: 'description' as const,
+      },
+      {
+        key: 'about.features.global.description.ar',
+        language: 'ar',
+        content: 'نقدم خدمات طبية متميزة بمعايير عالمية.',
+        section: 'about',
+        pageId: homepageId,
+        type: 'description' as const,
+      },
+      {
+        key: 'about.features.comprehensive.title.ar',
+        language: 'ar',
+        content: 'رعاية شاملة',
+        section: 'about',
+        pageId: homepageId,
+        type: 'title' as const,
+      },
+      {
+        key: 'about.features.comprehensive.description.ar',
+        language: 'ar',
+        content: 'رعاية صحية متكاملة لجميع المرضى.',
+        section: 'about',
+        pageId: homepageId,
+        type: 'description' as const,
+      },
+      {
+        key: 'about.features.specialized.title.ar',
+        language: 'ar',
+        content: 'أطباء متخصصون',
+        section: 'about',
+        pageId: homepageId,
+        type: 'title' as const,
+      },
+      {
+        key: 'about.features.specialized.description.ar',
+        language: 'ar',
+        content: 'نخبة من الأطباء والاستشاريين المتخصصين.',
+        section: 'about',
+        pageId: homepageId,
+        type: 'description' as const,
+      },
+      {
+        key: 'about.additional.text1.ar',
+        language: 'ar',
+        content: 'نستخدم أحدث التقنيات والأجهزة لضمان أفضل النتائج الصحية.',
+        section: 'about',
+        pageId: homepageId,
+        type: 'text' as const,
+      },
+      {
+        key: 'about.additional.text2.ar',
+        language: 'ar',
+        content: 'نلتزم بالمسؤولية المجتمعية من خلال المخيمات الطبية الخيرية.',
+        section: 'about',
+        pageId: homepageId,
+        type: 'text' as const,
+      },
+      {
+        key: 'about.image.caption.ar',
+        language: 'ar',
+        content: 'المستشفى السعودي الألماني - صنعاء',
+        section: 'about',
+        pageId: homepageId,
+        type: 'text' as const,
+      },
+      {
+        key: 'cta.description.ar',
+        language: 'ar',
+        content: 'فريقنا الطبي في انتظارك. احجز موعدك أو تواصل معنا للاستفسار.',
+        section: 'cta',
+        pageId: homepageId,
+        type: 'description' as const,
+      },
+      {
+        key: 'cta.call.button.ar',
+        language: 'ar',
+        content: 'اتصل بنا',
+        section: 'cta',
+        pageId: homepageId,
+        type: 'button' as const,
+      },
+      {
+        key: 'accessibility.skip.link.ar',
+        language: 'ar',
+        content: 'تخطى إلى المحتوى الرئيسي',
+        section: 'accessibility',
+        pageId: homepageId,
+        type: 'text' as const,
+      },
+      {
+        key: 'accessibility.back.to.top.ar',
+        language: 'ar',
+        content: 'العودة إلى الأعلى',
+        section: 'accessibility',
+        pageId: homepageId,
+        type: 'text' as const,
+      },
+      {
+        key: 'accessibility.toggle.animations.ar',
+        language: 'ar',
+        content: 'إيقاف الحركات',
+        section: 'accessibility',
+        pageId: homepageId,
+        type: 'text' as const,
+      },
+      {
+        key: 'accessibility.start.animations.ar',
+        language: 'ar',
+        content: 'تشغيل الحركات',
+        section: 'accessibility',
+        pageId: homepageId,
+        type: 'text' as const,
+      },
     ];
 
     let addedCount = 0;
@@ -1015,6 +1269,8 @@ export const textContentRouter = router({
         await db.insert(textContent).values({
           ...item,
           isActive: 'yes',
+          status: 'published',
+          publishedAt: new Date(),
         });
         addedCount++;
       } else {

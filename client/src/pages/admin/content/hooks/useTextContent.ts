@@ -8,6 +8,7 @@ import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import type { TextContent, TextContentFormData } from '../types/content.types';
 import { initialTextContentFormData } from '../types/content.types';
+import { getContentListData, getContentListPagination } from '../utils/listResponse';
 
 /**
  * useTextContent - Hook لإدارة المحتوى النصي
@@ -27,6 +28,7 @@ export function useTextContent() {
   const [pageId, setPageId] = useState<number | undefined>(undefined);
   const [type, setType] = useState('all');
   const [isActive, setIsActive] = useState('all');
+  const [page, setPage] = useState(1);
 
   // Query
   const {
@@ -41,9 +43,11 @@ export function useTextContent() {
     type: type !== 'all' ? type : undefined,
     isActive: isActive !== 'all' ? (isActive as 'yes' | 'no') : undefined,
     search: searchQuery || undefined,
+    page,
   });
 
-  const textContents = Array.isArray(textContentsData) ? textContentsData : [];
+  const textContents = getContentListData<TextContent>(textContentsData);
+  const pagination = getContentListPagination<TextContent>(textContentsData);
 
   // Mutations
   const createMutation = trpc.content.textContent.create.useMutation({
@@ -163,7 +167,9 @@ export function useTextContent() {
     pageId,
     type,
     isActive,
+    page,
     textContents,
+    pagination,
     loadingTextContents,
     createMutation,
     updateMutation,
@@ -181,6 +187,7 @@ export function useTextContent() {
     setPageId,
     setType,
     setIsActive,
+    setPage,
 
     // Handlers
     handleCreateTextContent,

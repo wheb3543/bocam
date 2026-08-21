@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { getContentListData, getContentListPagination } from '../utils/listResponse';
 
 export type SectionType =
   | 'slider'
@@ -183,6 +184,7 @@ export function useSections() {
   const [pageId, setPageId] = useState<number | undefined>(undefined);
   const [type, setType] = useState<string>('all');
   const [isActive, setIsActive] = useState<'all' | 'yes' | 'no'>('all');
+  const [page, setPage] = useState(1);
 
   // Query
   const {
@@ -194,13 +196,17 @@ export function useSections() {
     type: type !== 'all' ? type : undefined,
     isActive: isActive !== 'all' ? (isActive as 'yes' | 'no') : undefined,
     search: searchQuery || undefined,
+    page,
   });
 
-  const sections = Array.isArray(sectionsData) ? sectionsData : [];
+  const sections = getContentListData<Section>(sectionsData);
+  const pagination = getContentListPagination<Section>(sectionsData);
 
   // Query for pages (for page selection)
   const { data: pagesData } = trpc.content.pages.list.useQuery({});
-  const pages = Array.isArray(pagesData) ? pagesData : [];
+  const pages = getContentListData<{ id: number; name: string; titleAr: string; titleEn: string }>(
+    pagesData
+  );
 
   // Mutations
   const createMutation = trpc.content.sections.create.useMutation({
@@ -263,9 +269,7 @@ export function useSections() {
     e.preventDefault();
 
     // التحقق من الترتيب المنطقي
-    const pageSections = Array.isArray(sectionsData)
-      ? sectionsData.filter((s: Section) => s.pageId === formData.pageId)
-      : [];
+    const pageSections = sections.filter((s) => s.pageId === formData.pageId);
     const newSection: Section = {
       id: 0,
       pageId: formData.pageId,
@@ -316,11 +320,9 @@ export function useSections() {
     }
 
     // التحقق من الترتيب المنطقي
-    const pageSections = Array.isArray(sectionsData)
-      ? sectionsData.filter(
-          (s: Section) => s.pageId === formData.pageId && s.id !== selectedSection.id
-        )
-      : [];
+    const pageSections = sections.filter(
+      (s) => s.pageId === formData.pageId && s.id !== selectedSection.id
+    );
     const updatedSection: Section = {
       ...selectedSection,
       pageId: formData.pageId,
@@ -412,7 +414,9 @@ export function useSections() {
     pageId,
     type,
     isActive,
+    page,
     sections,
+    pagination,
     pages,
     loadingSections,
     createMutation,
@@ -430,6 +434,7 @@ export function useSections() {
     setPageId,
     setType,
     setIsActive,
+    setPage,
 
     // Handlers
     handleCreateSection,
