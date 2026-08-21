@@ -196,6 +196,53 @@ export function SectionDialog({
               />
             </div>
 
+            <div className="grid gap-2">
+              <Label htmlFor="status">حالة المحتوى</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value: 'draft' | 'published' | 'archived') =>
+                  onFormDataChange({
+                    ...formData,
+                    status: value,
+                    publishedAt: value === 'published' ? null : formData.publishedAt,
+                  })
+                }
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="اختر حالة المحتوى" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">مسودة</SelectItem>
+                  <SelectItem value="published">نشر الآن</SelectItem>
+                  <SelectItem value="archived">مؤرشف</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.status === 'draft' && (
+              <div className="grid gap-2 rounded-lg border border-dashed bg-muted/30 p-3">
+                <Label htmlFor="publishedAt">موعد النشر المؤجل</Label>
+                <Input
+                  id="publishedAt"
+                  type="datetime-local"
+                  value={
+                    formData.publishedAt
+                      ? new Date(formData.publishedAt).toISOString().slice(0, 16)
+                      : ''
+                  }
+                  onChange={(event) =>
+                    onFormDataChange({
+                      ...formData,
+                      publishedAt: event.target.value ? new Date(event.target.value) : null,
+                    })
+                  }
+                />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  يحفظ القسم كمسودة الآن ويُنشر تلقائياً عند الموعد بعد تفعيل النشر الدوري.
+                </p>
+              </div>
+            )}
+
             {/* Active */}
             <div className="flex items-center gap-2">
               <Switch
@@ -209,6 +256,15 @@ export function SectionDialog({
             </div>
           </div>
           <DialogFooter>
+            {formData.status === 'draft' && (
+              <p className="me-auto text-xs text-muted-foreground" role="status" aria-live="polite">
+                {isPending
+                  ? 'جاري حفظ المسودة…'
+                  : formData.publishedAt
+                    ? 'المسودة مجدولة للنشر عند الموعد المحدد.'
+                    : 'المسودة جاهزة للحفظ وغير منشورة.'}
+              </p>
+            )}
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               إلغاء
             </Button>

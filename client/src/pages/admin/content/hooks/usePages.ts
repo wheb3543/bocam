@@ -27,6 +27,7 @@ export interface Page {
   status: 'draft' | 'published' | 'archived';
   isActive: 'yes' | 'no';
   sortOrder: number;
+  publishedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -318,7 +319,7 @@ export function usePages() {
       status: page.status,
       isActive: page.isActive,
       sortOrder: page.sortOrder,
-      publishedAt: null,
+      publishedAt: page.publishedAt,
     });
     setIsEditDialogOpen(true);
   };
