@@ -4,7 +4,13 @@
  */
 
 import { z } from 'zod';
-import { protectedProcedure, adminProcedure, router } from '../../_core/trpc';
+import { adminProcedure, router } from '../../_core/trpc';
+import {
+  assertContentCapability,
+  contentEditProcedure,
+  contentPublishProcedure,
+  contentReadProcedure,
+} from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or, isNull, count } from 'drizzle-orm';
 import { pages } from '../../../drizzle/schema';
@@ -61,7 +67,7 @@ export const pagesRouter = router({
   /**
    * الحصول على جميع الصفحات مع دعم البحث والتصفية والترحيل
    */
-  list: protectedProcedure
+  list: contentReadProcedure
     .input(
       z.object({
         type: z.enum(['main', 'sub']).optional(),
@@ -147,7 +153,7 @@ export const pagesRouter = router({
   /**
    * الحصول على صفحة واحدة بواسطة المعرف
    */
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
@@ -158,7 +164,7 @@ export const pagesRouter = router({
   /**
    * الحصول على صفحة واحدة بواسطة الرابط (slug)
    */
-  getBySlug: protectedProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
+  getBySlug: contentReadProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db.select().from(pages).where(eq(pages.slug, input.slug)).limit(1);
@@ -169,7 +175,7 @@ export const pagesRouter = router({
   /**
    * الحصول على الصفحات الفرعية لصفحة رئيسية
    */
-  getSubPages: protectedProcedure
+  getSubPages: contentReadProcedure
     .input(z.object({ parentId: z.number() }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -186,7 +192,7 @@ export const pagesRouter = router({
   /**
    * الحصول على الصفحات الرئيسية فقط
    */
-  getMainPages: protectedProcedure.query(async () => {
+  getMainPages: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db
@@ -201,8 +207,11 @@ export const pagesRouter = router({
   /**
    * إنشاء صفحة جديدة
    */
-  create: protectedProcedure.input(pageSchema).mutation(async ({ input, ctx }) => {
+  create: contentEditProcedure.input(pageSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
+    if (input.status === 'published') {
+      assertContentCapability(ctx.user.role, 'publish');
+    }
 
     // التحقق من عدم تكرار slug
     const existingSlug = await db.select().from(pages).where(eq(pages.slug, input.slug)).limit(1);
@@ -253,7 +262,7 @@ export const pagesRouter = router({
   /**
    * تحديث صفحة موجودة
    */
-  update: protectedProcedure
+  update: contentEditProcedure
     .input(
       pageSchema.extend({
         id: z.number(),
@@ -261,6 +270,9 @@ export const pagesRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      if (input.status === 'published') {
+        assertContentCapability(ctx.user.role, 'publish');
+      }
 
       // الحصول على القيمة القديمة قبل التحديث
       const oldPage = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
@@ -343,42 +355,46 @@ export const pagesRouter = router({
   /**
    * نشر صفحة - يتطلب صلاحيات admin
    */
-  publish: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  publish: contentPublishProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    await db
-      .update(pages)
-      .set({ status: 'published', publishedAt: new Date() })
-      .where(eq(pages.id, input.id));
+      await db
+        .update(pages)
+        .set({ status: 'published', publishedAt: new Date() })
+        .where(eq(pages.id, input.id));
 
-    logger.info(`Page published: ${input.id}`);
+      logger.info(`Page published: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية
-    await invalidateAdminPagesCache();
+      // إبطال Cache للواجهات الإدارية
+      await invalidateAdminPagesCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * أرشفة صفحة - يتطلب صلاحيات admin
    */
-  archive: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  archive: contentPublishProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    await db.update(pages).set({ status: 'archived' }).where(eq(pages.id, input.id));
+      await db.update(pages).set({ status: 'archived' }).where(eq(pages.id, input.id));
 
-    logger.info(`Page archived: ${input.id}`);
+      logger.info(`Page archived: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية
-    await invalidateAdminPagesCache();
+      // إبطال Cache للواجهات الإدارية
+      await invalidateAdminPagesCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * استعادة صفحة محذوفة
    */
-  restore: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db.update(pages).set({ deletedAt: null, status: 'draft' }).where(eq(pages.id, input.id));
@@ -394,50 +410,52 @@ export const pagesRouter = router({
   /**
    * نسخ صفحة
    */
-  duplicate: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  duplicate: contentEditProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    // الحصول على الصفحة الأصلية
-    const originalPage = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
+      // الحصول على الصفحة الأصلية
+      const originalPage = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
 
-    if (!originalPage[0]) {
-      throw new Error('الصفحة غير موجودة');
-    }
+      if (!originalPage[0]) {
+        throw new Error('الصفحة غير موجودة');
+      }
 
-    const page = originalPage[0];
+      const page = originalPage[0];
 
-    // إنشاء نسخة من الصفحة
-    const insertId = await db
-      .insert(pages)
-      .values({
-        name: `${page.name} (نسخة)`,
-        slug: `${page.slug}-copy-${Date.now()}`,
-        type: page.type,
-        parentId: page.parentId,
-        titleAr: `${page.titleAr} (نسخة)`,
-        titleEn: `${page.titleEn} (Copy)`,
-        metaTitleAr: page.metaTitleAr,
-        metaTitleEn: page.metaTitleEn,
-        metaDescriptionAr: page.metaDescriptionAr,
-        metaDescriptionEn: page.metaDescriptionEn,
-        keywordsAr: page.keywordsAr,
-        keywordsEn: page.keywordsEn,
-        status: 'draft', // النسخة تكون مسودة افتراضياً
-        isActive: 'no', // النسخة تكون معطلة افتراضياً
-        sortOrder: page.sortOrder + 1,
-        publishedAt: null, // النسخة ليس لها تاريخ نشر
-      })
-      .$returningId();
+      // إنشاء نسخة من الصفحة
+      const insertId = await db
+        .insert(pages)
+        .values({
+          name: `${page.name} (نسخة)`,
+          slug: `${page.slug}-copy-${Date.now()}`,
+          type: page.type,
+          parentId: page.parentId,
+          titleAr: `${page.titleAr} (نسخة)`,
+          titleEn: `${page.titleEn} (Copy)`,
+          metaTitleAr: page.metaTitleAr,
+          metaTitleEn: page.metaTitleEn,
+          metaDescriptionAr: page.metaDescriptionAr,
+          metaDescriptionEn: page.metaDescriptionEn,
+          keywordsAr: page.keywordsAr,
+          keywordsEn: page.keywordsEn,
+          status: 'draft', // النسخة تكون مسودة افتراضياً
+          isActive: 'no', // النسخة تكون معطلة افتراضياً
+          sortOrder: page.sortOrder + 1,
+          publishedAt: null, // النسخة ليس لها تاريخ نشر
+        })
+        .$returningId();
 
-    logger.info(`Page duplicated: ${input.id} -> ${insertId}`);
+      logger.info(`Page duplicated: ${input.id} -> ${insertId}`);
 
-    return { success: true, id: Number(insertId) };
-  }),
+      return { success: true, id: Number(insertId) };
+    }),
 
   /**
    * الحصول على نظرة عامة على الصفحات
    */
-  getOverview: protectedProcedure.query(async () => {
+  getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const allPages = await db.select().from(pages);

@@ -8,11 +8,16 @@
 
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { contentApprovals } from '../../../drizzle/schema';
-import { eq, and, desc, asc } from 'drizzle-orm';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { contentApprovals, users } from '../../../drizzle/schema';
+import { eq, and, desc, asc, inArray } from 'drizzle-orm';
+import { adminProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { createLogger } from '../../_core/logger';
+import {
+  contentEditProcedure,
+  contentReadProcedure,
+  contentReviewProcedure,
+} from './authorization';
 import {
   createApprovalRequestedNotification,
   createApprovalApprovedNotification,
@@ -59,7 +64,7 @@ export const approvalsRouter = router({
   /**
    * الحصول على جميع طلبات الموافقة
    */
-  list: protectedProcedure
+  list: contentReadProcedure
     .input(
       z.object({
         entityType: z.enum(['textContent', 'image', 'media', 'page', 'section']).optional(),
@@ -116,7 +121,7 @@ export const approvalsRouter = router({
   /**
    * الحصول على طلب موافقة بواسطة المعرف
    */
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const approval = await db
@@ -138,7 +143,7 @@ export const approvalsRouter = router({
   /**
    * إنشاء طلب موافقة جديد
    */
-  create: protectedProcedure.input(createApprovalSchema).mutation(async ({ input, ctx }) => {
+  create: contentEditProcedure.input(createApprovalSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
 
     // التحقق من عدم وجود طلب موافقة معلق لنفس الكيان
@@ -177,14 +182,25 @@ export const approvalsRouter = router({
 
     logger.info(`Content approval request created: ${insertId[0].id} by user ${ctx.user.id}`);
 
-    // إنشاء إشعار للمستخدمين المصرح لهم بالموافقة
-    // TODO: الحصول على قائمة المستخدمين المصرح لهم بالموافقة
-    // await createApprovalRequestedNotification(db, {
-    //   userId: adminUserId,
-    //   entityType: input.entityType,
-    //   entityId: input.entityId,
-    //   entityName: `Entity ${input.entityId}`,
-    // });
+    const reviewers = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        and(inArray(users.role, ['admin', 'manager', 'team_leader']), eq(users.isActive, 'yes'))
+      );
+
+    await Promise.all(
+      reviewers
+        .filter((reviewer) => reviewer.id !== ctx.user.id)
+        .map((reviewer) =>
+          createApprovalRequestedNotification(db, {
+            userId: reviewer.id,
+            entityType: input.entityType,
+            entityId: input.entityId,
+            entityName: `Entity ${input.entityId}`,
+          })
+        )
+    );
 
     return newApproval[0];
   }),
@@ -192,7 +208,7 @@ export const approvalsRouter = router({
   /**
    * الموافقة على طلب
    */
-  approve: protectedProcedure.input(approveApprovalSchema).mutation(async ({ input, ctx }) => {
+  approve: contentReviewProcedure.input(approveApprovalSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
 
     const [approval] = await db
@@ -248,7 +264,7 @@ export const approvalsRouter = router({
   /**
    * رفض طلب
    */
-  reject: protectedProcedure.input(rejectApprovalSchema).mutation(async ({ input, ctx }) => {
+  reject: contentReviewProcedure.input(rejectApprovalSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
 
     const [approval] = await db
@@ -306,7 +322,7 @@ export const approvalsRouter = router({
   /**
    * تحديث حالة الموافقة
    */
-  updateStatus: protectedProcedure
+  updateStatus: contentReviewProcedure
     .input(updateApprovalStatusSchema)
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
@@ -355,7 +371,7 @@ export const approvalsRouter = router({
   /**
    * حذف طلب الموافقة
    */
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db.delete(contentApprovals).where(eq(contentApprovals.id, input.id));
@@ -368,7 +384,7 @@ export const approvalsRouter = router({
   /**
    * الحصول على طلبات الموافقة المعلقة
    */
-  getPending: protectedProcedure
+  getPending: contentReviewProcedure
     .input(
       z.object({
         limit: z.number().default(50),
@@ -406,7 +422,7 @@ export const approvalsRouter = router({
   /**
    * الحصول على طلبات الموافقة للمستخدم الحالي
    */
-  getMyApprovals: protectedProcedure
+  getMyApprovals: contentReadProcedure
     .input(
       z.object({
         status: z.enum(['pending', 'approved', 'rejected']).optional(),

@@ -4,7 +4,8 @@
  */
 
 import { z } from 'zod';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { adminProcedure, router } from '../../_core/trpc';
+import { contentEditProcedure, contentReadProcedure } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or } from 'drizzle-orm';
 import { seoSettings } from '../../../drizzle/schema';
@@ -36,7 +37,7 @@ export const seoSettingsRouter = router({
   /**
    * الحصول على جميع إعدادات SEO
    */
-  list: protectedProcedure
+  list: contentReadProcedure
     .input(
       z.object({
         language: z.string().optional(),
@@ -76,7 +77,7 @@ export const seoSettingsRouter = router({
   /**
    * الحصول على إعدادات SEO لصفحة واحدة بواسطة المعرف
    */
-  getByPageId: protectedProcedure
+  getByPageId: contentReadProcedure
     .input(z.object({ pageId: z.number(), language: z.string().optional() }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -98,7 +99,7 @@ export const seoSettingsRouter = router({
   /**
    * الحصول على إعدادات SEO لصفحة واحدة بواسطة المفتاح
    */
-  getByPageKey: protectedProcedure
+  getByPageKey: contentReadProcedure
     .input(z.object({ pageKey: z.string(), language: z.string().optional() }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -120,7 +121,7 @@ export const seoSettingsRouter = router({
   /**
    * الحصول على إعدادات SEO لصفحة واحدة بواسطة الرابط
    */
-  getBySlug: protectedProcedure
+  getBySlug: contentReadProcedure
     .input(z.object({ slug: z.string(), language: z.string().optional() }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -142,7 +143,7 @@ export const seoSettingsRouter = router({
   /**
    * الحصول على إعدادات SEO واحدة بواسطة المعرف
    */
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db.select().from(seoSettings).where(eq(seoSettings.id, input.id)).limit(1);
@@ -153,7 +154,7 @@ export const seoSettingsRouter = router({
   /**
    * إنشاء إعدادات SEO جديدة
    */
-  create: protectedProcedure.input(seoSettingsSchema).mutation(async ({ input }) => {
+  create: contentEditProcedure.input(seoSettingsSchema).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const insertId = await db
@@ -184,7 +185,7 @@ export const seoSettingsRouter = router({
   /**
    * تحديث إعدادات SEO موجودة
    */
-  update: protectedProcedure
+  update: contentEditProcedure
     .input(
       seoSettingsSchema.extend({
         id: z.number(),
@@ -221,7 +222,7 @@ export const seoSettingsRouter = router({
   /**
    * حذف إعدادات SEO
    */
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db.delete(seoSettings).where(eq(seoSettings.id, input.id));
@@ -234,7 +235,7 @@ export const seoSettingsRouter = router({
   /**
    * الحصول على نظرة عامة على إعدادات SEO
    */
-  getOverview: protectedProcedure.query(async () => {
+  getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const allSEO = await db.select().from(seoSettings);

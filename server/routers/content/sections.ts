@@ -4,7 +4,13 @@
  */
 
 import { z } from 'zod';
-import { protectedProcedure, adminProcedure, router } from '../../_core/trpc';
+import { adminProcedure, router } from '../../_core/trpc';
+import {
+  assertContentCapability,
+  contentEditProcedure,
+  contentPublishProcedure,
+  contentReadProcedure,
+} from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or, isNull, count } from 'drizzle-orm';
 import { sections } from '../../../drizzle/schema';
@@ -78,7 +84,7 @@ export const sectionsRouter = router({
   /**
    * الحصول على جميع الأقسام
    */
-  list: protectedProcedure
+  list: contentReadProcedure
     .input(
       z.object({
         pageId: z.number().optional(),
@@ -158,7 +164,7 @@ export const sectionsRouter = router({
   /**
    * الحصول على قسم واحد بواسطة المعرف
    */
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
@@ -169,7 +175,7 @@ export const sectionsRouter = router({
   /**
    * الحصول على أقسام صفحة معينة
    */
-  getByPageId: protectedProcedure
+  getByPageId: contentReadProcedure
     .input(z.object({ pageId: z.number() }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -186,7 +192,7 @@ export const sectionsRouter = router({
   /**
    * الحصول على الأقسام النشطة لصفحة معينة
    */
-  getActiveByPageId: protectedProcedure
+  getActiveByPageId: contentReadProcedure
     .input(z.object({ pageId: z.number() }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -203,8 +209,11 @@ export const sectionsRouter = router({
   /**
    * إنشاء قسم جديد
    */
-  create: protectedProcedure.input(sectionSchema).mutation(async ({ input, ctx }) => {
+  create: contentEditProcedure.input(sectionSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
+    if (input.status === 'published') {
+      assertContentCapability(ctx.user.role, 'publish');
+    }
 
     const insertId = await db
       .insert(sections)
@@ -244,7 +253,7 @@ export const sectionsRouter = router({
   /**
    * تحديث قسم موجود
    */
-  update: protectedProcedure
+  update: contentEditProcedure
     .input(
       sectionSchema.extend({
         id: z.number(),
@@ -252,6 +261,9 @@ export const sectionsRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      if (input.status === 'published') {
+        assertContentCapability(ctx.user.role, 'publish');
+      }
 
       // الحصول على القيمة القديمة قبل التحديث
       const oldSection = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
@@ -323,42 +335,46 @@ export const sectionsRouter = router({
   /**
    * نشر قسم - يتطلب صلاحيات admin
    */
-  publish: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  publish: contentPublishProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    await db
-      .update(sections)
-      .set({ status: 'published', publishedAt: new Date() })
-      .where(eq(sections.id, input.id));
+      await db
+        .update(sections)
+        .set({ status: 'published', publishedAt: new Date() })
+        .where(eq(sections.id, input.id));
 
-    logger.info(`Section published: ${input.id}`);
+      logger.info(`Section published: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية
-    await invalidateAdminSectionsCache();
+      // إبطال Cache للواجهات الإدارية
+      await invalidateAdminSectionsCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * أرشفة قسم - يتطلب صلاحيات admin
    */
-  archive: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  archive: contentPublishProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    await db.update(sections).set({ status: 'archived' }).where(eq(sections.id, input.id));
+      await db.update(sections).set({ status: 'archived' }).where(eq(sections.id, input.id));
 
-    logger.info(`Section archived: ${input.id}`);
+      logger.info(`Section archived: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية
-    await invalidateAdminSectionsCache();
+      // إبطال Cache للواجهات الإدارية
+      await invalidateAdminSectionsCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * استعادة قسم محذوف
    */
-  restore: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db
@@ -377,52 +393,54 @@ export const sectionsRouter = router({
   /**
    * نسخ قسم
    */
-  duplicate: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  duplicate: contentEditProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    // الحصول على القسم الأصلي
-    const originalSection = await db
-      .select()
-      .from(sections)
-      .where(eq(sections.id, input.id))
-      .limit(1);
+      // الحصول على القسم الأصلي
+      const originalSection = await db
+        .select()
+        .from(sections)
+        .where(eq(sections.id, input.id))
+        .limit(1);
 
-    if (!originalSection[0]) {
-      throw new Error('القسم غير موجود');
-    }
+      if (!originalSection[0]) {
+        throw new Error('القسم غير موجود');
+      }
 
-    const section = originalSection[0];
+      const section = originalSection[0];
 
-    // إنشاء نسخة من القسم
-    const insertId = await db
-      .insert(sections)
-      .values({
-        pageId: section.pageId,
-        name: `${section.name} (نسخة)`,
-        titleAr: section.titleAr,
-        titleEn: section.titleEn,
-        subtitleAr: section.subtitleAr,
-        subtitleEn: section.subtitleEn,
-        type: section.type,
-        status: 'draft', // النسخة تكون مسودة افتراضياً
-        sortOrder: section.sortOrder + 1,
-        isActive: 'no', // النسخة تكون معطلة افتراضياً
-        publishedAt: null, // النسخة ليس لها تاريخ نشر
-      })
-      .$returningId();
+      // إنشاء نسخة من القسم
+      const insertId = await db
+        .insert(sections)
+        .values({
+          pageId: section.pageId,
+          name: `${section.name} (نسخة)`,
+          titleAr: section.titleAr,
+          titleEn: section.titleEn,
+          subtitleAr: section.subtitleAr,
+          subtitleEn: section.subtitleEn,
+          type: section.type,
+          status: 'draft', // النسخة تكون مسودة افتراضياً
+          sortOrder: section.sortOrder + 1,
+          isActive: 'no', // النسخة تكون معطلة افتراضياً
+          publishedAt: null, // النسخة ليس لها تاريخ نشر
+        })
+        .$returningId();
 
-    logger.info(`Section duplicated: ${input.id} -> ${insertId}`);
+      logger.info(`Section duplicated: ${input.id} -> ${insertId}`);
 
-    // إبطال Cache للواجهات الإدارية
-    await invalidateAdminSectionsCache();
+      // إبطال Cache للواجهات الإدارية
+      await invalidateAdminSectionsCache();
 
-    return { success: true, id: Number(insertId) };
-  }),
+      return { success: true, id: Number(insertId) };
+    }),
 
   /**
    * تحديث ترتيب الأقسام
    */
-  reorder: protectedProcedure
+  reorder: contentEditProcedure
     .input(
       z.object({
         sections: z.array(
@@ -451,7 +469,7 @@ export const sectionsRouter = router({
   /**
    * الحصول على نظرة عامة على الأقسام
    */
-  getOverview: protectedProcedure.query(async () => {
+  getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const allSections = await db.select().from(sections);

@@ -4,7 +4,8 @@
  */
 
 import { z } from 'zod';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { adminProcedure, router } from '../../_core/trpc';
+import { contentEditProcedure, contentReadProcedure } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or } from 'drizzle-orm';
 import { colorScheme } from '../../../drizzle/schema';
@@ -27,7 +28,7 @@ export const colorSchemeRouter = router({
   /**
    * الحصول على جميع الألوان
    */
-  list: protectedProcedure
+  list: contentReadProcedure
     .input(
       z.object({
         type: z.string().optional(),
@@ -72,7 +73,7 @@ export const colorSchemeRouter = router({
   /**
    * الحصول على لون واحد بواسطة المفتاح
    */
-  getByKey: protectedProcedure.input(z.object({ key: z.string() })).query(async ({ input }) => {
+  getByKey: contentReadProcedure.input(z.object({ key: z.string() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db
@@ -87,7 +88,7 @@ export const colorSchemeRouter = router({
   /**
    * الحصول على لون واحد بواسطة المعرف
    */
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db.select().from(colorScheme).where(eq(colorScheme.id, input.id)).limit(1);
@@ -98,7 +99,7 @@ export const colorSchemeRouter = router({
   /**
    * إنشاء لون جديد
    */
-  create: protectedProcedure.input(colorSchemeSchema).mutation(async ({ input }) => {
+  create: contentEditProcedure.input(colorSchemeSchema).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const insertId = await db
@@ -120,7 +121,7 @@ export const colorSchemeRouter = router({
   /**
    * تحديث لون موجود
    */
-  update: protectedProcedure
+  update: contentEditProcedure
     .input(
       colorSchemeSchema.extend({
         id: z.number(),
@@ -148,7 +149,7 @@ export const colorSchemeRouter = router({
   /**
    * حذف لون
    */
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db.delete(colorScheme).where(eq(colorScheme.id, input.id));
@@ -161,7 +162,7 @@ export const colorSchemeRouter = router({
   /**
    * الحصول على نظرة عامة على الألوان
    */
-  getOverview: protectedProcedure.query(async () => {
+  getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const allColors = await db.select().from(colorScheme);

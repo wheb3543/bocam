@@ -4,7 +4,12 @@
  */
 
 import { z } from 'zod';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { adminProcedure, router } from '../../_core/trpc';
+import {
+  assertContentCapability,
+  contentEditProcedure,
+  contentReadProcedure,
+} from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or, isNull } from 'drizzle-orm';
 import { images } from '../../../drizzle/schema';
@@ -36,7 +41,7 @@ export const imagesRouter = router({
   /**
    * الحصول على جميع الصور
    */
-  list: protectedProcedure
+  list: contentReadProcedure
     .input(
       z.object({
         section: z.string().optional(),
@@ -90,7 +95,7 @@ export const imagesRouter = router({
   /**
    * الحصول على صورة واحدة بواسطة المفتاح
    */
-  getByKey: protectedProcedure.input(z.object({ key: z.string() })).query(async ({ input }) => {
+  getByKey: contentReadProcedure.input(z.object({ key: z.string() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db
@@ -105,7 +110,7 @@ export const imagesRouter = router({
   /**
    * الحصول على صورة واحدة بواسطة المعرف
    */
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db
@@ -120,8 +125,11 @@ export const imagesRouter = router({
   /**
    * إنشاء صورة جديدة
    */
-  create: protectedProcedure.input(imageSchema).mutation(async ({ input }) => {
+  create: contentEditProcedure.input(imageSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
+    if (input.status === 'published') {
+      assertContentCapability(ctx.user.role, 'publish');
+    }
 
     const insertId = await db
       .insert(images)
@@ -151,14 +159,17 @@ export const imagesRouter = router({
   /**
    * تحديث صورة موجودة
    */
-  update: protectedProcedure
+  update: contentEditProcedure
     .input(
       imageSchema.extend({
         id: z.number(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      if (input.status === 'published') {
+        assertContentCapability(ctx.user.role, 'publish');
+      }
 
       await db
         .update(images)
@@ -188,7 +199,7 @@ export const imagesRouter = router({
   /**
    * حذف صورة (حذف ناعم)
    */
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db.update(images).set({ deletedAt: new Date() }).where(eq(images.id, input.id));
@@ -201,7 +212,7 @@ export const imagesRouter = router({
   /**
    * الحصول على نظرة عامة على الصور
    */
-  getOverview: protectedProcedure.query(async () => {
+  getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const allImages = await db.select().from(images).where(isNull(images.deletedAt));

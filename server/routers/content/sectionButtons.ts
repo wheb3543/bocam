@@ -4,7 +4,8 @@
  */
 
 import { z } from 'zod';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { adminProcedure, router } from '../../_core/trpc';
+import { contentEditProcedure, contentReadProcedure } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or } from 'drizzle-orm';
 import { sectionButtons } from '../../../drizzle/schema';
@@ -29,7 +30,7 @@ export const sectionButtonsRouter = router({
   /**
    * الحصول على جميع أزرار الأقسام
    */
-  list: protectedProcedure
+  list: contentReadProcedure
     .input(
       z.object({
         sectionId: z.number().optional(),
@@ -74,7 +75,7 @@ export const sectionButtonsRouter = router({
   /**
    * الحصول على زر واحد بواسطة المعرف
    */
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db
@@ -89,7 +90,7 @@ export const sectionButtonsRouter = router({
   /**
    * الحصول على أزرار قسم معين
    */
-  getBySectionId: protectedProcedure
+  getBySectionId: contentReadProcedure
     .input(z.object({ sectionId: z.number() }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -106,7 +107,7 @@ export const sectionButtonsRouter = router({
   /**
    * الحصول على الأزرار النشطة لقسم معين
    */
-  getActiveBySectionId: protectedProcedure
+  getActiveBySectionId: contentReadProcedure
     .input(z.object({ sectionId: z.number() }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -125,7 +126,7 @@ export const sectionButtonsRouter = router({
   /**
    * إنشاء زر جديد
    */
-  create: protectedProcedure.input(sectionButtonSchema).mutation(async ({ input }) => {
+  create: contentEditProcedure.input(sectionButtonSchema).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const insertId = await db
@@ -149,7 +150,7 @@ export const sectionButtonsRouter = router({
   /**
    * تحديث زر موجود
    */
-  update: protectedProcedure
+  update: contentEditProcedure
     .input(
       sectionButtonSchema.extend({
         id: z.number(),
@@ -179,7 +180,7 @@ export const sectionButtonsRouter = router({
   /**
    * حذف زر
    */
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db.delete(sectionButtons).where(eq(sectionButtons.id, input.id));
@@ -192,7 +193,7 @@ export const sectionButtonsRouter = router({
   /**
    * تحديث ترتيب الأزرار
    */
-  reorder: protectedProcedure
+  reorder: contentEditProcedure
     .input(
       z.object({
         buttons: z.array(
@@ -221,7 +222,7 @@ export const sectionButtonsRouter = router({
   /**
    * الحصول على نظرة عامة على أزرار الأقسام
    */
-  getOverview: protectedProcedure.query(async () => {
+  getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const allButtons = await db.select().from(sectionButtons);
