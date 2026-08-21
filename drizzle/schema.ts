@@ -2077,6 +2077,37 @@ export type Page = typeof pages.$inferSelect;
 export type InsertPage = typeof pages.$inferInsert;
 
 /**
+ * CMS Preview Tokens Table - روابط قصيرة العمر لمعاينة مسودات الصفحة دون جعلها عامة.
+ * لا يُخزّن الرمز الخام، بل بصمة SHA-256 فقط حتى لا يمكن استعادته من قاعدة البيانات.
+ */
+export const cmsPreviewTokens = mysqlTable(
+  'cmsPreviewTokens',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    tokenHash: varchar('tokenHash', { length: 64 }).notNull().unique(),
+    pageId: int('pageId')
+      .notNull()
+      .references(() => pages.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    language: varchar('language', { length: 10 }).default('ar').notNull(),
+    createdByUserId: int('createdByUserId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    expiresAt: timestamp('expiresAt').notNull(),
+    revokedAt: timestamp('revokedAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+  },
+  (table) => ({
+    pageIdIdx: index('cmsPreviewTokens_pageId_idx').on(table.pageId),
+    expiresAtIdx: index('cmsPreviewTokens_expiresAt_idx').on(table.expiresAt),
+    revokedAtIdx: index('cmsPreviewTokens_revokedAt_idx').on(table.revokedAt),
+  })
+);
+
+export type CmsPreviewToken = typeof cmsPreviewTokens.$inferSelect;
+export type InsertCmsPreviewToken = typeof cmsPreviewTokens.$inferInsert;
+
+/**
  * Sections Table - جدول الأقسام
  * يخزّن معلومات الأقسام داخل الصفحات
  */

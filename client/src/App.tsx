@@ -18,6 +18,7 @@ import { trpc } from '@/lib/api/trpc';
 const HomePage = lazy(() => import('./pages/public/HomePage'));
 const ThankYou = lazy(() => import('./pages/public/ThankYou'));
 const DynamicPage = lazy(() => import('./pages/public/DynamicPage'));
+const DraftPreviewPage = lazy(() => import('./pages/public/DraftPreviewPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const Doctors = lazy(() => import('./pages/public/Doctors'));
 const Unauthorized = lazy(() => import('./pages/Unauthorized'));
@@ -189,6 +190,7 @@ function Router() {
       <Switch>
         <Route path={'/activation'} component={ActivationPage} />
         <Route path={'/'} component={HomePage} />
+        <Route path={'/preview/:token'} component={DraftPreviewPage} />
         <Route path={'/page/:slug'} component={DynamicPage} />
         <Route path={'/doctors'} component={Doctors} />
         <Route path={'/visiting-doctors'} component={VisitingDoctors} />

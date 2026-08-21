@@ -56,6 +56,7 @@ export default function ContentManagementPage() {
       toast.error('فشل إضافة بيانات الصفحة الرئيسية: ' + error.message);
     },
   });
+  const draftPreviewMutation = trpc.content.preview.issue.useMutation();
   const images = useImages();
   const colorScheme = useColorScheme();
   const seo = useSEO();
@@ -87,6 +88,33 @@ export default function ContentManagementPage() {
 
   const handleNavigateToTab = (tab: string) => {
     contentManagement.setActiveTab(tab);
+  };
+
+  const openDraftPreview = (pageId: number, language: 'ar' | 'en') => {
+    // نفتح التبويب داخل حدث النقر نفسه لتفادي مانع النوافذ، ثم نقطع علاقة opener
+    // قبل تحميل الرابط الحساس الذي يتضمن الرمز المؤقت.
+    const previewTab = window.open('', '_blank');
+    if (previewTab) {
+      previewTab.opener = null;
+    }
+
+    draftPreviewMutation.mutate(
+      { pageId, language },
+      {
+        onSuccess: ({ previewUrl }) => {
+          if (previewTab) {
+            previewTab.location.replace(previewUrl);
+          } else {
+            window.location.assign(previewUrl);
+          }
+          toast.success('تم إنشاء رابط معاينة خاص لمدة 15 دقيقة.');
+        },
+        onError: (error) => {
+          previewTab?.close();
+          toast.error(`تعذر إنشاء معاينة المسودة: ${error.message}`);
+        },
+      }
+    );
   };
 
   return (
@@ -507,6 +535,8 @@ export default function ContentManagementPage() {
           sections.refetch();
         }}
         language={previewLanguage}
+        onOpenDraftPreview={openDraftPreview}
+        isDraftPreviewPending={draftPreviewMutation.isPending}
       />
 
       {/* Version History Dialog */}

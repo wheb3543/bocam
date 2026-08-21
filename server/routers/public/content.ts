@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { publicProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
-import { eq, and, count, inArray, isNull } from 'drizzle-orm';
+import { eq, and, count, inArray, isNull, gt, ne } from 'drizzle-orm';
 import {
   textContent,
   images,
@@ -15,7 +15,9 @@ import {
   pages,
   sections,
   sectionButtons,
+  cmsPreviewTokens,
 } from '../../../drizzle/schema';
+import { createHash } from 'node:crypto';
 import { cacheManager } from '../../services/redis';
 
 const CACHE_TTL = 5 * 60; // 5 minutes in seconds
@@ -637,6 +639,121 @@ export const publicContentRouter = router({
 
       await setCache(cacheKey, result);
       return result;
+    }),
+
+  /**
+   * يعيد نسخة المسودة فقط عند تقديم رمز معاينة قصير العمر. هذا المسار لا يستخدم
+   * cache عام ولا يستعلم بالـslug، حتى لا تصبح مسودة الصفحة قابلة للاكتشاف.
+   */
+  getDraftPreview: publicProcedure
+    .input(z.object({ token: z.string().min(40).max(128) }))
+    .query(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
+      const tokenHash = createHash('sha256').update(input.token).digest('hex');
+      const now = new Date();
+      const previewToken = await db
+        .select()
+        .from(cmsPreviewTokens)
+        .where(
+          and(
+            eq(cmsPreviewTokens.tokenHash, tokenHash),
+            gt(cmsPreviewTokens.expiresAt, now),
+            isNull(cmsPreviewTokens.revokedAt)
+          )
+        )
+        .limit(1);
+
+      if (!previewToken[0]) {
+        return null;
+      }
+
+      const language = previewToken[0].language;
+      const page = await db
+        .select()
+        .from(pages)
+        .where(and(eq(pages.id, previewToken[0].pageId), isNull(pages.deletedAt)))
+        .limit(1);
+      if (!page[0]) {
+        return null;
+      }
+
+      const [textContents, imagesList, colors, sectionsList] = await Promise.all([
+        db
+          .select()
+          .from(textContent)
+          .where(
+            and(
+              eq(textContent.isActive, 'yes'),
+              eq(textContent.language, language),
+              eq(textContent.pageId, page[0].id),
+              ne(textContent.status, 'archived'),
+              isNull(textContent.deletedAt)
+            )
+          ),
+        db
+          .select()
+          .from(images)
+          .where(
+            and(
+              eq(images.isActive, 'yes'),
+              eq(images.pageId, page[0].id),
+              ne(images.status, 'archived'),
+              isNull(images.deletedAt)
+            )
+          ),
+        db.select().from(colorScheme).where(eq(colorScheme.isActive, 'yes')),
+        db
+          .select()
+          .from(sections)
+          .where(
+            and(
+              eq(sections.pageId, page[0].id),
+              eq(sections.isActive, 'yes'),
+              ne(sections.status, 'archived'),
+              isNull(sections.deletedAt)
+            )
+          )
+          .orderBy(sections.sortOrder),
+      ]);
+
+      const sectionIds = sectionsList.map((section) => section.id);
+      const sectionButtonsList =
+        sectionIds.length > 0
+          ? await db
+              .select()
+              .from(sectionButtons)
+              .where(
+                and(
+                  inArray(sectionButtons.sectionId, sectionIds),
+                  eq(sectionButtons.isActive, 'yes'),
+                  isNull(sectionButtons.deletedAt)
+                )
+              )
+              .orderBy(sectionButtons.sortOrder)
+          : [];
+
+      const sectionIdToNameMap = new Map<number, string>();
+      sectionsList.forEach((section) => sectionIdToNameMap.set(section.id, section.name));
+      const withSectionName = <T extends { sectionId: number | null; section: string | null }>(
+        items: T[]
+      ) =>
+        items.map((item) => ({
+          ...item,
+          sectionName: item.sectionId
+            ? sectionIdToNameMap.get(item.sectionId) || item.section
+            : item.section,
+        }));
+
+      return {
+        language,
+        page: page[0],
+        textContents: withSectionName(textContents),
+        images: withSectionName(imagesList),
+        colors,
+        sections: sectionsList,
+        sectionButtons: sectionButtonsList,
+        expiresAt: previewToken[0].expiresAt,
+      };
     }),
 
   /**

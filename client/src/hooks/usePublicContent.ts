@@ -353,6 +353,23 @@ export function usePublicPageContentByPageId(pageId: number, language?: 'ar' | '
 }
 
 /**
+ * يجلب لقطة مسودة مقيدة برمز قصير العمر. لا نخزن محتوى المسودة في cache محلي طويل
+ * حتى لا يبقى مرئياً بعد انتهاء رابط المعاينة أو إلغائه من لوحة المحتوى.
+ */
+export function useDraftPreview(token: string) {
+  return trpc.publicContent.getDraftPreview.useQuery(
+    { token },
+    {
+      enabled: token.length >= 40,
+      staleTime: 0,
+      gcTime: 0,
+      retry: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+}
+
+/**
  * Hook للحصول على أزرار قسم معين
  */
 export function usePublicSectionButtons(sectionId: number) {

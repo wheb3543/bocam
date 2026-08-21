@@ -41,6 +41,8 @@ interface ContentPreviewPanelProps {
   onToggle: () => void;
   onRefresh: () => void;
   language: string;
+  onOpenDraftPreview?: (pageId: number, language: 'ar' | 'en') => void;
+  isDraftPreviewPending?: boolean;
 }
 
 type DeviceType = 'desktop' | 'tablet' | 'mobile';
@@ -60,6 +62,8 @@ export function ContentPreviewPanel({
   onToggle,
   onRefresh,
   language,
+  onOpenDraftPreview,
+  isDraftPreviewPending = false,
 }: ContentPreviewPanelProps) {
   const [device, setDevice] = useState<DeviceType>('desktop');
   const [theme, setTheme] = useState<ThemeType>('light');
@@ -306,6 +310,18 @@ export function ContentPreviewPanel({
                 </Select>
               )}
             </div>
+
+            {previewMode === 'site' && selectedPage && onOpenDraftPreview && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={isDraftPreviewPending}
+                onClick={() => onOpenDraftPreview(selectedPage.id, language === 'en' ? 'en' : 'ar')}
+              >
+                {isDraftPreviewPending ? 'جاري إنشاء رابط آمن…' : 'فتح معاينة المسودة الآمنة'}
+              </Button>
+            )}
 
             {/* Device and Theme Controls */}
             <div className="flex gap-2">
