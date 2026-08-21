@@ -20,6 +20,10 @@ type PendingLicenseRequest = {
   createdAt: string;
 };
 
+type PendingFeatureRequest = PendingLicenseRequest & {
+  featureKey: string;
+};
+
 type CentralLicenseFile = {
   key: string;
   hardwareId: string;
@@ -69,6 +73,45 @@ function savePendingRequest(request: PendingLicenseRequest): void {
 
 function clearPendingRequest(): void {
   fs.rmSync(getPendingRequestPath(), { force: true });
+}
+
+function getPendingFeatureRequestPath(featureKey: string): string {
+  const fingerprint = crypto.createHash('sha256').update(featureKey).digest('hex').slice(0, 16);
+  return path.join(process.cwd(), `.idea-hub-feature-request-${fingerprint}.json`);
+}
+
+function readPendingFeatureRequest(featureKey: string): PendingFeatureRequest | null {
+  const target = getPendingFeatureRequestPath(featureKey);
+  try {
+    const raw = fs.readFileSync(target, 'utf8');
+    const parsed = JSON.parse(raw) as PendingFeatureRequest;
+    if (
+      !parsed.requestId ||
+      !parsed.requestToken ||
+      parsed.status !== 'pending' ||
+      parsed.featureKey !== featureKey
+    ) {
+      return null;
+    }
+    if (new Date(parsed.expiresAt).getTime() <= Date.now()) {
+      fs.rmSync(target, { force: true });
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function savePendingFeatureRequest(request: PendingFeatureRequest): void {
+  const target = getPendingFeatureRequestPath(request.featureKey);
+  const temporary = `${target}.tmp`;
+  fs.writeFileSync(temporary, JSON.stringify(request, null, 2), { mode: 0o600 });
+  fs.renameSync(temporary, target);
+}
+
+function clearPendingFeatureRequest(featureKey: string): void {
+  fs.rmSync(getPendingFeatureRequestPath(featureKey), { force: true });
 }
 
 export function getCentralLicenseConfiguration() {
@@ -207,6 +250,116 @@ export async function checkCentralLicenseRequest() {
 
   if (body.data.status === 'rejected' || body.data.status === 'expired') {
     clearPendingRequest();
+  }
+  return { status: body.data.status, message: body.data.message };
+}
+
+export async function requestCentralFeatureActivation(input: {
+  featureKey: string;
+  instanceName: string;
+  serverUrl: string;
+}) {
+  const { configured, baseUrl, systemId } = getCentralLicenseConfiguration();
+  if (!configured || !baseUrl || !systemId) {
+    throw new Error('لم يُضبط IDEA_HUB_URL أو IDEA_HUB_SYSTEM_ID لهذه النسخة');
+  }
+
+  const pending = readPendingFeatureRequest(input.featureKey);
+  if (pending) {
+    return {
+      status: 'pending' as const,
+      requestId: pending.requestId,
+      expiresAt: pending.expiresAt,
+      reused: true,
+    };
+  }
+
+  const response = await fetch(`${baseUrl}/api/license-requests/feature`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'BOCAM-Feature-Request/1.0' },
+    body: JSON.stringify({
+      systemId,
+      featureKey: input.featureKey,
+      hardwareId: getHardwareId(),
+      instanceName: input.instanceName.trim(),
+      serverUrl: input.serverUrl.trim(),
+      systemVersion: process.env.npm_package_version || '1.0.0',
+      nonce: crypto.randomBytes(32).toString('base64url'),
+    }),
+    signal: requestTimeoutSignal(),
+  });
+  const body = (await response.json()) as {
+    success?: boolean;
+    error?: string;
+    data?: { requestId: number; requestToken: string; status: 'pending'; expiresAt: string };
+  };
+  if (!response.ok || !body.success || !body.data) {
+    throw new Error(body.error || 'تعذر إرسال طلب تفعيل الميزة إلى إيديا هب');
+  }
+
+  const request: PendingFeatureRequest = {
+    ...body.data,
+    featureKey: input.featureKey,
+    createdAt: new Date().toISOString(),
+  };
+  savePendingFeatureRequest(request);
+  logger.info(`Central feature request created: ${request.requestId} (${input.featureKey})`);
+  return {
+    status: 'pending' as const,
+    requestId: request.requestId,
+    expiresAt: request.expiresAt,
+    reused: false,
+  };
+}
+
+export async function checkCentralFeatureRequest(featureKey: string) {
+  const { configured, baseUrl } = getCentralLicenseConfiguration();
+  if (!configured || !baseUrl) {
+    throw new Error('لم يُضبط اتصال إيديا هب لهذه النسخة');
+  }
+  const pending = readPendingFeatureRequest(featureKey);
+  if (!pending) {
+    return { status: 'none' as const, message: 'لا يوجد طلب تفعيل معلق لهذه الميزة' };
+  }
+
+  const response = await fetch(`${baseUrl}/api/license-requests/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'BOCAM-Feature-Request/1.0' },
+    body: JSON.stringify({ requestId: pending.requestId, requestToken: pending.requestToken }),
+    signal: requestTimeoutSignal(),
+  });
+  const body = (await response.json()) as {
+    success?: boolean;
+    error?: string;
+    data?: { status: string; message: string; license?: CentralLicenseFile };
+  };
+  if (!response.ok || !body.success || !body.data) {
+    throw new Error(body.error || 'تعذر قراءة حالة طلب تفعيل الميزة');
+  }
+
+  if (body.data.status === 'approved' && body.data.license) {
+    const licenseInfo = installCentralLicense(body.data.license);
+    const confirmation = await fetch(`${baseUrl}/api/license-requests/delivered`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'BOCAM-Feature-Request/1.0' },
+      body: JSON.stringify({ requestId: pending.requestId, requestToken: pending.requestToken }),
+      signal: requestTimeoutSignal(),
+    });
+    if (!confirmation.ok) {
+      logger.warn(
+        `Feature license was installed but delivery confirmation returned ${confirmation.status}`
+      );
+    }
+    clearPendingFeatureRequest(featureKey);
+    return {
+      status: 'activated' as const,
+      message: 'تم حفظ الترخيص المحدث والتحقق من توقيعه محلياً. أعد تشغيل النظام.',
+      licenseInfo,
+    };
+  }
+
+  if (body.data.status === 'rejected' || body.data.status === 'expired') {
+    clearPendingFeatureRequest(featureKey);
   }
   return { status: body.data.status, message: body.data.message };
 }

@@ -157,15 +157,20 @@ function PrefetchRoutes() {
 
 function Router() {
   const [location] = useLocation();
-  const { data: licenseCheck, isLoading: checkingLicense } =
-    trpc.license.checkLicenseExists.useQuery();
+  const { data: licenseInfo, isLoading: checkingLicense } = trpc.license.getInfo.useQuery(
+    undefined,
+    {
+      retry: false,
+    }
+  );
 
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
 
-  // A locally installed instance without a verified file enters the central activation flow.
+  // License access is based on signature, expiry, and hardware validation rather than merely
+  // checking that a license.json file exists.
   if (checkingLicense) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -174,7 +179,9 @@ function Router() {
     );
   }
 
-  if (!licenseCheck?.exists && location !== '/activation') {
+  // Keep the local administrator login accessible so a successful sign-in can show the
+  // explicit request dialog; all other application routes remain gated.
+  if (!licenseInfo?.isValid && location !== '/activation' && location !== '/admin-login') {
     return <ActivationPage />;
   }
 

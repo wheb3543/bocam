@@ -10,13 +10,25 @@
  * <Route path="/feature-locked/:feature" component={FeatureLockedPage} />
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lock, Crown, Sparkles, Phone, Home, ShieldCheck } from 'lucide-react';
+import {
+  Lock,
+  Crown,
+  Sparkles,
+  Phone,
+  Home,
+  ShieldCheck,
+  CheckCircle2,
+  Loader2,
+  RefreshCw,
+} from 'lucide-react';
 import { useLicense } from '@/hooks/integrations/useLicense';
 import { APP_TITLE, COMPANY_PHONE } from '@/const';
+import { trpc } from '@/lib/api/trpc';
+import { toast } from 'sonner';
 
 interface FeatureLockedPageProps {
   /** اسم الميزة (يُؤخذ من URL params إذا لم يتم توفيره) */
@@ -124,6 +136,12 @@ export default function FeatureLockedPage({
   const params = useParams();
   const featureName = propFeatureName || params.feature;
   const { licenseInfo, daysRemaining } = useLicense();
+  const [requestPending, setRequestPending] = useState(false);
+  const [requestMessage, setRequestMessage] = useState('');
+  const featureCheck = trpc.license.checkFeature.useQuery(
+    { feature: featureName || '' },
+    { enabled: Boolean(featureName), retry: false }
+  );
 
   // الحصول على معلومات الميزة
   const featureInfo = featureName ? FEATURE_INFO[featureName] : null;
@@ -131,29 +149,61 @@ export default function FeatureLockedPage({
   const description = featureInfo?.description || 'ميزة متقدمة من نظام BOCAM CRM';
   const benefits = featureInfo?.benefits || [];
 
-  // إعادة التوجيه إذا كان الترخيص صالحاً (لمنع التكرار)
-  useEffect(() => {
-    if (!featureName) {
-      return;
-    }
-
-    // التحقق من الميزة
-    const checkFeature = async () => {
-      try {
-        const { trpc } = await import('@/lib/api/trpc');
-        const result = trpc.license.checkFeature.useQuery({ feature: featureName });
-
-        // إذا كانت الميزة مفعلة، أعد التوجيه للصفحة الرئيسية
-        if (result.data?.enabled) {
-          setLocation('/admin');
-        }
-      } catch {
-        // Silently handle feature check errors
+  const requestFeatureMutation = trpc.license.requestCentralFeatureActivation.useMutation({
+    onSuccess: (data) => {
+      if (!data.success || !('requestId' in data) || !('expiresAt' in data)) {
+        const errorMessage = 'error' in data ? data.error : undefined;
+        setRequestMessage(errorMessage || 'تعذر إرسال طلب تفعيل الميزة.');
+        toast.error(errorMessage || 'تعذر إرسال طلب تفعيل الميزة');
+        return;
       }
-    };
+      setRequestPending(true);
+      setRequestMessage(
+        data.reused
+          ? 'يوجد طلب تفعيل معلق لهذه الميزة لدى إدارة إيديا هب.'
+          : 'تم إرسال طلب تفعيل الميزة إلى إيديا هب بانتظار المراجعة.'
+      );
+      toast.success('تم إرسال طلب تفعيل الميزة إلى إيديا هب');
+    },
+    onError: (error) => {
+      setRequestMessage(error.message || 'تعذر الاتصال بخدمة التراخيص المركزية.');
+      toast.error(error.message || 'تعذر الاتصال بخدمة التراخيص المركزية');
+    },
+  });
 
-    checkFeature();
-  }, [featureName, setLocation]);
+  const checkFeatureRequestMutation = trpc.license.checkCentralFeatureStatus.useMutation({
+    onSuccess: (data) => {
+      if (!data.success || !('status' in data) || !('message' in data)) {
+        const errorMessage = 'error' in data ? data.error : undefined;
+        setRequestMessage(errorMessage || 'تعذر التحقق من حالة طلب التفعيل.');
+        toast.error(errorMessage || 'تعذر التحقق من حالة طلب التفعيل');
+        return;
+      }
+      setRequestMessage(data.message);
+      if (data.status === 'activated') {
+        setRequestPending(false);
+        toast.success('تم اعتماد الميزة وحفظ الترخيص المحدّث. ستُعاد تحميل الواجهة الآن.');
+        window.setTimeout(() => window.location.reload(), 1_500);
+      } else if (
+        data.status === 'rejected' ||
+        data.status === 'expired' ||
+        data.status === 'none'
+      ) {
+        setRequestPending(false);
+      }
+    },
+    onError: (error) => {
+      setRequestMessage(error.message || 'تعذر التحقق من حالة طلب التفعيل.');
+      toast.error(error.message || 'تعذر التحقق من حالة طلب التفعيل');
+    },
+  });
+
+  // إعادة التوجيه إذا أصبحت الميزة مفعلة.
+  useEffect(() => {
+    if (featureCheck.data?.enabled) {
+      setLocation('/admin');
+    }
+  }, [featureCheck.data?.enabled, setLocation]);
 
   const handleContactSupport = () => {
     // محاولة فتح تطبيق الهاتف
@@ -167,19 +217,15 @@ export default function FeatureLockedPage({
   };
 
   const handleUpgradeRequest = () => {
-    // إنشاء email مُجهز مسبقاً
-    const subject = encodeURIComponent(`طلب تفعيل ميزة ${displayName} - ${APP_TITLE}`);
-    const body = encodeURIComponent(
-      `السلام عليكم،\n\n` +
-        `أرغب في طلب تفعيل ميزة "${displayName}" في نظام ${APP_TITLE}.\n\n` +
-        `معلومات الترخيص:\n` +
-        `- Hardware ID: ${licenseInfo?.hardwareId || 'غير متوفر'}\n` +
-        `- تاريخ الانتهاء: ${licenseInfo?.expiryDate ? new Date(licenseInfo.expiryDate * 1000).toLocaleDateString('ar-SA') : 'غير متوفر'}\n` +
-        `- الأيام المتبقية: ${daysRemaining || 0}\n\n` +
-        `أرجو منكم تزويدي بالإجراءات اللازمة لتفعيل هذه الميزة.\n\n` +
-        `شكراً جزيلاً.`
-    );
-    window.location.href = `mailto:support@example.com?subject=${subject}&body=${body}`;
+    if (!featureName) {
+      toast.error('تعذر تحديد مفتاح الميزة المطلوبة');
+      return;
+    }
+    requestFeatureMutation.mutate({
+      featureKey: featureName,
+      instanceName: `bocam – ${window.location.hostname || 'local-instance'}`,
+      serverUrl: window.location.origin,
+    });
   };
 
   return (
@@ -253,8 +299,13 @@ export default function FeatureLockedPage({
 
           {/* رسالة التوجيه */}
           <div className="text-center text-sm text-muted-foreground space-y-2">
-            <p className="font-medium">لتفعيل هذه الميزة، يرجى:</p>
-            <p>التواصل مع الدعم الفني لترقية الترخيص الحالي</p>
+            <p className="font-medium">لتفعيل هذه الميزة، أرسل طلباً آمناً إلى إيديا هب:</p>
+            <p>عند الاعتماد سيُحفظ ترخيص محدّث لهذه النسخة دون تغيير بياناتها المحلية.</p>
+            {requestMessage && (
+              <p className="rounded-md bg-blue-50 p-3 text-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
+                {requestMessage}
+              </p>
+            )}
           </div>
 
           {/* أزرار الإجراء */}
@@ -263,10 +314,36 @@ export default function FeatureLockedPage({
               size="lg"
               className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               onClick={handleUpgradeRequest}
+              disabled={
+                requestPending ||
+                requestFeatureMutation.isPending ||
+                checkFeatureRequestMutation.isPending
+              }
             >
-              <Sparkles className="ml-2 h-4 w-4" />
-              طلب تفعيل الميزة
+              {requestFeatureMutation.isPending ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="ml-2 h-4 w-4" />
+              )}
+              {requestPending ? 'طلب التفعيل قيد المراجعة' : 'طلب تفعيل الميزة من Idea Hub'}
             </Button>
+
+            {requestPending && featureName && (
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full"
+                disabled={checkFeatureRequestMutation.isPending}
+                onClick={() => checkFeatureRequestMutation.mutate({ featureKey: featureName })}
+              >
+                {checkFeatureRequestMutation.isPending ? (
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="ml-2 h-4 w-4" />
+                )}
+                التحقق من حالة طلب التفعيل
+              </Button>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <Button

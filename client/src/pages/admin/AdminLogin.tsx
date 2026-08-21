@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import CentralLicenseRequestDialog from '@/components/license/CentralLicenseRequestDialog';
 import { Loader2, User, Lock, Shield, Heart, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -17,20 +18,35 @@ export default function AdminLogin() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [licenseRequestOpen, setLicenseRequestOpen] = useState(false);
 
   // Check if already logged in
   const { data: user, isLoading: checkingAuth } = trpc.auth.me.useQuery();
+  const licenseInfo = trpc.license.getInfo.useQuery(undefined, { retry: false });
 
   useEffect(() => {
-    if (user) {
-      navigate('/admin');
+    if (!user || licenseInfo.isLoading) {
+      return;
     }
-  }, [user, navigate]);
+
+    if (licenseInfo.data?.isValid) {
+      navigate('/admin');
+      return;
+    }
+
+    setLicenseRequestOpen(true);
+  }, [user, licenseInfo.data?.isValid, licenseInfo.isLoading, navigate]);
 
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(`مرحباً ${data.user.name || data.user.username}! تم تسجيل الدخول بنجاح`);
-      navigate('/admin');
+      const refreshedLicense = await licenseInfo.refetch();
+      if (refreshedLicense.data?.isValid) {
+        navigate('/admin');
+        return;
+      }
+
+      setLicenseRequestOpen(true);
     },
     onError: (err) => {
       toast.error(err.message || 'فشل تسجيل الدخول');
@@ -262,6 +278,7 @@ export default function AdminLogin() {
           </div>
         </div>
       </main>
+      <CentralLicenseRequestDialog open={licenseRequestOpen} onOpenChange={setLicenseRequestOpen} />
     </div>
   );
 }

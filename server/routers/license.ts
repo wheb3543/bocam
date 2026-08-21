@@ -18,9 +18,11 @@ import {
   type LicenseInfo,
 } from '../_core/license';
 import {
+  checkCentralFeatureRequest,
   checkCentralLicenseRequest,
   getCentralLicenseConfiguration,
   getPendingCentralLicenseRequest,
+  requestCentralFeatureActivation,
   requestCentralLicense,
 } from '../_core/centralLicenseRequest';
 import fs from 'fs';
@@ -236,6 +238,30 @@ export const licenseRouter = router({
       }
     }),
 
+  requestCentralFeatureActivation: publicProcedure
+    .input(
+      z.object({
+        featureKey: z
+          .string()
+          .trim()
+          .min(2)
+          .max(100)
+          .regex(/^[A-Za-z0-9_-]+$/),
+        instanceName: z.string().trim().min(2).max(160),
+        serverUrl: z.string().trim().url().max(500),
+      })
+    )
+    .mutation(async ({ input }) => {
+      try {
+        return { success: true, ...(await requestCentralFeatureActivation(input)) };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'تعذر إرسال طلب تفعيل الميزة',
+        };
+      }
+    }),
+
   /**
    * Query the decision exactly when the operator chooses to check its state.
    */
@@ -249,6 +275,28 @@ export const licenseRouter = router({
       };
     }
   }),
+
+  checkCentralFeatureStatus: publicProcedure
+    .input(
+      z.object({
+        featureKey: z
+          .string()
+          .trim()
+          .min(2)
+          .max(100)
+          .regex(/^[A-Za-z0-9_-]+$/),
+      })
+    )
+    .mutation(async ({ input }) => {
+      try {
+        return { success: true, ...(await checkCentralFeatureRequest(input.featureKey)) };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'تعذر التحقق من حالة طلب تفعيل الميزة',
+        };
+      }
+    }),
 
   /**
    * Save license file (public)
