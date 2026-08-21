@@ -15,7 +15,7 @@ import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or, sql, inArray, isNull, count } from 'drizzle-orm';
 import { textContent } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
-import { invalidateTextContentCache } from '../public/content';
+import { invalidateTextContentCache, invalidateSEOCache } from '../public/content';
 import {
   createContentUpdatedNotification,
   createContentDeletedNotification,
@@ -796,7 +796,7 @@ export const textContentRouter = router({
    */
   seedHomepage: contentPublishProcedure.mutation(async () => {
     const db = await ensureDatabaseAvailable();
-    const { pages } = await import('../../../drizzle/schema');
+    const { pages, seoSettings } = await import('../../../drizzle/schema');
     const { eq, and } = await import('drizzle-orm');
 
     // 1. التحقق من وجود صفحة الصفحة الرئيسية
@@ -833,6 +833,28 @@ export const textContentRouter = router({
     } else {
       homepageId = existingPages[0].id;
       logger.info(`Homepage page exists: ${homepageId}`);
+    }
+
+    const homepageSeo = await db
+      .select({ id: seoSettings.id })
+      .from(seoSettings)
+      .where(and(eq(seoSettings.slug, 'home'), eq(seoSettings.language, 'ar')))
+      .limit(1);
+    if (homepageSeo.length === 0) {
+      await db.insert(seoSettings).values({
+        pageId: homepageId,
+        pageKey: 'home',
+        slug: 'home',
+        language: 'ar',
+        title: 'المستشفى السعودي الألماني - صنعاء | احجز موعدك الآن',
+        description:
+          'احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.',
+        keywords:
+          'المستشفى السعودي الألماني, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية',
+        canonicalUrl: 'https://sghcrm-efgar5cn.manus.space/',
+        robots: 'index,follow',
+        isActive: 'yes',
+      });
     }
 
     // 2. إضافة المحتوى النصي
@@ -1283,6 +1305,7 @@ export const textContentRouter = router({
     // إبطال cache للواجهة العامة والإدارة كي لا تبقى القوائم الصفرية بعد التهيئة.
     await invalidateAdminTextContentCache();
     invalidateTextContentCache();
+    await invalidateSEOCache();
 
     return {
       success: true,

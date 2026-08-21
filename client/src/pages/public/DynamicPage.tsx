@@ -3,6 +3,7 @@ import {
   usePublicPageBySlug,
   usePublicPageContentByPageId,
   usePublicSectionsByPageId,
+  usePublicSEOSettings,
 } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ export default function DynamicPage() {
 
   // جلب بيانات الصفحة
   const { data: page, isLoading: pageLoading } = usePublicPageBySlug(slug || '', language);
+  const { data: seoSettings = [] } = usePublicSEOSettings({ slug: slug || '', language });
 
   // جلب محتوى الصفحة
   const { data: pageContent, isLoading: contentLoading } = usePublicPageContentByPageId(
@@ -78,21 +80,26 @@ export default function DynamicPage() {
   const title = language === 'ar' ? page.titleAr : page.titleEn;
   const metaTitle = language === 'ar' ? page.metaTitleAr : page.metaTitleEn;
   const metaDescription = language === 'ar' ? page.metaDescriptionAr : page.metaDescriptionEn;
-
-  // تحديث عنوان الصفحة
-  if (typeof document !== 'undefined') {
-    document.title = metaTitle || title;
-    const metaDescriptionTag = document.querySelector('meta[name="description"]');
-    if (metaDescriptionTag) {
-      metaDescriptionTag.setAttribute('content', metaDescription || '');
-    }
-  }
+  const pageSEO = seoSettings[0];
+  const seoProps = {
+    title: pageSEO?.title || metaTitle || title,
+    description: pageSEO?.description || metaDescription || '',
+    image: pageSEO?.ogImage || undefined,
+    canonicalUrl: pageSEO?.canonicalUrl || undefined,
+    keywords: pageSEO?.keywords || undefined,
+    ogTitle: pageSEO?.ogTitle || undefined,
+    ogDescription: pageSEO?.ogDescription || undefined,
+    ogImage: pageSEO?.ogImage || undefined,
+    robots: pageSEO?.robots || undefined,
+    structuredData: pageSEO?.structuredData || undefined,
+    locale: language === 'ar' ? 'ar_YE' : 'en_US',
+  };
 
   // إذا لم يوجد محتوى، عرض صفحة بسيطة
   if (!sections || sections.length === 0) {
     return (
       <>
-        <SEO title={metaTitle || title} description={metaDescription || ''} />
+        <SEO {...seoProps} />
         <Navbar />
         <div className="min-h-screen flex flex-col">
           <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -721,7 +728,7 @@ export default function DynamicPage() {
 
   return (
     <>
-      <SEO title={metaTitle || title} description={metaDescription || ''} />
+      <SEO {...seoProps} />
       <Navbar />
       <div className="min-h-screen flex flex-col">
         {/* Hero Section */}
