@@ -22,6 +22,7 @@ describe('تهيئة محتوى الصفحة الرئيسية', () => {
   it('يهيئ المحتوى الجديد منشوراً ويقرأ زر البطل من المفتاح نفسه', () => {
     expect(textRouterSource).toContain("status: 'published'");
     expect(textRouterSource).toContain('publishedAt: new Date()');
+    expect(textRouterSource).toContain('await invalidateAdminTextContentCache()');
     expect(homePageSource).toContain('key: `hero.button.${language}`');
     expect(homePageSource).not.toContain('hero.button.text.${language}');
   });

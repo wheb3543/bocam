@@ -1280,7 +1280,8 @@ export const textContentRouter = router({
 
     logger.info(`Homepage content seeded: ${addedCount} added, ${skippedCount} skipped`);
 
-    // إبطال Cache للمحتوى النصي
+    // إبطال cache للواجهة العامة والإدارة كي لا تبقى القوائم الصفرية بعد التهيئة.
+    await invalidateAdminTextContentCache();
     invalidateTextContentCache();
 
     return {
