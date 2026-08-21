@@ -2,7 +2,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
-import { X, GripVertical } from 'lucide-react';
+import { ChevronDown, ChevronUp, GripVertical, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import type { NavItem, NavGroup } from '@/components/layout/sidebarData';
 import { cn } from '@/lib/utils';
@@ -93,20 +93,24 @@ export default function EditSidebarModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl p-0 gap-0 bg-white dark:bg-gray-900" dir="rtl">
+      <DialogContent
+        className="flex h-[min(760px,calc(100dvh-1.5rem))] w-[calc(100vw-1.5rem)] max-w-[960px] flex-col gap-0 overflow-hidden p-0 sm:w-[calc(100vw-3rem)] bg-white dark:bg-gray-900"
+        dir="rtl"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-white dark:from-gray-800 dark:to-gray-900">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-gray-200 bg-gradient-to-l from-blue-50 to-white px-4 py-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-900 sm:items-center sm:px-6">
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+            aria-label="إغلاق نافذة تعديل الشريط الجانبي"
           >
             <X className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </button>
-          <div className="text-center flex-1">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <div className="min-w-0 flex-1 text-center">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 sm:text-xl">
               تعديل الشريط الجانبي
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
               اختر العناصر واسحبها لإعادة ترتيبها في الشريط الجانبي
             </p>
           </div>
@@ -114,18 +118,18 @@ export default function EditSidebarModal({
         </div>
 
         {/* Two Column Layout */}
-        <div
-          className="grid grid-cols-2 divide-x divide-gray-200 dark:divide-gray-700 divide-x-reverse"
-          style={{ height: 'calc(100vh - 280px)', maxHeight: '500px' }}
-        >
+        <div className="grid min-h-0 flex-1 grid-cols-1 divide-y divide-gray-200 overflow-y-auto dark:divide-gray-700 lg:grid-cols-2 lg:divide-x lg:divide-x-reverse lg:divide-y-0 lg:overflow-hidden">
           {/* Right Column - "التفاعل مع الجمهور" (Selected Items) */}
-          <div className="flex flex-col h-full">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30">
-              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
+          <section className="flex min-h-[300px] flex-col lg:min-h-0">
+            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/30">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 sm:text-base">
                 التفاعل مع الجمهور
               </h3>
+              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                {selectedItems.length} عناصر
+              </span>
             </div>
-            <ScrollArea className="flex-1 px-6 py-4">
+            <ScrollArea className="min-h-0 flex-1 px-4 py-3">
               <div className="space-y-2">
                 {selectedItems.map((item, index) => {
                   const Icon = item.icon;
@@ -133,7 +137,7 @@ export default function EditSidebarModal({
                   return (
                     <div
                       key={item.id}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 group"
+                      className="group flex min-w-0 items-center gap-2 rounded-lg bg-gray-50 p-2.5 dark:bg-gray-800"
                     >
                       {/* Drag Handle */}
                       {!isHome && (
@@ -141,16 +145,18 @@ export default function EditSidebarModal({
                           <button
                             onClick={() => moveItem(item.id, 'up')}
                             disabled={index === 0}
-                            className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded disabled:opacity-30"
+                            className="rounded p-0.5 hover:bg-gray-200 disabled:opacity-30 dark:hover:bg-gray-700"
+                            aria-label={`نقل ${item.title} للأعلى`}
                           >
-                            <GripVertical className="h-3 w-3 text-gray-400" />
+                            <ChevronUp className="h-3 w-3 text-gray-400" />
                           </button>
                           <button
                             onClick={() => moveItem(item.id, 'down')}
                             disabled={index === selectedItems.length - 1}
-                            className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded disabled:opacity-30"
+                            className="rounded p-0.5 hover:bg-gray-200 disabled:opacity-30 dark:hover:bg-gray-700"
+                            aria-label={`نقل ${item.title} للأسفل`}
                           >
-                            <GripVertical className="h-3 w-3 text-gray-400" />
+                            <ChevronDown className="h-3 w-3 text-gray-400" />
                           </button>
                         </div>
                       )}
@@ -175,7 +181,8 @@ export default function EditSidebarModal({
                       {!isHome && (
                         <button
                           onClick={() => removeItem(item.id)}
-                          className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="rounded-lg p-1.5 opacity-100 transition-opacity hover:bg-gray-200 dark:hover:bg-gray-700 sm:opacity-0 sm:group-hover:opacity-100"
+                          aria-label={`إزالة ${item.title} من الشريط الجانبي`}
                         >
                           <X className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                         </button>
@@ -185,23 +192,26 @@ export default function EditSidebarModal({
                 })}
               </div>
             </ScrollArea>
-          </div>
+          </section>
 
           {/* Left Column - "تم تحديد X من الأدوات" (All Available Items) */}
-          <div className="flex flex-col h-full">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30">
-              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
-                تم تحديد {selectedIds.length} من الأدوات
+          <section className="flex min-h-[300px] flex-col lg:min-h-0">
+            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/30">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 sm:text-base">
+                الأدوات المتاحة
               </h3>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                اختر حتى {MAX_VISIBLE_ITEMS}
+              </span>
             </div>
-            <ScrollArea className="flex-1 px-6 py-4">
-              <div className="space-y-6">
+            <ScrollArea className="min-h-0 flex-1 px-4 py-3">
+              <div className="space-y-4">
                 {allToolsGroups.map((group) => {
                   const GroupIcon = group.icon;
                   return (
                     <div key={group.label} className="space-y-2">
                       {/* Group Header */}
-                      <div className="flex items-center gap-2 px-2">
+                      <div className="flex items-center gap-2 px-1">
                         <GroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                           {group.label}
@@ -223,7 +233,7 @@ export default function EditSidebarModal({
                                 onClick={() => toggleItem(item.id)}
                                 disabled={isHome || !canSelect}
                                 className={cn(
-                                  'w-full flex items-center gap-3 p-2.5 rounded-lg transition-all text-right',
+                                  'flex w-full items-center gap-3 rounded-lg p-2.5 text-right transition-all',
                                   canSelect
                                     ? 'hover:bg-gray-100 dark:hover:bg-gray-800'
                                     : 'opacity-50 cursor-not-allowed'
@@ -247,17 +257,21 @@ export default function EditSidebarModal({
                 })}
               </div>
             </ScrollArea>
-          </div>
+          </section>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-center gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-          <Button onClick={handleCancel} variant="outline" className="min-w-[120px]">
+        <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50 sm:flex-row sm:items-center sm:justify-end sm:px-6">
+          <Button
+            onClick={handleCancel}
+            variant="outline"
+            className="w-full sm:min-w-[120px] sm:w-auto"
+          >
             إلغاء
           </Button>
           <Button
             onClick={handleSave}
-            className="min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-blue-600 text-white hover:bg-blue-700 sm:min-w-[120px] sm:w-auto"
           >
             حفظ
           </Button>

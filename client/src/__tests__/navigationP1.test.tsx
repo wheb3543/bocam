@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { fireEvent, render, screen } from '@testing-library/react';
 import MobileBottomNav from '@/components/layout/sidebar/MobileBottomNav';
 import {
@@ -6,6 +8,11 @@ import {
   bottomNavItems,
   defaultVisibleItemIds,
 } from '@/components/layout/sidebarData';
+
+const editSidebarModalSource = readFileSync(
+  resolve(process.cwd(), 'client/src/components/EditSidebarModal.tsx'),
+  'utf8'
+);
 
 describe('P1 navigation structure', () => {
   it('groups administrative tools around the revised user tasks', () => {
@@ -46,5 +53,16 @@ describe('P1 navigation structure', () => {
     fireEvent.click(home);
     expect(onNavigate).toHaveBeenCalledWith('/admin');
     expect(screen.getByRole('button', { name: 'المزيد من الأدوات' })).toBeTruthy();
+  });
+});
+
+describe('نافذة تعديل الشريط الجانبي', () => {
+  it('تستخدم تخطيطاً مرناً بتمرير داخلي وتذييل إجراءات ثابت', () => {
+    expect(editSidebarModalSource).toContain('h-[min(760px,calc(100dvh-1.5rem))]');
+    expect(editSidebarModalSource).toContain('min-h-0 flex-1 grid-cols-1');
+    expect(editSidebarModalSource).toContain('lg:grid-cols-2');
+    expect(editSidebarModalSource).toContain('flex shrink-0 flex-col-reverse');
+    expect(editSidebarModalSource).toContain('aria-label="إغلاق نافذة تعديل الشريط الجانبي"');
+    expect(editSidebarModalSource).toContain('sm:opacity-0 sm:group-hover:opacity-100');
   });
 });
