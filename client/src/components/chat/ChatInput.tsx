@@ -330,15 +330,28 @@ export const ChatInput = memo(
             <Paperclip className="h-5 w-5" />
           </Button>
 
-          {/* Text input */}
-          <Textarea
-            value={messageText}
-            onChange={(e) => handleMessageTextChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={outsideWindow ? 'أرسل قالب أولاً لفتح نافذة الكتابة' : 'اكتب رسالة...'}
-            className="min-h-[44px] max-h-[120px] flex-1 resize-none rounded-2xl px-3 py-2 text-sm"
-            disabled={outsideWindow}
-          />
+          <div className="flex min-w-0 flex-1 items-end gap-1.5">
+            {/* Text input */}
+            <Textarea
+              value={messageText}
+              onChange={(e) => handleMessageTextChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={outsideWindow ? 'أرسل قالب أولاً لفتح نافذة الكتابة' : 'اكتب رسالة...'}
+              className="min-h-[44px] max-h-[120px] min-w-0 flex-1 resize-none rounded-2xl px-3 py-2 text-sm"
+              disabled={outsideWindow}
+            />
+
+            {/* Send button stays attached to the text field on every viewport */}
+            <Button
+              onClick={handleSendMessage}
+              disabled={!messageText.trim() && !attachedFile}
+              className="h-11 w-11 shrink-0 rounded-full p-0 shadow-sm sm:h-10 sm:w-auto sm:rounded-md sm:px-3"
+              aria-label="إرسال الرسالة"
+            >
+              <Send className="h-5 w-5 sm:ml-2" />
+              <span className="hidden sm:inline">إرسال</span>
+            </Button>
+          </div>
 
           {/* Voice recording button */}
           {!messageText.trim() && !attachedFile ? (
@@ -352,17 +365,6 @@ export const ChatInput = memo(
               {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
             </Button>
           ) : null}
-
-          {/* Send button */}
-          <Button
-            onClick={handleSendMessage}
-            disabled={!messageText.trim() && !attachedFile}
-            className="h-10 w-10 shrink-0 rounded-full p-0 sm:w-auto sm:rounded-md sm:px-3"
-            aria-label="إرسال الرسالة"
-          >
-            <Send className="h-4 w-4 sm:ml-2 sm:h-5 sm:w-5" />
-            <span className="hidden sm:inline">إرسال</span>
-          </Button>
 
           {/* Additional actions */}
           <DropdownMenu>

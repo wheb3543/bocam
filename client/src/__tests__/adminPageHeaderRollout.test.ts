@@ -74,6 +74,8 @@ describe('مساحات العمل الإدارية دون بطاقة عنوان 
     expect(chatInputSource).toContain('hidden h-10 w-10 shrink-0 sm:inline-flex');
     expect(chatInputSource).toContain('إجراءات إضافية');
     expect(chatInputSource).toContain('min-h-[44px]');
+    expect(chatInputSource).toContain('flex min-w-0 flex-1 items-end gap-1.5');
+    expect(chatInputSource).toContain('h-11 w-11 shrink-0 rounded-full');
     expect(chatHeaderSource).toContain('hidden items-center justify-between');
   });
 
