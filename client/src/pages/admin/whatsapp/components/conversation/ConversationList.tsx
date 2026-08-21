@@ -3,18 +3,50 @@
  * يجمع جميع المكونات الفرعية لعرض قائمة المحادثات
  */
 
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MessageCircle, Plus, Send, LoaderIcon, Wifi, WifiOff, CheckSquare, AlertCircle } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  AlertCircle,
+  CheckSquare,
+  ChevronDown,
+  ChevronUp,
+  LoaderIcon,
+  MessageCircle,
+  Plus,
+  Send,
+  Wifi,
+  WifiOff,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { processPhoneInput } from '@/hooks/form/usePhoneFormat';
-import { Conversation, Template, ConnectionStatus, WhatsAppUser, FilterType, DateFilterType } from '../../types/whatsapp.types';
+import {
+  Conversation,
+  Template,
+  ConnectionStatus,
+  WhatsAppUser,
+  FilterType,
+  DateFilterType,
+} from '../../types/whatsapp.types';
 import StatsBar from '../shared/StatsBar';
 import ConversationFilters from './ConversationFilters';
 import ConversationSearchBar from './ConversationSearchBar';
@@ -100,6 +132,17 @@ const ConversationList = memo(function ConversationList({
   onBulkMarkImportant,
   onToggleSelectionMode,
 }: ConversationListProps) {
+  const [isStatsCollapsed, setIsStatsCollapsed] = useState(() => {
+    if (typeof window === 'undefined') {
+      return true;
+    }
+    return localStorage.getItem('whatsapp-conversation-stats-collapsed') !== 'false';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('whatsapp-conversation-stats-collapsed', String(isStatsCollapsed));
+  }, [isStatsCollapsed]);
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -250,8 +293,30 @@ const ConversationList = memo(function ConversationList({
       />
 
       {/* Stats */}
-      <div className="px-2 pt-2">
-        <StatsBar conversations={allConversations} />
+      <div className="shrink-0 px-2 pt-2">
+        <button
+          type="button"
+          onClick={() => setIsStatsCollapsed((current) => !current)}
+          className="flex w-full items-center justify-between rounded-lg border border-[var(--whatsapp-green)]/15 bg-[var(--whatsapp-green-light)]/60 px-3 py-2 text-sm font-medium text-[var(--whatsapp-green-dark)] sm:hidden"
+          aria-expanded={!isStatsCollapsed}
+          aria-controls="whatsapp-conversation-stats"
+        >
+          <span>ملخص المحادثات</span>
+          <span className="flex items-center gap-1.5 text-xs font-normal">
+            {isStatsCollapsed ? 'عرض البطاقات' : 'إخفاء البطاقات'}
+            {isStatsCollapsed ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronUp className="h-4 w-4" />
+            )}
+          </span>
+        </button>
+        <div
+          id="whatsapp-conversation-stats"
+          className={`${isStatsCollapsed ? 'hidden' : 'block'} pt-2 sm:block sm:pt-0`}
+        >
+          <StatsBar conversations={allConversations} />
+        </div>
       </div>
 
       {/* Bulk Actions */}

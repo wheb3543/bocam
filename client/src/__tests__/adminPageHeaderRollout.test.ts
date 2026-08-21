@@ -17,6 +17,9 @@ const chatAreaHeaderSource = readSource(
 );
 const chatInputSource = readSource('client/src/components/chat/ChatInput.tsx');
 const chatHeaderSource = readSource('client/src/components/chat/ChatHeader.tsx');
+const conversationListSource = readSource(
+  'client/src/pages/admin/whatsapp/components/conversation/ConversationList.tsx'
+);
 const digitalMarketingTasksSource = readSource(
   'client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx'
 );
@@ -72,6 +75,14 @@ describe('مساحات العمل الإدارية دون بطاقة عنوان 
     expect(chatInputSource).toContain('إجراءات إضافية');
     expect(chatInputSource).toContain('min-h-[44px]');
     expect(chatHeaderSource).toContain('hidden items-center justify-between');
+  });
+
+  it('يطي بطاقات إحصاءات قائمة محادثات WhatsApp افتراضياً على الهاتف', () => {
+    expect(conversationListSource).toContain('whatsapp-conversation-stats-collapsed');
+    expect(conversationListSource).toContain('ملخص المحادثات');
+    expect(conversationListSource).toContain('aria-expanded={!isStatsCollapsed}');
+    expect(conversationListSource).toContain("isStatsCollapsed ? 'hidden' : 'block'");
+    expect(conversationListSource).toContain('sm:block sm:pt-0');
   });
 
   it('يصحح مساحة مهام التسويق الرقمي الفعلية دون رأس مكرر', () => {
