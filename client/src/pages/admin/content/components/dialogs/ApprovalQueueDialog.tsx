@@ -5,6 +5,13 @@ import { trpc } from '@/lib/api/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -34,6 +41,10 @@ export function ApprovalQueueDialog({ open, onOpenChange }: ApprovalQueueDialogP
   );
   const approveMutation = trpc.content.approvals.approve.useMutation();
   const rejectMutation = trpc.content.approvals.reject.useMutation();
+  const assignReviewerMutation = trpc.content.approvals.assignReviewer.useMutation();
+  const reviewersQuery = trpc.content.approvals.getEligibleReviewers.useQuery(undefined, {
+    enabled: open,
+  });
 
   const refresh = () => pendingQuery.refetch();
 
@@ -65,6 +76,24 @@ export function ApprovalQueueDialog({ open, onOpenChange }: ApprovalQueueDialogP
       refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'تعذر رفض الطلب');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const assignReviewer = async (id: number, assignedReviewerId: string) => {
+    setBusyId(id);
+    try {
+      await assignReviewerMutation.mutateAsync({
+        id,
+        assignedReviewerId: assignedReviewerId === 'unassigned' ? null : Number(assignedReviewerId),
+      });
+      toast.success(
+        assignedReviewerId === 'unassigned' ? 'تمت إزالة تعيين المراجع' : 'تم تعيين المراجع للطلب'
+      );
+      refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'تعذر تعيين المراجع');
     } finally {
       setBusyId(null);
     }
@@ -107,6 +136,28 @@ export function ApprovalQueueDialog({ open, onOpenChange }: ApprovalQueueDialogP
                       <p className="text-sm text-muted-foreground">
                         طُلب في {new Date(approval.requestedAt).toLocaleString('ar-SA')}
                       </p>
+                      <div className="pt-2">
+                        <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                          المراجع المعيّن
+                        </label>
+                        <Select
+                          value={approval.assignedReviewerId?.toString() ?? 'unassigned'}
+                          onValueChange={(value) => assignReviewer(approval.id, value)}
+                          disabled={busyId === approval.id || reviewersQuery.isLoading}
+                        >
+                          <SelectTrigger className="h-8 w-52 text-xs">
+                            <SelectValue placeholder="اختر مراجعاً" />
+                          </SelectTrigger>
+                          <SelectContent dir="rtl">
+                            <SelectItem value="unassigned">غير معيّن</SelectItem>
+                            {(reviewersQuery.data ?? []).map((reviewer) => (
+                              <SelectItem key={reviewer.id} value={reviewer.id.toString()}>
+                                {reviewer.name || `مراجع #${reviewer.id}`}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <Button

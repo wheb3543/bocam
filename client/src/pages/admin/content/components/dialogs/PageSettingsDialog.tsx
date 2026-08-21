@@ -147,7 +147,7 @@ export function PageSettingsDialog({
                       variant="outline"
                       className="mt-4"
                       onClick={() => {
-                        onNavigateToTab?.('content');
+                        onNavigateToTab?.('text');
                         onOpenChange(false);
                       }}
                     >

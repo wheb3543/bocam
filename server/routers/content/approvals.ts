@@ -8,7 +8,17 @@
 
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { contentApprovals, users } from '../../../drizzle/schema';
+import {
+  contentApprovals,
+  contentAuditLog,
+  contentVersions,
+  images,
+  media,
+  pages,
+  sections,
+  textContent,
+  users,
+} from '../../../drizzle/schema';
 import { eq, and, desc, asc, inArray } from 'drizzle-orm';
 import { adminProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
@@ -23,6 +33,10 @@ import {
   createApprovalApprovedNotification,
   createApprovalRejectedNotification,
 } from '../../_core/notificationHelper';
+import { invalidateImagesCache, invalidateTextContentCache } from '../public/content';
+import { invalidateAdminTextContentCache } from './textContent';
+import { invalidateAdminPagesCache } from './pages';
+import { invalidateAdminSectionsCache } from './sections';
 
 const logger = createLogger('approvals');
 
@@ -34,6 +48,7 @@ const createApprovalSchema = z.object({
   entityId: z.number(),
   entityTypeVersion: z.number().default(0),
   changes: z.string(), // JSON string
+  assignedReviewerId: z.number().nullable().optional(),
 });
 
 /**
@@ -56,9 +71,196 @@ const rejectApprovalSchema = z.object({
  */
 const updateApprovalStatusSchema = z.object({
   id: z.number(),
-  status: z.enum(['pending', 'approved', 'rejected']),
+  status: z.enum(['rejected']),
   rejectionReason: z.string().optional(),
 });
+
+const assignReviewerSchema = z.object({
+  id: z.number(),
+  assignedReviewerId: z.number().nullable(),
+});
+
+const approvalChangesSchema = z
+  .object({
+    changes: z.record(z.string(), z.unknown()).optional(),
+    data: z.record(z.string(), z.unknown()).optional(),
+    patch: z.record(z.string(), z.unknown()).optional(),
+  })
+  .passthrough();
+
+const textContentChangeSchema = z
+  .object({
+    key: z.string().min(1).max(255).optional(),
+    language: z.string().min(1).max(10).optional(),
+    content: z.string().min(1).optional(),
+    section: z.string().max(100).nullable().optional(),
+    sectionId: z.number().int().nullable().optional(),
+    pageId: z.number().int().nullable().optional(),
+    type: z
+      .enum([
+        'title',
+        'subtitle',
+        'description',
+        'text',
+        'button',
+        'link',
+        'label',
+        'placeholder',
+        'error',
+        'success',
+        'warning',
+        'info',
+      ])
+      .optional(),
+    status: z.enum(['draft', 'published', 'archived']).optional(),
+    isActive: z.enum(['yes', 'no']).optional(),
+    publishedAt: z.coerce.date().nullable().optional(),
+  })
+  .strict()
+  .refine(
+    (value) => Object.keys(value).length > 0,
+    'لا تحتوي حمولة الموافقة على تغييرات قابلة للتطبيق'
+  );
+
+const imageChangeSchema = z
+  .object({
+    key: z.string().min(1).max(255).optional(),
+    url: z.string().min(1).max(500).optional(),
+    altAr: z.string().nullable().optional(),
+    altEn: z.string().nullable().optional(),
+    section: z.string().max(100).nullable().optional(),
+    sectionId: z.number().int().nullable().optional(),
+    pageId: z.number().int().nullable().optional(),
+    width: z.number().int().positive().nullable().optional(),
+    height: z.number().int().positive().nullable().optional(),
+    format: z.string().max(10).nullable().optional(),
+    size: z.number().int().nonnegative().nullable().optional(),
+    status: z.enum(['draft', 'published', 'archived']).optional(),
+    isActive: z.enum(['yes', 'no']).optional(),
+    publishedAt: z.coerce.date().nullable().optional(),
+  })
+  .strict()
+  .refine(
+    (value) => Object.keys(value).length > 0,
+    'لا تحتوي حمولة الموافقة على تغييرات قابلة للتطبيق'
+  );
+
+const mediaChangeSchema = imageChangeSchema.extend({
+  type: z.enum(['image', 'video', 'audio', 'document', 'other']).optional(),
+  mimeType: z.string().max(100).nullable().optional(),
+  fileName: z.string().max(255).nullable().optional(),
+  descriptionAr: z.string().nullable().optional(),
+  descriptionEn: z.string().nullable().optional(),
+  folderId: z.number().int().nullable().optional(),
+  duration: z.number().int().nonnegative().nullable().optional(),
+  thumbnailUrl: z.string().max(500).nullable().optional(),
+});
+
+const pageChangeSchema = z
+  .object({
+    name: z.string().min(1).max(255).optional(),
+    slug: z.string().min(1).max(255).optional(),
+    type: z.enum(['main', 'sub']).optional(),
+    parentId: z.number().int().nullable().optional(),
+    titleAr: z.string().min(1).max(255).optional(),
+    titleEn: z.string().min(1).max(255).optional(),
+    metaTitleAr: z.string().max(255).nullable().optional(),
+    metaTitleEn: z.string().max(255).nullable().optional(),
+    metaDescriptionAr: z.string().nullable().optional(),
+    metaDescriptionEn: z.string().nullable().optional(),
+    keywordsAr: z.string().nullable().optional(),
+    keywordsEn: z.string().nullable().optional(),
+    status: z.enum(['draft', 'published', 'archived']).optional(),
+    isActive: z.enum(['yes', 'no']).optional(),
+    sortOrder: z.number().int().min(0).optional(),
+    publishedAt: z.coerce.date().nullable().optional(),
+  })
+  .strict()
+  .refine(
+    (value) => Object.keys(value).length > 0,
+    'لا تحتوي حمولة الموافقة على تغييرات قابلة للتطبيق'
+  );
+
+const sectionChangeSchema = z
+  .object({
+    pageId: z.number().int().positive().optional(),
+    name: z.string().min(1).max(255).optional(),
+    titleAr: z.string().max(255).nullable().optional(),
+    titleEn: z.string().max(255).nullable().optional(),
+    subtitleAr: z.string().max(255).nullable().optional(),
+    subtitleEn: z.string().max(255).nullable().optional(),
+    type: z
+      .enum([
+        'slider',
+        'text',
+        'text-cards',
+        'stats-cards',
+        'image-cards',
+        'image',
+        'video',
+        'hero',
+        'cta',
+        'features',
+        'testimonials',
+        'faq',
+        'contact',
+        'pricing',
+        'team',
+        'gallery',
+        'timeline',
+        'custom',
+      ])
+      .optional(),
+    settings: z.string().nullable().optional(),
+    status: z.enum(['draft', 'published', 'archived']).optional(),
+    sortOrder: z.number().int().min(0).optional(),
+    isActive: z.enum(['yes', 'no']).optional(),
+    publishedAt: z.coerce.date().nullable().optional(),
+  })
+  .strict()
+  .refine(
+    (value) => Object.keys(value).length > 0,
+    'لا تحتوي حمولة الموافقة على تغييرات قابلة للتطبيق'
+  );
+
+function parseApprovalChanges(serializedChanges: string) {
+  let parsed: unknown;
+
+  try {
+    parsed = JSON.parse(serializedChanges);
+  } catch {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'تعذر قراءة حمولة التغييرات في طلب الموافقة.',
+    });
+  }
+
+  const envelope = approvalChangesSchema.safeParse(parsed);
+  if (!envelope.success) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'حمولة التغييرات غير صالحة أو تحتوي على بنية غير مدعومة.',
+    });
+  }
+
+  return envelope.data.changes ?? envelope.data.data ?? envelope.data.patch ?? envelope.data;
+}
+
+function parseEntityChanges<T extends z.ZodType>(
+  schema: T,
+  serializedChanges: string
+): z.output<T> {
+  const result = schema.safeParse(parseApprovalChanges(serializedChanges));
+  if (!result.success) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `تعذر تطبيق التغييرات المعتمدة: ${result.error.issues[0]?.message ?? 'بيانات غير صالحة'}`,
+    });
+  }
+  return result.data;
+}
+
+const reviewerRoles = ['admin', 'manager', 'team_leader'] as const;
 
 export const approvalsRouter = router({
   /**
@@ -146,6 +348,25 @@ export const approvalsRouter = router({
   create: contentEditProcedure.input(createApprovalSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
 
+    if (input.assignedReviewerId) {
+      const [assignedReviewer] = await db
+        .select({ id: users.id, role: users.role, isActive: users.isActive })
+        .from(users)
+        .where(eq(users.id, input.assignedReviewerId))
+        .limit(1);
+
+      if (
+        !assignedReviewer ||
+        assignedReviewer.isActive !== 'yes' ||
+        !reviewerRoles.includes(assignedReviewer.role as (typeof reviewerRoles)[number])
+      ) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'المستخدم المحدد لا يملك صلاحية مراجعة المحتوى أو حسابه غير نشط.',
+        });
+      }
+    }
+
     // التحقق من عدم وجود طلب موافقة معلق لنفس الكيان
     const existingApproval = await db
       .select()
@@ -191,7 +412,11 @@ export const approvalsRouter = router({
 
     await Promise.all(
       reviewers
-        .filter((reviewer) => reviewer.id !== ctx.user.id)
+        .filter(
+          (reviewer) =>
+            reviewer.id !== ctx.user.id &&
+            (!input.assignedReviewerId || reviewer.id === input.assignedReviewerId)
+        )
         .map((reviewer) =>
           createApprovalRequestedNotification(db, {
             userId: reviewer.id,
@@ -206,45 +431,233 @@ export const approvalsRouter = router({
   }),
 
   /**
+   * قائمة المراجعين الذين يمكن تعيينهم لطلبات المحتوى.
+   */
+  getEligibleReviewers: contentReadProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
+
+    return db
+      .select({ id: users.id, name: users.name, role: users.role })
+      .from(users)
+      .where(and(inArray(users.role, [...reviewerRoles]), eq(users.isActive, 'yes')))
+      .orderBy(asc(users.name));
+  }),
+
+  /**
+   * تعيين مراجع محدد أو إزالة التعيين من طلب معلق.
+   */
+  assignReviewer: contentReviewProcedure
+    .input(assignReviewerSchema)
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const [approval] = await db
+        .select({ id: contentApprovals.id, status: contentApprovals.status })
+        .from(contentApprovals)
+        .where(eq(contentApprovals.id, input.id))
+        .limit(1);
+
+      if (!approval) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'طلب الموافقة غير موجود.' });
+      }
+      if (approval.status !== 'pending') {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'لا يمكن تغيير المراجع بعد حسم طلب الموافقة.',
+        });
+      }
+
+      if (input.assignedReviewerId) {
+        const [reviewer] = await db
+          .select({ id: users.id, role: users.role, isActive: users.isActive })
+          .from(users)
+          .where(eq(users.id, input.assignedReviewerId))
+          .limit(1);
+
+        if (
+          !reviewer ||
+          reviewer.isActive !== 'yes' ||
+          !reviewerRoles.includes(reviewer.role as (typeof reviewerRoles)[number])
+        ) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'المستخدم المحدد لا يملك صلاحية مراجعة المحتوى أو حسابه غير نشط.',
+          });
+        }
+      }
+
+      await db
+        .update(contentApprovals)
+        .set({ assignedReviewerId: input.assignedReviewerId })
+        .where(eq(contentApprovals.id, input.id));
+
+      logger.info(`Content approval ${input.id} reviewer assigned by user ${ctx.user.id}`);
+      return { success: true, id: input.id, assignedReviewerId: input.assignedReviewerId };
+    }),
+
+  /**
    * الموافقة على طلب
    */
   approve: contentReviewProcedure.input(approveApprovalSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
 
-    const [approval] = await db
-      .select()
-      .from(contentApprovals)
-      .where(eq(contentApprovals.id, input.id))
-      .limit(1);
+    const { approval, entityType, approvedAt } = await db.transaction(async (tx) => {
+      const [pendingApproval] = await tx
+        .select()
+        .from(contentApprovals)
+        .where(eq(contentApprovals.id, input.id))
+        .limit(1);
 
-    if (!approval) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'طلب الموافقة غير موجود',
+      if (!pendingApproval) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'طلب الموافقة غير موجود.' });
+      }
+      if (pendingApproval.status !== 'pending') {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'يمكن الموافقة فقط على الطلبات المعلقة.',
+        });
+      }
+      if (
+        pendingApproval.assignedReviewerId !== null &&
+        pendingApproval.assignedReviewerId !== ctx.user.id
+      ) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'هذا الطلب معيّن لمراجع آخر ولا يمكن اعتماده من حسابك.',
+        });
+      }
+
+      let previousEntity: unknown;
+      let approvedChanges: unknown;
+      let auditEntityType: 'text' | 'image' | 'page' | 'section';
+      let versionEntityType: 'text' | 'image' | null = null;
+      let applyChanges: () => Promise<unknown>;
+
+      if (pendingApproval.entityType === 'textContent') {
+        const changes = parseEntityChanges(textContentChangeSchema, pendingApproval.changes);
+        const [existing] = await tx
+          .select()
+          .from(textContent)
+          .where(eq(textContent.id, pendingApproval.entityId))
+          .limit(1);
+        if (!existing) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'المحتوى النصي المطلوب لم يعد موجوداً.',
+          });
+        }
+        previousEntity = existing;
+        approvedChanges = changes;
+        auditEntityType = 'text';
+        versionEntityType = 'text';
+        applyChanges = () =>
+          tx.update(textContent).set(changes).where(eq(textContent.id, pendingApproval.entityId));
+      } else if (pendingApproval.entityType === 'image') {
+        const changes = parseEntityChanges(imageChangeSchema, pendingApproval.changes);
+        const [existing] = await tx
+          .select()
+          .from(images)
+          .where(eq(images.id, pendingApproval.entityId))
+          .limit(1);
+        if (!existing) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'الصورة المطلوبة لم تعد موجودة.' });
+        }
+        previousEntity = existing;
+        approvedChanges = changes;
+        auditEntityType = 'image';
+        versionEntityType = 'image';
+        applyChanges = () =>
+          tx.update(images).set(changes).where(eq(images.id, pendingApproval.entityId));
+      } else if (pendingApproval.entityType === 'media') {
+        const changes = parseEntityChanges(mediaChangeSchema, pendingApproval.changes);
+        const [existing] = await tx
+          .select()
+          .from(media)
+          .where(eq(media.id, pendingApproval.entityId))
+          .limit(1);
+        if (!existing) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'الوسيط المطلوب لم يعد موجوداً.' });
+        }
+        previousEntity = existing;
+        approvedChanges = changes;
+        auditEntityType = 'image';
+        applyChanges = () =>
+          tx.update(media).set(changes).where(eq(media.id, pendingApproval.entityId));
+      } else if (pendingApproval.entityType === 'page') {
+        const changes = parseEntityChanges(pageChangeSchema, pendingApproval.changes);
+        const [existing] = await tx
+          .select()
+          .from(pages)
+          .where(eq(pages.id, pendingApproval.entityId))
+          .limit(1);
+        if (!existing) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'الصفحة المطلوبة لم تعد موجودة.' });
+        }
+        previousEntity = existing;
+        approvedChanges = changes;
+        auditEntityType = 'page';
+        applyChanges = () =>
+          tx.update(pages).set(changes).where(eq(pages.id, pendingApproval.entityId));
+      } else {
+        const changes = parseEntityChanges(sectionChangeSchema, pendingApproval.changes);
+        const [existing] = await tx
+          .select()
+          .from(sections)
+          .where(eq(sections.id, pendingApproval.entityId))
+          .limit(1);
+        if (!existing) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'القسم المطلوب لم يعد موجوداً.' });
+        }
+        previousEntity = existing;
+        approvedChanges = changes;
+        auditEntityType = 'section';
+        applyChanges = () =>
+          tx.update(sections).set(changes).where(eq(sections.id, pendingApproval.entityId));
+      }
+
+      if (versionEntityType) {
+        await tx.insert(contentVersions).values({
+          entityType: versionEntityType,
+          entityId: pendingApproval.entityId,
+          versionNumber: Math.max(1, pendingApproval.entityTypeVersion),
+          data: JSON.stringify(previousEntity),
+          userId: ctx.user.id,
+          reason: `نسخة أمان قبل تطبيق طلب الموافقة #${pendingApproval.id}`,
+        });
+      }
+
+      await applyChanges();
+      await tx.insert(contentAuditLog).values({
+        entityType: auditEntityType,
+        entityId: pendingApproval.entityId,
+        action: 'update',
+        oldValue: JSON.stringify(previousEntity),
+        newValue: JSON.stringify(approvedChanges),
+        userId: ctx.user.id,
+        reason: `تطبيق طلب الموافقة #${pendingApproval.id}`,
       });
+
+      const approvedAt = new Date();
+      await tx
+        .update(contentApprovals)
+        .set({ status: 'approved', approvedBy: ctx.user.id, approvedAt })
+        .where(and(eq(contentApprovals.id, input.id), eq(contentApprovals.status, 'pending')));
+
+      return { approval: pendingApproval, entityType: pendingApproval.entityType, approvedAt };
+    });
+
+    if (entityType === 'textContent') {
+      await invalidateAdminTextContentCache();
+      invalidateTextContentCache();
     }
-
-    if (approval.status !== 'pending') {
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: 'يمكن الموافقة فقط على الطلبات المعلقة',
-      });
+    if (entityType === 'image') {
+      invalidateImagesCache();
     }
-
-    await db
-      .update(contentApprovals)
-      .set({
-        status: 'approved',
-        approvedBy: ctx.user.id,
-        approvedAt: new Date(),
-      })
-      .where(eq(contentApprovals.id, input.id));
-
-    const updatedApproval = await db
-      .select()
-      .from(contentApprovals)
-      .where(eq(contentApprovals.id, input.id))
-      .limit(1);
+    if (entityType === 'page') {
+      await invalidateAdminPagesCache();
+    }
+    if (entityType === 'section') {
+      await invalidateAdminSectionsCache();
+    }
 
     logger.info(`Content approval ${input.id} approved by user ${ctx.user.id}`);
 
@@ -258,7 +671,7 @@ export const approvalsRouter = router({
       });
     }
 
-    return updatedApproval[0];
+    return { ...approval, status: 'approved' as const, approvedBy: ctx.user.id, approvedAt };
   }),
 
   /**
@@ -284,6 +697,12 @@ export const approvalsRouter = router({
       throw new TRPCError({
         code: 'BAD_REQUEST',
         message: 'يمكن رفض فقط الطلبات المعلقة',
+      });
+    }
+    if (approval.assignedReviewerId !== null && approval.assignedReviewerId !== ctx.user.id) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'هذا الطلب معيّن لمراجع آخر ولا يمكن رفضه من حسابك.',
       });
     }
 
@@ -340,18 +759,25 @@ export const approvalsRouter = router({
         });
       }
 
+      if (approval.status !== 'pending') {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'يمكن تحديث حالة الطلبات المعلقة فقط.',
+        });
+      }
+      if (approval.assignedReviewerId !== null && approval.assignedReviewerId !== ctx.user.id) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'هذا الطلب معيّن لمراجع آخر ولا يمكن رفضه من حسابك.',
+        });
+      }
+
       const updateData: any = {
         status: input.status,
+        rejectedBy: ctx.user.id,
+        rejectedAt: new Date(),
+        rejectionReason: input.rejectionReason || null,
       };
-
-      if (input.status === 'approved') {
-        updateData.approvedBy = ctx.user.id;
-        updateData.approvedAt = new Date();
-      } else if (input.status === 'rejected') {
-        updateData.rejectedBy = ctx.user.id;
-        updateData.rejectedAt = new Date();
-        updateData.rejectionReason = input.rejectionReason || null;
-      }
 
       await db.update(contentApprovals).set(updateData).where(eq(contentApprovals.id, input.id));
 
