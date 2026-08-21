@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 6,
-  "numPassedTestSuites": 6,
+  "numTotalTestSuites": 4,
+  "numPassedTestSuites": 4,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 7,
-  "numPassedTests": 7,
+  "numTotalTests": 4,
+  "numPassedTests": 4,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,112 +24,70 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787336970953,
+  "startTime": 1787341936962,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["حماية تدفق موافقات المحتوى"],
-          "fullName": "حماية تدفق موافقات المحتوى يحصر الإنشاء بالمحررين والموافقة أو الرفض بالمراجعين",
+          "ancestorTitles": ["تهيئة محتوى الصفحة الرئيسية"],
+          "fullName": "تهيئة محتوى الصفحة الرئيسية تدقق جاهزية مفاتيح الصفحة الرئيسية المنشورة داخل إدارة المحتوى",
           "status": "passed",
-          "title": "يحصر الإنشاء بالمحررين والموافقة أو الرفض بالمراجعين",
-          "duration": 2.03412400000002,
+          "title": "تدقق جاهزية مفاتيح الصفحة الرئيسية المنشورة داخل إدارة المحتوى",
+          "duration": 1.8247779999999238,
           "failureMessages": [],
-          "location": { "line": 8, "column": 3 },
+          "location": { "line": 15, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["حماية تدفق موافقات المحتوى"],
-          "fullName": "حماية تدفق موافقات المحتوى يبلغ المستخدمين المؤهلين للمراجعة عند إنشاء طلب جديد",
+          "ancestorTitles": ["تهيئة محتوى الصفحة الرئيسية"],
+          "fullName": "تهيئة محتوى الصفحة الرئيسية يهيئ المحتوى الجديد منشوراً ويقرأ زر البطل من المفتاح نفسه",
           "status": "passed",
-          "title": "يبلغ المستخدمين المؤهلين للمراجعة عند إنشاء طلب جديد",
-          "duration": 0.35723299999995106,
+          "title": "يهيئ المحتوى الجديد منشوراً ويقرأ زر البطل من المفتاح نفسه",
+          "duration": 0.5195550000000821,
+          "failureMessages": [],
+          "location": { "line": 22, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787341938433,
+      "endTime": 1787341938435.5195,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/homepageReadiness.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["SEO المنشور من CMS"],
+          "fullName": "SEO المنشور من CMS يستهلك سجلات SEO المنشورة في الصفحة الرئيسية والصفحات ذات الرابط",
+          "status": "passed",
+          "title": "يستهلك سجلات SEO المنشورة في الصفحة الرئيسية والصفحات ذات الرابط",
+          "duration": 1.8172250000000076,
+          "failureMessages": [],
+          "location": { "line": 10, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["SEO المنشور من CMS"],
+          "fullName": "SEO المنشور من CMS ينشئ canonical وبيانات Open Graph وJSON-LD من الحقول الإدارية عند توفرها",
+          "status": "passed",
+          "title": "ينشئ canonical وبيانات Open Graph وJSON-LD من الحقول الإدارية عند توفرها",
+          "duration": 0.41635599999995065,
           "failureMessages": [],
           "location": { "line": 15, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787336972475,
-      "endTime": 1787336972477.3572,
+      "startTime": 1787341938432,
+      "endTime": 1787341938434.4163,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/approvals.authorization.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
-          "fullName": "صلاحيات إدارة المحتوى يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم",
-          "status": "passed",
-          "title": "يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم",
-          "duration": 1.8870719999999892,
-          "failureMessages": [],
-          "location": { "line": 12, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
-          "fullName": "صلاحيات إدارة المحتوى لا يسمح للمحرر بالنشر بينما يسمح به للمدير",
-          "status": "passed",
-          "title": "لا يسمح للمحرر بالنشر بينما يسمح به للمدير",
-          "duration": 1.1605110000000423,
-          "failureMessages": [],
-          "location": { "line": 20, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
-          "fullName": "صلاحيات إدارة المحتوى يوزع إجراءات CMS على طبقة الصلاحيات المشتركة",
-          "status": "passed",
-          "title": "يوزع إجراءات CMS على طبقة الصلاحيات المشتركة",
-          "duration": 3.015141999999969,
-          "failureMessages": [],
-          "location": { "line": 25, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787336972591,
-      "endTime": 1787336972597.0151,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/authorization.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["استعادة نسخ المحتوى"],
-          "fullName": "استعادة نسخ المحتوى ينفذ الاستعادة داخل معاملة ويُنشئ نسخة أمان ويسجل التغيير",
-          "status": "passed",
-          "title": "ينفذ الاستعادة داخل معاملة ويُنشئ نسخة أمان ويسجل التغيير",
-          "duration": 1.8890599999999722,
-          "failureMessages": [],
-          "location": { "line": 11, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["استعادة نسخ المحتوى"],
-          "fullName": "استعادة نسخ المحتوى يعيد إبطال cache الملائم لكل نوع محتوى بعد الاستعادة",
-          "status": "passed",
-          "title": "يعيد إبطال cache الملائم لكل نوع محتوى بعد الاستعادة",
-          "duration": 0.5595560000001569,
-          "failureMessages": [],
-          "location": { "line": 18, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787336972475,
-      "endTime": 1787336972477.5596,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/contentVersions.restore.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/public/__tests__/cmsSeoMetadata.test.ts"
     }
   ]
 }

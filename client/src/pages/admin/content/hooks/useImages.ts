@@ -92,7 +92,9 @@ export function useImages() {
       height: formData.height ? Number(formData.height) : undefined,
       format: formData.format || undefined,
       size: formData.size ? Number(formData.size) : undefined,
+      status: formData.status,
       isActive: formData.isActive,
+      publishedAt: formData.publishedAt || undefined,
     });
   };
 
@@ -115,7 +117,9 @@ export function useImages() {
       height: formData.height ? Number(formData.height) : undefined,
       format: formData.format || undefined,
       size: formData.size ? Number(formData.size) : undefined,
+      status: formData.status,
       isActive: formData.isActive,
+      publishedAt: formData.publishedAt || undefined,
     });
   };
 
@@ -141,7 +145,9 @@ export function useImages() {
       height: image.height?.toString() || '',
       format: image.format || '',
       size: image.size?.toString() || '',
+      status: image.status,
       isActive: image.isActive,
+      publishedAt: image.publishedAt || null,
     });
     setIsEditDialogOpen(true);
   };

@@ -102,7 +102,9 @@ export interface Image {
   height?: number | null;
   format?: string | null;
   size?: number | null;
+  status: 'draft' | 'published' | 'archived';
   isActive: 'yes' | 'no';
+  publishedAt?: Date | null;
   updatedAt: Date;
   createdAt: Date;
 }
@@ -123,7 +125,9 @@ export interface ImageFormData {
   height: string;
   format: string;
   size: string;
+  status: 'draft' | 'published' | 'archived';
   isActive: 'yes' | 'no';
+  publishedAt: Date | null;
 }
 
 /**
@@ -140,7 +144,9 @@ export const initialImageFormData: ImageFormData = {
   height: '',
   format: '',
   size: '',
+  status: 'draft',
   isActive: 'yes',
+  publishedAt: null,
 };
 
 /**
@@ -207,6 +213,8 @@ export interface SEOSettings {
  */
 export interface SEOSettingsFormData {
   pageKey: string;
+  pageId?: number;
+  slug: string;
   language: string;
   title: string;
   description: string;
@@ -225,6 +233,8 @@ export interface SEOSettingsFormData {
  */
 export const initialSEOSettingsFormData: SEOSettingsFormData = {
   pageKey: '',
+  pageId: undefined,
+  slug: '',
   language: 'ar',
   title: '',
   description: '',

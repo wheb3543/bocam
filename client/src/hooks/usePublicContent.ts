@@ -56,6 +56,24 @@ interface SectionItem {
   updatedAt: Date;
 }
 
+interface PublicSEOSettingsItem {
+  id: number;
+  pageId: number | null;
+  pageKey: string | null;
+  slug: string | null;
+  language: string | null;
+  title: string | null;
+  description: string | null;
+  keywords: string | null;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImage: string | null;
+  canonicalUrl: string | null;
+  robots: string | null;
+  structuredData: string | null;
+  isActive: 'yes' | 'no';
+}
+
 /**
  * Hook للحصول على المحتوى النصي العام
  */
@@ -180,7 +198,7 @@ export function usePublicSEOSettings(options?: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       refetchOnWindowFocus: false,
     }
-  );
+  ) as { data: PublicSEOSettingsItem[] | undefined };
 }
 
 /**

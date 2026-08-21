@@ -30,16 +30,22 @@ export default function MediaPicker({
   const [search, setSearch] = useState('');
   const [uploading, setUploading] = useState(false);
   const {
-    data: images = [],
+    data: mediaItems = [],
     isLoading,
     isError,
     error,
     refetch,
-  } = trpc.content.images.list.useQuery({ search: search.trim() || undefined }, { enabled: open });
+  } = trpc.content.media.list.useQuery(
+    { type: 'image', search: search.trim() || undefined },
+    { enabled: open }
+  );
 
   const sortedImages = useMemo(
-    () => [...images].sort((a, b) => Number(b.id) - Number(a.id)),
-    [images]
+    () =>
+      [...mediaItems].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ),
+    [mediaItems]
   );
 
   const selectImage = (url: string) => {
@@ -59,7 +65,10 @@ export default function MediaPicker({
     try {
       const formData = new FormData();
       files.forEach((file) => formData.append('files', file));
-      formData.append('folder', folder);
+      // يعالج مسار الرفع قيمة folderId عندما يكون محدداً من مكتبة الوسائط.
+      if (/^\d+$/.test(folder)) {
+        formData.append('folderId', folder);
+      }
       const response = await fetch('/api/upload/batch', { method: 'POST', body: formData });
       const result = await response.json().catch(() => null);
       if (!response.ok) {
@@ -206,7 +215,7 @@ export default function MediaPicker({
                     >
                       <img
                         src={image.url}
-                        alt={image.altAr || image.altEn || image.key}
+                        alt={image.altAr || image.altEn || image.fileName || image.key}
                         className="h-full w-full object-cover"
                         loading="lazy"
                       />

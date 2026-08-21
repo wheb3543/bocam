@@ -9,6 +9,7 @@ import { createMetaSocialWebhookRouter } from '../api/metaSocialWebhookRoute';
 import { createMetaBusinessOAuthCallbackRouter } from '../api/metaBusinessOAuthRoute';
 import { createExternalPlatformOAuthCallbackRouter } from '../api/externalPlatformOAuthRoute';
 import { createSocialPublishingScheduledRouter } from '../api/socialPublishingScheduledRoute';
+import { createCmsPublishingScheduledRouter } from '../api/cmsPublishingScheduledRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
 import { createContext } from './context';
@@ -73,6 +74,8 @@ async function startServer() {
   app.use(createMetaSocialWebhookRouter());
   // Heartbeat callback for social publishing schedules. It is activated after deployment.
   app.use(createSocialPublishingScheduledRouter());
+  // Heartbeat callback for deferred CMS publication. It is activated after deployment.
+  app.use(createCmsPublishingScheduledRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
   // Health check and metrics endpoints

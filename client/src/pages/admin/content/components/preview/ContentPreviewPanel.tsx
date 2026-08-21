@@ -45,7 +45,7 @@ interface ContentPreviewPanelProps {
 
 type DeviceType = 'desktop' | 'tablet' | 'mobile';
 type ThemeType = 'light' | 'dark';
-type PreviewMode = 'content' | 'page';
+type PreviewMode = 'content' | 'site';
 
 /**
  * ContentPreviewPanel - مكون لوحة المعاينة الفورية
@@ -65,6 +65,7 @@ export function ContentPreviewPanel({
   const [theme, setTheme] = useState<ThemeType>('light');
   const [previewMode, setPreviewMode] = useState<PreviewMode>('content');
   const [selectedPageId, setSelectedPageId] = useState<number | null>(null);
+  const [previewKey, setPreviewKey] = useState(0);
 
   if (!isVisible) {
     return (
@@ -239,12 +240,20 @@ export function ContentPreviewPanel({
   const isDark = theme === 'dark';
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:right-auto md:w-[500px] z-50">
-      <Card className="shadow-xl">
+    <div className="fixed inset-x-2 bottom-2 z-50 max-h-[calc(100dvh-1rem)] md:bottom-4 md:left-4 md:right-auto md:w-[500px]">
+      <Card className="max-h-[calc(100dvh-1rem)] overflow-hidden shadow-xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg">معاينة فورية</CardTitle>
           <div className="flex gap-2">
-            <Button variant="ghost" size="icon" onClick={onRefresh} aria-label="تحديث">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                onRefresh();
+                setPreviewKey((key) => key + 1);
+              }}
+              aria-label="تحديث المعاينة"
+            >
               <RefreshCw className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={onToggle} aria-label="إخفاء">
@@ -270,16 +279,16 @@ export function ContentPreviewPanel({
                       <span>المحتوى</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="page">
+                  <SelectItem value="site">
                     <div className="flex items-center gap-2">
                       <Layers className="h-4 w-4" />
-                      <span>الصفحة</span>
+                      <span>الصفحة المنشورة</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
               </Select>
 
-              {previewMode === 'page' && (
+              {previewMode === 'site' && (
                 <Select
                   value={selectedPageId?.toString() || ''}
                   onValueChange={(value) => setSelectedPageId(value ? Number(value) : null)}
@@ -371,22 +380,18 @@ export function ContentPreviewPanel({
                       sectionKey="about"
                     />
                   </>
+                ) : selectedPage ? (
+                  <iframe
+                    key={`${selectedPage.id}-${previewKey}`}
+                    src={`/page/${selectedPage.slug}`}
+                    title={`المعاينة المنشورة لصفحة ${selectedPage.titleAr || selectedPage.name}`}
+                    className="min-h-[420px] w-full border-0 bg-white"
+                    loading="lazy"
+                  />
                 ) : (
-                  <>
-                    {selectedPage ? (
-                      pageSections.length > 0 ? (
-                        pageSections.map(renderSection)
-                      ) : (
-                        <p className="text-center text-muted-foreground py-8">
-                          لا توجد أقسام مرتبطة بهذه الصفحة
-                        </p>
-                      )
-                    ) : (
-                      <p className="text-center text-muted-foreground py-8">
-                        اختر صفحة لعرض معاينة كاملة
-                      </p>
-                    )}
-                  </>
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    اختر صفحة لعرض النسخة المنشورة الفعلية ضمن المقاس المحدد.
+                  </p>
                 )}
               </div>
             </div>

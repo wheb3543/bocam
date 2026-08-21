@@ -16,6 +16,8 @@ import { AuditLogDialog } from './components/dialogs/AuditLogDialog';
 import { PageDialog } from './components/dialogs/PageDialog';
 import { SectionDialog } from './components/dialogs/SectionDialog';
 import { PageSettingsDialog } from './components/dialogs/PageSettingsDialog';
+import { ApprovalQueueDialog } from './components/dialogs/ApprovalQueueDialog';
+import { ContentQualityDialog } from './components/dialogs/ContentQualityDialog';
 import { useContentManagement } from './hooks/useContentManagement';
 import { useTextContent } from './hooks/useTextContent';
 import { useImages } from './hooks/useImages';
@@ -29,7 +31,7 @@ import { useImportExport } from './hooks/useImportExport';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, History, FileText } from 'lucide-react';
+import { AlertTriangle, History, FileText, ClipboardCheck, ShieldCheck } from 'lucide-react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 
@@ -69,6 +71,8 @@ export default function ContentManagementPage() {
   // Dialogs state
   const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
   const [isAuditLogOpen, setIsAuditLogOpen] = useState(false);
+  const [isApprovalQueueOpen, setIsApprovalQueueOpen] = useState(false);
+  const [isQualityDialogOpen, setIsQualityDialogOpen] = useState(false);
   const [selectedVersionEntityType, setSelectedVersionEntityType] = useState<
     'text' | 'image' | 'color' | 'seo'
   >('text');
@@ -107,6 +111,21 @@ export default function ContentManagementPage() {
             >
               <History className="h-4 w-4" />
               سجل التغييرات
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsApprovalQueueOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <ClipboardCheck className="h-4 w-4" />
+              الموافقات
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsQualityDialogOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <ShieldCheck className="h-4 w-4" /> فحص الجودة
             </Button>
             <Button
               variant="outline"
@@ -424,6 +443,17 @@ export default function ContentManagementPage() {
             <SEOList
               seoSettings={seo.seoSettings || []}
               isLoading={seo.loadingSEOSettings}
+              pages={
+                Array.isArray(pages.pages)
+                  ? pages.pages.map((page) => ({
+                      id: page.id,
+                      name: page.name,
+                      slug: page.slug,
+                      titleAr: page.titleAr,
+                      titleEn: page.titleEn,
+                    }))
+                  : []
+              }
               filters={{
                 searchQuery: seo.searchQuery,
                 language: seo.language,
@@ -495,6 +525,9 @@ export default function ContentManagementPage() {
 
       {/* Audit Log Dialog */}
       <AuditLogDialog open={isAuditLogOpen} onOpenChange={setIsAuditLogOpen} />
+
+      <ApprovalQueueDialog open={isApprovalQueueOpen} onOpenChange={setIsApprovalQueueOpen} />
+      <ContentQualityDialog open={isQualityDialogOpen} onOpenChange={setIsQualityDialogOpen} />
 
       {/* Page Dialog */}
       <PageDialog

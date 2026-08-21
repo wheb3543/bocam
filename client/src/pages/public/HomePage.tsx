@@ -36,7 +36,11 @@ import {
 } from '@/const';
 import { Link } from 'wouter';
 import { useState, useEffect } from 'react';
-import { usePublicTextContent, usePublicImages } from '@/hooks/usePublicContent';
+import {
+  usePublicTextContent,
+  usePublicImages,
+  usePublicSEOSettings,
+} from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function HomePage() {
@@ -50,6 +54,8 @@ export default function HomePage() {
 
   // الحصول على اللغة الحالية
   const { language } = useLanguage();
+  const { data: homeSEOSettings = [] } = usePublicSEOSettings({ slug: 'home', language });
+  const homeSEO = homeSEOSettings[0];
 
   // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
   const { data: heroTitle } = usePublicTextContent({
@@ -443,10 +449,23 @@ export default function HomePage() {
   return (
     <>
       <SEO
-        title={`${COMPANY_ARABIC_NAME} - صنعاء | احجز موعدك الآن`}
-        description={`احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME} بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: ${COMPANY_PHONE}`}
-        image={APP_LOGO}
-        keywords={`${COMPANY_ARABIC_NAME}, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية, ${COMPANY_PHONE}`}
+        title={homeSEO?.title || `${COMPANY_ARABIC_NAME} - صنعاء | احجز موعدك الآن`}
+        description={
+          homeSEO?.description ||
+          `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME} بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: ${COMPANY_PHONE}`
+        }
+        image={homeSEO?.ogImage || APP_LOGO}
+        canonicalUrl={homeSEO?.canonicalUrl || undefined}
+        keywords={
+          homeSEO?.keywords ||
+          `${COMPANY_ARABIC_NAME}, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية, ${COMPANY_PHONE}`
+        }
+        ogTitle={homeSEO?.ogTitle || undefined}
+        ogDescription={homeSEO?.ogDescription || undefined}
+        ogImage={homeSEO?.ogImage || undefined}
+        robots={homeSEO?.robots || undefined}
+        structuredData={homeSEO?.structuredData || undefined}
+        locale={language === 'ar' ? 'ar_YE' : 'en_US'}
       />
       <div
         className={`min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 relative overflow-hidden ${!animationsEnabled ? 'animations-disabled' : ''}`}

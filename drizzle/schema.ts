@@ -2179,6 +2179,10 @@ export const contentApprovals = mysqlTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }), // معرف المستخدم الذي طلب الموافقة
     requestedAt: timestamp('requestedAt').defaultNow().notNull(), // تاريخ طلب الموافقة
+    assignedReviewerId: int('assignedReviewerId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }), // المراجع المعيّن للطلب، إن وجد
     approvedBy: int('approvedBy').references(() => users.id, {
       onDelete: 'set null',
       onUpdate: 'cascade',
@@ -2202,6 +2206,9 @@ export const contentApprovals = mysqlTable(
     ),
     statusIdx: index('contentApprovals_status_idx').on(table.status),
     requestedByIdx: index('contentApprovals_requestedBy_idx').on(table.requestedBy),
+    assignedReviewerIdx: index('contentApprovals_assignedReviewer_idx').on(
+      table.assignedReviewerId
+    ),
     approvedByIdx: index('contentApprovals_approvedBy_idx').on(table.approvedBy),
     rejectedByIdx: index('contentApprovals_rejectedBy_idx').on(table.rejectedBy),
     requestedAtIdx: index('contentApprovals_requestedAt_idx').on(table.requestedAt),
