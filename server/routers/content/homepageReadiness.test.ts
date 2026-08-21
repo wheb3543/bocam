@@ -13,7 +13,7 @@ const homePageSource = readFileSync(
 
 describe('تهيئة محتوى الصفحة الرئيسية', () => {
   it('تدقق جاهزية مفاتيح الصفحة الرئيسية المنشورة داخل إدارة المحتوى', () => {
-    expect(textRouterSource).toContain('getHomepageReadiness: protectedProcedure');
+    expect(textRouterSource).toContain('getHomepageReadiness: contentReadProcedure');
     expect(textRouterSource).toContain("'hero.button.ar'");
     expect(textRouterSource).toContain("record.status === 'published'");
     expect(textRouterSource).toContain("record.isActive === 'yes'");

@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 2,
-  "numPassedTestSuites": 2,
+  "numTotalTestSuites": 32,
+  "numPassedTestSuites": 32,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 2,
-  "numPassedTests": 2,
+  "numTotalTests": 38,
+  "numPassedTests": 38,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,9 +24,513 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787337564532,
+  "startTime": 1787338194275,
   "success": true,
   "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["حماية تدفق موافقات المحتوى"],
+          "fullName": "حماية تدفق موافقات المحتوى يحصر الإنشاء بالمحررين والموافقة أو الرفض بالمراجعين",
+          "status": "passed",
+          "title": "يحصر الإنشاء بالمحررين والموافقة أو الرفض بالمراجعين",
+          "duration": 1.8897269999999935,
+          "failureMessages": [],
+          "location": { "line": 8, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["حماية تدفق موافقات المحتوى"],
+          "fullName": "حماية تدفق موافقات المحتوى يبلغ المستخدمين المؤهلين للمراجعة عند إنشاء طلب جديد",
+          "status": "passed",
+          "title": "يبلغ المستخدمين المؤهلين للمراجعة عند إنشاء طلب جديد",
+          "duration": 0.33236600000009275,
+          "failureMessages": [],
+          "location": { "line": 15, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338198019,
+      "endTime": 1787338198021.3323,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/approvals.authorization.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
+          "fullName": "صلاحيات إدارة المحتوى يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم",
+          "status": "passed",
+          "title": "يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم",
+          "duration": 1.8481410000001688,
+          "failureMessages": [],
+          "location": { "line": 12, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
+          "fullName": "صلاحيات إدارة المحتوى لا يسمح للمحرر بالنشر بينما يسمح به للمدير",
+          "status": "passed",
+          "title": "لا يسمح للمحرر بالنشر بينما يسمح به للمدير",
+          "duration": 1.236855000000105,
+          "failureMessages": [],
+          "location": { "line": 20, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
+          "fullName": "صلاحيات إدارة المحتوى يوزع إجراءات CMS على طبقة الصلاحيات المشتركة",
+          "status": "passed",
+          "title": "يوزع إجراءات CMS على طبقة الصلاحيات المشتركة",
+          "duration": 2.8993890000001556,
+          "failureMessages": [],
+          "location": { "line": 25, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338195974,
+      "endTime": 1787338195979.8994,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/authorization.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["استعادة نسخ المحتوى"],
+          "fullName": "استعادة نسخ المحتوى ينفذ الاستعادة داخل معاملة ويُنشئ نسخة أمان ويسجل التغيير",
+          "status": "passed",
+          "title": "ينفذ الاستعادة داخل معاملة ويُنشئ نسخة أمان ويسجل التغيير",
+          "duration": 2.4963399999999183,
+          "failureMessages": [],
+          "location": { "line": 11, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["استعادة نسخ المحتوى"],
+          "fullName": "استعادة نسخ المحتوى يعيد إبطال cache الملائم لكل نوع محتوى بعد الاستعادة",
+          "status": "passed",
+          "title": "يعيد إبطال cache الملائم لكل نوع محتوى بعد الاستعادة",
+          "duration": 0.4425779999999122,
+          "failureMessages": [],
+          "location": { "line": 18, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338196895,
+      "endTime": 1787338196897.4963,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/contentVersions.restore.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["تهيئة محتوى الصفحة الرئيسية"],
+          "fullName": "تهيئة محتوى الصفحة الرئيسية تدقق جاهزية مفاتيح الصفحة الرئيسية المنشورة داخل إدارة المحتوى",
+          "status": "passed",
+          "title": "تدقق جاهزية مفاتيح الصفحة الرئيسية المنشورة داخل إدارة المحتوى",
+          "duration": 2.017308999999841,
+          "failureMessages": [],
+          "location": { "line": 15, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["تهيئة محتوى الصفحة الرئيسية"],
+          "fullName": "تهيئة محتوى الصفحة الرئيسية يهيئ المحتوى الجديد منشوراً ويقرأ زر البطل من المفتاح نفسه",
+          "status": "passed",
+          "title": "يهيئ المحتوى الجديد منشوراً ويقرأ زر البطل من المفتاح نفسه",
+          "duration": 0.47392500000000837,
+          "failureMessages": [],
+          "location": { "line": 22, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338195834,
+      "endTime": 1787338195836.4739,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/homepageReadiness.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["استيراد المحتوى الآمن"],
+          "fullName": "استيراد المحتوى الآمن يتطلب معاينة وتأكيداً صريحاً قبل التعديل",
+          "status": "passed",
+          "title": "يتطلب معاينة وتأكيداً صريحاً قبل التعديل",
+          "duration": 2.180842000000098,
+          "failureMessages": [],
+          "location": { "line": 15, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["استيراد المحتوى الآمن"],
+          "fullName": "استيراد المحتوى الآمن يستورد البيانات داخل معاملة ويحافظ على خريطة العلاقات ويرفض التعارضات",
+          "status": "passed",
+          "title": "يستورد البيانات داخل معاملة ويحافظ على خريطة العلاقات ويرفض التعارضات",
+          "duration": 0.39184099999999944,
+          "failureMessages": [],
+          "location": { "line": 22, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338198058,
+      "endTime": 1787338198060.3918,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/importExport.atomic.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["publishingRouter"],
+          "fullName": "publishingRouter يرفض الوصول إلى صفحة النشر للدور غير المخول",
+          "status": "passed",
+          "title": "يرفض الوصول إلى صفحة النشر للدور غير المخول",
+          "duration": 4.042099999999891,
+          "failureMessages": [],
+          "location": { "line": 31, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["publishingRouter"],
+          "fullName": "publishingRouter يمرر منشئ المسودة وخيارات المنصات والوسائط إلى طبقة البيانات",
+          "status": "passed",
+          "title": "يمرر منشئ المسودة وخيارات المنصات والوسائط إلى طبقة البيانات",
+          "duration": 3.735429999999951,
+          "failureMessages": [],
+          "location": { "line": 35, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["publishingRouter"],
+          "fullName": "publishingRouter يقصر قرار الموافقة على الدور الإشرافي ويحتفظ بمعرّف المراجع",
+          "status": "passed",
+          "title": "يقصر قرار الموافقة على الدور الإشرافي ويحتفظ بمعرّف المراجع",
+          "duration": 1.2114559999999983,
+          "failureMessages": [],
+          "location": { "line": 53, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["publishingRouter"],
+          "fullName": "publishingRouter يتحقق من وقت الجدولة عبر مخطط الإدخال قبل استدعاء طبقة البيانات",
+          "status": "passed",
+          "title": "يتحقق من وقت الجدولة عبر مخطط الإدخال قبل استدعاء طبقة البيانات",
+          "duration": 1.333658000000014,
+          "failureMessages": [],
+          "location": { "line": 58, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338195981,
+      "endTime": 1787338195992.3337,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/publishing.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["فحص جودة المحتوى"],
+          "fullName": "فحص جودة المحتوى يفحص النص البديل للصور والأقسام المنشورة وأطوال SEO دون تعديل البيانات",
+          "status": "passed",
+          "title": "يفحص النص البديل للصور والأقسام المنشورة وأطوال SEO دون تعديل البيانات",
+          "duration": 1.7825410000000375,
+          "failureMessages": [],
+          "location": { "line": 8, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338198078,
+      "endTime": 1787338198079.7825,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/quality.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["PublishingPage"],
+          "fullName": "PublishingPage يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
+          "status": "passed",
+          "title": "يعرض جميع منصات النشر والحالة الآمنة للحسابات غير المرتبطة",
+          "duration": 339.51890000000003,
+          "failureMessages": [],
+          "location": { "line": 62, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["PublishingPage"],
+          "fullName": "PublishingPage ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
+          "status": "passed",
+          "title": "ينشئ مسودة من المحرر مع المنصات الافتراضية والوسيط المختار",
+          "duration": 120.76886100000002,
+          "failureMessages": [],
+          "location": { "line": 79, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["PublishingPage"],
+          "fullName": "PublishingPage يعرض إعادة المحاولة لوجهة فاشلة ويرسل معرفها إلى راوتر التسليم",
+          "status": "passed",
+          "title": "يعرض إعادة المحاولة لوجهة فاشلة ويرسل معرفها إلى راوتر التسليم",
+          "duration": 77.32876699999997,
+          "failureMessages": [],
+          "location": { "line": 96, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["PublishingPage"],
+          "fullName": "PublishingPage يعرض تقدم رفع فيديو YouTube من التشخيص الآمن للوجهة",
+          "status": "passed",
+          "title": "يعرض تقدم رفع فيديو YouTube من التشخيص الآمن للوجهة",
+          "duration": 36.914780000000064,
+          "failureMessages": [],
+          "location": { "line": 124, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338196483,
+      "endTime": 1787338197057.9148,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/PublishingPage.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["طابور موافقات المحتوى"],
+          "fullName": "طابور موافقات المحتوى يعرض الطلبات المعلقة ويربط الاعتماد والرفض بإجراءات الخادم",
+          "status": "passed",
+          "title": "يعرض الطلبات المعلقة ويربط الاعتماد والرفض بإجراءات الخادم",
+          "duration": 1.7752029999999195,
+          "failureMessages": [],
+          "location": { "line": 15, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["طابور موافقات المحتوى"],
+          "fullName": "طابور موافقات المحتوى يوفر مدخلاً لطابور الموافقات من صفحة إدارة المحتوى",
+          "status": "passed",
+          "title": "يوفر مدخلاً لطابور الموافقات من صفحة إدارة المحتوى",
+          "duration": 0.3207789999999022,
+          "failureMessages": [],
+          "location": { "line": 22, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338197074,
+      "endTime": 1787338197076.3208,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/__tests__/approvalQueue.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Content Management System", "Text Content"],
+          "fullName": "Content Management System Text Content should validate text content data",
+          "status": "passed",
+          "title": "should validate text content data",
+          "duration": 1.7120050000000901,
+          "failureMessages": [],
+          "location": { "line": 10, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Content Management System", "Text Content"],
+          "fullName": "Content Management System Text Content should validate required fields",
+          "status": "passed",
+          "title": "should validate required fields",
+          "duration": 0.3303089999999429,
+          "failureMessages": [],
+          "location": { "line": 25, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Content Management System", "Image Content"],
+          "fullName": "Content Management System Image Content should validate image data",
+          "status": "passed",
+          "title": "should validate image data",
+          "duration": 0.21797399999991285,
+          "failureMessages": [],
+          "location": { "line": 41, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Content Management System", "Color Scheme"],
+          "fullName": "Content Management System Color Scheme should validate color data",
+          "status": "passed",
+          "title": "should validate color data",
+          "duration": 0.4735330000000886,
+          "failureMessages": [],
+          "location": { "line": 61, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Content Management System", "Color Scheme"],
+          "fullName": "Content Management System Color Scheme should validate hex color format",
+          "status": "passed",
+          "title": "should validate hex color format",
+          "duration": 0.5222390000001269,
+          "failureMessages": [],
+          "location": { "line": 74, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Content Management System", "SEO Settings"],
+          "fullName": "Content Management System SEO Settings should validate SEO data",
+          "status": "passed",
+          "title": "should validate SEO data",
+          "duration": 0.16921000000002095,
+          "failureMessages": [],
+          "location": { "line": 89, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Content Management System", "SEO Settings"],
+          "fullName": "Content Management System SEO Settings should validate title length",
+          "status": "passed",
+          "title": "should validate title length",
+          "duration": 0.2467189999999846,
+          "failureMessages": [],
+          "location": { "line": 104, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Content Management System", "SEO Settings"],
+          "fullName": "Content Management System SEO Settings should validate description length",
+          "status": "passed",
+          "title": "should validate description length",
+          "duration": 0.14829000000008818,
+          "failureMessages": [],
+          "location": { "line": 115, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Content Management System", "Content Versions"],
+          "fullName": "Content Management System Content Versions should validate version data",
+          "status": "passed",
+          "title": "should validate version data",
+          "duration": 0.4144659999999476,
+          "failureMessages": [],
+          "location": { "line": 128, "column": 5 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["Content Management System", "Audit Log"],
+          "fullName": "Content Management System Audit Log should validate audit log data",
+          "status": "passed",
+          "title": "should validate audit log data",
+          "duration": 0.23598999999990156,
+          "failureMessages": [],
+          "location": { "line": 145, "column": 5 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338195806,
+      "endTime": 1787338195810.4146,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/__tests__/contentManagement.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["عقد قوائم إدارة المحتوى"],
+          "fullName": "عقد قوائم إدارة المحتوى يعرض عناصر النتيجة المرحّلة بدلاً من اعتبار الكائن قائمة فارغة",
+          "status": "passed",
+          "title": "يعرض عناصر النتيجة المرحّلة بدلاً من اعتبار الكائن قائمة فارغة",
+          "duration": 3.7495890000000145,
+          "failureMessages": [],
+          "location": { "line": 5, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["عقد قوائم إدارة المحتوى"],
+          "fullName": "عقد قوائم إدارة المحتوى يبقي التوافق مع القوائم القديمة ويعطي حالة آمنة عند غياب البيانات",
+          "status": "passed",
+          "title": "يبقي التوافق مع القوائم القديمة ويعطي حالة آمنة عند غياب البيانات",
+          "duration": 0.6199020000000246,
+          "failureMessages": [],
+          "location": { "line": 15, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338196843,
+      "endTime": 1787338196847.6199,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/__tests__/listResponse.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["المعاينة الحقيقية للمحتوى"],
+          "fullName": "المعاينة الحقيقية للمحتوى يعرض الصفحة العامة الفعلية داخل iframe قابل لمحاكاة الهاتف واللوحي",
+          "status": "passed",
+          "title": "يعرض الصفحة العامة الفعلية داخل iframe قابل لمحاكاة الهاتف واللوحي",
+          "duration": 1.9214019999999437,
+          "failureMessages": [],
+          "location": { "line": 15, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["المعاينة الحقيقية للمحتوى"],
+          "fullName": "المعاينة الحقيقية للمحتوى يوفر فحص الجودة من صفحة إدارة المحتوى",
+          "status": "passed",
+          "title": "يوفر فحص الجودة من صفحة إدارة المحتوى",
+          "duration": 0.27963999999997213,
+          "failureMessages": [],
+          "location": { "line": 22, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787338197052,
+      "endTime": 1787338197054.2795,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/__tests__/livePreview.test.ts"
+    },
     {
       "assertionResults": [
         {
@@ -34,7 +538,7 @@
           "fullName": "ربط SEO بالصفحات يحفظ pageId وslug مع إعدادات SEO ويعرض اختيار الصفحة في المحرر",
           "status": "passed",
           "title": "يحفظ pageId وslug مع إعدادات SEO ويعرض اختيار الصفحة في المحرر",
-          "duration": 2.040042000000085,
+          "duration": 2.137455999999929,
           "failureMessages": [],
           "location": { "line": 23, "column": 3 },
           "meta": {},
@@ -45,15 +549,15 @@
           "fullName": "ربط SEO بالصفحات يعرض إعداد SEO الفعلي من إعدادات الصفحة ويبطل cache عند تغييره",
           "status": "passed",
           "title": "يعرض إعداد SEO الفعلي من إعدادات الصفحة ويبطل cache عند تغييره",
-          "duration": 0.3333239999999478,
+          "duration": 0.39143699999999626,
           "failureMessages": [],
           "location": { "line": 30, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787337566505,
-      "endTime": 1787337566507.3333,
+      "startTime": 1787338197976,
+      "endTime": 1787338197978.3914,
       "status": "passed",
       "message": "",
       "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/__tests__/seoPageLinking.test.ts"

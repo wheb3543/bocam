@@ -17,6 +17,7 @@ import { sectionButtonsRouter } from './content/sectionButtons';
 import { importExportRouter } from './content/importExport';
 import { approvalsRouter } from './content/approvals';
 import { publishingRouter } from './content/publishing';
+import { qualityRouter } from './content/quality';
 
 /**
  * Router الرئيسي لنظام إدارة المحتوى
@@ -36,4 +37,5 @@ export const contentRouter = router({
   importExport: importExportRouter,
   approvals: approvalsRouter,
   publishing: publishingRouter,
+  quality: qualityRouter,
 });
