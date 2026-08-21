@@ -76,6 +76,8 @@ export function useSEO() {
     e.preventDefault();
     createMutation.mutate({
       pageKey: formData.pageKey,
+      pageId: formData.pageId,
+      slug: formData.slug || undefined,
       language: formData.language,
       title: formData.title || undefined,
       description: formData.description || undefined,
@@ -99,6 +101,8 @@ export function useSEO() {
     updateMutation.mutate({
       id: selectedSEOSettings.id,
       pageKey: formData.pageKey,
+      pageId: formData.pageId,
+      slug: formData.slug || undefined,
       language: formData.language,
       title: formData.title || undefined,
       description: formData.description || undefined,
@@ -124,6 +128,8 @@ export function useSEO() {
     setSelectedSEOSettings(seoSetting);
     setFormData({
       pageKey: seoSetting.pageKey || '',
+      pageId: seoSetting.pageId || undefined,
+      slug: seoSetting.slug || '',
       language: seoSetting.language || 'ar',
       title: seoSetting.title || '',
       description: seoSetting.description || '',

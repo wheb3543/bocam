@@ -207,6 +207,8 @@ export interface SEOSettings {
  */
 export interface SEOSettingsFormData {
   pageKey: string;
+  pageId?: number;
+  slug: string;
   language: string;
   title: string;
   description: string;
@@ -225,6 +227,8 @@ export interface SEOSettingsFormData {
  */
 export const initialSEOSettingsFormData: SEOSettingsFormData = {
   pageKey: '',
+  pageId: undefined,
+  slug: '',
   language: 'ar',
   title: '',
   description: '',

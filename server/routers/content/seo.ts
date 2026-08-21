@@ -10,6 +10,7 @@ import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or } from 'drizzle-orm';
 import { seoSettings } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
+import { invalidateSEOCache } from '../public/content';
 
 const logger = createLogger('seoSettings');
 
@@ -178,6 +179,7 @@ export const seoSettingsRouter = router({
       .$returningId();
 
     logger.info(`SEO settings created: ${input.pageKey}`);
+    await invalidateSEOCache();
 
     return { success: true, id: Number(insertId) };
   }),
@@ -215,6 +217,7 @@ export const seoSettingsRouter = router({
         .where(eq(seoSettings.id, input.id));
 
       logger.info(`SEO settings updated: ${input.id}`);
+      await invalidateSEOCache();
 
       return { success: true };
     }),
@@ -228,6 +231,7 @@ export const seoSettingsRouter = router({
     await db.delete(seoSettings).where(eq(seoSettings.id, input.id));
 
     logger.info(`SEO settings deleted: ${input.id}`);
+    await invalidateSEOCache();
 
     return { success: true };
   }),

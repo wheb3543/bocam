@@ -20,6 +20,7 @@ export function useImportExport() {
   const [isImporting, setIsImporting] = useState(false);
 
   const exportQuery = trpc.content.importExport.export.useQuery({});
+  const previewImportMutation = trpc.content.importExport.previewImport.useMutation();
   const importMutation = trpc.content.importExport.import.useMutation();
   const overviewQuery = trpc.content.importExport.getOverview.useQuery();
 
@@ -51,7 +52,12 @@ export function useImportExport() {
   const handleImport = async (data: unknown): Promise<void> => {
     setIsImporting(true);
     try {
-      await importMutation.mutateAsync(data as ImportData);
+      const importData = data as ImportData;
+      const preview = await previewImportMutation.mutateAsync(importData);
+      if (!preview.canImport) {
+        throw new Error('تعذر اعتماد ملف الاستيراد.');
+      }
+      await importMutation.mutateAsync({ ...importData, confirm: true });
       toast.success('تم استيراد المحتوى بنجاح');
     } catch (error) {
       toast.error('فشل استيراد المحتوى. تأكد من صحة الملف');
@@ -65,6 +71,7 @@ export function useImportExport() {
   return {
     isExporting,
     isImporting,
+    isPreviewingImport: previewImportMutation.isPending,
     overview: overviewQuery.data,
     isLoadingOverview: overviewQuery.isLoading,
     handleExport,

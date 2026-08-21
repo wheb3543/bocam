@@ -35,6 +35,7 @@ interface SEODialogProps {
   onFormDataChange: (data: SEOSettingsFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   isPending: boolean;
+  pages?: Array<{ id: number; name: string; slug: string; titleAr: string; titleEn: string }>;
   onSaveVersion?: () => void;
 }
 
@@ -49,6 +50,7 @@ export function SEODialog({
   onFormDataChange,
   onSubmit,
   isPending,
+  pages = [],
   onSaveVersion,
 }: SEODialogProps) {
   // SEO Validation Functions
@@ -119,6 +121,33 @@ export function SEODialog({
         </DialogHeader>
         <form onSubmit={onSubmit}>
           <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="pageId">الصفحة المرتبطة</Label>
+              <Select
+                value={formData.pageId ? String(formData.pageId) : 'none'}
+                onValueChange={(value) => {
+                  const page = pages.find((item) => item.id === Number(value));
+                  onFormDataChange({
+                    ...formData,
+                    pageId: page?.id,
+                    slug: page?.slug || '',
+                    pageKey: page ? formData.pageKey || page.name : formData.pageKey,
+                  });
+                }}
+              >
+                <SelectTrigger id="pageId">
+                  <SelectValue placeholder="اختر صفحة (اختياري)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">إعداد عام غير مرتبط بصفحة</SelectItem>
+                  {pages.map((page) => (
+                    <SelectItem key={page.id} value={String(page.id)}>
+                      {page.titleAr || page.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             {/* Page Key */}
             <div className="grid gap-2">
               <Label htmlFor="pageKey">مفتاح الصفحة *</Label>
@@ -129,6 +158,16 @@ export function SEODialog({
                 placeholder="مثال: home"
                 disabled={mode === 'edit'}
                 required
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="slug">رابط الصفحة (slug)</Label>
+              <Input
+                id="slug"
+                value={formData.slug}
+                onChange={(e) => onFormDataChange({ ...formData, slug: e.target.value })}
+                placeholder="مثال: about-us"
               />
             </div>
 

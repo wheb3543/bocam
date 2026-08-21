@@ -44,6 +44,14 @@ export function ContentImportExport({ onExport, onImport }: ContentImportExportP
     try {
       const text = await file.text();
       const data = JSON.parse(text);
+      if (
+        !confirm(
+          'سيجري فحص الملف ثم إضافة عناصره داخل معاملة واحدة. لن تُستبدل السجلات القائمة. هل تريد المتابعة؟'
+        )
+      ) {
+        event.target.value = '';
+        return;
+      }
       await onImport(data);
       toast.success('تم استيراد المحتوى بنجاح');
       event.target.value = '';
@@ -86,8 +94,8 @@ export function ContentImportExport({ onExport, onImport }: ContentImportExportP
                   <div className="text-sm text-yellow-800">
                     <p className="font-medium">تحذير</p>
                     <p className="mt-1">
-                      سيتم استبدال المحتوى الحالي بالمحتوى المستورد. تأكد من عمل نسخة احتياطية قبل
-                      الاستيراد.
+                      سيُفحص الملف أولاً، ثم تُضاف عناصره في معاملة واحدة. لن تستبدل العملية سجلات
+                      قائمة، وستتوقف بالكامل عند أي تعارض أو علاقة غير صالحة.
                     </p>
                   </div>
                 </div>

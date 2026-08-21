@@ -21,6 +21,7 @@ import type { TextContent, Image } from '../../types/content.types';
 import { useTextContent } from '../../hooks/useTextContent';
 import { useImages } from '../../hooks/useImages';
 import { useSections } from '../../hooks/useSections';
+import { useSEO } from '../../hooks/useSEO';
 
 interface PageSettingsDialogProps {
   open: boolean;
@@ -38,6 +39,7 @@ export function PageSettingsDialog({
   const textContent = useTextContent();
   const images = useImages();
   const sections = useSections();
+  const seo = useSEO();
 
   if (!page) {
     return null;
@@ -48,6 +50,9 @@ export function PageSettingsDialog({
     textContent.textContents?.filter((tc: TextContent) => tc.pageId === page.id) || [];
   const pageImages = images.images?.filter((img: Image) => img.pageId === page.id) || [];
   const pageSections = sections.sections?.filter((sec: Section) => sec.pageId === page.id) || [];
+  const pageSEO = seo.seoSettings?.find(
+    (setting) => setting.pageId === page.id || setting.slug === page.slug
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -235,33 +240,48 @@ export function PageSettingsDialog({
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">العنوان (AR)</label>
-                  <div className="p-3 bg-muted rounded-md">{page.metaTitleAr || 'غير محدد'}</div>
+                  <div className="p-3 bg-muted rounded-md">
+                    {pageSEO?.title || page.metaTitleAr || 'غير محدد'}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">العنوان (EN)</label>
-                  <div className="p-3 bg-muted rounded-md">{page.metaTitleEn || 'غير محدد'}</div>
+                  <div className="p-3 bg-muted rounded-md">
+                    {pageSEO?.title || page.metaTitleEn || 'غير محدد'}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">الوصف (AR)</label>
                   <div className="p-3 bg-muted rounded-md">
-                    {page.metaDescriptionAr || 'غير محدد'}
+                    {pageSEO?.description || page.metaDescriptionAr || 'غير محدد'}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">الوصف (EN)</label>
                   <div className="p-3 bg-muted rounded-md">
-                    {page.metaDescriptionEn || 'غير محدد'}
+                    {pageSEO?.description || page.metaDescriptionEn || 'غير محدد'}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">الكلمات المفتاحية (AR)</label>
-                  <div className="p-3 bg-muted rounded-md">{page.keywordsAr || 'غير محدد'}</div>
+                  <div className="p-3 bg-muted rounded-md">
+                    {pageSEO?.keywords || page.keywordsAr || 'غير محدد'}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">الكلمات المفتاحية (EN)</label>
-                  <div className="p-3 bg-muted rounded-md">{page.keywordsEn || 'غير محدد'}</div>
+                  <div className="p-3 bg-muted rounded-md">
+                    {pageSEO?.keywords || page.keywordsEn || 'غير محدد'}
+                  </div>
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    onNavigateToTab?.('seo');
+                    onOpenChange(false);
+                  }}
+                >
                   <ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
                   تعديل إعدادات SEO
                 </Button>

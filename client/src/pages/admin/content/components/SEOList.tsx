@@ -12,9 +12,12 @@ import { Plus } from 'lucide-react';
 import type { SEOSettings, SEOSettingsFormData } from '../types/content.types';
 import type { ContentFilters } from '../types/content.types';
 
+type SEOPageOption = { id: number; name: string; slug: string; titleAr: string; titleEn: string };
+
 interface SEOListProps {
   seoSettings: SEOSettings[];
   isLoading: boolean;
+  pages?: SEOPageOption[];
   filters: ContentFilters;
   onFiltersChange: (filters: ContentFilters) => void;
   isCreateDialogOpen: boolean;
@@ -39,6 +42,7 @@ interface SEOListProps {
 export function SEOList({
   seoSettings,
   isLoading,
+  pages = [],
   filters,
   onFiltersChange,
   isCreateDialogOpen,
@@ -112,6 +116,7 @@ export function SEOList({
         onFormDataChange={onFormDataChange}
         onSubmit={onCreateSEOSettings}
         isPending={createMutation.isPending}
+        pages={pages}
       />
 
       {/* Edit Dialog */}
@@ -123,6 +128,7 @@ export function SEOList({
         onFormDataChange={onFormDataChange}
         onSubmit={onEditSEOSettings}
         isPending={updateMutation.isPending}
+        pages={pages}
       />
     </div>
   );

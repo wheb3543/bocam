@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 6,
-  "numPassedTestSuites": 6,
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 7,
-  "numPassedTests": 7,
+  "numTotalTests": 2,
+  "numPassedTests": 2,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,112 +24,39 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1787336970953,
+  "startTime": 1787337564532,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["حماية تدفق موافقات المحتوى"],
-          "fullName": "حماية تدفق موافقات المحتوى يحصر الإنشاء بالمحررين والموافقة أو الرفض بالمراجعين",
+          "ancestorTitles": ["ربط SEO بالصفحات"],
+          "fullName": "ربط SEO بالصفحات يحفظ pageId وslug مع إعدادات SEO ويعرض اختيار الصفحة في المحرر",
           "status": "passed",
-          "title": "يحصر الإنشاء بالمحررين والموافقة أو الرفض بالمراجعين",
-          "duration": 2.03412400000002,
+          "title": "يحفظ pageId وslug مع إعدادات SEO ويعرض اختيار الصفحة في المحرر",
+          "duration": 2.040042000000085,
           "failureMessages": [],
-          "location": { "line": 8, "column": 3 },
+          "location": { "line": 23, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["حماية تدفق موافقات المحتوى"],
-          "fullName": "حماية تدفق موافقات المحتوى يبلغ المستخدمين المؤهلين للمراجعة عند إنشاء طلب جديد",
+          "ancestorTitles": ["ربط SEO بالصفحات"],
+          "fullName": "ربط SEO بالصفحات يعرض إعداد SEO الفعلي من إعدادات الصفحة ويبطل cache عند تغييره",
           "status": "passed",
-          "title": "يبلغ المستخدمين المؤهلين للمراجعة عند إنشاء طلب جديد",
-          "duration": 0.35723299999995106,
+          "title": "يعرض إعداد SEO الفعلي من إعدادات الصفحة ويبطل cache عند تغييره",
+          "duration": 0.3333239999999478,
           "failureMessages": [],
-          "location": { "line": 15, "column": 3 },
+          "location": { "line": 30, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1787336972475,
-      "endTime": 1787336972477.3572,
+      "startTime": 1787337566505,
+      "endTime": 1787337566507.3333,
       "status": "passed",
       "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/approvals.authorization.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
-          "fullName": "صلاحيات إدارة المحتوى يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم",
-          "status": "passed",
-          "title": "يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم",
-          "duration": 1.8870719999999892,
-          "failureMessages": [],
-          "location": { "line": 12, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
-          "fullName": "صلاحيات إدارة المحتوى لا يسمح للمحرر بالنشر بينما يسمح به للمدير",
-          "status": "passed",
-          "title": "لا يسمح للمحرر بالنشر بينما يسمح به للمدير",
-          "duration": 1.1605110000000423,
-          "failureMessages": [],
-          "location": { "line": 20, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["صلاحيات إدارة المحتوى"],
-          "fullName": "صلاحيات إدارة المحتوى يوزع إجراءات CMS على طبقة الصلاحيات المشتركة",
-          "status": "passed",
-          "title": "يوزع إجراءات CMS على طبقة الصلاحيات المشتركة",
-          "duration": 3.015141999999969,
-          "failureMessages": [],
-          "location": { "line": 25, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787336972591,
-      "endTime": 1787336972597.0151,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/authorization.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["استعادة نسخ المحتوى"],
-          "fullName": "استعادة نسخ المحتوى ينفذ الاستعادة داخل معاملة ويُنشئ نسخة أمان ويسجل التغيير",
-          "status": "passed",
-          "title": "ينفذ الاستعادة داخل معاملة ويُنشئ نسخة أمان ويسجل التغيير",
-          "duration": 1.8890599999999722,
-          "failureMessages": [],
-          "location": { "line": 11, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["استعادة نسخ المحتوى"],
-          "fullName": "استعادة نسخ المحتوى يعيد إبطال cache الملائم لكل نوع محتوى بعد الاستعادة",
-          "status": "passed",
-          "title": "يعيد إبطال cache الملائم لكل نوع محتوى بعد الاستعادة",
-          "duration": 0.5595560000001569,
-          "failureMessages": [],
-          "location": { "line": 18, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1787336972475,
-      "endTime": 1787336972477.5596,
-      "status": "passed",
-      "message": "",
-      "name": "/home/ubuntu/sgh-crm-portal/server/routers/content/contentVersions.restore.test.ts"
+      "name": "/home/ubuntu/sgh-crm-portal/client/src/pages/admin/content/__tests__/seoPageLinking.test.ts"
     }
   ]
 }
