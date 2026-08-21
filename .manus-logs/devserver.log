@@ -844,3 +844,131 @@
 [2026-08-21T21:42:55.630Z] cp .env.example .env
 [2026-08-21T21:42:55.661Z] [ELIFECYCLE] Command failed with exit code 1.
 [2026-08-21T21:42:55.694Z] Dev server exited with code 1
+[2026-08-21T21:56:10.810Z] 2026-08-21T21:56:10.810Z [sdk] [WARN] Missing session cookie
+[2026-08-21T21:56:26.042Z] 2026-08-21T21:56:26.042Z [sdk] [WARN] Missing session cookie
+[2026-08-21T21:56:29.202Z] 2026-08-21T21:56:29.202Z [sdk] [WARN] Missing session cookie
+[2026-08-21T21:56:29.215Z] 2026-08-21T21:56:29.215Z [sdk] [WARN] Missing session cookie
+[2026-08-21T21:56:29.219Z] 2026-08-21T21:56:29.219Z [sdk] [WARN] Missing session cookie
+[2026-08-21T21:56:29.335Z] 2026-08-21T21:56:29.335Z [sdk] [WARN] Missing session cookie
+[2026-08-21T21:56:29.365Z] 2026-08-21T21:56:29.365Z [sdk] [WARN] Missing session cookie
+[2026-08-21T21:56:29.761Z] 2026-08-21T21:56:29.761Z [sdk] [WARN] Missing session cookie
+[2026-08-21T21:56:34.674Z] 2026-08-21T21:56:34.673Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-21T21:56:35.296Z] 2026-08-21T21:56:35.296Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-21T21:56:59.077Z] 2026-08-21T21:56:59.076Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-21T21:56:59.742Z] 2026-08-21T21:56:59.741Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-21T22:16:42.573Z] [ELIFECYCLE] Command failed.
+[2026-08-21T22:16:42.587Z] 10:16:42 PM [tsx] Previous process hasn't exited yet. Force killing...
+[2026-08-21T22:16:42.629Z] Dev server exited with code -1
+[2026-08-21T22:16:43.664Z] Starting dev server with command: pnpm run dev
+[2026-08-21T22:16:44.910Z] $ node scripts/check-env.mjs
+[2026-08-21T22:16:44.952Z] 🔍 Checking environment variables...
+[2026-08-21T22:16:44.953Z] ℹ️  لم يُعثر على ملف .env؛ سيُستخدم إعداد بيئة التشغيل المدمج إن كان متاحاً.
+[2026-08-21T22:16:44.953Z] ✅ Required variables found:
+[2026-08-21T22:16:44.953Z] - DATABASE_URL
+[2026-08-21T22:16:44.953Z] - OAUTH_SERVER_URL
+[2026-08-21T22:16:44.953Z] - VITE_APP_ID
+[2026-08-21T22:16:44.953Z] ⚠️  Optional variables not set (project will work without them):
+[2026-08-21T22:16:44.953Z] - REDIS_URL
+[2026-08-21T22:16:44.953Z] - WHATSAPP_ACCESS_TOKEN
+[2026-08-21T22:16:44.953Z] ✅ Environment check passed!
+[2026-08-21T22:16:44.956Z] $ cross-env NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-21T22:16:47.549Z] 2026-08-21T22:16:47.548Z [sdk] [INFO] Initialized with baseURL: https://api.manus.im
+[2026-08-21T22:16:47.834Z] 2026-08-21T22:16:47.833Z [webhook] [WARN] WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests
+[2026-08-21T22:16:49.045Z] Sentry initialized successfully
+[2026-08-21T22:16:49.045Z] 2026-08-21T22:16:49.044Z [license] [INFO] Initializing License System...
+[2026-08-21T22:16:49.045Z] 2026-08-21T22:16:49.044Z [license] [INFO]
+[2026-08-21T22:16:49.045Z] 2026-08-21T22:16:49.044Z [license] [INFO] License Validation Starting...
+[2026-08-21T22:16:49.045Z] 2026-08-21T22:16:49.044Z [license] [INFO]
+[2026-08-21T22:16:49.045Z] 2026-08-21T22:16:49.045Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-21T22:16:49.047Z] 2026-08-21T22:16:49.046Z [license] [INFO] License file loaded successfully
+[2026-08-21T22:16:49.050Z] 2026-08-21T22:16:49.049Z [license] [INFO] Using configured License Hardware ID
+[2026-08-21T22:16:49.050Z] 2026-08-21T22:16:49.049Z [license] [INFO] License System initialized successfully
+[2026-08-21T22:16:49.050Z] 2026-08-21T22:16:49.050Z [license] [INFO]
+[2026-08-21T22:16:49.918Z] `server.hmr.protocol/host/port/path/clientPort/timeout/server` is deprecated. Use `server.ws.*` instead. Note that this option may be set by a plugin. Set VITE_DEPRECATION_TRACE=1 to see where it is called.
+[2026-08-21T22:16:49.968Z] 2026-08-21T22:16:49.968Z [server] [INFO] Server running on http://localhost:3000/
+[2026-08-21T22:16:51.150Z] 2026-08-21T22:16:51.150Z [appointmentReminders] [INFO] Initializing appointment reminders scheduler (every 30 minutes)...
+[2026-08-21T22:16:51.150Z] 2026-08-21T22:16:51.150Z [appointmentReminders] [INFO] Scheduler initialized. Running every 30 minutes.
+[2026-08-21T22:16:55.879Z] ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust proxy' setting is false (default). This could indicate a misconfiguration which would prevent express-rate-limit from accurately identifying users. See https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ for more information.
+[2026-08-21T22:16:55.879Z] at Object.xForwardedForHeader (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:352:13)
+[2026-08-21T22:16:55.879Z] at wrappedValidations.<computed> [as xForwardedForHeader] (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:675:22)
+[2026-08-21T22:16:55.879Z] at Object.keyGenerator (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:782:20)
+[2026-08-21T22:16:55.879Z] at file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:864:32
+[2026-08-21T22:16:55.879Z] at async file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:825:5 {
+[2026-08-21T22:16:55.879Z] code: 'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR',
+[2026-08-21T22:16:55.879Z] help: 'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/'
+[2026-08-21T22:16:55.879Z] }
+[2026-08-21T22:16:55.881Z] 2026-08-21T22:16:55.881Z [redis] [INFO] Redis cache not available. Using in-memory cache fallback.
+[2026-08-21T22:17:01.153Z] 2026-08-21T22:17:01.153Z [appointmentReminders] [INFO] Running appointment reminder jobs...
+[2026-08-21T22:17:02.359Z] 2026-08-21T22:17:02.359Z [appointmentReminders] [INFO] No 24h reminders needed
+[2026-08-21T22:17:02.379Z] 2026-08-21T22:17:02.379Z [appointmentReminders] [INFO] No 1h reminders needed
+[2026-08-21T22:17:02.379Z] 2026-08-21T22:17:02.379Z [appointmentReminders] [INFO] Done. 24h: 0 sent, 0 failed. 1h: 0 sent, 0 failed.
+[2026-08-21T22:17:20.610Z] 10:17:20 PM [tsx] Previous process hasn't exited yet. Force killing...
+[2026-08-21T22:17:20.619Z] [ELIFECYCLE] Command failed.
+[2026-08-21T22:17:20.671Z] Dev server exited with code -1
+[2026-08-21T22:17:21.702Z] Starting dev server with command: pnpm run dev
+[2026-08-21T22:17:22.915Z] $ node scripts/check-env.mjs
+[2026-08-21T22:17:22.959Z] 🔍 Checking environment variables...
+[2026-08-21T22:17:22.960Z] ℹ️  لم يُعثر على ملف .env؛ سيُستخدم إعداد بيئة التشغيل المدمج إن كان متاحاً.
+[2026-08-21T22:17:22.960Z] ✅ Required variables found:
+[2026-08-21T22:17:22.960Z] - DATABASE_URL
+[2026-08-21T22:17:22.960Z] - OAUTH_SERVER_URL
+[2026-08-21T22:17:22.960Z] - VITE_APP_ID
+[2026-08-21T22:17:22.960Z] ⚠️  Optional variables not set (project will work without them):
+[2026-08-21T22:17:22.960Z] - REDIS_URL
+[2026-08-21T22:17:22.960Z] - WHATSAPP_ACCESS_TOKEN
+[2026-08-21T22:17:22.960Z] ✅ Environment check passed!
+[2026-08-21T22:17:22.964Z] $ cross-env NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-21T22:17:25.118Z] 2026-08-21T22:17:25.118Z [sdk] [INFO] Initialized with baseURL: https://api.manus.im
+[2026-08-21T22:17:25.287Z] 2026-08-21T22:17:25.287Z [webhook] [WARN] WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests
+[2026-08-21T22:17:26.092Z] Sentry initialized successfully
+[2026-08-21T22:17:26.092Z] 2026-08-21T22:17:26.092Z [license] [INFO] Initializing License System...
+[2026-08-21T22:17:26.092Z] 2026-08-21T22:17:26.092Z [license] [INFO]
+[2026-08-21T22:17:26.093Z] 2026-08-21T22:17:26.093Z [license] [INFO] License Validation Starting...
+[2026-08-21T22:17:26.093Z] 2026-08-21T22:17:26.093Z [license] [INFO]
+[2026-08-21T22:17:26.093Z] 2026-08-21T22:17:26.093Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-21T22:17:26.093Z] 2026-08-21T22:17:26.093Z [license] [INFO] License file loaded successfully
+[2026-08-21T22:17:26.095Z] 2026-08-21T22:17:26.095Z [license] [INFO] Using configured License Hardware ID
+[2026-08-21T22:17:26.095Z] 2026-08-21T22:17:26.095Z [license] [INFO] License System initialized successfully
+[2026-08-21T22:17:26.095Z] 2026-08-21T22:17:26.095Z [license] [INFO]
+[2026-08-21T22:17:26.940Z] `server.hmr.protocol/host/port/path/clientPort/timeout/server` is deprecated. Use `server.ws.*` instead. Note that this option may be set by a plugin. Set VITE_DEPRECATION_TRACE=1 to see where it is called.
+[2026-08-21T22:17:26.980Z] 2026-08-21T22:17:26.980Z [server] [INFO] Server running on http://localhost:3000/
+[2026-08-21T22:17:28.379Z] 2026-08-21T22:17:28.379Z [appointmentReminders] [INFO] Initializing appointment reminders scheduler (every 30 minutes)...
+[2026-08-21T22:17:28.379Z] 2026-08-21T22:17:28.379Z [appointmentReminders] [INFO] Scheduler initialized. Running every 30 minutes.
+[2026-08-21T22:17:38.386Z] 2026-08-21T22:17:38.386Z [appointmentReminders] [INFO] Running appointment reminder jobs...
+[2026-08-21T22:17:38.780Z] 2026-08-21T22:17:38.780Z [appointmentReminders] [INFO] No 24h reminders needed
+[2026-08-21T22:17:38.788Z] 2026-08-21T22:17:38.788Z [appointmentReminders] [INFO] No 1h reminders needed
+[2026-08-21T22:17:38.788Z] 2026-08-21T22:17:38.788Z [appointmentReminders] [INFO] Done. 24h: 0 sent, 0 failed. 1h: 0 sent, 0 failed.
+[2026-08-21T22:17:55.515Z] ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust proxy' setting is false (default). This could indicate a misconfiguration which would prevent express-rate-limit from accurately identifying users. See https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ for more information.
+[2026-08-21T22:17:55.515Z] at Object.xForwardedForHeader (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:352:13)
+[2026-08-21T22:17:55.515Z] at wrappedValidations.<computed> [as xForwardedForHeader] (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:675:22)
+[2026-08-21T22:17:55.515Z] at Object.keyGenerator (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:782:20)
+[2026-08-21T22:17:55.515Z] at file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:864:32
+[2026-08-21T22:17:55.515Z] at async file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:825:5 {
+[2026-08-21T22:17:55.515Z] code: 'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR',
+[2026-08-21T22:17:55.515Z] help: 'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/'
+[2026-08-21T22:17:55.515Z] }
+[2026-08-21T22:17:55.516Z] 2026-08-21T22:17:55.516Z [redis] [INFO] Redis cache not available. Using in-memory cache fallback.
+[2026-08-21T22:19:54.272Z] 2026-08-21T22:19:54.271Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:19:56.261Z] 2026-08-21T22:19:56.261Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:20:00.648Z] 2026-08-21T22:20:00.648Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:20:01.846Z] 2026-08-21T22:20:01.846Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:20:22.661Z] ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust proxy' setting is false (default). This could indicate a misconfiguration which would prevent express-rate-limit from accurately identifying users. See https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ for more information.
+[2026-08-21T22:20:22.666Z] at Object.xForwardedForHeader (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:352:13)
+[2026-08-21T22:20:22.666Z] at wrappedValidations.<computed> [as xForwardedForHeader] (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:675:22)
+[2026-08-21T22:20:22.666Z] at Object.keyGenerator (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:782:20)
+[2026-08-21T22:20:22.666Z] at file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:864:32
+[2026-08-21T22:20:22.666Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-08-21T22:20:22.666Z] at async file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:825:5 {
+[2026-08-21T22:20:22.666Z] code: 'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR',
+[2026-08-21T22:20:22.666Z] help: 'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/'
+[2026-08-21T22:20:22.666Z] }
+[2026-08-21T22:20:22.666Z] 2026-08-21T22:20:22.663Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:20:23.422Z] 2026-08-21T22:20:23.422Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:20:37.396Z] 2026-08-21T22:20:37.396Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:20:38.504Z] 2026-08-21T22:20:38.503Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:20:44.908Z] 2026-08-21T22:20:44.908Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:20:45.654Z] 2026-08-21T22:20:45.654Z [sdk] [WARN] Missing session cookie
+[2026-08-21T22:47:28.392Z] 2026-08-21T22:47:28.390Z [appointmentReminders] [INFO] Running appointment reminder jobs...
+[2026-08-21T22:47:29.463Z] 2026-08-21T22:47:29.463Z [appointmentReminders] [INFO] No 24h reminders needed
+[2026-08-21T22:47:29.729Z] 2026-08-21T22:47:29.729Z [appointmentReminders] [INFO] No 1h reminders needed
+[2026-08-21T22:47:29.730Z] 2026-08-21T22:47:29.729Z [appointmentReminders] [INFO] Done. 24h: 0 sent, 0 failed. 1h: 0 sent, 0 failed.
