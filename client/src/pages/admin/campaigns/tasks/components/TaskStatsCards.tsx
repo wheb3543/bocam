@@ -15,7 +15,7 @@ interface TaskStatsCardsProps {
 
 const TaskStatsCards = memo(function TaskStatsCards({ stats }: TaskStatsCardsProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 [&_[data-slot=card-content]]:p-2.5">
       <Card>
         <CardContent className="p-3 md:p-4">
           <div className="flex items-center gap-2">

@@ -5,7 +5,6 @@
 
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Loader2, Plus, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -68,13 +67,27 @@ export default function DigitalMarketingTasksPage() {
       pageDescription="إدارة مهام فريق التسويق الرقمي"
       pageHeader="none"
     >
-      <div className="space-y-4 md:space-y-6" dir="rtl">
-        <AdminPageHeader
-          eyebrow="التسويق الرقمي"
-          title="إدارة مهام فريق التسويق الرقمي"
-          description="إنشاء وتوزيع ومتابعة مهام الفريق من لوحة عمل واحدة."
+      <div
+        className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden py-3 sm:py-4"
+        dir="rtl"
+      >
+        <div className="shrink-0">
+          <TaskStatsCards stats={stats} />
+        </div>
+
+        <TaskFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          priorityFilter={priorityFilter}
+          onPriorityFilterChange={setPriorityFilter}
+          categoryFilter={categoryFilter}
+          onCategoryFilterChange={setCategoryFilter}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
           actions={
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9">
                 <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="sr-only">تحديث المهام</span>
@@ -88,48 +101,33 @@ export default function DigitalMarketingTasksPage() {
           }
         />
 
-        {/* Stats Cards */}
-        <TaskStatsCards stats={stats} />
-
-        {/* Filters & View Toggle */}
-        <TaskFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          priorityFilter={priorityFilter}
-          onPriorityFilterChange={setPriorityFilter}
-          categoryFilter={categoryFilter}
-          onCategoryFilterChange={setCategoryFilter}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
-
         {/* Content */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : viewMode === 'kanban' ? (
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {statuses.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                tasks={tasks || []}
-                onTaskClick={handleTaskClick}
-                onStatusChange={handleStatusChange}
-              />
-            ))}
-          </div>
-        ) : (
-          <TaskListView
-            tasks={tasks}
-            onTaskClick={handleTaskClick}
-            onEditTask={handleEditTask}
-            onDeleteTask={handleDeleteWithConfirm}
-          />
-        )}
+        <div className="min-h-0 flex-1 overflow-hidden">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : viewMode === 'kanban' ? (
+            <div className="flex h-full min-w-max gap-4 overflow-x-auto pb-2">
+              {statuses.map((status) => (
+                <KanbanColumn
+                  key={status}
+                  status={status}
+                  tasks={tasks || []}
+                  onTaskClick={handleTaskClick}
+                  onStatusChange={handleStatusChange}
+                />
+              ))}
+            </div>
+          ) : (
+            <TaskListView
+              tasks={tasks}
+              onTaskClick={handleTaskClick}
+              onEditTask={handleEditTask}
+              onDeleteTask={handleDeleteWithConfirm}
+            />
+          )}
+        </div>
 
         {/* Task Details Dialog */}
         <TaskDetailsDialog

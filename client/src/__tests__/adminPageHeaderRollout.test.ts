@@ -12,6 +12,15 @@ const commentContextsSource = readSource(
   'client/src/pages/admin/communications/MetaCommentContextsPanel.tsx'
 );
 const whatsAppPageSource = readSource('client/src/pages/admin/whatsapp/WhatsAppPage.tsx');
+const digitalMarketingTasksSource = readSource(
+  'client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx'
+);
+const digitalMarketingStatsSource = readSource(
+  'client/src/pages/admin/campaigns/tasks/components/TaskStatsCards.tsx'
+);
+const digitalMarketingKanbanSource = readSource(
+  'client/src/pages/admin/campaigns/tasks/components/KanbanColumn.tsx'
+);
 
 describe('مساحات العمل الإدارية دون بطاقة عنوان مكررة', () => {
   it('لا يرسم رأس عنوان مركزياً فوق محتوى الصفحة', () => {
@@ -48,6 +57,15 @@ describe('مساحات العمل الإدارية دون بطاقة عنوان 
     expect(whatsAppPageSource).toContain('min-h-0 flex-1 overflow-hidden');
     expect(whatsAppPageSource).not.toContain('min-h-screen bg-gradient-to-br');
     expect(whatsAppPageSource).not.toContain("height: 'calc(100vh - 8.75rem)'");
+  });
+
+  it('يصحح مساحة مهام التسويق الرقمي الفعلية دون رأس مكرر', () => {
+    expect(digitalMarketingTasksSource).not.toContain('AdminPageHeader');
+    expect(digitalMarketingTasksSource).toContain('h-[calc(100dvh-4.25rem)]');
+    expect(digitalMarketingTasksSource).toContain('actions={');
+    expect(digitalMarketingTasksSource).toContain('min-h-0 flex-1 overflow-hidden');
+    expect(digitalMarketingStatsSource).toContain('grid grid-cols-2 gap-2');
+    expect(digitalMarketingKanbanSource).toContain('min-h-0 flex-1');
   });
 
   it.each([

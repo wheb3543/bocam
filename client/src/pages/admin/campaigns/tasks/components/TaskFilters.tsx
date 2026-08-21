@@ -3,7 +3,7 @@
  * يعرض فلاتر البحث والعرض للمهام
  */
 
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -28,6 +28,7 @@ interface TaskFiltersProps {
   onCategoryFilterChange: (value: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
+  actions?: ReactNode;
 }
 
 const TaskFilters = memo(function TaskFilters({
@@ -41,6 +42,7 @@ const TaskFilters = memo(function TaskFilters({
   onCategoryFilterChange,
   viewMode,
   onViewModeChange,
+  actions,
 }: TaskFiltersProps) {
   return (
     <Card>
@@ -101,27 +103,30 @@ const TaskFilters = memo(function TaskFilters({
             </Select>
           </div>
 
-          <div className="flex items-center gap-0.5 sm:gap-1 border rounded-lg p-0.5 sm:p-1">
-            <Button
-              variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => onViewModeChange('kanban')}
-              className="h-8 text-xs sm:text-sm"
-            >
-              <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1" />
-              <span className="hidden sm:inline">Kanban</span>
-              <span className="sm:hidden">K</span>
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => onViewModeChange('list')}
-              className="h-8 text-xs sm:text-sm"
-            >
-              <List className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1" />
-              <span className="hidden sm:inline">قائمة</span>
-              <span className="sm:hidden">ق</span>
-            </Button>
+          <div className="flex items-center gap-2">
+            {actions}
+            <div className="flex items-center gap-0.5 rounded-lg border p-0.5 sm:gap-1 sm:p-1">
+              <Button
+                variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => onViewModeChange('kanban')}
+                className="h-8 text-xs sm:text-sm"
+              >
+                <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1" />
+                <span className="hidden sm:inline">Kanban</span>
+                <span className="sm:hidden">K</span>
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => onViewModeChange('list')}
+                className="h-8 text-xs sm:text-sm"
+              >
+                <List className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1" />
+                <span className="hidden sm:inline">قائمة</span>
+                <span className="sm:hidden">ق</span>
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>

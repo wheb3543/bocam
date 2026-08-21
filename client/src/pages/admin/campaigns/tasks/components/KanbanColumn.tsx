@@ -44,7 +44,7 @@ const KanbanColumn = memo(function KanbanColumn({
 
   return (
     <div
-      className="flex-1 min-w-[280px] max-w-[320px] bg-muted/30 rounded-lg p-3"
+      className="flex h-full min-w-[280px] max-w-[320px] flex-1 flex-col rounded-lg bg-muted/30 p-3"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -58,7 +58,7 @@ const KanbanColumn = memo(function KanbanColumn({
         </div>
       </div>
 
-      <ScrollArea className="h-[calc(100vh-320px)]">
+      <ScrollArea className="min-h-0 flex-1">
         <div className="space-y-2 pe-2">
           {columnTasks.map((task) => (
             <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
