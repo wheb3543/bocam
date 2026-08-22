@@ -31,6 +31,7 @@ import {
 import { setupUpdateRoutes } from './routes/updateRoutes';
 import { setupBackupRoutes } from './routes/backupRoutes';
 import { setupConfigRoutes } from './routes/configRoutes';
+import { createLicenseDeliveryRouter } from '../api/licenseDeliveryRoute';
 
 // Initialize Sentry for error tracking
 initSentry();
@@ -91,6 +92,8 @@ async function startServer() {
   setupUpdateRoutes(app, apiLimiter, sensitiveApiLimiter);
   setupBackupRoutes(app, apiLimiter, sensitiveApiLimiter);
   setupConfigRoutes(app, apiLimiter, sensitiveApiLimiter);
+  // Idea Hub can deliver a signed license directly; bocam verifies the RSA signature and hardware ID locally.
+  app.use(createLicenseDeliveryRouter());
 
   // tRPC API
   app.use(

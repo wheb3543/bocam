@@ -24,7 +24,7 @@ type PendingFeatureRequest = PendingLicenseRequest & {
   featureKey: string;
 };
 
-type CentralLicenseFile = {
+export type CentralLicenseFile = {
   key: string;
   hardwareId: string;
   expiryDate: string;
@@ -176,7 +176,7 @@ export async function requestCentralLicense(input: { instanceName: string; serve
   };
 }
 
-function installCentralLicense(license: CentralLicenseFile) {
+export function installCentralLicense(license: CentralLicenseFile) {
   if (
     !license?.key ||
     !license.hardwareId ||
