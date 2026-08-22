@@ -22,6 +22,14 @@ const deferredPublicationSource = readFileSync(
   resolve(process.cwd(), 'server/services/content/deferredPublicationService.ts'),
   'utf8'
 );
+const auditLogRouterSource = readFileSync(
+  resolve(process.cwd(), 'server/routers/content/auditLog.ts'),
+  'utf8'
+);
+const deferredAlertsSource = readFileSync(
+  resolve(process.cwd(), 'client/src/pages/admin/content/components/DeferredPublicationAlerts.tsx'),
+  'utf8'
+);
 const pageDialogSource = readFileSync(
   resolve(process.cwd(), 'client/src/pages/admin/content/components/dialogs/PageDialog.tsx'),
   'utf8'
@@ -84,6 +92,15 @@ describe('النشر المؤجل لمحتوى CMS', () => {
     expect(deferredPublicationSource).toContain("set({ publishedAt: null })");
     expect(deferredPublicationSource).toContain('publicationBlocked: true');
     expect(deferredPublicationSource).toContain('blocked: DeferredEntityCounters');
+  });
+
+  it('يعرض للمسؤول حالات المنع المسجلة مع أخطاء الجودة وإجراء الوصول إلى المحتوى', () => {
+    expect(auditLogRouterSource).toContain('getDeferredPublicationBlocks');
+    expect(auditLogRouterSource).toContain('تم منع النشر المؤجل بواسطة مهمة CMS%');
+    expect(auditLogRouterSource).toContain('current.issues');
+    expect(deferredAlertsSource).toContain('تم إيقاف نشر مجدول بسبب فحص الجودة');
+    expect(deferredAlertsSource).toContain('فتح المحتوى');
+    expect(deferredAlertsSource).toContain('refetchInterval: 60_000');
   });
 
   it('يبقي فحوص الجودة المحلية مغطية الروابط والترجمة والمفاتيح', () => {

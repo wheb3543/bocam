@@ -10,6 +10,7 @@ import { SectionsList } from './components/SectionsList';
 import { SectionButtonsList } from './components/SectionButtonsList';
 import { ContentImportExport } from './components/ContentImportExport';
 import { BulkImageUpload } from './components/BulkImageUpload';
+import { DeferredPublicationAlerts } from './components/DeferredPublicationAlerts';
 import { ContentPreviewPanel } from './components/preview/ContentPreviewPanel';
 import { VersionHistoryDialog } from './components/dialogs/VersionHistoryDialog';
 import { AuditLogDialog } from './components/dialogs/AuditLogDialog';
@@ -192,6 +193,8 @@ export default function ContentManagementPage() {
             </AlertDescription>
           </Alert>
         )}
+
+        <DeferredPublicationAlerts onNavigateToTab={handleNavigateToTab} />
 
         {/* Overview Cards */}
         <ContentOverviewCards
