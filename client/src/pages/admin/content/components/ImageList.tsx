@@ -34,6 +34,7 @@ interface ImageListProps {
   qualityIssues: string[];
   isAdmin: boolean;
   clearQualityIssues: () => void;
+  approvalEntityId?: number | null;
 }
 
 /**
@@ -46,7 +47,6 @@ export function ImageList({
   onFiltersChange,
   isCreateDialogOpen,
   isEditDialogOpen,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   selectedImage,
   formData,
   onFormDataChange,
@@ -62,6 +62,7 @@ export function ImageList({
   qualityIssues,
   isAdmin,
   clearQualityIssues,
+  approvalEntityId,
 }: ImageListProps) {
   return (
     <div className="space-y-4">
@@ -144,6 +145,7 @@ export function ImageList({
         isPending={updateMutation.isPending}
         qualityIssues={qualityIssues}
         isAdmin={isAdmin}
+        approvalEntityId={approvalEntityId ?? selectedImage?.id}
       />
     </div>
   );

@@ -27,6 +27,7 @@ import { Bold, Italic, List, Heading, Link, Code, Quote } from 'lucide-react';
 import type { TextContentFormData } from '../../types/content.types';
 import { languageOptions, textContentTypeOptions } from '../../types/content.types';
 import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
+import { ApprovalSubmissionPanel } from '../ApprovalSubmissionPanel';
 
 interface TextContentDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ interface TextContentDialogProps {
   onSubmit: (e: React.FormEvent) => void;
   isPending: boolean;
   onSaveVersion?: () => void;
+  approvalEntityId?: number | null;
   qualityIssues: string[];
   isAdmin: boolean;
   pages?: Array<{ id: number; name: string; titleAr: string; titleEn: string }>;
@@ -61,6 +63,7 @@ export function TextContentDialog({
   onSubmit,
   isPending,
   onSaveVersion,
+  approvalEntityId,
   qualityIssues,
   isAdmin,
   pages = [],
@@ -362,6 +365,14 @@ export function TextContentDialog({
                 onFormDataChange({ ...formData, qualityOverrideReason })
               }
             />
+
+            {mode === 'edit' && (
+              <ApprovalSubmissionPanel
+                entityType="textContent"
+                entityId={approvalEntityId}
+                changes={formData}
+              />
+            )}
 
             {/* Active */}
             <div className="flex items-center gap-2">

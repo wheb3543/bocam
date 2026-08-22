@@ -47,6 +47,7 @@ interface TextContentListProps {
   qualityIssues: string[];
   isAdmin: boolean;
   clearQualityIssues: () => void;
+  approvalEntityId?: number | null;
 }
 
 /**
@@ -64,7 +65,6 @@ export function TextContentList({
   sections = [],
   isCreateDialogOpen,
   isEditDialogOpen,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   selectedTextContent,
   formData,
   onFormDataChange,
@@ -80,6 +80,7 @@ export function TextContentList({
   qualityIssues,
   isAdmin,
   clearQualityIssues,
+  approvalEntityId,
 }: TextContentListProps) {
   return (
     <div className="space-y-4">
@@ -183,6 +184,7 @@ export function TextContentList({
         isAdmin={isAdmin}
         pages={pages}
         sections={sections}
+        approvalEntityId={approvalEntityId ?? selectedTextContent?.id}
       />
     </div>
   );

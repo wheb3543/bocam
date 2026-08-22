@@ -17,6 +17,10 @@ const mediaPickerSource = readFileSync(
   resolve(process.cwd(), 'client/src/components/form/MediaPicker.tsx'),
   'utf8'
 );
+const submissionPanelSource = readFileSync(
+  resolve(process.cwd(), 'client/src/pages/admin/content/components/ApprovalSubmissionPanel.tsx'),
+  'utf8'
+);
 
 describe('تدفق موافقات المحتوى', () => {
   it('يطبق التغيير المعتمد داخل معاملة مع نسخة أمان وسجل تدقيق', () => {
@@ -47,5 +51,14 @@ describe('تدفق موافقات المحتوى', () => {
     expect(mediaPickerSource).toContain('trpc.content.media.list.useQuery');
     expect(mediaPickerSource).toContain("type: 'image'");
     expect(mediaPickerSource).not.toContain('trpc.content.images.list.useQuery');
+  });
+
+  it('يعيد آخر طلب للمحرر ويعرض حالته ومراجعه لإتاحة إعادة الإرسال بعد الرفض', () => {
+    expect(routerSource).toContain('getLatestForCurrentUser: contentEditProcedure');
+    expect(routerSource).toContain('eq(contentApprovals.requestedBy, ctx.user.id)');
+    expect(routerSource).toContain('orderBy(desc(contentApprovals.requestedAt))');
+    expect(submissionPanelSource).toContain('getLatestForCurrentUser.useQuery');
+    expect(submissionPanelSource).toContain('إعادة الإرسال للمراجعة');
+    expect(submissionPanelSource).toContain('المراجع المعيّن');
   });
 });

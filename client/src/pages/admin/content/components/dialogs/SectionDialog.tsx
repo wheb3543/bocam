@@ -24,6 +24,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import type { SectionFormData } from '../../hooks/useSections';
 import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
+import { ApprovalSubmissionPanel } from '../ApprovalSubmissionPanel';
 
 interface SectionDialogProps {
   open: boolean;
@@ -36,6 +37,7 @@ interface SectionDialogProps {
   pages?: Array<{ id: number; name: string }>;
   qualityIssues: string[];
   isAdmin: boolean;
+  approvalEntityId?: number | null;
 }
 
 /**
@@ -52,6 +54,7 @@ export function SectionDialog({
   pages = [],
   qualityIssues,
   isAdmin,
+  approvalEntityId,
 }: SectionDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -257,6 +260,14 @@ export function SectionDialog({
                 onFormDataChange({ ...formData, qualityOverrideReason })
               }
             />
+
+            {mode === 'edit' && (
+              <ApprovalSubmissionPanel
+                entityType="section"
+                entityId={approvalEntityId}
+                changes={formData}
+              />
+            )}
 
             {/* Active */}
             <div className="flex items-center gap-2">

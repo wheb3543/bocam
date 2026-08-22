@@ -277,6 +277,7 @@ export default function ContentManagementPage() {
               qualityIssues={textContent.qualityIssues}
               isAdmin={textContent.isAdmin}
               clearQualityIssues={textContent.clearQualityIssues}
+              approvalEntityId={textContent.selectedTextContent?.id}
             />
           )}
           {contentManagement.activeTab === 'images' && (
@@ -334,6 +335,7 @@ export default function ContentManagementPage() {
                 qualityIssues={images.qualityIssues}
                 isAdmin={images.isAdmin}
                 clearQualityIssues={images.clearQualityIssues}
+                approvalEntityId={images.selectedImage?.id}
               />
             </div>
           )}
@@ -450,6 +452,7 @@ export default function ContentManagementPage() {
               }}
               isCreateDialogOpen={sectionButtons.isCreateDialogOpen}
               isEditDialogOpen={sectionButtons.isEditDialogOpen}
+              selectedButton={sectionButtons.selectedButton}
               formData={sectionButtons.formData}
               sections={sectionButtons.sections.map((section) => ({
                 id: section.id,
@@ -474,11 +477,9 @@ export default function ContentManagementPage() {
                 setSelectedVersionEntityId(id);
                 setIsVersionHistoryOpen(true);
               }}
-              onRequestApproval={sectionButtons.handleRequestApproval}
               clearQualityIssues={sectionButtons.clearQualityIssues}
               createPending={sectionButtons.createMutation.isPending}
               updatePending={sectionButtons.updateMutation.isPending}
-              approvalPending={sectionButtons.requestApprovalMutation.isPending}
             />
           )}
           {contentManagement.activeTab === 'colors' && (
@@ -632,6 +633,7 @@ export default function ContentManagementPage() {
         mainPages={pages.mainPages}
         qualityIssues={pages.qualityIssues}
         isAdmin={pages.isAdmin}
+        approvalEntityId={pages.selectedPage?.id}
       />
 
       {/* Section Dialog */}
@@ -654,6 +656,7 @@ export default function ContentManagementPage() {
         pages={sections.pages}
         qualityIssues={sections.qualityIssues}
         isAdmin={sections.isAdmin}
+        approvalEntityId={sections.selectedSection?.id}
       />
 
       {/* Page Settings Dialog */}

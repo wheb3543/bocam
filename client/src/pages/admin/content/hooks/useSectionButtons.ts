@@ -171,13 +171,6 @@ export function useSectionButtons() {
     },
     onError: (error) => handleQualityError(error, 'فشل نسخ الزر'),
   });
-  const requestApprovalMutation = trpc.content.approvals.create.useMutation({
-    onSuccess: () => {
-      toast.success('تم إرسال تغييرات الزر إلى طابور المراجعة');
-      setIsEditDialogOpen(false);
-    },
-    onError: (error) => handleQualityError(error, 'فشل إرسال طلب المراجعة'),
-  });
   const reorderMutation = trpc.content.sectionButtons.reorder.useMutation({
     onSuccess: () => {
       toast.success('تم إعادة ترتيب الأزرار بنجاح');
@@ -227,17 +220,6 @@ export function useSectionButtons() {
   const handleArchiveButton = (id: number) => archiveMutation.mutate({ id });
   const handleRestoreButton = (id: number) => restoreMutation.mutate({ id });
   const handleDuplicateButton = (id: number) => duplicateMutation.mutate({ id });
-  const handleRequestApproval = () => {
-    if (!selectedButton) {
-      return;
-    }
-    const { qualityOverrideReason: _qualityOverrideReason, ...changes } = toMutationInput();
-    requestApprovalMutation.mutate({
-      entityType: 'sectionButton',
-      entityId: selectedButton.id,
-      changes: JSON.stringify({ changes }),
-    });
-  };
   const handleReorderButtons = (buttons: { id: number; sortOrder: number }[]) =>
     reorderMutation.mutate({ buttons });
 
@@ -286,7 +268,6 @@ export function useSectionButtons() {
     archiveMutation,
     restoreMutation,
     duplicateMutation,
-    requestApprovalMutation,
     reorderMutation,
     setIsCreateDialogOpen,
     setIsEditDialogOpen,
@@ -304,7 +285,6 @@ export function useSectionButtons() {
     handleArchiveButton,
     handleRestoreButton,
     handleDuplicateButton,
-    handleRequestApproval,
     handleReorderButtons,
     openEditDialog,
     resetForm,

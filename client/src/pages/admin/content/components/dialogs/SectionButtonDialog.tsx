@@ -24,6 +24,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import type { SectionButtonFormData } from '../../hooks/useSectionButtons';
 import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
+import { ApprovalSubmissionPanel } from '../ApprovalSubmissionPanel';
 
 interface SectionButtonDialogProps {
   open: boolean;
@@ -36,8 +37,7 @@ interface SectionButtonDialogProps {
   sections?: Array<{ id: number; name: string }>;
   qualityIssues: string[];
   isAdmin: boolean;
-  onRequestApproval?: () => void;
-  isApprovalPending?: boolean;
+  approvalEntityId?: number | null;
 }
 
 /**
@@ -54,8 +54,7 @@ export function SectionButtonDialog({
   sections = [],
   qualityIssues,
   isAdmin,
-  onRequestApproval,
-  isApprovalPending = false,
+  approvalEntityId,
 }: SectionButtonDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -209,6 +208,24 @@ export function SectionButtonDialog({
               }
             />
 
+            {mode === 'edit' && (
+              <ApprovalSubmissionPanel
+                entityType="sectionButton"
+                entityId={approvalEntityId}
+                changes={{
+                  sectionId: formData.sectionId,
+                  textAr: formData.textAr,
+                  textEn: formData.textEn,
+                  link: formData.link.trim(),
+                  style: formData.style,
+                  sortOrder: formData.sortOrder,
+                  isActive: formData.isActive,
+                  status: formData.status,
+                  publishedAt: formData.publishedAt || undefined,
+                }}
+              />
+            )}
+
             {/* Active */}
             <div className="flex items-center gap-2">
               <Switch
@@ -225,16 +242,6 @@ export function SectionButtonDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               إلغاء
             </Button>
-            {mode === 'edit' && onRequestApproval && (
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={onRequestApproval}
-                disabled={isPending || isApprovalPending}
-              >
-                {isApprovalPending ? 'جاري الإرسال...' : 'إرسال للمراجعة'}
-              </Button>
-            )}
             <Button type="submit" disabled={isPending}>
               {isPending ? 'جاري الحفظ...' : mode === 'create' ? 'إضافة' : 'حفظ التغييرات'}
             </Button>

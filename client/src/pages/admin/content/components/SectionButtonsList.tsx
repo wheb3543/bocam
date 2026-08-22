@@ -18,6 +18,7 @@ interface SectionButtonsListProps {
   onFiltersChange: (filters: ContentFilters) => void;
   isCreateDialogOpen: boolean;
   isEditDialogOpen: boolean;
+  selectedButton: SectionButton | null;
   formData: SectionButtonFormData;
   sections: Array<{ id: number; name: string }>;
   qualityIssues: string[];
@@ -35,11 +36,9 @@ interface SectionButtonsListProps {
   onDuplicateButton: (id: number) => void;
   onRestoreButton: (id: number) => void;
   onVersionHistory: (id: number) => void;
-  onRequestApproval: () => void;
   clearQualityIssues: () => void;
   createPending: boolean;
   updatePending: boolean;
-  approvalPending: boolean;
 }
 
 export function SectionButtonsList({
@@ -49,6 +48,7 @@ export function SectionButtonsList({
   onFiltersChange,
   isCreateDialogOpen,
   isEditDialogOpen,
+  selectedButton,
   formData,
   sections,
   qualityIssues,
@@ -66,11 +66,9 @@ export function SectionButtonsList({
   onDuplicateButton,
   onRestoreButton,
   onVersionHistory,
-  onRequestApproval,
   clearQualityIssues,
   createPending,
   updatePending,
-  approvalPending,
 }: SectionButtonsListProps) {
   const closeCreate = (open: boolean) => {
     if (!open) {
@@ -172,8 +170,7 @@ export function SectionButtonsList({
         sections={sections}
         qualityIssues={qualityIssues}
         isAdmin={isAdmin}
-        onRequestApproval={onRequestApproval}
-        isApprovalPending={approvalPending}
+        approvalEntityId={selectedButton?.id}
       />
     </div>
   );

@@ -25,6 +25,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import type { PageFormData } from '../../hooks/usePages';
 import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
+import { ApprovalSubmissionPanel } from '../ApprovalSubmissionPanel';
 
 interface PageDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ interface PageDialogProps {
   mainPages?: Array<{ id: number; name: string }>;
   qualityIssues: string[];
   isAdmin: boolean;
+  approvalEntityId?: number | null;
 }
 
 /**
@@ -53,6 +55,7 @@ export function PageDialog({
   mainPages = [],
   qualityIssues,
   isAdmin,
+  approvalEntityId,
 }: PageDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -298,6 +301,14 @@ export function PageDialog({
                 onFormDataChange({ ...formData, qualityOverrideReason })
               }
             />
+
+            {mode === 'edit' && (
+              <ApprovalSubmissionPanel
+                entityType="page"
+                entityId={approvalEntityId}
+                changes={formData}
+              />
+            )}
 
             {/* Active */}
             <div className="flex items-center gap-2">

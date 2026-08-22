@@ -29,6 +29,7 @@ import { sectionOptions, imageFormatOptions } from '../../types/content.types';
 import { useImageUpload } from '@/hooks/form/useImageUpload';
 import MediaPicker from '@/components/form/MediaPicker';
 import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
+import { ApprovalSubmissionPanel } from '../ApprovalSubmissionPanel';
 
 interface ImageUploadDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ interface ImageUploadDialogProps {
   onSubmit: (e: React.FormEvent) => void;
   isPending: boolean;
   onSaveVersion?: () => void;
+  approvalEntityId?: number | null;
   qualityIssues: string[];
   isAdmin: boolean;
 }
@@ -55,6 +57,7 @@ export function ImageUploadDialog({
   onSubmit,
   isPending,
   onSaveVersion,
+  approvalEntityId,
   qualityIssues,
   isAdmin,
 }: ImageUploadDialogProps) {
@@ -383,6 +386,29 @@ export function ImageUploadDialog({
                 onFormDataChange({ ...formData, qualityOverrideReason })
               }
             />
+
+            {mode === 'edit' && (
+              <ApprovalSubmissionPanel
+                entityType="image"
+                entityId={approvalEntityId}
+                changes={{
+                  key: formData.key,
+                  url: formData.url,
+                  altAr: formData.altAr || formData.alt || undefined,
+                  altEn: formData.altEn || undefined,
+                  section: formData.section || undefined,
+                  sectionId: formData.sectionId,
+                  pageId: formData.pageId,
+                  width: formData.width ? Number(formData.width) : undefined,
+                  height: formData.height ? Number(formData.height) : undefined,
+                  format: formData.format || undefined,
+                  size: formData.size ? Number(formData.size) : undefined,
+                  status: formData.status,
+                  isActive: formData.isActive,
+                  publishedAt: formData.publishedAt || undefined,
+                }}
+              />
+            )}
 
             {/* Active */}
             <div className="flex items-center gap-2">

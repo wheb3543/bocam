@@ -452,6 +452,31 @@ export const approvalsRouter = router({
     return newApproval[0];
   }),
 
+  /** أحدث طلب للكيان من المحرر الحالي، لعرض حالة التقديم وإتاحة إعادة الإرسال بعد الرفض. */
+  getLatestForCurrentUser: contentEditProcedure
+    .input(
+      z.object({
+        entityType: z.enum(['textContent', 'image', 'media', 'page', 'section', 'sectionButton']),
+        entityId: z.number(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const [approval] = await db
+        .select()
+        .from(contentApprovals)
+        .where(
+          and(
+            eq(contentApprovals.entityType, input.entityType),
+            eq(contentApprovals.entityId, input.entityId),
+            eq(contentApprovals.requestedBy, ctx.user.id)
+          )
+        )
+        .orderBy(desc(contentApprovals.requestedAt))
+        .limit(1);
+      return approval ?? null;
+    }),
+
   /**
    * قائمة المراجعين الذين يمكن تعيينهم لطلبات المحتوى.
    */
@@ -551,7 +576,7 @@ export const approvalsRouter = router({
       let previousEntity: unknown;
       let approvedChanges: unknown;
       let auditEntityType: 'text' | 'image' | 'page' | 'section' | 'sectionButton';
-      let versionEntityType: 'text' | 'image' | 'sectionButton' | null = null;
+      let versionEntityType: 'text' | 'image' | 'page' | 'section' | 'sectionButton' | null = null;
       let applyChanges: () => Promise<unknown>;
 
       if (pendingApproval.entityType === 'textContent') {
@@ -617,6 +642,7 @@ export const approvalsRouter = router({
         previousEntity = existing;
         approvedChanges = changes;
         auditEntityType = 'page';
+        versionEntityType = 'page';
         applyChanges = () =>
           tx.update(pages).set(changes).where(eq(pages.id, pendingApproval.entityId));
       } else if (pendingApproval.entityType === 'sectionButton') {
@@ -651,6 +677,7 @@ export const approvalsRouter = router({
         previousEntity = existing;
         approvedChanges = changes;
         auditEntityType = 'section';
+        versionEntityType = 'section';
         applyChanges = () =>
           tx.update(sections).set(changes).where(eq(sections.id, pendingApproval.entityId));
       }
@@ -666,12 +693,18 @@ export const approvalsRouter = router({
         });
       }
 
-      if (
-        pendingApproval.entityType === 'sectionButton' &&
-        (approvedChanges as { status?: string }).status === 'published'
-      ) {
+      if ((approvedChanges as { status?: string }).status === 'published') {
+        const qualityEntityType = {
+          textContent: 'textContent',
+          image: 'image',
+          media: 'media',
+          page: 'page',
+          section: 'section',
+          sectionButton: 'sectionButton',
+        }[pendingApproval.entityType] as
+          'textContent' | 'image' | 'media' | 'page' | 'section' | 'sectionButton';
         await assertPublicationQuality(tx, {
-          entityType: 'sectionButton',
+          entityType: qualityEntityType,
           entityId: pendingApproval.entityId,
           candidate: {
             ...(previousEntity as Record<string, unknown>),
