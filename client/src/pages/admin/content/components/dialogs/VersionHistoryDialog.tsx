@@ -20,7 +20,7 @@ import { useContentVersions } from '../../hooks/useContentVersions';
 
 interface Version {
   id: number;
-  entityType: 'text' | 'image' | 'color' | 'seo';
+  entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
   entityId: number;
   data: Record<string, unknown>;
   createdAt: Date;
@@ -33,7 +33,7 @@ interface Version {
 interface VersionHistoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  entityType: 'text' | 'image' | 'color' | 'seo';
+  entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
   entityId: number;
   onRestore: () => void;
 }
@@ -109,6 +109,7 @@ export function VersionHistoryDialog({
       image: 'صورة',
       color: 'لون',
       seo: 'إعدادات SEO',
+      sectionButton: 'زر قسم',
     };
     return labels[type as keyof typeof labels] || type;
   };

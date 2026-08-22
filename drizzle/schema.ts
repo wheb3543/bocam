@@ -2017,7 +2017,7 @@ export type InsertContentAuditLog = typeof contentAuditLog.$inferInsert;
  */
 export const contentVersions = mysqlTable('contentVersions', {
   id: int('id').autoincrement().primaryKey(),
-  entityType: mysqlEnum('entityType', ['text', 'image', 'color', 'seo']).notNull(),
+  entityType: mysqlEnum('entityType', ['text', 'image', 'color', 'seo', 'sectionButton']).notNull(),
   entityId: int('entityId').notNull(),
   versionNumber: int('versionNumber').notNull(),
   data: text('data').notNull(), // JSON string of the complete entity data
@@ -2174,23 +2174,34 @@ export type InsertSection = typeof sections.$inferInsert;
  * Section Buttons Table - جدول أزرار الأقسام
  * يخزّن أزرار الأقسام المرتبطة
  */
-export const sectionButtons = mysqlTable('sectionButtons', {
-  id: int('id').autoincrement().primaryKey(),
-  sectionId: int('sectionId')
-    .notNull()
-    .references(() => sections.id, { onDelete: 'cascade', onUpdate: 'cascade' }), // معرف القسم المرتبط
-  textAr: varchar('textAr', { length: 255 }).notNull(), // نص الزر بالعربية
-  textEn: varchar('textEn', { length: 255 }).notNull(), // نص الزر بالإنجليزية
-  link: varchar('link', { length: 500 }).notNull(), // رابط الزر
-  style: mysqlEnum('style', ['primary', 'secondary', 'outline', 'ghost'])
-    .default('primary')
-    .notNull(), // نمط الزر
-  sortOrder: int('sortOrder').default(0).notNull(), // ترتيب الزر
-  isActive: mysqlEnum('isActive', ['yes', 'no']).default('yes').notNull(), // حالة الزر: نشط أو معطل
-  deletedAt: timestamp('deletedAt'), // تاريخ الحذف الناعم
-  createdAt: timestamp('createdAt').defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
-});
+export const sectionButtons = mysqlTable(
+  'sectionButtons',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    sectionId: int('sectionId')
+      .notNull()
+      .references(() => sections.id, { onDelete: 'cascade', onUpdate: 'cascade' }), // معرف القسم المرتبط
+    textAr: varchar('textAr', { length: 255 }).notNull(), // نص الزر بالعربية
+    textEn: varchar('textEn', { length: 255 }).notNull(), // نص الزر بالإنجليزية
+    link: varchar('link', { length: 500 }).notNull(), // رابط الزر
+    style: mysqlEnum('style', ['primary', 'secondary', 'outline', 'ghost'])
+      .default('primary')
+      .notNull(), // نمط الزر
+    sortOrder: int('sortOrder').default(0).notNull(), // ترتيب الزر
+    isActive: mysqlEnum('isActive', ['yes', 'no']).default('yes').notNull(), // حالة الزر: نشط أو معطل
+    status: mysqlEnum('status', ['draft', 'published', 'archived']).default('draft').notNull(),
+    publishedAt: timestamp('publishedAt'),
+    deletedAt: timestamp('deletedAt'), // تاريخ الحذف الناعم
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    sectionIdIdx: index('sectionButtons_sectionId_idx').on(table.sectionId),
+    statusIdx: index('sectionButtons_status_idx').on(table.status),
+    deletedAtIdx: index('sectionButtons_deletedAt_idx').on(table.deletedAt),
+    sectionStatusIdx: index('sectionButtons_sectionStatus_idx').on(table.sectionId, table.status),
+  })
+);
 
 export type SectionButton = typeof sectionButtons.$inferSelect;
 export type InsertSectionButton = typeof sectionButtons.$inferInsert;

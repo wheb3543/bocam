@@ -15,6 +15,7 @@ import {
   images,
   media,
   pages,
+  sectionButtons,
   sections,
   textContent,
   users,
@@ -37,6 +38,7 @@ import { invalidateImagesCache, invalidateTextContentCache } from '../public/con
 import { invalidateAdminTextContentCache } from './textContent';
 import { invalidateAdminPagesCache } from './pages';
 import { invalidateAdminSectionsCache } from './sections';
+import { assertPublicationQuality } from '../../services/content/publicationQualityGate';
 
 const logger = createLogger('approvals');
 
@@ -44,7 +46,7 @@ const logger = createLogger('approvals');
  * Schema لطلب موافقة جديد
  */
 const createApprovalSchema = z.object({
-  entityType: z.enum(['textContent', 'image', 'media', 'page', 'section']),
+  entityType: z.enum(['textContent', 'image', 'media', 'page', 'section', 'sectionButton']),
   entityId: z.number(),
   entityTypeVersion: z.number().default(0),
   changes: z.string(), // JSON string
@@ -223,6 +225,24 @@ const sectionChangeSchema = z
     'لا تحتوي حمولة الموافقة على تغييرات قابلة للتطبيق'
   );
 
+const sectionButtonChangeSchema = z
+  .object({
+    sectionId: z.number().int().positive().optional(),
+    textAr: z.string().min(1).max(255).optional(),
+    textEn: z.string().min(1).max(255).optional(),
+    link: z.string().min(1).max(500).optional(),
+    style: z.enum(['primary', 'secondary', 'outline', 'ghost']).optional(),
+    sortOrder: z.number().int().min(0).optional(),
+    isActive: z.enum(['yes', 'no']).optional(),
+    status: z.enum(['draft', 'published', 'archived']).optional(),
+    publishedAt: z.coerce.date().nullable().optional(),
+  })
+  .strict()
+  .refine(
+    (value) => Object.keys(value).length > 0,
+    'لا تحتوي حمولة الموافقة على تغييرات قابلة للتطبيق'
+  );
+
 function parseApprovalChanges(serializedChanges: string) {
   let parsed: unknown;
 
@@ -269,7 +289,9 @@ export const approvalsRouter = router({
   list: contentReadProcedure
     .input(
       z.object({
-        entityType: z.enum(['textContent', 'image', 'media', 'page', 'section']).optional(),
+        entityType: z
+          .enum(['textContent', 'image', 'media', 'page', 'section', 'sectionButton'])
+          .optional(),
         entityId: z.number().optional(),
         status: z.enum(['pending', 'approved', 'rejected']).optional(),
         requestedBy: z.number().optional(),
@@ -528,8 +550,8 @@ export const approvalsRouter = router({
 
       let previousEntity: unknown;
       let approvedChanges: unknown;
-      let auditEntityType: 'text' | 'image' | 'page' | 'section';
-      let versionEntityType: 'text' | 'image' | null = null;
+      let auditEntityType: 'text' | 'image' | 'page' | 'section' | 'sectionButton';
+      let versionEntityType: 'text' | 'image' | 'sectionButton' | null = null;
       let applyChanges: () => Promise<unknown>;
 
       if (pendingApproval.entityType === 'textContent') {
@@ -597,6 +619,25 @@ export const approvalsRouter = router({
         auditEntityType = 'page';
         applyChanges = () =>
           tx.update(pages).set(changes).where(eq(pages.id, pendingApproval.entityId));
+      } else if (pendingApproval.entityType === 'sectionButton') {
+        const changes = parseEntityChanges(sectionButtonChangeSchema, pendingApproval.changes);
+        const [existing] = await tx
+          .select()
+          .from(sectionButtons)
+          .where(eq(sectionButtons.id, pendingApproval.entityId))
+          .limit(1);
+        if (!existing) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'زر القسم المطلوب لم يعد موجوداً.' });
+        }
+        previousEntity = existing;
+        approvedChanges = changes;
+        auditEntityType = 'sectionButton';
+        versionEntityType = 'sectionButton';
+        applyChanges = () =>
+          tx
+            .update(sectionButtons)
+            .set(changes)
+            .where(eq(sectionButtons.id, pendingApproval.entityId));
       } else {
         const changes = parseEntityChanges(sectionChangeSchema, pendingApproval.changes);
         const [existing] = await tx
@@ -622,6 +663,22 @@ export const approvalsRouter = router({
           data: JSON.stringify(previousEntity),
           userId: ctx.user.id,
           reason: `نسخة أمان قبل تطبيق طلب الموافقة #${pendingApproval.id}`,
+        });
+      }
+
+      if (
+        pendingApproval.entityType === 'sectionButton' &&
+        (approvedChanges as { status?: string }).status === 'published'
+      ) {
+        await assertPublicationQuality(tx, {
+          entityType: 'sectionButton',
+          entityId: pendingApproval.entityId,
+          candidate: {
+            ...(previousEntity as Record<string, unknown>),
+            ...(approvedChanges as Record<string, unknown>),
+          },
+          role: ctx.user.role,
+          userId: ctx.user.id,
         });
       }
 
@@ -655,7 +712,7 @@ export const approvalsRouter = router({
     if (entityType === 'page') {
       await invalidateAdminPagesCache();
     }
-    if (entityType === 'section') {
+    if (entityType === 'section' || entityType === 'sectionButton') {
       await invalidateAdminSectionsCache();
     }
 

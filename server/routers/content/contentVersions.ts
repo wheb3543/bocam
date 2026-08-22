@@ -9,7 +9,13 @@ import { adminProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { contentVersionsService } from '../../services/content/contentVersionsService';
 import { createLogger } from '../../_core/logger';
-import { textContent, images, colorScheme, seoSettings } from '../../../drizzle/schema';
+import {
+  textContent,
+  images,
+  colorScheme,
+  seoSettings,
+  sectionButtons,
+} from '../../../drizzle/schema';
 import { auditLogService } from '../../services/content/auditLogService';
 import {
   invalidateColorSchemeCache,
@@ -17,10 +23,11 @@ import {
   invalidateSEOCache,
   invalidateTextContentCache,
 } from '../public/content';
+import { invalidateAdminSectionsCache } from './sections';
 
 const logger = createLogger('contentVersionsRouter');
 
-const entityTypeSchema = z.enum(['text', 'image', 'color', 'seo']);
+const entityTypeSchema = z.enum(['text', 'image', 'color', 'seo', 'sectionButton']);
 
 function toDateOrNull(value: unknown): Date | null {
   if (!value) {
@@ -163,6 +170,56 @@ async function restoreVersionData(
     return;
   }
 
+  if (entityType === 'sectionButton') {
+    const parsed = z
+      .object({
+        sectionId: z.number(),
+        textAr: z.string().min(1).max(255),
+        textEn: z.string().min(1).max(255),
+        link: z.string().min(1).max(500),
+        style: z.enum(['primary', 'secondary', 'outline', 'ghost']),
+        sortOrder: z.number(),
+        isActive: z.enum(['yes', 'no']),
+        status: z.enum(['draft', 'published', 'archived']),
+        publishedAt: z.unknown().nullable().optional(),
+        deletedAt: z.unknown().nullable().optional(),
+      })
+      .parse(record);
+    const [current] = await tx
+      .select()
+      .from(sectionButtons)
+      .where(eq(sectionButtons.id, entityId))
+      .limit(1);
+    if (!current) {
+      throw new Error('زر القسم المراد استعادته غير موجود');
+    }
+    await contentVersionsService.createVersion(tx, {
+      entityType,
+      entityId,
+      data: current,
+      userId,
+      reason: 'نسخة أمان تلقائية قبل الاستعادة',
+    });
+    await tx
+      .update(sectionButtons)
+      .set({
+        ...parsed,
+        publishedAt: toDateOrNull(parsed.publishedAt),
+        deletedAt: toDateOrNull(parsed.deletedAt),
+      })
+      .where(eq(sectionButtons.id, entityId));
+    await auditLogService.logChange(tx, {
+      entityType: 'sectionButton',
+      entityId,
+      action: 'update',
+      userId,
+      oldValue: JSON.stringify(current),
+      newValue: JSON.stringify(parsed),
+      reason: 'استعادة نسخة سابقة',
+    });
+    return;
+  }
+
   if (entityType === 'color') {
     const parsed = z
       .object({
@@ -256,7 +313,7 @@ export const contentVersionsRouter = router({
   create: adminProcedure
     .input(
       z.object({
-        entityType: z.enum(['text', 'image', 'color', 'seo']),
+        entityType: entityTypeSchema,
         entityId: z.number(),
         data: z.any(),
         reason: z.string().optional(),
@@ -286,7 +343,7 @@ export const contentVersionsRouter = router({
   list: adminProcedure
     .input(
       z.object({
-        entityType: z.enum(['text', 'image', 'color', 'seo']),
+        entityType: entityTypeSchema,
         entityId: z.number(),
       })
     )
@@ -329,7 +386,7 @@ export const contentVersionsRouter = router({
   getLatest: adminProcedure
     .input(
       z.object({
-        entityType: z.enum(['text', 'image', 'color', 'seo']),
+        entityType: entityTypeSchema,
         entityId: z.number(),
       })
     )
@@ -376,6 +433,9 @@ export const contentVersionsRouter = router({
       if (version.entityType === 'seo') {
         invalidateSEOCache();
       }
+      if (version.entityType === 'sectionButton') {
+        await invalidateAdminSectionsCache();
+      }
 
       logger.info('Content version restored successfully', { versionId: input.versionId });
       return { success: true, entityType: version.entityType, entityId: version.entityId };
@@ -405,7 +465,7 @@ export const contentVersionsRouter = router({
   deleteAll: adminProcedure
     .input(
       z.object({
-        entityType: z.enum(['text', 'image', 'color', 'seo']),
+        entityType: entityTypeSchema,
         entityId: z.number(),
       })
     )

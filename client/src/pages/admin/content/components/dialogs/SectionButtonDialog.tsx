@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import type { SectionButtonFormData } from '../../hooks/useSectionButtons';
+import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
 
 interface SectionButtonDialogProps {
   open: boolean;
@@ -33,6 +34,10 @@ interface SectionButtonDialogProps {
   onSubmit: (e: React.FormEvent) => void;
   isPending: boolean;
   sections?: Array<{ id: number; name: string }>;
+  qualityIssues: string[];
+  isAdmin: boolean;
+  onRequestApproval?: () => void;
+  isApprovalPending?: boolean;
 }
 
 /**
@@ -47,6 +52,10 @@ export function SectionButtonDialog({
   onSubmit,
   isPending,
   sections = [],
+  qualityIssues,
+  isAdmin,
+  onRequestApproval,
+  isApprovalPending = false,
 }: SectionButtonDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -152,6 +161,54 @@ export function SectionButtonDialog({
               />
             </div>
 
+            <div className="grid gap-2">
+              <Label htmlFor="status">حالة النشر</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(status: SectionButtonFormData['status']) =>
+                  onFormDataChange({ ...formData, status })
+                }
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="اختر حالة النشر" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">مسودة</SelectItem>
+                  <SelectItem value="published">منشور</SelectItem>
+                  <SelectItem value="archived">مؤرشف</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.status === 'draft' && (
+              <div className="grid gap-2">
+                <Label htmlFor="publishedAt">موعد النشر المؤجل</Label>
+                <Input
+                  id="publishedAt"
+                  type="datetime-local"
+                  value={
+                    formData.publishedAt ? formData.publishedAt.toISOString().slice(0, 16) : ''
+                  }
+                  onChange={(event) =>
+                    onFormDataChange({
+                      ...formData,
+                      publishedAt: event.target.value ? new Date(event.target.value) : null,
+                    })
+                  }
+                />
+              </div>
+            )}
+
+            <PublicationQualityFeedback
+              status={formData.status}
+              issues={qualityIssues}
+              isAdmin={isAdmin}
+              overrideReason={formData.qualityOverrideReason}
+              onOverrideReasonChange={(qualityOverrideReason) =>
+                onFormDataChange({ ...formData, qualityOverrideReason })
+              }
+            />
+
             {/* Active */}
             <div className="flex items-center gap-2">
               <Switch
@@ -168,6 +225,16 @@ export function SectionButtonDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               إلغاء
             </Button>
+            {mode === 'edit' && onRequestApproval && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onRequestApproval}
+                disabled={isPending || isApprovalPending}
+              >
+                {isApprovalPending ? 'جاري الإرسال...' : 'إرسال للمراجعة'}
+              </Button>
+            )}
             <Button type="submit" disabled={isPending}>
               {isPending ? 'جاري الحفظ...' : mode === 'create' ? 'إضافة' : 'حفظ التغييرات'}
             </Button>

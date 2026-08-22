@@ -75,7 +75,7 @@ export default function ContentManagementPage() {
   const [isApprovalQueueOpen, setIsApprovalQueueOpen] = useState(false);
   const [isQualityDialogOpen, setIsQualityDialogOpen] = useState(false);
   const [selectedVersionEntityType, setSelectedVersionEntityType] = useState<
-    'text' | 'image' | 'color' | 'seo'
+    'text' | 'image' | 'color' | 'seo' | 'sectionButton'
   >('text');
   const [selectedVersionEntityId, setSelectedVersionEntityId] = useState<number>(0);
   const [isPageSettingsOpen, setIsPageSettingsOpen] = useState(false);
@@ -158,11 +158,15 @@ export default function ContentManagementPage() {
             <Button
               variant="outline"
               onClick={() => {
-                const entityTypeMap: Record<string, 'text' | 'image' | 'color' | 'seo'> = {
+                const entityTypeMap: Record<
+                  string,
+                  'text' | 'image' | 'color' | 'seo' | 'sectionButton'
+                > = {
                   text: 'text',
                   images: 'image',
                   pages: 'text',
                   sections: 'text',
+                  sectionButtons: 'sectionButton',
                   colors: 'color',
                   seo: 'seo',
                 };
@@ -431,9 +435,37 @@ export default function ContentManagementPage() {
                   sectionButtons.setIsActive(filters.isActive);
                 }
               }}
-              openEditDialog={sectionButtons.openEditDialog}
-              handleDeleteButton={sectionButtons.handleDeleteButton}
+              isCreateDialogOpen={sectionButtons.isCreateDialogOpen}
+              isEditDialogOpen={sectionButtons.isEditDialogOpen}
+              formData={sectionButtons.formData}
+              sections={sectionButtons.sections.map((section) => ({
+                id: section.id,
+                name: section.name,
+              }))}
+              qualityIssues={sectionButtons.qualityIssues}
+              isAdmin={sectionButtons.isAdmin}
+              showDeleted={sectionButtons.showDeleted}
+              onShowDeletedChange={sectionButtons.setShowDeleted}
+              onFormDataChange={sectionButtons.setFormData}
               onCreateDialogOpen={sectionButtons.setIsCreateDialogOpen}
+              onEditDialogOpen={sectionButtons.setIsEditDialogOpen}
+              onCreateButton={sectionButtons.handleCreateButton}
+              onEditButton={sectionButtons.handleEditButton}
+              onEditButtonOpen={sectionButtons.openEditDialog}
+              onDeleteButton={sectionButtons.handleDeleteButton}
+              onArchiveButton={sectionButtons.handleArchiveButton}
+              onDuplicateButton={sectionButtons.handleDuplicateButton}
+              onRestoreButton={sectionButtons.handleRestoreButton}
+              onVersionHistory={(id) => {
+                setSelectedVersionEntityType('sectionButton');
+                setSelectedVersionEntityId(id);
+                setIsVersionHistoryOpen(true);
+              }}
+              onRequestApproval={sectionButtons.handleRequestApproval}
+              clearQualityIssues={sectionButtons.clearQualityIssues}
+              createPending={sectionButtons.createMutation.isPending}
+              updatePending={sectionButtons.updateMutation.isPending}
+              approvalPending={sectionButtons.requestApprovalMutation.isPending}
             />
           )}
           {contentManagement.activeTab === 'colors' && (
@@ -539,6 +571,7 @@ export default function ContentManagementPage() {
           seo.refetch();
           pages.refetch();
           sections.refetch();
+          sectionButtons.refetch();
         }}
         language={previewLanguage}
         onOpenDraftPreview={openDraftPreview}
@@ -556,6 +589,7 @@ export default function ContentManagementPage() {
           images.refetch();
           colorScheme.refetch();
           seo.refetch();
+          sectionButtons.refetch();
         }}
       />
 

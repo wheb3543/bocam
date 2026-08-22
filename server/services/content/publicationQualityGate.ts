@@ -2,7 +2,8 @@ import { TRPCError } from '@trpc/server';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { contentAuditLog, images, sectionButtons, sections } from '../../../drizzle/schema';
 
-export type CmsPublishEntityType = 'page' | 'textContent' | 'image' | 'media' | 'section';
+export type CmsPublishEntityType =
+  'page' | 'textContent' | 'image' | 'media' | 'section' | 'sectionButton';
 
 export type PublicationQualityIssue = {
   code: string;
@@ -66,6 +67,13 @@ function inlineIssues(entityType: CmsPublishEntityType, candidate: PublishCandid
     issues.push({
       code: 'text-content-empty',
       message: 'لا يمكن نشر محتوى نصي فارغ.',
+    });
+  }
+
+  if (entityType === 'sectionButton' && hasInvalidLink(candidate.link)) {
+    issues.push({
+      code: 'section-button-link-invalid',
+      message: 'لا يمكن نشر زر قسم برابط فارغ أو غير صالح.',
     });
   }
 

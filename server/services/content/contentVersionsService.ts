@@ -16,11 +16,11 @@ export class ContentVersionsService {
   /**
    * إنشاء نسخة جديدة من المحتوى
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   async createVersion(
     db: any,
     params: {
-      entityType: 'text' | 'image' | 'color' | 'seo';
+      entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
       entityId: number;
       data: any;
       userId?: number;
@@ -71,11 +71,11 @@ export class ContentVersionsService {
   /**
    * الحصول على جميع نسخ المحتوى
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   async getVersions(
     db: any,
     params: {
-      entityType: 'text' | 'image' | 'color' | 'seo';
+      entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
       entityId: number;
     }
   ) {
@@ -129,11 +129,11 @@ export class ContentVersionsService {
   /**
    * الحصول على آخر نسخة
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   async getLatestVersion(
     db: any,
     params: {
-      entityType: 'text' | 'image' | 'color' | 'seo';
+      entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
       entityId: number;
     }
   ) {
@@ -182,11 +182,11 @@ export class ContentVersionsService {
   /**
    * حذف جميع نسخ المحتوى
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   async deleteAllVersions(
     db: any,
     params: {
-      entityType: 'text' | 'image' | 'color' | 'seo';
+      entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
       entityId: number;
     }
   ) {
