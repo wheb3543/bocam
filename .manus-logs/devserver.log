@@ -1789,3 +1789,335 @@
 [2026-08-22T23:21:36.048Z] 2026-08-22T23:21:36.048Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
 [2026-08-22T23:21:36.050Z] 2026-08-22T23:21:36.050Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
 [2026-08-22T23:21:36.060Z] 2026-08-22T23:21:36.060Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-22T23:21:50.589Z] 2026-08-22T23:21:50.588Z [heartbeat] [INFO] 💓 Heartbeat triggered
+[2026-08-22T23:21:50.589Z] 2026-08-22T23:21:50.589Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:50.589Z] 2026-08-22T23:21:50.589Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:21:50.589Z] 2026-08-22T23:21:50.589Z [license] [INFO]
+[2026-08-22T23:21:50.589Z] 2026-08-22T23:21:50.589Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:21:50.589Z] 2026-08-22T23:21:50.589Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] - Current time: 2026-08-22T23:21:50.000Z
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] Validating features...
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO]
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:21:50.590Z] 2026-08-22T23:21:50.590Z [license] [INFO]
+[2026-08-22T23:21:50.593Z] 2026-08-22T23:21:50.593Z [heartbeat] [INFO] 💓 Sending heartbeat to central server...
+[2026-08-22T23:21:50.593Z] 2026-08-22T23:21:50.593Z [heartbeat] [INFO] URL: https://ideahub-op7dfwr6.manus.space/api/heartbeat/bocam
+[2026-08-22T23:21:50.593Z] 2026-08-22T23:21:50.593Z [heartbeat] [INFO] Hardware ID: 42004E494300
+[2026-08-22T23:21:50.593Z] 2026-08-22T23:21:50.593Z [heartbeat] [INFO] License Version: 1.0.0
+[2026-08-22T23:21:50.593Z] 2026-08-22T23:21:50.593Z [heartbeat] [INFO] Timestamp: 2026-08-22T23:21:50.000Z
+[2026-08-22T23:21:51.750Z] 2026-08-22T23:21:51.750Z [heartbeat] [INFO] ✅ Heartbeat sent successfully
+[2026-08-22T23:21:54.001Z] 11:21:54 PM [vite] (client) hmr update /src/index.css
+[2026-08-22T23:21:54.136Z] 11:21:54 PM [tsx] change in ./server/routers/content/auditLog.ts Restarting...
+[2026-08-22T23:21:56.549Z] 2026-08-22T23:21:56.549Z [sdk] [INFO] Initialized with baseURL: https://api.manus.im
+[2026-08-22T23:21:56.671Z] 2026-08-22T23:21:56.671Z [webhook] [WARN] WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests
+[2026-08-22T23:21:57.501Z] Sentry initialized successfully
+[2026-08-22T23:21:57.502Z] 2026-08-22T23:21:57.502Z [license] [INFO] Initializing License System...
+[2026-08-22T23:21:57.502Z] 2026-08-22T23:21:57.502Z [license] [INFO]
+[2026-08-22T23:21:57.502Z] 2026-08-22T23:21:57.502Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:21:57.502Z] 2026-08-22T23:21:57.502Z [license] [INFO]
+[2026-08-22T23:21:57.502Z] 2026-08-22T23:21:57.502Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:21:57.502Z] 2026-08-22T23:21:57.502Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:21:57.504Z] 2026-08-22T23:21:57.504Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.504Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] - Current time: 2026-08-22T23:21:57.000Z
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] Validating features...
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO]
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO]
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO] License System initialized successfully
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [license] [INFO]
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [heartbeat] [INFO]
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [heartbeat] [INFO] 💓 Initializing Silent Heartbeat System...
+[2026-08-22T23:21:57.505Z] 2026-08-22T23:21:57.505Z [heartbeat] [INFO]
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.505Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.506Z [heartbeat] [INFO] Checking for clock tampering...
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.506Z [heartbeat] [INFO] Current Hardware ID: 42004E494300
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.506Z [heartbeat] [INFO] Current Time: 2026-08-22T23:21:57.000Z
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.506Z [heartbeat] [INFO] Last Run Time: 2026-08-22T23:17:50.000Z
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.506Z [heartbeat] [INFO] Last Hardware ID: 42004E494300
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.506Z [heartbeat] [INFO] Time Difference: 0.07 hours
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.506Z [heartbeat] [INFO] ✅ No clock tampering detected
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.506Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:57.506Z] 2026-08-22T23:21:57.506Z [heartbeat] [INFO] Last run time saved: 2026-08-22T23:21:57.000Z
+[2026-08-22T23:21:57.507Z] 2026-08-22T23:21:57.507Z [heartbeat] [INFO] 💓 Starting heartbeat scheduler...
+[2026-08-22T23:21:57.507Z] 2026-08-22T23:21:57.507Z [heartbeat] [INFO] Interval: 60 seconds
+[2026-08-22T23:21:57.507Z] 2026-08-22T23:21:57.507Z [heartbeat] [INFO] Central Server: https://ideahub-op7dfwr6.manus.space/api/heartbeat/bocam
+[2026-08-22T23:21:57.507Z] 2026-08-22T23:21:57.507Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:57.507Z] 2026-08-22T23:21:57.507Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:21:57.507Z] 2026-08-22T23:21:57.507Z [license] [INFO]
+[2026-08-22T23:21:57.507Z] 2026-08-22T23:21:57.507Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:21:57.507Z] 2026-08-22T23:21:57.507Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.507Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] - Current time: 2026-08-22T23:21:57.000Z
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] Validating features...
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO]
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:21:57.508Z] 2026-08-22T23:21:57.508Z [license] [INFO]
+[2026-08-22T23:21:57.509Z] 2026-08-22T23:21:57.508Z [heartbeat] [INFO] 💓 Sending heartbeat to central server...
+[2026-08-22T23:21:57.509Z] 2026-08-22T23:21:57.509Z [heartbeat] [INFO] URL: https://ideahub-op7dfwr6.manus.space/api/heartbeat/bocam
+[2026-08-22T23:21:57.509Z] 2026-08-22T23:21:57.509Z [heartbeat] [INFO] Hardware ID: 42004E494300
+[2026-08-22T23:21:57.509Z] 2026-08-22T23:21:57.509Z [heartbeat] [INFO] License Version: 1.0.0
+[2026-08-22T23:21:57.509Z] 2026-08-22T23:21:57.509Z [heartbeat] [INFO] Timestamp: 2026-08-22T23:21:57.000Z
+[2026-08-22T23:21:57.516Z] 2026-08-22T23:21:57.516Z [heartbeat] [INFO] ✅ Heartbeat scheduler started successfully
+[2026-08-22T23:21:57.516Z] 2026-08-22T23:21:57.516Z [heartbeat] [INFO]
+[2026-08-22T23:21:57.516Z] 2026-08-22T23:21:57.516Z [heartbeat] [INFO] ✅ Silent Heartbeat System initialized successfully
+[2026-08-22T23:21:57.516Z] 2026-08-22T23:21:57.516Z [heartbeat] [INFO]
+[2026-08-22T23:21:58.421Z] `server.hmr.protocol/host/port/path/clientPort/timeout/server` is deprecated. Use `server.ws.*` instead. Note that this option may be set by a plugin. Set VITE_DEPRECATION_TRACE=1 to see where it is called.
+[2026-08-22T23:21:58.481Z] 2026-08-22T23:21:58.481Z [server] [INFO] Server running on http://localhost:3000/
+[2026-08-22T23:21:59.122Z] 2026-08-22T23:21:59.122Z [heartbeat] [INFO] ✅ Heartbeat sent successfully
+[2026-08-22T23:22:00.332Z] 2026-08-22T23:22:00.332Z [appointmentReminders] [INFO] Initializing appointment reminders scheduler (every 30 minutes)...
+[2026-08-22T23:22:00.332Z] 2026-08-22T23:22:00.332Z [appointmentReminders] [INFO] Scheduler initialized. Running every 30 minutes.
+[2026-08-22T23:22:03.857Z] ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust proxy' setting is false (default). This could indicate a misconfiguration which would prevent express-rate-limit from accurately identifying users. See https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ for more information.
+[2026-08-22T23:22:03.857Z] at Object.xForwardedForHeader (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:352:13)
+[2026-08-22T23:22:03.857Z] at wrappedValidations.<computed> [as xForwardedForHeader] (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:675:22)
+[2026-08-22T23:22:03.857Z] at Object.keyGenerator (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:782:20)
+[2026-08-22T23:22:03.857Z] at file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:864:32
+[2026-08-22T23:22:03.857Z] at async file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:825:5 {
+[2026-08-22T23:22:03.857Z] code: 'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR',
+[2026-08-22T23:22:03.857Z] help: 'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/'
+[2026-08-22T23:22:03.857Z] }
+[2026-08-22T23:22:03.858Z] 2026-08-22T23:22:03.858Z [redis] [INFO] Redis cache not available. Using in-memory cache fallback.
+[2026-08-22T23:22:10.333Z] 2026-08-22T23:22:10.333Z [appointmentReminders] [INFO] Running appointment reminder jobs...
+[2026-08-22T23:22:11.899Z] 2026-08-22T23:22:11.899Z [appointmentReminders] [INFO] No 1h reminders needed
+[2026-08-22T23:22:11.900Z] 2026-08-22T23:22:11.899Z [appointmentReminders] [INFO] No 24h reminders needed
+[2026-08-22T23:22:11.900Z] 2026-08-22T23:22:11.900Z [appointmentReminders] [INFO] Done. 24h: 0 sent, 0 failed. 1h: 0 sent, 0 failed.
+[2026-08-22T23:22:12.765Z] 2026-08-22T23:22:12.764Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-22T23:22:12.789Z] 2026-08-22T23:22:12.789Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:22:12.789Z] 2026-08-22T23:22:12.789Z [license] [INFO]
+[2026-08-22T23:22:12.789Z] 2026-08-22T23:22:12.789Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:22:12.790Z] 2026-08-22T23:22:12.789Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:22:12.790Z] 2026-08-22T23:22:12.790Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:22:12.790Z] 2026-08-22T23:22:12.790Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:22:12.790Z] 2026-08-22T23:22:12.790Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:22:12.790Z] 2026-08-22T23:22:12.790Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:22:12.790Z] 2026-08-22T23:22:12.790Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:22:12.790Z] 2026-08-22T23:22:12.790Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:22:12.790Z] 2026-08-22T23:22:12.790Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:22:12.790Z] 2026-08-22T23:22:12.790Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.790Z [license] [INFO] - Current time: 2026-08-22T23:22:12.000Z
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.791Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.791Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.791Z [license] [INFO] Validating features...
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.791Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.791Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.791Z [license] [INFO]
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.791Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.791Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:22:12.791Z] 2026-08-22T23:22:12.791Z [license] [INFO]
+[2026-08-22T23:22:13.428Z] 2026-08-22T23:22:13.427Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-22T23:22:57.516Z] 2026-08-22T23:22:57.516Z [heartbeat] [INFO] 💓 Heartbeat triggered
+[2026-08-22T23:22:57.517Z] 2026-08-22T23:22:57.516Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:22:57.517Z] 2026-08-22T23:22:57.516Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:22:57.517Z] 2026-08-22T23:22:57.516Z [license] [INFO]
+[2026-08-22T23:22:57.517Z] 2026-08-22T23:22:57.516Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:22:57.517Z] 2026-08-22T23:22:57.517Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] - Current time: 2026-08-22T23:22:57.000Z
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] Validating features...
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO]
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:22:57.518Z] 2026-08-22T23:22:57.518Z [license] [INFO]
+[2026-08-22T23:22:57.531Z] 2026-08-22T23:22:57.531Z [heartbeat] [INFO] 💓 Sending heartbeat to central server...
+[2026-08-22T23:22:57.531Z] 2026-08-22T23:22:57.531Z [heartbeat] [INFO] URL: https://ideahub-op7dfwr6.manus.space/api/heartbeat/bocam
+[2026-08-22T23:22:57.531Z] 2026-08-22T23:22:57.531Z [heartbeat] [INFO] Hardware ID: 42004E494300
+[2026-08-22T23:22:57.531Z] 2026-08-22T23:22:57.531Z [heartbeat] [INFO] License Version: 1.0.0
+[2026-08-22T23:22:57.531Z] 2026-08-22T23:22:57.531Z [heartbeat] [INFO] Timestamp: 2026-08-22T23:22:57.000Z
+[2026-08-22T23:22:59.048Z] 2026-08-22T23:22:59.047Z [heartbeat] [INFO] ✅ Heartbeat sent successfully
+[2026-08-22T23:23:57.516Z] 2026-08-22T23:23:57.516Z [heartbeat] [INFO] 💓 Heartbeat triggered
+[2026-08-22T23:23:57.525Z] 2026-08-22T23:23:57.521Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:23:57.525Z] 2026-08-22T23:23:57.522Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:23:57.525Z] 2026-08-22T23:23:57.522Z [license] [INFO]
+[2026-08-22T23:23:57.525Z] 2026-08-22T23:23:57.522Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:23:57.525Z] 2026-08-22T23:23:57.522Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] - Current time: 2026-08-22T23:23:57.000Z
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] Validating features...
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO]
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:23:57.534Z] 2026-08-22T23:23:57.534Z [license] [INFO]
+[2026-08-22T23:23:57.549Z] 2026-08-22T23:23:57.548Z [heartbeat] [INFO] 💓 Sending heartbeat to central server...
+[2026-08-22T23:23:57.549Z] 2026-08-22T23:23:57.549Z [heartbeat] [INFO] URL: https://ideahub-op7dfwr6.manus.space/api/heartbeat/bocam
+[2026-08-22T23:23:57.549Z] 2026-08-22T23:23:57.549Z [heartbeat] [INFO] Hardware ID: 42004E494300
+[2026-08-22T23:23:57.549Z] 2026-08-22T23:23:57.549Z [heartbeat] [INFO] License Version: 1.0.0
+[2026-08-22T23:23:57.549Z] 2026-08-22T23:23:57.549Z [heartbeat] [INFO] Timestamp: 2026-08-22T23:23:57.000Z
+[2026-08-22T23:23:58.957Z] 2026-08-22T23:23:58.957Z [heartbeat] [INFO] ✅ Heartbeat sent successfully
+[2026-08-22T23:24:57.519Z] 2026-08-22T23:24:57.517Z [heartbeat] [INFO] 💓 Heartbeat triggered
+[2026-08-22T23:24:57.527Z] 2026-08-22T23:24:57.518Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:24:57.527Z] 2026-08-22T23:24:57.518Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:24:57.527Z] 2026-08-22T23:24:57.518Z [license] [INFO]
+[2026-08-22T23:24:57.527Z] 2026-08-22T23:24:57.525Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:24:57.527Z] 2026-08-22T23:24:57.527Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] - Current time: 2026-08-22T23:24:57.000Z
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:24:57.540Z] 2026-08-22T23:24:57.540Z [license] [INFO] Validating features...
+[2026-08-22T23:24:57.541Z] 2026-08-22T23:24:57.540Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:24:57.541Z] 2026-08-22T23:24:57.540Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:24:57.541Z] 2026-08-22T23:24:57.541Z [license] [INFO]
+[2026-08-22T23:24:57.541Z] 2026-08-22T23:24:57.541Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:24:57.541Z] 2026-08-22T23:24:57.541Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:24:57.541Z] 2026-08-22T23:24:57.541Z [license] [INFO]
+[2026-08-22T23:24:57.553Z] 2026-08-22T23:24:57.553Z [heartbeat] [INFO] 💓 Sending heartbeat to central server...
+[2026-08-22T23:24:57.553Z] 2026-08-22T23:24:57.553Z [heartbeat] [INFO] URL: https://ideahub-op7dfwr6.manus.space/api/heartbeat/bocam
+[2026-08-22T23:24:57.553Z] 2026-08-22T23:24:57.553Z [heartbeat] [INFO] Hardware ID: 42004E494300
+[2026-08-22T23:24:57.553Z] 2026-08-22T23:24:57.553Z [heartbeat] [INFO] License Version: 1.0.0
+[2026-08-22T23:24:57.553Z] 2026-08-22T23:24:57.553Z [heartbeat] [INFO] Timestamp: 2026-08-22T23:24:57.000Z
+[2026-08-22T23:24:58.959Z] 2026-08-22T23:24:58.959Z [heartbeat] [INFO] ✅ Heartbeat sent successfully
+[2026-08-22T23:25:57.520Z] 2026-08-22T23:25:57.517Z [heartbeat] [INFO] 💓 Heartbeat triggered
+[2026-08-22T23:25:57.521Z] 2026-08-22T23:25:57.521Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:25:57.521Z] 2026-08-22T23:25:57.521Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:25:57.521Z] 2026-08-22T23:25:57.521Z [license] [INFO]
+[2026-08-22T23:25:57.527Z] 2026-08-22T23:25:57.527Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:25:57.527Z] 2026-08-22T23:25:57.527Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] - Current time: 2026-08-22T23:25:57.000Z
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] Validating features...
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO]
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:25:57.541Z] 2026-08-22T23:25:57.541Z [license] [INFO]
+[2026-08-22T23:25:57.552Z] 2026-08-22T23:25:57.552Z [heartbeat] [INFO] 💓 Sending heartbeat to central server...
+[2026-08-22T23:25:57.552Z] 2026-08-22T23:25:57.552Z [heartbeat] [INFO] URL: https://ideahub-op7dfwr6.manus.space/api/heartbeat/bocam
+[2026-08-22T23:25:57.552Z] 2026-08-22T23:25:57.552Z [heartbeat] [INFO] Hardware ID: 42004E494300
+[2026-08-22T23:25:57.552Z] 2026-08-22T23:25:57.552Z [heartbeat] [INFO] License Version: 1.0.0
+[2026-08-22T23:25:57.552Z] 2026-08-22T23:25:57.552Z [heartbeat] [INFO] Timestamp: 2026-08-22T23:25:57.000Z
+[2026-08-22T23:25:58.891Z] 2026-08-22T23:25:58.891Z [heartbeat] [INFO] ✅ Heartbeat sent successfully
+[2026-08-22T23:26:57.526Z] 2026-08-22T23:26:57.525Z [heartbeat] [INFO] 💓 Heartbeat triggered
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.525Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.525Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.525Z [license] [INFO]
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.525Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.526Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.526Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.526Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] - Current time: 2026-08-22T23:26:57.000Z
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] Validating features...
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO]
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:26:57.527Z] 2026-08-22T23:26:57.527Z [license] [INFO]
+[2026-08-22T23:26:57.538Z] 2026-08-22T23:26:57.538Z [heartbeat] [INFO] 💓 Sending heartbeat to central server...
+[2026-08-22T23:26:57.538Z] 2026-08-22T23:26:57.538Z [heartbeat] [INFO] URL: https://ideahub-op7dfwr6.manus.space/api/heartbeat/bocam
+[2026-08-22T23:26:57.538Z] 2026-08-22T23:26:57.538Z [heartbeat] [INFO] Hardware ID: 42004E494300
+[2026-08-22T23:26:57.538Z] 2026-08-22T23:26:57.538Z [heartbeat] [INFO] License Version: 1.0.0
+[2026-08-22T23:26:57.538Z] 2026-08-22T23:26:57.538Z [heartbeat] [INFO] Timestamp: 2026-08-22T23:26:57.000Z
+[2026-08-22T23:26:58.604Z] 2026-08-22T23:26:58.604Z [heartbeat] [INFO] ✅ Heartbeat sent successfully
+[2026-08-22T23:27:57.526Z] 2026-08-22T23:27:57.526Z [heartbeat] [INFO] 💓 Heartbeat triggered
+[2026-08-22T23:27:57.530Z] 2026-08-22T23:27:57.528Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:27:57.530Z] 2026-08-22T23:27:57.528Z [license] [INFO] License Validation Starting...
+[2026-08-22T23:27:57.530Z] 2026-08-22T23:27:57.528Z [license] [INFO]
+[2026-08-22T23:27:57.530Z] 2026-08-22T23:27:57.528Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T23:27:57.530Z] 2026-08-22T23:27:57.528Z [license] [INFO] License file loaded successfully
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] Hardware ID matched
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] Validating expiry date...
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] - Current time: 2026-08-22T23:27:57.000Z
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] License is valid (not expired)
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] License valid for: 364 days
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] Validating features...
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] - Enabled features: reports
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO]
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T23:27:57.533Z] 2026-08-22T23:27:57.533Z [license] [INFO]
+[2026-08-22T23:27:57.547Z] 2026-08-22T23:27:57.547Z [heartbeat] [INFO] 💓 Sending heartbeat to central server...
+[2026-08-22T23:27:57.547Z] 2026-08-22T23:27:57.547Z [heartbeat] [INFO] URL: https://ideahub-op7dfwr6.manus.space/api/heartbeat/bocam
+[2026-08-22T23:27:57.547Z] 2026-08-22T23:27:57.547Z [heartbeat] [INFO] Hardware ID: 42004E494300
+[2026-08-22T23:27:57.547Z] 2026-08-22T23:27:57.547Z [heartbeat] [INFO] License Version: 1.0.0
+[2026-08-22T23:27:57.547Z] 2026-08-22T23:27:57.547Z [heartbeat] [INFO] Timestamp: 2026-08-22T23:27:57.000Z
+[2026-08-22T23:27:58.822Z] 2026-08-22T23:27:58.822Z [heartbeat] [INFO] ✅ Heartbeat sent successfully
