@@ -75,7 +75,7 @@ export default function ContentManagementPage() {
   const [isApprovalQueueOpen, setIsApprovalQueueOpen] = useState(false);
   const [isQualityDialogOpen, setIsQualityDialogOpen] = useState(false);
   const [selectedVersionEntityType, setSelectedVersionEntityType] = useState<
-    'text' | 'image' | 'color' | 'seo' | 'sectionButton'
+    'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton'
   >('text');
   const [selectedVersionEntityId, setSelectedVersionEntityId] = useState<number>(0);
   const [isPageSettingsOpen, setIsPageSettingsOpen] = useState(false);
@@ -160,12 +160,12 @@ export default function ContentManagementPage() {
               onClick={() => {
                 const entityTypeMap: Record<
                   string,
-                  'text' | 'image' | 'color' | 'seo' | 'sectionButton'
+                  'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton'
                 > = {
                   text: 'text',
                   images: 'image',
-                  pages: 'text',
-                  sections: 'text',
+                  pages: 'page',
+                  sections: 'section',
                   sectionButtons: 'sectionButton',
                   colors: 'color',
                   seo: 'seo',
@@ -366,6 +366,11 @@ export default function ContentManagementPage() {
               openEditDialog={pages.openEditDialog}
               handleDeletePage={pages.handleDeletePage}
               handleDuplicatePage={pages.handleDuplicatePage}
+              onVersionHistory={(id) => {
+                setSelectedVersionEntityType('page');
+                setSelectedVersionEntityId(id);
+                setIsVersionHistoryOpen(true);
+              }}
               onCreateDialogOpen={pages.setIsCreateDialogOpen}
               pageSections={Array.isArray(sections.sections) ? sections.sections : []}
             />
@@ -410,6 +415,11 @@ export default function ContentManagementPage() {
               handleDeleteSection={sections.handleDeleteSection}
               handleDuplicateSection={sections.handleDuplicateSection}
               handleReorderSections={sections.handleReorderSections}
+              onVersionHistory={(id) => {
+                setSelectedVersionEntityType('section');
+                setSelectedVersionEntityId(id);
+                setIsVersionHistoryOpen(true);
+              }}
               onCreateDialogOpen={sections.setIsCreateDialogOpen}
             />
           )}
@@ -589,6 +599,8 @@ export default function ContentManagementPage() {
           images.refetch();
           colorScheme.refetch();
           seo.refetch();
+          pages.refetch();
+          sections.refetch();
           sectionButtons.refetch();
         }}
       />

@@ -27,6 +27,7 @@ interface PagesListProps {
   handleDeletePage: (id: number) => void;
   handleDuplicatePage?: (id: number) => void;
   handlePageSettings?: (page: Page) => void;
+  onVersionHistory?: (id: number) => void;
   onCreateDialogOpen: (open: boolean) => void;
   pageSections?: Array<{
     id: number;
@@ -59,6 +60,7 @@ export function PagesList({
   openEditDialog,
   handleDeletePage,
   handleDuplicatePage,
+  onVersionHistory,
   onCreateDialogOpen,
   pageSections = [],
 }: PagesListProps) {
@@ -121,6 +123,7 @@ export function PagesList({
               onPreview={() => handlePreview(page)}
               onDuplicate={handleDuplicatePage ? () => handleDuplicatePage(page.id) : undefined}
               onSettings={handlePageSettings ? () => handlePageSettings(page) : undefined}
+              onVersionHistory={onVersionHistory ? () => onVersionHistory(page.id) : undefined}
             />
           ))}
         </div>

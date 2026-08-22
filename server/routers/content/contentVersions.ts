@@ -14,7 +14,9 @@ import {
   images,
   colorScheme,
   seoSettings,
+  pages,
   sectionButtons,
+  sections,
 } from '../../../drizzle/schema';
 import { auditLogService } from '../../services/content/auditLogService';
 import {
@@ -24,10 +26,19 @@ import {
   invalidateTextContentCache,
 } from '../public/content';
 import { invalidateAdminSectionsCache } from './sections';
+import { invalidateAdminPagesCache } from './pages';
 
 const logger = createLogger('contentVersionsRouter');
 
-const entityTypeSchema = z.enum(['text', 'image', 'color', 'seo', 'sectionButton']);
+const entityTypeSchema = z.enum([
+  'text',
+  'image',
+  'color',
+  'seo',
+  'page',
+  'section',
+  'sectionButton',
+]);
 
 function toDateOrNull(value: unknown): Date | null {
   if (!value) {
@@ -166,6 +177,127 @@ async function restoreVersionData(
       oldValue: JSON.stringify(current),
       newValue: JSON.stringify(parsed),
       reason: 'استعادة نسخة سابقة',
+    });
+    return;
+  }
+
+  if (entityType === 'page') {
+    const parsed = z
+      .object({
+        name: z.string().min(1).max(255),
+        slug: z.string().min(1).max(255),
+        type: z.enum(['main', 'sub']),
+        parentId: z.number().nullable().optional(),
+        titleAr: z.string().min(1).max(255),
+        titleEn: z.string().min(1).max(255),
+        metaTitleAr: z.string().max(255).nullable().optional(),
+        metaTitleEn: z.string().max(255).nullable().optional(),
+        metaDescriptionAr: z.string().nullable().optional(),
+        metaDescriptionEn: z.string().nullable().optional(),
+        keywordsAr: z.string().nullable().optional(),
+        keywordsEn: z.string().nullable().optional(),
+        status: z.enum(['draft', 'published', 'archived']),
+        isActive: z.enum(['yes', 'no']),
+        sortOrder: z.number().int(),
+        publishedAt: z.unknown().nullable().optional(),
+        deletedAt: z.unknown().nullable().optional(),
+      })
+      .parse(record);
+    const [current] = await tx.select().from(pages).where(eq(pages.id, entityId)).limit(1);
+    if (!current) {
+      throw new Error('الصفحة المراد استعادتها غير موجودة');
+    }
+    await contentVersionsService.createVersion(tx, {
+      entityType,
+      entityId,
+      data: current,
+      userId,
+      reason: 'نسخة أمان تلقائية قبل استعادة الصفحة',
+    });
+    await tx
+      .update(pages)
+      .set({
+        ...parsed,
+        publishedAt: toDateOrNull(parsed.publishedAt),
+        deletedAt: toDateOrNull(parsed.deletedAt),
+      })
+      .where(eq(pages.id, entityId));
+    await auditLogService.logChange(tx, {
+      entityType: 'page',
+      entityId,
+      action: 'update',
+      userId,
+      oldValue: JSON.stringify(current),
+      newValue: JSON.stringify(parsed),
+      reason: 'استعادة نسخة سابقة للصفحة',
+    });
+    return;
+  }
+
+  if (entityType === 'section') {
+    const parsed = z
+      .object({
+        pageId: z.number().int().positive(),
+        name: z.string().min(1).max(255),
+        titleAr: z.string().max(255).nullable().optional(),
+        titleEn: z.string().max(255).nullable().optional(),
+        subtitleAr: z.string().max(255).nullable().optional(),
+        subtitleEn: z.string().max(255).nullable().optional(),
+        type: z.enum([
+          'slider',
+          'text',
+          'text-cards',
+          'stats-cards',
+          'image-cards',
+          'image',
+          'video',
+          'hero',
+          'cta',
+          'features',
+          'testimonials',
+          'faq',
+          'contact',
+          'pricing',
+          'team',
+          'gallery',
+          'timeline',
+          'custom',
+        ]),
+        settings: z.string().nullable().optional(),
+        status: z.enum(['draft', 'published', 'archived']),
+        sortOrder: z.number().int(),
+        isActive: z.enum(['yes', 'no']),
+        publishedAt: z.unknown().nullable().optional(),
+        deletedAt: z.unknown().nullable().optional(),
+      })
+      .parse(record);
+    const [current] = await tx.select().from(sections).where(eq(sections.id, entityId)).limit(1);
+    if (!current) {
+      throw new Error('القسم المراد استعادته غير موجود');
+    }
+    await contentVersionsService.createVersion(tx, {
+      entityType,
+      entityId,
+      data: current,
+      userId,
+      reason: 'نسخة أمان تلقائية قبل استعادة القسم',
+    });
+    await tx
+      .update(sections)
+      .set({
+        ...parsed,
+        publishedAt: toDateOrNull(parsed.publishedAt),
+        deletedAt: toDateOrNull(parsed.deletedAt),
+      })
+      .where(eq(sections.id, entityId));
+    await auditLogService.logChange(tx, {
+      entityType: 'section',
+      entityId,
+      action: 'update',
+      userId,
+      oldValue: JSON.stringify(current),
+      newValue: JSON.stringify(parsed),
+      reason: 'استعادة نسخة سابقة للقسم',
     });
     return;
   }
@@ -432,6 +564,12 @@ export const contentVersionsRouter = router({
       }
       if (version.entityType === 'seo') {
         invalidateSEOCache();
+      }
+      if (version.entityType === 'page') {
+        await invalidateAdminPagesCache();
+      }
+      if (version.entityType === 'section') {
+        await invalidateAdminSectionsCache();
       }
       if (version.entityType === 'sectionButton') {
         await invalidateAdminSectionsCache();

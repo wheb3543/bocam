@@ -18,8 +18,24 @@ import { createLogger } from '../../_core/logger';
 import { cacheManager } from '../../services/redis';
 import { auditLogService } from '../../services/content/auditLogService';
 import { assertPublicationQuality } from '../../services/content/publicationQualityGate';
+import { contentVersionsService } from '../../services/content/contentVersionsService';
 
 const logger = createLogger('pages');
+
+async function savePageVersion(
+  db: any,
+  page: typeof pages.$inferSelect,
+  userId: number | undefined,
+  reason: string
+) {
+  return contentVersionsService.createVersion(db, {
+    entityType: 'page',
+    entityId: page.id,
+    data: page,
+    userId,
+    reason,
+  });
+}
 
 const ADMIN_CACHE_TTL = 2 * 60; // 2 minutes for admin interfaces
 
@@ -250,11 +266,16 @@ export const pagesRouter = router({
         publishedAt: input.status === 'published' ? new Date() : input.publishedAt,
       })
       .$returningId();
+    const id = Number(insertId[0]?.id);
+    const [createdPage] = await db.select().from(pages).where(eq(pages.id, id)).limit(1);
+    if (createdPage) {
+      await savePageVersion(db, createdPage, ctx.user.id, 'إنشاء الصفحة');
+    }
 
     // تسجيل التغيير في سجل التدقيق
     await auditLogService.logChange(db, {
       entityType: 'page',
-      entityId: Number(insertId),
+      entityId: id,
       action: 'create',
       userId: ctx.user?.id,
       newValue: JSON.stringify(input),
@@ -265,7 +286,7 @@ export const pagesRouter = router({
     // إبطال Cache للواجهات الإدارية
     await invalidateAdminPagesCache();
 
-    return { success: true, id: Number(insertId[0].id) };
+    return { success: true, id };
   }),
 
   /**
@@ -293,6 +314,9 @@ export const pagesRouter = router({
 
       // الحصول على القيمة القديمة قبل التحديث
       const oldPage = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
+      if (!oldPage[0]) {
+        throw new Error('الصفحة غير موجودة.');
+      }
 
       // التحقق من عدم تكرار slug (باستثناء الصفحة الحالية)
       const existingSlug = await db.select().from(pages).where(eq(pages.slug, input.slug)).limit(1);
@@ -300,6 +324,8 @@ export const pagesRouter = router({
       if (existingSlug.length > 0 && existingSlug[0].id !== input.id) {
         throw new Error('الرابط (slug) مستخدم بالفعل. الرجاء اختيار رابط آخر.');
       }
+
+      await savePageVersion(db, oldPage[0], ctx.user.id, 'نسخة قبل تحديث الصفحة');
 
       await db
         .update(pages)
@@ -349,6 +375,10 @@ export const pagesRouter = router({
 
     // الحصول على الصفحة قبل الحذف
     const existing = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
+    if (!existing[0]) {
+      throw new Error('الصفحة غير موجودة.');
+    }
+    await savePageVersion(db, existing[0], ctx.user.id, 'نسخة قبل حذف الصفحة');
 
     await db.update(pages).set({ deletedAt: new Date() }).where(eq(pages.id, input.id));
 
@@ -390,6 +420,8 @@ export const pagesRouter = router({
         overrideReason: input.qualityOverrideReason,
       });
 
+      await savePageVersion(db, page, ctx.user.id, 'نسخة قبل نشر الصفحة');
+
       await db
         .update(pages)
         .set({ status: 'published', publishedAt: new Date() })
@@ -406,8 +438,13 @@ export const pagesRouter = router({
    */
   archive: contentPublishProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      const [page] = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
+      if (!page) {
+        throw new Error('الصفحة غير موجودة.');
+      }
+      await savePageVersion(db, page, ctx.user.id, 'نسخة قبل أرشفة الصفحة');
 
       await db.update(pages).set({ status: 'archived' }).where(eq(pages.id, input.id));
 
@@ -422,8 +459,14 @@ export const pagesRouter = router({
   /**
    * استعادة صفحة محذوفة
    */
-  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
+
+    const [page] = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
+    if (!page) {
+      throw new Error('الصفحة غير موجودة.');
+    }
+    await savePageVersion(db, page, ctx.user.id, 'نسخة قبل استعادة الصفحة المحذوفة');
 
     await db.update(pages).set({ deletedAt: null, status: 'draft' }).where(eq(pages.id, input.id));
 

@@ -6,7 +6,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Layers, Lock, Unlock, Copy, Eye } from 'lucide-react';
+import { Edit, Trash2, Layers, Lock, Unlock, Copy, Eye, History } from 'lucide-react';
 import type { Section } from '../hooks/useSections';
 
 interface SectionCardProps {
@@ -15,6 +15,7 @@ interface SectionCardProps {
   onDelete: () => void;
   onDuplicate?: () => void;
   onPreview?: () => void;
+  onVersionHistory?: () => void;
 }
 
 /**
@@ -26,6 +27,7 @@ export function SectionCard({
   onDelete,
   onDuplicate,
   onPreview,
+  onVersionHistory,
 }: SectionCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -98,6 +100,12 @@ export function SectionCard({
           <Button onClick={onDuplicate} size="sm" variant="outline">
             <Copy className="h-4 w-4 ml-1" />
             نسخ
+          </Button>
+        )}
+        {onVersionHistory && (
+          <Button onClick={onVersionHistory} size="sm" variant="outline">
+            <History className="h-4 w-4 ml-1" />
+            تاريخ النسخ
           </Button>
         )}
         <Button onClick={onEdit} size="sm" variant="outline" className="flex-1">

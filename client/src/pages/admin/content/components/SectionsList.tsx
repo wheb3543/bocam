@@ -44,6 +44,7 @@ interface SectionsListProps {
   handleDeleteSection: (id: number) => void;
   handleDuplicateSection?: (id: number) => void;
   handleReorderSections?: (sections: Section[]) => void;
+  onVersionHistory?: (id: number) => void;
   onCreateDialogOpen: (open: boolean) => void;
 }
 
@@ -56,12 +57,14 @@ function SortableSectionCard({
   onDelete,
   onDuplicate,
   onPreview,
+  onVersionHistory,
 }: {
   section: Section;
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate?: () => void;
   onPreview: () => void;
+  onVersionHistory?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: section.id,
@@ -90,6 +93,7 @@ function SortableSectionCard({
           onDelete={onDelete}
           onDuplicate={onDuplicate}
           onPreview={onPreview}
+          onVersionHistory={onVersionHistory}
         />
       </Card>
     </div>
@@ -112,6 +116,7 @@ export function SectionsList({
   handleDeleteSection,
   handleDuplicateSection,
   handleReorderSections,
+  onVersionHistory,
   onCreateDialogOpen,
 }: SectionsListProps) {
   const [previewSection, setPreviewSection] = useState<Section | null>(null);
@@ -198,6 +203,9 @@ export function SectionsList({
                     handleDuplicateSection ? () => handleDuplicateSection(section.id) : undefined
                   }
                   onPreview={() => handlePreview(section)}
+                  onVersionHistory={
+                    onVersionHistory ? () => onVersionHistory(section.id) : undefined
+                  }
                 />
               ))}
             </div>

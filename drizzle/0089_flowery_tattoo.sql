@@ -1,0 +1,1 @@
+ALTER TABLE `contentVersions` MODIFY COLUMN `entityType` enum('text','image','color','seo','page','section','sectionButton') NOT NULL;

@@ -2017,7 +2017,15 @@ export type InsertContentAuditLog = typeof contentAuditLog.$inferInsert;
  */
 export const contentVersions = mysqlTable('contentVersions', {
   id: int('id').autoincrement().primaryKey(),
-  entityType: mysqlEnum('entityType', ['text', 'image', 'color', 'seo', 'sectionButton']).notNull(),
+  entityType: mysqlEnum('entityType', [
+    'text',
+    'image',
+    'color',
+    'seo',
+    'page',
+    'section',
+    'sectionButton',
+  ]).notNull(),
   entityId: int('entityId').notNull(),
   versionNumber: int('versionNumber').notNull(),
   data: text('data').notNull(), // JSON string of the complete entity data

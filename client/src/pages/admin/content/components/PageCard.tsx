@@ -6,7 +6,18 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, FileText, Globe, Lock, Unlock, Eye, Copy, Settings } from 'lucide-react';
+import {
+  Edit,
+  Trash2,
+  FileText,
+  Globe,
+  Lock,
+  Unlock,
+  Eye,
+  Copy,
+  Settings,
+  History,
+} from 'lucide-react';
 import type { Page } from '../hooks/usePages';
 
 interface PageCardProps {
@@ -16,6 +27,7 @@ interface PageCardProps {
   onPreview?: () => void;
   onDuplicate?: () => void;
   onSettings?: () => void;
+  onVersionHistory?: () => void;
 }
 
 /**
@@ -28,6 +40,7 @@ export function PageCard({
   onPreview,
   onDuplicate,
   onSettings,
+  onVersionHistory,
 }: PageCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -104,6 +117,12 @@ export function PageCard({
           <Button onClick={onDuplicate} size="sm" variant="outline">
             <Copy className="h-4 w-4 ml-1" />
             نسخ
+          </Button>
+        )}
+        {onVersionHistory && (
+          <Button onClick={onVersionHistory} size="sm" variant="outline">
+            <History className="h-4 w-4 ml-1" />
+            تاريخ النسخ
           </Button>
         )}
         <Button onClick={onEdit} size="sm" variant="outline" className="flex-1">

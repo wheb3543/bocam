@@ -18,8 +18,24 @@ import { createLogger } from '../../_core/logger';
 import { cacheManager } from '../../services/redis';
 import { auditLogService } from '../../services/content/auditLogService';
 import { assertPublicationQuality } from '../../services/content/publicationQualityGate';
+import { contentVersionsService } from '../../services/content/contentVersionsService';
 
 const logger = createLogger('sections');
+
+async function saveSectionVersion(
+  db: any,
+  section: typeof sections.$inferSelect,
+  userId: number | undefined,
+  reason: string
+) {
+  return contentVersionsService.createVersion(db, {
+    entityType: 'section',
+    entityId: section.id,
+    data: section,
+    userId,
+    reason,
+  });
+}
 
 const ADMIN_CACHE_TTL = 2 * 60; // 2 minutes for admin interfaces
 
@@ -241,11 +257,16 @@ export const sectionsRouter = router({
         publishedAt: input.status === 'published' ? new Date() : input.publishedAt,
       })
       .$returningId();
+    const id = Number(insertId[0]?.id);
+    const [createdSection] = await db.select().from(sections).where(eq(sections.id, id)).limit(1);
+    if (createdSection) {
+      await saveSectionVersion(db, createdSection, ctx.user.id, 'إنشاء القسم');
+    }
 
     // تسجيل التغيير في سجل التدقيق
     await auditLogService.logChange(db, {
       entityType: 'section',
-      entityId: Number(insertId),
+      entityId: id,
       action: 'create',
       userId: ctx.user?.id,
       newValue: JSON.stringify(input),
@@ -256,7 +277,7 @@ export const sectionsRouter = router({
     // إبطال Cache للواجهات الإدارية
     await invalidateAdminSectionsCache();
 
-    return { success: true, id: Number(insertId) };
+    return { success: true, id };
   }),
 
   /**
@@ -284,6 +305,11 @@ export const sectionsRouter = router({
 
       // الحصول على القيمة القديمة قبل التحديث
       const oldSection = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
+      if (!oldSection[0]) {
+        throw new Error('القسم غير موجود.');
+      }
+
+      await saveSectionVersion(db, oldSection[0], ctx.user.id, 'نسخة قبل تحديث القسم');
 
       await db
         .update(sections)
@@ -329,6 +355,10 @@ export const sectionsRouter = router({
 
     // الحصول على القسم قبل الحذف
     const existing = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
+    if (!existing[0]) {
+      throw new Error('القسم غير موجود.');
+    }
+    await saveSectionVersion(db, existing[0], ctx.user.id, 'نسخة قبل حذف القسم');
 
     await db.update(sections).set({ deletedAt: new Date() }).where(eq(sections.id, input.id));
 
@@ -370,6 +400,8 @@ export const sectionsRouter = router({
         overrideReason: input.qualityOverrideReason,
       });
 
+      await saveSectionVersion(db, section, ctx.user.id, 'نسخة قبل نشر القسم');
+
       await db
         .update(sections)
         .set({ status: 'published', publishedAt: new Date() })
@@ -386,8 +418,13 @@ export const sectionsRouter = router({
    */
   archive: contentPublishProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      const [section] = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
+      if (!section) {
+        throw new Error('القسم غير موجود.');
+      }
+      await saveSectionVersion(db, section, ctx.user.id, 'نسخة قبل أرشفة القسم');
 
       await db.update(sections).set({ status: 'archived' }).where(eq(sections.id, input.id));
 
@@ -402,8 +439,13 @@ export const sectionsRouter = router({
   /**
    * استعادة قسم محذوف
    */
-  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
+    const [section] = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
+    if (!section) {
+      throw new Error('القسم غير موجود.');
+    }
+    await saveSectionVersion(db, section, ctx.user.id, 'نسخة قبل استعادة القسم المحذوف');
 
     await db
       .update(sections)

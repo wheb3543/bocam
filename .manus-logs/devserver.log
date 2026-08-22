@@ -1691,3 +1691,49 @@
 [2026-08-22T22:23:15.005Z] 2026-08-22T22:23:15.005Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
 [2026-08-22T22:23:15.007Z] 2026-08-22T22:23:15.007Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
 [2026-08-22T22:23:15.012Z] 2026-08-22T22:23:15.012Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-22T22:36:13.315Z] 2026-08-22T22:36:13.315Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-22T22:36:13.334Z] 2026-08-22T22:36:13.334Z [license] [INFO] License Validation Starting...
+[2026-08-22T22:36:13.334Z] 2026-08-22T22:36:13.334Z [license] [INFO]
+[2026-08-22T22:36:13.334Z] 2026-08-22T22:36:13.334Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T22:36:13.334Z] 2026-08-22T22:36:13.334Z [license] [INFO] License file loaded successfully
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] Hardware ID matched
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] Validating expiry date...
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] - Current time: 2026-08-22T22:36:13.000Z
+[2026-08-22T22:36:13.335Z] 2026-08-22T22:36:13.335Z [license] [INFO] License is valid (not expired)
+[2026-08-22T22:36:13.336Z] 2026-08-22T22:36:13.335Z [license] [INFO] License valid for: 364 days
+[2026-08-22T22:36:13.336Z] 2026-08-22T22:36:13.335Z [license] [INFO] Validating features...
+[2026-08-22T22:36:13.336Z] 2026-08-22T22:36:13.336Z [license] [INFO] - Enabled features: reports
+[2026-08-22T22:36:13.336Z] 2026-08-22T22:36:13.336Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T22:36:13.336Z] 2026-08-22T22:36:13.336Z [license] [INFO]
+[2026-08-22T22:36:13.336Z] 2026-08-22T22:36:13.336Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T22:36:13.336Z] 2026-08-22T22:36:13.336Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T22:36:13.336Z] 2026-08-22T22:36:13.336Z [license] [INFO]
+[2026-08-22T22:36:19.804Z] 2026-08-22T22:36:19.804Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.824Z [license] [INFO] License Validation Starting...
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO]
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] License file loaded successfully
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] Hardware ID matched
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] Validating expiry date...
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] - Current time: 2026-08-22T22:36:19.000Z
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] License is valid (not expired)
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] License valid for: 364 days
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] Validating features...
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] - Enabled features: reports
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO]
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T22:36:19.825Z] 2026-08-22T22:36:19.825Z [license] [INFO]

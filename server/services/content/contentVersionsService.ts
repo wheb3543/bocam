@@ -9,6 +9,9 @@ import { createLogger } from '../../_core/logger';
 
 const logger = createLogger('contentVersionsService');
 
+export type ContentVersionEntityType =
+  'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton';
+
 /**
  * ContentVersionsService - خدمة النسخ المحفوظة
  */
@@ -20,7 +23,7 @@ export class ContentVersionsService {
   async createVersion(
     db: any,
     params: {
-      entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
+      entityType: ContentVersionEntityType;
       entityId: number;
       data: any;
       userId?: number;
@@ -75,7 +78,7 @@ export class ContentVersionsService {
   async getVersions(
     db: any,
     params: {
-      entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
+      entityType: ContentVersionEntityType;
       entityId: number;
     }
   ) {
@@ -133,7 +136,7 @@ export class ContentVersionsService {
   async getLatestVersion(
     db: any,
     params: {
-      entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
+      entityType: ContentVersionEntityType;
       entityId: number;
     }
   ) {
@@ -186,7 +189,7 @@ export class ContentVersionsService {
   async deleteAllVersions(
     db: any,
     params: {
-      entityType: 'text' | 'image' | 'color' | 'seo' | 'sectionButton';
+      entityType: ContentVersionEntityType;
       entityId: number;
     }
   ) {
