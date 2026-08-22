@@ -26,6 +26,7 @@ import { Switch } from '@/components/ui/switch';
 import { Bold, Italic, List, Heading, Link, Code, Quote } from 'lucide-react';
 import type { TextContentFormData } from '../../types/content.types';
 import { languageOptions, textContentTypeOptions } from '../../types/content.types';
+import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
 
 interface TextContentDialogProps {
   open: boolean;
@@ -36,6 +37,8 @@ interface TextContentDialogProps {
   onSubmit: (e: React.FormEvent) => void;
   isPending: boolean;
   onSaveVersion?: () => void;
+  qualityIssues: string[];
+  isAdmin: boolean;
   pages?: Array<{ id: number; name: string; titleAr: string; titleEn: string }>;
   sections?: Array<{
     id: number;
@@ -58,6 +61,8 @@ export function TextContentDialog({
   onSubmit,
   isPending,
   onSaveVersion,
+  qualityIssues,
+  isAdmin,
   pages = [],
   sections = [],
 }: TextContentDialogProps) {
@@ -347,6 +352,16 @@ export function TextContentDialog({
                 </p>
               </div>
             )}
+
+            <PublicationQualityFeedback
+              status={formData.status}
+              issues={qualityIssues}
+              isAdmin={isAdmin}
+              overrideReason={formData.qualityOverrideReason}
+              onOverrideReasonChange={(qualityOverrideReason) =>
+                onFormDataChange({ ...formData, qualityOverrideReason })
+              }
+            />
 
             {/* Active */}
             <div className="flex items-center gap-2">

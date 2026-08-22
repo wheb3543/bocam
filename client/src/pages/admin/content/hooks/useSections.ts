@@ -6,7 +6,9 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { useAuth } from '@/_core/hooks/useAuth';
 import { getContentListData, getContentListPagination } from '../utils/listResponse';
+import { getPublicationQualityIssues } from '../utils/publicationQuality';
 
 export type SectionType =
   | 'slider'
@@ -59,6 +61,7 @@ export interface SectionFormData {
   sortOrder: number;
   isActive: 'yes' | 'no';
   publishedAt: Date | null;
+  qualityOverrideReason: string;
 }
 
 export interface SectionOrderValidation {
@@ -167,6 +170,7 @@ export const initialSectionFormData: SectionFormData = {
   sortOrder: 0,
   isActive: 'yes',
   publishedAt: null,
+  qualityOverrideReason: '',
 };
 
 /**
@@ -178,6 +182,9 @@ export function useSections() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState<Section | null>(null);
   const [formData, setFormData] = useState<SectionFormData>(initialSectionFormData);
+  const [qualityIssues, setQualityIssues] = useState<string[]>([]);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -212,11 +219,18 @@ export function useSections() {
   const createMutation = trpc.content.sections.create.useMutation({
     onSuccess: () => {
       toast.success('تم إنشاء القسم بنجاح');
+      setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialSectionFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر نشر القسم. راجع أخطاء الجودة الظاهرة في النموذج.');
+        return;
+      }
       toast.error(`فشل إنشاء القسم: ${error.message}`);
     },
   });
@@ -224,12 +238,19 @@ export function useSections() {
   const updateMutation = trpc.content.sections.update.useMutation({
     onSuccess: () => {
       toast.success('تم تحديث القسم بنجاح');
+      setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedSection(null);
       setFormData(initialSectionFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر نشر القسم. راجع أخطاء الجودة الظاهرة في النموذج.');
+        return;
+      }
       toast.error(`فشل تحديث القسم: ${error.message}`);
     },
   });
@@ -310,6 +331,7 @@ export function useSections() {
       sortOrder: formData.sortOrder,
       isActive: formData.isActive,
       publishedAt: formData.publishedAt || undefined,
+      qualityOverrideReason: formData.qualityOverrideReason.trim() || undefined,
     });
   };
 
@@ -362,6 +384,7 @@ export function useSections() {
       sortOrder: formData.sortOrder,
       isActive: formData.isActive,
       publishedAt: formData.publishedAt || undefined,
+      qualityOverrideReason: formData.qualityOverrideReason.trim() || undefined,
     });
   };
 
@@ -382,6 +405,7 @@ export function useSections() {
 
   const openEditDialog = (section: Section) => {
     setSelectedSection(section);
+    setQualityIssues([]);
     setFormData({
       pageId: section.pageId,
       name: section.name,
@@ -395,6 +419,7 @@ export function useSections() {
       sortOrder: section.sortOrder,
       isActive: section.isActive,
       publishedAt: section.publishedAt,
+      qualityOverrideReason: '',
     });
     setIsEditDialogOpen(true);
   };
@@ -402,6 +427,7 @@ export function useSections() {
   const resetForm = () => {
     setFormData(initialSectionFormData);
     setSelectedSection(null);
+    setQualityIssues([]);
   };
 
   return {
@@ -410,6 +436,8 @@ export function useSections() {
     isEditDialogOpen,
     selectedSection,
     formData,
+    qualityIssues,
+    isAdmin,
     searchQuery,
     pageId,
     type,
@@ -444,6 +472,7 @@ export function useSections() {
     handleReorderSections,
     openEditDialog,
     resetForm,
+    clearQualityIssues: () => setQualityIssues([]),
 
     // Refetch
     refetch,

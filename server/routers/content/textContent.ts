@@ -23,6 +23,7 @@ import {
 } from '../../_core/notificationHelper';
 import { cacheManager } from '../../services/redis';
 import { auditLogService } from '../../services/content/auditLogService';
+import { assertPublicationQuality } from '../../services/content/publicationQualityGate';
 
 const logger = createLogger('textContent');
 
@@ -74,6 +75,7 @@ const textContentSchema = z.object({
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
   isActive: z.enum(['yes', 'no']).default('yes'),
   publishedAt: z.date().optional(),
+  qualityOverrideReason: z.string().max(500).optional(),
 });
 
 const homepageRequiredTextKeys = [
@@ -248,6 +250,13 @@ export const textContentRouter = router({
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
       assertContentCapability(ctx.user.role, 'publish');
+      await assertPublicationQuality(db, {
+        entityType: 'textContent',
+        candidate: input,
+        role: ctx.user.role,
+        userId: ctx.user.id,
+        overrideReason: input.qualityOverrideReason,
+      });
     }
 
     // التحقق من عدم تكرار key
@@ -318,6 +327,14 @@ export const textContentRouter = router({
       const db = await ensureDatabaseAvailable();
       if (input.status === 'published') {
         assertContentCapability(ctx.user.role, 'publish');
+        await assertPublicationQuality(db, {
+          entityType: 'textContent',
+          entityId: input.id,
+          candidate: input,
+          role: ctx.user.role,
+          userId: ctx.user.id,
+          overrideReason: input.qualityOverrideReason,
+        });
       }
 
       // الحصول على القيمة القديمة قبل التحديث
@@ -419,7 +436,7 @@ export const textContentRouter = router({
    * نشر محتوى نصي - يتطلب صلاحيات admin
    */
   publish: contentPublishProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({ id: z.number(), qualityOverrideReason: z.string().max(500).optional() }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
 
@@ -429,6 +446,18 @@ export const textContentRouter = router({
         .from(textContent)
         .where(eq(textContent.id, input.id))
         .limit(1);
+      if (!existing[0]) {
+        throw new Error('المحتوى النصي غير موجود.');
+      }
+
+      const quality = await assertPublicationQuality(db, {
+        entityType: 'textContent',
+        entityId: input.id,
+        candidate: existing[0],
+        role: ctx.user.role,
+        userId: ctx.user.id,
+        overrideReason: input.qualityOverrideReason,
+      });
 
       await db
         .update(textContent)
@@ -451,7 +480,7 @@ export const textContentRouter = router({
         });
       }
 
-      return { success: true };
+      return { success: true, qualityOverride: quality.overridden };
     }),
 
   /**

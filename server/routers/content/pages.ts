@@ -17,6 +17,7 @@ import { pages } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
 import { cacheManager } from '../../services/redis';
 import { auditLogService } from '../../services/content/auditLogService';
+import { assertPublicationQuality } from '../../services/content/publicationQualityGate';
 
 const logger = createLogger('pages');
 
@@ -61,6 +62,7 @@ const pageSchema = z.object({
   isActive: z.enum(['yes', 'no']).default('yes'),
   sortOrder: z.number().default(0),
   publishedAt: z.date().optional(),
+  qualityOverrideReason: z.string().max(500).optional(),
 });
 
 export const pagesRouter = router({
@@ -211,6 +213,13 @@ export const pagesRouter = router({
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
       assertContentCapability(ctx.user.role, 'publish');
+      await assertPublicationQuality(db, {
+        entityType: 'page',
+        candidate: input,
+        role: ctx.user.role,
+        userId: ctx.user.id,
+        overrideReason: input.qualityOverrideReason,
+      });
     }
 
     // التحقق من عدم تكرار slug
@@ -272,6 +281,14 @@ export const pagesRouter = router({
       const db = await ensureDatabaseAvailable();
       if (input.status === 'published') {
         assertContentCapability(ctx.user.role, 'publish');
+        await assertPublicationQuality(db, {
+          entityType: 'page',
+          entityId: input.id,
+          candidate: input,
+          role: ctx.user.role,
+          userId: ctx.user.id,
+          overrideReason: input.qualityOverrideReason,
+        });
       }
 
       // الحصول على القيمة القديمة قبل التحديث
@@ -356,9 +373,22 @@ export const pagesRouter = router({
    * نشر صفحة - يتطلب صلاحيات admin
    */
   publish: contentPublishProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .input(z.object({ id: z.number(), qualityOverrideReason: z.string().max(500).optional() }))
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      const [page] = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
+      if (!page) {
+        throw new Error('الصفحة غير موجودة.');
+      }
+
+      const quality = await assertPublicationQuality(db, {
+        entityType: 'page',
+        entityId: input.id,
+        candidate: page,
+        role: ctx.user.role,
+        userId: ctx.user.id,
+        overrideReason: input.qualityOverrideReason,
+      });
 
       await db
         .update(pages)
@@ -366,11 +396,9 @@ export const pagesRouter = router({
         .where(eq(pages.id, input.id));
 
       logger.info(`Page published: ${input.id}`);
-
-      // إبطال Cache للواجهات الإدارية
       await invalidateAdminPagesCache();
 
-      return { success: true };
+      return { success: true, qualityOverride: quality.overridden };
     }),
 
   /**

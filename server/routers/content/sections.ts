@@ -17,6 +17,7 @@ import { sections } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
 import { cacheManager } from '../../services/redis';
 import { auditLogService } from '../../services/content/auditLogService';
+import { assertPublicationQuality } from '../../services/content/publicationQualityGate';
 
 const logger = createLogger('sections');
 
@@ -78,6 +79,7 @@ const sectionSchema = z.object({
   sortOrder: z.number().default(0),
   isActive: z.enum(['yes', 'no']).default('yes'),
   publishedAt: z.date().optional(),
+  qualityOverrideReason: z.string().max(500).optional(),
 });
 
 export const sectionsRouter = router({
@@ -213,6 +215,13 @@ export const sectionsRouter = router({
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
       assertContentCapability(ctx.user.role, 'publish');
+      await assertPublicationQuality(db, {
+        entityType: 'section',
+        candidate: input,
+        role: ctx.user.role,
+        userId: ctx.user.id,
+        overrideReason: input.qualityOverrideReason,
+      });
     }
 
     const insertId = await db
@@ -263,6 +272,14 @@ export const sectionsRouter = router({
       const db = await ensureDatabaseAvailable();
       if (input.status === 'published') {
         assertContentCapability(ctx.user.role, 'publish');
+        await assertPublicationQuality(db, {
+          entityType: 'section',
+          entityId: input.id,
+          candidate: input,
+          role: ctx.user.role,
+          userId: ctx.user.id,
+          overrideReason: input.qualityOverrideReason,
+        });
       }
 
       // الحصول على القيمة القديمة قبل التحديث
@@ -336,9 +353,22 @@ export const sectionsRouter = router({
    * نشر قسم - يتطلب صلاحيات admin
    */
   publish: contentPublishProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .input(z.object({ id: z.number(), qualityOverrideReason: z.string().max(500).optional() }))
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      const [section] = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
+      if (!section) {
+        throw new Error('القسم غير موجود.');
+      }
+
+      const quality = await assertPublicationQuality(db, {
+        entityType: 'section',
+        entityId: input.id,
+        candidate: section,
+        role: ctx.user.role,
+        userId: ctx.user.id,
+        overrideReason: input.qualityOverrideReason,
+      });
 
       await db
         .update(sections)
@@ -346,11 +376,9 @@ export const sectionsRouter = router({
         .where(eq(sections.id, input.id));
 
       logger.info(`Section published: ${input.id}`);
-
-      // إبطال Cache للواجهات الإدارية
       await invalidateAdminSectionsCache();
 
-      return { success: true };
+      return { success: true, qualityOverride: quality.overridden };
     }),
 
   /**

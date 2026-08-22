@@ -31,6 +31,9 @@ interface ImageListProps {
   onVersionHistory?: (id: number) => void;
   createMutation: { isPending: boolean };
   updateMutation: { isPending: boolean };
+  qualityIssues: string[];
+  isAdmin: boolean;
+  clearQualityIssues: () => void;
 }
 
 /**
@@ -56,6 +59,9 @@ export function ImageList({
   onVersionHistory,
   createMutation,
   updateMutation,
+  qualityIssues,
+  isAdmin,
+  clearQualityIssues,
 }: ImageListProps) {
   return (
     <div className="space-y-4">
@@ -107,23 +113,37 @@ export function ImageList({
       {/* Create Dialog */}
       <ImageUploadDialog
         open={isCreateDialogOpen}
-        onOpenChange={onCreateDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            clearQualityIssues();
+          }
+          onCreateDialogOpen(open);
+        }}
         mode="create"
         formData={formData}
         onFormDataChange={onFormDataChange}
         onSubmit={onCreateImage}
         isPending={createMutation.isPending}
+        qualityIssues={qualityIssues}
+        isAdmin={isAdmin}
       />
 
       {/* Edit Dialog */}
       <ImageUploadDialog
         open={isEditDialogOpen}
-        onOpenChange={onEditDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            clearQualityIssues();
+          }
+          onEditDialogOpen(open);
+        }}
         mode="edit"
         formData={formData}
         onFormDataChange={onFormDataChange}
         onSubmit={onEditImage}
         isPending={updateMutation.isPending}
+        qualityIssues={qualityIssues}
+        isAdmin={isAdmin}
       />
     </div>
   );

@@ -267,6 +267,9 @@ export default function ContentManagementPage() {
               }}
               createMutation={textContent.createMutation}
               updateMutation={textContent.updateMutation}
+              qualityIssues={textContent.qualityIssues}
+              isAdmin={textContent.isAdmin}
+              clearQualityIssues={textContent.clearQualityIssues}
             />
           )}
           {contentManagement.activeTab === 'images' && (
@@ -321,6 +324,9 @@ export default function ContentManagementPage() {
                 }}
                 createMutation={images.createMutation}
                 updateMutation={images.updateMutation}
+                qualityIssues={images.qualityIssues}
+                isAdmin={images.isAdmin}
+                clearQualityIssues={images.clearQualityIssues}
               />
             </div>
           )}
@@ -563,6 +569,9 @@ export default function ContentManagementPage() {
       <PageDialog
         open={pages.isCreateDialogOpen || pages.isEditDialogOpen}
         onOpenChange={(open) => {
+          if (!open) {
+            pages.clearQualityIssues();
+          }
           pages.setIsCreateDialogOpen(open);
           pages.setIsEditDialogOpen(open);
         }}
@@ -572,12 +581,17 @@ export default function ContentManagementPage() {
         onSubmit={pages.isEditDialogOpen ? pages.handleEditPage : pages.handleCreatePage}
         isPending={pages.createMutation.isPending || pages.updateMutation.isPending}
         mainPages={pages.mainPages}
+        qualityIssues={pages.qualityIssues}
+        isAdmin={pages.isAdmin}
       />
 
       {/* Section Dialog */}
       <SectionDialog
         open={sections.isCreateDialogOpen || sections.isEditDialogOpen}
         onOpenChange={(open) => {
+          if (!open) {
+            sections.clearQualityIssues();
+          }
           sections.setIsCreateDialogOpen(open);
           sections.setIsEditDialogOpen(open);
         }}
@@ -589,6 +603,8 @@ export default function ContentManagementPage() {
         }
         isPending={sections.createMutation.isPending || sections.updateMutation.isPending}
         pages={sections.pages}
+        qualityIssues={sections.qualityIssues}
+        isAdmin={sections.isAdmin}
       />
 
       {/* Page Settings Dialog */}

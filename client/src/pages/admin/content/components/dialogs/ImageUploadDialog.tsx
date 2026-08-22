@@ -28,6 +28,7 @@ import type { ImageFormData } from '../../types/content.types';
 import { sectionOptions, imageFormatOptions } from '../../types/content.types';
 import { useImageUpload } from '@/hooks/form/useImageUpload';
 import MediaPicker from '@/components/form/MediaPicker';
+import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
 
 interface ImageUploadDialogProps {
   open: boolean;
@@ -38,6 +39,8 @@ interface ImageUploadDialogProps {
   onSubmit: (e: React.FormEvent) => void;
   isPending: boolean;
   onSaveVersion?: () => void;
+  qualityIssues: string[];
+  isAdmin: boolean;
 }
 
 /**
@@ -52,6 +55,8 @@ export function ImageUploadDialog({
   onSubmit,
   isPending,
   onSaveVersion,
+  qualityIssues,
+  isAdmin,
 }: ImageUploadDialogProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(formData.url || null);
   const [isDragging, setIsDragging] = useState(false);
@@ -368,6 +373,16 @@ export function ImageUploadDialog({
                 </p>
               </div>
             )}
+
+            <PublicationQualityFeedback
+              status={formData.status}
+              issues={qualityIssues}
+              isAdmin={isAdmin}
+              overrideReason={formData.qualityOverrideReason}
+              onOverrideReasonChange={(qualityOverrideReason) =>
+                onFormDataChange({ ...formData, qualityOverrideReason })
+              }
+            />
 
             {/* Active */}
             <div className="flex items-center gap-2">

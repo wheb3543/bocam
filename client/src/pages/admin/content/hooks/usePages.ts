@@ -6,9 +6,11 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { useAuth } from '@/_core/hooks/useAuth';
 import type { Section } from './useSections';
 import type { TextContent, Image } from '../types/content.types';
 import { getContentListData, getContentListPagination } from '../utils/listResponse';
+import { getPublicationQualityIssues } from '../utils/publicationQuality';
 
 export interface Page {
   id: number;
@@ -49,6 +51,7 @@ export interface PageFormData {
   isActive: 'yes' | 'no';
   sortOrder: number;
   publishedAt: Date | null;
+  qualityOverrideReason: string;
 }
 
 export interface PageCompletenessCheck {
@@ -136,6 +139,7 @@ export const initialPageFormData: PageFormData = {
   isActive: 'yes',
   sortOrder: 0,
   publishedAt: null,
+  qualityOverrideReason: '',
 };
 
 /**
@@ -147,6 +151,9 @@ export function usePages() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
   const [formData, setFormData] = useState<PageFormData>(initialPageFormData);
+  const [qualityIssues, setQualityIssues] = useState<string[]>([]);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -176,11 +183,18 @@ export function usePages() {
   const createMutation = trpc.content.pages.create.useMutation({
     onSuccess: () => {
       toast.success('تم إنشاء الصفحة بنجاح');
+      setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialPageFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر نشر الصفحة. راجع أخطاء الجودة الظاهرة في النموذج.');
+        return;
+      }
       toast.error(`فشل إنشاء الصفحة: ${error.message}`);
     },
   });
@@ -188,12 +202,19 @@ export function usePages() {
   const updateMutation = trpc.content.pages.update.useMutation({
     onSuccess: () => {
       toast.success('تم تحديث الصفحة بنجاح');
+      setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedPage(null);
       setFormData(initialPageFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر نشر الصفحة. راجع أخطاء الجودة الظاهرة في النموذج.');
+        return;
+      }
       toast.error(`فشل تحديث الصفحة: ${error.message}`);
     },
   });
@@ -251,6 +272,7 @@ export function usePages() {
       isActive: formData.isActive,
       sortOrder: formData.sortOrder,
       publishedAt: formData.publishedAt || undefined,
+      qualityOverrideReason: formData.qualityOverrideReason.trim() || undefined,
     });
   };
 
@@ -290,6 +312,7 @@ export function usePages() {
       isActive: formData.isActive,
       sortOrder: formData.sortOrder,
       publishedAt: formData.publishedAt || undefined,
+      qualityOverrideReason: formData.qualityOverrideReason.trim() || undefined,
     });
   };
 
@@ -320,6 +343,7 @@ export function usePages() {
       isActive: page.isActive,
       sortOrder: page.sortOrder,
       publishedAt: page.publishedAt,
+      qualityOverrideReason: '',
     });
     setIsEditDialogOpen(true);
   };
@@ -335,6 +359,8 @@ export function usePages() {
     isEditDialogOpen,
     selectedPage,
     formData,
+    qualityIssues,
+    isAdmin,
     searchQuery,
     type,
     isActive,
@@ -365,6 +391,7 @@ export function usePages() {
     handleDuplicatePage,
     openEditDialog,
     resetForm,
+    clearQualityIssues: () => setQualityIssues([]),
     refetch,
   };
 }

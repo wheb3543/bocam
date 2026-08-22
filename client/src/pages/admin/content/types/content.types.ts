@@ -68,6 +68,7 @@ export interface TextContentFormData {
   status: 'draft' | 'published' | 'archived';
   isActive: 'yes' | 'no';
   publishedAt: Date | null;
+  qualityOverrideReason: string;
 }
 
 /**
@@ -84,6 +85,7 @@ export const initialTextContentFormData: TextContentFormData = {
   status: 'draft',
   isActive: 'yes',
   publishedAt: null,
+  qualityOverrideReason: '',
 };
 
 /**
@@ -128,6 +130,7 @@ export interface ImageFormData {
   status: 'draft' | 'published' | 'archived';
   isActive: 'yes' | 'no';
   publishedAt: Date | null;
+  qualityOverrideReason: string;
 }
 
 /**
@@ -147,6 +150,7 @@ export const initialImageFormData: ImageFormData = {
   status: 'draft',
   isActive: 'yes',
   publishedAt: null,
+  qualityOverrideReason: '',
 };
 
 /**

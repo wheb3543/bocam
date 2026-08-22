@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import type { SectionFormData } from '../../hooks/useSections';
+import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
 
 interface SectionDialogProps {
   open: boolean;
@@ -33,6 +34,8 @@ interface SectionDialogProps {
   onSubmit: (e: React.FormEvent) => void;
   isPending: boolean;
   pages?: Array<{ id: number; name: string }>;
+  qualityIssues: string[];
+  isAdmin: boolean;
 }
 
 /**
@@ -47,6 +50,8 @@ export function SectionDialog({
   onSubmit,
   isPending,
   pages = [],
+  qualityIssues,
+  isAdmin,
 }: SectionDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -242,6 +247,16 @@ export function SectionDialog({
                 </p>
               </div>
             )}
+
+            <PublicationQualityFeedback
+              status={formData.status}
+              issues={qualityIssues}
+              isAdmin={isAdmin}
+              overrideReason={formData.qualityOverrideReason}
+              onOverrideReasonChange={(qualityOverrideReason) =>
+                onFormDataChange({ ...formData, qualityOverrideReason })
+              }
+            />
 
             {/* Active */}
             <div className="flex items-center gap-2">

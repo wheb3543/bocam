@@ -44,6 +44,9 @@ interface TextContentListProps {
   onVersionHistory?: (id: number) => void;
   createMutation: { isPending: boolean };
   updateMutation: { isPending: boolean };
+  qualityIssues: string[];
+  isAdmin: boolean;
+  clearQualityIssues: () => void;
 }
 
 /**
@@ -74,6 +77,9 @@ export function TextContentList({
   onVersionHistory,
   createMutation,
   updateMutation,
+  qualityIssues,
+  isAdmin,
+  clearQualityIssues,
 }: TextContentListProps) {
   return (
     <div className="space-y-4">
@@ -142,12 +148,19 @@ export function TextContentList({
       {/* Create Dialog */}
       <TextContentDialog
         open={isCreateDialogOpen}
-        onOpenChange={onCreateDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            clearQualityIssues();
+          }
+          onCreateDialogOpen(open);
+        }}
         mode="create"
         formData={formData}
         onFormDataChange={onFormDataChange}
         onSubmit={onCreateTextContent}
         isPending={createMutation.isPending}
+        qualityIssues={qualityIssues}
+        isAdmin={isAdmin}
         pages={pages}
         sections={sections}
       />
@@ -155,12 +168,19 @@ export function TextContentList({
       {/* Edit Dialog */}
       <TextContentDialog
         open={isEditDialogOpen}
-        onOpenChange={onEditDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            clearQualityIssues();
+          }
+          onEditDialogOpen(open);
+        }}
         mode="edit"
         formData={formData}
         onFormDataChange={onFormDataChange}
         onSubmit={onEditTextContent}
         isPending={updateMutation.isPending}
+        qualityIssues={qualityIssues}
+        isAdmin={isAdmin}
         pages={pages}
         sections={sections}
       />

@@ -14,6 +14,7 @@ import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or, isNull } from 'drizzle-orm';
 import { images } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
+import { assertPublicationQuality } from '../../services/content/publicationQualityGate';
 
 const logger = createLogger('images');
 
@@ -35,6 +36,7 @@ const imageSchema = z.object({
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
   isActive: z.enum(['yes', 'no']).default('yes'),
   publishedAt: z.date().optional(),
+  qualityOverrideReason: z.string().max(500).optional(),
 });
 
 export const imagesRouter = router({
@@ -129,6 +131,13 @@ export const imagesRouter = router({
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
       assertContentCapability(ctx.user.role, 'publish');
+      await assertPublicationQuality(db, {
+        entityType: 'image',
+        candidate: input,
+        role: ctx.user.role,
+        userId: ctx.user.id,
+        overrideReason: input.qualityOverrideReason,
+      });
     }
 
     const insertId = await db
@@ -169,6 +178,14 @@ export const imagesRouter = router({
       const db = await ensureDatabaseAvailable();
       if (input.status === 'published') {
         assertContentCapability(ctx.user.role, 'publish');
+        await assertPublicationQuality(db, {
+          entityType: 'image',
+          entityId: input.id,
+          candidate: input,
+          role: ctx.user.role,
+          userId: ctx.user.id,
+          overrideReason: input.qualityOverrideReason,
+        });
       }
 
       await db

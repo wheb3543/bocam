@@ -6,9 +6,11 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { useAuth } from '@/_core/hooks/useAuth';
 import type { TextContent, TextContentFormData } from '../types/content.types';
 import { initialTextContentFormData } from '../types/content.types';
 import { getContentListData, getContentListPagination } from '../utils/listResponse';
+import { getPublicationQualityIssues } from '../utils/publicationQuality';
 
 /**
  * useTextContent - Hook لإدارة المحتوى النصي
@@ -19,6 +21,9 @@ export function useTextContent() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTextContent, setSelectedTextContent] = useState<TextContent | null>(null);
   const [formData, setFormData] = useState<TextContentFormData>(initialTextContentFormData);
+  const [qualityIssues, setQualityIssues] = useState<string[]>([]);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,11 +58,18 @@ export function useTextContent() {
   const createMutation = trpc.content.textContent.create.useMutation({
     onSuccess: () => {
       toast.success('تم إنشاء المحتوى النصي بنجاح');
+      setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialTextContentFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر النشر. راجع أخطاء الجودة الظاهرة في النموذج.');
+        return;
+      }
       toast.error(`فشل إنشاء المحتوى النصي: ${error.message}`);
     },
   });
@@ -65,12 +77,19 @@ export function useTextContent() {
   const updateMutation = trpc.content.textContent.update.useMutation({
     onSuccess: () => {
       toast.success('تم تحديث المحتوى النصي بنجاح');
+      setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedTextContent(null);
       setFormData(initialTextContentFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر النشر. راجع أخطاء الجودة الظاهرة في النموذج.');
+        return;
+      }
       toast.error(`فشل تحديث المحتوى النصي: ${error.message}`);
     },
   });
@@ -100,6 +119,7 @@ export function useTextContent() {
       status: formData.status,
       isActive: formData.isActive,
       publishedAt: formData.publishedAt || undefined,
+      qualityOverrideReason: formData.qualityOverrideReason.trim() || undefined,
     });
   };
 
@@ -122,6 +142,7 @@ export function useTextContent() {
       status: formData.status,
       isActive: formData.isActive,
       publishedAt: formData.publishedAt || undefined,
+      qualityOverrideReason: formData.qualityOverrideReason.trim() || undefined,
     });
   };
 
@@ -134,6 +155,7 @@ export function useTextContent() {
 
   const openEditDialog = (textContent: TextContent) => {
     setSelectedTextContent(textContent);
+    setQualityIssues([]);
     setFormData({
       key: textContent.key,
       language: textContent.language,
@@ -145,6 +167,7 @@ export function useTextContent() {
       status: textContent.status || 'draft',
       isActive: textContent.isActive,
       publishedAt: textContent.publishedAt || null,
+      qualityOverrideReason: '',
     });
     setIsEditDialogOpen(true);
   };
@@ -152,6 +175,7 @@ export function useTextContent() {
   const resetForm = () => {
     setFormData(initialTextContentFormData);
     setSelectedTextContent(null);
+    setQualityIssues([]);
   };
 
   return {
@@ -160,6 +184,8 @@ export function useTextContent() {
     isEditDialogOpen,
     selectedTextContent,
     formData,
+    qualityIssues,
+    isAdmin,
     searchQuery,
     language,
     section,
@@ -195,6 +221,7 @@ export function useTextContent() {
     handleDeleteTextContent,
     openEditDialog,
     resetForm,
+    clearQualityIssues: () => setQualityIssues([]),
 
     // Refetch
     refetch,

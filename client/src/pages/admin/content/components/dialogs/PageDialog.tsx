@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import type { PageFormData } from '../../hooks/usePages';
+import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
 
 interface PageDialogProps {
   open: boolean;
@@ -34,6 +35,8 @@ interface PageDialogProps {
   onSubmit: (e: React.FormEvent) => void;
   isPending: boolean;
   mainPages?: Array<{ id: number; name: string }>;
+  qualityIssues: string[];
+  isAdmin: boolean;
 }
 
 /**
@@ -48,6 +51,8 @@ export function PageDialog({
   onSubmit,
   isPending,
   mainPages = [],
+  qualityIssues,
+  isAdmin,
 }: PageDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -283,6 +288,16 @@ export function PageDialog({
                 </p>
               </div>
             )}
+
+            <PublicationQualityFeedback
+              status={formData.status}
+              issues={qualityIssues}
+              isAdmin={isAdmin}
+              overrideReason={formData.qualityOverrideReason}
+              onOverrideReasonChange={(qualityOverrideReason) =>
+                onFormDataChange({ ...formData, qualityOverrideReason })
+              }
+            />
 
             {/* Active */}
             <div className="flex items-center gap-2">

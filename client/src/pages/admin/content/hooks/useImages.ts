@@ -6,8 +6,10 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { useAuth } from '@/_core/hooks/useAuth';
 import type { Image, ImageFormData } from '../types/content.types';
 import { initialImageFormData } from '../types/content.types';
+import { getPublicationQualityIssues } from '../utils/publicationQuality';
 
 /**
  * useImages - Hook لإدارة الصور
@@ -18,6 +20,9 @@ export function useImages() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<Image | null>(null);
   const [formData, setFormData] = useState<ImageFormData>(initialImageFormData);
+  const [qualityIssues, setQualityIssues] = useState<string[]>([]);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,11 +50,18 @@ export function useImages() {
   const createMutation = trpc.content.images.create.useMutation({
     onSuccess: () => {
       toast.success('تم إضافة الصورة بنجاح');
+      setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialImageFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر نشر الصورة. راجع أخطاء الجودة الظاهرة في النموذج.');
+        return;
+      }
       toast.error(`فشل إضافة الصورة: ${error.message}`);
     },
   });
@@ -57,12 +69,19 @@ export function useImages() {
   const updateMutation = trpc.content.images.update.useMutation({
     onSuccess: () => {
       toast.success('تم تحديث الصورة بنجاح');
+      setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedImage(null);
       setFormData(initialImageFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر نشر الصورة. راجع أخطاء الجودة الظاهرة في النموذج.');
+        return;
+      }
       toast.error(`فشل تحديث الصورة: ${error.message}`);
     },
   });
@@ -83,7 +102,7 @@ export function useImages() {
     createMutation.mutate({
       key: formData.key,
       url: formData.url,
-      altAr: formData.altAr || undefined,
+      altAr: formData.altAr || formData.alt || undefined,
       altEn: formData.altEn || undefined,
       section: formData.section || undefined,
       sectionId: formData.sectionId,
@@ -95,6 +114,7 @@ export function useImages() {
       status: formData.status,
       isActive: formData.isActive,
       publishedAt: formData.publishedAt || undefined,
+      qualityOverrideReason: formData.qualityOverrideReason.trim() || undefined,
     });
   };
 
@@ -108,7 +128,7 @@ export function useImages() {
       id: selectedImage.id,
       key: formData.key,
       url: formData.url,
-      altAr: formData.altAr || undefined,
+      altAr: formData.altAr || formData.alt || undefined,
       altEn: formData.altEn || undefined,
       section: formData.section || undefined,
       sectionId: formData.sectionId,
@@ -120,6 +140,7 @@ export function useImages() {
       status: formData.status,
       isActive: formData.isActive,
       publishedAt: formData.publishedAt || undefined,
+      qualityOverrideReason: formData.qualityOverrideReason.trim() || undefined,
     });
   };
 
@@ -132,6 +153,7 @@ export function useImages() {
 
   const openEditDialog = (image: Image) => {
     setSelectedImage(image);
+    setQualityIssues([]);
     setFormData({
       key: image.key,
       url: image.url,
@@ -148,6 +170,7 @@ export function useImages() {
       status: image.status,
       isActive: image.isActive,
       publishedAt: image.publishedAt || null,
+      qualityOverrideReason: '',
     });
     setIsEditDialogOpen(true);
   };
@@ -155,6 +178,7 @@ export function useImages() {
   const resetForm = () => {
     setFormData(initialImageFormData);
     setSelectedImage(null);
+    setQualityIssues([]);
   };
 
   return {
@@ -163,6 +187,8 @@ export function useImages() {
     isEditDialogOpen,
     selectedImage,
     formData,
+    qualityIssues,
+    isAdmin,
     searchQuery,
     section,
     sectionId,
@@ -193,6 +219,7 @@ export function useImages() {
     handleDeleteImage,
     openEditDialog,
     resetForm,
+    clearQualityIssues: () => setQualityIssues([]),
 
     // Refetch
     refetch,
