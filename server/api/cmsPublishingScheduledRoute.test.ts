@@ -78,6 +78,14 @@ describe('النشر المؤجل لمحتوى CMS', () => {
     expect(deferredPublicationSource).toContain('await db.transaction');
   });
 
+  it('يعيد فحص الجودة عند الاستحقاق ويلغي الموعد ويسجل المنع بدلاً من نشر محتوى مخالف', () => {
+    expect(deferredPublicationSource).toContain('evaluatePublicationQuality');
+    expect(deferredPublicationSource).toContain('recordBlockedPublication');
+    expect(deferredPublicationSource).toContain("set({ publishedAt: null })");
+    expect(deferredPublicationSource).toContain('publicationBlocked: true');
+    expect(deferredPublicationSource).toContain('blocked: DeferredEntityCounters');
+  });
+
   it('يبقي فحوص الجودة المحلية مغطية الروابط والترجمة والمفاتيح', () => {
     expect(qualitySource).toContain('hasInvalidLink');
     expect(qualitySource).toContain('text-key-duplicate');
