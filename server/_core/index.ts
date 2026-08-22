@@ -33,6 +33,7 @@ import { setupUpdateRoutes } from './routes/updateRoutes';
 import { setupBackupRoutes } from './routes/backupRoutes';
 import { setupConfigRoutes } from './routes/configRoutes';
 import { createLicenseDeliveryRouter } from '../api/licenseDeliveryRoute';
+import { reportUnauthorizedStartup } from './unauthorizedStartupReport';
 
 // Initialize Sentry for error tracking
 initSentry();
@@ -47,6 +48,10 @@ async function startServer() {
   // Initialize the outbound heartbeat only for a locally valid signed license.
   if (_licenseInfo?.isValid) {
     initializeHeartbeat();
+  } else if (_licenseInfo) {
+    void reportUnauthorizedStartup(
+      _licenseInfo.validationMessage || 'فشل التحقق المحلي من الترخيص'
+    );
   }
 
   const app = express();
