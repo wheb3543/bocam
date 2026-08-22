@@ -1054,3 +1054,134 @@
 [2026-08-22T01:18:41.203Z] 2026-08-22T01:18:41.203Z [license] [INFO] License file loaded successfully
 [2026-08-22T01:18:41.203Z] 2026-08-22T01:18:41.203Z [license] [INFO] Using configured License Hardware ID
 [2026-08-22T01:18:41.539Z] 2026-08-22T01:18:41.539Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:18:52.539Z] 1:18:52 AM [vite] (client) hmr update /src/index.css
+[2026-08-22T01:18:52.539Z] 1:18:52 AM [vite] (client) hmr update /src/index.css
+[2026-08-22T01:18:52.539Z] 1:18:52 AM [vite] (client) hmr update /src/index.css
+[2026-08-22T01:18:52.541Z] 1:18:52 AM [vite] (client) hmr update /src/index.css
+[2026-08-22T01:18:52.635Z] 1:18:52 AM [tsx] change in ./server/services/content/publicationQualityGate.ts Restarting...
+[2026-08-22T01:18:53.701Z] 1:18:53 AM [tsx] change in ./server/routers/content/pages.ts Restarting...
+[2026-08-22T01:18:53.803Z] 1:18:53 AM [tsx] change in ./server/routers/content/sections.ts Restarting...
+[2026-08-22T01:18:53.970Z] 1:18:53 AM [tsx] change in ./server/services/content/publicationQualityGate.ts Restarting...
+[2026-08-22T01:18:56.835Z] 2026-08-22T01:18:56.834Z [sdk] [INFO] Initialized with baseURL: https://api.manus.im
+[2026-08-22T01:18:57.081Z] 2026-08-22T01:18:57.081Z [webhook] [WARN] WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests
+[2026-08-22T01:18:58.548Z] Sentry initialized successfully
+[2026-08-22T01:18:58.548Z] 2026-08-22T01:18:58.548Z [license] [INFO] Initializing License System...
+[2026-08-22T01:18:58.548Z] 2026-08-22T01:18:58.548Z [license] [INFO]
+[2026-08-22T01:18:58.549Z] 2026-08-22T01:18:58.549Z [license] [INFO] License Validation Starting...
+[2026-08-22T01:18:58.551Z] 2026-08-22T01:18:58.549Z [license] [INFO]
+[2026-08-22T01:18:58.551Z] 2026-08-22T01:18:58.551Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T01:18:58.552Z] 2026-08-22T01:18:58.552Z [license] [INFO] License file loaded successfully
+[2026-08-22T01:18:58.554Z] 2026-08-22T01:18:58.554Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:18:58.554Z] 2026-08-22T01:18:58.554Z [license] [INFO] License System initialized successfully
+[2026-08-22T01:18:58.555Z] 2026-08-22T01:18:58.554Z [license] [INFO]
+[2026-08-22T01:18:59.698Z] `server.hmr.protocol/host/port/path/clientPort/timeout/server` is deprecated. Use `server.ws.*` instead. Note that this option may be set by a plugin. Set VITE_DEPRECATION_TRACE=1 to see where it is called.
+[2026-08-22T01:18:59.756Z] 2026-08-22T01:18:59.756Z [server] [INFO] Server running on http://localhost:3000/
+[2026-08-22T01:19:01.229Z] 2026-08-22T01:19:01.228Z [appointmentReminders] [INFO] Initializing appointment reminders scheduler (every 30 minutes)...
+[2026-08-22T01:19:01.229Z] 2026-08-22T01:19:01.228Z [appointmentReminders] [INFO] Scheduler initialized. Running every 30 minutes.
+[2026-08-22T01:19:05.056Z] ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust proxy' setting is false (default). This could indicate a misconfiguration which would prevent express-rate-limit from accurately identifying users. See https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ for more information.
+[2026-08-22T01:19:05.056Z] at Object.xForwardedForHeader (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:352:13)
+[2026-08-22T01:19:05.056Z] at wrappedValidations.<computed> [as xForwardedForHeader] (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:675:22)
+[2026-08-22T01:19:05.056Z] at Object.keyGenerator (file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:782:20)
+[2026-08-22T01:19:05.056Z] at file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:864:32
+[2026-08-22T01:19:05.056Z] at async file:///home/ubuntu/sgh-crm-portal/node_modules/.pnpm/express-rate-limit@8.5.2_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs:825:5 {
+[2026-08-22T01:19:05.057Z] code: 'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR',
+[2026-08-22T01:19:05.057Z] help: 'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/'
+[2026-08-22T01:19:05.057Z] }
+[2026-08-22T01:19:05.057Z] 2026-08-22T01:19:05.057Z [redis] [INFO] Redis cache not available. Using in-memory cache fallback.
+[2026-08-22T01:19:05.086Z] 2026-08-22T01:19:05.086Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:05.086Z] 2026-08-22T01:19:05.086Z [license] [INFO] License Validation Starting...
+[2026-08-22T01:19:05.086Z] 2026-08-22T01:19:05.086Z [license] [INFO]
+[2026-08-22T01:19:05.087Z] 2026-08-22T01:19:05.086Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T01:19:05.087Z] 2026-08-22T01:19:05.087Z [license] [INFO] License file loaded successfully
+[2026-08-22T01:19:05.087Z] 2026-08-22T01:19:05.087Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:05.270Z] 2026-08-22T01:19:05.270Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:05.270Z] 2026-08-22T01:19:05.270Z [license] [INFO] License Validation Starting...
+[2026-08-22T01:19:05.270Z] 2026-08-22T01:19:05.270Z [license] [INFO]
+[2026-08-22T01:19:05.270Z] 2026-08-22T01:19:05.270Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T01:19:05.270Z] 2026-08-22T01:19:05.270Z [license] [INFO] License file loaded successfully
+[2026-08-22T01:19:05.271Z] 2026-08-22T01:19:05.270Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:05.739Z] 2026-08-22T01:19:05.739Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:05.740Z] 2026-08-22T01:19:05.740Z [license] [INFO] License Validation Starting...
+[2026-08-22T01:19:05.740Z] 2026-08-22T01:19:05.740Z [license] [INFO]
+[2026-08-22T01:19:05.740Z] 2026-08-22T01:19:05.740Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T01:19:05.740Z] 2026-08-22T01:19:05.740Z [license] [INFO] License file loaded successfully
+[2026-08-22T01:19:05.740Z] 2026-08-22T01:19:05.740Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:05.993Z] 2026-08-22T01:19:05.993Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:05.993Z] 2026-08-22T01:19:05.993Z [license] [INFO] License Validation Starting...
+[2026-08-22T01:19:05.993Z] 2026-08-22T01:19:05.993Z [license] [INFO]
+[2026-08-22T01:19:05.993Z] 2026-08-22T01:19:05.993Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T01:19:05.993Z] 2026-08-22T01:19:05.993Z [license] [INFO] License file loaded successfully
+[2026-08-22T01:19:05.994Z] 2026-08-22T01:19:05.994Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:06.126Z] 2026-08-22T01:19:06.126Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:06.283Z] 2026-08-22T01:19:06.282Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:11.046Z] 2026-08-22T01:19:11.046Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-22T01:19:11.067Z] 2026-08-22T01:19:11.067Z [license] [INFO] License Validation Starting...
+[2026-08-22T01:19:11.067Z] 2026-08-22T01:19:11.067Z [license] [INFO]
+[2026-08-22T01:19:11.067Z] 2026-08-22T01:19:11.067Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T01:19:11.067Z] 2026-08-22T01:19:11.067Z [license] [INFO] License file loaded successfully
+[2026-08-22T01:19:11.068Z] 2026-08-22T01:19:11.068Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:11.187Z] 2026-08-22T01:19:11.186Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-22T01:19:11.210Z] 2026-08-22T01:19:11.210Z [license] [INFO] License Validation Starting...
+[2026-08-22T01:19:11.210Z] 2026-08-22T01:19:11.210Z [license] [INFO]
+[2026-08-22T01:19:11.210Z] 2026-08-22T01:19:11.210Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T01:19:11.210Z] 2026-08-22T01:19:11.210Z [license] [INFO] License file loaded successfully
+[2026-08-22T01:19:11.211Z] 2026-08-22T01:19:11.211Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:11.229Z] 2026-08-22T01:19:11.228Z [appointmentReminders] [INFO] Running appointment reminder jobs...
+[2026-08-22T01:19:11.255Z] 2026-08-22T01:19:11.255Z [appointmentReminders] [INFO] No 24h reminders needed
+[2026-08-22T01:19:11.576Z] 2026-08-22T01:19:11.576Z [appointmentReminders] [INFO] No 1h reminders needed
+[2026-08-22T01:19:11.576Z] 2026-08-22T01:19:11.576Z [appointmentReminders] [INFO] Done. 24h: 0 sent, 0 failed. 1h: 0 sent, 0 failed.
+[2026-08-22T01:19:11.640Z] 2026-08-22T01:19:11.640Z [database:users] [WARN] User not found, cannot create via upsertUser: wheb3543@gmail.com
+[2026-08-22T01:19:12.286Z] 2026-08-22T01:19:12.282Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:15.959Z] 2026-08-22T01:19:15.959Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:15.960Z] 2026-08-22T01:19:15.960Z [license] [INFO] License Validation Starting...
+[2026-08-22T01:19:15.960Z] 2026-08-22T01:19:15.960Z [license] [INFO]
+[2026-08-22T01:19:15.960Z] 2026-08-22T01:19:15.960Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T01:19:15.960Z] 2026-08-22T01:19:15.960Z [license] [INFO] License file loaded successfully
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] Hardware ID matched
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] Validating expiry date...
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] - Current time: 2026-08-22T01:19:15.000Z
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] License is valid (not expired)
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] License valid for: 364 days
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] Validating features...
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] - Enabled features: reports
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO]
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T01:19:15.961Z] 2026-08-22T01:19:15.961Z [license] [INFO]
+[2026-08-22T01:19:21.865Z] 2026-08-22T01:19:21.865Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:21.865Z] 2026-08-22T01:19:21.865Z [license] [INFO] License Validation Starting...
+[2026-08-22T01:19:21.865Z] 2026-08-22T01:19:21.865Z [license] [INFO]
+[2026-08-22T01:19:21.865Z] 2026-08-22T01:19:21.865Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T01:19:21.865Z] 2026-08-22T01:19:21.865Z [license] [INFO] License file loaded successfully
+[2026-08-22T01:19:21.866Z] 2026-08-22T01:19:21.866Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:21.866Z] 2026-08-22T01:19:21.866Z [license] [INFO] Validating Hardware ID...
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] - License Hardware ID: 42004E494300
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] - Current Hardware ID: 42004E494300
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] Hardware ID matched
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] Validating expiry date...
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] - License expiry: 2027-08-21T23:56:09.000Z
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] - Current time: 2026-08-22T01:19:21.000Z
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] License is valid (not expired)
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] License valid for: 364 days
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] Validating features...
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] - Enabled features: reports
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] Features validated (1 features enabled)
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO]
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] LICENSE VALIDATION SUCCESSFUL
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-08-22T01:19:21.867Z] 2026-08-22T01:19:21.866Z [license] [INFO]
+[2026-08-22T01:19:25.222Z] 2026-08-22T01:19:25.222Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:25.235Z] 2026-08-22T01:19:25.234Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:25.246Z] 2026-08-22T01:19:25.246Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:25.256Z] 2026-08-22T01:19:25.255Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:25.261Z] 2026-08-22T01:19:25.260Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:25.267Z] 2026-08-22T01:19:25.267Z [sdk] [WARN] Missing session cookie
+[2026-08-22T01:19:25.271Z] 2026-08-22T01:19:25.271Z [sdk] [WARN] Missing session cookie

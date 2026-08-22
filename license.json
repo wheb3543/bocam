@@ -1,25 +1,10 @@
 {
-  "key": "eyJwYXlsb2FkIjp7ImhpZCI6IjQyMDA0RTQ5NDMwMCIsImV4cCI6MTgxODM3NDQwMCwiZmVhdCI6WyJjbXMiLCJub3RpZmljYXRpb25zIiwicHVibGljX3BhZ2VzIiwiYWRtaW5fZGFzaGJvYXJkIiwiY29udGVudF9tYW5hZ2VtZW50Iiwic2VvX3Rvb2xzIiwiYXVkaXRfbG9nIiwidmVyc2lvbl9jb250cm9sIiwiaW1wb3J0X2V4cG9ydCIsImNvbG9yX3NjaGVtZSIsImltYWdlX21hbmFnZW1lbnQiLCJ0ZXh0X2NvbnRlbnQiLCJzZWN0aW9uX2J1dHRvbnMiLCJwYWdlcyIsInNlY3Rpb25zIiwiKiJdLCJpYXQiOjE3ODY4Mzg0MDAsInZlciI6IjEuMCJ9LCJzaWduYXR1cmUiOiJSYk9vZFFwMlQ0aHkvTXV2cU16S2lrT0ExZFJYeno3ZkFlR2o4NnMxRitxVFFrRmVwdlNTN0FmYWIyMjJhb1ZuZzFNbG1oOTQ1SkJGejV6U2FsU3RyYUFQNWZVZW1jcU45UkZ3UDZ2UENwQmlnS3FDZHgwUzV5bi85OCtSN29XR0loem15M1BvRjJ6Q3E3NVVHclBkQ1k4V3lFQU1DemY5d2xCYWN6WENSd3ZrK28zSU9qWlZxcXBSdnJ3bGlVWmZGYXdZeGFXQWNOWDZWUENsMC90TFRrZ05TVCs3bmVOQTBVOSt4eWIzUm5VcC94aEQwSng5QVptM1NlNnc2NHRqa0tOZzdSN0dvOTFxRGV2L0N1NDRqWURmd2JFM0kwSDZJajVQRk8xUklWLzNqeEZreTVCOEcreHdDYjFrUVE0c3pJTG5KaHd4TVhBMTNWaHVLVmFnVWc9PSJ9",
+  "key": "eyJwYXlsb2FkIjp7ImhpZCI6IjQyMDA0RTQ5NDMwMCIsImV4cCI6MTgxODg5MjU2OSwiZmVhdCI6WyJyZXBvcnRzIl0sImlhdCI6MTc4NzM1NjU2OSwidmVyIjoiMS4wLjAifSwic2lnbmF0dXJlIjoia3p6dlRLTFBhSVFBK1ozNktQTmVUR3VabTdsUU9lYVVybUxIMGRjZHJXUTI0c0hxNzk0dms0N2JLcEtjWEV5cnJwbmZDU2c3WnFSR2JuNHZNSk1GdDhBUjBBekVSYVQyTE50TlFTSlU0UFFGYW9WWDF1Sk5RYW5sK3RnUm9aK2wwU2xmbTlqUmpkenhYVHYvOStiRmtmd0J5U2NVV0xpcmhnZ0VmUFhyQ1hiRExCMHdDcnZyOFpHVWVTUFlkMVFEZjM3SVE0Nlh3WDFxM1N2ejlQNmc0UWZCKzhkWUFQKzN5MTJpTlB2anBXYkYvVTh2SHFPMCtIbUJIcW1RSTJzUC9SdUEwdGVVdmV3MW0yM21wTXhvRFJZMGk1aEpmRHp1VmZ1by9SNU1TY0FKWk1vMnM0ZkZXMlJoY2U0OUVQdTNTQUI4a1NtVFB5RHJESHJmWEx6YThBPT0ifQ==",
   "hardwareId": "42004E494300",
-  "expiryDate": "2027-08-16T00:00:00.000Z",
+  "expiryDate": "2027-08-21T23:56:09.799Z",
   "features": [
-    "cms",
-    "notifications",
-    "public_pages",
-    "admin_dashboard",
-    "content_management",
-    "seo_tools",
-    "audit_log",
-    "version_control",
-    "import_export",
-    "color_scheme",
-    "image_management",
-    "text_content",
-    "section_buttons",
-    "pages",
-    "sections",
-    "*"
+    "reports"
   ],
-  "issuedAt": "2026-08-16T00:00:00.000Z",
-  "version": "1.0"
+  "issuedAt": "2026-08-21T23:56:09.934Z",
+  "version": "1.0.0"
 }
