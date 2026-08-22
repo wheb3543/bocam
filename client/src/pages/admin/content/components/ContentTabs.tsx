@@ -4,7 +4,16 @@
  */
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Image, Palette, Search, Layout, Layers, MousePointerClick } from 'lucide-react';
+import {
+  FileText,
+  Image,
+  Palette,
+  Search,
+  Layout,
+  Layers,
+  MousePointerClick,
+  Trash2,
+} from 'lucide-react';
 
 interface ContentTabsProps {
   activeTab: string;
@@ -18,7 +27,7 @@ interface ContentTabsProps {
 export function ContentTabs({ activeTab, onTabChange, children }: ContentTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-7">
+      <TabsList className="grid w-full grid-cols-4 gap-1 md:grid-cols-8">
         <TabsTrigger value="text" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
           <span className="hidden sm:inline">النصوص</span>
@@ -46,6 +55,10 @@ export function ContentTabs({ activeTab, onTabChange, children }: ContentTabsPro
         <TabsTrigger value="seo" className="flex items-center gap-2">
           <Search className="h-4 w-4" />
           <span className="hidden sm:inline">SEO</span>
+        </TabsTrigger>
+        <TabsTrigger value="trash" className="flex items-center gap-2">
+          <Trash2 className="h-4 w-4" />
+          <span className="hidden sm:inline">المحذوفات</span>
         </TabsTrigger>
       </TabsList>
 

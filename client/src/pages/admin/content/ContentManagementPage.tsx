@@ -9,6 +9,7 @@ import { PagesList } from './components/PagesList';
 import { SectionsList } from './components/SectionsList';
 import { SectionButtonsList } from './components/SectionButtonsList';
 import { ContentImportExport } from './components/ContentImportExport';
+import { ContentTrashList } from './components/ContentTrashList';
 import { BulkImageUpload } from './components/BulkImageUpload';
 import { DeferredPublicationAlerts } from './components/DeferredPublicationAlerts';
 import { ContentPreviewPanel } from './components/preview/ContentPreviewPanel';
@@ -482,6 +483,7 @@ export default function ContentManagementPage() {
               updatePending={sectionButtons.updateMutation.isPending}
             />
           )}
+          {contentManagement.activeTab === 'trash' && <ContentTrashList />}
           {contentManagement.activeTab === 'colors' && (
             <ColorSchemeList
               colorSchemes={colorScheme.colorSchemes || []}
