@@ -15,6 +15,7 @@ import { appRouter } from '../routers/routers';
 import { createContext } from './context';
 import { serveStatic, setupVite } from './vite';
 import { initializeLicense } from './license';
+import { initializeHeartbeat } from './heartbeat';
 import { createLogger } from './logger';
 import { initSentry } from './sentry';
 import { setupHealthCheckRoutes } from './health';
@@ -43,15 +44,10 @@ async function startServer() {
   // Allow server to start in activation mode if license is missing
   const _licenseInfo = initializeLicense(true);
 
-  // TEMPORARY: Disable heartbeat, update checker, and backup cron jobs for deployment
-  // Initialize heartbeat system (Anti-Clock-Tampering) - only if license is valid
-  // if (licenseInfo) {
-  //   initializeHeartbeat();
-  //   // Initialize update checker system - only if license is valid
-  //   initializeUpdateChecker();
-  //   // Initialize backup cron jobs - only if license is valid
-  //   startBackupCronJobs();
-  // }
+  // Initialize the outbound heartbeat only for a locally valid signed license.
+  if (_licenseInfo?.isValid) {
+    initializeHeartbeat();
+  }
 
   const app = express();
   const server = createServer(app);

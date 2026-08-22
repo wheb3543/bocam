@@ -17,7 +17,8 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import { getHardwareId, validateLicense } from './license';
+import { getHardwareId, getLicenseFilePath, loadLicenseFile } from './license/helpers';
+import { validateLicense } from './license';
 import { createLogger } from './logger';
 
 /**
@@ -25,6 +26,7 @@ import { createLogger } from './logger';
  */
 interface HeartbeatData {
   hardwareId: string;
+  signedLicenseKey: string;
   licenseVersion: string;
   serverTimestamp: number;
   timezone: string;
@@ -51,8 +53,12 @@ const logger = createLogger('heartbeat');
 /**
  * الحصول على رابط السيرفر المركزي من البيئة
  */
-function getCentralActivationUrl(): string {
-  return process.env.CENTRAL_ACTIVATION_URL || 'https://api.ideahub.com/heartbeat';
+function getCentralActivationUrl(): string | null {
+  const baseUrl = process.env.IDEA_HUB_URL?.trim();
+  if (!baseUrl) {
+    return null;
+  }
+  return new URL('/api/heartbeat/bocam', baseUrl).toString();
 }
 
 /**
@@ -62,6 +68,7 @@ function collectHeartbeatData(): HeartbeatData {
   try {
     const hardwareId = getHardwareId();
     const licenseInfo = validateLicense();
+    const licenseFile = loadLicenseFile(getLicenseFilePath());
     const currentTime = Math.floor(Date.now() / 1000);
 
     // إنشاء توقيع رقمي للبيانات
@@ -75,6 +82,7 @@ function collectHeartbeatData(): HeartbeatData {
 
     return {
       hardwareId,
+      signedLicenseKey: licenseFile.key,
       licenseVersion: licenseInfo.version,
       serverTimestamp: currentTime,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -94,6 +102,10 @@ async function sendHeartbeat(): Promise<boolean> {
   try {
     const heartbeatData = collectHeartbeatData();
     const url = getCentralActivationUrl();
+    if (!url) {
+      logger.warn('IDEA_HUB_URL is not configured; heartbeat was not sent');
+      return false;
+    }
 
     logger.heartbeat('Sending heartbeat to central server...');
     logger.info(`URL: ${url}`);
@@ -111,7 +123,13 @@ async function sendHeartbeat(): Promise<boolean> {
         'Content-Type': 'application/json',
         'User-Agent': 'BOCAM-CRM-Heartbeat/1.0',
       },
-      body: JSON.stringify(heartbeatData),
+      body: JSON.stringify({
+        hardwareId: heartbeatData.hardwareId,
+        signedLicenseKey: heartbeatData.signedLicenseKey,
+        status: 'online',
+        version: heartbeatData.licenseVersion,
+        timestamp: Date.now(),
+      }),
       signal: controller.signal,
     });
 
@@ -336,14 +354,14 @@ export function checkClockTampering(): void {
 
 /**
  * تشغيل جدولة النبضات (Cron Job)
- * يعمل كل 24 ساعة
+ * يعمل كل دقيقة حتى تتمكن لوحة التحكم من عرض حالة الاتصال الحية.
  */
 function startHeartbeatScheduler(): void {
   try {
-    const heartbeatInterval = 24 * 60 * 60 * 1000; // 24 ساعة بالمللي ثانية
+    const heartbeatInterval = 60 * 1000;
 
     logger.heartbeat('Starting heartbeat scheduler...');
-    logger.info(`Interval: ${heartbeatInterval / (60 * 60 * 1000)} hours`);
+    logger.info(`Interval: ${heartbeatInterval / 1000} seconds`);
     logger.info(`Central Server: ${getCentralActivationUrl()}`);
 
     // إرسال نبضة فورية عند البدء
