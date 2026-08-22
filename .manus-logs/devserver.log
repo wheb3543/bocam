@@ -998,3 +998,20 @@
 [2026-08-21T23:52:33.879Z] 2026-08-21T23:52:33.877Z [license] [INFO] License file loaded successfully
 [2026-08-21T23:52:33.879Z] 2026-08-21T23:52:33.878Z [license] [INFO] Using configured License Hardware ID
 [2026-08-21T23:52:34.117Z] 2026-08-21T23:52:34.116Z [sdk] [WARN] Missing session cookie
+[2026-08-22T00:54:24.956Z] 12:54:24 AM [tsx] change in ./server/_core/index.ts Restarting...
+[2026-08-22T00:54:27.962Z] 2026-08-22T00:54:27.962Z [sdk] [INFO] Initialized with baseURL: https://api.manus.im
+[2026-08-22T00:54:28.290Z] 2026-08-22T00:54:28.290Z [webhook] [WARN] WHATSAPP_WEBHOOK_VERIFY_TOKEN not set — webhook verification will reject all requests
+[2026-08-22T00:54:29.406Z] Sentry initialized successfully
+[2026-08-22T00:54:29.408Z] 2026-08-22T00:54:29.408Z [license] [INFO] Initializing License System...
+[2026-08-22T00:54:29.409Z] 2026-08-22T00:54:29.408Z [license] [INFO]
+[2026-08-22T00:54:29.411Z] 2026-08-22T00:54:29.410Z [license] [INFO] License Validation Starting...
+[2026-08-22T00:54:29.412Z] 2026-08-22T00:54:29.411Z [license] [INFO]
+[2026-08-22T00:54:29.413Z] 2026-08-22T00:54:29.412Z [license] [INFO] License file path: /home/ubuntu/sgh-crm-portal/license.json
+[2026-08-22T00:54:29.415Z] 2026-08-22T00:54:29.415Z [license] [INFO] License file loaded successfully
+[2026-08-22T00:54:29.417Z] 2026-08-22T00:54:29.417Z [license] [INFO] Using configured License Hardware ID
+[2026-08-22T00:54:29.418Z] 2026-08-22T00:54:29.417Z [license] [INFO] License System initialized successfully
+[2026-08-22T00:54:29.418Z] 2026-08-22T00:54:29.418Z [license] [INFO]
+[2026-08-22T00:54:30.536Z] `server.hmr.protocol/host/port/path/clientPort/timeout/server` is deprecated. Use `server.ws.*` instead. Note that this option may be set by a plugin. Set VITE_DEPRECATION_TRACE=1 to see where it is called.
+[2026-08-22T00:54:30.646Z] 2026-08-22T00:54:30.646Z [server] [INFO] Server running on http://localhost:3000/
+[2026-08-22T00:54:32.577Z] 2026-08-22T00:54:32.572Z [appointmentReminders] [INFO] Initializing appointment reminders scheduler (every 30 minutes)...
+[2026-08-22T00:54:32.577Z] 2026-08-22T00:54:32.577Z [appointmentReminders] [INFO] Scheduler initialized. Running every 30 minutes.
