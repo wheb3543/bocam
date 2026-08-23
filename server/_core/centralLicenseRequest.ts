@@ -176,6 +176,71 @@ export async function requestCentralLicense(input: { instanceName: string; serve
   };
 }
 
+function getSupportTicketServerUrl(): string {
+  const value = process.env.BOCAM_PUBLIC_URL?.trim() || process.env.SERVER_URL?.trim();
+  if (!value) {
+    throw new Error('لم يُضبط BOCAM_PUBLIC_URL أو SERVER_URL لهذه النسخة');
+  }
+  try {
+    return new URL(value).toString().replace(/\/$/, '');
+  } catch {
+    throw new Error('عنوان النسخة الموزعة غير صالح لإرسال طلب الدعم');
+  }
+}
+
+/** يرسل بلاغ دعم من واجهة bocam دون كشف بيانات الترخيص للمتصفح. */
+export async function requestCentralSupportTicket(input: {
+  subject: string;
+  content: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+}) {
+  const { configured, baseUrl } = getCentralLicenseConfiguration();
+  if (!configured || !baseUrl) {
+    throw new Error('لم يُضبط اتصال Idea Hub لهذه النسخة');
+  }
+
+  const validation = validateLicense();
+  if (!validation.isValid) {
+    throw new Error(validation.validationMessage || 'لا يمكن إرسال طلب دعم بترخيص غير صالح');
+  }
+
+  let signedLicenseKey: string;
+  try {
+    const license = JSON.parse(fs.readFileSync(getLicenseFilePath(), 'utf8')) as CentralLicenseFile;
+    signedLicenseKey = license.key;
+  } catch {
+    throw new Error('تعذر قراءة ملف الترخيص المحلي لإرسال طلب الدعم');
+  }
+  if (!signedLicenseKey) {
+    throw new Error('ملف الترخيص المحلي لا يحتوي مفتاحاً موقعاً');
+  }
+
+  const response = await fetch(`${baseUrl}/api/support/tickets/intake`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'BOCAM-Support-Ticket/1.0' },
+    body: JSON.stringify({
+      hardwareId: getHardwareId(),
+      serverUrl: getSupportTicketServerUrl(),
+      licenseKeyFingerprint: crypto.createHash('sha256').update(signedLicenseKey).digest('hex'),
+      subject: input.subject.trim(),
+      content: input.content.trim(),
+      priority: input.priority,
+    }),
+    signal: requestTimeoutSignal(),
+  });
+  const body = (await response.json().catch(() => null)) as {
+    success?: boolean;
+    error?: string;
+    ticketId?: number;
+    ticketNumber?: string;
+  } | null;
+  if (!response.ok || !body?.success || !body.ticketId || !body.ticketNumber) {
+    throw new Error(body?.error || 'تعذر إرسال تذكرة الدعم إلى إيديا هب');
+  }
+  logger.info(`Central support ticket created: ${body.ticketNumber}`);
+  return { ticketId: body.ticketId, ticketNumber: body.ticketNumber };
+}
+
 export function installCentralLicense(license: CentralLicenseFile) {
   if (
     !license?.key ||

@@ -24,6 +24,7 @@ import {
   getPendingCentralLicenseRequest,
   requestCentralFeatureActivation,
   requestCentralLicense,
+  requestCentralSupportTicket,
 } from '../_core/centralLicenseRequest';
 import fs from 'fs';
 import path from 'path';
@@ -258,6 +259,25 @@ export const licenseRouter = router({
         return {
           success: false,
           error: error instanceof Error ? error.message : 'تعذر إرسال طلب تفعيل الميزة',
+        };
+      }
+    }),
+
+  requestCentralSupportTicket: protectedProcedure
+    .input(
+      z.object({
+        subject: z.string().trim().min(4).max(255),
+        content: z.string().trim().min(1).max(5000),
+        priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
+      })
+    )
+    .mutation(async ({ input }) => {
+      try {
+        return { success: true, ...(await requestCentralSupportTicket(input)) };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'تعذر إرسال طلب الدعم الفني',
         };
       }
     }),

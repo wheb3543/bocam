@@ -18,6 +18,7 @@ import GlobalSearch from '@/components/GlobalSearch';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { APP_LOGO, APP_TITLE } from '@/const';
+import { SupportRequestDialog } from '@/components/SupportRequestDialog';
 
 interface TopNavbarProps {
   pageTitle?: string;
@@ -67,6 +68,8 @@ export default function TopNavbar({
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Global Search */}
           <GlobalSearch />
+
+          <SupportRequestDialog />
 
           {/* Notification Center */}
           <NotificationCenter />
