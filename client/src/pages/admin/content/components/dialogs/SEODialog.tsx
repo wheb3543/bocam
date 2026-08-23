@@ -26,6 +26,8 @@ import { Switch } from '@/components/ui/switch';
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import type { SEOSettingsFormData } from '../../types/content.types';
 import { languageOptions } from '../../types/content.types';
+import { ApprovalSubmissionPanel } from '../ApprovalSubmissionPanel';
+import { PublicationQualityFeedback } from '../PublicationQualityFeedback';
 
 interface SEODialogProps {
   open: boolean;
@@ -37,6 +39,10 @@ interface SEODialogProps {
   isPending: boolean;
   pages?: Array<{ id: number; name: string; slug: string; titleAr: string; titleEn: string }>;
   onSaveVersion?: () => void;
+  qualityIssues?: string[];
+  isAdmin?: boolean;
+  approvalEntityId?: number | null;
+  onApprovalSubmitted?: () => void;
 }
 
 /**
@@ -52,6 +58,10 @@ export function SEODialog({
   isPending,
   pages = [],
   onSaveVersion,
+  qualityIssues = [],
+  isAdmin = false,
+  approvalEntityId,
+  onApprovalSubmitted,
 }: SEODialogProps) {
   // SEO Validation Functions
   const getTitleStatus = () => {
@@ -359,6 +369,83 @@ export function SEODialog({
               />
               <Label htmlFor="isActive">نشط</Label>
             </div>
+            <div className="grid gap-2">
+              <Label htmlFor="seo-status">حالة النشر</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  onFormDataChange({
+                    ...formData,
+                    status: value as SEOSettingsFormData['status'],
+                  })
+                }
+              >
+                <SelectTrigger id="seo-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">مسودة</SelectItem>
+                  <SelectItem value="published">منشور</SelectItem>
+                  <SelectItem value="archived">مؤرشف</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="seo-published-at">موعد النشر (اختياري)</Label>
+              <Input
+                id="seo-published-at"
+                type="datetime-local"
+                value={
+                  formData.publishedAt
+                    ? new Date(formData.publishedAt).toISOString().slice(0, 16)
+                    : ''
+                }
+                onChange={(event) =>
+                  onFormDataChange({
+                    ...formData,
+                    publishedAt: event.target.value ? new Date(event.target.value) : null,
+                  })
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                اترك الحالة «مسودة» وحدد موعداً مستقبلياً لاستخدام النشر المؤجل المحمي بالجودة.
+              </p>
+            </div>
+            <PublicationQualityFeedback
+              status={formData.status}
+              issues={qualityIssues}
+              isAdmin={isAdmin}
+              overrideReason={formData.qualityOverrideReason}
+              onOverrideReasonChange={(value) =>
+                onFormDataChange({ ...formData, qualityOverrideReason: value })
+              }
+            />
+            {mode === 'edit' && (
+              <ApprovalSubmissionPanel
+                entityType="seo"
+                entityId={approvalEntityId}
+                changes={{
+                  pageId: formData.pageId ?? null,
+                  pageKey: formData.pageKey.trim() || null,
+                  slug: formData.slug.trim() || null,
+                  language: formData.language,
+                  title: formData.title.trim() || null,
+                  description: formData.description.trim() || null,
+                  keywords: formData.keywords.trim() || null,
+                  ogTitle: formData.ogTitle.trim() || null,
+                  ogDescription: formData.ogDescription.trim() || null,
+                  ogImage: formData.ogImage.trim() || null,
+                  canonicalUrl: formData.canonicalUrl.trim() || null,
+                  robots: formData.robots.trim() || null,
+                  structuredData: formData.structuredData.trim() || null,
+                  isActive: formData.isActive,
+                  status: formData.status,
+                  publishedAt: formData.publishedAt,
+                  qualityOverrideReason: formData.qualityOverrideReason,
+                }}
+                onSubmitted={onApprovalSubmitted}
+              />
+            )}
           </div>
           <DialogFooter>
             <div className="flex gap-2">

@@ -8,11 +8,16 @@ import {
   pages,
   sectionButtons,
   sections,
+  seoSettings,
   textContent,
 } from '../../../drizzle/schema';
 import { auditLogService } from '../../services/content/auditLogService';
 import { contentVersionsService } from '../../services/content/contentVersionsService';
-import { invalidateImagesCache, invalidateTextContentCache } from '../public/content';
+import {
+  invalidateImagesCache,
+  invalidateSEOCache,
+  invalidateTextContentCache,
+} from '../public/content';
 import { invalidateAdminTextContentCache } from './textContent';
 import { invalidateAdminPagesCache } from './pages';
 import { invalidateAdminSectionsCache } from './sections';
@@ -21,7 +26,14 @@ import {
   getCmsTrashRetentionPolicy,
 } from '../../services/content/trashRetentionService';
 
-const trashEntityTypeSchema = z.enum(['textContent', 'image', 'page', 'section', 'sectionButton']);
+const trashEntityTypeSchema = z.enum([
+  'textContent',
+  'image',
+  'seo',
+  'page',
+  'section',
+  'sectionButton',
+]);
 type TrashEntityType = z.infer<typeof trashEntityTypeSchema>;
 
 export interface TrashItem {
@@ -56,6 +68,19 @@ export function toTrashItem(
       id: record.id as number,
       title: record.key as string,
       description: String(record.altAr || record.altEn || record.url || ''),
+      status: record.status as TrashItem['status'],
+      deletedAt,
+    };
+  }
+  if (entityType === 'seo') {
+    return {
+      entityType,
+      id: record.id as number,
+      title: String(record.pageKey || record.slug || record.title || 'إعداد SEO بلا عنوان'),
+      description: `${record.language ?? 'ar'} · ${record.title ?? record.description ?? ''}`.slice(
+        0,
+        140
+      ),
       status: record.status as TrashItem['status'],
       deletedAt,
     };
@@ -122,6 +147,16 @@ function toPreviewFields(entityType: TrashEntityType, record: Record<string, unk
       build('الصيغة', record.format),
     ];
   }
+  if (entityType === 'seo') {
+    return [
+      build('مفتاح الصفحة', record.pageKey),
+      build('الرابط', record.slug),
+      build('اللغة', record.language),
+      build('العنوان', record.title),
+      build('الرابط الأساسي', record.canonicalUrl),
+      build('الحالة السابقة', record.status),
+    ];
+  }
   if (entityType === 'page') {
     return [
       build('الاسم', record.name),
@@ -165,6 +200,15 @@ async function getDeletedRecord(db: any, entityType: TrashEntityType, id: number
         .select()
         .from(images)
         .where(and(eq(images.id, id), isNotNull(images.deletedAt)))
+        .limit(1)
+    )[0];
+  }
+  if (entityType === 'seo') {
+    return (
+      await db
+        .select()
+        .from(seoSettings)
+        .where(and(eq(seoSettings.id, id), isNotNull(seoSettings.deletedAt)))
         .limit(1)
     )[0];
   }
@@ -214,6 +258,12 @@ async function restoreDeletedEntity(
       auditEntityType: 'image' as const,
       versionReason: 'نسخة أمان قبل الاستعادة من سلة المحذوفات',
     },
+    seo: {
+      table: seoSettings,
+      versionEntityType: 'seo' as const,
+      auditEntityType: 'seo' as const,
+      versionReason: 'نسخة أمان قبل الاستعادة من سلة المحذوفات',
+    },
     page: {
       table: pages,
       versionEntityType: 'page' as const,
@@ -233,6 +283,10 @@ async function restoreDeletedEntity(
       versionReason: 'نسخة أمان قبل الاستعادة من سلة المحذوفات',
     },
   }[entityType];
+
+  if (!restoreConfig) {
+    throw new Error('نوع عنصر سلة المحذوفات غير مدعوم.');
+  }
 
   const [current] = await tx
     .select()
@@ -277,6 +331,9 @@ async function invalidateRestoredEntityCaches(entityTypes: Set<TrashEntityType>)
   }
   if (entityTypes.has('image')) {
     invalidateImagesCache();
+  }
+  if (entityTypes.has('seo')) {
+    await invalidateSEOCache();
   }
   if (entityTypes.has('page')) {
     await invalidateAdminPagesCache();
@@ -331,7 +388,7 @@ export const trashRouter = router({
       const db = await ensureDatabaseAvailable();
       const selectedTypes: TrashEntityType[] = input.entityType
         ? [input.entityType]
-        : ['textContent', 'image', 'page', 'section', 'sectionButton'];
+        : ['textContent', 'image', 'seo', 'page', 'section', 'sectionButton'];
       const requestedLimit = input.limit;
 
       const records = await Promise.all(
@@ -351,6 +408,15 @@ export const trashRouter = router({
               .from(images)
               .where(isNotNull(images.deletedAt))
               .orderBy(desc(images.deletedAt))
+              .limit(requestedLimit);
+            return rows.map((row) => toTrashItem(entityType, row));
+          }
+          if (entityType === 'seo') {
+            const rows = await db
+              .select()
+              .from(seoSettings)
+              .where(isNotNull(seoSettings.deletedAt))
+              .orderBy(desc(seoSettings.deletedAt))
               .limit(requestedLimit);
             return rows.map((row) => toTrashItem(entityType, row));
           }
@@ -403,7 +469,12 @@ export const trashRouter = router({
       return {
         item: toTrashItem(input.entityType, rawRecord),
         fields: toPreviewFields(input.entityType, rawRecord),
-        body: input.entityType === 'textContent' ? String(rawRecord.content ?? '') : null,
+        body:
+          input.entityType === 'textContent'
+            ? String(rawRecord.content ?? '')
+            : input.entityType === 'seo'
+              ? String(rawRecord.description ?? '')
+              : null,
         imageUrl: input.entityType === 'image' ? String(rawRecord.url ?? '') : null,
         settings: input.entityType === 'section' ? String(rawRecord.settings ?? '') : null,
       };

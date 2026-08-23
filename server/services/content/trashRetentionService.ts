@@ -8,11 +8,16 @@ import {
   pages,
   sectionButtons,
   sections,
+  seoSettings,
   textContent,
 } from '../../../drizzle/schema';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { createLogger } from '../../_core/logger';
-import { invalidateImagesCache, invalidateTextContentCache } from '../../routers/public/content';
+import {
+  invalidateImagesCache,
+  invalidateSEOCache,
+  invalidateTextContentCache,
+} from '../../routers/public/content';
 import { invalidateAdminPagesCache } from '../../routers/content/pages';
 import { invalidateAdminSectionsCache } from '../../routers/content/sections';
 import { invalidateAdminTextContentCache } from '../../routers/content/textContent';
@@ -21,7 +26,8 @@ const logger = createLogger('cmsTrashRetention');
 export const CMS_TRASH_RETENTION_POLICY_KEY = 'global';
 export const DEFAULT_CMS_TRASH_RETENTION_DAYS = 30;
 
-export type CmsTrashEntityType = 'textContent' | 'image' | 'page' | 'section' | 'sectionButton';
+export type CmsTrashEntityType =
+  'textContent' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
 type PurgeCounters = Record<CmsTrashEntityType, number>;
 
 export type CmsTrashPurgeResult = {
@@ -36,7 +42,7 @@ export type CmsTrashPurgeResult = {
 };
 
 function emptyPurgeCounters(): PurgeCounters {
-  return { textContent: 0, image: 0, page: 0, section: 0, sectionButton: 0 };
+  return { textContent: 0, image: 0, seo: 0, page: 0, section: 0, sectionButton: 0 };
 }
 
 export async function getCmsTrashRetentionPolicy(db: any) {
@@ -72,6 +78,9 @@ async function invalidatePurgedEntityCaches(entityTypes: Set<CmsTrashEntityType>
   if (entityTypes.has('image')) {
     invalidateImagesCache();
   }
+  if (entityTypes.has('seo')) {
+    await invalidateSEOCache();
+  }
   if (entityTypes.has('page')) {
     await invalidateAdminPagesCache();
   }
@@ -85,8 +94,8 @@ async function purgeEntityType(
   options: {
     entityType: CmsTrashEntityType;
     table: any;
-    versionEntityType: 'text' | 'image' | 'page' | 'section' | 'sectionButton';
-    auditEntityType: 'text' | 'image' | 'page' | 'section' | 'sectionButton';
+    versionEntityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
+    auditEntityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
     approvalEntityType: CmsTrashEntityType;
     cutoff: Date;
     taskUid: string;
@@ -257,6 +266,12 @@ export async function purgeExpiredCmsTrash(
         table: images,
         versionEntityType: 'image' as const,
         auditEntityType: 'image' as const,
+      },
+      {
+        entityType: 'seo' as const,
+        table: seoSettings,
+        versionEntityType: 'seo' as const,
+        auditEntityType: 'seo' as const,
       },
       {
         entityType: 'section' as const,

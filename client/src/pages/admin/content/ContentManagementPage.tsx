@@ -564,6 +564,10 @@ export default function ContentManagementPage() {
               onCreateSEOSettings={seo.handleCreateSEOSettings}
               openEditDialog={seo.openEditDialog}
               handleDeleteSEOSettings={seo.handleDeleteSEOSettings}
+              qualityIssues={seo.qualityIssues}
+              clearQualityIssues={seo.clearQualityIssues}
+              isAdmin={seo.isAdmin}
+              onApprovalSubmitted={seo.refetch}
               onVersionHistory={(id) => {
                 setSelectedVersionEntityType('seo');
                 setSelectedVersionEntityId(id);

@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, CalendarClock, RefreshCw } from 'lucide-react';
 import { trpc } from '@/lib/api/trpc';
 
-type DeferredPublicationEntityType = 'text' | 'image' | 'page' | 'section' | 'sectionButton';
+type DeferredPublicationEntityType =
+  'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
 
 const entityLabels: Record<DeferredPublicationEntityType, string> = {
   text: 'محتوى نصي',
   image: 'صورة أو وسيط',
+  seo: 'إعداد SEO',
   page: 'صفحة',
   section: 'قسم',
   sectionButton: 'زر قسم',
@@ -17,6 +19,7 @@ const entityLabels: Record<DeferredPublicationEntityType, string> = {
 const tabByEntityType: Record<DeferredPublicationEntityType, string> = {
   text: 'text',
   image: 'images',
+  seo: 'seo',
   page: 'pages',
   section: 'sections',
   sectionButton: 'sectionButtons',

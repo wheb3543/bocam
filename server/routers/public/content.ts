@@ -275,6 +275,8 @@ export const publicContentRouter = router({
       const conditions = [
         eq(seoSettings.isActive, 'yes'),
         eq(seoSettings.language, input.language),
+        eq(seoSettings.status, 'published'),
+        isNull(seoSettings.deletedAt),
       ];
 
       if (input.pageKey) {

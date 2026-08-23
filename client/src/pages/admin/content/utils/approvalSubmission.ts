@@ -1,5 +1,5 @@
 export type ApprovalEntityType =
-  'textContent' | 'image' | 'media' | 'page' | 'section' | 'sectionButton';
+  'textContent' | 'image' | 'media' | 'page' | 'section' | 'sectionButton' | 'seo';
 
 export function buildApprovalRequestInput(
   entityType: ApprovalEntityType,

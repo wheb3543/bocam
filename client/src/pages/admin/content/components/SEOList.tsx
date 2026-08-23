@@ -32,6 +32,10 @@ interface SEOListProps {
   openEditDialog: (seoSetting: SEOSettings) => void;
   handleDeleteSEOSettings: (id: number) => void;
   onVersionHistory?: (id: number) => void;
+  qualityIssues?: string[];
+  clearQualityIssues?: () => void;
+  isAdmin?: boolean;
+  onApprovalSubmitted?: () => void;
   createMutation: { isPending: boolean };
   updateMutation: { isPending: boolean };
 }
@@ -47,7 +51,6 @@ export function SEOList({
   onFiltersChange,
   isCreateDialogOpen,
   isEditDialogOpen,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   selectedSEOSettings,
   formData,
   onFormDataChange,
@@ -58,9 +61,27 @@ export function SEOList({
   openEditDialog,
   handleDeleteSEOSettings,
   onVersionHistory,
+  qualityIssues = [],
+  clearQualityIssues,
+  isAdmin = false,
+  onApprovalSubmitted,
   createMutation,
   updateMutation,
 }: SEOListProps) {
+  const handleCreateDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      clearQualityIssues?.();
+    }
+    onCreateDialogOpen(open);
+  };
+
+  const handleEditDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      clearQualityIssues?.();
+    }
+    onEditDialogOpen(open);
+  };
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -102,6 +123,7 @@ export function SEOList({
               onDelete={() => handleDeleteSEOSettings(seoSetting.id)}
               onVersionHistory={() => onVersionHistory?.(seoSetting.id)}
               isActive={seoSetting.isActive === 'yes'}
+              status={seoSetting.status}
             />
           ))}
         </div>
@@ -110,25 +132,31 @@ export function SEOList({
       {/* Create Dialog */}
       <SEODialog
         open={isCreateDialogOpen}
-        onOpenChange={onCreateDialogOpen}
+        onOpenChange={handleCreateDialogOpenChange}
         mode="create"
         formData={formData}
         onFormDataChange={onFormDataChange}
         onSubmit={onCreateSEOSettings}
         isPending={createMutation.isPending}
         pages={pages}
+        qualityIssues={qualityIssues}
+        isAdmin={isAdmin}
       />
 
       {/* Edit Dialog */}
       <SEODialog
         open={isEditDialogOpen}
-        onOpenChange={onEditDialogOpen}
+        onOpenChange={handleEditDialogOpenChange}
         mode="edit"
         formData={formData}
         onFormDataChange={onFormDataChange}
         onSubmit={onEditSEOSettings}
         isPending={updateMutation.isPending}
         pages={pages}
+        qualityIssues={qualityIssues}
+        isAdmin={isAdmin}
+        approvalEntityId={selectedSEOSettings?.id}
+        onApprovalSubmitted={onApprovalSubmitted}
       />
     </div>
   );

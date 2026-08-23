@@ -208,6 +208,9 @@ export interface SEOSettings {
   robots?: string | null;
   structuredData?: string | null;
   isActive: 'yes' | 'no';
+  status: 'draft' | 'published' | 'archived';
+  publishedAt: Date | null;
+  deletedAt?: Date | null;
   updatedAt: Date;
   createdAt: Date;
 }
@@ -230,6 +233,9 @@ export interface SEOSettingsFormData {
   robots: string;
   structuredData: string;
   isActive: 'yes' | 'no';
+  status: 'draft' | 'published' | 'archived';
+  publishedAt: Date | null;
+  qualityOverrideReason: string;
 }
 
 /**
@@ -250,6 +256,9 @@ export const initialSEOSettingsFormData: SEOSettingsFormData = {
   robots: '',
   structuredData: '',
   isActive: 'yes',
+  status: 'draft',
+  publishedAt: null,
+  qualityOverrideReason: '',
 };
 
 /**

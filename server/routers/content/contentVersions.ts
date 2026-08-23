@@ -409,6 +409,8 @@ async function restoreVersionData(
       robots: z.string().nullable().optional(),
       structuredData: z.string().nullable().optional(),
       isActive: z.enum(['yes', 'no']),
+      status: z.enum(['draft', 'published', 'archived']).default('draft'),
+      publishedAt: z.coerce.date().nullable().optional(),
     })
     .parse(record);
   const [current] = await tx

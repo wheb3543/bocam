@@ -1959,25 +1959,38 @@ export type InsertColorScheme = typeof colorScheme.$inferInsert;
  * SEO Settings Table - جدول إعدادات SEO
  * يخزّن إعدادات SEO لكل صفحة
  */
-export const seoSettings = mysqlTable('seoSettings', {
-  id: int('id').autoincrement().primaryKey(),
-  pageId: int('pageId'),
-  pageKey: varchar('pageKey', { length: 255 }),
-  slug: varchar('slug', { length: 255 }),
-  language: varchar('language', { length: 10 }).default('ar'),
-  title: varchar('title', { length: 255 }),
-  description: text('description'),
-  keywords: text('keywords'),
-  ogTitle: varchar('ogTitle', { length: 255 }),
-  ogDescription: text('ogDescription'),
-  ogImage: varchar('ogImage', { length: 500 }),
-  canonicalUrl: varchar('canonicalUrl', { length: 500 }),
-  robots: text('robots'),
-  structuredData: text('structuredData'),
-  isActive: mysqlEnum('isActive', ['yes', 'no']).default('yes').notNull(),
-  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
-  createdAt: timestamp('createdAt').defaultNow().notNull(),
-});
+export const seoSettings = mysqlTable(
+  'seoSettings',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    pageId: int('pageId'),
+    pageKey: varchar('pageKey', { length: 255 }),
+    slug: varchar('slug', { length: 255 }),
+    language: varchar('language', { length: 10 }).default('ar'),
+    title: varchar('title', { length: 255 }),
+    description: text('description'),
+    keywords: text('keywords'),
+    ogTitle: varchar('ogTitle', { length: 255 }),
+    ogDescription: text('ogDescription'),
+    ogImage: varchar('ogImage', { length: 500 }),
+    canonicalUrl: varchar('canonicalUrl', { length: 500 }),
+    robots: text('robots'),
+    structuredData: text('structuredData'),
+    isActive: mysqlEnum('isActive', ['yes', 'no']).default('yes').notNull(),
+    status: mysqlEnum('status', ['draft', 'published', 'archived']).default('draft').notNull(),
+    publishedAt: timestamp('publishedAt'),
+    deletedAt: timestamp('deletedAt'),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+  },
+  (table) => ({
+    pageIdIdx: index('seoSettings_pageId_idx').on(table.pageId),
+    pageKeyIdx: index('seoSettings_pageKey_idx').on(table.pageKey),
+    slugLanguageIdx: index('seoSettings_slugLanguage_idx').on(table.slug, table.language),
+    statusIdx: index('seoSettings_status_idx').on(table.status),
+    deletedAtIdx: index('seoSettings_deletedAt_idx').on(table.deletedAt),
+  })
+);
 
 export type SEOSettings = typeof seoSettings.$inferSelect;
 export type InsertSEOSettings = typeof seoSettings.$inferInsert;

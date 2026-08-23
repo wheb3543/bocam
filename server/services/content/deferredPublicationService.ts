@@ -6,11 +6,16 @@ import {
   pages,
   sectionButtons,
   sections,
+  seoSettings,
   textContent,
 } from '../../../drizzle/schema';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { createLogger } from '../../_core/logger';
-import { invalidateImagesCache, invalidateTextContentCache } from '../../routers/public/content';
+import {
+  invalidateImagesCache,
+  invalidateSEOCache,
+  invalidateTextContentCache,
+} from '../../routers/public/content';
 import { invalidateAdminPagesCache } from '../../routers/content/pages';
 import { invalidateAdminSectionsCache } from '../../routers/content/sections';
 import { invalidateAdminTextContentCache } from '../../routers/content/textContent';
@@ -26,6 +31,7 @@ type DeferredEntityCounters = {
   textContent: number;
   images: number;
   media: number;
+  seo: number;
   pages: number;
   sections: number;
   sectionButtons: number;
@@ -43,6 +49,7 @@ const emptyCounters = (): DeferredEntityCounters => ({
   textContent: 0,
   images: 0,
   media: 0,
+  seo: 0,
   pages: 0,
   sections: 0,
   sectionButtons: 0,
@@ -60,7 +67,7 @@ export async function publishDueCmsContent(
   const db = await ensureDatabaseAvailable();
 
   const result = await db.transaction(async (tx) => {
-    const [dueTextContent, dueImages, dueMedia, duePages, dueSections, dueSectionButtons] =
+    const [dueTextContent, dueImages, dueMedia, dueSeo, duePages, dueSections, dueSectionButtons] =
       await Promise.all([
         tx
           .select()
@@ -83,6 +90,16 @@ export async function publishDueCmsContent(
           .from(media)
           .where(
             and(eq(media.status, 'draft'), lte(media.publishedAt, now), isNull(media.deletedAt))
+          ),
+        tx
+          .select()
+          .from(seoSettings)
+          .where(
+            and(
+              eq(seoSettings.status, 'draft'),
+              lte(seoSettings.publishedAt, now),
+              isNull(seoSettings.deletedAt)
+            )
           ),
         tx
           .select()
@@ -123,7 +140,7 @@ export async function publishDueCmsContent(
     }
 
     async function recordBlockedPublication(options: {
-      entityType: 'text' | 'image' | 'page' | 'section' | 'sectionButton';
+      entityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
       entityId: number;
       scheduledAt: Date | null;
       issues: PublicationQualityIssue[];
@@ -229,6 +246,31 @@ export async function publishDueCmsContent(
       published.media += 1;
     }
 
+    for (const item of dueSeo) {
+      const issues = await qualityIssues('seo', item);
+      if (issues.length) {
+        await tx.update(seoSettings).set({ publishedAt: null }).where(eq(seoSettings.id, item.id));
+        await recordBlockedPublication({
+          entityType: 'seo',
+          entityId: item.id,
+          scheduledAt: item.publishedAt,
+          issues,
+        });
+        blocked.seo += 1;
+        continue;
+      }
+      await tx.update(seoSettings).set({ status: 'published' }).where(eq(seoSettings.id, item.id));
+      await tx.insert(contentAuditLog).values({
+        entityType: 'seo',
+        entityId: item.id,
+        action: 'update',
+        oldValue: JSON.stringify({ status: 'draft', publishedAt: item.publishedAt }),
+        newValue: JSON.stringify({ status: 'published', publishedAt: item.publishedAt }),
+        reason: `نشر SEO مؤجل بواسطة مهمة CMS ${taskUid}`,
+      });
+      published.seo += 1;
+    }
+
     for (const item of duePages) {
       const issues = await qualityIssues('page', item);
       if (issues.length) {
@@ -317,6 +359,7 @@ export async function publishDueCmsContent(
         dueTextContent.length +
         dueImages.length +
         dueMedia.length +
+        dueSeo.length +
         duePages.length +
         dueSections.length +
         dueSectionButtons.length,
@@ -339,6 +382,9 @@ export async function publishDueCmsContent(
   }
   if (result.published.pages > 0 || result.blocked.pages > 0) {
     await invalidateAdminPagesCache();
+  }
+  if (result.published.seo > 0 || result.blocked.seo > 0) {
+    await invalidateSEOCache();
   }
   if (
     result.published.sections > 0 ||

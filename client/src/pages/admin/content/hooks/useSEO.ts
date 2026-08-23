@@ -6,8 +6,32 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { useAuth } from '@/_core/hooks/useAuth';
 import type { SEOSettings, SEOSettingsFormData } from '../types/content.types';
 import { initialSEOSettingsFormData } from '../types/content.types';
+import { getPublicationQualityIssues } from '../utils/publicationQuality';
+
+function toSeoPayload(formData: SEOSettingsFormData) {
+  return {
+    pageKey: formData.pageKey.trim() || null,
+    pageId: formData.pageId ?? null,
+    slug: formData.slug.trim() || null,
+    language: formData.language,
+    title: formData.title.trim() || null,
+    description: formData.description.trim() || null,
+    keywords: formData.keywords.trim() || null,
+    ogTitle: formData.ogTitle.trim() || null,
+    ogDescription: formData.ogDescription.trim() || null,
+    ogImage: formData.ogImage.trim() || null,
+    canonicalUrl: formData.canonicalUrl.trim() || null,
+    robots: formData.robots.trim() || null,
+    structuredData: formData.structuredData.trim() || null,
+    isActive: formData.isActive,
+    status: formData.status,
+    publishedAt: formData.publishedAt,
+    qualityOverrideReason: formData.qualityOverrideReason.trim() || undefined,
+  };
+}
 
 /**
  * useSEO - Hook لإدارة إعدادات SEO
@@ -18,6 +42,9 @@ export function useSEO() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedSEOSettings, setSelectedSEOSettings] = useState<SEOSettings | null>(null);
   const [formData, setFormData] = useState<SEOSettingsFormData>(initialSEOSettingsFormData);
+  const [qualityIssues, setQualityIssues] = useState<string[]>([]);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,11 +66,18 @@ export function useSEO() {
   const createMutation = trpc.content.seoSettings.create.useMutation({
     onSuccess: () => {
       toast.success('تم إنشاء إعدادات SEO بنجاح');
+      setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialSEOSettingsFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر نشر إعداد SEO. راجع أخطاء الجودة في النموذج.');
+        return;
+      }
       toast.error(`فشل إنشاء إعدادات SEO: ${error.message}`);
     },
   });
@@ -51,12 +85,19 @@ export function useSEO() {
   const updateMutation = trpc.content.seoSettings.update.useMutation({
     onSuccess: () => {
       toast.success('تم تحديث إعدادات SEO بنجاح');
+      setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedSEOSettings(null);
       setFormData(initialSEOSettingsFormData);
       refetch();
     },
     onError: (error) => {
+      const issues = getPublicationQualityIssues(error);
+      if (issues.length > 0) {
+        setQualityIssues(issues);
+        toast.error('تعذر نشر إعداد SEO. راجع أخطاء الجودة في النموذج.');
+        return;
+      }
       toast.error(`فشل تحديث إعدادات SEO: ${error.message}`);
     },
   });
@@ -71,25 +112,26 @@ export function useSEO() {
     },
   });
 
+  const publishMutation = trpc.content.seoSettings.publish.useMutation({
+    onSuccess: () => {
+      toast.success('تم نشر إعداد SEO بنجاح.');
+      refetch();
+    },
+    onError: (error) => toast.error(`تعذر نشر إعداد SEO: ${error.message}`),
+  });
+
+  const archiveMutation = trpc.content.seoSettings.archive.useMutation({
+    onSuccess: () => {
+      toast.success('تمت أرشفة إعداد SEO.');
+      refetch();
+    },
+    onError: (error) => toast.error(`تعذرت أرشفة إعداد SEO: ${error.message}`),
+  });
+
   // Handlers
   const handleCreateSEOSettings = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate({
-      pageKey: formData.pageKey,
-      pageId: formData.pageId,
-      slug: formData.slug || undefined,
-      language: formData.language,
-      title: formData.title || undefined,
-      description: formData.description || undefined,
-      keywords: formData.keywords || undefined,
-      ogTitle: formData.ogTitle || undefined,
-      ogDescription: formData.ogDescription || undefined,
-      ogImage: formData.ogImage || undefined,
-      canonicalUrl: formData.canonicalUrl || undefined,
-      robots: formData.robots || undefined,
-      structuredData: formData.structuredData || undefined,
-      isActive: formData.isActive,
-    });
+    createMutation.mutate(toSeoPayload(formData));
   };
 
   const handleEditSEOSettings = (e: React.FormEvent) => {
@@ -98,23 +140,7 @@ export function useSEO() {
       return;
     }
 
-    updateMutation.mutate({
-      id: selectedSEOSettings.id,
-      pageKey: formData.pageKey,
-      pageId: formData.pageId,
-      slug: formData.slug || undefined,
-      language: formData.language,
-      title: formData.title || undefined,
-      description: formData.description || undefined,
-      keywords: formData.keywords || undefined,
-      ogTitle: formData.ogTitle || undefined,
-      ogDescription: formData.ogDescription || undefined,
-      ogImage: formData.ogImage || undefined,
-      canonicalUrl: formData.canonicalUrl || undefined,
-      robots: formData.robots || undefined,
-      structuredData: formData.structuredData || undefined,
-      isActive: formData.isActive,
-    });
+    updateMutation.mutate({ id: selectedSEOSettings.id, ...toSeoPayload(formData) });
   };
 
   const handleDeleteSEOSettings = (id: number) => {
@@ -141,6 +167,9 @@ export function useSEO() {
       robots: seoSetting.robots || '',
       structuredData: seoSetting.structuredData || '',
       isActive: seoSetting.isActive,
+      status: seoSetting.status,
+      publishedAt: seoSetting.publishedAt,
+      qualityOverrideReason: '',
     });
     setIsEditDialogOpen(true);
   };
@@ -156,6 +185,8 @@ export function useSEO() {
     isEditDialogOpen,
     selectedSEOSettings,
     formData,
+    qualityIssues,
+    isAdmin,
     searchQuery,
     language,
     isActive,
@@ -164,6 +195,8 @@ export function useSEO() {
     createMutation,
     updateMutation,
     deleteMutation,
+    publishMutation,
+    archiveMutation,
 
     // Setters
     setIsCreateDialogOpen,
@@ -178,8 +211,12 @@ export function useSEO() {
     handleCreateSEOSettings,
     handleEditSEOSettings,
     handleDeleteSEOSettings,
+    handlePublishSEOSettings: (id: number, qualityOverrideReason?: string) =>
+      publishMutation.mutate({ id, qualityOverrideReason }),
+    handleArchiveSEOSettings: (id: number) => archiveMutation.mutate({ id }),
     openEditDialog,
     resetForm,
+    clearQualityIssues: () => setQualityIssues([]),
 
     // Refetch
     refetch,

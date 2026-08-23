@@ -42,7 +42,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-type TrashEntityType = 'textContent' | 'image' | 'page' | 'section' | 'sectionButton';
+type TrashEntityType = 'textContent' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
 type TrashFilter = TrashEntityType | 'all';
 
 const entityOptions: Array<{ value: TrashFilter; label: string }> = [
@@ -51,12 +51,14 @@ const entityOptions: Array<{ value: TrashFilter; label: string }> = [
   { value: 'section', label: 'الأقسام' },
   { value: 'textContent', label: 'النصوص' },
   { value: 'image', label: 'الصور' },
+  { value: 'seo', label: 'إعدادات SEO' },
   { value: 'sectionButton', label: 'أزرار الأقسام' },
 ];
 
 const entityPresentation = {
   textContent: { label: 'نص', icon: FileText, className: 'bg-sky-50 text-sky-700 ring-sky-200' },
   image: { label: 'صورة', icon: Image, className: 'bg-violet-50 text-violet-700 ring-violet-200' },
+  seo: { label: 'SEO', icon: Settings2, className: 'bg-indigo-50 text-indigo-700 ring-indigo-200' },
   page: {
     label: 'صفحة',
     icon: Layout,
@@ -136,6 +138,7 @@ export function ContentTrashList() {
         utils.content.trash.list.invalidate(),
         utils.content.textContent.list.invalidate(),
         utils.content.images.list.invalidate(),
+        utils.content.seoSettings.list.invalidate(),
         utils.content.pages.list.invalidate(),
         utils.content.sections.list.invalidate(),
         utils.content.sectionButtons.list.invalidate(),

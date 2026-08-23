@@ -3,7 +3,7 @@ import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { contentAuditLog, images, sectionButtons, sections } from '../../../drizzle/schema';
 
 export type CmsPublishEntityType =
-  'page' | 'textContent' | 'image' | 'media' | 'section' | 'sectionButton';
+  'page' | 'textContent' | 'image' | 'media' | 'section' | 'sectionButton' | 'seo';
 
 export type PublicationQualityIssue = {
   code: string;
@@ -16,11 +16,16 @@ type PublishCandidate = {
   pageId?: number | null;
   sectionId?: number | null;
   key?: string | null;
+  pageKey?: string | null;
+  slug?: string | null;
   content?: string | null;
   url?: string | null;
   altAr?: string | null;
   altEn?: string | null;
   link?: string | null;
+  canonicalUrl?: string | null;
+  ogImage?: string | null;
+  structuredData?: string | null;
 };
 
 function hasInvalidLink(value: string | null | undefined) {
@@ -75,6 +80,40 @@ function inlineIssues(entityType: CmsPublishEntityType, candidate: PublishCandid
       code: 'section-button-link-invalid',
       message: 'لا يمكن نشر زر قسم برابط فارغ أو غير صالح.',
     });
+  }
+
+  if (entityType === 'seo') {
+    const hasTarget = Boolean(
+      candidate.pageId || candidate.pageKey?.trim() || candidate.slug?.trim()
+    );
+    if (!hasTarget) {
+      issues.push({
+        code: 'seo-target-missing',
+        message: 'لا يمكن نشر إعداد SEO بلا صفحة مرتبطة أو مفتاح صفحة أو رابط.',
+      });
+    }
+    for (const [field, label] of [
+      ['canonicalUrl', 'الرابط الأساسي'],
+      ['ogImage', 'صورة Open Graph'],
+    ] as const) {
+      const value = candidate[field];
+      if (typeof value === 'string' && value.trim() && hasInvalidLink(value)) {
+        issues.push({
+          code: `seo-${field}-invalid`,
+          message: `لا يمكن نشر إعداد SEO لأن ${label} غير صالح أو غير آمن.`,
+        });
+      }
+    }
+    if (typeof candidate.structuredData === 'string' && candidate.structuredData.trim()) {
+      try {
+        JSON.parse(candidate.structuredData);
+      } catch {
+        issues.push({
+          code: 'seo-structured-data-invalid',
+          message: 'لا يمكن نشر إعداد SEO ببيانات منظمة غير صالحة JSON.',
+        });
+      }
+    }
   }
 
   return issues;

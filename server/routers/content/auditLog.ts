@@ -47,7 +47,9 @@ export const auditLogRouter = router({
         .filter(
           (record) =>
             record.entityId !== null &&
-            ['text', 'image', 'page', 'section', 'sectionButton'].includes(record.entityType ?? '')
+            ['text', 'image', 'seo', 'page', 'section', 'sectionButton'].includes(
+              record.entityType ?? ''
+            )
         )
         .map((record) => {
           const previous = parseRecord(record.oldValue);
@@ -69,7 +71,7 @@ export const auditLogRouter = router({
           return {
             id: record.id,
             entityType: record.entityType as
-              'text' | 'image' | 'page' | 'section' | 'sectionButton',
+              'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton',
             entityId: record.entityId as number,
             scheduledAt: typeof previous.publishedAt === 'string' ? previous.publishedAt : null,
             blockedAt: record.createdAt,
