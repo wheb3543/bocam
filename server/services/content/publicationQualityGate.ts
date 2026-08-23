@@ -10,6 +10,14 @@ export type PublicationQualityIssue = {
   message: string;
 };
 
+/**
+ * مؤشر بسيط وموحد لواجهة الإدارة: تبدأ الإعدادات من 100% وتُخصم 20 نقطة
+ * لكل ملاحظة نشر، مع عدم السماح بنزول النسبة عن الصفر.
+ */
+export function getPublicationQualityScore(issues: PublicationQualityIssue[]) {
+  return Math.max(0, 100 - issues.length * 20);
+}
+
 type PublishCandidate = {
   [key: string]: unknown;
   id?: number;

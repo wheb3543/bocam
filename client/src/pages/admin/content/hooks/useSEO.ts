@@ -67,6 +67,12 @@ export function useSEO() {
   });
   const { data: seoOverview, refetch: refetchOverview } =
     trpc.content.seoSettings.getOverview.useQuery();
+  const { data: seoReport, refetch: refetchReport } = trpc.content.seoSettings.getReport.useQuery();
+
+  const refetchSEOInsights = () => {
+    refetchOverview();
+    refetchReport();
+  };
 
   // Mutations
   const createMutation = trpc.content.seoSettings.create.useMutation({
@@ -76,7 +82,7 @@ export function useSEO() {
       setIsCreateDialogOpen(false);
       setFormData(initialSEOSettingsFormData);
       refetch();
-      refetchOverview();
+      refetchSEOInsights();
     },
     onError: (error) => {
       const issues = getPublicationQualityIssues(error);
@@ -97,7 +103,7 @@ export function useSEO() {
       setSelectedSEOSettings(null);
       setFormData(initialSEOSettingsFormData);
       refetch();
-      refetchOverview();
+      refetchSEOInsights();
     },
     onError: (error) => {
       const issues = getPublicationQualityIssues(error);
@@ -114,7 +120,7 @@ export function useSEO() {
     onSuccess: () => {
       toast.success('تم حذف إعدادات SEO بنجاح');
       refetch();
-      refetchOverview();
+      refetchSEOInsights();
     },
     onError: (error) => {
       toast.error(`فشل حذف إعدادات SEO: ${error.message}`);
@@ -125,7 +131,7 @@ export function useSEO() {
     onSuccess: () => {
       toast.success('تم نشر إعداد SEO بنجاح.');
       refetch();
-      refetchOverview();
+      refetchSEOInsights();
     },
     onError: (error) => toast.error(`تعذر نشر إعداد SEO: ${error.message}`),
   });
@@ -134,7 +140,7 @@ export function useSEO() {
     onSuccess: () => {
       toast.success('تمت أرشفة إعداد SEO.');
       refetch();
-      refetchOverview();
+      refetchSEOInsights();
     },
     onError: (error) => toast.error(`تعذرت أرشفة إعداد SEO: ${error.message}`),
   });
@@ -143,7 +149,7 @@ export function useSEO() {
     onSuccess: () => {
       toast.success('تمت استعادة إعداد SEO كمسودة.');
       refetch();
-      refetchOverview();
+      refetchSEOInsights();
     },
     onError: (error) => toast.error(`تعذرت استعادة إعداد SEO: ${error.message}`),
   });
@@ -206,6 +212,60 @@ export function useSEO() {
     setSelectedSEOSettings(null);
   };
 
+  const exportSEOReportCsv = () => {
+    const escapeCsv = (value: unknown) => {
+      const text = String(value ?? '');
+      const safeText = /^[=+\-@]/.test(text) ? `'${text}` : text;
+      return `"${safeText.replace(/"/g, '""')}"`;
+    };
+    const statusLabel: Record<string, string> = {
+      draft: 'مسودة',
+      published: 'منشور',
+      archived: 'مؤرشف',
+    };
+    const header = [
+      'المعرف',
+      'مفتاح الصفحة',
+      'الرابط',
+      'اللغة',
+      'العنوان',
+      'حالة النشر',
+      'نشط',
+      'محذوف',
+      'ينتظر الموافقة',
+      'نسبة الجودة',
+      'ملاحظات الجودة',
+      'تاريخ النشر',
+      'آخر تحديث',
+    ];
+    const rows = (seoReport?.rows ?? []).map((row) => [
+      row.id,
+      row.pageKey,
+      row.slug,
+      row.language,
+      row.title,
+      statusLabel[row.status] ?? row.status,
+      row.isActive === 'yes' ? 'نعم' : 'لا',
+      row.deletedAt ? 'نعم' : 'لا',
+      row.pendingApproval ? 'نعم' : 'لا',
+      `${row.qualityScore}%`,
+      row.qualityIssueCodes.join(' | '),
+      row.publishedAt ? new Date(row.publishedAt).toLocaleString('ar-SA') : '',
+      new Date(row.updatedAt).toLocaleString('ar-SA'),
+    ]);
+    const csv = [header, ...rows].map((row) => row.map(escapeCsv).join(',')).join('\n');
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `seo-status-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    toast.success(`تم تصدير تقرير SEO (${rows.length} سجل).`);
+  };
+
   return {
     // State
     isCreateDialogOpen,
@@ -221,6 +281,7 @@ export function useSEO() {
     showDeleted,
     seoSettings,
     seoOverview,
+    seoReport,
     loadingSEOSettings,
     createMutation,
     updateMutation,
@@ -250,9 +311,11 @@ export function useSEO() {
     handleRestoreSEOSettings,
     openEditDialog,
     resetForm,
+    exportSEOReportCsv,
     clearQualityIssues: () => setQualityIssues([]),
 
     // Refetch
     refetch,
+    refetchSEOInsights,
   };
 }

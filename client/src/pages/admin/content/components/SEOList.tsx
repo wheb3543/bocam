@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { ContentCard } from './ContentCard';
 import { ContentFiltersComponent } from './ContentFilters';
 import { SEODialog } from './dialogs/SEODialog';
-import { Plus } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import {
@@ -52,7 +52,16 @@ interface SEOListProps {
     published: number;
     archived: number;
     deleted: number;
+    pendingApprovals: number;
   };
+  reportRows?: Array<{
+    id: number;
+    qualityScore: number;
+    qualityIssueCodes: string[];
+    pendingApproval: boolean;
+  }>;
+  onPendingApprovalClick?: () => void;
+  onExportCsv?: () => void;
   onVersionHistory?: (id: number) => void;
   qualityIssues?: string[];
   clearQualityIssues?: () => void;
@@ -89,6 +98,9 @@ export function SEOList({
   showDeleted,
   onShowDeletedChange,
   overview,
+  reportRows = [],
+  onPendingApprovalClick,
+  onExportCsv,
   onVersionHistory,
   qualityIssues = [],
   clearQualityIssues,
@@ -98,6 +110,7 @@ export function SEOList({
   updateMutation,
   restoreMutation,
 }: SEOListProps) {
+  const seoInsightsById = new Map(reportRows.map((row) => [row.id, row]));
   const handleCreateDialogOpenChange = (open: boolean) => {
     if (!open) {
       clearQualityIssues?.();
@@ -115,12 +128,18 @@ export function SEOList({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <h2 className="text-2xl font-bold">إدارة إعدادات SEO</h2>
-        <Button onClick={() => onCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 ml-2" />
-          إضافة إعدادات SEO
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={onExportCsv} disabled={!reportRows.length}>
+            <Download className="ml-2 h-4 w-4" />
+            تصدير CSV
+          </Button>
+          <Button onClick={() => onCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 ml-2" />
+            إضافة إعدادات SEO
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -190,6 +209,18 @@ export function SEOList({
             {overview?.deleted ?? 0}
           </Badge>
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={onPendingApprovalClick}
+        >
+          ينتظر الموافقة
+          <Badge variant="secondary" className="min-w-5 justify-center px-1.5">
+            {overview?.pendingApprovals ?? 0}
+          </Badge>
+        </Button>
       </div>
 
       {/* Content List */}
@@ -232,6 +263,7 @@ export function SEOList({
               onVersionHistory={() => onVersionHistory?.(seoSetting.id)}
               isActive={!seoSetting.deletedAt && seoSetting.isActive === 'yes'}
               status={seoSetting.status}
+              qualityScore={seoInsightsById.get(seoSetting.id)?.qualityScore}
             />
           ))}
         </div>

@@ -19,6 +19,7 @@ interface ContentCardProps {
   onRestore?: () => void;
   isActive?: boolean;
   status?: 'draft' | 'published' | 'archived';
+  qualityScore?: number;
 }
 
 /**
@@ -35,6 +36,7 @@ export function ContentCard({
   onRestore,
   isActive = true,
   status,
+  qualityScore,
 }: ContentCardProps) {
   return (
     <Card className={`transition-all hover:shadow-md ${!isActive ? 'opacity-50' : ''}`}>
@@ -57,6 +59,16 @@ export function ContentCard({
                 className="text-xs"
               >
                 {status === 'published' ? 'منشور' : status === 'archived' ? 'مؤرشف' : 'مسودة'}
+              </Badge>
+            )}
+            {typeof qualityScore === 'number' && (
+              <Badge
+                variant={
+                  qualityScore >= 80 ? 'default' : qualityScore >= 60 ? 'secondary' : 'destructive'
+                }
+                className="text-xs"
+              >
+                جودة {qualityScore}%
               </Badge>
             )}
             <div className="flex gap-2">

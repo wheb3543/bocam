@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { assertPublicationQuality, evaluatePublicationQuality } from './publicationQualityGate';
+import {
+  assertPublicationQuality,
+  evaluatePublicationQuality,
+  getPublicationQualityScore,
+} from './publicationQualityGate';
 
 function createAuditDb() {
   const values = vi.fn().mockResolvedValue(undefined);
@@ -24,6 +28,14 @@ const imageWithoutAlt = {
 };
 
 describe('assertPublicationQuality', () => {
+  it('يحوّل عدد ملاحظات النشر إلى نسبة جودة محكومة بين صفر ومئة', () => {
+    expect(getPublicationQualityScore([])).toBe(100);
+    expect(getPublicationQualityScore([{ code: 'a', message: 'ملاحظة' }])).toBe(80);
+    expect(
+      getPublicationQualityScore(Array.from({ length: 8 }, (_, index) => ({ code: `${index}`, message: '' })))
+    ).toBe(0);
+  });
+
   it('يرفض نشر صورة بلا نص بديل برمز PRECONDITION_FAILED', async () => {
     await expect(
       assertPublicationQuality({}, {

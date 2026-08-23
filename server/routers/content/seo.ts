@@ -13,11 +13,20 @@ import {
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { and, desc, eq, isNotNull, isNull, like, or } from 'drizzle-orm';
-import { contentVersions, seoSettings, type SEOSettings } from '../../../drizzle/schema';
+import {
+  contentApprovals,
+  contentVersions,
+  seoSettings,
+  type SEOSettings,
+} from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
 import { invalidateSEOCache } from '../public/content';
 import { auditLogService } from '../../services/content/auditLogService';
-import { assertPublicationQuality } from '../../services/content/publicationQualityGate';
+import {
+  assertPublicationQuality,
+  evaluatePublicationQuality,
+  getPublicationQualityScore,
+} from '../../services/content/publicationQualityGate';
 
 const logger = createLogger('seoSettings');
 const seoStatusSchema = z.enum(['draft', 'published', 'archived']);
@@ -364,7 +373,13 @@ export const seoSettingsRouter = router({
 
   getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
-    const allSeo = await db.select().from(seoSettings);
+    const [allSeo, pendingApprovals] = await Promise.all([
+      db.select().from(seoSettings),
+      db
+        .select({ entityId: contentApprovals.entityId })
+        .from(contentApprovals)
+        .where(and(eq(contentApprovals.entityType, 'seo'), eq(contentApprovals.status, 'pending'))),
+    ]);
     const activeSeo = allSeo.filter((item) => !item.deletedAt);
     const total = activeSeo.length;
     const published = activeSeo.filter((item) => item.status === 'published').length;
@@ -378,7 +393,32 @@ export const seoSettingsRouter = router({
       drafts,
       archived,
       deleted: allSeo.length - total,
+      pendingApprovals: pendingApprovals.length,
       inactive: total - active,
     };
+  }),
+
+  getReport: contentReadProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
+    const [allSeo, pendingApprovals] = await Promise.all([
+      db.select().from(seoSettings).orderBy(seoSettings.createdAt),
+      db
+        .select({ entityId: contentApprovals.entityId })
+        .from(contentApprovals)
+        .where(and(eq(contentApprovals.entityType, 'seo'), eq(contentApprovals.status, 'pending'))),
+    ]);
+    const pendingEntityIds = new Set(pendingApprovals.map((approval) => approval.entityId));
+    const rows = await Promise.all(
+      allSeo.map(async (seo) => {
+        const qualityIssues = await evaluatePublicationQuality(db, 'seo', seo);
+        return {
+          ...seo,
+          pendingApproval: pendingEntityIds.has(seo.id),
+          qualityScore: getPublicationQualityScore(qualityIssues),
+          qualityIssueCodes: qualityIssues.map((issue) => issue.code),
+        };
+      })
+    );
+    return { generatedAt: new Date(), rows };
   }),
 });

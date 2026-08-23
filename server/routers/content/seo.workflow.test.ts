@@ -38,6 +38,9 @@ describe('دورة CMS لإعدادات SEO', () => {
     expect(seoRouterSource).toContain('invalidateSEOCache');
     expect(seoRouterSource).toContain('archived,');
     expect(seoRouterSource).toContain('deleted: allSeo.length - total');
+    expect(seoRouterSource).toContain('pendingApprovals: pendingApprovals.length');
+    expect(seoRouterSource).toContain('getReport: contentReadProcedure');
+    expect(seoRouterSource).toContain('qualityScore: getPublicationQualityScore(qualityIssues)');
   });
 
   it('يفرض بوابة الجودة ويعرض للعامة SEO منشوراً ونشطاً وغير محذوف فقط', () => {
@@ -83,6 +86,9 @@ describe('دورة CMS لإعدادات SEO', () => {
     expect(listSource).toContain('إحصاءات حالات SEO');
     expect(listSource).toContain('overview?.drafts ?? 0');
     expect(listSource).toContain('overview?.deleted ?? 0');
+    expect(listSource).toContain('ينتظر الموافقة');
+    expect(listSource).toContain('تصدير CSV');
+    expect(listSource).toContain('qualityScore={seoInsightsById.get(seoSetting.id)?.qualityScore}');
     expect(hookSource).toContain('qualityOverrideReason');
     expect(hookSource).toContain('handlePublishSEOSettings');
     expect(hookSource).toContain('handleArchiveSEOSettings');
@@ -90,5 +96,7 @@ describe('دورة CMS لإعدادات SEO', () => {
     expect(hookSource).toContain('includeDeleted: showDeleted');
     expect(hookSource).toContain('handleRestoreSEOSettings');
     expect(hookSource).toContain('seoOverview');
+    expect(hookSource).toContain('seoReport');
+    expect(hookSource).toContain('exportSEOReportCsv');
   });
 });

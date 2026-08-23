@@ -570,10 +570,16 @@ export default function ContentManagementPage() {
               showDeleted={seo.showDeleted}
               onShowDeletedChange={seo.setShowDeleted}
               overview={seo.seoOverview}
+              reportRows={seo.seoReport?.rows ?? []}
+              onPendingApprovalClick={() => setIsApprovalQueueOpen(true)}
+              onExportCsv={seo.exportSEOReportCsv}
               qualityIssues={seo.qualityIssues}
               clearQualityIssues={seo.clearQualityIssues}
               isAdmin={seo.isAdmin}
-              onApprovalSubmitted={seo.refetch}
+              onApprovalSubmitted={() => {
+                seo.refetch();
+                seo.refetchSEOInsights();
+              }}
               onVersionHistory={(id) => {
                 setSelectedVersionEntityType('seo');
                 setSelectedVersionEntityId(id);
