@@ -19,16 +19,19 @@ import SectionDivider from '@/components/SectionDivider';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
-import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { usePublicSEOSettings, usePublicTextContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Doctors() {
   const companyName = getCompanyName('ar');
+  const { language } = useLanguage();
+  const { data: doctorsSEOSettings = [] } = usePublicSEOSettings({ slug: 'doctors', language });
+  const doctorsSEO = doctorsSEOSettings[0];
   return (
     <PageLayout
-      title={`الأطباء - ${companyName}`}
-      description={`احجز موعدك مع أفضل الأطباء في ${companyName} بصنعاء`}
-      keywords="أطباء, استشاريين, تخصصات طبية, حجز موعد"
+      title={doctorsSEO?.title || `الأطباء - ${companyName}`}
+      description={doctorsSEO?.description || `احجز موعدك مع أفضل الأطباء في ${companyName} بصنعاء`}
+      keywords={doctorsSEO?.keywords || 'أطباء, استشاريين, تخصصات طبية, حجز موعد'}
     >
       <DoctorsContent />
     </PageLayout>
@@ -59,12 +62,59 @@ function DoctorsContent() {
     section: 'doctors',
     type: 'text',
   });
+  const { data: searchPlaceholder } = usePublicTextContent({
+    key: `doctors.search.placeholder.${language}`,
+    section: 'doctors',
+  });
+  const { data: allSpecialtiesLabel } = usePublicTextContent({
+    key: `doctors.filter.all.${language}`,
+    section: 'doctors',
+  });
+  const { data: emptyTitle } = usePublicTextContent({
+    key: `doctors.empty.title.${language}`,
+    section: 'doctors',
+  });
+  const { data: emptyDescription } = usePublicTextContent({
+    key: `doctors.empty.description.${language}`,
+    section: 'doctors',
+  });
+  const { data: bookingCta } = usePublicTextContent({
+    key: `doctors.booking.cta.${language}`,
+    section: 'doctors',
+    type: 'button',
+  });
 
   // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
-  const title = doctorsTitle?.data?.[0]?.content || 'أطباؤنا المتميزون';
-  const description =
-    doctorsDescription?.data?.[0]?.content || 'فريق طبي متكامل من أفضل الأطباء في مختلف التخصصات';
-  const badgeText = doctorsBadge?.data?.[0]?.content || 'أطباء متخصصون';
+  const fallback =
+    language === 'en'
+      ? {
+          title: 'Our Distinguished Doctors',
+          description: 'An integrated medical team of the best doctors in various specialties',
+          badge: 'Specialized Doctors',
+          search: 'Search for a doctor or specialty...',
+          allSpecialties: 'All specialties',
+          emptyTitle: 'No results match your search',
+          emptyDescription: 'Try changing your search criteria',
+          booking: 'Book an appointment',
+        }
+      : {
+          title: 'أطباؤنا المتميزون',
+          description: 'فريق طبي متكامل من أفضل الأطباء في مختلف التخصصات',
+          badge: 'أطباء متخصصون',
+          search: 'ابحث عن طبيب أو تخصص...',
+          allSpecialties: 'جميع التخصصات',
+          emptyTitle: 'لا توجد نتائج مطابقة للبحث',
+          emptyDescription: 'جرب تغيير معايير البحث',
+          booking: 'احجز موعد',
+        };
+  const title = doctorsTitle?.data?.[0]?.content || fallback.title;
+  const description = doctorsDescription?.data?.[0]?.content || fallback.description;
+  const badgeText = doctorsBadge?.data?.[0]?.content || fallback.badge;
+  const searchPlaceholderText = searchPlaceholder?.data?.[0]?.content || fallback.search;
+  const allSpecialtiesText = allSpecialtiesLabel?.data?.[0]?.content || fallback.allSpecialties;
+  const emptyTitleText = emptyTitle?.data?.[0]?.content || fallback.emptyTitle;
+  const emptyDescriptionText = emptyDescription?.data?.[0]?.content || fallback.emptyDescription;
+  const bookingCtaText = bookingCta?.data?.[0]?.content || fallback.booking;
 
   // Fetch doctors list (only available doctors)
   const { data: doctors, isLoading } = trpc.doctors.list.useQuery();
@@ -119,7 +169,7 @@ function DoctorsContent() {
                   <div className="relative">
                     <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
                     <Input
-                      placeholder="ابحث عن طبيب أو تخصص..."
+                      placeholder={searchPlaceholderText}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pr-9 sm:pr-10 text-right text-xs sm:text-sm h-9 sm:h-10"
@@ -127,10 +177,10 @@ function DoctorsContent() {
                   </div>
                   <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
                     <SelectTrigger className="text-xs sm:text-sm h-9 sm:h-10">
-                      <SelectValue placeholder="جميع التخصصات" />
+                      <SelectValue placeholder={allSpecialtiesText} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">جميع التخصصات</SelectItem>
+                      <SelectItem value="all">{allSpecialtiesText}</SelectItem>
                       {specialties.map((specialty) => (
                         <SelectItem key={specialty} value={specialty}>
                           {specialty}
@@ -211,7 +261,7 @@ function DoctorsContent() {
                           }}
                         >
                           <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />
-                          احجز موعد
+                          {bookingCtaText}
                         </Button>
                       </div>
                     </div>
@@ -222,10 +272,10 @@ function DoctorsContent() {
               <div className="text-center py-12 sm:py-20">
                 <Stethoscope className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 dark:text-muted-foreground mx-auto mb-3 sm:mb-4" />
                 <p className="text-base sm:text-xl text-muted-foreground dark:text-muted-foreground">
-                  لا توجد نتائج مطابقة للبحث
+                  {emptyTitleText}
                 </p>
                 <p className="text-xs sm:text-base text-muted-foreground dark:text-muted-foreground mt-1 sm:mt-2">
-                  جرب تغيير معايير البحث
+                  {emptyDescriptionText}
                 </p>
               </div>
             )}
