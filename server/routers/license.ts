@@ -20,6 +20,7 @@ import {
 import {
   checkCentralFeatureRequest,
   checkCentralLicenseRequest,
+  getCentralSupportTickets,
   getCentralLicenseConfiguration,
   getPendingCentralLicenseRequest,
   requestCentralFeatureActivation,
@@ -269,6 +270,19 @@ export const licenseRouter = router({
         subject: z.string().trim().min(4).max(255),
         content: z.string().trim().min(1).max(5000),
         priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
+        attachments: z
+          .array(
+            z.object({
+              fileName: z.string().trim().min(1).max(120),
+              mimeType: z.enum(['image/png', 'image/jpeg', 'application/pdf', 'text/plain']),
+              dataBase64: z
+                .string()
+                .regex(/^[A-Za-z0-9+/]+={0,2}$/)
+                .max(700_000),
+            })
+          )
+          .max(3)
+          .default([]),
       })
     )
     .mutation(async ({ input }) => {
@@ -281,6 +295,18 @@ export const licenseRouter = router({
         };
       }
     }),
+
+  getCentralSupportTickets: protectedProcedure.query(async () => {
+    try {
+      return { success: true, tickets: await getCentralSupportTickets() };
+    } catch (error) {
+      return {
+        success: false,
+        tickets: [],
+        error: error instanceof Error ? error.message : 'تعذر استرجاع تذاكر الدعم الفني',
+      };
+    }
+  }),
 
   /**
    * Query the decision exactly when the operator chooses to check its state.

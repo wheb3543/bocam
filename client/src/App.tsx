@@ -32,6 +32,7 @@ const VisitingDoctors = lazy(() => import('./pages/public/VisitingDoctors'));
 const OfflinePage = lazy(() => import('./pages/OfflinePage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/admin/ProfilePage'));
+const SupportTicketsPage = lazy(() => import('./pages/admin/SupportTicketsPage'));
 const ManagementPage = lazy(() => import('./pages/admin/ManagementPage'));
 const ContentManagementPage = lazy(() => import('./pages/admin/content/ContentManagementPage'));
 const MediaLibraryPage = lazy(() => import('./pages/admin/media/MediaLibraryPage'));
@@ -230,6 +231,7 @@ function Router() {
               <Switch>
                 <Route path={'/admin/offline'} component={OfflinePage} />
                 <Route path={'/admin/profile'} component={ProfilePage} />
+                <Route path={'/admin/support'} component={SupportTicketsPage} />
                 <Route path={'/admin/management'} component={ManagementPage} />
                 <Route path={'/admin/content/content'} component={ContentManagementPage} />
                 <Route path={'/admin/content/media-library'} component={MediaLibraryPage} />

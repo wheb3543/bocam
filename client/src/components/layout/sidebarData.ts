@@ -41,6 +41,7 @@ import {
   ShoppingCart,
   Package,
   Images,
+  CircleHelp,
 } from 'lucide-react';
 import { SOCIAL_INBOX_ALLOWED_ROLES } from '@shared/socialInboxAccess';
 
@@ -183,6 +184,7 @@ export const allNavItems: NavItem[] = [
     icon: MessageSquare,
     allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
   },
+  { id: 'support', title: 'الدعم الفني', href: '/admin/support', icon: CircleHelp },
   {
     id: 'integration-settings',
     title: 'ربط المنصات الاجتماعية',
@@ -288,6 +290,7 @@ export const allToolsGroups: NavGroup[] = [
         icon: MessageSquare,
         allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
       },
+      { id: 'support', title: 'الدعم الفني', href: '/admin/support', icon: CircleHelp },
       {
         id: 'whatsapp',
         title: 'صندوق وارد WhatsApp',

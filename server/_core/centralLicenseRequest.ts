@@ -4,6 +4,7 @@ import path from 'path';
 import { createLogger } from './logger';
 import { getHardwareId, getLicenseFilePath } from './license/helpers';
 import { validateLicense } from './license';
+import { getMetrics } from './health';
 
 const logger = createLogger('centralLicenseRequest');
 const PENDING_REQUEST_FILE = '.idea-hub-license-request.json';
@@ -188,12 +189,42 @@ function getSupportTicketServerUrl(): string {
   }
 }
 
-/** يرسل بلاغ دعم من واجهة bocam دون كشف بيانات الترخيص للمتصفح. */
-export async function requestCentralSupportTicket(input: {
+type SupportAttachment = {
+  fileName: string;
+  mimeType: 'image/png' | 'image/jpeg' | 'application/pdf' | 'text/plain';
+  dataBase64: string;
+};
+
+export type CentralSupportTicket = {
+  id: number;
+  ticketNumber: string;
   subject: string;
-  content: string;
+  status: 'open' | 'in_progress' | 'waiting_customer' | 'resolved' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'critical';
-}) {
+  source: string;
+  diagnostics: Record<string, unknown> | null;
+  lastMessageAt: string;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  messages: Array<{
+    id: number;
+    senderType: 'staff' | 'client_system' | 'system';
+    senderName: string | null;
+    content: string;
+    createdAt: string;
+  }>;
+  attachments: Array<{
+    id: number;
+    fileName: string;
+    mimeType: string;
+    sizeBytes: number;
+    createdAt: string;
+    url: string;
+  }>;
+};
+
+function getCentralSupportCredentials() {
   const { configured, baseUrl } = getCentralLicenseConfiguration();
   if (!configured || !baseUrl) {
     throw new Error('لم يُضبط اتصال Idea Hub لهذه النسخة');
@@ -201,7 +232,7 @@ export async function requestCentralSupportTicket(input: {
 
   const validation = validateLicense();
   if (!validation.isValid) {
-    throw new Error(validation.validationMessage || 'لا يمكن إرسال طلب دعم بترخيص غير صالح');
+    throw new Error(validation.validationMessage || 'لا يمكن الوصول إلى الدعم بترخيص غير صالح');
   }
 
   let signedLicenseKey: string;
@@ -209,22 +240,58 @@ export async function requestCentralSupportTicket(input: {
     const license = JSON.parse(fs.readFileSync(getLicenseFilePath(), 'utf8')) as CentralLicenseFile;
     signedLicenseKey = license.key;
   } catch {
-    throw new Error('تعذر قراءة ملف الترخيص المحلي لإرسال طلب الدعم');
+    throw new Error('تعذر قراءة ملف الترخيص المحلي للوصول إلى الدعم');
   }
   if (!signedLicenseKey) {
     throw new Error('ملف الترخيص المحلي لا يحتوي مفتاحاً موقعاً');
   }
 
-  const response = await fetch(`${baseUrl}/api/support/tickets/intake`, {
+  return {
+    baseUrl,
+    hardwareId: getHardwareId(),
+    serverUrl: getSupportTicketServerUrl(),
+    licenseKeyFingerprint: crypto.createHash('sha256').update(signedLicenseKey).digest('hex'),
+    validation,
+  };
+}
+
+function collectSupportDiagnostics(validation: ReturnType<typeof validateLicense>) {
+  const metrics = getMetrics();
+  return {
+    collectedAt: new Date().toISOString(),
+    appVersion: process.env.npm_package_version || 'unknown',
+    licenseVersion: validation.version || 'unknown',
+    enabledFeatures: [...(validation.features || [])].sort(),
+    runtime: {
+      node: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      uptimeSeconds: Math.max(0, Math.round(metrics.uptime)),
+    },
+  };
+}
+
+/** يرسل بلاغ دعم من واجهة bocam دون كشف بيانات الترخيص للمتصفح. */
+export async function requestCentralSupportTicket(input: {
+  subject: string;
+  content: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  attachments?: SupportAttachment[];
+}) {
+  const credentials = getCentralSupportCredentials();
+
+  const response = await fetch(`${credentials.baseUrl}/api/support/tickets/intake`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'User-Agent': 'BOCAM-Support-Ticket/1.0' },
     body: JSON.stringify({
-      hardwareId: getHardwareId(),
-      serverUrl: getSupportTicketServerUrl(),
-      licenseKeyFingerprint: crypto.createHash('sha256').update(signedLicenseKey).digest('hex'),
+      hardwareId: credentials.hardwareId,
+      serverUrl: credentials.serverUrl,
+      licenseKeyFingerprint: credentials.licenseKeyFingerprint,
       subject: input.subject.trim(),
       content: input.content.trim(),
       priority: input.priority,
+      diagnostics: collectSupportDiagnostics(credentials.validation),
+      attachments: input.attachments || [],
     }),
     signal: requestTimeoutSignal(),
   });
@@ -239,6 +306,30 @@ export async function requestCentralSupportTicket(input: {
   }
   logger.info(`Central support ticket created: ${body.ticketNumber}`);
   return { ticketId: body.ticketId, ticketNumber: body.ticketNumber };
+}
+
+/** يسترجع تذاكر النسخة الحالية فقط بعد التحقق من الترخيص محلياً ومركزياً. */
+export async function getCentralSupportTickets() {
+  const credentials = getCentralSupportCredentials();
+  const response = await fetch(`${credentials.baseUrl}/api/support/tickets/lookup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'BOCAM-Support-Ticket/1.0' },
+    body: JSON.stringify({
+      hardwareId: credentials.hardwareId,
+      serverUrl: credentials.serverUrl,
+      licenseKeyFingerprint: credentials.licenseKeyFingerprint,
+    }),
+    signal: requestTimeoutSignal(),
+  });
+  const body = (await response.json().catch(() => null)) as {
+    success?: boolean;
+    error?: string;
+    tickets?: unknown[];
+  } | null;
+  if (!response.ok || !body?.success || !Array.isArray(body.tickets)) {
+    throw new Error(body?.error || 'تعذر استرجاع تذاكر الدعم');
+  }
+  return body.tickets as CentralSupportTicket[];
 }
 
 export function installCentralLicense(license: CentralLicenseFile) {
