@@ -205,8 +205,13 @@ export default function ContentManagementPage() {
 
         {/* Import/Export */}
         <ContentImportExport
-          onExport={importExport.handleExport}
-          onImport={importExport.handleImport}
+          defaultExportOptions={importExport.defaultExportOptions}
+          onExport={importExport.exportContent}
+          onPreviewImport={importExport.previewImport}
+          onConfirmImport={importExport.confirmImport}
+          isExporting={importExport.isExporting}
+          isImporting={importExport.isImporting}
+          isPreviewingImport={importExport.isPreviewingImport}
         />
 
         {/* Content Tabs */}

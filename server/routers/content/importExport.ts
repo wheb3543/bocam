@@ -7,13 +7,36 @@ import { z } from 'zod';
 import { inArray } from 'drizzle-orm';
 import { adminProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
-import { pages, sections, sectionButtons, textContent, images } from '../../../drizzle/schema';
+import {
+  colorScheme,
+  contentAuditLog,
+  images,
+  media,
+  mediaFolders,
+  pages,
+  sections,
+  sectionButtons,
+  seoSettings,
+  textContent,
+} from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
 import { contentReadProcedure } from './authorization';
 
 const logger = createLogger('importExport');
-const MAX_IMPORT_ITEMS = 2_000;
-const collectionNames = ['pages', 'sections', 'sectionButtons', 'textContent', 'images'] as const;
+const MAX_IMPORT_ITEMS = 10_000;
+const MAX_AUDIT_LOG_ITEMS = 5_000;
+const collectionNames = [
+  'pages',
+  'sections',
+  'sectionButtons',
+  'textContent',
+  'images',
+  'colors',
+  'seoSettings',
+  'mediaFolders',
+  'media',
+  'auditLog',
+] as const;
 type CollectionName = (typeof collectionNames)[number];
 type ContentRecord = Record<string, unknown>;
 
@@ -23,6 +46,10 @@ const exportSchema = z.object({
   includeSectionButtons: z.boolean().default(true),
   includeTextContent: z.boolean().default(true),
   includeImages: z.boolean().default(true),
+  includeColors: z.boolean().default(true),
+  includeSeoSettings: z.boolean().default(true),
+  includeMedia: z.boolean().default(true),
+  includeAuditLog: z.boolean().default(true),
 });
 
 const bundleSchema = z.object({
@@ -31,6 +58,11 @@ const bundleSchema = z.object({
   sectionButtons: z.array(z.record(z.string(), z.unknown())).optional(),
   textContent: z.array(z.record(z.string(), z.unknown())).optional(),
   images: z.array(z.record(z.string(), z.unknown())).optional(),
+  colors: z.array(z.record(z.string(), z.unknown())).optional(),
+  seoSettings: z.array(z.record(z.string(), z.unknown())).optional(),
+  mediaFolders: z.array(z.record(z.string(), z.unknown())).optional(),
+  media: z.array(z.record(z.string(), z.unknown())).optional(),
+  auditLog: z.array(z.record(z.string(), z.unknown())).optional(),
   exportDate: z.string().optional(),
   version: z.string().optional(),
 });
@@ -70,6 +102,49 @@ function cleanRecord(record: ContentRecord): ContentRecord {
   return clean;
 }
 
+function cleanAuditRecord(
+  record: ContentRecord,
+  entityIdMaps: Record<string, Map<number, number>>
+): ContentRecord | null {
+  const entityType = record.entityType;
+  const action = record.action;
+  const validEntityTypes = ['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton'];
+  const validActions = ['create', 'update', 'delete'];
+  if (typeof entityType !== 'string' || !validEntityTypes.includes(entityType)) {
+    throw new Error('سجل التدقيق يحتوي نوع كيان غير مدعوم.');
+  }
+  if (typeof action !== 'string' || !validActions.includes(action)) {
+    throw new Error('سجل التدقيق يحتوي إجراء غير مدعوم.');
+  }
+
+  const sourceEntityId = record.entityId;
+  const entityMap = entityIdMaps[entityType];
+  let entityId: number | null = null;
+  if (sourceEntityId !== null && sourceEntityId !== undefined) {
+    if (!entityMap) {
+      return null;
+    }
+    entityId = entityMap.get(Number(sourceEntityId)) ?? null;
+    if (!entityId) {
+      return null;
+    }
+  }
+
+  const originalReason = typeof record.reason === 'string' ? record.reason : null;
+  const importedAt = record.createdAt ? new Date(String(record.createdAt)) : null;
+  return {
+    entityType,
+    entityId,
+    action,
+    oldValue: typeof record.oldValue === 'string' ? record.oldValue : null,
+    newValue: typeof record.newValue === 'string' ? record.newValue : null,
+    reason: originalReason
+      ? `سجل تاريخي مستورد: ${originalReason}`
+      : 'سجل تاريخي مستورد من نسخة CMS احتياطية',
+    createdAt: importedAt && !Number.isNaN(importedAt.getTime()) ? importedAt : new Date(),
+  };
+}
+
 function relationId(
   sourceRelationId: unknown,
   map: Map<number, number>,
@@ -100,14 +175,26 @@ function validateBundle(bundle: z.infer<typeof bundleSchema>) {
   if (total > MAX_IMPORT_ITEMS) {
     throw new Error(`يتجاوز ملف الاستيراد الحد الآمن (${MAX_IMPORT_ITEMS} عنصر).`);
   }
+  if (records(bundle, 'auditLog').length > MAX_AUDIT_LOG_ITEMS) {
+    throw new Error(`يتجاوز سجل التدقيق الحد الآمن (${MAX_AUDIT_LOG_ITEMS} سجل).`);
+  }
 
   assertUnique(records(bundle, 'pages'), 'slug', 'الصفحات');
   assertUnique(records(bundle, 'textContent'), 'key', 'النصوص');
   assertUnique(records(bundle, 'images'), 'key', 'الصور');
+  assertUnique(records(bundle, 'colors'), 'key', 'الألوان');
+  assertUnique(records(bundle, 'mediaFolders'), 'path', 'مجلدات الوسائط');
+  assertUnique(records(bundle, 'media'), 'key', 'الوسائط');
 
   records(bundle, 'pages').forEach((record) => sourceId(record, 'صفحة'));
   records(bundle, 'sections').forEach((record) => sourceId(record, 'قسم'));
   records(bundle, 'sectionButtons').forEach((record) => sourceId(record, 'زر قسم'));
+  records(bundle, 'textContent').forEach((record) => sourceId(record, 'نص'));
+  records(bundle, 'images').forEach((record) => sourceId(record, 'صورة'));
+  records(bundle, 'colors').forEach((record) => sourceId(record, 'لون'));
+  records(bundle, 'seoSettings').forEach((record) => sourceId(record, 'إعداد SEO'));
+  records(bundle, 'mediaFolders').forEach((record) => sourceId(record, 'مجلد وسائط'));
+  records(bundle, 'media').forEach((record) => sourceId(record, 'وسيط'));
 
   return {
     total,
@@ -131,8 +218,32 @@ async function assertNoKeyConflicts(
   const imageKeys = records(bundle, 'images').map((record) =>
     requiredString(record, 'key', 'الصور')
   );
+  const colorKeys = records(bundle, 'colors').map((record) =>
+    requiredString(record, 'key', 'الألوان')
+  );
+  const mediaFolderPaths = records(bundle, 'mediaFolders').map((record) =>
+    requiredString(record, 'path', 'مجلدات الوسائط')
+  );
+  const mediaKeys = records(bundle, 'media').map((record) =>
+    requiredString(record, 'key', 'الوسائط')
+  );
+  const seoCandidates = records(bundle, 'seoSettings')
+    .map((record) => ({
+      pageKey: typeof record.pageKey === 'string' ? record.pageKey : null,
+      slug: typeof record.slug === 'string' ? record.slug : null,
+      language: typeof record.language === 'string' ? record.language : 'ar',
+    }))
+    .filter((record) => record.pageKey || record.slug);
 
-  const [existingPages, existingText, existingImages] = await Promise.all([
+  const [
+    existingPages,
+    existingText,
+    existingImages,
+    existingColors,
+    existingMediaFolders,
+    existingMedia,
+    existingSeoSettings,
+  ] = await Promise.all([
     pageSlugs.length
       ? db.select({ slug: pages.slug }).from(pages).where(inArray(pages.slug, pageSlugs))
       : [],
@@ -145,12 +256,53 @@ async function assertNoKeyConflicts(
     imageKeys.length
       ? db.select({ key: images.key }).from(images).where(inArray(images.key, imageKeys))
       : [],
+    colorKeys.length
+      ? db
+          .select({ key: colorScheme.key })
+          .from(colorScheme)
+          .where(inArray(colorScheme.key, colorKeys))
+      : [],
+    mediaFolderPaths.length
+      ? db
+          .select({ path: mediaFolders.path })
+          .from(mediaFolders)
+          .where(inArray(mediaFolders.path, mediaFolderPaths))
+      : [],
+    mediaKeys.length
+      ? db.select({ key: media.key }).from(media).where(inArray(media.key, mediaKeys))
+      : [],
+    seoCandidates.length
+      ? db
+          .select({
+            pageKey: seoSettings.pageKey,
+            slug: seoSettings.slug,
+            language: seoSettings.language,
+          })
+          .from(seoSettings)
+      : [],
   ]);
 
   const conflicts = [
     ...existingPages.map((item: { slug: string }) => `صفحة: ${item.slug}`),
     ...existingText.map((item: { key: string }) => `نص: ${item.key}`),
     ...existingImages.map((item: { key: string }) => `صورة: ${item.key}`),
+    ...existingColors.map((item: { key: string }) => `لون: ${item.key}`),
+    ...existingMediaFolders.map((item: { path: string }) => `مجلد وسائط: ${item.path}`),
+    ...existingMedia.map((item: { key: string }) => `وسيط: ${item.key}`),
+    ...existingSeoSettings
+      .filter(
+        (existing: { pageKey: string | null; slug: string | null; language: string | null }) =>
+          seoCandidates.some(
+            (candidate) =>
+              candidate.language === (existing.language ?? 'ar') &&
+              ((candidate.pageKey && candidate.pageKey === existing.pageKey) ||
+                (candidate.slug && candidate.slug === existing.slug))
+          )
+      )
+      .map(
+        (item: { pageKey: string | null; slug: string | null }) =>
+          `SEO: ${item.pageKey ?? item.slug ?? 'إعداد بلا مفتاح'}`
+      ),
   ];
 
   if (conflicts.length) {
@@ -161,11 +313,11 @@ async function assertNoKeyConflicts(
 }
 
 export const importExportRouter = router({
-  export: contentReadProcedure.input(exportSchema).query(async ({ input }) => {
+  export: adminProcedure.input(exportSchema).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
     const exportData: Record<string, unknown> = {
       exportDate: new Date().toISOString(),
-      version: '2.0',
+      version: '3.0',
     };
 
     if (input.includePages) {
@@ -183,6 +335,26 @@ export const importExportRouter = router({
     if (input.includeImages) {
       exportData.images = await db.select().from(images);
     }
+    if (input.includeColors) {
+      exportData.colors = await db.select().from(colorScheme);
+    }
+    if (input.includeSeoSettings) {
+      exportData.seoSettings = await db.select().from(seoSettings);
+    }
+    if (input.includeMedia) {
+      const [folderRows, mediaRows] = await Promise.all([
+        db.select().from(mediaFolders),
+        db.select().from(media),
+      ]);
+      exportData.mediaFolders = folderRows;
+      exportData.media = mediaRows;
+    }
+    if (input.includeAuditLog) {
+      exportData.auditLog = await db.select().from(contentAuditLog);
+    }
+    exportData.collections = Object.keys(exportData).filter(
+      (key) => !['exportDate', 'version', 'collections'].includes(key)
+    );
 
     return exportData;
   }),
@@ -202,15 +374,35 @@ export const importExportRouter = router({
     const summary = validateBundle(input);
     await assertNoKeyConflicts(db, input);
 
-    await db.transaction(async (tx: any) => {
+    const importResult = await db.transaction(async (tx: any) => {
       const pageIdMap = new Map<number, number>();
       const sectionIdMap = new Map<number, number>();
+      const sectionButtonIdMap = new Map<number, number>();
+      const textContentIdMap = new Map<number, number>();
+      const imageIdMap = new Map<number, number>();
+      const colorIdMap = new Map<number, number>();
+      const seoIdMap = new Map<number, number>();
+      const mediaFolderIdMap = new Map<number, number>();
+      const mediaIdMap = new Map<number, number>();
 
-      for (const record of records(input, 'pages')) {
+      const pendingPages = [...records(input, 'pages')];
+      while (pendingPages.length) {
+        const nextIndex = pendingPages.findIndex(
+          (record) =>
+            record.parentId === null ||
+            record.parentId === undefined ||
+            pageIdMap.has(Number(record.parentId))
+        );
+        if (nextIndex < 0) {
+          throw new Error('تعذر ترتيب الصفحات لأن علاقة الصفحة الأب غير صالحة داخل ملف الاستيراد.');
+        }
+        const record = pendingPages.splice(nextIndex, 1)[0];
         const source = sourceId(record, 'صفحة');
+        const data = cleanRecord(record);
+        data.parentId = relationId(record.parentId, pageIdMap, 'الصفحة بالصفحة الأب');
         const result = await tx
           .insert(pages)
-          .values(cleanRecord(record) as any)
+          .values(data as any)
           .$returningId();
         pageIdMap.set(source, Number(result[0].id));
       }
@@ -227,41 +419,147 @@ export const importExportRouter = router({
       }
 
       for (const record of records(input, 'sectionButtons')) {
+        const source = sourceId(record, 'زر قسم');
         const data = cleanRecord(record);
         data.sectionId = relationId(record.sectionId, sectionIdMap, 'الزر بالقسم');
-        await tx.insert(sectionButtons).values(data as any);
+        const result = await tx
+          .insert(sectionButtons)
+          .values(data as any)
+          .$returningId();
+        sectionButtonIdMap.set(source, Number(result[0].id));
       }
 
       for (const record of records(input, 'textContent')) {
+        const source = sourceId(record, 'نص');
         const data = cleanRecord(record);
         data.pageId = relationId(record.pageId, pageIdMap, 'النص بالصفحة');
         data.sectionId = relationId(record.sectionId, sectionIdMap, 'النص بالقسم');
-        await tx.insert(textContent).values(data as any);
+        const result = await tx
+          .insert(textContent)
+          .values(data as any)
+          .$returningId();
+        textContentIdMap.set(source, Number(result[0].id));
       }
 
       for (const record of records(input, 'images')) {
+        const source = sourceId(record, 'صورة');
         const data = cleanRecord(record);
         data.pageId = relationId(record.pageId, pageIdMap, 'الصورة بالصفحة');
         data.sectionId = relationId(record.sectionId, sectionIdMap, 'الصورة بالقسم');
-        await tx.insert(images).values(data as any);
+        const result = await tx
+          .insert(images)
+          .values(data as any)
+          .$returningId();
+        imageIdMap.set(source, Number(result[0].id));
       }
+
+      for (const record of records(input, 'colors')) {
+        const source = sourceId(record, 'لون');
+        const result = await tx
+          .insert(colorScheme)
+          .values(cleanRecord(record) as any)
+          .$returningId();
+        colorIdMap.set(source, Number(result[0].id));
+      }
+
+      for (const record of records(input, 'seoSettings')) {
+        const source = sourceId(record, 'إعداد SEO');
+        const data = cleanRecord(record);
+        data.pageId = relationId(record.pageId, pageIdMap, 'إعداد SEO بالصفحة');
+        const result = await tx
+          .insert(seoSettings)
+          .values(data as any)
+          .$returningId();
+        seoIdMap.set(source, Number(result[0].id));
+      }
+
+      const pendingMediaFolders = [...records(input, 'mediaFolders')];
+      while (pendingMediaFolders.length) {
+        const nextIndex = pendingMediaFolders.findIndex(
+          (record) =>
+            record.parentId === null ||
+            record.parentId === undefined ||
+            mediaFolderIdMap.has(Number(record.parentId))
+        );
+        if (nextIndex < 0) {
+          throw new Error(
+            'تعذر ترتيب مجلدات الوسائط لأن علاقة المجلد الأب غير صالحة داخل ملف الاستيراد.'
+          );
+        }
+        const record = pendingMediaFolders.splice(nextIndex, 1)[0];
+        const source = sourceId(record, 'مجلد وسائط');
+        const data = cleanRecord(record);
+        data.parentId = relationId(record.parentId, mediaFolderIdMap, 'مجلد الوسائط الأب');
+        const result = await tx
+          .insert(mediaFolders)
+          .values(data as any)
+          .$returningId();
+        mediaFolderIdMap.set(source, Number(result[0].id));
+      }
+
+      for (const record of records(input, 'media')) {
+        const source = sourceId(record, 'وسيط');
+        const data = cleanRecord(record);
+        data.folderId = relationId(record.folderId, mediaFolderIdMap, 'الوسيط بالمجلد');
+        data.pageId = relationId(record.pageId, pageIdMap, 'الوسيط بالصفحة');
+        data.sectionId = relationId(record.sectionId, sectionIdMap, 'الوسيط بالقسم');
+        const result = await tx
+          .insert(media)
+          .values(data as any)
+          .$returningId();
+        mediaIdMap.set(source, Number(result[0].id));
+      }
+
+      const entityIdMaps: Record<string, Map<number, number>> = {
+        text: textContentIdMap,
+        image: imageIdMap,
+        color: colorIdMap,
+        seo: seoIdMap,
+        page: pageIdMap,
+        section: sectionIdMap,
+        sectionButton: sectionButtonIdMap,
+      };
+      const auditRows = records(input, 'auditLog')
+        .map((record) => cleanAuditRecord(record, entityIdMaps))
+        .filter((record): record is ContentRecord => record !== null);
+      if (auditRows.length) {
+        await tx.insert(contentAuditLog).values(auditRows as any);
+      }
+      return {
+        importedAuditLog: auditRows.length,
+        skippedAuditLog: records(input, 'auditLog').length - auditRows.length,
+      };
     });
 
     logger.info('Content import completed atomically', {
       userId: ctx.user.id,
       total: summary.total,
     });
-    return { success: true, ...summary };
+    return { success: true, ...summary, ...importResult };
   }),
 
   getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
-    const [pagesData, sectionsData, buttonsData, textData, imagesData] = await Promise.all([
+    const [
+      pagesData,
+      sectionsData,
+      buttonsData,
+      textData,
+      imagesData,
+      colorsData,
+      seoData,
+      mediaData,
+      auditData,
+    ] = await Promise.all([
       db.select().from(pages),
       db.select().from(sections),
       db.select().from(sectionButtons),
       db.select().from(textContent),
       db.select().from(images),
+      db.select().from(colorScheme),
+      db.select().from(seoSettings),
+      db.select().from(media),
+      db.select().from(contentAuditLog),
     ]);
     return {
       pages: pagesData.length,
@@ -269,6 +567,10 @@ export const importExportRouter = router({
       sectionButtons: buttonsData.length,
       textContent: textData.length,
       images: imagesData.length,
+      colors: colorsData.length,
+      seoSettings: seoData.length,
+      media: mediaData.length,
+      auditLog: auditData.length,
     };
   }),
 });

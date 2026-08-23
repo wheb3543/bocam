@@ -1,81 +1,124 @@
 /**
  * Import/Export Hook
- * Hook لاستيراد وتصدير المحتوى
+ * Hook لاستيراد وتصدير حزم CMS مع معاينة صريحة قبل التعديل.
  */
 
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
-import { toast } from 'sonner';
 
-interface ImportData {
+export interface CmsExportOptions {
+  includePages: boolean;
+  includeSections: boolean;
+  includeSectionButtons: boolean;
+  includeTextContent: boolean;
+  includeImages: boolean;
+  includeColors: boolean;
+  includeSeoSettings: boolean;
+  includeMedia: boolean;
+  includeAuditLog: boolean;
+}
+
+export interface ImportPreview {
+  total: number;
+  counts: Record<string, number>;
+  canImport: boolean;
+  policy: string;
+}
+
+export interface ImportResult extends ImportPreview {
+  success: boolean;
+  importedAuditLog: number;
+  skippedAuditLog: number;
+}
+
+type ImportPayload = {
   pages?: Array<Record<string, unknown>>;
   sections?: Array<Record<string, unknown>>;
   sectionButtons?: Array<Record<string, unknown>>;
   textContent?: Array<Record<string, unknown>>;
   images?: Array<Record<string, unknown>>;
+  colors?: Array<Record<string, unknown>>;
+  seoSettings?: Array<Record<string, unknown>>;
+  mediaFolders?: Array<Record<string, unknown>>;
+  media?: Array<Record<string, unknown>>;
+  auditLog?: Array<Record<string, unknown>>;
+  exportDate?: string;
+  version?: string;
+};
+
+function asImportPayload(data: unknown): ImportPayload {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error('ملف الاستيراد يجب أن يكون كائن JSON صالحاً.');
+  }
+  return data as ImportPayload;
 }
+
+const defaultExportOptions: CmsExportOptions = {
+  includePages: true,
+  includeSections: true,
+  includeSectionButtons: true,
+  includeTextContent: true,
+  includeImages: true,
+  includeColors: true,
+  includeSeoSettings: true,
+  includeMedia: true,
+  includeAuditLog: true,
+};
 
 export function useImportExport() {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-
-  const exportQuery = trpc.content.importExport.export.useQuery({});
+  const utils = trpc.useUtils();
   const previewImportMutation = trpc.content.importExport.previewImport.useMutation();
   const importMutation = trpc.content.importExport.import.useMutation();
   const overviewQuery = trpc.content.importExport.getOverview.useQuery();
 
-  const handleExport = async (): Promise<void> => {
+  const exportContent = async (options: CmsExportOptions = defaultExportOptions): Promise<void> => {
     setIsExporting(true);
     try {
-      const data = await exportQuery.refetch();
-      if (data.data) {
-        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `content-export-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast.success('تم تصدير المحتوى بنجاح');
-      }
-    } catch (error) {
-      toast.error('فشل تصدير المحتوى');
-
-      console.error(error);
+      const data = await utils.content.importExport.export.fetch(options);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `sgh-cms-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
     } finally {
       setIsExporting(false);
     }
   };
 
-  const handleImport = async (data: unknown): Promise<void> => {
+  const previewImport = async (data: unknown): Promise<ImportPreview> => {
+    return (await previewImportMutation.mutateAsync(asImportPayload(data))) as ImportPreview;
+  };
+
+  const confirmImport = async (data: unknown): Promise<ImportResult> => {
     setIsImporting(true);
     try {
-      const importData = data as ImportData;
-      const preview = await previewImportMutation.mutateAsync(importData);
-      if (!preview.canImport) {
-        throw new Error('تعذر اعتماد ملف الاستيراد.');
-      }
-      await importMutation.mutateAsync({ ...importData, confirm: true });
-      toast.success('تم استيراد المحتوى بنجاح');
-    } catch (error) {
-      toast.error('فشل استيراد المحتوى. تأكد من صحة الملف');
-
-      console.error(error);
+      const result = (await importMutation.mutateAsync({
+        ...asImportPayload(data),
+        confirm: true,
+      })) as ImportResult;
+      await utils.invalidate();
+      return result;
     } finally {
       setIsImporting(false);
     }
   };
 
   return {
+    defaultExportOptions,
     isExporting,
     isImporting,
     isPreviewingImport: previewImportMutation.isPending,
     overview: overviewQuery.data,
     isLoadingOverview: overviewQuery.isLoading,
-    handleExport,
-    handleImport,
+    exportContent,
+    previewImport,
+    confirmImport,
     refetchOverview: overviewQuery.refetch,
   };
 }
