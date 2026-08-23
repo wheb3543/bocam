@@ -65,6 +65,8 @@ export function useSEO() {
     includeDeleted: showDeleted,
     search: searchQuery || undefined,
   });
+  const { data: seoOverview, refetch: refetchOverview } =
+    trpc.content.seoSettings.getOverview.useQuery();
 
   // Mutations
   const createMutation = trpc.content.seoSettings.create.useMutation({
@@ -74,6 +76,7 @@ export function useSEO() {
       setIsCreateDialogOpen(false);
       setFormData(initialSEOSettingsFormData);
       refetch();
+      refetchOverview();
     },
     onError: (error) => {
       const issues = getPublicationQualityIssues(error);
@@ -94,6 +97,7 @@ export function useSEO() {
       setSelectedSEOSettings(null);
       setFormData(initialSEOSettingsFormData);
       refetch();
+      refetchOverview();
     },
     onError: (error) => {
       const issues = getPublicationQualityIssues(error);
@@ -110,6 +114,7 @@ export function useSEO() {
     onSuccess: () => {
       toast.success('تم حذف إعدادات SEO بنجاح');
       refetch();
+      refetchOverview();
     },
     onError: (error) => {
       toast.error(`فشل حذف إعدادات SEO: ${error.message}`);
@@ -120,6 +125,7 @@ export function useSEO() {
     onSuccess: () => {
       toast.success('تم نشر إعداد SEO بنجاح.');
       refetch();
+      refetchOverview();
     },
     onError: (error) => toast.error(`تعذر نشر إعداد SEO: ${error.message}`),
   });
@@ -128,6 +134,7 @@ export function useSEO() {
     onSuccess: () => {
       toast.success('تمت أرشفة إعداد SEO.');
       refetch();
+      refetchOverview();
     },
     onError: (error) => toast.error(`تعذرت أرشفة إعداد SEO: ${error.message}`),
   });
@@ -136,6 +143,7 @@ export function useSEO() {
     onSuccess: () => {
       toast.success('تمت استعادة إعداد SEO كمسودة.');
       refetch();
+      refetchOverview();
     },
     onError: (error) => toast.error(`تعذرت استعادة إعداد SEO: ${error.message}`),
   });
@@ -212,6 +220,7 @@ export function useSEO() {
     statusFilter,
     showDeleted,
     seoSettings,
+    seoOverview,
     loadingSEOSettings,
     createMutation,
     updateMutation,

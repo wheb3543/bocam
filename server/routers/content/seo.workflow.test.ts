@@ -36,6 +36,8 @@ describe('دورة CMS لإعدادات SEO', () => {
     expect(seoRouterSource).toContain('saveSeoVersion');
     expect(seoRouterSource).toContain("entityType: 'seo'");
     expect(seoRouterSource).toContain('invalidateSEOCache');
+    expect(seoRouterSource).toContain('archived,');
+    expect(seoRouterSource).toContain('deleted: allSeo.length - total');
   });
 
   it('يفرض بوابة الجودة ويعرض للعامة SEO منشوراً ونشطاً وغير محذوف فقط', () => {
@@ -78,11 +80,15 @@ describe('دورة CMS لإعدادات SEO', () => {
     expect(listSource).toContain('clearQualityIssues?.()');
     expect(listSource).toContain('عرض المحذوفات فقط');
     expect(listSource).toContain('handleRestoreSEOSettings');
+    expect(listSource).toContain('إحصاءات حالات SEO');
+    expect(listSource).toContain('overview?.drafts ?? 0');
+    expect(listSource).toContain('overview?.deleted ?? 0');
     expect(hookSource).toContain('qualityOverrideReason');
     expect(hookSource).toContain('handlePublishSEOSettings');
     expect(hookSource).toContain('handleArchiveSEOSettings');
     expect(hookSource).toContain('status: statusFilter');
     expect(hookSource).toContain('includeDeleted: showDeleted');
     expect(hookSource).toContain('handleRestoreSEOSettings');
+    expect(hookSource).toContain('seoOverview');
   });
 });

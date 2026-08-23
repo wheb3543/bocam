@@ -364,15 +364,20 @@ export const seoSettingsRouter = router({
 
   getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
-    const allSeo = await db.select().from(seoSettings).where(isNull(seoSettings.deletedAt));
-    const total = allSeo.length;
-    const published = allSeo.filter((item) => item.status === 'published').length;
-    const active = allSeo.filter((item) => item.isActive === 'yes').length;
+    const allSeo = await db.select().from(seoSettings);
+    const activeSeo = allSeo.filter((item) => !item.deletedAt);
+    const total = activeSeo.length;
+    const published = activeSeo.filter((item) => item.status === 'published').length;
+    const drafts = activeSeo.filter((item) => item.status === 'draft').length;
+    const archived = activeSeo.filter((item) => item.status === 'archived').length;
+    const active = activeSeo.filter((item) => item.isActive === 'yes').length;
     return {
       total,
       active,
       published,
-      drafts: allSeo.filter((item) => item.status === 'draft').length,
+      drafts,
+      archived,
+      deleted: allSeo.length - total,
       inactive: total - active,
     };
   }),

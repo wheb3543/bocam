@@ -9,6 +9,7 @@ import { ContentCard } from './ContentCard';
 import { ContentFiltersComponent } from './ContentFilters';
 import { SEODialog } from './dialogs/SEODialog';
 import { Plus } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -45,6 +46,13 @@ interface SEOListProps {
   onStatusFilterChange: (status: 'all' | SEOSettings['status']) => void;
   showDeleted: boolean;
   onShowDeletedChange: (showDeleted: boolean) => void;
+  overview?: {
+    total: number;
+    drafts: number;
+    published: number;
+    archived: number;
+    deleted: number;
+  };
   onVersionHistory?: (id: number) => void;
   qualityIssues?: string[];
   clearQualityIssues?: () => void;
@@ -80,6 +88,7 @@ export function SEOList({
   onStatusFilterChange,
   showDeleted,
   onShowDeletedChange,
+  overview,
   onVersionHistory,
   qualityIssues = [],
   clearQualityIssues,
@@ -144,6 +153,43 @@ export function SEOList({
             عرض المحذوفات فقط
           </Label>
         </div>
+      </div>
+      <div className="flex flex-wrap gap-2" aria-label="إحصاءات حالات SEO">
+        {[
+          { label: 'الكل', value: overview?.total ?? 0, status: 'all' as const },
+          { label: 'مسودة', value: overview?.drafts ?? 0, status: 'draft' as const },
+          { label: 'منشور', value: overview?.published ?? 0, status: 'published' as const },
+          { label: 'مؤرشف', value: overview?.archived ?? 0, status: 'archived' as const },
+        ].map((counter) => (
+          <Button
+            key={counter.status}
+            type="button"
+            variant={statusFilter === counter.status && !showDeleted ? 'secondary' : 'outline'}
+            size="sm"
+            className="gap-2"
+            onClick={() => {
+              onShowDeletedChange(false);
+              onStatusFilterChange(counter.status);
+            }}
+          >
+            {counter.label}
+            <Badge variant="secondary" className="min-w-5 justify-center px-1.5">
+              {counter.value}
+            </Badge>
+          </Button>
+        ))}
+        <Button
+          type="button"
+          variant={showDeleted ? 'secondary' : 'outline'}
+          size="sm"
+          className="gap-2"
+          onClick={() => onShowDeletedChange(true)}
+        >
+          المحذوفات
+          <Badge variant="secondary" className="min-w-5 justify-center px-1.5">
+            {overview?.deleted ?? 0}
+          </Badge>
+        </Button>
       </div>
 
       {/* Content List */}

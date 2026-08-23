@@ -569,6 +569,7 @@ export default function ContentManagementPage() {
               onStatusFilterChange={seo.setStatusFilter}
               showDeleted={seo.showDeleted}
               onShowDeletedChange={seo.setShowDeleted}
+              overview={seo.seoOverview}
               qualityIssues={seo.qualityIssues}
               clearQualityIssues={seo.clearQualityIssues}
               isAdmin={seo.isAdmin}
