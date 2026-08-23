@@ -600,6 +600,7 @@ export const publicContentRouter = router({
                 and(
                   inArray(sectionButtons.sectionId, sectionIds),
                   eq(sectionButtons.isActive, 'yes'),
+                  eq(sectionButtons.status, 'published'),
                   isNull(sectionButtons.deletedAt)
                 )
               )
@@ -726,6 +727,7 @@ export const publicContentRouter = router({
                 and(
                   inArray(sectionButtons.sectionId, sectionIds),
                   eq(sectionButtons.isActive, 'yes'),
+                  ne(sectionButtons.status, 'archived'),
                   isNull(sectionButtons.deletedAt)
                 )
               )
@@ -781,6 +783,7 @@ export const publicContentRouter = router({
           and(
             eq(sectionButtons.sectionId, input.sectionId),
             eq(sectionButtons.isActive, 'yes'),
+            eq(sectionButtons.status, 'published'),
             isNull(sectionButtons.deletedAt)
           )
         )
