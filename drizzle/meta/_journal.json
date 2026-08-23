@@ -610,6 +610,13 @@
       "when": 1787437743101,
       "tag": "0089_flowery_tattoo",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "5",
+      "when": 1787444956645,
+      "tag": "0090_mighty_rumiko_fujikawa",
+      "breakpoints": true
     }
   ]
 }

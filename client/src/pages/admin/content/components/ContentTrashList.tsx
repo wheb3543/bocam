@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { trpc } from '@/lib/api/trpc';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -18,6 +18,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  CalendarClock,
+  Eye,
   FileText,
   Image,
   Layers,
@@ -26,6 +36,7 @@ import {
   MousePointerClick,
   RefreshCcw,
   Search,
+  Settings2,
   ShieldCheck,
   Trash2,
 } from 'lucide-react';
@@ -70,6 +81,12 @@ export function ContentTrashList() {
   const [search, setSearch] = useState('');
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [previewTarget, setPreviewTarget] = useState<{
+    entityType: TrashEntityType;
+    id: number;
+  } | null>(null);
+  const [retentionDays, setRetentionDays] = useState('30');
+  const [retentionEnabled, setRetentionEnabled] = useState(true);
   const deferredSearch = useDeferredValue(search);
   const utils = trpc.useUtils();
   const queryInput = useMemo(
@@ -81,6 +98,13 @@ export function ContentTrashList() {
     [deferredSearch, entityType]
   );
   const trashQuery = trpc.content.trash.list.useQuery(queryInput, { enabled: isAdmin });
+  const retentionQuery = trpc.content.trash.getRetentionPolicy.useQuery(undefined, {
+    enabled: isAdmin,
+  });
+  const previewQuery = trpc.content.trash.preview.useQuery(
+    previewTarget ?? { entityType: 'textContent', id: 1 },
+    { enabled: Boolean(previewTarget) }
+  );
   const trashItems = trashQuery.data?.data;
   const items = useMemo(() => trashItems ?? [], [trashItems]);
 
@@ -90,6 +114,13 @@ export function ContentTrashList() {
   );
   const allVisibleSelected =
     items.length > 0 && items.every((item) => selectedKeys.includes(keyOf(item)));
+
+  useEffect(() => {
+    if (retentionQuery.data) {
+      setRetentionDays(String(retentionQuery.data.retentionDays));
+      setRetentionEnabled(retentionQuery.data.isEnabled);
+    }
+  }, [retentionQuery.data]);
 
   const restoreMutation = trpc.content.trash.restoreMany.useMutation({
     onSuccess: async (result) => {
@@ -111,6 +142,14 @@ export function ContentTrashList() {
       ]);
     },
     onError: (error) => toast.error(error.message || 'تعذرت استعادة العناصر المحددة.'),
+  });
+
+  const retentionMutation = trpc.content.trash.updateRetentionPolicy.useMutation({
+    onSuccess: async () => {
+      toast.success('تم حفظ سياسة الاحتفاظ بسلة المحذوفات.');
+      await retentionQuery.refetch();
+    },
+    onError: (error) => toast.error(error.message || 'تعذر حفظ سياسة الاحتفاظ.'),
   });
 
   const toggleItem = (item: { entityType: TrashEntityType; id: number }) => {
@@ -194,6 +233,68 @@ export function ContentTrashList() {
                   {option.label}
                 </Button>
               ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-primary/15 bg-primary/[0.035] p-4">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+              <div className="space-y-1">
+                <p className="flex items-center gap-2 font-medium">
+                  <CalendarClock className="h-4 w-4 text-primary" />
+                  سياسة الحذف النهائي المؤجل
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  لا تُحذف العناصر نهائياً إلا بعد انتهاء مدة الاحتفاظ. قبل ذلك تبقى قابلة للمعاينة
+                  والاستعادة.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {retentionQuery.data?.isScheduled
+                    ? 'مهمة التنظيف اليومية مفعّلة وتتحقق من العناصر المستحقة.'
+                    : 'سيُفعَّل التنظيف اليومي بعد اعتماد إعداد المهمة الآمنة.'}
+                  {retentionQuery.data?.lastPurgeAt
+                    ? ` آخر تنفيذ: ${new Intl.DateTimeFormat('ar-SA', { dateStyle: 'medium', timeStyle: 'short' }).format(retentionQuery.data.lastPurgeAt)}.`
+                    : ''}
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                <label className="grid gap-1 text-sm font-medium">
+                  أيام الاحتفاظ
+                  <Input
+                    type="number"
+                    min={7}
+                    max={365}
+                    value={retentionDays}
+                    onChange={(event) => setRetentionDays(event.target.value)}
+                    className="w-32"
+                  />
+                </label>
+                <label className="flex h-10 items-center gap-2 rounded-md border bg-background px-3 text-sm">
+                  <Checkbox
+                    checked={retentionEnabled}
+                    onCheckedChange={(checked) => setRetentionEnabled(checked === true)}
+                  />
+                  تفعيل الحذف النهائي
+                </label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    retentionMutation.mutate({
+                      retentionDays: Number(retentionDays),
+                      isEnabled: retentionEnabled,
+                    })
+                  }
+                  disabled={
+                    retentionMutation.isPending ||
+                    !Number.isInteger(Number(retentionDays)) ||
+                    Number(retentionDays) < 7 ||
+                    Number(retentionDays) > 365
+                  }
+                >
+                  <Settings2 className="ml-2 h-4 w-4" />
+                  حفظ السياسة
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -287,17 +388,30 @@ export function ContentTrashList() {
                           timeStyle: 'short',
                         }).format(item.deletedAt)}
                       </p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedKeys([keyOf(item)]);
-                          setIsConfirmationOpen(true);
-                        }}
-                      >
-                        استعادة
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setPreviewTarget({ entityType: item.entityType, id: item.id })
+                          }
+                        >
+                          <Eye className="ml-1 h-3.5 w-3.5" />
+                          معاينة
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedKeys([keyOf(item)]);
+                            setIsConfirmationOpen(true);
+                          }}
+                        >
+                          استعادة
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}
@@ -335,6 +449,90 @@ export function ContentTrashList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog
+        open={Boolean(previewTarget)}
+        onOpenChange={(open) => !open && setPreviewTarget(null)}
+      >
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-primary" />
+              معاينة العنصر المحذوف
+            </DialogTitle>
+            <DialogDescription>
+              راجع البيانات كاملة قبل بدء الاستعادة. ستعود الاستعادة دائماً كمسودة غير منشورة.
+            </DialogDescription>
+          </DialogHeader>
+          {previewQuery.isLoading ? (
+            <div className="flex min-h-44 items-center justify-center text-muted-foreground">
+              <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+              جارٍ تحميل المعاينة…
+            </div>
+          ) : previewQuery.data ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border bg-muted/20 p-4">
+                <p className="font-semibold">{previewQuery.data.item.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {previewQuery.data.item.description}
+                </p>
+              </div>
+              {previewQuery.data.imageUrl ? (
+                <img
+                  src={previewQuery.data.imageUrl}
+                  alt={previewQuery.data.item.title}
+                  className="max-h-80 w-full rounded-lg border bg-muted/20 object-contain"
+                />
+              ) : null}
+              <dl className="grid gap-3 sm:grid-cols-2">
+                {previewQuery.data.fields.map((field) => (
+                  <div key={field.label} className="rounded-lg border p-3">
+                    <dt className="text-xs text-muted-foreground">{field.label}</dt>
+                    <dd className="mt-1 break-words text-sm font-medium">{field.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              {previewQuery.data.body ? (
+                <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border bg-muted/30 p-4 text-sm leading-7">
+                  {previewQuery.data.body}
+                </pre>
+              ) : null}
+              {previewQuery.data.settings ? (
+                <pre
+                  className="max-h-56 overflow-auto whitespace-pre-wrap rounded-lg border bg-muted/30 p-4 text-xs"
+                  dir="ltr"
+                >
+                  {previewQuery.data.settings}
+                </pre>
+              ) : null}
+            </div>
+          ) : (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              تعذرت قراءة العنصر المحدد.
+            </p>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setPreviewTarget(null)}>
+              إغلاق
+            </Button>
+            <Button
+              type="button"
+              disabled={!previewQuery.data}
+              onClick={() => {
+                if (!previewQuery.data) {
+                  return;
+                }
+                setSelectedKeys([keyOf(previewQuery.data.item)]);
+                setPreviewTarget(null);
+                setIsConfirmationOpen(true);
+              }}
+            >
+              <RefreshCcw className="ml-2 h-4 w-4" />
+              متابعة الاستعادة
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

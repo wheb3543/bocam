@@ -49,4 +49,14 @@ describe('سلة محذوفات CMS الموحدة', () => {
     expect(componentSource).toContain('restoreMany.useMutation');
     expect(componentSource).toContain('استعادة كمسودات');
   });
+
+  it('يوفر معاينة تفصيلية للعنصر وإعداد سياسة احتفاظ قبل الاستعادة', () => {
+    expect(routerSource).toContain('preview: adminProcedure');
+    expect(routerSource).toContain('getRetentionPolicy: adminProcedure');
+    expect(routerSource).toContain('updateRetentionPolicy: adminProcedure');
+    expect(componentSource).toContain('معاينة العنصر المحذوف');
+    expect(componentSource).toContain('متابعة الاستعادة');
+    expect(componentSource).toContain('سياسة الحذف النهائي المؤجل');
+    expect(componentSource).toContain('حفظ السياسة');
+  });
 });

@@ -10,6 +10,7 @@ import { createMetaBusinessOAuthCallbackRouter } from '../api/metaBusinessOAuthR
 import { createExternalPlatformOAuthCallbackRouter } from '../api/externalPlatformOAuthRoute';
 import { createSocialPublishingScheduledRouter } from '../api/socialPublishingScheduledRoute';
 import { createCmsPublishingScheduledRouter } from '../api/cmsPublishingScheduledRoute';
+import { createCmsTrashRetentionScheduledRouter } from '../api/cmsTrashRetentionScheduledRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
 import { createContext } from './context';
@@ -78,6 +79,8 @@ async function startServer() {
   app.use(createSocialPublishingScheduledRouter());
   // Heartbeat callback for deferred CMS publication. It is activated after deployment.
   app.use(createCmsPublishingScheduledRouter());
+  // Heartbeat callback for irreversible CMS trash cleanup after the retention window.
+  app.use(createCmsTrashRetentionScheduledRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
   // Health check and metrics endpoints

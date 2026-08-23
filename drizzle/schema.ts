@@ -2012,6 +2012,33 @@ export type ContentAuditLog = typeof contentAuditLog.$inferSelect;
 export type InsertContentAuditLog = typeof contentAuditLog.$inferInsert;
 
 /**
+ * CMS Trash Retention Policy - سياسة الاحتفاظ بسلة محذوفات المحتوى
+ * صف وحيد للتحكم في الحذف النهائي المؤجل ومهمة Heartbeat المرتبطة به.
+ */
+export const cmsTrashRetentionPolicies = mysqlTable(
+  'cmsTrashRetentionPolicies',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    policyKey: varchar('policyKey', { length: 50 }).notNull().unique(),
+    retentionDays: int('retentionDays').default(30).notNull(),
+    isEnabled: boolean('isEnabled').default(true).notNull(),
+    scheduleCronTaskUid: varchar('scheduleCronTaskUid', { length: 65 }),
+    lastPurgeAt: timestamp('lastPurgeAt'),
+    lastPurgeSummary: text('lastPurgeSummary'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    scheduleCronTaskUidIdx: index('cmsTrashRetentionPolicies_scheduleCronTaskUid_idx').on(
+      table.scheduleCronTaskUid
+    ),
+  })
+);
+
+export type CmsTrashRetentionPolicy = typeof cmsTrashRetentionPolicies.$inferSelect;
+export type InsertCmsTrashRetentionPolicy = typeof cmsTrashRetentionPolicies.$inferInsert;
+
+/**
  * Content Versions Table - جدول النسخ المحفوظة
  * يخزّن النسخ المحفوظة من المحتوى للتراجع والإعادة
  */

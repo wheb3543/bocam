@@ -2,13 +2,24 @@ import { z } from 'zod';
 import { and, desc, eq, isNotNull } from 'drizzle-orm';
 import { adminProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
-import { images, pages, sectionButtons, sections, textContent } from '../../../drizzle/schema';
+import {
+  cmsTrashRetentionPolicies,
+  images,
+  pages,
+  sectionButtons,
+  sections,
+  textContent,
+} from '../../../drizzle/schema';
 import { auditLogService } from '../../services/content/auditLogService';
 import { contentVersionsService } from '../../services/content/contentVersionsService';
 import { invalidateImagesCache, invalidateTextContentCache } from '../public/content';
 import { invalidateAdminTextContentCache } from './textContent';
 import { invalidateAdminPagesCache } from './pages';
 import { invalidateAdminSectionsCache } from './sections';
+import {
+  DEFAULT_CMS_TRASH_RETENTION_DAYS,
+  getCmsTrashRetentionPolicy,
+} from '../../services/content/trashRetentionService';
 
 const trashEntityTypeSchema = z.enum(['textContent', 'image', 'page', 'section', 'sectionButton']);
 type TrashEntityType = z.infer<typeof trashEntityTypeSchema>;
@@ -86,6 +97,102 @@ function matchesSearch(item: TrashItem, search?: string) {
   }
   const normalizedSearch = search.trim().toLocaleLowerCase('ar');
   return `${item.title} ${item.description}`.toLocaleLowerCase('ar').includes(normalizedSearch);
+}
+
+function toPreviewFields(entityType: TrashEntityType, record: Record<string, unknown>) {
+  const build = (label: string, value: unknown) => ({
+    label,
+    value: value === null || value === undefined ? '—' : String(value),
+  });
+  if (entityType === 'textContent') {
+    return [
+      build('المفتاح', record.key),
+      build('اللغة', record.language),
+      build('القسم', record.section),
+      build('الصفحة', record.pageId),
+      build('الحالة السابقة', record.status),
+    ];
+  }
+  if (entityType === 'image') {
+    return [
+      build('المفتاح', record.key),
+      build('النص البديل العربي', record.altAr),
+      build('النص البديل الإنجليزي', record.altEn),
+      build('الأبعاد', record.width && record.height ? `${record.width} × ${record.height}` : null),
+      build('الصيغة', record.format),
+    ];
+  }
+  if (entityType === 'page') {
+    return [
+      build('الاسم', record.name),
+      build('الرابط', `/${record.slug ?? ''}`),
+      build('العنوان العربي', record.titleAr),
+      build('العنوان الإنجليزي', record.titleEn),
+      build('نوع الصفحة', record.type),
+    ];
+  }
+  if (entityType === 'section') {
+    return [
+      build('اسم القسم', record.name),
+      build('العنوان العربي', record.titleAr),
+      build('العنوان الإنجليزي', record.titleEn),
+      build('نوع القسم', record.type),
+      build('الصفحة المرتبطة', record.pageId),
+    ];
+  }
+  return [
+    build('النص العربي', record.textAr),
+    build('النص الإنجليزي', record.textEn),
+    build('الرابط', record.link),
+    build('النمط', record.style),
+    build('القسم المرتبط', record.sectionId),
+  ];
+}
+
+async function getDeletedRecord(db: any, entityType: TrashEntityType, id: number) {
+  if (entityType === 'textContent') {
+    return (
+      await db
+        .select()
+        .from(textContent)
+        .where(and(eq(textContent.id, id), isNotNull(textContent.deletedAt)))
+        .limit(1)
+    )[0];
+  }
+  if (entityType === 'image') {
+    return (
+      await db
+        .select()
+        .from(images)
+        .where(and(eq(images.id, id), isNotNull(images.deletedAt)))
+        .limit(1)
+    )[0];
+  }
+  if (entityType === 'page') {
+    return (
+      await db
+        .select()
+        .from(pages)
+        .where(and(eq(pages.id, id), isNotNull(pages.deletedAt)))
+        .limit(1)
+    )[0];
+  }
+  if (entityType === 'section') {
+    return (
+      await db
+        .select()
+        .from(sections)
+        .where(and(eq(sections.id, id), isNotNull(sections.deletedAt)))
+        .limit(1)
+    )[0];
+  }
+  return (
+    await db
+      .select()
+      .from(sectionButtons)
+      .where(and(eq(sectionButtons.id, id), isNotNull(sectionButtons.deletedAt)))
+      .limit(1)
+  )[0];
 }
 
 async function restoreDeletedEntity(
@@ -180,6 +287,38 @@ async function invalidateRestoredEntityCaches(entityTypes: Set<TrashEntityType>)
 }
 
 export const trashRouter = router({
+  getRetentionPolicy: adminProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
+    const policy = await getCmsTrashRetentionPolicy(db);
+    return {
+      retentionDays: policy?.retentionDays ?? DEFAULT_CMS_TRASH_RETENTION_DAYS,
+      isEnabled: policy?.isEnabled ?? true,
+      isScheduled: Boolean(policy?.scheduleCronTaskUid),
+      lastPurgeAt: policy?.lastPurgeAt ?? null,
+      lastPurgeSummary: policy?.lastPurgeSummary ? JSON.parse(policy.lastPurgeSummary) : null,
+    };
+  }),
+
+  updateRetentionPolicy: adminProcedure
+    .input(
+      z.object({
+        retentionDays: z.number().int().min(7).max(365),
+        isEnabled: z.boolean(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
+      const policy = await getCmsTrashRetentionPolicy(db);
+      if (!policy) {
+        throw new Error('تعذر العثور على سياسة الاحتفاظ بسلة المحذوفات.');
+      }
+      await db
+        .update(cmsTrashRetentionPolicies)
+        .set({ retentionDays: input.retentionDays, isEnabled: input.isEnabled })
+        .where(eq(cmsTrashRetentionPolicies.id, policy.id));
+      return { retentionDays: input.retentionDays, isEnabled: input.isEnabled };
+    }),
+
   list: adminProcedure
     .input(
       z.object({
@@ -250,6 +389,24 @@ export const trashRouter = router({
         .slice(0, requestedLimit);
 
       return { data, total: data.length };
+    }),
+
+  preview: adminProcedure
+    .input(z.object({ entityType: trashEntityTypeSchema, id: z.number().int().positive() }))
+    .query(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
+      const record = await getDeletedRecord(db, input.entityType, input.id);
+      if (!record) {
+        throw new Error('العنصر غير موجود أو لم يعد ضمن سلة المحذوفات.');
+      }
+      const rawRecord = record as Record<string, unknown>;
+      return {
+        item: toTrashItem(input.entityType, rawRecord),
+        fields: toPreviewFields(input.entityType, rawRecord),
+        body: input.entityType === 'textContent' ? String(rawRecord.content ?? '') : null,
+        imageUrl: input.entityType === 'image' ? String(rawRecord.url ?? '') : null,
+        settings: input.entityType === 'section' ? String(rawRecord.settings ?? '') : null,
+      };
     }),
 
   restoreMany: adminProcedure
