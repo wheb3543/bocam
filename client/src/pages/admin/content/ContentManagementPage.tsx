@@ -564,6 +564,11 @@ export default function ContentManagementPage() {
               onCreateSEOSettings={seo.handleCreateSEOSettings}
               openEditDialog={seo.openEditDialog}
               handleDeleteSEOSettings={seo.handleDeleteSEOSettings}
+              handleRestoreSEOSettings={seo.handleRestoreSEOSettings}
+              statusFilter={seo.statusFilter}
+              onStatusFilterChange={seo.setStatusFilter}
+              showDeleted={seo.showDeleted}
+              onShowDeletedChange={seo.setShowDeleted}
               qualityIssues={seo.qualityIssues}
               clearQualityIssues={seo.clearQualityIssues}
               isAdmin={seo.isAdmin}
@@ -575,6 +580,7 @@ export default function ContentManagementPage() {
               }}
               createMutation={seo.createMutation}
               updateMutation={seo.updateMutation}
+              restoreMutation={seo.restoreMutation}
             />
           )}
         </ContentTabs>

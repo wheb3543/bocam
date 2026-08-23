@@ -76,8 +76,13 @@ describe('دورة CMS لإعدادات SEO', () => {
     expect(dialogSource).toContain('ApprovalSubmissionPanel');
     expect(listSource).toContain('selectedSEOSettings?.id');
     expect(listSource).toContain('clearQualityIssues?.()');
+    expect(listSource).toContain('عرض المحذوفات فقط');
+    expect(listSource).toContain('handleRestoreSEOSettings');
     expect(hookSource).toContain('qualityOverrideReason');
     expect(hookSource).toContain('handlePublishSEOSettings');
     expect(hookSource).toContain('handleArchiveSEOSettings');
+    expect(hookSource).toContain('status: statusFilter');
+    expect(hookSource).toContain('includeDeleted: showDeleted');
+    expect(hookSource).toContain('handleRestoreSEOSettings');
   });
 });

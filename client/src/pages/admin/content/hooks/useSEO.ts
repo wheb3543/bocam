@@ -50,6 +50,8 @@ export function useSEO() {
   const [searchQuery, setSearchQuery] = useState('');
   const [language, setLanguage] = useState('all');
   const [isActive, setIsActive] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | SEOSettings['status']>('all');
+  const [showDeleted, setShowDeleted] = useState(false);
 
   // Query
   const {
@@ -59,6 +61,8 @@ export function useSEO() {
   } = trpc.content.seoSettings.list.useQuery({
     language: language !== 'all' ? language : undefined,
     isActive: isActive !== 'all' ? (isActive as 'yes' | 'no') : undefined,
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+    includeDeleted: showDeleted,
     search: searchQuery || undefined,
   });
 
@@ -128,6 +132,14 @@ export function useSEO() {
     onError: (error) => toast.error(`تعذرت أرشفة إعداد SEO: ${error.message}`),
   });
 
+  const restoreMutation = trpc.content.seoSettings.restore.useMutation({
+    onSuccess: () => {
+      toast.success('تمت استعادة إعداد SEO كمسودة.');
+      refetch();
+    },
+    onError: (error) => toast.error(`تعذرت استعادة إعداد SEO: ${error.message}`),
+  });
+
   // Handlers
   const handleCreateSEOSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,6 +159,13 @@ export function useSEO() {
     // eslint-disable-next-line no-alert -- Intentional user confirmation
     if (confirm('هل أنت متأكد من حذف هذه الإعدادات؟')) {
       deleteMutation.mutate({ id });
+    }
+  };
+
+  const handleRestoreSEOSettings = (id: number) => {
+    // eslint-disable-next-line no-alert -- Intentional user confirmation
+    if (confirm('سيُستعاد إعداد SEO كمسودة غير منشورة. هل تريد المتابعة؟')) {
+      restoreMutation.mutate({ id });
     }
   };
 
@@ -190,6 +209,8 @@ export function useSEO() {
     searchQuery,
     language,
     isActive,
+    statusFilter,
+    showDeleted,
     seoSettings,
     loadingSEOSettings,
     createMutation,
@@ -197,6 +218,7 @@ export function useSEO() {
     deleteMutation,
     publishMutation,
     archiveMutation,
+    restoreMutation,
 
     // Setters
     setIsCreateDialogOpen,
@@ -206,6 +228,8 @@ export function useSEO() {
     setSearchQuery,
     setLanguage,
     setIsActive,
+    setStatusFilter,
+    setShowDeleted,
 
     // Handlers
     handleCreateSEOSettings,
@@ -214,6 +238,7 @@ export function useSEO() {
     handlePublishSEOSettings: (id: number, qualityOverrideReason?: string) =>
       publishMutation.mutate({ id, qualityOverrideReason }),
     handleArchiveSEOSettings: (id: number) => archiveMutation.mutate({ id }),
+    handleRestoreSEOSettings,
     openEditDialog,
     resetForm,
     clearQualityIssues: () => setQualityIssues([]),

@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
-import { contentAuditLog, images, sectionButtons, sections } from '../../../drizzle/schema';
+import { contentAuditLog, images, pages, sectionButtons, sections } from '../../../drizzle/schema';
 
 export type CmsPublishEntityType =
   'page' | 'textContent' | 'image' | 'media' | 'section' | 'sectionButton' | 'seo';
@@ -26,7 +26,91 @@ type PublishCandidate = {
   canonicalUrl?: string | null;
   ogImage?: string | null;
   structuredData?: string | null;
+  title?: string | null;
+  description?: string | null;
+  robots?: string | null;
 };
+
+type SeoPageProfile = 'main' | 'sub' | 'general';
+
+const seoQualityProfiles: Record<
+  SeoPageProfile,
+  {
+    minTitleLength: number;
+    minDescriptionLength: number;
+    requiresCanonical: boolean;
+    requiresRobots: boolean;
+  }
+> = {
+  main: {
+    minTitleLength: 30,
+    minDescriptionLength: 120,
+    requiresCanonical: true,
+    requiresRobots: true,
+  },
+  sub: {
+    minTitleLength: 20,
+    minDescriptionLength: 70,
+    requiresCanonical: true,
+    requiresRobots: false,
+  },
+  general: {
+    minTitleLength: 20,
+    minDescriptionLength: 70,
+    requiresCanonical: false,
+    requiresRobots: false,
+  },
+};
+
+async function getSeoPageProfile(db: any, candidate: PublishCandidate): Promise<SeoPageProfile> {
+  if (!candidate.pageId || !db?.select) {
+    return 'general';
+  }
+
+  const [page] = await db
+    .select({ type: pages.type })
+    .from(pages)
+    .where(eq(pages.id, candidate.pageId))
+    .limit(1);
+
+  return page?.type === 'main' || page?.type === 'sub' ? page.type : 'general';
+}
+
+function seoProfileIssues(profile: SeoPageProfile, candidate: PublishCandidate) {
+  const rules = seoQualityProfiles[profile];
+  const profileLabel =
+    profile === 'main' ? 'الصفحة الرئيسية' : profile === 'sub' ? 'الصفحة الفرعية' : 'الإعداد العام';
+  const issues: PublicationQualityIssue[] = [];
+  const title = candidate.title?.trim() ?? '';
+  const description = candidate.description?.trim() ?? '';
+
+  if (title.length < rules.minTitleLength || title.length > 60) {
+    issues.push({
+      code: `seo-title-length-${profile}`,
+      message: `${profileLabel}: يجب أن يتراوح عنوان SEO بين ${rules.minTitleLength} و60 حرفاً.`,
+    });
+  }
+  if (description.length < rules.minDescriptionLength || description.length > 160) {
+    issues.push({
+      code: `seo-description-length-${profile}`,
+      message: `${profileLabel}: يجب أن يتراوح وصف SEO بين ${rules.minDescriptionLength} و160 حرفاً.`,
+    });
+  }
+  if (rules.requiresCanonical && !candidate.canonicalUrl?.trim()) {
+    issues.push({
+      code: `seo-canonical-required-${profile}`,
+      message: `${profileLabel}: يتطلب رابطاً أساسياً Canonical قبل النشر.`,
+    });
+  }
+  if (rules.requiresRobots && !candidate.robots?.trim()) {
+    issues.push({
+      code: `seo-robots-required-${profile}`,
+      message: `${profileLabel}: تتطلب تعليمات robots صريحة قبل النشر.`,
+    });
+  }
+
+  return issues;
+}
 
 function hasInvalidLink(value: string | null | undefined) {
   const link = value?.trim();
@@ -130,6 +214,10 @@ export async function evaluatePublicationQuality(
   candidate: PublishCandidate
 ): Promise<PublicationQualityIssue[]> {
   const issues = inlineIssues(entityType, candidate);
+
+  if (entityType === 'seo') {
+    issues.push(...seoProfileIssues(await getSeoPageProfile(db, candidate), candidate));
+  }
 
   if (entityType === 'page' && candidate.id) {
     const pageImages = await db

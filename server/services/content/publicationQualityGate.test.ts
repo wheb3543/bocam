@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { assertPublicationQuality } from './publicationQualityGate';
+import { assertPublicationQuality, evaluatePublicationQuality } from './publicationQualityGate';
 
 function createAuditDb() {
   const values = vi.fn().mockResolvedValue(undefined);
@@ -7,6 +7,13 @@ function createAuditDb() {
     insert: vi.fn().mockReturnValue({ values }),
     values,
   };
+}
+
+function createSeoPageDb(type: 'main' | 'sub') {
+  const limit = vi.fn().mockResolvedValue([{ type }]);
+  const where = vi.fn().mockReturnValue({ limit });
+  const from = vi.fn().mockReturnValue({ where });
+  return { select: vi.fn().mockReturnValue({ from }) };
 }
 
 const imageWithoutAlt = {
@@ -68,5 +75,36 @@ describe('assertPublicationQuality', () => {
     ).rejects.toMatchObject({ code: 'FORBIDDEN' });
 
     expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  it('يفرض متطلبات SEO الأشد للصفحة الرئيسية قبل النشر', async () => {
+    const issues = await evaluatePublicationQuality(createSeoPageDb('main'), 'seo', {
+      pageId: 1,
+      title: 'عنوان قصير',
+      description: 'وصف قصير',
+      canonicalUrl: null,
+      robots: null,
+    });
+
+    expect(issues.map((issue) => issue.code)).toEqual(
+      expect.arrayContaining([
+        'seo-title-length-main',
+        'seo-description-length-main',
+        'seo-canonical-required-main',
+        'seo-robots-required-main',
+      ])
+    );
+  });
+
+  it('يطبق نطاقات SEO المناسبة للصفحات الفرعية دون اشتراط robots', async () => {
+    const issues = await evaluatePublicationQuality(createSeoPageDb('sub'), 'seo', {
+      pageId: 2,
+      title: 'عنوان صفحة فرعية مناسب للاختبار',
+      description: 'وصف صفحة فرعية مناسب لاختبار سياسة الجودة ويحتوي عدداً كافياً من الأحرف المطلوبة.',
+      canonicalUrl: 'https://example.test/services',
+      robots: null,
+    });
+
+    expect(issues.filter((issue) => issue.code.startsWith('seo-'))).toEqual([]);
   });
 });

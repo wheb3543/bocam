@@ -9,6 +9,15 @@ import { ContentCard } from './ContentCard';
 import { ContentFiltersComponent } from './ContentFilters';
 import { SEODialog } from './dialogs/SEODialog';
 import { Plus } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import type { SEOSettings, SEOSettingsFormData } from '../types/content.types';
 import type { ContentFilters } from '../types/content.types';
 
@@ -31,6 +40,11 @@ interface SEOListProps {
   onCreateSEOSettings: (e: React.FormEvent) => void;
   openEditDialog: (seoSetting: SEOSettings) => void;
   handleDeleteSEOSettings: (id: number) => void;
+  handleRestoreSEOSettings: (id: number) => void;
+  statusFilter: 'all' | SEOSettings['status'];
+  onStatusFilterChange: (status: 'all' | SEOSettings['status']) => void;
+  showDeleted: boolean;
+  onShowDeletedChange: (showDeleted: boolean) => void;
   onVersionHistory?: (id: number) => void;
   qualityIssues?: string[];
   clearQualityIssues?: () => void;
@@ -38,6 +52,7 @@ interface SEOListProps {
   onApprovalSubmitted?: () => void;
   createMutation: { isPending: boolean };
   updateMutation: { isPending: boolean };
+  restoreMutation: { isPending: boolean };
 }
 
 /**
@@ -60,6 +75,11 @@ export function SEOList({
   onCreateSEOSettings,
   openEditDialog,
   handleDeleteSEOSettings,
+  handleRestoreSEOSettings,
+  statusFilter,
+  onStatusFilterChange,
+  showDeleted,
+  onShowDeletedChange,
   onVersionHistory,
   qualityIssues = [],
   clearQualityIssues,
@@ -67,6 +87,7 @@ export function SEOList({
   onApprovalSubmitted,
   createMutation,
   updateMutation,
+  restoreMutation,
 }: SEOListProps) {
   const handleCreateDialogOpenChange = (open: boolean) => {
     if (!open) {
@@ -95,6 +116,35 @@ export function SEOList({
 
       {/* Filters */}
       <ContentFiltersComponent filters={filters} onFiltersChange={onFiltersChange} type="seo" />
+      <div className="flex flex-wrap items-end justify-between gap-3 rounded-lg border border-border/70 bg-muted/30 p-3">
+        <div className="grid min-w-48 gap-1.5">
+          <Label htmlFor="seo-status-filter">حالة النشر</Label>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => onStatusFilterChange(value as 'all' | SEOSettings['status'])}
+          >
+            <SelectTrigger id="seo-status-filter">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الحالات</SelectItem>
+              <SelectItem value="draft">مسودة</SelectItem>
+              <SelectItem value="published">منشور</SelectItem>
+              <SelectItem value="archived">مؤرشف</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2 pb-1">
+          <Switch
+            id="seo-show-deleted"
+            checked={showDeleted}
+            onCheckedChange={onShowDeletedChange}
+          />
+          <Label htmlFor="seo-show-deleted" className="cursor-pointer">
+            عرض المحذوفات فقط
+          </Label>
+        </div>
+      </div>
 
       {/* Content List */}
       {isLoading ? (
@@ -105,8 +155,14 @@ export function SEOList({
         </div>
       ) : seoSettings.length === 0 ? (
         <Card className="p-8 text-center">
-          <p className="text-muted-foreground">لا توجد إعدادات SEO</p>
-          <p className="text-sm text-muted-foreground mt-2">ابدأ بإضافة إعدادات SEO جديدة</p>
+          <p className="text-muted-foreground">
+            {showDeleted ? 'لا توجد إعدادات SEO محذوفة.' : 'لا توجد إعدادات SEO'}
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            {showDeleted
+              ? 'ستظهر هنا العناصر المحذوفة القابلة للاستعادة.'
+              : 'ابدأ بإضافة إعدادات SEO جديدة'}
+          </p>
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -118,11 +174,17 @@ export function SEOList({
               metadata={{
                 اللغة: seoSetting.language || '-',
                 العنوان: seoSetting.title || '-',
+                ...(seoSetting.deletedAt ? { الحالة: 'في سلة المحذوفات' } : {}),
               }}
-              onEdit={() => openEditDialog(seoSetting)}
-              onDelete={() => handleDeleteSEOSettings(seoSetting.id)}
+              onEdit={seoSetting.deletedAt ? undefined : () => openEditDialog(seoSetting)}
+              onDelete={
+                seoSetting.deletedAt ? undefined : () => handleDeleteSEOSettings(seoSetting.id)
+              }
+              onRestore={
+                seoSetting.deletedAt ? () => handleRestoreSEOSettings(seoSetting.id) : undefined
+              }
               onVersionHistory={() => onVersionHistory?.(seoSetting.id)}
-              isActive={seoSetting.isActive === 'yes'}
+              isActive={!seoSetting.deletedAt && seoSetting.isActive === 'yes'}
               status={seoSetting.status}
             />
           ))}

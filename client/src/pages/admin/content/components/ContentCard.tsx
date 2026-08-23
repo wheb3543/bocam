@@ -6,7 +6,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Eye, History } from 'lucide-react';
+import { Edit, Trash2, Eye, History, RotateCcw } from 'lucide-react';
 
 interface ContentCardProps {
   title: string;
@@ -16,6 +16,7 @@ interface ContentCardProps {
   onDelete?: () => void;
   onView?: () => void;
   onVersionHistory?: () => void;
+  onRestore?: () => void;
   isActive?: boolean;
   status?: 'draft' | 'published' | 'archived';
 }
@@ -31,6 +32,7 @@ export function ContentCard({
   onDelete,
   onView,
   onVersionHistory,
+  onRestore,
   isActive = true,
   status,
 }: ContentCardProps) {
@@ -71,6 +73,11 @@ export function ContentCard({
                   aria-label="تاريخ النسخ"
                 >
                   <History className="h-4 w-4" />
+                </Button>
+              )}
+              {onRestore && (
+                <Button variant="ghost" size="icon" onClick={onRestore} aria-label="استعادة">
+                  <RotateCcw className="h-4 w-4 text-primary" />
                 </Button>
               )}
               {onEdit && (
