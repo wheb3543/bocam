@@ -17,6 +17,8 @@ describe('تكامل CMS لصفحات التفاصيل', () => {
     expect(offerDetailSource).toContain('offers.detail.included.title.${language}');
     expect(offerDetailSource).toContain('offers.detail.form.submit.${language}');
     expect(offerDetailSource).toContain('offers.detail.contact.whatsapp.message.${language}');
+    expect(offerDetailSource).toContain('offers.detail.alert.success.${language}');
+    expect(offerDetailSource).toContain('offers.detail.alert.phone.${language}');
     expect(offerDetailSource).toContain('trpc.offers.getBySlug.useQuery');
   });
 
@@ -24,7 +26,9 @@ describe('تكامل CMS لصفحات التفاصيل', () => {
     expect(campDetailSource).toContain("usePublicPageContent('camps', language)");
     expect(campDetailSource).toContain('camps.detail.${key}.${language}');
     expect(campDetailSource).toContain("detailText('form.submit', 'تسجيل في المخيم مجاناً')");
-    expect(campDetailSource).toContain("detailText('contact.whatsapp.message', 'مرحباً، أود الاستفسار عن المخيم الطبي')");
+    expect(campDetailSource).toContain("'contact.whatsapp.message'");
+    expect(campDetailSource).toContain("detailText('alert.success', 'تم تسجيلك بنجاح! سنتواصل معك قريباً')");
+    expect(campDetailSource).toContain("detailText('alert.phone', 'رقم الهاتف غير صحيح')");
     expect(campDetailSource).toContain('trpc.camps.getBySlug.useQuery');
     expect(campDetailSource).toContain('trpc.campRegistrations.submit.useMutation');
   });

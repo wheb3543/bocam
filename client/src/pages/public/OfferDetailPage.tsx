@@ -315,6 +315,41 @@ function OfferDetailContent({ slug }: { slug: string }) {
     section: 'offers',
     type: 'text',
   });
+  const { data: alertNotFoundData } = usePublicTextContent({
+    key: `offers.detail.alert.notfound.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: alertRequiredData } = usePublicTextContent({
+    key: `offers.detail.alert.required.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: alertGenderData } = usePublicTextContent({
+    key: `offers.detail.alert.gender.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: alertAgeData } = usePublicTextContent({
+    key: `offers.detail.alert.age.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: alertPhoneData } = usePublicTextContent({
+    key: `offers.detail.alert.phone.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: alertSuccessData } = usePublicTextContent({
+    key: `offers.detail.alert.success.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
+  const { data: alertErrorData } = usePublicTextContent({
+    key: `offers.detail.alert.error.${language}`,
+    section: 'offers',
+    type: 'text',
+  });
 
   // Extract content from data
   const breadcrumbHome = breadcrumbHomeData?.data?.[0]?.content || 'الرئيسية';
@@ -381,6 +416,14 @@ function OfferDetailContent({ slug }: { slug: string }) {
   const contactWhatsapp = contactWhatsappData?.data?.[0]?.content || 'واتساب';
   const contactWhatsappMessage =
     contactWhatsappMessageData?.data?.[0]?.content || 'مرحباً، أود الاستفسار عن العرض';
+  const alertNotFound = alertNotFoundData?.data?.[0]?.content || 'العرض غير موجود';
+  const alertRequired = alertRequiredData?.data?.[0]?.content || 'الرجاء إدخال الاسم ورقم الهاتف';
+  const alertGender = alertGenderData?.data?.[0]?.content || 'الرجاء تحديد الجنس';
+  const alertAge = alertAgeData?.data?.[0]?.content || 'الرجاء إدخال عمر صحيح';
+  const alertPhone = alertPhoneData?.data?.[0]?.content || 'رقم الهاتف غير صحيح';
+  const alertSuccess =
+    alertSuccessData?.data?.[0]?.content || 'تم إرسال طلبك بنجاح! سنتواصل معك قريباً';
+  const alertError = alertErrorData?.data?.[0]?.content || 'حدث خطأ أثناء إرسال الطلب';
 
   const { data: offer, isLoading } = trpc.offers.getBySlug.useQuery(
     { slug },
@@ -427,22 +470,22 @@ function OfferDetailContent({ slug }: { slug: string }) {
 
   useEffect(() => {
     if (!isLoading && !offer) {
-      toast.error('العرض غير موجود');
+      toast.error(alertNotFound);
       setLocation('/offers');
     }
-  }, [offer, isLoading, setLocation]);
+  }, [alertNotFound, offer, isLoading, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.fullName || !formData.phone) {
-      toast.error('الرجاء إدخال الاسم ورقم الهاتف');
+      toast.error(alertRequired);
       return;
     }
 
     if (!formData.gender) {
-      setGenderError('الرجاء تحديد الجنس');
-      toast.error('الرجاء تحديد الجنس');
+      setGenderError(alertGender);
+      toast.error(alertGender);
       return;
     }
     setGenderError('');
@@ -453,15 +496,15 @@ function OfferDetailContent({ slug }: { slug: string }) {
       Number(formData.age) < 1 ||
       Number(formData.age) > 120
     ) {
-      toast.error('الرجاء إدخال عمر صحيح');
+      toast.error(alertAge);
       return;
     }
 
     // التحقق من رقم الهاتف اليمني
     const phoneValidation = validateYemeniPhone(formData.phone);
     if (!phoneValidation.valid) {
-      setPhoneError(phoneValidation.message || 'رقم الهاتف غير صحيح');
-      toast.error(phoneValidation.message || 'رقم الهاتف غير صحيح');
+      setPhoneError(alertPhone);
+      toast.error(alertPhone);
       return;
     }
     setPhoneError('');
@@ -513,7 +556,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
       });
 
       setSubmitted(true);
-      toast.success('تم إرسال طلبك بنجاح! سنتواصل معك قريباً');
+      toast.success(alertSuccess);
 
       const params = new URLSearchParams({
         type: 'offer',
@@ -528,11 +571,8 @@ function OfferDetailContent({ slug }: { slug: string }) {
       }, 1500);
     } catch (error: unknown) {
       const msg = (error as { message?: string })?.message;
-      if (msg && (msg.includes('تكرار') || msg.includes('طلب'))) {
-        toast.error(msg);
-      } else {
-        toast.error('حدث خطأ أثناء إرسال الطلب');
-      }
+      void msg;
+      toast.error(alertError);
     }
   };
 
@@ -852,13 +892,13 @@ function OfferDetailContent({ slug }: { slug: string }) {
                           setFormData({ ...formData, phone: processed });
                           if (phoneError) {
                             const v = validateYemeniPhone(processed);
-                            setPhoneError(v.valid ? '' : v.message || '');
+                            setPhoneError(v.valid ? '' : alertPhone);
                           }
                         }}
                         onBlur={() => {
                           if (formData.phone) {
                             const v = validateYemeniPhone(formData.phone);
-                            setPhoneError(v.valid ? '' : v.message || '');
+                            setPhoneError(v.valid ? '' : alertPhone);
                           }
                         }}
                         placeholder={formPhonePlaceholder}

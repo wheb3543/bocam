@@ -173,6 +173,12 @@ function CampDetailContent({ slug }: { slug: string }) {
       'contact.whatsapp.message',
       'مرحباً، أود الاستفسار عن المخيم الطبي'
     ),
+    alertNotFound: detailText('alert.notfound', 'المخيم غير موجود'),
+    alertRequired: detailText('alert.required', 'الرجاء إدخال الاسم ورقم الهاتف'),
+    alertPhone: detailText('alert.phone', 'رقم الهاتف غير صحيح'),
+    alertAge: detailText('alert.age', 'الرجاء إدخال العمر بشكل صحيح'),
+    alertSuccess: detailText('alert.success', 'تم تسجيلك بنجاح! سنتواصل معك قريباً'),
+    alertError: detailText('alert.error', 'حدث خطأ أثناء التسجيل'),
   };
 
   const { user } = useAuth();
@@ -270,30 +276,30 @@ function CampDetailContent({ slug }: { slug: string }) {
 
   useEffect(() => {
     if (!isLoading && !camp) {
-      toast.error('المخيم غير موجود');
+      toast.error(copy.alertNotFound);
       setLocation('/camps');
     }
-  }, [camp, isLoading, setLocation]);
+  }, [camp, copy.alertNotFound, isLoading, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.fullName || !formData.phone) {
-      toast.error('الرجاء إدخال الاسم ورقم الهاتف');
+      toast.error(copy.alertRequired);
       return;
     }
 
     // التحقق من رقم الهاتف اليمني
     const phoneValidation = validateYemeniPhone(formData.phone);
     if (!phoneValidation.valid) {
-      setPhoneError(phoneValidation.message || 'رقم الهاتف غير صحيح');
-      toast.error(phoneValidation.message || 'رقم الهاتف غير صحيح');
+      setPhoneError(copy.alertPhone);
+      toast.error(copy.alertPhone);
       return;
     }
     setPhoneError('');
 
     if (!formData.age || parseInt(formData.age) <= 0) {
-      toast.error('الرجاء إدخال العمر بشكل صحيح');
+      toast.error(copy.alertAge);
       return;
     }
 
@@ -349,7 +355,7 @@ function CampDetailContent({ slug }: { slug: string }) {
       });
 
       setSubmitted(true);
-      toast.success('تم تسجيلك بنجاح! سنتواصل معك قريباً');
+      toast.success(copy.alertSuccess);
 
       const params = new URLSearchParams({
         type: 'camp',
@@ -364,11 +370,8 @@ function CampDetailContent({ slug }: { slug: string }) {
       }, 1500);
     } catch (error: unknown) {
       const msg = (error as { message?: string })?.message;
-      if (msg && (msg.includes('تكرار') || msg.includes('طلب') || msg.includes('مخيم'))) {
-        toast.error(msg);
-      } else {
-        toast.error('حدث خطأ أثناء التسجيل');
-      }
+      void msg;
+      toast.error(copy.alertError);
     }
   };
 
@@ -787,13 +790,13 @@ function CampDetailContent({ slug }: { slug: string }) {
                             setFormData({ ...formData, phone: processed });
                             if (phoneError) {
                               const v = validateYemeniPhone(processed);
-                              setPhoneError(v.valid ? '' : v.message || '');
+                              setPhoneError(v.valid ? '' : copy.alertPhone);
                             }
                           }}
                           onBlur={() => {
                             if (formData.phone) {
                               const v = validateYemeniPhone(formData.phone);
-                              setPhoneError(v.valid ? '' : v.message || '');
+                              setPhoneError(v.valid ? '' : copy.alertPhone);
                             }
                           }}
                           placeholder={copy.formPhonePlaceholder}
