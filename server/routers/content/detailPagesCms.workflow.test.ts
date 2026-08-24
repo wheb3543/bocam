@@ -10,6 +10,7 @@ const campDetailSource = readFileSync(
   resolve(process.cwd(), 'client/src/pages/public/CampDetailPage.tsx'),
   'utf8'
 );
+const thankYouSource = readFileSync(resolve(process.cwd(), 'client/src/pages/public/ThankYou.tsx'), 'utf8');
 
 describe('تكامل CMS لصفحات التفاصيل', () => {
   it('يبقي نصوص صفحة تفاصيل العرض قابلة للإدارة عبر مفاتيح CMS', () => {
@@ -31,5 +32,14 @@ describe('تكامل CMS لصفحات التفاصيل', () => {
     expect(campDetailSource).toContain("detailText('alert.phone', 'رقم الهاتف غير صحيح')");
     expect(campDetailSource).toContain('trpc.camps.getBySlug.useQuery');
     expect(campDetailSource).toContain('trpc.campRegistrations.submit.useMutation');
+  });
+
+  it('يبقي نصوص صفحة الشكر قابلة للتحرير عبر محتوى الصفحة المنشور', () => {
+    expect(thankYouSource).toContain("usePublicPageContent('thankyou', language)");
+    expect(thankYouSource).toContain('thankyou.${key}.${language}');
+    expect(thankYouSource).toContain("thankYouText('details.title', 'تفاصيل الحجز')");
+    expect(thankYouSource).toContain("thankYouText('next.step3', 'سنرسل لك رسالة تأكيد عبر الواتساب')");
+    expect(thankYouSource).toContain("thankYouText('action.home', 'العودة للصفحة الرئيسية')");
+    expect(thankYouSource).toContain('dir={language === \'ar\' ? \'rtl\' : \'ltr\'}');
   });
 });

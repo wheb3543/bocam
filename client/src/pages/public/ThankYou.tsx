@@ -14,8 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link, useLocation } from 'wouter';
 import { useEffect, useState } from 'react';
-import { getCompanySlogan, COMPANY_ARABIC_NAME } from '@/const';
-import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BookingInfo {
@@ -30,6 +29,11 @@ interface BookingInfo {
   time?: string;
 }
 
+type PublicPageTextContent = {
+  key: string;
+  content: string;
+};
+
 export default function ThankYou() {
   const { formatDate } = useFormatDate();
   const [location] = useLocation();
@@ -38,21 +42,45 @@ export default function ThankYou() {
   // الحصول على اللغة الحالية
   const { language } = useLanguage();
 
-  // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
-  const { data: thankYouTitle } = usePublicTextContent({
-    key: `thankyou.title.${language}`,
-    section: 'thankyou',
-    type: 'title',
-  });
-  const { data: thankYouSubtitle } = usePublicTextContent({
-    key: `thankyou.subtitle.${language}`,
-    section: 'thankyou',
-    type: 'subtitle',
-  });
+  const pageContentQuery = usePublicPageContent('thankyou', language) as {
+    data?: { textContents: PublicPageTextContent[] };
+  };
+  const cmsText = (key: string, fallback: string) =>
+    pageContentQuery.data?.textContents.find((item) => item.key === key)?.content || fallback;
+  const thankYouText = (key: string, fallback: string) =>
+    cmsText(`thankyou.${key}.${language}`, fallback);
 
-  // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
-  const title = thankYouTitle?.data?.[0]?.content || 'تم التسجيل بنجاح!';
-  thankYouSubtitle?.data?.[0]?.content || 'شكراً لك، تم استلام طلبك بنجاح';
+  const copy = {
+    title: thankYouText('title', 'تم التسجيل بنجاح!'),
+    subtitle: thankYouText(
+      'subtitle',
+      'تم استلام طلبك بنجاح. سيتواصل معك فريقنا الطبي خلال 24 ساعة لتأكيد موعدك وتقديم المساعدة اللازمة.'
+    ),
+    detailsTitle: thankYouText('details.title', 'تفاصيل الحجز'),
+    nameLabel: thankYouText('details.name.label', 'الاسم:'),
+    phoneLabel: thankYouText('details.phone.label', 'الهاتف:'),
+    emailLabel: thankYouText('details.email.label', 'البريد:'),
+    doctorLabel: thankYouText('details.doctor.label', 'الطبيب:'),
+    offerLabel: thankYouText('details.offer.label', 'العرض:'),
+    campLabel: thankYouText('details.camp.label', 'المخيم:'),
+    preferredDateLabel: thankYouText('details.preferredDate.label', 'الموعد المفضل:'),
+    contactTitle: thankYouText('contact.title', 'للاستفسارات العاجلة'),
+    contactPhone: thankYouText('contact.phone', '8000018'),
+    contactAvailability: thankYouText(
+      'contact.availability',
+      'الرقم المجاني - متاح على مدار الساعة'
+    ),
+    nextTitle: thankYouText('next.title', 'ما التالي؟'),
+    nextSteps: [
+      thankYouText('next.step1', 'سيتم مراجعة طلبك من قبل فريقنا الطبي'),
+      thankYouText('next.step2', 'سنتصل بك لتحديد موعد مناسب'),
+      thankYouText('next.step3', 'سنرسل لك رسالة تأكيد عبر الواتساب'),
+    ],
+    homeAction: thankYouText('action.home', 'العودة للصفحة الرئيسية'),
+    brandName: thankYouText('brand.name', 'المستشفى السعودي الألماني'),
+    brandSlogan: thankYouText('brand.slogan', 'نهتم بصحتكم'),
+    brandLogoAlt: thankYouText('brand.logoAlt', 'المستشفى السعودي الألماني'),
+  };
 
   useEffect(() => {
     // Parse URL parameters
@@ -84,18 +112,18 @@ export default function ThankYou() {
 
   const getTypeInfo = () => {
     if (!bookingInfo) {
-      return { title: title, icon: CheckCircle2, color: 'text-secondary' };
+      return { title: copy.title, icon: CheckCircle2, color: 'text-secondary' };
     }
 
     switch (bookingInfo.type) {
       case 'appointment':
-        return { title: title, icon: Stethoscope, color: 'text-blue-600' };
+        return { title: copy.title, icon: Stethoscope, color: 'text-blue-600' };
       case 'offer':
-        return { title: title, icon: Gift, color: 'text-purple-600' };
+        return { title: copy.title, icon: Gift, color: 'text-purple-600' };
       case 'camp':
-        return { title: title, icon: Tent, color: 'text-green-600' };
+        return { title: copy.title, icon: Tent, color: 'text-green-600' };
       default:
-        return { title: title, icon: CheckCircle2, color: 'text-secondary' };
+        return { title: copy.title, icon: CheckCircle2, color: 'text-secondary' };
     }
   };
 
@@ -105,7 +133,7 @@ export default function ThankYou() {
   return (
     <div
       className="min-h-screen bg-gradient-to-b from-white to-blue-50 flex items-center justify-center p-3 sm:p-4"
-      dir="rtl"
+      dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
       <Card className="max-w-2xl w-full shadow-2xl border-2 border-primary/20">
         <CardContent className="pt-6 sm:pt-8 md:pt-12 pb-4 sm:pb-6 md:pb-8 px-3 sm:px-6 text-center">
@@ -122,26 +150,25 @@ export default function ThankYou() {
           </h1>
 
           <p className="text-xs sm:text-sm md:text-lg text-muted-foreground mb-4 sm:mb-6 md:mb-8 max-w-lg mx-auto">
-            تم استلام طلبك بنجاح. سيتواصل معك فريقنا الطبي خلال 24 ساعة لتأكيد موعدك وتقديم المساعدة
-            اللازمة.
+            {copy.subtitle}
           </p>
 
           {/* Booking Details */}
           {bookingInfo && (
             <div className="bg-white dark:bg-card rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8 border border-border">
               <h3 className="font-bold text-sm sm:text-base md:text-lg mb-2 sm:mb-3 md:mb-4 text-right">
-                تفاصيل الحجز
+                {copy.detailsTitle}
               </h3>
               <div className="space-y-2 sm:space-y-3 text-right">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <User className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
-                  <span className="text-xs sm:text-sm text-muted-foreground">الاسم:</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground">{copy.nameLabel}</span>
                   <span className="font-medium">{bookingInfo.name}</span>
                 </div>
                 {bookingInfo.phone && (
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">الهاتف:</span>
+                    <span className="text-sm text-muted-foreground">{copy.phoneLabel}</span>
                     <span className="font-medium" dir="ltr">
                       {bookingInfo.phone}
                     </span>
@@ -150,7 +177,7 @@ export default function ThankYou() {
                 {bookingInfo.email && (
                   <div className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">البريد:</span>
+                    <span className="text-sm text-muted-foreground">{copy.emailLabel}</span>
                     <span className="font-medium" dir="ltr">
                       {bookingInfo.email}
                     </span>
@@ -159,28 +186,28 @@ export default function ThankYou() {
                 {bookingInfo.doctor && (
                   <div className="flex items-center gap-3">
                     <Stethoscope className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">الطبيب:</span>
+                    <span className="text-sm text-muted-foreground">{copy.doctorLabel}</span>
                     <span className="font-medium">{bookingInfo.doctor}</span>
                   </div>
                 )}
                 {bookingInfo.offer && (
                   <div className="flex items-center gap-3">
                     <Gift className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">العرض:</span>
+                    <span className="text-sm text-muted-foreground">{copy.offerLabel}</span>
                     <span className="font-medium">{bookingInfo.offer}</span>
                   </div>
                 )}
                 {bookingInfo.camp && (
                   <div className="flex items-center gap-3">
                     <Tent className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">المخيم:</span>
+                    <span className="text-sm text-muted-foreground">{copy.campLabel}</span>
                     <span className="font-medium">{bookingInfo.camp}</span>
                   </div>
                 )}
                 {(bookingInfo.date || bookingInfo.time) && (
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">الموعد المفضل:</span>
+                    <span className="text-sm text-muted-foreground">{copy.preferredDateLabel}</span>
                     <span className="font-medium">
                       {bookingInfo.date && formatDate(bookingInfo.date)}
                       {bookingInfo.date && bookingInfo.time && ' - '}
@@ -195,32 +222,28 @@ export default function ThankYou() {
           <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8">
             <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-3">
               <Phone className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary" />
-              <span className="text-xs sm:text-sm text-muted-foreground">للاستفسارات العاجلة</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">{copy.contactTitle}</span>
             </div>
-            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">8000018</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
+              {copy.contactPhone}
+            </p>
             <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-1 sm:mt-2">
-              الرقم المجاني - متاح على مدار الساعة
+              {copy.contactAvailability}
             </p>
           </div>
 
           <div className="space-y-3 sm:space-y-4">
             <div className="bg-white dark:bg-card rounded-lg p-3 sm:p-4 border border-border">
               <h3 className="font-bold text-sm sm:text-base md:text-lg mb-1.5 sm:mb-2">
-                ما التالي؟
+                {copy.nextTitle}
               </h3>
               <ul className="text-right space-y-2 text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary font-bold">1.</span>
-                  <span>سيتم مراجعة طلبك من قبل فريقنا الطبي</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary font-bold">2.</span>
-                  <span>سنتصل بك لتحديد موعد مناسب</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary font-bold">3.</span>
-                  <span>سنرسل لك رسالة تأكيد عبر الواتساب</span>
-                </li>
+                {copy.nextSteps.map((step, index) => (
+                  <li key={step} className="flex items-start gap-2">
+                    <span className="text-primary font-bold">{index + 1}.</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -229,7 +252,7 @@ export default function ThankYou() {
             <Button asChild variant="default" size="default" className="sm:text-base">
               <Link href="/">
                 <Home className="w-4 h-4 sm:w-5 sm:h-5 ml-1.5 sm:ml-2" />
-                العودة للصفحة الرئيسية
+                {copy.homeAction}
               </Link>
             </Button>
           </div>
@@ -237,13 +260,13 @@ export default function ThankYou() {
           <div className="mt-4 sm:mt-6 md:mt-8 pt-4 sm:pt-6 border-t border-border">
             <img
               src="/assets/new-logo.png"
-              alt="المستشفى السعودي الألماني"
+              alt={copy.brandLogoAlt}
               className="h-10 sm:h-12 md:h-16 mx-auto mb-2 sm:mb-3"
             />
             <p className="text-sm text-muted-foreground">
-              {COMPANY_ARABIC_NAME}
+              {copy.brandName}
               <br />
-              {getCompanySlogan()}
+              {copy.brandSlogan}
             </p>
           </div>
         </CardContent>
