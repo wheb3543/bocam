@@ -15,6 +15,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { PRIVACY_POLICY_VERSION } from '@/config';
 import { SafeLocalStorage } from '@/utils/errorHandling';
+import {
+  getCookiePreferences,
+  saveCookiePreferences,
+  type CookiePreferences,
+} from '@/lib/privacy/cookiePreferences';
 
 type PublicPageTextContent = {
   key: string;
@@ -62,7 +67,10 @@ export function openPrivacyPreferences(): void {
 
 export function isPublicVisitorPath(path: string): boolean {
   return (
-    !path.startsWith('/admin') && !path.startsWith('/activation') && !path.startsWith('/preview')
+    !path.startsWith('/admin') &&
+    !path.startsWith('/activation') &&
+    !path.startsWith('/preview') &&
+    !path.startsWith('/patient-portal')
   );
 }
 
@@ -72,12 +80,16 @@ export default function PrivacyPolicyConsentBanner() {
   const [visible, setVisible] = useState(false);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [consentRecord, setConsentRecord] = useState<PrivacyConsentRecord | null>(null);
+  const [cookiePreferences, setCookiePreferences] =
+    useState<CookiePreferences>(getCookiePreferences);
   const reduceMotion = useReducedMotion();
   const pageContentQuery = usePublicPageContent('privacy', language) as {
     data?: { textContents: PublicPageTextContent[] };
   };
   const isPublicVisitor = isPublicVisitorPath(location);
   const isPrivacyPolicyPage = location === '/privacy-policy';
+  const isPatientPortal = location.startsWith('/patient-portal');
+  const canManagePrivacy = isPublicVisitor || isPatientPortal;
   const t = (key: string, fallback: string) =>
     pageContentQuery.data?.textContents.find(
       (item) => item.key === `privacy.consent.${key}.${language}`
@@ -93,7 +105,11 @@ export default function PrivacyPolicyConsentBanner() {
       timer = window.setTimeout(() => setVisible(true), 650);
     };
     const openPreferences = () => {
+      if (!canManagePrivacy) {
+        return;
+      }
       setConsentRecord(getPrivacyPolicyConsent());
+      setCookiePreferences(getCookiePreferences());
       setPreferencesOpen(true);
     };
 
@@ -108,7 +124,7 @@ export default function PrivacyPolicyConsentBanner() {
       window.removeEventListener(PRIVACY_PREFERENCES_OPEN_EVENT, openPreferences);
       window.removeEventListener(PRIVACY_POLICY_CONSENT_RESET_EVENT, revealConsent);
     };
-  }, [isPublicVisitor, isPrivacyPolicyPage, location]);
+  }, [canManagePrivacy, isPublicVisitor, isPrivacyPolicyPage, location]);
 
   const handleAccept = () => {
     savePrivacyPolicyConsent();
@@ -117,18 +133,26 @@ export default function PrivacyPolicyConsentBanner() {
   };
 
   const handleRevoke = () => {
+    const essentialOnly: CookiePreferences = {
+      essential: true,
+      analytical: false,
+      marketing: false,
+    };
+    saveCookiePreferences(essentialOnly);
     clearPrivacyPolicyConsent();
     setConsentRecord(null);
+    setCookiePreferences(essentialOnly);
     setPreferencesOpen(false);
   };
 
-  const handleManageAccept = () => {
+  const handleSavePreferences = () => {
+    saveCookiePreferences(cookiePreferences);
     savePrivacyPolicyConsent();
     setConsentRecord(getPrivacyPolicyConsent());
     setVisible(false);
   };
 
-  if (!isPublicVisitor) {
+  if (!canManagePrivacy && !preferencesOpen) {
     return null;
   }
 
@@ -213,6 +237,54 @@ export default function PrivacyPolicyConsentBanner() {
               </div>
             </div>
           </div>
+          <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-3.5">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">
+                {t('manageCookiesTitle', 'تفضيلات ملفات تعريف الارتباط')}
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-gray-600">
+                {t(
+                  'manageCookiesDescription',
+                  'اختر الفئات الاختيارية التي تسمح بها على هذا الجهاز.'
+                )}
+              </p>
+            </div>
+            <div className="flex items-start justify-between gap-3 border-t border-gray-200 pt-3">
+              <div>
+                <p className="text-sm font-medium text-gray-900">
+                  {t('manageEssentialTitle', 'الأساسية')}
+                </p>
+                <p className="mt-0.5 text-xs leading-5 text-gray-600">
+                  {t('manageEssentialDescription', 'تشغيل الموقع والجلسات والأمان. مطلوبة دائماً.')}
+                </p>
+              </div>
+              <span className="rounded-full bg-green-700 px-2.5 py-1 text-xs font-medium text-white">
+                {t('manageAlwaysOn', 'مفعلة دائماً')}
+              </span>
+            </div>
+            <CookiePreferenceToggle
+              label={t('manageAnalyticalTitle', 'التحليلية')}
+              description={t(
+                'manageAnalyticalDescription',
+                'تساعدنا على قياس الأداء وتحسين الخدمات.'
+              )}
+              checked={cookiePreferences.analytical}
+              onCheckedChange={(analytical) =>
+                setCookiePreferences((current) => ({ ...current, analytical }))
+              }
+            />
+            <CookiePreferenceToggle
+              label={t('manageMarketingTitle', 'التسويقية')}
+              description={t(
+                'manageMarketingDescription',
+                'تستخدم لقياس الحملات والإعلانات الملائمة.'
+              )}
+              checked={cookiePreferences.marketing}
+              onCheckedChange={(marketing) =>
+                setCookiePreferences((current) => ({ ...current, marketing }))
+              }
+            />
+          </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button
               variant="outline"
@@ -221,12 +293,49 @@ export default function PrivacyPolicyConsentBanner() {
             >
               {t('manageRevoke', 'إزالة الموافقة')}
             </Button>
-            <Button onClick={handleManageAccept} className="bg-green-700 hover:bg-green-800">
-              {t('manageAccept', 'اعتماد الإصدار الحالي')}
+            <Button onClick={handleSavePreferences} className="bg-green-700 hover:bg-green-800">
+              {t('manageSavePreferences', 'حفظ اختيارات الخصوصية')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function CookiePreferenceToggle({
+  label,
+  description,
+  checked,
+  onCheckedChange,
+}: {
+  label: string;
+  description: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3 border-t border-gray-200 pt-3">
+      <div>
+        <p className="text-sm font-medium text-gray-900">{label}</p>
+        <p className="mt-0.5 text-xs leading-5 text-gray-600">{description}</p>
+      </div>
+      <button
+        type="button"
+        onClick={() => onCheckedChange(!checked)}
+        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors ${
+          checked ? 'bg-green-600' : 'bg-gray-300'
+        }`}
+        role="switch"
+        aria-label={label}
+        aria-checked={checked}
+      >
+        <span
+          className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-all ${
+            checked ? 'right-1' : 'left-1'
+          }`}
+        />
+      </button>
+    </div>
   );
 }

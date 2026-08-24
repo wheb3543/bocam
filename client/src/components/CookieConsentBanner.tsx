@@ -17,38 +17,17 @@ import { Shield, ChevronDown, ChevronUp, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { hasAcceptedPrivacyPolicy } from './PrivacyPolicyConsentBanner';
+import {
+  getCookiePreferences,
+  hasCookieConsentBeenGiven,
+  saveCookiePreferences,
+  type CookiePreferences,
+} from '@/lib/privacy/cookiePreferences';
 
-export interface CookiePreferences {
-  essential: boolean; // Always true
-  analytical: boolean; // Google Analytics, etc.
-  marketing: boolean; // Meta Pixel, WhatsApp tracking
-}
-
-import { SafeLocalStorage } from '../utils/errorHandling';
-
-const COOKIE_CONSENT_KEY = 'sgh_cookie_consent';
-const COOKIE_PREFS_KEY = 'sgh_cookie_preferences';
-
-export function getCookiePreferences(): CookiePreferences {
-  const stored = SafeLocalStorage.getItem(COOKIE_PREFS_KEY);
-  if (stored) {
-    const parsed = SafeLocalStorage.getJSON<CookiePreferences>(COOKIE_PREFS_KEY);
-    if (parsed) {
-      return parsed;
-    }
-  }
-  return { essential: true, analytical: false, marketing: false };
-}
+export { getCookiePreferences, saveCookiePreferences, type CookiePreferences };
 
 export function hasConsentBeenGiven(): boolean {
-  return SafeLocalStorage.getItem(COOKIE_CONSENT_KEY) === 'true';
-}
-
-export function saveCookiePreferences(prefs: CookiePreferences): void {
-  SafeLocalStorage.setJSON(COOKIE_PREFS_KEY, { ...prefs, essential: true });
-  SafeLocalStorage.setItem(COOKIE_CONSENT_KEY, 'true');
-  // Dispatch event so other components can react
-  window.dispatchEvent(new CustomEvent('cookieConsentUpdated', { detail: prefs }));
+  return hasCookieConsentBeenGiven();
 }
 
 export default function CookieConsentBanner() {

@@ -40,6 +40,7 @@ import { toast } from 'sonner';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import PrivacyPolicyUpdateAlert from '@/components/patient/PrivacyPolicyUpdateAlert';
 
 export default function PatientDashboard() {
   const { formatPhoneDisplay } = usePhoneFormat();
@@ -95,7 +96,9 @@ export default function PatientDashboard() {
   }, [patient, authLoading, navigate]);
 
   useEffect(() => {
-    if (!patient) {return;}
+    if (!patient) {
+      return;
+    }
     setProfileForm({
       fullName: patient.fullName || '',
       age: patient.age ? String(patient.age) : '',
@@ -112,7 +115,9 @@ export default function PatientDashboard() {
     );
   }
 
-  if (!patient) {return null;}
+  if (!patient) {
+    return null;
+  }
 
   const handleProfileSave = () => {
     const fullName = profileForm.fullName.trim();
@@ -214,6 +219,8 @@ export default function PatientDashboard() {
         </div>
 
         {/* Quick Stats */}
+        <PrivacyPolicyUpdateAlert />
+
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
           <Card className="border-green-100 dark:border-gray-700">
             <CardContent className="p-3 sm:p-4 text-center">
@@ -325,12 +332,13 @@ export default function PatientDashboard() {
                         className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50"
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium truncate">
-                            {'موعد طبي'}
-                          </p>
+                          <p className="text-xs sm:text-sm font-medium truncate">{'موعد طبي'}</p>
                           <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Clock className="h-3 w-3" />
-                            {formatDate((apt.appointmentDate as Date | string | null) || (apt["createdAt"] as Date | string))}
+                            {formatDate(
+                              (apt.appointmentDate as Date | string | null) ||
+                                (apt['createdAt'] as Date | string)
+                            )}
                           </p>
                         </div>
                         {statusBadge(apt.status as string)}
@@ -390,7 +398,10 @@ export default function PatientDashboard() {
                           <div className="min-w-0">
                             <p className="text-xs sm:text-sm font-medium truncate">{res.title}</p>
                             <p className="text-[10px] sm:text-xs text-muted-foreground">
-                              {formatDate((res.resultDate as Date | string | null) || (res["createdAt"] as Date | string))}
+                              {formatDate(
+                                (res.resultDate as Date | string | null) ||
+                                  (res['createdAt'] as Date | string)
+                              )}
                             </p>
                           </div>
                         </div>
@@ -448,13 +459,14 @@ export default function PatientDashboard() {
                           <CardContent className="p-3 sm:p-4">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium">
-                                  {'موعد طبي'}
-                                </p>
+                                <p className="text-sm font-medium">{'موعد طبي'}</p>
                                 <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-[10px] sm:text-xs text-muted-foreground">
                                   <span className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    {formatDate((apt.appointmentDate as Date | string | null) || (apt["createdAt"] as Date | string))}
+                                    {formatDate(
+                                      (apt.appointmentDate as Date | string | null) ||
+                                        (apt['createdAt'] as Date | string)
+                                    )}
                                   </span>
                                 </div>
                               </div>
@@ -479,7 +491,9 @@ export default function PatientDashboard() {
                           <CardContent className="p-3 sm:p-4">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium">{booking.fullName || 'حجز عرض'}</p>
+                                <p className="text-sm font-medium">
+                                  {booking.fullName || 'حجز عرض'}
+                                </p>
                                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                                   {formatDate(booking.createdAt as Date | string)}
                                 </p>
@@ -505,7 +519,9 @@ export default function PatientDashboard() {
                           <CardContent className="p-3 sm:p-4">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium">{reg.fullName || 'تسجيل مخيم'}</p>
+                                <p className="text-sm font-medium">
+                                  {reg.fullName || 'تسجيل مخيم'}
+                                </p>
                                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                                   {formatDate(reg.createdAt as Date | string)}
                                 </p>
@@ -559,19 +575,26 @@ export default function PatientDashboard() {
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium">{res.title}</p>
-                                  {(res["doctorName"] as string | null) && (
+                                  {(res['doctorName'] as string | null) && (
                                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                                      د. {(res["doctorName"] as string)}
+                                      د. {res['doctorName'] as string}
                                     </p>
                                   )}
                                   <p className="text-[10px] sm:text-xs text-muted-foreground">
-                                    {formatDate((res.resultDate as Date | string | null) || (res["createdAt"] as Date | string))}
+                                    {formatDate(
+                                      (res.resultDate as Date | string | null) ||
+                                        (res['createdAt'] as Date | string)
+                                    )}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {statusBadge(res.status as string)}
-                                  {(res["fileUrl"] as string | null) && (
-                                    <a href={(res["fileUrl"] as string)} target="_blank" rel="noopener noreferrer">
+                                  {(res['fileUrl'] as string | null) && (
+                                    <a
+                                      href={res['fileUrl'] as string}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
                                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                                         <FileText className="h-3.5 w-3.5 text-blue-500" />
                                       </Button>
@@ -601,19 +624,26 @@ export default function PatientDashboard() {
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium">{res.title}</p>
-                                  {(res["doctorName"] as string | null) && (
+                                  {(res['doctorName'] as string | null) && (
                                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                                      د. {(res["doctorName"] as string)}
+                                      د. {res['doctorName'] as string}
                                     </p>
                                   )}
                                   <p className="text-[10px] sm:text-xs text-muted-foreground">
-                                    {formatDate((res.resultDate as Date | string | null) || (res["createdAt"] as Date | string))}
+                                    {formatDate(
+                                      (res.resultDate as Date | string | null) ||
+                                        (res['createdAt'] as Date | string)
+                                    )}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {statusBadge(res.status as string)}
-                                  {(res["fileUrl"] as string | null) && (
-                                    <a href={(res["fileUrl"] as string)} target="_blank" rel="noopener noreferrer">
+                                  {(res['fileUrl'] as string | null) && (
+                                    <a
+                                      href={res['fileUrl'] as string}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
                                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                                         <FileText className="h-3.5 w-3.5 text-purple-500" />
                                       </Button>
@@ -643,19 +673,26 @@ export default function PatientDashboard() {
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium">{res.title}</p>
-                                  {(res["doctorName"] as string | null) && (
+                                  {(res['doctorName'] as string | null) && (
                                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                                      د. {(res["doctorName"] as string)}
+                                      د. {res['doctorName'] as string}
                                     </p>
                                   )}
                                   <p className="text-[10px] sm:text-xs text-muted-foreground">
-                                    {formatDate((res.resultDate as Date | string | null) || (res["createdAt"] as Date | string))}
+                                    {formatDate(
+                                      (res.resultDate as Date | string | null) ||
+                                        (res['createdAt'] as Date | string)
+                                    )}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {statusBadge(res.status as string)}
-                                  {(res["fileUrl"] as string | null) && (
-                                    <a href={(res["fileUrl"] as string)} target="_blank" rel="noopener noreferrer">
+                                  {(res['fileUrl'] as string | null) && (
+                                    <a
+                                      href={res['fileUrl'] as string}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
                                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                                         <FileText className="h-3.5 w-3.5 text-amber-500" />
                                       </Button>

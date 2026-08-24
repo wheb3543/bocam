@@ -6,10 +6,16 @@ import {
   PRIVACY_POLICY_CONSENT_STORAGE_KEY,
   savePrivacyPolicyConsent,
 } from './PrivacyPolicyConsentBanner';
+import {
+  getCookiePreferences,
+  saveCookiePreferences,
+} from '@/lib/privacy/cookiePreferences';
 
 describe('PrivacyPolicyConsentBanner', () => {
   afterEach(() => {
     localStorage.removeItem(PRIVACY_POLICY_CONSENT_STORAGE_KEY);
+    localStorage.removeItem('sgh_cookie_consent');
+    localStorage.removeItem('sgh_cookie_preferences');
   });
 
   it('يحفظ قبول المستخدم للإصدار الحالي من السياسة', () => {
@@ -40,5 +46,12 @@ describe('PrivacyPolicyConsentBanner', () => {
     expect(isPublicVisitorPath('/privacy-policy')).toBe(true);
     expect(isPublicVisitorPath('/admin')).toBe(false);
     expect(isPublicVisitorPath('/preview/example')).toBe(false);
+    expect(isPublicVisitorPath('/patient-portal/home')).toBe(false);
+  });
+
+  it('يحفظ التفضيلات التحليلية والتسويقية مع إبقاء ملفات الارتباط الأساسية مفعلة', () => {
+    saveCookiePreferences({ essential: false, analytical: true, marketing: false });
+
+    expect(getCookiePreferences()).toEqual({ essential: true, analytical: true, marketing: false });
   });
 });

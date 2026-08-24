@@ -23,6 +23,10 @@ const privacyChangelogSource = readFileSync(
   resolve(process.cwd(), 'client/src/pages/public/PrivacyPolicyChangelogPage.tsx'),
   'utf8'
 );
+const privacyDashboardAlertSource = readFileSync(
+  resolve(process.cwd(), 'client/src/components/patient/PrivacyPolicyUpdateAlert.tsx'),
+  'utf8'
+);
 
 describe('تكامل CMS لصفحات التفاصيل', () => {
   it('يبقي نصوص صفحة تفاصيل العرض قابلة للإدارة عبر مفاتيح CMS', () => {
@@ -78,5 +82,12 @@ describe('تكامل CMS لصفحات التفاصيل', () => {
     expect(privacyChangelogSource).toContain('privacy.changelog.${key}.${language}');
     expect(privacyChangelogSource).toContain("t('current.version', 'الإصدار 2026-03-01')");
     expect(privacyChangelogSource).toContain("t('previous.heading', 'الإصدارات السابقة')");
+  });
+
+  it('يوفر تنبيهاً داخل بوابة المستخدم لتحديثات سياسة الخصوصية', () => {
+    expect(privacyDashboardAlertSource).toContain("usePublicPageContent('privacy', language)");
+    expect(privacyDashboardAlertSource).toContain('privacy.dashboard.${key}.${language}');
+    expect(privacyDashboardAlertSource).toContain('requiresPrivacyPolicyReview');
+    expect(privacyDashboardAlertSource).toContain('openPrivacyPreferences');
   });
 });

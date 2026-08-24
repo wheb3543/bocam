@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowRight, Home, Calendar, Gift, FileText, User, Plus } from 'lucide-react';
+import PrivacyPolicyUpdateAlert from './PrivacyPolicyUpdateAlert';
 
 type PatientPortalLayoutProps = {
   children: ReactNode;
@@ -151,6 +152,9 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
 
       {/* Main Content */}
       <main id="main-content" className="pt-16 pb-24 px-3 sm:px-4" role="main">
+        <div className="max-w-4xl mx-auto pt-3">
+          <PrivacyPolicyUpdateAlert />
+        </div>
         <AnimatePresence mode="wait">
           <motion.div
             key={location}
