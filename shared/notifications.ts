@@ -52,6 +52,8 @@ export type NotificationPreferences = {
   enabled: boolean;
   highPriorityOnly: boolean;
   dailyDigestEnabled: boolean;
+  visualAlertEnabled: boolean;
+  soundAlertEnabled: boolean;
   enabledSources: Record<NotificationSource, boolean>;
 };
 

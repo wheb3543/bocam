@@ -70,6 +70,8 @@ const notificationPreferencesSchema = z.object({
   enabled: z.boolean(),
   highPriorityOnly: z.boolean(),
   dailyDigestEnabled: z.boolean(),
+  visualAlertEnabled: z.boolean(),
+  soundAlertEnabled: z.boolean(),
   enabledSources: z.record(z.enum(NOTIFICATION_SOURCES), z.boolean()),
 });
 

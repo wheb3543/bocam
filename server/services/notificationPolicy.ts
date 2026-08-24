@@ -24,6 +24,8 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   enabled: true,
   highPriorityOnly: false,
   dailyDigestEnabled: false,
+  visualAlertEnabled: true,
+  soundAlertEnabled: false,
   enabledSources: {
     content: true,
     bookings: true,
@@ -84,6 +86,8 @@ export function normalizeNotificationPreferences(value: unknown): NotificationPr
     enabled: candidate?.enabled !== false,
     highPriorityOnly: candidate?.highPriorityOnly === true,
     dailyDigestEnabled: candidate?.dailyDigestEnabled === true,
+    visualAlertEnabled: candidate?.visualAlertEnabled !== false,
+    soundAlertEnabled: candidate?.soundAlertEnabled === true,
     enabledSources: Object.fromEntries(
       NOTIFICATION_SOURCES.map((source) => [source, sourceCandidate[source] !== false])
     ) as Record<NotificationSource, boolean>,

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { NotificationCenter } from '@/components/NotificationCenter';
 
 const markAllMutate = vi.fn();
@@ -30,6 +30,25 @@ vi.mock('@/hooks/useNotifications', () => ({
           createdAt: new Date('2026-08-24T20:00:00.000Z'),
           updatedAt: new Date('2026-08-24T20:00:00.000Z'),
         },
+        {
+          id: 18,
+          userId: 1,
+          type: 'booking_pending',
+          source: 'bookings',
+          title: 'حجز جديد',
+          message: 'يوجد موعد جديد بانتظار المراجعة.',
+          data: null,
+          entityType: null,
+          entityId: null,
+          isRead: 'yes',
+          readAt: new Date('2026-08-24T19:00:00.000Z'),
+          actionUrl: null,
+          actionLabel: null,
+          priority: 'medium',
+          expiresAt: null,
+          createdAt: new Date('2026-08-24T19:00:00.000Z'),
+          updatedAt: new Date('2026-08-24T19:00:00.000Z'),
+        },
       ],
       pagination: { limit: 20, offset: 0, total: 1, hasMore: false },
     },
@@ -45,6 +64,25 @@ vi.mock('@/hooks/useNotifications', () => ({
 
 vi.mock('wouter', () => ({
   useLocation: () => ['/admin', vi.fn()],
+}));
+
+vi.mock('@/lib/api/trpc', () => ({
+  trpc: {
+    notifications: {
+      preferences: {
+        useQuery: () => ({
+          data: {
+            enabled: true,
+            highPriorityOnly: false,
+            dailyDigestEnabled: false,
+            visualAlertEnabled: true,
+            soundAlertEnabled: false,
+            enabledSources: {},
+          },
+        }),
+      },
+    },
+  },
 }));
 
 describe('NotificationCenter dropdown experience', () => {
@@ -81,9 +119,22 @@ describe('NotificationCenter dropdown experience', () => {
     openNotificationsDropdown();
 
     fireEvent.click(screen.getByRole('button', { name: 'تحديد الإشعار كمقروء' }));
-    fireEvent.click(screen.getByRole('button', { name: 'حذف الإشعار' }));
+    fireEvent.click(
+      within(screen.getByRole('region', { name: 'النظام' })).getByRole('button', {
+        name: 'حذف الإشعار',
+      })
+    );
 
     expect(markAsReadMutate).toHaveBeenCalledWith({ id: 17 });
     expect(deleteMutate).toHaveBeenCalledWith({ id: 17 });
+  });
+
+  it('organizes entries under clear source groups', () => {
+    render(<NotificationCenter />);
+
+    openNotificationsDropdown();
+
+    expect(screen.getByRole('region', { name: 'النظام' })).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'حجوزات المواعيد' })).toBeTruthy();
   });
 });

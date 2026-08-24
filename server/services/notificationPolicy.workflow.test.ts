@@ -54,6 +54,8 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(preferences.enabledSources.camps).toBe(true);
     expect(preferences.enabledSources.offers).toBe(true);
     expect(preferences.dailyDigestEnabled).toBe(false);
+    expect(preferences.visualAlertEnabled).toBe(true);
+    expect(preferences.soundAlertEnabled).toBe(false);
   });
 
   it('يحترم نموذج النظام إيقاف مصدر محدد وتخصيص مستلمي المصدر', () => {
@@ -112,5 +114,14 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(notificationsPageSource).toContain('إنشاء ملخص الآن');
     expect(notificationCenterSource).toContain("unreadCount > 99 ? '99+' : unreadCount");
     expect(notificationCenterSource).toContain('animate-[pulse_1.8s_ease-in-out_infinite]');
+  });
+
+  it('ينظم الإشعارات حسب المصدر ويحترم تفضيلات التنبيه المرئي والصوتي', () => {
+    expect(notificationCenterSource).toContain('notificationGroups');
+    expect(notificationCenterSource).toContain('playImportantNotificationTone');
+    expect(notificationCenterSource).toContain('visualAlertEnabled');
+    expect(notificationCenterSource).toContain('soundAlertEnabled');
+    expect(routerSource).toContain('visualAlertEnabled: z.boolean()');
+    expect(routerSource).toContain('soundAlertEnabled: z.boolean()');
   });
 });

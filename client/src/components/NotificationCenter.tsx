@@ -3,7 +3,7 @@
  * مركز الإشعارات - يعرض جميع الإشعارات للمستخدم
  */
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bell,
   Check,
@@ -38,6 +38,51 @@ import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useLocation } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+import { toast } from 'sonner';
+import { NOTIFICATION_SOURCES, type NotificationSource } from '@shared/notifications';
+
+const sourceLabels: Record<NotificationSource, string> = {
+  content: 'المحتوى والموافقات',
+  bookings: 'حجوزات المواعيد',
+  camps: 'تسجيلات المخيمات',
+  offers: 'تسجيلات العروض',
+  campaigns: 'الحملات',
+  integrations: 'التكاملات',
+  privacy: 'الخصوصية',
+  security: 'الأمان',
+  system: 'النظام',
+  manual: 'تنبيهات الإدارة',
+};
+
+const EMPTY_NOTIFICATIONS: UnifiedNotificationItem[] = [];
+
+function playImportantNotificationTone() {
+  if (typeof window === 'undefined' || typeof window.AudioContext === 'undefined') {
+    return;
+  }
+
+  try {
+    const context = new window.AudioContext();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const now = context.currentTime;
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(880, now);
+    oscillator.frequency.exponentialRampToValueAtTime(660, now + 0.18);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.055, now + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.23);
+    oscillator.addEventListener('ended', () => void context.close());
+  } catch {
+    // يمنع المتصفح تشغيل الصوت أحياناً حتى تفاعل المستخدم؛ لا نوقف مركز الإشعارات لذلك.
+  }
+}
 
 /**
  * الحصول على أيقونة حسب نوع الإشعار
@@ -195,12 +240,65 @@ export function NotificationCenter() {
   const [, setLocation] = useLocation();
   const { data: notificationsData } = useNotifications({ limit: 20 });
   const { data: unreadCount } = useUnreadCount();
+  const { data: preferences } = trpc.notifications.preferences.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  });
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
   const deleteNotification = useDeleteNotification();
   const deleteReadNotifications = useDeleteReadNotifications();
 
-  const notifications = notificationsData?.data || [];
+  const notifications = notificationsData?.data ?? EMPTY_NOTIFICATIONS;
+  const seenImportantNotificationIds = useRef(new Set<number>());
+  const hasInitialImportantNotifications = useRef(false);
+  const notificationGroups = useMemo(() => {
+    const groups = new Map<NotificationSource, UnifiedNotificationItem[]>();
+
+    NOTIFICATION_SOURCES.forEach((source) => groups.set(source, []));
+    notifications.forEach((notification) => groups.get(notification.source)?.push(notification));
+
+    return NOTIFICATION_SOURCES.map((source) => ({
+      source,
+      label: sourceLabels[source],
+      items: groups.get(source) || [],
+    })).filter((group) => group.items.length > 0);
+  }, [notifications]);
+
+  const importantUnreadIds = useMemo(
+    () =>
+      notifications
+        .filter((notification) => notification.isRead === 'no' && notification.priority === 'high')
+        .map((notification) => notification.id),
+    [notifications]
+  );
+
+  useEffect(() => {
+    const previousIds = seenImportantNotificationIds.current;
+    const newlyArrived = importantUnreadIds.filter((id) => !previousIds.has(id));
+    seenImportantNotificationIds.current = new Set(importantUnreadIds);
+
+    if (!hasInitialImportantNotifications.current) {
+      hasInitialImportantNotifications.current = true;
+      return;
+    }
+
+    if (newlyArrived.length === 0) {
+      return;
+    }
+
+    if (preferences?.visualAlertEnabled !== false) {
+      toast.info('وصل إشعار جديد عالي الأولوية', {
+        description:
+          newlyArrived.length > 1
+            ? `لديك ${newlyArrived.length} إشعارات مهمة جديدة.`
+            : 'راجع مركز الإشعارات للتفاصيل.',
+      });
+    }
+    if (preferences?.soundAlertEnabled === true) {
+      playImportantNotificationTone();
+    }
+  }, [importantUnreadIds, preferences?.soundAlertEnabled, preferences?.visualAlertEnabled]);
 
   const handleMarkAsRead = (id: number) => {
     markAsRead.mutate({ id });
@@ -316,14 +414,31 @@ export function NotificationCenter() {
               </p>
             </div>
           ) : (
-            notifications.map((notification) => (
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-                onMarkAsRead={handleMarkAsRead}
-                onDelete={handleDelete}
-              />
-            ))
+            <div className="divide-y divide-border/70">
+              {notificationGroups.map((group) => {
+                const unreadInGroup = group.items.filter((item) => item.isRead === 'no').length;
+                return (
+                  <section key={group.source} aria-label={group.label}>
+                    <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/60 bg-muted/95 px-4 py-2 text-xs font-semibold text-muted-foreground backdrop-blur">
+                      <span>{group.label}</span>
+                      {unreadInGroup > 0 ? (
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] text-primary">
+                          {unreadInGroup} جديد
+                        </span>
+                      ) : null}
+                    </div>
+                    {group.items.map((notification) => (
+                      <NotificationItem
+                        key={notification.id}
+                        notification={notification}
+                        onMarkAsRead={handleMarkAsRead}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </section>
+                );
+              })}
+            </div>
           )}
         </ScrollArea>
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BellRing, Check, Loader2, ShieldCheck } from 'lucide-react';
+import { BellRing, Check, Eye, Loader2, ShieldCheck, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -30,6 +30,8 @@ function fallbackPreferences(): NotificationPreferences {
     enabled: true,
     highPriorityOnly: false,
     dailyDigestEnabled: false,
+    visualAlertEnabled: true,
+    soundAlertEnabled: false,
     enabledSources: Object.fromEntries(
       NOTIFICATION_SOURCES.map((source) => [source, true])
     ) as Record<NotificationSource, boolean>,
@@ -111,6 +113,33 @@ export function NotificationPreferencesCard() {
                 setPreferences((current) => ({ ...current, dailyDigestEnabled: checked }))
               }
             />
+            <div className="rounded-xl border border-primary/15 bg-primary/[0.025] p-3 sm:p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                <BellRing className="h-4 w-4 text-primary" /> تنبيهات الإشعارات المهمة
+              </div>
+              <div className="space-y-3">
+                <PreferenceRow
+                  label="تنبيه مرئي داخل النظام"
+                  description="يظهر تنبيه واضح عند وصول إشعار جديد عالي الأولوية أثناء استخدام لوحة التحكم."
+                  checked={preferences.visualAlertEnabled}
+                  disabled={!preferences.enabled}
+                  icon={<Eye className="h-4 w-4 text-primary" />}
+                  onCheckedChange={(checked) =>
+                    setPreferences((current) => ({ ...current, visualAlertEnabled: checked }))
+                  }
+                />
+                <PreferenceRow
+                  label="تنبيه صوتي قصير"
+                  description="يشغّل نغمة خفيفة للإشعارات الجديدة عالية الأولوية؛ قد تحتاج المتصفحات تفاعلاً سابقاً لتشغيل الصوت."
+                  checked={preferences.soundAlertEnabled}
+                  disabled={!preferences.enabled}
+                  icon={<Volume2 className="h-4 w-4 text-primary" />}
+                  onCheckedChange={(checked) =>
+                    setPreferences((current) => ({ ...current, soundAlertEnabled: checked }))
+                  }
+                />
+              </div>
+            </div>
             <div className="rounded-xl border border-border bg-muted/20 p-3 sm:p-4">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
                 <ShieldCheck className="h-4 w-4 text-green-700" /> المصادر المفعّلة
@@ -150,6 +179,7 @@ export function NotificationPreferencesCard() {
 function PreferenceRow({
   label,
   description,
+  icon,
   checked,
   onCheckedChange,
   disabled = false,
@@ -157,6 +187,7 @@ function PreferenceRow({
 }: {
   label: string;
   description?: string;
+  icon?: React.ReactNode;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
@@ -167,7 +198,10 @@ function PreferenceRow({
       className={`flex items-center justify-between gap-3 ${compact ? 'rounded-lg bg-background p-2.5' : 'rounded-xl border border-border p-3'}`}
     >
       <div>
-        <Label className="text-sm font-medium">{label}</Label>
+        <Label className="flex items-center gap-2 text-sm font-medium">
+          {icon}
+          {label}
+        </Label>
         {description && (
           <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
         )}
