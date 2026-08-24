@@ -2326,11 +2326,31 @@ export const notifications = mysqlTable(
       'content_updated', // تحديث المحتوى
       'content_deleted', // حذف المحتوى
       'content_published', // نشر المحتوى
+      'booking_pending', // حجز أو تسجيل يحتاج متابعة
+      'booking_confirmed', // تأكيد حجز أو تسجيل
+      'campaign_review', // مراجعة حملة
+      'integration_status', // حالة تكامل خارجي
+      'privacy_update', // تحديث سياسة أو تفضيل خصوصية
+      'security', // تنبيه أمني
       'system', // إشعار نظام
     ]).notNull(), // نوع الإشعار
+    source: mysqlEnum('source', [
+      'content',
+      'bookings',
+      'campaigns',
+      'integrations',
+      'privacy',
+      'security',
+      'system',
+      'manual',
+    ])
+      .default('system')
+      .notNull(), // المصدر التشغيلي للإشعار
     title: varchar('title', { length: 255 }).notNull(), // عنوان الإشعار
     message: text('message').notNull(), // نص الإشعار
     data: text('data'), // بيانات إضافية (JSON)
+    entityType: varchar('entityType', { length: 100 }), // نوع السجل المرتبط
+    entityId: varchar('entityId', { length: 100 }), // معرف السجل المرتبط
     isRead: mysqlEnum('isRead', ['yes', 'no']).default('no').notNull(), // حالة القراءة
     readAt: timestamp('readAt'), // تاريخ القراءة
     actionUrl: varchar('actionUrl', { length: 500 }), // رابط الإجراء
@@ -2343,6 +2363,7 @@ export const notifications = mysqlTable(
   (table) => ({
     userIdIdx: index('notifications_userId_idx').on(table.userId),
     typeIdx: index('notifications_type_idx').on(table.type),
+    sourceIdx: index('notifications_source_idx').on(table.source),
     isReadIdx: index('notifications_isRead_idx').on(table.isRead),
     priorityIdx: index('notifications_priority_idx').on(table.priority),
     createdAtIdx: index('notifications_createdAt_idx').on(table.createdAt),
@@ -2351,6 +2372,7 @@ export const notifications = mysqlTable(
       table.userId,
       table.createdAt
     ),
+    userIdSourceIdx: index('notifications_userIdSource_idx').on(table.userId, table.source),
   })
 );
 

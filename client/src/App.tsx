@@ -125,6 +125,7 @@ const UpdateManagementPage = lazy(() => import('./pages/admin/system/UpdateManag
 const SystemStatusPage = lazy(() => import('./pages/admin/system/SystemStatusPage'));
 const BackupManagementPage = lazy(() => import('./pages/admin/system/BackupManagementPage'));
 const AdvancedSettingsPage = lazy(() => import('./pages/admin/AdvancedSettingsPage'));
+const NotificationsPage = lazy(() => import('./pages/admin/NotificationsPage'));
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 
 // Prefetch critical pages for better performance
@@ -236,6 +237,7 @@ function Router() {
                 <Route path={'/admin/profile'} component={ProfilePage} />
                 <Route path={'/admin/support'} component={SupportTicketsPage} />
                 <Route path={'/admin/management'} component={ManagementPage} />
+                <Route path={'/admin/notifications'} component={NotificationsPage} />
                 <Route path={'/admin/content/content'} component={ContentManagementPage} />
                 <Route path={'/admin/content/media-library'} component={MediaLibraryPage} />
                 <Route path={'/admin/users/users'} component={UsersManagementPage} />

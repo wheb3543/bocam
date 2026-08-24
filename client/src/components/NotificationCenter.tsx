@@ -31,29 +31,12 @@ import {
   useMarkAllAsRead,
   useDeleteNotification,
   useDeleteReadNotifications,
+  type NotificationItem as UnifiedNotificationItem,
 } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-
-interface NotificationData {
-  id: number;
-  type:
-    | 'approval_requested'
-    | 'approval_approved'
-    | 'approval_rejected'
-    | 'content_updated'
-    | 'content_deleted'
-    | 'content_published'
-    | 'system';
-  title: string;
-  message: string;
-  isRead: 'yes' | 'no';
-  actionUrl: string | null;
-  actionLabel: string | null;
-  priority: 'low' | 'medium' | 'high';
-  createdAt: Date;
-}
+import { useLocation } from 'wouter';
 
 /**
  * الحصول على أيقونة حسب نوع الإشعار
@@ -103,7 +86,7 @@ function NotificationItem({
   onMarkAsRead,
   onDelete,
 }: {
-  notification: NotificationData;
+  notification: UnifiedNotificationItem;
   onMarkAsRead: (id: number) => void;
   onDelete: (id: number) => void;
 }) {
@@ -195,6 +178,7 @@ function NotificationItem({
  */
 export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const { data: notificationsData } = useNotifications({ limit: 20 });
   const { data: unreadCount } = useUnreadCount();
   const markAsRead = useMarkAsRead();
@@ -291,7 +275,15 @@ export function NotificationCenter() {
           <>
             <DropdownMenuSeparator />
             <div className="p-2">
-              <Button variant="ghost" size="sm" className="w-full" onClick={() => setIsOpen(false)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setIsOpen(false);
+                  setLocation('/admin/notifications');
+                }}
+              >
                 عرض جميع الإشعارات
               </Button>
             </div>

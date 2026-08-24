@@ -1,43 +1,39 @@
-/**
- * Notification Helper
- * دوال مساعدة لإنشاء الإشعارات
- */
+/** Shared server-side helpers for the unified per-user notification inbox. */
 
 import { notifications } from '../../drizzle/schema';
-import { eq } from 'drizzle-orm';
+import type {
+  NotificationPriority,
+  NotificationSource,
+  NotificationType,
+} from '../../shared/notifications';
 
-/**
- * إنشاء إشعار جديد
- */
-export async function createNotification(
-  db: any,
-  options: {
-    userId: number;
-    type:
-      | 'approval_requested'
-      | 'approval_approved'
-      | 'approval_rejected'
-      | 'content_updated'
-      | 'content_deleted'
-      | 'content_published'
-      | 'system';
-    title: string;
-    message: string;
-    data?: string; // JSON string
-    actionUrl?: string;
-    actionLabel?: string;
-    priority?: 'low' | 'medium' | 'high';
-    expiresAt?: Date;
-  }
-) {
+type NotificationOptions = {
+  userId: number;
+  type: NotificationType;
+  source?: NotificationSource;
+  title: string;
+  message: string;
+  data?: string;
+  entityType?: string;
+  entityId?: string | number;
+  actionUrl?: string;
+  actionLabel?: string;
+  priority?: NotificationPriority;
+  expiresAt?: Date;
+};
+
+export async function createNotification(db: any, options: NotificationOptions) {
   const [notification] = await db
     .insert(notifications)
     .values({
       userId: options.userId,
       type: options.type,
+      source: options.source || 'system',
       title: options.title,
       message: options.message,
       data: options.data || null,
+      entityType: options.entityType || null,
+      entityId: options.entityId ? String(options.entityId) : null,
       actionUrl: options.actionUrl || null,
       actionLabel: options.actionLabel || null,
       priority: options.priority || 'medium',
@@ -48,201 +44,127 @@ export async function createNotification(
   return notification.id;
 }
 
-/**
- * إنشاء إشعار لعدة مستخدمين
- */
 export async function createBulkNotifications(
   db: any,
   userIds: number[],
-  notificationOptions: {
-    type:
-      | 'approval_requested'
-      | 'approval_approved'
-      | 'approval_rejected'
-      | 'content_updated'
-      | 'content_deleted'
-      | 'content_published'
-      | 'system';
-    title: string;
-    message: string;
-    data?: string;
-    actionUrl?: string;
-    actionLabel?: string;
-    priority?: 'low' | 'medium' | 'high';
-    expiresAt?: Date;
-  }
+  notificationOptions: Omit<NotificationOptions, 'userId'>
 ) {
-  const notificationIds = [];
-
+  const notificationIds: number[] = [];
   for (const userId of userIds) {
-    const id = await createNotification(db, {
-      userId,
-      ...notificationOptions,
-    });
-    notificationIds.push(id);
+    notificationIds.push(await createNotification(db, { userId, ...notificationOptions }));
   }
-
   return notificationIds;
 }
 
-/**
- * إنشاء إشعار طلب موافقة
- */
+type ContentNotificationOptions = {
+  userId: number;
+  entityType: string;
+  entityId: number;
+  entityName: string;
+};
+
+function contentData(options: ContentNotificationOptions, extras: Record<string, unknown> = {}) {
+  return JSON.stringify({ entityType: options.entityType, entityId: options.entityId, ...extras });
+}
+
+const contentAction = '/admin/content/content';
+
 export async function createApprovalRequestedNotification(
   db: any,
-  options: {
-    userId: number;
-    entityType: string;
-    entityId: number;
-    entityName: string;
-  }
+  options: ContentNotificationOptions
 ) {
   return createNotification(db, {
-    userId: options.userId,
+    ...options,
     type: 'approval_requested',
+    source: 'content',
     title: 'طلب موافقة جديد',
     message: `تم تقديم طلب موافقة لـ ${options.entityName} (${options.entityType})`,
-    data: JSON.stringify({
-      entityType: options.entityType,
-      entityId: options.entityId,
-    }),
-    actionUrl: `/admin/content/approvals`,
+    data: contentData(options),
+    actionUrl: '/admin/campaigns/review-approval',
     actionLabel: 'عرض الطلب',
     priority: 'high',
   });
 }
 
-/**
- * إنشاء إشعار موافقة
- */
 export async function createApprovalApprovedNotification(
   db: any,
-  options: {
-    userId: number;
-    entityType: string;
-    entityId: number;
-    entityName: string;
-  }
+  options: ContentNotificationOptions
 ) {
   return createNotification(db, {
-    userId: options.userId,
+    ...options,
     type: 'approval_approved',
+    source: 'content',
     title: 'تمت الموافقة',
     message: `تمت الموافقة على طلبك لـ ${options.entityName} (${options.entityType})`,
-    data: JSON.stringify({
-      entityType: options.entityType,
-      entityId: options.entityId,
-    }),
-    actionUrl: `/admin/content/approvals`,
+    data: contentData(options),
+    actionUrl: '/admin/campaigns/review-approval',
     actionLabel: 'عرض التفاصيل',
     priority: 'medium',
   });
 }
 
-/**
- * إنشاء إشعار رفض
- */
 export async function createApprovalRejectedNotification(
   db: any,
-  options: {
-    userId: number;
-    entityType: string;
-    entityId: number;
-    entityName: string;
-    rejectionReason?: string;
-  }
+  options: ContentNotificationOptions & { rejectionReason?: string }
 ) {
   return createNotification(db, {
-    userId: options.userId,
+    ...options,
     type: 'approval_rejected',
+    source: 'content',
     title: 'تم الرفض',
     message: `تم رفض طلبك لـ ${options.entityName} (${options.entityType})${options.rejectionReason ? `: ${options.rejectionReason}` : ''}`,
-    data: JSON.stringify({
-      entityType: options.entityType,
-      entityId: options.entityId,
-      rejectionReason: options.rejectionReason,
-    }),
-    actionUrl: `/admin/content/approvals`,
+    data: contentData(options, { rejectionReason: options.rejectionReason }),
+    actionUrl: '/admin/campaigns/review-approval',
     actionLabel: 'عرض التفاصيل',
     priority: 'high',
   });
 }
 
-/**
- * إنشاء إشعار تحديث المحتوى
- */
 export async function createContentUpdatedNotification(
   db: any,
-  options: {
-    userId: number;
-    entityType: string;
-    entityId: number;
-    entityName: string;
-  }
+  options: ContentNotificationOptions
 ) {
   return createNotification(db, {
-    userId: options.userId,
+    ...options,
     type: 'content_updated',
+    source: 'content',
     title: 'تحديث المحتوى',
     message: `تم تحديث ${options.entityName} (${options.entityType})`,
-    data: JSON.stringify({
-      entityType: options.entityType,
-      entityId: options.entityId,
-    }),
-    actionUrl: `/admin/content/${options.entityType}s`,
-    actionLabel: 'عرض التفاصيل',
+    data: contentData(options),
+    actionUrl: contentAction,
+    actionLabel: 'عرض المحتوى',
     priority: 'low',
   });
 }
 
-/**
- * إنشاء إشعار حذف المحتوى
- */
 export async function createContentDeletedNotification(
   db: any,
-  options: {
-    userId: number;
-    entityType: string;
-    entityId: number;
-    entityName: string;
-  }
+  options: ContentNotificationOptions
 ) {
   return createNotification(db, {
-    userId: options.userId,
+    ...options,
     type: 'content_deleted',
+    source: 'content',
     title: 'حذف المحتوى',
     message: `تم حذف ${options.entityName} (${options.entityType})`,
-    data: JSON.stringify({
-      entityType: options.entityType,
-      entityId: options.entityId,
-    }),
+    data: contentData(options),
     priority: 'medium',
   });
 }
 
-/**
- * إنشاء إشعار نشر المحتوى
- */
 export async function createContentPublishedNotification(
   db: any,
-  options: {
-    userId: number;
-    entityType: string;
-    entityId: number;
-    entityName: string;
-  }
+  options: ContentNotificationOptions
 ) {
   return createNotification(db, {
-    userId: options.userId,
+    ...options,
     type: 'content_published',
+    source: 'content',
     title: 'نشر المحتوى',
     message: `تم نشر ${options.entityName} (${options.entityType})`,
-    data: JSON.stringify({
-      entityType: options.entityType,
-      entityId: options.entityId,
-    }),
-    actionUrl: `/admin/content/${options.entityType}s`,
-    actionLabel: 'عرض التفاصيل',
+    data: contentData(options),
+    actionUrl: contentAction,
+    actionLabel: 'عرض المحتوى',
     priority: 'medium',
   });
 }

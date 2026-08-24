@@ -1,343 +1,278 @@
 /**
- * Notifications Router
- * Router لإدارة الإشعارات
+ * Unified notifications router.
+ * Every record belongs to exactly one recipient; creation is restricted to administrators
+ * or internal server helpers, while recipients can only manage their own inbox state.
  */
 
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { notifications } from '../../drizzle/schema';
-import { eq, and, desc, lt, isNull } from 'drizzle-orm';
-import { protectedProcedure, router } from '../_core/trpc';
+import { and, desc, eq, gt, isNotNull, isNull, lt, or } from 'drizzle-orm';
+import { notifications, users } from '../../drizzle/schema';
+import { adminProcedure, protectedProcedure, router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
-import { createLogger } from '../_core/logger';
+import {
+  NOTIFICATION_PRIORITIES,
+  NOTIFICATION_SOURCES,
+  NOTIFICATION_TYPES,
+} from '../../shared/notifications';
 
-const logger = createLogger('notifications');
+const relativeActionUrlSchema = z
+  .string()
+  .max(500)
+  .refine((value) => value === '' || value.startsWith('/'), {
+    message: 'يجب أن يكون رابط الإجراء مساراً داخلياً آمناً',
+  });
 
-/**
- * Schema لإنشاء إشعار جديد
- */
 const createNotificationSchema = z.object({
-  userId: z.number(),
-  type: z.enum([
-    'approval_requested',
-    'approval_approved',
-    'approval_rejected',
-    'content_updated',
-    'content_deleted',
-    'content_published',
-    'system',
-  ]),
-  title: z.string().min(1).max(255),
-  message: z.string().min(1),
-  data: z.string().optional(), // JSON string
-  actionUrl: z.string().url().optional().or(z.literal('')),
-  actionLabel: z.string().max(100).optional(),
-  priority: z.enum(['low', 'medium', 'high']).default('medium'),
-  expiresAt: z.date().optional(),
+  userId: z.number().int().positive(),
+  type: z.enum(NOTIFICATION_TYPES),
+  source: z.enum(NOTIFICATION_SOURCES).default('manual'),
+  title: z.string().trim().min(1).max(255),
+  message: z.string().trim().min(1).max(4000),
+  data: z.string().max(10000).optional(),
+  entityType: z.string().trim().max(100).optional(),
+  entityId: z.string().trim().max(100).optional(),
+  actionUrl: relativeActionUrlSchema.optional(),
+  actionLabel: z.string().trim().max(100).optional(),
+  priority: z.enum(NOTIFICATION_PRIORITIES).default('medium'),
+  expiresAt: z.coerce.date().optional(),
 });
 
-/**
- * Schema لتحديث إشعار
- */
-const updateNotificationSchema = z.object({
-  id: z.number(),
-  isRead: z.enum(['yes', 'no']).optional(),
-  readAt: z.date().optional(),
-  actionUrl: z.string().url().optional().or(z.literal('')),
-  actionLabel: z.string().max(100).optional(),
-});
-
-/**
- * Schema لفلترة الإشعارات
- */
 const notificationFilterSchema = z.object({
-  type: z
-    .enum([
-      'approval_requested',
-      'approval_approved',
-      'approval_rejected',
-      'content_updated',
-      'content_deleted',
-      'content_published',
-      'system',
-    ])
-    .optional(),
+  type: z.enum(NOTIFICATION_TYPES).optional(),
+  source: z.enum(NOTIFICATION_SOURCES).optional(),
   isRead: z.enum(['yes', 'no']).optional(),
-  priority: z.enum(['low', 'medium', 'high']).optional(),
-  limit: z.number().min(1).max(100).default(20),
-  offset: z.number().min(0).default(0),
+  priority: z.enum(NOTIFICATION_PRIORITIES).optional(),
+  limit: z.number().int().min(1).max(100).default(20),
+  offset: z.number().int().min(0).default(0),
 });
+
+const currentNotificationConditions = () =>
+  or(isNull(notifications.expiresAt), gt(notifications.expiresAt, new Date()));
+
+async function findOwnedNotification(id: number, userId: number) {
+  const db = await ensureDatabaseAvailable();
+  const existing = await db
+    .select({ id: notifications.id })
+    .from(notifications)
+    .where(and(eq(notifications.id, id), eq(notifications.userId, userId)))
+    .limit(1);
+
+  if (!existing[0]) {
+    throw new TRPCError({ code: 'NOT_FOUND', message: 'الإشعار غير موجود' });
+  }
+
+  return db;
+}
 
 export const notificationsRouter = router({
-  /**
-   * الحصول على جميع الإشعارات للمستخدم الحالي
-   */
   list: protectedProcedure
     .input(notificationFilterSchema.optional())
     .query(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
-      const userId = ctx.user.id;
       const filters = input || { limit: 20, offset: 0 };
-
-      // بناء شروط الفلترة
-      const conditions = [eq(notifications.userId, userId)];
+      const conditions = [eq(notifications.userId, ctx.user.id), currentNotificationConditions()];
 
       if (filters.type) {
         conditions.push(eq(notifications.type, filters.type));
       }
-
+      if (filters.source) {
+        conditions.push(eq(notifications.source, filters.source));
+      }
       if (filters.isRead) {
         conditions.push(eq(notifications.isRead, filters.isRead));
       }
-
       if (filters.priority) {
         conditions.push(eq(notifications.priority, filters.priority));
       }
 
-      // الحصول على الإشعارات
-      const data = await db
+      const matching = await db
         .select()
         .from(notifications)
         .where(and(...conditions))
-        .orderBy(desc(notifications.createdAt))
-        .limit(filters.limit)
-        .offset(filters.offset);
-
-      // الحصول على العدد الكلي
-      const totalResult = await db
-        .select({ count: notifications.id })
-        .from(notifications)
-        .where(and(...conditions));
-
-      const total = totalResult.length;
+        .orderBy(desc(notifications.createdAt));
 
       return {
-        data,
+        data: matching.slice(filters.offset, filters.offset + filters.limit),
         pagination: {
           limit: filters.limit,
           offset: filters.offset,
-          total,
-          hasMore: filters.offset + filters.limit < total,
+          total: matching.length,
+          hasMore: filters.offset + filters.limit < matching.length,
         },
       };
     }),
 
-  /**
-   * الحصول على إشعار محدد
-   */
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input, ctx }) => {
+  overview: protectedProcedure.query(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
-    const notification = await db
-      .select()
+    const items = await db
+      .select({
+        isRead: notifications.isRead,
+        priority: notifications.priority,
+        source: notifications.source,
+      })
       .from(notifications)
-      .where(and(eq(notifications.id, input.id), eq(notifications.userId, ctx.user.id)))
-      .limit(1);
+      .where(and(eq(notifications.userId, ctx.user.id), currentNotificationConditions()));
 
-    if (!notification[0]) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'الإشعار غير موجود',
-      });
-    }
-
-    return notification[0];
+    return {
+      total: items.length,
+      unread: items.filter((item) => item.isRead === 'no').length,
+      highPriority: items.filter((item) => item.priority === 'high' && item.isRead === 'no').length,
+      bySource: Object.fromEntries(
+        NOTIFICATION_SOURCES.map((source) => [
+          source,
+          items.filter((item) => item.source === source && item.isRead === 'no').length,
+        ])
+      ),
+    };
   }),
 
-  /**
-   * الحصول على الإشعارات غير المقروءة
-   */
   getUnread: protectedProcedure.query(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
-    const unread = await db
+    return db
       .select()
       .from(notifications)
-      .where(and(eq(notifications.userId, ctx.user.id), eq(notifications.isRead, 'no')))
+      .where(
+        and(
+          eq(notifications.userId, ctx.user.id),
+          eq(notifications.isRead, 'no'),
+          currentNotificationConditions()
+        )
+      )
       .orderBy(desc(notifications.createdAt));
-
-    return unread;
   }),
 
-  /**
-   * الحصول على عدد الإشعارات غير المقروءة
-   */
   getUnreadCount: protectedProcedure.query(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
-    const result = await db
-      .select({ count: notifications.id })
+    const unread = await db
+      .select({ id: notifications.id })
       .from(notifications)
-      .where(and(eq(notifications.userId, ctx.user.id), eq(notifications.isRead, 'no')));
-
-    return result.length;
+      .where(
+        and(
+          eq(notifications.userId, ctx.user.id),
+          eq(notifications.isRead, 'no'),
+          currentNotificationConditions()
+        )
+      );
+    return unread.length;
   }),
 
-  /**
-   * إنشاء إشعار جديد
-   */
-  create: protectedProcedure.input(createNotificationSchema).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
-    const [notification] = await db
-      .insert(notifications)
-      .values({
-        ...input,
-        actionUrl: input.actionUrl || null,
-        actionLabel: input.actionLabel || null,
-      })
-      .$returningId();
-
-    return notification.id;
-  }),
-
-  /**
-   * تحديث إشعار
-   */
-  update: protectedProcedure.input(updateNotificationSchema).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
-    // التحقق من أن الإشعار يخص المستخدم الحالي
-    const existing = await db
-      .select()
-      .from(notifications)
-      .where(and(eq(notifications.id, input.id), eq(notifications.userId, ctx.user.id)))
-      .limit(1);
-
-    if (!existing[0]) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'الإشعار غير موجود',
-      });
-    }
-
-    // تحديث الإشعار
-    const updateData: any = {};
-    if (input.isRead !== undefined) {
-      updateData.isRead = input.isRead;
-      if (input.isRead === 'yes' && !input.readAt) {
-        updateData.readAt = new Date();
-      }
-    }
-    if (input.actionUrl !== undefined) {
-      updateData.actionUrl = input.actionUrl || null;
-    }
-    if (input.actionLabel !== undefined) {
-      updateData.actionLabel = input.actionLabel || null;
-    }
-
-    await db.update(notifications).set(updateData).where(eq(notifications.id, input.id));
-
-    return { success: true };
-  }),
-
-  /**
-   * تحديد إشعار كمقروء
-   */
   markAsRead: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ input, ctx }) => {
-      const db = await ensureDatabaseAvailable();
-      // التحقق من أن الإشعار يخص المستخدم الحالي
-      const existing = await db
-        .select()
-        .from(notifications)
-        .where(and(eq(notifications.id, input.id), eq(notifications.userId, ctx.user.id)))
-        .limit(1);
-
-      if (!existing[0]) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'الإشعار غير موجود',
-        });
-      }
-
+      const db = await findOwnedNotification(input.id, ctx.user.id);
       await db
         .update(notifications)
-        .set({
-          isRead: 'yes',
-          readAt: new Date(),
-        })
+        .set({ isRead: 'yes', readAt: new Date() })
         .where(eq(notifications.id, input.id));
-
       return { success: true };
     }),
 
-  /**
-   * تحديد جميع الإشعارات كمقروءة
-   */
+  markAsUnread: protectedProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await findOwnedNotification(input.id, ctx.user.id);
+      await db
+        .update(notifications)
+        .set({ isRead: 'no', readAt: null })
+        .where(eq(notifications.id, input.id));
+      return { success: true };
+    }),
+
   markAllAsRead: protectedProcedure.mutation(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
     await db
       .update(notifications)
-      .set({
-        isRead: 'yes',
-        readAt: new Date(),
-      })
+      .set({ isRead: 'yes', readAt: new Date() })
       .where(and(eq(notifications.userId, ctx.user.id), eq(notifications.isRead, 'no')));
-
     return { success: true };
   }),
 
-  /**
-   * حذف إشعار
-   */
   delete: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ input, ctx }) => {
-      const db = await ensureDatabaseAvailable();
-      // التحقق من أن الإشعار يخص المستخدم الحالي
-      const existing = await db
-        .select()
-        .from(notifications)
-        .where(and(eq(notifications.id, input.id), eq(notifications.userId, ctx.user.id)))
-        .limit(1);
-
-      if (!existing[0]) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'الإشعار غير موجود',
-        });
-      }
-
+      const db = await findOwnedNotification(input.id, ctx.user.id);
       await db.delete(notifications).where(eq(notifications.id, input.id));
-
       return { success: true };
     }),
 
-  /**
-   * حذف جميع الإشعارات المقروءة
-   */
   deleteRead: protectedProcedure.mutation(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
     await db
       .delete(notifications)
       .where(and(eq(notifications.userId, ctx.user.id), eq(notifications.isRead, 'yes')));
-
     return { success: true };
   }),
 
-  /**
-   * حذف الإشعارات المنتهية الصلاحية
-   */
-  deleteExpired: protectedProcedure.mutation(async () => {
+  create: adminProcedure.input(createNotificationSchema).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
-    await db
-      .delete(notifications)
-      .where(and(isNull(notifications.expiresAt), lt(notifications.expiresAt, new Date())));
-
-    return { success: true };
-  }),
-
-  /**
-   * إنشاء إشعار لمستخدم محدد (للاستخدام الداخلي)
-   */
-  createForUser: protectedProcedure.input(createNotificationSchema).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
-    const [notification] = await db
+    const [created] = await db
       .insert(notifications)
       .values({
         ...input,
+        data: input.data || null,
+        entityType: input.entityType || null,
+        entityId: input.entityId || null,
         actionUrl: input.actionUrl || null,
         actionLabel: input.actionLabel || null,
       })
       .$returningId();
+    return { id: created.id };
+  }),
 
-    return notification.id;
+  createForUser: adminProcedure.input(createNotificationSchema).mutation(async ({ input, ctx }) => {
+    const db = await ensureDatabaseAvailable();
+    const [created] = await db
+      .insert(notifications)
+      .values({
+        ...input,
+        source: input.source || 'manual',
+        data: input.data || null,
+        entityType: input.entityType || null,
+        entityId: input.entityId || null,
+        actionUrl: input.actionUrl || null,
+        actionLabel: input.actionLabel || null,
+      })
+      .$returningId();
+    return { id: created.id, createdBy: ctx.user.id };
+  }),
+
+  broadcastToAdmins: adminProcedure
+    .input(
+      createNotificationSchema
+        .omit({ userId: true })
+        .extend({ source: z.enum(NOTIFICATION_SOURCES).default('manual') })
+    )
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
+      const administrators = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.role, 'admin'));
+
+      if (administrators.length === 0) {
+        return { recipients: 0 };
+      }
+
+      await db.insert(notifications).values(
+        administrators.map((administrator) => ({
+          ...input,
+          userId: administrator.id,
+          data: input.data || null,
+          entityType: input.entityType || null,
+          entityId: input.entityId || null,
+          actionUrl: input.actionUrl || null,
+          actionLabel: input.actionLabel || null,
+        }))
+      );
+      return { recipients: administrators.length };
+    }),
+
+  deleteExpired: adminProcedure.mutation(async () => {
+    const db = await ensureDatabaseAvailable();
+    await db
+      .delete(notifications)
+      .where(and(isNotNull(notifications.expiresAt), lt(notifications.expiresAt, new Date())));
+    return { success: true };
   }),
 });
