@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  clearPrivacyPolicyConsent,
   hasAcceptedPrivacyPolicy,
   isPublicVisitorPath,
   PRIVACY_POLICY_CONSENT_STORAGE_KEY,
@@ -24,6 +25,14 @@ describe('PrivacyPolicyConsentBanner', () => {
     savePrivacyPolicyConsent('2026-03-01');
 
     expect(hasAcceptedPrivacyPolicy('2026-04-01')).toBe(false);
+  });
+
+  it('يسمح بإزالة القرار الحالي لإعادة طلب الموافقة لاحقاً', () => {
+    savePrivacyPolicyConsent('2026-03-01');
+    clearPrivacyPolicyConsent();
+
+    expect(hasAcceptedPrivacyPolicy('2026-03-01')).toBe(false);
+    expect(localStorage.getItem(PRIVACY_POLICY_CONSENT_STORAGE_KEY)).toBeNull();
   });
 
   it('يعرض الطلب للمسارات العامة فقط', () => {

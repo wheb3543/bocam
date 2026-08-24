@@ -115,6 +115,7 @@ const PatientPortalLayout = lazy(() => import('./components/patient/PatientPorta
 const MessageSettingsPage = lazy(() => import('./pages/admin/MessageSettingsPage'));
 const PWAStatsPage = lazy(() => import('./pages/admin/reports/PWAStatsPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/public/PrivacyPolicyPage'));
+const PrivacyPolicyChangelogPage = lazy(() => import('./pages/public/PrivacyPolicyChangelogPage'));
 const BIPage = lazy(() => import('./pages/admin/reports/BIPage'));
 const TrackingSettingsPage = lazy(() => import('./pages/admin/TrackingSettingsPage'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
@@ -211,6 +212,7 @@ function Router() {
         <Route path={'/camps/:slug'} component={CampDetailPage} />
         <Route path={'/thank-you'} component={ThankYou} />
         <Route path={'/privacy-policy'} component={PrivacyPolicyPage} />
+        <Route path={'/privacy-policy-changelog'} component={PrivacyPolicyChangelogPage} />
         <Route path={'/unauthorized'} component={Unauthorized} />
         <Route path={'/access-request'} component={AccessRequest} />
         <Route path={'/admin-login'} component={AdminLogin} />

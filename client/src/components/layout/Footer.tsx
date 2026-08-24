@@ -6,6 +6,7 @@
 import { Phone, MapPin, Clock } from 'lucide-react';
 import { APP_LOGO, APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from '@/const';
 import { Link } from 'wouter';
+import { openPrivacyPreferences } from '@/components/PrivacyPolicyConsentBanner';
 
 export default function Footer() {
   return (
@@ -102,12 +103,26 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} {APP_TITLE}. جميع الحقوق محفوظة.
           </p>
-          <div className="mt-2 flex items-center justify-center gap-3">
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
             <Link href="/privacy-policy">
               <span className="hover:text-green-200 transition-colors cursor-pointer">
                 سياسة الخصوصية
               </span>
             </Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/privacy-policy-changelog">
+              <span className="hover:text-green-200 transition-colors cursor-pointer">
+                سجل تغييرات الخصوصية
+              </span>
+            </Link>
+            <span aria-hidden="true">•</span>
+            <button
+              type="button"
+              onClick={openPrivacyPreferences}
+              className="hover:text-green-200 transition-colors underline underline-offset-4"
+            >
+              إدارة الخصوصية
+            </button>
           </div>
         </div>
       </div>

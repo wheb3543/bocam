@@ -19,6 +19,10 @@ const privacyConsentSource = readFileSync(
   resolve(process.cwd(), 'client/src/components/PrivacyPolicyConsentBanner.tsx'),
   'utf8'
 );
+const privacyChangelogSource = readFileSync(
+  resolve(process.cwd(), 'client/src/pages/public/PrivacyPolicyChangelogPage.tsx'),
+  'utf8'
+);
 
 describe('تكامل CMS لصفحات التفاصيل', () => {
   it('يبقي نصوص صفحة تفاصيل العرض قابلة للإدارة عبر مفاتيح CMS', () => {
@@ -65,5 +69,14 @@ describe('تكامل CMS لصفحات التفاصيل', () => {
     expect(privacyConsentSource).toContain('privacy.consent.${key}.${language}');
     expect(privacyConsentSource).toContain('PRIVACY_POLICY_VERSION');
     expect(privacyConsentSource).toContain('PRIVACY_POLICY_CONSENT_STORAGE_KEY');
+    expect(privacyConsentSource).toContain('AnimatePresence');
+    expect(privacyConsentSource).toContain('openPrivacyPreferences');
+  });
+
+  it('يعرض سجل تغييرات الخصوصية من مفاتيح CMS المنشورة', () => {
+    expect(privacyChangelogSource).toContain("usePublicPageContent('privacy-changelog', language)");
+    expect(privacyChangelogSource).toContain('privacy.changelog.${key}.${language}');
+    expect(privacyChangelogSource).toContain("t('current.version', 'الإصدار 2026-03-01')");
+    expect(privacyChangelogSource).toContain("t('previous.heading', 'الإصدارات السابقة')");
   });
 });
