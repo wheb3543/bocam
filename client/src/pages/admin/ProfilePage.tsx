@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import { Loader2, User, Mail, Shield, Calendar } from 'lucide-react';
+import { NotificationPreferencesCard } from '@/components/notification/NotificationPreferencesCard';
 
 export default function ProfilePage() {
   const { formatDate } = useFormatDate();
@@ -206,6 +207,8 @@ export default function ProfilePage() {
             )}
           </CardContent>
         </Card>
+
+        <NotificationPreferencesCard />
 
         {/* Account Security Card */}
         <Card>

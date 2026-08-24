@@ -15,6 +15,7 @@ import { dispatchWhatsAppMessage } from '../../services/whatsappMessageDispatche
 import { createLogger } from '../../_core/logger';
 import { invalidateEntityCache } from '../../services/cacheInvalidator';
 import { createStatusTimestamps } from '../../_core/statusTimestamps';
+import { notifyEligibleRecipients } from '../../services/notificationPolicy';
 
 const logger = createLogger('offerLeads.registration');
 
@@ -94,6 +95,21 @@ export const offerRegistrationRouter = router({
       // Get offer details for notification
       const { offers } = await import('../../../drizzle/schema');
       const [offer] = await db.select().from(offers).where(eq(offers.id, input.offerId)).limit(1);
+
+      notifyEligibleRecipients(db, {
+        source: 'offers',
+        type: 'booking_pending',
+        title: 'تسجيل عرض جديد',
+        message: `تم إنشاء تسجيل جديد لعرض ${offer?.title || 'مفعّل'}.`,
+        entityType: 'offer_lead',
+        entityId: lead.insertId,
+        actionUrl: '/admin/bookings/offer-leads',
+        actionLabel: 'عرض تسجيلات العروض',
+        priority: 'high',
+        data: JSON.stringify({ offerId: input.offerId }),
+      }).catch((error: unknown) =>
+        logger.error('Failed to create offer lead notification:', error)
+      );
 
       // Send Telegram notification
       if (offer) {

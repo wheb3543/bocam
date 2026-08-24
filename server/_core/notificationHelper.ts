@@ -6,6 +6,7 @@ import type {
   NotificationSource,
   NotificationType,
 } from '../../shared/notifications';
+import { shouldDeliverNotification } from '../services/notificationPolicy';
 
 type NotificationOptions = {
   userId: number;
@@ -23,12 +24,18 @@ type NotificationOptions = {
 };
 
 export async function createNotification(db: any, options: NotificationOptions) {
+  const source = options.source || 'system';
+  const priority = options.priority || 'medium';
+  if (!(await shouldDeliverNotification(db, { userId: options.userId, source, priority }))) {
+    return null;
+  }
+
   const [notification] = await db
     .insert(notifications)
     .values({
       userId: options.userId,
       type: options.type,
-      source: options.source || 'system',
+      source,
       title: options.title,
       message: options.message,
       data: options.data || null,
@@ -36,7 +43,7 @@ export async function createNotification(db: any, options: NotificationOptions) 
       entityId: options.entityId ? String(options.entityId) : null,
       actionUrl: options.actionUrl || null,
       actionLabel: options.actionLabel || null,
-      priority: options.priority || 'medium',
+      priority,
       expiresAt: options.expiresAt || null,
     })
     .$returningId();
@@ -51,7 +58,10 @@ export async function createBulkNotifications(
 ) {
   const notificationIds: number[] = [];
   for (const userId of userIds) {
-    notificationIds.push(await createNotification(db, { userId, ...notificationOptions }));
+    const notificationId = await createNotification(db, { userId, ...notificationOptions });
+    if (notificationId !== null) {
+      notificationIds.push(notificationId);
+    }
   }
   return notificationIds;
 }

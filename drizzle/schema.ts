@@ -1099,6 +1099,10 @@ export const userPreferences = mysqlTable(
   },
   (table) => ({
     userKeyIdx: index('userPreferences_userKey_idx').on(table.userId, table.preferenceKey),
+    userKeyUnique: uniqueIndex('userPreferences_userKey_unique').on(
+      table.userId,
+      table.preferenceKey
+    ),
   })
 );
 
@@ -2337,6 +2341,8 @@ export const notifications = mysqlTable(
     source: mysqlEnum('source', [
       'content',
       'bookings',
+      'camps',
+      'offers',
       'campaigns',
       'integrations',
       'privacy',

@@ -45,6 +45,8 @@ type SourceFilter = 'all' | NotificationSource;
 const sourceLabels: Record<NotificationSource, string> = {
   content: 'المحتوى',
   bookings: 'الحجوزات',
+  camps: 'المخيمات',
+  offers: 'العروض',
   campaigns: 'الحملات',
   integrations: 'التكاملات',
   privacy: 'الخصوصية',

@@ -22,6 +22,7 @@ import { sendAppointmentLeadEvent } from '../../../api/facebookCAPI';
 import { createLogger } from '../../../_core/logger';
 import { dispatchWhatsAppMessage } from '../../../services/whatsappMessageDispatcher';
 import { buildStatusTimestamps, invalidateAppointmentCaches } from '../utils/appointmentHelpers';
+import { notifyEligibleRecipients } from '../../../services/notificationPolicy';
 
 const logger = createLogger('appointments');
 
@@ -91,6 +92,20 @@ export async function submitAppointment({
 
   // Send email notification
   const doctor = await getDoctorById(input.doctorId as number);
+  if (result?.insertId) {
+    notifyEligibleRecipients(_db, {
+      source: 'bookings',
+      type: 'booking_pending',
+      title: 'حجز موعد جديد',
+      message: `تم إنشاء حجز موعد جديد لدى ${doctor?.name || 'طبيب غير محدد'}.`,
+      entityType: 'appointment',
+      entityId: result.insertId,
+      actionUrl: '/admin/bookings/appointments',
+      actionLabel: 'عرض المواعيد',
+      priority: 'high',
+      data: JSON.stringify({ doctorId: input.doctorId, campaignId: campaign.id }),
+    }).catch((error: unknown) => logger.error('Failed to create appointment notification:', error));
+  }
   await sendNewAppointmentEmail({
     appointment: {
       fullName: input.fullName as string,

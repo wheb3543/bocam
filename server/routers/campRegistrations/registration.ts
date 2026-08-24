@@ -17,6 +17,7 @@ import {
   createStatusTimestamps,
 } from '../campRegistrationHelpers';
 import { createLogger } from '../../_core/logger';
+import { notifyEligibleRecipients } from '../../services/notificationPolicy';
 
 const logger = createLogger('campRegistrations.registration');
 
@@ -65,6 +66,21 @@ export const campRegistrationRouter = router({
 
     const { camps } = await import('../../../drizzle/schema');
     const [camp] = await db.select().from(camps).where(eq(camps.id, input.campId)).limit(1);
+
+    notifyEligibleRecipients(db, {
+      source: 'camps',
+      type: 'booking_pending',
+      title: 'تسجيل مخيم جديد',
+      message: `تم إنشاء تسجيل جديد في ${camp?.name || 'أحد المخيمات'}.`,
+      entityType: 'camp_registration',
+      entityId: registration.insertId,
+      actionUrl: '/admin/bookings/camp-registrations',
+      actionLabel: 'عرض التسجيلات',
+      priority: 'high',
+      data: JSON.stringify({ campId: input.campId }),
+    }).catch((error: unknown) =>
+      logger.error('Failed to create camp registration notification:', error)
+    );
 
     if (camp) {
       await sendTelegramNotification(

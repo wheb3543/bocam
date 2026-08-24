@@ -17,6 +17,8 @@ export const NOTIFICATION_TYPES = [
 export const NOTIFICATION_SOURCES = [
   'content',
   'bookings',
+  'camps',
+  'offers',
   'campaigns',
   'integrations',
   'privacy',
@@ -30,3 +32,29 @@ export const NOTIFICATION_PRIORITIES = ['low', 'medium', 'high'] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 export type NotificationSource = (typeof NOTIFICATION_SOURCES)[number];
 export type NotificationPriority = (typeof NOTIFICATION_PRIORITIES)[number];
+
+export const NOTIFICATION_PREFERENCE_KEY = 'notifications.inbox.preferences';
+export const NOTIFICATION_SYSTEM_SETTINGS_KEY = 'notifications.system.settings';
+
+export const NOTIFICATION_RECIPIENT_ROLES = [
+  'admin',
+  'manager',
+  'staff',
+  'team_leader',
+  'viewer',
+  'user',
+] as const;
+
+export type NotificationRecipientRole = (typeof NOTIFICATION_RECIPIENT_ROLES)[number];
+
+export type NotificationPreferences = {
+  enabled: boolean;
+  highPriorityOnly: boolean;
+  enabledSources: Record<NotificationSource, boolean>;
+};
+
+export type NotificationSystemSettings = {
+  enabled: boolean;
+  sourceEnabled: Record<NotificationSource, boolean>;
+  recipientRoles: Record<NotificationSource, NotificationRecipientRole[]>;
+};

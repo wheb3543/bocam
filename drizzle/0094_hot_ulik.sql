@@ -1,0 +1,1 @@
+ALTER TABLE `notifications` MODIFY COLUMN `source` enum('content','bookings','camps','offers','campaigns','integrations','privacy','security','system','manual') NOT NULL DEFAULT 'system';

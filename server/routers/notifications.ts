@@ -12,9 +12,22 @@ import { adminProcedure, protectedProcedure, router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
   NOTIFICATION_PRIORITIES,
+  NOTIFICATION_PREFERENCE_KEY,
+  NOTIFICATION_RECIPIENT_ROLES,
   NOTIFICATION_SOURCES,
+  NOTIFICATION_SYSTEM_SETTINGS_KEY,
   NOTIFICATION_TYPES,
 } from '../../shared/notifications';
+import { setUserPreference } from '../database/db';
+import {
+  getNotificationPreferences,
+  getNotificationSystemSettings,
+  normalizeNotificationPreferences,
+  normalizeNotificationSystemSettings,
+  notifyEligibleRecipients,
+  saveNotificationSystemSettings,
+  shouldDeliverNotification,
+} from '../services/notificationPolicy';
 
 const relativeActionUrlSchema = z
   .string()
@@ -45,6 +58,21 @@ const notificationFilterSchema = z.object({
   priority: z.enum(NOTIFICATION_PRIORITIES).optional(),
   limit: z.number().int().min(1).max(100).default(20),
   offset: z.number().int().min(0).default(0),
+});
+
+const notificationPreferencesSchema = z.object({
+  enabled: z.boolean(),
+  highPriorityOnly: z.boolean(),
+  enabledSources: z.record(z.enum(NOTIFICATION_SOURCES), z.boolean()),
+});
+
+const notificationSystemSettingsSchema = z.object({
+  enabled: z.boolean(),
+  sourceEnabled: z.record(z.enum(NOTIFICATION_SOURCES), z.boolean()),
+  recipientRoles: z.record(
+    z.enum(NOTIFICATION_SOURCES),
+    z.array(z.enum(NOTIFICATION_RECIPIENT_ROLES)).max(NOTIFICATION_RECIPIENT_ROLES.length)
+  ),
 });
 
 const currentNotificationConditions = () =>
@@ -204,8 +232,40 @@ export const notificationsRouter = router({
     return { success: true };
   }),
 
+  preferences: protectedProcedure.query(async ({ ctx }) => {
+    return getNotificationPreferences(ctx.user.id);
+  }),
+
+  updatePreferences: protectedProcedure
+    .input(notificationPreferencesSchema)
+    .mutation(async ({ input, ctx }) => {
+      const normalized = normalizeNotificationPreferences(input);
+      await setUserPreference(ctx.user.id, NOTIFICATION_PREFERENCE_KEY, JSON.stringify(normalized));
+      return normalized;
+    }),
+
+  systemSettings: adminProcedure.query(async () => {
+    return getNotificationSystemSettings();
+  }),
+
+  updateSystemSettings: adminProcedure
+    .input(notificationSystemSettingsSchema)
+    .mutation(async ({ input }) => {
+      const normalized = normalizeNotificationSystemSettings(input);
+      await saveNotificationSystemSettings(normalized);
+      return normalized;
+    }),
+
   create: adminProcedure.input(createNotificationSchema).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
+    const allowed = await shouldDeliverNotification(db, {
+      userId: input.userId,
+      source: input.source,
+      priority: input.priority,
+    });
+    if (!allowed) {
+      return { id: null, skipped: true };
+    }
     const [created] = await db
       .insert(notifications)
       .values({
@@ -217,11 +277,19 @@ export const notificationsRouter = router({
         actionLabel: input.actionLabel || null,
       })
       .$returningId();
-    return { id: created.id };
+    return { id: created.id, skipped: false };
   }),
 
   createForUser: adminProcedure.input(createNotificationSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
+    const allowed = await shouldDeliverNotification(db, {
+      userId: input.userId,
+      source: input.source,
+      priority: input.priority,
+    });
+    if (!allowed) {
+      return { id: null, createdBy: ctx.user.id, skipped: true };
+    }
     const [created] = await db
       .insert(notifications)
       .values({
@@ -234,7 +302,7 @@ export const notificationsRouter = router({
         actionLabel: input.actionLabel || null,
       })
       .$returningId();
-    return { id: created.id, createdBy: ctx.user.id };
+    return { id: created.id, createdBy: ctx.user.id, skipped: false };
   }),
 
   broadcastToAdmins: adminProcedure
@@ -245,27 +313,16 @@ export const notificationsRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
-      const administrators = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.role, 'admin'));
-
-      if (administrators.length === 0) {
-        return { recipients: 0 };
-      }
-
-      await db.insert(notifications).values(
-        administrators.map((administrator) => ({
-          ...input,
-          userId: administrator.id,
-          data: input.data || null,
-          entityType: input.entityType || null,
-          entityId: input.entityId || null,
-          actionUrl: input.actionUrl || null,
-          actionLabel: input.actionLabel || null,
-        }))
-      );
-      return { recipients: administrators.length };
+      const result = await notifyEligibleRecipients(db, {
+        ...input,
+        source: input.source || 'manual',
+        entityType: input.entityType || 'notification',
+        entityId: input.entityId || 'manual',
+        actionUrl: input.actionUrl || '/admin/notifications',
+        actionLabel: input.actionLabel || 'عرض الإشعارات',
+        priority: input.priority || 'medium',
+      });
+      return result;
     }),
 
   deleteExpired: adminProcedure.mutation(async () => {
