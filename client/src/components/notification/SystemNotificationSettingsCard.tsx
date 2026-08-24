@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BellRing, Check, Loader2, ShieldAlert } from 'lucide-react';
+import { BellRing, Check, Clock3, Loader2, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,6 +11,7 @@ import {
   NOTIFICATION_RECIPIENT_ROLES,
   NOTIFICATION_SOURCES,
   type NotificationRecipientRole,
+  type NotificationDigestScheduleSettings,
   type NotificationSource,
   type NotificationSystemSettings,
 } from '@shared/notifications';
@@ -51,7 +52,14 @@ function fallbackSettings(): NotificationSystemSettings {
 
 export function SystemNotificationSettingsCard() {
   const { data, isLoading } = trpc.notifications.systemSettings.useQuery();
+  const { data: digestData, isLoading: digestLoading } =
+    trpc.notifications.dailyDigestSettings.useQuery();
   const [settings, setSettings] = useState<NotificationSystemSettings>(fallbackSettings);
+  const [digest, setDigest] = useState<NotificationDigestScheduleSettings>({
+    enabled: true,
+    deliveryHour: 9,
+    timezone: 'Asia/Aden',
+  });
   const mutation = trpc.notifications.updateSystemSettings.useMutation({
     onSuccess: (updated) => {
       setSettings(updated);
@@ -59,12 +67,24 @@ export function SystemNotificationSettingsCard() {
     },
     onError: () => toast.error('تعذر حفظ إعدادات الإشعارات'),
   });
+  const digestMutation = trpc.notifications.updateDailyDigestSettings.useMutation({
+    onSuccess: (updated) => {
+      setDigest(updated);
+      toast.success('تم حفظ وقت الملخص اليومي');
+    },
+    onError: () => toast.error('تعذر حفظ إعدادات الملخص اليومي'),
+  });
 
   useEffect(() => {
     if (data) {
       setSettings(data);
     }
   }, [data]);
+  useEffect(() => {
+    if (digestData) {
+      setDigest(digestData);
+    }
+  }, [digestData]);
 
   const setSourceEnabled = (source: NotificationSource, checked: boolean) =>
     setSettings((current) => ({
@@ -148,6 +168,71 @@ export function SystemNotificationSettingsCard() {
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="rounded-xl border border-green-100 bg-green-50/40 p-3 sm:p-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-lg bg-green-100 p-2 text-green-700">
+                  <Clock3 className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <Label className="font-medium">الملخص اليومي للإشعارات</Label>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                        يرسل ملخصاً للمستخدمين الذين فعّلوا الاشتراك في ملفهم الشخصي.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={digest.enabled}
+                      disabled={digestLoading}
+                      onCheckedChange={(enabled) =>
+                        setDigest((current) => ({ ...current, enabled }))
+                      }
+                    />
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <Label htmlFor="digest-hour" className="text-sm">
+                      وقت الإرسال
+                    </Label>
+                    <select
+                      id="digest-hour"
+                      value={digest.deliveryHour}
+                      disabled={!digest.enabled || digestLoading}
+                      onChange={(event) =>
+                        setDigest((current) => ({
+                          ...current,
+                          deliveryHour: Number(event.target.value),
+                        }))
+                      }
+                      className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                    >
+                      {Array.from({ length: 24 }, (_, hour) => (
+                        <option key={hour} value={hour}>
+                          {String(hour).padStart(2, '0')}:00
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-xs text-muted-foreground">بتوقيت اليمن</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        digestMutation.mutate({
+                          enabled: digest.enabled,
+                          deliveryHour: digest.deliveryHour,
+                          timezone: 'Asia/Aden',
+                        })
+                      }
+                      disabled={digestMutation.isPending || digestLoading}
+                    >
+                      {digestMutation.isPending && (
+                        <Loader2 className="ml-1.5 h-3.5 w-3.5 animate-spin" />
+                      )}
+                      حفظ وقت الملخص
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs leading-5 text-amber-800">
               <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />

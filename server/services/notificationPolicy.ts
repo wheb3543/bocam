@@ -23,6 +23,7 @@ const ALL_OPERATIONAL_ROLES: NotificationRecipientRole[] = [
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   enabled: true,
   highPriorityOnly: false,
+  dailyDigestEnabled: false,
   enabledSources: {
     content: true,
     bookings: true,
@@ -82,6 +83,7 @@ export function normalizeNotificationPreferences(value: unknown): NotificationPr
   return {
     enabled: candidate?.enabled !== false,
     highPriorityOnly: candidate?.highPriorityOnly === true,
+    dailyDigestEnabled: candidate?.dailyDigestEnabled === true,
     enabledSources: Object.fromEntries(
       NOTIFICATION_SOURCES.map((source) => [source, sourceCandidate[source] !== false])
     ) as Record<NotificationSource, boolean>,

@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { protectedProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { offerLeads } from '../../../drizzle/schema';
@@ -14,6 +14,7 @@ import { dispatchWhatsAppMessage } from '../../services/whatsappMessageDispatche
 import { createLogger } from '../../_core/logger';
 import { invalidateEntityCache } from '../../services/cacheInvalidator';
 import { updateStatusTimestamps } from '../../_core/statusTimestamps';
+import { notifyRegistrationStatusFollowUp } from '../../services/notificationFollowUpService';
 
 const logger = createLogger('offerLeads.status');
 
@@ -70,6 +71,18 @@ export const offerStatusRouter = router({
         userName: ctx.user?.name,
         notes: input.notes,
       });
+
+      notifyRegistrationStatusFollowUp(db, {
+        source: 'offers',
+        entityType: 'offer_lead',
+        entityId: input.id,
+        oldStatus,
+        newStatus: input.status,
+        actionUrl: '/admin/bookings/offer-leads',
+        actionLabel: 'عرض تسجيلات العروض',
+      }).catch((error: unknown) =>
+        logger.error('Offer status follow-up notification failed:', error)
+      );
 
       // ── Send CAPI funnel event for status change (fire-and-forget) ────────────
       {
@@ -158,6 +171,10 @@ export const offerStatusRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const db = await ensureDatabaseAvailable();
+      const previousStatuses = await db
+        .select({ id: offerLeads.id, status: offerLeads.status })
+        .from(offerLeads)
+        .where(inArray(offerLeads.id, input.ids));
 
       // حفظ وقت كل حالة
       const timestampUpdate = updateStatusTimestamps(input.status);
@@ -186,6 +203,20 @@ export const offerStatusRouter = router({
           userName: ctx.user?.name,
           notes: input.notes,
         });
+      }
+
+      for (const previous of previousStatuses) {
+        notifyRegistrationStatusFollowUp(db, {
+          source: 'offers',
+          entityType: 'offer_lead',
+          entityId: previous.id,
+          oldStatus: previous.status,
+          newStatus: input.status,
+          actionUrl: '/admin/bookings/offer-leads',
+          actionLabel: 'عرض تسجيلات العروض',
+        }).catch((error: unknown) =>
+          logger.error('Bulk offer status follow-up notification failed:', error)
+        );
       }
 
       // Invalidate offer leads caches after bulk update

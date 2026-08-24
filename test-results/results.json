@@ -1,0 +1,192 @@
+{
+  "numTotalTestSuites": 4,
+  "numPassedTestSuites": 4,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 13,
+  "numPassedTests": 13,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1787611712462,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["نظام الإشعارات الموحد"],
+          "fullName": "نظام الإشعارات الموحد يقيّد إنشاء الإشعارات والتوزيع الإداري بصلاحية المدير",
+          "status": "passed",
+          "title": "يقيّد إنشاء الإشعارات والتوزيع الإداري بصلاحية المدير",
+          "duration": 2.5892770000000382,
+          "failureMessages": [],
+          "location": { "line": 11, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["نظام الإشعارات الموحد"],
+          "fullName": "نظام الإشعارات الموحد يدعم حالة القراءة والفلاتر والملخص التشغيلي لكل مستلم",
+          "status": "passed",
+          "title": "يدعم حالة القراءة والفلاتر والملخص التشغيلي لكل مستلم",
+          "duration": 0.4513959999999315,
+          "failureMessages": [],
+          "location": { "line": 18, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["نظام الإشعارات الموحد"],
+          "fullName": "نظام الإشعارات الموحد يوسع المخطط بالمصدر والسياق التشغيلي اللازمين للمركز الموحد",
+          "status": "passed",
+          "title": "يوسع المخطط بالمصدر والسياق التشغيلي اللازمين للمركز الموحد",
+          "duration": 0.5998469999999543,
+          "failureMessages": [],
+          "location": { "line": 25, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["نظام الإشعارات الموحد"],
+          "fullName": "نظام الإشعارات الموحد يربط واجهة المركز بالفلاتر والقراءة والانتقال إلى الإجراء",
+          "status": "passed",
+          "title": "يربط واجهة المركز بالفلاتر والقراءة والانتقال إلى الإجراء",
+          "duration": 0.3467570000000251,
+          "failureMessages": [],
+          "location": { "line": 32, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["نظام الإشعارات الموحد"],
+          "fullName": "نظام الإشعارات الموحد يرسل مساعد الموافقات والمحتوى إشعارات بمصدر محتوى موحد",
+          "status": "passed",
+          "title": "يرسل مساعد الموافقات والمحتوى إشعارات بمصدر محتوى موحد",
+          "duration": 0.34935699999982717,
+          "failureMessages": [],
+          "location": { "line": 39, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787611714085,
+      "endTime": 1787611714090.3494,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/routers/notifications.workflow.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["سياسة تفضيلات الإشعارات وربط التسجيلات"],
+          "fullName": "سياسة تفضيلات الإشعارات وربط التسجيلات تحافظ على الافتراضات الآمنة عند غياب تفضيلات المستخدم",
+          "status": "passed",
+          "title": "تحافظ على الافتراضات الآمنة عند غياب تفضيلات المستخدم",
+          "duration": 1.8796060000001944,
+          "failureMessages": [],
+          "location": { "line": 50, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["سياسة تفضيلات الإشعارات وربط التسجيلات"],
+          "fullName": "سياسة تفضيلات الإشعارات وربط التسجيلات يحترم نموذج النظام إيقاف مصدر محدد وتخصيص مستلمي المصدر",
+          "status": "passed",
+          "title": "يحترم نموذج النظام إيقاف مصدر محدد وتخصيص مستلمي المصدر",
+          "duration": 0.9381949999999506,
+          "failureMessages": [],
+          "location": { "line": 59, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["سياسة تفضيلات الإشعارات وربط التسجيلات"],
+          "fullName": "سياسة تفضيلات الإشعارات وربط التسجيلات يقيد إعدادات النظام بالمسؤول ويتيح تفضيلات خاصة بالمستلم",
+          "status": "passed",
+          "title": "يقيد إعدادات النظام بالمسؤول ويتيح تفضيلات خاصة بالمستلم",
+          "duration": 0.4304939999999533,
+          "failureMessages": [],
+          "location": { "line": 69, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["سياسة تفضيلات الإشعارات وربط التسجيلات"],
+          "fullName": "سياسة تفضيلات الإشعارات وربط التسجيلات يعرض التفضيلات الشخصية في الملف الشخصي والسياسة النظامية للمسؤولين",
+          "status": "passed",
+          "title": "يعرض التفضيلات الشخصية في الملف الشخصي والسياسة النظامية للمسؤولين",
+          "duration": 0.563036000000011,
+          "failureMessages": [],
+          "location": { "line": 78, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["سياسة تفضيلات الإشعارات وربط التسجيلات"],
+          "fullName": "سياسة تفضيلات الإشعارات وربط التسجيلات يربط إنشاء الموعد والمخيم والعرض بسياسة الإشعارات دون تعطيل التسجيل",
+          "status": "passed",
+          "title": "يربط إنشاء الموعد والمخيم والعرض بسياسة الإشعارات دون تعطيل التسجيل",
+          "duration": 0.3480400000000827,
+          "failureMessages": [],
+          "location": { "line": 84, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["سياسة تفضيلات الإشعارات وربط التسجيلات"],
+          "fullName": "سياسة تفضيلات الإشعارات وربط التسجيلات يدعم الملخص التلقائي والملخص الفوري مع مسار Heartbeat آمن",
+          "status": "passed",
+          "title": "يدعم الملخص التلقائي والملخص الفوري مع مسار Heartbeat آمن",
+          "duration": 0.4652489999998579,
+          "failureMessages": [],
+          "location": { "line": 93, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["سياسة تفضيلات الإشعارات وربط التسجيلات"],
+          "fullName": "سياسة تفضيلات الإشعارات وربط التسجيلات يسجل إعدادات الإشعارات وينبه المتابعة عند تغيّر حالات التسجيل",
+          "status": "passed",
+          "title": "يسجل إعدادات الإشعارات وينبه المتابعة عند تغيّر حالات التسجيل",
+          "duration": 16.176165999999967,
+          "failureMessages": [],
+          "location": { "line": 101, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["سياسة تفضيلات الإشعارات وربط التسجيلات"],
+          "fullName": "سياسة تفضيلات الإشعارات وربط التسجيلات يعزز واجهة المركز بخيار غير المقروءة والملخص ومؤشر جرس رقمي",
+          "status": "passed",
+          "title": "يعزز واجهة المركز بخيار غير المقروءة والملخص ومؤشر جرس رقمي",
+          "duration": 1.1260459999998602,
+          "failureMessages": [],
+          "location": { "line": 110, "column": 3 },
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1787611714672,
+      "endTime": 1787611714694.126,
+      "status": "passed",
+      "message": "",
+      "name": "/home/ubuntu/sgh-crm-portal/server/services/notificationPolicy.workflow.test.ts"
+    }
+  ]
+}

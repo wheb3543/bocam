@@ -2332,6 +2332,7 @@ export const notifications = mysqlTable(
       'content_published', // نشر المحتوى
       'booking_pending', // حجز أو تسجيل يحتاج متابعة
       'booking_confirmed', // تأكيد حجز أو تسجيل
+      'booking_status_changed', // تغيير حالة حجز أو تسجيل
       'campaign_review', // مراجعة حملة
       'integration_status', // حالة تكامل خارجي
       'privacy_update', // تحديث سياسة أو تفضيل خصوصية
@@ -2384,6 +2385,30 @@ export const notifications = mysqlTable(
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+/**
+ * Notification digest schedule - إعداد المهمة الدورية للملخص اليومي.
+ * يحتفظ بمعرف مهمة Heartbeat الموثوق وبتاريخ آخر ملخص لضمان idempotency.
+ */
+export const notificationDigestSchedules = mysqlTable(
+  'notificationDigestSchedules',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    enabled: boolean('enabled').default(true).notNull(),
+    deliveryHour: int('deliveryHour').default(9).notNull(),
+    timezone: varchar('timezone', { length: 64 }).default('Asia/Aden').notNull(),
+    scheduleCronTaskUid: varchar('scheduleCronTaskUid', { length: 65 }),
+    lastDigestDate: varchar('lastDigestDate', { length: 10 }),
+    updatedBy: int('updatedBy'),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    taskUidIdx: index('notificationDigestSchedules_taskUid_idx').on(table.scheduleCronTaskUid),
+  })
+);
+
+export type NotificationDigestSchedule = typeof notificationDigestSchedules.$inferSelect;
+export type InsertNotificationDigestSchedule = typeof notificationDigestSchedules.$inferInsert;
 
 /**
  * Social Inbox Accounts - حسابات المنصات الاجتماعية المرتبطة بصندوق البريد الموحد

@@ -18,6 +18,7 @@ import {
 } from '../campRegistrationHelpers';
 import { createLogger } from '../../_core/logger';
 import { updateStatusTimestamps } from '../../_core/statusTimestamps';
+import { notifyRegistrationStatusFollowUp } from '../../services/notificationFollowUpService';
 
 const logger = createLogger('campRegistrations.status');
 
@@ -69,6 +70,18 @@ export const campStatusRouter = router({
         ctx.user?.id,
         ctx.user?.name || undefined,
         input.notes
+      );
+
+      notifyRegistrationStatusFollowUp(db, {
+        source: 'camps',
+        entityType: 'camp_registration',
+        entityId: input.id,
+        oldStatus,
+        newStatus: input.status,
+        actionUrl: '/admin/bookings/camp-registrations',
+        actionLabel: 'عرض التسجيلات',
+      }).catch((error: unknown) =>
+        logger.error('Camp status follow-up notification failed:', error)
       );
 
       const [regRow] = await db
@@ -153,6 +166,10 @@ export const campStatusRouter = router({
     .input(bulkUpdateCampRegistrationStatusSchema)
     .mutation(async ({ ctx, input }) => {
       const db = await ensureDatabaseAvailable();
+      const previousStatuses = await db
+        .select({ id: campRegistrations.id, status: campRegistrations.status })
+        .from(campRegistrations)
+        .where(inArray(campRegistrations.id, input.ids));
 
       const now = new Date();
       const updateData: Record<string, unknown> = {
@@ -175,6 +192,20 @@ export const campStatusRouter = router({
           ctx.user?.id,
           ctx.user?.name || undefined,
           input.notes
+        );
+      }
+
+      for (const previous of previousStatuses) {
+        notifyRegistrationStatusFollowUp(db, {
+          source: 'camps',
+          entityType: 'camp_registration',
+          entityId: previous.id,
+          oldStatus: previous.status,
+          newStatus: input.status,
+          actionUrl: '/admin/bookings/camp-registrations',
+          actionLabel: 'عرض التسجيلات',
+        }).catch((error: unknown) =>
+          logger.error('Bulk camp status follow-up notification failed:', error)
         );
       }
 

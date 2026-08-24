@@ -3,7 +3,7 @@
  * مسارات تحديث المواعيد
  */
 
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { ensureDatabaseAvailable } from '../../../_core/databaseGuard';
 import { getDb } from '../../../database/db';
 import { appointments } from '../../../../drizzle/schema';
@@ -17,6 +17,7 @@ import {
   invalidateAppointmentCaches,
   sendStatusWhatsAppMessage,
 } from '../utils/appointmentHelpers';
+import { notifyRegistrationStatusFollowUp } from '../../../services/notificationFollowUpService';
 
 const logger = createLogger('appointments');
 
@@ -57,6 +58,20 @@ export const updateRoutes = {
       userName: (ctx.user as { name?: string })?.name,
       notes: staffNotes,
     });
+
+    if (dbForAudit) {
+      notifyRegistrationStatusFollowUp(dbForAudit, {
+        source: 'bookings',
+        entityType: 'appointment',
+        entityId: id,
+        oldStatus,
+        newStatus: status,
+        actionUrl: '/admin/bookings/appointments',
+        actionLabel: 'عرض المواعيد',
+      }).catch((error: unknown) =>
+        logger.error('Appointment status follow-up notification failed:', error)
+      );
+    }
 
     // Invalidate appointment caches after status update
     invalidateAppointmentCaches();
@@ -144,6 +159,11 @@ export const updateRoutes = {
     const ids = input.ids as number[];
     const status = input.status as string;
     const staffNotes = input.staffNotes as string | undefined;
+    const dbForFollowUp = await ensureDatabaseAvailable();
+    const previousStatuses = await dbForFollowUp
+      .select({ id: appointments.id, status: appointments.status })
+      .from(appointments)
+      .where(inArray(appointments.id, ids));
 
     const result = await bulkUpdateAppointmentStatus(ids, status, staffNotes);
 
@@ -158,6 +178,20 @@ export const updateRoutes = {
         userName: (ctx.user as { name?: string })?.name,
         notes: staffNotes,
       });
+    }
+
+    for (const previous of previousStatuses) {
+      notifyRegistrationStatusFollowUp(dbForFollowUp, {
+        source: 'bookings',
+        entityType: 'appointment',
+        entityId: previous.id,
+        oldStatus: previous.status,
+        newStatus: status,
+        actionUrl: '/admin/bookings/appointments',
+        actionLabel: 'عرض المواعيد',
+      }).catch((error: unknown) =>
+        logger.error('Bulk appointment status follow-up notification failed:', error)
+      );
     }
 
     // Invalidate appointment caches after bulk update

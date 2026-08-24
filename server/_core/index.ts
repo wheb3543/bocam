@@ -11,6 +11,7 @@ import { createExternalPlatformOAuthCallbackRouter } from '../api/externalPlatfo
 import { createSocialPublishingScheduledRouter } from '../api/socialPublishingScheduledRoute';
 import { createCmsPublishingScheduledRouter } from '../api/cmsPublishingScheduledRoute';
 import { createCmsTrashRetentionScheduledRouter } from '../api/cmsTrashRetentionScheduledRoute';
+import { createNotificationDigestScheduledRouter } from '../api/notificationDigestScheduledRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
 import { createContext } from './context';
@@ -81,6 +82,8 @@ async function startServer() {
   app.use(createCmsPublishingScheduledRouter());
   // Heartbeat callback for irreversible CMS trash cleanup after the retention window.
   app.use(createCmsTrashRetentionScheduledRouter());
+  // Heartbeat callback for opt-in daily unread-notification digests.
+  app.use(createNotificationDigestScheduledRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
   // Health check and metrics endpoints

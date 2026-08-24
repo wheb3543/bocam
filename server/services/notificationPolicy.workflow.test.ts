@@ -13,7 +13,38 @@ const campSource = readFileSync(resolve(process.cwd(), 'server/routers/campRegis
 const offerSource = readFileSync(resolve(process.cwd(), 'server/routers/offerLeads/registration.ts'), 'utf8');
 const helperSource = readFileSync(resolve(process.cwd(), 'server/_core/notificationHelper.ts'), 'utf8');
 const profileSource = readFileSync(resolve(process.cwd(), 'client/src/pages/admin/ProfilePage.tsx'), 'utf8');
-const settingsPageSource = readFileSync(resolve(process.cwd(), 'client/src/pages/admin/SettingsPage.tsx'), 'utf8');
+const settingsPageSource = readFileSync(
+  resolve(process.cwd(), 'client/src/pages/admin/SettingsPage.tsx'),
+  'utf8'
+);
+const digestServiceSource = readFileSync(
+  resolve(process.cwd(), 'server/services/notificationDigestService.ts'),
+  'utf8'
+);
+const scheduledDigestSource = readFileSync(
+  resolve(process.cwd(), 'server/api/notificationDigestScheduledRoute.ts'),
+  'utf8'
+);
+const notificationsPageSource = readFileSync(
+  resolve(process.cwd(), 'client/src/pages/admin/NotificationsPage.tsx'),
+  'utf8'
+);
+const notificationCenterSource = readFileSync(
+  resolve(process.cwd(), 'client/src/components/NotificationCenter.tsx'),
+  'utf8'
+);
+const appointmentStatusSource = readFileSync(
+  resolve(process.cwd(), 'server/routers/appointments/routes/updateRoutes.ts'),
+  'utf8'
+);
+const campStatusSource = readFileSync(
+  resolve(process.cwd(), 'server/routers/campRegistrations/status.ts'),
+  'utf8'
+);
+const offerStatusSource = readFileSync(
+  resolve(process.cwd(), 'server/routers/offerLeads/status.ts'),
+  'utf8'
+);
 
 describe('سياسة تفضيلات الإشعارات وربط التسجيلات', () => {
   it('تحافظ على الافتراضات الآمنة عند غياب تفضيلات المستخدم', () => {
@@ -22,6 +53,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(preferences.enabledSources.bookings).toBe(true);
     expect(preferences.enabledSources.camps).toBe(true);
     expect(preferences.enabledSources.offers).toBe(true);
+    expect(preferences.dailyDigestEnabled).toBe(false);
   });
 
   it('يحترم نموذج النظام إيقاف مصدر محدد وتخصيص مستلمي المصدر', () => {
@@ -56,5 +88,29 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(campSource).toContain('notifyEligibleRecipients');
     expect(offerSource).toContain("source: 'offers'");
     expect(offerSource).toContain('notifyEligibleRecipients');
+  });
+
+  it('يدعم الملخص التلقائي والملخص الفوري مع مسار Heartbeat آمن', () => {
+    expect(routerSource).toContain('dailyDigestSettings: adminProcedure');
+    expect(routerSource).toContain('createDigestNow: protectedProcedure');
+    expect(digestServiceSource).toContain('dispatchDailyUnreadNotificationDigests');
+    expect(scheduledDigestSource).toContain("'/api/scheduled/notification-digest'");
+    expect(scheduledDigestSource).toContain('user.isCron || !user.taskUid');
+  });
+
+  it('يسجل إعدادات الإشعارات وينبه المتابعة عند تغيّر حالات التسجيل', () => {
+    expect(routerSource).toContain('notification_preferences_updated');
+    expect(routerSource).toContain('notification_system_settings_updated');
+    expect(routerSource).toContain('notification_digest_schedule_updated');
+    expect(appointmentStatusSource).toContain('notifyRegistrationStatusFollowUp');
+    expect(campStatusSource).toContain('notifyRegistrationStatusFollowUp');
+    expect(offerStatusSource).toContain('notifyRegistrationStatusFollowUp');
+  });
+
+  it('يعزز واجهة المركز بخيار غير المقروءة والملخص ومؤشر جرس رقمي', () => {
+    expect(notificationsPageSource).toContain('غير المقروءة فقط');
+    expect(notificationsPageSource).toContain('إنشاء ملخص الآن');
+    expect(notificationCenterSource).toContain("unreadCount > 99 ? '99+' : unreadCount");
+    expect(notificationCenterSource).toContain('animate-[pulse_1.8s_ease-in-out_infinite]');
   });
 });

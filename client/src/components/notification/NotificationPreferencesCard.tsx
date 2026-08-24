@@ -29,6 +29,7 @@ function fallbackPreferences(): NotificationPreferences {
   return {
     enabled: true,
     highPriorityOnly: false,
+    dailyDigestEnabled: false,
     enabledSources: Object.fromEntries(
       NOTIFICATION_SOURCES.map((source) => [source, true])
     ) as Record<NotificationSource, boolean>,
@@ -99,6 +100,15 @@ export function NotificationPreferencesCard() {
               disabled={!preferences.enabled}
               onCheckedChange={(checked) =>
                 setPreferences((current) => ({ ...current, highPriorityOnly: checked }))
+              }
+            />
+            <PreferenceRow
+              label="الملخص اليومي"
+              description="إشعار يومي يلخص ما بقي غير مقروء خلال آخر 24 ساعة."
+              checked={preferences.dailyDigestEnabled}
+              disabled={!preferences.enabled}
+              onCheckedChange={(checked) =>
+                setPreferences((current) => ({ ...current, dailyDigestEnabled: checked }))
               }
             />
             <div className="rounded-xl border border-border bg-muted/20 p-3 sm:p-4">

@@ -28,6 +28,12 @@ import {
   saveNotificationSystemSettings,
   shouldDeliverNotification,
 } from '../services/notificationPolicy';
+import {
+  createUnreadNotificationDigest,
+  getNotificationDigestSchedule,
+  updateNotificationDigestSchedule,
+} from '../services/notificationDigestService';
+import { createAuditLog } from './auditLogs';
 
 const relativeActionUrlSchema = z
   .string()
@@ -63,6 +69,7 @@ const notificationFilterSchema = z.object({
 const notificationPreferencesSchema = z.object({
   enabled: z.boolean(),
   highPriorityOnly: z.boolean(),
+  dailyDigestEnabled: z.boolean(),
   enabledSources: z.record(z.enum(NOTIFICATION_SOURCES), z.boolean()),
 });
 
@@ -73,6 +80,12 @@ const notificationSystemSettingsSchema = z.object({
     z.enum(NOTIFICATION_SOURCES),
     z.array(z.enum(NOTIFICATION_RECIPIENT_ROLES)).max(NOTIFICATION_RECIPIENT_ROLES.length)
   ),
+});
+
+const notificationDigestSettingsSchema = z.object({
+  enabled: z.boolean(),
+  deliveryHour: z.number().int().min(0).max(23),
+  timezone: z.literal('Asia/Aden'),
 });
 
 const currentNotificationConditions = () =>
@@ -239,8 +252,18 @@ export const notificationsRouter = router({
   updatePreferences: protectedProcedure
     .input(notificationPreferencesSchema)
     .mutation(async ({ input, ctx }) => {
+      const previous = await getNotificationPreferences(ctx.user.id);
       const normalized = normalizeNotificationPreferences(input);
       await setUserPreference(ctx.user.id, NOTIFICATION_PREFERENCE_KEY, JSON.stringify(normalized));
+      await createAuditLog({
+        entityType: 'notification_preferences',
+        entityId: ctx.user.id,
+        action: 'notification_preferences_updated',
+        oldValue: JSON.stringify(previous),
+        newValue: JSON.stringify(normalized),
+        userId: ctx.user.id,
+        userName: ctx.user.name,
+      });
       return normalized;
     }),
 
@@ -250,11 +273,52 @@ export const notificationsRouter = router({
 
   updateSystemSettings: adminProcedure
     .input(notificationSystemSettingsSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const previous = await getNotificationSystemSettings();
       const normalized = normalizeNotificationSystemSettings(input);
       await saveNotificationSystemSettings(normalized);
+      await createAuditLog({
+        entityType: 'notification_system_settings',
+        entityId: 1,
+        action: 'notification_system_settings_updated',
+        oldValue: JSON.stringify(previous),
+        newValue: JSON.stringify(normalized),
+        userId: ctx.user.id,
+        userName: ctx.user.name,
+      });
       return normalized;
     }),
+
+  dailyDigestSettings: adminProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
+    return getNotificationDigestSchedule(db);
+  }),
+
+  updateDailyDigestSettings: adminProcedure
+    .input(notificationDigestSettingsSchema)
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const previous = await getNotificationDigestSchedule(db);
+      const updated = await updateNotificationDigestSchedule(db, {
+        ...input,
+        updatedBy: ctx.user.id,
+      });
+      await createAuditLog({
+        entityType: 'notification_digest_schedule',
+        entityId: updated.id,
+        action: 'notification_digest_schedule_updated',
+        oldValue: JSON.stringify(previous),
+        newValue: JSON.stringify(updated),
+        userId: ctx.user.id,
+        userName: ctx.user.name,
+      });
+      return updated;
+    }),
+
+  createDigestNow: protectedProcedure.mutation(async ({ ctx }) => {
+    const db = await ensureDatabaseAvailable();
+    return createUnreadNotificationDigest(db, ctx.user.id, { automatic: false });
+  }),
 
   create: adminProcedure.input(createNotificationSchema).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();

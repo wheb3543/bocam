@@ -7,6 +7,7 @@ export const NOTIFICATION_TYPES = [
   'content_published',
   'booking_pending',
   'booking_confirmed',
+  'booking_status_changed',
   'campaign_review',
   'integration_status',
   'privacy_update',
@@ -50,6 +51,7 @@ export type NotificationRecipientRole = (typeof NOTIFICATION_RECIPIENT_ROLES)[nu
 export type NotificationPreferences = {
   enabled: boolean;
   highPriorityOnly: boolean;
+  dailyDigestEnabled: boolean;
   enabledSources: Record<NotificationSource, boolean>;
 };
 
@@ -57,4 +59,12 @@ export type NotificationSystemSettings = {
   enabled: boolean;
   sourceEnabled: Record<NotificationSource, boolean>;
   recipientRoles: Record<NotificationSource, NotificationRecipientRole[]>;
+};
+
+export type NotificationDigestScheduleSettings = {
+  enabled: boolean;
+  deliveryHour: number;
+  timezone: string;
+  scheduleCronTaskUid?: string | null;
+  lastDigestDate?: string | null;
 };

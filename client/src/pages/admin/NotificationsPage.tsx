@@ -15,6 +15,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { toast } from 'sonner';
+import { trpc } from '@/lib/api/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -108,6 +110,18 @@ export default function NotificationsPage() {
   const markAllAsRead = useMarkAllAsRead();
   const deleteNotification = useDeleteNotification();
   const deleteReadNotifications = useDeleteReadNotifications();
+  const createDigest = trpc.notifications.createDigestNow.useMutation({
+    onSuccess: (result) => {
+      if (result.created) {
+        toast.success('تم إنشاء ملخص الإشعارات');
+      } else if (result.reason === 'no_unread') {
+        toast.info('لا توجد إشعارات غير مقروءة لتلخيصها');
+      } else {
+        toast.info('تعذر إنشاء الملخص وفق إعدادات الإشعارات الحالية');
+      }
+    },
+    onError: () => toast.error('تعذر إنشاء الملخص الآن'),
+  });
   const notifications = data?.data || [];
   const pagination = data?.pagination;
 
@@ -140,6 +154,25 @@ export default function NotificationsPage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button
+            variant={readFilter === 'no' ? 'default' : 'outline'}
+            onClick={() => changeFilters(() => setReadFilter(readFilter === 'no' ? 'all' : 'no'))}
+          >
+            <BellRing className="ml-1.5 h-4 w-4" />
+            غير المقروءة فقط
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => createDigest.mutate()}
+            disabled={createDigest.isPending}
+          >
+            {createDigest.isPending ? (
+              <Loader2 className="ml-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <Info className="ml-1.5 h-4 w-4" />
+            )}
+            إنشاء ملخص الآن
+          </Button>
           <Button
             variant="outline"
             onClick={() => markAllAsRead.mutate()}
