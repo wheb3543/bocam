@@ -7,6 +7,7 @@ import { useState } from 'react';
 import {
   Bell,
   Check,
+  CheckCheck,
   Trash2,
   X,
   AlertCircle,
@@ -90,39 +91,50 @@ function NotificationItem({
   onMarkAsRead: (id: number) => void;
   onDelete: (id: number) => void;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <div
       className={cn(
-        'relative p-4 border-b last:border-b-0 transition-colors',
-        notification.isRead === 'no' ? 'bg-muted/50' : 'bg-background',
-        'hover:bg-muted/80'
+        'group relative border-b border-border/60 px-4 py-3 transition-colors last:border-b-0',
+        notification.isRead === 'no'
+          ? 'border-r-2 border-r-primary bg-primary/[0.045] hover:bg-primary/[0.08]'
+          : 'bg-background hover:bg-muted/60'
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 mt-1">{getNotificationIcon(notification.type)}</div>
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/70">
+          {getNotificationIcon(notification.type)}
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <p
               className={cn(
-                'text-sm font-medium',
+                'line-clamp-1 text-sm font-medium',
                 notification.isRead === 'no' ? 'text-foreground' : 'text-muted-foreground'
               )}
             >
               {notification.title}
             </p>
+            {notification.isRead === 'no' && (
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                aria-label="غير مقروء"
+              />
+            )}
             {notification.priority === 'high' && (
               <div
-                className={cn('w-2 h-2 rounded-full', getPriorityColor(notification.priority))}
+                className={cn(
+                  'h-1.5 w-1.5 shrink-0 rounded-full',
+                  getPriorityColor(notification.priority)
+                )}
+                title="أولوية عالية"
               />
             )}
           </div>
 
-          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{notification.message}</p>
+          <p className="mb-2 line-clamp-2 text-sm leading-5 text-muted-foreground">
+            {notification.message}
+          </p>
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>
@@ -146,28 +158,30 @@ function NotificationItem({
           </div>
         </div>
 
-        {isHovered && (
-          <div className="flex items-center gap-1">
-            {notification.isRead === 'no' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => onMarkAsRead(notification.id)}
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-            )}
+        <div className="ms-1 flex shrink-0 items-center gap-0.5 self-start">
+          {notification.isRead === 'no' && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
-              onClick={() => onDelete(notification.id)}
+              className="h-8 w-8 text-primary hover:bg-primary/10 hover:text-primary"
+              onClick={() => onMarkAsRead(notification.id)}
+              aria-label="تحديد الإشعار كمقروء"
+              title="تحديد كمقروء"
             >
-              <Trash2 className="h-4 w-4" />
+              <Check className="h-4 w-4" />
             </Button>
-          </div>
-        )}
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+            onClick={() => onDelete(notification.id)}
+            aria-label="حذف الإشعار"
+            title="حذف الإشعار"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -210,7 +224,12 @@ export function NotificationCenter() {
         <Button
           variant="ghost"
           size="icon"
-          className={`relative ${unreadCount && unreadCount > 0 ? 'text-green-700 hover:bg-green-50 hover:text-green-800' : ''}`}
+          className={cn(
+            'relative rounded-full',
+            unreadCount && unreadCount > 0
+              ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
+              : 'hover:bg-muted'
+          )}
           aria-label={
             unreadCount && unreadCount > 0 ? `لديك ${unreadCount} إشعارات غير مقروءة` : 'الإشعارات'
           }
@@ -229,44 +248,72 @@ export function NotificationCenter() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-96 p-0">
-        <DropdownMenuLabel className="p-4 border-b">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold">الإشعارات</span>
-            <div className="flex items-center gap-2">
-              {unreadCount && unreadCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMarkAllAsRead}
-                  disabled={markAllAsRead.isPending}
+      <DropdownMenuContent
+        align="end"
+        sideOffset={10}
+        className="w-[calc(100vw-2rem)] max-w-[26rem] overflow-hidden rounded-xl border border-border/80 p-0 shadow-2xl"
+      >
+        <DropdownMenuLabel dir="rtl" className="p-0">
+          <div className="flex items-center justify-between gap-3 px-4 pb-2 pt-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="font-semibold text-foreground">الإشعارات</span>
+              {unreadCount && unreadCount > 0 ? (
+                <Badge
+                  variant="secondary"
+                  className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
                 >
-                  <Check className="h-4 w-4 mr-1" />
-                  تحديد الكل كمقروء
-                </Button>
-              )}
-              {notifications.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDeleteRead}
-                  disabled={deleteReadNotifications.isPending}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  حذف المقروءة
-                </Button>
-              )}
+                  {unreadCount > 99 ? '99+' : unreadCount} جديدة
+                </Badge>
+              ) : null}
             </div>
+            {unreadCount && unreadCount > 0 ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 shrink-0 gap-1.5 border-primary/30 bg-primary/[0.03] text-xs text-primary hover:bg-primary/10 hover:text-primary"
+                onClick={handleMarkAllAsRead}
+                disabled={markAllAsRead.isPending}
+                aria-label="تحديد جميع الإشعارات كمقروءة"
+              >
+                <CheckCheck className="h-3.5 w-3.5" />
+                {markAllAsRead.isPending ? 'جارٍ التحديث...' : 'قراءة الكل'}
+              </Button>
+            ) : null}
+          </div>
+          <div className="flex items-center justify-between gap-3 px-4 pb-3">
+            <span className="text-xs font-normal text-muted-foreground" aria-live="polite">
+              {unreadCount && unreadCount > 0
+                ? `${unreadCount} إشعار يحتاج إلى مراجعتك`
+                : 'تمت قراءة جميع الإشعارات'}
+            </span>
+            {notifications.some((notification) => notification.isRead === 'yes') ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 gap-1 px-1.5 text-xs font-normal text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                onClick={handleDeleteRead}
+                disabled={deleteReadNotifications.isPending}
+                aria-label="حذف الإشعارات المقروءة"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                حذف المقروءة
+              </Button>
+            ) : null}
           </div>
         </DropdownMenuLabel>
 
         <DropdownMenuSeparator />
 
-        <ScrollArea className="h-96">
+        <ScrollArea className="h-[min(60vh,26rem)]">
           {notifications.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>لا توجد إشعارات</p>
+            <div className="px-8 py-10 text-center text-muted-foreground">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <Bell className="h-6 w-6 opacity-70" />
+              </div>
+              <p className="text-sm font-medium text-foreground">لا توجد إشعارات حالياً</p>
+              <p className="mt-1 text-xs leading-5">
+                ستظهر هنا آخر التحديثات والتنبيهات الخاصة بك.
+              </p>
             </div>
           ) : (
             notifications.map((notification) => (
@@ -283,11 +330,11 @@ export function NotificationCenter() {
         {notifications.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <div className="p-2">
+            <div className="bg-muted/20 p-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full"
+                className="w-full font-medium text-primary hover:bg-primary/10 hover:text-primary"
                 onClick={() => {
                   setIsOpen(false);
                   setLocation('/admin/notifications');
