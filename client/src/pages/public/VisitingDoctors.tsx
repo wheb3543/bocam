@@ -13,6 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 import { trpc } from '@/lib/api/trpc';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { usePublicPageContent } from '@/hooks/usePublicContent';
 
 export default function VisitingDoctors() {
   return (
@@ -36,9 +38,86 @@ type VisitingDoctor = {
   consultationFee?: number | string | null;
 };
 
+type PublicPageTextContent = {
+  key: string;
+  content: string;
+};
+
 function VisitingDoctorsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('all');
+  const { language } = useLanguage();
+  const pageContentQuery = usePublicPageContent('visiting-doctors', language) as {
+    data?: { textContents: PublicPageTextContent[] };
+  };
+  const pageContent = pageContentQuery.data;
+
+  const fallback =
+    language === 'en'
+      ? {
+          title: 'Visiting Doctors',
+          description: 'Specialized consultants from various medical fields at your service',
+          contactLabel: 'For bookings and inquiries:',
+          phone: '8000018',
+          search: 'Search for a doctor or specialty...',
+          allSpecialties: 'All specialties',
+          resultsSuffix: 'visiting doctors available',
+          emptySearchTitle: 'No search results found',
+          emptyNoneTitle: 'No visiting doctors are currently available',
+          emptySearchDescription: 'Try different search terms or select another specialty',
+          emptyNoneDescription: 'Visiting doctors will be added soon',
+          allDoctors: 'View all doctors',
+          badge: 'Visiting doctor',
+          feeSuffix: 'YER',
+          booking: 'Book an appointment',
+        }
+      : {
+          title: 'الأطباء الزائرين',
+          description: 'استشاريون متخصصون من مختلف التخصصات الطبية لخدمتكم',
+          contactLabel: 'للحجز والاستفسار:',
+          phone: '8000018',
+          search: 'ابحث عن طبيب أو تخصص...',
+          allSpecialties: 'جميع التخصصات',
+          resultsSuffix: 'طبيب زائر متاح',
+          emptySearchTitle: 'لا توجد نتائج للبحث',
+          emptyNoneTitle: 'لا يوجد أطباء زائرين حالياً',
+          emptySearchDescription: 'جرب البحث بكلمات مختلفة أو اختر تخصص آخر',
+          emptyNoneDescription: 'سيتم إضافة الأطباء الزائرين قريباً',
+          allDoctors: 'عرض جميع الأطباء',
+          badge: 'طبيب زائر',
+          feeSuffix: 'ريال',
+          booking: 'احجز موعد',
+        };
+  const text = (key: string, fallbackValue: string) =>
+    pageContent?.textContents.find((item) => item.key === key)?.content || fallbackValue;
+  const title = text(`visitingDoctors.title.${language}`, fallback.title);
+  const description = text(`visitingDoctors.description.${language}`, fallback.description);
+  const contactLabel = text(`visitingDoctors.contact.label.${language}`, fallback.contactLabel);
+  const phone = text(`visitingDoctors.contact.phone.${language}`, fallback.phone);
+  const searchPlaceholder = text(`visitingDoctors.search.placeholder.${language}`, fallback.search);
+  const allSpecialties = text(`visitingDoctors.filter.all.${language}`, fallback.allSpecialties);
+  const resultsSuffix = text(`visitingDoctors.results.suffix.${language}`, fallback.resultsSuffix);
+  const emptySearchTitle = text(
+    `visitingDoctors.empty.search.title.${language}`,
+    fallback.emptySearchTitle
+  );
+  const emptyNoneTitle = text(
+    `visitingDoctors.empty.none.title.${language}`,
+    fallback.emptyNoneTitle
+  );
+  const emptySearchDescription = text(
+    `visitingDoctors.empty.search.description.${language}`,
+    fallback.emptySearchDescription
+  );
+  const emptyNoneDescription = text(
+    `visitingDoctors.empty.none.description.${language}`,
+    fallback.emptyNoneDescription
+  );
+  const allDoctorsCta = text(`visitingDoctors.allDoctors.cta.${language}`, fallback.allDoctors);
+  const visitingBadge = text(`visitingDoctors.badge.${language}`, fallback.badge);
+  const feeSuffix = text(`visitingDoctors.fee.suffix.${language}`, fallback.feeSuffix);
+  const bookingCta = text(`visitingDoctors.booking.cta.${language}`, fallback.booking);
+  const phoneHref = phone.replace(/[^\d+]/g, '');
 
   const { data: allDoctors, isLoading } = trpc.doctors.list.useQuery();
 
@@ -95,19 +174,19 @@ function VisitingDoctorsContent() {
               </div>
             </div>
             <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 text-center">
-              الأطباء الزائرين
+              {title}
             </h1>
             <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-green-100 px-2">
-              استشاريون متخصصون من مختلف التخصصات الطبية لخدمتكم
+              {description}
             </p>
             <div className="mt-4 sm:mt-6 flex items-center justify-center gap-1.5 sm:gap-2 text-green-100">
               <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="text-sm sm:text-lg">للحجز والاستفسار: </span>
+              <span className="text-sm sm:text-lg">{contactLabel}</span>
               <a
-                href="tel:8000018"
+                href={`tel:${phoneHref}`}
                 className="text-lg sm:text-2xl font-bold hover:text-white transition-colors"
               >
-                8000018
+                {phone}
               </a>
             </div>
           </div>
@@ -124,7 +203,7 @@ function VisitingDoctorsContent() {
                 <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
                 <Input
                   type="text"
-                  placeholder="ابحث عن طبيب أو تخصص..."
+                  placeholder={searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pr-9 sm:pr-10 h-9 sm:h-10 md:h-12 text-xs sm:text-sm md:text-lg"
@@ -139,7 +218,7 @@ function VisitingDoctorsContent() {
                   onChange={(e) => setSelectedSpecialty(e.target.value)}
                   className="w-full h-9 sm:h-10 md:h-12 pr-9 sm:pr-10 pl-3 sm:pl-4 text-xs sm:text-sm md:text-lg border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-card"
                 >
-                  <option value="all">جميع التخصصات</option>
+                  <option value="all">{allSpecialties}</option>
                   {specialties.map((specialty: string) => (
                     <option key={specialty} value={specialty}>
                       {specialty}
@@ -151,7 +230,7 @@ function VisitingDoctorsContent() {
 
             {/* Results Count */}
             <div className="mt-3 sm:mt-4 text-center text-muted-foreground text-xs sm:text-sm">
-              <span className="font-semibold">{filteredDoctors.length}</span> طبيب زائر متاح
+              <span className="font-semibold">{filteredDoctors.length}</span> {resultsSuffix}
             </div>
           </div>
         </div>
@@ -168,17 +247,15 @@ function VisitingDoctorsContent() {
             <div className="text-center py-12 sm:py-20">
               <Stethoscope className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-3 sm:mb-4" />
               <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1.5 sm:mb-2">
-                {searchTerm || selectedSpecialty !== 'all'
-                  ? 'لا توجد نتائج للبحث'
-                  : 'لا يوجد أطباء زائرين حالياً'}
+                {searchTerm || selectedSpecialty !== 'all' ? emptySearchTitle : emptyNoneTitle}
               </h3>
               <p className="text-xs sm:text-sm md:text-base opacity-90 text-center">
                 {searchTerm || selectedSpecialty !== 'all'
-                  ? 'جرب البحث بكلمات مختلفة أو اختر تخصص آخر'
-                  : 'سيتم إضافة الأطباء الزائرين قريباً'}
+                  ? emptySearchDescription
+                  : emptyNoneDescription}
               </p>
               <Link href="/doctors">
-                <Button className="bg-green-600 hover:bg-green-700">عرض جميع الأطباء</Button>
+                <Button className="bg-green-600 hover:bg-green-700">{allDoctorsCta}</Button>
               </Link>
             </div>
           ) : (
@@ -211,7 +288,7 @@ function VisitingDoctorsContent() {
                             {doctor.specialty}
                           </Badge>
                           <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 mr-2">
-                            طبيب زائر
+                            {visitingBadge}
                           </Badge>
                         </div>
                       </div>
@@ -233,14 +310,16 @@ function VisitingDoctorsContent() {
                         {doctor.consultationFee && (
                           <div className="flex items-center gap-1 text-[10px] sm:text-xs md:text-sm text-muted-foreground bg-muted px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                             <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                            <span>{String(doctor.consultationFee)} ريال</span>
+                            <span>
+                              {String(doctor.consultationFee)} {feeSuffix}
+                            </span>
                           </div>
                         )}
                       </div>
 
                       <Button className="w-full bg-green-600 hover:bg-green-700 mt-2 sm:mt-4 group-hover:shadow-lg transition-all text-xs sm:text-sm h-8 sm:h-9 md:h-10">
                         <Calendar className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        احجز موعد
+                        {bookingCta}
                       </Button>
                     </CardContent>
                   </Card>
