@@ -42,6 +42,8 @@ import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { usePatientStorage } from '@/hooks/data/usePatientStorage';
 import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { usePublicPageContent } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Select,
   SelectContent,
@@ -56,6 +58,11 @@ interface CampRegistration {
   status: string;
   [key: string]: unknown;
 }
+
+type PublicPageTextContent = {
+  key: string;
+  content: string;
+};
 
 export default function CampDetailPage() {
   const params = useParams();
@@ -75,6 +82,98 @@ function CampDetailContent({ slug }: { slug: string }) {
   const { formatDate } = useFormatDate();
   const [, setLocation] = useLocation();
   const [phoneError, setPhoneError] = useState<string>('');
+  const { language } = useLanguage();
+  const pageContentQuery = usePublicPageContent('camps', language) as {
+    data?: { textContents: PublicPageTextContent[] };
+  };
+  const pageContent = pageContentQuery.data;
+  const cmsText = (key: string, fallback: string) =>
+    pageContent?.textContents.find((item) => item.key === key)?.content || fallback;
+  const detailText = (key: string, fallback: string) =>
+    cmsText(`camps.detail.${key}.${language}`, fallback);
+
+  const copy = {
+    notFoundTitle: detailText('notfound.title', 'لم يتم العثور على المخيم'),
+    notFoundDescription: detailText(
+      'notfound.description',
+      'عذراً، لم نتمكن من العثور على المخيم المطلوب. قد يكون المخيم منتهياً أو الرابط غير صحيح.'
+    ),
+    notFoundButton: detailText('notfound.button', 'العودة إلى المخيمات'),
+    breadcrumbHome: detailText('breadcrumb.home', 'الرئيسية'),
+    breadcrumbCamps: detailText('breadcrumb.camps', 'المخيمات'),
+    heroBadge: detailText('hero.badge', 'مخيم طبي خيري'),
+    heroRegister: detailText('hero.register', 'سجل الآن مجاناً'),
+    heroDate: detailText('hero.date', 'التاريخ'),
+    heroAttendance: detailText('hero.attendance', 'معدل الحضور'),
+    heroLimitedSeats: detailText('hero.limitedSeats', 'المقاعد محدودة'),
+    heroLimitedSeatsDescription: detailText(
+      'hero.limitedSeats.description',
+      'سجل الآن قبل انتهاء الفرصة'
+    ),
+    freeBadge: detailText('free.badge', 'خدمات مجانية'),
+    freeTitle: detailText('free.title', 'ما يشمله المخيم'),
+    discountedBadge: detailText('discounted.badge', 'عروض مخفضة'),
+    discountedTitle: detailText('discounted.title', 'العروض المخفضة'),
+    showMore: detailText('expand.showMore', 'عرض المزيد'),
+    hide: detailText('expand.hide', 'إخفاء'),
+    service: detailText('expand.service', 'خدمة'),
+    offer: detailText('expand.offer', 'عرض'),
+    galleryTitle: detailText('gallery.title', 'معرض صور المخيم'),
+    galleryImage: detailText('gallery.image', 'صورة'),
+    formUrgency: detailText('form.urgency', 'المقاعد محدودة - سجل الآن!'),
+    formTitle: detailText('form.title', 'سجل الآن في المخيم'),
+    formDescription: detailText('form.description', 'املأ النموذج وسنتواصل معك لتأكيد التسجيل'),
+    formFullName: detailText('form.fullName', 'الاسم الكامل'),
+    formFullNamePlaceholder: detailText('form.fullName.placeholder', 'أدخل اسمك الكامل'),
+    formPhone: detailText('form.phone', 'رقم الهاتف'),
+    formPhonePlaceholder: detailText('form.phone.placeholder', 'مثال: 771234567'),
+    formAge: detailText('form.age', 'العمر'),
+    formAgePlaceholder: detailText('form.age.placeholder', 'أدخل عمرك'),
+    formGender: detailText('form.gender', 'الجنس'),
+    formGenderMale: detailText('form.gender.male', 'ذكر'),
+    formGenderFemale: detailText('form.gender.female', 'أنثى'),
+    formProcedures: detailText('form.procedures', 'الإجراءات المطلوبة (اختياري)'),
+    formChooseProcedures: detailText('form.procedures.choose', 'اختر الإجراءات المطلوبة'),
+    formSelected: detailText('form.procedures.selected', 'مختار'),
+    formHideProcedures: detailText('form.procedures.hide', 'إخفاء الإجراءات'),
+    formPreferredDateTime: detailText(
+      'form.preferredDateTime',
+      'التاريخ والوقت المناسب لك (اختياري)'
+    ),
+    formPreferredDateTimeDescription: detailText(
+      'form.preferredDateTime.description',
+      'إذا لم تختر، سيتم تحديد وقت مناسب تلقائياً'
+    ),
+    formDate: detailText('form.date', 'التاريخ'),
+    formDatePlaceholder: detailText('form.date.placeholder', 'اختر التاريخ المناسب'),
+    formTime: detailText('form.time', 'الوقت'),
+    formMorning: detailText('form.time.morning', 'صباحاً'),
+    formEvening: detailText('form.time.evening', 'مساءً'),
+    formMessage: detailText('form.message', 'رسالة أو ملاحظة (اختياري)'),
+    formMessagePlaceholder: detailText(
+      'form.message.placeholder',
+      'أي معلومات إضافية تودّ إضافتها...'
+    ),
+    formSending: detailText('form.sending', 'جاري التسجيل...'),
+    formSubmit: detailText('form.submit', 'تسجيل في المخيم مجاناً'),
+    trustSecure: detailText('form.trust.secure', 'تسجيل آمن'),
+    trustImmediate: detailText('form.trust.immediate', 'رد فوري'),
+    trustFree: detailText('form.trust.free', '100% مجاني'),
+    expiredTitle: detailText('expired.title', 'المخيم منتهي'),
+    expiredDescription: detailText(
+      'expired.description',
+      'هذا المخيم قد انتهى ولا يمكن التسجيل فيه حالياً. تابعنا للحصول على آخر التحديثات عن المخيمات القادمة.'
+    ),
+    expiredButton: detailText('expired.button', 'عودة إلى المخيمات'),
+    contactTitle: detailText('contact.title', 'للاستفسارات والمزيد من المعلومات'),
+    contactDescription: detailText('contact.description', 'اتصل بنا على الرقم المجاني'),
+    contactPhone: detailText('contact.phone', '8000018'),
+    contactWhatsapp: detailText('contact.whatsapp', 'واتساب'),
+    contactWhatsappMessage: detailText(
+      'contact.whatsapp.message',
+      'مرحباً، أود الاستفسار عن المخيم الطبي'
+    ),
+  };
 
   const { user } = useAuth();
   const { data: availableDates } = trpc.camps.getAvailableDates.useQuery(
@@ -327,15 +426,12 @@ function CampDetailContent({ slug }: { slug: string }) {
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
               <Heart className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-3">لم يتم العثور على المخيم</h2>
-            <p className="text-muted-foreground mb-6 text-sm">
-              عذراً، لم نتمكن من العثور على المخيم المطلوب. قد يكون المخيم منتهياً أو الرابط غير
-              صحيح.
-            </p>
+            <h2 className="text-2xl font-bold text-foreground mb-3">{copy.notFoundTitle}</h2>
+            <p className="text-muted-foreground mb-6 text-sm">{copy.notFoundDescription}</p>
             <Link href="/camps">
               <Button className="bg-green-600 hover:bg-green-700 gap-2">
                 <ArrowRight className="h-4 w-4" />
-                العودة إلى المخيمات
+                {copy.notFoundButton}
               </Button>
             </Link>
           </div>
@@ -352,11 +448,11 @@ function CampDetailContent({ slug }: { slug: string }) {
         <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
             <Link href="/" className="hover:text-green-600 transition-colors">
-              الرئيسية
+              {copy.breadcrumbHome}
             </Link>
             <span>/</span>
             <Link href="/camps" className="hover:text-green-600 transition-colors">
-              المخيمات
+              {copy.breadcrumbCamps}
             </Link>
             <span>/</span>
             <span className="text-foreground font-medium truncate max-w-[120px] sm:max-w-[200px]">
@@ -386,14 +482,14 @@ function CampDetailContent({ slug }: { slug: string }) {
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
                   <img src="/assets/new-logo.png" alt="شعار المستشفى" className="h-4 w-4" />
-                  <span className="text-sm font-semibold">مخيم طبي خيري</span>
+                  <span className="text-sm font-semibold">{copy.heroBadge}</span>
                 </div>
                 <a href="#registration-form">
                   <Button
                     size="sm"
                     className="bg-white dark:bg-card text-green-700 hover:bg-green-50 font-bold text-sm px-4 py-2 shadow-lg"
                   >
-                    سجل الآن مجاناً
+                    {copy.heroRegister}
                   </Button>
                 </a>
               </div>
@@ -412,7 +508,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                   <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
                     <Calendar className="h-5 w-5 flex-shrink-0" />
                     <div className="text-sm">
-                      <div className="font-semibold">التاريخ</div>
+                      <div className="font-semibold">{copy.heroDate}</div>
                       <div className="text-white/90 text-xs">
                         {formatDate(camp.startDate)} - {formatDate(camp.endDate)}
                       </div>
@@ -424,7 +520,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                   <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
                     <TrendingUp className="h-5 w-5 flex-shrink-0" />
                     <div className="text-sm">
-                      <div className="font-semibold">معدل الحضور</div>
+                      <div className="font-semibold">{copy.heroAttendance}</div>
                       <div className="text-white/90 text-xs">{campStats.attendanceRate}%</div>
                     </div>
                   </div>
@@ -433,8 +529,8 @@ function CampDetailContent({ slug }: { slug: string }) {
                 <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
                   <Users className="h-5 w-5 flex-shrink-0" />
                   <div className="text-sm">
-                    <div className="font-semibold">المقاعد محدودة</div>
-                    <div className="text-white/90 text-xs">سجل الآن قبل انتهاء الفرصة</div>
+                    <div className="font-semibold">{copy.heroLimitedSeats}</div>
+                    <div className="text-white/90 text-xs">{copy.heroLimitedSeatsDescription}</div>
                   </div>
                 </div>
               </div>
@@ -465,11 +561,11 @@ function CampDetailContent({ slug }: { slug: string }) {
                   <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-green-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full mb-2 sm:mb-3">
                     <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
                     <span className="text-xs sm:text-sm font-semibold text-green-700">
-                      خدمات مجانية
+                      {copy.freeBadge}
                     </span>
                   </div>
                   <h2 className="text-base sm:text-xl md:text-2xl font-bold text-foreground">
-                    ما يشمله المخيم
+                    {copy.freeTitle}
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
@@ -498,11 +594,11 @@ function CampDetailContent({ slug }: { slug: string }) {
                     >
                       {showAllFreeOffers ? (
                         <>
-                          إخفاء <ChevronUp className="h-4 w-4" />
+                          {copy.hide} <ChevronUp className="h-4 w-4" />
                         </>
                       ) : (
                         <>
-                          عرض المزيد ({allOffers.length - 4} خدمة){' '}
+                          {copy.showMore} ({allOffers.length - 4} {copy.service}){' '}
                           <ChevronDown className="h-4 w-4" />
                         </>
                       )}
@@ -530,11 +626,11 @@ function CampDetailContent({ slug }: { slug: string }) {
                   <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-blue-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full mb-2 sm:mb-3">
                     <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
                     <span className="text-xs sm:text-sm font-semibold text-blue-700">
-                      عروض مخفضة
+                      {copy.discountedBadge}
                     </span>
                   </div>
                   <h2 className="text-base sm:text-xl md:text-2xl font-bold text-foreground">
-                    العروض المخفضة
+                    {copy.discountedTitle}
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
@@ -563,11 +659,11 @@ function CampDetailContent({ slug }: { slug: string }) {
                     >
                       {showAllDiscountedOffers ? (
                         <>
-                          إخفاء <ChevronUp className="h-4 w-4" />
+                          {copy.hide} <ChevronUp className="h-4 w-4" />
                         </>
                       ) : (
                         <>
-                          عرض المزيد ({allOffers.length - 4} عرض){' '}
+                          {copy.showMore} ({allOffers.length - 4} {copy.offer}){' '}
                           <ChevronDown className="h-4 w-4" />
                         </>
                       )}
@@ -600,7 +696,7 @@ function CampDetailContent({ slug }: { slug: string }) {
             <section className="pb-6 sm:pb-10 md:pb-14">
               <div className="container mx-auto px-3 sm:px-4 max-w-6xl">
                 <h2 className="text-base sm:text-xl md:text-2xl font-bold text-center text-foreground mb-4 sm:mb-6">
-                  معرض صور المخيم
+                  {copy.galleryTitle}
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
                   {images.map((imageUrl: string, index: number) => (
@@ -610,7 +706,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                     >
                       <img
                         src={typeof imageUrl === 'string' ? imageUrl.trim() : imageUrl}
-                        alt={`${camp.name} - صورة ${index + 1}`}
+                        alt={`${camp.name} - ${copy.galleryImage} ${index + 1}`}
                         className="w-full h-32 sm:h-40 md:h-56 object-cover"
                       />
                     </div>
@@ -630,7 +726,7 @@ function CampDetailContent({ slug }: { slug: string }) {
               <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                 <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
                 <span className="font-bold text-xs sm:text-sm md:text-base">
-                  المقاعد محدودة - سجل الآن!
+                  {copy.formUrgency}
                 </span>
               </div>
             </div>
@@ -645,10 +741,10 @@ function CampDetailContent({ slug }: { slug: string }) {
                   />
                   <div>
                     <CardTitle className="text-base sm:text-lg md:text-xl">
-                      سجل الآن في المخيم
+                      {copy.formTitle}
                     </CardTitle>
                     <CardDescription className="text-green-100 text-xs sm:text-sm">
-                      املأ النموذج وسنتواصل معك لتأكيد التسجيل
+                      {copy.formDescription}
                     </CardDescription>
                   </div>
                 </div>
@@ -657,7 +753,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
-                      الاسم الكامل <span className="text-red-500">*</span>
+                      {copy.formFullName} <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="fullName"
@@ -666,7 +762,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                       enterKeyHint="next"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      placeholder="أدخل اسمك الكامل"
+                      placeholder={copy.formFullNamePlaceholder}
                       required
                       className="mt-1.5 h-11"
                     />
@@ -675,7 +771,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="phone" className="text-sm font-medium text-foreground">
-                        رقم الهاتف <span className="text-red-500">*</span>
+                        {copy.formPhone} <span className="text-red-500">*</span>
                       </Label>
                       <div className="relative">
                         <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -700,7 +796,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                               setPhoneError(v.valid ? '' : v.message || '');
                             }
                           }}
-                          placeholder="مثال: 771234567"
+                          placeholder={copy.formPhonePlaceholder}
                           required
                           className={`mt-1.5 pr-10 h-11 ${phoneError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                           dir="ltr"
@@ -711,7 +807,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                     </div>
                     <div>
                       <Label htmlFor="age" className="text-sm font-medium text-foreground">
-                        العمر <span className="text-red-500">*</span>
+                        {copy.formAge} <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="age"
@@ -723,7 +819,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                         max="120"
                         value={formData.age}
                         onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                        placeholder="أدخل عمرك"
+                        placeholder={copy.formAgePlaceholder}
                         required
                         className="mt-1.5 h-11"
                       />
@@ -733,7 +829,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                   {/* حقل الجنس */}
                   <div>
                     <Label className="text-sm font-medium text-foreground">
-                      الجنس <span className="text-red-500">*</span>
+                      {copy.formGender} <span className="text-red-500">*</span>
                     </Label>
                     <div className="grid grid-cols-2 gap-3 mt-1.5">
                       <button
@@ -745,7 +841,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                             : 'border-border bg-background text-foreground hover:border-green-400'
                         }`}
                       >
-                        ذكر
+                        {copy.formGenderMale}
                       </button>
                       <button
                         type="button"
@@ -756,7 +852,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                             : 'border-border bg-background text-foreground hover:border-green-400'
                         }`}
                       >
-                        أنثى
+                        {copy.formGenderFemale}
                       </button>
                     </div>
                   </div>
@@ -765,7 +861,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                   {availableProcedures.length > 0 && (
                     <div>
                       <Label className="text-sm font-medium text-foreground block mb-2">
-                        الإجراءات المطلوبة (اختياري)
+                        {copy.formProcedures}
                       </Label>
 
                       {!showProcedures ? (
@@ -776,10 +872,10 @@ function CampDetailContent({ slug }: { slug: string }) {
                           className="w-full py-4 text-sm border-dashed border-border hover:border-green-500 hover:bg-green-50 gap-2"
                         >
                           <Heart className="w-4 h-4" />
-                          اختر الإجراءات المطلوبة
+                          {copy.formChooseProcedures}
                           {formData.procedures.length > 0 && (
                             <span className="bg-green-600 text-white px-2 py-0.5 rounded-full text-xs">
-                              {formData.procedures.length} مختار
+                              {formData.procedures.length} {copy.formSelected}
                             </span>
                           )}
                         </Button>
@@ -834,7 +930,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                             onClick={() => setShowProcedures(false)}
                             className="text-xs text-muted-foreground"
                           >
-                            إخفاء الإجراءات
+                            {copy.formHideProcedures}
                           </Button>
                         </div>
                       )}
@@ -848,15 +944,15 @@ function CampDetailContent({ slug }: { slug: string }) {
                       <div className="space-y-3">
                         <Label className="text-sm font-medium text-foreground">
                           <Calendar className="inline h-4 w-4 ml-1" />
-                          التاريخ والوقت المناسب لك (اختياري)
+                          {copy.formPreferredDateTime}
                         </Label>
                         <p className="text-xs text-muted-foreground">
-                          إذا لم تختر، سيتم تحديد وقت مناسب تلقائياً
+                          {copy.formPreferredDateTimeDescription}
                         </p>
                         {/* اختيار التاريخ */}
                         <div>
                           <Label className="text-xs text-muted-foreground mb-1 block">
-                            التاريخ
+                            {copy.formDate}
                           </Label>
                           <Select
                             value={formData.preferredDate}
@@ -869,7 +965,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                             }
                           >
                             <SelectTrigger className="h-11">
-                              <SelectValue placeholder="اختر التاريخ المناسب" />
+                              <SelectValue placeholder={copy.formDatePlaceholder} />
                             </SelectTrigger>
                             <SelectContent>
                               {availableDates.dates.map((d) => (
@@ -901,7 +997,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                             return (
                               <div>
                                 <Label className="text-xs text-muted-foreground mb-1 block">
-                                  الوقت
+                                  {copy.formTime}
                                 </Label>
                                 <div className="grid grid-cols-2 gap-3">
                                   {hasMorning && (
@@ -917,7 +1013,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                                       }`}
                                     >
                                       <Clock className="h-4 w-4" />
-                                      صباحاً {availableDates.morningTime}
+                                      {copy.formMorning} {availableDates.morningTime}
                                     </button>
                                   )}
                                   {hasEvening && (
@@ -933,7 +1029,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                                       }`}
                                     >
                                       <Clock className="h-4 w-4" />
-                                      مساءً {availableDates.eveningTime}
+                                      {copy.formEvening} {availableDates.eveningTime}
                                     </button>
                                   )}
                                 </div>
@@ -945,14 +1041,14 @@ function CampDetailContent({ slug }: { slug: string }) {
                   {/* حقل الرسالة الاختياري */}
                   <div>
                     <Label htmlFor="patientMessage" className="text-sm font-medium text-foreground">
-                      رسالة أو ملاحظة (اختياري)
+                      {copy.formMessage}
                     </Label>
                     <textarea
                       id="patientMessage"
                       name="patientMessage"
                       value={formData.patientMessage}
                       onChange={(e) => setFormData({ ...formData, patientMessage: e.target.value })}
-                      placeholder="أي معلومات إضافية تودّ إضافتها..."
+                      placeholder={copy.formMessagePlaceholder}
                       maxLength={500}
                       rows={3}
                       className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
@@ -970,12 +1066,12 @@ function CampDetailContent({ slug }: { slug: string }) {
                     {submitRegistration.isPending ? (
                       <>
                         <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                        جاري التسجيل...
+                        {copy.formSending}
                       </>
                     ) : (
                       <>
                         <Heart className="ml-2 h-5 w-5" />
-                        تسجيل في المخيم مجاناً
+                        {copy.formSubmit}
                       </>
                     )}
                   </Button>
@@ -984,15 +1080,15 @@ function CampDetailContent({ slug }: { slug: string }) {
                   <div className="flex flex-wrap items-center justify-center gap-4 pt-3 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                      <span>تسجيل آمن</span>
+                      <span>{copy.trustSecure}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                      <span>رد فوري</span>
+                      <span>{copy.trustImmediate}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                      <span>100% مجاني</span>
+                      <span>{copy.trustFree}</span>
                     </div>
                   </div>
                 </form>
@@ -1011,18 +1107,15 @@ function CampDetailContent({ slug }: { slug: string }) {
                 <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
               <h2 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-2 sm:mb-3">
-                المخيم منتهي
+                {copy.expiredTitle}
               </h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                هذا المخيم قد انتهى ولا يمكن التسجيل فيه حالياً. تابعنا للحصول على آخر التحديثات عن
-                المخيمات القادمة.
-              </p>
+              <p className="text-sm text-muted-foreground mb-6">{copy.expiredDescription}</p>
               <Button
                 onClick={() => setLocation('/camps')}
                 className="bg-green-600 hover:bg-green-700 gap-2"
               >
                 <ArrowRight className="h-4 w-4" />
-                عودة إلى المخيمات
+                {copy.expiredButton}
               </Button>
             </div>
           </div>
@@ -1033,27 +1126,27 @@ function CampDetailContent({ slug }: { slug: string }) {
       <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-6 sm:py-8 md:py-10">
         <div className="container mx-auto px-3 sm:px-4 text-center">
           <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">
-            للاستفسارات والمزيد من المعلومات
+            {copy.contactTitle}
           </h3>
           <p className="text-xs sm:text-sm md:text-base text-white/90 mb-3 sm:mb-4">
-            اتصل بنا على الرقم المجاني
+            {copy.contactDescription}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
-              href="tel:8000018"
+              href={`tel:${copy.contactPhone.replace(/[^\d+]/g, '')}`}
               className="inline-flex items-center gap-2 bg-white dark:bg-card text-green-600 px-5 py-2.5 rounded-full font-bold text-sm hover:bg-muted transition-colors shadow-lg"
             >
               <Phone className="h-4 w-4" />
-              8000018
+              {copy.contactPhone}
             </a>
             <a
-              href={`https://wa.me/9678000018?text=${encodeURIComponent('مرحباً، أود الاستفسار عن المخيم الطبي')}`}
+              href={`https://wa.me/9678000018?text=${encodeURIComponent(copy.contactWhatsappMessage)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-2.5 rounded-full font-bold text-sm hover:bg-white/20 transition-colors"
             >
               <MessageSquare className="h-4 w-4" />
-              واتساب
+              {copy.contactWhatsapp}
             </a>
           </div>
         </div>
