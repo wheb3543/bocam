@@ -11,6 +11,10 @@ const campDetailSource = readFileSync(
   'utf8'
 );
 const thankYouSource = readFileSync(resolve(process.cwd(), 'client/src/pages/public/ThankYou.tsx'), 'utf8');
+const privacyPolicySource = readFileSync(
+  resolve(process.cwd(), 'client/src/pages/public/PrivacyPolicyPage.tsx'),
+  'utf8'
+);
 
 describe('تكامل CMS لصفحات التفاصيل', () => {
   it('يبقي نصوص صفحة تفاصيل العرض قابلة للإدارة عبر مفاتيح CMS', () => {
@@ -41,5 +45,14 @@ describe('تكامل CMS لصفحات التفاصيل', () => {
     expect(thankYouSource).toContain("thankYouText('next.step3', 'سنرسل لك رسالة تأكيد عبر الواتساب')");
     expect(thankYouSource).toContain("thankYouText('action.home', 'العودة للصفحة الرئيسية')");
     expect(thankYouSource).toContain('dir={language === \'ar\' ? \'rtl\' : \'ltr\'}');
+  });
+
+  it('ينقل كامل سياسة الخصوصية إلى محتوى الصفحة المنشور مع دعم العربية والإنجليزية', () => {
+    expect(privacyPolicySource).toContain("usePublicPageContent('privacy', language)");
+    expect(privacyPolicySource).toContain('privacy.${key}.${language}');
+    expect(privacyPolicySource).toContain("t('rights.heading', '11. حقوقك بموجب نظام حماية البيانات الشخصية (PDPL)')");
+    expect(privacyPolicySource).toContain("t('cookies.table.required', 'إلزامي؟')");
+    expect(privacyPolicySource).toContain("t('contact.emailAddress', 'DPO@sghsanaa.net')");
+    expect(privacyPolicySource).toContain("dir={copy.language === 'ar' ? 'rtl' : 'ltr'}");
   });
 });
