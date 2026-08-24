@@ -85,6 +85,7 @@ import PWAManager from './components/PWAManager';
 import MetaPixel from './components/MetaPixel';
 import OfflineIndicator from './components/OfflineIndicator';
 import CookieConsentBanner from './components/CookieConsentBanner';
+import PrivacyPolicyConsentBanner from './components/PrivacyPolicyConsentBanner';
 const MediaTeamPage = lazy(() => import('./pages/admin/teams/MediaTeamPage'));
 const FieldMarketingTeamPage = lazy(() => import('./pages/admin/teams/FieldMarketingTeamPage'));
 const CustomerServiceTeamPage = lazy(() => import('./pages/admin/teams/CustomerServiceTeamPage'));
@@ -480,6 +481,7 @@ function App() {
             <PWAManager />
             <OfflineIndicator />
             <CookieConsentBanner />
+            <PrivacyPolicyConsentBanner />
             <MetaPixel />
             <OptionalUpdateBanner />
             <UpdateProgressModal open={showProgressModal} onOpenChange={setShowProgressModal} />

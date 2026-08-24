@@ -16,6 +16,7 @@ import { useState, useEffect } from 'react';
 import { Shield, ChevronDown, ChevronUp, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
+import { hasAcceptedPrivacyPolicy } from './PrivacyPolicyConsentBanner';
 
 export interface CookiePreferences {
   essential: boolean; // Always true
@@ -60,12 +61,24 @@ export default function CookieConsentBanner() {
   });
 
   useEffect(() => {
-    // Show banner only if consent hasn't been given yet
-    if (!hasConsentBeenGiven()) {
-      // Small delay for better UX
-      const timer = setTimeout(() => setVisible(true), 1500);
-      return () => clearTimeout(timer);
-    }
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const scheduleCookieConsent = () => {
+      // Ask for privacy-policy acknowledgement first so the two banners never overlap.
+      if (!hasAcceptedPrivacyPolicy() || hasConsentBeenGiven()) {
+        return;
+      }
+      timer = setTimeout(() => setVisible(true), 350);
+    };
+
+    scheduleCookieConsent();
+    window.addEventListener('privacyPolicyConsentUpdated', scheduleCookieConsent);
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      window.removeEventListener('privacyPolicyConsentUpdated', scheduleCookieConsent);
+    };
   }, []);
 
   const handleAcceptAll = () => {

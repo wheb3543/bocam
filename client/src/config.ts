@@ -54,6 +54,12 @@ export const COMPANY_ADDRESS = import.meta.env.VITE_COMPANY_ADDRESS || '';
 export const COMPANY_SLOGAN = import.meta.env.VITE_COMPANY_SLOGAN || 'نرعاكم كأهالينا';
 
 /**
+ * Privacy-policy version requiring a renewed visitor acknowledgement when changed.
+ * Bump this value whenever a material policy update is published.
+ */
+export const PRIVACY_POLICY_VERSION = '2026-03-01';
+
+/**
  * Social Media URLs
  * External social media links
  */
