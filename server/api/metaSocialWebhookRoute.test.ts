@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   processMetaSocialWebhookPayload,
   validateMetaWebhookChallenge,
@@ -54,6 +54,34 @@ describe('Meta social webhook verification', () => {
       }
     );
 
-    expect(result).toEqual({ received: 1, failed: 1 });
+    expect(result).toEqual({ received: 1, failed: 1, leadNotifications: 0 });
+  });
+
+  it('notifies only after an inbound social item was stored successfully', async () => {
+    const notifyInbound = vi.fn().mockResolvedValue(null);
+    const result = await processMetaSocialWebhookPayload(
+      {
+        object: 'page',
+        entry: [
+          {
+            id: 'page-1',
+            messaging: [
+              {
+                sender: { id: 'sender-1' },
+                recipient: { id: 'page-1' },
+                timestamp: 1710000001000,
+                message: { mid: 'mid-1', text: 'message' },
+              },
+            ],
+          },
+        ],
+      },
+      async () => ({ status: 'processed', threadId: 73, itemId: 74 }),
+      async () => ({ enriched: false, reason: 'لا يلزم إثراء الرسائل' }),
+      notifyInbound
+    );
+
+    expect(result).toEqual({ received: 1, failed: 0, leadNotifications: 0 });
+    expect(notifyInbound).toHaveBeenCalledWith(73);
   });
 });

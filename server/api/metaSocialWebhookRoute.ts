@@ -6,6 +6,7 @@ import {
   recordMetaLeadgenNotification,
 } from '../database/db';
 import { createLogger } from '../_core/logger';
+import { notifyStoredSocialInboxInbound } from '../services/communicationNotificationService';
 import { normalizeMetaSocialInboxPayload } from '../integrations/meta/socialInboxMetaWebhook';
 import { enrichStoredMetaCommentContext } from '../integrations/meta/socialInboxMetaActions';
 import { extractMetaLeadgenNotifications } from '../integrations/meta/metaLeadAdsWebhook';
@@ -48,12 +49,14 @@ type MetaWebhookDependencies = {
   ingest?: typeof ingestMetaSocialInboxEvent;
   enrichCommentContext?: typeof enrichStoredMetaCommentContext;
   recordLeadNotification?: typeof recordMetaLeadgenNotification;
+  notifyInbound?: typeof notifyStoredSocialInboxInbound;
 };
 
 export async function processMetaSocialWebhookPayload(
   payload: unknown,
   ingest: typeof ingestMetaSocialInboxEvent,
-  enrichCommentContext: typeof enrichStoredMetaCommentContext = enrichStoredMetaCommentContext
+  enrichCommentContext: typeof enrichStoredMetaCommentContext = enrichStoredMetaCommentContext,
+  notifyInbound?: typeof notifyStoredSocialInboxInbound
 ) {
   const events = normalizeMetaSocialInboxPayload(payload);
   const leadNotifications = extractMetaLeadgenNotifications(payload);
@@ -68,6 +71,16 @@ export async function processMetaSocialWebhookPayload(
       ) {
         void enrichCommentContext(result.threadId, result.itemId).catch((error) => {
           logger.warn('تعذر إثراء سياق تعليق Meta بعد التخزين:', error);
+        });
+      }
+      if (
+        event.direction === 'inbound' &&
+        result.status === 'processed' &&
+        result.threadId &&
+        notifyInbound
+      ) {
+        void notifyInbound(result.threadId).catch((error) => {
+          logger.warn('تعذر إنشاء إشعار الصندوق الاجتماعي الوارد:', error);
         });
       }
       return result;
@@ -97,6 +110,7 @@ export function createMetaSocialWebhookRouter(dependencies: MetaWebhookDependenc
   const enrichCommentContext = dependencies.enrichCommentContext ?? enrichStoredMetaCommentContext;
   const recordLeadNotification =
     dependencies.recordLeadNotification ?? recordMetaLeadgenNotification;
+  const notifyInbound = dependencies.notifyInbound ?? notifyStoredSocialInboxInbound;
 
   router.get('/api/webhooks/meta-social-inbox', async (req: Request, res: Response) => {
     try {
@@ -144,7 +158,8 @@ export function createMetaSocialWebhookRouter(dependencies: MetaWebhookDependenc
           const result = await processMetaSocialWebhookPayload(
             req.body,
             ingest,
-            enrichCommentContext
+            enrichCommentContext,
+            notifyInbound
           );
           const leadNotifications = extractMetaLeadgenNotifications(req.body);
           await Promise.allSettled(

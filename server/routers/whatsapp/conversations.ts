@@ -4,6 +4,7 @@ import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import * as db from '../../database/db';
 import { z } from 'zod';
 import { createLogger } from '../../_core/logger';
+import { notifyWhatsAppAssignment } from '../../services/communicationNotificationService';
 
 const logger = createLogger('whatsapp-conversations');
 
@@ -121,9 +122,25 @@ export const conversationsRouter = router({
           assignedToUserId: input.userId,
         });
 
-        return db.updateWhatsAppConversation(input.id, {
+        const conversation = await db.getWhatsAppConversationById(input.id);
+        if (!conversation) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'المحادثة غير موجودة' });
+        }
+
+        const result = await db.updateWhatsAppConversation(input.id, {
           assignedToUserId: input.userId,
         });
+
+        if (conversation.assignedToUserId !== input.userId) {
+          const dbConn = await ensureDatabaseAvailable();
+          void notifyWhatsAppAssignment(dbConn, {
+            conversationId: input.id,
+            assignedUserId: input.userId,
+            actorUserId: ctx.user.id,
+          }).catch((error) => logger.error('تعذر إنشاء إشعار تعيين محادثة WhatsApp:', error));
+        }
+
+        return result;
       }),
 
     updateNotes: protectedProcedure

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { canAccessSocialInbox } from '../../shared/socialInboxAccess';
 import { protectedProcedure, router } from '../_core/trpc';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
   assignSocialInboxThread,
   createSocialInboxAccount,
@@ -18,6 +19,7 @@ import {
   updateSocialInboxCommentWorkflow,
   updateSocialInboxAccount,
 } from '../database/db';
+import { notifySocialInboxAssignment } from '../services/communicationNotificationService';
 import { getMetaWebhookCredentials } from '../database/db/metaIntegrationSettings';
 import { clearMetaSocialInboxTestData } from '../database/db/socialInbox';
 import {
@@ -145,7 +147,24 @@ export const socialInboxRouter = router({
         assignedToUserId: z.number().int().positive().nullable(),
       })
     )
-    .mutation(({ input }) => assignSocialInboxThread(input.id, input.assignedToUserId)),
+    .mutation(async ({ input, ctx }) => {
+      const context = await getSocialInboxThreadById(input.id);
+      if (!context) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'المحادثة غير موجودة' });
+      }
+
+      const result = await assignSocialInboxThread(input.id, input.assignedToUserId);
+      if (input.assignedToUserId && context.thread.assignedToUserId !== input.assignedToUserId) {
+        const db = await ensureDatabaseAvailable();
+        void notifySocialInboxAssignment(db, {
+          threadId: input.id,
+          channelType: context.thread.channelType,
+          assignedUserId: input.assignedToUserId,
+          actorUserId: ctx.user.id,
+        }).catch(() => undefined);
+      }
+      return result;
+    }),
 
   updateCommentWorkflow: socialInboxProcedure
     .input(
@@ -155,9 +174,23 @@ export const socialInboxRouter = router({
         assignedToUserId: z.number().int().positive().nullable().optional(),
       })
     )
-    .mutation(({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const context = await getSocialInboxThreadById(input.id);
+      if (!context) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'سياق التعليق غير موجود' });
+      }
       const { id, ...patch } = input;
-      return updateSocialInboxCommentWorkflow(id, patch);
+      const result = await updateSocialInboxCommentWorkflow(id, patch);
+      if (patch.assignedToUserId && context.thread.assignedToUserId !== patch.assignedToUserId) {
+        const db = await ensureDatabaseAvailable();
+        void notifySocialInboxAssignment(db, {
+          threadId: id,
+          channelType: 'comment',
+          assignedUserId: patch.assignedToUserId,
+          actorUserId: ctx.user.id,
+        }).catch(() => undefined);
+      }
+      return result;
     }),
 
   replyToComment: socialInboxProcedure

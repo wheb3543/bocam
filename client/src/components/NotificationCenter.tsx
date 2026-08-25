@@ -47,6 +47,8 @@ const sourceLabels: Record<NotificationSource, string> = {
   bookings: 'حجوزات المواعيد',
   camps: 'تسجيلات المخيمات',
   offers: 'تسجيلات العروض',
+  whatsapp: 'رسائل WhatsApp',
+  social_inbox: 'صندوق البريد الاجتماعي',
   campaigns: 'الحملات',
   integrations: 'التكاملات',
   privacy: 'الخصوصية',

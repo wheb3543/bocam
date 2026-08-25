@@ -34,6 +34,7 @@ import { createLogger } from '../../_core/logger';
 import { verifyWebhookSignature, verifyWebhookToken } from './utils/signatureVerifier';
 import { handleMessageFactory } from './handlers/messageHandlerFactory';
 import { handleTemplateStatusUpdate } from './handlers/templateStatusHandler';
+import { notifyWhatsAppInbound } from '../../services/communicationNotificationService';
 import type {
   MetaWebhookMessagePayload,
   MetaWebhookStatusPayload,
@@ -320,6 +321,12 @@ async function handleIncomingMessage(
       lastMessageAt: new Date(),
       unreadCount: updatedUnreadCount,
     });
+
+    void notifyWhatsAppInbound(db, {
+      conversationId: conversation.id as number,
+      assignedUserId: conversation.assignedToUserId,
+      isImportant: Boolean(conversation.isImportant),
+    }).catch((error) => logger.error('تعذر إنشاء إشعار الرسالة الواردة:', error));
 
     // 🔔 Publish SSE events
     const { publish, channelForConversation, channelForUser } = await import('../../_core/pubsub');

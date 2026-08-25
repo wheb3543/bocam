@@ -124,4 +124,10 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(routerSource).toContain('visualAlertEnabled: z.boolean()');
     expect(routerSource).toContain('soundAlertEnabled: z.boolean()');
   });
+
+  it('يسجل مصادر واتساب والصندوق الاجتماعي في السياسة الموحدة', () => {
+    expect(routerSource).toContain('source: input.source || \'manual\'');
+    expect(notificationCenterSource).toContain("whatsapp: 'رسائل WhatsApp'");
+    expect(notificationCenterSource).toContain("social_inbox: 'صندوق البريد الاجتماعي'");
+  });
 });

@@ -2333,6 +2333,10 @@ export const notifications = mysqlTable(
       'booking_pending', // حجز أو تسجيل يحتاج متابعة
       'booking_confirmed', // تأكيد حجز أو تسجيل
       'booking_status_changed', // تغيير حالة حجز أو تسجيل
+      'message_received', // رسالة واردة جديدة
+      'comment_received', // تعليق وارد جديد
+      'conversation_assigned', // إسناد محادثة إلى مستخدم
+      'comment_assigned', // إسناد تعليق إلى مستخدم
       'campaign_review', // مراجعة حملة
       'integration_status', // حالة تكامل خارجي
       'privacy_update', // تحديث سياسة أو تفضيل خصوصية
@@ -2344,6 +2348,8 @@ export const notifications = mysqlTable(
       'bookings',
       'camps',
       'offers',
+      'whatsapp',
+      'social_inbox',
       'campaigns',
       'integrations',
       'privacy',
