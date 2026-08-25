@@ -12,6 +12,7 @@ import {
   upsertIntegrationExternalAsset,
   upsertIntegrationWebhookSubscription,
 } from '../../database/db';
+import { notifyIntegrationIssue } from '../../services/integrationNotificationService';
 
 const META_GRAPH_VERSION = 'v26.0';
 const META_OAUTH_DIALOG_URL = `https://www.facebook.com/${META_GRAPH_VERSION}/dialog/oauth`;
@@ -253,6 +254,11 @@ export async function completeMetaBusinessOAuth(input: { code: string; state: st
   const app = await getMetaOAuthAppCredentials();
   if (!app) {
     await markIntegrationConnectionError(oauthState.connectionId!, 'بيانات تطبيق Meta غير مكتملة.');
+    void notifyIntegrationIssue({
+      connectionId: oauthState.connectionId!,
+      provider: 'meta',
+      event: 'connection_error',
+    }).catch(() => undefined);
     throw new Error('بيانات تطبيق Meta غير مكتملة.');
   }
 
@@ -295,6 +301,11 @@ export async function completeMetaBusinessOAuth(input: { code: string; state: st
     const message = error instanceof Error ? error.message : 'تعذر إكمال تفويض Meta.';
     await failIntegrationOauthState(stateHash, message);
     await markIntegrationConnectionError(oauthState.connectionId!, message);
+    void notifyIntegrationIssue({
+      connectionId: oauthState.connectionId!,
+      provider: 'meta',
+      event: 'connection_error',
+    }).catch(() => undefined);
     await createIntegrationAuditEvent({
       provider: 'meta',
       connectionId: oauthState.connectionId,
@@ -369,6 +380,11 @@ export async function completeWhatsAppEmbeddedSignup(input: {
   const app = await getMetaOAuthAppCredentials();
   if (!app) {
     await markIntegrationConnectionError(oauthState.connectionId!, 'بيانات تطبيق Meta غير مكتملة.');
+    void notifyIntegrationIssue({
+      connectionId: oauthState.connectionId!,
+      provider: 'whatsapp',
+      event: 'connection_error',
+    }).catch(() => undefined);
     throw new Error('بيانات تطبيق Meta غير مكتملة.');
   }
 
@@ -438,6 +454,11 @@ export async function completeWhatsAppEmbeddedSignup(input: {
     const message = error instanceof Error ? error.message : 'تعذر إكمال WhatsApp Embedded Signup.';
     await failIntegrationOauthState(stateHash, message);
     await markIntegrationConnectionError(oauthState.connectionId!, message);
+    void notifyIntegrationIssue({
+      connectionId: oauthState.connectionId!,
+      provider: 'whatsapp',
+      event: 'connection_error',
+    }).catch(() => undefined);
     await createIntegrationAuditEvent({
       provider: 'whatsapp',
       connectionId: oauthState.connectionId,

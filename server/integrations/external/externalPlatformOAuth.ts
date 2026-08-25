@@ -11,6 +11,7 @@ import {
   storeIntegrationTokens,
   upsertIntegrationExternalAsset,
 } from '../../database/db';
+import { notifyIntegrationIssue } from '../../services/integrationNotificationService';
 import type { ExternalPublishingPlatform } from '../../database/db/socialPlatformIntegrationSettings';
 
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
@@ -375,6 +376,11 @@ export async function completeExternalPlatformOAuth(input: {
     const message = error instanceof Error ? error.message : `تعذر إكمال تفويض ${input.provider}.`;
     await failIntegrationOauthState(stateHash, message);
     await markIntegrationConnectionError(oauthState.connectionId, message);
+    void notifyIntegrationIssue({
+      connectionId: oauthState.connectionId,
+      provider: input.provider,
+      event: 'connection_error',
+    }).catch(() => undefined);
     await createIntegrationAuditEvent({
       provider: input.provider,
       connectionId: oauthState.connectionId,

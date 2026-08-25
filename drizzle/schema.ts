@@ -2367,6 +2367,8 @@ export const notifications = mysqlTable(
       'task_overdue', // تجاوز موعد استحقاق مهمة
       'lead_created', // عميل محتمل جديد
       'lead_status_changed', // تغيير مرحلة عميل محتمل
+      'connection_error', // فشل اتصال تكامل
+      'authorization_expiring', // قرب انتهاء تفويض تكامل
       'campaign_review', // مراجعة حملة
       'integration_status', // حالة تكامل خارجي
       'privacy_update', // تحديث سياسة أو تفضيل خصوصية
@@ -2743,6 +2745,7 @@ export const integrationConnections = mysqlTable(
     grantedScopes: text('grantedScopes'),
     authorizationMethod: varchar('authorizationMethod', { length: 80 }),
     expiresAt: timestamp('expiresAt'),
+    authorizationExpiryNotifiedAt: timestamp('authorizationExpiryNotifiedAt'),
     lastValidatedAt: timestamp('lastValidatedAt'),
     lastError: text('lastError'),
     disconnectedAt: timestamp('disconnectedAt'),
@@ -2768,6 +2771,29 @@ export const integrationConnections = mysqlTable(
 
 export type IntegrationConnection = typeof integrationConnections.$inferSelect;
 export type InsertIntegrationConnection = typeof integrationConnections.$inferInsert;
+
+/**
+ * Integration alert scheduler configuration - إعداد فحص انتهاء تفويض التكاملات
+ */
+export const integrationAlertSchedules = mysqlTable(
+  'integrationAlertSchedules',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    enabled: mysqlEnum('enabled', ['yes', 'no']).default('yes').notNull(),
+    leadTimeHours: int('leadTimeHours').default(72).notNull(),
+    scheduleCronTaskUid: varchar('scheduleCronTaskUid', { length: 65 }),
+    lastRunAt: timestamp('lastRunAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    scheduleTaskUidIdx: index('integration_alert_schedule_task_uid_idx').on(
+      table.scheduleCronTaskUid
+    ),
+  })
+);
+
+export type IntegrationAlertSchedule = typeof integrationAlertSchedules.$inferSelect;
 
 /**
  * Integration Connection Tokens - أسرار OAuth المشفرة؛ لا تعاد إلى الواجهة أو سجل التدقيق.

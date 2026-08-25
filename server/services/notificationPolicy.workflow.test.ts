@@ -157,4 +157,20 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(leadsRouterSource).toContain("type: 'lead_status_changed'");
     expect(leadsRouterSource).toContain("actionUrl: '/admin/bookings/leads'");
   });
+
+  it('يربط فشل التكاملات وقرب انتهاء التفويض بمسار Heartbeat محمي', () => {
+    const integrationAlertsSource = readFileSync(
+      resolve(process.cwd(), 'server/services/integrationNotificationService.ts'),
+      'utf8'
+    );
+    const integrationRouteSource = readFileSync(
+      resolve(process.cwd(), 'server/api/integrationAlertScheduledRoute.ts'),
+      'utf8'
+    );
+    expect(integrationAlertsSource).toContain("source: 'integrations'");
+    expect(integrationAlertsSource).toContain("event: 'authorization_expiring'");
+    expect(integrationAlertsSource).toContain('authorizationExpiryNotifiedAt');
+    expect(integrationRouteSource).toContain("'/api/scheduled/integration-alerts'");
+    expect(integrationRouteSource).toContain('user.isCron || !user.taskUid');
+  });
 });

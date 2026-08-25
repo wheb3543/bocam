@@ -203,6 +203,7 @@ export async function completeIntegrationConnection(input: {
       externalBusinessId: input.externalBusinessId?.trim() || null,
       grantedScopes: input.grantedScopes ? JSON.stringify(input.grantedScopes) : null,
       expiresAt: input.expiresAt ?? null,
+      authorizationExpiryNotifiedAt: null,
       authorizationMethod: input.authorizationMethod,
       lastValidatedAt: new Date(),
       lastError: null,

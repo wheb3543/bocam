@@ -17,6 +17,8 @@ export const NOTIFICATION_TYPES = [
   'task_overdue',
   'lead_created',
   'lead_status_changed',
+  'connection_error',
+  'authorization_expiring',
   'campaign_review',
   'integration_status',
   'privacy_update',
