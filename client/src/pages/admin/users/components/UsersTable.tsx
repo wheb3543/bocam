@@ -108,14 +108,14 @@ const UsersTable = memo(function UsersTable({
           <TableRow>
             {userTable.visibleColumnOrder.map((colKey) => {
               const col = userColumns.find((c) => c.key === colKey);
-              if (!col || !userTable.visibleColumns[colKey]) {return null;}
+              if (!col || !userTable.visibleColumns[colKey]) {
+                return null;
+              }
               return (
                 <ResizableHeaderCell
                   key={colKey}
                   columnKey={colKey}
-                  width={
-                    userTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150
-                  }
+                  width={userTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150}
                   minWidth={col.minWidth || 80}
                   maxWidth={col.maxWidth || 500}
                   onResize={userTable.columnWidths.handleResize}
@@ -127,14 +127,14 @@ const UsersTable = memo(function UsersTable({
             })}
           </TableRow>
         </TableHeader>
-        <TableBody
-          className={filteredUsers && filteredUsers.length > 0 ? 'stagger-rows' : ''}
-        >
+        <TableBody className={filteredUsers && filteredUsers.length > 0 ? 'stagger-rows' : ''}>
           {filteredUsers && filteredUsers.length > 0 ? (
             filteredUsers.map((user) => (
               <TableRow key={user.id}>
                 {userTable.visibleColumnOrder.map((colKey) => {
-                  if (!userTable.visibleColumns[colKey]) {return null;}
+                  if (!userTable.visibleColumns[colKey]) {
+                    return null;
+                  }
 
                   switch (colKey) {
                     case 'user':
@@ -169,16 +169,14 @@ const UsersTable = memo(function UsersTable({
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
                           <Badge className={roleColors[user.role] + ' border'}>
-                            {roleLabels[user.role]}
+                            {user.roleDefinitionName || roleLabels[user.role]}
                           </Badge>
                         </FrozenTableCell>
                       );
                     case 'status':
                       return (
                         <FrozenTableCell key={colKey} columnKey={colKey}>
-                          <Badge
-                            variant={user.isActive === 'yes' ? 'default' : 'secondary'}
-                          >
+                          <Badge variant={user.isActive === 'yes' ? 'default' : 'secondary'}>
                             {user.isActive === 'yes' ? 'نشط' : 'معطل'}
                           </Badge>
                         </FrozenTableCell>
@@ -246,8 +244,7 @@ const UsersTable = memo(function UsersTable({
               <FrozenTableCell
                 columnKey=""
                 colSpan={
-                  userTable.visibleColumnOrder.filter((k) => userTable.visibleColumns[k])
-                    .length
+                  userTable.visibleColumnOrder.filter((k) => userTable.visibleColumns[k]).length
                 }
                 className="text-center py-12"
               >

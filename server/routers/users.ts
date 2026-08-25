@@ -1,10 +1,12 @@
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { users } from '../../drizzle/schema';
+import { roleDefinitions, userRoleAssignments, users } from '../../drizzle/schema';
 import { protectedProcedure, router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcryptjs';
+import { assignRoleDefinition, hasRolePermission } from '../services/rolePermissionService';
+import { roleManagementRouter } from './roleManagement';
 
 const userInputSchema = z.object({
   username: z.string().min(3, 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل'),
@@ -12,21 +14,28 @@ const userInputSchema = z.object({
   name: z.string().optional(),
   email: z.string().email('البريد الإلكتروني غير صحيح').optional(),
   role: z.enum(['user', 'admin', 'manager', 'staff', 'viewer', 'team_leader']).default('user'),
+  roleDefinitionId: z.number().int().positive().nullable().optional(),
   isActive: z.enum(['yes', 'no']).default('yes'),
 });
 
-// Admin-only procedure for user management
-const adminOnlyProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== 'admin') {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'يجب أن تكون مسؤولاً للوصول إلى هذه الميزة',
-    });
+const usersViewProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const db = await ensureDatabaseAvailable();
+  if (!(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'users.view'))) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'لا تملك صلاحية عرض المستخدمين' });
+  }
+  return next({ ctx });
+});
+
+const usersManagementProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const db = await ensureDatabaseAvailable();
+  if (!(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'users.manage'))) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'لا تملك صلاحية إدارة المستخدمين' });
   }
   return next({ ctx });
 });
 
 export const usersRouter = router({
+  roles: roleManagementRouter,
   // Get active users list (for task assignment)
   getActiveUsers: protectedProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
@@ -43,8 +52,8 @@ export const usersRouter = router({
     return activeUsers;
   }),
 
-  // Get all users (admin only)
-  getAll: adminOnlyProcedure.query(async () => {
+  // Get all users with the role permission
+  getAll: usersViewProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const allUsers = await db
@@ -56,16 +65,20 @@ export const usersRouter = router({
         role: users.role,
         isActive: users.isActive,
         loginMethod: users.loginMethod,
+        roleDefinitionId: userRoleAssignments.roleDefinitionId,
+        roleDefinitionName: roleDefinitions.name,
         createdAt: users.createdAt,
         lastSignedIn: users.lastSignedIn,
       })
-      .from(users);
+      .from(users)
+      .leftJoin(userRoleAssignments, eq(userRoleAssignments.userId, users.id))
+      .leftJoin(roleDefinitions, eq(roleDefinitions.id, userRoleAssignments.roleDefinitionId));
 
     return allUsers;
   }),
 
-  // Get user by ID (admin only)
-  getById: adminOnlyProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  // Get user by ID with the role permission
+  getById: usersViewProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const user = await db
@@ -77,10 +90,14 @@ export const usersRouter = router({
         role: users.role,
         isActive: users.isActive,
         loginMethod: users.loginMethod,
+        roleDefinitionId: userRoleAssignments.roleDefinitionId,
+        roleDefinitionName: roleDefinitions.name,
         createdAt: users.createdAt,
         lastSignedIn: users.lastSignedIn,
       })
       .from(users)
+      .leftJoin(userRoleAssignments, eq(userRoleAssignments.userId, users.id))
+      .leftJoin(roleDefinitions, eq(roleDefinitions.id, userRoleAssignments.roleDefinitionId))
       .where(eq(users.id, input.id))
       .limit(1);
 
@@ -91,8 +108,8 @@ export const usersRouter = router({
     return user[0];
   }),
 
-  // Create new user (admin only)
-  create: adminOnlyProcedure.input(userInputSchema).mutation(async ({ input }) => {
+  // Create new user with the role permission
+  create: usersManagementProcedure.input(userInputSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
 
     // Check if username already exists
@@ -108,21 +125,38 @@ export const usersRouter = router({
     // Hash password
     const hashedPassword = await bcrypt.hash(input.password || '123456', 10);
 
-    await db.insert(users).values({
-      username: input.username,
-      password: hashedPassword,
-      name: input.name,
-      email: input.email,
-      role: input.role,
-      isActive: input.isActive,
-      loginMethod: 'manual',
-    });
+    const [created] = await db
+      .insert(users)
+      .values({
+        username: input.username,
+        password: hashedPassword,
+        name: input.name,
+        email: input.email,
+        role: input.role,
+        isActive: input.isActive,
+        loginMethod: 'manual',
+      })
+      .$returningId();
+
+    if (input.roleDefinitionId !== undefined) {
+      const assignedRole = await assignRoleDefinition(db, {
+        userId: Number(created.id),
+        roleDefinitionId: input.roleDefinitionId,
+        actorId: ctx.user.id,
+      });
+      if (assignedRole) {
+        await db
+          .update(users)
+          .set({ role: assignedRole.baseRole })
+          .where(eq(users.id, Number(created.id)));
+      }
+    }
 
     return { success: true };
   }),
 
-  // Update user (admin only)
-  update: adminOnlyProcedure
+  // Update user with the role permission
+  update: usersManagementProcedure
     .input(
       z.object({
         id: z.number(),
@@ -132,10 +166,10 @@ export const usersRouter = router({
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
 
-      const { id, password, ...data } = input;
+      const { id, password, roleDefinitionId, ...data } = input;
 
       // Prevent user from changing their own role or status
-      if (id === ctx.user.id && (data.role || data.isActive)) {
+      if (id === ctx.user.id && (data.role || data.isActive || roleDefinitionId !== undefined)) {
         throw new TRPCError({
           code: 'FORBIDDEN',
           message: 'لا يمكنك تغيير دورك أو حالتك الخاصة',
@@ -149,13 +183,24 @@ export const usersRouter = router({
         updateData.password = await bcrypt.hash(password, 10);
       }
 
+      if (roleDefinitionId !== undefined) {
+        const assignedRole = await assignRoleDefinition(db, {
+          userId: id,
+          roleDefinitionId,
+          actorId: ctx.user.id,
+        });
+        if (assignedRole) {
+          updateData.role = assignedRole.baseRole;
+        }
+      }
+
       await db.update(users).set(updateData).where(eq(users.id, id));
 
       return { success: true };
     }),
 
-  // Delete user (admin only)
-  delete: adminOnlyProcedure
+  // Delete user with the role permission
+  delete: usersManagementProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
@@ -173,8 +218,8 @@ export const usersRouter = router({
       return { success: true };
     }),
 
-  // Toggle user active status (admin only)
-  toggleActive: adminOnlyProcedure
+  // Toggle user active status with the role permission
+  toggleActive: usersManagementProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();

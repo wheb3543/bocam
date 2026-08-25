@@ -722,6 +722,13 @@
       "when": 1787682737149,
       "tag": "0105_loving_wendigo",
       "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "5",
+      "when": 1787686761332,
+      "tag": "0106_superb_cerise",
+      "breakpoints": true
     }
   ]
 }

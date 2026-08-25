@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import type { User, UserFormData } from '../types/user.types';
+import { trpc } from '@/lib/api/trpc';
+import type { RouterOutputs } from '@/types/trpc';
 
 interface UserFormDialogProps {
   open: boolean;
@@ -47,6 +49,9 @@ const UserFormDialog = memo(function UserFormDialog({
   isPending,
   onReset,
 }: UserFormDialogProps) {
+  type RoleDefinition = RouterOutputs['users']['roles']['listAssignable'][number];
+  const { data: roleData } = trpc.users.roles.listAssignable.useQuery();
+  const roleDefinitions = (roleData || []) as RoleDefinition[];
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
@@ -56,13 +61,9 @@ const UserFormDialog = memo(function UserFormDialog({
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {editingUser ? 'تعديل مستخدم' : 'إضافة مستخدم جديد'}
-          </DialogTitle>
+          <DialogTitle>{editingUser ? 'تعديل مستخدم' : 'إضافة مستخدم جديد'}</DialogTitle>
           <DialogDescription>
-            {editingUser
-              ? 'تحديث معلومات المستخدم'
-              : 'إنشاء حساب مستخدم جديد في النظام'}
+            {editingUser ? 'تحديث معلومات المستخدم' : 'إنشاء حساب مستخدم جديد في النظام'}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -71,9 +72,7 @@ const UserFormDialog = memo(function UserFormDialog({
             <Input
               id="username"
               value={formData.username}
-              onChange={(e) =>
-                onFormDataChange({ ...formData, username: e.target.value })
-              }
+              onChange={(e) => onFormDataChange({ ...formData, username: e.target.value })}
               placeholder="أدخل اسم المستخدم"
               disabled={!!editingUser}
             />
@@ -86,9 +85,7 @@ const UserFormDialog = memo(function UserFormDialog({
               id="password"
               type="password"
               value={formData.password}
-              onChange={(e) =>
-                onFormDataChange({ ...formData, password: e.target.value })
-              }
+              onChange={(e) => onFormDataChange({ ...formData, password: e.target.value })}
               placeholder="أدخل كلمة المرور"
             />
           </div>
@@ -116,9 +113,9 @@ const UserFormDialog = memo(function UserFormDialog({
             <Label htmlFor="role">الدور *</Label>
             <Select
               value={formData.role}
-              onValueChange={(value: 'user' | 'admin' | 'manager' | 'staff' | 'viewer') =>
-                onFormDataChange({ ...formData, role: value })
-              }
+              onValueChange={(
+                value: 'user' | 'admin' | 'manager' | 'staff' | 'viewer' | 'team_leader'
+              ) => onFormDataChange({ ...formData, role: value, roleDefinitionId: null })}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -127,8 +124,39 @@ const UserFormDialog = memo(function UserFormDialog({
                 <SelectItem value="user">مستخدم</SelectItem>
                 <SelectItem value="viewer">مشاهد</SelectItem>
                 <SelectItem value="staff">موظف</SelectItem>
+                <SelectItem value="team_leader">قائد فريق</SelectItem>
                 <SelectItem value="manager">مدير</SelectItem>
                 <SelectItem value="admin">مسؤول</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="role-definition">دور مخصص (اختياري)</Label>
+            <Select
+              value={formData.roleDefinitionId ? String(formData.roleDefinitionId) : 'none'}
+              onValueChange={(value) => {
+                if (value === 'none') {
+                  onFormDataChange({ ...formData, roleDefinitionId: null });
+                  return;
+                }
+                const selected = roleDefinitions.find((role) => role.id === Number(value));
+                onFormDataChange({
+                  ...formData,
+                  roleDefinitionId: Number(value),
+                  role: selected?.baseRole || formData.role,
+                });
+              }}
+            >
+              <SelectTrigger id="role-definition">
+                <SelectValue placeholder="استخدم الدور النظامي فقط" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">استخدم الدور النظامي فقط</SelectItem>
+                {roleDefinitions.map((role) => (
+                  <SelectItem key={role.id} value={String(role.id)}>
+                    {role.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -160,10 +188,7 @@ const UserFormDialog = memo(function UserFormDialog({
           >
             إلغاء
           </Button>
-          <Button
-            onClick={onSubmit}
-            disabled={isPending}
-          >
+          <Button onClick={onSubmit} disabled={isPending}>
             {isPending && <Loader2 className="w-4 h-4 ml-2 animate-spin" />}
             {editingUser ? 'تحديث' : 'إضافة'}
           </Button>

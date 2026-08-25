@@ -36,6 +36,55 @@ export const users = mysqlTable('users', {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
+/** تعريفات الأدوار النظامية والمخصصة وصلاحياتها القابلة للإدارة. */
+export const roleDefinitions = mysqlTable(
+  'roleDefinitions',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    key: varchar('key', { length: 80 }).notNull().unique(),
+    name: varchar('name', { length: 120 }).notNull(),
+    description: text('description'),
+    baseRole: mysqlEnum('baseRole', [
+      'user',
+      'admin',
+      'manager',
+      'staff',
+      'viewer',
+      'team_leader',
+    ]).notNull(),
+    permissions: text('permissions').notNull(),
+    isSystem: boolean('isSystem').default(false).notNull(),
+    isActive: boolean('isActive').default(true).notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    keyIdx: uniqueIndex('role_definitions_key_idx').on(table.key),
+    activeIdx: index('role_definitions_active_idx').on(table.isActive),
+  })
+);
+
+/** يحتفظ بدور مخصص اختياري فوق الدور التشغيلي الأساسي للمستخدم. */
+export const userRoleAssignments = mysqlTable(
+  'userRoleAssignments',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    userId: int('userId')
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    roleDefinitionId: int('roleDefinitionId')
+      .notNull()
+      .references(() => roleDefinitions.id, { onDelete: 'restrict' }),
+    assignedBy: int('assignedBy').references(() => users.id, { onDelete: 'set null' }),
+    assignedAt: timestamp('assignedAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    roleIdx: index('user_role_assignments_role_idx').on(table.roleDefinitionId),
+  })
+);
+
 /**
  * Campaigns table - stores comprehensive marketing campaign information
  * يخزّن معلومات شاملة عن الحملات التسويقية

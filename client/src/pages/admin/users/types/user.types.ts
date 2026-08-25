@@ -32,7 +32,8 @@ export interface UserFormData {
   name: string;
   email: string;
   role: RouterInputs['users']['create']['role'];
+  roleDefinitionId: number | null;
   isActive: 'yes' | 'no';
 }
 
-export type ActiveSection = 'users' | 'requests' | 'activity';
+export type ActiveSection = 'users' | 'requests' | 'roles' | 'activity';

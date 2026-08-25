@@ -15,7 +15,7 @@ import RecentActivity from '@/components/dashboard/RecentActivity';
 import { type ColumnConfig } from '@/components/table/ColumnVisibility';
 import { useTableFeatures } from '@/hooks/table/useTableFeatures';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
-import { Users, UserCheck, UserCog, Download } from 'lucide-react';
+import { Users, UserCheck, UserCog, Download, ShieldCheck } from 'lucide-react';
 import type { User, AccessRequest, UserFormData, ActiveSection } from './types/user.types';
 import { exportToCSV } from './utils/userHelpers';
 import UserStatsCards from './components/UserStatsCards';
@@ -23,6 +23,7 @@ import UserFormDialog from './components/UserFormDialog';
 import UsersTable from './components/UsersTable';
 import AccessRequestsTable from './components/AccessRequestsTable';
 import RoleDescriptionsCard from './components/RoleDescriptionsCard';
+import RolesPermissionsPanel from './components/RolesPermissionsPanel';
 import { useUsers } from './hooks/useUsers';
 
 // تعريف أعمدة جدول طلبات الوصول
@@ -164,6 +165,7 @@ export default function UsersManagementPage() {
     name: '',
     email: '',
     role: 'user',
+    roleDefinitionId: null,
     isActive: 'yes',
   });
 
@@ -217,6 +219,7 @@ export default function UsersManagementPage() {
       name: '',
       email: '',
       role: 'user',
+      roleDefinitionId: null,
       isActive: 'yes',
     });
     setEditingUser(null);
@@ -230,6 +233,7 @@ export default function UsersManagementPage() {
       name: user.name || '',
       email: user.email || '',
       role: user.role,
+      roleDefinitionId: user.roleDefinitionId || null,
       isActive: user.isActive,
     });
     setShowAddDialog(true);
@@ -290,6 +294,14 @@ export default function UsersManagementPage() {
             {accessRequests && accessRequests.length > 0 && (
               <Badge className="mr-2 bg-red-500 text-white">{accessRequests.length}</Badge>
             )}
+          </Button>
+          <Button
+            variant={activeSection === 'roles' ? 'default' : 'outline'}
+            onClick={() => setActiveSection('roles')}
+            className="flex-1 sm:flex-none"
+          >
+            <ShieldCheck className="w-4 h-4 ml-2" />
+            الأدوار والصلاحيات
           </Button>
           <Button
             variant={activeSection === 'activity' ? 'default' : 'outline'}
@@ -400,6 +412,8 @@ export default function UsersManagementPage() {
             </CardContent>
           </Card>
         )}
+
+        {activeSection === 'roles' && <RolesPermissionsPanel />}
 
         {/* Activity Section */}
         {activeSection === 'activity' && (
