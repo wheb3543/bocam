@@ -18,6 +18,7 @@ import {
   sendStatusWhatsAppMessage,
 } from '../utils/appointmentHelpers';
 import { notifyRegistrationStatusFollowUp } from '../../../services/notificationFollowUpService';
+import { notifyEligibleRecipients } from '../../../services/notificationPolicy';
 
 const logger = createLogger('appointments');
 
@@ -125,14 +126,27 @@ export const updateRoutes = {
   updateAppointment: async ({ input }: { input: Record<string, unknown> }) => {
     const id = input.id as number;
     const appointmentDate = input.appointmentDate as string | undefined;
+    const doctorId = input.doctorId as number | undefined;
     const status = input.status as string | undefined;
     const staffNotes = input.staffNotes as string | undefined;
 
     const db = await ensureDatabaseAvailable();
+    const [previous] = await db
+      .select({
+        appointmentDate: appointments.appointmentDate,
+        doctorId: appointments.doctorId,
+        status: appointments.status,
+      })
+      .from(appointments)
+      .where(eq(appointments.id, id))
+      .limit(1);
 
     const updateData: Record<string, unknown> = {};
     if (appointmentDate) {
       updateData.appointmentDate = new Date(appointmentDate);
+    }
+    if (doctorId) {
+      updateData.doctorId = doctorId;
     }
     if (status) {
       updateData.status = status;
@@ -142,6 +156,40 @@ export const updateRoutes = {
     }
 
     await db.update(appointments).set(updateData).where(eq(appointments.id, id));
+
+    const dateChanged =
+      appointmentDate !== undefined &&
+      new Date(appointmentDate).getTime() !== previous?.appointmentDate?.getTime();
+    const doctorChanged = doctorId !== undefined && doctorId !== previous?.doctorId;
+    if (dateChanged || doctorChanged) {
+      void notifyEligibleRecipients(db, {
+        source: 'bookings',
+        type: 'booking_schedule_changed',
+        title: 'تم تعديل موعد',
+        message: 'تم تعديل تاريخ الموعد أو الطبيب المسؤول. راجع الحجز عند الحاجة.',
+        entityType: 'appointment',
+        entityId: id,
+        actionUrl: '/admin/bookings/appointments',
+        actionLabel: 'عرض المواعيد',
+        priority: 'medium',
+        data: JSON.stringify({ dateChanged, doctorChanged }),
+      }).catch((error: unknown) =>
+        logger.error('Appointment schedule notification failed:', error)
+      );
+    }
+    if (status && previous?.status && previous.status !== status) {
+      void notifyRegistrationStatusFollowUp(db, {
+        source: 'bookings',
+        entityType: 'appointment',
+        entityId: id,
+        oldStatus: previous.status,
+        newStatus: status,
+        actionUrl: '/admin/bookings/appointments',
+        actionLabel: 'عرض المواعيد',
+      }).catch((error: unknown) =>
+        logger.error('Appointment direct status notification failed:', error)
+      );
+    }
 
     // Invalidate appointment caches after update
     invalidateAppointmentCaches();

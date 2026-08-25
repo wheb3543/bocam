@@ -203,4 +203,23 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(backupSource).toContain("type: 'backup_failed'");
     expect(backupSource).toContain('backup_restore_failed');
   });
+
+  it('يربط تعديل وفشل رسائل المواعيد بمسار تذكير Heartbeat آمن دون مؤقتات داخلية', () => {
+    const appointmentUpdateSource = readFileSync(
+      resolve(process.cwd(), 'server/routers/appointments/routes/updateRoutes.ts'),
+      'utf8'
+    );
+    const reminderSource = readFileSync(
+      resolve(process.cwd(), 'server/tasks/cron/appointmentReminders.ts'),
+      'utf8'
+    );
+    const reminderRouteSource = readFileSync(
+      resolve(process.cwd(), 'server/api/appointmentReminderScheduledRoute.ts'),
+      'utf8'
+    );
+    expect(appointmentUpdateSource).toContain("type: 'booking_schedule_changed'");
+    expect(reminderSource).toContain("type: 'booking_message_failed'");
+    expect(reminderSource).not.toContain('setInterval(');
+    expect(reminderRouteSource).toContain("'/api/scheduled/appointment-reminders'");
+  });
 });

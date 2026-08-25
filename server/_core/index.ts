@@ -15,6 +15,7 @@ import { createNotificationDigestScheduledRouter } from '../api/notificationDige
 import { createTaskReminderScheduledRouter } from '../api/taskReminderScheduledRoute';
 import { createIntegrationAlertScheduledRouter } from '../api/integrationAlertScheduledRoute';
 import { createCampaignAlertScheduledRouter } from '../api/campaignAlertScheduledRoute';
+import { createAppointmentReminderScheduledRouter } from '../api/appointmentReminderScheduledRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
 import { createContext } from './context';
@@ -92,6 +93,7 @@ async function startServer() {
   // Heartbeat callback for integration error and authorization expiry alerts.
   app.use(createIntegrationAlertScheduledRouter());
   app.use(createCampaignAlertScheduledRouter());
+  app.use(createAppointmentReminderScheduledRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
   // Health check and metrics endpoints
@@ -138,19 +140,6 @@ async function startServer() {
 
     // Initialize cron scheduler for automatic deactivation
     // initSimpleCronScheduler(); // Disabled: Auto-deactivation feature removed per user request
-
-    // Initialize WhatsApp appointment reminders scheduler (every 30 minutes)
-    import('../tasks/cron/appointmentReminders')
-      .then(({ initAppointmentRemindersScheduler }) => {
-        try {
-          initAppointmentRemindersScheduler();
-        } catch (error) {
-          logger.error('[AppointmentReminders] Failed to initialize scheduler:', error);
-        }
-      })
-      .catch((error) => {
-        logger.error('[AppointmentReminders] Failed to load appointment reminders module:', error);
-      });
   });
 }
 

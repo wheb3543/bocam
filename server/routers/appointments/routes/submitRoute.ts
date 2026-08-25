@@ -193,6 +193,20 @@ export async function submitAppointment({
       })
       .catch((error: unknown) => {
         logger.error('Failed to send appointment on_create:', error);
+        if (_db) {
+          void notifyEligibleRecipients(_db, {
+            source: 'bookings',
+            type: 'booking_message_failed',
+            title: 'فشل إرسال رسالة موعد',
+            message: 'تعذر إرسال رسالة تلقائية مرتبطة بموعد جديد. راجع القناة وإعدادات الرسائل.',
+            entityType: 'appointment',
+            entityId: apptId,
+            actionUrl: '/admin/bookings/appointments',
+            actionLabel: 'عرض المواعيد',
+            priority: 'medium',
+            data: JSON.stringify({ event: 'appointment_on_create_message_failed' }),
+          }).catch(() => undefined);
+        }
       });
   }
 

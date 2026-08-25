@@ -1,12 +1,7 @@
 /**
- * Appointment Reminders Cron Job
- * مهمة جدولة تذكيرات المواعيد عبر WhatsApp
- *
- * تُرسل تذكيراً:
- *  - قبل 24 ساعة من الموعد
- *  - قبل ساعة واحدة من الموعد
- *
- * تعمل كل 30 دقيقة للتحقق من المواعيد القادمة
+ * Appointment Reminders Job
+ * ترسل المهمة تذكيرات WhatsApp قبل 24 ساعة وقبل ساعة من الموعد.
+ * يستدعيها Heartbeat عبر المسار المحمي بدلاً من مؤقتات داخل الخادم.
  */
 
 import { getDb } from '../../database/db';
@@ -14,16 +9,17 @@ import { appointments, whatsappNotifications } from '../../../drizzle/schema';
 import { and, between, eq, sql } from 'drizzle-orm';
 import { sendAppointmentReminder } from '../../services/whatsappAppointments';
 import { createLogger } from '../../_core/logger';
+import { notifyEligibleRecipients } from '../../services/notificationPolicy';
 
 const logger = createLogger('appointmentReminders');
+const MAX_RETRIES = 3;
 
-/**
- * جلب المواعيد التي تحتاج إلى تذكير خلال نافذة زمنية محددة
- */
+type ReminderType = 'reminder_24h' | 'reminder_1h';
+
 async function getAppointmentsNeedingReminder(
   windowStart: Date,
   windowEnd: Date,
-  notifType: 'reminder_24h' | 'reminder_1h'
+  notifType: ReminderType
 ) {
   const db = await getDb();
   if (!db) {
@@ -32,14 +28,12 @@ async function getAppointmentsNeedingReminder(
   }
 
   try {
-    // جلب المواعيد في النافذة الزمنية المحددة
     const upcomingAppointments = await db
       .select()
       .from(appointments)
       .where(
         and(
           between(appointments.appointmentDate, windowStart, windowEnd),
-          // فقط المواعيد المؤكدة أو المعلقة
           sql`${appointments.status} IN ('pending', 'confirmed', 'contacted')`
         )
       );
@@ -48,8 +42,7 @@ async function getAppointmentsNeedingReminder(
       return [];
     }
 
-    // التحقق من أنه لم يُرسل تذكير من هذا النوع مسبقاً
-    const appointmentIds = upcomingAppointments.map((a) => a.id);
+    const appointmentIds = upcomingAppointments.map((appointment) => appointment.id);
     const alreadySent = await db
       .select({ entityId: whatsappNotifications.entityId })
       .from(whatsappNotifications)
@@ -64,17 +57,45 @@ async function getAppointmentsNeedingReminder(
         )
       );
 
-    const alreadySentIds = new Set(alreadySent.map((r) => r.entityId));
-    return upcomingAppointments.filter((a) => !alreadySentIds.has(a.id));
+    const alreadySentIds = new Set(alreadySent.map((record) => record.entityId));
+    return upcomingAppointments.filter((appointment) => !alreadySentIds.has(appointment.id));
   } catch (error) {
     logger.error('Error fetching appointments:', error);
     return [];
   }
 }
 
-/**
- * إرسال تذكير مع إعادة المحاولة باستخدام تراجع أسي
- */
+async function notifyReminderFailure(
+  appointmentId: number,
+  reminderType: ReminderType,
+  event: 'reminder_contact_missing' | 'reminder_delivery_failed'
+) {
+  try {
+    const db = await getDb();
+    if (!db) {
+      return;
+    }
+    await notifyEligibleRecipients(db, {
+      source: 'bookings',
+      type: 'booking_message_failed',
+      title:
+        event === 'reminder_contact_missing' ? 'تعذر إرسال تذكير موعد' : 'فشل إرسال تذكير موعد',
+      message:
+        event === 'reminder_contact_missing'
+          ? 'تعذر إرسال تذكير موعد لغياب بيانات الاتصال. راجع الحجز قبل الاستحقاق.'
+          : 'تعذر إرسال تذكير موعد بعد محاولات الإعادة. راجع القناة والحجز.',
+      entityType: 'appointment',
+      entityId: appointmentId,
+      actionUrl: '/admin/bookings/appointments',
+      actionLabel: 'عرض المواعيد',
+      priority: 'medium',
+      data: JSON.stringify({ event, reminderType }),
+    });
+  } catch (error) {
+    logger.warn('Could not create appointment reminder failure notification:', error);
+  }
+}
+
 async function sendReminderWithRetry(
   appt: {
     id: number;
@@ -84,13 +105,12 @@ async function sendReminderWithRetry(
     createdAt: Date | string;
   },
   hoursUntil: number,
-  notifType: 'reminder_24h' | 'reminder_1h',
-  maxRetries: number = 3
+  notifType: ReminderType
 ): Promise<{ success: boolean; error?: string }> {
-  const baseDelay = 1000; // 1 second base delay
-  const maxDelay = 10000; // 10 seconds max delay
+  const baseDelay = 1000;
+  const maxDelay = 10000;
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const result = await sendAppointmentReminder({
         appointmentId: appt.id,
@@ -103,169 +123,84 @@ async function sendReminderWithRetry(
             : new Date(appt.appointmentDate || appt.createdAt),
         hoursUntil,
       });
-
       if (result.success) {
         return { success: true };
       }
-
-      // If failed and not last attempt, retry with exponential backoff
-      if (attempt < maxRetries) {
-        const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
-        logger.warn(
-          `${notifType} reminder failed for appointment #${appt.id} (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${delay}ms...`
-        );
-        await new Promise((resolve) => {
-          setTimeout(resolve, delay);
-        });
-      } else {
+      if (attempt === MAX_RETRIES) {
         return { success: false, error: result.error };
       }
-    } catch (err) {
-      if (attempt < maxRetries) {
-        const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
-        logger.error(
-          `Error sending ${notifType} reminder for appointment #${appt.id} (attempt ${attempt + 1}/${maxRetries + 1}). Retrying in ${delay}ms...`,
-          err
-        );
-        await new Promise((resolve) => {
-          setTimeout(resolve, delay);
-        });
-      } else {
-        return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
+    } catch (error) {
+      if (attempt === MAX_RETRIES) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
       }
     }
+
+    const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
+    logger.warn(
+      `${notifType} reminder failed for appointment #${appt.id} (attempt ${attempt + 1}/${MAX_RETRIES + 1}). Retrying in ${delay}ms...`
+    );
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, delay);
+    });
   }
 
   return { success: false, error: 'Max retries exceeded' };
 }
 
-/**
- * إرسال تذكيرات 24 ساعة
- */
-async function send24HourReminders() {
+async function sendReminders(hoursUntil: 24 | 1, reminderType: ReminderType) {
   const now = new Date();
-  // نافذة: من 23:30 إلى 24:30 ساعة من الآن
-  const windowStart = new Date(now.getTime() + 23.5 * 60 * 60 * 1000);
-  const windowEnd = new Date(now.getTime() + 24.5 * 60 * 60 * 1000);
-
-  const toRemind = await getAppointmentsNeedingReminder(windowStart, windowEnd, 'reminder_24h');
+  const windowStart =
+    hoursUntil === 24
+      ? new Date(now.getTime() + 23.5 * 60 * 60 * 1000)
+      : new Date(now.getTime() + 45 * 60 * 1000);
+  const windowEnd =
+    hoursUntil === 24
+      ? new Date(now.getTime() + 24.5 * 60 * 60 * 1000)
+      : new Date(now.getTime() + 75 * 60 * 1000);
+  const toRemind = await getAppointmentsNeedingReminder(windowStart, windowEnd, reminderType);
 
   if (toRemind.length === 0) {
-    logger.info('No 24h reminders needed');
+    logger.info(`No ${hoursUntil}h reminders needed`);
     return { sent: 0, failed: 0 };
   }
 
-  logger.info(`Sending 24h reminders for ${toRemind.length} appointments`);
-
   let sent = 0;
   let failed = 0;
-
-  for (const appt of toRemind) {
-    if (!appt.phone) {
-      failed++;
+  for (const appointment of toRemind) {
+    if (!appointment.phone) {
+      failed += 1;
+      void notifyReminderFailure(appointment.id, reminderType, 'reminder_contact_missing');
       continue;
     }
-
-    const result = await sendReminderWithRetry(appt, 24, 'reminder_24h');
-
+    const result = await sendReminderWithRetry(appointment, hoursUntil, reminderType);
     if (result.success) {
-      sent++;
-      logger.info(`24h reminder sent for appointment #${appt.id}`);
+      sent += 1;
+      logger.info(`${hoursUntil}h reminder sent for appointment #${appointment.id}`);
     } else {
-      failed++;
+      failed += 1;
+      void notifyReminderFailure(appointment.id, reminderType, 'reminder_delivery_failed');
       logger.warn(
-        `Failed to send 24h reminder for appointment #${appt.id} after retries: ${result.error}`
+        `Failed to send ${hoursUntil}h reminder for appointment #${appointment.id}: ${result.error}`
       );
     }
   }
-
   return { sent, failed };
 }
 
-/**
- * إرسال تذكيرات ساعة واحدة
- */
-async function send1HourReminders() {
-  const now = new Date();
-  // نافذة: من 45 دقيقة إلى 75 دقيقة من الآن
-  const windowStart = new Date(now.getTime() + 45 * 60 * 1000);
-  const windowEnd = new Date(now.getTime() + 75 * 60 * 1000);
-
-  const toRemind = await getAppointmentsNeedingReminder(windowStart, windowEnd, 'reminder_1h');
-
-  if (toRemind.length === 0) {
-    logger.info('No 1h reminders needed');
-    return { sent: 0, failed: 0 };
-  }
-
-  logger.info(`Sending 1h reminders for ${toRemind.length} appointments`);
-
-  let sent = 0;
-  let failed = 0;
-
-  for (const appt of toRemind) {
-    if (!appt.phone) {
-      failed++;
-      continue;
-    }
-
-    const result = await sendReminderWithRetry(appt, 1, 'reminder_1h');
-
-    if (result.success) {
-      sent++;
-      logger.info(`1h reminder sent for appointment #${appt.id}`);
-    } else {
-      failed++;
-      logger.warn(
-        `Failed to send 1h reminder for appointment #${appt.id} after retries: ${result.error}`
-      );
-    }
-  }
-
-  return { sent, failed };
-}
-
-/**
- * تشغيل جميع مهام التذكير
- */
+/** تشغيل فحوصات التذكير؛ يستدعيها فقط مسار Heartbeat المحمي. */
 export async function runAppointmentReminderJobs() {
   logger.info('Running appointment reminder jobs...');
-
   try {
-    const [result24h, result1h] = await Promise.all([send24HourReminders(), send1HourReminders()]);
-
+    const [result24h, result1h] = await Promise.all([
+      sendReminders(24, 'reminder_24h'),
+      sendReminders(1, 'reminder_1h'),
+    ]);
     logger.info(
       `Done. 24h: ${result24h.sent} sent, ${result24h.failed} failed. 1h: ${result1h.sent} sent, ${result1h.failed} failed.`
     );
-
-    return {
-      success: true,
-      reminders24h: result24h,
-      reminders1h: result1h,
-    };
-  } catch (err) {
-    logger.error('Unexpected error:', err);
-    return { success: false, error: String(err) };
+    return { success: true, reminders24h: result24h, reminders1h: result1h };
+  } catch (error) {
+    logger.error('Unexpected reminder job error:', error);
+    return { success: false, error: String(error) };
   }
-}
-
-/**
- * تهيئة جدولة تذكيرات المواعيد (كل 30 دقيقة)
- */
-export function initAppointmentRemindersScheduler() {
-  const INTERVAL_MS = 30 * 60 * 1000; // 30 دقيقة
-
-  logger.info('Initializing appointment reminders scheduler (every 30 minutes)...');
-
-  // تشغيل فوري عند بدء التشغيل (بعد 10 ثوانٍ للسماح للسيرفر بالاستقرار)
-  setTimeout(() => {
-    runAppointmentReminderJobs().catch((err) => logger.error('Reminder job error:', err));
-  }, 10_000);
-
-  // تشغيل كل 30 دقيقة
-  setInterval(() => {
-    runAppointmentReminderJobs().catch((err) => logger.error('Reminder job error:', err));
-  }, INTERVAL_MS);
-
-  logger.info('Scheduler initialized. Running every 30 minutes.');
 }

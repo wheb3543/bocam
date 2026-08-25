@@ -4,6 +4,7 @@
  */
 
 import { createLogger } from '../../../_core/logger';
+import { notifyEligibleRecipients } from '../../../services/notificationPolicy';
 import { eq } from 'drizzle-orm';
 import { appointments } from '../../../../drizzle/schema';
 import { invalidateEntityCache } from '../../../services/cacheInvalidator';
@@ -82,7 +83,21 @@ export async function sendStatusWhatsAppMessage(
         },
         entityId: appointmentId,
         sentBy: userId,
-      }).catch((err: unknown) => logger.error('Appointment status trigger error:', err));
+      }).catch((err: unknown) => {
+        logger.error('Appointment status trigger error:', err);
+        void notifyEligibleRecipients(db, {
+          source: 'bookings',
+          type: 'booking_message_failed',
+          title: 'فشل إرسال رسالة موعد',
+          message: 'تعذر إرسال رسالة تلقائية بعد تحديث حالة موعد. راجع القناة وإعدادات الرسائل.',
+          entityType: 'appointment',
+          entityId: appointmentId,
+          actionUrl: '/admin/bookings/appointments',
+          actionLabel: 'عرض المواعيد',
+          priority: 'medium',
+          data: JSON.stringify({ event: 'appointment_status_message_failed' }),
+        }).catch(() => undefined);
+      });
     }
   }
 }

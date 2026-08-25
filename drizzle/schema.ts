@@ -272,6 +272,22 @@ export const appointments = mysqlTable(
 export type Appointment = typeof appointments.$inferSelect;
 export type InsertAppointment = typeof appointments.$inferInsert;
 
+/** إعداد مهمة Heartbeat لتذكيرات المواعيد. */
+export const appointmentReminderSchedules = mysqlTable(
+  'appointmentReminderSchedules',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    enabled: mysqlEnum('enabled', ['yes', 'no']).default('yes').notNull(),
+    scheduleCronTaskUid: varchar('scheduleCronTaskUid', { length: 65 }),
+    lastRunAt: timestamp('lastRunAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    taskUidIdx: index('appointment_reminder_schedule_task_uid_idx').on(table.scheduleCronTaskUid),
+  })
+);
+
 /**
  * Access Requests table - stores access requests
  */
@@ -2378,6 +2394,8 @@ export const notifications = mysqlTable(
       'booking_pending', // حجز أو تسجيل يحتاج متابعة
       'booking_confirmed', // تأكيد حجز أو تسجيل
       'booking_status_changed', // تغيير حالة حجز أو تسجيل
+      'booking_schedule_changed', // تعديل تاريخ أو طبيب الموعد
+      'booking_message_failed', // فشل رسالة متعلقة بالموعد
       'message_received', // رسالة واردة جديدة
       'comment_received', // تعليق وارد جديد
       'conversation_assigned', // إسناد محادثة إلى مستخدم

@@ -8,6 +8,8 @@ export const NOTIFICATION_TYPES = [
   'booking_pending',
   'booking_confirmed',
   'booking_status_changed',
+  'booking_schedule_changed',
+  'booking_message_failed',
   'message_received',
   'comment_received',
   'conversation_assigned',
