@@ -10,9 +10,10 @@ import { createLogger } from '../../_core/logger';
 const logger = createLogger('auditLogService');
 
 interface AuditLogFilters {
-  entityType?: 'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton';
+  entityType?:
+    'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton' | 'operation';
   entityId?: number;
-  action?: 'create' | 'update' | 'delete';
+  action?: 'create' | 'update' | 'delete' | 'operation_succeeded' | 'operation_failed';
   startDate?: Date;
   endDate?: Date;
   limit?: number;
@@ -26,13 +27,14 @@ export class AuditLogService {
   /**
    * تسجيل تغيير في المحتوى
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   async logChange(
     db: any,
     params: {
-      entityType: 'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton';
+      entityType:
+        'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton' | 'operation';
       entityId: number;
-      action: 'create' | 'update' | 'delete';
+      action: 'create' | 'update' | 'delete' | 'operation_succeeded' | 'operation_failed';
       userId?: number;
       oldValue?: string;
       newValue?: string;

@@ -88,10 +88,12 @@ export const auditLogRouter = router({
     .input(
       z.object({
         entityType: z
-          .enum(['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton'])
+          .enum(['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton', 'operation'])
           .optional(),
         entityId: z.number().optional(),
-        action: z.enum(['create', 'update', 'delete']).optional(),
+        action: z
+          .enum(['create', 'update', 'delete', 'operation_succeeded', 'operation_failed'])
+          .optional(),
         startDate: z.date().optional(),
         endDate: z.date().optional(),
         limit: z.number().min(1).max(100).default(50),
@@ -117,10 +119,12 @@ export const auditLogRouter = router({
     .input(
       z.object({
         entityType: z
-          .enum(['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton'])
+          .enum(['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton', 'operation'])
           .optional(),
         entityId: z.number().optional(),
-        action: z.enum(['create', 'update', 'delete']).optional(),
+        action: z
+          .enum(['create', 'update', 'delete', 'operation_succeeded', 'operation_failed'])
+          .optional(),
       })
     )
     .query(async ({ input }) => {
@@ -141,9 +145,13 @@ export const auditLogRouter = router({
   export: protectedProcedure
     .input(
       z.object({
-        entityType: z.enum(['text', 'image', 'color', 'seo']).optional(),
+        entityType: z
+          .enum(['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton', 'operation'])
+          .optional(),
         entityId: z.number().optional(),
-        action: z.enum(['create', 'update', 'delete']).optional(),
+        action: z
+          .enum(['create', 'update', 'delete', 'operation_succeeded', 'operation_failed'])
+          .optional(),
         startDate: z.date().optional(),
         endDate: z.date().optional(),
       })

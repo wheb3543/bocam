@@ -222,4 +222,24 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(reminderSource).not.toContain('setInterval(');
     expect(reminderRouteSource).toContain("'/api/scheduled/appointment-reminders'");
   });
+
+  it('يسجل ويلخص عمليات الوسائط واستيراد وتصدير CMS مع رابط إلى سجل العملية', () => {
+    const operationServiceSource = readFileSync(
+      resolve(process.cwd(), 'server/services/contentOperationNotificationService.ts'),
+      'utf8'
+    );
+    const uploadRouteSource = readFileSync(
+      resolve(process.cwd(), 'server/api/uploadRoute.ts'),
+      'utf8'
+    );
+    const importExportSource = readFileSync(
+      resolve(process.cwd(), 'server/routers/content/importExport.ts'),
+      'utf8'
+    );
+    expect(operationServiceSource).toContain("source: 'content'");
+    expect(operationServiceSource).toContain("actionUrl: '/admin/content/content?audit=operations'");
+    expect(uploadRouteSource).toContain("operation: 'media_upload'");
+    expect(importExportSource).toContain("operation: 'cms_import'");
+    expect(importExportSource).toContain("operation: 'cms_export'");
+  });
 });

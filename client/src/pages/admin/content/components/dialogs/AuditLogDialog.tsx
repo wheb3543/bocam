@@ -22,11 +22,11 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Download, Clock, User, Edit, Trash, Plus } from 'lucide-react';
 import { useAuditLog } from '../../hooks/useAuditLog';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-type EntityType = 'text' | 'image' | 'color' | 'seo';
-type AuditAction = 'create' | 'update' | 'delete';
+type EntityType = 'text' | 'image' | 'color' | 'seo' | 'operation';
+type AuditAction = 'create' | 'update' | 'delete' | 'operation_succeeded' | 'operation_failed';
 
 interface AuditLogEntry {
   id: number;
@@ -44,15 +44,22 @@ interface AuditLogEntry {
 interface AuditLogDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialEntityType?: EntityType;
 }
 
 /**
  * AuditLogDialog - مكون حوار سجل التغييرات
  */
-export function AuditLogDialog({ open, onOpenChange }: AuditLogDialogProps) {
+export function AuditLogDialog({ open, onOpenChange, initialEntityType }: AuditLogDialogProps) {
   const { getAuditLog, exportAuditLog } = useAuditLog();
   const [entityTypeFilter, setEntityTypeFilter] = useState<string>('all');
   const [actionFilter, setActionFilter] = useState<string>('all');
+
+  useEffect(() => {
+    if (open && initialEntityType) {
+      setEntityTypeFilter(initialEntityType);
+    }
+  }, [initialEntityType, open]);
 
   const { data: auditLogs, isLoading } = getAuditLog({
     entityType: entityTypeFilter === 'all' ? undefined : (entityTypeFilter as EntityType),
@@ -89,6 +96,7 @@ export function AuditLogDialog({ open, onOpenChange }: AuditLogDialogProps) {
       image: 'صورة',
       color: 'لون',
       seo: 'إعدادات SEO',
+      operation: 'عملية نظامية',
     };
     return labels[type as keyof typeof labels] || type;
   };
@@ -98,6 +106,8 @@ export function AuditLogDialog({ open, onOpenChange }: AuditLogDialogProps) {
       create: 'إنشاء',
       update: 'تحديث',
       delete: 'حذف',
+      operation_succeeded: 'اكتملت العملية',
+      operation_failed: 'فشلت العملية',
     };
     return labels[action as keyof typeof labels] || action;
   };
@@ -110,6 +120,12 @@ export function AuditLogDialog({ open, onOpenChange }: AuditLogDialogProps) {
       return <Edit className="h-4 w-4 text-blue-500" />;
     }
     if (action === 'delete') {
+      return <Trash className="h-4 w-4 text-red-500" />;
+    }
+    if (action === 'operation_succeeded') {
+      return <Plus className="h-4 w-4 text-green-500" />;
+    }
+    if (action === 'operation_failed') {
       return <Trash className="h-4 w-4 text-red-500" />;
     }
     return null;
@@ -138,6 +154,7 @@ export function AuditLogDialog({ open, onOpenChange }: AuditLogDialogProps) {
               <SelectItem value="image">صورة</SelectItem>
               <SelectItem value="color">لون</SelectItem>
               <SelectItem value="seo">إعدادات SEO</SelectItem>
+              <SelectItem value="operation">عمليات النظام</SelectItem>
             </SelectContent>
           </Select>
 
@@ -150,6 +167,8 @@ export function AuditLogDialog({ open, onOpenChange }: AuditLogDialogProps) {
               <SelectItem value="create">إنشاء</SelectItem>
               <SelectItem value="update">تحديث</SelectItem>
               <SelectItem value="delete">حذف</SelectItem>
+              <SelectItem value="operation_succeeded">اكتملت العملية</SelectItem>
+              <SelectItem value="operation_failed">فشلت العملية</SelectItem>
             </SelectContent>
           </Select>
 

@@ -1,0 +1,2 @@
+ALTER TABLE `contentAuditLog` MODIFY COLUMN `entityType` enum('text','image','color','seo','page','section','sectionButton','operation');--> statement-breakpoint
+ALTER TABLE `contentAuditLog` MODIFY COLUMN `action` enum('create','update','delete','operation_succeeded','operation_failed');

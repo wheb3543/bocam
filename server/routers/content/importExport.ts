@@ -21,6 +21,7 @@ import {
 } from '../../../drizzle/schema';
 import { createLogger } from '../../_core/logger';
 import { contentReadProcedure } from './authorization';
+import { recordContentOperation } from '../../services/contentOperationNotificationService';
 
 const logger = createLogger('importExport');
 const MAX_IMPORT_ITEMS = 10_000;
@@ -313,50 +314,73 @@ async function assertNoKeyConflicts(
 }
 
 export const importExportRouter = router({
-  export: adminProcedure.input(exportSchema).query(async ({ input }) => {
+  export: adminProcedure.input(exportSchema).query(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
-    const exportData: Record<string, unknown> = {
-      exportDate: new Date().toISOString(),
-      version: '3.0',
-    };
+    try {
+      const exportData: Record<string, unknown> = {
+        exportDate: new Date().toISOString(),
+        version: '3.0',
+      };
 
-    if (input.includePages) {
-      exportData.pages = await db.select().from(pages);
-    }
-    if (input.includeSections) {
-      exportData.sections = await db.select().from(sections);
-    }
-    if (input.includeSectionButtons) {
-      exportData.sectionButtons = await db.select().from(sectionButtons);
-    }
-    if (input.includeTextContent) {
-      exportData.textContent = await db.select().from(textContent);
-    }
-    if (input.includeImages) {
-      exportData.images = await db.select().from(images);
-    }
-    if (input.includeColors) {
-      exportData.colors = await db.select().from(colorScheme);
-    }
-    if (input.includeSeoSettings) {
-      exportData.seoSettings = await db.select().from(seoSettings);
-    }
-    if (input.includeMedia) {
-      const [folderRows, mediaRows] = await Promise.all([
-        db.select().from(mediaFolders),
-        db.select().from(media),
-      ]);
-      exportData.mediaFolders = folderRows;
-      exportData.media = mediaRows;
-    }
-    if (input.includeAuditLog) {
-      exportData.auditLog = await db.select().from(contentAuditLog);
-    }
-    exportData.collections = Object.keys(exportData).filter(
-      (key) => !['exportDate', 'version', 'collections'].includes(key)
-    );
+      if (input.includePages) {
+        exportData.pages = await db.select().from(pages);
+      }
+      if (input.includeSections) {
+        exportData.sections = await db.select().from(sections);
+      }
+      if (input.includeSectionButtons) {
+        exportData.sectionButtons = await db.select().from(sectionButtons);
+      }
+      if (input.includeTextContent) {
+        exportData.textContent = await db.select().from(textContent);
+      }
+      if (input.includeImages) {
+        exportData.images = await db.select().from(images);
+      }
+      if (input.includeColors) {
+        exportData.colors = await db.select().from(colorScheme);
+      }
+      if (input.includeSeoSettings) {
+        exportData.seoSettings = await db.select().from(seoSettings);
+      }
+      if (input.includeMedia) {
+        const [folderRows, mediaRows] = await Promise.all([
+          db.select().from(mediaFolders),
+          db.select().from(media),
+        ]);
+        exportData.mediaFolders = folderRows;
+        exportData.media = mediaRows;
+      }
+      if (input.includeAuditLog) {
+        exportData.auditLog = await db.select().from(contentAuditLog);
+      }
+      exportData.collections = Object.keys(exportData).filter(
+        (key) => !['exportDate', 'version', 'collections'].includes(key)
+      );
 
-    return exportData;
+      const exportedItems = Object.values(exportData).reduce<number>(
+        (total, value) => total + (Array.isArray(value) ? value.length : 0),
+        0
+      );
+      void recordContentOperation(db, {
+        operation: 'cms_export',
+        status: 'succeeded',
+        attemptedItems: exportedItems,
+        completedItems: exportedItems,
+        actorId: ctx.user.id,
+        details: { collections: exportData.collections },
+      });
+
+      return exportData;
+    } catch (error) {
+      void recordContentOperation(db, {
+        operation: 'cms_export',
+        status: 'failed',
+        attemptedItems: 0,
+        actorId: ctx.user.id,
+      });
+      throw error;
+    }
   }),
 
   previewImport: adminProcedure.input(bundleSchema).mutation(async ({ input }) => {
@@ -372,170 +396,190 @@ export const importExportRouter = router({
   import: adminProcedure.input(importSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     const summary = validateBundle(input);
-    await assertNoKeyConflicts(db, input);
+    try {
+      await assertNoKeyConflicts(db, input);
 
-    const importResult = await db.transaction(async (tx: any) => {
-      const pageIdMap = new Map<number, number>();
-      const sectionIdMap = new Map<number, number>();
-      const sectionButtonIdMap = new Map<number, number>();
-      const textContentIdMap = new Map<number, number>();
-      const imageIdMap = new Map<number, number>();
-      const colorIdMap = new Map<number, number>();
-      const seoIdMap = new Map<number, number>();
-      const mediaFolderIdMap = new Map<number, number>();
-      const mediaIdMap = new Map<number, number>();
+      const importResult = await db.transaction(async (tx: any) => {
+        const pageIdMap = new Map<number, number>();
+        const sectionIdMap = new Map<number, number>();
+        const sectionButtonIdMap = new Map<number, number>();
+        const textContentIdMap = new Map<number, number>();
+        const imageIdMap = new Map<number, number>();
+        const colorIdMap = new Map<number, number>();
+        const seoIdMap = new Map<number, number>();
+        const mediaFolderIdMap = new Map<number, number>();
+        const mediaIdMap = new Map<number, number>();
 
-      const pendingPages = [...records(input, 'pages')];
-      while (pendingPages.length) {
-        const nextIndex = pendingPages.findIndex(
-          (record) =>
-            record.parentId === null ||
-            record.parentId === undefined ||
-            pageIdMap.has(Number(record.parentId))
-        );
-        if (nextIndex < 0) {
-          throw new Error('تعذر ترتيب الصفحات لأن علاقة الصفحة الأب غير صالحة داخل ملف الاستيراد.');
-        }
-        const record = pendingPages.splice(nextIndex, 1)[0];
-        const source = sourceId(record, 'صفحة');
-        const data = cleanRecord(record);
-        data.parentId = relationId(record.parentId, pageIdMap, 'الصفحة بالصفحة الأب');
-        const result = await tx
-          .insert(pages)
-          .values(data as any)
-          .$returningId();
-        pageIdMap.set(source, Number(result[0].id));
-      }
-
-      for (const record of records(input, 'sections')) {
-        const source = sourceId(record, 'قسم');
-        const data = cleanRecord(record);
-        data.pageId = relationId(record.pageId, pageIdMap, 'القسم بالصفحة');
-        const result = await tx
-          .insert(sections)
-          .values(data as any)
-          .$returningId();
-        sectionIdMap.set(source, Number(result[0].id));
-      }
-
-      for (const record of records(input, 'sectionButtons')) {
-        const source = sourceId(record, 'زر قسم');
-        const data = cleanRecord(record);
-        data.sectionId = relationId(record.sectionId, sectionIdMap, 'الزر بالقسم');
-        const result = await tx
-          .insert(sectionButtons)
-          .values(data as any)
-          .$returningId();
-        sectionButtonIdMap.set(source, Number(result[0].id));
-      }
-
-      for (const record of records(input, 'textContent')) {
-        const source = sourceId(record, 'نص');
-        const data = cleanRecord(record);
-        data.pageId = relationId(record.pageId, pageIdMap, 'النص بالصفحة');
-        data.sectionId = relationId(record.sectionId, sectionIdMap, 'النص بالقسم');
-        const result = await tx
-          .insert(textContent)
-          .values(data as any)
-          .$returningId();
-        textContentIdMap.set(source, Number(result[0].id));
-      }
-
-      for (const record of records(input, 'images')) {
-        const source = sourceId(record, 'صورة');
-        const data = cleanRecord(record);
-        data.pageId = relationId(record.pageId, pageIdMap, 'الصورة بالصفحة');
-        data.sectionId = relationId(record.sectionId, sectionIdMap, 'الصورة بالقسم');
-        const result = await tx
-          .insert(images)
-          .values(data as any)
-          .$returningId();
-        imageIdMap.set(source, Number(result[0].id));
-      }
-
-      for (const record of records(input, 'colors')) {
-        const source = sourceId(record, 'لون');
-        const result = await tx
-          .insert(colorScheme)
-          .values(cleanRecord(record) as any)
-          .$returningId();
-        colorIdMap.set(source, Number(result[0].id));
-      }
-
-      for (const record of records(input, 'seoSettings')) {
-        const source = sourceId(record, 'إعداد SEO');
-        const data = cleanRecord(record);
-        data.pageId = relationId(record.pageId, pageIdMap, 'إعداد SEO بالصفحة');
-        const result = await tx
-          .insert(seoSettings)
-          .values(data as any)
-          .$returningId();
-        seoIdMap.set(source, Number(result[0].id));
-      }
-
-      const pendingMediaFolders = [...records(input, 'mediaFolders')];
-      while (pendingMediaFolders.length) {
-        const nextIndex = pendingMediaFolders.findIndex(
-          (record) =>
-            record.parentId === null ||
-            record.parentId === undefined ||
-            mediaFolderIdMap.has(Number(record.parentId))
-        );
-        if (nextIndex < 0) {
-          throw new Error(
-            'تعذر ترتيب مجلدات الوسائط لأن علاقة المجلد الأب غير صالحة داخل ملف الاستيراد.'
+        const pendingPages = [...records(input, 'pages')];
+        while (pendingPages.length) {
+          const nextIndex = pendingPages.findIndex(
+            (record) =>
+              record.parentId === null ||
+              record.parentId === undefined ||
+              pageIdMap.has(Number(record.parentId))
           );
+          if (nextIndex < 0) {
+            throw new Error(
+              'تعذر ترتيب الصفحات لأن علاقة الصفحة الأب غير صالحة داخل ملف الاستيراد.'
+            );
+          }
+          const record = pendingPages.splice(nextIndex, 1)[0];
+          const source = sourceId(record, 'صفحة');
+          const data = cleanRecord(record);
+          data.parentId = relationId(record.parentId, pageIdMap, 'الصفحة بالصفحة الأب');
+          const result = await tx
+            .insert(pages)
+            .values(data as any)
+            .$returningId();
+          pageIdMap.set(source, Number(result[0].id));
         }
-        const record = pendingMediaFolders.splice(nextIndex, 1)[0];
-        const source = sourceId(record, 'مجلد وسائط');
-        const data = cleanRecord(record);
-        data.parentId = relationId(record.parentId, mediaFolderIdMap, 'مجلد الوسائط الأب');
-        const result = await tx
-          .insert(mediaFolders)
-          .values(data as any)
-          .$returningId();
-        mediaFolderIdMap.set(source, Number(result[0].id));
-      }
 
-      for (const record of records(input, 'media')) {
-        const source = sourceId(record, 'وسيط');
-        const data = cleanRecord(record);
-        data.folderId = relationId(record.folderId, mediaFolderIdMap, 'الوسيط بالمجلد');
-        data.pageId = relationId(record.pageId, pageIdMap, 'الوسيط بالصفحة');
-        data.sectionId = relationId(record.sectionId, sectionIdMap, 'الوسيط بالقسم');
-        const result = await tx
-          .insert(media)
-          .values(data as any)
-          .$returningId();
-        mediaIdMap.set(source, Number(result[0].id));
-      }
+        for (const record of records(input, 'sections')) {
+          const source = sourceId(record, 'قسم');
+          const data = cleanRecord(record);
+          data.pageId = relationId(record.pageId, pageIdMap, 'القسم بالصفحة');
+          const result = await tx
+            .insert(sections)
+            .values(data as any)
+            .$returningId();
+          sectionIdMap.set(source, Number(result[0].id));
+        }
 
-      const entityIdMaps: Record<string, Map<number, number>> = {
-        text: textContentIdMap,
-        image: imageIdMap,
-        color: colorIdMap,
-        seo: seoIdMap,
-        page: pageIdMap,
-        section: sectionIdMap,
-        sectionButton: sectionButtonIdMap,
-      };
-      const auditRows = records(input, 'auditLog')
-        .map((record) => cleanAuditRecord(record, entityIdMaps))
-        .filter((record): record is ContentRecord => record !== null);
-      if (auditRows.length) {
-        await tx.insert(contentAuditLog).values(auditRows as any);
-      }
-      return {
-        importedAuditLog: auditRows.length,
-        skippedAuditLog: records(input, 'auditLog').length - auditRows.length,
-      };
-    });
+        for (const record of records(input, 'sectionButtons')) {
+          const source = sourceId(record, 'زر قسم');
+          const data = cleanRecord(record);
+          data.sectionId = relationId(record.sectionId, sectionIdMap, 'الزر بالقسم');
+          const result = await tx
+            .insert(sectionButtons)
+            .values(data as any)
+            .$returningId();
+          sectionButtonIdMap.set(source, Number(result[0].id));
+        }
 
-    logger.info('Content import completed atomically', {
-      userId: ctx.user.id,
-      total: summary.total,
-    });
-    return { success: true, ...summary, ...importResult };
+        for (const record of records(input, 'textContent')) {
+          const source = sourceId(record, 'نص');
+          const data = cleanRecord(record);
+          data.pageId = relationId(record.pageId, pageIdMap, 'النص بالصفحة');
+          data.sectionId = relationId(record.sectionId, sectionIdMap, 'النص بالقسم');
+          const result = await tx
+            .insert(textContent)
+            .values(data as any)
+            .$returningId();
+          textContentIdMap.set(source, Number(result[0].id));
+        }
+
+        for (const record of records(input, 'images')) {
+          const source = sourceId(record, 'صورة');
+          const data = cleanRecord(record);
+          data.pageId = relationId(record.pageId, pageIdMap, 'الصورة بالصفحة');
+          data.sectionId = relationId(record.sectionId, sectionIdMap, 'الصورة بالقسم');
+          const result = await tx
+            .insert(images)
+            .values(data as any)
+            .$returningId();
+          imageIdMap.set(source, Number(result[0].id));
+        }
+
+        for (const record of records(input, 'colors')) {
+          const source = sourceId(record, 'لون');
+          const result = await tx
+            .insert(colorScheme)
+            .values(cleanRecord(record) as any)
+            .$returningId();
+          colorIdMap.set(source, Number(result[0].id));
+        }
+
+        for (const record of records(input, 'seoSettings')) {
+          const source = sourceId(record, 'إعداد SEO');
+          const data = cleanRecord(record);
+          data.pageId = relationId(record.pageId, pageIdMap, 'إعداد SEO بالصفحة');
+          const result = await tx
+            .insert(seoSettings)
+            .values(data as any)
+            .$returningId();
+          seoIdMap.set(source, Number(result[0].id));
+        }
+
+        const pendingMediaFolders = [...records(input, 'mediaFolders')];
+        while (pendingMediaFolders.length) {
+          const nextIndex = pendingMediaFolders.findIndex(
+            (record) =>
+              record.parentId === null ||
+              record.parentId === undefined ||
+              mediaFolderIdMap.has(Number(record.parentId))
+          );
+          if (nextIndex < 0) {
+            throw new Error(
+              'تعذر ترتيب مجلدات الوسائط لأن علاقة المجلد الأب غير صالحة داخل ملف الاستيراد.'
+            );
+          }
+          const record = pendingMediaFolders.splice(nextIndex, 1)[0];
+          const source = sourceId(record, 'مجلد وسائط');
+          const data = cleanRecord(record);
+          data.parentId = relationId(record.parentId, mediaFolderIdMap, 'مجلد الوسائط الأب');
+          const result = await tx
+            .insert(mediaFolders)
+            .values(data as any)
+            .$returningId();
+          mediaFolderIdMap.set(source, Number(result[0].id));
+        }
+
+        for (const record of records(input, 'media')) {
+          const source = sourceId(record, 'وسيط');
+          const data = cleanRecord(record);
+          data.folderId = relationId(record.folderId, mediaFolderIdMap, 'الوسيط بالمجلد');
+          data.pageId = relationId(record.pageId, pageIdMap, 'الوسيط بالصفحة');
+          data.sectionId = relationId(record.sectionId, sectionIdMap, 'الوسيط بالقسم');
+          const result = await tx
+            .insert(media)
+            .values(data as any)
+            .$returningId();
+          mediaIdMap.set(source, Number(result[0].id));
+        }
+
+        const entityIdMaps: Record<string, Map<number, number>> = {
+          text: textContentIdMap,
+          image: imageIdMap,
+          color: colorIdMap,
+          seo: seoIdMap,
+          page: pageIdMap,
+          section: sectionIdMap,
+          sectionButton: sectionButtonIdMap,
+        };
+        const auditRows = records(input, 'auditLog')
+          .map((record) => cleanAuditRecord(record, entityIdMaps))
+          .filter((record): record is ContentRecord => record !== null);
+        if (auditRows.length) {
+          await tx.insert(contentAuditLog).values(auditRows as any);
+        }
+        return {
+          importedAuditLog: auditRows.length,
+          skippedAuditLog: records(input, 'auditLog').length - auditRows.length,
+        };
+      });
+
+      logger.info('Content import completed atomically', {
+        userId: ctx.user.id,
+        total: summary.total,
+      });
+      void recordContentOperation(db, {
+        operation: 'cms_import',
+        status: 'succeeded',
+        attemptedItems: summary.total,
+        completedItems: summary.total,
+        actorId: ctx.user.id,
+        details: { collections: Object.keys(summary.counts) },
+      });
+      return { success: true, ...summary, ...importResult };
+    } catch (error) {
+      void recordContentOperation(db, {
+        operation: 'cms_import',
+        status: 'failed',
+        attemptedItems: summary.total,
+        actorId: ctx.user.id,
+      });
+      throw error;
+    }
   }),
 
   getOverview: contentReadProcedure.query(async () => {

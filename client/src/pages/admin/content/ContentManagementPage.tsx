@@ -30,7 +30,7 @@ import type { Page } from './hooks/usePages';
 import { useSections } from './hooks/useSections';
 import { useSectionButtons } from './hooks/useSectionButtons';
 import { useImportExport } from './hooks/useImportExport';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, History, FileText, ClipboardCheck, ShieldCheck } from 'lucide-react';
@@ -82,6 +82,12 @@ export default function ContentManagementPage() {
   const [selectedVersionEntityId, setSelectedVersionEntityId] = useState<number>(0);
   const [isPageSettingsOpen, setIsPageSettingsOpen] = useState(false);
   const [selectedPageForSettings, setSelectedPageForSettings] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('audit') === 'operations') {
+      setIsAuditLogOpen(true);
+    }
+  }, []);
 
   const handlePageSettings = (page: Page) => {
     setSelectedPageForSettings(page.id);
@@ -634,7 +640,15 @@ export default function ContentManagementPage() {
       />
 
       {/* Audit Log Dialog */}
-      <AuditLogDialog open={isAuditLogOpen} onOpenChange={setIsAuditLogOpen} />
+      <AuditLogDialog
+        open={isAuditLogOpen}
+        onOpenChange={setIsAuditLogOpen}
+        initialEntityType={
+          new URLSearchParams(window.location.search).get('audit') === 'operations'
+            ? 'operation'
+            : undefined
+        }
+      />
 
       <ApprovalQueueDialog open={isApprovalQueueOpen} onOpenChange={setIsApprovalQueueOpen} />
       <ContentQualityDialog open={isQualityDialogOpen} onOpenChange={setIsQualityDialogOpen} />

@@ -17,6 +17,7 @@ import {
   type MediaKind,
 } from '../services/mediaFiles';
 import { prepareMediaUpload } from '../services/mediaUploadPreparation';
+import { recordContentOperation } from '../services/contentOperationNotificationService';
 
 type MulterFile = {
   originalname: string;
@@ -27,6 +28,33 @@ type MulterFile = {
 
 const logger = createLogger('upload');
 const MAX_MEDIA_FILE_SIZE = 100 * 1024 * 1024;
+
+type UploadOperationActor = { userId: number; username?: string };
+
+function getUploadOperationActor(res: Response): UploadOperationActor | undefined {
+  const actor = res.locals.uploadOperationActor as UploadOperationActor | undefined;
+  return actor?.userId ? actor : undefined;
+}
+
+function recordMediaUploadOperation(
+  res: Response,
+  status: 'succeeded' | 'failed',
+  attemptedItems: number,
+  completedItems = 0
+) {
+  const actor = getUploadOperationActor(res);
+  void ensureDatabaseAvailable()
+    .then((db) =>
+      recordContentOperation(db, {
+        operation: 'media_upload',
+        status,
+        attemptedItems,
+        completedItems,
+        actorId: actor?.userId,
+      })
+    )
+    .catch(() => undefined);
+}
 
 const allowedTypes = new Set([
   'image/jpeg',
@@ -78,7 +106,13 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
 
   try {
-    jwt.verify(token, secret);
+    const verified = jwt.verify(token, secret) as { userId?: unknown; username?: unknown };
+    if (typeof verified !== 'string' && typeof verified.userId === 'number') {
+      res.locals.uploadOperationActor = {
+        userId: verified.userId,
+        username: typeof verified.username === 'string' ? verified.username : undefined,
+      } satisfies UploadOperationActor;
+    }
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired session' });
@@ -287,9 +321,12 @@ export function createUploadRouter(): Router {
           return res.status(400).json({ error: 'لم يتم إرسال ملف' });
         }
         const folderId = Number(req.body?.folderId) || undefined;
-        return res.status(201).json(await uploadAndIndexMedia(file, folderId));
+        const uploaded = await uploadAndIndexMedia(file, folderId);
+        recordMediaUploadOperation(res, 'succeeded', 1, 1);
+        return res.status(201).json(uploaded);
       } catch (error) {
         logger.error('Single media upload error:', error);
+        recordMediaUploadOperation(res, 'failed', 1);
         return res.status(500).json({ error: 'حدث خطأ أثناء رفع الملف' });
       }
     }
@@ -309,9 +346,11 @@ export function createUploadRouter(): Router {
         const uploaded = await Promise.all(
           files.map((file) => uploadAndIndexMedia(file, folderId))
         );
+        recordMediaUploadOperation(res, 'succeeded', files.length, uploaded.length);
         return res.status(201).json({ files: uploaded });
       } catch (error) {
         logger.error('Batch media upload error:', error);
+        recordMediaUploadOperation(res, 'failed', ((req.files || []) as MulterFile[]).length);
         return res.status(500).json({ error: 'حدث خطأ أثناء رفع الملفات' });
       }
     }
