@@ -11,6 +11,12 @@ import {
   startWhatsAppEmbeddedSignup,
 } from '../integrations/meta/metaBusinessOAuth';
 import { startExternalPlatformOAuth } from '../integrations/external/externalPlatformOAuth';
+import { permissionProcedure } from './permissionProcedures';
+
+const integrationSettingsProcedure = permissionProcedure(
+  'settings.manage',
+  'إدارة اتصالات التكامل'
+);
 
 function callbackUri(req: { protocol?: string; get: (header: string) => string | undefined }) {
   const host = req.get('host');
@@ -34,23 +40,23 @@ function externalCallbackUri(
 }
 
 export const integrationConnectionsRouter = router({
-  overview: adminProcedure.query(() => getIntegrationConnectionsOverview()),
+  overview: integrationSettingsProcedure.query(() => getIntegrationConnectionsOverview()),
 
-  startMetaBusiness: adminProcedure.mutation(async ({ ctx }) => {
+  startMetaBusiness: integrationSettingsProcedure.mutation(async ({ ctx }) => {
     return startMetaBusinessOAuth({
       initiatedByUserId: ctx.user.id,
       redirectUri: callbackUri(ctx.req),
     });
   }),
 
-  startWhatsAppEmbeddedSignup: adminProcedure.mutation(async ({ ctx }) => {
+  startWhatsAppEmbeddedSignup: integrationSettingsProcedure.mutation(async ({ ctx }) => {
     return startWhatsAppEmbeddedSignup({
       initiatedByUserId: ctx.user.id,
       redirectUri: callbackUri(ctx.req),
     });
   }),
 
-  startExternalOAuth: adminProcedure
+  startExternalOAuth: integrationSettingsProcedure
     .input(z.object({ provider: z.enum(['x', 'linkedin', 'youtube', 'tiktok']) }))
     .mutation(({ ctx, input }) =>
       startExternalPlatformOAuth({
@@ -60,7 +66,7 @@ export const integrationConnectionsRouter = router({
       })
     ),
 
-  completeWhatsAppEmbeddedSignup: adminProcedure
+  completeWhatsAppEmbeddedSignup: integrationSettingsProcedure
     .input(
       z.object({
         code: z.string().trim().min(4).max(4096),
@@ -71,14 +77,14 @@ export const integrationConnectionsRouter = router({
     )
     .mutation(({ input }) => completeWhatsAppEmbeddedSignup(input)),
 
-  setAssetSelected: adminProcedure
+  setAssetSelected: integrationSettingsProcedure
     .input(z.object({ assetId: z.number().int().positive(), isSelected: z.boolean() }))
     .mutation(async ({ input }) => {
       await setIntegrationAssetSelected(input.assetId, input.isSelected);
       return { success: true };
     }),
 
-  disconnect: adminProcedure
+  disconnect: integrationSettingsProcedure
     .input(z.object({ connectionId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       await disconnectIntegrationConnection(input.connectionId, ctx.user.id);

@@ -1,13 +1,15 @@
 import { z } from 'zod';
-import { adminProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { getMetaIntegrationSettingsStatus, saveMetaIntegrationSettings } from '../database/db';
+import { permissionProcedure } from './permissionProcedures';
 
 const optionalText = z.string().trim().max(10000).optional();
+const integrationSettingsProcedure = permissionProcedure('settings.manage', 'إدارة إعدادات Meta');
 
 export const metaIntegrationRouter = router({
-  status: adminProcedure.query(() => getMetaIntegrationSettingsStatus()),
+  status: integrationSettingsProcedure.query(() => getMetaIntegrationSettingsStatus()),
 
-  save: adminProcedure
+  save: integrationSettingsProcedure
     .input(
       z.object({
         appId: z.string().trim().max(255).optional(),

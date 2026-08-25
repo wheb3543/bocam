@@ -1,11 +1,14 @@
 import { z } from 'zod';
-import { adminProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { getMetaOperationsOverview, upsertMetaLeadForm } from '../database/db';
+import { permissionProcedure } from './permissionProcedures';
+
+const integrationSettingsProcedure = permissionProcedure('settings.manage', 'إدارة عمليات Meta');
 
 export const metaOperationsRouter = router({
-  overview: adminProcedure.query(() => getMetaOperationsOverview()),
+  overview: integrationSettingsProcedure.query(() => getMetaOperationsOverview()),
 
-  saveLeadForm: adminProcedure
+  saveLeadForm: integrationSettingsProcedure
     .input(
       z.object({
         connectionId: z.number().int().positive(),

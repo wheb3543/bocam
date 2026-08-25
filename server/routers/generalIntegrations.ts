@@ -1,15 +1,20 @@
 import { z } from 'zod';
-import { adminProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import {
   getSocialPlatformIntegrationStatuses,
   saveSocialPlatformIntegrationSettings,
 } from '../database/db';
+import { permissionProcedure } from './permissionProcedures';
 
 const platformSchema = z.enum(['x', 'linkedin', 'youtube', 'tiktok']);
+const integrationSettingsProcedure = permissionProcedure(
+  'settings.manage',
+  'إدارة إعدادات التكاملات'
+);
 
 export const generalIntegrationsRouter = router({
-  status: adminProcedure.query(() => getSocialPlatformIntegrationStatuses()),
-  save: adminProcedure
+  status: integrationSettingsProcedure.query(() => getSocialPlatformIntegrationStatuses()),
+  save: integrationSettingsProcedure
     .input(
       z.object({
         platform: platformSchema,
