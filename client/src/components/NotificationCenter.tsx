@@ -49,6 +49,7 @@ const sourceLabels: Record<NotificationSource, string> = {
   offers: 'تسجيلات العروض',
   whatsapp: 'رسائل WhatsApp',
   social_inbox: 'صندوق البريد الاجتماعي',
+  tasks: 'المهام والمتابعة',
   campaigns: 'الحملات',
   integrations: 'التكاملات',
   privacy: 'الخصوصية',

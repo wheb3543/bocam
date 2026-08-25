@@ -130,4 +130,20 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(notificationCenterSource).toContain("whatsapp: 'رسائل WhatsApp'");
     expect(notificationCenterSource).toContain("social_inbox: 'صندوق البريد الاجتماعي'");
   });
+
+  it('يدعم مصدر المهام وتنبيهات الاستحقاق عبر Heartbeat آمن', () => {
+    const taskReminderSource = readFileSync(
+      resolve(process.cwd(), 'server/services/taskReminderService.ts'),
+      'utf8'
+    );
+    const reminderRouteSource = readFileSync(
+      resolve(process.cwd(), 'server/api/taskReminderScheduledRoute.ts'),
+      'utf8'
+    );
+    expect(taskReminderSource).toContain("source: 'tasks'");
+    expect(taskReminderSource).toContain("type: overdue ? 'task_overdue' : 'task_due'");
+    expect(taskReminderSource).toContain('scheduleCronTaskUid');
+    expect(reminderRouteSource).toContain("'/api/scheduled/task-reminders'");
+    expect(reminderRouteSource).toContain('user.isCron || !user.taskUid');
+  });
 });

@@ -17,6 +17,8 @@ import {
   getTasksByUser,
   getOverdueTasks,
 } from '../database/db/tasks';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { notifyTaskAssignment } from '../services/taskReminderService';
 
 export const tasksRouter = router({
   // Get all tasks with filters
@@ -63,10 +65,20 @@ export const tasksRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return createTask({
+      const created = await createTask({
         ...input,
         createdBy: ctx.user.id,
       });
+      if (input.assignedTo && input.assignedTo !== ctx.user.id) {
+        const db = await ensureDatabaseAvailable();
+        void notifyTaskAssignment(db, {
+          kind: 'task',
+          taskId: Number(created.id),
+          assignedUserId: input.assignedTo,
+          actorUserId: ctx.user.id,
+        }).catch(() => undefined);
+      }
+      return created;
     }),
 
   // Update task
@@ -90,9 +102,25 @@ export const tasksRouter = router({
         tags: z.string().nullable().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input;
-      return updateTask(id, data);
+      const existing = await getTaskById(id);
+      const result = await updateTask(id, data);
+      if (
+        data.assignedTo &&
+        existing &&
+        existing.assignedTo !== data.assignedTo &&
+        data.assignedTo !== ctx.user.id
+      ) {
+        const db = await ensureDatabaseAvailable();
+        void notifyTaskAssignment(db, {
+          kind: 'task',
+          taskId: id,
+          assignedUserId: data.assignedTo,
+          actorUserId: ctx.user.id,
+        }).catch(() => undefined);
+      }
+      return result;
     }),
 
   // Delete task

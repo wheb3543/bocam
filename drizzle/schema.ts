@@ -531,6 +531,8 @@ export const tasks = mysqlTable('tasks', {
     .default('other')
     .notNull(),
   dueDate: timestamp('dueDate'),
+  dueReminderSentAt: timestamp('dueReminderSentAt'),
+  overdueReminderSentAt: timestamp('overdueReminderSentAt'),
   completedAt: timestamp('completedAt'),
   estimatedHours: int('estimatedHours'),
   actualHours: int('actualHours'),
@@ -1056,6 +1058,8 @@ export const followUpTasks = mysqlTable(
     priority: mysqlEnum('priority', ['low', 'medium', 'high']).default('medium').notNull(),
     // Due date
     dueDate: timestamp('dueDate'),
+    dueReminderSentAt: timestamp('dueReminderSentAt'),
+    overdueReminderSentAt: timestamp('overdueReminderSentAt'),
     // Assignment
     assignedToId: int('assignedToId'),
     assignedToName: varchar('assignedToName', { length: 255 }),
@@ -1080,6 +1084,27 @@ export const followUpTasks = mysqlTable(
 
 export type FollowUpTask = typeof followUpTasks.$inferSelect;
 export type InsertFollowUpTask = typeof followUpTasks.$inferInsert;
+
+/**
+ * Task reminder scheduler configuration - إعداد مهمة التذكير الدوري بالمهام
+ */
+export const taskReminderSchedules = mysqlTable(
+  'taskReminderSchedules',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    enabled: mysqlEnum('enabled', ['yes', 'no']).default('yes').notNull(),
+    leadTimeHours: int('leadTimeHours').default(24).notNull(),
+    scheduleCronTaskUid: varchar('scheduleCronTaskUid', { length: 65 }),
+    lastRunAt: timestamp('lastRunAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    scheduleTaskUidIdx: index('task_reminder_schedule_task_uid_idx').on(table.scheduleCronTaskUid),
+  })
+);
+
+export type TaskReminderSchedule = typeof taskReminderSchedules.$inferSelect;
 
 /**
  * User Preferences table - stores user-specific preferences and settings
@@ -2337,6 +2362,9 @@ export const notifications = mysqlTable(
       'comment_received', // تعليق وارد جديد
       'conversation_assigned', // إسناد محادثة إلى مستخدم
       'comment_assigned', // إسناد تعليق إلى مستخدم
+      'task_assigned', // إسناد مهمة إلى مستخدم
+      'task_due', // اقتراب موعد استحقاق مهمة
+      'task_overdue', // تجاوز موعد استحقاق مهمة
       'campaign_review', // مراجعة حملة
       'integration_status', // حالة تكامل خارجي
       'privacy_update', // تحديث سياسة أو تفضيل خصوصية
@@ -2350,6 +2378,7 @@ export const notifications = mysqlTable(
       'offers',
       'whatsapp',
       'social_inbox',
+      'tasks',
       'campaigns',
       'integrations',
       'privacy',

@@ -9,7 +9,7 @@ export async function createFollowUpTask(task: InsertFollowUpTask) {
   }
 
   const result = await db.insert(followUpTasks).values(task);
-  return result;
+  return { id: Number(result[0].insertId) };
 }
 
 export async function getFollowUpTasksByEntity(

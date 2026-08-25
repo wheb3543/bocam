@@ -659,6 +659,20 @@
       "when": 1787615834438,
       "tag": "0096_watery_tigra",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "5",
+      "when": 1787617774872,
+      "tag": "0097_glossy_zeigeist",
+      "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "5",
+      "when": 1787617873143,
+      "tag": "0098_magical_switch",
+      "breakpoints": true
     }
   ]
 }

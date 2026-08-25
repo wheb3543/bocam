@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { protectedProcedure, router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { notifyTaskAssignment } from '../services/taskReminderService';
 import {
   createFollowUpTask,
   getFollowUpTasksByEntity,
@@ -57,7 +58,7 @@ export const followUpTasksRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      await createFollowUpTask({
+      const created = await createFollowUpTask({
         entityType: input.entityType,
         entityId: input.entityId,
         title: input.title,
@@ -71,7 +72,17 @@ export const followUpTasksRouter = router({
         status: 'pending',
       });
 
-      return { success: true };
+      if (input.assignedToId && input.assignedToId !== ctx.user.id) {
+        const db = await ensureDatabaseAvailable();
+        void notifyTaskAssignment(db, {
+          kind: 'follow_up',
+          taskId: created.id,
+          assignedUserId: input.assignedToId,
+          actorUserId: ctx.user.id,
+        }).catch(() => undefined);
+      }
+
+      return { success: true, id: created.id };
     }),
 
   // Update task status

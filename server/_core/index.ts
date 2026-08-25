@@ -12,6 +12,7 @@ import { createSocialPublishingScheduledRouter } from '../api/socialPublishingSc
 import { createCmsPublishingScheduledRouter } from '../api/cmsPublishingScheduledRoute';
 import { createCmsTrashRetentionScheduledRouter } from '../api/cmsTrashRetentionScheduledRoute';
 import { createNotificationDigestScheduledRouter } from '../api/notificationDigestScheduledRoute';
+import { createTaskReminderScheduledRouter } from '../api/taskReminderScheduledRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
 import { createContext } from './context';
@@ -84,6 +85,8 @@ async function startServer() {
   app.use(createCmsTrashRetentionScheduledRouter());
   // Heartbeat callback for opt-in daily unread-notification digests.
   app.use(createNotificationDigestScheduledRouter());
+  // Heartbeat callback for task due-date reminders and overdue alerts.
+  app.use(createTaskReminderScheduledRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
   // Health check and metrics endpoints
