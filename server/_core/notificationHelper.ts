@@ -96,6 +96,23 @@ export async function createApprovalRequestedNotification(
   });
 }
 
+export async function createApprovalReviewerAssignedNotification(
+  db: any,
+  options: ContentNotificationOptions
+) {
+  return createNotification(db, {
+    ...options,
+    type: 'approval_requested',
+    source: 'content',
+    title: 'تم إسناد طلب مراجعة إليك',
+    message: `تم إسناد طلب مراجعة لـ ${options.entityName} إليك.`,
+    data: contentData(options, { event: 'reviewer_assigned' }),
+    actionUrl: '/admin/campaigns/review-approval',
+    actionLabel: 'مراجعة الطلب',
+    priority: 'high',
+  });
+}
+
 export async function createApprovalApprovedNotification(
   db: any,
   options: ContentNotificationOptions

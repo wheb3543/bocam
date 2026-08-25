@@ -32,6 +32,7 @@ import {
 } from './authorization';
 import {
   createApprovalRequestedNotification,
+  createApprovalReviewerAssignedNotification,
   createApprovalApprovedNotification,
   createApprovalRejectedNotification,
 } from '../../_core/notificationHelper';
@@ -536,7 +537,13 @@ export const approvalsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
       const [approval] = await db
-        .select({ id: contentApprovals.id, status: contentApprovals.status })
+        .select({
+          id: contentApprovals.id,
+          status: contentApprovals.status,
+          entityType: contentApprovals.entityType,
+          entityId: contentApprovals.entityId,
+          assignedReviewerId: contentApprovals.assignedReviewerId,
+        })
         .from(contentApprovals)
         .where(eq(contentApprovals.id, input.id))
         .limit(1);
@@ -574,6 +581,19 @@ export const approvalsRouter = router({
         .update(contentApprovals)
         .set({ assignedReviewerId: input.assignedReviewerId })
         .where(eq(contentApprovals.id, input.id));
+
+      if (
+        input.assignedReviewerId &&
+        input.assignedReviewerId !== ctx.user.id &&
+        input.assignedReviewerId !== approval.assignedReviewerId
+      ) {
+        void createApprovalReviewerAssignedNotification(db, {
+          userId: input.assignedReviewerId,
+          entityType: approval.entityType,
+          entityId: approval.entityId,
+          entityName: `طلب موافقة #${approval.id}`,
+        }).catch(() => undefined);
+      }
 
       logger.info(`Content approval ${input.id} reviewer assigned by user ${ctx.user.id}`);
       return { success: true, id: input.id, assignedReviewerId: input.assignedReviewerId };

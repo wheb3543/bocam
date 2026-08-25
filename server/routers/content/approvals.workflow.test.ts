@@ -6,6 +6,10 @@ const routerSource = readFileSync(
   resolve(process.cwd(), 'server/routers/content/approvals.ts'),
   'utf8'
 );
+const notificationHelperSource = readFileSync(
+  resolve(process.cwd(), 'server/_core/notificationHelper.ts'),
+  'utf8'
+);
 const dialogSource = readFileSync(
   resolve(
     process.cwd(),
@@ -38,6 +42,12 @@ describe('تدفق موافقات المحتوى', () => {
     expect(routerSource).toContain('assignReviewer');
     expect(routerSource).toContain("const reviewerRoles = ['admin', 'manager', 'team_leader']");
     expect(routerSource).toContain('هذا الطلب معيّن لمراجع آخر');
+  });
+
+  it('يرسل إشعاراً مباشراً للمراجع عند إسناد أو إعادة إسناد طلب معلق', () => {
+    expect(routerSource).toContain('createApprovalReviewerAssignedNotification');
+    expect(notificationHelperSource).toContain("event: 'reviewer_assigned'");
+    expect(routerSource).toContain('input.assignedReviewerId !== approval.assignedReviewerId');
   });
 
   it('يوفر للمراجع اختياراً واضحاً في طابور الموافقات دون إدخال حر', () => {
