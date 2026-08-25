@@ -23,6 +23,9 @@ const LEGACY_MANAGEMENT_PERMISSION_BY_GRANULAR: Partial<Record<RolePermission, R
   'users.deactivate': 'users.manage',
   'users.delete': 'users.manage',
   'users.assign_role': 'users.manage',
+  'content.create': 'content.manage',
+  'content.update': 'content.manage',
+  'content.review': 'content.manage',
 };
 
 export function normalizeRolePermissions(value: unknown): RolePermission[] {

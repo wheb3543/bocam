@@ -6,10 +6,11 @@
 import { z } from 'zod';
 import { protectedProcedure, adminProcedure, router } from '../../_core/trpc';
 import {
-  contentEditProcedure,
+  contentCreateProcedure,
   contentPublishProcedure,
   contentReadProcedure,
   assertContentCapability,
+  contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or, sql, inArray, isNull, count } from 'drizzle-orm';
@@ -246,7 +247,7 @@ export const textContentRouter = router({
   /**
    * إنشاء محتوى نصي جديد
    */
-  create: contentEditProcedure.input(textContentSchema).mutation(async ({ input, ctx }) => {
+  create: contentCreateProcedure.input(textContentSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
       await assertContentCapability(ctx.user, 'publish');
@@ -317,7 +318,7 @@ export const textContentRouter = router({
   /**
    * تحديث محتوى نصي موجود
    */
-  update: contentEditProcedure
+  update: contentUpdateProcedure
     .input(
       textContentSchema.extend({
         id: z.number(),
@@ -525,7 +526,7 @@ export const textContentRouter = router({
   /**
    * نسخ محتوى نصي
    */
-  duplicate: contentEditProcedure
+  duplicate: contentCreateProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();

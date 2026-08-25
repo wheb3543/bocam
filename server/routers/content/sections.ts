@@ -7,9 +7,10 @@ import { z } from 'zod';
 import { adminProcedure, router } from '../../_core/trpc';
 import {
   assertContentCapability,
-  contentEditProcedure,
+  contentCreateProcedure,
   contentPublishProcedure,
   contentReadProcedure,
+  contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or, isNull, count } from 'drizzle-orm';
@@ -227,7 +228,7 @@ export const sectionsRouter = router({
   /**
    * إنشاء قسم جديد
    */
-  create: contentEditProcedure.input(sectionSchema).mutation(async ({ input, ctx }) => {
+  create: contentCreateProcedure.input(sectionSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
       await assertContentCapability(ctx.user, 'publish');
@@ -283,7 +284,7 @@ export const sectionsRouter = router({
   /**
    * تحديث قسم موجود
    */
-  update: contentEditProcedure
+  update: contentUpdateProcedure
     .input(
       sectionSchema.extend({
         id: z.number(),
@@ -463,7 +464,7 @@ export const sectionsRouter = router({
   /**
    * نسخ قسم
    */
-  duplicate: contentEditProcedure
+  duplicate: contentCreateProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -510,7 +511,7 @@ export const sectionsRouter = router({
   /**
    * تحديث ترتيب الأقسام
    */
-  reorder: contentEditProcedure
+  reorder: contentUpdateProcedure
     .input(
       z.object({
         sections: z.array(

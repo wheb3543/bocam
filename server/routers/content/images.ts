@@ -7,8 +7,9 @@ import { z } from 'zod';
 import { adminProcedure, router } from '../../_core/trpc';
 import {
   assertContentCapability,
-  contentEditProcedure,
+  contentCreateProcedure,
   contentReadProcedure,
+  contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or, isNull } from 'drizzle-orm';
@@ -127,7 +128,7 @@ export const imagesRouter = router({
   /**
    * إنشاء صورة جديدة
    */
-  create: contentEditProcedure.input(imageSchema).mutation(async ({ input, ctx }) => {
+  create: contentCreateProcedure.input(imageSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
       await assertContentCapability(ctx.user, 'publish');
@@ -168,7 +169,7 @@ export const imagesRouter = router({
   /**
    * تحديث صورة موجودة
    */
-  update: contentEditProcedure
+  update: contentUpdateProcedure
     .input(
       imageSchema.extend({
         id: z.number(),

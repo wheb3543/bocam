@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { cmsPreviewTokens, pages } from '../../../drizzle/schema';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { router } from '../../_core/trpc';
-import { contentEditProcedure } from './authorization';
+import { contentUpdateProcedure } from './authorization';
 
 const PREVIEW_TTL_MINUTES = 15;
 
@@ -17,7 +17,7 @@ function hashPreviewToken(token: string) {
  * يستطيع رؤيته حتى انتهاء صلاحيته، لذا يصدر للمحررين فقط لمدة قصيرة قابلة للإلغاء.
  */
 export const previewRouter = router({
-  issue: contentEditProcedure
+  issue: contentUpdateProcedure
     .input(
       z.object({
         pageId: z.number().int().positive(),
@@ -56,7 +56,7 @@ export const previewRouter = router({
       };
     }),
 
-  revoke: contentEditProcedure
+  revoke: contentUpdateProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();

@@ -8,10 +8,12 @@ const source = readFileSync(
 );
 
 describe('صلاحيات إدارة المحتوى', () => {
-  it('يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم', () => {
-    expect(source).toContain("export type ContentCapability = 'read' | 'edit' | 'review' | 'publish'");
+  it('يفصل قدرات القراءة والإنشاء والتعديل والمراجعة والنشر على الخادم', () => {
+    expect(source).toContain("export type ContentCapability = 'read' | 'create' | 'update' | 'review' | 'publish'");
     expect(source).toContain("read: 'content.view'");
-    expect(source).toContain("edit: 'content.manage'");
+    expect(source).toContain("create: 'content.create'");
+    expect(source).toContain("update: 'content.update'");
+    expect(source).toContain("review: 'content.review'");
     expect(source).toContain("publish: 'content.publish'");
     expect(source).toContain('hasRolePermission');
     expect(source).toContain("code: 'FORBIDDEN'");
@@ -32,7 +34,8 @@ describe('صلاحيات إدارة المحتوى', () => {
       );
       expect(routerSource).toContain("from './authorization'");
       expect(routerSource).toContain('contentReadProcedure');
-      expect(routerSource).toContain('contentEditProcedure');
+      expect(routerSource).toContain('contentCreateProcedure');
+      expect(routerSource).toContain('contentUpdateProcedure');
     }
   });
 

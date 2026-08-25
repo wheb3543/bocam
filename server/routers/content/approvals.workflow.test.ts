@@ -64,7 +64,7 @@ describe('تدفق موافقات المحتوى', () => {
   });
 
   it('يعيد آخر طلب للمحرر ويعرض حالته ومراجعه لإتاحة إعادة الإرسال بعد الرفض', () => {
-    expect(routerSource).toContain('getLatestForCurrentUser: contentEditProcedure');
+    expect(routerSource).toContain('getLatestForCurrentUser: contentUpdateProcedure');
     expect(routerSource).toContain('eq(contentApprovals.requestedBy, ctx.user.id)');
     expect(routerSource).toContain('orderBy(desc(contentApprovals.requestedAt))');
     expect(submissionPanelSource).toContain('getLatestForCurrentUser.useQuery');

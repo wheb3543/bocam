@@ -4,12 +4,13 @@ import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { hasRolePermission } from '../../services/rolePermissionService';
 import type { RolePermission } from '../../../shared/rolePermissions';
 
-export type ContentCapability = 'read' | 'edit' | 'review' | 'publish';
+export type ContentCapability = 'read' | 'create' | 'update' | 'review' | 'publish';
 
 const capabilityPermissions: Record<ContentCapability, RolePermission> = {
   read: 'content.view',
-  edit: 'content.manage',
-  review: 'content.manage',
+  create: 'content.create',
+  update: 'content.update',
+  review: 'content.review',
   publish: 'content.publish',
 };
 
@@ -35,6 +36,7 @@ function contentProcedure(capability: ContentCapability) {
 }
 
 export const contentReadProcedure = contentProcedure('read');
-export const contentEditProcedure = contentProcedure('edit');
+export const contentCreateProcedure = contentProcedure('create');
+export const contentUpdateProcedure = contentProcedure('update');
 export const contentReviewProcedure = contentProcedure('review');
 export const contentPublishProcedure = contentProcedure('publish');

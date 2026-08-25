@@ -7,9 +7,10 @@ import { z } from 'zod';
 import { adminProcedure, router } from '../../_core/trpc';
 import {
   assertContentCapability,
-  contentEditProcedure,
+  contentCreateProcedure,
   contentPublishProcedure,
   contentReadProcedure,
+  contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { and, desc, eq, isNotNull, isNull, like, or } from 'drizzle-orm';
@@ -207,7 +208,7 @@ export const seoSettingsRouter = router({
     return seo ?? null;
   }),
 
-  create: contentEditProcedure.input(seoSettingsSchema).mutation(async ({ input, ctx }) => {
+  create: contentCreateProcedure.input(seoSettingsSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     let qualityOverridden = false;
     if (input.status === 'published') {
@@ -239,7 +240,7 @@ export const seoSettingsRouter = router({
     return { success: true, id, qualityOverride: qualityOverridden };
   }),
 
-  update: contentEditProcedure
+  update: contentUpdateProcedure
     .input(seoSettingsSchema.extend({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();

@@ -5,7 +5,11 @@
 
 import { z } from 'zod';
 import { adminProcedure, router } from '../../_core/trpc';
-import { contentEditProcedure, contentReadProcedure } from './authorization';
+import {
+  contentCreateProcedure,
+  contentReadProcedure,
+  contentUpdateProcedure,
+} from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or } from 'drizzle-orm';
 import { colorScheme } from '../../../drizzle/schema';
@@ -99,7 +103,7 @@ export const colorSchemeRouter = router({
   /**
    * إنشاء لون جديد
    */
-  create: contentEditProcedure.input(colorSchemeSchema).mutation(async ({ input }) => {
+  create: contentCreateProcedure.input(colorSchemeSchema).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const insertId = await db
@@ -121,7 +125,7 @@ export const colorSchemeRouter = router({
   /**
    * تحديث لون موجود
    */
-  update: contentEditProcedure
+  update: contentUpdateProcedure
     .input(
       colorSchemeSchema.extend({
         id: z.number(),

@@ -6,7 +6,7 @@ const source = readFileSync(resolve(process.cwd(), 'server/routers/content/appro
 
 describe('حماية تدفق موافقات المحتوى', () => {
   it('يحصر الإنشاء بالمحررين والموافقة أو الرفض بالمراجعين', () => {
-    expect(source).toContain('create: contentEditProcedure');
+    expect(source).toContain('create: contentUpdateProcedure');
     expect(source).toContain('approve: contentReviewProcedure');
     expect(source).toContain('reject: contentReviewProcedure');
     expect(source).toContain('updateStatus: contentReviewProcedure');

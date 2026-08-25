@@ -7,9 +7,10 @@ import { z } from 'zod';
 import { adminProcedure, router } from '../../_core/trpc';
 import {
   assertContentCapability,
-  contentEditProcedure,
+  contentCreateProcedure,
   contentPublishProcedure,
   contentReadProcedure,
+  contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { eq, and, like, or, isNull, count } from 'drizzle-orm';
@@ -225,7 +226,7 @@ export const pagesRouter = router({
   /**
    * إنشاء صفحة جديدة
    */
-  create: contentEditProcedure.input(pageSchema).mutation(async ({ input, ctx }) => {
+  create: contentCreateProcedure.input(pageSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
       await assertContentCapability(ctx.user, 'publish');
@@ -292,7 +293,7 @@ export const pagesRouter = router({
   /**
    * تحديث صفحة موجودة
    */
-  update: contentEditProcedure
+  update: contentUpdateProcedure
     .input(
       pageSchema.extend({
         id: z.number(),
@@ -481,7 +482,7 @@ export const pagesRouter = router({
   /**
    * نسخ صفحة
    */
-  duplicate: contentEditProcedure
+  duplicate: contentCreateProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();

@@ -7,9 +7,10 @@ import { z } from 'zod';
 import { adminProcedure, router } from '../../_core/trpc';
 import {
   assertContentCapability,
-  contentEditProcedure,
+  contentCreateProcedure,
   contentPublishProcedure,
   contentReadProcedure,
+  contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { and, desc, eq, isNotNull, isNull, like, or } from 'drizzle-orm';
@@ -165,7 +166,7 @@ export const sectionButtonsRouter = router({
         .orderBy(sectionButtons.sortOrder);
     }),
 
-  create: contentEditProcedure.input(sectionButtonSchema).mutation(async ({ input, ctx }) => {
+  create: contentCreateProcedure.input(sectionButtonSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     let qualityOverridden = false;
 
@@ -215,7 +216,7 @@ export const sectionButtonsRouter = router({
     return { success: true, id, qualityOverride: qualityOverridden };
   }),
 
-  update: contentEditProcedure
+  update: contentUpdateProcedure
     .input(sectionButtonSchema.extend({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
@@ -376,7 +377,7 @@ export const sectionButtonsRouter = router({
     return { success: true };
   }),
 
-  duplicate: contentEditProcedure
+  duplicate: contentCreateProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
@@ -410,7 +411,7 @@ export const sectionButtonsRouter = router({
       return { success: true, id };
     }),
 
-  reorder: contentEditProcedure
+  reorder: contentUpdateProcedure
     .input(z.object({ buttons: z.array(z.object({ id: z.number(), sortOrder: z.number() })) }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();

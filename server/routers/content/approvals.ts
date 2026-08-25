@@ -26,9 +26,9 @@ import { adminProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { createLogger } from '../../_core/logger';
 import {
-  contentEditProcedure,
   contentReadProcedure,
   contentReviewProcedure,
+  contentUpdateProcedure,
 } from './authorization';
 import {
   createApprovalRequestedNotification,
@@ -398,7 +398,7 @@ export const approvalsRouter = router({
   /**
    * إنشاء طلب موافقة جديد
    */
-  create: contentEditProcedure.input(createApprovalSchema).mutation(async ({ input, ctx }) => {
+  create: contentUpdateProcedure.input(createApprovalSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
 
     if (input.assignedReviewerId) {
@@ -484,7 +484,7 @@ export const approvalsRouter = router({
   }),
 
   /** أحدث طلب للكيان من المحرر الحالي، لعرض حالة التقديم وإتاحة إعادة الإرسال بعد الرفض. */
-  getLatestForCurrentUser: contentEditProcedure
+  getLatestForCurrentUser: contentUpdateProcedure
     .input(
       z.object({
         entityType: z.enum([

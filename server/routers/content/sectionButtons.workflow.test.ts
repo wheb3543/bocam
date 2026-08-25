@@ -32,7 +32,7 @@ describe('دورة CMS لأزرار الأقسام', () => {
     expect(routerSource).toContain('publish: contentPublishProcedure');
     expect(routerSource).toContain('archive: contentPublishProcedure');
     expect(routerSource).toContain('restore: adminProcedure');
-    expect(routerSource).toContain('duplicate: contentEditProcedure');
+    expect(routerSource).toContain('duplicate: contentCreateProcedure');
     expect(routerSource).toContain("set({ deletedAt: new Date() })");
     expect(routerSource).toContain("set({ deletedAt: null, status: 'draft', publishedAt: null })");
   });
@@ -58,7 +58,7 @@ describe('دورة CMS لأزرار الأقسام', () => {
   it('يقبل طلب مراجعة زر القسم ويعيد فحص الجودة عند اعتماد النشر', () => {
     expect(approvalsSource).toContain("'sectionButton'");
     expect(approvalsSource).toContain('sectionButtonChangeSchema');
-    expect(approvalsSource).toContain("entityType: 'sectionButton'");
+    expect(approvalsSource).toContain("pendingApproval.entityType === 'sectionButton'");
     expect(approvalsSource).toContain('assertPublicationQuality(tx');
   });
 });
