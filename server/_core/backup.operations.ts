@@ -19,37 +19,31 @@ import {
 
 const logger = createLogger('backupManager');
 
-async function notifyBackupFailure(
+async function recordBackupOperation(
   backupId: number,
-  event: 'backup_failed' | 'backup_restore_failed'
+  event: 'backup_failed' | 'backup_restore_failed',
+  succeeded: boolean
 ) {
   try {
-    const [{ getDb }, { notifyEligibleRecipients }] = await Promise.all([
+    const [{ getDb }, { recordOperationalResult }] = await Promise.all([
       import('../database/db'),
-      import('../services/notificationPolicy'),
+      import('../services/operationalAlertService'),
     ]);
     const db = await getDb();
     if (!db) {
       return;
     }
-    await notifyEligibleRecipients(db, {
-      source: 'operations',
-      type: 'backup_failed',
-      title:
-        event === 'backup_restore_failed' ? 'فشلت استعادة نسخة احتياطية' : 'فشلت عملية نسخ احتياطي',
-      message:
-        event === 'backup_restore_failed'
-          ? 'تعذر إكمال استعادة نسخة احتياطية. راجع سجل النسخ قبل إعادة المحاولة.'
-          : 'تعذر إكمال عملية نسخ احتياطي. راجع سجل النسخ وإعدادات التخزين.',
-      entityType: 'backup',
-      entityId: backupId,
+    await recordOperationalResult(db, {
+      key: event === 'backup_restore_failed' ? 'backup_restore' : 'backup_execution',
+      succeeded,
+      title: event === 'backup_restore_failed' ? 'استعادة النسخة الاحتياطية' : 'النسخ الاحتياطي',
+      failureMessage: 'تعذر إكمال العملية. راجع سجل النسخ وإعدادات التخزين قبل إعادة المحاولة.',
+      recoveryMessage: 'عادت عملية النسخ أو الاستعادة للعمل بنجاح بعد إخفاق سابق.',
       actionUrl: '/admin/settings/system',
       actionLabel: 'مراجعة الإعدادات',
-      priority: 'high',
-      data: JSON.stringify({ event }),
     });
   } catch (error) {
-    logger.warn('Could not create backup failure notification:', error);
+    logger.warn('Could not record backup operational transition:', error);
   }
 }
 
@@ -145,6 +139,7 @@ export async function createBackup(backupName: string, config: BackupConfig): Pr
 
     logger.info('BACKUP COMPLETED SUCCESSFULLY');
     logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    void recordBackupOperation(backupInfo.id ?? 0, 'backup_failed', true);
 
     return backupInfo;
   } catch (error) {
@@ -157,7 +152,7 @@ export async function createBackup(backupName: string, config: BackupConfig): Pr
     if (backupInfo.id) {
       await updateBackupStatus(backupInfo.id, 'failed', backupInfo.errorMessage);
     }
-    void notifyBackupFailure(backupInfo.id ?? 0, 'backup_failed');
+    void recordBackupOperation(backupInfo.id ?? 0, 'backup_failed', false);
 
     throw error;
   }
@@ -198,9 +193,10 @@ export async function restoreBackup(backupId: number): Promise<void> {
     }
 
     logger.info('Backup restored successfully');
+    void recordBackupOperation(backupId, 'backup_restore_failed', true);
   } catch (error) {
     logger.error('Restore failed:', error);
-    void notifyBackupFailure(backupId, 'backup_restore_failed');
+    void recordBackupOperation(backupId, 'backup_restore_failed', false);
     throw error;
   }
 }

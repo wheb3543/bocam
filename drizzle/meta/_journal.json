@@ -715,6 +715,13 @@
       "when": 1787681582836,
       "tag": "0104_cold_obadiah_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "5",
+      "when": 1787682737149,
+      "tag": "0105_loving_wendigo",
+      "breakpoints": true
     }
   ]
 }

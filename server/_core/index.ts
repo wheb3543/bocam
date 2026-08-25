@@ -16,6 +16,7 @@ import { createTaskReminderScheduledRouter } from '../api/taskReminderScheduledR
 import { createIntegrationAlertScheduledRouter } from '../api/integrationAlertScheduledRoute';
 import { createCampaignAlertScheduledRouter } from '../api/campaignAlertScheduledRoute';
 import { createAppointmentReminderScheduledRouter } from '../api/appointmentReminderScheduledRoute';
+import { createUpdateCheckScheduledRouter } from '../api/updateCheckScheduledRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
 import { createContext } from './context';
@@ -50,6 +51,30 @@ async function startServer() {
   // Initialize license validation (Kill Switch)
   // Allow server to start in activation mode if license is missing
   const _licenseInfo = initializeLicense(true);
+  void (async () => {
+    try {
+      const [{ getDb }, { recordOperationalResult }] = await Promise.all([
+        import('../database/db'),
+        import('../services/operationalAlertService'),
+      ]);
+      const db = await getDb();
+      if (!db) {
+        return;
+      }
+      await recordOperationalResult(db, {
+        key: 'license_validation',
+        succeeded: _licenseInfo?.isValid === true,
+        title: 'التحقق من الترخيص',
+        failureMessage:
+          'تعذر التحقق من الترخيص المحلي أو أنه غير صالح. راجع إعدادات الترخيص قبل تشغيل الميزات المقيدة.',
+        recoveryMessage: 'عاد التحقق من الترخيص المحلي للعمل بنجاح بعد إخفاق سابق.',
+        actionUrl: '/admin/management',
+        actionLabel: 'عرض حالة النظام',
+      });
+    } catch {
+      // لا يوقف تسجيل تنبيه الترخيص إقلاع الخادم.
+    }
+  })();
 
   // Initialize the outbound heartbeat only for a locally valid signed license.
   if (_licenseInfo?.isValid) {
@@ -94,6 +119,7 @@ async function startServer() {
   app.use(createIntegrationAlertScheduledRouter());
   app.use(createCampaignAlertScheduledRouter());
   app.use(createAppointmentReminderScheduledRouter());
+  app.use(createUpdateCheckScheduledRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
   // Health check and metrics endpoints

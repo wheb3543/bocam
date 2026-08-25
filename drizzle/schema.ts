@@ -1142,6 +1142,39 @@ export const taskReminderSchedules = mysqlTable(
 
 export type TaskReminderSchedule = typeof taskReminderSchedules.$inferSelect;
 
+/** حالة انتقالات تنبيهات عمليات النظام لمنع التكرار وإظهار التعافي مرة واحدة. */
+export const operationalAlertStates = mysqlTable(
+  'operationalAlertStates',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    operationKey: varchar('operationKey', { length: 80 }).notNull().unique(),
+    status: mysqlEnum('status', ['healthy', 'degraded']).default('healthy').notNull(),
+    lastFailureAt: timestamp('lastFailureAt'),
+    lastRecoveryAt: timestamp('lastRecoveryAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    operationKeyIdx: index('operational_alert_states_operation_key_idx').on(table.operationKey),
+  })
+);
+
+/** إعداد Heartbeat لفحص التحديثات بدلاً من جدولة مؤقت داخل الذاكرة. */
+export const updateCheckSchedules = mysqlTable(
+  'updateCheckSchedules',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    enabled: mysqlEnum('enabled', ['yes', 'no']).default('yes').notNull(),
+    scheduleCronTaskUid: varchar('scheduleCronTaskUid', { length: 65 }),
+    lastRunAt: timestamp('lastRunAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    scheduleTaskUidIdx: index('update_check_schedule_task_uid_idx').on(table.scheduleCronTaskUid),
+  })
+);
+
 /**
  * User Preferences table - stores user-specific preferences and settings
  * جدول تفضيلات المستخدم - يخزن إعدادات وتفضيلات كل مستخدم

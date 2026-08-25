@@ -351,11 +351,13 @@ export async function syncTemplatesCompletely(
     const fetchResult = await fetchTemplatesFromMeta(phoneNumberId);
 
     if (!fetchResult.success) {
+      void recordTemplateSyncResult(false);
       return fetchResult;
     }
 
     const db = await getDb();
     if (!db) {
+      void recordTemplateSyncResult(false);
       return { success: false, message: 'لا يمكن الاتصال بقاعدة البيانات' };
     }
 
@@ -364,16 +366,41 @@ export async function syncTemplatesCompletely(
       .from(whatsappTemplates)
       .where(eq(whatsappTemplates.metaStatus, 'APPROVED'));
 
-    return {
+    const result = {
       success: true,
       message: `تمت المزامنة بنجاح. ${approvedTemplates.length} قالب معتمد جاهز للاستخدام`,
       synced: fetchResult.synced,
       failed: fetchResult.failed,
     };
+    void recordTemplateSyncResult(fetchResult.failed === 0);
+    return result;
   } catch (error) {
+    void recordTemplateSyncResult(false);
     return {
       success: false,
       message: `خطأ في المزامنة الشاملة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
     };
+  }
+}
+
+async function recordTemplateSyncResult(succeeded: boolean) {
+  try {
+    const db = await getDb();
+    if (!db) {
+      return;
+    }
+    const { recordOperationalResult } = await import('./operationalAlertService');
+    await recordOperationalResult(db, {
+      key: 'meta_template_sync',
+      succeeded,
+      title: 'مزامنة قوالب WhatsApp',
+      failureMessage:
+        'تعذرت مزامنة قوالب WhatsApp مع Meta. راجع إعدادات الاتصال قبل إعادة المحاولة.',
+      recoveryMessage: 'عادت مزامنة قوالب WhatsApp مع Meta للعمل بنجاح بعد إخفاق سابق.',
+      actionUrl: '/admin/whatsapp/templates',
+      actionLabel: 'مراجعة القوالب',
+    });
+  } catch {
+    // لا نؤثر في نتيجة المزامنة الأصلية.
   }
 }

@@ -132,11 +132,13 @@ async function checkForUpdates(): Promise<UpdateCheckResponse | null> {
 
       // تسجيل النتيجة
       logUpdateCheck(data);
+      void recordUpdateCheckResult(true);
 
       return data;
     } else {
       logger.warn(`Update check failed with status: ${response.status}`);
       logUpdateCheckFailure(response.status);
+      void recordUpdateCheckResult(false);
       return null;
     }
   } catch (error) {
@@ -146,7 +148,32 @@ async function checkForUpdates(): Promise<UpdateCheckResponse | null> {
       error instanceof Error ? error.message : 'Unknown error'
     );
     logUpdateCheckFailure(0);
+    void recordUpdateCheckResult(false);
     return null;
+  }
+}
+
+async function recordUpdateCheckResult(succeeded: boolean) {
+  try {
+    const [{ getDb }, { recordOperationalResult }] = await Promise.all([
+      import('../database/db'),
+      import('../services/operationalAlertService'),
+    ]);
+    const db = await getDb();
+    if (!db) {
+      return;
+    }
+    await recordOperationalResult(db, {
+      key: 'update_check',
+      succeeded,
+      title: 'فحص التحديثات',
+      failureMessage: 'تعذر الاتصال بخدمة فحص التحديثات. ستتم إعادة المحاولة في الموعد التالي.',
+      recoveryMessage: 'عاد فحص التحديثات للعمل بنجاح بعد إخفاق سابق.',
+      actionUrl: '/admin/management',
+      actionLabel: 'عرض حالة النظام',
+    });
+  } catch {
+    // لا نوقف فحص التحديثات بسبب تعذر تسجيل التنبيه.
   }
 }
 
@@ -253,49 +280,12 @@ function handleAvailableUpdate(updateInfo: UpdateInfo): void {
 /**
  * تشغيل جدولة التحقق من التحديثات
  */
-function startUpdateCheckerScheduler(): void {
-  try {
-    const checkInterval = 6 * 60 * 60 * 1000; // 6 ساعات
-
-    logger.info('Starting update checker scheduler...');
-    logger.info(`Interval: ${checkInterval / (60 * 60 * 1000)} hours`);
-    logger.info(`Central Server: ${getCentralUpdateUrl()}`);
-
-    // التحقق فوري عند البدء
-    checkForUpdates()
-      .then((response) => {
-        if (response && response.hasUpdate && response.update) {
-          handleAvailableUpdate(response.update);
-        }
-      })
-      .catch((error) => {
-        logger.error('Error in initial update check:', error);
-      });
-
-    // جدولة التحقق الدوري
-    const intervalId = setInterval(() => {
-      logger.info('Update check triggered');
-      checkForUpdates()
-        .then((response) => {
-          if (response && response.hasUpdate && response.update) {
-            handleAvailableUpdate(response.update);
-          }
-        })
-        .catch((error) => {
-          logger.error('Error in scheduled update check:', error);
-        });
-    }, checkInterval);
-
-    // منع إنهاء العملية
-    if (intervalId.unref) {
-      intervalId.unref();
-    }
-
-    logger.info('Update checker scheduler started successfully');
-  } catch (error) {
-    logger.error('Error starting update checker scheduler:', error);
-    // Silent failure - لا نوقف السيرفر بسبب مشاكل التحقق من التحديثات
+export async function runScheduledUpdateCheck() {
+  const response = await checkForUpdates();
+  if (response?.hasUpdate && response.update) {
+    handleAvailableUpdate(response.update);
   }
+  return { checked: true, hasUpdate: response?.hasUpdate === true };
 }
 
 /**
@@ -320,12 +310,7 @@ export function initializeUpdateChecker(): void {
       }
     }
 
-    // تشغيل جدولة التحقق من التحديثات
-    startUpdateCheckerScheduler();
-
-    logger.info('');
-    logger.info('Update Checker System initialized successfully');
-    logger.info('');
+    logger.info('Update checks are managed by the protected Heartbeat route.');
   } catch (error) {
     logger.error('Error initializing update checker system:', error);
     // Silent failure - لا نوقف السيرفر بسبب مشاكل التهيئة

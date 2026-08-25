@@ -200,7 +200,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     );
     expect(labPollerSource).toContain("source: 'operations'");
     expect(labPollerSource).toContain("type: 'job_failed'");
-    expect(backupSource).toContain("type: 'backup_failed'");
+    expect(backupSource).toContain('recordOperationalResult');
     expect(backupSource).toContain('backup_restore_failed');
   });
 
@@ -257,5 +257,25 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(accessRequestRouterSource).toContain('approve: adminProcedure');
     expect(accessRequestRouterSource).toContain('reject: adminProcedure');
     expect(accessRequestRouterSource).toContain("event: 'access_request_approved'");
+  });
+
+  it('يجمع فشل العمليات ويبلغ عن التعافي دون مؤقتات داخلية لفحص التحديثات', () => {
+    const operationalServiceSource = readFileSync(
+      resolve(process.cwd(), 'server/services/operationalAlertService.ts'),
+      'utf8'
+    );
+    const updateCheckerSource = readFileSync(
+      resolve(process.cwd(), 'server/_core/updateChecker.ts'),
+      'utf8'
+    );
+    const updateRouteSource = readFileSync(
+      resolve(process.cwd(), 'server/api/updateCheckScheduledRoute.ts'),
+      'utf8'
+    );
+    expect(operationalServiceSource).toContain("status: 'degraded'");
+    expect(operationalServiceSource).toContain("input, 'recovery'");
+    expect(updateCheckerSource).not.toContain('setInterval(');
+    expect(updateRouteSource).toContain("'/api/scheduled/update-checks'");
+    expect(updateRouteSource).toContain('!user.isCron || !user.taskUid');
   });
 });
