@@ -14,6 +14,11 @@ describe('إدارة الأدوار والصلاحيات', () => {
     ]);
     expect(permissions).toEqual(['users.manage', 'content.publish']);
     expect(ROLE_PERMISSIONS).toContain('roles.manage');
+    expect(ROLE_PERMISSIONS).toContain('users.create');
+    expect(ROLE_PERMISSIONS).toContain('content.review');
+    expect(ROLE_PERMISSIONS).toContain('communications.broadcast');
+    expect(ROLE_PERMISSIONS).toContain('campaigns.delete');
+    expect(ROLE_PERMISSIONS).toContain('operations.manage');
   });
 
   it('يربط تعريف الدور وتعيينه بإجراءات خادمية محمية ولا يعتمد على الواجهة فقط', () => {
