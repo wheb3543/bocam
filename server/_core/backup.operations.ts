@@ -19,6 +19,40 @@ import {
 
 const logger = createLogger('backupManager');
 
+async function notifyBackupFailure(
+  backupId: number,
+  event: 'backup_failed' | 'backup_restore_failed'
+) {
+  try {
+    const [{ getDb }, { notifyEligibleRecipients }] = await Promise.all([
+      import('../database/db'),
+      import('../services/notificationPolicy'),
+    ]);
+    const db = await getDb();
+    if (!db) {
+      return;
+    }
+    await notifyEligibleRecipients(db, {
+      source: 'operations',
+      type: 'backup_failed',
+      title:
+        event === 'backup_restore_failed' ? 'فشلت استعادة نسخة احتياطية' : 'فشلت عملية نسخ احتياطي',
+      message:
+        event === 'backup_restore_failed'
+          ? 'تعذر إكمال استعادة نسخة احتياطية. راجع سجل النسخ قبل إعادة المحاولة.'
+          : 'تعذر إكمال عملية نسخ احتياطي. راجع سجل النسخ وإعدادات التخزين.',
+      entityType: 'backup',
+      entityId: backupId,
+      actionUrl: '/admin/settings/system',
+      actionLabel: 'مراجعة الإعدادات',
+      priority: 'high',
+      data: JSON.stringify({ event }),
+    });
+  } catch (error) {
+    logger.warn('Could not create backup failure notification:', error);
+  }
+}
+
 /**
  * حذف النسخ الاحتياطي القديمة
  */
@@ -123,6 +157,7 @@ export async function createBackup(backupName: string, config: BackupConfig): Pr
     if (backupInfo.id) {
       await updateBackupStatus(backupInfo.id, 'failed', backupInfo.errorMessage);
     }
+    void notifyBackupFailure(backupInfo.id ?? 0, 'backup_failed');
 
     throw error;
   }
@@ -165,6 +200,7 @@ export async function restoreBackup(backupId: number): Promise<void> {
     logger.info('Backup restored successfully');
   } catch (error) {
     logger.error('Restore failed:', error);
+    void notifyBackupFailure(backupId, 'backup_restore_failed');
     throw error;
   }
 }

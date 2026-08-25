@@ -2392,6 +2392,8 @@ export const notifications = mysqlTable(
       'campaign_assigned', // إسناد قيادة حملة
       'campaign_ending', // قرب نهاية حملة نشطة
       'campaign_budget_threshold', // بلوغ عتبة ميزانية حملة
+      'job_failed', // فشل نهائي لمهمة تشغيلية
+      'backup_failed', // فشل نسخة أو استعادة احتياطية
       'campaign_review', // مراجعة حملة
       'integration_status', // حالة تكامل خارجي
       'privacy_update', // تحديث سياسة أو تفضيل خصوصية
@@ -2409,6 +2411,7 @@ export const notifications = mysqlTable(
       'leads',
       'campaigns',
       'integrations',
+      'operations',
       'privacy',
       'security',
       'system',

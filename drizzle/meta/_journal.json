@@ -694,6 +694,13 @@
       "when": 1787679368895,
       "tag": "0101_misty_namorita",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "5",
+      "when": 1787679910419,
+      "tag": "0102_sturdy_tenebrous",
+      "breakpoints": true
     }
   ]
 }

@@ -11,6 +11,7 @@ import {
 import { ensureConversationAndSaveMessage } from '../../services/whatsappMessageDispatcher';
 import { normalizePhoneNumber } from '../../database/db';
 import { createLogger } from '../../_core/logger';
+import { notifyEligibleRecipients } from '../../services/notificationPolicy';
 
 const logger = createLogger('labResultsPoller');
 
@@ -96,6 +97,18 @@ export async function pollLabResults() {
         await hospitalDb.execute(
           sql`UPDATE lab_orders SET status = 'failed', error_message = ${validation.error} WHERE ORDER_ID = ${order.ORDER_ID}`
         );
+        void notifyEligibleRecipients(db, {
+          source: 'operations',
+          type: 'job_failed',
+          title: 'فشل نهائي في معالجة نتيجة مختبر',
+          message: 'تعذر إكمال معالجة إحدى نتائج المختبر. راجع السجل التشغيلي وإعدادات الإرسال.',
+          entityType: 'lab_result_delivery',
+          entityId: String(order.ORDER_ID),
+          actionUrl: '/admin/whatsapp',
+          actionLabel: 'مراجعة القناة',
+          priority: 'high',
+          data: JSON.stringify({ event: 'lab_result_invalid' }),
+        }).catch(() => undefined);
         continue;
       }
 
@@ -290,6 +303,19 @@ async function processOrder(
       await hospitalDb.execute(
         sql`UPDATE lab_orders SET status = 'failed', retry_count = ${newRetryCount}, error_message = ${errorMessage} WHERE ORDER_ID = ${order.ORDER_ID}`
       );
+      void notifyEligibleRecipients(db, {
+        source: 'operations',
+        type: 'job_failed',
+        title: 'فشل نهائي في إرسال نتيجة مختبر',
+        message:
+          'تعذر إكمال إرسال نتيجة مختبر بعد محاولات الإعادة. راجع السجل التشغيلي وإعدادات الإرسال.',
+        entityType: 'lab_result_delivery',
+        entityId: order.ORDER_ID,
+        actionUrl: '/admin/whatsapp',
+        actionLabel: 'مراجعة القناة',
+        priority: 'high',
+        data: JSON.stringify({ event: 'lab_result_delivery_failed' }),
+      }).catch(() => undefined);
       logger.error(`Order ${order.ORDER_ID} marked as failed after ${newRetryCount} retries`);
     } else {
       await hospitalDb.execute(

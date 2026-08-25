@@ -188,4 +188,19 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(campaignServiceSource).toContain("type: 'campaign_budget_threshold'");
     expect(campaignServiceSource).toContain('budgetAlertLevel');
   });
+
+  it('يربط إخفاق نتائج المختبر والنسخ الاحتياطي بقناة عمليات نظامية آمنة', () => {
+    const labPollerSource = readFileSync(
+      resolve(process.cwd(), 'server/tasks/cron/labResultsPoller.ts'),
+      'utf8'
+    );
+    const backupSource = readFileSync(
+      resolve(process.cwd(), 'server/_core/backup.operations.ts'),
+      'utf8'
+    );
+    expect(labPollerSource).toContain("source: 'operations'");
+    expect(labPollerSource).toContain("type: 'job_failed'");
+    expect(backupSource).toContain("type: 'backup_failed'");
+    expect(backupSource).toContain('backup_restore_failed');
+  });
 });

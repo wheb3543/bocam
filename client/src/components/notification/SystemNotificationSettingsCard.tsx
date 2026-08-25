@@ -27,6 +27,7 @@ const sourceLabels: Record<NotificationSource, string> = {
   leads: 'العملاء المحتملون',
   campaigns: 'الحملات',
   integrations: 'التكاملات',
+  operations: 'عمليات النظام',
   privacy: 'الخصوصية',
   security: 'الأمان',
   system: 'النظام',
