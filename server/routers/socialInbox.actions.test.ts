@@ -3,6 +3,7 @@ import type { TrpcContext } from '../_core/context';
 
 const mocks = vi.hoisted(() => ({
   updateWorkflow: vi.fn(),
+  getThread: vi.fn(),
   getTarget: vi.fn(),
   updateMetadata: vi.fn(),
   updateEnrichment: vi.fn(),
@@ -14,12 +15,13 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../database/db', () => ({
+  getDb: vi.fn().mockResolvedValue({}),
   assignSocialInboxThread: vi.fn(),
   createSocialInboxAccount: vi.fn(),
   getSocialInboxCommentActionTarget: mocks.getTarget,
   getSocialInboxStats: vi.fn(),
   listSocialInboxCommentContexts: vi.fn(),
-  getSocialInboxThreadById: vi.fn(),
+  getSocialInboxThreadById: mocks.getThread,
   listSocialInboxAccounts: vi.fn(),
   listSocialInboxThreads: vi.fn(),
   markSocialInboxThreadRead: vi.fn(),
@@ -28,6 +30,10 @@ vi.mock('../database/db', () => ({
   updateSocialInboxCommentEnrichment: mocks.updateEnrichment,
   updateSocialInboxCommentMetadata: mocks.updateMetadata,
   updateSocialInboxCommentWorkflow: mocks.updateWorkflow,
+}));
+
+vi.mock('../services/rolePermissionService', () => ({
+  hasRolePermission: vi.fn().mockResolvedValue(true),
 }));
 
 vi.mock('../database/db/metaIntegrationSettings', () => ({ getMetaWebhookCredentials: mocks.getCredentials }));
@@ -62,6 +68,7 @@ function caller(role: 'admin' | 'manager' | 'viewer' = 'admin') {
 describe('socialInbox Meta comment action procedures', () => {
   beforeEach(() => {
     mocks.updateWorkflow.mockReset().mockResolvedValue({ success: true });
+    mocks.getThread.mockReset().mockResolvedValue({ thread: { id: 45, assignedToUserId: null } });
     mocks.getTarget.mockReset().mockResolvedValue(actionTarget);
     mocks.updateMetadata.mockReset().mockResolvedValue({ success: true });
     mocks.updateEnrichment.mockReset().mockResolvedValue({ success: true });

@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { canAccessSocialInbox } from '../../shared/socialInboxAccess';
 import { protectedProcedure, router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
@@ -29,6 +28,7 @@ import {
   setMetaCommentHidden,
 } from '../integrations/meta/socialInboxMetaActions';
 import { seedMetaSocialInboxTestData } from '../integrations/meta/seedMetaSocialInboxTestData';
+import { permissionProcedure } from './permissionProcedures';
 
 const platformSchema = z.enum(['messenger', 'instagram', 'facebook', 'x', 'linkedin', 'youtube']);
 const channelTypeSchema = z.enum(['message', 'comment']);
@@ -36,16 +36,10 @@ const commentActionInput = z.object({
   threadId: z.number().int().positive(),
   itemId: z.number().int().positive(),
 });
-const socialInboxProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  if (!canAccessSocialInbox(ctx.user.role)) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'ليس لديك صلاحية الوصول إلى صندوق البريد الموحد',
-    });
-  }
-
-  return next();
-});
+const socialInboxProcedure = permissionProcedure(
+  'communications.manage',
+  'الوصول إلى صندوق البريد الموحد'
+);
 
 const socialInboxAdminProcedure = socialInboxProcedure.use(async ({ ctx, next }) => {
   if (ctx.user.role !== 'admin') {

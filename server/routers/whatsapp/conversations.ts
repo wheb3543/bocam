@@ -5,8 +5,17 @@ import * as db from '../../database/db';
 import { z } from 'zod';
 import { createLogger } from '../../_core/logger';
 import { notifyWhatsAppAssignment } from '../../services/communicationNotificationService';
+import { permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('whatsapp-conversations');
+const communicationViewProcedure = permissionProcedure(
+  'communications.manage',
+  'عرض محادثات WhatsApp'
+);
+const communicationManagementProcedure = permissionProcedure(
+  'communications.manage',
+  'إدارة محادثات WhatsApp'
+);
 
 // Logging helper for sensitive operations
 function logOperation(operation: string, userId: number, details: unknown) {
@@ -15,37 +24,39 @@ function logOperation(operation: string, userId: number, details: unknown) {
 
 export const conversationsRouter = router({
   conversations: router({
-    list: protectedProcedure.query(async () => {
+    list: communicationViewProcedure.query(async () => {
       return db.getAllWhatsAppConversations();
     }),
 
-    getCustomerInfo: protectedProcedure
+    getCustomerInfo: communicationViewProcedure
       .input(z.object({ phone: z.string().min(1, 'رقم الهاتف مطلوب') }))
       .query(async ({ input }) => {
         return db.getCustomerInfoByPhone(input.phone);
       }),
 
-    getCustomerRecords: protectedProcedure
+    getCustomerRecords: communicationViewProcedure
       .input(z.object({ phone: z.string().min(1, 'رقم الهاتف مطلوب') }))
       .query(async ({ input }) => {
         return db.getAllCustomerRecordsByPhone(input.phone);
       }),
 
-    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
-      return db.getWhatsAppConversationById(input.id);
-    }),
+    getById: communicationViewProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return db.getWhatsAppConversationById(input.id);
+      }),
 
-    search: protectedProcedure
+    search: communicationViewProcedure
       .input(z.object({ searchTerm: z.string().min(1, 'مصطلح البحث مطلوب') }))
       .query(async ({ input }) => {
         return db.searchWhatsAppConversations(input.searchTerm);
       }),
 
-    unreadCount: protectedProcedure.query(async () => {
+    unreadCount: communicationViewProcedure.query(async () => {
       return db.getUnreadWhatsAppConversationsCount();
     }),
 
-    create: protectedProcedure
+    create: communicationManagementProcedure
       .input(
         z.object({
           customerName: z.string().min(1, 'اسم العميل مطلوب'),
@@ -74,7 +85,7 @@ export const conversationsRouter = router({
         });
       }),
 
-    update: protectedProcedure
+    update: communicationManagementProcedure
       .input(
         z.object({
           id: z.number(),
@@ -104,7 +115,7 @@ export const conversationsRouter = router({
         return db.updateWhatsAppConversation(id, updateData);
       }),
 
-    markAsRead: protectedProcedure
+    markAsRead: communicationManagementProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
         logOperation('markAsRead', ctx.user.id, { conversationId: input.id });
@@ -114,7 +125,7 @@ export const conversationsRouter = router({
         });
       }),
 
-    assignToUser: protectedProcedure
+    assignToUser: communicationManagementProcedure
       .input(z.object({ id: z.number(), userId: z.number() }))
       .mutation(async ({ input, ctx }) => {
         logOperation('assignToUser', ctx.user.id, {
@@ -143,7 +154,7 @@ export const conversationsRouter = router({
         return result;
       }),
 
-    updateNotes: protectedProcedure
+    updateNotes: communicationManagementProcedure
       .input(z.object({ id: z.number(), notes: z.string() }))
       .mutation(async ({ input, ctx }) => {
         logOperation('updateNotes', ctx.user.id, {
@@ -156,7 +167,7 @@ export const conversationsRouter = router({
         });
       }),
 
-    updateName: protectedProcedure
+    updateName: communicationManagementProcedure
       .input(z.object({ id: z.number(), customerName: z.string() }))
       .mutation(async ({ input, ctx }) => {
         logOperation('updateName', ctx.user.id, {
@@ -169,24 +180,26 @@ export const conversationsRouter = router({
         });
       }),
 
-    delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-      logOperation('deleteConversation', ctx.user.id, { conversationId: input.id });
+    delete: communicationManagementProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        logOperation('deleteConversation', ctx.user.id, { conversationId: input.id });
 
-      const dbConn = await ensureDatabaseAvailable();
+        const dbConn = await ensureDatabaseAvailable();
 
-      const { whatsappConversations, whatsappMessages } = await import('../../../drizzle/schema');
-      const { eq } = await import('drizzle-orm');
+        const { whatsappConversations, whatsappMessages } = await import('../../../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
 
-      // Delete all messages in the conversation first
-      await dbConn.delete(whatsappMessages).where(eq(whatsappMessages.conversationId, input.id));
+        // Delete all messages in the conversation first
+        await dbConn.delete(whatsappMessages).where(eq(whatsappMessages.conversationId, input.id));
 
-      // Delete the conversation
-      await dbConn.delete(whatsappConversations).where(eq(whatsappConversations.id, input.id));
+        // Delete the conversation
+        await dbConn.delete(whatsappConversations).where(eq(whatsappConversations.id, input.id));
 
-      return { success: true };
-    }),
+        return { success: true };
+      }),
 
-    bulkArchive: adminProcedure
+    bulkArchive: communicationManagementProcedure
       .input(z.object({ ids: z.array(z.number()).min(1, 'يجب تحديد محادثة واحدة على الأقل') }))
       .mutation(async ({ input, ctx }) => {
         logOperation('bulkArchive', ctx.user.id, { conversationIds: input.ids });
@@ -210,7 +223,7 @@ export const conversationsRouter = router({
         return { success: true, count: input.ids.length };
       }),
 
-    bulkMarkImportant: adminProcedure
+    bulkMarkImportant: communicationManagementProcedure
       .input(
         z.object({
           ids: z.array(z.number()).min(1, 'يجب تحديد محادثة واحدة على الأقل'),
@@ -242,7 +255,7 @@ export const conversationsRouter = router({
         return { success: true, count: input.ids.length };
       }),
 
-    getStats: protectedProcedure
+    getStats: communicationViewProcedure
       .input(z.object({ conversationId: z.number() }))
       .query(async ({ input }) => {
         const dbConn = await db.getDb();
@@ -294,7 +307,7 @@ export const conversationsRouter = router({
         };
       }),
 
-    exportConversation: protectedProcedure
+    exportConversation: communicationViewProcedure
       .input(z.object({ conversationId: z.number(), format: z.enum(['json', 'csv']).optional() }))
       .query(async ({ input, ctx }) => {
         logOperation('exportConversation', ctx.user.id, {

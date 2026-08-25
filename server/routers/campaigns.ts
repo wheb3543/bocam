@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { router, protectedProcedure } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import {
   getCampaigns,
   getCampaignById,
@@ -15,6 +15,7 @@ import {
   linkDoctorsToCampaign,
 } from '../database/db/campaigns';
 import { notifyCampaignLeaderAssigned } from '../services/campaignNotificationService';
+import { permissionProcedure } from './permissionProcedures';
 
 // Validation schemas
 const campaignTypeSchema = z.enum(['digital', 'field', 'awareness', 'mixed']);
@@ -54,9 +55,12 @@ const updateCampaignSchema = createCampaignSchema.partial().extend({
   notes: z.string().optional(),
 });
 
+const campaignsReadProcedure = permissionProcedure('campaigns.manage', 'عرض الحملات');
+const campaignsManagementProcedure = permissionProcedure('campaigns.manage', 'إدارة الحملات');
+
 export const campaignsRouter = router({
   // Get all campaigns with filters
-  list: protectedProcedure
+  list: campaignsReadProcedure
     .input(
       z
         .object({
@@ -71,82 +75,90 @@ export const campaignsRouter = router({
     }),
 
   // Get campaign by ID
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: campaignsReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     return getCampaignById(input.id);
   }),
 
   // Get campaign by slug
-  getBySlug: protectedProcedure.input(z.object({ slug: z.string() })).query(async ({ input }) => {
-    return getCampaignBySlug(input.slug);
-  }),
+  getBySlug: campaignsReadProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input }) => {
+      return getCampaignBySlug(input.slug);
+    }),
 
   // Create campaign
-  create: protectedProcedure.input(createCampaignSchema).mutation(async ({ input, ctx }) => {
-    const created = await createCampaign(
-      input as typeof import('../../drizzle/schema').campaigns.$inferInsert
-    );
-    const campaignId = Number(created[0].insertId);
-    if (input.teamLeaderId && input.teamLeaderId !== ctx.user.id) {
-      void notifyCampaignLeaderAssigned({
-        userId: input.teamLeaderId,
-        campaignId,
-        campaignName: input.name,
-      }).catch(() => undefined);
-    }
-    return created;
-  }),
+  create: campaignsManagementProcedure
+    .input(createCampaignSchema)
+    .mutation(async ({ input, ctx }) => {
+      const created = await createCampaign(
+        input as typeof import('../../drizzle/schema').campaigns.$inferInsert
+      );
+      const campaignId = Number(created[0].insertId);
+      if (input.teamLeaderId && input.teamLeaderId !== ctx.user.id) {
+        void notifyCampaignLeaderAssigned({
+          userId: input.teamLeaderId,
+          campaignId,
+          campaignName: input.name,
+        }).catch(() => undefined);
+      }
+      return created;
+    }),
 
   // Update campaign
-  update: protectedProcedure.input(updateCampaignSchema).mutation(async ({ input, ctx }) => {
-    const { id, ...data } = input;
-    const existing = await getCampaignById(id);
-    const updated = await updateCampaign(id, {
-      ...data,
-      ...(data.endDate !== undefined && data.endDate?.getTime() !== existing?.endDate?.getTime()
-        ? { endDateNotifiedAt: null }
-        : {}),
-    } as Partial<typeof import('../../drizzle/schema').campaigns.$inferInsert>);
-    if (
-      data.teamLeaderId !== undefined &&
-      data.teamLeaderId !== null &&
-      data.teamLeaderId !== ctx.user.id &&
-      data.teamLeaderId !== existing?.teamLeaderId
-    ) {
-      void notifyCampaignLeaderAssigned({
-        userId: data.teamLeaderId,
-        campaignId: id,
-        campaignName: updated?.name ?? existing?.name ?? 'الحملة',
-      }).catch(() => undefined);
-    }
-    return updated;
-  }),
+  update: campaignsManagementProcedure
+    .input(updateCampaignSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { id, ...data } = input;
+      const existing = await getCampaignById(id);
+      const updated = await updateCampaign(id, {
+        ...data,
+        ...(data.endDate !== undefined && data.endDate?.getTime() !== existing?.endDate?.getTime()
+          ? { endDateNotifiedAt: null }
+          : {}),
+      } as Partial<typeof import('../../drizzle/schema').campaigns.$inferInsert>);
+      if (
+        data.teamLeaderId !== undefined &&
+        data.teamLeaderId !== null &&
+        data.teamLeaderId !== ctx.user.id &&
+        data.teamLeaderId !== existing?.teamLeaderId
+      ) {
+        void notifyCampaignLeaderAssigned({
+          userId: data.teamLeaderId,
+          campaignId: id,
+          campaignName: updated?.name ?? existing?.name ?? 'الحملة',
+        }).catch(() => undefined);
+      }
+      return updated;
+    }),
 
   // Delete campaign
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    return deleteCampaign(input.id);
-  }),
+  delete: campaignsManagementProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      return deleteCampaign(input.id);
+    }),
 
   // Get campaign statistics
-  getStats: protectedProcedure
+  getStats: campaignsReadProcedure
     .input(z.object({ campaignId: z.number() }))
     .query(async ({ input }) => {
       return getCampaignStats(input.campaignId);
     }),
 
   // Get campaigns overview
-  getOverview: protectedProcedure.query(async () => {
+  getOverview: campaignsReadProcedure.query(async () => {
     return getCampaignsOverview();
   }),
 
   // Get all campaign links (offers, camps, doctors)
-  getLinks: protectedProcedure
+  getLinks: campaignsReadProcedure
     .input(z.object({ campaignId: z.number() }))
     .query(async ({ input }) => {
       return getCampaignAllLinks(input.campaignId);
     }),
 
   // Link offers to campaign
-  linkOffers: protectedProcedure
+  linkOffers: campaignsManagementProcedure
     .input(
       z.object({
         campaignId: z.number(),
@@ -158,7 +170,7 @@ export const campaignsRouter = router({
     }),
 
   // Link camps to campaign
-  linkCamps: protectedProcedure
+  linkCamps: campaignsManagementProcedure
     .input(
       z.object({
         campaignId: z.number(),
@@ -170,7 +182,7 @@ export const campaignsRouter = router({
     }),
 
   // Link doctors to campaign
-  linkDoctors: protectedProcedure
+  linkDoctors: campaignsManagementProcedure
     .input(
       z.object({
         campaignId: z.number(),

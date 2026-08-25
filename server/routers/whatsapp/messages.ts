@@ -7,16 +7,25 @@ import { createLogger } from '../../_core/logger';
 import { messageRoutes } from './routes/messageRoutes';
 import { broadcastRoutes } from './routes/broadcastRoutes';
 import { quickRepliesRoutes } from './routes/quickRepliesRoutes';
+import { permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('whatsapp-messages');
+const communicationViewProcedure = permissionProcedure(
+  'communications.manage',
+  'عرض رسائل WhatsApp'
+);
+const communicationManagementProcedure = permissionProcedure(
+  'communications.manage',
+  'إدارة رسائل WhatsApp'
+);
 
 export const messagesRouter = router({
   messages: router({
-    listByConversation: protectedProcedure
+    listByConversation: communicationViewProcedure
       .input(z.object({ conversationId: z.number() }))
       .query(messageRoutes.listByConversation),
 
-    send: protectedProcedure
+    send: communicationManagementProcedure
       // @ts-expect-error - tRPC middleware type compatibility issue
       .use(requireWhatsAppFeature())
       .input(
@@ -44,7 +53,7 @@ export const messagesRouter = router({
       )
       .mutation(messageRoutes.send),
 
-    uploadMedia: protectedProcedure
+    uploadMedia: communicationManagementProcedure
       .input(
         z.object({
           fileBuffer: z.string(), // base64 encoded buffer
@@ -53,11 +62,11 @@ export const messagesRouter = router({
       )
       .mutation(messageRoutes.uploadMedia),
 
-    delete: protectedProcedure
+    delete: communicationManagementProcedure
       .input(z.object({ messageId: z.number() }))
       .mutation(messageRoutes.delete),
 
-    exportConversation: protectedProcedure
+    exportConversation: communicationManagementProcedure
       .input(
         z.object({
           conversationId: z.number(),
@@ -65,7 +74,7 @@ export const messagesRouter = router({
       )
       .mutation(messageRoutes.exportConversation),
 
-    searchInConversation: protectedProcedure
+    searchInConversation: communicationViewProcedure
       .input(
         z.object({
           conversationId: z.number(),
@@ -74,7 +83,7 @@ export const messagesRouter = router({
       )
       .query(messageRoutes.searchInConversation),
 
-    forward: protectedProcedure
+    forward: communicationManagementProcedure
       .input(
         z.object({
           messageId: z.number(),
@@ -84,7 +93,7 @@ export const messagesRouter = router({
       .mutation(messageRoutes.forward),
   }),
 
-  sendSimpleText: protectedProcedure
+  sendSimpleText: communicationManagementProcedure
     .input(
       z.object({
         phone: z.string().min(9).max(15),
@@ -94,7 +103,7 @@ export const messagesRouter = router({
     )
     .mutation(broadcastRoutes.sendSimpleText),
 
-  sendWelcomeMsg: protectedProcedure
+  sendWelcomeMsg: communicationManagementProcedure
     .input(
       z.object({
         phone: z.string().min(9).max(15),
@@ -104,7 +113,7 @@ export const messagesRouter = router({
     )
     .mutation(broadcastRoutes.sendWelcomeMsg),
 
-  sendTypingIndicator: protectedProcedure
+  sendTypingIndicator: communicationManagementProcedure
     .input(
       z.object({
         conversationId: z.number(),
@@ -153,7 +162,7 @@ export const messagesRouter = router({
       return result;
     }),
 
-  sendBroadcast: protectedProcedure
+  sendBroadcast: communicationManagementProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireWhatsAppFeature())
     .input(
@@ -166,13 +175,13 @@ export const messagesRouter = router({
     )
     .mutation(broadcastRoutes.sendBroadcast),
 
-  getBroadcastStatus: protectedProcedure
+  getBroadcastStatus: communicationViewProcedure
     .input(z.object({ jobId: z.string() }))
     .query(broadcastRoutes.getBroadcastStatus),
 
-  getBroadcastStats: protectedProcedure.query(broadcastRoutes.getBroadcastStats),
+  getBroadcastStats: communicationViewProcedure.query(broadcastRoutes.getBroadcastStats),
 
-  scheduleBroadcast: protectedProcedure
+  scheduleBroadcast: communicationManagementProcedure
     .input(
       z.object({
         message: z.string().min(1).max(4096),
@@ -184,9 +193,9 @@ export const messagesRouter = router({
     .mutation(broadcastRoutes.scheduleBroadcast),
 
   quickReplies: router({
-    list: protectedProcedure.query(quickRepliesRoutes.list),
+    list: communicationViewProcedure.query(quickRepliesRoutes.list),
 
-    create: protectedProcedure
+    create: communicationManagementProcedure
       .input(
         z.object({
           name: z.string().min(1),
@@ -196,7 +205,7 @@ export const messagesRouter = router({
       )
       .mutation(quickRepliesRoutes.create),
 
-    update: protectedProcedure
+    update: communicationManagementProcedure
       .input(
         z.object({
           id: z.number(),
@@ -208,7 +217,7 @@ export const messagesRouter = router({
       )
       .mutation(quickRepliesRoutes.update),
 
-    delete: protectedProcedure
+    delete: communicationManagementProcedure
       .input(z.object({ id: z.number() }))
       .mutation(quickRepliesRoutes.delete),
   }),
