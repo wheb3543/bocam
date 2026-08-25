@@ -7,7 +7,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { and, desc, eq, gt, isNotNull, isNull, lt, or } from 'drizzle-orm';
-import { notifications, users } from '../../drizzle/schema';
+import { notifications, teams, users } from '../../drizzle/schema';
 import { adminProcedure, protectedProcedure, router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
@@ -82,6 +82,10 @@ const notificationSystemSettingsSchema = z.object({
     z.enum(NOTIFICATION_SOURCES),
     z.array(z.enum(NOTIFICATION_RECIPIENT_ROLES)).max(NOTIFICATION_RECIPIENT_ROLES.length)
   ),
+  recipientTeamIds: z.record(
+    z.enum(NOTIFICATION_SOURCES),
+    z.array(z.number().int().positive()).max(250)
+  ),
 });
 
 const notificationDigestSettingsSchema = z.object({
@@ -109,6 +113,14 @@ async function findOwnedNotification(id: number, userId: number) {
 }
 
 export const notificationsRouter = router({
+  availableTeams: adminProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
+    return db
+      .select({ id: teams.id, name: teams.name, slug: teams.slug })
+      .from(teams)
+      .where(eq(teams.isActive, true))
+      .orderBy(teams.name);
+  }),
   list: protectedProcedure
     .input(notificationFilterSchema.optional())
     .query(async ({ input, ctx }) => {

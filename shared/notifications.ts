@@ -84,6 +84,7 @@ export type NotificationSystemSettings = {
   enabled: boolean;
   sourceEnabled: Record<NotificationSource, boolean>;
   recipientRoles: Record<NotificationSource, NotificationRecipientRole[]>;
+  recipientTeamIds: Record<NotificationSource, number[]>;
 };
 
 export type NotificationDigestScheduleSettings = {

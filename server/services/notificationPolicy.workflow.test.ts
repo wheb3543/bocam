@@ -278,4 +278,19 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(updateRouteSource).toContain("'/api/scheduled/update-checks'");
     expect(updateRouteSource).toContain('!user.isCron || !user.taskUid');
   });
+
+  it('يحصر بث المصدر في أعضاء فرق العمل المصرح لها مع استمرار فحص الدور والتفضيلات', () => {
+    const policySource = readFileSync(
+      resolve(process.cwd(), 'server/services/notificationPolicy.ts'),
+      'utf8'
+    );
+    const settingsSource = readFileSync(
+      resolve(process.cwd(), 'client/src/components/notification/SystemNotificationSettingsCard.tsx'),
+      'utf8'
+    );
+    expect(policySource).toContain('recipientTeamIds');
+    expect(policySource).toContain('teamMembers.teamId');
+    expect(policySource).toContain('scopedUserIds.has(candidate.id)');
+    expect(settingsSource).toContain('نطاق فرق العمل');
+  });
 });

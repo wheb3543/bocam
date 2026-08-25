@@ -1,5 +1,5 @@
 import { eq, inArray } from 'drizzle-orm';
-import { notifications, users } from '../../drizzle/schema';
+import { notifications, teamMembers, users } from '../../drizzle/schema';
 import { getSetting, getUserPreference, upsertSetting } from '../database/db';
 import {
   NOTIFICATION_PREFERENCE_KEY,
@@ -65,6 +65,9 @@ export const DEFAULT_NOTIFICATION_SYSTEM_SETTINGS: NotificationSystemSettings = 
     system: ['admin', 'manager'],
     manual: ['admin'],
   },
+  recipientTeamIds: Object.fromEntries(
+    NOTIFICATION_SOURCES.map((source) => [source, []])
+  ) as unknown as Record<NotificationSource, number[]>,
 };
 
 function parseJson(value: string | null | undefined): unknown {
@@ -83,6 +86,10 @@ function isBooleanRecord(value: unknown): value is Record<string, boolean> {
 }
 
 function isRolesRecord(value: unknown): value is Record<string, NotificationRecipientRole[]> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isTeamIdsRecord(value: unknown): value is Record<string, number[]> {
   return typeof value === 'object' && value !== null;
 }
 
@@ -108,6 +115,9 @@ export function normalizeNotificationSystemSettings(value: unknown): Notificatio
   const candidate = value as Partial<NotificationSystemSettings> | undefined;
   const sourceCandidate = isBooleanRecord(candidate?.sourceEnabled) ? candidate.sourceEnabled : {};
   const roleCandidate = isRolesRecord(candidate?.recipientRoles) ? candidate.recipientRoles : {};
+  const teamCandidate = isTeamIdsRecord(candidate?.recipientTeamIds)
+    ? candidate.recipientTeamIds
+    : {};
 
   return {
     enabled: candidate?.enabled !== false,
@@ -122,6 +132,20 @@ export function normalizeNotificationSystemSettings(value: unknown): Notificatio
           : DEFAULT_NOTIFICATION_SYSTEM_SETTINGS.recipientRoles[source],
       ])
     ) as Record<NotificationSource, NotificationRecipientRole[]>,
+    recipientTeamIds: Object.fromEntries(
+      NOTIFICATION_SOURCES.map((source) => [
+        source,
+        Array.isArray(teamCandidate[source])
+          ? Array.from(
+              new Set(
+                teamCandidate[source].filter(
+                  (teamId): teamId is number => Number.isInteger(teamId) && teamId > 0
+                )
+              )
+            )
+          : [],
+      ])
+    ) as Record<NotificationSource, number[]>,
   };
 }
 
@@ -203,9 +227,23 @@ export async function notifyEligibleRecipients(
     .from(users)
     .where(inArray(users.role, roles));
 
+  const scopedTeamIds = systemSettings.recipientTeamIds[input.source];
+  const scopedUserIds =
+    scopedTeamIds.length > 0
+      ? new Set(
+          (
+            await db
+              .select({ userId: teamMembers.userId })
+              .from(teamMembers)
+              .where(inArray(teamMembers.teamId, scopedTeamIds))
+          ).map((member: { userId: number }) => member.userId)
+        )
+      : null;
+
   const eligibleUserIds = (
     await Promise.all(
       candidates.map(async (candidate: { id: number }) =>
+        (scopedUserIds === null || scopedUserIds.has(candidate.id)) &&
         (await shouldDeliverNotification(db, {
           userId: candidate.id,
           source: input.source,

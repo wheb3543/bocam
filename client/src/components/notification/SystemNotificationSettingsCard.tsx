@@ -52,11 +52,15 @@ function fallbackSettings(): NotificationSystemSettings {
       source === 'security' ? ['admin'] : ['admin', 'manager', 'staff', 'team_leader'],
     ])
   ) as Record<NotificationSource, NotificationRecipientRole[]>;
-  return { enabled: true, sourceEnabled, recipientRoles };
+  const recipientTeamIds = Object.fromEntries(
+    NOTIFICATION_SOURCES.map((source) => [source, []])
+  ) as unknown as Record<NotificationSource, number[]>;
+  return { enabled: true, sourceEnabled, recipientRoles, recipientTeamIds };
 }
 
 export function SystemNotificationSettingsCard() {
   const { data, isLoading } = trpc.notifications.systemSettings.useQuery();
+  const { data: availableTeams = [] } = trpc.notifications.availableTeams.useQuery();
   const { data: digestData, isLoading: digestLoading } =
     trpc.notifications.dailyDigestSettings.useQuery();
   const [settings, setSettings] = useState<NotificationSystemSettings>(fallbackSettings);
@@ -104,6 +108,16 @@ export function SystemNotificationSettingsCard() {
         [source]: checked
           ? Array.from(new Set([...current.recipientRoles[source], role]))
           : current.recipientRoles[source].filter((item) => item !== role),
+      },
+    }));
+  const setTeam = (source: NotificationSource, teamId: number, checked: boolean) =>
+    setSettings((current) => ({
+      ...current,
+      recipientTeamIds: {
+        ...current.recipientTeamIds,
+        [source]: checked
+          ? Array.from(new Set([...current.recipientTeamIds[source], teamId]))
+          : current.recipientTeamIds[source].filter((item) => item !== teamId),
       },
     }));
 
@@ -171,6 +185,29 @@ export function SystemNotificationSettingsCard() {
                       ))}
                     </div>
                   </div>
+                  {availableTeams.length > 0 && (
+                    <div className="mt-3 border-t border-border pt-3">
+                      <p className="mb-1 text-xs text-muted-foreground">نطاق فرق العمل</p>
+                      <p className="mb-2 text-xs leading-5 text-muted-foreground">
+                        عند اختيار فريق أو أكثر، لا يصل بث هذا المصدر إلا للأعضاء الذين يطابقون
+                        الدور المسموح.
+                      </p>
+                      <div className="flex flex-wrap gap-x-4 gap-y-2">
+                        {availableTeams.map((team) => (
+                          <label key={team.id} className="flex items-center gap-2 text-xs">
+                            <Checkbox
+                              checked={settings.recipientTeamIds[source].includes(team.id)}
+                              disabled={!settings.enabled || !settings.sourceEnabled[source]}
+                              onCheckedChange={(checked) =>
+                                setTeam(source, team.id, checked === true)
+                              }
+                            />
+                            {team.name}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
