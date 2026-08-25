@@ -3,7 +3,7 @@
  * تم إعادة هيكللتها لتقليل التعقيد وتحسين قابلية الصيانة
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useConfirmDialog } from '@/hooks/ui/useConfirmDialog';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { Button } from '@/components/ui/button';
@@ -166,6 +166,12 @@ export default function UsersManagementPage() {
     role: 'user',
     isActive: 'yes',
   });
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tab') === 'requests') {
+      setActiveSection('requests');
+    }
+  }, []);
 
   // useTableFeatures hook
   const userTable = useTableFeatures({

@@ -1,7 +1,7 @@
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle2, Clock, Home } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, Home } from 'lucide-react';
 import { COMPANY_ARABIC_NAME, getCompanySlogan } from '@/const';
 
 export default function AccessRequest() {
@@ -10,6 +10,8 @@ export default function AccessRequest() {
   // Get email from URL params
   const params = new URLSearchParams(window.location.search);
   const email = params.get('email');
+  const status = params.get('status');
+  const isRejected = status === 'rejected';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-green-50 p-4">
@@ -22,21 +24,36 @@ export default function AccessRequest() {
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-foreground">
-              تم إرسال طلب التصريح
+              {isRejected ? 'لم تتم الموافقة على طلب التصريح' : 'تم إرسال طلب التصريح'}
             </CardTitle>
-            <CardDescription className="text-base mt-2">تم تسجيل طلبك بنجاح</CardDescription>
+            <CardDescription className="text-base mt-2">
+              {isRejected ? 'تمت مراجعة الطلب ولم يُقبل في الوقت الحالي' : 'تم تسجيل طلبك بنجاح'}
+            </CardDescription>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+          <div
+            className={
+              isRejected
+                ? 'bg-red-50 border border-red-200 rounded-lg p-4 space-y-3'
+                : 'bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3'
+            }
+          >
             <div className="flex items-start gap-3">
-              <Clock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              {isRejected ? (
+                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              ) : (
+                <Clock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              )}
               <div className="text-sm text-foreground">
-                <p className="font-semibold mb-1">طلبك قيد المراجعة</p>
+                <p className="font-semibold mb-1">
+                  {isRejected ? 'تم رفض الطلب' : 'طلبك قيد المراجعة'}
+                </p>
                 <p>
-                  سيتم مراجعة طلبك من قبل فريق الإدارة وسنقوم بإشعارك عبر البريد الإلكتروني فور
-                  الموافقة على الطلب.
+                  {isRejected
+                    ? 'يمكنك التواصل مع فريق الإدارة إذا احتجت إلى توضيح بشأن قرار المراجعة.'
+                    : 'سيتم مراجعة طلبك من قبل فريق الإدارة وسنقوم بإشعارك عبر البريد الإلكتروني فور الموافقة على الطلب.'}
                 </p>
               </div>
             </div>
@@ -51,11 +68,13 @@ export default function AccessRequest() {
             </div>
           )}
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <p className="text-sm text-foreground text-center">
-              عادة ما تستغرق عملية المراجعة من 24 إلى 48 ساعة. شكراً لصبرك.
-            </p>
-          </div>
+          {!isRejected && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-foreground text-center">
+                عادة ما تستغرق عملية المراجعة من 24 إلى 48 ساعة. شكراً لصبرك.
+              </p>
+            </div>
+          )}
 
           <Button
             onClick={() => setLocation('/')}

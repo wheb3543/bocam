@@ -242,4 +242,20 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(importExportSource).toContain("operation: 'cms_import'");
     expect(importExportSource).toContain("operation: 'cms_export'");
   });
+
+  it('يربط دورة طلبات الوصول الفعلية بتنبيهات التقديم والقرار مع صلاحيات مراجعة إدارية', () => {
+    const accessRequestDataSource = readFileSync(
+      resolve(process.cwd(), 'server/database/db/users.ts'),
+      'utf8'
+    );
+    const accessRequestRouterSource = readFileSync(
+      resolve(process.cwd(), 'server/routers/routers.ts'),
+      'utf8'
+    );
+    expect(accessRequestDataSource).toContain("event: 'access_request_submitted'");
+    expect(accessRequestDataSource).toContain("source: 'security'");
+    expect(accessRequestRouterSource).toContain('approve: adminProcedure');
+    expect(accessRequestRouterSource).toContain('reject: adminProcedure');
+    expect(accessRequestRouterSource).toContain("event: 'access_request_approved'");
+  });
 });

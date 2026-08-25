@@ -3,6 +3,7 @@ import { users, accessRequests, InsertAccessRequest } from '../../../drizzle/sch
 import { createLogger } from '../../_core/logger';
 import { getDb } from './connection';
 import crypto from 'crypto';
+import { notifyEligibleRecipients } from '../../services/notificationPolicy';
 
 const logger = createLogger('database:users');
 
@@ -113,7 +114,20 @@ export async function createAccessRequest(request: InsertAccessRequest) {
   }
 
   const result = await db.insert(accessRequests).values(request);
-  return { id: Number(result[0].insertId), ...request };
+  const created = { id: Number(result[0].insertId), ...request };
+  void notifyEligibleRecipients(db, {
+    source: 'security',
+    type: 'security',
+    title: 'طلب وصول جديد',
+    message: 'يوجد طلب وصول جديد بانتظار مراجعة مسؤول النظام.',
+    entityType: 'access_request',
+    entityId: created.id,
+    actionUrl: '/admin/users/users?tab=requests',
+    actionLabel: 'مراجعة الطلبات',
+    priority: 'high',
+    data: JSON.stringify({ event: 'access_request_submitted', requestId: created.id }),
+  }).catch(() => undefined);
+  return created;
 }
 
 export async function getAllAccessRequests() {
@@ -158,16 +172,29 @@ export async function approveAccessRequest(requestId: number, reviewerId: number
     throw new Error('Request missing openId');
   }
 
-  const randomPassword = crypto.randomBytes(32).toString('hex');
-  await db.insert(users).values({
-    openId: request[0].openId,
-    username: request[0].email.split('@')[0],
-    password: randomPassword,
-    name: request[0].name,
-    email: request[0].email,
-    role: 'user',
-    isActive: 'yes',
-  });
+  const existingUser = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.openId, request[0].openId))
+    .limit(1);
+  let approvedUserId = Number(existingUser[0]?.id);
+
+  if (!approvedUserId) {
+    const randomPassword = crypto.randomBytes(32).toString('hex');
+    const [createdUser] = await db
+      .insert(users)
+      .values({
+        openId: request[0].openId,
+        username: request[0].email.split('@')[0],
+        password: randomPassword,
+        name: request[0].name,
+        email: request[0].email,
+        role: 'user',
+        isActive: 'yes',
+      })
+      .$returningId();
+    approvedUserId = Number(createdUser.id);
+  }
 
   await db
     .update(accessRequests)
@@ -177,12 +204,23 @@ export async function approveAccessRequest(requestId: number, reviewerId: number
       reviewedBy: reviewerId,
     })
     .where(eq(accessRequests.id, requestId));
+
+  return { request: request[0], approvedUserId };
 }
 
 export async function rejectAccessRequest(requestId: number, reviewerId: number) {
   const db = await getDb();
   if (!db) {
     throw new Error('Database not available');
+  }
+
+  const request = await db
+    .select()
+    .from(accessRequests)
+    .where(eq(accessRequests.id, requestId))
+    .limit(1);
+  if (!request[0]) {
+    throw new Error('Request not found');
   }
 
   await db
@@ -193,4 +231,6 @@ export async function rejectAccessRequest(requestId: number, reviewerId: number)
       reviewedBy: reviewerId,
     })
     .where(eq(accessRequests.id, requestId));
+
+  return request[0];
 }

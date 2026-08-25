@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { systemRouter } from '../_core/systemRouter';
-import { protectedProcedure, router } from '../_core/trpc';
+import { adminProcedure, protectedProcedure, router } from '../_core/trpc';
 import {
   getAllAccessRequests,
   getPendingAccessRequests,
@@ -8,6 +8,8 @@ import {
   rejectAccessRequest,
 } from '../database/db';
 import { notifyOwner } from '../_core/notification';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { createNotification } from '../_core/notificationHelper';
 import { offersRouter } from './offers';
 import { campsRouter } from './camps';
 import { offerLeadsRouter } from './offerLeads';
@@ -233,32 +235,49 @@ export const appRouter = router({
   }),
 
   accessRequests: router({
-    list: protectedProcedure.query(async () => {
+    list: adminProcedure.query(async () => {
       return getAllAccessRequests();
     }),
 
-    pending: protectedProcedure.query(async () => {
+    pending: adminProcedure.query(async () => {
       return getPendingAccessRequests();
     }),
 
-    approve: protectedProcedure
+    approve: adminProcedure
       .input(z.object({ requestId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        await approveAccessRequest(input.requestId, ctx.user.id);
+        const approved = await approveAccessRequest(input.requestId, ctx.user.id);
+        const db = await ensureDatabaseAvailable();
+        void createNotification(db, {
+          userId: approved.approvedUserId,
+          source: 'security',
+          type: 'approval_approved',
+          title: 'تمت الموافقة على طلب الوصول',
+          message: 'تمت الموافقة على طلب وصولك. يمكنك الآن تسجيل الدخول إلى لوحة التحكم.',
+          entityType: 'access_request',
+          entityId: input.requestId,
+          actionUrl: '/admin',
+          actionLabel: 'فتح لوحة التحكم',
+          priority: 'high',
+          data: JSON.stringify({ event: 'access_request_approved', requestId: input.requestId }),
+        }).catch(() => undefined);
 
-        // Notify owner
-        await notifyOwner({
+        void notifyOwner({
           title: 'تم الموافقة على طلب تصريح',
           content: `تمت الموافقة على طلب التصريح رقم ${input.requestId}`,
-        });
+        }).catch(() => undefined);
 
         return { success: true };
       }),
 
-    reject: protectedProcedure
+    reject: adminProcedure
       .input(z.object({ requestId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         await rejectAccessRequest(input.requestId, ctx.user.id);
+        void notifyOwner({
+          title: 'تم رفض طلب تصريح',
+          content: `تمت معالجة طلب التصريح رقم ${input.requestId} بالرفض.`,
+        }).catch(() => undefined);
         return { success: true };
       }),
   }),

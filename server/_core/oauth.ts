@@ -43,7 +43,7 @@ export function registerOAuthRoutes(app: Express) {
         logger.warn(`Unauthorized access attempt by ${userEmail}`);
 
         // Create access request automatically with openId
-        await db.createAccessRequest({
+        const accessRequest = await db.createAccessRequest({
           openId: userInfo.openId,
           name: userInfo.name || 'مستخدم جديد',
           email: userEmail,
@@ -51,7 +51,13 @@ export function registerOAuthRoutes(app: Express) {
           reason: 'طلب تلقائي عند محاولة تسجيل الدخول',
         });
 
-        res.redirect(302, '/access-request?email=' + encodeURIComponent(userEmail));
+        res.redirect(
+          302,
+          '/access-request?email=' +
+            encodeURIComponent(userEmail) +
+            '&status=' +
+            encodeURIComponent(accessRequest.status ?? 'pending')
+        );
         return;
       }
 
