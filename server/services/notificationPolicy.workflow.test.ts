@@ -173,4 +173,19 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(integrationRouteSource).toContain("'/api/scheduled/integration-alerts'");
     expect(integrationRouteSource).toContain('user.isCron || !user.taskUid');
   });
+
+  it('يدعم تنبيهات قيادة الحملة والنهاية والميزانية عبر مسار دوري محمي', () => {
+    const campaignsRouterSource = readFileSync(
+      resolve(process.cwd(), 'server/routers/campaigns.ts'),
+      'utf8'
+    );
+    const campaignServiceSource = readFileSync(
+      resolve(process.cwd(), 'server/services/campaignNotificationService.ts'),
+      'utf8'
+    );
+    expect(campaignsRouterSource).toContain('notifyCampaignLeaderAssigned');
+    expect(campaignServiceSource).toContain("type: 'campaign_ending'");
+    expect(campaignServiceSource).toContain("type: 'campaign_budget_threshold'");
+    expect(campaignServiceSource).toContain('budgetAlertLevel');
+  });
 });

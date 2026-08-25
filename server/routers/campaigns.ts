@@ -14,6 +14,7 @@ import {
   linkCampsToCampaign,
   linkDoctorsToCampaign,
 } from '../database/db/campaigns';
+import { notifyCampaignLeaderAssigned } from '../services/campaignNotificationService';
 
 // Validation schemas
 const campaignTypeSchema = z.enum(['digital', 'field', 'awareness', 'mixed']);
@@ -80,17 +81,44 @@ export const campaignsRouter = router({
   }),
 
   // Create campaign
-  create: protectedProcedure.input(createCampaignSchema).mutation(async ({ input }) => {
-    return createCampaign(input as typeof import('../../drizzle/schema').campaigns.$inferInsert);
+  create: protectedProcedure.input(createCampaignSchema).mutation(async ({ input, ctx }) => {
+    const created = await createCampaign(
+      input as typeof import('../../drizzle/schema').campaigns.$inferInsert
+    );
+    const campaignId = Number(created[0].insertId);
+    if (input.teamLeaderId && input.teamLeaderId !== ctx.user.id) {
+      void notifyCampaignLeaderAssigned({
+        userId: input.teamLeaderId,
+        campaignId,
+        campaignName: input.name,
+      }).catch(() => undefined);
+    }
+    return created;
   }),
 
   // Update campaign
-  update: protectedProcedure.input(updateCampaignSchema).mutation(async ({ input }) => {
+  update: protectedProcedure.input(updateCampaignSchema).mutation(async ({ input, ctx }) => {
     const { id, ...data } = input;
-    return updateCampaign(
-      id,
-      data as Partial<typeof import('../../drizzle/schema').campaigns.$inferInsert>
-    );
+    const existing = await getCampaignById(id);
+    const updated = await updateCampaign(id, {
+      ...data,
+      ...(data.endDate !== undefined && data.endDate?.getTime() !== existing?.endDate?.getTime()
+        ? { endDateNotifiedAt: null }
+        : {}),
+    } as Partial<typeof import('../../drizzle/schema').campaigns.$inferInsert>);
+    if (
+      data.teamLeaderId !== undefined &&
+      data.teamLeaderId !== null &&
+      data.teamLeaderId !== ctx.user.id &&
+      data.teamLeaderId !== existing?.teamLeaderId
+    ) {
+      void notifyCampaignLeaderAssigned({
+        userId: data.teamLeaderId,
+        campaignId: id,
+        campaignName: updated?.name ?? existing?.name ?? 'الحملة',
+      }).catch(() => undefined);
+    }
+    return updated;
   }),
 
   // Delete campaign

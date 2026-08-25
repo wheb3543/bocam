@@ -14,6 +14,7 @@ import { createCmsTrashRetentionScheduledRouter } from '../api/cmsTrashRetention
 import { createNotificationDigestScheduledRouter } from '../api/notificationDigestScheduledRoute';
 import { createTaskReminderScheduledRouter } from '../api/taskReminderScheduledRoute';
 import { createIntegrationAlertScheduledRouter } from '../api/integrationAlertScheduledRoute';
+import { createCampaignAlertScheduledRouter } from '../api/campaignAlertScheduledRoute';
 import { createWhatsAppSseRouter } from '../integrations/whatsappSse';
 import { appRouter } from '../routers/routers';
 import { createContext } from './context';
@@ -90,6 +91,7 @@ async function startServer() {
   app.use(createTaskReminderScheduledRouter());
   // Heartbeat callback for integration error and authorization expiry alerts.
   app.use(createIntegrationAlertScheduledRouter());
+  app.use(createCampaignAlertScheduledRouter());
   // WhatsApp SSE endpoints for realtime chat updates
   app.use(createWhatsAppSseRouter());
   // Health check and metrics endpoints

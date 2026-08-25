@@ -60,6 +60,8 @@ export const campaigns = mysqlTable('campaigns', {
   // Dates
   startDate: timestamp('startDate'),
   endDate: timestamp('endDate'),
+  endDateNotifiedAt: timestamp('endDateNotifiedAt'),
+  budgetAlertLevel: int('budgetAlertLevel').default(0).notNull(),
 
   // Platforms (JSON array)
   platforms: text('platforms'), // ["facebook", "instagram", "google", "whatsapp", "field"]
@@ -94,6 +96,24 @@ export const campaigns = mysqlTable('campaigns', {
 
 export type Campaign = typeof campaigns.$inferSelect;
 export type InsertCampaign = typeof campaigns.$inferInsert;
+
+/** إعداد فحص تنبيهات الحملات اليومية. */
+export const campaignAlertSchedules = mysqlTable(
+  'campaignAlertSchedules',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    enabled: mysqlEnum('enabled', ['yes', 'no']).default('yes').notNull(),
+    endWarningDays: int('endWarningDays').default(7).notNull(),
+    budgetWarningPercent: int('budgetWarningPercent').default(90).notNull(),
+    scheduleCronTaskUid: varchar('scheduleCronTaskUid', { length: 65 }),
+    lastRunAt: timestamp('lastRunAt'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    taskUidIdx: index('campaign_alert_schedule_task_uid_idx').on(table.scheduleCronTaskUid),
+  })
+);
 
 /**
  * Leads table - stores customer registration data
@@ -2369,6 +2389,9 @@ export const notifications = mysqlTable(
       'lead_status_changed', // تغيير مرحلة عميل محتمل
       'connection_error', // فشل اتصال تكامل
       'authorization_expiring', // قرب انتهاء تفويض تكامل
+      'campaign_assigned', // إسناد قيادة حملة
+      'campaign_ending', // قرب نهاية حملة نشطة
+      'campaign_budget_threshold', // بلوغ عتبة ميزانية حملة
       'campaign_review', // مراجعة حملة
       'integration_status', // حالة تكامل خارجي
       'privacy_update', // تحديث سياسة أو تفضيل خصوصية
