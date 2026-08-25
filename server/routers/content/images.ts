@@ -130,7 +130,7 @@ export const imagesRouter = router({
   create: contentEditProcedure.input(imageSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
-      assertContentCapability(ctx.user.role, 'publish');
+      await assertContentCapability(ctx.user, 'publish');
       await assertPublicationQuality(db, {
         entityType: 'image',
         candidate: input,
@@ -177,7 +177,7 @@ export const imagesRouter = router({
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
       if (input.status === 'published') {
-        assertContentCapability(ctx.user.role, 'publish');
+        await assertContentCapability(ctx.user, 'publish');
         await assertPublicationQuality(db, {
           entityType: 'image',
           entityId: input.id,

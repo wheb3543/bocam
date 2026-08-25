@@ -211,7 +211,7 @@ export const seoSettingsRouter = router({
     const db = await ensureDatabaseAvailable();
     let qualityOverridden = false;
     if (input.status === 'published') {
-      assertContentCapability(ctx.user.role, 'publish');
+      await assertContentCapability(ctx.user, 'publish');
       const quality = await assertPublicationQuality(db, {
         entityType: 'seo',
         candidate: input,
@@ -246,7 +246,7 @@ export const seoSettingsRouter = router({
       const previous = await getSeoOrThrow(db, input.id);
       let qualityOverridden = false;
       if (input.status === 'published') {
-        assertContentCapability(ctx.user.role, 'publish');
+        await assertContentCapability(ctx.user, 'publish');
         const quality = await assertPublicationQuality(db, {
           entityType: 'seo',
           entityId: input.id,

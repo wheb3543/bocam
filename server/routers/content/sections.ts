@@ -230,7 +230,7 @@ export const sectionsRouter = router({
   create: contentEditProcedure.input(sectionSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
-      assertContentCapability(ctx.user.role, 'publish');
+      await assertContentCapability(ctx.user, 'publish');
       await assertPublicationQuality(db, {
         entityType: 'section',
         candidate: input,
@@ -292,7 +292,7 @@ export const sectionsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
       if (input.status === 'published') {
-        assertContentCapability(ctx.user.role, 'publish');
+        await assertContentCapability(ctx.user, 'publish');
         await assertPublicationQuality(db, {
           entityType: 'section',
           entityId: input.id,

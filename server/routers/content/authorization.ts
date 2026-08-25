@@ -1,21 +1,24 @@
 import { TRPCError } from '@trpc/server';
 import { protectedProcedure } from '../../_core/trpc';
+import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
+import { hasRolePermission } from '../../services/rolePermissionService';
+import type { RolePermission } from '../../../shared/rolePermissions';
 
 export type ContentCapability = 'read' | 'edit' | 'review' | 'publish';
 
-const roleCapabilities: Record<string, readonly ContentCapability[]> = {
-  admin: ['read', 'edit', 'review', 'publish'],
-  manager: ['read', 'edit', 'review', 'publish'],
-  team_leader: ['read', 'edit', 'review'],
-  staff: ['read', 'edit'],
-  viewer: ['read'],
-  user: [],
+const capabilityPermissions: Record<ContentCapability, RolePermission> = {
+  read: 'content.view',
+  edit: 'content.manage',
+  review: 'content.manage',
+  publish: 'content.publish',
 };
 
-export function assertContentCapability(role: string, capability: ContentCapability) {
-  const capabilities = roleCapabilities[role] ?? [];
-
-  if (!capabilities.includes(capability)) {
+export async function assertContentCapability(
+  user: { id: number; role: string },
+  capability: ContentCapability
+) {
+  const db = await ensureDatabaseAvailable();
+  if (!(await hasRolePermission(db, user.id, user.role, capabilityPermissions[capability]))) {
     throw new TRPCError({
       code: 'FORBIDDEN',
       message: 'ليس لديك الصلاحية المطلوبة لتنفيذ هذا الإجراء في إدارة المحتوى.',
@@ -25,7 +28,7 @@ export function assertContentCapability(role: string, capability: ContentCapabil
 
 function contentProcedure(capability: ContentCapability) {
   return protectedProcedure.use(async ({ ctx, next }) => {
-    assertContentCapability(ctx.user.role, capability);
+    await assertContentCapability(ctx.user, capability);
 
     return next({ ctx });
   });

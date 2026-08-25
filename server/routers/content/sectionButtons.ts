@@ -170,7 +170,7 @@ export const sectionButtonsRouter = router({
     let qualityOverridden = false;
 
     if (input.status === 'published') {
-      assertContentCapability(ctx.user.role, 'publish');
+      await assertContentCapability(ctx.user, 'publish');
       const quality = await assertPublicationQuality(db, {
         entityType: 'sectionButton',
         candidate: input,
@@ -223,7 +223,7 @@ export const sectionButtonsRouter = router({
       let qualityOverridden = false;
 
       if (input.status === 'published') {
-        assertContentCapability(ctx.user.role, 'publish');
+        await assertContentCapability(ctx.user, 'publish');
         const quality = await assertPublicationQuality(db, {
           entityType: 'sectionButton',
           entityId: input.id,

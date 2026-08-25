@@ -249,7 +249,7 @@ export const textContentRouter = router({
   create: contentEditProcedure.input(textContentSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
-      assertContentCapability(ctx.user.role, 'publish');
+      await assertContentCapability(ctx.user, 'publish');
       await assertPublicationQuality(db, {
         entityType: 'textContent',
         candidate: input,
@@ -326,7 +326,7 @@ export const textContentRouter = router({
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
       if (input.status === 'published') {
-        assertContentCapability(ctx.user.role, 'publish');
+        await assertContentCapability(ctx.user, 'publish');
         await assertPublicationQuality(db, {
           entityType: 'textContent',
           entityId: input.id,

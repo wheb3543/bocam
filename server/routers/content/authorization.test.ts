@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { assertContentCapability } from './authorization';
 
 const source = readFileSync(
   resolve(process.cwd(), 'server/routers/content/authorization.ts'),
@@ -11,15 +10,16 @@ const source = readFileSync(
 describe('صلاحيات إدارة المحتوى', () => {
   it('يفصل قدرات القراءة والتحرير والمراجعة والنشر على الخادم', () => {
     expect(source).toContain("export type ContentCapability = 'read' | 'edit' | 'review' | 'publish'");
-    expect(source).toContain("staff: ['read', 'edit']");
-    expect(source).toContain("viewer: ['read']");
-    expect(source).toContain("manager: ['read', 'edit', 'review', 'publish']");
+    expect(source).toContain("read: 'content.view'");
+    expect(source).toContain("edit: 'content.manage'");
+    expect(source).toContain("publish: 'content.publish'");
+    expect(source).toContain('hasRolePermission');
     expect(source).toContain("code: 'FORBIDDEN'");
   });
 
-  it('لا يسمح للمحرر بالنشر بينما يسمح به للمدير', () => {
-    expect(() => assertContentCapability('staff', 'publish')).toThrow();
-    expect(() => assertContentCapability('manager', 'publish')).not.toThrow();
+  it('يفحص النشر بحسب هوية المستخدم لا بحسب اسم الدور الثابت', () => {
+    expect(source).toContain('await assertContentCapability(ctx.user, capability)');
+    expect(source).toContain('await hasRolePermission');
   });
 
   it('يوزع إجراءات CMS على طبقة الصلاحيات المشتركة', () => {
@@ -34,5 +34,16 @@ describe('صلاحيات إدارة المحتوى', () => {
       expect(routerSource).toContain('contentReadProcedure');
       expect(routerSource).toContain('contentEditProcedure');
     }
+  });
+
+  it('يفصل قراءة الوسائط عن صلاحية إدارتها', () => {
+    const mediaSource = readFileSync(
+      resolve(process.cwd(), 'server/routers/content/media.ts'),
+      'utf8'
+    );
+    expect(mediaSource).toContain("permissionProcedure('media.manage'");
+    expect(mediaSource).toContain('list: contentReadProcedure');
+    expect(mediaSource).toContain('create: mediaManagementProcedure');
+    expect(mediaSource).toContain('deleteMany: mediaManagementProcedure');
   });
 });

@@ -228,7 +228,7 @@ export const pagesRouter = router({
   create: contentEditProcedure.input(pageSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
-      assertContentCapability(ctx.user.role, 'publish');
+      await assertContentCapability(ctx.user, 'publish');
       await assertPublicationQuality(db, {
         entityType: 'page',
         candidate: input,
@@ -301,7 +301,7 @@ export const pagesRouter = router({
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
       if (input.status === 'published') {
-        assertContentCapability(ctx.user.role, 'publish');
+        await assertContentCapability(ctx.user, 'publish');
         await assertPublicationQuality(db, {
           entityType: 'page',
           entityId: input.id,
