@@ -2365,6 +2365,8 @@ export const notifications = mysqlTable(
       'task_assigned', // إسناد مهمة إلى مستخدم
       'task_due', // اقتراب موعد استحقاق مهمة
       'task_overdue', // تجاوز موعد استحقاق مهمة
+      'lead_created', // عميل محتمل جديد
+      'lead_status_changed', // تغيير مرحلة عميل محتمل
       'campaign_review', // مراجعة حملة
       'integration_status', // حالة تكامل خارجي
       'privacy_update', // تحديث سياسة أو تفضيل خصوصية
@@ -2379,6 +2381,7 @@ export const notifications = mysqlTable(
       'whatsapp',
       'social_inbox',
       'tasks',
+      'leads',
       'campaigns',
       'integrations',
       'privacy',

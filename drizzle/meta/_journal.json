@@ -673,6 +673,13 @@
       "when": 1787617873143,
       "tag": "0098_magical_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "5",
+      "when": 1787678033588,
+      "tag": "0099_sloppy_electro",
+      "breakpoints": true
     }
   ]
 }

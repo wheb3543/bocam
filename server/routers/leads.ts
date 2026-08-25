@@ -17,6 +17,8 @@ import {
   normalizePhoneNumber,
 } from '../database/db';
 import { notifyOwner } from '../_core/notification';
+import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { notifyEligibleRecipients } from '../services/notificationPolicy';
 import { sendNewLeadNotification } from '../services/email';
 import { sendNewLeadTelegram } from '../services/telegram';
 import {
@@ -86,7 +88,7 @@ export const leadsRouter = router({
       }
 
       // Create lead
-      await createLead({
+      const createdLead = await createLead({
         campaignId: campaign.id,
         fullName: input.fullName,
         phone: normalizePhoneNumber(input.phone),
@@ -102,6 +104,24 @@ export const leadsRouter = router({
         whatsappSent: false,
         bookingConfirmationSent: false,
       });
+      const leadId = Number(createdLead[0].insertId);
+
+      void ensureDatabaseAvailable()
+        .then((db) =>
+          notifyEligibleRecipients(db, {
+            source: 'leads',
+            type: 'lead_created',
+            title: 'عميل محتمل جديد يحتاج متابعة',
+            message: `تم تسجيل عميل محتمل جديد من حملة ${campaign.name}.`,
+            entityType: 'lead',
+            entityId: leadId,
+            actionUrl: '/admin/bookings/leads',
+            actionLabel: 'فتح العملاء المحتملين',
+            priority: 'medium',
+            data: JSON.stringify({ campaignId: campaign.id, source: input.source || 'direct' }),
+          })
+        )
+        .catch(() => undefined);
 
       // Send notification to owner
       await notifyOwner({
@@ -208,6 +228,25 @@ export const leadsRouter = router({
         userName: ctx.user?.name,
         notes: input.notes,
       });
+
+      if (lead.status !== input.status) {
+        void ensureDatabaseAvailable()
+          .then((db) =>
+            notifyEligibleRecipients(db, {
+              source: 'leads',
+              type: 'lead_status_changed',
+              title: 'تم تحديث مرحلة عميل محتمل',
+              message: 'تم تحديث مرحلة عميل محتمل وتحتاج إلى المراجعة عند الحاجة.',
+              entityType: 'lead',
+              entityId: input.id,
+              actionUrl: '/admin/bookings/leads',
+              actionLabel: 'فتح العملاء المحتملين',
+              priority: input.status === 'booked' ? 'high' : 'medium',
+              data: JSON.stringify({ previousStatus: lead.status, status: input.status }),
+            })
+          )
+          .catch(() => undefined);
+      }
 
       return { success: true };
     }),

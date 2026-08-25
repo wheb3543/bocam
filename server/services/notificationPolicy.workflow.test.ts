@@ -146,4 +146,15 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     expect(reminderRouteSource).toContain("'/api/scheduled/task-reminders'");
     expect(reminderRouteSource).toContain('user.isCron || !user.taskUid');
   });
+
+  it('يربط إنشاء وتغيير مرحلة العملاء المحتملين بسياسة الإشعارات الموحدة', () => {
+    const leadsRouterSource = readFileSync(
+      resolve(process.cwd(), 'server/routers/leads.ts'),
+      'utf8'
+    );
+    expect(leadsRouterSource).toContain("source: 'leads'");
+    expect(leadsRouterSource).toContain("type: 'lead_created'");
+    expect(leadsRouterSource).toContain("type: 'lead_status_changed'");
+    expect(leadsRouterSource).toContain("actionUrl: '/admin/bookings/leads'");
+  });
 });
