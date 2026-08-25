@@ -290,7 +290,27 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     );
     expect(policySource).toContain('recipientTeamIds');
     expect(policySource).toContain('teamMembers.teamId');
-    expect(policySource).toContain('scopedUserIds.has(candidate.id)');
+    expect(policySource).toContain('scopedUserIds.has(userId)');
     expect(settingsSource).toContain('نطاق فرق العمل');
+  });
+
+  it('يوجه أحداث الملكية إلى المكلّف أو فريق العمل مع احترام التفضيلات دون بث غير لازم', () => {
+    const policySource = readFileSync(
+      resolve(process.cwd(), 'server/services/notificationPolicy.ts'),
+      'utf8'
+    );
+    const helperSource = readFileSync(
+      resolve(process.cwd(), 'server/_core/notificationHelper.ts'),
+      'utf8'
+    );
+    const campaignSource = readFileSync(
+      resolve(process.cwd(), 'server/services/campaignNotificationService.ts'),
+      'utf8'
+    );
+    expect(policySource).toContain('includeSourceRecipients');
+    expect(policySource).toContain('bypassRecipientRole: directUserIds.includes(userId)');
+    expect(helperSource).toContain('bypassRecipientRole: true');
+    expect(campaignSource).toContain('getCampaignWorkRecipients');
+    expect(campaignSource).toContain('includeSourceRecipients: recipientIds.length === 0');
   });
 });

@@ -6,6 +6,30 @@ import { notifyEligibleRecipients } from './notificationPolicy';
 
 const CAMPAIGN_ACTION_URL = '/admin/campaigns/campaigns';
 
+function getCampaignWorkRecipients(input: {
+  teamLeaderId: number | null;
+  teamMembers: string | null;
+}) {
+  const recipientIds = new Set<number>();
+  if (input.teamLeaderId && input.teamLeaderId > 0) {
+    recipientIds.add(input.teamLeaderId);
+  }
+  try {
+    const members = JSON.parse(input.teamMembers || '[]');
+    if (Array.isArray(members)) {
+      members.forEach((member) => {
+        const userId = typeof member === 'number' ? member : Number(member?.userId ?? member?.id);
+        if (Number.isInteger(userId) && userId > 0) {
+          recipientIds.add(userId);
+        }
+      });
+    }
+  } catch {
+    // تبقى القائمة فارغة لتستخدم سياسة المصدر الاحتياطية.
+  }
+  return Array.from(recipientIds);
+}
+
 export async function notifyCampaignLeaderAssigned(input: {
   userId: number;
   campaignId: number;
@@ -66,7 +90,13 @@ export async function dispatchCampaignAlerts(taskUid: string, now = new Date()) 
 
   const endWindow = new Date(now.getTime() + schedule.endWarningDays * 24 * 60 * 60 * 1000);
   const endingCampaigns = await db
-    .select({ id: campaigns.id, name: campaigns.name, endDate: campaigns.endDate })
+    .select({
+      id: campaigns.id,
+      name: campaigns.name,
+      endDate: campaigns.endDate,
+      teamLeaderId: campaigns.teamLeaderId,
+      teamMembers: campaigns.teamMembers,
+    })
     .from(campaigns)
     .where(
       and(
@@ -84,6 +114,8 @@ export async function dispatchCampaignAlerts(taskUid: string, now = new Date()) 
       plannedBudget: campaigns.plannedBudget,
       actualBudget: campaigns.actualBudget,
       budgetAlertLevel: campaigns.budgetAlertLevel,
+      teamLeaderId: campaigns.teamLeaderId,
+      teamMembers: campaigns.teamMembers,
     })
     .from(campaigns)
     .where(
@@ -97,6 +129,7 @@ export async function dispatchCampaignAlerts(taskUid: string, now = new Date()) 
 
   let alerted = 0;
   for (const campaign of endingCampaigns) {
+    const recipientIds = getCampaignWorkRecipients(campaign);
     const result = await notifyEligibleRecipients(db, {
       source: 'campaigns',
       type: 'campaign_ending',
@@ -108,6 +141,7 @@ export async function dispatchCampaignAlerts(taskUid: string, now = new Date()) 
       actionLabel: 'مراجعة الحملة',
       priority: 'medium',
       data: JSON.stringify({ event: 'campaign_ending', endDate: campaign.endDate?.toISOString() }),
+      audience: { userIds: recipientIds, includeSourceRecipients: recipientIds.length === 0 },
     });
     if (result.recipients > 0) {
       await db
@@ -130,6 +164,7 @@ export async function dispatchCampaignAlerts(taskUid: string, now = new Date()) 
     if (level === 0 || level <= campaign.budgetAlertLevel) {
       continue;
     }
+    const recipientIds = getCampaignWorkRecipients(campaign);
     const result = await notifyEligibleRecipients(db, {
       source: 'campaigns',
       type: 'campaign_budget_threshold',
@@ -141,6 +176,7 @@ export async function dispatchCampaignAlerts(taskUid: string, now = new Date()) 
       actionLabel: 'مراجعة الحملة',
       priority: level === 100 ? 'high' : 'medium',
       data: JSON.stringify({ event: 'campaign_budget_threshold', percent, level }),
+      audience: { userIds: recipientIds, includeSourceRecipients: recipientIds.length === 0 },
     });
     if (result.recipients > 0) {
       await db

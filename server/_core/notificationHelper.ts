@@ -26,7 +26,14 @@ type NotificationOptions = {
 export async function createNotification(db: any, options: NotificationOptions) {
   const source = options.source || 'system';
   const priority = options.priority || 'medium';
-  if (!(await shouldDeliverNotification(db, { userId: options.userId, source, priority }))) {
+  if (
+    !(await shouldDeliverNotification(db, {
+      userId: options.userId,
+      source,
+      priority,
+      bypassRecipientRole: true,
+    }))
+  ) {
     return null;
   }
 

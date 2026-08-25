@@ -171,7 +171,12 @@ export async function saveNotificationSystemSettings(value: unknown) {
 
 export async function shouldDeliverNotification(
   db: any,
-  input: { userId: number; source: NotificationSource; priority?: NotificationPriority }
+  input: {
+    userId: number;
+    source: NotificationSource;
+    priority?: NotificationPriority;
+    bypassRecipientRole?: boolean;
+  }
 ) {
   const systemSettings = await getNotificationSystemSettings();
   const priority = input.priority || 'medium';
@@ -180,11 +185,16 @@ export async function shouldDeliverNotification(
   }
 
   const [recipient] = await db
-    .select({ role: users.role })
+    .select({ role: users.role, isActive: users.isActive })
     .from(users)
     .where(eq(users.id, input.userId))
     .limit(1);
-  if (!recipient || !systemSettings.recipientRoles[input.source].includes(recipient.role)) {
+  if (
+    !recipient ||
+    recipient.isActive !== 'yes' ||
+    (!input.bypassRecipientRole &&
+      !systemSettings.recipientRoles[input.source].includes(recipient.role))
+  ) {
     return false;
   }
 
@@ -208,6 +218,12 @@ export async function notifyEligibleRecipients(
     actionLabel: string;
     priority?: NotificationPriority;
     data?: string;
+    audience?: {
+      /** مستخدمون يملكون العمل أو أُسند إليهم مباشرةً؛ لا يُلغى بهم فحص التفضيلات. */
+      userIds?: number[];
+      /** عند وجود مالكي عمل، لا تبث للأدوار العامة إلا إذا طلب المنتج ذلك صراحة. */
+      includeSourceRecipients?: boolean;
+    };
   }
 ) {
   const systemSettings = await getNotificationSystemSettings();
@@ -222,10 +238,18 @@ export async function notifyEligibleRecipients(
     return { recipients: 0, skipped: 'no_roles' as const };
   }
 
-  const candidates = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(inArray(users.role, roles));
+  const directUserIds = Array.from(
+    new Set(
+      (input.audience?.userIds || []).filter(
+        (userId): userId is number => Number.isInteger(userId) && userId > 0
+      )
+    )
+  );
+  const includeSourceRecipients =
+    input.audience?.includeSourceRecipients ?? directUserIds.length === 0;
+  const candidates = includeSourceRecipients
+    ? await db.select({ id: users.id }).from(users).where(inArray(users.role, roles))
+    : [];
 
   const scopedTeamIds = systemSettings.recipientTeamIds[input.source];
   const scopedUserIds =
@@ -240,16 +264,20 @@ export async function notifyEligibleRecipients(
         )
       : null;
 
+  const candidateIds = new Set<number>(candidates.map((candidate: { id: number }) => candidate.id));
+  directUserIds.forEach((userId) => candidateIds.add(userId));
+
   const eligibleUserIds = (
     await Promise.all(
-      candidates.map(async (candidate: { id: number }) =>
-        (scopedUserIds === null || scopedUserIds.has(candidate.id)) &&
+      Array.from(candidateIds).map(async (userId) =>
+        (directUserIds.includes(userId) || scopedUserIds === null || scopedUserIds.has(userId)) &&
         (await shouldDeliverNotification(db, {
-          userId: candidate.id,
+          userId,
           source: input.source,
           priority,
+          bypassRecipientRole: directUserIds.includes(userId),
         }))
-          ? candidate.id
+          ? userId
           : null
       )
     )
