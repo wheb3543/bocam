@@ -12,6 +12,19 @@ import { createAuditLog } from '../routers/auditLogs';
 const VALID_PERMISSIONS = new Set<string>(ROLE_PERMISSIONS);
 const VALID_BASE_ROLES = new Set<string>(ROLE_BASE_KEYS);
 
+/**
+ * تحافظ هذه الخريطة على سلوك الأدوار القديمة التي مُنحت «إدارة كاملة» صراحةً.
+ * لا تمنح صلاحيات جديدة للأدوار المقيدة، وإنما تترجم الامتياز الشامل الموجود
+ * إلى الإجراء الدقيق الذي كان محمياً به سابقاً أثناء الانتقال التدريجي.
+ */
+const LEGACY_MANAGEMENT_PERMISSION_BY_GRANULAR: Partial<Record<RolePermission, RolePermission>> = {
+  'users.create': 'users.manage',
+  'users.update': 'users.manage',
+  'users.deactivate': 'users.manage',
+  'users.delete': 'users.manage',
+  'users.assign_role': 'users.manage',
+};
+
 export function normalizeRolePermissions(value: unknown): RolePermission[] {
   if (!Array.isArray(value)) {
     return [];
@@ -24,6 +37,17 @@ export function normalizeRolePermissions(value: unknown): RolePermission[] {
       )
     )
   );
+}
+
+export function doesRolePermissionSetGrant(
+  permissions: RolePermission[],
+  requestedPermission: RolePermission
+) {
+  if (permissions.includes(requestedPermission)) {
+    return true;
+  }
+  const legacyManagementPermission = LEGACY_MANAGEMENT_PERMISSION_BY_GRANULAR[requestedPermission];
+  return legacyManagementPermission ? permissions.includes(legacyManagementPermission) : false;
 }
 
 export async function ensureSystemRoleDefinitions(db: any) {
@@ -196,7 +220,10 @@ export async function hasRolePermission(
     .where(and(eq(userRoleAssignments.userId, userId), eq(roleDefinitions.isActive, true)))
     .limit(1);
   if (assignment) {
-    return normalizeRolePermissions(safeParse(assignment.permissions)).includes(permission);
+    return doesRolePermissionSetGrant(
+      normalizeRolePermissions(safeParse(assignment.permissions)),
+      permission
+    );
   }
   const [systemRole] = await db
     .select({ permissions: roleDefinitions.permissions })
@@ -204,7 +231,10 @@ export async function hasRolePermission(
     .where(eq(roleDefinitions.key, baseRole))
     .limit(1);
   return systemRole
-    ? normalizeRolePermissions(safeParse(systemRole.permissions)).includes(permission)
+    ? doesRolePermissionSetGrant(
+        normalizeRolePermissions(safeParse(systemRole.permissions)),
+        permission
+      )
     : false;
 }
 

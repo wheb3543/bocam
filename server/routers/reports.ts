@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { router, protectedProcedure, requireReportsFeature } from '../_core/trpc';
+import { router, requireReportsFeature } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
   appointments,
@@ -11,6 +11,7 @@ import {
   doctors,
 } from '../../drizzle/schema';
 import { and, count, eq, gte, lte, sql } from 'drizzle-orm';
+import { permissionProcedure } from './permissionProcedures';
 
 /**
  * Reports Router
@@ -22,12 +23,15 @@ const dateRangeSchema = z.object({
   endDate: z.string().optional(),
 });
 
+const reportsViewProcedure = permissionProcedure('reports.view', 'عرض التقارير');
+const reportsExportProcedure = permissionProcedure('reports.export', 'تصدير التقارير');
+
 export const reportsRouter = router({
   /**
    * Get bookings and appointments report
    * Returns statistics for appointments, camp registrations, and offer leads
    */
-  getBookingsReport: protectedProcedure
+  getBookingsReport: reportsViewProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
@@ -107,7 +111,7 @@ export const reportsRouter = router({
    * Get new leads report
    * Returns statistics for new customer registrations
    */
-  getNewLeadsReport: protectedProcedure
+  getNewLeadsReport: reportsViewProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
@@ -205,7 +209,7 @@ export const reportsRouter = router({
    * Get conversion rates report
    * Returns conversion statistics from leads to bookings
    */
-  getConversionRatesReport: protectedProcedure
+  getConversionRatesReport: reportsViewProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
@@ -338,7 +342,7 @@ export const reportsRouter = router({
    * Get revenue report (placeholder - will be implemented when payment integration is added)
    * Returns revenue and profit statistics
    */
-  getRevenueReport: protectedProcedure
+  getRevenueReport: reportsViewProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)
@@ -357,7 +361,7 @@ export const reportsRouter = router({
   /**
    * Get detailed bookings list for export
    */
-  getDetailedBookingsList: protectedProcedure
+  getDetailedBookingsList: reportsExportProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireReportsFeature())
     .input(dateRangeSchema)

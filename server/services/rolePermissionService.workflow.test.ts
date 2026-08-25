@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { normalizeRolePermissions } from './rolePermissionService';
+import { doesRolePermissionSetGrant, normalizeRolePermissions } from './rolePermissionService';
 import { ROLE_PERMISSIONS } from '../../shared/rolePermissions';
 
 describe('إدارة الأدوار والصلاحيات', () => {
@@ -15,10 +15,19 @@ describe('إدارة الأدوار والصلاحيات', () => {
     expect(permissions).toEqual(['users.manage', 'content.publish']);
     expect(ROLE_PERMISSIONS).toContain('roles.manage');
     expect(ROLE_PERMISSIONS).toContain('users.create');
+    expect(ROLE_PERMISSIONS).toContain('users.delete');
+    expect(ROLE_PERMISSIONS).toContain('users.assign_role');
     expect(ROLE_PERMISSIONS).toContain('content.review');
     expect(ROLE_PERMISSIONS).toContain('communications.broadcast');
     expect(ROLE_PERMISSIONS).toContain('campaigns.delete');
     expect(ROLE_PERMISSIONS).toContain('operations.manage');
+  });
+
+  it('يحافظ على الامتياز العام الموجود صراحةً أثناء الانتقال إلى إجراءات المستخدمين الدقيقة', () => {
+    expect(doesRolePermissionSetGrant(['users.manage'], 'users.create')).toBe(true);
+    expect(doesRolePermissionSetGrant(['users.manage'], 'users.assign_role')).toBe(true);
+    expect(doesRolePermissionSetGrant(['users.view'], 'users.update')).toBe(false);
+    expect(doesRolePermissionSetGrant(['reports.view'], 'reports.export')).toBe(false);
   });
 
   it('يربط تعريف الدور وتعيينه بإجراءات خادمية محمية ولا يعتمد على الواجهة فقط', () => {
@@ -30,6 +39,6 @@ describe('إدارة الأدوار والصلاحيات', () => {
     expect(usersRouterSource).toContain('assignRoleDefinition');
     expect(usersRouterSource).toContain('roles: roleManagementRouter');
     expect(roleRouterSource).toContain('hasRolePermission');
-    expect(usersRouterSource).toContain('usersManagementProcedure');
+    expect(usersRouterSource).toContain("permissionProcedure('users.create'");
   });
 });

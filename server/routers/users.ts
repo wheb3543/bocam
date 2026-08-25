@@ -7,6 +7,7 @@ import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcryptjs';
 import { assignRoleDefinition, hasRolePermission } from '../services/rolePermissionService';
 import { roleManagementRouter } from './roleManagement';
+import { permissionProcedure } from './permissionProcedures';
 
 const userInputSchema = z.object({
   username: z.string().min(3, 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل'),
@@ -18,26 +19,16 @@ const userInputSchema = z.object({
   isActive: z.enum(['yes', 'no']).default('yes'),
 });
 
-const usersViewProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const db = await ensureDatabaseAvailable();
-  if (!(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'users.view'))) {
-    throw new TRPCError({ code: 'FORBIDDEN', message: 'لا تملك صلاحية عرض المستخدمين' });
-  }
-  return next({ ctx });
-});
-
-const usersManagementProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const db = await ensureDatabaseAvailable();
-  if (!(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'users.manage'))) {
-    throw new TRPCError({ code: 'FORBIDDEN', message: 'لا تملك صلاحية إدارة المستخدمين' });
-  }
-  return next({ ctx });
-});
+const usersViewProcedure = permissionProcedure('users.view', 'عرض المستخدمين');
+const usersCreateProcedure = permissionProcedure('users.create', 'إضافة مستخدمين');
+const usersUpdateProcedure = permissionProcedure('users.update', 'تعديل المستخدمين');
+const usersDeactivateProcedure = permissionProcedure('users.deactivate', 'تغيير حالة المستخدمين');
+const usersDeleteProcedure = permissionProcedure('users.delete', 'حذف المستخدمين');
 
 export const usersRouter = router({
   roles: roleManagementRouter,
   // Get active users list (for task assignment)
-  getActiveUsers: protectedProcedure.query(async () => {
+  getActiveUsers: usersViewProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const activeUsers = await db
@@ -109,8 +100,15 @@ export const usersRouter = router({
   }),
 
   // Create new user with the role permission
-  create: usersManagementProcedure.input(userInputSchema).mutation(async ({ input, ctx }) => {
+  create: usersCreateProcedure.input(userInputSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
+
+    if (
+      (input.role !== 'user' || input.roleDefinitionId !== undefined) &&
+      !(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'users.assign_role'))
+    ) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'لا تملك صلاحية تعيين أدوار المستخدمين' });
+    }
 
     // Check if username already exists
     const existingUser = await db
@@ -156,7 +154,7 @@ export const usersRouter = router({
   }),
 
   // Update user with the role permission
-  update: usersManagementProcedure
+  update: usersUpdateProcedure
     .input(
       z.object({
         id: z.number(),
@@ -167,6 +165,16 @@ export const usersRouter = router({
       const db = await ensureDatabaseAvailable();
 
       const { id, password, roleDefinitionId, ...data } = input;
+
+      if (
+        (data.role !== undefined || roleDefinitionId !== undefined) &&
+        !(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'users.assign_role'))
+      ) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'لا تملك صلاحية تعيين أدوار المستخدمين',
+        });
+      }
 
       // Prevent user from changing their own role or status
       if (id === ctx.user.id && (data.role || data.isActive || roleDefinitionId !== undefined)) {
@@ -200,7 +208,7 @@ export const usersRouter = router({
     }),
 
   // Delete user with the role permission
-  delete: usersManagementProcedure
+  delete: usersDeleteProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
@@ -219,7 +227,7 @@ export const usersRouter = router({
     }),
 
   // Toggle user active status with the role permission
-  toggleActive: usersManagementProcedure
+  toggleActive: usersDeactivateProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
