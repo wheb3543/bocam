@@ -34,6 +34,7 @@ import {
   updateNotificationDigestSchedule,
 } from '../services/notificationDigestService';
 import { createAuditLog } from './auditLogs';
+import { hasRolePermission } from '../services/rolePermissionService';
 
 const relativeActionUrlSchema = z
   .string()
@@ -94,6 +95,14 @@ const notificationDigestSettingsSchema = z.object({
   timezone: z.literal('Asia/Aden'),
 });
 
+const notificationsManagementProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const db = await ensureDatabaseAvailable();
+  if (!(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'notifications.manage'))) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'لا تملك صلاحية إدارة إعدادات الإشعارات' });
+  }
+  return next({ ctx });
+});
+
 const currentNotificationConditions = () =>
   or(isNull(notifications.expiresAt), gt(notifications.expiresAt, new Date()));
 
@@ -113,7 +122,7 @@ async function findOwnedNotification(id: number, userId: number) {
 }
 
 export const notificationsRouter = router({
-  availableTeams: adminProcedure.query(async () => {
+  availableTeams: notificationsManagementProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
     return db
       .select({ id: teams.id, name: teams.name, slug: teams.slug })
@@ -281,11 +290,11 @@ export const notificationsRouter = router({
       return normalized;
     }),
 
-  systemSettings: adminProcedure.query(async () => {
+  systemSettings: notificationsManagementProcedure.query(async () => {
     return getNotificationSystemSettings();
   }),
 
-  updateSystemSettings: adminProcedure
+  updateSystemSettings: notificationsManagementProcedure
     .input(notificationSystemSettingsSchema)
     .mutation(async ({ input, ctx }) => {
       const previous = await getNotificationSystemSettings();
@@ -303,12 +312,12 @@ export const notificationsRouter = router({
       return normalized;
     }),
 
-  dailyDigestSettings: adminProcedure.query(async () => {
+  dailyDigestSettings: notificationsManagementProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
     return getNotificationDigestSchedule(db);
   }),
 
-  updateDailyDigestSettings: adminProcedure
+  updateDailyDigestSettings: notificationsManagementProcedure
     .input(notificationDigestSettingsSchema)
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
@@ -334,56 +343,60 @@ export const notificationsRouter = router({
     return createUnreadNotificationDigest(db, ctx.user.id, { automatic: false });
   }),
 
-  create: adminProcedure.input(createNotificationSchema).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
-    const allowed = await shouldDeliverNotification(db, {
-      userId: input.userId,
-      source: input.source,
-      priority: input.priority,
-    });
-    if (!allowed) {
-      return { id: null, skipped: true };
-    }
-    const [created] = await db
-      .insert(notifications)
-      .values({
-        ...input,
-        data: input.data || null,
-        entityType: input.entityType || null,
-        entityId: input.entityId || null,
-        actionUrl: input.actionUrl || null,
-        actionLabel: input.actionLabel || null,
-      })
-      .$returningId();
-    return { id: created.id, skipped: false };
-  }),
+  create: notificationsManagementProcedure
+    .input(createNotificationSchema)
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
+      const allowed = await shouldDeliverNotification(db, {
+        userId: input.userId,
+        source: input.source,
+        priority: input.priority,
+      });
+      if (!allowed) {
+        return { id: null, skipped: true };
+      }
+      const [created] = await db
+        .insert(notifications)
+        .values({
+          ...input,
+          data: input.data || null,
+          entityType: input.entityType || null,
+          entityId: input.entityId || null,
+          actionUrl: input.actionUrl || null,
+          actionLabel: input.actionLabel || null,
+        })
+        .$returningId();
+      return { id: created.id, skipped: false };
+    }),
 
-  createForUser: adminProcedure.input(createNotificationSchema).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
-    const allowed = await shouldDeliverNotification(db, {
-      userId: input.userId,
-      source: input.source,
-      priority: input.priority,
-    });
-    if (!allowed) {
-      return { id: null, createdBy: ctx.user.id, skipped: true };
-    }
-    const [created] = await db
-      .insert(notifications)
-      .values({
-        ...input,
-        source: input.source || 'manual',
-        data: input.data || null,
-        entityType: input.entityType || null,
-        entityId: input.entityId || null,
-        actionUrl: input.actionUrl || null,
-        actionLabel: input.actionLabel || null,
-      })
-      .$returningId();
-    return { id: created.id, createdBy: ctx.user.id, skipped: false };
-  }),
+  createForUser: notificationsManagementProcedure
+    .input(createNotificationSchema)
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const allowed = await shouldDeliverNotification(db, {
+        userId: input.userId,
+        source: input.source,
+        priority: input.priority,
+      });
+      if (!allowed) {
+        return { id: null, createdBy: ctx.user.id, skipped: true };
+      }
+      const [created] = await db
+        .insert(notifications)
+        .values({
+          ...input,
+          source: input.source || 'manual',
+          data: input.data || null,
+          entityType: input.entityType || null,
+          entityId: input.entityId || null,
+          actionUrl: input.actionUrl || null,
+          actionLabel: input.actionLabel || null,
+        })
+        .$returningId();
+      return { id: created.id, createdBy: ctx.user.id, skipped: false };
+    }),
 
-  broadcastToAdmins: adminProcedure
+  broadcastToAdmins: notificationsManagementProcedure
     .input(
       createNotificationSchema
         .omit({ userId: true })
@@ -403,7 +416,7 @@ export const notificationsRouter = router({
       return result;
     }),
 
-  deleteExpired: adminProcedure.mutation(async () => {
+  deleteExpired: notificationsManagementProcedure.mutation(async () => {
     const db = await ensureDatabaseAvailable();
     await db
       .delete(notifications)

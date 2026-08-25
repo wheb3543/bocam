@@ -2,11 +2,13 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { publicProcedure, adminProcedure, router } from '../_core/trpc';
+import { publicProcedure, adminProcedure, protectedProcedure, router } from '../_core/trpc';
 import { getUserByUsername, getUserByEmail, getUserById } from '../database/db';
 import { users } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { ROLE_PERMISSIONS } from '../../shared/rolePermissions';
+import { hasRolePermission } from '../services/rolePermissionService';
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is required');
@@ -42,6 +44,17 @@ function _verifyAuthToken(
 }
 
 export const authRouter = router({
+  permissions: protectedProcedure.query(async ({ ctx }) => {
+    const db = await ensureDatabaseAvailable();
+    const permissions = await Promise.all(
+      ROLE_PERMISSIONS.map(async (permission) =>
+        (await hasRolePermission(db, ctx.user.id, ctx.user.role, permission)) ? permission : null
+      )
+    );
+    return permissions.filter(
+      (permission): permission is (typeof ROLE_PERMISSIONS)[number] => permission !== null
+    );
+  }),
   // تسجيل دخول بـ username أو email + password
   login: publicProcedure
     .input(

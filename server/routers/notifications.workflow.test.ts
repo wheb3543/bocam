@@ -8,10 +8,12 @@ const pageSource = readFileSync(resolve(process.cwd(), 'client/src/pages/admin/N
 const helperSource = readFileSync(resolve(process.cwd(), 'server/_core/notificationHelper.ts'), 'utf8');
 
 describe('نظام الإشعارات الموحد', () => {
-  it('يقيّد إنشاء الإشعارات والتوزيع الإداري بصلاحية المدير', () => {
-    expect(routerSource).toContain('create: adminProcedure');
-    expect(routerSource).toContain('createForUser: adminProcedure');
-    expect(routerSource).toContain('broadcastToAdmins: adminProcedure');
+  it('يقيّد إنشاء الإشعارات والتوزيع الإداري بصلاحية الإشعارات', () => {
+    expect(routerSource).toContain('notificationsManagementProcedure');
+    expect(routerSource).toContain("'notifications.manage'");
+    expect(routerSource).toContain('create: notificationsManagementProcedure');
+    expect(routerSource).toContain('createForUser: notificationsManagementProcedure');
+    expect(routerSource).toContain('broadcastToAdmins: notificationsManagementProcedure');
     expect(routerSource).toContain("value.startsWith('/')");
   });
 

@@ -59,10 +59,16 @@ function fallbackSettings(): NotificationSystemSettings {
 }
 
 export function SystemNotificationSettingsCard() {
-  const { data, isLoading } = trpc.notifications.systemSettings.useQuery();
-  const { data: availableTeams = [] } = trpc.notifications.availableTeams.useQuery();
+  const { data: permissions } = trpc.auth.permissions.useQuery();
+  const canManageNotifications = permissions?.includes('notifications.manage') === true;
+  const { data, isLoading } = trpc.notifications.systemSettings.useQuery(undefined, {
+    enabled: canManageNotifications,
+  });
+  const { data: availableTeams = [] } = trpc.notifications.availableTeams.useQuery(undefined, {
+    enabled: canManageNotifications,
+  });
   const { data: digestData, isLoading: digestLoading } =
-    trpc.notifications.dailyDigestSettings.useQuery();
+    trpc.notifications.dailyDigestSettings.useQuery(undefined, { enabled: canManageNotifications });
   const [settings, setSettings] = useState<NotificationSystemSettings>(fallbackSettings);
   const [digest, setDigest] = useState<NotificationDigestScheduleSettings>({
     enabled: true,
@@ -120,6 +126,19 @@ export function SystemNotificationSettingsCard() {
           : current.recipientTeamIds[source].filter((item) => item !== teamId),
       },
     }));
+
+  if (permissions && !canManageNotifications) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>إعدادات الإشعارات النظامية</CardTitle>
+          <CardDescription>
+            ليس لديك صلاحية إدارة إعدادات الإشعارات على مستوى النظام.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-green-100">
