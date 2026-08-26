@@ -2,7 +2,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { doesRolePermissionSetGrant, normalizeRolePermissions } from './rolePermissionService';
-import { ROLE_PERMISSIONS } from '../../shared/rolePermissions';
+import {
+  ROLE_PERMISSION_GROUPS,
+  ROLE_PERMISSION_LABELS,
+  ROLE_PERMISSIONS,
+} from '../../shared/rolePermissions';
 
 describe('إدارة الأدوار والصلاحيات', () => {
   it('تقبل الصلاحيات المعروفة فقط وتزيل التكرار', () => {
@@ -13,12 +17,18 @@ describe('إدارة الأدوار والصلاحيات', () => {
       'content.publish',
       'tasks.assign',
       'privacy.export',
+      'catalog.publish',
+      'operations.purge',
+      'integrations.webhooks.manage',
     ]);
     expect(permissions).toEqual([
       'users.manage',
       'content.publish',
       'tasks.assign',
       'privacy.export',
+      'catalog.publish',
+      'operations.purge',
+      'integrations.webhooks.manage',
     ]);
     expect(ROLE_PERMISSIONS).toContain('roles.manage');
     expect(ROLE_PERMISSIONS).toContain('users.create');
@@ -37,6 +47,15 @@ describe('إدارة الأدوار والصلاحيات', () => {
     expect(ROLE_PERMISSIONS).toContain('privacy.manage');
     expect(ROLE_PERMISSIONS).toContain('operations.restore');
     expect(ROLE_PERMISSIONS).toContain('audit.export');
+    expect(ROLE_PERMISSIONS).toContain('content.schedule');
+    expect(ROLE_PERMISSIONS).toContain('media.restore');
+    expect(ROLE_PERMISSIONS).toContain('appointments.reschedule');
+    expect(ROLE_PERMISSIONS).toContain('leads.merge');
+    expect(ROLE_PERMISSIONS).toContain('communications.comment.moderate');
+    expect(ROLE_PERMISSIONS).toContain('campaigns.links.manage');
+    expect(ROLE_PERMISSIONS).toContain('tasks.attachments.manage');
+    expect(ROLE_PERMISSIONS).toContain('registrations.assign');
+    expect(ROLE_PERMISSIONS).toContain('patients.results.manage');
   });
 
   it('يحافظ على الامتياز العام الموجود صراحةً أثناء الانتقال إلى إجراءات المستخدمين الدقيقة', () => {
@@ -59,6 +78,18 @@ describe('إدارة الأدوار والصلاحيات', () => {
     expect(doesRolePermissionSetGrant(['settings.manage'], 'integrations.credentials.manage')).toBe(false);
     expect(doesRolePermissionSetGrant(['integrations.view'], 'integrations.connect')).toBe(false);
     expect(doesRolePermissionSetGrant(['privacy.view'], 'privacy.manage')).toBe(false);
+    expect(doesRolePermissionSetGrant(['campaigns.manage'], 'campaigns.links.manage')).toBe(false);
+    expect(doesRolePermissionSetGrant(['operations.manage'], 'operations.purge')).toBe(false);
+  });
+
+  it('يعرض كل صلاحية موسعة في مجموعة قابلة للتحرير بتسمية مفهومة', () => {
+    const groupedPermissions = ROLE_PERMISSION_GROUPS.flatMap((group) => group.permissions);
+    expect(groupedPermissions).toContain('catalog.publish');
+    expect(groupedPermissions).toContain('registrations.assign');
+    expect(groupedPermissions).toContain('patients.records.manage');
+    expect(ROLE_PERMISSION_LABELS['integrations.webhooks.manage']).toContain('Webhook');
+    expect(ROLE_PERMISSION_LABELS['operations.purge']).toContain('الحذف النهائي');
+    expect(ROLE_PERMISSION_LABELS['content.translations.manage']).toContain('ترجمات');
   });
 
   it('يربط تعريف الدور وتعيينه بإجراءات خادمية محمية ولا يعتمد على الواجهة فقط', () => {

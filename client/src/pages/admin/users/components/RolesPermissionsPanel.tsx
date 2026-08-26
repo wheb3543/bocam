@@ -67,6 +67,7 @@ export default function RolesPermissionsPanel() {
   const roles = (roleData || []) as RoleDefinition[];
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<RoleForm>(emptyRole);
+  const [permissionSearch, setPermissionSearch] = useState('');
   const mutation = trpc.users.roles.save.useMutation({
     onSuccess: () => {
       utils.users.roles.list.invalidate();
@@ -79,6 +80,7 @@ export default function RolesPermissionsPanel() {
   });
 
   const selectedCount = useMemo(() => form.permissions.length, [form.permissions]);
+  const normalizedPermissionSearch = permissionSearch.trim().toLowerCase();
   const editRole = (role: RoleDefinition) => {
     setForm({
       id: role.id,
@@ -255,57 +257,82 @@ export default function RolesPermissionsPanel() {
                 {selectedCount}/{Object.keys(ROLE_PERMISSION_LABELS).length}
               </span>
             </div>
+            <Input
+              value={permissionSearch}
+              onChange={(event) => setPermissionSearch(event.target.value)}
+              placeholder="ابحث عن صلاحية، مثل: تصدير أو حملات أو Webhook"
+              className="mb-4"
+              aria-label="البحث في الصلاحيات"
+            />
             <div className="space-y-4">
-              {ROLE_PERMISSION_GROUPS.map((group) => (
-                <div key={group.key}>
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium">{group.label}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {
-                          group.permissions.filter((permission) =>
-                            form.permissions.includes(permission)
-                          ).length
-                        }
-                        /{group.permissions.length} صلاحية
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-8 text-xs"
-                      onClick={() => toggleGroupPermissions(group.permissions)}
-                    >
-                      {group.permissions.every((permission) =>
-                        form.permissions.includes(permission)
-                      )
-                        ? 'إلغاء المجموعة'
-                        : 'تحديد المجموعة'}
-                    </Button>
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {group.permissions.map((permission) => (
-                      <label
-                        key={permission}
-                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-border p-2.5 text-sm"
+              {ROLE_PERMISSION_GROUPS.map((group) => {
+                const visiblePermissions = group.permissions.filter((permission) => {
+                  if (!normalizedPermissionSearch) {
+                    return true;
+                  }
+                  return (
+                    ROLE_PERMISSION_LABELS[permission]
+                      .toLowerCase()
+                      .includes(normalizedPermissionSearch) ||
+                    permission.includes(normalizedPermissionSearch)
+                  );
+                });
+                if (visiblePermissions.length === 0) {
+                  return null;
+                }
+                return (
+                  <div key={group.key}>
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium">{group.label}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {
+                            group.permissions.filter((permission) =>
+                              form.permissions.includes(permission)
+                            ).length
+                          }
+                          /{group.permissions.length} صلاحية
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={() => toggleGroupPermissions(group.permissions)}
                       >
-                        <Checkbox
-                          checked={form.permissions.includes(permission)}
-                          disabled={
-                            form.baseRole === 'admin' &&
-                            ['users.manage', 'roles.manage', 'settings.manage'].includes(permission)
-                          }
-                          onCheckedChange={(checked) =>
-                            togglePermission(permission, checked === true)
-                          }
-                        />
-                        {ROLE_PERMISSION_LABELS[permission]}
-                      </label>
-                    ))}
+                        {group.permissions.every((permission) =>
+                          form.permissions.includes(permission)
+                        )
+                          ? 'إلغاء المجموعة'
+                          : 'تحديد المجموعة'}
+                      </Button>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {visiblePermissions.map((permission) => (
+                        <label
+                          key={permission}
+                          className="flex cursor-pointer items-center gap-2 rounded-lg border border-border p-2.5 text-sm"
+                        >
+                          <Checkbox
+                            checked={form.permissions.includes(permission)}
+                            disabled={
+                              form.baseRole === 'admin' &&
+                              ['users.manage', 'roles.manage', 'settings.manage'].includes(
+                                permission
+                              )
+                            }
+                            onCheckedChange={(checked) =>
+                              togglePermission(permission, checked === true)
+                            }
+                          />
+                          {ROLE_PERMISSION_LABELS[permission]}
+                        </label>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <DialogFooter>
