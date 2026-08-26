@@ -8,8 +8,8 @@ interface LeadMobileCardsProps {
   isLoading: boolean;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
-  onUpdateStatus: (lead: UnifiedLead) => void;
-  onWhatsApp: (lead: UnifiedLead) => void;
+  onUpdateStatus?: (lead: UnifiedLead) => void;
+  onWhatsApp?: (lead: UnifiedLead) => void;
 }
 
 export default function LeadMobileCards({

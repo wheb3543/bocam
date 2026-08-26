@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { eq } from 'drizzle-orm';
 import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
 import { createAuditLog } from './auditLogs';
 import {
@@ -18,6 +19,7 @@ import {
 } from '../database/db';
 import { notifyOwner } from '../_core/notification';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { leads as leadsTable } from '../../drizzle/schema';
 import { notifyEligibleRecipients } from '../services/notificationPolicy';
 import { sendNewLeadNotification } from '../services/email';
 import { sendNewLeadTelegram } from '../services/telegram';
@@ -27,9 +29,15 @@ import {
   sendCustomMessage,
 } from '../services/whatsapp';
 import { permissionProcedure } from './permissionProcedures';
+import {
+  assertAssignableUser,
+  listAssignableUsers,
+  notifyWorkAssignment,
+} from '../services/workAssignmentService';
 
 const leadsViewProcedure = permissionProcedure('leads.view', 'عرض العملاء المحتملين');
 const leadsUpdateProcedure = permissionProcedure('leads.update', 'تعديل العملاء المحتملين');
+const leadsAssignProcedure = permissionProcedure('leads.assign', 'إسناد العملاء المحتملين');
 const communicationsReplyProcedure = permissionProcedure(
   'communications.reply',
   'إرسال رسائل متابعة العملاء المحتملين'
@@ -268,6 +276,53 @@ export const leadsRouter = router({
   stats: leadsViewProcedure.query(async () => {
     return getLeadsStats();
   }),
+
+  assignableUsers: leadsAssignProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
+    return listAssignableUsers(db, 'leads.update');
+  }),
+
+  assign: leadsAssignProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        assignedToUserId: z.number().int().positive().nullable(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const [lead] = await db
+        .select({ assignedToUserId: leadsTable.assignedToUserId })
+        .from(leadsTable)
+        .where(eq(leadsTable.id, input.id))
+        .limit(1);
+      if (!lead) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'العميل المحتمل غير موجود' });
+      }
+      await assertAssignableUser(db, input.assignedToUserId, 'leads.update');
+      await db
+        .update(leadsTable)
+        .set({ assignedToUserId: input.assignedToUserId })
+        .where(eq(leadsTable.id, input.id));
+      await createAuditLog({
+        entityType: 'lead',
+        entityId: input.id,
+        action: 'assignment_change',
+        oldValue: lead.assignedToUserId ? String(lead.assignedToUserId) : null,
+        newValue: input.assignedToUserId ? String(input.assignedToUserId) : null,
+        userId: ctx.user.id,
+        userName: ctx.user.name,
+      });
+      if (input.assignedToUserId && input.assignedToUserId !== lead.assignedToUserId) {
+        void notifyWorkAssignment(db, {
+          kind: 'lead',
+          entityId: input.id,
+          assignedUserId: input.assignedToUserId,
+          actorUserId: ctx.user.id,
+        }).catch(() => undefined);
+      }
+      return { success: true };
+    }),
 
   sendWhatsApp: communicationsReplyProcedure
     .input(

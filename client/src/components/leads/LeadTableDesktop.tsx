@@ -57,7 +57,7 @@ interface LeadTableDesktopProps {
   isLoading: boolean;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
-  onUpdateStatus: (lead: UnifiedLead) => void;
+  onUpdateStatus?: (lead: UnifiedLead) => void;
 }
 
 export default function LeadTableDesktop({
@@ -82,19 +82,21 @@ export default function LeadTableDesktop({
               <TableHead className="font-semibold">المصدر</TableHead>
               <TableHead className="font-semibold">الحالة</TableHead>
               <TableHead className="font-semibold">التاريخ</TableHead>
-              <TableHead className="font-semibold text-center">الإجراءات</TableHead>
+              {onUpdateStatus && (
+                <TableHead className="font-semibold text-center">الإجراءات</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody className={!isLoading && leads.length > 0 ? 'stagger-rows' : ''}>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-12">
+                <TableCell colSpan={onUpdateStatus ? 7 : 6} className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
                 </TableCell>
               </TableRow>
             ) : leads.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7}>
+                <TableCell colSpan={onUpdateStatus ? 7 : 6}>
                   <EmptyState
                     icon={Users}
                     title="لا توجد تسجيلات"
@@ -167,16 +169,18 @@ export default function LeadTableDesktop({
                     <TableCell className="text-xs text-muted-foreground">
                       {formatDate(lead.createdAt)}
                     </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs gap-1"
-                        onClick={() => onUpdateStatus(lead)}
-                      >
-                        تحديث الحالة
-                      </Button>
-                    </TableCell>
+                    {onUpdateStatus && (
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs gap-1"
+                          onClick={() => onUpdateStatus(lead)}
+                        >
+                          تحديث الحالة
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })

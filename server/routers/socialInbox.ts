@@ -4,6 +4,7 @@ import { router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
   assignSocialInboxThread,
+  deleteSocialInboxThread,
   createSocialInboxAccount,
   getSocialInboxCommentActionTarget,
   getSocialInboxStats,
@@ -13,6 +14,7 @@ import {
   listSocialInboxThreads,
   markSocialInboxThreadRead,
   setSocialInboxThreadStarred,
+  setSocialInboxThreadArchived,
   updateSocialInboxCommentEnrichment,
   updateSocialInboxCommentMetadata,
   updateSocialInboxCommentWorkflow,
@@ -29,6 +31,7 @@ import {
 } from '../integrations/meta/socialInboxMetaActions';
 import { seedMetaSocialInboxTestData } from '../integrations/meta/seedMetaSocialInboxTestData';
 import { permissionProcedure } from './permissionProcedures';
+import { createAuditLog } from './auditLogs';
 
 const platformSchema = z.enum(['messenger', 'instagram', 'facebook', 'x', 'linkedin', 'youtube']);
 const channelTypeSchema = z.enum(['message', 'comment']);
@@ -51,6 +54,14 @@ const socialInboxAssignProcedure = permissionProcedure(
 const socialInboxManagementProcedure = permissionProcedure(
   'communications.manage',
   'إدارة إعدادات صندوق البريد الموحد'
+);
+const socialInboxArchiveProcedure = permissionProcedure(
+  'communications.archive',
+  'أرشفة محادثات الصندوق الموحد'
+);
+const socialInboxDeleteProcedure = permissionProcedure(
+  'communications.delete',
+  'حذف محادثات الصندوق الموحد'
 );
 
 const socialInboxAdminProcedure = socialInboxManagementProcedure.use(async ({ ctx, next }) => {
@@ -145,6 +156,34 @@ export const socialInboxRouter = router({
   setStarred: socialInboxViewProcedure
     .input(z.object({ id: z.number().int().positive(), isStarred: z.boolean() }))
     .mutation(({ input }) => setSocialInboxThreadStarred(input.id, input.isStarred)),
+
+  archive: socialInboxArchiveProcedure
+    .input(z.object({ id: z.number().int().positive(), isArchived: z.boolean() }))
+    .mutation(async ({ input, ctx }) => {
+      const result = await setSocialInboxThreadArchived(input.id, input.isArchived);
+      await createAuditLog({
+        entityType: 'social_inbox_thread',
+        entityId: input.id,
+        action: input.isArchived ? 'archived' : 'unarchived',
+        userId: ctx.user.id,
+        userName: ctx.user.name,
+      });
+      return result;
+    }),
+
+  delete: socialInboxDeleteProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input, ctx }) => {
+      const result = await deleteSocialInboxThread(input.id);
+      await createAuditLog({
+        entityType: 'social_inbox_thread',
+        entityId: input.id,
+        action: 'deleted',
+        userId: ctx.user.id,
+        userName: ctx.user.name,
+      });
+      return result;
+    }),
 
   assign: socialInboxAssignProcedure
     .input(

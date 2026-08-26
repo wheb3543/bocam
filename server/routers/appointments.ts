@@ -10,11 +10,18 @@ import { updateRoutes } from './appointments/routes/updateRoutes';
 import { sendArrivalWelcome } from './appointments/routes/arrivalRoute';
 import { generateReceiptNumber } from './appointments/routes/receiptRoute';
 import { invalidateAppointmentCaches } from './appointments/utils/appointmentHelpers';
+import { createAuditLog } from './auditLogs';
+import {
+  assertAssignableUser,
+  listAssignableUsers,
+  notifyWorkAssignment,
+} from '../services/workAssignmentService';
 
 const appointmentsViewProcedure = permissionProcedure('appointments.view', 'عرض المواعيد');
 const appointmentsUpdateProcedure = permissionProcedure('appointments.update', 'تعديل المواعيد');
 const appointmentsCancelProcedure = permissionProcedure('appointments.cancel', 'إلغاء المواعيد');
 const appointmentsDeleteProcedure = permissionProcedure('appointments.delete', 'حذف المواعيد');
+const appointmentsAssignProcedure = permissionProcedure('appointments.assign', 'إسناد المواعيد');
 
 async function assertCancellationPermission(user: { id: number; role: string }, status?: string) {
   if (status === 'cancelled') {
@@ -150,6 +157,54 @@ export const appointmentsRouter = router({
       })
     )
     .mutation(generateReceiptNumber),
+
+  assignableUsers: appointmentsAssignProcedure.query(async () => {
+    const db = await ensureDatabaseAvailable();
+    return listAssignableUsers(db, 'appointments.update');
+  }),
+
+  assign: appointmentsAssignProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        assignedToUserId: z.number().int().positive().nullable(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const [appointment] = await db
+        .select({ assignedToUserId: appointments.assignedToUserId })
+        .from(appointments)
+        .where(eq(appointments.id, input.id))
+        .limit(1);
+      if (!appointment) {
+        throw new Error('الموعد غير موجود');
+      }
+      await assertAssignableUser(db, input.assignedToUserId, 'appointments.update');
+      await db
+        .update(appointments)
+        .set({ assignedToUserId: input.assignedToUserId })
+        .where(eq(appointments.id, input.id));
+      await createAuditLog({
+        entityType: 'appointment',
+        entityId: input.id,
+        action: 'assignment_change',
+        oldValue: appointment.assignedToUserId ? String(appointment.assignedToUserId) : null,
+        newValue: input.assignedToUserId ? String(input.assignedToUserId) : null,
+        userId: ctx.user.id,
+        userName: ctx.user.name,
+      });
+      if (input.assignedToUserId && input.assignedToUserId !== appointment.assignedToUserId) {
+        void notifyWorkAssignment(db, {
+          kind: 'appointment',
+          entityId: input.id,
+          assignedUserId: input.assignedToUserId,
+          actorUserId: ctx.user.id,
+        }).catch(() => undefined);
+      }
+      invalidateAppointmentCaches();
+      return { success: true };
+    }),
 
   cancel: appointmentsCancelProcedure
     .input(z.object({ id: z.number(), staffNotes: z.string().optional() }))

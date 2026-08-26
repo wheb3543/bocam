@@ -18,6 +18,7 @@ type SocialInboxFilters = {
   search?: string;
   unreadOnly?: boolean;
   followUpOnly?: boolean;
+  archived?: boolean;
 };
 
 export async function listSocialInboxAccounts() {
@@ -48,6 +49,7 @@ export async function listSocialInboxThreads(filters: SocialInboxFilters = {}) {
   if (filters.followUpOnly) {
     conditions.push(eq(socialInboxThreads.isFollowUpRequired, true));
   }
+  conditions.push(eq(socialInboxThreads.isArchived, filters.archived ?? false));
   if (filters.search?.trim()) {
     const search = `%${filters.search.trim()}%`;
     conditions.push(
@@ -449,6 +451,24 @@ export async function assignSocialInboxThread(id: number, assignedToUserId: numb
     .update(socialInboxThreads)
     .set({ assignedToUserId })
     .where(eq(socialInboxThreads.id, id));
+  return { success: true };
+}
+
+export async function setSocialInboxThreadArchived(id: number, isArchived: boolean) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+  await db.update(socialInboxThreads).set({ isArchived }).where(eq(socialInboxThreads.id, id));
+  return { success: true };
+}
+
+export async function deleteSocialInboxThread(id: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+  await db.delete(socialInboxThreads).where(eq(socialInboxThreads.id, id));
   return { success: true };
 }
 

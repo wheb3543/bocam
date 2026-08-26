@@ -46,6 +46,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { printReceipt } from '@/components/booking/PrintReceipt';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { trpc } from '@/lib/api/trpc';
 import { SOURCE_OPTIONS } from '@shared/sources';
 import SourceBadge from '@/components/SourceBadge';
 import Pagination from '@/components/table/Pagination';
@@ -66,6 +68,23 @@ export default function AppointmentsManagementPage() {
   const { formatPhoneDisplay } = usePhoneFormat();
   const { formatRegistrationDate } = useFormatDate();
   const { user } = useAuth();
+  const { can } = useRolePermissions();
+  const canUpdateAppointments = can('appointments.update');
+  const canCancelAppointments = can('appointments.cancel');
+  const canDeleteAppointments = can('appointments.delete');
+  const canAssignAppointments = can('appointments.assign');
+  const utils = trpc.useUtils();
+  const { data: appointmentAssignees = [] } = trpc.appointments.assignableUsers.useQuery(
+    undefined,
+    {
+      enabled: canAssignAppointments,
+    }
+  );
+  const assignAppointmentMutation = trpc.appointments.assign.useMutation({
+    onSuccess: () => {
+      utils.appointments.listPaginated.invalidate();
+    },
+  });
 
   const appointmentsHook = useAppointments({ _userRole: user?.role });
 
@@ -452,32 +471,48 @@ export default function AppointmentsManagementPage() {
                             if (colKey === 'status') {
                               return (
                                 <TableCell key={colKey}>
-                                  <InlineStatusEditor
-                                    currentStatus={appointment.status}
-                                    statusOptions={[
-                                      {
-                                        value: 'pending',
-                                        label: 'قيد الانتظار',
-                                        color: 'bg-blue-500',
-                                      },
-                                      {
-                                        value: 'confirmed',
-                                        label: 'مؤكد',
-                                        color: 'bg-emerald-500',
-                                      },
-                                      { value: 'completed', label: 'مكتمل', color: 'bg-green-600' },
-                                      { value: 'cancelled', label: 'ملغي', color: 'bg-red-500' },
-                                    ]}
-                                    onSave={async (newStatus: string) => {
-                                      await appointmentsHook.updateAppointmentStatusMutation.mutateAsync(
+                                  {canUpdateAppointments ? (
+                                    <InlineStatusEditor
+                                      currentStatus={appointment.status}
+                                      statusOptions={[
                                         {
-                                          id: appointment.id,
-                                          status: newStatus as
-                                            'pending' | 'confirmed' | 'completed' | 'cancelled',
-                                        }
-                                      );
-                                    }}
-                                  />
+                                          value: 'pending',
+                                          label: 'قيد الانتظار',
+                                          color: 'bg-blue-500',
+                                        },
+                                        {
+                                          value: 'confirmed',
+                                          label: 'مؤكد',
+                                          color: 'bg-emerald-500',
+                                        },
+                                        {
+                                          value: 'completed',
+                                          label: 'مكتمل',
+                                          color: 'bg-green-600',
+                                        },
+                                        ...(canCancelAppointments
+                                          ? [
+                                              {
+                                                value: 'cancelled',
+                                                label: 'ملغي',
+                                                color: 'bg-red-500',
+                                              },
+                                            ]
+                                          : []),
+                                      ]}
+                                      onSave={async (newStatus: string) => {
+                                        await appointmentsHook.updateAppointmentStatusMutation.mutateAsync(
+                                          {
+                                            id: appointment.id,
+                                            status: newStatus as
+                                              'pending' | 'confirmed' | 'completed' | 'cancelled',
+                                          }
+                                        );
+                                      }}
+                                    />
+                                  ) : (
+                                    <span className="text-sm">{appointment.status}</span>
+                                  )}
                                 </TableCell>
                               );
                             }
@@ -528,37 +563,41 @@ export default function AppointmentsManagementPage() {
                                   >
                                     عرض التفاصيل
                                   </Button>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>حذف الموعد</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          هل أنت متأكد من حذف هذا الموعد؟ لا يمكن التراجع عن هذا
-                                          الإجراء.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                                        <AlertDialogAction
-                                          onClick={() =>
-                                            appointmentsHook.handleDeleteAppointment(appointment.id)
-                                          }
-                                          className="bg-red-600 hover:bg-red-700"
+                                  {canDeleteAppointments && (
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                         >
-                                          حذف
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>حذف الموعد</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            هل أنت متأكد من حذف هذا الموعد؟ لا يمكن التراجع عن هذا
+                                            الإجراء.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                          <AlertDialogAction
+                                            onClick={() =>
+                                              appointmentsHook.handleDeleteAppointment(
+                                                appointment.id
+                                              )
+                                            }
+                                            className="bg-red-600 hover:bg-red-700"
+                                          >
+                                            حذف
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  )}
                                 </TableCell>
                               );
                             }
@@ -604,44 +643,79 @@ export default function AppointmentsManagementPage() {
                 تحديث حالة الموعد لـ {appointmentsHook.selectedAppointment?.fullName}
               </DialogDescription>
             </DialogHeader>
-            <Tabs defaultValue="status">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="status">الحالة</TabsTrigger>
+            <Tabs defaultValue={canUpdateAppointments ? 'status' : 'assignment'}>
+              <TabsList className="flex w-full flex-wrap">
+                {canUpdateAppointments && <TabsTrigger value="status">الحالة</TabsTrigger>}
+                {canAssignAppointments && <TabsTrigger value="assignment">إسناد</TabsTrigger>}
                 <TabsTrigger value="comments">التعليقات</TabsTrigger>
                 <TabsTrigger value="tasks">المهام</TabsTrigger>
                 <TabsTrigger value="history">السجل</TabsTrigger>
               </TabsList>
-              <TabsContent value="status" className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>الحالة الجديدة</Label>
-                  <Select
-                    value={appointmentsHook.newAppointmentStatus}
-                    onValueChange={appointmentsHook.setNewAppointmentStatus}
+              {canUpdateAppointments && (
+                <TabsContent value="status" className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label>الحالة الجديدة</Label>
+                    <Select
+                      value={appointmentsHook.newAppointmentStatus}
+                      onValueChange={appointmentsHook.setNewAppointmentStatus}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الحالة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">قيد الانتظار</SelectItem>
+                        <SelectItem value="confirmed">مؤكد</SelectItem>
+                        <SelectItem value="completed">مكتمل</SelectItem>
+                        {canCancelAppointments && <SelectItem value="cancelled">ملغي</SelectItem>}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>ملاحظات الموظفين</Label>
+                    <Textarea
+                      value={appointmentsHook.appointmentStatusNotes}
+                      onChange={(e) => appointmentsHook.setAppointmentStatusNotes(e.target.value)}
+                      placeholder="أضف ملاحظات هنا..."
+                      rows={3}
+                    />
+                  </div>
+                  {canUpdateAppointments && (
+                    <Button
+                      onClick={appointmentsHook.handleAppointmentStatusUpdate}
+                      className="w-full"
+                    >
+                      تحديث الحالة
+                    </Button>
+                  )}
+                </TabsContent>
+              )}
+              {canAssignAppointments && (
+                <TabsContent value="assignment" className="space-y-4 pt-4">
+                  <Label htmlFor="appointment-assignee">المسؤول عن متابعة الموعد</Label>
+                  <select
+                    id="appointment-assignee"
+                    key={appointmentsHook.selectedAppointment?.id}
+                    defaultValue={appointmentsHook.selectedAppointment?.assignedToUserId ?? ''}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    disabled={assignAppointmentMutation.isPending}
+                    onChange={(event) => {
+                      if (appointmentsHook.selectedAppointment) {
+                        assignAppointmentMutation.mutate({
+                          id: appointmentsHook.selectedAppointment.id,
+                          assignedToUserId: event.target.value ? Number(event.target.value) : null,
+                        });
+                      }
+                    }}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الحالة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">قيد الانتظار</SelectItem>
-                      <SelectItem value="confirmed">مؤكد</SelectItem>
-                      <SelectItem value="completed">مكتمل</SelectItem>
-                      <SelectItem value="cancelled">ملغي</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>ملاحظات الموظفين</Label>
-                  <Textarea
-                    value={appointmentsHook.appointmentStatusNotes}
-                    onChange={(e) => appointmentsHook.setAppointmentStatusNotes(e.target.value)}
-                    placeholder="أضف ملاحظات هنا..."
-                    rows={3}
-                  />
-                </div>
-                <Button onClick={appointmentsHook.handleAppointmentStatusUpdate} className="w-full">
-                  تحديث الحالة
-                </Button>
-              </TabsContent>
+                    <option value="">غير معيّن</option>
+                    {appointmentAssignees.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name || user.username || `مستخدم #${user.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </TabsContent>
+              )}
               <TabsContent value="comments">
                 {appointmentsHook.selectedAppointment && (
                   <CommentsSection

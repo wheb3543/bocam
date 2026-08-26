@@ -28,6 +28,20 @@ describe('الإنفاذ التفصيلي للمواعيد والعملاء ال
     expect(leadsSource).toContain('getStatusHistory: leadsViewProcedure');
   });
 
+  it('يحمي إسناد المواعيد والعملاء المحتملين ويتحقق من أهلية المسؤول المحدد', () => {
+    const appointmentsSource = source('server/routers/appointments.ts');
+    const leadsSource = source('server/routers/leads.ts');
+    const assignmentService = source('server/services/workAssignmentService.ts');
+
+    expect(appointmentsSource).toContain("permissionProcedure('appointments.assign'");
+    expect(appointmentsSource).toContain('assign: appointmentsAssignProcedure');
+    expect(leadsSource).toContain("permissionProcedure('leads.assign'");
+    expect(leadsSource).toContain('assign: leadsAssignProcedure');
+    expect(assignmentService).toContain('assertAssignableUser');
+    expect(assignmentService).toContain('hasRolePermission');
+    expect(assignmentService).toContain('notifyWorkAssignment');
+  });
+
   it('لا يرفع صلاحية إدارة عامة قديمة إلى الحذف الحساس للمواعيد', () => {
     const permissionsSource = source('server/services/rolePermissionService.ts');
     expect(permissionsSource).toContain("'appointments.update': 'appointments.manage'");

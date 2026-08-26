@@ -16,10 +16,12 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { trpc } from '@/lib/api/trpc';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { toast } from 'sonner';
 import {
   Check,
   CheckCheck,
+  Archive,
   ChevronLeft,
   Clock3,
   EllipsisVertical,
@@ -33,6 +35,7 @@ import {
   Search,
   Send,
   Star,
+  Trash2,
   UserRound,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -163,6 +166,12 @@ function EmptyPanel({
 }
 
 export default function MessagesPage() {
+  const { can } = useRolePermissions();
+  const canReply = can('communications.reply');
+  const canAssign = can('communications.assign');
+  const canManage = can('communications.manage');
+  const canArchive = can('communications.archive');
+  const canDelete = can('communications.delete');
   const [activeTab, setActiveTab] = useState<InboxTabId>('all-messages');
   const [search, setSearch] = useState('');
   const [selectedThreadId, setSelectedThreadId] = useState<number | null>(null);
@@ -184,7 +193,7 @@ export default function MessagesPage() {
   const utils = trpc.useUtils();
   const accountsQuery = trpc.socialInbox.accounts.useQuery();
   const activeUsersQuery = trpc.users.getActiveUsers.useQuery(undefined, {
-    enabled: isMetaCommentTab,
+    enabled: isMetaCommentTab && canAssign,
   });
   const statsQuery = trpc.socialInbox.stats.useQuery();
   const threadsQuery = trpc.socialInbox.threads.useQuery(filters, {
@@ -218,6 +227,27 @@ export default function MessagesPage() {
       await utils.socialInbox.thread.invalidate();
     },
     onError: (error) => toast.error(`تعذّر تحديث التمييز: ${error.message}`),
+  });
+  const archiveMutation = trpc.socialInbox.archive.useMutation({
+    onSuccess: async () => {
+      await Promise.all([
+        utils.socialInbox.threads.invalidate(),
+        utils.socialInbox.stats.invalidate(),
+      ]);
+      setSelectedThreadId(null);
+    },
+    onError: (error) => toast.error(`تعذرت أرشفة المحادثة: ${error.message}`),
+  });
+  const deleteMutation = trpc.socialInbox.delete.useMutation({
+    onSuccess: async () => {
+      await Promise.all([
+        utils.socialInbox.threads.invalidate(),
+        utils.socialInbox.stats.invalidate(),
+      ]);
+      setSelectedThreadId(null);
+      toast.success('تم حذف المحادثة');
+    },
+    onError: (error) => toast.error(`تعذر حذف المحادثة: ${error.message}`),
   });
   const workflowMutation = trpc.socialInbox.updateCommentWorkflow.useMutation({
     onSuccess: async () => {
@@ -451,6 +481,9 @@ export default function MessagesPage() {
                 platform={activeTabConfig.platform as 'facebook' | 'instagram'}
                 onSelectContext={handleSelectCommentContext}
                 activeUsers={activeUsersQuery.data ?? []}
+                canReply={canReply}
+                canAssign={canAssign}
+                canManage={canManage}
                 onSubmitReply={async (threadId, itemId, message) => {
                   await replyCommentMutation.mutateAsync({ threadId, itemId, message });
                 }}
@@ -672,6 +705,43 @@ export default function MessagesPage() {
                               >
                                 <ExternalLink className="h-4 w-4" />
                               </a>
+                            </Button>
+                          )}
+                          {canArchive && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9"
+                              disabled={archiveMutation.isPending}
+                              onClick={() =>
+                                archiveMutation.mutate({
+                                  id: selectedThread.id,
+                                  isArchived: !selectedThread.isArchived,
+                                })
+                              }
+                              aria-label={
+                                selectedThread.isArchived ? 'إلغاء الأرشفة' : 'أرشفة المحادثة'
+                              }
+                            >
+                              <Archive className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {canDelete && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 text-destructive hover:text-destructive"
+                              disabled={deleteMutation.isPending}
+                              onClick={() => {
+                                if (
+                                  window.confirm('سيُحذف سجل المحادثة نهائياً. هل تريد المتابعة؟')
+                                ) {
+                                  deleteMutation.mutate({ id: selectedThread.id });
+                                }
+                              }}
+                              aria-label="حذف المحادثة"
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>

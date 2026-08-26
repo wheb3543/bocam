@@ -179,6 +179,8 @@ export {
   ingestMetaSocialInboxEvent,
   markSocialInboxThreadRead,
   setSocialInboxThreadStarred,
+  setSocialInboxThreadArchived,
+  deleteSocialInboxThread,
   assignSocialInboxThread,
   updateSocialInboxCommentWorkflow,
   getSocialInboxCommentActionTarget,

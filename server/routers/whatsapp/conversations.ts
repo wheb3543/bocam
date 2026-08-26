@@ -20,6 +20,14 @@ const communicationManagementProcedure = permissionProcedure(
   'communications.manage',
   'إدارة محادثات WhatsApp'
 );
+const communicationArchiveProcedure = permissionProcedure(
+  'communications.archive',
+  'أرشفة محادثات WhatsApp'
+);
+const communicationDeleteProcedure = permissionProcedure(
+  'communications.delete',
+  'حذف محادثات WhatsApp'
+);
 
 // Logging helper for sensitive operations
 function logOperation(operation: string, userId: number, details: unknown) {
@@ -96,7 +104,6 @@ export const conversationsRouter = router({
           customerName: z.string().optional(),
           unreadCount: z.number().optional(),
           important: z.boolean().optional(),
-          archived: z.boolean().optional(),
         })
       )
       .mutation(async ({ input, ctx }) => {
@@ -105,18 +112,26 @@ export const conversationsRouter = router({
           hasCustomerName: !!input.customerName,
           hasUnreadCount: input.unreadCount !== undefined,
           hasImportant: input.important !== undefined,
-          hasArchived: input.archived !== undefined,
         });
 
-        const { id, important, archived, ...rest } = input;
+        const { id, important, ...rest } = input;
         const updateData: Record<string, unknown> = { ...rest };
         if (important !== undefined) {
           updateData.isImportant = important ? 1 : 0;
         }
-        if (archived !== undefined) {
-          updateData.isArchived = archived ? 1 : 0;
-        }
         return db.updateWhatsAppConversation(id, updateData);
+      }),
+
+    archive: communicationArchiveProcedure
+      .input(z.object({ id: z.number(), isArchived: z.boolean() }))
+      .mutation(async ({ input, ctx }) => {
+        logOperation('archiveConversation', ctx.user.id, {
+          conversationId: input.id,
+          isArchived: input.isArchived,
+        });
+        return db.updateWhatsAppConversation(input.id, {
+          isArchived: input.isArchived ? 1 : 0,
+        });
       }),
 
     markAsRead: communicationManagementProcedure
@@ -184,7 +199,7 @@ export const conversationsRouter = router({
         });
       }),
 
-    delete: communicationManagementProcedure
+    delete: communicationDeleteProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
         logOperation('deleteConversation', ctx.user.id, { conversationId: input.id });
@@ -203,7 +218,7 @@ export const conversationsRouter = router({
         return { success: true };
       }),
 
-    bulkArchive: communicationManagementProcedure
+    bulkArchive: communicationArchiveProcedure
       .input(z.object({ ids: z.array(z.number()).min(1, 'يجب تحديد محادثة واحدة على الأقل') }))
       .mutation(async ({ input, ctx }) => {
         logOperation('bulkArchive', ctx.user.id, { conversationIds: input.ids });

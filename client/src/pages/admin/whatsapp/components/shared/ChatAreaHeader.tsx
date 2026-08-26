@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Conversation } from '../../types/whatsapp.types';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 interface ChatAreaHeaderProps {
   selectedConv: Conversation | undefined;
@@ -46,6 +47,9 @@ const ChatAreaHeader = memo(function ChatAreaHeader({
   onOpenSearchInConversation,
   onOpenExportConversation,
 }: ChatAreaHeaderProps) {
+  const { can } = useRolePermissions();
+  const canManageCommunications = can('communications.manage');
+  const canDeleteConversations = can('communications.delete');
   const isImportant = Boolean(selectedConv?.isImportant);
 
   return (
@@ -73,7 +77,7 @@ const ChatAreaHeader = memo(function ChatAreaHeader({
         </div>
 
         <div className="flex flex-shrink-0 items-center gap-1">
-          {selectedConv && (
+          {selectedConv && canManageCommunications && (
             <Button
               variant="ghost"
               size="icon"
@@ -121,7 +125,7 @@ const ChatAreaHeader = memo(function ChatAreaHeader({
                   تصدير المحادثة
                 </DropdownMenuItem>
               )}
-              {selectedConv && onDeleteConversation && (
+              {selectedConv && onDeleteConversation && canDeleteConversations && (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -137,7 +141,7 @@ const ChatAreaHeader = memo(function ChatAreaHeader({
           </DropdownMenu>
 
           <div className="hidden items-center gap-1 sm:flex">
-            {selectedConv && (
+            {selectedConv && canManageCommunications && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -173,7 +177,7 @@ const ChatAreaHeader = memo(function ChatAreaHeader({
                 <MessageSquare className="h-4 w-4" />
               </Button>
             )}
-            {onDeleteConversation && selectedConv && (
+            {onDeleteConversation && selectedConv && canDeleteConversations && (
               <Button
                 variant="ghost"
                 size="sm"

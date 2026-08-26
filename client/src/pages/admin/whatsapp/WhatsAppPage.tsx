@@ -9,6 +9,7 @@ import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import useSSE from '@/hooks/integrations/useSSE';
 import {
   useWhatsAppSSE,
@@ -56,6 +57,8 @@ export default function WhatsAppPage() {
 }
 
 function WhatsAppContent() {
+  const { can } = useRolePermissions();
+  const canAssignConversations = can('communications.assign');
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -138,7 +141,9 @@ function WhatsAppContent() {
       refetchInterval: 60_000,
       refetchOnWindowFocus: false,
     });
-  const { data: activeUsers } = trpc.users.getActiveUsers.useQuery();
+  const { data: activeUsers } = trpc.users.getActiveUsers.useQuery(undefined, {
+    enabled: canAssignConversations,
+  });
   const { data: autoReplyRulesData, refetch: refetchAutoReplyRules } =
     trpc.whatsapp.autoReply.getAutoReplyRules.useQuery();
   const autoReplyRules = autoReplyRulesData?.rules;

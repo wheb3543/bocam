@@ -194,6 +194,7 @@ export const leads = mysqlTable('leads', {
   utmContent: varchar('utmContent', { length: 100 }),
   utmPlacement: varchar('utmPlacement', { length: 100 }),
   notes: text('notes'),
+  assignedToUserId: int('assignedToUserId'),
   emailSent: boolean('emailSent').default(false).notNull(),
   whatsappSent: boolean('whatsappSent').default(false).notNull(),
   bookingConfirmationSent: boolean('bookingConfirmationSent').default(false).notNull(),
@@ -279,6 +280,7 @@ export const appointments = mysqlTable(
     notes: text('notes'), // Patient notes
     additionalNotes: text('additionalNotes'), // Additional patient notes
     staffNotes: text('staffNotes'), // Staff notes (admin only)
+    assignedToUserId: int('assignedToUserId'),
     status: mysqlEnum('status', [
       'pending',
       'contacted',

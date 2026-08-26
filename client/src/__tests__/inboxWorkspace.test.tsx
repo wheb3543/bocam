@@ -52,6 +52,9 @@ describe('Unified inbox workspace', () => {
         onWorkflowChange={vi.fn().mockResolvedValue(undefined)}
         onEnrich={vi.fn().mockResolvedValue(undefined)}
         isActionPending={false}
+        canReply
+        canAssign
+        canManage
       />
     );
 

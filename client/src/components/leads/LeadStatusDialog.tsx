@@ -64,8 +64,13 @@ interface LeadStatusDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   lead: UnifiedLead | null;
-  onSubmit: (status: string, notes: string) => void;
+  onSubmit?: (status: string, notes: string) => void;
   isPending: boolean;
+  canUpdateStatus: boolean;
+  canAssign: boolean;
+  assignableUsers: Array<{ id: number; name: string | null; username: string | null }>;
+  onAssign?: (assignedToUserId: number | null) => void;
+  isAssigning?: boolean;
 }
 
 export default function LeadStatusDialog({
@@ -74,19 +79,27 @@ export default function LeadStatusDialog({
   lead,
   onSubmit,
   isPending,
+  canUpdateStatus,
+  canAssign,
+  assignableUsers,
+  onAssign,
+  isAssigning = false,
 }: LeadStatusDialogProps) {
   const { formatDateTime } = useFormatDate();
   const { formatPhoneDisplay } = usePhoneFormat();
   const [newStatus, setNewStatus] = useState('');
   const [statusNotes, setStatusNotes] = useState('');
+  const [assignedToUserId, setAssignedToUserId] = useState('');
 
   // Reset state when lead changes
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       setNewStatus('');
       setStatusNotes('');
+      setAssignedToUserId('');
     } else if (lead) {
       setNewStatus(lead.status);
+      setAssignedToUserId(lead.assignedToUserId ? String(lead.assignedToUserId) : '');
     }
     onOpenChange(isOpen);
   };
@@ -97,8 +110,10 @@ export default function LeadStatusDialog({
   }
 
   const handleSubmit = () => {
-    if (!newStatus) {return;}
-    onSubmit(newStatus, statusNotes);
+    if (!newStatus) {
+      return;
+    }
+    onSubmit?.(newStatus, statusNotes);
     setNewStatus('');
     setStatusNotes('');
   };
@@ -156,7 +171,11 @@ export default function LeadStatusDialog({
                 <div>
                   <span className="text-muted-foreground">النوع:</span>{' '}
                   <span className="font-medium">
-                    {lead.type === 'appointment' ? 'موعد طبيب' : lead.type === 'offer' ? 'عرض' : 'مخيم'}
+                    {lead.type === 'appointment'
+                      ? 'موعد طبيب'
+                      : lead.type === 'offer'
+                        ? 'عرض'
+                        : 'مخيم'}
                   </span>
                 </div>
                 <div>
@@ -183,6 +202,30 @@ export default function LeadStatusDialog({
                 })()}
               </p>
             </div>
+
+            {canAssign && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">المسؤول عن المتابعة</Label>
+                <select
+                  value={assignedToUserId}
+                  disabled={isAssigning}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setAssignedToUserId(value);
+                    onAssign?.(value ? Number(value) : null);
+                  }}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  aria-label="تعيين مسؤول للعميل المحتمل"
+                >
+                  <option value="">غير معيّن</option>
+                  {assignableUsers.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name || user.username || `مستخدم #${user.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Quick actions */}
             <div className="flex gap-2">
@@ -214,49 +257,53 @@ export default function LeadStatusDialog({
               </Button>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">الحالة الجديدة</Label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                {STATUS_BUTTONS.map((s) => (
-                  <button
-                    key={s.value}
-                    type="button"
-                    onClick={() => setNewStatus(s.value)}
-                    className={`text-[10px] py-2 px-1 rounded-lg border-2 transition-all text-center leading-tight ${
-                      newStatus === s.value
-                        ? `border-${s.color}-500 bg-${s.color}-50 text-${s.color}-700 font-semibold ring-1 ring-${s.color}-200`
-                        : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
-                    }`}
+            {canUpdateStatus && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">الحالة الجديدة</Label>
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                    {STATUS_BUTTONS.map((s) => (
+                      <button
+                        key={s.value}
+                        type="button"
+                        onClick={() => setNewStatus(s.value)}
+                        className={`text-[10px] py-2 px-1 rounded-lg border-2 transition-all text-center leading-tight ${
+                          newStatus === s.value
+                            ? `border-${s.color}-500 bg-${s.color}-50 text-${s.color}-700 font-semibold ring-1 ring-${s.color}-200`
+                            : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">ملاحظات (اختياري)</Label>
+                  <Textarea
+                    placeholder="أضف ملاحظات..."
+                    value={statusNotes}
+                    onChange={(e) => setStatusNotes(e.target.value)}
+                    rows={3}
+                    className="resize-none"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-2 border-t">
+                  <Button variant="outline" size="sm" onClick={handleCancel}>
+                    إلغاء
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSubmit}
+                    disabled={!newStatus || isPending}
+                    className="gap-1.5"
                   >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">ملاحظات (اختياري)</Label>
-              <Textarea
-                placeholder="أضف ملاحظات..."
-                value={statusNotes}
-                onChange={(e) => setStatusNotes(e.target.value)}
-                rows={3}
-                className="resize-none"
-              />
-            </div>
-            <div className="flex justify-end gap-2 pt-2 border-t">
-              <Button variant="outline" size="sm" onClick={handleCancel}>
-                إلغاء
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSubmit}
-                disabled={!newStatus || isPending}
-                className="gap-1.5"
-              >
-                {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                تحديث الحالة
-              </Button>
-            </div>
+                    {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                    تحديث الحالة
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         )}
       </DialogContent>

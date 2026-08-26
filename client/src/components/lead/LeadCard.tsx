@@ -45,8 +45,8 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string; bord
 
 interface LeadCardProps {
   lead: UnifiedLead;
-  onUpdateStatus: (lead: UnifiedLead) => void;
-  onWhatsApp: (lead: UnifiedLead) => void;
+  onUpdateStatus?: (lead: UnifiedLead) => void;
+  onWhatsApp?: (lead: UnifiedLead) => void;
 }
 
 export default function LeadCard({ lead, onUpdateStatus, onWhatsApp }: LeadCardProps) {
@@ -119,7 +119,12 @@ export default function LeadCard({ lead, onUpdateStatus, onWhatsApp }: LeadCardP
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-3 gap-2">
+        <div
+          className="grid gap-2"
+          style={{
+            gridTemplateColumns: `repeat(${1 + Number(Boolean(onWhatsApp)) + Number(Boolean(onUpdateStatus))}, minmax(0, 1fr))`,
+          }}
+        >
           <Button
             size="sm"
             variant="outline"
@@ -129,24 +134,28 @@ export default function LeadCard({ lead, onUpdateStatus, onWhatsApp }: LeadCardP
             <Phone className="w-3.5 h-3.5" />
             اتصال
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 text-xs gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
-            onClick={() => onWhatsApp(lead)}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            واتساب
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 text-xs gap-1"
-            onClick={() => onUpdateStatus(lead)}
-          >
-            <Eye className="w-3.5 h-3.5" />
-            تحديث
-          </Button>
+          {onWhatsApp && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 text-xs gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+              onClick={() => onWhatsApp(lead)}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              واتساب
+            </Button>
+          )}
+          {onUpdateStatus && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 text-xs gap-1"
+              onClick={() => onUpdateStatus(lead)}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              تحديث
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

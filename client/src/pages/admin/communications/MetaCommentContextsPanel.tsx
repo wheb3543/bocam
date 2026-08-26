@@ -143,6 +143,7 @@ function CommentActions({
   onPrivateReply,
   onHiddenChange,
   isTestData,
+  canReply,
 }: {
   item: MetaCommentContextItem;
   platform: Platform;
@@ -150,12 +151,13 @@ function CommentActions({
   onPrivateReply: (item: MetaCommentContextItem) => void;
   onHiddenChange: (item: MetaCommentContextItem, isHidden: boolean) => void;
   isTestData: boolean;
+  canReply: boolean;
 }) {
   const metadata = item.commentMetadata;
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-1 border-t border-slate-100 pt-2 text-xs">
-      {metadata?.canComment !== false && (
+      {canReply && metadata?.canComment !== false && (
         <Button
           variant="ghost"
           size="sm"
@@ -167,7 +169,7 @@ function CommentActions({
           رد
         </Button>
       )}
-      {(metadata?.canReplyPrivately || platform === 'instagram') && (
+      {canReply && (metadata?.canReplyPrivately || platform === 'instagram') && (
         <Button
           variant="ghost"
           size="sm"
@@ -179,7 +181,7 @@ function CommentActions({
           رسالة خاصة
         </Button>
       )}
-      {typeof metadata?.isHidden === 'boolean' && (
+      {canReply && typeof metadata?.isHidden === 'boolean' && (
         <Button
           variant="ghost"
           size="sm"
@@ -203,6 +205,7 @@ function CommentTreeNode({
   onPrivateReply,
   onHiddenChange,
   isTestData,
+  canReply,
 }: {
   node: CommentNode;
   platform: Platform;
@@ -211,6 +214,7 @@ function CommentTreeNode({
   onPrivateReply: (item: MetaCommentContextItem) => void;
   onHiddenChange: (item: MetaCommentContextItem, isHidden: boolean) => void;
   isTestData: boolean;
+  canReply: boolean;
 }) {
   const metadata = node.item.commentMetadata;
   return (
@@ -260,6 +264,7 @@ function CommentTreeNode({
           onPrivateReply={onPrivateReply}
           onHiddenChange={onHiddenChange}
           isTestData={isTestData}
+          canReply={canReply}
         />
       </div>
       {node.children.length > 0 && (
@@ -274,6 +279,7 @@ function CommentTreeNode({
               onPrivateReply={onPrivateReply}
               onHiddenChange={onHiddenChange}
               isTestData={isTestData}
+              canReply={canReply}
             />
           ))}
         </div>
@@ -294,6 +300,9 @@ export default function MetaCommentContextsPanel({
   onWorkflowChange,
   onEnrich,
   isActionPending,
+  canReply,
+  canAssign,
+  canManage,
 }: {
   contexts: MetaCommentContext[];
   isLoading: boolean;
@@ -309,6 +318,9 @@ export default function MetaCommentContextsPanel({
   ) => Promise<void>;
   onEnrich: (threadId: number, itemId: number) => Promise<void>;
   isActionPending: boolean;
+  canReply: boolean;
+  canAssign: boolean;
+  canManage: boolean;
 }) {
   const [selectedContextId, setSelectedContextId] = useState<number | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread' | 'followUp'>('all');
@@ -508,22 +520,24 @@ export default function MetaCommentContextsPanel({
                 </div>
                 <div className="flex items-center gap-2">
                   {isTestContext && <TestDataBadge />}
-                  <Button
-                    variant={selectedContext.isFollowUpRequired ? 'default' : 'outline'}
-                    size="sm"
-                    className="min-h-9 gap-1.5"
-                    disabled={isTestContext || isActionPending}
-                    onClick={() =>
-                      void onWorkflowChange(selectedContext.id, {
-                        isFollowUpRequired: !selectedContext.isFollowUpRequired,
-                      })
-                    }
-                  >
-                    <Star
-                      className={`h-3.5 w-3.5 ${selectedContext.isFollowUpRequired ? 'fill-current' : ''}`}
-                    />
-                    متابعة
-                  </Button>
+                  {canAssign && (
+                    <Button
+                      variant={selectedContext.isFollowUpRequired ? 'default' : 'outline'}
+                      size="sm"
+                      className="min-h-9 gap-1.5"
+                      disabled={isTestContext || isActionPending}
+                      onClick={() =>
+                        void onWorkflowChange(selectedContext.id, {
+                          isFollowUpRequired: !selectedContext.isFollowUpRequired,
+                        })
+                      }
+                    >
+                      <Star
+                        className={`h-3.5 w-3.5 ${selectedContext.isFollowUpRequired ? 'fill-current' : ''}`}
+                      />
+                      متابعة
+                    </Button>
+                  )}
                   {(selectedContext.commentContext?.sourceUrl || selectedContext.postUrl) && (
                     <Button variant="outline" size="sm" className="min-h-9 gap-1.5" asChild>
                       <a
@@ -573,47 +587,53 @@ export default function MetaCommentContextsPanel({
                       )}
                     </div>
                     <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-                      <UserRoundCheck className="h-4 w-4 text-slate-500" />
-                      <label
-                        className="text-xs font-medium text-slate-600"
-                        htmlFor={`assign-${selectedContext.id}`}
-                      >
-                        المسؤول
-                      </label>
-                      <select
-                        id={`assign-${selectedContext.id}`}
-                        aria-label="تعيين مسؤول للسياق"
-                        className="min-h-9 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700"
-                        value={selectedContext.assignedToUserId ?? ''}
-                        disabled={isTestContext || isActionPending}
-                        onChange={(event) =>
-                          void onWorkflowChange(selectedContext.id, {
-                            assignedToUserId: event.target.value
-                              ? Number(event.target.value)
-                              : null,
-                          })
-                        }
-                      >
-                        <option value="">غير معيّن</option>
-                        {activeUsers.map((user) => (
-                          <option key={user.id} value={user.id}>
-                            {user.name || user.username || `مستخدم #${user.id}`}
-                          </option>
-                        ))}
-                      </select>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="min-h-9 gap-1.5"
-                        disabled={
-                          isTestContext || isActionPending || selectedContext.items.length === 0
-                        }
-                        onClick={() =>
-                          void onEnrich(selectedContext.id, selectedContext.items[0]!.id)
-                        }
-                      >
-                        <Sparkles className="h-3.5 w-3.5" /> إثراء
-                      </Button>
+                      {canAssign && (
+                        <>
+                          <UserRoundCheck className="h-4 w-4 text-slate-500" />
+                          <label
+                            className="text-xs font-medium text-slate-600"
+                            htmlFor={`assign-${selectedContext.id}`}
+                          >
+                            المسؤول
+                          </label>
+                          <select
+                            id={`assign-${selectedContext.id}`}
+                            aria-label="تعيين مسؤول للسياق"
+                            className="min-h-9 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700"
+                            value={selectedContext.assignedToUserId ?? ''}
+                            disabled={isTestContext || isActionPending}
+                            onChange={(event) =>
+                              void onWorkflowChange(selectedContext.id, {
+                                assignedToUserId: event.target.value
+                                  ? Number(event.target.value)
+                                  : null,
+                              })
+                            }
+                          >
+                            <option value="">غير معيّن</option>
+                            {activeUsers.map((user) => (
+                              <option key={user.id} value={user.id}>
+                                {user.name || user.username || `مستخدم #${user.id}`}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      )}
+                      {canManage && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="min-h-9 gap-1.5"
+                          disabled={
+                            isTestContext || isActionPending || selectedContext.items.length === 0
+                          }
+                          onClick={() =>
+                            void onEnrich(selectedContext.id, selectedContext.items[0]!.id)
+                          }
+                        >
+                          <Sparkles className="h-3.5 w-3.5" /> إثراء
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </article>
@@ -635,47 +655,52 @@ export default function MetaCommentContextsPanel({
                         void onHiddenChange(selectedContext.id, item.id, isHidden)
                       }
                       isTestData={Boolean(isTestContext)}
+                      canReply={canReply}
                     />
                   ))}
                 </section>
               </div>
             </div>
 
-            <div className="border-t border-border bg-white p-3 md:p-4">
-              <div className="mx-auto max-w-3xl rounded-xl border border-blue-100 bg-blue-50/50 p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-blue-950">
-                    {replyTarget
-                      ? `${replyMode === 'private' ? 'رسالة خاصة إلى' : 'رد عام على'} ${replyTarget.authorName || 'التعليق المحدد'}`
-                      : 'إضافة تعليق عام'}
-                  </p>
-                  {replyTarget && (
-                    <Button variant="ghost" size="sm" onClick={() => setReplyTarget(null)}>
-                      إلغاء التحديد
+            {canReply && (
+              <div className="border-t border-border bg-white p-3 md:p-4">
+                <div className="mx-auto max-w-3xl rounded-xl border border-blue-100 bg-blue-50/50 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-blue-950">
+                      {replyTarget
+                        ? `${replyMode === 'private' ? 'رسالة خاصة إلى' : 'رد عام على'} ${replyTarget.authorName || 'التعليق المحدد'}`
+                        : 'إضافة تعليق عام'}
+                    </p>
+                    {replyTarget && (
+                      <Button variant="ghost" size="sm" onClick={() => setReplyTarget(null)}>
+                        إلغاء التحديد
+                      </Button>
+                    )}
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Input
+                      value={replyText}
+                      onChange={(event) => setReplyText(event.target.value)}
+                      disabled={!replyTarget || isTestContext || isActionPending}
+                      placeholder={
+                        replyTarget ? 'اكتب الرد ثم أرسله عبر Meta.' : 'اختر تعليقاً للرد عليه.'
+                      }
+                      className="bg-white"
+                    />
+                    <Button
+                      disabled={
+                        !replyTarget || !replyText.trim() || isTestContext || isActionPending
+                      }
+                      onClick={() => void submitComposer()}
+                      className="gap-1.5"
+                    >
+                      <Send className="h-4 w-4" />
+                      إرسال
                     </Button>
-                  )}
-                </div>
-                <div className="mt-3 flex gap-2">
-                  <Input
-                    value={replyText}
-                    onChange={(event) => setReplyText(event.target.value)}
-                    disabled={!replyTarget || isTestContext || isActionPending}
-                    placeholder={
-                      replyTarget ? 'اكتب الرد ثم أرسله عبر Meta.' : 'اختر تعليقاً للرد عليه.'
-                    }
-                    className="bg-white"
-                  />
-                  <Button
-                    disabled={!replyTarget || !replyText.trim() || isTestContext || isActionPending}
-                    onClick={() => void submitComposer()}
-                    className="gap-1.5"
-                  >
-                    <Send className="h-4 w-4" />
-                    إرسال
-                  </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </section>

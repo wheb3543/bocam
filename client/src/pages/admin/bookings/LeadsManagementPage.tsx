@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { exportToExcel, formatLeadsForExport } from '@/lib/export/exportToExcel';
 import { useFilterUtils, type DateFilterPreset } from '@/hooks/table/useFilterUtils';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { usePagination } from '@/hooks/table/usePagination';
 import {
   LeadFilters,
@@ -33,6 +34,10 @@ const sanitizeLead = (lead: UnifiedLead) => {
 
 export default function LeadsManagementPage() {
   const { user } = useAuth();
+  const { can } = useRolePermissions();
+  const canUpdateLeads = can('leads.update');
+  const canAssignLeads = can('leads.assign');
+  const canReplyToLeads = can('communications.reply');
   const [selectedLead, setSelectedLead] = useState<UnifiedLead | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
 
@@ -97,10 +102,13 @@ export default function LeadsManagementPage() {
   };
 
   const {
-    data: unifiedLeads,
+    data: leadsData,
     isLoading: leadsLoading,
     refetch: refetchLeads,
-  } = trpc.leads.unifiedList.useQuery();
+  } = trpc.leads.list.useQuery();
+  const { data: assignableUsers = [] } = trpc.leads.assignableUsers.useQuery(undefined, {
+    enabled: canAssignLeads,
+  });
   const { data: stats } = trpc.leads.stats.useQuery();
 
   const updateStatusMutation = trpc.leads.updateStatus.useMutation({
@@ -114,6 +122,27 @@ export default function LeadsManagementPage() {
       toast.error('حدث خطأ أثناء تحديث الحالة');
     },
   });
+  const assignLeadMutation = trpc.leads.assign.useMutation({
+    onSuccess: () => {
+      toast.success('تم تحديث مسؤول المتابعة');
+      refetchLeads();
+    },
+    onError: (error) => toast.error(`تعذر إسناد العميل: ${error.message}`),
+  });
+
+  const unifiedLeads = useMemo<UnifiedLead[]>(
+    () =>
+      (leadsData ?? []).map((lead) => ({
+        ...lead,
+        type: 'lead' as const,
+        typeLabel: 'عميل محتمل',
+        relatedId: lead.campaignId,
+        utmSource: lead.utmSource ?? null,
+        utmMedium: lead.utmMedium ?? null,
+        utmCampaign: lead.utmCampaign ?? null,
+      })),
+    [leadsData]
+  );
 
   const filteredLeads = useMemo(() => {
     if (!unifiedLeads) {
@@ -208,7 +237,9 @@ export default function LeadsManagementPage() {
       toast.error('لا توجد بيانات للتصدير');
       return;
     }
-    const formattedData = formatLeadsForExport(filteredLeads);
+    const formattedData = formatLeadsForExport(
+      filteredLeads as unknown as Record<string, unknown>[]
+    );
     exportToExcel(formattedData, 'تسجيلات_العملاء');
     toast.success('تم تصدير البيانات بنجاح');
   }, [filteredLeads]);
@@ -314,8 +345,8 @@ export default function LeadsManagementPage() {
             isLoading={leadsLoading}
             hasActiveFilters={hasActiveFilters}
             onClearFilters={clearAllFilters}
-            onUpdateStatus={handleUpdateStatusClick}
-            onWhatsApp={handleWhatsApp}
+            onUpdateStatus={canUpdateLeads || canAssignLeads ? handleUpdateStatusClick : undefined}
+            onWhatsApp={canReplyToLeads ? handleWhatsApp : undefined}
           />
         </div>
 
@@ -326,7 +357,7 @@ export default function LeadsManagementPage() {
             isLoading={leadsLoading}
             hasActiveFilters={hasActiveFilters}
             onClearFilters={clearAllFilters}
-            onUpdateStatus={handleUpdateStatusClick}
+            onUpdateStatus={canUpdateLeads || canAssignLeads ? handleUpdateStatusClick : undefined}
           />
         </div>
 
@@ -336,13 +367,24 @@ export default function LeadsManagementPage() {
         </div>
 
         {/* Update Lead Status Dialog */}
-        <LeadStatusDialog
-          open={statusDialogOpen}
-          onOpenChange={setStatusDialogOpen}
-          lead={selectedLead}
-          onSubmit={handleStatusUpdate}
-          isPending={updateStatusMutation.isPending}
-        />
+        {(canUpdateLeads || canAssignLeads) && (
+          <LeadStatusDialog
+            open={statusDialogOpen}
+            onOpenChange={setStatusDialogOpen}
+            lead={selectedLead}
+            onSubmit={handleStatusUpdate}
+            isPending={updateStatusMutation.isPending}
+            canUpdateStatus={canUpdateLeads}
+            canAssign={canAssignLeads}
+            assignableUsers={assignableUsers}
+            onAssign={(assignedToUserId) => {
+              if (selectedLead) {
+                assignLeadMutation.mutate({ id: selectedLead.id, assignedToUserId });
+              }
+            }}
+            isAssigning={assignLeadMutation.isPending}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

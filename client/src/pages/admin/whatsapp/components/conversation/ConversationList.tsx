@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { processPhoneInput } from '@/hooks/form/usePhoneFormat';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import {
   Conversation,
   Template,
@@ -78,9 +79,9 @@ interface ConversationListProps {
   onFilterChange: (filter: FilterType) => void;
   dateFilter: DateFilterType;
   onDateFilterChange: (filter: DateFilterType) => void;
-  onArchiveConversation: (id: number) => void;
-  onToggleImportant: (id: number) => void;
-  onAssignConversation: (id: number, userId: number) => void;
+  onArchiveConversation?: (id: number) => void;
+  onToggleImportant?: (id: number) => void;
+  onAssignConversation?: (id: number, userId: number) => void;
   activeUsers: WhatsAppUser[] | undefined;
   onSaveSearchClick: () => void;
   isSelectionMode: boolean;
@@ -132,6 +133,10 @@ const ConversationList = memo(function ConversationList({
   onBulkMarkImportant,
   onToggleSelectionMode,
 }: ConversationListProps) {
+  const { can } = useRolePermissions();
+  const canManageCommunications = can('communications.manage');
+  const canArchiveConversations = can('communications.archive');
+  const canAssignConversations = can('communications.assign');
   const [isStatsCollapsed, setIsStatsCollapsed] = useState(() => {
     if (typeof window === 'undefined') {
       return true;
@@ -356,10 +361,12 @@ const ConversationList = memo(function ConversationList({
                     }
                   }}
                   onToggleSelection={onToggleSelection}
-                  onToggleImportant={onToggleImportant}
-                  onArchiveConversation={onArchiveConversation}
-                  onAssignConversation={onAssignConversation}
-                  activeUsers={activeUsers}
+                  onToggleImportant={canManageCommunications ? onToggleImportant : undefined}
+                  onArchiveConversation={
+                    canArchiveConversations ? onArchiveConversation : undefined
+                  }
+                  onAssignConversation={canAssignConversations ? onAssignConversation : undefined}
+                  activeUsers={canAssignConversations ? activeUsers : undefined}
                 />
               ))}
             </div>
