@@ -9,10 +9,13 @@ const source = readFileSync(
 
 describe('صلاحيات إدارة المحتوى', () => {
   it('يفصل قدرات القراءة والإنشاء والتعديل والمراجعة والنشر على الخادم', () => {
-    expect(source).toContain("export type ContentCapability = 'read' | 'create' | 'update' | 'review' | 'publish'");
+    expect(source).toContain("| 'delete'");
+    expect(source).toContain("| 'restore'");
     expect(source).toContain("read: 'content.view'");
     expect(source).toContain("create: 'content.create'");
     expect(source).toContain("update: 'content.update'");
+    expect(source).toContain("delete: 'content.delete'");
+    expect(source).toContain("restore: 'content.restore'");
     expect(source).toContain("review: 'content.review'");
     expect(source).toContain("publish: 'content.publish'");
     expect(source).toContain('hasRolePermission');

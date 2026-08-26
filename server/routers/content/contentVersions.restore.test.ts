@@ -9,7 +9,7 @@ const source = readFileSync(
 
 describe('استعادة نسخ المحتوى', () => {
   it('ينفذ الاستعادة داخل معاملة ويُنشئ نسخة أمان ويسجل التغيير', () => {
-    expect(source).toContain('restore: adminProcedure');
+    expect(source).toContain('restore: contentRestoreProcedure');
     expect(source).toContain('await db.transaction');
     expect(source).toContain('نسخة أمان تلقائية قبل الاستعادة');
     expect(source).toContain("reason: 'استعادة نسخة سابقة'");

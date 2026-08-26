@@ -4,12 +4,14 @@
  */
 
 import { z } from 'zod';
-import { adminProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import {
   assertContentCapability,
   contentCreateProcedure,
+  contentDeleteProcedure,
   contentPublishProcedure,
   contentReadProcedure,
+  contentRestoreProcedure,
   contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
@@ -329,53 +331,62 @@ export const sectionButtonsRouter = router({
       return { success: true };
     }),
 
-  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
-    const button = await getButtonOrThrow(db, input.id);
-    await saveButtonVersion(db, button, ctx.user.id, 'نسخة قبل حذف زر القسم');
-    await db
-      .update(sectionButtons)
-      .set({ deletedAt: new Date() })
-      .where(eq(sectionButtons.id, input.id));
-    await auditLogService.logChange(db, {
-      entityType: 'sectionButton',
-      entityId: input.id,
-      action: 'delete',
-      userId: ctx.user.id,
-      oldValue: JSON.stringify(button),
-      reason: 'حذف ناعم لزر القسم',
-    });
-    await invalidateAdminSectionsCache();
-    return { success: true };
-  }),
+  delete: contentDeleteProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const button = await getButtonOrThrow(db, input.id);
+      await saveButtonVersion(db, button, ctx.user.id, 'نسخة قبل حذف زر القسم');
+      await db
+        .update(sectionButtons)
+        .set({ deletedAt: new Date() })
+        .where(eq(sectionButtons.id, input.id));
+      await auditLogService.logChange(db, {
+        entityType: 'sectionButton',
+        entityId: input.id,
+        action: 'delete',
+        userId: ctx.user.id,
+        oldValue: JSON.stringify(button),
+        reason: 'حذف ناعم لزر القسم',
+      });
+      await invalidateAdminSectionsCache();
+      return { success: true };
+    }),
 
-  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
-    const [button] = await db
-      .select()
-      .from(sectionButtons)
-      .where(eq(sectionButtons.id, input.id))
-      .limit(1);
-    if (!button) {
-      throw new Error('زر القسم غير موجود.');
-    }
+  restore: contentRestoreProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const [button] = await db
+        .select()
+        .from(sectionButtons)
+        .where(eq(sectionButtons.id, input.id))
+        .limit(1);
+      if (!button) {
+        throw new Error('زر القسم غير موجود.');
+      }
 
-    await db
-      .update(sectionButtons)
-      .set({ deletedAt: null, status: 'draft', publishedAt: null })
-      .where(eq(sectionButtons.id, input.id));
-    await auditLogService.logChange(db, {
-      entityType: 'sectionButton',
-      entityId: input.id,
-      action: 'update',
-      userId: ctx.user.id,
-      oldValue: JSON.stringify(button),
-      newValue: JSON.stringify({ ...button, deletedAt: null, status: 'draft', publishedAt: null }),
-      reason: 'استعادة زر القسم كمسودة',
-    });
-    await invalidateAdminSectionsCache();
-    return { success: true };
-  }),
+      await db
+        .update(sectionButtons)
+        .set({ deletedAt: null, status: 'draft', publishedAt: null })
+        .where(eq(sectionButtons.id, input.id));
+      await auditLogService.logChange(db, {
+        entityType: 'sectionButton',
+        entityId: input.id,
+        action: 'update',
+        userId: ctx.user.id,
+        oldValue: JSON.stringify(button),
+        newValue: JSON.stringify({
+          ...button,
+          deletedAt: null,
+          status: 'draft',
+          publishedAt: null,
+        }),
+        reason: 'استعادة زر القسم كمسودة',
+      });
+      await invalidateAdminSectionsCache();
+      return { success: true };
+    }),
 
   duplicate: contentCreateProcedure
     .input(z.object({ id: z.number() }))

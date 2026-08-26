@@ -31,7 +31,7 @@ describe('دورة CMS لأزرار الأقسام', () => {
     expect(routerSource).toContain("z.enum(['draft', 'published', 'archived'])");
     expect(routerSource).toContain('publish: contentPublishProcedure');
     expect(routerSource).toContain('archive: contentPublishProcedure');
-    expect(routerSource).toContain('restore: adminProcedure');
+    expect(routerSource).toContain('restore: contentRestoreProcedure');
     expect(routerSource).toContain('duplicate: contentCreateProcedure');
     expect(routerSource).toContain("set({ deletedAt: new Date() })");
     expect(routerSource).toContain("set({ deletedAt: null, status: 'draft', publishedAt: null })");

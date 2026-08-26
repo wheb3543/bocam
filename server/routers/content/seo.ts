@@ -4,12 +4,14 @@
  */
 
 import { z } from 'zod';
-import { adminProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import {
   assertContentCapability,
   contentCreateProcedure,
+  contentDeleteProcedure,
   contentPublishProcedure,
   contentReadProcedure,
+  contentRestoreProcedure,
   contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
@@ -332,45 +334,53 @@ export const seoSettingsRouter = router({
       return { success: true };
     }),
 
-  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
-    const seo = await getSeoOrThrow(db, input.id);
-    await saveSeoVersion(db, seo, ctx.user.id, 'نسخة قبل حذف إعداد SEO');
-    await db.update(seoSettings).set({ deletedAt: new Date() }).where(eq(seoSettings.id, seo.id));
-    await auditLogService.logChange(db, {
-      entityType: 'seo',
-      entityId: seo.id,
-      action: 'delete',
-      userId: ctx.user.id,
-      oldValue: JSON.stringify(seo),
-      reason: 'حذف ناعم لإعداد SEO',
-    });
-    await invalidateSEOCache();
-    return { success: true };
-  }),
+  delete: contentDeleteProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const seo = await getSeoOrThrow(db, input.id);
+      await saveSeoVersion(db, seo, ctx.user.id, 'نسخة قبل حذف إعداد SEO');
+      await db.update(seoSettings).set({ deletedAt: new Date() }).where(eq(seoSettings.id, seo.id));
+      await auditLogService.logChange(db, {
+        entityType: 'seo',
+        entityId: seo.id,
+        action: 'delete',
+        userId: ctx.user.id,
+        oldValue: JSON.stringify(seo),
+        reason: 'حذف ناعم لإعداد SEO',
+      });
+      await invalidateSEOCache();
+      return { success: true };
+    }),
 
-  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
-    const [seo] = await db.select().from(seoSettings).where(eq(seoSettings.id, input.id)).limit(1);
-    if (!seo) {
-      throw new Error('إعداد SEO غير موجود.');
-    }
-    await db
-      .update(seoSettings)
-      .set({ deletedAt: null, status: 'draft', publishedAt: null })
-      .where(eq(seoSettings.id, input.id));
-    await auditLogService.logChange(db, {
-      entityType: 'seo',
-      entityId: input.id,
-      action: 'update',
-      userId: ctx.user.id,
-      oldValue: JSON.stringify(seo),
-      newValue: JSON.stringify({ ...seo, deletedAt: null, status: 'draft', publishedAt: null }),
-      reason: 'استعادة إعداد SEO كمسودة',
-    });
-    await invalidateSEOCache();
-    return { success: true };
-  }),
+  restore: contentRestoreProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const [seo] = await db
+        .select()
+        .from(seoSettings)
+        .where(eq(seoSettings.id, input.id))
+        .limit(1);
+      if (!seo) {
+        throw new Error('إعداد SEO غير موجود.');
+      }
+      await db
+        .update(seoSettings)
+        .set({ deletedAt: null, status: 'draft', publishedAt: null })
+        .where(eq(seoSettings.id, input.id));
+      await auditLogService.logChange(db, {
+        entityType: 'seo',
+        entityId: input.id,
+        action: 'update',
+        userId: ctx.user.id,
+        oldValue: JSON.stringify(seo),
+        newValue: JSON.stringify({ ...seo, deletedAt: null, status: 'draft', publishedAt: null }),
+        reason: 'استعادة إعداد SEO كمسودة',
+      });
+      await invalidateSEOCache();
+      return { success: true };
+    }),
 
   getOverview: contentReadProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();

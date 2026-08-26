@@ -6,6 +6,7 @@
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { adminProcedure, router } from '../../_core/trpc';
+import { contentRestoreProcedure } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { contentVersionsService } from '../../services/content/contentVersionsService';
 import { createLogger } from '../../_core/logger';
@@ -539,7 +540,7 @@ export const contentVersionsRouter = router({
   /**
    * حذف نسخة محددة
    */
-  restore: adminProcedure
+  restore: contentRestoreProcedure
     .input(z.object({ versionId: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();

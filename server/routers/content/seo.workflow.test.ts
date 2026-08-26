@@ -30,7 +30,7 @@ describe('دورة CMS لإعدادات SEO', () => {
     expect(seoRouterSource).toContain('includeDeleted: z.boolean().optional().default(false)');
     expect(seoRouterSource).toContain('publish: contentPublishProcedure');
     expect(seoRouterSource).toContain('archive: contentPublishProcedure');
-    expect(seoRouterSource).toContain('restore: adminProcedure');
+    expect(seoRouterSource).toContain('restore: contentRestoreProcedure');
     expect(seoRouterSource).toContain("set({ deletedAt: new Date() })");
     expect(seoRouterSource).toContain("set({ deletedAt: null, status: 'draft', publishedAt: null })");
     expect(seoRouterSource).toContain('saveSeoVersion');

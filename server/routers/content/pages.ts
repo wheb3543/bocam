@@ -4,12 +4,14 @@
  */
 
 import { z } from 'zod';
-import { adminProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import {
   assertContentCapability,
   contentCreateProcedure,
+  contentDeleteProcedure,
   contentPublishProcedure,
   contentReadProcedure,
+  contentRestoreProcedure,
   contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
@@ -371,34 +373,36 @@ export const pagesRouter = router({
   /**
    * حذف صفحة (حذف ناعم) - يتطلب صلاحيات admin
    */
-  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
+  delete: contentDeleteProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
 
-    // الحصول على الصفحة قبل الحذف
-    const existing = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
-    if (!existing[0]) {
-      throw new Error('الصفحة غير موجودة.');
-    }
-    await savePageVersion(db, existing[0], ctx.user.id, 'نسخة قبل حذف الصفحة');
+      // الحصول على الصفحة قبل الحذف
+      const existing = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
+      if (!existing[0]) {
+        throw new Error('الصفحة غير موجودة.');
+      }
+      await savePageVersion(db, existing[0], ctx.user.id, 'نسخة قبل حذف الصفحة');
 
-    await db.update(pages).set({ deletedAt: new Date() }).where(eq(pages.id, input.id));
+      await db.update(pages).set({ deletedAt: new Date() }).where(eq(pages.id, input.id));
 
-    // تسجيل التغيير في سجل التدقيق
-    await auditLogService.logChange(db, {
-      entityType: 'page',
-      entityId: input.id,
-      action: 'delete',
-      userId: ctx.user?.id,
-      oldValue: existing && existing.length > 0 ? JSON.stringify(existing[0]) : undefined,
-    });
+      // تسجيل التغيير في سجل التدقيق
+      await auditLogService.logChange(db, {
+        entityType: 'page',
+        entityId: input.id,
+        action: 'delete',
+        userId: ctx.user?.id,
+        oldValue: existing && existing.length > 0 ? JSON.stringify(existing[0]) : undefined,
+      });
 
-    logger.info(`Page soft deleted: ${input.id}`);
+      logger.info(`Page soft deleted: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية
-    await invalidateAdminPagesCache();
+      // إبطال Cache للواجهات الإدارية
+      await invalidateAdminPagesCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * نشر صفحة - يتطلب صلاحيات admin
@@ -460,24 +464,29 @@ export const pagesRouter = router({
   /**
    * استعادة صفحة محذوفة
    */
-  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
+  restore: contentRestoreProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
 
-    const [page] = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
-    if (!page) {
-      throw new Error('الصفحة غير موجودة.');
-    }
-    await savePageVersion(db, page, ctx.user.id, 'نسخة قبل استعادة الصفحة المحذوفة');
+      const [page] = await db.select().from(pages).where(eq(pages.id, input.id)).limit(1);
+      if (!page) {
+        throw new Error('الصفحة غير موجودة.');
+      }
+      await savePageVersion(db, page, ctx.user.id, 'نسخة قبل استعادة الصفحة المحذوفة');
 
-    await db.update(pages).set({ deletedAt: null, status: 'draft' }).where(eq(pages.id, input.id));
+      await db
+        .update(pages)
+        .set({ deletedAt: null, status: 'draft' })
+        .where(eq(pages.id, input.id));
 
-    logger.info(`Page restored: ${input.id}`);
+      logger.info(`Page restored: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية
-    await invalidateAdminPagesCache();
+      // إبطال Cache للواجهات الإدارية
+      await invalidateAdminPagesCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * نسخ صفحة

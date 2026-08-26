@@ -4,10 +4,11 @@
  */
 
 import { z } from 'zod';
-import { adminProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import {
   assertContentCapability,
   contentCreateProcedure,
+  contentDeleteProcedure,
   contentReadProcedure,
   contentUpdateProcedure,
 } from './authorization';
@@ -217,7 +218,7 @@ export const imagesRouter = router({
   /**
    * حذف صورة (حذف ناعم)
    */
-  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: contentDeleteProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db.update(images).set({ deletedAt: new Date() }).where(eq(images.id, input.id));

@@ -34,7 +34,7 @@ describe('سلة محذوفات CMS الموحدة', () => {
 
   it('يفرض صلاحية المدير والاستعادة الذرية كمسودة مع نسخة أمان وسجل تدقيق', () => {
     expect(routerSource).toContain('list: adminProcedure');
-    expect(routerSource).toContain('restoreMany: adminProcedure');
+    expect(routerSource).toContain('restoreMany: contentRestoreProcedure');
     expect(routerSource).toContain('isNotNull(restoreConfig.table.deletedAt)');
     expect(routerSource).toContain('await db.transaction');
     expect(routerSource).toContain('contentVersionsService.createVersion');

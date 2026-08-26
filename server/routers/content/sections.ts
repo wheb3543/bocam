@@ -4,12 +4,14 @@
  */
 
 import { z } from 'zod';
-import { adminProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import {
   assertContentCapability,
   contentCreateProcedure,
+  contentDeleteProcedure,
   contentPublishProcedure,
   contentReadProcedure,
+  contentRestoreProcedure,
   contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
@@ -351,34 +353,36 @@ export const sectionsRouter = router({
   /**
    * حذف قسم (حذف ناعم) - يتطلب صلاحيات admin
    */
-  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
+  delete: contentDeleteProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
 
-    // الحصول على القسم قبل الحذف
-    const existing = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
-    if (!existing[0]) {
-      throw new Error('القسم غير موجود.');
-    }
-    await saveSectionVersion(db, existing[0], ctx.user.id, 'نسخة قبل حذف القسم');
+      // الحصول على القسم قبل الحذف
+      const existing = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
+      if (!existing[0]) {
+        throw new Error('القسم غير موجود.');
+      }
+      await saveSectionVersion(db, existing[0], ctx.user.id, 'نسخة قبل حذف القسم');
 
-    await db.update(sections).set({ deletedAt: new Date() }).where(eq(sections.id, input.id));
+      await db.update(sections).set({ deletedAt: new Date() }).where(eq(sections.id, input.id));
 
-    // تسجيل التغيير في سجل التدقيق
-    await auditLogService.logChange(db, {
-      entityType: 'section',
-      entityId: input.id,
-      action: 'delete',
-      userId: ctx.user?.id,
-      oldValue: existing && existing.length > 0 ? JSON.stringify(existing[0]) : undefined,
-    });
+      // تسجيل التغيير في سجل التدقيق
+      await auditLogService.logChange(db, {
+        entityType: 'section',
+        entityId: input.id,
+        action: 'delete',
+        userId: ctx.user?.id,
+        oldValue: existing && existing.length > 0 ? JSON.stringify(existing[0]) : undefined,
+      });
 
-    logger.info(`Section soft deleted: ${input.id}`);
+      logger.info(`Section soft deleted: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية
-    await invalidateAdminSectionsCache();
+      // إبطال Cache للواجهات الإدارية
+      await invalidateAdminSectionsCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * نشر قسم - يتطلب صلاحيات admin
@@ -440,26 +444,28 @@ export const sectionsRouter = router({
   /**
    * استعادة قسم محذوف
    */
-  restore: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
-    const [section] = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
-    if (!section) {
-      throw new Error('القسم غير موجود.');
-    }
-    await saveSectionVersion(db, section, ctx.user.id, 'نسخة قبل استعادة القسم المحذوف');
+  restore: contentRestoreProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
+      const [section] = await db.select().from(sections).where(eq(sections.id, input.id)).limit(1);
+      if (!section) {
+        throw new Error('القسم غير موجود.');
+      }
+      await saveSectionVersion(db, section, ctx.user.id, 'نسخة قبل استعادة القسم المحذوف');
 
-    await db
-      .update(sections)
-      .set({ deletedAt: null, status: 'draft' })
-      .where(eq(sections.id, input.id));
+      await db
+        .update(sections)
+        .set({ deletedAt: null, status: 'draft' })
+        .where(eq(sections.id, input.id));
 
-    logger.info(`Section restored: ${input.id}`);
+      logger.info(`Section restored: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية
-    await invalidateAdminSectionsCache();
+      // إبطال Cache للواجهات الإدارية
+      await invalidateAdminSectionsCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * نسخ قسم

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { and, desc, eq, isNotNull } from 'drizzle-orm';
 import { adminProcedure, router } from '../../_core/trpc';
+import { contentRestoreProcedure } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import {
   cmsTrashRetentionPolicies,
@@ -480,7 +481,7 @@ export const trashRouter = router({
       };
     }),
 
-  restoreMany: adminProcedure
+  restoreMany: contentRestoreProcedure
     .input(
       z.object({
         items: z

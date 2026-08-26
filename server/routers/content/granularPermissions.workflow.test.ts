@@ -29,4 +29,16 @@ describe('الإنفاذ التفصيلي لدورة المحتوى', () => {
     expect(source).toContain('approve: contentReviewProcedure');
     expect(source).toContain('reject: contentReviewProcedure');
   });
+
+  it('يحمي الحذف والاستعادة بحارسين منفصلين مع بقاء سياسة الاحتفاظ إدارية', () => {
+    for (const file of ['pages.ts', 'sections.ts', 'sectionButtons.ts', 'seo.ts', 'textContent.ts']) {
+      const source = readRouter(file);
+      expect(source).toContain('delete: contentDeleteProcedure');
+      expect(source).toContain('restore: contentRestoreProcedure');
+    }
+    expect(readRouter('images.ts')).toContain('delete: contentDeleteProcedure');
+    expect(readRouter('trash.ts')).toContain('restoreMany: contentRestoreProcedure');
+    expect(readRouter('trash.ts')).toContain('getRetentionPolicy: adminProcedure');
+    expect(readRouter('contentVersions.ts')).toContain('restore: contentRestoreProcedure');
+  });
 });

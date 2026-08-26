@@ -4,12 +4,14 @@
  */
 
 import { z } from 'zod';
-import { protectedProcedure, adminProcedure, router } from '../../_core/trpc';
+import { adminProcedure, router } from '../../_core/trpc';
 import {
   contentCreateProcedure,
+  contentDeleteProcedure,
   contentPublishProcedure,
   contentReadProcedure,
   assertContentCapability,
+  contentRestoreProcedure,
   contentUpdateProcedure,
 } from './authorization';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
@@ -393,45 +395,50 @@ export const textContentRouter = router({
   /**
    * حذف محتوى نصي (حذف ناعم) - يتطلب صلاحيات admin
    */
-  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
-    const db = await ensureDatabaseAvailable();
+  delete: contentDeleteProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
 
-    // الحصول على المحتوى قبل الحذف
-    const existing = await db
-      .select()
-      .from(textContent)
-      .where(eq(textContent.id, input.id))
-      .limit(1);
+      // الحصول على المحتوى قبل الحذف
+      const existing = await db
+        .select()
+        .from(textContent)
+        .where(eq(textContent.id, input.id))
+        .limit(1);
 
-    await db.update(textContent).set({ deletedAt: new Date() }).where(eq(textContent.id, input.id));
+      await db
+        .update(textContent)
+        .set({ deletedAt: new Date() })
+        .where(eq(textContent.id, input.id));
 
-    // تسجيل التغيير في سجل التدقيق
-    await auditLogService.logChange(db, {
-      entityType: 'text',
-      entityId: input.id,
-      action: 'delete',
-      userId: ctx.user?.id,
-      oldValue: existing && existing.length > 0 ? JSON.stringify(existing[0]) : undefined,
-    });
-
-    logger.info(`Text content deleted: ${input.id}`);
-
-    // إبطال Cache للواجهات الإدارية والعامة
-    await invalidateAdminTextContentCache();
-    invalidateTextContentCache();
-
-    // إنشاء إشعار للمستخدم الحالي
-    if (ctx.user?.id && existing && existing.length > 0) {
-      await createContentDeletedNotification(db, {
-        userId: ctx.user.id,
-        entityType: 'textContent',
+      // تسجيل التغيير في سجل التدقيق
+      await auditLogService.logChange(db, {
+        entityType: 'text',
         entityId: input.id,
-        entityName: existing[0].key,
+        action: 'delete',
+        userId: ctx.user?.id,
+        oldValue: existing && existing.length > 0 ? JSON.stringify(existing[0]) : undefined,
       });
-    }
 
-    return { success: true };
-  }),
+      logger.info(`Text content deleted: ${input.id}`);
+
+      // إبطال Cache للواجهات الإدارية والعامة
+      await invalidateAdminTextContentCache();
+      invalidateTextContentCache();
+
+      // إنشاء إشعار للمستخدم الحالي
+      if (ctx.user?.id && existing && existing.length > 0) {
+        await createContentDeletedNotification(db, {
+          userId: ctx.user.id,
+          entityType: 'textContent',
+          entityId: input.id,
+          entityName: existing[0].key,
+        });
+      }
+
+      return { success: true };
+    }),
 
   /**
    * نشر محتوى نصي - يتطلب صلاحيات admin
@@ -506,22 +513,24 @@ export const textContentRouter = router({
   /**
    * استعادة محتوى نصي محذوف
    */
-  restore: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  restore: contentRestoreProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    await db
-      .update(textContent)
-      .set({ deletedAt: null, status: 'draft' })
-      .where(eq(textContent.id, input.id));
+      await db
+        .update(textContent)
+        .set({ deletedAt: null, status: 'draft' })
+        .where(eq(textContent.id, input.id));
 
-    logger.info(`Text content restored: ${input.id}`);
+      logger.info(`Text content restored: ${input.id}`);
 
-    // إبطال Cache للواجهات الإدارية والعامة
-    await invalidateAdminTextContentCache();
-    invalidateTextContentCache();
+      // إبطال Cache للواجهات الإدارية والعامة
+      await invalidateAdminTextContentCache();
+      invalidateTextContentCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   /**
    * نسخ محتوى نصي
