@@ -1,4 +1,4 @@
-import { protectedProcedure, adminProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { TRPCError } from '@trpc/server';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import * as db from '../../database/db';
@@ -9,8 +9,12 @@ import { permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('whatsapp-conversations');
 const communicationViewProcedure = permissionProcedure(
-  'communications.manage',
+  'communications.view',
   'عرض محادثات WhatsApp'
+);
+const communicationAssignProcedure = permissionProcedure(
+  'communications.assign',
+  'إسناد محادثات WhatsApp'
 );
 const communicationManagementProcedure = permissionProcedure(
   'communications.manage',
@@ -125,7 +129,7 @@ export const conversationsRouter = router({
         });
       }),
 
-    assignToUser: communicationManagementProcedure
+    assignToUser: communicationAssignProcedure
       .input(z.object({ id: z.number(), userId: z.number() }))
       .mutation(async ({ input, ctx }) => {
         logOperation('assignToUser', ctx.user.id, {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { protectedProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
   assignSocialInboxThread,
@@ -36,12 +36,24 @@ const commentActionInput = z.object({
   threadId: z.number().int().positive(),
   itemId: z.number().int().positive(),
 });
-const socialInboxProcedure = permissionProcedure(
+const socialInboxViewProcedure = permissionProcedure(
+  'communications.view',
+  'عرض صندوق البريد الموحد'
+);
+const socialInboxReplyProcedure = permissionProcedure(
+  'communications.reply',
+  'الرد على رسائل وتعليقات الصندوق الموحد'
+);
+const socialInboxAssignProcedure = permissionProcedure(
+  'communications.assign',
+  'إسناد محادثات وتعليقات الصندوق الموحد'
+);
+const socialInboxManagementProcedure = permissionProcedure(
   'communications.manage',
-  'الوصول إلى صندوق البريد الموحد'
+  'إدارة إعدادات صندوق البريد الموحد'
 );
 
-const socialInboxAdminProcedure = socialInboxProcedure.use(async ({ ctx, next }) => {
+const socialInboxAdminProcedure = socialInboxManagementProcedure.use(async ({ ctx, next }) => {
   if (ctx.user.role !== 'admin') {
     throw new TRPCError({
       code: 'FORBIDDEN',
@@ -53,9 +65,9 @@ const socialInboxAdminProcedure = socialInboxProcedure.use(async ({ ctx, next })
 });
 
 export const socialInboxRouter = router({
-  accounts: socialInboxProcedure.query(() => listSocialInboxAccounts()),
+  accounts: socialInboxViewProcedure.query(() => listSocialInboxAccounts()),
 
-  createAccount: socialInboxProcedure
+  createAccount: socialInboxManagementProcedure
     .input(
       z.object({
         platform: platformSchema,
@@ -73,7 +85,7 @@ export const socialInboxRouter = router({
       })
     ),
 
-  updateAccount: socialInboxProcedure
+  updateAccount: socialInboxManagementProcedure
     .input(
       z.object({
         id: z.number().int().positive(),
@@ -94,9 +106,9 @@ export const socialInboxRouter = router({
       });
     }),
 
-  stats: socialInboxProcedure.query(() => getSocialInboxStats()),
+  stats: socialInboxViewProcedure.query(() => getSocialInboxStats()),
 
-  threads: socialInboxProcedure
+  threads: socialInboxViewProcedure
     .input(
       z
         .object({
@@ -109,7 +121,7 @@ export const socialInboxRouter = router({
     )
     .query(({ input }) => listSocialInboxThreads(input ?? {})),
 
-  commentContexts: socialInboxProcedure
+  commentContexts: socialInboxViewProcedure
     .input(
       z
         .object({
@@ -122,19 +134,19 @@ export const socialInboxRouter = router({
     )
     .query(({ input }) => listSocialInboxCommentContexts(input ?? {})),
 
-  thread: socialInboxProcedure
+  thread: socialInboxViewProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .query(({ input }) => getSocialInboxThreadById(input.id)),
 
-  markRead: socialInboxProcedure
+  markRead: socialInboxViewProcedure
     .input(z.object({ id: z.number().int().positive(), isRead: z.boolean() }))
     .mutation(({ input }) => markSocialInboxThreadRead(input.id, input.isRead)),
 
-  setStarred: socialInboxProcedure
+  setStarred: socialInboxViewProcedure
     .input(z.object({ id: z.number().int().positive(), isStarred: z.boolean() }))
     .mutation(({ input }) => setSocialInboxThreadStarred(input.id, input.isStarred)),
 
-  assign: socialInboxProcedure
+  assign: socialInboxAssignProcedure
     .input(
       z.object({
         id: z.number().int().positive(),
@@ -160,7 +172,7 @@ export const socialInboxRouter = router({
       return result;
     }),
 
-  updateCommentWorkflow: socialInboxProcedure
+  updateCommentWorkflow: socialInboxAssignProcedure
     .input(
       z.object({
         id: z.number().int().positive(),
@@ -187,7 +199,7 @@ export const socialInboxRouter = router({
       return result;
     }),
 
-  replyToComment: socialInboxProcedure
+  replyToComment: socialInboxReplyProcedure
     .input(commentActionInput.extend({ message: z.string().trim().min(1).max(1000) }))
     .mutation(async ({ input }) => {
       const target = await getSocialInboxCommentActionTarget(input.threadId, input.itemId);
@@ -213,7 +225,7 @@ export const socialInboxRouter = router({
       );
     }),
 
-  setCommentHidden: socialInboxProcedure
+  setCommentHidden: socialInboxReplyProcedure
     .input(commentActionInput.extend({ isHidden: z.boolean() }))
     .mutation(async ({ input }) => {
       const target = await getSocialInboxCommentActionTarget(input.threadId, input.itemId);
@@ -244,7 +256,7 @@ export const socialInboxRouter = router({
       return result;
     }),
 
-  sendCommentPrivateReply: socialInboxProcedure
+  sendCommentPrivateReply: socialInboxReplyProcedure
     .input(commentActionInput.extend({ message: z.string().trim().min(1).max(1000) }))
     .mutation(async ({ input }) => {
       const target = await getSocialInboxCommentActionTarget(input.threadId, input.itemId);
@@ -277,7 +289,7 @@ export const socialInboxRouter = router({
       );
     }),
 
-  enrichCommentContext: socialInboxProcedure
+  enrichCommentContext: socialInboxManagementProcedure
     .input(commentActionInput)
     .mutation(async ({ input }) => {
       const target = await getSocialInboxCommentActionTarget(input.threadId, input.itemId);

@@ -10,9 +10,18 @@ import { quickRepliesRoutes } from './routes/quickRepliesRoutes';
 import { permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('whatsapp-messages');
-const communicationViewProcedure = permissionProcedure(
-  'communications.manage',
-  'عرض رسائل WhatsApp'
+const communicationViewProcedure = permissionProcedure('communications.view', 'عرض رسائل WhatsApp');
+const communicationReplyProcedure = permissionProcedure(
+  'communications.reply',
+  'إرسال والرد على رسائل WhatsApp'
+);
+const communicationBroadcastProcedure = permissionProcedure(
+  'communications.broadcast',
+  'إرسال بث WhatsApp'
+);
+const communicationTemplatesProcedure = permissionProcedure(
+  'communications.templates.manage',
+  'إدارة قوالب الردود السريعة'
 );
 const communicationManagementProcedure = permissionProcedure(
   'communications.manage',
@@ -25,7 +34,7 @@ export const messagesRouter = router({
       .input(z.object({ conversationId: z.number() }))
       .query(messageRoutes.listByConversation),
 
-    send: communicationManagementProcedure
+    send: communicationReplyProcedure
       // @ts-expect-error - tRPC middleware type compatibility issue
       .use(requireWhatsAppFeature())
       .input(
@@ -53,7 +62,7 @@ export const messagesRouter = router({
       )
       .mutation(messageRoutes.send),
 
-    uploadMedia: communicationManagementProcedure
+    uploadMedia: communicationReplyProcedure
       .input(
         z.object({
           fileBuffer: z.string(), // base64 encoded buffer
@@ -83,7 +92,7 @@ export const messagesRouter = router({
       )
       .query(messageRoutes.searchInConversation),
 
-    forward: communicationManagementProcedure
+    forward: communicationReplyProcedure
       .input(
         z.object({
           messageId: z.number(),
@@ -93,7 +102,7 @@ export const messagesRouter = router({
       .mutation(messageRoutes.forward),
   }),
 
-  sendSimpleText: communicationManagementProcedure
+  sendSimpleText: communicationReplyProcedure
     .input(
       z.object({
         phone: z.string().min(9).max(15),
@@ -103,7 +112,7 @@ export const messagesRouter = router({
     )
     .mutation(broadcastRoutes.sendSimpleText),
 
-  sendWelcomeMsg: communicationManagementProcedure
+  sendWelcomeMsg: communicationReplyProcedure
     .input(
       z.object({
         phone: z.string().min(9).max(15),
@@ -113,7 +122,7 @@ export const messagesRouter = router({
     )
     .mutation(broadcastRoutes.sendWelcomeMsg),
 
-  sendTypingIndicator: communicationManagementProcedure
+  sendTypingIndicator: communicationReplyProcedure
     .input(
       z.object({
         conversationId: z.number(),
@@ -162,7 +171,7 @@ export const messagesRouter = router({
       return result;
     }),
 
-  sendBroadcast: communicationManagementProcedure
+  sendBroadcast: communicationBroadcastProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireWhatsAppFeature())
     .input(
@@ -181,7 +190,7 @@ export const messagesRouter = router({
 
   getBroadcastStats: communicationViewProcedure.query(broadcastRoutes.getBroadcastStats),
 
-  scheduleBroadcast: communicationManagementProcedure
+  scheduleBroadcast: communicationBroadcastProcedure
     .input(
       z.object({
         message: z.string().min(1).max(4096),
@@ -195,7 +204,7 @@ export const messagesRouter = router({
   quickReplies: router({
     list: communicationViewProcedure.query(quickRepliesRoutes.list),
 
-    create: communicationManagementProcedure
+    create: communicationTemplatesProcedure
       .input(
         z.object({
           name: z.string().min(1),
@@ -205,7 +214,7 @@ export const messagesRouter = router({
       )
       .mutation(quickRepliesRoutes.create),
 
-    update: communicationManagementProcedure
+    update: communicationTemplatesProcedure
       .input(
         z.object({
           id: z.number(),
@@ -217,7 +226,7 @@ export const messagesRouter = router({
       )
       .mutation(quickRepliesRoutes.update),
 
-    delete: communicationManagementProcedure
+    delete: communicationTemplatesProcedure
       .input(z.object({ id: z.number() }))
       .mutation(quickRepliesRoutes.delete),
   }),

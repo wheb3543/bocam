@@ -35,6 +35,8 @@ describe('إدارة الأدوار والصلاحيات', () => {
     expect(doesRolePermissionSetGrant(['appointments.manage'], 'appointments.cancel')).toBe(true);
     expect(doesRolePermissionSetGrant(['appointments.manage'], 'appointments.delete')).toBe(false);
     expect(doesRolePermissionSetGrant(['leads.manage'], 'leads.update')).toBe(true);
+    expect(doesRolePermissionSetGrant(['communications.manage'], 'communications.broadcast')).toBe(true);
+    expect(doesRolePermissionSetGrant(['communications.reply'], 'communications.broadcast')).toBe(false);
   });
 
   it('يربط تعريف الدور وتعيينه بإجراءات خادمية محمية ولا يعتمد على الواجهة فقط', () => {

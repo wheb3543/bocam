@@ -31,6 +31,11 @@ const LEGACY_MANAGEMENT_PERMISSION_BY_GRANULAR: Partial<Record<RolePermission, R
   'appointments.cancel': 'appointments.manage',
   'leads.view': 'leads.manage',
   'leads.update': 'leads.manage',
+  'communications.view': 'communications.manage',
+  'communications.reply': 'communications.manage',
+  'communications.assign': 'communications.manage',
+  'communications.broadcast': 'communications.manage',
+  'communications.templates.manage': 'communications.manage',
 };
 
 export function normalizeRolePermissions(value: unknown): RolePermission[] {

@@ -30,6 +30,10 @@ import { permissionProcedure } from './permissionProcedures';
 
 const leadsViewProcedure = permissionProcedure('leads.view', 'عرض العملاء المحتملين');
 const leadsUpdateProcedure = permissionProcedure('leads.update', 'تعديل العملاء المحتملين');
+const communicationsReplyProcedure = permissionProcedure(
+  'communications.reply',
+  'إرسال رسائل متابعة العملاء المحتملين'
+);
 
 export const leadsRouter = router({
   // Public endpoint for lead submission from landing page
@@ -265,7 +269,7 @@ export const leadsRouter = router({
     return getLeadsStats();
   }),
 
-  sendWhatsApp: protectedProcedure
+  sendWhatsApp: communicationsReplyProcedure
     .input(
       z.object({
         leadId: z.number(),
@@ -289,7 +293,7 @@ export const leadsRouter = router({
       return { success };
     }),
 
-  sendBookingConfirmation: protectedProcedure
+  sendBookingConfirmation: communicationsReplyProcedure
     .input(
       z.object({
         leadId: z.number(),

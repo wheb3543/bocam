@@ -1,22 +1,34 @@
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import * as db from '../../database/db';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { z } from 'zod';
 import { createLogger } from '../../_core/logger';
+import { permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('whatsapp-templates');
+const communicationViewProcedure = permissionProcedure('communications.view', 'عرض قوالب WhatsApp');
+const communicationReplyProcedure = permissionProcedure(
+  'communications.reply',
+  'إرسال قوالب ورسائل WhatsApp'
+);
+const communicationTemplatesProcedure = permissionProcedure(
+  'communications.templates.manage',
+  'إدارة قوالب WhatsApp'
+);
 
 export const templatesRouter = router({
   templates: router({
-    list: protectedProcedure.query(async () => {
+    list: communicationViewProcedure.query(async () => {
       return db.getAllWhatsAppTemplates();
     }),
 
-    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
-      return db.getWhatsAppTemplateById(input.id);
-    }),
+    getById: communicationViewProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return db.getWhatsAppTemplateById(input.id);
+      }),
 
-    syncFromMeta: protectedProcedure.mutation(async () => {
+    syncFromMeta: communicationTemplatesProcedure.mutation(async () => {
       const wabaId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
       const hasToken = !!process.env.META_ACCESS_TOKEN;
       const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -45,7 +57,7 @@ export const templatesRouter = router({
       return result;
     }),
 
-    syncStatus: protectedProcedure.mutation(async () => {
+    syncStatus: communicationTemplatesProcedure.mutation(async () => {
       const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
       const hasToken = !!process.env.META_ACCESS_TOKEN;
 
@@ -68,7 +80,7 @@ export const templatesRouter = router({
       return result;
     }),
 
-    create: protectedProcedure
+    create: communicationTemplatesProcedure
       .input(
         z.object({
           name: z.string().min(1),
@@ -82,7 +94,7 @@ export const templatesRouter = router({
         return createTemplate(input);
       }),
 
-    update: protectedProcedure
+    update: communicationTemplatesProcedure
       .input(
         z.object({
           id: z.number(),
@@ -96,13 +108,15 @@ export const templatesRouter = router({
         return updateTemplate(input.id, input);
       }),
 
-    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-      const { deleteTemplate } = await import('../../services/whatsappTemplates');
-      return deleteTemplate(input.id);
-    }),
+    delete: communicationTemplatesProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteTemplate } = await import('../../services/whatsappTemplates');
+        return deleteTemplate(input.id);
+      }),
   }),
 
-  sendTemplate: protectedProcedure
+  sendTemplate: communicationReplyProcedure
     .input(
       z.object({
         phone: z.string().min(9).max(15),
@@ -156,21 +170,21 @@ export const templatesRouter = router({
       return result;
     }),
 
-  getTemplates: protectedProcedure.query(async () => {
+  getTemplates: communicationViewProcedure.query(async () => {
     const { whatsappTemplates } = await import('../../../drizzle/schema');
     const dbConn = await ensureDatabaseAvailable();
     const templates = await dbConn.select().from(whatsappTemplates).orderBy(whatsappTemplates.name);
     return { success: true, templates };
   }),
 
-  getTemplateStatus: protectedProcedure
+  getTemplateStatus: communicationViewProcedure
     .input(z.object({ templateName: z.string() }))
     .query(async ({ input }) => {
       const { getTemplateStatus } = await import('../../services/whatsappTemplates');
       return getTemplateStatus(input.templateName);
     }),
 
-  sendMedia: protectedProcedure
+  sendMedia: communicationReplyProcedure
     .input(
       z.object({
         phone: z.string().min(9).max(15),
@@ -190,7 +204,7 @@ export const templatesRouter = router({
     }),
 
   templateQuality: router({
-    getHistory: protectedProcedure
+    getHistory: communicationViewProcedure
       .input(
         z
           .object({
@@ -215,7 +229,7 @@ export const templatesRouter = router({
       }),
   }),
 
-  getTemplatePerformance: protectedProcedure
+  getTemplatePerformance: communicationViewProcedure
     .input(
       z.object({ templateName: z.string().optional(), startDate: z.string(), endDate: z.string() })
     )
