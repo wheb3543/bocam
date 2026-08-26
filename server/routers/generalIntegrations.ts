@@ -7,14 +7,15 @@ import {
 import { permissionProcedure } from './permissionProcedures';
 
 const platformSchema = z.enum(['x', 'linkedin', 'youtube', 'tiktok']);
-const integrationSettingsProcedure = permissionProcedure(
-  'settings.manage',
-  'إدارة إعدادات التكاملات'
+const integrationsViewProcedure = permissionProcedure('integrations.view', 'عرض حالة التكاملات');
+const integrationCredentialsProcedure = permissionProcedure(
+  'integrations.credentials.manage',
+  'إدارة بيانات اعتماد التكاملات'
 );
 
 export const generalIntegrationsRouter = router({
-  status: integrationSettingsProcedure.query(() => getSocialPlatformIntegrationStatuses()),
-  save: integrationSettingsProcedure
+  status: integrationsViewProcedure.query(() => getSocialPlatformIntegrationStatuses()),
+  save: integrationCredentialsProcedure
     .input(
       z.object({
         platform: platformSchema,

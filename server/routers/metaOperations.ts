@@ -3,12 +3,16 @@ import { router } from '../_core/trpc';
 import { getMetaOperationsOverview, upsertMetaLeadForm } from '../database/db';
 import { permissionProcedure } from './permissionProcedures';
 
-const integrationSettingsProcedure = permissionProcedure('settings.manage', 'إدارة عمليات Meta');
+const integrationsViewProcedure = permissionProcedure('integrations.view', 'عرض عمليات Meta');
+const integrationsConnectProcedure = permissionProcedure(
+  'integrations.connect',
+  'إدارة ربط أصول Meta'
+);
 
 export const metaOperationsRouter = router({
-  overview: integrationSettingsProcedure.query(() => getMetaOperationsOverview()),
+  overview: integrationsViewProcedure.query(() => getMetaOperationsOverview()),
 
-  saveLeadForm: integrationSettingsProcedure
+  saveLeadForm: integrationsConnectProcedure
     .input(
       z.object({
         connectionId: z.number().int().positive(),

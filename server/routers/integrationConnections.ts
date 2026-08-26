@@ -1,4 +1,4 @@
-import { adminProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { z } from 'zod';
 import {
   disconnectIntegrationConnection,
@@ -13,9 +13,11 @@ import {
 import { startExternalPlatformOAuth } from '../integrations/external/externalPlatformOAuth';
 import { permissionProcedure } from './permissionProcedures';
 
-const integrationSettingsProcedure = permissionProcedure(
-  'settings.manage',
-  'إدارة اتصالات التكامل'
+const integrationsViewProcedure = permissionProcedure('integrations.view', 'عرض اتصالات التكامل');
+const integrationsConnectProcedure = permissionProcedure('integrations.connect', 'ربط التكاملات');
+const integrationsDisconnectProcedure = permissionProcedure(
+  'integrations.disconnect',
+  'فصل التكاملات'
 );
 
 function callbackUri(req: { protocol?: string; get: (header: string) => string | undefined }) {
@@ -40,23 +42,23 @@ function externalCallbackUri(
 }
 
 export const integrationConnectionsRouter = router({
-  overview: integrationSettingsProcedure.query(() => getIntegrationConnectionsOverview()),
+  overview: integrationsViewProcedure.query(() => getIntegrationConnectionsOverview()),
 
-  startMetaBusiness: integrationSettingsProcedure.mutation(async ({ ctx }) => {
+  startMetaBusiness: integrationsConnectProcedure.mutation(async ({ ctx }) => {
     return startMetaBusinessOAuth({
       initiatedByUserId: ctx.user.id,
       redirectUri: callbackUri(ctx.req),
     });
   }),
 
-  startWhatsAppEmbeddedSignup: integrationSettingsProcedure.mutation(async ({ ctx }) => {
+  startWhatsAppEmbeddedSignup: integrationsConnectProcedure.mutation(async ({ ctx }) => {
     return startWhatsAppEmbeddedSignup({
       initiatedByUserId: ctx.user.id,
       redirectUri: callbackUri(ctx.req),
     });
   }),
 
-  startExternalOAuth: integrationSettingsProcedure
+  startExternalOAuth: integrationsConnectProcedure
     .input(z.object({ provider: z.enum(['x', 'linkedin', 'youtube', 'tiktok']) }))
     .mutation(({ ctx, input }) =>
       startExternalPlatformOAuth({
@@ -66,7 +68,7 @@ export const integrationConnectionsRouter = router({
       })
     ),
 
-  completeWhatsAppEmbeddedSignup: integrationSettingsProcedure
+  completeWhatsAppEmbeddedSignup: integrationsConnectProcedure
     .input(
       z.object({
         code: z.string().trim().min(4).max(4096),
@@ -77,14 +79,14 @@ export const integrationConnectionsRouter = router({
     )
     .mutation(({ input }) => completeWhatsAppEmbeddedSignup(input)),
 
-  setAssetSelected: integrationSettingsProcedure
+  setAssetSelected: integrationsConnectProcedure
     .input(z.object({ assetId: z.number().int().positive(), isSelected: z.boolean() }))
     .mutation(async ({ input }) => {
       await setIntegrationAssetSelected(input.assetId, input.isSelected);
       return { success: true };
     }),
 
-  disconnect: integrationSettingsProcedure
+  disconnect: integrationsDisconnectProcedure
     .input(z.object({ connectionId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       await disconnectIntegrationConnection(input.connectionId, ctx.user.id);

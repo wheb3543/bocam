@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { protectedProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { notifyTaskAssignment } from '../services/taskReminderService';
 import {
@@ -9,10 +9,16 @@ import {
   updateFollowUpTaskStatus,
   deleteFollowUpTask,
 } from '../tasks/followUpTasks';
+import { assertRolePermission, permissionProcedure } from './permissionProcedures';
+
+const tasksViewProcedure = permissionProcedure('tasks.view', 'عرض مهام المتابعة');
+const tasksCreateProcedure = permissionProcedure('tasks.create', 'إنشاء مهام المتابعة');
+const tasksUpdateProcedure = permissionProcedure('tasks.update', 'تعديل مهام المتابعة');
+const tasksDeleteProcedure = permissionProcedure('tasks.delete', 'حذف مهام المتابعة');
 
 export const followUpTasksRouter = router({
   // Get all tasks
-  getAll: protectedProcedure.query(async () => {
+  getAll: tasksViewProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
     const { followUpTasks } = await import('../../drizzle/schema');
     const { desc } = await import('drizzle-orm');
@@ -20,7 +26,7 @@ export const followUpTasksRouter = router({
   }),
 
   // Get tasks for a specific entity
-  getByEntity: protectedProcedure
+  getByEntity: tasksViewProcedure
     .input(
       z.object({
         entityType: z.enum(['appointment', 'lead', 'offerLead', 'campRegistration']),
@@ -32,7 +38,7 @@ export const followUpTasksRouter = router({
     }),
 
   // Get task count for a specific entity
-  getCount: protectedProcedure
+  getCount: tasksViewProcedure
     .input(
       z.object({
         entityType: z.enum(['appointment', 'lead', 'offerLead', 'campRegistration']),
@@ -44,7 +50,7 @@ export const followUpTasksRouter = router({
     }),
 
   // Create a new task
-  create: protectedProcedure
+  create: tasksCreateProcedure
     .input(
       z.object({
         entityType: z.enum(['appointment', 'lead', 'offerLead', 'campRegistration']),
@@ -58,6 +64,9 @@ export const followUpTasksRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      if (input.assignedToId && input.assignedToId !== ctx.user.id) {
+        await assertRolePermission(ctx.user, 'tasks.assign', 'إسناد مهام المتابعة');
+      }
       const created = await createFollowUpTask({
         entityType: input.entityType,
         entityId: input.entityId,
@@ -86,7 +95,7 @@ export const followUpTasksRouter = router({
     }),
 
   // Update task status
-  updateStatus: protectedProcedure
+  updateStatus: tasksUpdateProcedure
     .input(
       z.object({
         id: z.number(),
@@ -94,6 +103,9 @@ export const followUpTasksRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      if (input.status === 'completed') {
+        await assertRolePermission(ctx.user, 'tasks.complete', 'إكمال مهام المتابعة');
+      }
       await updateFollowUpTaskStatus(
         input.id,
         input.status,
@@ -105,7 +117,7 @@ export const followUpTasksRouter = router({
     }),
 
   // Delete a task
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: tasksDeleteProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     await deleteFollowUpTask(input.id);
     return { success: true };
   }),

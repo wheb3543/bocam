@@ -27,8 +27,13 @@ import {
 import { cacheManager } from '../../services/redis';
 import { auditLogService } from '../../services/content/auditLogService';
 import { assertPublicationQuality } from '../../services/content/publicationQualityGate';
+import { assertRolePermission } from '../permissionProcedures';
 
 const logger = createLogger('textContent');
+
+function isPrivacyTextContent(value: { key?: string | null; section?: string | null }) {
+  return value.key?.startsWith('privacy.') || value.section?.startsWith('privacy') || false;
+}
 
 const ADMIN_CACHE_TTL = 2 * 60; // 2 minutes for admin interfaces
 
@@ -139,7 +144,10 @@ export const textContentRouter = router({
         limit: z.number().optional().default(50),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (input.section?.startsWith('privacy')) {
+        await assertRolePermission(ctx.user, 'privacy.view', 'عرض محتوى الخصوصية');
+      }
       const cacheKey = getAdminCacheKey('textContent:list', input);
       const cached = await getFromAdminCache(cacheKey);
       if (cached) {
@@ -218,7 +226,10 @@ export const textContentRouter = router({
    */
   getByKey: contentReadProcedure
     .input(z.object({ key: z.string(), language: z.string().optional() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (input.key.startsWith('privacy.')) {
+        await assertRolePermission(ctx.user, 'privacy.view', 'عرض محتوى الخصوصية');
+      }
       const db = await ensureDatabaseAvailable();
 
       const conditions = [eq(textContent.key, input.key)];
@@ -238,18 +249,30 @@ export const textContentRouter = router({
   /**
    * الحصول على محتوى نصي واحد بواسطة المعرف
    */
-  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  getById: contentReadProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const db = await ensureDatabaseAvailable();
 
-    const result = await db.select().from(textContent).where(eq(textContent.id, input.id)).limit(1);
+      const result = await db
+        .select()
+        .from(textContent)
+        .where(eq(textContent.id, input.id))
+        .limit(1);
 
-    return result[0] || null;
-  }),
+      if (result[0] && isPrivacyTextContent(result[0])) {
+        await assertRolePermission(ctx.user, 'privacy.view', 'عرض محتوى الخصوصية');
+      }
+      return result[0] || null;
+    }),
 
   /**
    * إنشاء محتوى نصي جديد
    */
   create: contentCreateProcedure.input(textContentSchema).mutation(async ({ input, ctx }) => {
+    if (isPrivacyTextContent(input)) {
+      await assertRolePermission(ctx.user, 'privacy.manage', 'إدارة محتوى الخصوصية');
+    }
     const db = await ensureDatabaseAvailable();
     if (input.status === 'published') {
       await assertContentCapability(ctx.user, 'publish');
@@ -328,6 +351,14 @@ export const textContentRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      const [currentContent] = await db
+        .select({ key: textContent.key, section: textContent.section })
+        .from(textContent)
+        .where(eq(textContent.id, input.id))
+        .limit(1);
+      if (isPrivacyTextContent(input) || (currentContent && isPrivacyTextContent(currentContent))) {
+        await assertRolePermission(ctx.user, 'privacy.manage', 'إدارة محتوى الخصوصية');
+      }
       if (input.status === 'published') {
         await assertContentCapability(ctx.user, 'publish');
         await assertPublicationQuality(db, {
@@ -406,6 +437,9 @@ export const textContentRouter = router({
         .from(textContent)
         .where(eq(textContent.id, input.id))
         .limit(1);
+      if (existing[0] && isPrivacyTextContent(existing[0])) {
+        await assertRolePermission(ctx.user, 'privacy.manage', 'إدارة محتوى الخصوصية');
+      }
 
       await db
         .update(textContent)
@@ -457,6 +491,9 @@ export const textContentRouter = router({
       if (!existing[0]) {
         throw new Error('المحتوى النصي غير موجود.');
       }
+      if (isPrivacyTextContent(existing[0])) {
+        await assertRolePermission(ctx.user, 'privacy.manage', 'إدارة محتوى الخصوصية');
+      }
 
       const quality = await assertPublicationQuality(db, {
         entityType: 'textContent',
@@ -496,8 +533,16 @@ export const textContentRouter = router({
    */
   archive: contentPublishProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      const [existing] = await db
+        .select()
+        .from(textContent)
+        .where(eq(textContent.id, input.id))
+        .limit(1);
+      if (existing && isPrivacyTextContent(existing)) {
+        await assertRolePermission(ctx.user, 'privacy.manage', 'إدارة محتوى الخصوصية');
+      }
 
       await db.update(textContent).set({ status: 'archived' }).where(eq(textContent.id, input.id));
 
@@ -515,8 +560,16 @@ export const textContentRouter = router({
    */
   restore: contentRestoreProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
+      const [existing] = await db
+        .select()
+        .from(textContent)
+        .where(eq(textContent.id, input.id))
+        .limit(1);
+      if (existing && isPrivacyTextContent(existing)) {
+        await assertRolePermission(ctx.user, 'privacy.manage', 'إدارة محتوى الخصوصية');
+      }
 
       await db
         .update(textContent)
@@ -537,7 +590,7 @@ export const textContentRouter = router({
    */
   duplicate: contentCreateProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
 
       // الحصول على المحتوى الأصلي
@@ -549,6 +602,9 @@ export const textContentRouter = router({
 
       if (!originalContent[0]) {
         throw new Error('المحتوى النصي غير موجود');
+      }
+      if (isPrivacyTextContent(originalContent[0])) {
+        await assertRolePermission(ctx.user, 'privacy.manage', 'إدارة محتوى الخصوصية');
       }
 
       const content = originalContent[0];
@@ -608,7 +664,10 @@ export const textContentRouter = router({
         status: z.enum(['draft', 'published', 'archived']).optional(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      if (input.section?.startsWith('privacy')) {
+        await assertRolePermission(ctx.user, 'privacy.export', 'تصدير محتوى الخصوصية');
+      }
       const db = await ensureDatabaseAvailable();
 
       const conditions = [];

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { router, protectedProcedure } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import {
   getAllTasks,
   getTaskById,
@@ -19,10 +19,16 @@ import {
 } from '../database/db/tasks';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { notifyTaskAssignment } from '../services/taskReminderService';
+import { assertRolePermission, permissionProcedure } from './permissionProcedures';
+
+const tasksViewProcedure = permissionProcedure('tasks.view', 'عرض المهام');
+const tasksCreateProcedure = permissionProcedure('tasks.create', 'إنشاء المهام');
+const tasksUpdateProcedure = permissionProcedure('tasks.update', 'تعديل المهام');
+const tasksDeleteProcedure = permissionProcedure('tasks.delete', 'حذف المهام');
 
 export const tasksRouter = router({
   // Get all tasks with filters
-  list: protectedProcedure
+  list: tasksViewProcedure
     .input(
       z
         .object({
@@ -40,12 +46,12 @@ export const tasksRouter = router({
     }),
 
   // Get single task by ID
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: tasksViewProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     return getTaskById(input.id);
   }),
 
   // Create new task
-  create: protectedProcedure
+  create: tasksCreateProcedure
     .input(
       z.object({
         title: z.string().min(1),
@@ -65,6 +71,9 @@ export const tasksRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      if (input.assignedTo && input.assignedTo !== ctx.user.id) {
+        await assertRolePermission(ctx.user, 'tasks.assign', 'إسناد المهام');
+      }
       const created = await createTask({
         ...input,
         createdBy: ctx.user.id,
@@ -82,7 +91,7 @@ export const tasksRouter = router({
     }),
 
   // Update task
-  update: protectedProcedure
+  update: tasksUpdateProcedure
     .input(
       z.object({
         id: z.number(),
@@ -103,6 +112,12 @@ export const tasksRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      if (input.assignedTo !== undefined) {
+        await assertRolePermission(ctx.user, 'tasks.assign', 'إسناد المهام');
+      }
+      if (input.status === 'completed') {
+        await assertRolePermission(ctx.user, 'tasks.complete', 'إكمال المهام');
+      }
       const { id, ...data } = input;
       const existing = await getTaskById(id);
       const result = await updateTask(id, data);
@@ -124,48 +139,51 @@ export const tasksRouter = router({
     }),
 
   // Delete task
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: tasksDeleteProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     return deleteTask(input.id);
   }),
 
   // Update task status (for drag & drop)
-  updateStatus: protectedProcedure
+  updateStatus: tasksUpdateProcedure
     .input(
       z.object({
         id: z.number(),
         status: z.enum(['todo', 'in_progress', 'review', 'completed', 'cancelled']),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (input.status === 'completed') {
+        await assertRolePermission(ctx.user, 'tasks.complete', 'إكمال المهام');
+      }
       return updateTaskStatus(input.id, input.status);
     }),
 
   // Get tasks statistics
-  stats: protectedProcedure.query(async () => {
+  stats: tasksViewProcedure.query(async () => {
     return getTasksStats();
   }),
 
   // Get my tasks
-  myTasks: protectedProcedure.query(async ({ ctx }) => {
+  myTasks: tasksViewProcedure.query(async ({ ctx }) => {
     return getTasksByUser(ctx.user.id);
   }),
 
   // Get overdue tasks
-  overdue: protectedProcedure.query(async () => {
+  overdue: tasksViewProcedure.query(async () => {
     return getOverdueTasks();
   }),
 
   // ============ COMMENTS ============
 
   // Get task comments
-  getComments: protectedProcedure
+  getComments: tasksViewProcedure
     .input(z.object({ taskId: z.number() }))
     .query(async ({ input }) => {
       return getTaskComments(input.taskId);
     }),
 
   // Add comment
-  addComment: protectedProcedure
+  addComment: tasksUpdateProcedure
     .input(
       z.object({
         taskId: z.number(),
@@ -181,7 +199,7 @@ export const tasksRouter = router({
     }),
 
   // Delete comment
-  deleteComment: protectedProcedure
+  deleteComment: tasksDeleteProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return deleteTaskComment(input.id);
@@ -190,14 +208,14 @@ export const tasksRouter = router({
   // ============ ATTACHMENTS ============
 
   // Get task attachments
-  getAttachments: protectedProcedure
+  getAttachments: tasksViewProcedure
     .input(z.object({ taskId: z.number() }))
     .query(async ({ input }) => {
       return getTaskAttachments(input.taskId);
     }),
 
   // Add attachment
-  addAttachment: protectedProcedure
+  addAttachment: tasksUpdateProcedure
     .input(
       z.object({
         taskId: z.number(),
@@ -221,7 +239,7 @@ export const tasksRouter = router({
     }),
 
   // Delete attachment
-  deleteAttachment: protectedProcedure
+  deleteAttachment: tasksDeleteProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return deleteTaskAttachment(input.id);

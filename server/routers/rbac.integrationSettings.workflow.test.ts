@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-describe('توسيع صلاحيات إعدادات النظام والتكاملات', () => {
-  it('يحمي راوترات التكاملات الحساسة بصلاحية settings.manage مشتركة', () => {
+describe('فصل صلاحيات التكاملات الخادمية', () => {
+  it('يفصل العرض والربط والفصل وبيانات الاعتماد بدلاً من حراسة إعدادات عامة واحدة', () => {
     const procedureSource = readFileSync(resolve(process.cwd(), 'server/routers/permissionProcedures.ts'), 'utf8');
     const generalSource = readFileSync(resolve(process.cwd(), 'server/routers/generalIntegrations.ts'), 'utf8');
     const connectionsSource = readFileSync(resolve(process.cwd(), 'server/routers/integrationConnections.ts'), 'utf8');
@@ -11,9 +11,17 @@ describe('توسيع صلاحيات إعدادات النظام والتكامل
     const operationsSource = readFileSync(resolve(process.cwd(), 'server/routers/metaOperations.ts'), 'utf8');
     expect(procedureSource).toContain('hasRolePermission');
     expect(procedureSource).toContain('FORBIDDEN');
+    expect(generalSource).toContain("permissionProcedure('integrations.view'");
+    expect(generalSource).toContain("permissionProcedure(\n  'integrations.credentials.manage'");
+    expect(metaSource).toContain("permissionProcedure('integrations.view'");
+    expect(metaSource).toContain("permissionProcedure(\n  'integrations.credentials.manage'");
+    expect(connectionsSource).toContain("permissionProcedure('integrations.view'");
+    expect(connectionsSource).toContain("permissionProcedure('integrations.connect'");
+    expect(connectionsSource).toContain("permissionProcedure('integrations.disconnect'");
+    expect(operationsSource).toContain("permissionProcedure('integrations.view'");
+    expect(operationsSource).toContain("permissionProcedure('integrations.connect'");
     [generalSource, connectionsSource, metaSource, operationsSource].forEach((source) => {
-      expect(source).toContain("permissionProcedure('settings.manage'");
-      expect(source).toContain('integrationSettingsProcedure');
+      expect(source).not.toContain('integrationSettingsProcedure');
     });
   });
 

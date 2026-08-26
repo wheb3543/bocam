@@ -4,12 +4,16 @@ import { getMetaIntegrationSettingsStatus, saveMetaIntegrationSettings } from '.
 import { permissionProcedure } from './permissionProcedures';
 
 const optionalText = z.string().trim().max(10000).optional();
-const integrationSettingsProcedure = permissionProcedure('settings.manage', 'إدارة إعدادات Meta');
+const integrationsViewProcedure = permissionProcedure('integrations.view', 'عرض إعدادات Meta');
+const integrationCredentialsProcedure = permissionProcedure(
+  'integrations.credentials.manage',
+  'إدارة بيانات اعتماد Meta'
+);
 
 export const metaIntegrationRouter = router({
-  status: integrationSettingsProcedure.query(() => getMetaIntegrationSettingsStatus()),
+  status: integrationsViewProcedure.query(() => getMetaIntegrationSettingsStatus()),
 
-  save: integrationSettingsProcedure
+  save: integrationCredentialsProcedure
     .input(
       z.object({
         appId: z.string().trim().max(255).optional(),
