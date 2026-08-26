@@ -98,6 +98,16 @@ export default function RolesPermissionsPanel() {
         ? Array.from(new Set([...current.permissions, permission]))
         : current.permissions.filter((item) => item !== permission),
     }));
+  const toggleGroupPermissions = (permissions: readonly RolePermission[]) =>
+    setForm((current) => {
+      const selected = permissions.every((permission) => current.permissions.includes(permission));
+      return {
+        ...current,
+        permissions: selected
+          ? current.permissions.filter((permission) => !permissions.includes(permission))
+          : Array.from(new Set([...current.permissions, ...permissions])),
+      };
+    });
 
   return (
     <>
@@ -248,7 +258,32 @@ export default function RolesPermissionsPanel() {
             <div className="space-y-4">
               {ROLE_PERMISSION_GROUPS.map((group) => (
                 <div key={group.key}>
-                  <p className="mb-2 text-sm font-medium">{group.label}</p>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium">{group.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {
+                          group.permissions.filter((permission) =>
+                            form.permissions.includes(permission)
+                          ).length
+                        }
+                        /{group.permissions.length} صلاحية
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => toggleGroupPermissions(group.permissions)}
+                    >
+                      {group.permissions.every((permission) =>
+                        form.permissions.includes(permission)
+                      )
+                        ? 'إلغاء المجموعة'
+                        : 'تحديد المجموعة'}
+                    </Button>
+                  </div>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {group.permissions.map((permission) => (
                       <label

@@ -11,8 +11,15 @@ describe('إدارة الأدوار والصلاحيات', () => {
       'users.manage',
       'unknown.permission',
       'content.publish',
+      'tasks.assign',
+      'privacy.export',
     ]);
-    expect(permissions).toEqual(['users.manage', 'content.publish']);
+    expect(permissions).toEqual([
+      'users.manage',
+      'content.publish',
+      'tasks.assign',
+      'privacy.export',
+    ]);
     expect(ROLE_PERMISSIONS).toContain('roles.manage');
     expect(ROLE_PERMISSIONS).toContain('users.create');
     expect(ROLE_PERMISSIONS).toContain('users.delete');
@@ -21,6 +28,15 @@ describe('إدارة الأدوار والصلاحيات', () => {
     expect(ROLE_PERMISSIONS).toContain('communications.broadcast');
     expect(ROLE_PERMISSIONS).toContain('campaigns.delete');
     expect(ROLE_PERMISSIONS).toContain('operations.manage');
+    expect(ROLE_PERMISSIONS).toContain('media.organize');
+    expect(ROLE_PERMISSIONS).toContain('appointments.export');
+    expect(ROLE_PERMISSIONS).toContain('leads.export');
+    expect(ROLE_PERMISSIONS).toContain('campaigns.publish');
+    expect(ROLE_PERMISSIONS).toContain('tasks.complete');
+    expect(ROLE_PERMISSIONS).toContain('integrations.credentials.manage');
+    expect(ROLE_PERMISSIONS).toContain('privacy.manage');
+    expect(ROLE_PERMISSIONS).toContain('operations.restore');
+    expect(ROLE_PERMISSIONS).toContain('audit.export');
   });
 
   it('يحافظ على الامتياز العام الموجود صراحةً أثناء الانتقال إلى إجراءات المستخدمين الدقيقة', () => {
