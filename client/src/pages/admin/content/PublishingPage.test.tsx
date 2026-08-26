@@ -22,6 +22,22 @@ vi.mock('@/components/layout/DashboardLayout', () => ({
 vi.mock('@/lib/api/trpc', () => ({
   trpc: {
     useUtils: () => ({ content: { publishing: { overview: { invalidate: mocks.invalidate } } } }),
+    auth: {
+      permissions: {
+        useQuery: () => ({
+          data: [
+            'content.view',
+            'content.create',
+            'content.update',
+            'content.review',
+            'content.schedule',
+            'content.publish',
+            'media.view',
+          ],
+          isLoading: false,
+        }),
+      },
+    },
     content: {
       publishing: {
         overview: { useQuery: mocks.overviewQuery },

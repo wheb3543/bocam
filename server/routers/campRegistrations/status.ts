@@ -4,8 +4,9 @@
  */
 
 import { eq, inArray } from 'drizzle-orm';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
+import { permissionProcedure } from '../permissionProcedures';
 import { campRegistrations } from '../../../drizzle/schema';
 import {
   updateCampRegistrationStatusSchema,
@@ -21,10 +22,14 @@ import { updateStatusTimestamps } from '../../_core/statusTimestamps';
 import { notifyRegistrationStatusFollowUp } from '../../services/notificationFollowUpService';
 
 const logger = createLogger('campRegistrations.status');
+const registrationsUpdateProcedure = permissionProcedure(
+  'registrations.update',
+  'تعديل تسجيلات المخيمات'
+);
 
 export const campStatusRouter = router({
   // Update camp registration status (protected)
-  updateStatus: protectedProcedure
+  updateStatus: registrationsUpdateProcedure
     .input(updateCampRegistrationStatusSchema)
     .mutation(async ({ ctx, input }) => {
       const db = await ensureDatabaseAvailable();
@@ -162,7 +167,7 @@ export const campStatusRouter = router({
     }),
 
   // Bulk update status for multiple registrations (protected)
-  bulkUpdateStatus: protectedProcedure
+  bulkUpdateStatus: registrationsUpdateProcedure
     .input(bulkUpdateCampRegistrationStatusSchema)
     .mutation(async ({ ctx, input }) => {
       const db = await ensureDatabaseAvailable();

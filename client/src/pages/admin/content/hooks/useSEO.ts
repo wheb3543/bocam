@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import type { SEOSettings, SEOSettingsFormData } from '../types/content.types';
 import { initialSEOSettingsFormData } from '../types/content.types';
 import { getPublicationQualityIssues } from '../utils/publicationQuality';
@@ -45,6 +46,12 @@ export function useSEO() {
   const [qualityIssues, setQualityIssues] = useState<string[]>([]);
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canViewSEO = can('content.view');
+  const canManageSEO = can('content.seo.manage');
+  const canPublishSEO = can('content.publish');
+  const canDeleteSEO = can('content.delete');
+  const canRestoreSEO = can('content.restore');
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,16 +65,22 @@ export function useSEO() {
     data: seoSettings,
     isLoading: loadingSEOSettings,
     refetch,
-  } = trpc.content.seoSettings.list.useQuery({
-    language: language !== 'all' ? language : undefined,
-    isActive: isActive !== 'all' ? (isActive as 'yes' | 'no') : undefined,
-    status: statusFilter !== 'all' ? statusFilter : undefined,
-    includeDeleted: showDeleted,
-    search: searchQuery || undefined,
-  });
+  } = trpc.content.seoSettings.list.useQuery(
+    {
+      language: language !== 'all' ? language : undefined,
+      isActive: isActive !== 'all' ? (isActive as 'yes' | 'no') : undefined,
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      includeDeleted: showDeleted,
+      search: searchQuery || undefined,
+    },
+    { enabled: canViewSEO }
+  );
   const { data: seoOverview, refetch: refetchOverview } =
-    trpc.content.seoSettings.getOverview.useQuery();
-  const { data: seoReport, refetch: refetchReport } = trpc.content.seoSettings.getReport.useQuery();
+    trpc.content.seoSettings.getOverview.useQuery(undefined, { enabled: canViewSEO });
+  const { data: seoReport, refetch: refetchReport } = trpc.content.seoSettings.getReport.useQuery(
+    undefined,
+    { enabled: canViewSEO }
+  );
 
   const refetchSEOInsights = () => {
     refetchOverview();
@@ -274,6 +287,12 @@ export function useSEO() {
     formData,
     qualityIssues,
     isAdmin,
+    permissionsLoading,
+    canViewSEO,
+    canManageSEO,
+    canPublishSEO,
+    canDeleteSEO,
+    canRestoreSEO,
     searchQuery,
     language,
     isActive,

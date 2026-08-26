@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { trpc } from '@/lib/api/trpc';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 import { toast } from 'sonner';
 import {
   CalendarClock,
@@ -85,10 +87,22 @@ function PlatformMark({ platform, compact = false }: { platform: Platform; compa
 
 export default function PublishingPage() {
   const utils = trpc.useUtils();
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canViewPublishing = can('content.view');
+  const canCreateDraft = can('content.create');
+  const canUpdateDraft = can('content.update');
+  const canReviewDraft = can('content.review');
+  const canSchedulePublishing = can('content.schedule');
+  const canRetryPublishing = can('content.publish');
+  const canViewMedia = can('media.view');
   const workspaceQuery = trpc.content.publishing.overview.useQuery(undefined, {
     staleTime: 15_000,
+    enabled: canViewPublishing,
   });
-  const mediaQuery = trpc.content.media.list.useQuery({});
+  const mediaQuery = trpc.content.media.list.useQuery(
+    {},
+    { enabled: canCreateDraft && canViewMedia }
+  );
   const [title, setTitle] = useState('');
   const [caption, setCaption] = useState('');
   const [contentType, setContentType] = useState<ContentType>('post');
@@ -188,6 +202,29 @@ export default function PublishingPage() {
   const posts = workspaceQuery.data?.posts ?? [];
   const totals = workspaceQuery.data?.totals;
 
+  if (permissionsLoading) {
+    return (
+      <DashboardLayout pageTitle="النشر متعدد المنصات" pageHeader="none">
+        <div className="flex min-h-64 items-center justify-center text-muted-foreground">
+          <Loader2 className="ml-2 h-5 w-5 animate-spin" /> جارِ التحقق من الصلاحيات…
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!canViewPublishing) {
+    return (
+      <DashboardLayout pageTitle="النشر متعدد المنصات" pageHeader="none">
+        <Card className="mx-auto mt-10 max-w-xl p-8 text-center" dir="rtl">
+          <CardTitle>النشر متعدد المنصات</CardTitle>
+          <div className="mt-4 flex justify-center">
+            <PermissionHint message="تحتاج إلى صلاحية عرض المحتوى للوصول إلى مساحة النشر." />
+          </div>
+        </Card>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout
       pageTitle="النشر متعدد المنصات"
@@ -266,168 +303,177 @@ export default function PublishingPage() {
         </section>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]">
-          <Card className="border-slate-200 shadow-sm dark:border-slate-800">
-            <CardHeader className="border-b border-slate-100 pb-4 dark:border-slate-800">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
-                  1
-                </span>
-                <Send className="h-5 w-5 text-primary" /> إنشاء مسودة جديدة
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-6">
-              <div className="grid gap-4 md:grid-cols-[1fr_190px]">
-                <label className="space-y-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  عنوان داخلي للمحتوى
-                  <Input
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                    placeholder="مثال: تعريف بخدمة العناية الرقمية"
-                    maxLength={255}
+          {canCreateDraft ? (
+            <Card className="border-slate-200 shadow-sm dark:border-slate-800">
+              <CardHeader className="border-b border-slate-100 pb-4 dark:border-slate-800">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+                    1
+                  </span>
+                  <Send className="h-5 w-5 text-primary" /> إنشاء مسودة جديدة
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-6">
+                <div className="grid gap-4 md:grid-cols-[1fr_190px]">
+                  <label className="space-y-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    عنوان داخلي للمحتوى
+                    <Input
+                      value={title}
+                      onChange={(event) => setTitle(event.target.value)}
+                      placeholder="مثال: تعريف بخدمة العناية الرقمية"
+                      maxLength={255}
+                    />
+                  </label>
+                  <label className="space-y-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    نوع المحتوى
+                    <select
+                      value={contentType}
+                      onChange={(event) => setContentType(event.target.value as ContentType)}
+                      className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <option value="post">منشور نصي</option>
+                      <option value="image">منشور صور</option>
+                      <option value="video">فيديو</option>
+                      <option value="reel">ريل</option>
+                      <option value="story">ستوري</option>
+                      <option value="short">YouTube Short</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label className="block space-y-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  النص الأساسي والوصف
+                  <Textarea
+                    value={caption}
+                    onChange={(event) => setCaption(event.target.value)}
+                    placeholder="اكتب الرسالة الأساسية. ستُنشأ منها نسخة قابلة للتخصيص لكل منصة."
+                    className="min-h-36 resize-y leading-7"
+                    maxLength={10000}
                   />
-                </label>
-                <label className="space-y-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  نوع المحتوى
-                  <select
-                    value={contentType}
-                    onChange={(event) => setContentType(event.target.value as ContentType)}
-                    className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  <span
+                    className="block text-left text-xs font-normal tabular-nums text-muted-foreground"
+                    aria-live="polite"
                   >
-                    <option value="post">منشور نصي</option>
-                    <option value="image">منشور صور</option>
-                    <option value="video">فيديو</option>
-                    <option value="reel">ريل</option>
-                    <option value="story">ستوري</option>
-                    <option value="short">YouTube Short</option>
-                  </select>
+                    {caption.length.toLocaleString('ar-SA')} / 10,000
+                  </span>
                 </label>
-              </div>
 
-              <label className="block space-y-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                النص الأساسي والوصف
-                <Textarea
-                  value={caption}
-                  onChange={(event) => setCaption(event.target.value)}
-                  placeholder="اكتب الرسالة الأساسية. ستُنشأ منها نسخة قابلة للتخصيص لكل منصة."
-                  className="min-h-36 resize-y leading-7"
-                  maxLength={10000}
-                />
-                <span
-                  className="block text-left text-xs font-normal tabular-nums text-muted-foreground"
-                  aria-live="polite"
-                >
-                  {caption.length.toLocaleString('ar-SA')} / 10,000
-                </span>
-              </label>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                    المنصات والوجهات
-                  </h2>
-                  <span className="hidden text-xs text-muted-foreground sm:inline">
-                    يتحقق الخادم من اتصال الحساب قبل النشر الحي
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                  {platformCatalog.map((platform) => {
-                    const selected = platforms.includes(platform.id);
-                    const connected = connectedByPlatform.has(platform.id);
-                    return (
-                      <button
-                        type="button"
-                        key={platform.id}
-                        onClick={() => togglePlatform(platform.id)}
-                        aria-pressed={selected}
-                        className={`flex min-h-14 items-center justify-between rounded-2xl border p-3 text-right transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? 'border-primary bg-primary/5 ring-1 ring-primary dark:bg-primary/10' : 'border-border bg-card hover:border-primary/40'}`}
-                      >
-                        <PlatformMark platform={platform.id} />
-                        <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                          <span
-                            className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-500' : 'bg-amber-400'}`}
-                            aria-hidden="true"
-                          />
-                          {connected ? 'متصل' : 'بانتظار الربط'}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="space-y-3 rounded-2xl border border-dashed border-primary/20 bg-primary/5 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <ImagePlus className="h-4 w-4 text-primary" />
-                    <h2 className="text-sm font-bold">اختيار من مكتبة الوسائط</h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                      المنصات والوجهات
+                    </h2>
+                    <span className="hidden text-xs text-muted-foreground sm:inline">
+                      يتحقق الخادم من اتصال الحساب قبل النشر الحي
+                    </span>
                   </div>
-                  <span className="text-xs tabular-nums text-muted-foreground">
-                    {selectedMediaIds.length} أصل محدد
-                  </span>
-                </div>
-                {mediaQuery.isLoading ? (
-                  <div
-                    className="flex items-center gap-2 py-3 text-sm text-muted-foreground"
-                    role="status"
-                  >
-                    <Loader2 className="h-4 w-4 animate-spin" /> جارِ تحميل الوسائط…
-                  </div>
-                ) : (
-                  <div className="grid max-h-56 grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-4">
-                    {(mediaQuery.data ?? []).slice(-16).map((asset) => {
-                      const selected = selectedMediaIds.includes(asset.id);
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                    {platformCatalog.map((platform) => {
+                      const selected = platforms.includes(platform.id);
+                      const connected = connectedByPlatform.has(platform.id);
                       return (
                         <button
                           type="button"
-                          key={asset.id}
-                          onClick={() => toggleMedia(asset.id)}
+                          key={platform.id}
+                          onClick={() => togglePlatform(platform.id)}
                           aria-pressed={selected}
-                          className={`overflow-hidden rounded-xl border text-right transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? 'border-primary ring-2 ring-primary/30' : 'border-border bg-card hover:border-primary/40'}`}
+                          className={`flex min-h-14 items-center justify-between rounded-2xl border p-3 text-right transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? 'border-primary bg-primary/5 ring-1 ring-primary dark:bg-primary/10' : 'border-border bg-card hover:border-primary/40'}`}
                         >
-                          <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800">
-                            {asset.type === 'image' ? (
-                              <img
-                                src={asset.url}
-                                alt={asset.altAr || asset.fileName || 'وسيط'}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="grid h-full place-items-center text-slate-500">
-                                <Video className="h-7 w-7" />
-                              </div>
-                            )}
-                          </div>
-                          <p className="truncate px-2 py-2 text-[11px] text-muted-foreground">
-                            {asset.fileName || asset.type}
-                          </p>
+                          <PlatformMark platform={platform.id} />
+                          <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                            <span
+                              className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-500' : 'bg-amber-400'}`}
+                              aria-hidden="true"
+                            />
+                            {connected ? 'متصل' : 'بانتظار الربط'}
+                          </span>
                         </button>
                       );
                     })}
-                    {!mediaQuery.data?.length && (
-                      <p className="col-span-full py-3 text-center text-sm text-slate-500">
-                        لا توجد وسائط متاحة بعد. أضفها من مكتبة الوسائط.
-                      </p>
-                    )}
                   </div>
-                )}
-              </div>
+                </div>
 
-              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-5">
-                <Button
-                  onClick={submitDraft}
-                  disabled={createDraft.isPending}
-                  className="min-h-10 w-full gap-2 sm:w-auto"
-                >
-                  {createDraft.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="space-y-3 rounded-2xl border border-dashed border-primary/20 bg-primary/5 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <ImagePlus className="h-4 w-4 text-primary" />
+                      <h2 className="text-sm font-bold">اختيار من مكتبة الوسائط</h2>
+                    </div>
+                    <span className="text-xs tabular-nums text-muted-foreground">
+                      {selectedMediaIds.length} أصل محدد
+                    </span>
+                  </div>
+                  {mediaQuery.isLoading ? (
+                    <div
+                      className="flex items-center gap-2 py-3 text-sm text-muted-foreground"
+                      role="status"
+                    >
+                      <Loader2 className="h-4 w-4 animate-spin" /> جارِ تحميل الوسائط…
+                    </div>
                   ) : (
-                    <FileText className="h-4 w-4" />
-                  )}{' '}
-                  حفظ المسودة
-                </Button>
+                    <div className="grid max-h-56 grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-4">
+                      {(mediaQuery.data ?? []).slice(-16).map((asset) => {
+                        const selected = selectedMediaIds.includes(asset.id);
+                        return (
+                          <button
+                            type="button"
+                            key={asset.id}
+                            onClick={() => toggleMedia(asset.id)}
+                            aria-pressed={selected}
+                            className={`overflow-hidden rounded-xl border text-right transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? 'border-primary ring-2 ring-primary/30' : 'border-border bg-card hover:border-primary/40'}`}
+                          >
+                            <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800">
+                              {asset.type === 'image' ? (
+                                <img
+                                  src={asset.url}
+                                  alt={asset.altAr || asset.fileName || 'وسيط'}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="grid h-full place-items-center text-slate-500">
+                                  <Video className="h-7 w-7" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="truncate px-2 py-2 text-[11px] text-muted-foreground">
+                              {asset.fileName || asset.type}
+                            </p>
+                          </button>
+                        );
+                      })}
+                      {!mediaQuery.data?.length && (
+                        <p className="col-span-full py-3 text-center text-sm text-slate-500">
+                          لا توجد وسائط متاحة بعد. أضفها من مكتبة الوسائط.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-5">
+                  <Button
+                    onClick={submitDraft}
+                    disabled={createDraft.isPending}
+                    className="min-h-10 w-full gap-2 sm:w-auto"
+                  >
+                    {createDraft.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileText className="h-4 w-4" />
+                    )}{' '}
+                    حفظ المسودة
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-slate-200 p-8 text-center shadow-sm dark:border-slate-800">
+              <CardTitle>إنشاء مسودة جديدة</CardTitle>
+              <div className="mt-4 flex justify-center">
+                <PermissionHint message="تحتاج إلى صلاحية إنشاء المحتوى لإعداد مسودات النشر." />
               </div>
-            </CardContent>
-          </Card>
+            </Card>
+          )}
 
           <Card className="border-slate-200 shadow-sm dark:border-slate-800">
             <CardHeader className="border-b border-slate-100 pb-4 dark:border-slate-800">
@@ -532,25 +578,26 @@ export default function PublishingPage() {
                                         : 'تعالج المنصة الفيديو'}
                                   </span>
                                 )}
-                                {destination.publicationStatus === 'failed' && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="min-h-9 px-2 text-[10px] text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                    onClick={() =>
-                                      retryDestination.mutate({ destinationId: destination.id })
-                                    }
-                                    disabled={retryDestination.isPending}
-                                  >
-                                    إعادة المحاولة
-                                  </Button>
-                                )}
+                                {destination.publicationStatus === 'failed' &&
+                                  canRetryPublishing && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="min-h-9 px-2 text-[10px] text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                      onClick={() =>
+                                        retryDestination.mutate({ destinationId: destination.id })
+                                      }
+                                      disabled={retryDestination.isPending}
+                                    >
+                                      إعادة المحاولة
+                                    </Button>
+                                  )}
                               </div>
                             ))}
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                          {post.status === 'draft' && (
+                          {post.status === 'draft' && canUpdateDraft && (
                             <Button
                               size="sm"
                               variant="outline"
@@ -560,7 +607,7 @@ export default function PublishingPage() {
                               إرسال للموافقة
                             </Button>
                           )}
-                          {post.status === 'in_review' && (
+                          {post.status === 'in_review' && canReviewDraft && (
                             <>
                               <Button
                                 size="sm"
@@ -580,7 +627,7 @@ export default function PublishingPage() {
                               </Button>
                             </>
                           )}
-                          {post.status === 'approved' && (
+                          {post.status === 'approved' && canSchedulePublishing && (
                             <div className="flex items-center gap-2">
                               <Input
                                 aria-label="موعد النشر"
@@ -606,7 +653,7 @@ export default function PublishingPage() {
                               </Button>
                             </div>
                           )}
-                          {post.status === 'scheduled' && (
+                          {post.status === 'scheduled' && canSchedulePublishing && (
                             <Button
                               size="sm"
                               variant="outline"
@@ -616,6 +663,21 @@ export default function PublishingPage() {
                               إلغاء الجدولة
                             </Button>
                           )}
+                          {post.status === 'draft' && !canUpdateDraft ? (
+                            <PermissionHint message="تحتاج إلى صلاحية تعديل المحتوى لإرسال المسودة للموافقة." />
+                          ) : null}
+                          {post.status === 'in_review' && !canReviewDraft ? (
+                            <PermissionHint message="تحتاج إلى صلاحية مراجعة المحتوى لاتخاذ قرار الموافقة." />
+                          ) : null}
+                          {(post.status === 'approved' || post.status === 'scheduled') &&
+                          !canSchedulePublishing ? (
+                            <PermissionHint message="تحتاج إلى صلاحية جدولة المحتوى لتحديد موعد النشر أو إلغائه." />
+                          ) : null}
+                          {entry.destinations.some(
+                            (item) => item.destination.publicationStatus === 'failed'
+                          ) && !canRetryPublishing ? (
+                            <PermissionHint message="تحتاج إلى صلاحية نشر المحتوى لإعادة محاولة التوزيع." />
+                          ) : null}
                           <ChevronLeft className="h-4 w-4 text-slate-400" />
                         </div>
                       </div>

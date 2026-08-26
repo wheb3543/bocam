@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
+import { permissionProcedure } from '../permissionProcedures';
 import {
   cancelSocialPublishSchedule,
   createSocialPublishDraft,
@@ -15,26 +16,17 @@ import {
 
 const platformSchema = z.enum(['facebook', 'instagram', 'x', 'linkedin', 'youtube', 'tiktok']);
 const contentTypeSchema = z.enum(['post', 'image', 'video', 'reel', 'story', 'short']);
-const publishingRoles = ['admin', 'manager', 'team_leader', 'staff'] as const;
-
-const publishingProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  if (!publishingRoles.includes(ctx.user.role as (typeof publishingRoles)[number])) {
-    throw new TRPCError({ code: 'FORBIDDEN', message: 'ليس لديك صلاحية الوصول إلى صفحة النشر' });
-  }
-  return next();
-});
-
-const reviewerProcedure = publishingProcedure.use(async ({ ctx, next }) => {
-  if (!['admin', 'manager', 'team_leader'].includes(ctx.user.role)) {
-    throw new TRPCError({ code: 'FORBIDDEN', message: 'الموافقة على النشر تتطلب صلاحية إشرافية' });
-  }
-  return next();
-});
+const publishingViewProcedure = permissionProcedure('content.view', 'عرض مساحة النشر');
+const publishingCreateProcedure = permissionProcedure('content.create', 'إنشاء مسودات النشر');
+const publishingUpdateProcedure = permissionProcedure('content.update', 'تعديل مسودات النشر');
+const publishingReviewProcedure = permissionProcedure('content.review', 'مراجعة مسودات النشر');
+const publishingScheduleProcedure = permissionProcedure('content.schedule', 'جدولة النشر');
+const publishingRetryProcedure = permissionProcedure('content.publish', 'إعادة محاولة النشر');
 
 export const publishingRouter = router({
-  overview: publishingProcedure.query(() => getSocialPublishingOverview()),
+  overview: publishingViewProcedure.query(() => getSocialPublishingOverview()),
 
-  post: publishingProcedure
+  post: publishingViewProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .query(async ({ input }) => {
       const post = await getSocialPublishPost(input.id);
@@ -44,7 +36,7 @@ export const publishingRouter = router({
       return post;
     }),
 
-  createDraft: publishingProcedure
+  createDraft: publishingCreateProcedure
     .input(
       z.object({
         title: z.string().trim().min(3).max(255),
@@ -60,7 +52,7 @@ export const publishingRouter = router({
       createSocialPublishDraft({ ...input, createdByUserId: ctx.user.id })
     ),
 
-  updateDraft: publishingProcedure
+  updateDraft: publishingUpdateProcedure
     .input(
       z.object({
         id: z.number().int().positive(),
@@ -75,11 +67,11 @@ export const publishingRouter = router({
       return updateSocialPublishDraft(id, ctx.user.id, patch);
     }),
 
-  submitForReview: publishingProcedure
+  submitForReview: publishingUpdateProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(({ ctx, input }) => submitSocialPublishPostForReview(input.id, ctx.user.id)),
 
-  review: reviewerProcedure
+  review: publishingReviewProcedure
     .input(
       z.object({
         id: z.number().int().positive(),
@@ -91,7 +83,7 @@ export const publishingRouter = router({
       reviewSocialPublishPost(input.id, ctx.user.id, input.decision, input.notes)
     ),
 
-  schedule: reviewerProcedure
+  schedule: publishingScheduleProcedure
     .input(
       z.object({
         id: z.number().int().positive(),
@@ -103,11 +95,11 @@ export const publishingRouter = router({
       scheduleSocialPublishPost(input.id, input.scheduledAt, input.timezone)
     ),
 
-  cancelSchedule: reviewerProcedure
+  cancelSchedule: publishingScheduleProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(({ input }) => cancelSocialPublishSchedule(input.id)),
 
-  retryDestination: reviewerProcedure
+  retryDestination: publishingRetryProcedure
     .input(z.object({ destinationId: z.number().int().positive() }))
     .mutation(({ input }) => retrySocialPublishDelivery(input.destinationId)),
 });

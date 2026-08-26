@@ -5,8 +5,9 @@
 
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
+import { permissionProcedure } from '../permissionProcedures';
 import { campRegistrations } from '../../../drizzle/schema';
 import {
   generateReceiptNumberSchema,
@@ -15,20 +16,32 @@ import {
 } from '../campRegistrationSchemas';
 import { invalidateCampRegistrationCache } from '../campRegistrationHelpers';
 
+const registrationsDeleteProcedure = permissionProcedure(
+  'registrations.delete',
+  'حذف تسجيلات المخيمات'
+);
+const registrationsUpdateProcedure = permissionProcedure(
+  'registrations.update',
+  'تحديث تسجيلات المخيمات'
+);
+const reportsScheduleProcedure = permissionProcedure('reports.schedule', 'جدولة تقارير التسجيلات');
+
 export const campAdminRouter = router({
   // Delete camp registration (protected)
-  delete: protectedProcedure.input(deleteCampRegistrationSchema).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  delete: registrationsDeleteProcedure
+    .input(deleteCampRegistrationSchema)
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    await db.delete(campRegistrations).where(eq(campRegistrations.id, input.id));
+      await db.delete(campRegistrations).where(eq(campRegistrations.id, input.id));
 
-    invalidateCampRegistrationCache();
+      invalidateCampRegistrationCache();
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   // Generate and save receipt number
-  generateReceiptNumber: protectedProcedure
+  generateReceiptNumber: registrationsUpdateProcedure
     .input(generateReceiptNumberSchema)
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -70,7 +83,7 @@ export const campAdminRouter = router({
     }),
 
   // Schedule camp stats report (not implemented)
-  scheduleReport: protectedProcedure.input(scheduleReportSchema).mutation(async () => {
+  scheduleReport: reportsScheduleProcedure.input(scheduleReportSchema).mutation(async () => {
     throw new TRPCError({
       code: 'NOT_IMPLEMENTED',
       message: 'جدولة التقارير غير مفعّلة بعد. سيتم دعمها لاحقاً عند ربط البريد والجدولة.',

@@ -8,8 +8,9 @@
 
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { publicProcedure, protectedProcedure, router, requireCampsFeature } from '../_core/trpc';
+import { publicProcedure, router, requireCampsFeature } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { assertRolePermission, permissionProcedure } from './permissionProcedures';
 import { camps, campRegistrations } from '../../drizzle/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { generateSlug, isValidSlug } from '../../shared/_core/utils/slug';
@@ -37,6 +38,11 @@ const campInputSchema = z.object({
   dailyCapacity: z.number().int().positive().optional(), // الطاقة الاستيعابية اليومية لكل وقت
 });
 
+const catalogViewProcedure = permissionProcedure('catalog.view', 'عرض المخيمات الإدارية');
+const catalogCreateProcedure = permissionProcedure('catalog.create', 'إنشاء المخيمات');
+const catalogUpdateProcedure = permissionProcedure('catalog.update', 'تعديل المخيمات');
+const catalogDeleteProcedure = permissionProcedure('catalog.delete', 'حذف المخيمات');
+
 export const campsRouter = router({
   /**
    * Get all camps (public)
@@ -60,7 +66,7 @@ export const campsRouter = router({
    * Get all camps for admin (includes inactive)
    * الحصول على جميع المخيمات للإدارة (يشمل غير النشطة)
    */
-  getAllAdmin: publicProcedure.query(async () => {
+  getAllAdmin: catalogViewProcedure.query(async () => {
     return serverCache.getOrCompute(CacheKeys.campsList(), CacheTTL.LONG, async () => {
       const db = await ensureDatabaseAvailable();
 
@@ -211,11 +217,14 @@ export const campsRouter = router({
    * Create new camp (admin only)
    * إنشاء مخيم جديد (للإدارة فقط)
    */
-  create: protectedProcedure
+  create: catalogCreateProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireCampsFeature())
     .input(campInputSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (input.isActive !== false) {
+        await assertRolePermission(ctx.user, 'catalog.publish', 'نشر المخيمات');
+      }
       const db = await ensureDatabaseAvailable();
 
       // Generate slug if not provided (normalize to lowercase)
@@ -271,7 +280,7 @@ export const campsRouter = router({
    * Update camp (admin only)
    * تحديث مخيم (للإدارة فقط)
    */
-  update: protectedProcedure
+  update: catalogUpdateProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireCampsFeature())
     .input(
@@ -280,10 +289,21 @@ export const campsRouter = router({
         ...campInputSchema.shape,
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
 
       const { id, ...data } = input;
+      const [currentCamp] = await db.select().from(camps).where(eq(camps.id, id)).limit(1);
+      if (!currentCamp) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'المخيم غير موجود' });
+      }
+      if (data.isActive !== currentCamp.isActive) {
+        await assertRolePermission(
+          ctx.user,
+          data.isActive ? 'catalog.publish' : 'catalog.archive',
+          data.isActive ? 'نشر المخيمات' : 'أرشفة المخيمات'
+        );
+      }
 
       // Use provided slug (convert to lowercase) or keep existing from DB
       let slug: string;
@@ -292,8 +312,7 @@ export const campsRouter = router({
         slug = data.slug.trim().toLowerCase().replace(/\s+/g, '-');
       } else {
         // Fallback: get current slug from DB to avoid overwriting with empty
-        const currentCamp = await db.select().from(camps).where(eq(camps.id, id)).limit(1);
-        slug = currentCamp[0]?.slug || generateSlug(data.name);
+        slug = currentCamp.slug || generateSlug(data.name);
       }
 
       // Only validate if slug doesn't look valid (allow existing slugs)
@@ -349,7 +368,7 @@ export const campsRouter = router({
    * Delete camp (admin only))
    * حذف مخيم (للإدارة فقط)
    */
-  delete: protectedProcedure
+  delete: catalogDeleteProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireCampsFeature())
     .input(z.object({ id: z.number() }))
@@ -369,11 +388,11 @@ export const campsRouter = router({
    * Toggle camp active status (admin only)
    * تبديل حالة نشاط المخيم (للإدارة فقط)
    */
-  toggleActive: protectedProcedure
+  toggleActive: catalogUpdateProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireCampsFeature())
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
 
       // Get current status
@@ -383,13 +402,20 @@ export const campsRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'المخيم غير موجود' });
       }
 
+      const nextIsActive = !current[0].isActive;
+      await assertRolePermission(
+        ctx.user,
+        nextIsActive ? 'catalog.publish' : 'catalog.archive',
+        nextIsActive ? 'نشر المخيمات' : 'أرشفة المخيمات'
+      );
+
       // Toggle status
-      await db.update(camps).set({ isActive: !current[0].isActive }).where(eq(camps.id, input.id));
+      await db.update(camps).set({ isActive: nextIsActive }).where(eq(camps.id, input.id));
 
       // Invalidate camps cache
       serverCache.invalidate(CacheKeys.campsList());
       serverCache.invalidate('camps:active');
 
-      return { success: true, isActive: !current[0].isActive };
+      return { success: true, isActive: nextIsActive };
     }),
 });

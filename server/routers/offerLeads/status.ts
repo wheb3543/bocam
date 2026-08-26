@@ -5,8 +5,9 @@
 
 import { z } from 'zod';
 import { eq, inArray } from 'drizzle-orm';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
+import { permissionProcedure } from '../permissionProcedures';
 import { offerLeads } from '../../../drizzle/schema';
 import { createAuditLog } from '../auditLogs';
 import { sendStatusChangeEvent } from '../../api/facebookCAPI';
@@ -17,10 +18,14 @@ import { updateStatusTimestamps } from '../../_core/statusTimestamps';
 import { notifyRegistrationStatusFollowUp } from '../../services/notificationFollowUpService';
 
 const logger = createLogger('offerLeads.status');
+const registrationsUpdateProcedure = permissionProcedure(
+  'registrations.update',
+  'تعديل تسجيلات العروض'
+);
 
 export const offerStatusRouter = router({
   // Update offer lead status (protected)
-  updateStatus: protectedProcedure
+  updateStatus: registrationsUpdateProcedure
     .input(
       z.object({
         id: z.number(),
@@ -153,7 +158,7 @@ export const offerStatusRouter = router({
     }),
 
   // Bulk update status for multiple offer leads (protected)
-  bulkUpdateStatus: protectedProcedure
+  bulkUpdateStatus: registrationsUpdateProcedure
     .input(
       z.object({
         ids: z.array(z.number()),

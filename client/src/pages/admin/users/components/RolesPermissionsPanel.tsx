@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Check, Plus, ShieldCheck, UsersRound } from 'lucide-react';
+import { Check, Copy, Plus, ShieldCheck, UsersRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -68,6 +68,7 @@ export default function RolesPermissionsPanel() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<RoleForm>(emptyRole);
   const [permissionSearch, setPermissionSearch] = useState('');
+  const [copiedFromRole, setCopiedFromRole] = useState<string | null>(null);
   const mutation = trpc.users.roles.save.useMutation({
     onSuccess: () => {
       utils.users.roles.list.invalidate();
@@ -75,6 +76,7 @@ export default function RolesPermissionsPanel() {
       toast.success('تم حفظ الدور وصلاحياته');
       setOpen(false);
       setForm(emptyRole());
+      setCopiedFromRole(null);
     },
     onError: (error) => toast.error(error.message || 'تعذر حفظ الدور'),
   });
@@ -82,6 +84,7 @@ export default function RolesPermissionsPanel() {
   const selectedCount = useMemo(() => form.permissions.length, [form.permissions]);
   const normalizedPermissionSearch = permissionSearch.trim().toLowerCase();
   const editRole = (role: RoleDefinition) => {
+    setCopiedFromRole(null);
     setForm({
       id: role.id,
       key: role.key,
@@ -92,6 +95,24 @@ export default function RolesPermissionsPanel() {
       isActive: role.isActive,
     });
     setOpen(true);
+  };
+  const cloneCurrentRole = () => {
+    if (!form.id) {
+      return;
+    }
+    const sourceName = form.name;
+    setForm({
+      ...form,
+      id: undefined,
+      key: `${form.key}-copy`,
+      name: `نسخة من ${sourceName}`,
+      description: form.description
+        ? `نسخة قابلة للتعديل من دور ${sourceName}: ${form.description}`
+        : `نسخة قابلة للتعديل من دور ${sourceName}.`,
+      isActive: true,
+    });
+    setCopiedFromRole(sourceName);
+    setPermissionSearch('');
   };
   const togglePermission = (permission: RolePermission, enabled: boolean) =>
     setForm((current) => ({
@@ -127,6 +148,8 @@ export default function RolesPermissionsPanel() {
           <Button
             onClick={() => {
               setForm(emptyRole());
+              setCopiedFromRole(null);
+              setPermissionSearch('');
               setOpen(true);
             }}
           >
@@ -182,6 +205,11 @@ export default function RolesPermissionsPanel() {
             <DialogDescription>
               الأدوار المخصصة ترث دوراً تشغيلياً أساسياً، ثم تضبط صلاحياتها التفصيلية من هنا.
             </DialogDescription>
+            {copiedFromRole ? (
+              <p className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-primary">
+                نُسخت صلاحيات دور «{copiedFromRole}». راجع الاسم والمعرف والصلاحيات قبل الحفظ.
+              </p>
+            ) : null}
           </DialogHeader>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -336,6 +364,12 @@ export default function RolesPermissionsPanel() {
             </div>
           </div>
           <DialogFooter>
+            {form.id ? (
+              <Button type="button" variant="outline" onClick={cloneCurrentRole}>
+                <Copy className="ml-2 h-4 w-4" />
+                نسخ هذا الدور
+              </Button>
+            ) : null}
             <Button variant="outline" onClick={() => setOpen(false)}>
               إلغاء
             </Button>

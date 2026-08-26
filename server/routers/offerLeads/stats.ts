@@ -3,14 +3,20 @@
  * Router للإحصائيات
  */
 
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { getDb } from '../../database/db';
+import { permissionProcedure } from '../permissionProcedures';
 import { offerLeads } from '../../../drizzle/schema';
 import { serverCache, CacheKeys, CacheTTL } from '../../services/cache';
 
+const registrationsViewProcedure = permissionProcedure(
+  'registrations.view',
+  'عرض إحصاءات تسجيلات العروض'
+);
+
 export const offerStatsRouter = router({
   // Get stats for offer leads (protected)
-  stats: protectedProcedure.query(async () => {
+  stats: registrationsViewProcedure.query(async () => {
     return serverCache.getOrCompute(CacheKeys.offerLeadStats(), CacheTTL.STATS, async () => {
       const db = await getDb();
       if (!db) {

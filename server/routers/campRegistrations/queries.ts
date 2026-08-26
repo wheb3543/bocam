@@ -4,15 +4,21 @@
  */
 
 import { eq, desc } from 'drizzle-orm';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { getDb } from '../../database/db';
+import { permissionProcedure } from '../permissionProcedures';
 import { campRegistrations } from '../../../drizzle/schema';
 import { serverCache, CacheKeys, CacheTTL } from '../../services/cache';
 import { listPaginatedCampRegistrationsSchema } from '../campRegistrationSchemas';
 
+const registrationsViewProcedure = permissionProcedure(
+  'registrations.view',
+  'عرض تسجيلات المخيمات'
+);
+
 export const campQueriesRouter = router({
   // List all camp registrations (protected)
-  list: protectedProcedure.query(async () => {
+  list: registrationsViewProcedure.query(async () => {
     return serverCache.getOrCompute('list:campRegistrations', CacheTTL.LIST, async () => {
       const db = await getDb();
       if (!db) {
@@ -51,7 +57,7 @@ export const campQueriesRouter = router({
   }),
 
   // List camp registrations with pagination (protected)
-  listPaginated: protectedProcedure
+  listPaginated: registrationsViewProcedure
     .input(listPaginatedCampRegistrationsSchema)
     .query(async ({ input }) => {
       const cacheKey = CacheKeys.campRegistrationsPaginated(input);

@@ -1,9 +1,15 @@
 import { z } from 'zod';
-import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { publicProcedure, router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+import { permissionProcedure } from './permissionProcedures';
 import { doctors } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
+
+const catalogCreateProcedure = permissionProcedure('catalog.create', 'إنشاء عناصر الكتالوج الطبي');
+const catalogUpdateProcedure = permissionProcedure('catalog.update', 'تعديل عناصر الكتالوج الطبي');
+const catalogPublishProcedure = permissionProcedure('catalog.publish', 'نشر عناصر الكتالوج الطبي');
+const catalogDeleteProcedure = permissionProcedure('catalog.delete', 'حذف عناصر الكتالوج الطبي');
 
 export const doctorsRouter = router({
   // List all doctors (public) - cached
@@ -33,7 +39,7 @@ export const doctorsRouter = router({
   }),
 
   // Create doctor (protected)
-  create: protectedProcedure
+  create: catalogCreateProcedure
     .input(
       z.object({
         name: z.string().min(1, 'الاسم مطلوب'),
@@ -61,7 +67,7 @@ export const doctorsRouter = router({
     }),
 
   // Update doctor (protected)
-  update: protectedProcedure
+  update: catalogUpdateProcedure
     .input(
       z.object({
         id: z.number(),
@@ -92,7 +98,7 @@ export const doctorsRouter = router({
     }),
 
   // Delete doctor (protected)
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: catalogDeleteProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db.delete(doctors).where(eq(doctors.id, input.id));
@@ -104,7 +110,7 @@ export const doctorsRouter = router({
   }),
 
   // Toggle doctor availability (protected)
-  toggleAvailability: protectedProcedure
+  toggleAvailability: catalogPublishProcedure
     .input(
       z.object({
         id: z.number(),

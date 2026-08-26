@@ -582,6 +582,10 @@ export default function ContentManagementPage() {
               qualityIssues={seo.qualityIssues}
               clearQualityIssues={seo.clearQualityIssues}
               isAdmin={seo.isAdmin}
+              canViewSEO={seo.canViewSEO}
+              canManageSEO={seo.canManageSEO}
+              canDeleteSEO={seo.canDeleteSEO}
+              canRestoreSEO={seo.canRestoreSEO}
               onApprovalSubmitted={() => {
                 seo.refetch();
                 seo.refetchSEOInsights();

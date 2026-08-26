@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { PermissionHint } from '@/components/PermissionHint';
 import type { SEOSettings, SEOSettingsFormData } from '../types/content.types';
 import type { ContentFilters } from '../types/content.types';
 
@@ -66,6 +67,10 @@ interface SEOListProps {
   qualityIssues?: string[];
   clearQualityIssues?: () => void;
   isAdmin?: boolean;
+  canViewSEO?: boolean;
+  canManageSEO?: boolean;
+  canDeleteSEO?: boolean;
+  canRestoreSEO?: boolean;
   onApprovalSubmitted?: () => void;
   createMutation: { isPending: boolean };
   updateMutation: { isPending: boolean };
@@ -105,6 +110,10 @@ export function SEOList({
   qualityIssues = [],
   clearQualityIssues,
   isAdmin = false,
+  canViewSEO = true,
+  canManageSEO = false,
+  canDeleteSEO = false,
+  canRestoreSEO = false,
   onApprovalSubmitted,
   createMutation,
   updateMutation,
@@ -125,20 +134,37 @@ export function SEOList({
     onEditDialogOpen(open);
   };
 
+  if (!canViewSEO) {
+    return (
+      <Card className="p-8 text-center">
+        <h2 className="text-xl font-bold">إعدادات SEO</h2>
+        <div className="mt-4 flex justify-center">
+          <PermissionHint message="تحتاج إلى صلاحية عرض المحتوى للاطلاع على إعدادات SEO." />
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center gap-3">
         <h2 className="text-2xl font-bold">إدارة إعدادات SEO</h2>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={onExportCsv} disabled={!reportRows.length}>
-            <Download className="ml-2 h-4 w-4" />
-            تصدير CSV
-          </Button>
-          <Button onClick={() => onCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 ml-2" />
-            إضافة إعدادات SEO
-          </Button>
+          {canManageSEO ? (
+            <Button variant="outline" onClick={onExportCsv} disabled={!reportRows.length}>
+              <Download className="ml-2 h-4 w-4" />
+              تصدير CSV
+            </Button>
+          ) : null}
+          {canManageSEO ? (
+            <Button onClick={() => onCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 ml-2" />
+              إضافة إعدادات SEO
+            </Button>
+          ) : (
+            <PermissionHint message="تحتاج إلى صلاحية إدارة SEO لإنشاء الإعدادات أو تعديلها أو تصديرها." />
+          )}
         </div>
       </div>
 
@@ -253,14 +279,20 @@ export function SEOList({
                 العنوان: seoSetting.title || '-',
                 ...(seoSetting.deletedAt ? { الحالة: 'في سلة المحذوفات' } : {}),
               }}
-              onEdit={seoSetting.deletedAt ? undefined : () => openEditDialog(seoSetting)}
+              onEdit={
+                seoSetting.deletedAt || !canManageSEO ? undefined : () => openEditDialog(seoSetting)
+              }
               onDelete={
-                seoSetting.deletedAt ? undefined : () => handleDeleteSEOSettings(seoSetting.id)
+                seoSetting.deletedAt || !canManageSEO || !canDeleteSEO
+                  ? undefined
+                  : () => handleDeleteSEOSettings(seoSetting.id)
               }
               onRestore={
-                seoSetting.deletedAt ? () => handleRestoreSEOSettings(seoSetting.id) : undefined
+                seoSetting.deletedAt && canManageSEO && canRestoreSEO
+                  ? () => handleRestoreSEOSettings(seoSetting.id)
+                  : undefined
               }
-              onVersionHistory={() => onVersionHistory?.(seoSetting.id)}
+              onVersionHistory={canManageSEO ? () => onVersionHistory?.(seoSetting.id) : undefined}
               isActive={!seoSetting.deletedAt && seoSetting.isActive === 'yes'}
               status={seoSetting.status}
               qualityScore={seoInsightsById.get(seoSetting.id)?.qualityScore}
@@ -270,34 +302,38 @@ export function SEOList({
       )}
 
       {/* Create Dialog */}
-      <SEODialog
-        open={isCreateDialogOpen}
-        onOpenChange={handleCreateDialogOpenChange}
-        mode="create"
-        formData={formData}
-        onFormDataChange={onFormDataChange}
-        onSubmit={onCreateSEOSettings}
-        isPending={createMutation.isPending}
-        pages={pages}
-        qualityIssues={qualityIssues}
-        isAdmin={isAdmin}
-      />
+      {canManageSEO ? (
+        <SEODialog
+          open={isCreateDialogOpen}
+          onOpenChange={handleCreateDialogOpenChange}
+          mode="create"
+          formData={formData}
+          onFormDataChange={onFormDataChange}
+          onSubmit={onCreateSEOSettings}
+          isPending={createMutation.isPending}
+          pages={pages}
+          qualityIssues={qualityIssues}
+          isAdmin={isAdmin}
+        />
+      ) : null}
 
       {/* Edit Dialog */}
-      <SEODialog
-        open={isEditDialogOpen}
-        onOpenChange={handleEditDialogOpenChange}
-        mode="edit"
-        formData={formData}
-        onFormDataChange={onFormDataChange}
-        onSubmit={onEditSEOSettings}
-        isPending={updateMutation.isPending}
-        pages={pages}
-        qualityIssues={qualityIssues}
-        isAdmin={isAdmin}
-        approvalEntityId={selectedSEOSettings?.id}
-        onApprovalSubmitted={onApprovalSubmitted}
-      />
+      {canManageSEO ? (
+        <SEODialog
+          open={isEditDialogOpen}
+          onOpenChange={handleEditDialogOpenChange}
+          mode="edit"
+          formData={formData}
+          onFormDataChange={onFormDataChange}
+          onSubmit={onEditSEOSettings}
+          isPending={updateMutation.isPending}
+          pages={pages}
+          qualityIssues={qualityIssues}
+          isAdmin={isAdmin}
+          approvalEntityId={selectedSEOSettings?.id}
+          onApprovalSubmitted={onApprovalSubmitted}
+        />
+      ) : null}
     </div>
   );
 }

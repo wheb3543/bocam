@@ -8,8 +8,9 @@
 
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { publicProcedure, protectedProcedure, router, requireOffersFeature } from '../_core/trpc';
+import { publicProcedure, router, requireOffersFeature } from '../_core/trpc';
 import { getDb } from '../database/db';
+import { assertRolePermission, permissionProcedure } from './permissionProcedures';
 import { offers } from '../../drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 import { generateSlug } from '../../shared/_core/utils/slug';
@@ -17,6 +18,11 @@ import { serverCache, CacheKeys, CacheTTL } from '../services/cache';
 import { createLogger } from '../_core/logger';
 
 const logger = createLogger('offers');
+const catalogViewProcedure = permissionProcedure('catalog.view', 'عرض العروض الإدارية');
+const catalogCreateProcedure = permissionProcedure('catalog.create', 'إنشاء العروض');
+const catalogUpdateProcedure = permissionProcedure('catalog.update', 'تعديل العروض');
+const catalogArchiveProcedure = permissionProcedure('catalog.archive', 'أرشفة العروض');
+const catalogDeleteProcedure = permissionProcedure('catalog.delete', 'حذف العروض');
 
 /**
  * Validation schema for creating/updating offers
@@ -69,15 +75,7 @@ export const offersRouter = router({
    * Get all offers for admin (includes inactive)
    * الحصول على جميع العروض للإدارة (يشمل غير النشطة)
    */
-  getAllAdmin: protectedProcedure.query(async ({ ctx }) => {
-    // Verify user is admin
-    if (ctx.user?.role !== 'admin') {
-      throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'غير مصرح: فقط المسؤولين يمكنهم عرض جميع العروض',
-      });
-    }
-
+  getAllAdmin: catalogViewProcedure.query(async () => {
     try {
       const dbInstance = await getDb();
       if (!dbInstance) {
@@ -131,19 +129,14 @@ export const offersRouter = router({
    * Create a new offer (admin only)
    * إنشاء عرض جديد (مسؤول فقط)
    */
-  create: protectedProcedure
+  create: catalogCreateProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireOffersFeature())
     .input(offerInputSchema)
     .mutation(async ({ input, ctx }) => {
-      // Verify user is admin
-      if (ctx.user?.role !== 'admin') {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'غير مصرح: فقط المسؤولين يمكنهم إنشاء عروض',
-        });
+      if (input.isActive !== false) {
+        await assertRolePermission(ctx.user, 'catalog.publish', 'نشر العروض');
       }
-
       try {
         const dbInstance = await getDb();
         if (!dbInstance) {
@@ -217,7 +210,7 @@ export const offersRouter = router({
    * Update an existing offer (admin only)
    * تحديث عرض موجود (مسؤول فقط)
    */
-  update: protectedProcedure
+  update: catalogUpdateProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireOffersFeature())
     .input(
@@ -227,14 +220,12 @@ export const offersRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      // Verify user is admin
-      if (ctx.user?.role !== 'admin') {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'غير مصرح: فقط المسؤولين يمكنهم تحديث العروض',
-        });
+      if (input.isActive === true) {
+        await assertRolePermission(ctx.user, 'catalog.publish', 'نشر العروض');
       }
-
+      if (input.isActive === false) {
+        await assertRolePermission(ctx.user, 'catalog.archive', 'أرشفة العروض');
+      }
       try {
         const dbInstance = await getDb();
         if (!dbInstance) {
@@ -307,19 +298,11 @@ export const offersRouter = router({
    * Deactivate an offer (admin only)
    * إلغاء تفعيل عرض (مسؤول فقط)
    */
-  deactivate: protectedProcedure
+  deactivate: catalogArchiveProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireOffersFeature())
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      // Verify user is admin
-      if (ctx.user?.role !== 'admin') {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'غير مصرح: فقط المسؤولين يمكنهم إلغاء تفعيل العروض',
-        });
-      }
-
+    .mutation(async ({ input }) => {
       try {
         const dbInstance = await getDb();
         if (!dbInstance) {
@@ -348,19 +331,11 @@ export const offersRouter = router({
    * Delete an offer (admin only)
    * حذف عرض (مسؤول فقط)
    */
-  delete: protectedProcedure
+  delete: catalogDeleteProcedure
     // @ts-expect-error - tRPC middleware type compatibility issue
     .use(requireOffersFeature())
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      // Verify user is admin
-      if (ctx.user?.role !== 'admin') {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'غير مصرح: فقط المسؤولين يمكنهم حذف العروض',
-        });
-      }
-
+    .mutation(async ({ input }) => {
       try {
         const dbInstance = await getDb();
         if (!dbInstance) {

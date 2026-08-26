@@ -5,14 +5,17 @@
 
 import { z } from 'zod';
 import { eq, desc } from 'drizzle-orm';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { getDb } from '../../database/db';
+import { permissionProcedure } from '../permissionProcedures';
 import { offerLeads } from '../../../drizzle/schema';
 import { serverCache, CacheKeys, CacheTTL } from '../../services/cache';
 
+const registrationsViewProcedure = permissionProcedure('registrations.view', 'عرض تسجيلات العروض');
+
 export const offerQueriesRouter = router({
   // List all offer leads (protected)
-  list: protectedProcedure.query(async () => {
+  list: registrationsViewProcedure.query(async () => {
     return serverCache.getOrCompute('list:offerLeads', CacheTTL.LIST, async () => {
       const db = await getDb();
       if (!db) {
@@ -44,7 +47,7 @@ export const offerQueriesRouter = router({
   }),
 
   // List offer leads with pagination (protected)
-  listPaginated: protectedProcedure
+  listPaginated: registrationsViewProcedure
     .input(
       z.object({
         page: z.number().min(1).default(1),

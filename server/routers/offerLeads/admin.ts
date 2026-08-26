@@ -6,26 +6,38 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
+import { permissionProcedure } from '../permissionProcedures';
 import { offerLeads } from '../../../drizzle/schema';
 import { invalidateEntityCache } from '../../services/cacheInvalidator';
 
+const registrationsDeleteProcedure = permissionProcedure(
+  'registrations.delete',
+  'حذف تسجيلات العروض'
+);
+const registrationsUpdateProcedure = permissionProcedure(
+  'registrations.update',
+  'تحديث تسجيلات العروض'
+);
+
 export const offerAdminRouter = router({
   // Delete offer lead (protected)
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
+  delete: registrationsDeleteProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
 
-    await db.delete(offerLeads).where(eq(offerLeads.id, input.id));
+      await db.delete(offerLeads).where(eq(offerLeads.id, input.id));
 
-    // Invalidate offer leads caches after deletion
-    invalidateEntityCache('offerLeads');
+      // Invalidate offer leads caches after deletion
+      invalidateEntityCache('offerLeads');
 
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   // Generate and save receipt number
-  generateReceiptNumber: protectedProcedure
+  generateReceiptNumber: registrationsUpdateProcedure
     .input(
       z.object({
         id: z.number(),
