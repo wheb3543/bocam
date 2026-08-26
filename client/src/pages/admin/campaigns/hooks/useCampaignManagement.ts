@@ -10,7 +10,7 @@ import type { Campaign, CampaignFormData } from '../types/campaign.types';
 import { initialFormData } from '../types/campaign.types';
 import { useSlugGenerator } from '@/hooks/data/useSlugGenerator';
 
-export function useCampaignManagement() {
+export function useCampaignManagement(canViewCampaigns = true) {
   // Dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -28,17 +28,20 @@ export function useCampaignManagement() {
     data: overview,
     isLoading: loadingOverview,
     refetch: refetchOverview,
-  } = trpc.campaigns.getOverview.useQuery();
+  } = trpc.campaigns.getOverview.useQuery(undefined, { enabled: canViewCampaigns });
 
   const {
     data: campaigns,
     isLoading: loadingCampaigns,
     refetch,
-  } = trpc.campaigns.list.useQuery({
-    status: statusFilter !== 'all' ? statusFilter : undefined,
-    type: typeFilter !== 'all' ? typeFilter : undefined,
-    search: searchQuery || undefined,
-  });
+  } = trpc.campaigns.list.useQuery(
+    {
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      type: typeFilter !== 'all' ? typeFilter : undefined,
+      search: searchQuery || undefined,
+    },
+    { enabled: canViewCampaigns }
+  );
 
   // Mutations
   const createMutation = trpc.campaigns.create.useMutation({

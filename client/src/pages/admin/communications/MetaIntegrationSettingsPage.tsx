@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 import { trpc } from '@/lib/api/trpc';
 import { IntegrationConnectionsPanel } from './IntegrationConnectionsPanel';
 import {
@@ -264,6 +265,13 @@ export default function MetaIntegrationSettingsPage() {
             ) : undefined
           }
         />
+
+        {!canManageCredentials && (
+          <PermissionHint
+            label="بيانات الاعتماد مقيّدة"
+            message="يمكنك عرض حالة التكاملات، لكن لا تملك صلاحية إدارة معرفات التطبيقات أو الأسرار المشفّرة."
+          />
+        )}
 
         {canManageCredentials && (
           <Alert className="border-blue-200 bg-blue-50/70">

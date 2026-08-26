@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -360,6 +361,12 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
               </DialogFooter>
             </DialogContent>
           </Dialog>
+        )}
+        {canViewTasks && !canCreateTasks && (
+          <PermissionHint
+            label="إنشاء مقيّد"
+            message="لا تملك صلاحية إنشاء مهام المتابعة. تواصل مع مسؤول النظام إذا احتجت هذا الإجراء."
+          />
         )}
       </div>
 

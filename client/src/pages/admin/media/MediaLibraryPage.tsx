@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { trpc } from '@/lib/api/trpc';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 import { toast } from 'sonner';
 import { createMediaPreview } from './mediaPreview';
 import {
@@ -55,6 +57,13 @@ function toUploadArray(files: UploadableFiles) {
 }
 
 export default function MediaLibraryPage() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewMedia = can('media.view');
+  const canUploadMedia = can('media.upload');
+  const canOrganizeMedia = can('media.organize');
+  const canDownloadMedia = can('media.download');
+  const canDeleteMedia = can('media.delete');
+  const canSelectMedia = canOrganizeMedia || canDeleteMedia;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const directoryInputRef = useRef<HTMLInputElement>(null);
   const folderPathCache = useRef<Map<string, number>>(new Map());
@@ -71,7 +80,7 @@ export default function MediaLibraryPage() {
 
   const utils = trpc.useUtils();
   const { data: folders = [], isLoading: foldersLoading } =
-    trpc.content.media.folders.list.useQuery();
+    trpc.content.media.folders.list.useQuery(undefined, { enabled: canViewMedia });
   const generalFolder = folders.find((folder) => folder.path === '/general');
   const effectiveFolderId = selectedFolderId ?? generalFolder?.id;
 
@@ -91,11 +100,14 @@ export default function MediaLibraryPage() {
     isError,
     error,
     refetch,
-  } = trpc.content.media.list.useQuery({
-    folderId: effectiveFolderId,
-    type: typeFilter === 'all' ? undefined : typeFilter,
-    search: search.trim() || undefined,
-  });
+  } = trpc.content.media.list.useQuery(
+    {
+      folderId: effectiveFolderId,
+      type: typeFilter === 'all' ? undefined : typeFilter,
+      search: search.trim() || undefined,
+    },
+    { enabled: canViewMedia }
+  );
 
   const createFolderMutation = trpc.content.media.folders.create.useMutation({
     onSuccess: async (folder) => {
@@ -170,6 +182,9 @@ export default function MediaLibraryPage() {
   };
 
   const uploadFiles = async (input: UploadableFiles, targetFolderId = effectiveFolderId) => {
+    if (!canUploadMedia) {
+      return;
+    }
     const files = toUploadArray(input);
     if (!files.length || !targetFolderId) {
       return;
@@ -217,6 +232,9 @@ export default function MediaLibraryPage() {
   };
 
   const uploadDirectory = async (input: UploadableFiles) => {
+    if (!canUploadMedia || !canOrganizeMedia) {
+      return;
+    }
     const files = toUploadArray(input) as Array<File & { webkitRelativePath?: string }>;
     if (!files.length) {
       return;
@@ -266,7 +284,7 @@ export default function MediaLibraryPage() {
   };
 
   const moveSelection = (folderId: number) => {
-    if (!selectedIds.length) {
+    if (!canOrganizeMedia || !selectedIds.length) {
       return;
     }
     moveManyMutation.mutate({ ids: selectedIds, folderId });
@@ -275,18 +293,18 @@ export default function MediaLibraryPage() {
   const handleFolderDrop = (event: React.DragEvent, folderId: number) => {
     event.preventDefault();
     const mediaId = Number(event.dataTransfer.getData('application/x-sgh-media-id'));
-    if (mediaId) {
+    if (mediaId && canOrganizeMedia) {
       moveManyMutation.mutate({ ids: [mediaId], folderId });
       setDraggedMediaId(null);
       return;
     }
-    if (event.dataTransfer.files.length) {
+    if (event.dataTransfer.files.length && canUploadMedia) {
       void uploadFiles(event.dataTransfer.files, folderId);
     }
   };
 
   const downloadFolderZip = () => {
-    if (!effectiveFolderId) {
+    if (!canDownloadMedia || !effectiveFolderId) {
       return;
     }
     const anchor = document.createElement('a');
@@ -308,8 +326,16 @@ export default function MediaLibraryPage() {
           type="button"
           draggable={false}
           onClick={() => setSelectedFolderId(folder.id)}
-          onDragOver={(event) => event.preventDefault()}
-          onDrop={(event) => handleFolderDrop(event, folder.id)}
+          onDragOver={(event) => {
+            if (canOrganizeMedia || canUploadMedia) {
+              event.preventDefault();
+            }
+          }}
+          onDrop={(event) => {
+            if (canOrganizeMedia || canUploadMedia) {
+              handleFolderDrop(event, folder.id);
+            }
+          }}
           className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-right text-sm transition-colors ${
             active
               ? 'bg-primary text-primary-foreground shadow-sm'
@@ -369,6 +395,38 @@ export default function MediaLibraryPage() {
   };
 
   const rootFolders = childrenByParent.get(null) || [];
+
+  if (arePermissionsLoading) {
+    return (
+      <DashboardLayout
+        pageTitle="مكتبة الوسائط"
+        pageDescription="مكتبة موحّدة للملفات"
+        pageHeader="none"
+      >
+        <div className="flex h-[calc(100dvh-4.25rem)] items-center justify-center text-sm text-muted-foreground">
+          جارٍ التحقق من الصلاحيات...
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!canViewMedia) {
+    return (
+      <DashboardLayout
+        pageTitle="مكتبة الوسائط"
+        pageDescription="مكتبة موحّدة للملفات"
+        pageHeader="none"
+      >
+        <div className="flex h-[calc(100dvh-4.25rem)] items-center justify-center p-4">
+          <Card className="max-w-md border-amber-200 bg-amber-50">
+            <CardContent className="p-6 text-center text-sm text-amber-900">
+              لا تملك صلاحية عرض مكتبة الوسائط.
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout
@@ -449,36 +507,51 @@ export default function MediaLibraryPage() {
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                className="min-h-9"
-                onClick={() => setIsCreatingFolder(true)}
-              >
-                <FolderPlus className="ml-1.5 h-4 w-4" />
-                مجلد جديد
-              </Button>
-              <Button
-                className="min-h-9"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-              >
-                <Upload className="ml-1.5 h-4 w-4" />
-                رفع ملفات
-              </Button>
-              <Button
-                variant="outline"
-                className="min-h-9"
-                onClick={() => directoryInputRef.current?.click()}
-                disabled={isUploading}
-              >
-                <FolderOpen className="ml-1.5 h-4 w-4" />
-                رفع مجلد
-              </Button>
+              {canOrganizeMedia ? (
+                <Button
+                  variant="outline"
+                  className="min-h-9"
+                  onClick={() => setIsCreatingFolder(true)}
+                >
+                  <FolderPlus className="ml-1.5 h-4 w-4" />
+                  مجلد جديد
+                </Button>
+              ) : (
+                <PermissionHint
+                  label="تنظيم مقيّد"
+                  message="لا تملك صلاحية إنشاء المجلدات أو نقل الوسائط بينها."
+                />
+              )}
+              {canUploadMedia ? (
+                <>
+                  <Button
+                    className="min-h-9"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                  >
+                    <Upload className="ml-1.5 h-4 w-4" />
+                    رفع ملفات
+                  </Button>
+                  {canOrganizeMedia && (
+                    <Button
+                      variant="outline"
+                      className="min-h-9"
+                      onClick={() => directoryInputRef.current?.click()}
+                      disabled={isUploading}
+                    >
+                      <FolderOpen className="ml-1.5 h-4 w-4" />
+                      رفع مجلد
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <PermissionHint label="رفع مقيّد" message="لا تملك صلاحية رفع وسائط إلى المكتبة." />
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {isCreatingFolder && (
+        {canOrganizeMedia && isCreatingFolder && (
           <Card className="border-blue-200 bg-blue-50/60">
             <CardContent className="flex flex-wrap items-center gap-3 p-4">
               <FolderPlus className="h-5 w-5 text-blue-700" />
@@ -564,55 +637,67 @@ export default function MediaLibraryPage() {
                   rootFolders.map((folder) => renderFolder(folder))
                 )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-4 w-full shrink-0 justify-start"
-                onClick={downloadFolderZip}
-                disabled={!effectiveFolderId}
-              >
-                <Download className="ml-2 h-4 w-4 text-blue-600" />
-                تنزيل المجلد ZIP
-              </Button>
+              {canDownloadMedia ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 w-full shrink-0 justify-start"
+                  onClick={downloadFolderZip}
+                  disabled={!effectiveFolderId}
+                >
+                  <Download className="ml-2 h-4 w-4 text-blue-600" />
+                  تنزيل المجلد ZIP
+                </Button>
+              ) : (
+                <PermissionHint
+                  className="mt-4 w-full justify-center"
+                  label="تنزيل مقيّد"
+                  message="لا تملك صلاحية تنزيل المجلدات أو تصدير ملفات الوسائط."
+                />
+              )}
             </CardContent>
           </Card>
 
           <div className="flex min-h-0 flex-col gap-3">
-            {selectedIds.length > 0 && (
+            {canSelectMedia && selectedIds.length > 0 && (
               <Card className="shrink-0 border-primary/20 bg-primary/5">
                 <CardContent className="flex flex-wrap items-center gap-3 p-3" aria-live="polite">
                   <span className="text-sm font-semibold text-foreground">
                     تم تحديد {selectedIds.length} عنصر
                   </span>
-                  <select
-                    className="h-8 rounded border bg-white px-2 text-xs"
-                    defaultValue=""
-                    onChange={(event) => {
-                      const folderId = Number(event.target.value);
-                      if (folderId) {
-                        moveSelection(folderId);
-                      }
-                      event.currentTarget.value = '';
-                    }}
-                    disabled={moveManyMutation.isPending}
-                  >
-                    <option value="">نقل إلى مجلد...</option>
-                    {folders
-                      .filter((folder) => folder.id !== effectiveFolderId)
-                      .map((folder) => (
-                        <option key={folder.id} value={folder.id}>
-                          {folder.path}
-                        </option>
-                      ))}
-                  </select>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="min-h-9"
-                    onClick={() => setPendingDelete(selectedIds)}
-                  >
-                    حذف المحدد
-                  </Button>
+                  {canOrganizeMedia && (
+                    <select
+                      className="h-8 rounded border bg-white px-2 text-xs"
+                      defaultValue=""
+                      onChange={(event) => {
+                        const folderId = Number(event.target.value);
+                        if (folderId) {
+                          moveSelection(folderId);
+                        }
+                        event.currentTarget.value = '';
+                      }}
+                      disabled={moveManyMutation.isPending}
+                    >
+                      <option value="">نقل إلى مجلد...</option>
+                      {folders
+                        .filter((folder) => folder.id !== effectiveFolderId)
+                        .map((folder) => (
+                          <option key={folder.id} value={folder.id}>
+                            {folder.path}
+                          </option>
+                        ))}
+                    </select>
+                  )}
+                  {canDeleteMedia && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="min-h-9"
+                      onClick={() => setPendingDelete(selectedIds)}
+                    >
+                      حذف المحدد
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -626,30 +711,38 @@ export default function MediaLibraryPage() {
               </Card>
             )}
 
-            <div
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={(event) => {
-                event.preventDefault();
-                if (event.dataTransfer.files.length) {
-                  void uploadFiles(event.dataTransfer.files);
-                }
-              }}
-              className="shrink-0 rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5 p-4 text-center text-sm text-foreground"
-            >
-              <Upload className="mx-auto mb-1 h-5 w-5 text-primary" />
-              <p>اسحب ملفاتك هنا لرفعها إلى «{selectedFolder?.name || 'المجلد'}»</p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-3 min-h-9 bg-card"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
+            {canUploadMedia ? (
+              <div
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  if (event.dataTransfer.files.length) {
+                    void uploadFiles(event.dataTransfer.files);
+                  }
+                }}
+                className="shrink-0 rounded-2xl border-2 border-dashed border-primary/20 bg-primary/5 p-4 text-center text-sm text-foreground"
               >
-                <Upload className="ml-1.5 h-4 w-4" />
-                اختيار ملفات
-              </Button>
-            </div>
+                <Upload className="mx-auto mb-1 h-5 w-5 text-primary" />
+                <p>اسحب ملفاتك هنا لرفعها إلى «{selectedFolder?.name || 'المجلد'}»</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 min-h-9 bg-card"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  <Upload className="ml-1.5 h-4 w-4" />
+                  اختيار ملفات
+                </Button>
+              </div>
+            ) : (
+              <PermissionHint
+                className="shrink-0 w-full justify-center"
+                label="رفع مقيّد"
+                message="لا تملك صلاحية رفع ملفات إلى مكتبة الوسائط."
+              />
+            )}
 
             <div className="min-h-0 flex-1 overflow-y-auto pr-1">
               {isLoading ? (
@@ -685,18 +778,20 @@ export default function MediaLibraryPage() {
               ) : (
                 <>
                   <div className="flex flex-col gap-2 px-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-                    <button
-                      type="button"
-                      onClick={toggleSelectAll}
-                      className="flex min-h-9 items-center gap-1.5 rounded-lg px-2 font-medium hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      {selectedIds.length === items.length ? (
-                        <CheckSquare className="h-4 w-4 text-primary" />
-                      ) : (
-                        <Square className="h-4 w-4" />
-                      )}
-                      تحديد الكل ({items.length})
-                    </button>
+                    {canSelectMedia && (
+                      <button
+                        type="button"
+                        onClick={toggleSelectAll}
+                        className="flex min-h-9 items-center gap-1.5 rounded-lg px-2 font-medium hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {selectedIds.length === items.length ? (
+                          <CheckSquare className="h-4 w-4 text-primary" />
+                        ) : (
+                          <Square className="h-4 w-4" />
+                        )}
+                        تحديد الكل ({items.length})
+                      </button>
+                    )}
                     <span>{selectedFolder?.path}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
@@ -705,34 +800,40 @@ export default function MediaLibraryPage() {
                       return (
                         <article
                           key={item.id}
-                          draggable
-                          onDragStart={(event) => {
-                            event.dataTransfer.setData(
-                              'application/x-sgh-media-id',
-                              String(item.id)
-                            );
-                            setDraggedMediaId(item.id);
-                          }}
-                          onDragEnd={() => setDraggedMediaId(null)}
+                          draggable={canOrganizeMedia}
+                          onDragStart={
+                            canOrganizeMedia
+                              ? (event) => {
+                                  event.dataTransfer.setData(
+                                    'application/x-sgh-media-id',
+                                    String(item.id)
+                                  );
+                                  setDraggedMediaId(item.id);
+                                }
+                              : undefined
+                          }
+                          onDragEnd={canOrganizeMedia ? () => setDraggedMediaId(null) : undefined}
                           className={`group overflow-hidden rounded-xl border bg-card shadow-sm transition hover:shadow-md ${selected ? 'border-primary ring-2 ring-primary/40' : 'border-border'}`}
                         >
                           <div className="relative aspect-video overflow-hidden bg-slate-100">
-                            <button
-                              type="button"
-                              className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-card/95 shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              onClick={() => toggleSelection(item.id)}
-                              aria-label={
-                                selected
-                                  ? `إلغاء تحديد ${item.fileName || 'الوسيط'}`
-                                  : `تحديد ${item.fileName || 'الوسيط'}`
-                              }
-                            >
-                              {selected ? (
-                                <CheckSquare className="h-4 w-4 text-primary" />
-                              ) : (
-                                <Square className="h-4 w-4 text-slate-500" />
-                              )}
-                            </button>
+                            {canSelectMedia && (
+                              <button
+                                type="button"
+                                className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-card/95 shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                onClick={() => toggleSelection(item.id)}
+                                aria-label={
+                                  selected
+                                    ? `إلغاء تحديد ${item.fileName || 'الوسيط'}`
+                                    : `تحديد ${item.fileName || 'الوسيط'}`
+                                }
+                              >
+                                {selected ? (
+                                  <CheckSquare className="h-4 w-4 text-primary" />
+                                ) : (
+                                  <Square className="h-4 w-4 text-slate-500" />
+                                )}
+                              </button>
+                            )}
                             {createMediaPreview({
                               type: item.type,
                               url: item.url,
@@ -770,15 +871,17 @@ export default function MediaLibraryPage() {
                                 <Copy className="ml-1 h-3 w-3" />
                                 رابط
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="min-h-9 px-2 text-xs text-destructive"
-                                onClick={() => setPendingDelete([item.id])}
-                              >
-                                <Trash2 className="ml-1 h-3 w-3" />
-                                حذف
-                              </Button>
+                              {canDeleteMedia && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="min-h-9 px-2 text-xs text-destructive"
+                                  onClick={() => setPendingDelete([item.id])}
+                                >
+                                  <Trash2 className="ml-1 h-3 w-3" />
+                                  حذف
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </article>

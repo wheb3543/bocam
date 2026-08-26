@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Plus, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 import type { Task, ViewMode, TaskStatus } from './tasks/types/task.types';
 import { useTasks } from './tasks/hooks/useTasks';
 import TaskStatsCards from './tasks/components/TaskStatsCards';
@@ -114,6 +115,12 @@ export default function DigitalMarketingTasksPage() {
                       <span className="hidden sm:inline">مهمة جديدة</span>
                       <span className="sm:hidden">جديد</span>
                     </Button>
+                  )}
+                  {!canCreateTasks && (
+                    <PermissionHint
+                      label="إنشاء مقيّد"
+                      message="لا تملك صلاحية إنشاء مهام التسويق الرقمي."
+                    />
                   )}
                 </div>
               }

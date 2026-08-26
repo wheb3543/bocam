@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { trpc } from '@/lib/api/trpc';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 import {
   CheckCircle2,
   ExternalLink,
@@ -244,6 +245,18 @@ export function IntegrationConnectionsPanel() {
           <RefreshCw className={`ml-2 h-4 w-4 ${overviewQuery.isFetching ? 'animate-spin' : ''}`} />
           تحديث الحالة
         </Button>
+        {(!canConnectIntegrations || !canDisconnectIntegrations) && (
+          <PermissionHint
+            label="عمليات مقيّدة"
+            message={
+              !canConnectIntegrations && !canDisconnectIntegrations
+                ? 'يمكنك عرض حالة الاتصالات فقط؛ لا تملك صلاحية ربطها أو فصلها.'
+                : !canConnectIntegrations
+                  ? 'لا تملك صلاحية بدء ربط حسابات أو اختيار الأصول.'
+                  : 'لا تملك صلاحية فصل الاتصالات الحالية.'
+            }
+          />
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         {canConnectIntegrations && (

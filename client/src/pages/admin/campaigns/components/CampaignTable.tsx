@@ -28,9 +28,9 @@ interface CampaignTableProps {
   campaigns: Campaign[] | undefined;
   isLoading: boolean;
   onView: (campaign: Campaign) => void;
-  onEdit: (campaign: Campaign) => void;
-  onDelete: (id: number) => void;
-  onCreate: () => void;
+  onEdit?: (campaign: Campaign) => void;
+  onDelete?: (id: number) => void;
+  onCreate?: () => void;
 }
 
 export function CampaignTable({
@@ -54,10 +54,12 @@ export function CampaignTable({
       <div className="text-center py-12">
         <Megaphone className="h-12 w-12 mx-auto text-gray-300 mb-4" />
         <p className="text-muted-foreground mb-4">لا توجد حملات</p>
-        <Button onClick={onCreate}>
-          <Plus className="ml-2 h-4 w-4" />
-          إنشاء أول حملة
-        </Button>
+        {onCreate ? (
+          <Button onClick={onCreate}>
+            <Plus className="ml-2 h-4 w-4" />
+            إنشاء أول حملة
+          </Button>
+        ) : null}
       </div>
     );
   }
@@ -73,12 +75,8 @@ export function CampaignTable({
             <TableHead className="text-right hidden md:table-cell min-w-[100px]">
               الميزانية
             </TableHead>
-            <TableHead className="text-right hidden lg:table-cell min-w-[120px]">
-              التقدم
-            </TableHead>
-            <TableHead className="text-right hidden md:table-cell min-w-[100px]">
-              الفترة
-            </TableHead>
+            <TableHead className="text-right hidden lg:table-cell min-w-[120px]">التقدم</TableHead>
+            <TableHead className="text-right hidden md:table-cell min-w-[100px]">الفترة</TableHead>
             <TableHead className="text-right min-w-[100px]">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
@@ -147,22 +145,26 @@ export function CampaignTable({
                   >
                     <Eye className="h-4 w-4 text-blue-600" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(campaign)}
-                    title="تعديل"
-                  >
-                    <Edit className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(campaign.id)}
-                    title="حذف"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-600" />
-                  </Button>
+                  {onEdit && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(campaign)}
+                      title="تعديل"
+                    >
+                      <Edit className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  )}
+                  {onDelete && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(campaign.id)}
+                      title="حذف"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

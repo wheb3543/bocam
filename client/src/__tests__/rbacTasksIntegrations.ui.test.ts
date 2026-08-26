@@ -15,8 +15,8 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(tasksSection).toContain("const canCompleteTasks = can('tasks.complete')");
     expect(tasksSection).toContain("const canDeleteTasks = can('tasks.delete')");
     expect(tasksSection).toContain('{canCreateTasks && (');
-    expect(tasksSection).toContain('{canDeleteTasks && <Button');
-    expect(tasksSection).toContain('{canCompleteTasks && <SelectItem value="completed">');
+    expect(tasksSection).toMatch(/\{canDeleteTasks && \(?\s*<Button/);
+    expect(tasksSection).toMatch(/\{canCompleteTasks && \(?\s*<SelectItem value="completed">/);
     expect(taskCount).toContain("const canViewTasks = can('tasks.view')");
     expect(taskCount).toContain('enabled: canViewTasks');
   });
@@ -43,10 +43,41 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
 
     expect(settings).toContain("const canViewIntegrations = can('integrations.view')");
     expect(settings).toContain("const canManageCredentials = can('integrations.credentials.manage')");
-    expect(settings).toContain('{canManageCredentials && <Card id="platform-connections"');
+    expect(settings).toMatch(/\{canManageCredentials && \(\s*<Card id="platform-connections"/);
     expect(connections).toContain("const canConnectIntegrations = can('integrations.connect')");
     expect(connections).toContain("const canDisconnectIntegrations = can('integrations.disconnect')");
     expect(connections).toContain('{canConnectIntegrations && (');
-    expect(connections).toContain('{canDisconnectIntegrations && <Button');
+    expect(connections).toMatch(/\{canDisconnectIntegrations && \(?\s*<Button/);
+  });
+
+  it('يعرض تلميح وصول موحداً عند إخفاء إجراء حساس بسبب الصلاحيات', () => {
+    const hint = source('client/src/components/PermissionHint.tsx');
+    const tasks = source('client/src/components/TasksSection.tsx');
+    const settings = source('client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx');
+
+    expect(hint).toContain('TooltipContent');
+    expect(hint).toContain('LockKeyhole');
+    expect(tasks).toContain('label="إنشاء مقيّد"');
+    expect(settings).toContain('label="بيانات الاعتماد مقيّدة"');
+  });
+
+  it('يحجب إجراءات الحملات والوسائط في الواجهة وفق صلاحياتها الدقيقة', () => {
+    const campaigns = source('client/src/pages/admin/campaigns/CampaignsPage.tsx');
+    const campaignTable = source('client/src/pages/admin/campaigns/components/CampaignTable.tsx');
+    const media = source('client/src/pages/admin/media/MediaLibraryPage.tsx');
+
+    expect(campaigns).toContain("const canViewCampaigns = can('campaigns.view')");
+    expect(campaigns).toContain("const canCreateCampaigns = can('campaigns.create')");
+    expect(campaigns).toContain("const canUpdateCampaigns = can('campaigns.update')");
+    expect(campaigns).toContain("const canDeleteCampaigns = can('campaigns.delete')");
+    expect(campaignTable).toContain('onEdit?:');
+    expect(campaignTable).toContain('onDelete?:');
+
+    expect(media).toContain("const canViewMedia = can('media.view')");
+    expect(media).toContain("const canUploadMedia = can('media.upload')");
+    expect(media).toContain("const canOrganizeMedia = can('media.organize')");
+    expect(media).toContain("const canDownloadMedia = can('media.download')");
+    expect(media).toContain("const canDeleteMedia = can('media.delete')");
+    expect(media).toContain('draggable={canOrganizeMedia}');
   });
 });
