@@ -14,6 +14,8 @@ interface KanbanColumnProps {
   tasks: Task[];
   onTaskClick: (task: Task) => void;
   onStatusChange: (taskId: number, newStatus: TaskStatus) => void;
+  canUpdateTasks: boolean;
+  canCompleteTasks: boolean;
 }
 
 const KanbanColumn = memo(function KanbanColumn({
@@ -21,10 +23,15 @@ const KanbanColumn = memo(function KanbanColumn({
   tasks,
   onTaskClick,
   onStatusChange,
+  canUpdateTasks,
+  canCompleteTasks,
 }: KanbanColumnProps) {
   const columnTasks = tasks.filter((t) => t.status === status);
 
   const handleDragOver = (e: React.DragEvent) => {
+    if (!canUpdateTasks || (status === 'completed' && !canCompleteTasks)) {
+      return;
+    }
     e.preventDefault();
     e.currentTarget.classList.add('bg-muted/50');
   };
@@ -34,6 +41,9 @@ const KanbanColumn = memo(function KanbanColumn({
   };
 
   const handleDrop = (e: React.DragEvent) => {
+    if (!canUpdateTasks || (status === 'completed' && !canCompleteTasks)) {
+      return;
+    }
     e.preventDefault();
     e.currentTarget.classList.remove('bg-muted/50');
     const taskId = parseInt(e.dataTransfer.getData('taskId'));
@@ -61,7 +71,12 @@ const KanbanColumn = memo(function KanbanColumn({
       <ScrollArea className="min-h-0 flex-1">
         <div className="space-y-2 pe-2">
           {columnTasks.map((task) => (
-            <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+            <TaskCard
+              key={task.id}
+              task={task}
+              onClick={() => onTaskClick(task)}
+              draggable={canUpdateTasks}
+            />
           ))}
           {columnTasks.length === 0 && (
             <div className="text-center py-8 text-muted-foreground text-sm">لا توجد مهام</div>

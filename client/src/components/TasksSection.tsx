@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -45,6 +46,13 @@ type FollowUpTask = {
 };
 
 export default function TasksSection({ entityType, entityId }: TasksSectionProps) {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewTasks = can('tasks.view');
+  const canCreateTasks = can('tasks.create');
+  const canUpdateTasks = can('tasks.update');
+  const canAssignTasks = can('tasks.assign');
+  const canCompleteTasks = can('tasks.complete');
+  const canDeleteTasks = can('tasks.delete');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -62,19 +70,21 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
   const utils = trpc.useUtils();
 
   // Fetch active users for assignment
-  const { data: users = [] } = trpc.users.getActiveUsers.useQuery();
+  const { data: users = [] } = trpc.users.getActiveUsers.useQuery(undefined, {
+    enabled: canCreateTasks && canAssignTasks,
+  });
 
   // Fetch tasks
   const { data: tasks = [], isLoading } = trpc.followUpTasks.getByEntity.useQuery(
     entityType === 'all'
       ? { entityType: 'appointment', entityId: 0 } // Dummy query, will be replaced with getAll
       : { entityType, entityId: entityId ?? 0 },
-    { enabled: entityType !== 'all' }
+    { enabled: canViewTasks && entityType !== 'all' }
   );
 
   // Fetch all tasks when entityType is "all"
   const { data: allTasks = [] } = trpc.followUpTasks.getAll.useQuery(undefined, {
-    enabled: entityType === 'all',
+    enabled: canViewTasks && entityType === 'all',
   });
 
   const displayTasks = entityType === 'all' ? allTasks : tasks;
@@ -150,7 +160,7 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
       description,
       priority,
       dueDate: dueDate || undefined,
-      assignedToId,
+      assignedToId: canAssignTasks ? assignedToId : undefined,
       assignedToName: assignedUser ? assignedUser.name || assignedUser.username : undefined,
     });
   };
@@ -194,7 +204,7 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
     }
   };
 
-  if (isLoading) {
+  if (arePermissionsLoading || (canViewTasks && isLoading)) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-muted-foreground">جاري التحميل...</div>
@@ -259,256 +269,280 @@ export default function TasksSection({ entityType, entityId }: TasksSectionProps
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">مهام المتابعة</h3>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus className="h-4 w-4 ml-2" />
-              إضافة مهمة
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>إنشاء مهمة متابعة جديدة</DialogTitle>
-              <DialogDescription>أضف مهمة جديدة لمتابعة هذا السجل</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">العنوان *</label>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="مثال: الاتصال بالعميل للمتابعة"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">الوصف</label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="تفاصيل المهمة..."
-                  rows={3}
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {canCreateTasks && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="h-4 w-4 ml-2" />
+                إضافة مهمة
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>إنشاء مهمة متابعة جديدة</DialogTitle>
+                <DialogDescription>أضف مهمة جديدة لمتابعة هذا السجل</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">الأولوية</label>
-                  <Select
-                    value={priority}
-                    onValueChange={(value: 'low' | 'medium' | 'high') => setPriority(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">منخفضة</SelectItem>
-                      <SelectItem value="medium">متوسطة</SelectItem>
-                      <SelectItem value="high">عالية</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">تاريخ الاستحقاق</label>
+                  <label className="text-sm font-medium">العنوان *</label>
                   <Input
-                    type="datetime-local"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="مثال: الاتصال بالعميل للمتابعة"
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">تعيين لـ</label>
-                <Select
-                  value={assignedToId?.toString()}
-                  onValueChange={(value: string) =>
-                    setAssignedToId(value ? parseInt(value) : undefined)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر مستخدم (اختياري)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">بدون تعيين</SelectItem>
-                    {users.map((user: TaskUser) => (
-                      <SelectItem key={user.id} value={user.id.toString()}>
-                        {user.name || user.username}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                إلغاء
-              </Button>
-              <Button onClick={handleCreateTask} disabled={createTaskMutation.isPending}>
-                {createTaskMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء المهمة'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 bg-muted/30 rounded-lg">
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">المستخدم المعين</label>
-          <Select
-            value={filterAssignedTo.toString()}
-            onValueChange={(value) =>
-              setFilterAssignedTo(
-                value === 'all' ? 'all' : value === 'unassigned' ? 'unassigned' : parseInt(value)
-              )
-            }
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">الكل</SelectItem>
-              <SelectItem value="unassigned">غير معين</SelectItem>
-              {users.map((user: TaskUser) => (
-                <SelectItem key={user.id} value={user.id.toString()}>
-                  {user.name || user.username}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">الأولوية</label>
-          <Select
-            value={filterPriority}
-            onValueChange={(value: 'low' | 'medium' | 'high' | 'all') => setFilterPriority(value)}
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">الكل</SelectItem>
-              <SelectItem value="low">منخفضة</SelectItem>
-              <SelectItem value="medium">متوسطة</SelectItem>
-              <SelectItem value="high">عالية</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">تاريخ الاستحقاق</label>
-          <Select
-            value={filterDueDate}
-            onValueChange={(value: 'overdue' | 'all' | 'today' | 'this_week' | 'future') =>
-              setFilterDueDate(value)
-            }
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">الكل</SelectItem>
-              <SelectItem value="overdue">متأخرة</SelectItem>
-              <SelectItem value="today">اليوم</SelectItem>
-              <SelectItem value="this_week">هذا الأسبوع</SelectItem>
-              <SelectItem value="future">مستقبلية</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-end">
-          {hasActiveFilters && (
-            <Button variant="outline" size="sm" onClick={clearFilters} className="w-full h-9">
-              مسح الفلاتر
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Results count */}
-      {hasActiveFilters && (
-        <div className="text-sm text-muted-foreground px-1">
-          عرض {filteredTasks.length} من {tasks.length} مهمة
-        </div>
-      )}
-
-      {filteredTasks.length === 0 ? (
-        <Card className="p-8 text-center">
-          <div className="flex flex-col items-center gap-2 text-muted-foreground">
-            <Circle className="h-12 w-12" />
-            <p>لا توجد مهام متابعة</p>
-            <p className="text-sm">أضف مهمة جديدة للبدء</p>
-          </div>
-        </Card>
-      ) : (
-        <div className="space-y-2">
-          {filteredTasks.map((task) => (
-            <Card key={task.id} className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="mt-1">{getStatusIcon(task.status)}</div>
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <h4 className="font-medium">{task.title}</h4>
-                      {task.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteTaskMutation.mutate({ id: task.id })}
-                      disabled={deleteTaskMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className="text-xs">
-                      <div
-                        className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)} ml-1`}
-                      />
-                      {getPriorityLabel(task.priority)}
-                    </Badge>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">الوصف</label>
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="تفاصيل المهمة..."
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">الأولوية</label>
                     <Select
-                      value={task.status}
-                      onValueChange={(
-                        value: 'completed' | 'cancelled' | 'pending' | 'in_progress'
-                      ) => updateStatusMutation.mutate({ id: task.id, status: value })}
-                      disabled={updateStatusMutation.isPending}
+                      value={priority}
+                      onValueChange={(value: 'low' | 'medium' | 'high') => setPriority(value)}
                     >
-                      <SelectTrigger className="h-7 w-auto text-xs">
+                      <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pending">قيد الانتظار</SelectItem>
-                        <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
-                        <SelectItem value="completed">مكتملة</SelectItem>
-                        <SelectItem value="cancelled">ملغية</SelectItem>
+                        <SelectItem value="low">منخفضة</SelectItem>
+                        <SelectItem value="medium">متوسطة</SelectItem>
+                        <SelectItem value="high">عالية</SelectItem>
                       </SelectContent>
                     </Select>
-                    {task.dueDate && (
-                      <Badge variant="secondary" className="text-xs">
-                        <Clock className="h-3 w-3 ml-1" />
-                        {formatDistanceToNow(new Date(task.dueDate), {
-                          addSuffix: true,
-                          locale: ar,
-                        })}
-                      </Badge>
-                    )}
-                    {task.assignedToName && (
-                      <Badge variant="outline" className="text-xs">
-                        معين لـ: {task.assignedToName}
-                      </Badge>
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      بواسطة: {task.createdByName}
-                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">تاريخ الاستحقاق</label>
+                    <Input
+                      type="datetime-local"
+                      value={dueDate}
+                      onChange={(e) => setDueDate(e.target.value)}
+                    />
                   </div>
                 </div>
+                {canAssignTasks && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">تعيين لـ</label>
+                    <Select
+                      value={assignedToId?.toString()}
+                      onValueChange={(value: string) =>
+                        setAssignedToId(value ? parseInt(value) : undefined)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر مستخدم (اختياري)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">بدون تعيين</SelectItem>
+                        {users.map((user: TaskUser) => (
+                          <SelectItem key={user.id} value={user.id.toString()}>
+                            {user.name || user.username}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  إلغاء
+                </Button>
+                <Button onClick={handleCreateTask} disabled={createTaskMutation.isPending}>
+                  {createTaskMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء المهمة'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
+
+      {canViewTasks && (
+        <>
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">المستخدم المعين</label>
+              <Select
+                value={filterAssignedTo.toString()}
+                onValueChange={(value) =>
+                  setFilterAssignedTo(
+                    value === 'all'
+                      ? 'all'
+                      : value === 'unassigned'
+                        ? 'unassigned'
+                        : parseInt(value)
+                  )
+                }
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  <SelectItem value="unassigned">غير معين</SelectItem>
+                  {users.map((user: TaskUser) => (
+                    <SelectItem key={user.id} value={user.id.toString()}>
+                      {user.name || user.username}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">الأولوية</label>
+              <Select
+                value={filterPriority}
+                onValueChange={(value: 'low' | 'medium' | 'high' | 'all') =>
+                  setFilterPriority(value)
+                }
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  <SelectItem value="low">منخفضة</SelectItem>
+                  <SelectItem value="medium">متوسطة</SelectItem>
+                  <SelectItem value="high">عالية</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">تاريخ الاستحقاق</label>
+              <Select
+                value={filterDueDate}
+                onValueChange={(value: 'overdue' | 'all' | 'today' | 'this_week' | 'future') =>
+                  setFilterDueDate(value)
+                }
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  <SelectItem value="overdue">متأخرة</SelectItem>
+                  <SelectItem value="today">اليوم</SelectItem>
+                  <SelectItem value="this_week">هذا الأسبوع</SelectItem>
+                  <SelectItem value="future">مستقبلية</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-end">
+              {hasActiveFilters && (
+                <Button variant="outline" size="sm" onClick={clearFilters} className="w-full h-9">
+                  مسح الفلاتر
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Results count */}
+          {hasActiveFilters && (
+            <div className="text-sm text-muted-foreground px-1">
+              عرض {filteredTasks.length} من {tasks.length} مهمة
+            </div>
+          )}
+
+          {filteredTasks.length === 0 ? (
+            <Card className="p-8 text-center">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <Circle className="h-12 w-12" />
+                <p>لا توجد مهام متابعة</p>
+                {canCreateTasks && <p className="text-sm">أضف مهمة جديدة للبدء</p>}
               </div>
             </Card>
-          ))}
-        </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredTasks.map((task) => (
+                <Card key={task.id} className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1">{getStatusIcon(task.status)}</div>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{task.title}</h4>
+                          {task.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                          )}
+                        </div>
+                        {canDeleteTasks && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteTaskMutation.mutate({ id: task.id })}
+                            disabled={deleteTaskMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="outline" className="text-xs">
+                          <div
+                            className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)} ml-1`}
+                          />
+                          {getPriorityLabel(task.priority)}
+                        </Badge>
+                        {canUpdateTasks ? (
+                          <Select
+                            value={task.status}
+                            onValueChange={(
+                              value: 'completed' | 'cancelled' | 'pending' | 'in_progress'
+                            ) => updateStatusMutation.mutate({ id: task.id, status: value })}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            <SelectTrigger className="h-7 w-auto text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">قيد الانتظار</SelectItem>
+                              <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
+                              {canCompleteTasks && (
+                                <SelectItem value="completed">مكتملة</SelectItem>
+                              )}
+                              <SelectItem value="cancelled">ملغية</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            {task.status || 'قيد الانتظار'}
+                          </Badge>
+                        )}
+                        {task.dueDate && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Clock className="h-3 w-3 ml-1" />
+                            {formatDistanceToNow(new Date(task.dueDate), {
+                              addSuffix: true,
+                              locale: ar,
+                            })}
+                          </Badge>
+                        )}
+                        {task.assignedToName && (
+                          <Badge variant="outline" className="text-xs">
+                            معين لـ: {task.assignedToName}
+                          </Badge>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          بواسطة: {task.createdByName}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

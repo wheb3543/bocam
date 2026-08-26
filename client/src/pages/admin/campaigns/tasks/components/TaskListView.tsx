@@ -30,8 +30,8 @@ import { formatDateUtil } from '@/hooks/export/useFormatDate';
 interface TaskListViewProps {
   tasks: Task[] | undefined;
   onTaskClick: (task: Task) => void;
-  onEditTask: (task: Task) => void;
-  onDeleteTask: (id: number) => void;
+  onEditTask?: (task: Task) => void;
+  onDeleteTask?: (id: number) => void;
 }
 
 const TaskListView = memo(function TaskListView({
@@ -55,7 +55,9 @@ const TaskListView = memo(function TaskListView({
                 <th className="text-right p-3 font-medium">التصنيف</th>
                 <th className="text-right p-3 font-medium">المعيّن إليه</th>
                 <th className="text-right p-3 font-medium">تاريخ التسليم</th>
-                <th className="text-right p-3 font-medium">إجراءات</th>
+                {(onEditTask || onDeleteTask) && (
+                  <th className="text-right p-3 font-medium">إجراءات</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -111,41 +113,50 @@ const TaskListView = memo(function TaskListView({
                       {formatDate(task.dueDate)}
                     </span>
                   </td>
-                  <td className="p-3">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEditTask(task);
-                          }}
-                        >
-                          <Edit className="h-4 w-4 me-2" />
-                          تعديل
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteTask(task.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 me-2" />
-                          حذف
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
+                  {(onEditTask || onDeleteTask) && (
+                    <td className="p-3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {onEditTask && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEditTask(task);
+                              }}
+                            >
+                              <Edit className="h-4 w-4 me-2" />
+                              تعديل
+                            </DropdownMenuItem>
+                          )}
+                          {onDeleteTask && (
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteTask(task.id);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 me-2" />
+                              حذف
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  )}
                 </tr>
               ))}
               {(!tasks || tasks.length === 0) && (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                  <td
+                    colSpan={onEditTask || onDeleteTask ? 7 : 6}
+                    className="p-8 text-center text-muted-foreground"
+                  >
                     لا توجد مهام
                   </td>
                 </tr>

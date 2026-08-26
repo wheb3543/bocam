@@ -1,4 +1,5 @@
 import { trpc } from '@/lib/api/trpc';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { Badge } from '@/components/ui/badge';
 import { CheckSquare } from 'lucide-react';
 
@@ -8,10 +9,19 @@ interface TaskCountProps {
 }
 
 export default function TaskCount({ entityType, entityId }: TaskCountProps) {
-  const { data: count = 0 } = trpc.followUpTasks.getCount.useQuery({
-    entityType,
-    entityId,
-  });
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewTasks = can('tasks.view');
+  const { data: count = 0 } = trpc.followUpTasks.getCount.useQuery(
+    {
+      entityType,
+      entityId,
+    },
+    { enabled: canViewTasks }
+  );
+
+  if (arePermissionsLoading || !canViewTasks) {
+    return null;
+  }
 
   if (count === 0) {
     return (

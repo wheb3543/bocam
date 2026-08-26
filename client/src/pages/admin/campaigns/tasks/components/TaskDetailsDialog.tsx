@@ -19,10 +19,27 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import { MoreVertical, Edit, Trash2, MessageSquare, Paperclip, Send, File, Upload } from 'lucide-react';
+import {
+  MoreVertical,
+  Edit,
+  Trash2,
+  MessageSquare,
+  Paperclip,
+  Send,
+  File,
+  Upload,
+} from 'lucide-react';
 import { trpc } from '@/lib/api/trpc';
 import type { Task, Comment, Attachment } from '../types/task.types';
-import { getStatusLabel, getStatusColor, getPriorityLabel, getPriorityColor, getCategoryLabel, getCategoryColor, isOverdue } from './TaskHelpers';
+import {
+  getStatusLabel,
+  getStatusColor,
+  getPriorityLabel,
+  getPriorityColor,
+  getCategoryLabel,
+  getCategoryColor,
+  isOverdue,
+} from './TaskHelpers';
 import { formatDateUtil } from '@/hooks/export/useFormatDate';
 
 interface TaskDetailsDialogProps {
@@ -30,7 +47,9 @@ interface TaskDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   _onUpdate: () => void;
-  onDelete: (id: number) => void;
+  onDelete?: (id: number) => void;
+  canUpdateTasks: boolean;
+  canDeleteTasks: boolean;
 }
 
 const TaskDetailsDialog = memo(function TaskDetailsDialog({
@@ -39,6 +58,8 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
   onOpenChange,
   _onUpdate,
   onDelete,
+  canUpdateTasks,
+  canDeleteTasks,
 }: TaskDetailsDialogProps) {
   const [_isEditing, _setIsEditing] = useState(false);
   const [newComment, setNewComment] = useState('');
@@ -62,13 +83,17 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
   });
 
   const handleAddComment = () => {
-    if (!task || !newComment.trim()) {return;}
+    if (!task || !newComment.trim()) {
+      return;
+    }
     addCommentMutation.mutate({ taskId: task.id, content: newComment });
   };
 
   const formatDate = formatDateUtil;
 
-  if (!task) {return null;}
+  if (!task) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -87,29 +112,35 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
                 </Badge>
               </div>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => _setIsEditing(true)}>
-                  <Edit className="h-4 w-4 me-2" />
-                  تعديل
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-red-600"
-                  onClick={() => {
-                    onDelete(task.id);
-                    onOpenChange(false);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 me-2" />
-                  حذف
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {(canUpdateTasks || canDeleteTasks) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {canUpdateTasks && (
+                    <DropdownMenuItem onClick={() => _setIsEditing(true)}>
+                      <Edit className="h-4 w-4 me-2" />
+                      تعديل
+                    </DropdownMenuItem>
+                  )}
+                  {canDeleteTasks && onDelete && (
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() => {
+                        onDelete(task.id);
+                        onOpenChange(false);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 me-2" />
+                      حذف
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </DialogHeader>
 
@@ -158,10 +189,12 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
                   <Paperclip className="h-4 w-4" />
                   المرفقات ({attachments?.length || 0})
                 </h4>
-                <Button variant="outline" size="sm">
-                  <Upload className="h-4 w-4 me-2" />
-                  رفع ملف
-                </Button>
+                {canUpdateTasks && (
+                  <Button variant="outline" size="sm">
+                    <Upload className="h-4 w-4 me-2" />
+                    رفع ملف
+                  </Button>
+                )}
               </div>
               {attachments && attachments.length > 0 ? (
                 <div className="space-y-2">
@@ -218,21 +251,23 @@ const TaskDetailsDialog = memo(function TaskDetailsDialog({
                 )}
               </div>
 
-              <div className="flex gap-2">
-                <Input
-                  placeholder="أضف تعليقاً..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
-                />
-                <Button
-                  size="icon"
-                  onClick={handleAddComment}
-                  disabled={!newComment.trim() || addCommentMutation.isPending}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
+              {canUpdateTasks && (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="أضف تعليقاً..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                  />
+                  <Button
+                    size="icon"
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim() || addCommentMutation.isPending}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </ScrollArea>

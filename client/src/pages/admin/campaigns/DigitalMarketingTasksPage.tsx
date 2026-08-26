@@ -8,6 +8,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Loader2, Plus, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import type { Task, ViewMode, TaskStatus } from './tasks/types/task.types';
 import { useTasks } from './tasks/hooks/useTasks';
 import TaskStatsCards from './tasks/components/TaskStatsCards';
@@ -19,6 +20,13 @@ import TaskFormDialog from './tasks/components/TaskFormDialog';
 
 // Main Page Component
 export default function DigitalMarketingTasksPage() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewTasks = can('tasks.view');
+  const canCreateTasks = can('tasks.create');
+  const canUpdateTasks = can('tasks.update');
+  const canAssignTasks = can('tasks.assign');
+  const canCompleteTasks = can('tasks.complete');
+  const canDeleteTasks = can('tasks.delete');
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -34,6 +42,7 @@ export default function DigitalMarketingTasksPage() {
     priorityFilter,
     categoryFilter,
     searchQuery,
+    canViewTasks,
   });
 
   const handleTaskClick = (task: Task) => {
@@ -71,39 +80,58 @@ export default function DigitalMarketingTasksPage() {
         className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden py-3 sm:py-4"
         dir="rtl"
       >
-        <div className="shrink-0">
-          <TaskStatsCards stats={stats} />
-        </div>
-
-        <TaskFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          priorityFilter={priorityFilter}
-          onPriorityFilterChange={setPriorityFilter}
-          categoryFilter={categoryFilter}
-          onCategoryFilterChange={setCategoryFilter}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          actions={
-            <div className="flex shrink-0 items-center gap-2">
-              <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9">
-                <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="sr-only">تحديث المهام</span>
-              </Button>
-              <Button onClick={handleCreateNew} className="h-9 text-sm">
-                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1.5 sm:me-2" />
-                <span className="hidden sm:inline">مهمة جديدة</span>
-                <span className="sm:hidden">جديد</span>
-              </Button>
+        {canViewTasks && (
+          <>
+            <div className="shrink-0">
+              <TaskStatsCards stats={stats} />
             </div>
-          }
-        />
+
+            <TaskFilters
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              priorityFilter={priorityFilter}
+              onPriorityFilterChange={setPriorityFilter}
+              categoryFilter={categoryFilter}
+              onCategoryFilterChange={setCategoryFilter}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              actions={
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => refetch()}
+                    className="h-9 w-9"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="sr-only">تحديث المهام</span>
+                  </Button>
+                  {canCreateTasks && (
+                    <Button onClick={handleCreateNew} className="h-9 text-sm">
+                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 me-1.5 sm:me-2" />
+                      <span className="hidden sm:inline">مهمة جديدة</span>
+                      <span className="sm:hidden">جديد</span>
+                    </Button>
+                  )}
+                </div>
+              }
+            />
+          </>
+        )}
 
         {/* Content */}
         <div className="min-h-0 flex-1 overflow-hidden">
-          {isLoading ? (
+          {arePermissionsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : !canViewTasks ? (
+            <div className="flex h-full items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+              لا تملك صلاحية عرض مهام التسويق الرقمي.
+            </div>
+          ) : isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
@@ -116,6 +144,8 @@ export default function DigitalMarketingTasksPage() {
                   tasks={tasks || []}
                   onTaskClick={handleTaskClick}
                   onStatusChange={handleStatusChange}
+                  canUpdateTasks={canUpdateTasks}
+                  canCompleteTasks={canCompleteTasks}
                 />
               ))}
             </div>
@@ -123,28 +153,38 @@ export default function DigitalMarketingTasksPage() {
             <TaskListView
               tasks={tasks}
               onTaskClick={handleTaskClick}
-              onEditTask={handleEditTask}
-              onDeleteTask={handleDeleteWithConfirm}
+              onEditTask={canUpdateTasks ? handleEditTask : undefined}
+              onDeleteTask={canDeleteTasks ? handleDeleteWithConfirm : undefined}
             />
           )}
         </div>
 
         {/* Task Details Dialog */}
-        <TaskDetailsDialog
-          task={selectedTask}
-          open={isDetailsOpen}
-          onOpenChange={setIsDetailsOpen}
-          _onUpdate={refetch}
-          onDelete={handleDeleteWithConfirm}
-        />
+        {canViewTasks && (
+          <TaskDetailsDialog
+            task={selectedTask}
+            open={isDetailsOpen}
+            onOpenChange={setIsDetailsOpen}
+            _onUpdate={refetch}
+            onDelete={canDeleteTasks ? handleDeleteWithConfirm : undefined}
+            canUpdateTasks={canUpdateTasks}
+            canDeleteTasks={canDeleteTasks}
+          />
+        )}
 
         {/* Create/Edit Task Dialog */}
-        <TaskFormDialog
-          open={isFormOpen}
-          onOpenChange={setIsFormOpen}
-          task={editingTask}
-          onSuccess={refetch}
-        />
+        {(canCreateTasks || canUpdateTasks) && (
+          <TaskFormDialog
+            open={isFormOpen}
+            onOpenChange={setIsFormOpen}
+            task={editingTask}
+            onSuccess={refetch}
+            canCreateTasks={canCreateTasks}
+            canUpdateTasks={canUpdateTasks}
+            canAssignTasks={canAssignTasks}
+            canCompleteTasks={canCompleteTasks}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

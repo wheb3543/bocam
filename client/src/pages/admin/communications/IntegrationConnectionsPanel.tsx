@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { trpc } from '@/lib/api/trpc';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import {
   CheckCircle2,
   ExternalLink,
@@ -99,10 +100,20 @@ function assetLabel(type: string) {
 }
 
 export function IntegrationConnectionsPanel() {
+  const { can } = useRolePermissions();
+  const canViewIntegrations = can('integrations.view');
+  const canConnectIntegrations = can('integrations.connect');
+  const canDisconnectIntegrations = can('integrations.disconnect');
   const utils = trpc.useUtils();
-  const overviewQuery = trpc.integrationConnections.overview.useQuery();
-  const metaOperationsQuery = trpc.metaOperations.overview.useQuery();
-  const externalPlatformsQuery = trpc.generalIntegrations.status.useQuery();
+  const overviewQuery = trpc.integrationConnections.overview.useQuery(undefined, {
+    enabled: canViewIntegrations,
+  });
+  const metaOperationsQuery = trpc.metaOperations.overview.useQuery(undefined, {
+    enabled: canViewIntegrations,
+  });
+  const externalPlatformsQuery = trpc.generalIntegrations.status.useQuery(undefined, {
+    enabled: canViewIntegrations,
+  });
   const startMetaMutation = trpc.integrationConnections.startMetaBusiness.useMutation({
     onSuccess: ({ authorizationUrl }) => window.location.assign(authorizationUrl),
     onError: (error) => toast.error(error.message),
@@ -235,71 +246,75 @@ export function IntegrationConnectionsPanel() {
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-3 md:grid-cols-2">
-          <Button
-            type="button"
-            className="h-auto min-h-12 bg-blue-600 px-4 py-3 hover:bg-blue-700"
-            onClick={() => startMetaMutation.mutate()}
-            disabled={startMetaMutation.isPending}
-          >
-            {startMetaMutation.isPending ? (
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-            ) : (
-              <ExternalLink className="ml-2 h-4 w-4" />
-            )}
-            ربط Meta Business والأصول
-          </Button>
-          <Button
-            type="button"
-            className="h-auto min-h-12 bg-emerald-600 px-4 py-3 hover:bg-emerald-700"
-            onClick={launchWhatsAppEmbeddedSignup}
-            disabled={startWhatsAppMutation.isPending || completeWhatsAppMutation.isPending}
-          >
-            {startWhatsAppMutation.isPending || completeWhatsAppMutation.isPending ? (
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-            ) : (
-              <WandSparkles className="ml-2 h-4 w-4" />
-            )}
-            ربط WhatsApp Business
-          </Button>
-        </div>
+        {canConnectIntegrations && (
+          <div className="grid gap-3 md:grid-cols-2">
+            <Button
+              type="button"
+              className="h-auto min-h-12 bg-blue-600 px-4 py-3 hover:bg-blue-700"
+              onClick={() => startMetaMutation.mutate()}
+              disabled={startMetaMutation.isPending}
+            >
+              {startMetaMutation.isPending ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ExternalLink className="ml-2 h-4 w-4" />
+              )}
+              ربط Meta Business والأصول
+            </Button>
+            <Button
+              type="button"
+              className="h-auto min-h-12 bg-emerald-600 px-4 py-3 hover:bg-emerald-700"
+              onClick={launchWhatsAppEmbeddedSignup}
+              disabled={startWhatsAppMutation.isPending || completeWhatsAppMutation.isPending}
+            >
+              {startWhatsAppMutation.isPending || completeWhatsAppMutation.isPending ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <WandSparkles className="ml-2 h-4 w-4" />
+              )}
+              ربط WhatsApp Business
+            </Button>
+          </div>
+        )}
 
-        <section className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div className="mb-3">
-            <h3 className="font-semibold text-slate-900">ربط المنصات الخارجية</h3>
-            <p className="mt-1 text-xs leading-5 text-slate-600">
-              تبدأ عملية الربط من نافذة التفويض الرسمية بعد حفظ بيانات التطبيق وتفعيل المنصة. لا
-              تنتقل الأسرار أو التوكنات إلى المتصفح أو رابط التفويض.
-            </p>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-            {(externalPlatformsQuery.data ?? []).map((platform) => {
-              const enabled = platform.connectionStatus === 'ready_for_oauth';
-              return (
-                <Button
-                  key={platform.platform}
-                  type="button"
-                  variant="outline"
-                  className="h-auto min-h-16 justify-between whitespace-normal border-slate-300 bg-white px-3 py-2 text-right hover:bg-slate-100"
-                  disabled={!enabled || startExternalMutation.isPending}
-                  onClick={() => startExternalMutation.mutate({ provider: platform.platform })}
-                >
-                  <span className="flex flex-col items-start gap-1">
-                    <span className="font-semibold text-slate-900">{platform.label}</span>
-                    <span
-                      className={
-                        enabled ? 'text-[11px] text-emerald-700' : 'text-[11px] text-amber-700'
-                      }
-                    >
-                      {enabled ? 'جاهز لبدء OAuth' : 'أضف بيانات التطبيق أولاً'}
+        {canConnectIntegrations && (
+          <section className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div className="mb-3">
+              <h3 className="font-semibold text-slate-900">ربط المنصات الخارجية</h3>
+              <p className="mt-1 text-xs leading-5 text-slate-600">
+                تبدأ عملية الربط من نافذة التفويض الرسمية بعد حفظ بيانات التطبيق وتفعيل المنصة. لا
+                تنتقل الأسرار أو التوكنات إلى المتصفح أو رابط التفويض.
+              </p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              {(externalPlatformsQuery.data ?? []).map((platform) => {
+                const enabled = platform.connectionStatus === 'ready_for_oauth';
+                return (
+                  <Button
+                    key={platform.platform}
+                    type="button"
+                    variant="outline"
+                    className="h-auto min-h-16 justify-between whitespace-normal border-slate-300 bg-white px-3 py-2 text-right hover:bg-slate-100"
+                    disabled={!enabled || startExternalMutation.isPending}
+                    onClick={() => startExternalMutation.mutate({ provider: platform.platform })}
+                  >
+                    <span className="flex flex-col items-start gap-1">
+                      <span className="font-semibold text-slate-900">{platform.label}</span>
+                      <span
+                        className={
+                          enabled ? 'text-[11px] text-emerald-700' : 'text-[11px] text-amber-700'
+                        }
+                      >
+                        {enabled ? 'جاهز لبدء OAuth' : 'أضف بيانات التطبيق أولاً'}
+                      </span>
                     </span>
-                  </span>
-                  <ExternalLink className="h-4 w-4 shrink-0 text-blue-700" />
-                </Button>
-              );
-            })}
-          </div>
-        </section>
+                    <ExternalLink className="h-4 w-4 shrink-0 text-blue-700" />
+                  </Button>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         <Alert className="border-slate-200 bg-slate-50">
           <ShieldCheck className="h-4 w-4 text-blue-700" />
@@ -369,21 +384,23 @@ export function IntegrationConnectionsPanel() {
                         <p className="mt-2 text-xs text-rose-700">{connection.lastError}</p>
                       ) : null}
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
-                      onClick={() => {
-                        if (window.confirm('هل تريد إلغاء هذا الربط؟ لن يحذف المحتوى الداخلي.')) {
-                          disconnectMutation.mutate({ connectionId: connection.id });
-                        }
-                      }}
-                      disabled={disconnectMutation.isPending}
-                    >
-                      <Unplug className="ml-2 h-4 w-4" />
-                      إلغاء الربط
-                    </Button>
+                    {canDisconnectIntegrations && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                        onClick={() => {
+                          if (window.confirm('هل تريد إلغاء هذا الربط؟ لن يحذف المحتوى الداخلي.')) {
+                            disconnectMutation.mutate({ connectionId: connection.id });
+                          }
+                        }}
+                        disabled={disconnectMutation.isPending}
+                      >
+                        <Unplug className="ml-2 h-4 w-4" />
+                        إلغاء الربط
+                      </Button>
+                    )}
                   </div>
 
                   <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr]">
@@ -408,13 +425,15 @@ export function IntegrationConnectionsPanel() {
                                   {assetLabel(asset.assetType)}
                                 </span>
                               </span>
-                              <Switch
-                                checked={asset.isSelected}
-                                onCheckedChange={(isSelected) =>
-                                  selectAssetMutation.mutate({ assetId: asset.id, isSelected })
-                                }
-                                aria-label={`تحديد ${asset.displayName || asset.externalAssetId}`}
-                              />
+                              {canConnectIntegrations && (
+                                <Switch
+                                  checked={asset.isSelected}
+                                  onCheckedChange={(isSelected) =>
+                                    selectAssetMutation.mutate({ assetId: asset.id, isSelected })
+                                  }
+                                  aria-label={`تحديد ${asset.displayName || asset.externalAssetId}`}
+                                />
+                              )}
                             </label>
                           ))}
                         </div>

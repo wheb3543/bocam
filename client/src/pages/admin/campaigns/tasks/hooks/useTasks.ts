@@ -11,21 +11,31 @@ interface UseTasksProps {
   priorityFilter: string;
   categoryFilter: string;
   searchQuery: string;
+  canViewTasks: boolean;
 }
 
-export function useTasks({ statusFilter, priorityFilter, categoryFilter, searchQuery }: UseTasksProps) {
+export function useTasks({
+  statusFilter,
+  priorityFilter,
+  categoryFilter,
+  searchQuery,
+  canViewTasks,
+}: UseTasksProps) {
   const {
     data: tasks,
     isLoading,
     refetch,
-  } = trpc.tasks.list.useQuery({
-    status: statusFilter !== 'all' ? statusFilter : undefined,
-    priority: priorityFilter !== 'all' ? priorityFilter : undefined,
-    category: categoryFilter !== 'all' ? categoryFilter : undefined,
-    search: searchQuery || undefined,
-  });
+  } = trpc.tasks.list.useQuery(
+    {
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      priority: priorityFilter !== 'all' ? priorityFilter : undefined,
+      category: categoryFilter !== 'all' ? categoryFilter : undefined,
+      search: searchQuery || undefined,
+    },
+    { enabled: canViewTasks }
+  );
 
-  const { data: stats } = trpc.tasks.stats.useQuery();
+  const { data: stats } = trpc.tasks.stats.useQuery(undefined, { enabled: canViewTasks });
 
   const updateStatusMutation = trpc.tasks.updateStatus.useMutation({
     onSuccess: () => {
@@ -39,7 +49,10 @@ export function useTasks({ statusFilter, priorityFilter, categoryFilter, searchQ
     },
   });
 
-  const handleStatusChange = (taskId: number, newStatus: 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled') => {
+  const handleStatusChange = (
+    taskId: number,
+    newStatus: 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled'
+  ) => {
     updateStatusMutation.mutate({ id: taskId, status: newStatus });
   };
 

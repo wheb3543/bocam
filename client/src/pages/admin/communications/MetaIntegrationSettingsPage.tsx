@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import AdminPageHeader from '@/components/layout/AdminPageHeader';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { trpc } from '@/lib/api/trpc';
 import { IntegrationConnectionsPanel } from './IntegrationConnectionsPanel';
 import {
@@ -79,14 +80,20 @@ const initialForm: MetaForm = {
 
 export default function MetaIntegrationSettingsPage() {
   const { user, loading } = useAuth();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
   const utils = trpc.useUtils();
   const [form, setForm] = useState<MetaForm>(initialForm);
   const [callbackUrl, setCallbackUrl] = useState('');
   const [oauthCallbackUrl, setOauthCallbackUrl] = useState('');
-  const isAdmin = user?.role === 'admin';
-  const statusQuery = trpc.metaIntegration.status.useQuery(undefined, { enabled: isAdmin });
+  const canViewIntegrations = can('integrations.view');
+  const canConnectIntegrations = can('integrations.connect');
+  const canManageCredentials = can('integrations.credentials.manage');
+  const isSystemAdmin = user?.role === 'admin';
+  const statusQuery = trpc.metaIntegration.status.useQuery(undefined, {
+    enabled: canViewIntegrations,
+  });
   const generalStatusQuery = trpc.generalIntegrations.status.useQuery(undefined, {
-    enabled: isAdmin,
+    enabled: canViewIntegrations,
   });
   const saveMutation = trpc.metaIntegration.save.useMutation({
     onSuccess: async () => {
@@ -181,7 +188,7 @@ export default function MetaIntegrationSettingsPage() {
     }
   };
 
-  if (loading) {
+  if (loading || arePermissionsLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -189,7 +196,7 @@ export default function MetaIntegrationSettingsPage() {
     );
   }
 
-  if (!isAdmin) {
+  if (!canViewIntegrations) {
     return (
       <DashboardLayout
         pageTitle="إعدادات الربط العامة"
@@ -200,7 +207,7 @@ export default function MetaIntegrationSettingsPage() {
           <AdminPageHeader
             eyebrow="إدارة الاتصالات"
             title="إعدادات الربط العامة"
-            description="تتطلب هذه المساحة صلاحية المسؤول لحماية الحسابات والأسرار المرتبطة بالمنصات."
+            description="تتطلب هذه المساحة صلاحية عرض التكاملات لعرض حالة الحسابات والأصول المرتبطة بالمنصات."
             status={
               <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
                 وصول مقيّد
@@ -209,9 +216,9 @@ export default function MetaIntegrationSettingsPage() {
           />
           <Alert className="border-amber-200 bg-amber-50">
             <ShieldAlert className="h-4 w-4 text-amber-700" />
-            <AlertTitle>صلاحية المسؤول مطلوبة</AlertTitle>
+            <AlertTitle>صلاحية عرض التكاملات مطلوبة</AlertTitle>
             <AlertDescription>
-              تُدار أسرار Meta والمنصات الخارجية من قبل المسؤول فقط لحماية حسابات المؤسسة.
+              لن تظهر حالات الاتصالات أو إجراءاتها قبل منحك صلاحية عرض التكاملات.
             </AlertDescription>
           </Alert>
         </main>
@@ -247,201 +254,211 @@ export default function MetaIntegrationSettingsPage() {
             </Badge>
           }
           actions={
-            <Button asChild className="min-h-10">
-              <a href="#platform-connections">
-                <KeyRound className="ml-2 h-4 w-4" />
-                تجهيز منصة
-              </a>
-            </Button>
+            canManageCredentials ? (
+              <Button asChild className="min-h-10">
+                <a href="#platform-connections">
+                  <KeyRound className="ml-2 h-4 w-4" />
+                  تجهيز منصة
+                </a>
+              </Button>
+            ) : undefined
           }
         />
 
-        <Alert className="border-blue-200 bg-blue-50/70">
-          <LockKeyhole className="h-4 w-4 text-blue-700" />
-          <AlertTitle>حماية الأسرار</AlertTitle>
-          <AlertDescription>
-            لا تُعرض قيم App Secret أو Verify Token أو Page Access Token بعد الحفظ. تُخزّن مشفّرة
-            على الخادم، ويمكنك استبدالها بإدخال قيمة جديدة.
-          </AlertDescription>
-        </Alert>
+        {canManageCredentials && (
+          <Alert className="border-blue-200 bg-blue-50/70">
+            <LockKeyhole className="h-4 w-4 text-blue-700" />
+            <AlertTitle>حماية الأسرار</AlertTitle>
+            <AlertDescription>
+              لا تُعرض قيم App Secret أو Verify Token أو Page Access Token بعد الحفظ. تُخزّن مشفّرة
+              على الخادم، ويمكنك استبدالها بإدخال قيمة جديدة.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <IntegrationConnectionsPanel />
 
-        <Card id="platform-connections" className="border-blue-100">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base text-slate-900">
-              <KeyRound className="h-5 w-5 text-blue-700" />
-              ربط منصات النشر الخارجية
-            </CardTitle>
-            <CardDescription>
-              احفظ Client ID وClient Secret لكل منصة. يُشفّر Client Secret على الخادم ولا يعاد إلى
-              المتصفح بعد الحفظ. عند اكتمال الحقول وتفعيل المنصة تصبح جاهزة لبدء OAuth.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {generalStatusQuery.isLoading ? (
-              <div
-                className="flex min-h-32 items-center justify-center text-sm text-slate-500"
-                role="status"
-              >
-                <Loader2 className="ml-2 h-4 w-4 animate-spin text-blue-600" />
-                جارٍ تحميل حالات المنصات...
-              </div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {(generalStatusQuery.data ?? []).map((platform) => (
-                  <ExternalIntegrationCard key={platform.platform} status={platform} />
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="border-amber-200 bg-amber-50/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base text-amber-950">
-              <DatabaseZap className="h-5 w-5 text-amber-700" />
-              تجربة حمولات Meta الرسمية
-            </CardTitle>
-            <CardDescription>
-              تُنشئ رسائل Messenger وInstagram وتعليقات Facebook وInstagram اصطناعية وموسومة
-              <strong className="mx-1">بيانات اختبار Meta — قابلة للحذف</strong>
-              داخل صندوق البريد، ثم تُشغّل عليها منطق التطبيع والتخزين نفسه المستخدم في Webhook.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 sm:flex-row">
-            <Button
-              type="button"
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => seedTestDataMutation.mutate()}
-              disabled={seedTestDataMutation.isPending}
-            >
-              {seedTestDataMutation.isPending ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-              ) : (
-                <DatabaseZap className="ml-2 h-4 w-4" />
-              )}
-              إدخال بيانات الاختبار
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
-              onClick={clearTestData}
-              disabled={clearTestDataMutation.isPending}
-            >
-              {clearTestDataMutation.isPending ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="ml-2 h-4 w-4" />
-              )}
-              تنظيف بيانات الاختبار
-            </Button>
-          </CardContent>
-        </Card>
-
-        <div className="grid gap-5 lg:grid-cols-[1.4fr_0.9fr]">
-          <Card>
+        {canManageCredentials && (
+          <Card id="platform-connections" className="border-blue-100">
             <CardHeader>
-              <CardTitle>بيانات التطبيق والحسابات</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-base text-slate-900">
+                <KeyRound className="h-5 w-5 text-blue-700" />
+                ربط منصات النشر الخارجية
+              </CardTitle>
               <CardDescription>
-                أدخل المعرفات من لوحة تطبيق Meta والحسابات الاحترافية المرتبطة.
+                احفظ Client ID وClient Secret لكل منصة. يُشفّر Client Secret على الخادم ولا يعاد إلى
+                المتصفح بعد الحفظ. عند اكتمال الحقول وتفعيل المنصة تصبح جاهزة لبدء OAuth.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <FormField
-                label="App ID"
-                value={form.appId}
-                onChange={(value) => update('appId', value)}
-                placeholder="معرف تطبيق Meta"
-              />
-              <FormField
-                label="Facebook Login for Business Configuration ID"
-                value={form.facebookLoginConfigId}
-                onChange={(value) => update('facebookLoginConfigId', value)}
-                placeholder="Configuration ID لتفويض أصول Meta"
-              />
-              <FormField
-                label="WhatsApp Embedded Signup Configuration ID"
-                value={form.whatsappEmbeddedSignupConfigId}
-                onChange={(value) => update('whatsappEmbeddedSignupConfigId', value)}
-                placeholder="Configuration ID لتسجيل WhatsApp المضمن"
-              />
-              <FormField
-                label="Facebook Page ID"
-                value={form.facebookPageId}
-                onChange={(value) => update('facebookPageId', value)}
-                placeholder="معرف صفحة Facebook"
-              />
-              <FormField
-                label="Instagram Professional Account ID"
-                value={form.instagramAccountId}
-                onChange={(value) => update('instagramAccountId', value)}
-                placeholder="معرف حساب Instagram الاحترافي"
-              />
-              <div className="border-t pt-4" />
-              <FormField
-                label="App Secret"
-                value={form.appSecret}
-                onChange={(value) => update('appSecret', value)}
-                placeholder={
-                  statusQuery.data?.hasAppSecret
-                    ? 'محفوظ؛ اتركه فارغاً للاحتفاظ به'
-                    : 'ألصق App Secret'
-                }
-                secret
-              />
-              <FormField
-                label="Verify Token"
-                value={form.verifyToken}
-                onChange={(value) => update('verifyToken', value)}
-                placeholder={
-                  statusQuery.data?.hasVerifyToken
-                    ? 'محفوظ؛ اتركه فارغاً للاحتفاظ به'
-                    : 'أدخل رمز تحقق عشوائياً'
-                }
-                secret
-              />
-              <FormField
-                label="Page Access Token"
-                value={form.pageAccessToken}
-                onChange={(value) => update('pageAccessToken', value)}
-                placeholder={
-                  statusQuery.data?.hasPageAccessToken
-                    ? 'محفوظ؛ اتركه فارغاً للاحتفاظ به'
-                    : 'اختياري الآن؛ مطلوب للاشتراك والردود'
-                }
-                secret
-              />
-              <label className="flex items-center justify-between rounded-xl border bg-slate-50 px-4 py-3 text-sm">
-                <span>
-                  <strong className="block text-slate-900">تفعيل Webhook</strong>
-                  <span className="text-slate-500">
-                    لن يُفعّل قبل وجود App Secret وVerify Token.
-                  </span>
-                </span>
-                <input
-                  aria-label="تفعيل Webhook Meta"
-                  type="checkbox"
-                  checked={form.isEnabled}
-                  onChange={(event) => update('isEnabled', event.target.checked)}
-                  className="h-4 w-4 accent-blue-600"
-                />
-              </label>
+            <CardContent>
+              {generalStatusQuery.isLoading ? (
+                <div
+                  className="flex min-h-32 items-center justify-center text-sm text-slate-500"
+                  role="status"
+                >
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin text-blue-600" />
+                  جارٍ تحميل حالات المنصات...
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {(generalStatusQuery.data ?? []).map((platform) => (
+                    <ExternalIntegrationCard key={platform.platform} status={platform} />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {isSystemAdmin && (
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base text-amber-950">
+                <DatabaseZap className="h-5 w-5 text-amber-700" />
+                تجربة حمولات Meta الرسمية
+              </CardTitle>
+              <CardDescription>
+                تُنشئ رسائل Messenger وInstagram وتعليقات Facebook وInstagram اصطناعية وموسومة
+                <strong className="mx-1">بيانات اختبار Meta — قابلة للحذف</strong>
+                داخل صندوق البريد، ثم تُشغّل عليها منطق التطبيع والتخزين نفسه المستخدم في Webhook.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3 sm:flex-row">
               <Button
-                onClick={save}
-                disabled={saveMutation.isPending}
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                type="button"
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => seedTestDataMutation.mutate()}
+                disabled={seedTestDataMutation.isPending}
               >
-                {saveMutation.isPending ? (
+                {seedTestDataMutation.isPending ? (
                   <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <CheckCircle2 className="ml-2 h-4 w-4" />
+                  <DatabaseZap className="ml-2 h-4 w-4" />
                 )}
-                حفظ إعدادات الربط
+                إدخال بيانات الاختبار
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                onClick={clearTestData}
+                disabled={clearTestDataMutation.isPending}
+              >
+                {clearTestDataMutation.isPending ? (
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="ml-2 h-4 w-4" />
+                )}
+                تنظيف بيانات الاختبار
               </Button>
             </CardContent>
           </Card>
+        )}
+
+        <div className="grid gap-5 lg:grid-cols-[1.4fr_0.9fr]">
+          {canManageCredentials && (
+            <Card>
+              <CardHeader>
+                <CardTitle>بيانات التطبيق والحسابات</CardTitle>
+                <CardDescription>
+                  أدخل المعرفات من لوحة تطبيق Meta والحسابات الاحترافية المرتبطة.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  label="App ID"
+                  value={form.appId}
+                  onChange={(value) => update('appId', value)}
+                  placeholder="معرف تطبيق Meta"
+                />
+                <FormField
+                  label="Facebook Login for Business Configuration ID"
+                  value={form.facebookLoginConfigId}
+                  onChange={(value) => update('facebookLoginConfigId', value)}
+                  placeholder="Configuration ID لتفويض أصول Meta"
+                />
+                <FormField
+                  label="WhatsApp Embedded Signup Configuration ID"
+                  value={form.whatsappEmbeddedSignupConfigId}
+                  onChange={(value) => update('whatsappEmbeddedSignupConfigId', value)}
+                  placeholder="Configuration ID لتسجيل WhatsApp المضمن"
+                />
+                <FormField
+                  label="Facebook Page ID"
+                  value={form.facebookPageId}
+                  onChange={(value) => update('facebookPageId', value)}
+                  placeholder="معرف صفحة Facebook"
+                />
+                <FormField
+                  label="Instagram Professional Account ID"
+                  value={form.instagramAccountId}
+                  onChange={(value) => update('instagramAccountId', value)}
+                  placeholder="معرف حساب Instagram الاحترافي"
+                />
+                <div className="border-t pt-4" />
+                <FormField
+                  label="App Secret"
+                  value={form.appSecret}
+                  onChange={(value) => update('appSecret', value)}
+                  placeholder={
+                    statusQuery.data?.hasAppSecret
+                      ? 'محفوظ؛ اتركه فارغاً للاحتفاظ به'
+                      : 'ألصق App Secret'
+                  }
+                  secret
+                />
+                <FormField
+                  label="Verify Token"
+                  value={form.verifyToken}
+                  onChange={(value) => update('verifyToken', value)}
+                  placeholder={
+                    statusQuery.data?.hasVerifyToken
+                      ? 'محفوظ؛ اتركه فارغاً للاحتفاظ به'
+                      : 'أدخل رمز تحقق عشوائياً'
+                  }
+                  secret
+                />
+                <FormField
+                  label="Page Access Token"
+                  value={form.pageAccessToken}
+                  onChange={(value) => update('pageAccessToken', value)}
+                  placeholder={
+                    statusQuery.data?.hasPageAccessToken
+                      ? 'محفوظ؛ اتركه فارغاً للاحتفاظ به'
+                      : 'اختياري الآن؛ مطلوب للاشتراك والردود'
+                  }
+                  secret
+                />
+                <label className="flex items-center justify-between rounded-xl border bg-slate-50 px-4 py-3 text-sm">
+                  <span>
+                    <strong className="block text-slate-900">تفعيل Webhook</strong>
+                    <span className="text-slate-500">
+                      لن يُفعّل قبل وجود App Secret وVerify Token.
+                    </span>
+                  </span>
+                  <input
+                    aria-label="تفعيل Webhook Meta"
+                    type="checkbox"
+                    checked={form.isEnabled}
+                    onChange={(event) => update('isEnabled', event.target.checked)}
+                    className="h-4 w-4 accent-blue-600"
+                  />
+                </label>
+                <Button
+                  onClick={save}
+                  disabled={saveMutation.isPending}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  {saveMutation.isPending ? (
+                    <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="ml-2 h-4 w-4" />
+                  )}
+                  حفظ إعدادات الربط
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="space-y-5">
             <Card>

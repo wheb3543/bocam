@@ -4,7 +4,14 @@
  */
 
 import { memo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,6 +33,10 @@ interface TaskFormDialogProps {
   onOpenChange: (open: boolean) => void;
   task?: Task | null;
   onSuccess: () => void;
+  canCreateTasks: boolean;
+  canUpdateTasks: boolean;
+  canAssignTasks: boolean;
+  canCompleteTasks: boolean;
 }
 
 const TaskFormDialog = memo(function TaskFormDialog({
@@ -33,6 +44,10 @@ const TaskFormDialog = memo(function TaskFormDialog({
   onOpenChange,
   task,
   onSuccess,
+  canCreateTasks,
+  canUpdateTasks,
+  canAssignTasks,
+  canCompleteTasks,
 }: TaskFormDialogProps) {
   const [formData, setFormData] = useState<TaskFormData>({
     title: task?.title || '',
@@ -46,7 +61,7 @@ const TaskFormDialog = memo(function TaskFormDialog({
     estimatedHours: task?.estimatedHours?.toString() || '',
   });
 
-  const { data: users } = trpc.users.getAll.useQuery();
+  const { data: users } = trpc.users.getAll.useQuery(undefined, { enabled: canAssignTasks });
   const { data: campaigns } = trpc.campaigns.list.useQuery();
 
   const createMutation = trpc.tasks.create.useMutation({
@@ -78,17 +93,14 @@ const TaskFormDialog = memo(function TaskFormDialog({
       title: formData.title,
       description: formData.description || undefined,
       priority: formData.priority as 'low' | 'medium' | 'high' | 'urgent',
-      status: formData.status as 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled',
+      status:
+        !task || canCompleteTasks || formData.status !== 'completed'
+          ? (formData.status as 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled')
+          : undefined,
       category: formData.category as
-        | 'content'
-        | 'design'
-        | 'ads'
-        | 'seo'
-        | 'social_media'
-        | 'analytics'
-        | 'other',
+        'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other',
       assignedTo:
-        formData.assignedTo && formData.assignedTo !== 'none'
+        canAssignTasks && formData.assignedTo && formData.assignedTo !== 'none'
           ? parseInt(formData.assignedTo)
           : undefined,
       campaignId:
@@ -105,6 +117,10 @@ const TaskFormDialog = memo(function TaskFormDialog({
       createMutation.mutate(data);
     }
   };
+
+  if ((task && !canUpdateTasks) || (!task && !canCreateTasks)) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -140,7 +156,10 @@ const TaskFormDialog = memo(function TaskFormDialog({
               <Select
                 value={formData.priority}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, priority: value as 'low' | 'medium' | 'high' | 'urgent' })
+                  setFormData({
+                    ...formData,
+                    priority: value as 'low' | 'medium' | 'high' | 'urgent',
+                  })
                 }
               >
                 <SelectTrigger>
@@ -160,7 +179,10 @@ const TaskFormDialog = memo(function TaskFormDialog({
               <Select
                 value={formData.status}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, status: value as 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled' })
+                  setFormData({
+                    ...formData,
+                    status: value as 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled',
+                  })
                 }
               >
                 <SelectTrigger>
@@ -170,7 +192,7 @@ const TaskFormDialog = memo(function TaskFormDialog({
                   <SelectItem value="todo">قيد الانتظار</SelectItem>
                   <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
                   <SelectItem value="review">مراجعة</SelectItem>
-                  <SelectItem value="completed">مكتمل</SelectItem>
+                  {canCompleteTasks && <SelectItem value="completed">مكتمل</SelectItem>}
                   <SelectItem value="cancelled">ملغي</SelectItem>
                 </SelectContent>
               </Select>
@@ -183,7 +205,11 @@ const TaskFormDialog = memo(function TaskFormDialog({
               <Select
                 value={formData.category}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, category: value as 'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other' })
+                  setFormData({
+                    ...formData,
+                    category: value as
+                      'content' | 'design' | 'ads' | 'seo' | 'social_media' | 'analytics' | 'other',
+                  })
                 }
               >
                 <SelectTrigger>
@@ -201,25 +227,27 @@ const TaskFormDialog = memo(function TaskFormDialog({
               </Select>
             </div>
 
-            <div>
-              <Label>المعيّن إليه</Label>
-              <Select
-                value={formData.assignedTo}
-                onValueChange={(value) => setFormData({ ...formData, assignedTo: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر عضو الفريق" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">غير معيّن</SelectItem>
-                  {users?.map((user: UserEntity) => (
-                    <SelectItem key={user.id} value={user.id.toString()}>
-                      {user.name || user.username}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {canAssignTasks && (
+              <div>
+                <Label>المعيّن إليه</Label>
+                <Select
+                  value={formData.assignedTo}
+                  onValueChange={(value) => setFormData({ ...formData, assignedTo: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر عضو الفريق" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">غير معيّن</SelectItem>
+                    {users?.map((user: UserEntity) => (
+                      <SelectItem key={user.id} value={user.id.toString()}>
+                        {user.name || user.username}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
