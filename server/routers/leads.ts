@@ -26,6 +26,10 @@ import {
   sendBookingConfirmation,
   sendCustomMessage,
 } from '../services/whatsapp';
+import { permissionProcedure } from './permissionProcedures';
+
+const leadsViewProcedure = permissionProcedure('leads.view', 'عرض العملاء المحتملين');
+const leadsUpdateProcedure = permissionProcedure('leads.update', 'تعديل العملاء المحتملين');
 
 export const leadsRouter = router({
   // Public endpoint for lead submission from landing page
@@ -165,33 +169,33 @@ export const leadsRouter = router({
     }),
 
   // Admin endpoints
-  list: protectedProcedure.query(async () => {
+  list: leadsViewProcedure.query(async () => {
     return getAllLeads();
   }),
 
   // Unified list from all sources
-  unifiedList: protectedProcedure.query(async () => {
+  unifiedList: leadsViewProcedure.query(async () => {
     const { getAllUnifiedLeads } = await import('../database/db');
     return getAllUnifiedLeads();
   }),
 
-  getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: leadsViewProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     return getLeadById(input.id);
   }),
 
-  search: protectedProcedure
+  search: leadsViewProcedure
     .input(z.object({ searchTerm: z.string() }))
     .query(async ({ input }) => {
       return searchLeads(input.searchTerm);
     }),
 
-  getByCampaign: protectedProcedure
+  getByCampaign: leadsViewProcedure
     .input(z.object({ campaignId: z.number() }))
     .query(async ({ input }) => {
       return getLeadsByCampaign(input.campaignId);
     }),
 
-  updateStatus: protectedProcedure
+  updateStatus: leadsUpdateProcedure
     .input(
       z.object({
         id: z.number(),
@@ -251,13 +255,13 @@ export const leadsRouter = router({
       return { success: true };
     }),
 
-  getStatusHistory: protectedProcedure
+  getStatusHistory: leadsViewProcedure
     .input(z.object({ leadId: z.number() }))
     .query(async ({ input }) => {
       return getLeadStatusHistory(input.leadId);
     }),
 
-  stats: protectedProcedure.query(async () => {
+  stats: leadsViewProcedure.query(async () => {
     return getLeadsStats();
   }),
 

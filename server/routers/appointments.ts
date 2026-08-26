@@ -2,13 +2,25 @@ import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { appointments } from '../../drizzle/schema';
-import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { publicProcedure, router } from '../_core/trpc';
+import { assertRolePermission, permissionProcedure } from './permissionProcedures';
 import { submitAppointment } from './appointments/routes/submitRoute';
 import { listRoutes } from './appointments/routes/listRoutes';
 import { updateRoutes } from './appointments/routes/updateRoutes';
 import { sendArrivalWelcome } from './appointments/routes/arrivalRoute';
 import { generateReceiptNumber } from './appointments/routes/receiptRoute';
 import { invalidateAppointmentCaches } from './appointments/utils/appointmentHelpers';
+
+const appointmentsViewProcedure = permissionProcedure('appointments.view', 'عرض المواعيد');
+const appointmentsUpdateProcedure = permissionProcedure('appointments.update', 'تعديل المواعيد');
+const appointmentsCancelProcedure = permissionProcedure('appointments.cancel', 'إلغاء المواعيد');
+const appointmentsDeleteProcedure = permissionProcedure('appointments.delete', 'حذف المواعيد');
+
+async function assertCancellationPermission(user: { id: number; role: string }, status?: string) {
+  if (status === 'cancelled') {
+    await assertRolePermission(user, 'appointments.cancel', 'إلغاء المواعيد');
+  }
+}
 
 export const appointmentsRouter = router({
   submit: publicProcedure
@@ -57,9 +69,9 @@ export const appointmentsRouter = router({
     )
     .mutation(submitAppointment),
 
-  list: protectedProcedure.query(listRoutes.list),
+  list: appointmentsViewProcedure.query(listRoutes.list),
 
-  listPaginated: protectedProcedure
+  listPaginated: appointmentsViewProcedure
     .input(
       z.object({
         page: z.number().min(1).default(1),
@@ -75,7 +87,7 @@ export const appointmentsRouter = router({
     )
     .query(listRoutes.listPaginated),
 
-  updateStatus: protectedProcedure
+  updateStatus: appointmentsUpdateProcedure
     .input(
       z.object({
         id: z.number(),
@@ -83,9 +95,12 @@ export const appointmentsRouter = router({
         staffNotes: z.string().optional(),
       })
     )
-    .mutation(updateRoutes.updateStatus),
+    .mutation(async ({ input, ctx }) => {
+      await assertCancellationPermission(ctx.user, input.status);
+      return updateRoutes.updateStatus({ input, ctx });
+    }),
 
-  updateAppointment: protectedProcedure
+  updateAppointment: appointmentsUpdateProcedure
     .input(
       z.object({
         id: z.number(),
@@ -94,9 +109,12 @@ export const appointmentsRouter = router({
         staffNotes: z.string().optional(),
       })
     )
-    .mutation(updateRoutes.updateAppointment),
+    .mutation(async ({ input, ctx }) => {
+      await assertCancellationPermission(ctx.user, input.status);
+      return updateRoutes.updateAppointment({ input });
+    }),
 
-  sendArrivalWelcome: protectedProcedure
+  sendArrivalWelcome: appointmentsUpdateProcedure
     .input(
       z.object({
         appointmentId: z.number(),
@@ -104,7 +122,7 @@ export const appointmentsRouter = router({
     )
     .mutation(sendArrivalWelcome),
 
-  bulkUpdateStatus: protectedProcedure
+  bulkUpdateStatus: appointmentsUpdateProcedure
     .input(
       z.object({
         ids: z.array(z.number()),
@@ -120,9 +138,12 @@ export const appointmentsRouter = router({
         staffNotes: z.string().optional(),
       })
     )
-    .mutation(updateRoutes.bulkUpdateStatus),
+    .mutation(async ({ input, ctx }) => {
+      await assertCancellationPermission(ctx.user, input.status);
+      return updateRoutes.bulkUpdateStatus({ input, ctx });
+    }),
 
-  generateReceiptNumber: protectedProcedure
+  generateReceiptNumber: appointmentsUpdateProcedure
     .input(
       z.object({
         id: z.number(),
@@ -130,11 +151,19 @@ export const appointmentsRouter = router({
     )
     .mutation(generateReceiptNumber),
 
-  delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-    const db = await ensureDatabaseAvailable();
-    await db.delete(appointments).where(eq(appointments.id, input.id));
-    // Invalidate appointment caches after deletion
-    invalidateAppointmentCaches();
-    return { success: true };
-  }),
+  cancel: appointmentsCancelProcedure
+    .input(z.object({ id: z.number(), staffNotes: z.string().optional() }))
+    .mutation(async ({ input, ctx }) =>
+      updateRoutes.updateStatus({ input: { ...input, status: 'cancelled' }, ctx })
+    ),
+
+  delete: appointmentsDeleteProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await ensureDatabaseAvailable();
+      await db.delete(appointments).where(eq(appointments.id, input.id));
+      // Invalidate appointment caches after deletion
+      invalidateAppointmentCaches();
+      return { success: true };
+    }),
 });
