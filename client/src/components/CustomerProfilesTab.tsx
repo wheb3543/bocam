@@ -1,4 +1,3 @@
-
 /**
  * CustomerProfilesTab - تبويب ملفات العملاء الموحد
  * يعرض قائمة بجميع العملاء الفريدين مع إمكانية عرض تفاصيل كل عميل
@@ -12,6 +11,8 @@
 import { useState, useMemo, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -162,7 +163,9 @@ const statusColors: Record<string, string> = {
 };
 
 function formatDateOnly(date: string | Date | null | undefined) {
-  if (!date) {return '-';}
+  if (!date) {
+    return '-';
+  }
   try {
     return new Date(date).toLocaleDateString('ar-EG', {
       year: 'numeric',
@@ -175,7 +178,9 @@ function formatDateOnly(date: string | Date | null | undefined) {
 }
 
 function formatDateTime(date: string | Date | null | undefined) {
-  if (!date) {return '-';}
+  if (!date) {
+    return '-';
+  }
   try {
     return new Date(date).toLocaleString('ar-EG', {
       year: 'numeric',
@@ -212,6 +217,11 @@ const customerColumns: ColumnConfig[] = [
 export default function CustomerProfilesTab() {
   const { formatPhoneDisplay } = usePhoneFormat();
   const { user } = useAuth();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewCustomers = can('customers.view');
+  const canExportCustomers = can('customers.export');
+  const canExportReports = can('reports.export');
+  const canExportCustomerPdf = canExportCustomers && canExportReports;
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSizeValue>('100');
   const [selectedPhone, setSelectedPhone] = useState<string | null>(null);
@@ -267,16 +277,19 @@ export default function CustomerProfilesTab() {
   );
 
   // Fetch paginated customers
-  const { data: customersData, isLoading } = trpc.customers.listPaginated.useQuery({
-    page: pageSize === 'all' ? 1 : page,
-    limit,
-    searchTerm: debouncedSearch || undefined,
-  });
+  const { data: customersData, isLoading } = trpc.customers.listPaginated.useQuery(
+    {
+      page: pageSize === 'all' ? 1 : page,
+      limit,
+      searchTerm: debouncedSearch || undefined,
+    },
+    { enabled: !arePermissionsLoading && canViewCustomers }
+  );
 
   // Fetch customer details when selected
   const { data: customerProfile, isLoading: profileLoading } = trpc.customers.getByPhone.useQuery(
     { phone: selectedPhone || '' },
-    { enabled: !!selectedPhone && detailsOpen }
+    { enabled: !arePermissionsLoading && canViewCustomers && !!selectedPhone && detailsOpen }
   );
 
   const customers = useMemo(() => customersData?.customers || [], [customersData?.customers]);
@@ -285,7 +298,9 @@ export default function CustomerProfilesTab() {
 
   // === Apply sorting using useTableFeatures ===
   const sortedCustomers = useMemo(() => {
-    if (!customers || customers.length === 0) {return [];}
+    if (!customers || customers.length === 0) {
+      return [];
+    }
 
     const sorted = customerTable.sortData(customers, (item: Customer, key: string) => {
       switch (key) {
@@ -341,6 +356,25 @@ export default function CustomerProfilesTab() {
     customerExport.handlePrint(getExportOptions());
   }, [customerExport, getExportOptions]);
 
+  if (arePermissionsLoading) {
+    return <TableSkeleton rows={6} />;
+  }
+
+  if (!canViewCustomers) {
+    return (
+      <Card>
+        <CardContent className="flex min-h-56 flex-col items-center justify-center gap-3 text-center">
+          <Users className="h-8 w-8 text-muted-foreground" />
+          <p className="font-medium">ملفات العملاء غير متاحة لهذا الدور</p>
+          <PermissionHint
+            label="عرض ملفات العملاء مقيّد"
+            message="تحتاج إلى صلاحية عرض ملفات العملاء الموحدة للاطلاع على بيانات العملاء وتاريخ تفاعلاتهم."
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Stats */}
@@ -384,32 +418,41 @@ export default function CustomerProfilesTab() {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2 flex-shrink-0">
-                {/* Print Button */}
-                <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2 h-9">
-                  <Printer className="h-4 w-4" />
-                  <span className="hidden sm:inline">طباعة</span>
-                </Button>
-
-                {/* Export Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2 h-9">
-                      <Download className="h-4 w-4" />
-                      <span className="hidden sm:inline">تصدير</span>
+                {canExportCustomers ? (
+                  <>
+                    <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2 h-9">
+                      <Printer className="h-4 w-4" />
+                      <span className="hidden sm:inline">طباعة</span>
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleExport("excel")}>
-                      تصدير Excel
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport("csv")}>
-                      تصدير CSV
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport("pdf")}>
-                      تصدير PDF
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-2 h-9">
+                          <Download className="h-4 w-4" />
+                          <span className="hidden sm:inline">تصدير</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleExport('excel')}>
+                          تصدير Excel
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('csv')}>
+                          تصدير CSV
+                        </DropdownMenuItem>
+                        {canExportCustomerPdf ? (
+                          <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                            تصدير PDF
+                          </DropdownMenuItem>
+                        ) : null}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
+                ) : (
+                  <PermissionHint
+                    label="التصدير مقيّد"
+                    message="تحتاج إلى صلاحية تصدير ملفات العملاء لطباعة البيانات أو تصديرها."
+                  />
+                )}
 
                 {/* Column Visibility */}
                 <ColumnVisibility
@@ -441,9 +484,11 @@ export default function CustomerProfilesTab() {
                     searchTerm: customerFilter.filters.searchTerm,
                   }}
                   onApplyFilter={(filters: FilterParams) => {
-                    if (filters && typeof filters.searchTerm === 'string')
-                      {customerFilter.filters.setSearchTerm(filters.searchTerm);}
-                    else {customerFilter.filters.setSearchTerm('');}
+                    if (filters && typeof filters.searchTerm === 'string') {
+                      customerFilter.filters.setSearchTerm(filters.searchTerm);
+                    } else {
+                      customerFilter.filters.setSearchTerm('');
+                    }
                   }}
                 />
               </div>
@@ -492,7 +537,9 @@ export default function CustomerProfilesTab() {
                       .filter((key) => customerTable.visibleColumns[key])
                       .map((colKey) => {
                         const col = customerColumns.find((c) => c.key === colKey);
-                        if (!col) {return null;}
+                        if (!col) {
+                          return null;
+                        }
                         const widthConfig = getColumnWidth(colKey, col);
                         return (
                           <ResizableHeaderCell

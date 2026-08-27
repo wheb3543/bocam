@@ -44,6 +44,7 @@ import {
   CircleHelp,
 } from 'lucide-react';
 import { SOCIAL_INBOX_ALLOWED_ROLES } from '@shared/socialInboxAccess';
+import type { RolePermission } from '@shared/rolePermissions';
 
 export interface NavItem {
   title: string;
@@ -53,6 +54,7 @@ export interface NavItem {
   hasDot?: boolean;
   id: string;
   allowedRoles?: readonly string[];
+  requiredPermission?: RolePermission;
 }
 
 export interface NavGroup {
@@ -85,7 +87,13 @@ export const allNavItems: NavItem[] = [
     href: '/admin/bookings/camp-registrations',
     icon: Tent,
   },
-  { id: 'customers', title: 'ملفات العملاء', href: '/admin/bookings/customers', icon: Contact },
+  {
+    id: 'customers',
+    title: 'ملفات العملاء',
+    href: '/admin/bookings/customers',
+    icon: Contact,
+    requiredPermission: 'customers.view',
+  },
   { id: 'tasks', title: 'المهام', href: '/admin/bookings/tasks', icon: CheckSquare },
   { id: 'bookings', title: 'إدارة الحجوزات', href: '/admin/bookings', icon: ClipboardList },
   { id: 'reports', title: 'التقارير', href: '/admin/reports/reports', icon: FileText },
@@ -260,7 +268,13 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/bookings/camp-registrations',
         icon: Tent,
       },
-      { id: 'customers', title: 'ملفات العملاء', href: '/admin/bookings/customers', icon: Contact },
+      {
+        id: 'customers',
+        title: 'ملفات العملاء',
+        href: '/admin/bookings/customers',
+        icon: Contact,
+        requiredPermission: 'customers.view',
+      },
       { id: 'tasks', title: 'المهام', href: '/admin/bookings/tasks', icon: CheckSquare },
     ],
   },

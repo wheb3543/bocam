@@ -6,6 +6,8 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { trpc } from '@/lib/api/trpc';
 import { Badge } from '@/components/ui/badge';
+import { PermissionHint } from '@/components/PermissionHint';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { Clock, User, ArrowRight } from 'lucide-react';
 
 const statusLabels: Record<string, string> = {
@@ -47,10 +49,25 @@ interface AuditLogSectionProps {
 
 export default function AuditLogSection({ entityType, entityId }: AuditLogSectionProps) {
   const { formatDateTime } = useFormatDate();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewAuditLog = can('audit.view');
   const { data: logs, isLoading } = trpc.auditLogs.getByEntity.useQuery(
     { entityType, entityId },
-    { enabled: !!entityId }
+    { enabled: !arePermissionsLoading && canViewAuditLog && !!entityId }
   );
+
+  if (arePermissionsLoading) {
+    return null;
+  }
+
+  if (!canViewAuditLog) {
+    return (
+      <PermissionHint
+        label="سجل التغييرات مقيّد"
+        message="تحتاج إلى صلاحية عرض سجل التدقيق للاطلاع على تاريخ تغييرات هذا السجل."
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -88,7 +105,7 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
-                      {log.action ? (actionLabels[log.action] || log.action) : '-'}
+                      {log.action ? actionLabels[log.action] || log.action : '-'}
                     </Badge>
                     {log.userName && (
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -108,12 +125,12 @@ export default function AuditLogSection({ entityType, entityId }: AuditLogSectio
                   <div className="flex items-center gap-2 mt-1">
                     {log.oldValue && (
                       <Badge variant="secondary" className="text-xs">
-                        {log.oldValue ? (statusLabels[log.oldValue] || log.oldValue) : '-'}
+                        {log.oldValue ? statusLabels[log.oldValue] || log.oldValue : '-'}
                       </Badge>
                     )}
                     <ArrowRight className="h-3 w-3 text-muted-foreground" />
                     <Badge className="text-xs bg-primary/10 text-primary">
-                      {log.newValue ? (statusLabels[log.newValue] || log.newValue) : '-'}
+                      {log.newValue ? statusLabels[log.newValue] || log.newValue : '-'}
                     </Badge>
                   </div>
                 )}

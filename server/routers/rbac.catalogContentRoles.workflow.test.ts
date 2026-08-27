@@ -71,4 +71,29 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
     expect(roleService).toContain("action: sourceRole ? 'role_cloned' : 'created'");
     expect(roleService).toContain('نسخة من الدور: ${sourceRole.name} (#${sourceRole.id})');
   });
+
+  it('يحرس ملفات العملاء ونتائج المرضى وسجل التدقيق وتصدير PDF بصلاحيات P0-A الدقيقة', () => {
+    const permissions = source('shared/rolePermissions.ts');
+    const auditLogs = source('server/routers/auditLogs.ts');
+    const customers = source('server/routers/customers.ts');
+    const patientResults = source('server/routers/patientResults.ts');
+    const rootRouter = source('server/routers/routers.ts');
+
+    expect(permissions).toContain("'customers.view'");
+    expect(permissions).toContain("'customers.export'");
+    expect(permissions).toContain("'patients.results.view'");
+    expect(permissions).toContain("'patients.results.create'");
+    expect(permissions).toContain("'patients.results.status.update'");
+    expect(auditLogs).toContain("permissionProcedure('audit.view', 'عرض سجل التدقيق')");
+    expect(auditLogs).toContain('getByEntity: auditViewProcedure');
+    expect(auditLogs).toContain('listPaginated: auditViewProcedure');
+    expect(customers).toContain("permissionProcedure('customers.view', 'عرض ملفات العملاء الموحدة')");
+    expect(customers).toContain('listPaginated: customersViewProcedure');
+    expect(customers).toContain('getByPhone: customersViewProcedure');
+    expect(patientResults).toContain("permissionProcedure('patients.results.view'");
+    expect(patientResults).toContain("permissionProcedure('patients.results.create'");
+    expect(patientResults).toContain("permissionProcedure(\n  'patients.results.status.update'");
+    expect(patientResults).toContain("'patients.results.status.update'");
+    expect(rootRouter).toContain("generatePDF: permissionProcedure('reports.export', 'تصدير التقارير')");
+  });
 });

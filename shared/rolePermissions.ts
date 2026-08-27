@@ -157,9 +157,14 @@ export const ROLE_PERMISSIONS = [
   'registrations.export',
   'registrations.delete',
   'registrations.manage',
+  'customers.view',
+  'customers.export',
   'patients.view',
   'patients.records.manage',
   'patients.results.manage',
+  'patients.results.view',
+  'patients.results.create',
+  'patients.results.status.update',
 ] as const;
 
 export type RolePermission = (typeof ROLE_PERMISSIONS)[number];
@@ -215,9 +220,21 @@ export const ROLE_PERMISSION_GROUPS = [
     ],
   },
   {
+    key: 'customers',
+    label: 'ملفات العملاء الموحدة',
+    permissions: ['customers.view', 'customers.export'],
+  },
+  {
     key: 'patients',
     label: 'ملفات المرضى والنتائج',
-    permissions: ['patients.view', 'patients.records.manage', 'patients.results.manage'],
+    permissions: [
+      'patients.view',
+      'patients.records.manage',
+      'patients.results.view',
+      'patients.results.create',
+      'patients.results.status.update',
+      'patients.results.manage',
+    ],
   },
   {
     key: 'content',
@@ -552,9 +569,14 @@ export const ROLE_PERMISSION_LABELS: Record<RolePermission, string> = {
   'registrations.export': 'تصدير التسجيلات والنماذج',
   'registrations.delete': 'حذف التسجيلات والنماذج',
   'registrations.manage': 'إدارة التسجيلات بالكامل',
+  'customers.view': 'عرض ملفات العملاء الموحدة',
+  'customers.export': 'تصدير ملفات العملاء',
   'patients.view': 'عرض ملفات المرضى',
   'patients.records.manage': 'إدارة ملفات المرضى',
   'patients.results.manage': 'إدارة نتائج المرضى',
+  'patients.results.view': 'عرض نتائج المرضى',
+  'patients.results.create': 'إضافة نتائج المرضى',
+  'patients.results.status.update': 'تحديث حالة نتائج المرضى',
 };
 
 export const DEFAULT_ROLE_DEFINITIONS: Record<

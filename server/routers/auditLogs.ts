@@ -4,13 +4,15 @@
  */
 
 import { z } from 'zod';
-import { protectedProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { getDb } from '../database/db';
 import { auditLogs } from '../../drizzle/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { createLogger } from '../_core/logger';
+import { permissionProcedure } from './permissionProcedures';
 
 const logger = createLogger('auditLogs');
+const auditViewProcedure = permissionProcedure('audit.view', 'عرض سجل التدقيق');
 
 /**
  * Helper function to create an audit log entry
@@ -52,7 +54,7 @@ export const auditLogsRouter = router({
    * Get audit logs for a specific entity
    * جلب سجل التغييرات لكيان محدد
    */
-  getByEntity: protectedProcedure
+  getByEntity: auditViewProcedure
     .input(
       z.object({
         entityType: z.string(),
@@ -78,7 +80,7 @@ export const auditLogsRouter = router({
    * Get paginated audit logs with filters
    * جلب سجل التغييرات مع pagination وفلاتر
    */
-  listPaginated: protectedProcedure
+  listPaginated: auditViewProcedure
     .input(
       z.object({
         page: z.number().min(1).default(1),

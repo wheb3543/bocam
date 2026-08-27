@@ -27,6 +27,8 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 type ResultType = 'lab' | 'radiology' | 'report';
 type ResultStatus = 'pending' | 'ready' | 'delivered';
@@ -46,6 +48,10 @@ const STATUS_LABELS: Record<ResultStatus, string> = {
 export default function PatientResultsAdminPage() {
   const { formatDate } = useFormatDate();
   const utils = trpc.useUtils();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewResults = can('patients.results.view');
+  const canCreateResults = can('patients.results.create');
+  const canUpdateResultStatus = can('patients.results.status.update');
   const [phone, setPhone] = useState('');
   const [searchPhone, setSearchPhone] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -61,7 +67,7 @@ export default function PatientResultsAdminPage() {
 
   const { data, isLoading } = trpc.patientResults.listByPhone.useQuery(
     { phone: searchPhone },
-    { enabled: searchPhone.length >= 9 }
+    { enabled: !arePermissionsLoading && canViewResults && searchPhone.length >= 9 }
   );
 
   const createMutation = trpc.patientResults.create.useMutation({
@@ -91,6 +97,10 @@ export default function PatientResultsAdminPage() {
   });
 
   const handleSearch = () => {
+    if (!canViewResults) {
+      toast.error('لا تملك صلاحية عرض نتائج المرضى');
+      return;
+    }
     const validation = validateYemeniPhone(phone);
     if (!validation.valid) {
       toast.error(validation.message || 'رقم الهاتف غير صحيح');
@@ -100,6 +110,10 @@ export default function PatientResultsAdminPage() {
   };
 
   const handleCreate = () => {
+    if (!canCreateResults) {
+      toast.error('لا تملك صلاحية إضافة نتائج المرضى');
+      return;
+    }
     if (!searchPhone) {
       toast.error('ابحث عن المريض أولاً');
       return;
@@ -122,10 +136,53 @@ export default function PatientResultsAdminPage() {
   };
 
   const resultIcon = (type: ResultType) => {
-    if (type === 'lab') {return <FlaskConical className="h-4 w-4 text-blue-500" />;}
-    if (type === 'radiology') {return <ScanLine className="h-4 w-4 text-purple-500" />;}
+    if (type === 'lab') {
+      return <FlaskConical className="h-4 w-4 text-blue-500" />;
+    }
+    if (type === 'radiology') {
+      return <ScanLine className="h-4 w-4 text-purple-500" />;
+    }
     return <ClipboardList className="h-4 w-4 text-amber-500" />;
   };
+
+  if (arePermissionsLoading) {
+    return (
+      <DashboardLayout
+        pageTitle="نتائج بوابة المريض"
+        pageDescription="إدارة نتائج المرضى المسجلين في البوابة"
+      >
+        <div className="container mx-auto py-6" dir="rtl">
+          <Card>
+            <CardContent className="py-12 text-center text-sm text-muted-foreground">
+              جارٍ التحقق من الصلاحيات…
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!canViewResults) {
+    return (
+      <DashboardLayout
+        pageTitle="نتائج بوابة المريض"
+        pageDescription="إدارة نتائج المرضى المسجلين في البوابة"
+      >
+        <div className="container mx-auto py-6" dir="rtl">
+          <Card>
+            <CardContent className="flex min-h-56 flex-col items-center justify-center gap-3 text-center">
+              <FileText className="h-8 w-8 text-muted-foreground" />
+              <p className="font-medium">نتائج المرضى غير متاحة لهذا الدور</p>
+              <PermissionHint
+                label="عرض النتائج مقيّد"
+                message="تحتاج إلى صلاحية عرض نتائج المرضى للاطلاع على هذه البيانات الطبية."
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout
@@ -160,12 +217,18 @@ export default function PatientResultsAdminPage() {
               )}
               بحث
             </Button>
-            {data?.patient && (
-              <Button variant="outline" onClick={() => setShowForm((v) => !v)}>
-                <Plus className="h-4 w-4 ml-1" />
-                إضافة نتيجة
-              </Button>
-            )}
+            {data?.patient &&
+              (canCreateResults ? (
+                <Button variant="outline" onClick={() => setShowForm((v) => !v)}>
+                  <Plus className="h-4 w-4 ml-1" />
+                  إضافة نتيجة
+                </Button>
+              ) : (
+                <PermissionHint
+                  label="إضافة نتيجة مقيّدة"
+                  message="تحتاج إلى صلاحية إضافة نتائج المرضى لإنشاء نتيجة جديدة."
+                />
+              ))}
           </CardContent>
         </Card>
 
@@ -190,7 +253,7 @@ export default function PatientResultsAdminPage() {
           </Card>
         )}
 
-        {showForm && data?.patient && (
+        {showForm && data?.patient && canCreateResults && (
           <Card>
             <CardHeader>
               <CardTitle className="text-base">إضافة نتيجة جديدة</CardTitle>
@@ -212,22 +275,24 @@ export default function PatientResultsAdminPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
-                <Label>الحالة</Label>
-                <Select
-                  value={form.status}
-                  onValueChange={(v) => setForm({ ...form, status: v as ResultStatus })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">قيد الانتظار</SelectItem>
-                    <SelectItem value="ready">جاهز</SelectItem>
-                    <SelectItem value="delivered">تم التسليم</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {canUpdateResultStatus ? (
+                <div className="space-y-1.5">
+                  <Label>الحالة</Label>
+                  <Select
+                    value={form.status}
+                    onValueChange={(v) => setForm({ ...form, status: v as ResultStatus })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">قيد الانتظار</SelectItem>
+                      <SelectItem value="ready">جاهز</SelectItem>
+                      <SelectItem value="delivered">تم التسليم</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : null}
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>العنوان *</Label>
                 <Input
@@ -318,24 +383,26 @@ export default function PatientResultsAdminPage() {
                   )}
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <Select
-                      value={result.status}
-                      onValueChange={(v) =>
-                        updateStatusMutation.mutate({
-                          resultId: result.id,
-                          status: v as ResultStatus,
-                        })
-                      }
-                    >
-                      <SelectTrigger className="w-[160px] h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">قيد الانتظار</SelectItem>
-                        <SelectItem value="ready">جاهز</SelectItem>
-                        <SelectItem value="delivered">تم التسليم</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {canUpdateResultStatus ? (
+                      <Select
+                        value={result.status}
+                        onValueChange={(v) =>
+                          updateStatusMutation.mutate({
+                            resultId: result.id,
+                            status: v as ResultStatus,
+                          })
+                        }
+                      >
+                        <SelectTrigger className="w-[160px] h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">قيد الانتظار</SelectItem>
+                          <SelectItem value="ready">جاهز</SelectItem>
+                          <SelectItem value="delivered">تم التسليم</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : null}
                     {result.fileUrl && (
                       <a
                         href={result.fileUrl}

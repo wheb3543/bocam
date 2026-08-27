@@ -7,6 +7,7 @@ import EditSidebarModal from '@/components/EditSidebarModal';
 import DesktopSidebar from './sidebar/DesktopSidebar';
 import MobileBottomNav from './sidebar/MobileBottomNav';
 import { useSidebarNotifications } from '@/hooks/layout/useSidebarNotifications';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { canAccessSocialInbox } from '@shared/socialInboxAccess';
 import {
   allNavItems,
@@ -18,6 +19,7 @@ import {
 
 export default function DashboardSidebarV2({ currentPath }: { currentPath: string }) {
   const { user } = useAuth();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
   const { shouldShowText, handleMouseEnter, handleMouseLeave, closeMobile } = useSidebarState();
 
   const { addRecentlyUsed } = useRecentlyUsed();
@@ -31,6 +33,9 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
 
   const canAccessNavItem = useCallback(
     (item: NavItem) => {
+      if (item.requiredPermission && (arePermissionsLoading || !can(item.requiredPermission))) {
+        return false;
+      }
       if (!item.allowedRoles?.length) {
         return true;
       }
@@ -39,7 +44,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
       }
       return Boolean(user?.role && item.allowedRoles.includes(user.role));
     },
-    [canAccessInbox, user?.role]
+    [arePermissionsLoading, can, canAccessInbox, user?.role]
   );
 
   // تحديد العناصر المرئية في الشريط (أول 10 عناصر)

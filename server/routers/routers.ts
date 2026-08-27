@@ -52,6 +52,7 @@ import { authRouter } from './auth';
 import { generatePDF } from '../services/pdfService';
 import { licenseRouter } from './license';
 import { createLogger } from '../_core/logger';
+import { permissionProcedure } from './permissionProcedures';
 
 const logger = createLogger('routers');
 
@@ -344,7 +345,7 @@ export const appRouter = router({
 
   // Export to PDF
   export: router({
-    generatePDF: protectedProcedure
+    generatePDF: permissionProcedure('reports.export', 'تصدير التقارير')
       .input(
         z.object({
           metadata: z.object({

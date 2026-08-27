@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { protectedProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { getDb } from '../database/db';
 import { eq, desc, sql } from 'drizzle-orm';
 import {
@@ -17,8 +17,10 @@ import {
   camps,
 } from '../../drizzle/schema';
 import { createLogger } from '../_core/logger';
+import { permissionProcedure } from './permissionProcedures';
 
 const logger = createLogger('customers');
+const customersViewProcedure = permissionProcedure('customers.view', 'عرض ملفات العملاء الموحدة');
 
 /**
  * Get unified customer profile by phone number
@@ -204,7 +206,7 @@ export const customersRouter = router({
    * Get paginated list of all unique customers
    * جلب قائمة العملاء الفريدين مع pagination
    */
-  listPaginated: protectedProcedure
+  listPaginated: customersViewProcedure
     .input(
       z.object({
         page: z.number().min(1).default(1),
@@ -220,7 +222,7 @@ export const customersRouter = router({
    * Get customer profile by phone number
    * جلب ملف العميل الكامل عبر رقم الهاتف
    */
-  getByPhone: protectedProcedure
+  getByPhone: customersViewProcedure
     .input(
       z.object({
         phone: z.string().min(1),

@@ -122,7 +122,8 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(rolesPanel).toContain('collapseAllGroups');
     expect(rolesPanel).toContain('toggleAllGroups');
     expect(rolesPanel).toContain('size="icon"');
-    expect(rolesPanel).toContain('aria-label={areAllGroupsExpanded');
+    expect(rolesPanel).toContain('onClick={toggleAllGroups}');
+    expect(rolesPanel).toContain('aria-pressed={areAllGroupsExpanded}');
     expect(rolesPanel).not.toContain('onClick={expandAllGroups}');
     expect(rolesPanel).not.toContain('onClick={collapseAllGroups}');
     expect(rolesPanel).toContain('showSelectedOnly');
@@ -158,5 +159,26 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(rolesPanel).toContain('space-y-2.5');
     expect(rolesPanel).toContain('hover:border-primary/50 hover:bg-primary/[0.025]');
     expect(rolesPanel).toContain('h-11 transition-colors hover:border-primary/50 hover:bg-primary/[0.025]');
+  });
+
+  it('يعكس صلاحيات P0-A في واجهات العملاء ونتائج المرضى وسجل التدقيق والتنقل', () => {
+    const customers = source('client/src/components/CustomerProfilesTab.tsx');
+    const patientResults = source('client/src/pages/admin/shared/PatientResultsAdminPage.tsx');
+    const auditLog = source('client/src/components/AuditLogSection.tsx');
+    const sidebar = source('client/src/components/layout/DashboardSidebarV2.tsx');
+    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+
+    expect(customers).toContain("const canViewCustomers = can('customers.view')");
+    expect(customers).toContain("const canExportCustomers = can('customers.export')");
+    expect(customers).toContain('enabled: !arePermissionsLoading && canViewCustomers');
+    expect(customers).toContain('ملفات العملاء غير متاحة لهذا الدور');
+    expect(patientResults).toContain("const canViewResults = can('patients.results.view')");
+    expect(patientResults).toContain("const canCreateResults = can('patients.results.create')");
+    expect(patientResults).toContain("const canUpdateResultStatus = can('patients.results.status.update')");
+    expect(patientResults).toContain('نتائج المرضى غير متاحة لهذا الدور');
+    expect(auditLog).toContain("const canViewAuditLog = can('audit.view')");
+    expect(auditLog).toContain('enabled: !arePermissionsLoading && canViewAuditLog');
+    expect(sidebarData).toContain("requiredPermission: 'customers.view'");
+    expect(sidebar).toContain('item.requiredPermission && (arePermissionsLoading || !can(item.requiredPermission))');
   });
 });

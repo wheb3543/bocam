@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { adminProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import {
   createPatientResult,
   getPatientByPhone,
@@ -8,15 +8,29 @@ import {
   sanitizePatient,
   updatePatientResultStatus,
 } from '../database/db/patients';
+import { assertRolePermission, permissionProcedure } from './permissionProcedures';
+
+const patientResultsViewProcedure = permissionProcedure(
+  'patients.results.view',
+  'عرض نتائج المرضى'
+);
+const patientResultsCreateProcedure = permissionProcedure(
+  'patients.results.create',
+  'إضافة نتائج المرضى'
+);
+const patientResultsStatusProcedure = permissionProcedure(
+  'patients.results.status.update',
+  'تحديث حالة نتائج المرضى'
+);
 
 export const patientResultsRouter = router({
-  listByPatientId: adminProcedure
+  listByPatientId: patientResultsViewProcedure
     .input(z.object({ patientId: z.number() }))
     .query(async ({ input }) => {
       return getPatientResults(input.patientId);
     }),
 
-  listByPhone: adminProcedure
+  listByPhone: patientResultsViewProcedure
     .input(z.object({ phone: z.string().min(9).max(20) }))
     .query(async ({ input }) => {
       const patient = await getPatientByPhone(input.phone);
@@ -27,7 +41,7 @@ export const patientResultsRouter = router({
       return { patient: sanitizePatient(patient), results };
     }),
 
-  create: adminProcedure
+  create: patientResultsCreateProcedure
     .input(
       z.object({
         phone: z.string().min(9).max(20),
@@ -40,7 +54,14 @@ export const patientResultsRouter = router({
         status: z.enum(['pending', 'ready', 'delivered']).optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (input.status && input.status !== 'pending') {
+        await assertRolePermission(
+          ctx.user,
+          'patients.results.status.update',
+          'تحديث حالة نتائج المرضى'
+        );
+      }
       const patient = await getPatientByPhone(input.phone);
       if (!patient) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'لا يوجد مريض بهذا الرقم' });
@@ -60,7 +81,7 @@ export const patientResultsRouter = router({
       return { success: true };
     }),
 
-  updateStatus: adminProcedure
+  updateStatus: patientResultsStatusProcedure
     .input(
       z.object({
         resultId: z.number(),
