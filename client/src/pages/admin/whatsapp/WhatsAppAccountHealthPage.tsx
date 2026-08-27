@@ -23,6 +23,7 @@ import {
   BusinessProfileUpdateEvent,
   BusinessAccountUpdateEvent,
 } from '@/hooks/integrations/useWhatsAppSSE';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 interface LiveAlert {
   alertType: string;
@@ -89,6 +90,8 @@ interface WebhookEvent {
 }
 
 export default function WhatsAppAccountHealthPage() {
+  const { can } = useRolePermissions();
+  const canViewWebhookLogs = can('integrations.logs.view');
   const [activeTab, setActiveTab] = useState('alerts');
   const [severityFilter, setSeverityFilter] = useState<string | null>(null);
 
@@ -121,7 +124,7 @@ export default function WhatsAppAccountHealthPage() {
     refetch: refetchWebhook,
   } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
     { category: 'account', limit: 50 },
-    { refetchInterval: 120000 }
+    { enabled: canViewWebhookLogs, refetchInterval: 120000 }
   );
 
   const {
@@ -130,7 +133,7 @@ export default function WhatsAppAccountHealthPage() {
     refetch: refetchSecurityWebhook,
   } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
     { category: 'security', limit: 50 },
-    { refetchInterval: 120000 }
+    { enabled: canViewWebhookLogs, refetchInterval: 120000 }
   );
 
   // استعلامات جديدة للتنبيهات الذكية
@@ -143,6 +146,7 @@ export default function WhatsAppAccountHealthPage() {
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
+    enabled: canViewWebhookLogs,
     onAccountReviewUpdate: useCallback(
       (event: AccountReviewUpdateEvent) => {
         toast.info(`تحديث مراجعة الحساب: ${event.status}`);
@@ -211,6 +215,7 @@ export default function WhatsAppAccountHealthPage() {
 
   // ── SSE: تنبيهات فورية من الـ webhook ──────────────────────────────────────
   useWhatsAppSSE({
+    enabled: canViewWebhookLogs,
     onAccountAlert: useCallback(
       (event: { alertType: string; severity: string; details?: unknown; timestamp: string }) => {
         // إضافة التنبيه للقائمة المحلية فوراً
@@ -452,8 +457,8 @@ export default function WhatsAppAccountHealthPage() {
         <TabsList className="mb-4">
           <TabsTrigger value="alerts">تنبيهات الحساب</TabsTrigger>
           <TabsTrigger value="smart-alerts">تنبيهات ذكية</TabsTrigger>
-          <TabsTrigger value="security">أحداث الأمان</TabsTrigger>
-          <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>
+          {canViewWebhookLogs && <TabsTrigger value="security">أحداث الأمان</TabsTrigger>}
+          {canViewWebhookLogs && <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="alerts">
@@ -616,144 +621,126 @@ export default function WhatsAppAccountHealthPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="security">
-          <Card>
-            <CardHeader>
-              <CardTitle>أحداث الأمان</CardTitle>
-              <CardDescription>أحداث أمان متعلقة بحساب WhatsApp</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {securityWebhookLoading ? (
-                <div className="text-center py-8">جاري التحميل...</div>
-              ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
-                <div className="space-y-4">
-                  {securityWebhookEvents.map((event: WebhookEvent) => (
-                    <div key={event.id} className="p-4 border rounded-lg bg-white">
-                      <div className="flex items-start gap-3">
-                        <Shield className="h-5 w-5 text-blue-500" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{event.eventType}</h4>
-                            <Badge className={getSeverityColor(String(event.severity))}>
-                              {String(event.severity)}
-                            </Badge>
+        {canViewWebhookLogs && (
+          <TabsContent value="security">
+            <Card>
+              <CardHeader>
+                <CardTitle>أحداث الأمان</CardTitle>
+                <CardDescription>أحداث أمان متعلقة بحساب WhatsApp</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {securityWebhookLoading ? (
+                  <div className="text-center py-8">جاري التحميل...</div>
+                ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
+                  <div className="space-y-4">
+                    {securityWebhookEvents.map((event: WebhookEvent) => (
+                      <div key={event.id} className="p-4 border rounded-lg bg-white">
+                        <div className="flex items-start gap-3">
+                          <Shield className="h-5 w-5 text-blue-500" />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold">{event.eventType}</h4>
+                            </div>
+                            {event.phoneNumber && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                الرقم: {event.phoneNumber}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-400 mt-2">
+                              {new Date(event.createdAt).toLocaleString('ar-SA')}
+                            </p>
                           </div>
-                          {event.phoneNumber && (
-                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber}</p>
-                          )}
-                          <p className="text-sm text-gray-600 mt-1">
-                            {event.details
-                              ? (() => {
-                                  try {
-                                    const parsed = JSON.parse(String(event.details));
-                                    if (
-                                      typeof parsed === 'object' &&
-                                      parsed !== null &&
-                                      'message' in parsed
-                                    ) {
-                                      return String(
-                                        (parsed as { message?: unknown }).message || event.details
-                                      );
-                                    }
-                                    return String(event.details);
-                                  } catch {
-                                    return String(event.details);
-                                  }
-                                })()
-                              : ''}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-2">
-                            {new Date(event.createdAt).toLocaleString('ar-SA')}
-                          </p>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Shield className="h-12 w-12 mx-auto mb-2 text-green-500" />
-                  <p>لا توجد أحداث أمان حالياً</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Shield className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                    <p>لا توجد أحداث أمان حالياً</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
-        <TabsContent value="webhook-events">
-          <Card>
-            <CardHeader>
-              <CardTitle>أحداث Webhook الخام</CardTitle>
-              <CardDescription>أحداث الحساب والأمان الواردة مباشرة من Meta</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="account">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="account">أحداث الحساب</TabsTrigger>
-                  <TabsTrigger value="security">أحداث الأمان</TabsTrigger>
-                </TabsList>
-                <TabsContent value="account">
-                  {webhookLoading ? (
-                    <div className="text-center py-8">جاري التحميل...</div>
-                  ) : accountWebhookEvents && accountWebhookEvents.length > 0 ? (
-                    <div className="space-y-3">
-                      {accountWebhookEvents.map((event: WebhookEvent) => (
-                        <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-semibold text-sm">{event.eventType}</h4>
-                              {event.subType && (
-                                <Badge variant="outline" className="text-xs mt-1">
-                                  {event.subType}
-                                </Badge>
-                              )}
+        {canViewWebhookLogs && (
+          <TabsContent value="webhook-events">
+            <Card>
+              <CardHeader>
+                <CardTitle>ملخص أحداث Webhook</CardTitle>
+                <CardDescription>ملخصات آمنة لأحداث الحساب والأمان الواردة من Meta</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="account">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="account">أحداث الحساب</TabsTrigger>
+                    <TabsTrigger value="security">أحداث الأمان</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="account">
+                    {webhookLoading ? (
+                      <div className="text-center py-8">جاري التحميل...</div>
+                    ) : accountWebhookEvents && accountWebhookEvents.length > 0 ? (
+                      <div className="space-y-3">
+                        {accountWebhookEvents.map((event: WebhookEvent) => (
+                          <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-semibold text-sm">{event.eventType}</h4>
+                                {event.subType && (
+                                  <Badge variant="outline" className="text-xs mt-1">
+                                    {event.subType}
+                                  </Badge>
+                                )}
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
+                              </span>
                             </div>
-                            <span className="text-xs text-gray-500">
-                              {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
-                            </span>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>لا توجد أحداث حساب حالياً</p>
-                    </div>
-                  )}
-                </TabsContent>
-                <TabsContent value="security">
-                  {securityWebhookLoading ? (
-                    <div className="text-center py-8">جاري التحميل...</div>
-                  ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
-                    <div className="space-y-3">
-                      {securityWebhookEvents.map((event: WebhookEvent) => (
-                        <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-semibold text-sm">{event.eventType}</h4>
-                              {event.subType && (
-                                <Badge variant="outline" className="text-xs mt-1">
-                                  {event.subType}
-                                </Badge>
-                              )}
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>لا توجد أحداث حساب حالياً</p>
+                      </div>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="security">
+                    {securityWebhookLoading ? (
+                      <div className="text-center py-8">جاري التحميل...</div>
+                    ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
+                      <div className="space-y-3">
+                        {securityWebhookEvents.map((event: WebhookEvent) => (
+                          <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-semibold text-sm">{event.eventType}</h4>
+                                {event.subType && (
+                                  <Badge variant="outline" className="text-xs mt-1">
+                                    {event.subType}
+                                  </Badge>
+                                )}
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
+                              </span>
                             </div>
-                            <span className="text-xs text-gray-500">
-                              {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
-                            </span>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>لا توجد أحداث أمان حالياً</p>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>لا توجد أحداث أمان حالياً</p>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

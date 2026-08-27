@@ -30,8 +30,11 @@ import {
   ConversationCostUpdateEvent,
   AccountUpdateEvent,
 } from '@/hooks/integrations/useWhatsAppSSE';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 export default function WhatsAppPhoneQualityPage() {
+  const { can } = useRolePermissions();
+  const canViewWebhookLogs = can('integrations.logs.view');
   const [phoneFilter, _setPhoneFilter] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -66,7 +69,7 @@ export default function WhatsAppPhoneQualityPage() {
     refetch: refetchWebhook,
   } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
     { category: 'quality', limit: 50 },
-    { refetchInterval: 300000 }
+    { enabled: canViewWebhookLogs, refetchInterval: 300000 }
   );
 
   const {
@@ -97,6 +100,7 @@ export default function WhatsAppPhoneQualityPage() {
 
   // ── SSE: تحديث فوري لجودة الهاتف ──────────────────────────────────────────
   useWhatsAppSSE({
+    enabled: canViewWebhookLogs,
     onPhoneQualityUpdate: useCallback(
       (event: PhoneQualityUpdateEvent) => {
         setLiveQuality({
@@ -405,7 +409,7 @@ export default function WhatsAppPhoneQualityPage() {
         <TabsList className="mb-4">
           <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
           <TabsTrigger value="cost-quality">التكاليف والجودة</TabsTrigger>
-          <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>
+          {canViewWebhookLogs && <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>}
           <TabsTrigger value="conversation-quality">جودة المحادثات</TabsTrigger>
         </TabsList>
 
@@ -532,53 +536,57 @@ export default function WhatsAppPhoneQualityPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="webhook-events">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                أحداث Webhook للجودة
-              </CardTitle>
-              <CardDescription>أحداث تحديث الجودة الواردة مباشرة من Meta</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {webhookLoading ? (
-                <div className="text-center py-8">جاري التحميل...</div>
-              ) : qualityWebhookEvents && qualityWebhookEvents.length > 0 ? (
-                <div className="space-y-3">
-                  {qualityWebhookEvents.map((event: QualityWebhookEvent) => (
-                    <div key={event.id} className="p-4 border rounded-lg bg-gray-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold">{event.eventType || ''}</h4>
-                            {event.subType && <Badge variant="outline">{event.subType}</Badge>}
+        {canViewWebhookLogs && (
+          <TabsContent value="webhook-events">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  أحداث Webhook للجودة
+                </CardTitle>
+                <CardDescription>ملخصات آمنة لأحداث تحديث الجودة الواردة من Meta</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {webhookLoading ? (
+                  <div className="text-center py-8">جاري التحميل...</div>
+                ) : qualityWebhookEvents && qualityWebhookEvents.length > 0 ? (
+                  <div className="space-y-3">
+                    {qualityWebhookEvents.map((event: QualityWebhookEvent) => (
+                      <div key={event.id} className="p-4 border rounded-lg bg-gray-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-semibold">{event.eventType || ''}</h4>
+                              {event.subType && <Badge variant="outline">{event.subType}</Badge>}
+                            </div>
+                            {event.phoneNumber && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                الرقم: {event.phoneNumber}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              {event.createdAt
+                                ? new Date(event.createdAt).toLocaleString('ar-SA')
+                                : '-'}
+                            </p>
                           </div>
-                          {event.phoneNumber && (
-                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber}</p>
-                          )}
-                          <p className="text-xs text-gray-500 mt-2">
-                            {event.createdAt
-                              ? new Date(event.createdAt).toLocaleString('ar-SA')
-                              : '-'}
-                          </p>
+                          <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>
+                            {event.handlerExists ? 'معالج' : 'غير معالج'}
+                          </Badge>
                         </div>
-                        <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>
-                          {event.handlerExists ? 'معالج' : 'غير معالج'}
-                        </Badge>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Activity className="h-12 w-12 mx-auto mb-2" />
-                  <p>لا توجد أحداث جودة حالياً</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Activity className="h-12 w-12 mx-auto mb-2" />
+                    <p>لا توجد أحداث جودة حالياً</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         <TabsContent value="conversation-quality">
           <Card>

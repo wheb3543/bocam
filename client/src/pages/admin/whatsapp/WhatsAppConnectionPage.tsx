@@ -23,6 +23,8 @@ import {
   BusinessAccountUpdateEvent,
 } from '@/hooks/integrations/useWhatsAppSSE';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 export default function WhatsAppConnectionPage() {
   return (
@@ -33,16 +35,20 @@ export default function WhatsAppConnectionPage() {
 }
 
 function WhatsAppConnectionContent() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewIntegrations = can('integrations.view');
   const {
     data: statusData,
     isLoading: statusLoading,
     refetch: refetchStatus,
   } = trpc.whatsapp.connection.status.useQuery(undefined, {
+    enabled: canViewIntegrations,
     refetchInterval: 30000,
   });
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
+    enabled: canViewIntegrations,
     onAccountUpdate: useCallback(
       (event: AccountUpdateEvent) => {
         toast.info(`تحديث الحساب: ${event.eventType}`);
@@ -62,6 +68,26 @@ function WhatsAppConnectionContent() {
   const handleRefresh = () => {
     refetchStatus();
   };
+
+  if (arePermissionsLoading) {
+    return (
+      <div className="container mx-auto p-6 text-sm text-muted-foreground">
+        جاري التحقق من الصلاحيات...
+      </div>
+    );
+  }
+
+  if (!canViewIntegrations) {
+    return (
+      <div className="container mx-auto space-y-4 p-6" dir="rtl">
+        <h1 className="text-2xl font-bold text-foreground">اتصال WhatsApp</h1>
+        <PermissionHint
+          label="الوصول إلى التكامل مقيّد"
+          message="تحتاج إلى صلاحية عرض التكاملات للاطلاع على حالة اتصال WhatsApp."
+        />
+      </div>
+    );
+  }
 
   const getStatusBadge = () => {
     if (statusLoading) {

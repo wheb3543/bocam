@@ -18,8 +18,11 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 export default function WhatsAppUserSubscriptionsPage() {
+  const { can } = useRolePermissions();
+  const canViewWebhookLogs = can('integrations.logs.view');
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [optInType, setOptInType] = useState<'general' | 'marketing'>('general');
@@ -44,11 +47,12 @@ export default function WhatsAppUserSubscriptionsPage() {
     refetch: refetchWebhook,
   } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
     { category: 'subscriptions', limit: 50 },
-    { refetchInterval: 30000 }
+    { enabled: canViewWebhookLogs, refetchInterval: 30000 }
   );
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
+    enabled: canViewWebhookLogs,
     onAccountUpdate: useCallback(
       (event: AccountUpdateEvent) => {
         toast.info(`تحديث الحساب: ${event.eventType}`);
@@ -201,7 +205,7 @@ export default function WhatsAppUserSubscriptionsPage() {
           <TabsTrigger value="all">الكل</TabsTrigger>
           <TabsTrigger value="opted_in">مشتركين</TabsTrigger>
           <TabsTrigger value="opted_out">غير مشتركين</TabsTrigger>
-          <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>
+          {canViewWebhookLogs && <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>}
         </TabsList>
 
         <TabsContent value={activeTab}>
@@ -246,7 +250,9 @@ export default function WhatsAppUserSubscriptionsPage() {
                           </td>
                           <td className="py-3 px-4">{sub.source as ReactNode}</td>
                           <td className="py-3 px-4">
-                            {new Date(sub.updatedAt as string | number | Date).toLocaleString('ar-SA')}
+                            {new Date(sub.updatedAt as string | number | Date).toLocaleString(
+                              'ar-SA'
+                            )}
                           </td>
                           <td className="py-3 px-4">
                             {sub.status === 'opted_in' ? (
@@ -254,7 +260,9 @@ export default function WhatsAppUserSubscriptionsPage() {
                                 size="sm"
                                 variant="outline"
                                 className="text-red-600 hover:bg-red-50"
-                                onClick={() => handleUpdateStatus(sub.phoneNumber as string, 'opted_out')}
+                                onClick={() =>
+                                  handleUpdateStatus(sub.phoneNumber as string, 'opted_out')
+                                }
                                 disabled={updateStatusMutation.isPending}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
@@ -265,7 +273,9 @@ export default function WhatsAppUserSubscriptionsPage() {
                                 size="sm"
                                 variant="outline"
                                 className="text-green-600 hover:bg-green-50"
-                                onClick={() => handleUpdateStatus(sub.phoneNumber as string, 'opted_in')}
+                                onClick={() =>
+                                  handleUpdateStatus(sub.phoneNumber as string, 'opted_in')
+                                }
                                 disabled={updateStatusMutation.isPending}
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
@@ -288,51 +298,59 @@ export default function WhatsAppUserSubscriptionsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="webhook-events">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                أحداث Webhook للاشتراكات
-              </CardTitle>
-              <CardDescription>أحداث الاشتراك الواردة مباشرة من Meta</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {webhookLoading ? (
-                <div className="text-center py-8">جاري التحميل...</div>
-              ) : subscriptionWebhookEvents && subscriptionWebhookEvents.length > 0 ? (
-                <div className="space-y-3">
-                  {subscriptionWebhookEvents.map((event: Record<string, unknown>) => (
-                    <div key={event.id as string} className="p-4 border rounded-lg bg-gray-50">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-semibold">{event.eventType as ReactNode}</h4>
-                            {(event.subType as string) && <Badge variant="outline">{event.subType as string}</Badge>}
+        {canViewWebhookLogs && (
+          <TabsContent value="webhook-events">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  أحداث Webhook للاشتراكات
+                </CardTitle>
+                <CardDescription>ملخصات آمنة لأحداث الاشتراك الواردة من Meta</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {webhookLoading ? (
+                  <div className="text-center py-8">جاري التحميل...</div>
+                ) : subscriptionWebhookEvents && subscriptionWebhookEvents.length > 0 ? (
+                  <div className="space-y-3">
+                    {subscriptionWebhookEvents.map((event: Record<string, unknown>) => (
+                      <div key={event.id as string} className="p-4 border rounded-lg bg-gray-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-semibold">{event.eventType as ReactNode}</h4>
+                              {(event.subType as string) && (
+                                <Badge variant="outline">{event.subType as string}</Badge>
+                              )}
+                            </div>
+                            {(event.phoneNumber as string) && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                الرقم: {event.phoneNumber as string}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              {new Date(event.createdAt as string | number | Date).toLocaleString(
+                                'ar-SA'
+                              )}
+                            </p>
                           </div>
-                          {(event.phoneNumber as string) && (
-                            <p className="text-sm text-gray-600 mt-1">الرقم: {event.phoneNumber as string}</p>
-                          )}
-                          <p className="text-xs text-gray-500 mt-2">
-                            {new Date(event.createdAt as string | number | Date).toLocaleString('ar-SA')}
-                          </p>
+                          <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>
+                            {event.handlerExists ? 'معالج' : 'غير معالج'}
+                          </Badge>
                         </div>
-                        <Badge className={event.handlerExists ? 'bg-green-500' : 'bg-red-500'}>
-                          {event.handlerExists ? 'معالج' : 'غير معالج'}
-                        </Badge>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Users className="h-12 w-12 mx-auto mb-2" />
-                  <p>لا توجد أحداث اشتراك حالياً</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Users className="h-12 w-12 mx-auto mb-2" />
+                    <p>لا توجد أحداث اشتراك حالياً</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

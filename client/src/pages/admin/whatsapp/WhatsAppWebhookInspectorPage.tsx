@@ -16,6 +16,8 @@ import {
 } from '@/hooks/integrations/useWhatsAppSSE';
 import { trpc } from '@/lib/api/trpc';
 import type { RouterOutputs } from '@/types/trpc';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 type WebhookEvent = RouterOutputs['whatsapp']['webhookEvents']['getAll'][number];
 
@@ -51,6 +53,9 @@ import {
 } from '@/components/ui/dialog';
 
 export default function WhatsAppWebhookInspectorPage() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewWebhookLogs = can('integrations.logs.view');
+  const canManageWebhooks = can('integrations.webhooks.manage');
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -69,7 +74,7 @@ export default function WhatsAppWebhookInspectorPage() {
       handlerExists: activeTab === 'unhandled' ? false : undefined,
       limit: 100,
     },
-    { refetchInterval: 60000 }
+    { enabled: canViewWebhookLogs, refetchInterval: 60000 }
   );
 
   const {
@@ -88,22 +93,31 @@ export default function WhatsAppWebhookInspectorPage() {
         | 'subscriptions',
       limit: 100,
     },
-    { enabled: selectedCategory !== 'all', refetchInterval: 60000 }
+    { enabled: canViewWebhookLogs && selectedCategory !== 'all', refetchInterval: 60000 }
   );
 
   const { data: statsByType, isLoading: _isLoadingStats } =
-    trpc.whatsapp.webhookEvents.getStatsByType.useQuery(undefined, { refetchInterval: 120000 });
+    trpc.whatsapp.webhookEvents.getStatsByType.useQuery(undefined, {
+      enabled: canViewWebhookLogs,
+      refetchInterval: 120000,
+    });
 
   const { data: unhandledCount, refetch: refetchCount } =
-    trpc.whatsapp.webhookEvents.getUnhandledCount.useQuery(undefined, { refetchInterval: 60000 });
+    trpc.whatsapp.webhookEvents.getUnhandledCount.useQuery(undefined, {
+      enabled: canViewWebhookLogs,
+      refetchInterval: 60000,
+    });
 
   const { data: eventTypes, refetch: refetchTypes } =
-    trpc.whatsapp.webhookEvents.getEventTypes.useQuery(undefined, { refetchInterval: 120000 });
+    trpc.whatsapp.webhookEvents.getEventTypes.useQuery(undefined, {
+      enabled: canViewWebhookLogs,
+      refetchInterval: 120000,
+    });
 
   const { data: templateEventsQuery, isLoading: isLoadingTemplate } =
     trpc.whatsapp.webhookEvents.getTemplateEvents.useQuery(
       { templateId: selectedTemplateId || undefined, limit: 100 },
-      { enabled: !!selectedTemplateId, refetchInterval: 60000 }
+      { enabled: canViewWebhookLogs && !!selectedTemplateId, refetchInterval: 60000 }
     );
 
   const markAsProcessedMutation = trpc.whatsapp.webhookEvents.markAsProcessed.useMutation({
@@ -119,6 +133,7 @@ export default function WhatsAppWebhookInspectorPage() {
 
   // ── SSE: تحديث فوري عند وصول أحداث جديدة ──────────────────────────────────
   useWhatsAppSSE({
+    enabled: canViewWebhookLogs,
     onWebhookEvent: useCallback(
       (event: unknown) => {
         setLiveEventCount((prev) => prev + 1);
@@ -290,7 +305,9 @@ export default function WhatsAppWebhookInspectorPage() {
     ? displayEvents.filter((event: WebhookEvent) => {
         const matchesSearch =
           (event.eventType?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-          (event.rawPayload && event.rawPayload.includes(searchTerm));
+          (event.subType?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+          (event.eventId?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+          (event.phoneNumber || '').includes(searchTerm);
         return matchesSearch;
       })
     : [];
@@ -312,6 +329,26 @@ export default function WhatsAppWebhookInspectorPage() {
   const processedEvents = Array.isArray(displayEvents)
     ? displayEvents.filter((e: WebhookEvent) => e.processed).length
     : 0;
+
+  if (arePermissionsLoading) {
+    return (
+      <div className="container mx-auto p-6 text-sm text-muted-foreground" dir="rtl">
+        جاري التحقق من الصلاحيات...
+      </div>
+    );
+  }
+
+  if (!canViewWebhookLogs) {
+    return (
+      <div className="container mx-auto space-y-4 p-6" dir="rtl">
+        <h1 className="text-2xl font-bold text-foreground">فاحص أحداث Webhook</h1>
+        <PermissionHint
+          label="الوصول إلى السجل مقيّد"
+          message="تحتاج إلى صلاحية عرض سجلات التكاملات للاطلاع على أحداث Webhook."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 px-4" dir="rtl">
@@ -577,11 +614,6 @@ export default function WhatsAppWebhookInspectorPage() {
                               </p>
                             )}
                           </div>
-
-                          {/* Preview of payload */}
-                          <div className="mt-3 p-2 bg-gray-100 rounded text-xs font-mono overflow-hidden text-ellipsis whitespace-nowrap">
-                            {((event.rawPayload as string) || '').substring(0, 200)}...
-                          </div>
                         </div>
 
                         <div className="flex flex-col gap-2 mr-4">
@@ -617,6 +649,10 @@ export default function WhatsAppWebhookInspectorPage() {
                                     <p>{(event.phoneNumber as string) || '-'}</p>
                                   </div>
                                   <div>
+                                    <p className="text-sm font-semibold">معرف الحدث:</p>
+                                    <p>{event.eventId || '-'}</p>
+                                  </div>
+                                  <div>
                                     <p className="text-sm font-semibold">التاريخ:</p>
                                     <p>
                                       {event.createdAt
@@ -625,22 +661,15 @@ export default function WhatsAppWebhookInspectorPage() {
                                     </p>
                                   </div>
                                 </div>
-
-                                <div>
-                                  <p className="text-sm font-semibold mb-2">البيانات الكاملة:</p>
-                                  <pre className="p-4 bg-gray-900 text-green-400 rounded-lg overflow-auto max-h-96 text-xs">
-                                    {JSON.stringify(
-                                      JSON.parse((event.rawPayload as string) || '{}'),
-                                      null,
-                                      2
-                                    )}
-                                  </pre>
-                                </div>
+                                <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+                                  تعرض هذه الصفحة ملخص الحدث فقط لحماية بيانات الرسائل الواردة
+                                  وحمولة Webhook الخام.
+                                </p>
                               </div>
                             </DialogContent>
                           </Dialog>
 
-                          {!event.processed && (
+                          {!event.processed && canManageWebhooks && (
                             <>
                               <Button
                                 size="sm"

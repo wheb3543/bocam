@@ -10,6 +10,10 @@ vi.mock('@/hooks/integrations/useWhatsAppSSE', () => ({
   useWhatsAppSSE: vi.fn(),
 }));
 
+vi.mock('@/hooks/auth/useRolePermissions', () => ({
+  useRolePermissions: () => ({ can: () => true, isLoading: false }),
+}));
+
 vi.mock('@/lib/api/trpc', () => ({
   trpc: {
     whatsapp: {

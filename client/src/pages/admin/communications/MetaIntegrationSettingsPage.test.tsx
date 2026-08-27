@@ -20,6 +20,10 @@ vi.mock('@/_core/hooks/useAuth', () => ({
   useAuth: () => ({ user: { id: 1, role: 'admin' }, loading: false }),
 }));
 
+vi.mock('@/hooks/auth/useRolePermissions', () => ({
+  useRolePermissions: () => ({ can: () => true, isLoading: false }),
+}));
+
 vi.mock('@/lib/api/trpc', () => ({
   trpc: {
     useUtils: () => ({

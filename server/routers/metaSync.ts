@@ -1,4 +1,4 @@
-import { router, protectedProcedure } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { z } from 'zod';
 import {
   fetchTemplatesFromMeta,
@@ -8,50 +8,49 @@ import {
   syncTemplatesCompletely,
 } from '../services/metaTemplateSync';
 import { ENV } from '../_core/env';
+import { permissionProcedure } from './permissionProcedures';
+
+const templatesManagementProcedure = permissionProcedure(
+  'communications.templates.manage',
+  'إدارة قوالب التواصل'
+);
+const templateSyncProcedure = permissionProcedure('integrations.sync.manage', 'مزامنة قوالب Meta');
 
 export const metaSyncRouter = router({
   /**
    * جلب جميع القوالب من Meta
    */
-  fetchTemplates: protectedProcedure.mutation(async () => {
+  fetchTemplates: templateSyncProcedure.mutation(async () => {
     const phoneNumberId = ENV.whatsappPhoneNumberId;
     const wabaId = ENV.whatsappBusinessAccountId;
     const accessToken = ENV.metaAccessToken;
 
-    // تشخيص شامل لمتغيرات البيئة
-    const diagnostics = {
-      hasPhoneNumberId: !!phoneNumberId,
-      hasWabaId: !!wabaId,
-      hasAccessToken: !!accessToken,
-      phoneNumberIdLength: phoneNumberId?.length || 0,
-      wabaIdLength: wabaId?.length || 0,
-      accessTokenPrefix: accessToken ? accessToken.substring(0, 10) + '...' : 'MISSING',
-    };
+    const configured = Boolean(phoneNumberId || wabaId) && Boolean(accessToken);
 
     if (!accessToken) {
       return {
         success: false,
-        message: 'توكن Meta غير موجود. تأكد من إضافة META_ACCESS_TOKEN إلى متغيرات البيئة',
-        diagnostics,
+        message: 'بيانات اعتماد Meta غير مكتملة.',
+        configured,
       };
     }
 
     if (!phoneNumberId && !wabaId) {
       return {
         success: false,
-        message: 'يجب توفير WHATSAPP_PHONE_NUMBER_ID أو WHATSAPP_BUSINESS_ACCOUNT_ID',
-        diagnostics,
+        message: 'إعدادات حساب WhatsApp غير مكتملة.',
+        configured,
       };
     }
 
     const result = await fetchTemplatesFromMeta(phoneNumberId || wabaId, accessToken);
-    return { ...result, diagnostics };
+    return { ...result, configured };
   }),
 
   /**
    * دفع قالب جديد إلى Meta
    */
-  pushTemplate: protectedProcedure
+  pushTemplate: templatesManagementProcedure
     .input(
       z.object({
         templateName: z.string().min(1),
@@ -84,7 +83,7 @@ export const metaSyncRouter = router({
   /**
    * التحقق من حالة قالب معين
    */
-  checkStatus: protectedProcedure
+  checkStatus: templateSyncProcedure
     .input(
       z.object({
         templateId: z.string().min(1),
@@ -107,7 +106,7 @@ export const metaSyncRouter = router({
   /**
    * حذف قالب من Meta
    */
-  deleteTemplate: protectedProcedure
+  deleteTemplate: templatesManagementProcedure
     .input(
       z.object({
         templateName: z.string().min(1),
@@ -130,7 +129,7 @@ export const metaSyncRouter = router({
   /**
    * مزامنة شاملة للقوالب
    */
-  syncAll: protectedProcedure.mutation(async () => {
+  syncAll: templateSyncProcedure.mutation(async () => {
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
     const accessToken = ENV.metaAccessToken;
 

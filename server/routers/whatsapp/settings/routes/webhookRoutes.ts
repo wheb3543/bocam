@@ -3,21 +3,62 @@
  * مسارات أحداث الويب هوك لواتساب
  */
 
-import { protectedProcedure, router } from '../../../../_core/trpc';
+import { router } from '../../../../_core/trpc';
 import { TRPCError } from '@trpc/server';
 import { ensureDatabaseAvailable } from '../../../../_core/databaseGuard';
 import * as db from '../../../../database/db';
 import { z } from 'zod';
+import { permissionProcedure } from '../../../permissionProcedures';
+
+const webhookLogsProcedure = permissionProcedure('integrations.logs.view', 'عرض سجلات Webhooks');
+const webhooksManagementProcedure = permissionProcedure(
+  'integrations.webhooks.manage',
+  'إدارة أحداث Webhooks'
+);
+
+type WebhookEventRow = {
+  id: number;
+  eventId: string | null;
+  eventType: string;
+  subType: string | null;
+  phoneNumber: string | null;
+  processed: boolean;
+  handlerExists: boolean;
+  createdAt: Date;
+  processedAt: Date | null;
+};
+
+function maskPhoneNumber(phoneNumber: string | null): string | null {
+  if (!phoneNumber) {
+    return null;
+  }
+  const lastDigits = phoneNumber.replace(/\D/g, '').slice(-4);
+  return lastDigits ? `••••${lastDigits}` : '••••';
+}
+
+function toWebhookEventSummary(event: WebhookEventRow) {
+  return {
+    id: event.id,
+    eventId: event.eventId,
+    eventType: event.eventType,
+    subType: event.subType,
+    phoneNumber: maskPhoneNumber(event.phoneNumber),
+    processed: event.processed,
+    handlerExists: event.handlerExists,
+    createdAt: event.createdAt,
+    processedAt: event.processedAt,
+  };
+}
 
 export const webhookRouter = router({
-  getAll: protectedProcedure
+  getAll: webhookLogsProcedure
     .input(
       z
         .object({
           eventType: z.string().optional(),
           processed: z.boolean().optional(),
           handlerExists: z.boolean().optional(),
-          limit: z.number().default(100),
+          limit: z.number().int().min(1).max(100).default(100),
         })
         .optional()
     )
@@ -45,25 +86,28 @@ export const webhookRouter = router({
               .where(and(...conditions))
           : dbConn.select().from(whatsappWebhookEvents);
 
-      return query.orderBy(desc(whatsappWebhookEvents.createdAt)).limit(input?.limit || 100);
+      const events = await query
+        .orderBy(desc(whatsappWebhookEvents.createdAt))
+        .limit(input?.limit || 100);
+      return events.map(toWebhookEventSummary);
     }),
 
-  getUnhandledCount: protectedProcedure.query(async () => {
+  getUnhandledCount: webhookLogsProcedure.query(async () => {
     return db.getUnhandledWebhookEventsCount();
   }),
 
-  getEventTypes: protectedProcedure.query(async () => {
+  getEventTypes: webhookLogsProcedure.query(async () => {
     return db.getUniqueEventTypes();
   }),
 
-  markAsProcessed: protectedProcedure
+  markAsProcessed: webhooksManagementProcedure
     .input(z.object({ id: z.number(), handlerExists: z.boolean().default(true) }))
     .mutation(async ({ input }: { input: { id: number; handlerExists: boolean } }) => {
       await db.markWebhookEventAsProcessed(input.id, input.handlerExists);
       return { success: true };
     }),
 
-  getStatsByType: protectedProcedure.query(async () => {
+  getStatsByType: webhookLogsProcedure.query(async () => {
     const dbConn = await db.getDb();
     if (!dbConn) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });
@@ -82,7 +126,7 @@ export const webhookRouter = router({
     return stats;
   }),
 
-  getEventsByCategory: protectedProcedure
+  getEventsByCategory: webhookLogsProcedure
     .input(
       z.object({
         category: z.enum([
@@ -94,7 +138,7 @@ export const webhookRouter = router({
           'quality',
           'subscriptions',
         ]),
-        limit: z.number().default(50),
+        limit: z.number().int().min(1).max(100).default(50),
       })
     )
     .query(
@@ -133,20 +177,21 @@ export const webhookRouter = router({
           subscriptions: 'opt%',
         };
 
-        return dbConn
+        const events = await dbConn
           .select()
           .from(whatsappWebhookEvents)
           .where(like(whatsappWebhookEvents.eventType, categoryPatterns[input.category]))
           .orderBy(desc(whatsappWebhookEvents.createdAt))
           .limit(input.limit);
+        return events.map(toWebhookEventSummary);
       }
     ),
 
-  getTemplateEvents: protectedProcedure
+  getTemplateEvents: webhookLogsProcedure
     .input(
       z.object({
         templateId: z.string().optional(),
-        limit: z.number().default(100),
+        limit: z.number().int().min(1).max(100).default(100),
       })
     )
     .query(async ({ input }: { input: { templateId?: string; limit: number } }) => {
@@ -169,16 +214,19 @@ export const webhookRouter = router({
         const events = await query
           .orderBy(desc(whatsappWebhookEvents.createdAt))
           .limit(input.limit);
-        return events.filter((e) => {
-          try {
-            const payload = JSON.parse(e.rawPayload);
-            return payload.message_template_id === input.templateId;
-          } catch {
-            return false;
-          }
-        });
+        return events
+          .filter((e) => {
+            try {
+              const payload = JSON.parse(e.rawPayload);
+              return payload.message_template_id === input.templateId;
+            } catch {
+              return false;
+            }
+          })
+          .map(toWebhookEventSummary);
       }
 
-      return query.orderBy(desc(whatsappWebhookEvents.createdAt)).limit(input.limit);
+      const events = await query.orderBy(desc(whatsappWebhookEvents.createdAt)).limit(input.limit);
+      return events.map(toWebhookEventSummary);
     }),
 });

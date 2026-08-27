@@ -239,4 +239,28 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(desktopSidebar).toContain('useUnreadCount(canViewNotifications)');
     expect(sidebarData).toContain("requiredPermission: 'media.view'");
   });
+
+  it('يعكس صلاحيات P0-C في واجهات اتصال Meta وسجل Webhooks دون عرض الحمولة الخام', () => {
+    const webhookInspector = source('client/src/pages/admin/whatsapp/WhatsAppWebhookInspectorPage.tsx');
+    const connection = source('client/src/pages/admin/whatsapp/WhatsAppConnectionPage.tsx');
+    const accountHealth = source('client/src/pages/admin/whatsapp/WhatsAppAccountHealthPage.tsx');
+    const phoneQuality = source('client/src/pages/admin/whatsapp/WhatsAppPhoneQualityPage.tsx');
+    const subscriptions = source('client/src/pages/admin/whatsapp/WhatsAppUserSubscriptionsPage.tsx');
+    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+
+    expect(webhookInspector).toContain("const canViewWebhookLogs = can('integrations.logs.view')");
+    expect(webhookInspector).toContain("const canManageWebhooks = can('integrations.webhooks.manage')");
+    expect(webhookInspector).toContain('enabled: canViewWebhookLogs');
+    expect(webhookInspector).toContain('enabled: canViewWebhookLogs,');
+    expect(webhookInspector).toContain('{!event.processed && canManageWebhooks && (');
+    expect(webhookInspector).not.toContain('rawPayload');
+    expect(connection).toContain("const canViewIntegrations = can('integrations.view')");
+    expect(connection).toContain('enabled: canViewIntegrations');
+    expect(connection).toContain('الوصول إلى التكامل مقيّد');
+    expect(accountHealth).toContain("const canViewWebhookLogs = can('integrations.logs.view')");
+    expect(phoneQuality).toContain("const canViewWebhookLogs = can('integrations.logs.view')");
+    expect(subscriptions).toContain("const canViewWebhookLogs = can('integrations.logs.view')");
+    expect(sidebarData).toContain("requiredPermission: 'integrations.logs.view'");
+    expect(sidebarData).toContain("requiredPermission: 'integrations.view'");
+  });
 });

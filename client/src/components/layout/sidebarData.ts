@@ -155,6 +155,7 @@ export const allNavItems: NavItem[] = [
     title: 'ربط حساب WhatsApp',
     href: '/admin/whatsapp/connection',
     icon: SettingsIcon,
+    requiredPermission: 'integrations.view',
   },
   {
     id: 'whatsapp-integration',
@@ -185,6 +186,7 @@ export const allNavItems: NavItem[] = [
     title: 'سجل أحداث Webhooks',
     href: '/admin/whatsapp/webhook-inspector',
     icon: Terminal,
+    requiredPermission: 'integrations.logs.view',
   },
   {
     id: 'messages',
@@ -199,7 +201,7 @@ export const allNavItems: NavItem[] = [
     title: 'ربط المنصات الاجتماعية',
     href: '/admin/communications/integration-settings',
     icon: Shield,
-    allowedRoles: ['admin'],
+    requiredPermission: 'integrations.view',
   },
   {
     id: 'message-settings',
@@ -361,6 +363,7 @@ export const allToolsGroups: NavGroup[] = [
         title: 'ربط حساب WhatsApp',
         href: '/admin/whatsapp/connection',
         icon: SettingsIcon,
+        requiredPermission: 'integrations.view',
       },
       {
         id: 'whatsapp-integration',
@@ -391,6 +394,7 @@ export const allToolsGroups: NavGroup[] = [
         title: 'سجل أحداث Webhooks',
         href: '/admin/whatsapp/webhook-inspector',
         icon: Terminal,
+        requiredPermission: 'integrations.logs.view',
       },
       {
         id: 'whatsapp-costs',

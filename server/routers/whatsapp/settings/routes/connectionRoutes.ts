@@ -3,22 +3,36 @@
  * مسارات اتصال واتساب
  */
 
-import { protectedProcedure, adminProcedure, router } from '../../../../_core/trpc';
+import { router } from '../../../../_core/trpc';
 import { meta } from '../../../../api/MetaApiService';
 import { z } from 'zod';
 import { verifyWhatsAppHealth } from '../../../../services/whatsappService';
 import { logOperation } from '../utils';
+import { permissionProcedure } from '../../../permissionProcedures';
+
+const integrationsViewProcedure = permissionProcedure(
+  'integrations.view',
+  'عرض حالة تكامل WhatsApp'
+);
+const integrationsConnectProcedure = permissionProcedure(
+  'integrations.connect',
+  'ربط تكامل WhatsApp'
+);
+const webhooksManagementProcedure = permissionProcedure(
+  'integrations.webhooks.manage',
+  'إدارة اشتراكات Webhooks'
+);
 
 export const connectionRouter = router({
-  status: protectedProcedure.query(async () => {
+  status: integrationsViewProcedure.query(async () => {
     return verifyWhatsAppHealth();
   }),
 
-  setupHealth: protectedProcedure.query(async () => {
+  setupHealth: integrationsViewProcedure.query(async () => {
     return verifyWhatsAppHealth();
   }),
 
-  registerPhoneNumber: adminProcedure
+  registerPhoneNumber: integrationsConnectProcedure
     .input(
       z.object({
         pin: z.string().regex(/^\d{6}$/, 'PIN يجب أن يكون 6 أرقام'),
@@ -39,7 +53,7 @@ export const connectionRouter = router({
         }
 
         logOperation('registerPhoneNumber', ctx.user.id, {
-          phoneNumberId,
+          usesProvidedPhoneNumber: Boolean(input.phoneNumberId),
         });
 
         const result = await meta.registerWhatsAppPhoneNumber(phoneNumberId, input.pin);
@@ -47,13 +61,12 @@ export const connectionRouter = router({
           ? {
               success: true,
               message: 'تم تسجيل رقم الهاتف بنجاح في WhatsApp Cloud API',
-              data: result.data,
             }
           : { success: false, error: result.error };
       }
     ),
 
-  subscribeAppToWaba: adminProcedure
+  subscribeAppToWaba: webhooksManagementProcedure
     .input(
       z.object({
         wabaId: z.string().optional(),
@@ -87,7 +100,6 @@ export const connectionRouter = router({
         }
 
         logOperation('subscribeAppToWaba', ctx.user.id, {
-          wabaId,
           hasOverrideCallbackUri: !!input.overrideCallbackUri,
         });
 
@@ -97,7 +109,7 @@ export const connectionRouter = router({
         });
 
         return result.success
-          ? { success: true, message: 'تم اشتراك التطبيق في WABA بنجاح', data: result.data }
+          ? { success: true, message: 'تم اشتراك التطبيق في WABA بنجاح' }
           : { success: false, error: result.error };
       }
     ),
