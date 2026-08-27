@@ -134,8 +134,17 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
 
     expect(rolesPanel).toContain('id="role-active"');
-    expect(rolesPanel).toContain('h-10 shrink-0 items-center gap-2');
+    expect(rolesPanel).toContain('h-11 shrink-0 items-center gap-2');
     expect(rolesPanel).toContain('الدور نشط');
     expect(rolesPanel).not.toContain('يمكن إسناد الأدوار النشطة فقط للمستخدمين.');
+  });
+
+  it('يوحد ارتفاع حقول نموذج تفاصيل الدور', () => {
+    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+    const uniformFieldHeights = rolesPanel.match(/className="h-11"/g) || [];
+
+    expect(uniformFieldHeights).toHaveLength(3);
+    expect(rolesPanel).toContain('SelectTrigger className="h-11 flex-1"');
+    expect(rolesPanel).toContain('flex h-11 shrink-0 items-center gap-2');
   });
 });

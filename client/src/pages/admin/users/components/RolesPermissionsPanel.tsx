@@ -255,6 +255,7 @@ export default function RolesPermissionsPanel() {
                 value={form.name}
                 onChange={(event) => setForm({ ...form, name: event.target.value })}
                 placeholder="مثال: مشرف التسويق"
+                className="h-11"
               />
             </div>
             {!form.id && (
@@ -266,6 +267,7 @@ export default function RolesPermissionsPanel() {
                   onChange={(event) => setForm({ ...form, key: event.target.value })}
                   placeholder="marketing-supervisor"
                   dir="ltr"
+                  className="h-11"
                 />
               </div>
             )}
@@ -276,7 +278,7 @@ export default function RolesPermissionsPanel() {
                   value={form.baseRole}
                   onValueChange={(value) => setForm({ ...form, baseRole: value as RoleBaseKey })}
                 >
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger className="h-11 flex-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -287,7 +289,7 @@ export default function RolesPermissionsPanel() {
                     ))}
                   </SelectContent>
                 </Select>
-                <div className="flex h-10 shrink-0 items-center gap-2 rounded-lg border border-border px-3">
+                <div className="flex h-11 shrink-0 items-center gap-2 rounded-lg border border-border px-3">
                   <Label htmlFor="role-active" className="cursor-pointer whitespace-nowrap text-sm">
                     الدور نشط
                   </Label>
@@ -306,6 +308,7 @@ export default function RolesPermissionsPanel() {
                 value={form.description}
                 onChange={(event) => setForm({ ...form, description: event.target.value })}
                 placeholder="وصف مسؤوليات الدور وحدود عمله"
+                className="h-11"
               />
             </div>
           </div>
