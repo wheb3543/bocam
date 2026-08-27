@@ -70,6 +70,8 @@ import {
   AreaChart,
 } from 'recharts';
 import { useLicense } from '@/hooks/integrations/useLicense';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 type Period = '7d' | '30d' | '90d' | '12m';
 
@@ -662,6 +664,8 @@ function SummaryCards({ period }: { period: Period }) {
  */
 export default function DashboardCharts() {
   const { hasFeature, isLicenseValid } = useLicense();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewReports = can('reports.view');
   const [period, setPeriod] = useState<Period>('30d');
 
   // Check if analytics feature is enabled
@@ -676,6 +680,25 @@ export default function DashboardCharts() {
           <p className="text-sm text-muted-foreground">
             هذه الميزة تتطلب ترخيص يحتوي على ميزة التحليلات
           </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (arePermissionsLoading) {
+    return null;
+  }
+
+  if (!canViewReports) {
+    return (
+      <Card>
+        <CardContent className="space-y-3 p-6 text-center" dir="rtl">
+          <BarChart3 className="mx-auto h-10 w-10 text-muted-foreground opacity-40" />
+          <p className="font-semibold text-foreground">لوحة الرسوم غير متاحة لهذا الدور</p>
+          <PermissionHint
+            label="الوصول إلى الرسوم مقيّد"
+            message="تحتاج إلى صلاحية عرض التقارير للاطلاع على مؤشرات التشغيل والرسوم البيانية."
+          />
         </CardContent>
       </Card>
     );

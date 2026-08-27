@@ -36,9 +36,15 @@ import CampaignsTab from './bi/components/CampaignsTab';
 import DailyStatsTab from './bi/components/DailyStatsTab';
 import { useBI } from './bi/hooks/useBI';
 import { COLORS } from './bi/types/bi.types';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 // Main BI Page
 export default function BIPage() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewReports = can('reports.view');
+  const canExportReports = can('reports.export');
+  const canViewLeads = can('leads.view');
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [autoRefresh, setAutoRefresh] = useState(false);
   const { start, end } = useMemo(() => getDateRange(dateRange), [dateRange]);
@@ -70,6 +76,7 @@ export default function BIPage() {
     dailyStatsLoading,
     handleRefresh,
   } = useBI({
+    enabled: !arePermissionsLoading && canViewReports,
     autoRefresh,
     start,
     end,
@@ -154,6 +161,37 @@ export default function BIPage() {
   const conversionRate = totalSessions > 0 ? Math.round((converted / totalSessions) * 100) : 0;
   const abandonedRate = totalSessions > 0 ? Math.round((abandoned / totalSessions) * 100) : 0;
 
+  if (arePermissionsLoading) {
+    return (
+      <DashboardLayout
+        pageTitle="ذكاء الأعمال (BI)"
+        pageDescription="جاري التحقق من الصلاحيات"
+        pageHeader="none"
+      >
+        <div className="p-6 text-sm text-muted-foreground" dir="rtl">
+          جاري التحقق من الصلاحيات...
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!canViewReports) {
+    return (
+      <DashboardLayout
+        pageTitle="ذكاء الأعمال (BI)"
+        pageDescription="تحليلات شاملة لمصادر الزيارات والتحويلات"
+        pageHeader="none"
+      >
+        <div className="p-6" dir="rtl">
+          <PermissionHint
+            label="ذكاء الأعمال مقيّد"
+            message="تحتاج إلى صلاحية عرض التقارير للوصول إلى تحليلات ذكاء الأعمال."
+          />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout
       pageTitle="ذكاء الأعمال (BI)"
@@ -180,14 +218,23 @@ export default function BIPage() {
                 <RefreshCw className="w-4 h-4 mr-2" />
                 تحديث
               </Button>
-              <Button variant="outline" size="sm" onClick={handleExportCSV}>
-                <Download className="w-4 h-4 mr-2" />
-                CSV
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="w-4 h-4 mr-2" />
-                JSON
-              </Button>
+              {canExportReports ? (
+                <>
+                  <Button variant="outline" size="sm" onClick={handleExportCSV}>
+                    <Download className="w-4 h-4 mr-2" />
+                    CSV
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleExport}>
+                    <Download className="w-4 h-4 mr-2" />
+                    JSON
+                  </Button>
+                </>
+              ) : (
+                <PermissionHint
+                  label="التصدير مقيّد"
+                  message="تحتاج إلى صلاحية تصدير التقارير لتنزيل بيانات ذكاء الأعمال."
+                />
+              )}
               <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
                 <SelectTrigger className="w-36">
                   <SelectValue />
@@ -290,7 +337,7 @@ export default function BIPage() {
             <TabsTrigger value="sources">المصادر</TabsTrigger>
             <TabsTrigger value="campaigns">الحملات</TabsTrigger>
             <TabsTrigger value="daily">الإحصائيات اليومية</TabsTrigger>
-            <TabsTrigger value="abandoned">الفرص الضائعة</TabsTrigger>
+            {canViewLeads && <TabsTrigger value="abandoned">الفرص الضائعة</TabsTrigger>}
           </TabsList>
 
           {/* Conversion Funnel Tab */}
@@ -391,13 +438,15 @@ export default function BIPage() {
           </TabsContent>
 
           {/* Abandoned Forms Tab */}
-          <TabsContent value="abandoned">
-            <Card>
-              <CardContent className="pt-6">
-                <AbandonedFormsTable />
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {canViewLeads && (
+            <TabsContent value="abandoned">
+              <Card>
+                <CardContent className="pt-6">
+                  <AbandonedFormsTable />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Info Banner */}

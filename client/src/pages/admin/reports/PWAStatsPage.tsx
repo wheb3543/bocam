@@ -27,15 +27,21 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 export default function PWAStatsPage() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewReports = can('reports.view');
+  const canExportReports = can('reports.export');
   const [autoRefresh, setAutoRefresh] = useState(false);
   const {
     data: stats,
     isLoading,
     refetch,
   } = trpc.pwa.getStats.useQuery(undefined, {
-    refetchInterval: autoRefresh ? 30000 : false, // Auto-refresh every 30 seconds
+    enabled: !arePermissionsLoading && canViewReports,
+    refetchInterval: !arePermissionsLoading && canViewReports && autoRefresh ? 30000 : false,
   });
 
   const publicTotal = stats?.public ?? 0;
@@ -115,6 +121,37 @@ export default function PWAStatsPage() {
     toast.success('تم تصدير البيانات بنجاح');
   };
 
+  if (arePermissionsLoading) {
+    return (
+      <DashboardLayout
+        pageTitle="إحصائيات PWA"
+        pageDescription="جاري التحقق من الصلاحيات"
+        pageHeader="none"
+      >
+        <div className="p-6 text-sm text-muted-foreground" dir="rtl">
+          جاري التحقق من الصلاحيات...
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!canViewReports) {
+    return (
+      <DashboardLayout
+        pageTitle="إحصائيات PWA"
+        pageDescription="تتبع عمليات تثبيت تطبيقات الويب التقدمية"
+        pageHeader="none"
+      >
+        <div className="p-6" dir="rtl">
+          <PermissionHint
+            label="إحصاءات PWA مقيّدة"
+            message="تحتاج إلى صلاحية عرض التقارير للوصول إلى إحصاءات تثبيت التطبيق."
+          />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout
       pageTitle="إحصائيات PWA"
@@ -141,10 +178,17 @@ export default function PWAStatsPage() {
                 <RefreshCw className="w-4 h-4 mr-2" />
                 تحديث
               </Button>
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="w-4 h-4 mr-2" />
-                تصدير
-              </Button>
+              {canExportReports ? (
+                <Button variant="outline" size="sm" onClick={handleExport}>
+                  <Download className="w-4 h-4 mr-2" />
+                  تصدير
+                </Button>
+              ) : (
+                <PermissionHint
+                  label="التصدير مقيّد"
+                  message="تحتاج إلى صلاحية تصدير التقارير لتنزيل إحصاءات PWA."
+                />
+              )}
             </div>
           }
         />

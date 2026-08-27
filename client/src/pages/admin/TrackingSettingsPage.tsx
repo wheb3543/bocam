@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -102,6 +104,8 @@ function EnvVarRow({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TrackingSettingsPage() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canManageTracking = can('settings.tracking.manage');
   // Detect which env vars are configured (frontend-accessible ones only)
   const pixelId = import.meta.env.VITE_META_PIXEL_ID;
   const isPixelConfigured = !!pixelId && pixelId !== 'YOUR_PIXEL_ID';
@@ -117,7 +121,11 @@ export default function TrackingSettingsPage() {
     try {
       // Send a test event to Meta Pixel
       if (typeof window !== 'undefined' && (window as Window & { fbq?: unknown }).fbq) {
-        (window as Window & { fbq: (event: string, eventName: string, data?: Record<string, unknown>) => void }).fbq('track', 'TestEvent', {
+        (
+          window as Window & {
+            fbq: (event: string, eventName: string, data?: Record<string, unknown>) => void;
+          }
+        ).fbq('track', 'TestEvent', {
           test_event_code: import.meta.env.VITE_META_TEST_EVENT_CODE || 'TEST12345',
         });
         toast.success('تم إرسال حدث اختبار إلى Meta Pixel');
@@ -130,6 +138,35 @@ export default function TrackingSettingsPage() {
       setIsTesting(false);
     }
   };
+
+  if (arePermissionsLoading) {
+    return (
+      <DashboardLayout
+        pageTitle="إعدادات التتبع والتحويل"
+        pageDescription="جاري التحقق من الصلاحيات"
+      >
+        <div className="container py-6 text-sm text-muted-foreground" dir="rtl">
+          جاري التحقق من الصلاحيات...
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!canManageTracking) {
+    return (
+      <DashboardLayout
+        pageTitle="إعدادات التتبع والتحويل"
+        pageDescription="إدارة Meta Pixel وأدوات التتبع"
+      >
+        <div className="container py-6" dir="rtl">
+          <PermissionHint
+            label="إعدادات التتبع مقيّدة"
+            message="تحتاج إلى صلاحية إدارة إعدادات التتبع لعرض التكوين واختبار الأحداث."
+          />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout

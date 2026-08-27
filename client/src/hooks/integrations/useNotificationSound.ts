@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 const SOUND_ENABLED_KEY = 'sgh-notification-sound-enabled';
 const POLLING_INTERVAL = 15_000; // 15 seconds for faster detection
@@ -69,6 +70,8 @@ function playNotificationSound() {
  * when new messages arrive
  */
 export function useNotificationSound() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewCommunications = can('communications.view');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
     try {
       const stored = localStorage.getItem(SOUND_ENABLED_KEY);
@@ -101,6 +104,7 @@ export function useNotificationSound() {
 
   // Fetch sidebar badges with faster polling for notification detection
   const { data: badgeCounts } = trpc.sidebarBadges.useQuery(undefined, {
+    enabled: !arePermissionsLoading && canViewCommunications,
     refetchInterval: POLLING_INTERVAL,
     refetchOnWindowFocus: true,
   });

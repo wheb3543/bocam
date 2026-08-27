@@ -9,6 +9,7 @@ import type { Trends } from '../types/bi.types';
 import { calculateTrend } from '../utils/biHelpers';
 
 interface UseBIProps {
+  enabled: boolean;
   autoRefresh: boolean;
   start: string;
   end: string;
@@ -16,19 +17,19 @@ interface UseBIProps {
   prevEnd: string;
 }
 
-export function useBI({ autoRefresh, start, end, prevStart, prevEnd }: UseBIProps) {
+export function useBI({ enabled, autoRefresh, start, end, prevStart, prevEnd }: UseBIProps) {
   const {
     data: funnelData,
     isLoading: funnelLoading,
     refetch: refetchFunnel,
   } = trpc.tracking.conversionFunnel.useQuery(
     { startDate: start, endDate: end },
-    { refetchInterval: autoRefresh ? 60000 : false }
+    { enabled, refetchInterval: enabled && autoRefresh ? 60000 : false }
   );
 
   const { data: prevFunnelData } = trpc.tracking.conversionFunnel.useQuery(
     { startDate: prevStart, endDate: prevEnd },
-    { enabled: !!start && !!end }
+    { enabled: enabled && !!start && !!end }
   );
 
   const {
@@ -37,7 +38,7 @@ export function useBI({ autoRefresh, start, end, prevStart, prevEnd }: UseBIProp
     refetch: refetchSource,
   } = trpc.tracking.sourceBreakdown.useQuery(
     { startDate: start, endDate: end },
-    { refetchInterval: autoRefresh ? 60000 : false }
+    { enabled, refetchInterval: enabled && autoRefresh ? 60000 : false }
   );
 
   const {
@@ -46,17 +47,19 @@ export function useBI({ autoRefresh, start, end, prevStart, prevEnd }: UseBIProp
     refetch: refetchCampaign,
   } = trpc.tracking.campaignPerformance.useQuery(
     { startDate: start, endDate: end },
-    { refetchInterval: autoRefresh ? 60000 : false }
+    { enabled, refetchInterval: enabled && autoRefresh ? 60000 : false }
   );
 
   const { data: dailyStats, isLoading: dailyStatsLoading } = trpc.tracking.dailyStats.useQuery(
     { startDate: start, endDate: end },
-    { refetchInterval: autoRefresh ? 60000 : false }
+    { enabled, refetchInterval: enabled && autoRefresh ? 60000 : false }
   );
 
   // Calculate trends
   const trends = useMemo<Trends | null>(() => {
-    if (!funnelData || !prevFunnelData) {return null;}
+    if (!funnelData || !prevFunnelData) {
+      return null;
+    }
 
     return {
       totalSessions: calculateTrend(funnelData.totalSessions, prevFunnelData.totalSessions),
@@ -72,6 +75,9 @@ export function useBI({ autoRefresh, start, end, prevStart, prevEnd }: UseBIProp
   }, [funnelData, prevFunnelData]);
 
   const handleRefresh = async () => {
+    if (!enabled) {
+      return;
+    }
     await Promise.all([refetchFunnel(), refetchSource(), refetchCampaign()]);
   };
 

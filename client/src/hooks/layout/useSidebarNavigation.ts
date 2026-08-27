@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { SafeLocalStorage } from '@/utils/errorHandling';
 import { trpc } from '@/lib/api/trpc';
 import { useLicense } from '@/hooks/integrations/useLicense';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import type { NavItem } from '@/config/sidebarNavigation';
 import {
   allNavItems,
@@ -21,9 +22,13 @@ export function useSidebarNavigation(currentPath: string) {
 
   // License features check
   const { hasFeature } = useLicense();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canLoadAnyBadge =
+    can('leads.view') || can('tasks.view') || can('communications.view') || can('users.manage');
 
   // Fetch sidebar badge counts (auto-refresh every 60 seconds)
   const { data: badgeCounts } = trpc.sidebarBadges.useQuery(undefined, {
+    enabled: !arePermissionsLoading && canLoadAnyBadge,
     refetchInterval: 60_000,
     refetchOnWindowFocus: true,
     staleTime: 30_000,
@@ -36,13 +41,13 @@ export function useSidebarNavigation(currentPath: string) {
       if (!badgeCounts) {
         return 0;
       }
-      const mapping: Record<string, number> = {
+      const mapping: Record<string, number | undefined> = {
         leads: badgeCounts.leads,
         tasks: badgeCounts.tasks,
         whatsapp: badgeCounts.whatsapp,
         management: badgeCounts.management,
       };
-      return mapping[itemId] || 0;
+      return mapping[itemId] ?? 0;
     },
     [badgeCounts]
   );

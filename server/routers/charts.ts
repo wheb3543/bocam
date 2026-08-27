@@ -1,8 +1,11 @@
 import { z } from 'zod';
-import { router, protectedProcedure } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { leads, appointments } from '../../drizzle/schema';
 import { sql, count } from 'drizzle-orm';
+import { permissionProcedure } from './permissionProcedures';
+
+const reportsViewProcedure = permissionProcedure('reports.view', 'عرض الرسوم والتحليلات');
 
 /**
  * Charts Router - يوفر بيانات الرسوم البيانية للوحة التحكم
@@ -52,7 +55,7 @@ export const chartsRouter = router({
    * اتجاه التسجيلات عبر الزمن (خطي)
    * Registrations trend over time - combines leads, appointments, offer leads, camp registrations
    */
-  registrationsTrend: protectedProcedure
+  registrationsTrend: reportsViewProcedure
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -154,7 +157,7 @@ export const chartsRouter = router({
    * توزيع حالات العملاء (دائري)
    * Lead status distribution
    */
-  leadStatusDistribution: protectedProcedure.query(async () => {
+  leadStatusDistribution: reportsViewProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db
@@ -175,7 +178,7 @@ export const chartsRouter = router({
    * التسجيلات حسب المصدر (شريطي)
    * Registrations by source
    */
-  registrationsBySource: protectedProcedure.query(async () => {
+  registrationsBySource: reportsViewProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     // Leads by source
@@ -236,7 +239,7 @@ export const chartsRouter = router({
    * أداء العروض والمخيمات (شريطي)
    * Offers and camps performance
    */
-  offersAndCampsPerformance: protectedProcedure.query(async () => {
+  offersAndCampsPerformance: reportsViewProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     // Offer leads count per offer
@@ -294,7 +297,7 @@ export const chartsRouter = router({
    * إحصائيات المواعيد حسب الحالة (دائري)
    * Appointments by status
    */
-  appointmentStatusDistribution: protectedProcedure.query(async () => {
+  appointmentStatusDistribution: reportsViewProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const result = await db
@@ -315,7 +318,7 @@ export const chartsRouter = router({
    * إحصائيات واتساب (خطي)
    * WhatsApp messages trend
    */
-  whatsappTrend: protectedProcedure
+  whatsappTrend: reportsViewProcedure
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -386,7 +389,7 @@ export const chartsRouter = router({
    * ملخص سريع للإحصائيات مع مقارنة بالفترة السابقة
    * Quick summary with period comparison
    */
-  summaryComparison: protectedProcedure
+  summaryComparison: reportsViewProcedure
     .input(z.object({ period: periodSchema }))
     .query(async ({ input }) => {
       const db = await ensureDatabaseAvailable();

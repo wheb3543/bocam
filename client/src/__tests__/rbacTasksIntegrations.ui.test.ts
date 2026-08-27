@@ -263,4 +263,39 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(sidebarData).toContain("requiredPermission: 'integrations.logs.view'");
     expect(sidebarData).toContain("requiredPermission: 'integrations.view'");
   });
+
+  it('يعكس صلاحيات P0-D في الرسوم وذكاء الأعمال وإحصاءات PWA وإعدادات التتبع والعدادات', () => {
+    const dashboardCharts = source('client/src/components/dashboard/DashboardCharts.tsx');
+    const biPage = source('client/src/pages/admin/reports/BIPage.tsx');
+    const biHook = source('client/src/pages/admin/reports/bi/hooks/useBI.ts');
+    const abandonedForms = source('client/src/pages/admin/reports/bi/components/AbandonedFormsTable.tsx');
+    const pwa = source('client/src/pages/admin/reports/PWAStatsPage.tsx');
+    const trackingSettings = source('client/src/pages/admin/TrackingSettingsPage.tsx');
+    const sidebarNavigation = source('client/src/hooks/layout/useSidebarNavigation.ts');
+    const sound = source('client/src/hooks/integrations/useNotificationSound.ts');
+    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+
+    expect(dashboardCharts).toContain("const canViewReports = can('reports.view')");
+    expect(dashboardCharts).toContain('لوحة الرسوم غير متاحة لهذا الدور');
+    expect(biPage).toContain("const canViewReports = can('reports.view')");
+    expect(biPage).toContain("const canExportReports = can('reports.export')");
+    expect(biPage).toContain("const canViewLeads = can('leads.view')");
+    expect(biPage).toContain('enabled: !arePermissionsLoading && canViewReports');
+    expect(biHook).toContain('enabled: boolean');
+    expect(biHook).toContain('enabled && autoRefresh');
+    expect(abandonedForms).toContain("const canViewLeads = can('leads.view')");
+    expect(abandonedForms).toContain("const canUpdateLeads = can('leads.update')");
+    expect(abandonedForms).toContain('enabled: !arePermissionsLoading && canViewLeads');
+    expect(pwa).toContain("const canViewReports = can('reports.view')");
+    expect(pwa).toContain("const canExportReports = can('reports.export')");
+    expect(pwa).toContain('إحصاءات PWA مقيّدة');
+    expect(trackingSettings).toContain("const canManageTracking = can('settings.tracking.manage')");
+    expect(trackingSettings).toContain('إعدادات التتبع مقيّدة');
+    expect(sidebarNavigation).toContain("const canLoadAnyBadge =");
+    expect(sidebarNavigation).toContain('enabled: !arePermissionsLoading && canLoadAnyBadge');
+    expect(sound).toContain("const canViewCommunications = can('communications.view')");
+    expect(sound).toContain('enabled: !arePermissionsLoading && canViewCommunications');
+    expect(sidebarData).toContain("requiredPermission: 'reports.view'");
+    expect(sidebarData).toContain("requiredPermission: 'settings.tracking.manage'");
+  });
 });

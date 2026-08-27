@@ -53,6 +53,7 @@ import { generatePDF } from '../services/pdfService';
 import { licenseRouter } from './license';
 import { createLogger } from '../_core/logger';
 import { permissionProcedure } from './permissionProcedures';
+import { hasRolePermission } from '../services/rolePermissionService';
 
 const logger = createLogger('routers');
 
@@ -229,7 +230,7 @@ export const appRouter = router({
 
   // Social Media Insights
   socialMedia: router({
-    getStats: protectedProcedure.query(async () => {
+    getStats: permissionProcedure('reports.view', 'عرض تحليلات القنوات').query(async () => {
       const stats = await getCombinedSocialMediaStats();
       return stats;
     }),
@@ -303,43 +304,47 @@ export const appRouter = router({
   followUpTasks: followUpTasksRouter,
 
   // Sidebar badges - aggregated counts for sidebar icons
-  sidebarBadges: protectedProcedure.query(async () => {
+  sidebarBadges: protectedProcedure.query(async ({ ctx }) => {
     try {
+      const db = await ensureDatabaseAvailable();
+      const [canViewLeads, canViewTasks, canViewCommunications, canManageUsers] = await Promise.all(
+        [
+          hasRolePermission(db, ctx.user.id, ctx.user.role, 'leads.view'),
+          hasRolePermission(db, ctx.user.id, ctx.user.role, 'tasks.view'),
+          hasRolePermission(db, ctx.user.id, ctx.user.role, 'communications.view'),
+          hasRolePermission(db, ctx.user.id, ctx.user.role, 'users.manage'),
+        ]
+      );
       const { getLeadsStats } = await import('../database/db');
       const { getTasksStats } = await import('../database/db/tasks');
       const { getUnreadWhatsAppConversationsCount } = await import('../database/db');
       const { getPendingAccessRequests } = await import('../database/db');
 
-      // Fetch all stats in parallel
       const [leadsStats, tasksStats, whatsappUnread, pendingAccess] = await Promise.allSettled([
-        getLeadsStats(),
-        getTasksStats(),
-        getUnreadWhatsAppConversationsCount(),
-        getPendingAccessRequests(),
+        canViewLeads ? getLeadsStats() : Promise.resolve(undefined),
+        canViewTasks ? getTasksStats() : Promise.resolve(undefined),
+        canViewCommunications ? getUnreadWhatsAppConversationsCount() : Promise.resolve(undefined),
+        canManageUsers ? getPendingAccessRequests() : Promise.resolve(undefined),
       ]);
 
-      const newLeads =
-        leadsStats.status === 'fulfilled' && leadsStats.value
-          ? Number(leadsStats.value.new) || 0
-          : 0;
-      const pendingTasks =
-        tasksStats.status === 'fulfilled' && tasksStats.value
-          ? (Number(tasksStats.value.todo) || 0) + (Number(tasksStats.value.overdue) || 0)
-          : 0;
-      const unreadMessages =
-        whatsappUnread.status === 'fulfilled' ? Number(whatsappUnread.value) || 0 : 0;
-      const pendingAccessCount =
-        pendingAccess.status === 'fulfilled' ? pendingAccess.value.length : 0;
-
-      return {
-        leads: newLeads,
-        tasks: pendingTasks,
-        whatsapp: unreadMessages,
-        management: pendingAccessCount,
-      };
+      const badges: Partial<Record<'leads' | 'tasks' | 'whatsapp' | 'management', number>> = {};
+      if (canViewLeads && leadsStats.status === 'fulfilled' && leadsStats.value) {
+        badges.leads = Number(leadsStats.value.new) || 0;
+      }
+      if (canViewTasks && tasksStats.status === 'fulfilled' && tasksStats.value) {
+        badges.tasks =
+          (Number(tasksStats.value.todo) || 0) + (Number(tasksStats.value.overdue) || 0);
+      }
+      if (canViewCommunications && whatsappUnread.status === 'fulfilled') {
+        badges.whatsapp = Number(whatsappUnread.value) || 0;
+      }
+      if (canManageUsers && pendingAccess.status === 'fulfilled' && pendingAccess.value) {
+        badges.management = pendingAccess.value.length;
+      }
+      return badges;
     } catch (error) {
       logger.error('Error fetching badge counts:', error);
-      return { leads: 0, tasks: 0, whatsapp: 0, management: 0 };
+      return {};
     }
   }),
 

@@ -1,10 +1,15 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { router, publicProcedure, protectedProcedure } from '../_core/trpc';
+import { router, publicProcedure } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { getDb } from '../database/db';
 import { visitSessions, abandonedForms, trackingEvents } from '../../drizzle/schema';
 import { eq, desc, and, gte, lte, sql, count, asc } from 'drizzle-orm';
+import { permissionProcedure } from './permissionProcedures';
+
+const reportsViewProcedure = permissionProcedure('reports.view', 'عرض تحليلات التتبع');
+const leadsViewProcedure = permissionProcedure('leads.view', 'عرض الفرص المهجورة');
+const leadsUpdateProcedure = permissionProcedure('leads.update', 'تحديث متابعة الفرص المهجورة');
 
 /**
  * Tracking Router - نظام تتبع الزوار والفرص الضائعة
@@ -178,7 +183,7 @@ export const trackingRouter = router({
   /**
    * إحصائيات قمع التحويل (Conversion Funnel)
    */
-  conversionFunnel: protectedProcedure
+  conversionFunnel: reportsViewProcedure
     .input(
       z.object({
         startDate: z.string().optional(),
@@ -253,7 +258,7 @@ export const trackingRouter = router({
   /**
    * توزيع المصادر (Source Attribution)
    */
-  sourceBreakdown: protectedProcedure
+  sourceBreakdown: reportsViewProcedure
     .input(
       z.object({
         startDate: z.string().optional(),
@@ -293,7 +298,7 @@ export const trackingRouter = router({
   /**
    * قائمة الفرص الضائعة (Abandoned Forms)
    */
-  abandonedFormsList: protectedProcedure
+  abandonedFormsList: leadsViewProcedure
     .input(
       z.object({
         page: z.number().default(1),
@@ -341,7 +346,7 @@ export const trackingRouter = router({
   /**
    * تحديث حالة التواصل مع فرصة ضائعة
    */
-  markAbandonedContacted: protectedProcedure
+  markAbandonedContacted: leadsUpdateProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -359,7 +364,7 @@ export const trackingRouter = router({
   /**
    * إحصائيات UTM Campaigns (ROI Analysis)
    */
-  campaignPerformance: protectedProcedure
+  campaignPerformance: reportsViewProcedure
     .input(
       z.object({
         startDate: z.string().optional(),
@@ -408,7 +413,7 @@ export const trackingRouter = router({
   /**
    * إحصائيات يومية للتحويلات
    */
-  dailyStats: protectedProcedure
+  dailyStats: reportsViewProcedure
     .input(
       z.object({
         startDate: z.string().optional(),

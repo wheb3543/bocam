@@ -6,8 +6,11 @@
 import { z } from 'zod';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { pwaInstalls } from '../../drizzle/schema';
-import { publicProcedure, protectedProcedure, router } from '../_core/trpc';
+import { publicProcedure, router } from '../_core/trpc';
 import { desc, eq, count, sql, asc, gte } from 'drizzle-orm';
+import { permissionProcedure } from './permissionProcedures';
+
+const reportsViewProcedure = permissionProcedure('reports.view', 'عرض إحصاءات PWA');
 
 export const pwaRouter = router({
   /**
@@ -42,7 +45,7 @@ export const pwaRouter = router({
   /**
    * جلب إحصائيات التثبيت (للمشرفين فقط)
    */
-  getStats: protectedProcedure.query(async () => {
+  getStats: reportsViewProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
     const [totalResult, publicResult, adminResult, recentInstalls] = await Promise.all([

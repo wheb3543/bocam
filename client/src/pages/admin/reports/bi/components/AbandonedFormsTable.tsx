@@ -27,6 +27,8 @@ import {
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 const SOURCE_ICONS: Record<string, React.ReactNode> = {
   facebook: <MessageCircle className="h-4 w-4" />,
@@ -37,18 +39,19 @@ const SOURCE_ICONS: Record<string, React.ReactNode> = {
 };
 
 const AbandonedFormsTable = memo(function AbandonedFormsTable() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewLeads = can('leads.view');
+  const canUpdateLeads = can('leads.update');
   const [page, setPage] = useState(1);
   const [contacted, setContacted] = useState<boolean | undefined>(undefined);
   const [formType, setFormType] = useState<
     'appointment' | 'offer' | 'camp' | 'general' | undefined
   >(undefined);
 
-  const { data, isLoading, refetch } = trpc.tracking.abandonedFormsList.useQuery({
-    page,
-    limit: 20,
-    contacted,
-    formType,
-  });
+  const { data, isLoading, refetch } = trpc.tracking.abandonedFormsList.useQuery(
+    { page, limit: 20, contacted, formType },
+    { enabled: !arePermissionsLoading && canViewLeads }
+  );
 
   const markContactedMutation = trpc.tracking.markAbandonedContacted.useMutation({
     onSuccess: () => {
@@ -63,6 +66,19 @@ const AbandonedFormsTable = memo(function AbandonedFormsTable() {
     camp: 'مخيم',
     general: 'عام',
   };
+
+  if (arePermissionsLoading) {
+    return null;
+  }
+
+  if (!canViewLeads) {
+    return (
+      <PermissionHint
+        label="الفرص الضائعة مقيّدة"
+        message="تحتاج إلى صلاحية عرض العملاء المحتملين للاطلاع على النماذج المهجورة."
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -182,7 +198,7 @@ const AbandonedFormsTable = memo(function AbandonedFormsTable() {
                     )}
                   </td>
                   <td className="p-3">
-                    {!item.contacted && (
+                    {!item.contacted && canUpdateLeads && (
                       <Button
                         size="sm"
                         variant="outline"

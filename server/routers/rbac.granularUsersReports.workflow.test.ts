@@ -24,4 +24,34 @@ describe('الإنفاذ التفصيلي للمستخدمين والتقاري�
     expect(source).toContain('getDetailedBookingsList: reportsExportProcedure');
     expect(source).toContain('requireReportsFeature()');
   });
+
+  it('يحرس الرسوم وتحليلات التتبع وإحصاءات PWA بصلاحيات العرض وسجل الفرص بصلاحيات العملاء المحتملين', () => {
+    const charts = readFileSync(resolve(process.cwd(), 'server/routers/charts.ts'), 'utf8');
+    const tracking = readFileSync(resolve(process.cwd(), 'server/routers/tracking.ts'), 'utf8');
+    const pwa = readFileSync(resolve(process.cwd(), 'server/routers/pwa.ts'), 'utf8');
+
+    expect(charts).toContain("permissionProcedure('reports.view', 'عرض الرسوم والتحليلات')");
+    expect(charts).toContain('registrationsTrend: reportsViewProcedure');
+    expect(charts).toContain('summaryComparison: reportsViewProcedure');
+    expect(tracking).toContain("permissionProcedure('reports.view', 'عرض تحليلات التتبع')");
+    expect(tracking).toContain("permissionProcedure('leads.view', 'عرض الفرص المهجورة')");
+    expect(tracking).toContain("permissionProcedure('leads.update', 'تحديث متابعة الفرص المهجورة')");
+    expect(tracking).toContain('abandonedFormsList: leadsViewProcedure');
+    expect(tracking).toContain('markAbandonedContacted: leadsUpdateProcedure');
+    expect(pwa).toContain("permissionProcedure('reports.view', 'عرض إحصاءات PWA')");
+    expect(pwa).toContain('getStats: reportsViewProcedure');
+  });
+
+  it('يعزل عدادات الشريط الجانبي وإحصاءات القنوات بحسب صلاحية الوحدة', () => {
+    const source = readFileSync(resolve(process.cwd(), 'server/routers/routers.ts'), 'utf8');
+
+    expect(source).toContain("permissionProcedure('reports.view', 'عرض تحليلات القنوات')");
+    expect(source).toContain("hasRolePermission(db, ctx.user.id, ctx.user.role, 'leads.view')");
+    expect(source).toContain("hasRolePermission(db, ctx.user.id, ctx.user.role, 'tasks.view')");
+    expect(source).toContain("hasRolePermission(db, ctx.user.id, ctx.user.role, 'communications.view')");
+    expect(source).toContain("hasRolePermission(db, ctx.user.id, ctx.user.role, 'users.manage')");
+    expect(source).toContain("Partial<Record<'leads' | 'tasks' | 'whatsapp' | 'management', number>>");
+    expect(source).toContain('return badges;');
+    expect(source).toContain('return {};');
+  });
 });
