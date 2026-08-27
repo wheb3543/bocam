@@ -271,33 +271,33 @@ export default function RolesPermissionsPanel() {
             )}
             <div className="space-y-2">
               <Label>الدور التشغيلي الأساسي</Label>
-              <Select
-                value={form.baseRole}
-                onValueChange={(value) => setForm({ ...form, baseRole: value as RoleBaseKey })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLE_BASE_KEYS.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {baseRoleLabels[role]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-end justify-between rounded-lg border border-border p-3">
-              <div>
-                <Label>الدور نشط</Label>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  يمكن إسناد الأدوار النشطة فقط للمستخدمين.
-                </p>
+              <div className="flex items-center gap-3">
+                <Select
+                  value={form.baseRole}
+                  onValueChange={(value) => setForm({ ...form, baseRole: value as RoleBaseKey })}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLE_BASE_KEYS.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {baseRoleLabels[role]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex h-10 shrink-0 items-center gap-2 rounded-lg border border-border px-3">
+                  <Label htmlFor="role-active" className="cursor-pointer whitespace-nowrap text-sm">
+                    الدور نشط
+                  </Label>
+                  <Switch
+                    id="role-active"
+                    checked={form.isActive}
+                    onCheckedChange={(isActive) => setForm({ ...form, isActive })}
+                  />
+                </div>
               </div>
-              <Switch
-                checked={form.isActive}
-                onCheckedChange={(isActive) => setForm({ ...form, isActive })}
-              />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="role-description">الوصف</Label>

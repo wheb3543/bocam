@@ -129,4 +129,13 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(groups).toContain("key: 'integrations'");
     expect(groups).toContain("label: 'الإعدادات والحوكمة والعمليات'");
   });
+
+  it('يبسط حقل حالة الدور ويضعه بجوار اختيار الدور التشغيلي', () => {
+    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+
+    expect(rolesPanel).toContain('id="role-active"');
+    expect(rolesPanel).toContain('h-10 shrink-0 items-center gap-2');
+    expect(rolesPanel).toContain('الدور نشط');
+    expect(rolesPanel).not.toContain('يمكن إسناد الأدوار النشطة فقط للمستخدمين.');
+  });
 });
