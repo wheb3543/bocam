@@ -100,6 +100,10 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(roleAudit).toContain("const canViewAudit = can('audit.view')");
     expect(roleAudit).toContain('enabled: canViewAudit');
     expect(roleAudit).toContain('permissionCount(log.newValue)');
+    expect(roleAudit).toContain('setSelectedLog(log)');
+    expect(roleAudit).toContain('تفاصيل سجل تدقيق الدور');
+    expect(roleAudit).toContain('ملخص تغيير الصلاحيات');
+    expect(roleAudit).toContain('parsePermissions');
     expect(usersPage).toContain("activeSection === 'role-audit'");
     expect(rolesPanel).toContain('sourceRoleId: copiedFromRoleId');
   });
