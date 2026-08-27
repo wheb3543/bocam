@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Check, Copy, Plus, ShieldCheck, UsersRound } from 'lucide-react';
+import { Check, ChevronDown, Copy, Plus, ShieldCheck, UsersRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -68,6 +68,7 @@ export default function RolesPermissionsPanel() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<RoleForm>(emptyRole);
   const [permissionSearch, setPermissionSearch] = useState('');
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
   const [copiedFromRole, setCopiedFromRole] = useState<string | null>(null);
   const [copiedFromRoleId, setCopiedFromRoleId] = useState<number | null>(null);
   const mutation = trpc.users.roles.save.useMutation({
@@ -134,6 +135,16 @@ export default function RolesPermissionsPanel() {
           ? current.permissions.filter((permission) => !permissions.includes(permission))
           : Array.from(new Set([...current.permissions, ...permissions])),
       };
+    });
+  const toggleGroupExpanded = (groupKey: string) =>
+    setExpandedGroups((current) => {
+      const next = new Set(current);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
+      } else {
+        next.add(groupKey);
+      }
+      return next;
     });
 
   return (
@@ -203,8 +214,8 @@ export default function RolesPermissionsPanel() {
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="flex h-[min(92vh,760px)] max-w-3xl flex-col overflow-hidden">
+          <DialogHeader className="shrink-0">
             <DialogTitle>{form.id ? 'تعديل الدور والصلاحيات' : 'إضافة دور جديد'}</DialogTitle>
             <DialogDescription>
               الأدوار المخصصة ترث دوراً تشغيلياً أساسياً، ثم تضبط صلاحياتها التفصيلية من هنا.
@@ -215,7 +226,7 @@ export default function RolesPermissionsPanel() {
               </p>
             ) : null}
           </DialogHeader>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid shrink-0 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="role-name">اسم الدور</Label>
               <Input
@@ -277,7 +288,7 @@ export default function RolesPermissionsPanel() {
               />
             </div>
           </div>
-          <div className="rounded-xl border border-border p-4">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border p-4">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h3 className="font-semibold">الصلاحيات</h3>
@@ -296,13 +307,17 @@ export default function RolesPermissionsPanel() {
               className="mb-4"
               aria-label="البحث في الصلاحيات"
             />
-            <div className="space-y-4">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pl-1">
               {ROLE_PERMISSION_GROUPS.map((group) => {
+                const groupMatchesSearch = group.label
+                  .toLowerCase()
+                  .includes(normalizedPermissionSearch);
                 const visiblePermissions = group.permissions.filter((permission) => {
                   if (!normalizedPermissionSearch) {
                     return true;
                   }
                   return (
+                    groupMatchesSearch ||
                     ROLE_PERMISSION_LABELS[permission]
                       .toLowerCase()
                       .includes(normalizedPermissionSearch) ||
@@ -312,20 +327,35 @@ export default function RolesPermissionsPanel() {
                 if (visiblePermissions.length === 0) {
                   return null;
                 }
+                const isExpanded =
+                  Boolean(normalizedPermissionSearch) || expandedGroups.has(group.key);
                 return (
-                  <div key={group.key}>
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-medium">{group.label}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {
-                            group.permissions.filter((permission) =>
-                              form.permissions.includes(permission)
-                            ).length
-                          }
-                          /{group.permissions.length} صلاحية
-                        </p>
-                      </div>
+                  <div
+                    key={group.key}
+                    className="overflow-hidden rounded-xl border border-border bg-background"
+                  >
+                    <div className="flex items-center gap-2 p-3">
+                      <button
+                        type="button"
+                        onClick={() => toggleGroupExpanded(group.key)}
+                        aria-expanded={isExpanded}
+                        className="flex min-w-0 flex-1 items-center justify-between gap-3 text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium">{group.label}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {
+                              group.permissions.filter((permission) =>
+                                form.permissions.includes(permission)
+                              ).length
+                            }
+                            /{group.permissions.length} صلاحية
+                          </p>
+                        </div>
+                        <ChevronDown
+                          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        />
+                      </button>
                       <Button
                         type="button"
                         variant="outline"
@@ -340,34 +370,36 @@ export default function RolesPermissionsPanel() {
                           : 'تحديد المجموعة'}
                       </Button>
                     </div>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {visiblePermissions.map((permission) => (
-                        <label
-                          key={permission}
-                          className="flex cursor-pointer items-center gap-2 rounded-lg border border-border p-2.5 text-sm"
-                        >
-                          <Checkbox
-                            checked={form.permissions.includes(permission)}
-                            disabled={
-                              form.baseRole === 'admin' &&
-                              ['users.manage', 'roles.manage', 'settings.manage'].includes(
-                                permission
-                              )
-                            }
-                            onCheckedChange={(checked) =>
-                              togglePermission(permission, checked === true)
-                            }
-                          />
-                          {ROLE_PERMISSION_LABELS[permission]}
-                        </label>
-                      ))}
-                    </div>
+                    {isExpanded ? (
+                      <div className="grid gap-2 border-t border-border p-3 sm:grid-cols-2">
+                        {visiblePermissions.map((permission) => (
+                          <label
+                            key={permission}
+                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border p-2.5 text-sm"
+                          >
+                            <Checkbox
+                              checked={form.permissions.includes(permission)}
+                              disabled={
+                                form.baseRole === 'admin' &&
+                                ['users.manage', 'roles.manage', 'settings.manage'].includes(
+                                  permission
+                                )
+                              }
+                              onCheckedChange={(checked) =>
+                                togglePermission(permission, checked === true)
+                              }
+                            />
+                            {ROLE_PERMISSION_LABELS[permission]}
+                          </label>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 );
               })}
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="shrink-0 border-t border-border bg-background pt-4">
             {form.id ? (
               <Button type="button" variant="outline" onClick={cloneCurrentRole}>
                 <Copy className="ml-2 h-4 w-4" />

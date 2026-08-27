@@ -107,4 +107,19 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(usersPage).toContain("activeSection === 'role-audit'");
     expect(rolesPanel).toContain('sourceRoleId: copiedFromRoleId');
   });
+
+  it('ينظم محرر الأدوار في مجموعات مطوية مع تذييل ثابت وتمرير داخل قائمة الصلاحيات', () => {
+    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+    const groups = source('shared/rolePermissions.ts');
+
+    expect(rolesPanel).toContain('useState<Set<string>>(() => new Set())');
+    expect(rolesPanel).toContain('toggleGroupExpanded');
+    expect(rolesPanel).toContain('aria-expanded={isExpanded}');
+    expect(rolesPanel).toContain('h-[min(92vh,760px)]');
+    expect(rolesPanel).toContain('min-h-0 flex-1 space-y-3 overflow-y-auto');
+    expect(rolesPanel).toContain('DialogFooter className="shrink-0 border-t');
+    expect(groups).toContain("key: 'notifications'");
+    expect(groups).toContain("key: 'integrations'");
+    expect(groups).toContain("label: 'الإعدادات والحوكمة والعمليات'");
+  });
 });
