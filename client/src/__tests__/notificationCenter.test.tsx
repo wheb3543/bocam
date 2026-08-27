@@ -62,6 +62,19 @@ vi.mock('@/hooks/useNotifications', () => ({
   useDeleteReadNotifications: () => ({ mutate: deleteReadMutate, isPending: false }),
 }));
 
+vi.mock('@/hooks/auth/useRolePermissions', () => ({
+  useRolePermissions: () => ({
+    can: (permission: string) =>
+      [
+        'notifications.view',
+        'notifications.mark_read',
+        'notifications.manage',
+        'notifications.preferences.manage',
+      ].includes(permission),
+    isLoading: false,
+  }),
+}));
+
 vi.mock('wouter', () => ({
   useLocation: () => ['/admin', vi.fn()],
 }));

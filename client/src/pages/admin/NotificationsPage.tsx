@@ -39,6 +39,8 @@ import {
   useNotificationsOverview,
 } from '@/hooks/useNotifications';
 import type { NotificationPriority, NotificationSource } from '@shared/notifications';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 type ReadFilter = 'all' | 'yes' | 'no';
 type PriorityFilter = 'all' | NotificationPriority;
@@ -93,6 +95,11 @@ function priorityBadgeClass(priority: NotificationPriority) {
 
 export default function NotificationsPage() {
   const [, setLocation] = useLocation();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewNotifications = can('notifications.view');
+  const canMarkNotifications = can('notifications.mark_read');
+  const canManageNotifications = can('notifications.manage');
+  const canSendNotifications = can('notifications.send');
   const [readFilter, setReadFilter] = useState<ReadFilter>('all');
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
@@ -108,8 +115,11 @@ export default function NotificationsPage() {
     }),
     [page, priorityFilter, readFilter, sourceFilter]
   );
-  const { data, isLoading, isError } = useNotifications(queryInput);
-  const { data: overview } = useNotificationsOverview();
+  const { data, isLoading, isError } = useNotifications({
+    ...queryInput,
+    enabled: canViewNotifications,
+  });
+  const { data: overview } = useNotificationsOverview(canViewNotifications);
   const markAsRead = useMarkAsRead();
   const markAsUnread = useMarkAsUnread();
   const markAllAsRead = useMarkAllAsRead();
@@ -136,13 +146,32 @@ export default function NotificationsPage() {
   };
 
   const openNotification = (notification: NotificationItem) => {
-    if (notification.isRead === 'no') {
+    if (notification.isRead === 'no' && canMarkNotifications) {
       markAsRead.mutate({ id: notification.id });
     }
     if (notification.actionUrl) {
       setLocation(notification.actionUrl);
     }
   };
+
+  if (arePermissionsLoading) {
+    return (
+      <div className="flex min-h-64 items-center justify-center" dir="rtl">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!canViewNotifications) {
+    return (
+      <div className="min-h-full px-3 py-4 sm:px-5 lg:px-7" dir="rtl">
+        <PermissionHint
+          label="مركز الإشعارات مقيّد"
+          message="لا تملك صلاحية عرض الإشعارات المسندة إلى حسابك."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full space-y-5 px-3 py-4 sm:px-5 lg:px-7" dir="rtl">
@@ -166,35 +195,48 @@ export default function NotificationsPage() {
             <BellRing className="ml-1.5 h-4 w-4" />
             غير المقروءة فقط
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => createDigest.mutate()}
-            disabled={createDigest.isPending}
-          >
-            {createDigest.isPending ? (
-              <Loader2 className="ml-1.5 h-4 w-4 animate-spin" />
-            ) : (
-              <Info className="ml-1.5 h-4 w-4" />
-            )}
-            إنشاء ملخص الآن
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => markAllAsRead.mutate()}
-            disabled={!overview?.unread || markAllAsRead.isPending}
-          >
-            <Check className="ml-1.5 h-4 w-4" />
-            تحديد الكل كمقروء
-          </Button>
-          <Button
-            variant="outline"
-            className="border-red-200 text-red-700 hover:bg-red-50"
-            onClick={() => deleteReadNotifications.mutate()}
-            disabled={deleteReadNotifications.isPending}
-          >
-            <Trash2 className="ml-1.5 h-4 w-4" />
-            حذف المقروءة
-          </Button>
+          {canSendNotifications ? (
+            <Button
+              variant="outline"
+              onClick={() => createDigest.mutate()}
+              disabled={createDigest.isPending}
+            >
+              {createDigest.isPending ? (
+                <Loader2 className="ml-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <Info className="ml-1.5 h-4 w-4" />
+              )}
+              إنشاء ملخص الآن
+            </Button>
+          ) : (
+            <PermissionHint label="الملخص مقيّد" message="لا تملك صلاحية إنشاء ملخص الآن." />
+          )}
+          {canMarkNotifications ? (
+            <Button
+              variant="outline"
+              onClick={() => markAllAsRead.mutate()}
+              disabled={!overview?.unread || markAllAsRead.isPending}
+            >
+              <Check className="ml-1.5 h-4 w-4" />
+              تحديد الكل كمقروء
+            </Button>
+          ) : (
+            <PermissionHint
+              label="تحديث القراءة مقيّد"
+              message="لا تملك صلاحية تغيير حالة الإشعارات."
+            />
+          )}
+          {canManageNotifications ? (
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-700 hover:bg-red-50"
+              onClick={() => deleteReadNotifications.mutate()}
+              disabled={deleteReadNotifications.isPending}
+            >
+              <Trash2 className="ml-1.5 h-4 w-4" />
+              حذف المقروءة
+            </Button>
+          ) : null}
         </div>
       </section>
 
@@ -349,27 +391,31 @@ export default function NotificationsPage() {
                         </Button>
                       )}
                       <span className="flex-1" />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8"
-                        onClick={() =>
-                          notification.isRead === 'no'
-                            ? markAsRead.mutate({ id: notification.id })
-                            : markAsUnread.mutate({ id: notification.id })
-                        }
-                      >
-                        {notification.isRead === 'no' ? 'تحديد كمقروء' : 'تحديد كغير مقروء'}
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-red-600 hover:bg-red-50 hover:text-red-700"
-                        aria-label="حذف الإشعار"
-                        onClick={() => deleteNotification.mutate({ id: notification.id })}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {canMarkNotifications ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8"
+                          onClick={() =>
+                            notification.isRead === 'no'
+                              ? markAsRead.mutate({ id: notification.id })
+                              : markAsUnread.mutate({ id: notification.id })
+                          }
+                        >
+                          {notification.isRead === 'no' ? 'تحديد كمقروء' : 'تحديد كغير مقروء'}
+                        </Button>
+                      ) : null}
+                      {canManageNotifications ? (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-red-600 hover:bg-red-50 hover:text-red-700"
+                          aria-label="حذف الإشعار"
+                          onClick={() => deleteNotification.mutate({ id: notification.id })}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      ) : null}
                     </div>
                   </div>
                 </article>

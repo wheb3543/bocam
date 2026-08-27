@@ -7,6 +7,16 @@ vi.mock('@/components/layout/DashboardLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <main>{children}</main>,
 }));
 
+vi.mock('@/hooks/auth/useRolePermissions', () => ({
+  useRolePermissions: () => ({
+    can: (permission: string) =>
+      ['media.view', 'media.upload', 'media.organize', 'media.download', 'media.delete'].includes(
+        permission
+      ),
+    isLoading: false,
+  }),
+}));
+
 vi.mock('@/lib/api/trpc', () => ({
   trpc: {
     useUtils: () => ({

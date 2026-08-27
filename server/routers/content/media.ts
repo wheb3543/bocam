@@ -3,7 +3,6 @@ import { and, asc, eq, inArray, isNull, like, or } from 'drizzle-orm';
 import { router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { media, mediaFolders } from '../../../drizzle/schema';
-import { contentReadProcedure } from './authorization';
 import { permissionProcedure } from '../permissionProcedures';
 
 const mediaTypeSchema = z.enum(['image', 'video', 'audio', 'document', 'other']);
@@ -31,10 +30,14 @@ function normalizeFolderName(name: string) {
   return name.trim().replace(/\s+/g, ' ');
 }
 
-const mediaManagementProcedure = permissionProcedure('media.manage', 'إدارة مكتبة الوسائط');
+const mediaViewProcedure = permissionProcedure('media.view', 'عرض مكتبة الوسائط');
+const mediaUploadProcedure = permissionProcedure('media.upload', 'رفع وفهرسة الوسائط');
+const mediaOrganizeProcedure = permissionProcedure('media.organize', 'تنظيم مجلدات ووسائط المكتبة');
+const mediaRenameProcedure = permissionProcedure('media.rename', 'إعادة تسمية الوسائط');
+const mediaDeleteProcedure = permissionProcedure('media.delete', 'حذف الوسائط');
 
 export const mediaLibraryRouter = router({
-  list: contentReadProcedure
+  list: mediaViewProcedure
     .input(
       z.object({
         folderId: z.number().optional(),
@@ -91,13 +94,13 @@ export const mediaLibraryRouter = router({
         .orderBy(asc(media.createdAt));
     }),
 
-  create: mediaManagementProcedure.input(mediaInput).mutation(async ({ input }) => {
+  create: mediaUploadProcedure.input(mediaInput).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
     const [inserted] = await db.insert(media).values(input).$returningId();
     return { id: Number(inserted.id) };
   }),
 
-  moveMany: mediaManagementProcedure
+  moveMany: mediaOrganizeProcedure
     .input(z.object({ ids: z.array(z.number()).min(1).max(100), folderId: z.number().nullable() }))
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -115,7 +118,7 @@ export const mediaLibraryRouter = router({
       return { success: true, moved: input.ids.length };
     }),
 
-  deleteMany: mediaManagementProcedure
+  deleteMany: mediaDeleteProcedure
     .input(z.object({ ids: z.array(z.number()).min(1).max(100) }))
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -123,7 +126,7 @@ export const mediaLibraryRouter = router({
       return { success: true, deleted: input.ids.length };
     }),
 
-  rename: mediaManagementProcedure
+  rename: mediaRenameProcedure
     .input(z.object({ id: z.number(), fileName: z.string().min(1).max(255) }))
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
@@ -132,12 +135,12 @@ export const mediaLibraryRouter = router({
     }),
 
   folders: router({
-    list: contentReadProcedure.query(async () => {
+    list: mediaViewProcedure.query(async () => {
       const db = await ensureDatabaseAvailable();
       return db.select().from(mediaFolders).orderBy(asc(mediaFolders.path));
     }),
 
-    create: mediaManagementProcedure
+    create: mediaOrganizeProcedure
       .input(
         z.object({ name: z.string().min(1).max(120), parentId: z.number().nullable().optional() })
       )
@@ -164,7 +167,7 @@ export const mediaLibraryRouter = router({
         return { id: Number(inserted.id), name, path };
       }),
 
-    rename: mediaManagementProcedure
+    rename: mediaOrganizeProcedure
       .input(z.object({ id: z.number(), name: z.string().min(1).max(120) }))
       .mutation(async ({ input }) => {
         const db = await ensureDatabaseAvailable();

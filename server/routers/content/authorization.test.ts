@@ -42,14 +42,19 @@ describe('صلاحيات إدارة المحتوى', () => {
     }
   });
 
-  it('يفصل قراءة الوسائط عن صلاحية إدارتها', () => {
+  it('يفصل قراءة الوسائط ورفعها وتنظيمها وإعادة تسميتها وحذفها', () => {
     const mediaSource = readFileSync(
       resolve(process.cwd(), 'server/routers/content/media.ts'),
       'utf8'
     );
-    expect(mediaSource).toContain("permissionProcedure('media.manage'");
-    expect(mediaSource).toContain('list: contentReadProcedure');
-    expect(mediaSource).toContain('create: mediaManagementProcedure');
-    expect(mediaSource).toContain('deleteMany: mediaManagementProcedure');
+    expect(mediaSource).toContain("permissionProcedure('media.view'");
+    expect(mediaSource).toContain("permissionProcedure('media.upload'");
+    expect(mediaSource).toContain("permissionProcedure('media.organize'");
+    expect(mediaSource).toContain("permissionProcedure('media.rename'");
+    expect(mediaSource).toContain("permissionProcedure('media.delete'");
+    expect(mediaSource).toContain('list: mediaViewProcedure');
+    expect(mediaSource).toContain('create: mediaUploadProcedure');
+    expect(mediaSource).toContain('moveMany: mediaOrganizeProcedure');
+    expect(mediaSource).toContain('deleteMany: mediaDeleteProcedure');
   });
 });

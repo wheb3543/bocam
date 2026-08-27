@@ -42,6 +42,7 @@ export function useNotifications(options?: {
   priority?: NotificationPriority;
   limit?: number;
   offset?: number;
+  enabled?: boolean;
 }) {
   return trpc.notifications.list.useQuery(
     {
@@ -56,6 +57,7 @@ export function useNotifications(options?: {
       staleTime: 30_000,
       refetchInterval: 30_000,
       refetchOnWindowFocus: true,
+      enabled: options?.enabled ?? true,
     }
   ) as {
     data:
@@ -69,27 +71,30 @@ export function useNotifications(options?: {
   };
 }
 
-export function useUnreadNotifications() {
+export function useUnreadNotifications(enabled = true) {
   return trpc.notifications.getUnread.useQuery(undefined, {
     staleTime: 30_000,
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
+    enabled,
   }) as { data: NotificationItem[] | undefined };
 }
 
-export function useUnreadCount() {
+export function useUnreadCount(enabled = true) {
   return trpc.notifications.getUnreadCount.useQuery(undefined, {
     staleTime: 30_000,
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
+    enabled,
   }) as { data: number | undefined };
 }
 
-export function useNotificationsOverview() {
+export function useNotificationsOverview(enabled = true) {
   return trpc.notifications.overview.useQuery(undefined, {
     staleTime: 30_000,
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
+    enabled,
   });
 }
 

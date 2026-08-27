@@ -206,4 +206,37 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(sseHook).toContain('enabled?: boolean');
     expect(sseHook).toContain("useSSE(enabled ? '/api/whatsapp/stream/global' : null");
   });
+
+  it('يعكس صلاحيات P1 في مراكز الإشعارات ومكتبة الوسائط ومحدد الملفات المشترك', () => {
+    const notificationsPage = source('client/src/pages/admin/NotificationsPage.tsx');
+    const notificationCenter = source('client/src/components/NotificationCenter.tsx');
+    const notificationHooks = source('client/src/hooks/useNotifications.ts');
+    const notificationPreferences = source(
+      'client/src/components/notification/NotificationPreferencesCard.tsx'
+    );
+    const notificationSettings = source(
+      'client/src/components/notification/SystemNotificationSettingsCard.tsx'
+    );
+    const mediaPicker = source('client/src/components/form/MediaPicker.tsx');
+    const desktopSidebar = source('client/src/components/layout/sidebar/DesktopSidebar.tsx');
+    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+
+    expect(notificationsPage).toContain("const canViewNotifications = can('notifications.view')");
+    expect(notificationsPage).toContain("const canMarkNotifications = can('notifications.mark_read')");
+    expect(notificationsPage).toContain("const canSendNotifications = can('notifications.send')");
+    expect(notificationsPage).toContain('enabled: canViewNotifications');
+    expect(notificationsPage).toContain('مركز الإشعارات مقيّد');
+    expect(notificationCenter).toContain("const canViewNotifications = can('notifications.view')");
+    expect(notificationCenter).toContain('enabled: canManagePreferences');
+    expect(notificationHooks).toContain('enabled?: boolean');
+    expect(notificationHooks).toContain('enabled: options?.enabled ?? true');
+    expect(notificationPreferences).toContain("const canManagePreferences = can('notifications.preferences.manage')");
+    expect(notificationSettings).toContain("const canManageNotifications = can('notifications.settings.manage')");
+    expect(mediaPicker).toContain("const canViewMedia = can('media.view')");
+    expect(mediaPicker).toContain("const canUploadMedia = can('media.upload')");
+    expect(mediaPicker).toContain('enabled: open && activeTab === \'library\' && canViewMedia');
+    expect(desktopSidebar).toContain("const canViewNotifications = can('notifications.view')");
+    expect(desktopSidebar).toContain('useUnreadCount(canViewNotifications)');
+    expect(sidebarData).toContain("requiredPermission: 'media.view'");
+  });
 });

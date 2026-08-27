@@ -18,6 +18,9 @@ import {
 } from '../services/mediaFiles';
 import { prepareMediaUpload } from '../services/mediaUploadPreparation';
 import { recordContentOperation } from '../services/contentOperationNotificationService';
+import type { RolePermission } from '../../shared/rolePermissions';
+import { hasRolePermission } from '../services/rolePermissionService';
+import { getUserById } from '../database/db';
 
 type MulterFile = {
   originalname: string;
@@ -106,17 +109,53 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
 
   try {
-    const verified = jwt.verify(token, secret) as { userId?: unknown; username?: unknown };
-    if (typeof verified !== 'string' && typeof verified.userId === 'number') {
-      res.locals.uploadOperationActor = {
-        userId: verified.userId,
-        username: typeof verified.username === 'string' ? verified.username : undefined,
-      } satisfies UploadOperationActor;
+    const verified = jwt.verify(token, secret) as {
+      userId?: unknown;
+      username?: unknown;
+      type?: unknown;
+    };
+    if (
+      typeof verified === 'string' ||
+      typeof verified.userId !== 'number' ||
+      verified.type !== 'admin'
+    ) {
+      res.status(401).json({ error: 'Invalid or expired session' });
+      return;
     }
+    res.locals.uploadOperationActor = {
+      userId: verified.userId,
+      username: typeof verified.username === 'string' ? verified.username : undefined,
+    } satisfies UploadOperationActor;
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired session' });
   }
+}
+
+function requireMediaPermission(permission: RolePermission, label: string) {
+  return async (_req: Request, res: Response, next: NextFunction) => {
+    const actor = getUploadOperationActor(res);
+    if (!actor) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    try {
+      const [db, user] = await Promise.all([ensureDatabaseAvailable(), getUserById(actor.userId)]);
+      if (!user || user.isActive !== 'yes') {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+      if (!(await hasRolePermission(db, user.id, user.role, permission))) {
+        res.status(403).json({ error: `لا تملك صلاحية ${label}` });
+        return;
+      }
+      next();
+    } catch (error) {
+      logger.error('Media permission check failed:', error);
+      res.status(500).json({ error: 'تعذّر التحقق من صلاحية الوسائط' });
+    }
+  };
 }
 
 const upload = multer({
@@ -313,6 +352,7 @@ export function createUploadRouter(): Router {
   router.post(
     '/api/upload',
     requireAuth,
+    requireMediaPermission('media.upload', 'رفع الوسائط'),
     asMulterMiddleware(upload.single('file')),
     async (req: Request, res: Response) => {
       try {
@@ -335,6 +375,7 @@ export function createUploadRouter(): Router {
   router.post(
     '/api/upload/batch',
     requireAuth,
+    requireMediaPermission('media.upload', 'رفع الوسائط'),
     asMulterMiddleware(upload.array('files', 20)),
     async (req: Request, res: Response) => {
       try {
@@ -359,6 +400,7 @@ export function createUploadRouter(): Router {
   router.get(
     '/api/media/folders/:folderId/download',
     requireAuth,
+    requireMediaPermission('media.download', 'تنزيل وسائط المجلد'),
     async (req: Request, res: Response) => {
       try {
         const folderId = Number(req.params.folderId);

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import {
   NOTIFICATION_SOURCES,
   type NotificationPreferences,
@@ -44,7 +45,11 @@ function fallbackPreferences(): NotificationPreferences {
 }
 
 export function NotificationPreferencesCard() {
-  const { data, isLoading } = trpc.notifications.preferences.useQuery();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canManagePreferences = can('notifications.preferences.manage');
+  const { data, isLoading } = trpc.notifications.preferences.useQuery(undefined, {
+    enabled: canManagePreferences,
+  });
   const [preferences, setPreferences] = useState<NotificationPreferences>(fallbackPreferences);
   const mutation = trpc.notifications.updatePreferences.useMutation({
     onSuccess: (updated) => {
@@ -71,6 +76,21 @@ export function NotificationPreferencesCard() {
       enabledSources: { ...current.enabledSources, [source]: checked },
     }));
   };
+
+  if (arePermissionsLoading) {
+    return null;
+  }
+
+  if (!canManagePreferences) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>تفضيلات الإشعارات</CardTitle>
+          <CardDescription>ليس لديك صلاحية تعديل تفضيلات الإشعارات الخاصة بحسابك.</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card>

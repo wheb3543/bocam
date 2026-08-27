@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import {
   NOTIFICATION_RECIPIENT_ROLES,
   NOTIFICATION_SOURCES,
@@ -59,8 +60,8 @@ function fallbackSettings(): NotificationSystemSettings {
 }
 
 export function SystemNotificationSettingsCard() {
-  const { data: permissions } = trpc.auth.permissions.useQuery();
-  const canManageNotifications = permissions?.includes('notifications.manage') === true;
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canManageNotifications = can('notifications.settings.manage');
   const { data, isLoading } = trpc.notifications.systemSettings.useQuery(undefined, {
     enabled: canManageNotifications,
   });
@@ -127,7 +128,11 @@ export function SystemNotificationSettingsCard() {
       },
     }));
 
-  if (permissions && !canManageNotifications) {
+  if (arePermissionsLoading) {
+    return null;
+  }
+
+  if (!canManageNotifications) {
     return (
       <Card>
         <CardHeader>

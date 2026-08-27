@@ -214,6 +214,7 @@ export const allNavItems: NavItem[] = [
     title: 'مكتبة الوسائط',
     href: '/admin/content/media-library',
     icon: Images,
+    requiredPermission: 'media.view',
   },
   { id: 'publishing', title: 'النشر', href: '/admin/content/publishing', icon: Send },
   {
@@ -290,6 +291,7 @@ export const allToolsGroups: NavGroup[] = [
         title: 'مكتبة الوسائط',
         href: '/admin/content/media-library',
         icon: Images,
+        requiredPermission: 'media.view',
       },
       { id: 'publishing', title: 'النشر', href: '/admin/content/publishing', icon: Send },
     ],

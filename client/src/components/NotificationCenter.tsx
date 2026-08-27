@@ -41,6 +41,7 @@ import { useLocation } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import { NOTIFICATION_SOURCES, type NotificationSource } from '@shared/notifications';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 const sourceLabels: Record<NotificationSource, string> = {
   content: 'المحتوى والموافقات',
@@ -138,8 +139,8 @@ function NotificationItem({
   onDelete,
 }: {
   notification: UnifiedNotificationItem;
-  onMarkAsRead: (id: number) => void;
-  onDelete: (id: number) => void;
+  onMarkAsRead?: (id: number) => void;
+  onDelete?: (id: number) => void;
 }) {
   return (
     <div
@@ -199,7 +200,7 @@ function NotificationItem({
                 className="text-primary hover:underline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onMarkAsRead(notification.id);
+                  onMarkAsRead?.(notification.id);
                 }}
               >
                 {notification.actionLabel}
@@ -209,7 +210,7 @@ function NotificationItem({
         </div>
 
         <div className="ms-1 flex shrink-0 items-center gap-0.5 self-start">
-          {notification.isRead === 'no' && (
+          {notification.isRead === 'no' && onMarkAsRead ? (
             <Button
               variant="ghost"
               size="icon"
@@ -220,17 +221,19 @@ function NotificationItem({
             >
               <Check className="h-4 w-4" />
             </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
-            onClick={() => onDelete(notification.id)}
-            aria-label="حذف الإشعار"
-            title="حذف الإشعار"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          ) : null}
+          {onDelete ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+              onClick={() => onDelete(notification.id)}
+              aria-label="حذف الإشعار"
+              title="حذف الإشعار"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          ) : null}
         </div>
       </div>
     </div>
@@ -243,11 +246,20 @@ function NotificationItem({
 export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [, setLocation] = useLocation();
-  const { data: notificationsData } = useNotifications({ limit: 20 });
-  const { data: unreadCount } = useUnreadCount();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewNotifications = can('notifications.view');
+  const canMarkNotifications = can('notifications.mark_read');
+  const canManageNotifications = can('notifications.manage');
+  const canManagePreferences = can('notifications.preferences.manage');
+  const { data: notificationsData } = useNotifications({
+    limit: 20,
+    enabled: canViewNotifications,
+  });
+  const { data: unreadCount } = useUnreadCount(canViewNotifications);
   const { data: preferences } = trpc.notifications.preferences.useQuery(undefined, {
     staleTime: 30_000,
     refetchOnWindowFocus: true,
+    enabled: canManagePreferences,
   });
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
@@ -314,12 +326,20 @@ export function NotificationCenter() {
   };
 
   const handleMarkAllAsRead = () => {
-    markAllAsRead.mutate();
+    if (canMarkNotifications) {
+      markAllAsRead.mutate();
+    }
   };
 
   const handleDeleteRead = () => {
-    deleteReadNotifications.mutate();
+    if (canManageNotifications) {
+      deleteReadNotifications.mutate();
+    }
   };
+
+  if (arePermissionsLoading || !canViewNotifications) {
+    return null;
+  }
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -369,7 +389,7 @@ export function NotificationCenter() {
                 </Badge>
               ) : null}
             </div>
-            {unreadCount && unreadCount > 0 ? (
+            {canMarkNotifications && unreadCount && unreadCount > 0 ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -389,7 +409,8 @@ export function NotificationCenter() {
                 ? `${unreadCount} إشعار يحتاج إلى مراجعتك`
                 : 'تمت قراءة جميع الإشعارات'}
             </span>
-            {notifications.some((notification) => notification.isRead === 'yes') ? (
+            {canManageNotifications &&
+            notifications.some((notification) => notification.isRead === 'yes') ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -436,8 +457,8 @@ export function NotificationCenter() {
                       <NotificationItem
                         key={notification.id}
                         notification={notification}
-                        onMarkAsRead={handleMarkAsRead}
-                        onDelete={handleDelete}
+                        onMarkAsRead={canMarkNotifications ? handleMarkAsRead : undefined}
+                        onDelete={canManageNotifications ? handleDelete : undefined}
                       />
                     ))}
                   </section>

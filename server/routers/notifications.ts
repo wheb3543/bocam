@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { and, desc, eq, gt, isNotNull, isNull, lt, or } from 'drizzle-orm';
 import { notifications, teams, users } from '../../drizzle/schema';
-import { adminProcedure, protectedProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
   NOTIFICATION_PRIORITIES,
@@ -34,7 +34,7 @@ import {
   updateNotificationDigestSchedule,
 } from '../services/notificationDigestService';
 import { createAuditLog } from './auditLogs';
-import { hasRolePermission } from '../services/rolePermissionService';
+import { permissionProcedure } from './permissionProcedures';
 
 const relativeActionUrlSchema = z
   .string()
@@ -95,13 +95,24 @@ const notificationDigestSettingsSchema = z.object({
   timezone: z.literal('Asia/Aden'),
 });
 
-const notificationsManagementProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const db = await ensureDatabaseAvailable();
-  if (!(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'notifications.manage'))) {
-    throw new TRPCError({ code: 'FORBIDDEN', message: 'لا تملك صلاحية إدارة إعدادات الإشعارات' });
-  }
-  return next({ ctx });
-});
+const notificationsViewProcedure = permissionProcedure('notifications.view', 'عرض الإشعارات');
+const notificationsReadProcedure = permissionProcedure(
+  'notifications.mark_read',
+  'تغيير حالة قراءة الإشعارات'
+);
+const notificationsPreferencesProcedure = permissionProcedure(
+  'notifications.preferences.manage',
+  'إدارة تفضيلات الإشعارات'
+);
+const notificationsSettingsProcedure = permissionProcedure(
+  'notifications.settings.manage',
+  'إدارة إعدادات الإشعارات النظامية'
+);
+const notificationsSendProcedure = permissionProcedure('notifications.send', 'إرسال إشعارات يدوية');
+const notificationsManagementProcedure = permissionProcedure(
+  'notifications.manage',
+  'إدارة الإشعارات'
+);
 
 const currentNotificationConditions = () =>
   or(isNull(notifications.expiresAt), gt(notifications.expiresAt, new Date()));
@@ -122,7 +133,7 @@ async function findOwnedNotification(id: number, userId: number) {
 }
 
 export const notificationsRouter = router({
-  availableTeams: notificationsManagementProcedure.query(async () => {
+  availableTeams: notificationsSettingsProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
     return db
       .select({ id: teams.id, name: teams.name, slug: teams.slug })
@@ -130,7 +141,7 @@ export const notificationsRouter = router({
       .where(eq(teams.isActive, true))
       .orderBy(teams.name);
   }),
-  list: protectedProcedure
+  list: notificationsViewProcedure
     .input(notificationFilterSchema.optional())
     .query(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
@@ -167,7 +178,7 @@ export const notificationsRouter = router({
       };
     }),
 
-  overview: protectedProcedure.query(async ({ ctx }) => {
+  overview: notificationsViewProcedure.query(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
     const items = await db
       .select({
@@ -191,7 +202,7 @@ export const notificationsRouter = router({
     };
   }),
 
-  getUnread: protectedProcedure.query(async ({ ctx }) => {
+  getUnread: notificationsViewProcedure.query(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
     return db
       .select()
@@ -206,7 +217,7 @@ export const notificationsRouter = router({
       .orderBy(desc(notifications.createdAt));
   }),
 
-  getUnreadCount: protectedProcedure.query(async ({ ctx }) => {
+  getUnreadCount: notificationsViewProcedure.query(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
     const unread = await db
       .select({ id: notifications.id })
@@ -221,7 +232,7 @@ export const notificationsRouter = router({
     return unread.length;
   }),
 
-  markAsRead: protectedProcedure
+  markAsRead: notificationsReadProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ input, ctx }) => {
       const db = await findOwnedNotification(input.id, ctx.user.id);
@@ -232,7 +243,7 @@ export const notificationsRouter = router({
       return { success: true };
     }),
 
-  markAsUnread: protectedProcedure
+  markAsUnread: notificationsReadProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ input, ctx }) => {
       const db = await findOwnedNotification(input.id, ctx.user.id);
@@ -243,7 +254,7 @@ export const notificationsRouter = router({
       return { success: true };
     }),
 
-  markAllAsRead: protectedProcedure.mutation(async ({ ctx }) => {
+  markAllAsRead: notificationsReadProcedure.mutation(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
     await db
       .update(notifications)
@@ -252,7 +263,7 @@ export const notificationsRouter = router({
     return { success: true };
   }),
 
-  delete: protectedProcedure
+  delete: notificationsManagementProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ input, ctx }) => {
       const db = await findOwnedNotification(input.id, ctx.user.id);
@@ -260,7 +271,7 @@ export const notificationsRouter = router({
       return { success: true };
     }),
 
-  deleteRead: protectedProcedure.mutation(async ({ ctx }) => {
+  deleteRead: notificationsManagementProcedure.mutation(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
     await db
       .delete(notifications)
@@ -268,11 +279,11 @@ export const notificationsRouter = router({
     return { success: true };
   }),
 
-  preferences: protectedProcedure.query(async ({ ctx }) => {
+  preferences: notificationsPreferencesProcedure.query(async ({ ctx }) => {
     return getNotificationPreferences(ctx.user.id);
   }),
 
-  updatePreferences: protectedProcedure
+  updatePreferences: notificationsPreferencesProcedure
     .input(notificationPreferencesSchema)
     .mutation(async ({ input, ctx }) => {
       const previous = await getNotificationPreferences(ctx.user.id);
@@ -290,11 +301,11 @@ export const notificationsRouter = router({
       return normalized;
     }),
 
-  systemSettings: notificationsManagementProcedure.query(async () => {
+  systemSettings: notificationsSettingsProcedure.query(async () => {
     return getNotificationSystemSettings();
   }),
 
-  updateSystemSettings: notificationsManagementProcedure
+  updateSystemSettings: notificationsSettingsProcedure
     .input(notificationSystemSettingsSchema)
     .mutation(async ({ input, ctx }) => {
       const previous = await getNotificationSystemSettings();
@@ -312,12 +323,12 @@ export const notificationsRouter = router({
       return normalized;
     }),
 
-  dailyDigestSettings: notificationsManagementProcedure.query(async () => {
+  dailyDigestSettings: notificationsSettingsProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
     return getNotificationDigestSchedule(db);
   }),
 
-  updateDailyDigestSettings: notificationsManagementProcedure
+  updateDailyDigestSettings: notificationsSettingsProcedure
     .input(notificationDigestSettingsSchema)
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
@@ -338,38 +349,36 @@ export const notificationsRouter = router({
       return updated;
     }),
 
-  createDigestNow: protectedProcedure.mutation(async ({ ctx }) => {
+  createDigestNow: notificationsSendProcedure.mutation(async ({ ctx }) => {
     const db = await ensureDatabaseAvailable();
     return createUnreadNotificationDigest(db, ctx.user.id, { automatic: false });
   }),
 
-  create: notificationsManagementProcedure
-    .input(createNotificationSchema)
-    .mutation(async ({ input }) => {
-      const db = await ensureDatabaseAvailable();
-      const allowed = await shouldDeliverNotification(db, {
-        userId: input.userId,
-        source: input.source,
-        priority: input.priority,
-      });
-      if (!allowed) {
-        return { id: null, skipped: true };
-      }
-      const [created] = await db
-        .insert(notifications)
-        .values({
-          ...input,
-          data: input.data || null,
-          entityType: input.entityType || null,
-          entityId: input.entityId || null,
-          actionUrl: input.actionUrl || null,
-          actionLabel: input.actionLabel || null,
-        })
-        .$returningId();
-      return { id: created.id, skipped: false };
-    }),
+  create: notificationsSendProcedure.input(createNotificationSchema).mutation(async ({ input }) => {
+    const db = await ensureDatabaseAvailable();
+    const allowed = await shouldDeliverNotification(db, {
+      userId: input.userId,
+      source: input.source,
+      priority: input.priority,
+    });
+    if (!allowed) {
+      return { id: null, skipped: true };
+    }
+    const [created] = await db
+      .insert(notifications)
+      .values({
+        ...input,
+        data: input.data || null,
+        entityType: input.entityType || null,
+        entityId: input.entityId || null,
+        actionUrl: input.actionUrl || null,
+        actionLabel: input.actionLabel || null,
+      })
+      .$returningId();
+    return { id: created.id, skipped: false };
+  }),
 
-  createForUser: notificationsManagementProcedure
+  createForUser: notificationsSendProcedure
     .input(createNotificationSchema)
     .mutation(async ({ input, ctx }) => {
       const db = await ensureDatabaseAvailable();
@@ -396,7 +405,7 @@ export const notificationsRouter = router({
       return { id: created.id, createdBy: ctx.user.id, skipped: false };
     }),
 
-  broadcastToAdmins: notificationsManagementProcedure
+  broadcastToAdmins: notificationsSendProcedure
     .input(
       createNotificationSchema
         .omit({ userId: true })

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,8 @@ import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import { Check, ImagePlus, Images, Loader2, RefreshCw, Search, Upload } from 'lucide-react';
 import { completeMediaSelection } from './mediaSelection';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 interface MediaPickerProps {
   open: boolean;
@@ -25,6 +27,9 @@ export default function MediaPicker({
   onSelect,
   folder = 'uploads',
 }: MediaPickerProps) {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewMedia = can('media.view');
+  const canUploadMedia = can('media.upload');
   const inputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<'library' | 'upload'>('library');
   const [search, setSearch] = useState('');
@@ -37,8 +42,17 @@ export default function MediaPicker({
     refetch,
   } = trpc.content.media.list.useQuery(
     { type: 'image', search: search.trim() || undefined },
-    { enabled: open }
+    { enabled: open && activeTab === 'library' && canViewMedia }
   );
+
+  useEffect(() => {
+    if (!canViewMedia && canUploadMedia && activeTab === 'library') {
+      setActiveTab('upload');
+    }
+    if (canViewMedia && !canUploadMedia && activeTab === 'upload') {
+      setActiveTab('library');
+    }
+  }, [activeTab, canUploadMedia, canViewMedia]);
 
   const sortedImages = useMemo(
     () =>
@@ -53,6 +67,9 @@ export default function MediaPicker({
   };
 
   const handleUpload = async (files: File[]) => {
+    if (!canUploadMedia) {
+      return;
+    }
     if (!files.length) {
       return;
     }
@@ -100,25 +117,41 @@ export default function MediaPicker({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-2 border-b px-6 pt-3">
-          <button
-            type="button"
-            onClick={() => setActiveTab('library')}
-            className={`border-b-2 px-3 pb-3 text-sm font-medium transition-colors ${activeTab === 'library' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
-          >
-            <Images className="ml-1.5 inline h-4 w-4" /> اختيار من المكتبة
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('upload')}
-            className={`border-b-2 px-3 pb-3 text-sm font-medium transition-colors ${activeTab === 'upload' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
-          >
-            <Upload className="ml-1.5 inline h-4 w-4" /> رفع ملف
-          </button>
-        </div>
+        {arePermissionsLoading ? null : canViewMedia || canUploadMedia ? (
+          <div className="flex gap-2 border-b px-6 pt-3">
+            {canViewMedia ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab('library')}
+                className={`border-b-2 px-3 pb-3 text-sm font-medium transition-colors ${activeTab === 'library' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+              >
+                <Images className="ml-1.5 inline h-4 w-4" /> اختيار من المكتبة
+              </button>
+            ) : null}
+            {canUploadMedia ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab('upload')}
+                className={`border-b-2 px-3 pb-3 text-sm font-medium transition-colors ${activeTab === 'upload' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+              >
+                <Upload className="ml-1.5 inline h-4 w-4" /> رفع ملف
+              </button>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="min-h-[360px] overflow-y-auto px-6 py-5">
-          {activeTab === 'upload' ? (
+          {arePermissionsLoading ? (
+            <div className="flex min-h-[320px] items-center justify-center">
+              <Loader2 className="h-7 w-7 animate-spin text-primary" />
+            </div>
+          ) : !canViewMedia && !canUploadMedia ? (
+            <PermissionHint
+              className="w-full justify-center"
+              label="الوصول إلى الوسائط مقيّد"
+              message="لا تملك صلاحية اختيار وسائط من المكتبة أو رفع ملفات جديدة."
+            />
+          ) : activeTab === 'upload' && canUploadMedia ? (
             <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border-2 border-dashed bg-muted/20 p-8 text-center">
               <input
                 ref={inputRef}
@@ -156,7 +189,7 @@ export default function MediaPicker({
                 اختيار الملفات
               </Button>
             </div>
-          ) : (
+          ) : canViewMedia ? (
             <>
               <div className="mb-4 flex gap-2">
                 <label className="relative flex-1">
@@ -227,6 +260,12 @@ export default function MediaPicker({
                 </div>
               )}
             </>
+          ) : (
+            <PermissionHint
+              className="w-full justify-center"
+              label="اختيار الوسائط مقيّد"
+              message="لا تملك صلاحية عرض مكتبة الوسائط."
+            />
           )}
         </div>
       </DialogContent>
