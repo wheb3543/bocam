@@ -117,6 +117,7 @@ export const allNavItems: NavItem[] = [
     title: 'أداء WhatsApp',
     href: '/admin/whatsapp/whatsapp-dashboard',
     icon: BarChart3,
+    requiredPermission: 'reports.view',
   },
   {
     id: 'whatsapp-templates',

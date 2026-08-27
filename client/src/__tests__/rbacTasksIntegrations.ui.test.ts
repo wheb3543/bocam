@@ -181,4 +181,29 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(sidebarData).toContain("requiredPermission: 'customers.view'");
     expect(sidebar).toContain('item.requiredPermission && (arePermissionsLoading || !can(item.requiredPermission))');
   });
+
+  it('يعكس صلاحيات P0-B في استيراد وتصدير المحتوى وتحليلات WhatsApp', () => {
+    const contentImportExport = source('client/src/pages/admin/content/components/ContentImportExport.tsx');
+    const contentPage = source('client/src/pages/admin/content/ContentManagementPage.tsx');
+    const analytics = source('client/src/pages/admin/whatsapp/WhatsAppAnalytics.tsx');
+    const dashboard = source('client/src/pages/admin/whatsapp/WhatsAppDashboard.tsx');
+    const sseHook = source('client/src/hooks/integrations/useWhatsAppSSE.ts');
+
+    expect(contentImportExport).toContain('canExport: boolean');
+    expect(contentImportExport).toContain('canImport: boolean');
+    expect(contentImportExport).toContain('canExportAudit: boolean');
+    expect(contentImportExport).toContain('canExport ?');
+    expect(contentImportExport).toContain('تصدير المحتوى مقيّد');
+    expect(contentImportExport).toContain('استيراد المحتوى مقيّد');
+    expect(contentPage).toContain("canExport={can('content.export')}");
+    expect(contentPage).toContain("canImport={can('content.import')}");
+    expect(analytics).toContain("const canViewAnalytics = can('reports.view')");
+    expect(analytics).toContain("const canExportAnalytics = can('reports.export')");
+    expect(analytics).toContain('enabled: !arePermissionsLoading && canViewAnalytics');
+    expect(analytics).toContain('تحليلات WhatsApp غير متاحة لهذا الدور');
+    expect(analytics).toContain('تحتاج إلى صلاحية تصدير التقارير');
+    expect(dashboard).toContain("const canViewAnalytics = can('reports.view')");
+    expect(sseHook).toContain('enabled?: boolean');
+    expect(sseHook).toContain("useSSE(enabled ? '/api/whatsapp/stream/global' : null");
+  });
 });

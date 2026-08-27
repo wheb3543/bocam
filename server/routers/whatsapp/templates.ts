@@ -7,6 +7,7 @@ import { permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('whatsapp-templates');
 const communicationViewProcedure = permissionProcedure('communications.view', 'عرض قوالب WhatsApp');
+const reportsViewProcedure = permissionProcedure('reports.view', 'عرض تحليلات WhatsApp');
 const communicationReplyProcedure = permissionProcedure(
   'communications.reply',
   'إرسال قوالب ورسائل WhatsApp'
@@ -229,7 +230,7 @@ export const templatesRouter = router({
       }),
   }),
 
-  getTemplatePerformance: communicationViewProcedure
+  getTemplatePerformance: reportsViewProcedure
     .input(
       z.object({ templateName: z.string().optional(), startDate: z.string(), endDate: z.string() })
     )

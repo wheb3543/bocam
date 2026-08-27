@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm';
-import { adminProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import {
   colorScheme,
@@ -22,8 +22,11 @@ import {
 import { createLogger } from '../../_core/logger';
 import { contentReadProcedure } from './authorization';
 import { recordContentOperation } from '../../services/contentOperationNotificationService';
+import { assertRolePermission, permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('importExport');
+const contentExportProcedure = permissionProcedure('content.export', 'تصدير حزم المحتوى');
+const contentImportProcedure = permissionProcedure('content.import', 'استيراد حزم المحتوى');
 const MAX_IMPORT_ITEMS = 10_000;
 const MAX_AUDIT_LOG_ITEMS = 5_000;
 const collectionNames = [
@@ -314,9 +317,12 @@ async function assertNoKeyConflicts(
 }
 
 export const importExportRouter = router({
-  export: adminProcedure.input(exportSchema).query(async ({ input, ctx }) => {
+  export: contentExportProcedure.input(exportSchema).query(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     try {
+      if (input.includeAuditLog) {
+        await assertRolePermission(ctx.user, 'audit.export', 'تصدير سجل التدقيق');
+      }
       const exportData: Record<string, unknown> = {
         exportDate: new Date().toISOString(),
         version: '3.0',
@@ -383,7 +389,7 @@ export const importExportRouter = router({
     }
   }),
 
-  previewImport: adminProcedure.input(bundleSchema).mutation(async ({ input }) => {
+  previewImport: contentImportProcedure.input(bundleSchema).mutation(async ({ input }) => {
     const summary = validateBundle(input);
     return {
       ...summary,
@@ -393,7 +399,7 @@ export const importExportRouter = router({
     };
   }),
 
-  import: adminProcedure.input(importSchema).mutation(async ({ input, ctx }) => {
+  import: contentImportProcedure.input(importSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
     const summary = validateBundle(input);
     try {

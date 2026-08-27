@@ -2,11 +2,23 @@ import { protectedProcedure, router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { z } from 'zod';
 import { createLogger } from '../../_core/logger';
+import { permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('whatsapp-analytics');
+const reportsViewProcedure = permissionProcedure('reports.view', 'عرض تحليلات WhatsApp');
+const auditViewProcedure = permissionProcedure('audit.view', 'عرض سجل تدقيق WhatsApp');
+const auditExportProcedure = permissionProcedure('audit.export', 'تصدير سجل تدقيق WhatsApp');
+const integrationLogsProcedure = permissionProcedure(
+  'integrations.logs.view',
+  'عرض سجلات تكامل WhatsApp'
+);
+const communicationsViewProcedure = permissionProcedure(
+  'communications.view',
+  'عرض بيانات تواصل WhatsApp'
+);
 
 export const analyticsRouter = router({
-  getMessageStats: protectedProcedure.query(async () => {
+  getMessageStats: reportsViewProcedure.query(async () => {
     try {
       const dbConn = await ensureDatabaseAvailable();
 
@@ -90,7 +102,7 @@ export const analyticsRouter = router({
     }
   }),
 
-  getAuditLogs: protectedProcedure
+  getAuditLogs: auditViewProcedure
     .input(
       z.object({
         phone: z.string().optional(),
@@ -103,12 +115,12 @@ export const analyticsRouter = router({
       return getAuditLogs(input);
     }),
 
-  getAuditStats: protectedProcedure.query(async () => {
+  getAuditStats: auditViewProcedure.query(async () => {
     const { getAuditStats } = await import('../../services/whatsappAuditLog');
     return getAuditStats();
   }),
 
-  exportAuditLogs: protectedProcedure
+  exportAuditLogs: auditExportProcedure
     .input(
       z.object({
         phone: z.string().optional(),
@@ -119,7 +131,7 @@ export const analyticsRouter = router({
       return exportAuditLogs(input);
     }),
 
-  getNotificationLogs: protectedProcedure
+  getNotificationLogs: integrationLogsProcedure
     .input(
       z.object({
         entityType: z.enum(['appointment', 'camp_registration', 'offer_lead']).optional(),
@@ -133,12 +145,12 @@ export const analyticsRouter = router({
       return getNotificationLogs(input);
     }),
 
-  getNotificationStats: protectedProcedure.query(async () => {
+  getNotificationStats: integrationLogsProcedure.query(async () => {
     const { getNotificationStats } = await import('../../services/whatsappAppointments');
     return getNotificationStats();
   }),
 
-  getEntityWhatsAppStatus: protectedProcedure
+  getEntityWhatsAppStatus: communicationsViewProcedure
     .input(
       z.object({
         entityType: z.enum(['appointment', 'camp_registration', 'offer_lead']),
@@ -162,7 +174,7 @@ export const analyticsRouter = router({
       };
     }),
 
-  getConversationCosts: protectedProcedure
+  getConversationCosts: reportsViewProcedure
     .input(z.object({ startDate: z.string().optional(), endDate: z.string().optional() }))
     .query(async ({ input }) => {
       const dbConn = await ensureDatabaseAvailable();
@@ -188,7 +200,7 @@ export const analyticsRouter = router({
       return query.orderBy(desc(whatsappConversations.createdAt)).limit(100);
     }),
 
-  getContacts: protectedProcedure
+  getContacts: communicationsViewProcedure
     .input(z.object({ phoneNumber: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await ensureDatabaseAvailable();
@@ -205,7 +217,7 @@ export const analyticsRouter = router({
       return query.orderBy(desc(whatsappContacts.createdAt)).limit(input.limit);
     }),
 
-  getOrders: protectedProcedure
+  getOrders: reportsViewProcedure
     .input(z.object({ status: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await ensureDatabaseAvailable();
@@ -223,7 +235,7 @@ export const analyticsRouter = router({
       return query.orderBy(desc(whatsappOrders.createdAt)).limit(input.limit);
     }),
 
-  getReferrals: protectedProcedure
+  getReferrals: reportsViewProcedure
     .input(z.object({ sourceType: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await ensureDatabaseAvailable();
@@ -240,7 +252,7 @@ export const analyticsRouter = router({
       return query.orderBy(desc(whatsappReferrals.createdAt)).limit(input.limit);
     }),
 
-  getReactions: protectedProcedure
+  getReactions: reportsViewProcedure
     .input(z.object({ emoji: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await ensureDatabaseAvailable();
@@ -254,7 +266,7 @@ export const analyticsRouter = router({
       return query.orderBy(desc(whatsappReactions.createdAt)).limit(input.limit);
     }),
 
-  getTransactions: protectedProcedure
+  getTransactions: reportsViewProcedure
     .input(z.object({ status: z.string().optional(), limit: z.number().default(50) }))
     .query(async ({ input }) => {
       const dbConn = await ensureDatabaseAvailable();

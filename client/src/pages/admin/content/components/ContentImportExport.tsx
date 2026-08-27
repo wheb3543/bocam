@@ -28,6 +28,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PermissionHint } from '@/components/PermissionHint';
 import type { CmsExportOptions, ImportPreview, ImportResult } from '../hooks/useImportExport';
 
 interface ContentImportExportProps {
@@ -38,6 +39,9 @@ interface ContentImportExportProps {
   isExporting: boolean;
   isImporting: boolean;
   isPreviewingImport: boolean;
+  canExport: boolean;
+  canImport: boolean;
+  canExportAudit: boolean;
 }
 
 const exportGroups: Array<{ key: keyof CmsExportOptions; label: string; description: string }> = [
@@ -81,6 +85,9 @@ export function ContentImportExport({
   isExporting,
   isImporting,
   isPreviewingImport,
+  canExport,
+  canImport,
+  canExportAudit,
 }: ContentImportExportProps) {
   const [options, setOptions] = useState<CmsExportOptions>(defaultExportOptions);
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -89,7 +96,10 @@ export function ContentImportExport({
   const [fileName, setFileName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedCount = exportGroups.filter((group) => options[group.key]).length;
+  const visibleExportGroups = exportGroups.filter(
+    (group) => group.key !== 'includeAuditLog' || canExportAudit
+  );
+  const selectedCount = visibleExportGroups.filter((group) => options[group.key]).length;
 
   const handleExport = async () => {
     if (selectedCount === 0) {
@@ -97,7 +107,7 @@ export function ContentImportExport({
       return;
     }
     try {
-      await onExport(options);
+      await onExport({ ...options, includeAuditLog: canExportAudit && options.includeAuditLog });
       toast.success(`تم إنشاء نسخة CMS تضم ${selectedCount} مجموعات بيانات.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'فشل تصدير المحتوى.');
@@ -158,43 +168,68 @@ export function ContentImportExport({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-4">
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-          {exportGroups.map((group) => (
-            <label
-              key={group.key}
-              className="flex cursor-pointer items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:border-primary/40"
-            >
-              <Checkbox
-                checked={options[group.key]}
-                onCheckedChange={(checked) =>
-                  setOptions((current) => ({ ...current, [group.key]: checked === true }))
-                }
-              />
-              <span className="grid gap-0.5">
-                <span className="text-sm font-medium">{group.label}</span>
-                <span className="text-xs text-muted-foreground">{group.description}</span>
-              </span>
-            </label>
-          ))}
-        </div>
+        {canExport ? (
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            {visibleExportGroups.map((group) => (
+              <label
+                key={group.key}
+                className="flex cursor-pointer items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:border-primary/40"
+              >
+                <Checkbox
+                  checked={options[group.key]}
+                  onCheckedChange={(checked) =>
+                    setOptions((current) => ({ ...current, [group.key]: checked === true }))
+                  }
+                />
+                <span className="grid gap-0.5">
+                  <span className="text-sm font-medium">{group.label}</span>
+                  <span className="text-xs text-muted-foreground">{group.description}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        ) : (
+          <PermissionHint
+            className="w-full justify-center py-3"
+            label="تصدير المحتوى مقيّد"
+            message="تحتاج إلى صلاحية تصدير حزم المحتوى لإنشاء نسخة احتياطية من محتوى الموقع."
+          />
+        )}
+
+        {canExport && !canExportAudit ? (
+          <PermissionHint
+            label="سجل التدقيق مستثنى"
+            message="تحتاج إلى صلاحية تصدير سجل التدقيق لإضافته إلى حزمة المحتوى."
+          />
+        ) : null}
 
         <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row">
-          <Button
-            onClick={handleExport}
-            disabled={isExporting || selectedCount === 0}
-            className="flex-1"
-          >
-            {isExporting ? (
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="ml-2 h-4 w-4" />
-            )}
-            تصدير {selectedCount} مجموعات
-          </Button>
-          <Button variant="outline" className="flex-1" onClick={() => setIsImportOpen(true)}>
-            <Upload className="ml-2 h-4 w-4" />
-            استيراد حزمة CMS
-          </Button>
+          {canExport ? (
+            <Button
+              onClick={handleExport}
+              disabled={isExporting || selectedCount === 0}
+              className="flex-1"
+            >
+              {isExporting ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="ml-2 h-4 w-4" />
+              )}
+              تصدير {selectedCount} مجموعات
+            </Button>
+          ) : null}
+          {canImport ? (
+            <Button variant="outline" className="flex-1" onClick={() => setIsImportOpen(true)}>
+              <Upload className="ml-2 h-4 w-4" />
+              استيراد حزمة CMS
+            </Button>
+          ) : (
+            <PermissionHint
+              className="flex-1 justify-center"
+              label="استيراد المحتوى مقيّد"
+              message="تحتاج إلى صلاحية استيراد حزم المحتوى لإضافة بيانات إلى إدارة المحتوى."
+            />
+          )}
         </div>
         <p className="text-xs leading-6 text-muted-foreground">
           تتضمن الوسائط بيانات الملفات وروابط التخزين فقط، ولا تنسخ الملفات الثنائية. يُقيّد سجل
@@ -202,111 +237,113 @@ export function ContentImportExport({
         </p>
       </CardContent>
 
-      <Dialog
-        open={isImportOpen}
-        onOpenChange={(open) => {
-          setIsImportOpen(open);
-          if (!open) {
-            resetImport();
-          }
-        }}
-      >
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileSearch className="h-5 w-5 text-primary" />
-              معاينة حزمة CMS قبل الاستيراد
-            </DialogTitle>
-            <DialogDescription>
-              تُفحص العلاقات والمفاتيح والتعارضات قبل أي كتابة. لن تُستبدل سجلات موجودة.
-            </DialogDescription>
-          </DialogHeader>
+      {canImport ? (
+        <Dialog
+          open={isImportOpen}
+          onOpenChange={(open) => {
+            setIsImportOpen(open);
+            if (!open) {
+              resetImport();
+            }
+          }}
+        >
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileSearch className="h-5 w-5 text-primary" />
+                معاينة حزمة CMS قبل الاستيراد
+              </DialogTitle>
+              <DialogDescription>
+                تُفحص العلاقات والمفاتيح والتعارضات قبل أي كتابة. لن تُستبدل سجلات موجودة.
+              </DialogDescription>
+            </DialogHeader>
 
-          {!preview ? (
-            <div className="space-y-4 py-2">
-              <Alert className="border-amber-300 bg-amber-50 text-amber-950">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>تنبيه الاستيراد</AlertTitle>
-                <AlertDescription>
-                  يُنفذ الاستيراد الذري بعد المراجعة فقط. عند أي تعارض أو مرجع غير صالح لن تُضاف أي
-                  بيانات.
-                </AlertDescription>
-              </Alert>
-              <label className="block rounded-lg border border-dashed p-6 text-center">
-                <Upload className="mx-auto mb-2 h-7 w-7 text-muted-foreground" />
-                <span className="block text-sm font-medium">اختر ملف JSON للمعاينة</span>
-                <span className="mt-1 block text-xs text-muted-foreground">
-                  الحد الأقصى لسجل التدقيق هو 5,000 سجل.
-                </span>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="application/json,.json"
-                  onChange={handleFileChange}
-                  className="sr-only"
-                />
+            {!preview ? (
+              <div className="space-y-4 py-2">
+                <Alert className="border-amber-300 bg-amber-50 text-amber-950">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>تنبيه الاستيراد</AlertTitle>
+                  <AlertDescription>
+                    يُنفذ الاستيراد الذري بعد المراجعة فقط. عند أي تعارض أو مرجع غير صالح لن تُضاف
+                    أي بيانات.
+                  </AlertDescription>
+                </Alert>
+                <label className="block rounded-lg border border-dashed p-6 text-center">
+                  <Upload className="mx-auto mb-2 h-7 w-7 text-muted-foreground" />
+                  <span className="block text-sm font-medium">اختر ملف JSON للمعاينة</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">
+                    الحد الأقصى لسجل التدقيق هو 5,000 سجل.
+                  </span>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/json,.json"
+                    onChange={handleFileChange}
+                    className="sr-only"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isPreviewingImport}
+                  >
+                    {isPreviewingImport ? (
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileJson className="ml-2 h-4 w-4" />
+                    )}
+                    قراءة الملف
+                  </Button>
+                </label>
+              </div>
+            ) : (
+              <div className="space-y-4 py-2">
+                <Alert className="border-emerald-300 bg-emerald-50 text-emerald-950">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertTitle>الحزمة جاهزة للمراجعة</AlertTitle>
+                  <AlertDescription>{preview.policy}</AlertDescription>
+                </Alert>
+                <div className="rounded-lg border bg-muted/20 p-3">
+                  <p className="text-sm font-medium">{fileName}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    إجمالي العناصر: {preview.total}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(preview.counts)
+                    .filter(([, count]) => count > 0)
+                    .map(([key, count]) => (
+                      <Badge key={key} variant="secondary" className="px-2 py-1">
+                        {countLabels[key] ?? key}: {count}
+                      </Badge>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsImportOpen(false)}>
+                إلغاء
+              </Button>
+              {preview ? (
                 <Button
                   type="button"
-                  variant="outline"
-                  className="mt-4"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isPreviewingImport}
+                  onClick={handleConfirmImport}
+                  disabled={isImporting || !preview.canImport}
                 >
-                  {isPreviewingImport ? (
+                  {isImporting ? (
                     <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <FileJson className="ml-2 h-4 w-4" />
+                    <ShieldCheck className="ml-2 h-4 w-4" />
                   )}
-                  قراءة الملف
+                  تأكيد الاستيراد الذري
                 </Button>
-              </label>
-            </div>
-          ) : (
-            <div className="space-y-4 py-2">
-              <Alert className="border-emerald-300 bg-emerald-50 text-emerald-950">
-                <CheckCircle2 className="h-4 w-4" />
-                <AlertTitle>الحزمة جاهزة للمراجعة</AlertTitle>
-                <AlertDescription>{preview.policy}</AlertDescription>
-              </Alert>
-              <div className="rounded-lg border bg-muted/20 p-3">
-                <p className="text-sm font-medium">{fileName}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  إجمالي العناصر: {preview.total}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(preview.counts)
-                  .filter(([, count]) => count > 0)
-                  .map(([key, count]) => (
-                    <Badge key={key} variant="secondary" className="px-2 py-1">
-                      {countLabels[key] ?? key}: {count}
-                    </Badge>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsImportOpen(false)}>
-              إلغاء
-            </Button>
-            {preview ? (
-              <Button
-                type="button"
-                onClick={handleConfirmImport}
-                disabled={isImporting || !preview.canImport}
-              >
-                {isImporting ? (
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <ShieldCheck className="ml-2 h-4 w-4" />
-                )}
-                تأكيد الاستيراد الذري
-              </Button>
-            ) : null}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              ) : null}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </Card>
   );
 }

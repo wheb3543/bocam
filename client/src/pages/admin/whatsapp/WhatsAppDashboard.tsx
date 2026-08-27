@@ -28,6 +28,7 @@ import {
   MessagingProductUpdateEvent,
   ConversationCostUpdateEvent,
 } from '@/hooks/integrations/useWhatsAppSSE';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 export default function WhatsAppDashboard() {
   return (
@@ -44,6 +45,8 @@ function WhatsAppDashboardContent() {
   const [testPhone, setTestPhone] = useState('');
   const [testMessage, setTestMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { can } = useRolePermissions();
+  const canViewAnalytics = can('reports.view');
 
   // Queries
   const healthQuery = trpc.whatsapp.connection.status.useQuery();
@@ -299,11 +302,13 @@ function WhatsAppDashboardContent() {
               عرض الرسائل الواردة
             </Button>
           </Link>
-          <Link href="/admin/whatsapp/analytics">
-            <Button variant="outline" className="w-full justify-start">
-              إحصائيات الرسائل
-            </Button>
-          </Link>
+          {canViewAnalytics ? (
+            <Link href="/admin/whatsapp/analytics">
+              <Button variant="outline" className="w-full justify-start">
+                إحصائيات الرسائل
+              </Button>
+            </Link>
+          ) : null}
           <Link href="/admin/whatsapp/templates">
             <Button variant="outline" className="w-full justify-start">
               إدارة القوالب

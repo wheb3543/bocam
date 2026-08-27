@@ -36,6 +36,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, History, FileText, ClipboardCheck, ShieldCheck } from 'lucide-react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 /**
  * Content Management Page
@@ -43,6 +44,7 @@ import { toast } from 'sonner';
  */
 export default function ContentManagementPage() {
   const contentManagement = useContentManagement();
+  const { can } = useRolePermissions();
   const textContent = useTextContent();
   const { data: homepageReadiness, refetch: refetchHomepageReadiness } =
     trpc.content.textContent.getHomepageReadiness.useQuery();
@@ -218,6 +220,9 @@ export default function ContentManagementPage() {
           isExporting={importExport.isExporting}
           isImporting={importExport.isImporting}
           isPreviewingImport={importExport.isPreviewingImport}
+          canExport={can('content.export')}
+          canImport={can('content.import')}
+          canExportAudit={can('audit.export')}
         />
 
         {/* Content Tabs */}

@@ -52,15 +52,30 @@ import {
   TemplateEvent,
 } from '@/hooks/integrations/useWhatsAppSSE';
 import { toast } from 'sonner';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 export default function WhatsAppAnalytics() {
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d'>('7d');
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewAnalytics = can('reports.view');
+  const canExportAnalytics = can('reports.export');
+  const canViewCommunication = can('communications.view');
 
   // Queries
-  const broadcastStatsQuery = trpc.whatsapp.getBroadcastStats.useQuery();
-  const autoReplyRulesQuery = trpc.whatsapp.autoReply.getAutoReplyRules.useQuery();
-  const messageStatsQuery = trpc.whatsapp.getMessageStats.useQuery();
-  const conversationCostsQuery = trpc.whatsapp.getConversationCosts.useQuery({
+  const analyticsQueryOptions = { enabled: !arePermissionsLoading && canViewAnalytics };
+  const broadcastStatsQuery = trpc.whatsapp.getBroadcastStats.useQuery(
+    undefined,
+    analyticsQueryOptions
+  );
+  const autoReplyRulesQuery = trpc.whatsapp.autoReply.getAutoReplyRules.useQuery(undefined, {
+    enabled: !arePermissionsLoading && canViewAnalytics && canViewCommunication,
+  });
+  const messageStatsQuery = trpc.whatsapp.getMessageStats.useQuery(
+    undefined,
+    analyticsQueryOptions
+  );
+  const analyticsRange = {
     startDate:
       dateRange === '7d'
         ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -68,19 +83,19 @@ export default function WhatsAppAnalytics() {
           ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
           : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0],
-  });
-  const templatePerformanceQuery = trpc.whatsapp.getTemplatePerformance.useQuery({
-    startDate:
-      dateRange === '7d'
-        ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-        : dateRange === '30d'
-          ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-          : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0],
-  });
+  };
+  const conversationCostsQuery = trpc.whatsapp.getConversationCosts.useQuery(
+    analyticsRange,
+    analyticsQueryOptions
+  );
+  const templatePerformanceQuery = trpc.whatsapp.getTemplatePerformance.useQuery(
+    analyticsRange,
+    analyticsQueryOptions
+  );
 
   // SSE: تحديث فوري عند وصول أحداث التكلفة والقوالب الجديدة
   useWhatsAppSSE({
+    enabled: !arePermissionsLoading && canViewAnalytics,
     onConversationCostUpdate: useCallback(
       (event: ConversationCostUpdateEvent) => {
         toast.info(`تحديث تكلفة المحادثة: ${event.phoneNumber}`);
@@ -106,6 +121,10 @@ export default function WhatsAppAnalytics() {
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 
   const handleExport = () => {
+    if (!canExportAnalytics) {
+      toast.error('لا تملك صلاحية تصدير التقارير');
+      return;
+    }
     const data = {
       broadcastStats: broadcastStatsQuery.data?.stats,
       autoReplyRules: autoReplyRulesQuery.data?.rules,
@@ -126,9 +145,42 @@ export default function WhatsAppAnalytics() {
 
   const handleRefresh = () => {
     broadcastStatsQuery.refetch();
-    autoReplyRulesQuery.refetch();
+    if (canViewCommunication) {
+      autoReplyRulesQuery.refetch();
+    }
     messageStatsQuery.refetch();
   };
+
+  if (arePermissionsLoading) {
+    return (
+      <DashboardLayout pageTitle="تحليلات WhatsApp" pageDescription="مراقبة الإحصائيات والأداء">
+        <FeatureGate feature="whatsapp">
+          <div className="p-6 text-center text-sm text-muted-foreground">
+            جارٍ التحقق من الصلاحيات…
+          </div>
+        </FeatureGate>
+      </DashboardLayout>
+    );
+  }
+
+  if (!canViewAnalytics) {
+    return (
+      <DashboardLayout pageTitle="تحليلات WhatsApp" pageDescription="مراقبة الإحصائيات والأداء">
+        <FeatureGate feature="whatsapp">
+          <Card className="m-6">
+            <CardContent className="flex min-h-56 flex-col items-center justify-center gap-3 text-center">
+              <TrendingUp className="h-8 w-8 text-muted-foreground" />
+              <p className="font-medium">تحليلات WhatsApp غير متاحة لهذا الدور</p>
+              <PermissionHint
+                label="عرض التحليلات مقيّد"
+                message="تحتاج إلى صلاحية عرض التقارير للاطلاع على تحليلات WhatsApp."
+              />
+            </CardContent>
+          </Card>
+        </FeatureGate>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout pageTitle="تحليلات WhatsApp" pageDescription="مراقبة الإحصائيات والأداء">
@@ -165,10 +217,17 @@ export default function WhatsAppAnalytics() {
                   className={`h-4 w-4 ${messageStatsQuery.isLoading ? 'animate-spin' : ''}`}
                 />
               </Button>
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="h-4 w-4 ml-2" />
-                تصدير
-              </Button>
+              {canExportAnalytics ? (
+                <Button variant="outline" size="sm" onClick={handleExport}>
+                  <Download className="h-4 w-4 ml-2" />
+                  تصدير
+                </Button>
+              ) : (
+                <PermissionHint
+                  label="التصدير مقيّد"
+                  message="تحتاج إلى صلاحية تصدير التقارير لتنزيل تحليلات WhatsApp."
+                />
+              )}
             </div>
           </div>
 

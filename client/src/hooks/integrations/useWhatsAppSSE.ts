@@ -179,6 +179,8 @@ export interface TransactionStatusUpdateEvent {
 // ── واجهة الـ Hook ─────────────────────────────────────────────────────────────
 
 export interface UseWhatsAppSSEOptions {
+  /** يوقف الاشتراك في القنوات الحية دون تغيير ترتيب استدعاء الخطاف. */
+  enabled?: boolean;
   /** معرّف المحادثة للاشتراك في أحداثها الخاصة */
   conversationId?: number | null;
   /** تنبيه حساب جديد (account_alerts) */
@@ -239,6 +241,7 @@ export interface UseWhatsAppSSEOptions {
  * });
  */
 export function useWhatsAppSSE({
+  enabled = true,
   conversationId,
   onAccountAlert,
   onPhoneQualityUpdate,
@@ -475,10 +478,13 @@ export function useWhatsAppSSE({
   }, []);
 
   // ── الاشتراك في القناة العامة ──────────────────────────────────────────────
-  useSSE('/api/whatsapp/stream/global', handleGlobalEvent);
+  useSSE(enabled ? '/api/whatsapp/stream/global' : null, handleGlobalEvent);
 
   // ── الاشتراك في قناة المحادثة (إن وُجدت) ─────────────────────────────────
-  useSSE(conversationId ? `/api/whatsapp/stream/${conversationId}` : null, handleConversationEvent);
+  useSSE(
+    enabled && conversationId ? `/api/whatsapp/stream/${conversationId}` : null,
+    handleConversationEvent
+  );
 }
 
 export default useWhatsAppSSE;

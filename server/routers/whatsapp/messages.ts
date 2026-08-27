@@ -11,6 +11,7 @@ import { permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('whatsapp-messages');
 const communicationViewProcedure = permissionProcedure('communications.view', 'عرض رسائل WhatsApp');
+const reportsViewProcedure = permissionProcedure('reports.view', 'عرض تحليلات WhatsApp');
 const communicationReplyProcedure = permissionProcedure(
   'communications.reply',
   'إرسال والرد على رسائل WhatsApp'
@@ -188,7 +189,7 @@ export const messagesRouter = router({
     .input(z.object({ jobId: z.string() }))
     .query(broadcastRoutes.getBroadcastStatus),
 
-  getBroadcastStats: communicationViewProcedure.query(broadcastRoutes.getBroadcastStats),
+  getBroadcastStats: reportsViewProcedure.query(broadcastRoutes.getBroadcastStats),
 
   scheduleBroadcast: communicationBroadcastProcedure
     .input(

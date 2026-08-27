@@ -90,10 +90,34 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
     expect(customers).toContain("permissionProcedure('customers.view', 'عرض ملفات العملاء الموحدة')");
     expect(customers).toContain('listPaginated: customersViewProcedure');
     expect(customers).toContain('getByPhone: customersViewProcedure');
-    expect(patientResults).toContain("permissionProcedure('patients.results.view'");
-    expect(patientResults).toContain("permissionProcedure('patients.results.create'");
+    expect(patientResults).toContain("permissionProcedure(\n  'patients.results.view'");
+    expect(patientResults).toContain("permissionProcedure(\n  'patients.results.create'");
     expect(patientResults).toContain("permissionProcedure(\n  'patients.results.status.update'");
     expect(patientResults).toContain("'patients.results.status.update'");
     expect(rootRouter).toContain("generatePDF: permissionProcedure('reports.export', 'تصدير التقارير')");
+  });
+
+  it('يحرس استيراد وتصدير المحتوى وتحليلات WhatsApp بصلاحيات P0-B الدقيقة', () => {
+    const permissions = source('shared/rolePermissions.ts');
+    const importExport = source('server/routers/content/importExport.ts');
+    const analytics = source('server/routers/whatsapp/analytics.ts');
+    const messages = source('server/routers/whatsapp/messages.ts');
+    const templates = source('server/routers/whatsapp/templates.ts');
+
+    expect(permissions).toContain("'content.export'");
+    expect(permissions).toContain("'content.import'");
+    expect(importExport).toContain("permissionProcedure('content.export', 'تصدير حزم المحتوى')");
+    expect(importExport).toContain("permissionProcedure('content.import', 'استيراد حزم المحتوى')");
+    expect(importExport).toContain('export: contentExportProcedure');
+    expect(importExport).toContain('previewImport: contentImportProcedure');
+    expect(importExport).toContain('import: contentImportProcedure');
+    expect(importExport).toContain("assertRolePermission(ctx.user, 'audit.export', 'تصدير سجل التدقيق')");
+    expect(analytics).toContain("permissionProcedure('reports.view', 'عرض تحليلات WhatsApp')");
+    expect(analytics).toContain("permissionProcedure('audit.view', 'عرض سجل تدقيق WhatsApp')");
+    expect(analytics).toContain("permissionProcedure('audit.export', 'تصدير سجل تدقيق WhatsApp')");
+    expect(analytics).toContain('getMessageStats: reportsViewProcedure');
+    expect(analytics).toContain('exportAuditLogs: auditExportProcedure');
+    expect(messages).toContain("getBroadcastStats: reportsViewProcedure");
+    expect(templates).toContain('getTemplatePerformance: reportsViewProcedure');
   });
 });
