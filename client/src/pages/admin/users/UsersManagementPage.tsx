@@ -24,7 +24,9 @@ import UsersTable from './components/UsersTable';
 import AccessRequestsTable from './components/AccessRequestsTable';
 import RoleDescriptionsCard from './components/RoleDescriptionsCard';
 import RolesPermissionsPanel from './components/RolesPermissionsPanel';
+import RoleAuditPanel from './components/RoleAuditPanel';
 import { useUsers } from './hooks/useUsers';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 // تعريف أعمدة جدول طلبات الوصول
 const requestColumns: ColumnConfig[] = [
@@ -153,6 +155,8 @@ const userColumns: ColumnConfig[] = [
 
 export default function UsersManagementPage() {
   const { formatPhoneDisplay } = usePhoneFormat();
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canViewRoleAudit = !permissionsLoading && can('audit.view');
   const [activeSection, setActiveSection] = useState<ActiveSection>('users');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -303,6 +307,16 @@ export default function UsersManagementPage() {
             <ShieldCheck className="w-4 h-4 ml-2" />
             الأدوار والصلاحيات
           </Button>
+          {canViewRoleAudit ? (
+            <Button
+              variant={activeSection === 'role-audit' ? 'default' : 'outline'}
+              onClick={() => setActiveSection('role-audit')}
+              className="flex-1 sm:flex-none"
+            >
+              <ShieldCheck className="w-4 h-4 ml-2" />
+              سجل تدقيق الأدوار
+            </Button>
+          ) : null}
           <Button
             variant={activeSection === 'activity' ? 'default' : 'outline'}
             onClick={() => setActiveSection('activity')}
@@ -414,6 +428,7 @@ export default function UsersManagementPage() {
         )}
 
         {activeSection === 'roles' && <RolesPermissionsPanel />}
+        {activeSection === 'role-audit' && canViewRoleAudit && <RoleAuditPanel />}
 
         {/* Activity Section */}
         {activeSection === 'activity' && (

@@ -220,12 +220,6 @@ export const offersRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      if (input.isActive === true) {
-        await assertRolePermission(ctx.user, 'catalog.publish', 'نشر العروض');
-      }
-      if (input.isActive === false) {
-        await assertRolePermission(ctx.user, 'catalog.archive', 'أرشفة العروض');
-      }
       try {
         const dbInstance = await getDb();
         if (!dbInstance) {
@@ -233,6 +227,21 @@ export const offersRouter = router({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'قاعدة البيانات غير متاحة',
           });
+        }
+        const [currentOffer] = await dbInstance
+          .select()
+          .from(offers)
+          .where(eq(offers.id, input.id))
+          .limit(1);
+        if (!currentOffer) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'العرض غير موجود' });
+        }
+        if (input.isActive !== undefined && input.isActive !== currentOffer.isActive) {
+          await assertRolePermission(
+            ctx.user,
+            input.isActive ? 'catalog.publish' : 'catalog.archive',
+            input.isActive ? 'نشر العروض' : 'أرشفة العروض'
+          );
         }
 
         // Use provided slug (normalize to lowercase) or keep existing from DB
@@ -247,12 +256,7 @@ export const offersRouter = router({
             .replace(/^-|-$/g, '');
         } else {
           // Fallback: get current slug from DB to avoid overwriting with empty
-          const currentOffer = await dbInstance
-            .select()
-            .from(offers)
-            .where(eq(offers.id, input.id))
-            .limit(1);
-          slug = currentOffer[0]?.slug || generateSlug(input.title);
+          slug = currentOffer.slug || generateSlug(input.title);
         }
 
         // Fallback if slug is empty after normalization

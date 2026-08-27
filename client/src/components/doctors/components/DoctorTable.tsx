@@ -149,6 +149,11 @@ interface DoctorTableProps {
   onDuplicate: (doctor: Doctor) => void;
   onDelete: (doctor: Doctor) => void;
   onAdd: () => void;
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canPublish?: boolean;
+  canArchive?: boolean;
+  canDelete?: boolean;
 }
 
 export function DoctorTable({
@@ -160,6 +165,11 @@ export function DoctorTable({
   onDuplicate,
   onDelete,
   onAdd,
+  canCreate = false,
+  canUpdate = false,
+  canPublish = false,
+  canArchive = false,
+  canDelete = false,
 }: DoctorTableProps) {
   const { formatDate } = useFormatDate();
 
@@ -207,7 +217,7 @@ export function DoctorTable({
         icon={Stethoscope}
         title={searchTerm ? 'لا توجد نتائج مطابقة' : 'لا يوجد أطباء بعد'}
         description={searchTerm ? 'جرّب تغيير كلمات البحث' : 'ابدأ بإضافة أول طبيب إلى النظام'}
-        action={!searchTerm ? { label: 'إضافة طبيب جديد', onClick: onAdd } : undefined}
+        action={!searchTerm && canCreate ? { label: 'إضافة طبيب جديد', onClick: onAdd } : undefined}
       />
     );
   }
@@ -218,16 +228,23 @@ export function DoctorTable({
         <TableRow>
           {doctorTable.visibleColumnOrder.map((colKey: string) => {
             const col = doctorColumns.find((c) => c.key === colKey);
-            if (!col || !doctorTable.visibleColumns[colKey]) {
+            if (
+              !col ||
+              !doctorTable.visibleColumns[colKey] ||
+              (colKey === 'actions' &&
+                !canCreate &&
+                !canUpdate &&
+                !canPublish &&
+                !canArchive &&
+                !canDelete)
+            ) {
               return null;
             }
             return (
               <ResizableHeaderCell
                 key={colKey}
                 columnKey={colKey}
-                width={
-                  doctorTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150
-                }
+                width={doctorTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150}
                 minWidth={col.minWidth || 80}
                 maxWidth={col.maxWidth || 500}
                 onResize={doctorTable.columnWidths.handleResize}
@@ -243,7 +260,15 @@ export function DoctorTable({
         {filteredDoctors.map((doctor: Doctor) => (
           <TableRow key={`${doctor.id ?? doctor.slug ?? ''}`} className="hover:bg-muted/50/50">
             {doctorTable.visibleColumnOrder.map((colKey: string) => {
-              if (!doctorTable.visibleColumns[colKey]) {
+              if (
+                !doctorTable.visibleColumns[colKey] ||
+                (colKey === 'actions' &&
+                  !canCreate &&
+                  !canUpdate &&
+                  !canPublish &&
+                  !canArchive &&
+                  !canDelete)
+              ) {
                 return null;
               }
 
@@ -279,9 +304,7 @@ export function DoctorTable({
                 case 'specialty':
                   return (
                     <FrozenTableCell key={colKey} columnKey={colKey}>
-                      <span className="truncate text-sm text-foreground">
-                        {doctor.specialty}
-                      </span>
+                      <span className="truncate text-sm text-foreground">{doctor.specialty}</span>
                     </FrozenTableCell>
                   );
                 case 'experience':
@@ -342,9 +365,7 @@ export function DoctorTable({
                       columnKey={colKey}
                       className="text-sm text-muted-foreground"
                     >
-                      <span className="truncate block max-w-[200px]">
-                        {doctor.bio || '-'}
-                      </span>
+                      <span className="truncate block max-w-[200px]">{doctor.bio || '-'}</span>
                     </FrozenTableCell>
                   );
                 case 'image':
@@ -393,45 +414,53 @@ export function DoctorTable({
                   return (
                     <FrozenTableCell key={colKey} columnKey={colKey}>
                       <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-2 text-xs"
-                          onClick={() => onToggleAvailability(doctor)}
-                        >
-                          {doctor.available === 'yes' ? (
-                            <span className="text-red-500">تعطيل</span>
-                          ) : (
-                            <span className="text-emerald-600">تفعيل</span>
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => onEdit(doctor)}
-                          title="تعديل"
-                        >
-                          <Edit className="h-3.5 w-3.5 text-muted-foreground" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => onDuplicate(doctor)}
-                          title="نسخ"
-                        >
-                          <Copy className="h-3.5 w-3.5 text-blue-400" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => onDelete(doctor)}
-                          title="حذف"
-                        >
-                          <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                        </Button>
+                        {(doctor.available === 'yes' ? canArchive : canPublish) ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 text-xs"
+                            onClick={() => onToggleAvailability(doctor)}
+                          >
+                            {doctor.available === 'yes' ? (
+                              <span className="text-red-500">تعطيل</span>
+                            ) : (
+                              <span className="text-emerald-600">تفعيل</span>
+                            )}
+                          </Button>
+                        ) : null}
+                        {canUpdate ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => onEdit(doctor)}
+                            title="تعديل"
+                          >
+                            <Edit className="h-3.5 w-3.5 text-muted-foreground" />
+                          </Button>
+                        ) : null}
+                        {canCreate ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => onDuplicate(doctor)}
+                            title="نسخ"
+                          >
+                            <Copy className="h-3.5 w-3.5 text-blue-400" />
+                          </Button>
+                        ) : null}
+                        {canDelete ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => onDelete(doctor)}
+                            title="حذف"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                          </Button>
+                        ) : null}
                       </div>
                     </FrozenTableCell>
                   );
@@ -445,4 +474,3 @@ export function DoctorTable({
     </ResizableTable>
   );
 }
-

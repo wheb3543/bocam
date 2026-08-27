@@ -11,10 +11,18 @@ import { DoctorFormDialog } from './doctors/components/DoctorFormDialog';
 import { DoctorTable } from './doctors/components/DoctorTable';
 import { doctorColumns } from './doctors/components/DoctorTable';
 import type { Doctor } from './doctors/types/doctor.types';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 export default function DoctorsManagement() {
   const deleteConfirm = useConfirmDialog<Doctor>();
   const doctorManagement = useDoctorManagement();
+  const { can } = useRolePermissions();
+  const canCreate = can('catalog.create');
+  const canUpdate = can('catalog.update');
+  const canPublish = can('catalog.publish');
+  const canArchive = can('catalog.archive');
+  const canDelete = can('catalog.delete');
 
   // === useTableFeatures hook ===
   const doctorTable = useTableFeatures({
@@ -78,10 +86,14 @@ export default function DoctorsManagement() {
           </div>
           <ColumnVisibility {...doctorTable.columnVisibilityProps} />
         </div>
-        <Button onClick={() => doctorManagement.handleOpenDialog()} className="w-full sm:w-auto">
-          <Plus className="h-4 w-4 ml-2" />
-          إضافة طبيب جديد
-        </Button>
+        {canCreate ? (
+          <Button onClick={() => doctorManagement.handleOpenDialog()} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 ml-2" />
+            إضافة طبيب جديد
+          </Button>
+        ) : (
+          <PermissionHint message="تحتاج إلى صلاحية إنشاء الكتالوج لإضافة طبيب أو نسخ بياناته." />
+        )}
       </div>
 
       {/* Table */}
@@ -95,37 +107,46 @@ export default function DoctorsManagement() {
           onDuplicate={doctorManagement.handleDuplicate}
           onDelete={(doctor) => deleteConfirm.openConfirm(doctor)}
           onAdd={() => doctorManagement.handleOpenDialog()}
+          canCreate={canCreate}
+          canUpdate={canUpdate}
+          canPublish={canPublish}
+          canArchive={canArchive}
+          canDelete={canDelete}
         />
       </div>
 
       {/* Add/Edit Dialog */}
-      <DoctorFormDialog
-        open={doctorManagement.dialogOpen}
-        onOpenChange={doctorManagement.setDialogOpen}
-        mode={doctorManagement.editingDoctor ? 'edit' : 'create'}
-        formData={doctorManagement.formData}
-        onFormDataChange={doctorManagement.setFormData}
-        onSubmit={doctorManagement.handleSubmit}
-        isPending={
-          doctorManagement.createMutation.isPending || doctorManagement.updateMutation.isPending
-        }
-        onNameChange={doctorManagement.autoGenerateSlug}
-      />
+      {canCreate || canUpdate ? (
+        <DoctorFormDialog
+          open={doctorManagement.dialogOpen}
+          onOpenChange={doctorManagement.setDialogOpen}
+          mode={doctorManagement.editingDoctor ? 'edit' : 'create'}
+          formData={doctorManagement.formData}
+          onFormDataChange={doctorManagement.setFormData}
+          onSubmit={doctorManagement.handleSubmit}
+          isPending={
+            doctorManagement.createMutation.isPending || doctorManagement.updateMutation.isPending
+          }
+          onNameChange={doctorManagement.autoGenerateSlug}
+        />
+      ) : null}
 
       {/* Delete Confirmation Dialog */}
-      <ConfirmDeleteDialog
-        open={deleteConfirm.isOpen}
-        onOpenChange={() => deleteConfirm.closeConfirm()}
-        itemName={deleteConfirm.item?.name || undefined}
-        itemType="الطبيب"
-        onConfirm={() => {
-          if (deleteConfirm.item && deleteConfirm.item.id) {
-            doctorManagement.deleteMutation.mutate({ id: deleteConfirm.item.id });
-          }
-        }}
-        isLoading={doctorManagement.deleteMutation.isPending}
-        confirmText="حذف الطبيب"
-      />
+      {canDelete ? (
+        <ConfirmDeleteDialog
+          open={deleteConfirm.isOpen}
+          onOpenChange={() => deleteConfirm.closeConfirm()}
+          itemName={deleteConfirm.item?.name || undefined}
+          itemType="الطبيب"
+          onConfirm={() => {
+            if (deleteConfirm.item && deleteConfirm.item.id) {
+              doctorManagement.deleteMutation.mutate({ id: deleteConfirm.item.id });
+            }
+          }}
+          isLoading={doctorManagement.deleteMutation.isPending}
+          confirmText="حذف الطبيب"
+        />
+      ) : null}
     </div>
   );
 }

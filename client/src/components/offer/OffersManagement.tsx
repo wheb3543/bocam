@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import type { RouterOutputs } from '@/types/trpc';
 
-type Offer = RouterOutputs['offers']['getAll'][number];
+type Offer = RouterOutputs['offers']['getAllAdmin'][number];
 
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { useConfirmDialog } from '@/hooks/ui/useConfirmDialog';
@@ -44,6 +44,8 @@ import { useTableFeatures } from '@/hooks/table/useTableFeatures';
 import EmptyState from '@/components/EmptyState';
 import { useSlugGenerator } from '@/hooks/data/useSlugGenerator';
 import ImageUpload from '@/components/form/ImageUpload';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 // === تعريف أعمدة جدول العروض ===
 const offerColumns: ColumnConfig[] = [
@@ -131,6 +133,13 @@ const offerColumns: ColumnConfig[] = [
 ];
 
 export default function OffersManagement() {
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canView = can('catalog.view');
+  const canCreate = can('catalog.create');
+  const canUpdate = can('catalog.update');
+  const canDelete = can('catalog.delete');
+  const canPublish = can('catalog.publish');
+  const canArchive = can('catalog.archive');
   const { formatDate } = useFormatDate();
   const deleteConfirm = useConfirmDialog<Offer>();
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -159,7 +168,11 @@ export default function OffersManagement() {
     defaultFrozenColumns: ['title'],
   });
 
-  const { data: offers, isLoading, refetch } = trpc.offers.getAll.useQuery();
+  const {
+    data: offers,
+    isLoading,
+    refetch,
+  } = trpc.offers.getAllAdmin.useQuery(undefined, { enabled: canView });
 
   const createMutation = trpc.offers.create.useMutation({
     onSuccess: () => {
@@ -293,7 +306,7 @@ export default function OffersManagement() {
   const activeOffers = offers?.filter((o) => o.isActive === true).length || 0;
   const inactiveOffers = offers?.filter((o) => o.isActive === false).length || 0;
 
-  if (isLoading) {
+  if (permissionsLoading || isLoading) {
     return (
       <div className="space-y-6">
         {/* Stats Skeleton */}
@@ -316,6 +329,14 @@ export default function OffersManagement() {
             <div key={i} className="h-14 w-full bg-muted/50 rounded animate-pulse mb-2" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (!canView) {
+    return (
+      <div className="p-8 text-center">
+        <PermissionHint message="تحتاج إلى صلاحية عرض الكتالوج للوصول إلى إدارة العروض." />
       </div>
     );
   }
@@ -375,16 +396,20 @@ export default function OffersManagement() {
           </div>
           <ColumnVisibility {...offerTable.columnVisibilityProps} />
         </div>
-        <Button
-          onClick={() => {
-            resetForm();
-            setShowAddDialog(true);
-          }}
-          className="w-full sm:w-auto"
-        >
-          <Plus className="h-4 w-4 ml-2" />
-          إضافة عرض جديد
-        </Button>
+        {canCreate ? (
+          <Button
+            onClick={() => {
+              resetForm();
+              setShowAddDialog(true);
+            }}
+            className="w-full sm:w-auto"
+          >
+            <Plus className="h-4 w-4 ml-2" />
+            إضافة عرض جديد
+          </Button>
+        ) : (
+          <PermissionHint message="تحتاج إلى صلاحية إنشاء الكتالوج لإضافة عرض أو نسخ بياناته." />
+        )}
       </div>
 
       {/* Table */}
@@ -397,7 +422,7 @@ export default function OffersManagement() {
               searchTerm ? 'جرّب تغيير كلمات البحث' : 'ابدأ بإضافة أول عرض طبي إلى النظام'
             }
             action={
-              !searchTerm
+              !searchTerm && canCreate
                 ? {
                     label: 'إضافة عرض جديد',
                     onClick: () => {
@@ -414,7 +439,11 @@ export default function OffersManagement() {
               <TableRow>
                 {offerTable.visibleColumnOrder.map((colKey) => {
                   const col = offerColumns.find((c) => c.key === colKey);
-                  if (!col || !offerTable.visibleColumns[colKey]) {
+                  if (
+                    !col ||
+                    !offerTable.visibleColumns[colKey] ||
+                    (colKey === 'actions' && !canCreate && !canUpdate && !canDelete)
+                  ) {
                     return null;
                   }
                   return (
@@ -439,7 +468,10 @@ export default function OffersManagement() {
               {filteredOffers.map((offer: Offer) => (
                 <TableRow key={offer.id} className="hover:bg-muted/50/50">
                   {offerTable.visibleColumnOrder.map((colKey) => {
-                    if (!offerTable.visibleColumns[colKey]) {
+                    if (
+                      !offerTable.visibleColumns[colKey] ||
+                      (colKey === 'actions' && !canCreate && !canUpdate && !canDelete)
+                    ) {
                       return null;
                     }
 
@@ -553,33 +585,39 @@ export default function OffersManagement() {
                         return (
                           <FrozenTableCell key={colKey} columnKey={colKey}>
                             <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => handleEdit(offer)}
-                                title="تعديل"
-                              >
-                                <Edit className="h-3.5 w-3.5 text-muted-foreground" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => handleDuplicate(offer)}
-                                title="نسخ"
-                              >
-                                <Copy className="h-3.5 w-3.5 text-blue-400" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => deleteConfirm.openConfirm(offer)}
-                                title="حذف"
-                              >
-                                <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                              </Button>
+                              {canUpdate ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleEdit(offer)}
+                                  title="تعديل"
+                                >
+                                  <Edit className="h-3.5 w-3.5 text-muted-foreground" />
+                                </Button>
+                              ) : null}
+                              {canCreate ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleDuplicate(offer)}
+                                  title="نسخ"
+                                >
+                                  <Copy className="h-3.5 w-3.5 text-blue-400" />
+                                </Button>
+                              ) : null}
+                              {canDelete ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => deleteConfirm.openConfirm(offer)}
+                                  title="حذف"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                                </Button>
+                              ) : null}
                             </div>
                           </FrozenTableCell>
                         );
@@ -595,192 +633,197 @@ export default function OffersManagement() {
       </div>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <div
-                className={`h-8 w-8 rounded-lg flex items-center justify-center ${editingOffer ? 'bg-blue-50' : 'bg-emerald-50'}`}
+      {canCreate || canUpdate ? (
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <div
+                  className={`h-8 w-8 rounded-lg flex items-center justify-center ${editingOffer ? 'bg-blue-50' : 'bg-emerald-50'}`}
+                >
+                  {editingOffer ? (
+                    <Edit className="h-4 w-4 text-blue-600" />
+                  ) : (
+                    <Plus className="h-4 w-4 text-emerald-600" />
+                  )}
+                </div>
+                {editingOffer ? 'تعديل العرض' : 'إضافة عرض جديد'}
+              </DialogTitle>
+              <DialogDescription>
+                {editingOffer ? 'قم بتعديل بيانات العرض' : 'أدخل بيانات العرض الجديد'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-5 py-4">
+              {/* المعلومات الأساسية */}
+              <div className="space-y-1 mb-4">
+                <h4 className="text-sm font-semibold text-foreground">المعلومات الأساسية</h4>
+                <div className="h-px bg-muted" />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label
+                    className="text-right block text-xs font-medium text-muted-foreground"
+                    htmlFor="title"
+                  >
+                    عنوان العرض *
+                  </Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => {
+                      setFormData({ ...formData, title: e.target.value });
+                      autoGenerateSlug(e.target.value);
+                    }}
+                    placeholder="مثال: عرض الولادة الخاص"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label
+                    className="text-right block text-xs font-medium text-muted-foreground"
+                    htmlFor="slug"
+                  >
+                    الرابط (slug) *
+                  </Label>
+                  <Input
+                    id="slug"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    placeholder="مثال: birth-offer"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  className="text-right block text-xs font-medium text-muted-foreground"
+                  htmlFor="description"
+                >
+                  الوصف
+                </Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="وصف تفصيلي للعرض..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-right block text-xs font-medium text-muted-foreground">
+                  صورة العرض
+                </Label>
+                <ImageUpload
+                  value={formData.imageUrl}
+                  onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                  folder="offers"
+                  placeholder="اسحب صورة العرض هنا أو اضغط للاختيار"
+                />
+              </div>
+
+              {/* الإعدادات */}
+              <div className="space-y-1 mb-4 mt-6">
+                <h4 className="text-sm font-semibold text-foreground">الإعدادات والتواريخ</h4>
+                <div className="h-px bg-muted" />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label
+                    className="text-right block text-xs font-medium text-muted-foreground"
+                    htmlFor="startDate"
+                  >
+                    تاريخ البداية
+                  </Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label
+                    className="text-right block text-xs font-medium text-muted-foreground"
+                    htmlFor="endDate"
+                  >
+                    تاريخ النهاية
+                  </Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  disabled={formData.isActive ? !canArchive : !canPublish}
+                  className="rounded"
+                />
+                <Label htmlFor="isActive" className="text-sm text-foreground">
+                  العرض نشط
+                </Label>
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddDialog(false);
+                  resetForm();
+                }}
               >
-                {editingOffer ? (
-                  <Edit className="h-4 w-4 text-blue-600" />
+                إلغاء
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={
+                  !formData.title ||
+                  !formData.slug ||
+                  createMutation.isPending ||
+                  updateMutation.isPending
+                }
+              >
+                {createMutation.isPending || updateMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                    جاري الحفظ...
+                  </>
+                ) : editingOffer ? (
+                  'حفظ التعديلات'
                 ) : (
-                  <Plus className="h-4 w-4 text-emerald-600" />
+                  'إضافة العرض'
                 )}
-              </div>
-              {editingOffer ? 'تعديل العرض' : 'إضافة عرض جديد'}
-            </DialogTitle>
-            <DialogDescription>
-              {editingOffer ? 'قم بتعديل بيانات العرض' : 'أدخل بيانات العرض الجديد'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-5 py-4">
-            {/* المعلومات الأساسية */}
-            <div className="space-y-1 mb-4">
-              <h4 className="text-sm font-semibold text-foreground">المعلومات الأساسية</h4>
-              <div className="h-px bg-muted" />
-            </div>
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label
-                  className="text-right block text-xs font-medium text-muted-foreground"
-                  htmlFor="title"
-                >
-                  عنوان العرض *
-                </Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => {
-                    setFormData({ ...formData, title: e.target.value });
-                    autoGenerateSlug(e.target.value);
-                  }}
-                  placeholder="مثال: عرض الولادة الخاص"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label
-                  className="text-right block text-xs font-medium text-muted-foreground"
-                  htmlFor="slug"
-                >
-                  الرابط (slug) *
-                </Label>
-                <Input
-                  id="slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  placeholder="مثال: birth-offer"
-                  dir="ltr"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label
-                className="text-right block text-xs font-medium text-muted-foreground"
-                htmlFor="description"
-              >
-                الوصف
-              </Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="وصف تفصيلي للعرض..."
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-right block text-xs font-medium text-muted-foreground">
-                صورة العرض
-              </Label>
-              <ImageUpload
-                value={formData.imageUrl}
-                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-                folder="offers"
-                placeholder="اسحب صورة العرض هنا أو اضغط للاختيار"
-              />
-            </div>
-
-            {/* الإعدادات */}
-            <div className="space-y-1 mb-4 mt-6">
-              <h4 className="text-sm font-semibold text-foreground">الإعدادات والتواريخ</h4>
-              <div className="h-px bg-muted" />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label
-                  className="text-right block text-xs font-medium text-muted-foreground"
-                  htmlFor="startDate"
-                >
-                  تاريخ البداية
-                </Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label
-                  className="text-right block text-xs font-medium text-muted-foreground"
-                  htmlFor="endDate"
-                >
-                  تاريخ النهاية
-                </Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 pt-2">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="rounded"
-              />
-              <Label htmlFor="isActive" className="text-sm text-foreground">
-                العرض نشط
-              </Label>
-            </div>
-          </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowAddDialog(false);
-                resetForm();
-              }}
-            >
-              إلغاء
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={
-                !formData.title ||
-                !formData.slug ||
-                createMutation.isPending ||
-                updateMutation.isPending
-              }
-            >
-              {createMutation.isPending || updateMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                  جاري الحفظ...
-                </>
-              ) : editingOffer ? (
-                'حفظ التعديلات'
-              ) : (
-                'إضافة العرض'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <ConfirmDeleteDialog
-        open={deleteConfirm.isOpen}
-        onOpenChange={() => deleteConfirm.closeConfirm()}
-        itemName={deleteConfirm.item?.title}
-        itemType="العرض"
-        onConfirm={() => {
-          if (deleteConfirm.item) {
-            deleteMutation.mutate({ id: deleteConfirm.item.id });
-          }
-        }}
-        isLoading={deleteMutation.isPending}
-        confirmText="حذف العرض"
-      />
+      {canDelete ? (
+        <ConfirmDeleteDialog
+          open={deleteConfirm.isOpen}
+          onOpenChange={() => deleteConfirm.closeConfirm()}
+          itemName={deleteConfirm.item?.title}
+          itemType="العرض"
+          onConfirm={() => {
+            if (deleteConfirm.item) {
+              deleteMutation.mutate({ id: deleteConfirm.item.id });
+            }
+          }}
+          isLoading={deleteMutation.isPending}
+          confirmText="حذف العرض"
+        />
+      ) : null}
     </div>
   );
 }

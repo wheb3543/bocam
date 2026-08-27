@@ -19,7 +19,7 @@ interface OfferLead {
 
 interface OfferLeadCardProps {
   lead: OfferLead;
-  onEdit: () => void;
+  onEdit?: () => void;
   onPrint?: () => void;
 }
 
@@ -191,14 +191,14 @@ export default function OfferLeadCard({ lead, onEdit, onPrint }: OfferLeadCardPr
               <Printer className="w-3.5 h-3.5" />
               طباعة
             </Button>
-          ) : (
+          ) : onEdit ? (
             <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={onEdit}>
               <Edit className="w-3.5 h-3.5" />
               تحديث
             </Button>
-          )}
+          ) : null}
         </div>
-        {onPrint && (
+        {onPrint && onEdit && (
           <Button variant="outline" size="sm" onClick={onEdit} className="w-full h-8 text-xs gap-1">
             <Edit className="w-3.5 h-3.5" />
             تحديث الحالة

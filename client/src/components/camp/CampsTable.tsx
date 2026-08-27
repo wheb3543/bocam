@@ -24,6 +24,9 @@ interface CampsTableProps {
   onEdit: (camp: Camp) => void;
   onDuplicate: (camp: Camp) => void;
   onDelete: (camp: Camp) => void;
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
 }
 
 export default function CampsTable({
@@ -33,6 +36,9 @@ export default function CampsTable({
   onEdit,
   onDuplicate,
   onDelete,
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
 }: CampsTableProps) {
   const { campTable } = tableFeatures;
 
@@ -43,7 +49,13 @@ export default function CampsTable({
           <TableRow>
             {campTable.visibleColumnOrder.map((colKey) => {
               const col = campColumns.find((c) => c.key === colKey);
-              if (!col || !campTable.visibleColumns[colKey]) {return null;}
+              if (
+                !col ||
+                !campTable.visibleColumns[colKey] ||
+                (colKey === 'actions' && !canCreate && !canUpdate && !canDelete)
+              ) {
+                return null;
+              }
               return (
                 <ResizableHeaderCell
                   key={colKey}
@@ -64,7 +76,12 @@ export default function CampsTable({
           {camps.map((camp: Camp) => (
             <TableRow key={camp.id} className="hover:bg-muted/50/50">
               {campTable.visibleColumnOrder.map((colKey) => {
-                if (!campTable.visibleColumns[colKey]) {return null;}
+                if (
+                  !campTable.visibleColumns[colKey] ||
+                  (colKey === 'actions' && !canCreate && !canUpdate && !canDelete)
+                ) {
+                  return null;
+                }
 
                 switch (colKey) {
                   case 'name':
@@ -176,33 +193,39 @@ export default function CampsTable({
                     return (
                       <FrozenTableCell key={colKey} columnKey={colKey}>
                         <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => onEdit(camp)}
-                            title="تعديل"
-                          >
-                            <Edit className="h-3.5 w-3.5 text-muted-foreground" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => onDuplicate(camp)}
-                            title="نسخ"
-                          >
-                            <Copy className="h-3.5 w-3.5 text-blue-400" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => onDelete(camp)}
-                            title="حذف"
-                          >
-                            <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                          </Button>
+                          {canUpdate ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => onEdit(camp)}
+                              title="تعديل"
+                            >
+                              <Edit className="h-3.5 w-3.5 text-muted-foreground" />
+                            </Button>
+                          ) : null}
+                          {canCreate ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => onDuplicate(camp)}
+                              title="نسخ"
+                            >
+                              <Copy className="h-3.5 w-3.5 text-blue-400" />
+                            </Button>
+                          ) : null}
+                          {canDelete ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => onDelete(camp)}
+                              title="حذف"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                            </Button>
+                          ) : null}
                         </div>
                       </FrozenTableCell>
                     );

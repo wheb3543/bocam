@@ -13,9 +13,16 @@ import CampFormDialog from './CampFormDialog';
 import CampsTable from './CampsTable';
 import { campColumns } from './columns';
 import type { Camp, CampFormData } from './types';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 export default function CampsManagement() {
   const { formatDate } = useFormatDate();
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canView = can('catalog.view');
+  const canCreate = can('catalog.create');
+  const canUpdate = can('catalog.update');
+  const canDelete = can('catalog.delete');
   const deleteConfirm = useConfirmDialog<Camp>();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCamp, setEditingCamp] = useState<Camp | null>(null);
@@ -45,7 +52,11 @@ export default function CampsManagement() {
     defaultFrozenColumns: ['name'],
   });
 
-  const { data: camps, isLoading, refetch } = trpc.camps.getAllAdmin.useQuery();
+  const {
+    data: camps,
+    isLoading,
+    refetch,
+  } = trpc.camps.getAllAdmin.useQuery(undefined, { enabled: canView });
 
   const createMutation = trpc.camps.create.useMutation({
     onSuccess: () => {
@@ -207,7 +218,7 @@ export default function CampsManagement() {
   const activeCamps = camps?.filter((c: Camp) => c.isActive === true).length || 0;
   const inactiveCamps = camps?.filter((c: Camp) => c.isActive === false).length || 0;
 
-  if (isLoading) {
+  if (permissionsLoading || isLoading) {
     return (
       <div className="space-y-6">
         {/* Stats Skeleton */}
@@ -234,6 +245,14 @@ export default function CampsManagement() {
     );
   }
 
+  if (!canView) {
+    return (
+      <div className="p-8 text-center">
+        <PermissionHint message="تحتاج إلى صلاحية عرض الكتالوج للوصول إلى إدارة المخيمات." />
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       {/* Stats Cards */}
@@ -254,8 +273,14 @@ export default function CampsManagement() {
             resetForm();
             setShowAddDialog(true);
           }}
+          canCreate={canCreate}
           columnVisibilityProps={campTable.columnVisibilityProps}
         />
+        {!canCreate ? (
+          <div className="mt-2">
+            <PermissionHint message="تحتاج إلى صلاحية إنشاء الكتالوج لإضافة مخيم أو نسخ بياناته." />
+          </div>
+        ) : null}
       </div>
 
       {/* Table */}
@@ -269,7 +294,7 @@ export default function CampsManagement() {
                 searchTerm ? 'جرّب تغيير كلمات البحث' : 'ابدأ بإضافة أول مخيم طبي إلى النظام'
               }
               action={
-                !searchTerm
+                !searchTerm && canCreate
                   ? {
                       label: 'إضافة مخيم جديد',
                       onClick: () => {
@@ -289,34 +314,41 @@ export default function CampsManagement() {
             onEdit={handleEdit}
             onDuplicate={handleDuplicate}
             onDelete={(camp) => deleteConfirm.openConfirm(camp)}
+            canCreate={canCreate}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
           />
         )}
       </div>
 
       {/* Add/Edit Dialog */}
-      <CampFormDialog
-        isOpen={showAddDialog}
-        onOpenChange={setShowAddDialog}
-        editingCamp={editingCamp}
-        formData={formData}
-        onFormDataChange={setFormData}
-        onSubmit={handleSubmit}
-        isSubmitting={createMutation.isPending || updateMutation.isPending}
-      />
+      {canCreate || canUpdate ? (
+        <CampFormDialog
+          isOpen={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          editingCamp={editingCamp}
+          formData={formData}
+          onFormDataChange={setFormData}
+          onSubmit={handleSubmit}
+          isSubmitting={createMutation.isPending || updateMutation.isPending}
+        />
+      ) : null}
 
-      <ConfirmDeleteDialog
-        open={deleteConfirm.isOpen}
-        onOpenChange={() => deleteConfirm.closeConfirm()}
-        itemName={deleteConfirm.item?.name}
-        itemType="المخيم"
-        onConfirm={() => {
-          if (deleteConfirm.item) {
-            deleteMutation.mutate({ id: deleteConfirm.item.id });
-          }
-        }}
-        isLoading={deleteMutation.isPending}
-        confirmText="حذف المخيم"
-      />
+      {canDelete ? (
+        <ConfirmDeleteDialog
+          open={deleteConfirm.isOpen}
+          onOpenChange={() => deleteConfirm.closeConfirm()}
+          itemName={deleteConfirm.item?.name}
+          itemType="المخيم"
+          onConfirm={() => {
+            if (deleteConfirm.item) {
+              deleteMutation.mutate({ id: deleteConfirm.item.id });
+            }
+          }}
+          isLoading={deleteMutation.isPending}
+          confirmText="حذف المخيم"
+        />
+      ) : null}
     </div>
   );
 }

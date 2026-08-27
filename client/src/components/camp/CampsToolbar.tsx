@@ -13,6 +13,7 @@ interface CampsToolbarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onAddClick: () => void;
+  canCreate?: boolean;
   columnVisibilityProps: {
     columns: ColumnConfig[];
     visibleColumns: Record<string, boolean>;
@@ -27,6 +28,7 @@ export default function CampsToolbar({
   searchTerm,
   onSearchChange,
   onAddClick,
+  canCreate = false,
   columnVisibilityProps,
 }: CampsToolbarProps) {
   return (
@@ -43,10 +45,12 @@ export default function CampsToolbar({
         </div>
         <ColumnVisibility {...columnVisibilityProps} />
       </div>
-      <Button onClick={onAddClick} className="w-full sm:w-auto">
-        <Plus className="h-4 w-4 ml-2" />
-        إضافة مخيم جديد
-      </Button>
+      {canCreate ? (
+        <Button onClick={onAddClick} className="w-full sm:w-auto">
+          <Plus className="h-4 w-4 ml-2" />
+          إضافة مخيم جديد
+        </Button>
+      ) : null}
     </div>
   );
 }

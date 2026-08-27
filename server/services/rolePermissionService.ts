@@ -122,6 +122,7 @@ export async function saveRoleDefinition(
     baseRole: RoleBaseKey;
     permissions: RolePermission[];
     isActive: boolean;
+    sourceRoleId?: number;
   },
   actor: { id: number; name?: string | null }
 ) {
@@ -168,6 +169,19 @@ export async function saveRoleDefinition(
     return input.id;
   }
 
+  let sourceRole: { id: number; name: string } | undefined;
+  if (input.sourceRoleId) {
+    const [source] = await db
+      .select({ id: roleDefinitions.id, name: roleDefinitions.name })
+      .from(roleDefinitions)
+      .where(eq(roleDefinitions.id, input.sourceRoleId))
+      .limit(1);
+    if (!source) {
+      throw new Error('الدور المصدر للنسخ غير موجود');
+    }
+    sourceRole = source;
+  }
+
   const key = (input.key || input.name)
     .trim()
     .toLowerCase()
@@ -191,10 +205,11 @@ export async function saveRoleDefinition(
   void createAuditLog({
     entityType: 'role_definition',
     entityId: Number(created.id),
-    action: 'created',
+    action: sourceRole ? 'role_cloned' : 'created',
     newValue: JSON.stringify(permissions),
     userId: actor.id,
     userName: actor.name || null,
+    notes: sourceRole ? `نسخة من الدور: ${sourceRole.name} (#${sourceRole.id})` : null,
   });
   return Number(created.id);
 }

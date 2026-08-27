@@ -43,6 +43,12 @@ interface OfferLead {
 interface UseOfferLeadsProps {
   dateRange: { from: Date; to: Date };
   onPendingCountChange?: (count: number) => void;
+  permissions: {
+    canView: boolean;
+    canUpdate: boolean;
+    canDelete: boolean;
+    canExport: boolean;
+  };
 }
 
 const offerLeadColumns: ColumnConfig[] = [
@@ -78,7 +84,11 @@ const offerLeadColumns: ColumnConfig[] = [
   { key: 'actions', label: 'الإجراءات', defaultVisible: true, sortable: false },
 ];
 
-export function useOfferLeads({ dateRange, onPendingCountChange }: UseOfferLeadsProps) {
+export function useOfferLeads({
+  dateRange,
+  onPendingCountChange,
+  permissions,
+}: UseOfferLeadsProps) {
   const utils = trpc.useUtils();
 
   // State
@@ -193,19 +203,24 @@ export function useOfferLeads({ dateRange, onPendingCountChange }: UseOfferLeads
     data: offerLeadsData,
     isLoading,
     refetch,
-  } = trpc.offerLeads.listPaginated.useQuery({
-    page: offerPageSize === 'all' ? 1 : offerPage,
-    limit: offerLimit,
-    searchTerm: debouncedSearch,
-    dateFrom: dateRange.from.toISOString(),
-    dateTo: dateRange.to.toISOString(),
-    dateFilter: dateFilter !== 'all' ? (dateFilter as 'today' | 'week' | 'month') : undefined,
-    offerIds: selectedOffer && selectedOffer.length > 0 ? selectedOffer.map(Number) : undefined,
-    sources: sourceFilter && sourceFilter.length > 0 ? sourceFilter : undefined,
-    statuses: statusFilter && statusFilter.length > 0 ? statusFilter : undefined,
-  });
+  } = trpc.offerLeads.listPaginated.useQuery(
+    {
+      page: offerPageSize === 'all' ? 1 : offerPage,
+      limit: offerLimit,
+      searchTerm: debouncedSearch,
+      dateFrom: dateRange.from.toISOString(),
+      dateTo: dateRange.to.toISOString(),
+      dateFilter: dateFilter !== 'all' ? (dateFilter as 'today' | 'week' | 'month') : undefined,
+      offerIds: selectedOffer && selectedOffer.length > 0 ? selectedOffer.map(Number) : undefined,
+      sources: sourceFilter && sourceFilter.length > 0 ? sourceFilter : undefined,
+      statuses: statusFilter && statusFilter.length > 0 ? statusFilter : undefined,
+    },
+    { enabled: permissions.canView }
+  );
 
-  const { data: stats } = trpc.offerLeads.stats.useQuery();
+  const { data: stats } = trpc.offerLeads.stats.useQuery(undefined, {
+    enabled: permissions.canView,
+  });
 
   const offerLeads = useMemo(() => offerLeadsData?.data || [], [offerLeadsData?.data]);
 
@@ -363,6 +378,9 @@ export function useOfferLeads({ dateRange, onPendingCountChange }: UseOfferLeads
 
   // Handlers
   const handleSelectAll = useCallback(() => {
+    if (!permissions.canUpdate && !permissions.canDelete) {
+      return;
+    }
     if (selectedIds.length === filteredLeads.length) {
       setSelectedIds([]);
     } else {
@@ -370,23 +388,38 @@ export function useOfferLeads({ dateRange, onPendingCountChange }: UseOfferLeads
         filteredLeads.map((lead) => lead.id).filter((id): id is number => id !== undefined)
       );
     }
-  }, [selectedIds, filteredLeads]);
+  }, [selectedIds, filteredLeads, permissions.canUpdate, permissions.canDelete]);
 
-  const handleSelectOne = useCallback((id: number) => {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
-  }, []);
+  const handleSelectOne = useCallback(
+    (id: number) => {
+      if (!permissions.canUpdate && !permissions.canDelete) {
+        return;
+      }
+      setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+    },
+    [permissions.canUpdate, permissions.canDelete]
+  );
 
-  const handleEditLead = useCallback((lead: OfferLead) => {
-    setSelectedLead(lead);
-    setStatusDialogOpen(true);
-    setNewStatus(lead.status);
-  }, []);
+  const handleEditLead = useCallback(
+    (lead: OfferLead) => {
+      if (!permissions.canUpdate) {
+        return;
+      }
+      setSelectedLead(lead);
+      setStatusDialogOpen(true);
+      setNewStatus(lead.status);
+    },
+    [permissions.canUpdate]
+  );
 
   const handleDeleteLead = useCallback(
     async (id: number) => {
+      if (!permissions.canDelete) {
+        return;
+      }
       await deleteLeadMutation.mutateAsync({ id });
     },
-    [deleteLeadMutation]
+    [deleteLeadMutation, permissions.canDelete]
   );
 
   const handleViewDetails = useCallback((lead: OfferLead) => {

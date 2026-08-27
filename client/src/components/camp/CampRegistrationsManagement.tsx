@@ -13,6 +13,8 @@ import EntityFilters from '@/components/common/EntityFilters';
 import CampRegistrationTable from '@/components/camp/CampRegistrationTable';
 import CampStatusUpdateDialog from '@/components/camp/CampStatusUpdateDialog';
 import type { CampRegistration } from '@/types/camp';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 export default function CampRegistrationsManagement({
   onPendingCountChange,
@@ -24,13 +26,22 @@ export default function CampRegistrationsManagement({
   onDateRangeChange?: (range: { from: Date; to: Date }) => void;
 }) {
   const { user } = useAuth();
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canView = can('registrations.view');
+  const canUpdate = can('registrations.update');
+  const canDelete = can('registrations.delete');
+  const canExport = can('registrations.export');
   const campHook = useCampRegistrations({
     dateRange,
     onDateRangeChange,
     onPendingCountChange,
+    permissions: { canView, canUpdate, canDelete, canExport },
   });
 
   const handlePrint = async (reg: CampRegistration) => {
+    if (!canUpdate) {
+      return;
+    }
     try {
       if (!reg.id) {
         return;
@@ -55,13 +66,24 @@ export default function CampRegistrationsManagement({
   };
 
   const handleDelete = (id: number) => {
+    if (!canDelete) {
+      return;
+    }
     campHook.deleteRegMutation.mutate({ id });
   };
 
-  if (campHook.isLoading) {
+  if (permissionsLoading || campHook.isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!canView) {
+    return (
+      <div className="p-8 text-center">
+        <PermissionHint message="تحتاج إلى صلاحية عرض التسجيلات للوصول إلى هذه الصفحة." />
       </div>
     );
   }
@@ -172,6 +194,7 @@ export default function CampRegistrationsManagement({
           }}
           onExport={campHook.handleExportCampRegistrations}
           onPrint={campHook.handlePrintCampRegistrations}
+          showExport={canExport}
         />
       </div>
 
@@ -200,16 +223,16 @@ export default function CampRegistrationsManagement({
                     ? new Date(reg.createdAt)
                     : (reg.createdAt ?? new Date()),
               }}
-              onEdit={() => campHook.handleEditRegistration(reg)}
+              onEdit={canUpdate ? () => campHook.handleEditRegistration(reg) : undefined}
               onViewDetails={() => campHook.handleViewDetails(reg)}
-              onPrint={() => handlePrint(reg)}
+              onPrint={canUpdate ? () => handlePrint(reg) : undefined}
             />
           ))
         )}
       </div>
 
       {/* Bulk Update Button */}
-      {campHook.selectedIds.length > 0 && (
+      {(canUpdate || canDelete) && campHook.selectedIds.length > 0 && (
         <div className="flex shrink-0 items-center justify-between rounded-lg border border-purple-200 bg-purple-50 p-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">
@@ -220,39 +243,49 @@ export default function CampRegistrationsManagement({
             selectedCount={campHook.selectedIds.length}
             onClear={() => campHook.setSelectedIds([])}
             actions={[
-              {
-                type: 'status-update',
-                label: 'تحديث الحالة',
-                statusOptions: [
-                  { value: 'confirmed', label: 'مؤكد' },
-                  { value: 'attended', label: 'حضر' },
-                  { value: 'completed', label: 'مكتمل' },
-                  { value: 'cancelled', label: 'ملغي' },
-                ],
-                onStatusConfirm: async (newStatus) => {
-                  await campHook.bulkUpdateMutation.mutateAsync({
-                    ids: campHook.selectedIds,
-                    status: newStatus as 'confirmed' | 'attended' | 'completed' | 'cancelled',
-                  });
-                  campHook.setSelectedIds([]);
-                  campHook.refetch();
-                },
-              },
-              {
-                type: 'delete',
-                label: 'حذف',
-                variant: 'destructive',
-                icon: <Trash2 className="h-4 w-4" />,
-                onConfirm: async () => {
-                  await Promise.all(
-                    campHook.selectedIds.map((id) => campHook.deleteRegMutation.mutateAsync({ id }))
-                  );
-                  campHook.setSelectedIds([]);
-                  campHook.refetch();
-                },
-                confirmTitle: 'تأكيد الحذف',
-                confirmDescription: `هل أنت متأكد من حذف ${campHook.selectedIds.length} تسجيل؟`,
-              },
+              ...(canUpdate
+                ? [
+                    {
+                      type: 'status-update' as const,
+                      label: 'تحديث الحالة',
+                      statusOptions: [
+                        { value: 'confirmed', label: 'مؤكد' },
+                        { value: 'attended', label: 'حضر' },
+                        { value: 'completed', label: 'مكتمل' },
+                        { value: 'cancelled', label: 'ملغي' },
+                      ],
+                      onStatusConfirm: async (newStatus: string) => {
+                        await campHook.bulkUpdateMutation.mutateAsync({
+                          ids: campHook.selectedIds,
+                          status: newStatus as 'confirmed' | 'attended' | 'completed' | 'cancelled',
+                        });
+                        campHook.setSelectedIds([]);
+                        campHook.refetch();
+                      },
+                    },
+                  ]
+                : []),
+              ...(canDelete
+                ? [
+                    {
+                      type: 'delete' as const,
+                      label: 'حذف',
+                      variant: 'destructive' as const,
+                      icon: <Trash2 className="h-4 w-4" />,
+                      onConfirm: async () => {
+                        await Promise.all(
+                          campHook.selectedIds.map((id) =>
+                            campHook.deleteRegMutation.mutateAsync({ id })
+                          )
+                        );
+                        campHook.setSelectedIds([]);
+                        campHook.refetch();
+                      },
+                      confirmTitle: 'تأكيد الحذف',
+                      confirmDescription: `هل أنت متأكد من حذف ${campHook.selectedIds.length} تسجيل؟`,
+                    },
+                  ]
+                : []),
             ]}
           />
         </div>
@@ -295,6 +328,9 @@ export default function CampRegistrationsManagement({
           formatStatusTime={campHook.formatStatusTime}
           _deleteRegMutation={campHook.deleteRegMutation}
           _updateStatusMutation={campHook.updateStatusMutation}
+          canSelect={canUpdate || canDelete}
+          canUpdate={canUpdate}
+          canDelete={canDelete}
         />
       </div>
 
@@ -319,27 +355,29 @@ export default function CampRegistrationsManagement({
       </div>
 
       {/* Status Update Dialog */}
-      <CampStatusUpdateDialog
-        open={campHook.statusDialogOpen}
-        onOpenChange={campHook.setStatusDialogOpen}
-        registration={campHook.selectedRegistration}
-        newStatus={campHook.newStatus}
-        onStatusChange={campHook.setNewStatus}
-        editedName={campHook.editedName}
-        onNameChange={campHook.setEditedName}
-        editedPhone={campHook.editedPhone}
-        onPhoneChange={campHook.setEditedPhone}
-        attendanceDate={campHook.attendanceDate}
-        onAttendanceDateChange={campHook.setAttendanceDate}
-        preferredDate={campHook.preferredDate}
-        onPreferredDateChange={campHook.setPreferredDate}
-        preferredTimeSlot={campHook.preferredTimeSlot}
-        onPreferredTimeSlotChange={campHook.setPreferredTimeSlot}
-        availableDates={campHook.availableDates}
-        onUpdate={campHook.handleStatusUpdate}
-        isUpdating={campHook.updateStatusMutation.isPending}
-        formatPhoneDisplay={campHook.formatPhoneDisplay}
-      />
+      {canUpdate ? (
+        <CampStatusUpdateDialog
+          open={campHook.statusDialogOpen}
+          onOpenChange={campHook.setStatusDialogOpen}
+          registration={campHook.selectedRegistration}
+          newStatus={campHook.newStatus}
+          onStatusChange={campHook.setNewStatus}
+          editedName={campHook.editedName}
+          onNameChange={campHook.setEditedName}
+          editedPhone={campHook.editedPhone}
+          onPhoneChange={campHook.setEditedPhone}
+          attendanceDate={campHook.attendanceDate}
+          onAttendanceDateChange={campHook.setAttendanceDate}
+          preferredDate={campHook.preferredDate}
+          onPreferredDateChange={campHook.setPreferredDate}
+          preferredTimeSlot={campHook.preferredTimeSlot}
+          onPreferredTimeSlotChange={campHook.setPreferredTimeSlot}
+          availableDates={campHook.availableDates}
+          onUpdate={campHook.handleStatusUpdate}
+          isUpdating={campHook.updateStatusMutation.isPending}
+          formatPhoneDisplay={campHook.formatPhoneDisplay}
+        />
+      ) : null}
     </div>
   );
 }

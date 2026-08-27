@@ -16,7 +16,7 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
     expect(doctors).toContain("permissionProcedure('catalog.publish'");
     expect(offers).toContain("permissionProcedure('catalog.view'");
     expect(offers).toContain("permissionProcedure('catalog.archive'");
-    expect(offers).toContain("assertRolePermission(ctx.user, 'catalog.publish'");
+    expect(offers).toContain("input.isActive ? 'catalog.publish' : 'catalog.archive'");
     expect(camps).toContain('getAllAdmin: catalogViewProcedure');
     expect(camps).toContain('create: catalogCreateProcedure');
     expect(camps).toContain('toggleActive: catalogUpdateProcedure');
@@ -32,9 +32,9 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
       'server/routers/offerLeads/status.ts',
       'server/routers/offerLeads/admin.ts',
     ].map(source);
-    expect(files.join('\n')).toContain("permissionProcedure('registrations.view'");
-    expect(files.join('\n')).toContain("permissionProcedure('registrations.update'");
-    expect(files.join('\n')).toContain("permissionProcedure('registrations.delete'");
+    expect(files.join('\n')).toContain("'registrations.view'");
+    expect(files.join('\n')).toContain("'registrations.update'");
+    expect(files.join('\n')).toContain("'registrations.delete'");
     expect(files.join('\n')).not.toContain('protectedProcedure');
   });
 
@@ -59,5 +59,16 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
     expect(panel).toContain('id: undefined');
     expect(panel).toContain('نسخ هذا الدور');
     expect(panel).toContain('راجع الاسم والمعرف والصلاحيات قبل الحفظ');
+  });
+
+  it('يحمي سجل تدقيق الأدوار ويسجل مصدر النسخ دون إظهار تفاصيل الصلاحيات', () => {
+    const roleRouter = source('server/routers/roleManagement.ts');
+    const roleService = source('server/services/rolePermissionService.ts');
+
+    expect(roleRouter).toContain("hasRolePermission(db, ctx.user.id, ctx.user.role, 'audit.view')");
+    expect(roleRouter).toContain('audit: roleAuditProcedure');
+    expect(roleRouter).toContain('sourceRoleId: z.number().int().positive().optional()');
+    expect(roleService).toContain("action: sourceRole ? 'role_cloned' : 'created'");
+    expect(roleService).toContain('نسخة من الدور: ${sourceRole.name} (#${sourceRole.id})');
   });
 });

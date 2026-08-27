@@ -84,10 +84,17 @@ export function useCampRegistrations({
   dateRange,
   onDateRangeChange,
   onPendingCountChange,
+  permissions,
 }: {
   dateRange: { from: Date; to: Date };
   onDateRangeChange?: (range: { from: Date; to: Date }) => void;
   onPendingCountChange?: (count: number) => void;
+  permissions: {
+    canView: boolean;
+    canUpdate: boolean;
+    canDelete: boolean;
+    canExport: boolean;
+  };
 }) {
   const { formatPhoneDisplay } = usePhoneFormat();
   const { formatDate, formatRegistrationDate } = useFormatDate();
@@ -116,7 +123,13 @@ export function useCampRegistrations({
   // Query لجلب المواعيد المتاحة للمخيم المحدد
   const { data: availableDates } = trpc.camps.getAvailableDates.useQuery(
     selectedRegistration?.campSlug ? { slug: selectedRegistration.campSlug } : skipToken,
-    { enabled: !!selectedRegistration?.campSlug && statusDialogOpen }
+    {
+      enabled:
+        permissions.canView &&
+        permissions.canUpdate &&
+        !!selectedRegistration?.campSlug &&
+        statusDialogOpen,
+    }
   );
 
   // Pagination state
@@ -303,9 +316,13 @@ export function useCampRegistrations({
     data: registrationsData,
     isLoading,
     refetch,
-  } = trpc.campRegistrations.listPaginated.useQuery(listPaginatedInput);
+  } = trpc.campRegistrations.listPaginated.useQuery(listPaginatedInput, {
+    enabled: permissions.canView,
+  });
   const registrations = useMemo(() => registrationsData?.data || [], [registrationsData?.data]);
-  const { data: stats } = trpc.campRegistrations.stats.useQuery();
+  const { data: stats } = trpc.campRegistrations.stats.useQuery(undefined, {
+    enabled: permissions.canView,
+  });
 
   // Count pending registrations (status = 'pending')
   const pendingCount = useMemo(() => {
@@ -367,7 +384,9 @@ export function useCampRegistrations({
   });
 
   // Get all camps for filter from database
-  const { data: allCamps } = trpc.camps.getAll.useQuery();
+  const { data: allCamps } = trpc.camps.getAll.useQuery(undefined, {
+    enabled: permissions.canView,
+  });
 
   // Apply sorting to camp registrations (filtering is now done server-side)
   const filteredRegistrations = useMemo(() => {
@@ -541,16 +560,27 @@ export function useCampRegistrations({
 
   const handleExportCampRegistrations = useCallback(
     async (format: 'excel' | 'csv' | 'pdf') => {
+      if (!permissions.canExport) {
+        toast.error('لا تملك صلاحية تصدير التسجيلات');
+        return;
+      }
       await campExport.handleExport(format, getCampExportOptions());
     },
-    [campExport, getCampExportOptions]
+    [campExport, getCampExportOptions, permissions.canExport]
   );
 
   const handlePrintCampRegistrations = useCallback(() => {
+    if (!permissions.canExport) {
+      toast.error('لا تملك صلاحية طباعة التسجيلات');
+      return;
+    }
     campExport.handlePrint(getCampExportOptions());
-  }, [campExport, getCampExportOptions]);
+  }, [campExport, getCampExportOptions, permissions.canExport]);
 
   const handleSelectAll = useCallback(() => {
+    if (!permissions.canUpdate && !permissions.canDelete) {
+      return;
+    }
     if (selectedIds.length === filteredRegistrations.length) {
       setSelectedIds([]);
     } else {
@@ -560,21 +590,24 @@ export function useCampRegistrations({
           .filter((id): id is number => id !== undefined)
       );
     }
-  }, [selectedIds.length, filteredRegistrations]);
+  }, [selectedIds.length, filteredRegistrations, permissions.canUpdate, permissions.canDelete]);
 
   const handleSelectOne = useCallback(
     (id: number) => {
+      if (!permissions.canUpdate && !permissions.canDelete) {
+        return;
+      }
       if (selectedIds.includes(id)) {
         setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
       } else {
         setSelectedIds([...selectedIds, id]);
       }
     },
-    [selectedIds]
+    [selectedIds, permissions.canUpdate, permissions.canDelete]
   );
 
   const handleStatusUpdate = useCallback(() => {
-    if (!selectedRegistration || !newStatus || !selectedRegistration.id) {
+    if (!permissions.canUpdate || !selectedRegistration || !newStatus || !selectedRegistration.id) {
       return;
     }
 
@@ -614,20 +647,27 @@ export function useCampRegistrations({
     preferredDate,
     preferredTimeSlot,
     updateStatusMutation,
+    permissions.canUpdate,
   ]);
 
-  const handleEditRegistration = useCallback((reg: CampRegistration) => {
-    setSelectedRegistration(reg);
-    setNewStatus(reg.status ?? '');
-    setEditedName(reg.fullName ?? '');
-    setEditedPhone(reg.phone ?? '');
-    setAttendanceDate(
-      reg.attendanceDate ? new Date(reg.attendanceDate).toISOString().slice(0, 16) : ''
-    );
-    setPreferredDate(reg.preferredDate ?? '');
-    setPreferredTimeSlot(reg.preferredTimeSlot ?? '');
-    setStatusDialogOpen(true);
-  }, []);
+  const handleEditRegistration = useCallback(
+    (reg: CampRegistration) => {
+      if (!permissions.canUpdate) {
+        return;
+      }
+      setSelectedRegistration(reg);
+      setNewStatus(reg.status ?? '');
+      setEditedName(reg.fullName ?? '');
+      setEditedPhone(reg.phone ?? '');
+      setAttendanceDate(
+        reg.attendanceDate ? new Date(reg.attendanceDate).toISOString().slice(0, 16) : ''
+      );
+      setPreferredDate(reg.preferredDate ?? '');
+      setPreferredTimeSlot(reg.preferredTimeSlot ?? '');
+      setStatusDialogOpen(true);
+    },
+    [permissions.canUpdate]
+  );
 
   const handleViewDetails = useCallback((reg: CampRegistration) => {
     setSelectedRegistration(reg);

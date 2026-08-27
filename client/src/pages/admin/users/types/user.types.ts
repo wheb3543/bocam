@@ -36,4 +36,4 @@ export interface UserFormData {
   isActive: 'yes' | 'no';
 }
 
-export type ActiveSection = 'users' | 'requests' | 'roles' | 'activity';
+export type ActiveSection = 'users' | 'requests' | 'roles' | 'role-audit' | 'activity';

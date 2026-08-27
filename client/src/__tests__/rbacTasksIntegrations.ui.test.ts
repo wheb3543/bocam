@@ -80,4 +80,27 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(media).toContain("const canDeleteMedia = can('media.delete')");
     expect(media).toContain('draggable={canOrganizeMedia}');
   });
+
+  it('يحرس واجهات الكتالوج والتسجيلات ويعرض سجل تدقيق الأدوار للمخولين فقط', () => {
+    const offers = source('client/src/components/offer/OffersManagement.tsx');
+    const camps = source('client/src/components/camp/CampsManagement.tsx');
+    const campRegistrations = source('client/src/components/camp/CampRegistrationsManagement.tsx');
+    const offerLeads = source('client/src/components/offer/OfferLeadsManagement.tsx');
+    const roleAudit = source('client/src/pages/admin/users/components/RoleAuditPanel.tsx');
+    const usersPage = source('client/src/pages/admin/users/UsersManagementPage.tsx');
+    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+
+    expect(offers).toContain("const canView = can('catalog.view')");
+    expect(offers).toContain('trpc.offers.getAllAdmin.useQuery');
+    expect(camps).toContain("const canView = can('catalog.view')");
+    expect(campRegistrations).toContain("const canUpdate = can('registrations.update')");
+    expect(campRegistrations).toContain('showExport={canExport}');
+    expect(offerLeads).toContain("const canDelete = can('registrations.delete')");
+    expect(offerLeads).toContain('visibleColumnOrder');
+    expect(roleAudit).toContain("const canViewAudit = can('audit.view')");
+    expect(roleAudit).toContain('enabled: canViewAudit');
+    expect(roleAudit).toContain('permissionCount(log.newValue)');
+    expect(usersPage).toContain("activeSection === 'role-audit'");
+    expect(rolesPanel).toContain('sourceRoleId: copiedFromRoleId');
+  });
 });

@@ -69,6 +69,7 @@ export default function RolesPermissionsPanel() {
   const [form, setForm] = useState<RoleForm>(emptyRole);
   const [permissionSearch, setPermissionSearch] = useState('');
   const [copiedFromRole, setCopiedFromRole] = useState<string | null>(null);
+  const [copiedFromRoleId, setCopiedFromRoleId] = useState<number | null>(null);
   const mutation = trpc.users.roles.save.useMutation({
     onSuccess: () => {
       utils.users.roles.list.invalidate();
@@ -77,6 +78,7 @@ export default function RolesPermissionsPanel() {
       setOpen(false);
       setForm(emptyRole());
       setCopiedFromRole(null);
+      setCopiedFromRoleId(null);
     },
     onError: (error) => toast.error(error.message || 'تعذر حفظ الدور'),
   });
@@ -85,6 +87,7 @@ export default function RolesPermissionsPanel() {
   const normalizedPermissionSearch = permissionSearch.trim().toLowerCase();
   const editRole = (role: RoleDefinition) => {
     setCopiedFromRole(null);
+    setCopiedFromRoleId(null);
     setForm({
       id: role.id,
       key: role.key,
@@ -112,6 +115,7 @@ export default function RolesPermissionsPanel() {
       isActive: true,
     });
     setCopiedFromRole(sourceName);
+    setCopiedFromRoleId(form.id);
     setPermissionSearch('');
   };
   const togglePermission = (permission: RolePermission, enabled: boolean) =>
@@ -370,12 +374,25 @@ export default function RolesPermissionsPanel() {
                 نسخ هذا الدور
               </Button>
             ) : null}
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+                setCopiedFromRole(null);
+                setCopiedFromRoleId(null);
+              }}
+            >
               إلغاء
             </Button>
             <Button
               disabled={!form.name.trim() || mutation.isPending}
-              onClick={() => mutation.mutate({ ...form, description: form.description || null })}
+              onClick={() =>
+                mutation.mutate({
+                  ...form,
+                  description: form.description || null,
+                  ...(form.id ? {} : copiedFromRoleId ? { sourceRoleId: copiedFromRoleId } : {}),
+                })
+              }
             >
               {mutation.isPending ? (
                 'جارٍ الحفظ…'

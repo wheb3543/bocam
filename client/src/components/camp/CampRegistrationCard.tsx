@@ -20,7 +20,7 @@ interface CampRegistration {
 
 interface CampRegistrationCardProps {
   registration: CampRegistration;
-  onEdit: () => void;
+  onEdit?: () => void;
   onViewDetails: () => void;
   onPrint?: () => void;
 }
@@ -228,7 +228,7 @@ export default function CampRegistrationCard({
             </Button>
           )}
         </div>
-        <div className={`grid gap-2 ${onPrint ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <div className={`grid gap-2 ${onPrint && onEdit ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {onPrint && (
             <Button
               variant="outline"
@@ -240,10 +240,12 @@ export default function CampRegistrationCard({
               تفاصيل
             </Button>
           )}
-          <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={onEdit}>
-            <Edit className="w-3.5 h-3.5" />
-            تحديث
-          </Button>
+          {onEdit ? (
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={onEdit}>
+              <Edit className="w-3.5 h-3.5" />
+              تحديث
+            </Button>
+          ) : null}
         </div>
       </CardContent>
     </Card>
