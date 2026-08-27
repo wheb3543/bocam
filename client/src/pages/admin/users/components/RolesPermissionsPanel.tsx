@@ -247,19 +247,19 @@ export default function RolesPermissionsPanel() {
               </p>
             ) : null}
           </DialogHeader>
-          <div className="grid shrink-0 gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+          <div className="grid shrink-0 gap-x-4 gap-y-5 sm:grid-cols-2">
+            <div className="space-y-2.5">
               <Label htmlFor="role-name">اسم الدور</Label>
               <Input
                 id="role-name"
                 value={form.name}
                 onChange={(event) => setForm({ ...form, name: event.target.value })}
                 placeholder="مثال: مشرف التسويق"
-                className="h-11"
+                className="h-11 transition-colors hover:border-primary/50 hover:bg-primary/[0.025]"
               />
             </div>
             {!form.id && (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Label htmlFor="role-key">المعرف الفني</Label>
                 <Input
                   id="role-key"
@@ -267,18 +267,18 @@ export default function RolesPermissionsPanel() {
                   onChange={(event) => setForm({ ...form, key: event.target.value })}
                   placeholder="marketing-supervisor"
                   dir="ltr"
-                  className="h-11"
+                  className="h-11 transition-colors hover:border-primary/50 hover:bg-primary/[0.025]"
                 />
               </div>
             )}
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <Label>الدور التشغيلي الأساسي</Label>
               <div className="flex items-center gap-3">
                 <Select
                   value={form.baseRole}
                   onValueChange={(value) => setForm({ ...form, baseRole: value as RoleBaseKey })}
                 >
-                  <SelectTrigger className="h-11 flex-1">
+                  <SelectTrigger className="h-11 flex-1 transition-colors hover:border-primary/50 hover:bg-primary/[0.025]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -289,7 +289,7 @@ export default function RolesPermissionsPanel() {
                     ))}
                   </SelectContent>
                 </Select>
-                <div className="flex h-11 shrink-0 items-center gap-2 rounded-lg border border-border px-3">
+                <div className="flex h-11 shrink-0 items-center gap-2 rounded-lg border border-border px-3 transition-colors hover:border-primary/50 hover:bg-primary/[0.025]">
                   <Label htmlFor="role-active" className="cursor-pointer whitespace-nowrap text-sm">
                     الدور نشط
                   </Label>
@@ -301,14 +301,14 @@ export default function RolesPermissionsPanel() {
                 </div>
               </div>
             </div>
-            <div className="space-y-2 sm:col-span-2">
+            <div className="space-y-2.5 sm:col-span-2">
               <Label htmlFor="role-description">الوصف</Label>
               <Input
                 id="role-description"
                 value={form.description}
                 onChange={(event) => setForm({ ...form, description: event.target.value })}
                 placeholder="وصف مسؤوليات الدور وحدود عمله"
-                className="h-11"
+                className="h-11 transition-colors hover:border-primary/50 hover:bg-primary/[0.025]"
               />
             </div>
           </div>

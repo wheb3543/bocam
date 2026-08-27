@@ -141,10 +141,19 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
 
   it('يوحد ارتفاع حقول نموذج تفاصيل الدور', () => {
     const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
-    const uniformFieldHeights = rolesPanel.match(/className="h-11"/g) || [];
+    const uniformFieldHeights = rolesPanel.match(/className="h-11 transition-colors hover:border-primary\/50 hover:bg-primary\/\[0\.025\]"/g) || [];
 
     expect(uniformFieldHeights).toHaveLength(3);
-    expect(rolesPanel).toContain('SelectTrigger className="h-11 flex-1"');
-    expect(rolesPanel).toContain('flex h-11 shrink-0 items-center gap-2');
+    expect(rolesPanel).toContain('SelectTrigger className="h-11 flex-1 transition-colors');
+    expect(rolesPanel).toContain('flex h-11 shrink-0 items-center gap-2 rounded-lg border border-border px-3 transition-colors');
+  });
+
+  it('يوحد المسافات العمودية ويضيف حالات تمرير مرئية لحقول نموذج الدور', () => {
+    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+
+    expect(rolesPanel).toContain('gap-x-4 gap-y-5 sm:grid-cols-2');
+    expect(rolesPanel).toContain('space-y-2.5');
+    expect(rolesPanel).toContain('hover:border-primary/50 hover:bg-primary/[0.025]');
+    expect(rolesPanel).toContain('h-11 transition-colors hover:border-primary/50 hover:bg-primary/[0.025]');
   });
 });
