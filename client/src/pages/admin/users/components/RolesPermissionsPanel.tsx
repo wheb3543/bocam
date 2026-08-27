@@ -165,6 +165,10 @@ export default function RolesPermissionsPanel() {
   const expandAllGroups = () =>
     setExpandedGroups(new Set(ROLE_PERMISSION_GROUPS.map((group) => group.key)));
   const collapseAllGroups = () => setExpandedGroups(new Set());
+  const areAllGroupsExpanded = ROLE_PERMISSION_GROUPS.every((group) =>
+    expandedGroups.has(group.key)
+  );
+  const toggleAllGroups = () => (areAllGroupsExpanded ? collapseAllGroups() : expandAllGroups());
 
   return (
     <>
@@ -324,26 +328,24 @@ export default function RolesPermissionsPanel() {
                 {selectedCount}/{Object.keys(ROLE_PERMISSION_LABELS).length}
               </span>
             </div>
-            <div className="mb-3 flex flex-wrap items-center gap-2">
+            <div className="mb-3 flex items-center justify-between gap-2">
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
-                className="h-8"
-                onClick={expandAllGroups}
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={toggleAllGroups}
+                aria-label={
+                  areAllGroupsExpanded ? 'طي كل مجموعات الصلاحيات' : 'فتح كل مجموعات الصلاحيات'
+                }
+                aria-pressed={areAllGroupsExpanded}
+                title={areAllGroupsExpanded ? 'طي الكل' : 'فتح الكل'}
               >
-                <Maximize2 className="ml-1.5 h-3.5 w-3.5" />
-                فتح الكل
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-8"
-                onClick={collapseAllGroups}
-              >
-                <Minimize2 className="ml-1.5 h-3.5 w-3.5" />
-                طي الكل
+                {areAllGroupsExpanded ? (
+                  <Minimize2 className="h-4 w-4" />
+                ) : (
+                  <Maximize2 className="h-4 w-4" />
+                )}
               </Button>
               <Button
                 type="button"

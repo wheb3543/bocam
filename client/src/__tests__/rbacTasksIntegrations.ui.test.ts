@@ -120,8 +120,11 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(rolesPanel).toContain('DialogFooter className="shrink-0 border-t');
     expect(rolesPanel).toContain('expandAllGroups');
     expect(rolesPanel).toContain('collapseAllGroups');
-    expect(rolesPanel).toContain('فتح الكل');
-    expect(rolesPanel).toContain('طي الكل');
+    expect(rolesPanel).toContain('toggleAllGroups');
+    expect(rolesPanel).toContain('size="icon"');
+    expect(rolesPanel).toContain('aria-label={areAllGroupsExpanded');
+    expect(rolesPanel).not.toContain('onClick={expandAllGroups}');
+    expect(rolesPanel).not.toContain('onClick={collapseAllGroups}');
     expect(rolesPanel).toContain('showSelectedOnly');
     expect(rolesPanel).toContain('المحددة فقط ({selectedCount})');
     expect(rolesPanel).toContain('لا توجد صلاحيات محددة في هذا الدور حالياً.');
