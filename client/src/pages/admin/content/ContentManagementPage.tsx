@@ -37,6 +37,7 @@ import { AlertTriangle, History, FileText, ClipboardCheck, ShieldCheck } from 'l
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 /**
  * Content Management Page
@@ -45,6 +46,7 @@ import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 export default function ContentManagementPage() {
   const contentManagement = useContentManagement();
   const { can } = useRolePermissions();
+  const canReviewContent = can('content.review');
   const textContent = useTextContent();
   const { data: homepageReadiness, refetch: refetchHomepageReadiness } =
     trpc.content.textContent.getHomepageReadiness.useQuery();
@@ -150,14 +152,18 @@ export default function ContentManagementPage() {
               <History className="h-4 w-4" />
               سجل التغييرات
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => setIsApprovalQueueOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <ClipboardCheck className="h-4 w-4" />
-              الموافقات
-            </Button>
+            {canReviewContent ? (
+              <Button
+                variant="outline"
+                onClick={() => setIsApprovalQueueOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <ClipboardCheck className="h-4 w-4" />
+                الموافقات
+              </Button>
+            ) : (
+              <PermissionHint message="تحتاج إلى صلاحية مراجعة المحتوى للاطلاع على طابور الموافقات واتخاذ قرارات الاعتماد." />
+            )}
             <Button
               variant="outline"
               onClick={() => setIsQualityDialogOpen(true)}
@@ -659,7 +665,9 @@ export default function ContentManagementPage() {
         }
       />
 
-      <ApprovalQueueDialog open={isApprovalQueueOpen} onOpenChange={setIsApprovalQueueOpen} />
+      {canReviewContent ? (
+        <ApprovalQueueDialog open={isApprovalQueueOpen} onOpenChange={setIsApprovalQueueOpen} />
+      ) : null}
       <ContentQualityDialog open={isQualityDialogOpen} onOpenChange={setIsQualityDialogOpen} />
 
       {/* Page Dialog */}

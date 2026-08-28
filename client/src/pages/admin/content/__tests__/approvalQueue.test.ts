@@ -22,6 +22,9 @@ const submissionHelperSource = readFileSync(
 describe('طابور موافقات المحتوى', () => {
   it('يعرض الطلبات المعلقة ويربط الاعتماد والرفض بإجراءات الخادم', () => {
     expect(dialogSource).toContain('trpc.content.approvals.getPending.useQuery');
+    expect(dialogSource).toContain("can('content.review')");
+    expect(dialogSource).toContain('enabled: isActive && canReviewContent');
+    expect(dialogSource).toContain('طابور المراجعة مقيّد');
     expect(dialogSource).toContain('approveMutation.mutateAsync');
     expect(dialogSource).toContain('rejectMutation.mutateAsync');
     expect(dialogSource).toContain('أدخل سبب الرفض');
@@ -30,6 +33,8 @@ describe('طابور موافقات المحتوى', () => {
   it('يوفر مدخلاً لطابور الموافقات من صفحة إدارة المحتوى', () => {
     expect(pageSource).toContain('ApprovalQueueDialog');
     expect(pageSource).toContain('الموافقات');
+    expect(pageSource).toContain('canReviewContent ?');
+    expect(pageSource).toContain('صلاحية مراجعة المحتوى');
   });
 
   it('يربط محررات CMS بحالة آخر طلب واختيار مراجع وإعادة إرسال الطلب المرفوض', () => {

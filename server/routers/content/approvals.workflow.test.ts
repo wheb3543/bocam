@@ -40,7 +40,9 @@ describe('تدفق موافقات المحتوى', () => {
     expect(routerSource).toContain('assignedReviewerId');
     expect(routerSource).toContain('getEligibleReviewers');
     expect(routerSource).toContain('assignReviewer');
-    expect(routerSource).toContain("const reviewerRoles = ['admin', 'manager', 'team_leader']");
+    expect(routerSource).toContain('getEligibleContentReviewers');
+    expect(routerSource).toContain("hasRolePermission(db, reviewer.id, reviewer.role, 'content.review')");
+    expect(routerSource).not.toContain('const reviewerRoles =');
     expect(routerSource).toContain('هذا الطلب معيّن لمراجع آخر');
   });
 

@@ -21,15 +21,12 @@ import {
   textContent,
   users,
 } from '../../../drizzle/schema';
-import { eq, and, desc, asc, inArray } from 'drizzle-orm';
-import { adminProcedure, router } from '../../_core/trpc';
+import { eq, and, desc, asc } from 'drizzle-orm';
+import { router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { createLogger } from '../../_core/logger';
-import {
-  contentReadProcedure,
-  contentReviewProcedure,
-  contentUpdateProcedure,
-} from './authorization';
+import { contentReviewProcedure, contentUpdateProcedure } from './authorization';
+import { hasRolePermission } from '../../services/rolePermissionService';
 import {
   createApprovalRequestedNotification,
   createApprovalReviewerAssignedNotification,
@@ -311,13 +308,30 @@ function parseEntityChanges<T extends z.ZodType>(
   return result.data;
 }
 
-const reviewerRoles = ['admin', 'manager', 'team_leader'] as const;
+async function getEligibleContentReviewers(
+  db: Awaited<ReturnType<typeof ensureDatabaseAvailable>>
+) {
+  const candidates = await db
+    .select({ id: users.id, name: users.name, role: users.role })
+    .from(users)
+    .where(eq(users.isActive, 'yes'))
+    .orderBy(asc(users.name));
+
+  const eligibility = await Promise.all(
+    candidates.map(async (reviewer) => ({
+      reviewer,
+      canReview: await hasRolePermission(db, reviewer.id, reviewer.role, 'content.review'),
+    }))
+  );
+
+  return eligibility.filter(({ canReview }) => canReview).map(({ reviewer }) => reviewer);
+}
 
 export const approvalsRouter = router({
   /**
    * الحصول على جميع طلبات الموافقة
    */
-  list: contentReadProcedure
+  list: contentReviewProcedure
     .input(
       z.object({
         entityType: z
@@ -376,7 +390,7 @@ export const approvalsRouter = router({
   /**
    * الحصول على طلب موافقة بواسطة المعرف
    */
-  getById: contentReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: contentReviewProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     const approval = await db
@@ -401,23 +415,15 @@ export const approvalsRouter = router({
   create: contentUpdateProcedure.input(createApprovalSchema).mutation(async ({ input, ctx }) => {
     const db = await ensureDatabaseAvailable();
 
-    if (input.assignedReviewerId) {
-      const [assignedReviewer] = await db
-        .select({ id: users.id, role: users.role, isActive: users.isActive })
-        .from(users)
-        .where(eq(users.id, input.assignedReviewerId))
-        .limit(1);
-
-      if (
-        !assignedReviewer ||
-        assignedReviewer.isActive !== 'yes' ||
-        !reviewerRoles.includes(assignedReviewer.role as (typeof reviewerRoles)[number])
-      ) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'المستخدم المحدد لا يملك صلاحية مراجعة المحتوى أو حسابه غير نشط.',
-        });
-      }
+    const eligibleReviewers = input.assignedReviewerId ? await getEligibleContentReviewers(db) : [];
+    if (
+      input.assignedReviewerId &&
+      !eligibleReviewers.some((reviewer) => reviewer.id === input.assignedReviewerId)
+    ) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'المستخدم المحدد لا يملك صلاحية مراجعة المحتوى أو حسابه غير نشط.',
+      });
     }
 
     // التحقق من عدم وجود طلب موافقة معلق لنفس الكيان
@@ -456,12 +462,7 @@ export const approvalsRouter = router({
 
     logger.info(`Content approval request created: ${insertId[0].id} by user ${ctx.user.id}`);
 
-    const reviewers = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(
-        and(inArray(users.role, ['admin', 'manager', 'team_leader']), eq(users.isActive, 'yes'))
-      );
+    const reviewers = await getEligibleContentReviewers(db);
 
     await Promise.all(
       reviewers
@@ -519,14 +520,10 @@ export const approvalsRouter = router({
   /**
    * قائمة المراجعين الذين يمكن تعيينهم لطلبات المحتوى.
    */
-  getEligibleReviewers: contentReadProcedure.query(async () => {
+  getEligibleReviewers: contentUpdateProcedure.query(async () => {
     const db = await ensureDatabaseAvailable();
 
-    return db
-      .select({ id: users.id, name: users.name, role: users.role })
-      .from(users)
-      .where(and(inArray(users.role, [...reviewerRoles]), eq(users.isActive, 'yes')))
-      .orderBy(asc(users.name));
+    return getEligibleContentReviewers(db);
   }),
 
   /**
@@ -559,17 +556,8 @@ export const approvalsRouter = router({
       }
 
       if (input.assignedReviewerId) {
-        const [reviewer] = await db
-          .select({ id: users.id, role: users.role, isActive: users.isActive })
-          .from(users)
-          .where(eq(users.id, input.assignedReviewerId))
-          .limit(1);
-
-        if (
-          !reviewer ||
-          reviewer.isActive !== 'yes' ||
-          !reviewerRoles.includes(reviewer.role as (typeof reviewerRoles)[number])
-        ) {
+        const eligibleReviewers = await getEligibleContentReviewers(db);
+        if (!eligibleReviewers.some((reviewer) => reviewer.id === input.assignedReviewerId)) {
           throw new TRPCError({
             code: 'BAD_REQUEST',
             message: 'المستخدم المحدد لا يملك صلاحية مراجعة المحتوى أو حسابه غير نشط.',
@@ -966,7 +954,7 @@ export const approvalsRouter = router({
   /**
    * حذف طلب الموافقة
    */
-  delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+  delete: contentReviewProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = await ensureDatabaseAvailable();
 
     await db.delete(contentApprovals).where(eq(contentApprovals.id, input.id));
@@ -1017,7 +1005,7 @@ export const approvalsRouter = router({
   /**
    * الحصول على طلبات الموافقة للمستخدم الحالي
    */
-  getMyApprovals: contentReadProcedure
+  getMyApprovals: contentUpdateProcedure
     .input(
       z.object({
         status: z.enum(['pending', 'approved', 'rejected']).optional(),

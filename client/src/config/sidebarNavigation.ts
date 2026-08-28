@@ -36,6 +36,7 @@ import {
   MoreHorizontal,
   Cloud,
 } from 'lucide-react';
+import type { RolePermission } from '../../../shared/rolePermissions';
 
 export interface NavItem {
   title: string;
@@ -45,6 +46,7 @@ export interface NavItem {
   hasDot?: boolean;
   id: string;
   feature?: string;
+  requiredPermission?: RolePermission;
 }
 
 export interface NavGroup {
@@ -384,13 +386,21 @@ export const allToolsGroups: NavGroup[] = [
         title: 'الحملات والمشاريع',
         href: '/admin/campaigns/campaigns',
         icon: Target,
+        requiredPermission: 'campaigns.view',
       },
-      { id: 'projects', title: 'المشاريع', href: '/admin/campaigns/projects', icon: FolderKanban },
+      {
+        id: 'projects',
+        title: 'المشاريع',
+        href: '/admin/campaigns/projects',
+        icon: FolderKanban,
+        requiredPermission: 'campaigns.view',
+      },
       {
         id: 'review-approval',
         title: 'المراجعة والاعتماد',
         href: '/admin/campaigns/review-approval',
         icon: CheckSquare,
+        requiredPermission: 'content.review',
       },
       {
         id: 'tracking-settings',

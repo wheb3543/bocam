@@ -19,6 +19,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { PermissionHint } from '@/components/PermissionHint';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 interface ApprovalQueueDialogProps {
   open: boolean;
@@ -34,16 +36,42 @@ const entityLabels: Record<string, string> = {
 };
 
 export function ApprovalQueueDialog({ open, onOpenChange }: ApprovalQueueDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ClipboardCheck className="h-5 w-5" />
+            طابور موافقات المحتوى
+          </DialogTitle>
+          <DialogDescription>
+            راجع التغييرات المعلقة واعتمدها أو ارفضها مع توثيق السبب.
+          </DialogDescription>
+        </DialogHeader>
+        <ApprovalQueuePanel isActive={open} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface ApprovalQueuePanelProps {
+  isActive?: boolean;
+}
+
+/** يعرض طابور المراجعة داخل النافذة أو صفحة المراجعة المخصصة، مع حراسة استعلامات مستقلة. */
+export function ApprovalQueuePanel({ isActive = true }: ApprovalQueuePanelProps) {
+  const { can } = useRolePermissions();
+  const canReviewContent = can('content.review');
   const [busyId, setBusyId] = useState<number | null>(null);
   const pendingQuery = trpc.content.approvals.getPending.useQuery(
     { limit: 50, offset: 0 },
-    { enabled: open }
+    { enabled: isActive && canReviewContent }
   );
   const approveMutation = trpc.content.approvals.approve.useMutation();
   const rejectMutation = trpc.content.approvals.reject.useMutation();
   const assignReviewerMutation = trpc.content.approvals.assignReviewer.useMutation();
   const reviewersQuery = trpc.content.approvals.getEligibleReviewers.useQuery(undefined, {
-    enabled: open,
+    enabled: isActive && canReviewContent,
   });
 
   const refresh = () => pendingQuery.refetch();
@@ -101,88 +129,85 @@ export function ApprovalQueueDialog({ open, onOpenChange }: ApprovalQueueDialogP
 
   const approvals = pendingQuery.data?.data ?? [];
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <ClipboardCheck className="h-5 w-5" />
-            طابور موافقات المحتوى
-          </DialogTitle>
-          <DialogDescription>
-            راجع التغييرات المعلقة واعتمدها أو ارفضها مع توثيق السبب.
-          </DialogDescription>
-        </DialogHeader>
+  if (!canReviewContent) {
+    return (
+      <div className="flex min-h-48 items-center justify-center py-8">
+        <PermissionHint
+          label="طابور المراجعة مقيّد"
+          message="تحتاج إلى صلاحية مراجعة المحتوى للاطلاع على طلبات الموافقة أو اتخاذ قرار بشأنها."
+        />
+      </div>
+    );
+  }
 
-        <ScrollArea className="max-h-[60dvh] pe-3">
-          {pendingQuery.isLoading ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">جاري تحميل الطلبات…</p>
-          ) : approvals.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">
-              لا توجد طلبات موافقة معلقة.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {approvals.map((approval) => (
-                <article key={approval.id} className="rounded-xl border bg-card p-4 shadow-sm">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">
-                          {entityLabels[approval.entityType] ?? approval.entityType}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">طلب #{approval.id}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        طُلب في {new Date(approval.requestedAt).toLocaleString('ar-SA')}
-                      </p>
-                      <div className="pt-2">
-                        <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                          المراجع المعيّن
-                        </label>
-                        <Select
-                          value={approval.assignedReviewerId?.toString() ?? 'unassigned'}
-                          onValueChange={(value) => assignReviewer(approval.id, value)}
-                          disabled={busyId === approval.id || reviewersQuery.isLoading}
-                        >
-                          <SelectTrigger className="h-8 w-52 text-xs">
-                            <SelectValue placeholder="اختر مراجعاً" />
-                          </SelectTrigger>
-                          <SelectContent dir="rtl">
-                            <SelectItem value="unassigned">غير معيّن</SelectItem>
-                            {(reviewersQuery.data ?? []).map((reviewer) => (
-                              <SelectItem key={reviewer.id} value={reviewer.id.toString()}>
-                                {reviewer.name || `مراجع #${reviewer.id}`}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => approve(approval.id)}
-                        disabled={busyId === approval.id}
-                      >
-                        <Check className="ms-1 h-4 w-4" /> اعتماد
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => reject(approval.id)}
-                        disabled={busyId === approval.id}
-                      >
-                        <X className="ms-1 h-4 w-4" /> رفض
-                      </Button>
-                    </div>
+  return (
+    <ScrollArea className="max-h-[60dvh] pe-3">
+      {pendingQuery.isLoading ? (
+        <p className="py-10 text-center text-sm text-muted-foreground">جاري تحميل الطلبات…</p>
+      ) : approvals.length === 0 ? (
+        <p className="py-10 text-center text-sm text-muted-foreground">
+          لا توجد طلبات موافقة معلقة.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {approvals.map((approval) => (
+            <article key={approval.id} className="rounded-xl border bg-card p-4 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">
+                      {entityLabels[approval.entityType] ?? approval.entityType}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">طلب #{approval.id}</span>
                   </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+                  <p className="text-sm text-muted-foreground">
+                    طُلب في {new Date(approval.requestedAt).toLocaleString('ar-SA')}
+                  </p>
+                  <div className="pt-2">
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      المراجع المعيّن
+                    </label>
+                    <Select
+                      value={approval.assignedReviewerId?.toString() ?? 'unassigned'}
+                      onValueChange={(value) => assignReviewer(approval.id, value)}
+                      disabled={busyId === approval.id || reviewersQuery.isLoading}
+                    >
+                      <SelectTrigger className="h-8 w-52 text-xs">
+                        <SelectValue placeholder="اختر مراجعاً" />
+                      </SelectTrigger>
+                      <SelectContent dir="rtl">
+                        <SelectItem value="unassigned">غير معيّن</SelectItem>
+                        {(reviewersQuery.data ?? []).map((reviewer) => (
+                          <SelectItem key={reviewer.id} value={reviewer.id.toString()}>
+                            {reviewer.name || `مراجع #${reviewer.id}`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => approve(approval.id)}
+                    disabled={busyId === approval.id}
+                  >
+                    <Check className="ms-1 h-4 w-4" /> اعتماد
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => reject(approval.id)}
+                    disabled={busyId === approval.id}
+                  >
+                    <X className="ms-1 h-4 w-4" /> رفض
+                  </Button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </ScrollArea>
   );
 }

@@ -12,8 +12,15 @@ describe('حماية تدفق موافقات المحتوى', () => {
     expect(source).toContain('updateStatus: contentReviewProcedure');
   });
 
-  it('يبلغ المستخدمين المؤهلين للمراجعة عند إنشاء طلب جديد', () => {
-    expect(source).toContain("inArray(users.role, ['admin', 'manager', 'team_leader'])");
+  it('يحدد المراجعين حسب صلاحية المحتوى ويقيد قائمة طابور الاعتماد وعملياتها بالمراجعة', () => {
+    expect(source).toContain('getEligibleContentReviewers');
+    expect(source).toContain("hasRolePermission(db, reviewer.id, reviewer.role, 'content.review')");
+    expect(source).toContain('list: contentReviewProcedure');
+    expect(source).toContain('getById: contentReviewProcedure');
+    expect(source).toContain('delete: contentReviewProcedure');
+    expect(source).toContain('getEligibleReviewers: contentUpdateProcedure');
+    expect(source).toContain('getMyApprovals: contentUpdateProcedure');
+    expect(source).not.toContain('const reviewerRoles =');
     expect(source).toContain('createApprovalRequestedNotification');
   });
 });
