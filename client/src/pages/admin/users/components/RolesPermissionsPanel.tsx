@@ -41,6 +41,8 @@ import {
   type RoleBaseKey,
   type RolePermission,
 } from '@shared/rolePermissions';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 type RoleForm = {
   id?: number;
@@ -73,7 +75,13 @@ const emptyRole = (): RoleForm => ({
 
 export default function RolesPermissionsPanel() {
   const utils = trpc.useUtils();
-  const { data: roleData, isLoading } = trpc.users.roles.list.useQuery();
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewRoles = can('roles.view');
+  const canCreateRoles = can('roles.create');
+  const canUpdateRoles = can('roles.update');
+  const { data: roleData, isLoading } = trpc.users.roles.list.useQuery(undefined, {
+    enabled: !arePermissionsLoading && canViewRoles,
+  });
   const roles = (roleData || []) as RoleDefinition[];
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<RoleForm>(emptyRole);
@@ -98,6 +106,9 @@ export default function RolesPermissionsPanel() {
   const selectedCount = useMemo(() => form.permissions.length, [form.permissions]);
   const normalizedPermissionSearch = permissionSearch.trim().toLowerCase();
   const editRole = (role: RoleDefinition) => {
+    if (!canUpdateRoles) {
+      return;
+    }
     setCopiedFromRole(null);
     setCopiedFromRoleId(null);
     setPermissionSearch('');
@@ -115,7 +126,7 @@ export default function RolesPermissionsPanel() {
     setOpen(true);
   };
   const cloneCurrentRole = () => {
-    if (!form.id) {
+    if (!form.id || !canCreateRoles) {
       return;
     }
     const sourceName = form.name;
@@ -170,6 +181,23 @@ export default function RolesPermissionsPanel() {
   );
   const toggleAllGroups = () => (areAllGroupsExpanded ? collapseAllGroups() : expandAllGroups());
 
+  if (arePermissionsLoading) {
+    return null;
+  }
+
+  if (!canViewRoles) {
+    return (
+      <Card>
+        <CardContent className="p-6" dir="rtl">
+          <PermissionHint
+            label="الأدوار والصلاحيات مقيّدة"
+            message="تحتاج إلى صلاحية عرض الأدوار والصلاحيات للوصول إلى هذه القائمة."
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <>
       <Card>
@@ -183,19 +211,21 @@ export default function RolesPermissionsPanel() {
               إدارة الأدوار النظامية والمخصصة وتحديد الصلاحيات الممنوحة لكل دور.
             </CardDescription>
           </div>
-          <Button
-            onClick={() => {
-              setForm(emptyRole());
-              setCopiedFromRole(null);
-              setPermissionSearch('');
-              setShowSelectedOnly(false);
-              setExpandedGroups(new Set());
-              setOpen(true);
-            }}
-          >
-            <Plus className="ml-2 h-4 w-4" />
-            إضافة دور
-          </Button>
+          {canCreateRoles ? (
+            <Button
+              onClick={() => {
+                setForm(emptyRole());
+                setCopiedFromRole(null);
+                setPermissionSearch('');
+                setShowSelectedOnly(false);
+                setExpandedGroups(new Set());
+                setOpen(true);
+              }}
+            >
+              <Plus className="ml-2 h-4 w-4" />
+              إضافة دور
+            </Button>
+          ) : null}
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -209,7 +239,8 @@ export default function RolesPermissionsPanel() {
                   key={role.id}
                   type="button"
                   onClick={() => editRole(role)}
-                  className="rounded-xl border border-border bg-card p-4 text-right transition hover:border-primary/50 hover:bg-primary/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  disabled={!canUpdateRoles}
+                  className="rounded-xl border border-border bg-card p-4 text-right transition hover:border-primary/50 hover:bg-primary/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:hover:border-border disabled:hover:bg-card"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -470,7 +501,7 @@ export default function RolesPermissionsPanel() {
             </div>
           </div>
           <DialogFooter className="shrink-0 border-t border-border bg-background pt-4">
-            {form.id ? (
+            {form.id && canCreateRoles ? (
               <Button type="button" variant="outline" onClick={cloneCurrentRole}>
                 <Copy className="ml-2 h-4 w-4" />
                 نسخ هذا الدور
@@ -487,7 +518,11 @@ export default function RolesPermissionsPanel() {
               إلغاء
             </Button>
             <Button
-              disabled={!form.name.trim() || mutation.isPending}
+              disabled={
+                !form.name.trim() ||
+                mutation.isPending ||
+                (form.id ? !canUpdateRoles : !canCreateRoles)
+              }
               onClick={() =>
                 mutation.mutate({
                   ...form,

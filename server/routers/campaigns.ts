@@ -15,7 +15,7 @@ import {
   linkDoctorsToCampaign,
 } from '../database/db/campaigns';
 import { notifyCampaignLeaderAssigned } from '../services/campaignNotificationService';
-import { permissionProcedure } from './permissionProcedures';
+import { assertRolePermission, permissionProcedure } from './permissionProcedures';
 
 // Validation schemas
 const campaignTypeSchema = z.enum(['digital', 'field', 'awareness', 'mixed']);
@@ -55,12 +55,47 @@ const updateCampaignSchema = createCampaignSchema.partial().extend({
   notes: z.string().optional(),
 });
 
-const campaignsReadProcedure = permissionProcedure('campaigns.manage', 'عرض الحملات');
-const campaignsManagementProcedure = permissionProcedure('campaigns.manage', 'إدارة الحملات');
+const campaignsViewProcedure = permissionProcedure('campaigns.view', 'عرض الحملات');
+const campaignsCreateProcedure = permissionProcedure('campaigns.create', 'إنشاء الحملات');
+const campaignsUpdateProcedure = permissionProcedure('campaigns.update', 'تعديل الحملات');
+const campaignsDeleteProcedure = permissionProcedure('campaigns.delete', 'حذف الحملات');
+const campaignsLinksProcedure = permissionProcedure('campaigns.links.manage', 'ربط عناصر الحملة');
+
+async function assertCampaignFieldPermissions(
+  user: { id: number; role: string },
+  input: Partial<z.infer<typeof createCampaignSchema>>
+) {
+  if (
+    input.plannedBudget !== undefined ||
+    input.actualBudget !== undefined ||
+    input.currency !== undefined
+  ) {
+    await assertRolePermission(user, 'campaigns.budget.manage', 'إدارة ميزانية الحملة');
+  }
+
+  if (
+    input.goals !== undefined ||
+    input.targetLeads !== undefined ||
+    input.targetBookings !== undefined ||
+    input.targetROI !== undefined ||
+    input.targetRevenue !== undefined ||
+    input.kpis !== undefined
+  ) {
+    await assertRolePermission(user, 'campaigns.metrics.manage', 'إدارة مقاييس الحملة');
+  }
+
+  if (input.metaAccessToken !== undefined) {
+    await assertRolePermission(
+      user,
+      'integrations.credentials.manage',
+      'إدارة بيانات اعتماد التكاملات'
+    );
+  }
+}
 
 export const campaignsRouter = router({
   // Get all campaigns with filters
-  list: campaignsReadProcedure
+  list: campaignsViewProcedure
     .input(
       z
         .object({
@@ -75,90 +110,88 @@ export const campaignsRouter = router({
     }),
 
   // Get campaign by ID
-  getById: campaignsReadProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+  getById: campaignsViewProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
     return getCampaignById(input.id);
   }),
 
   // Get campaign by slug
-  getBySlug: campaignsReadProcedure
+  getBySlug: campaignsViewProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
       return getCampaignBySlug(input.slug);
     }),
 
   // Create campaign
-  create: campaignsManagementProcedure
-    .input(createCampaignSchema)
-    .mutation(async ({ input, ctx }) => {
-      const created = await createCampaign(
-        input as typeof import('../../drizzle/schema').campaigns.$inferInsert
-      );
-      const campaignId = Number(created[0].insertId);
-      if (input.teamLeaderId && input.teamLeaderId !== ctx.user.id) {
-        void notifyCampaignLeaderAssigned({
-          userId: input.teamLeaderId,
-          campaignId,
-          campaignName: input.name,
-        }).catch(() => undefined);
-      }
-      return created;
-    }),
+  create: campaignsCreateProcedure.input(createCampaignSchema).mutation(async ({ input, ctx }) => {
+    await assertCampaignFieldPermissions(ctx.user, input);
+    const created = await createCampaign(
+      input as typeof import('../../drizzle/schema').campaigns.$inferInsert
+    );
+    const campaignId = Number(created[0].insertId);
+    if (input.teamLeaderId && input.teamLeaderId !== ctx.user.id) {
+      void notifyCampaignLeaderAssigned({
+        userId: input.teamLeaderId,
+        campaignId,
+        campaignName: input.name,
+      }).catch(() => undefined);
+    }
+    return created;
+  }),
 
   // Update campaign
-  update: campaignsManagementProcedure
-    .input(updateCampaignSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { id, ...data } = input;
-      const existing = await getCampaignById(id);
-      const updated = await updateCampaign(id, {
-        ...data,
-        ...(data.endDate !== undefined && data.endDate?.getTime() !== existing?.endDate?.getTime()
-          ? { endDateNotifiedAt: null }
-          : {}),
-      } as Partial<typeof import('../../drizzle/schema').campaigns.$inferInsert>);
-      if (
-        data.teamLeaderId !== undefined &&
-        data.teamLeaderId !== null &&
-        data.teamLeaderId !== ctx.user.id &&
-        data.teamLeaderId !== existing?.teamLeaderId
-      ) {
-        void notifyCampaignLeaderAssigned({
-          userId: data.teamLeaderId,
-          campaignId: id,
-          campaignName: updated?.name ?? existing?.name ?? 'الحملة',
-        }).catch(() => undefined);
-      }
-      return updated;
-    }),
+  update: campaignsUpdateProcedure.input(updateCampaignSchema).mutation(async ({ input, ctx }) => {
+    const { id, ...data } = input;
+    await assertCampaignFieldPermissions(ctx.user, data);
+    const existing = await getCampaignById(id);
+    const updated = await updateCampaign(id, {
+      ...data,
+      ...(data.endDate !== undefined && data.endDate?.getTime() !== existing?.endDate?.getTime()
+        ? { endDateNotifiedAt: null }
+        : {}),
+    } as Partial<typeof import('../../drizzle/schema').campaigns.$inferInsert>);
+    if (
+      data.teamLeaderId !== undefined &&
+      data.teamLeaderId !== null &&
+      data.teamLeaderId !== ctx.user.id &&
+      data.teamLeaderId !== existing?.teamLeaderId
+    ) {
+      void notifyCampaignLeaderAssigned({
+        userId: data.teamLeaderId,
+        campaignId: id,
+        campaignName: updated?.name ?? existing?.name ?? 'الحملة',
+      }).catch(() => undefined);
+    }
+    return updated;
+  }),
 
   // Delete campaign
-  delete: campaignsManagementProcedure
+  delete: campaignsDeleteProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return deleteCampaign(input.id);
     }),
 
   // Get campaign statistics
-  getStats: campaignsReadProcedure
+  getStats: campaignsViewProcedure
     .input(z.object({ campaignId: z.number() }))
     .query(async ({ input }) => {
       return getCampaignStats(input.campaignId);
     }),
 
   // Get campaigns overview
-  getOverview: campaignsReadProcedure.query(async () => {
+  getOverview: campaignsViewProcedure.query(async () => {
     return getCampaignsOverview();
   }),
 
   // Get all campaign links (offers, camps, doctors)
-  getLinks: campaignsReadProcedure
+  getLinks: campaignsViewProcedure
     .input(z.object({ campaignId: z.number() }))
     .query(async ({ input }) => {
       return getCampaignAllLinks(input.campaignId);
     }),
 
   // Link offers to campaign
-  linkOffers: campaignsManagementProcedure
+  linkOffers: campaignsLinksProcedure
     .input(
       z.object({
         campaignId: z.number(),
@@ -170,7 +203,7 @@ export const campaignsRouter = router({
     }),
 
   // Link camps to campaign
-  linkCamps: campaignsManagementProcedure
+  linkCamps: campaignsLinksProcedure
     .input(
       z.object({
         campaignId: z.number(),
@@ -182,7 +215,7 @@ export const campaignsRouter = router({
     }),
 
   // Link doctors to campaign
-  linkDoctors: campaignsManagementProcedure
+  linkDoctors: campaignsLinksProcedure
     .input(
       z.object({
         campaignId: z.number(),

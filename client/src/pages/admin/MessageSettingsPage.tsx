@@ -49,6 +49,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { processPhoneInput } from '@/hooks/form/usePhoneFormat';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 interface MessageSetting {
   id?: number;
@@ -132,6 +133,8 @@ export default function MessageSettingsPage() {
 }
 
 function MessageSettingsContent() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canManageScheduler = can('operations.scheduler.manage');
   const [activeTab, setActiveTab] = useState('settings');
   const [selectedCategory, setSelectedCategory] = useState('patient_journey');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -160,7 +163,7 @@ function MessageSettingsContent() {
     enabled: activeTab === 'stats' || activeTab === 'audit',
   });
   const { data: scheduledTasks } = trpc.whatsapp.scheduler.getScheduledTasks.useQuery(undefined, {
-    enabled: activeTab === 'scheduler',
+    enabled: !arePermissionsLoading && activeTab === 'scheduler' && canManageScheduler,
   });
 
   // Mutations
@@ -393,10 +396,12 @@ function MessageSettingsContent() {
             <History className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">سجل التدقيق</span>
           </TabsTrigger>
-          <TabsTrigger value="scheduler" className="text-xs gap-1">
-            <Calendar className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">الجدولة</span>
-          </TabsTrigger>
+          {canManageScheduler && (
+            <TabsTrigger value="scheduler" className="text-xs gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">الجدولة</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* ── Settings Tab ─────────────────────────────────────────────── */}
@@ -742,102 +747,108 @@ function MessageSettingsContent() {
         </TabsContent>
 
         {/* ── Scheduler Tab ─────────────────────────────────────────────── */}
-        <TabsContent value="scheduler" className="space-y-4 mt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold">المهام المجدولة</h3>
-              <p className="text-xs text-muted-foreground">إدارة مهام الإرسال التلقائية المجدولة</p>
+        {canManageScheduler && (
+          <TabsContent value="scheduler" className="space-y-4 mt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold">المهام المجدولة</h3>
+                <p className="text-xs text-muted-foreground">
+                  إدارة مهام الإرسال التلقائية المجدولة
+                </p>
+              </div>
             </div>
-          </div>
 
-          {scheduledTasks && Array.isArray(scheduledTasks) && scheduledTasks.length > 0 ? (
-            <div className="space-y-3">
-              {scheduledTasks.map((task: ScheduledTask) => (
-                <Card key={task.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Calendar className="h-3.5 w-3.5 text-purple-500" />
-                          <p className="text-sm font-medium">{(task.name as string) || task.id}</p>
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] ${
-                              task.status === 'running'
-                                ? 'border-green-200 text-green-700'
-                                : task.status === 'stopped'
-                                  ? 'border-red-200 text-red-700'
-                                  : 'border-gray-200 text-gray-600'
-                            }`}
-                          >
-                            {(task.status as string) === 'running'
-                              ? 'يعمل'
-                              : (task.status as string) === 'stopped'
-                                ? 'موقوف'
-                                : (task.status as string)}
-                          </Badge>
+            {scheduledTasks && Array.isArray(scheduledTasks) && scheduledTasks.length > 0 ? (
+              <div className="space-y-3">
+                {scheduledTasks.map((task: ScheduledTask) => (
+                  <Card key={task.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Calendar className="h-3.5 w-3.5 text-purple-500" />
+                            <p className="text-sm font-medium">
+                              {(task.name as string) || task.id}
+                            </p>
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] ${
+                                task.status === 'running'
+                                  ? 'border-green-200 text-green-700'
+                                  : task.status === 'stopped'
+                                    ? 'border-red-200 text-red-700'
+                                    : 'border-gray-200 text-gray-600'
+                              }`}
+                            >
+                              {(task.status as string) === 'running'
+                                ? 'يعمل'
+                                : (task.status as string) === 'stopped'
+                                  ? 'موقوف'
+                                  : (task.status as string)}
+                            </Badge>
+                          </div>
+                          {(task.nextRun as string) && (
+                            <p className="text-[10px] text-muted-foreground">
+                              التشغيل التالي:{' '}
+                              {formatDistanceToNow(new Date(task.nextRun as string), {
+                                locale: ar,
+                                addSuffix: true,
+                              })}
+                            </p>
+                          )}
+                          {(task.lastRun as string) && (
+                            <p className="text-[10px] text-muted-foreground">
+                              آخر تشغيل:{' '}
+                              {formatDistanceToNow(new Date(task.lastRun as string), {
+                                locale: ar,
+                                addSuffix: true,
+                              })}
+                            </p>
+                          )}
                         </div>
-                        {(task.nextRun as string) && (
-                          <p className="text-[10px] text-muted-foreground">
-                            التشغيل التالي:{' '}
-                            {formatDistanceToNow(new Date(task.nextRun as string), {
-                              locale: ar,
-                              addSuffix: true,
-                            })}
-                          </p>
-                        )}
-                        {(task.lastRun as string) && (
-                          <p className="text-[10px] text-muted-foreground">
-                            آخر تشغيل:{' '}
-                            {formatDistanceToNow(new Date(task.lastRun as string), {
-                              locale: ar,
-                              addSuffix: true,
-                            })}
-                          </p>
-                        )}
+                        <div className="flex gap-1.5">
+                          {(task.status as string) === 'running' ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs gap-1 text-red-600 hover:text-red-700"
+                              onClick={() =>
+                                stopTaskMutation.mutate({ taskId: String(task.id || 0) })
+                              }
+                              disabled={stopTaskMutation.isPending}
+                            >
+                              <XCircle className="h-3 w-3" />
+                              إيقاف
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs gap-1 text-green-600 hover:text-green-700"
+                              onClick={() =>
+                                resumeTaskMutation.mutate({ taskId: String(task.id || 0) })
+                              }
+                              disabled={resumeTaskMutation.isPending}
+                            >
+                              <CheckCircle2 className="h-3 w-3" />
+                              استئناف
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex gap-1.5">
-                        {(task.status as string) === 'running' ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs gap-1 text-red-600 hover:text-red-700"
-                            onClick={() =>
-                              stopTaskMutation.mutate({ taskId: String(task.id || 0) })
-                            }
-                            disabled={stopTaskMutation.isPending}
-                          >
-                            <XCircle className="h-3 w-3" />
-                            إيقاف
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs gap-1 text-green-600 hover:text-green-700"
-                            onClick={() =>
-                              resumeTaskMutation.mutate({ taskId: String(task.id || 0) })
-                            }
-                            disabled={resumeTaskMutation.isPending}
-                          >
-                            <CheckCircle2 className="h-3 w-3" />
-                            استئناف
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p>لا توجد مهام مجدولة نشطة</p>
-              <p className="text-xs mt-1">المهام المجدولة تُنشأ تلقائياً عند تفعيل التذكيرات</p>
-            </div>
-          )}
-        </TabsContent>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                <p>لا توجد مهام مجدولة نشطة</p>
+                <p className="text-xs mt-1">المهام المجدولة تُنشأ تلقائياً عند تفعيل التذكيرات</p>
+              </div>
+            )}
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* ── Edit Dialog ─────────────────────────────────────────────────── */}

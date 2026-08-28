@@ -7,16 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import {
-  Loader2,
-  Tag,
-  Tent,
-  Stethoscope,
-  Search,
-  Link2,
-  Save,
-  CheckCircle,
-} from 'lucide-react';
+import { Loader2, Tag, Tent, Stethoscope, Search, Link2, Save, CheckCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +17,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 interface LinkedOffer {
   offerId: number;
@@ -66,6 +59,11 @@ export default function CampaignLinksManager({
   readOnly = false,
   inline = false,
 }: CampaignLinksManagerProps) {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewCampaigns = can('campaigns.view');
+  const canManageLinks = can('campaigns.links.manage');
+  const canViewCatalog = can('catalog.view');
+  const canManageLinkedItems = canManageLinks && canViewCatalog;
   const [activeDialog, setActiveDialog] = useState<'offers' | 'camps' | 'doctors' | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -74,17 +72,20 @@ export default function CampaignLinksManager({
     data: links,
     isLoading: loadingLinks,
     refetch: refetchLinks,
-  } = trpc.campaigns.getLinks.useQuery({ campaignId }, { enabled: !!campaignId });
+  } = trpc.campaigns.getLinks.useQuery(
+    { campaignId },
+    { enabled: !arePermissionsLoading && !!campaignId && canViewCampaigns }
+  );
 
   // Fetch all available items
   const { data: allOffers } = trpc.offers.getAll.useQuery(undefined, {
-    enabled: activeDialog === 'offers',
+    enabled: activeDialog === 'offers' && canManageLinkedItems,
   });
   const { data: allCamps } = trpc.camps.getAll.useQuery(undefined, {
-    enabled: activeDialog === 'camps',
+    enabled: activeDialog === 'camps' && canManageLinkedItems,
   });
   const { data: allDoctors } = trpc.doctors.list.useQuery(undefined, {
-    enabled: activeDialog === 'doctors',
+    enabled: activeDialog === 'doctors' && canManageLinkedItems,
   });
 
   // Selection state
@@ -133,14 +134,23 @@ export default function CampaignLinksManager({
   });
 
   const handleSaveOffers = () => {
+    if (!canManageLinks) {
+      return;
+    }
     linkOffersMutation.mutate({ campaignId, offerIds: selectedOfferIds });
   };
 
   const handleSaveCamps = () => {
+    if (!canManageLinks) {
+      return;
+    }
     linkCampsMutation.mutate({ campaignId, campIds: selectedCampIds });
   };
 
   const handleSaveDoctors = () => {
+    if (!canManageLinks) {
+      return;
+    }
     linkDoctorsMutation.mutate({ campaignId, doctorIds: selectedDoctorIds });
   };
 
@@ -162,11 +172,20 @@ export default function CampaignLinksManager({
     );
   };
 
-  if (loadingLinks) {
+  if (arePermissionsLoading || loadingLinks) {
     return (
       <div className="flex justify-center py-4">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
+    );
+  }
+
+  if (!canViewCampaigns) {
+    return (
+      <PermissionHint
+        label="روابط الحملة مقيّدة"
+        message="تحتاج إلى صلاحية عرض الحملات للاطلاع على العناصر المرتبطة بها."
+      />
     );
   }
 
@@ -186,7 +205,7 @@ export default function CampaignLinksManager({
               {linkedOffers.length}
             </Badge>
           </Label>
-          {!readOnly && (
+          {!readOnly && canManageLinkedItems && (
             <Button variant="outline" size="sm" onClick={() => setActiveDialog('offers')}>
               <Link2 className="h-3.5 w-3.5 ml-1.5" />
               إدارة
@@ -224,7 +243,7 @@ export default function CampaignLinksManager({
               {linkedCamps.length}
             </Badge>
           </Label>
-          {!readOnly && (
+          {!readOnly && canManageLinkedItems && (
             <Button variant="outline" size="sm" onClick={() => setActiveDialog('camps')}>
               <Link2 className="h-3.5 w-3.5 ml-1.5" />
               إدارة
@@ -262,7 +281,7 @@ export default function CampaignLinksManager({
               {linkedDoctors.length}
             </Badge>
           </Label>
-          {!readOnly && (
+          {!readOnly && canManageLinkedItems && (
             <Button variant="outline" size="sm" onClick={() => setActiveDialog('doctors')}>
               <Link2 className="h-3.5 w-3.5 ml-1.5" />
               إدارة
@@ -323,7 +342,8 @@ export default function CampaignLinksManager({
                   {allOffers
                     .filter(
                       (o: Record<string, unknown>) =>
-                        !searchQuery || (o.title as string)?.toLowerCase().includes(searchQuery.toLowerCase())
+                        !searchQuery ||
+                        (o.title as string)?.toLowerCase().includes(searchQuery.toLowerCase())
                     )
                     .map((offer: Record<string, unknown>) => (
                       <div
@@ -500,7 +520,9 @@ export default function CampaignLinksManager({
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{doctor.name as string}</p>
-                          <p className="text-xs text-muted-foreground">{doctor.specialty as string}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {doctor.specialty as string}
+                          </p>
                         </div>
                         {selectedDoctorIds.includes(doctor.id as number) && (
                           <CheckCircle className="h-4 w-4 text-blue-600 shrink-0" />

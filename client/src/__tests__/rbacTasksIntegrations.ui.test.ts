@@ -298,4 +298,31 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     expect(sidebarData).toContain("requiredPermission: 'reports.view'");
     expect(sidebarData).toContain("requiredPermission: 'settings.tracking.manage'");
   });
+
+  it('يعكس صلاحيات P1-C في روابط الحملات ومحرر الأدوار وطابور ومجدول WhatsApp', () => {
+    const campaignLinks = source('client/src/components/CampaignLinksManager.tsx');
+    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+    const usersPage = source('client/src/pages/admin/users/UsersManagementPage.tsx');
+    const messageSettings = source('client/src/pages/admin/MessageSettingsPage.tsx');
+    const whatsappAppointments = source('client/src/pages/admin/whatsapp/WhatsAppAppointments.tsx');
+    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+
+    expect(campaignLinks).toContain("const canViewCampaigns = can('campaigns.view')");
+    expect(campaignLinks).toContain("const canManageLinks = can('campaigns.links.manage')");
+    expect(campaignLinks).toContain("const canViewCatalog = can('catalog.view')");
+    expect(campaignLinks).toContain('enabled: !arePermissionsLoading && !!campaignId && canViewCampaigns');
+    expect(campaignLinks).toContain('{!readOnly && canManageLinkedItems && (');
+    expect(rolesPanel).toContain("const canViewRoles = can('roles.view')");
+    expect(rolesPanel).toContain("const canCreateRoles = can('roles.create')");
+    expect(rolesPanel).toContain("const canUpdateRoles = can('roles.update')");
+    expect(rolesPanel).toContain('enabled: !arePermissionsLoading && canViewRoles');
+    expect(rolesPanel).toContain('الأدوار والصلاحيات مقيّدة');
+    expect(usersPage).toContain("const canViewRoles = !permissionsLoading && can('roles.view')");
+    expect(messageSettings).toContain("const canManageScheduler = can('operations.scheduler.manage')");
+    expect(messageSettings).toContain('activeTab === \'scheduler\' && canManageScheduler');
+    expect(whatsappAppointments).toContain("const canManageScheduler = can('operations.scheduler.manage')");
+    expect(whatsappAppointments).toContain('enabled: !arePermissionsLoading && can(\'communications.view\')');
+    expect(whatsappAppointments).toContain('{canManageScheduler ? (');
+    expect(sidebarData).toContain("requiredPermission: 'campaigns.view'");
+  });
 });

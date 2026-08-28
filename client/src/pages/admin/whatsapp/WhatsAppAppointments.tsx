@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 const entityTypeLabels: Record<string, string> = {
   appointment: 'موعد طبي',
@@ -74,6 +75,8 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function WhatsAppAppointments() {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canManageScheduler = can('operations.scheduler.manage');
   const [filterEntityType, setFilterEntityType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [offset, setOffset] = useState(0);
@@ -84,6 +87,7 @@ export default function WhatsAppAppointments() {
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
+    enabled: !arePermissionsLoading && can('communications.view'),
     onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
       toast.info(`تحديث الحساب: ${event.eventType}`);
     }, []),
@@ -166,6 +170,9 @@ export default function WhatsAppAppointments() {
   };
 
   const handleRunJobs = () => {
+    if (!canManageScheduler) {
+      return;
+    }
     runJobsMutation.mutate();
   };
 
@@ -249,15 +256,17 @@ export default function WhatsAppAppointments() {
               <Bell className="w-4 h-4 ml-2" />
               فحص التذكيرات
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRunJobs}
-              disabled={runJobsMutation.isPending}
-            >
-              <Play className="w-4 h-4 ml-2" />
-              تشغيل الوظائف
-            </Button>
+            {canManageScheduler ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRunJobs}
+                disabled={runJobsMutation.isPending}
+              >
+                <Play className="w-4 h-4 ml-2" />
+                تشغيل الوظائف
+              </Button>
+            ) : null}
             <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="w-4 h-4 ml-2" />
               تصدير

@@ -1,14 +1,27 @@
 import { z } from 'zod';
-import { protectedProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { createLogger } from '../_core/logger';
+import { permissionProcedure } from './permissionProcedures';
 
 const logger = createLogger('queue');
+const queueManagementProcedure = permissionProcedure(
+  'operations.queue.manage',
+  'إدارة طابور رسائل WhatsApp'
+);
+
+function maskPhoneNumber(value: string | undefined) {
+  if (!value) {
+    return null;
+  }
+  const visibleSuffix = value.slice(-3);
+  return `${'•'.repeat(Math.max(0, value.length - visibleSuffix.length))}${visibleSuffix}`;
+}
 
 export const queueRouter = router({
   /**
    * Get queue statistics
    */
-  getStats: protectedProcedure.query(async () => {
+  getStats: queueManagementProcedure.query(async () => {
     try {
       const { getQueueStats } = await import('../integrations/queues/whatsappQueue');
       const stats = await getQueueStats();
@@ -30,7 +43,7 @@ export const queueRouter = router({
   /**
    * Get recent jobs
    */
-  getRecentJobs: protectedProcedure
+  getRecentJobs: queueManagementProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).default(20),
@@ -70,14 +83,14 @@ export const queueRouter = router({
         const formattedJobs = await Promise.all(
           allJobs.slice(0, input.limit).map(async (job) => ({
             id: job.id,
-            phone: job.data.to,
+            phone: maskPhoneNumber(job.data.to),
             templateName: job.data.templateName,
             bookingType: job.data.metadata?.bookingType || null,
-            patientName: job.data.metadata?.patientName || null,
+            hasPatientContext: Boolean(job.data.metadata?.patientName),
             state: await job.getState(),
             timestamp: job.timestamp || Date.now(),
             attempts: job.attemptsMade,
-            error: job.failedReason || null,
+            hasError: Boolean(job.failedReason),
           }))
         );
 

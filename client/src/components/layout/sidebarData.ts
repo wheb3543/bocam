@@ -258,7 +258,13 @@ export const allNavItems: NavItem[] = [
     icon: Headphones,
   },
   { id: 'users', title: 'المستخدمين', href: '/admin/users/users', icon: Users },
-  { id: 'campaigns', title: 'الحملات والمشاريع', href: '/admin/campaigns/campaigns', icon: Target },
+  {
+    id: 'campaigns',
+    title: 'الحملات والمشاريع',
+    href: '/admin/campaigns/campaigns',
+    icon: Target,
+    requiredPermission: 'campaigns.view',
+  },
   { id: 'projects', title: 'المشاريع', href: '/admin/campaigns/projects', icon: FolderKanban },
   {
     id: 'review-approval',
@@ -549,6 +555,7 @@ export const allToolsGroups: NavGroup[] = [
         title: 'الحملات والمشاريع',
         href: '/admin/campaigns/campaigns',
         icon: Target,
+        requiredPermission: 'campaigns.view',
       },
       { id: 'projects', title: 'المشاريع', href: '/admin/campaigns/projects', icon: FolderKanban },
       {

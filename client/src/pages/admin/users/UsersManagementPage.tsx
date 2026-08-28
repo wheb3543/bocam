@@ -157,6 +157,7 @@ export default function UsersManagementPage() {
   const { formatPhoneDisplay } = usePhoneFormat();
   const { can, isLoading: permissionsLoading } = useRolePermissions();
   const canViewRoleAudit = !permissionsLoading && can('audit.view');
+  const canViewRoles = !permissionsLoading && can('roles.view');
   const [activeSection, setActiveSection] = useState<ActiveSection>('users');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -299,14 +300,16 @@ export default function UsersManagementPage() {
               <Badge className="mr-2 bg-red-500 text-white">{accessRequests.length}</Badge>
             )}
           </Button>
-          <Button
-            variant={activeSection === 'roles' ? 'default' : 'outline'}
-            onClick={() => setActiveSection('roles')}
-            className="flex-1 sm:flex-none"
-          >
-            <ShieldCheck className="w-4 h-4 ml-2" />
-            الأدوار والصلاحيات
-          </Button>
+          {canViewRoles ? (
+            <Button
+              variant={activeSection === 'roles' ? 'default' : 'outline'}
+              onClick={() => setActiveSection('roles')}
+              className="flex-1 sm:flex-none"
+            >
+              <ShieldCheck className="w-4 h-4 ml-2" />
+              الأدوار والصلاحيات
+            </Button>
+          ) : null}
           {canViewRoleAudit ? (
             <Button
               variant={activeSection === 'role-audit' ? 'default' : 'outline'}
@@ -427,7 +430,7 @@ export default function UsersManagementPage() {
           </Card>
         )}
 
-        {activeSection === 'roles' && <RolesPermissionsPanel />}
+        {activeSection === 'roles' && canViewRoles && <RolesPermissionsPanel />}
         {activeSection === 'role-audit' && canViewRoleAudit && <RoleAuditPanel />}
 
         {/* Activity Section */}

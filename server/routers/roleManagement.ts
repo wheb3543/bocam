@@ -9,14 +9,9 @@ import {
   listRoleDefinitions,
   saveRoleDefinition,
 } from '../services/rolePermissionService';
+import { assertRolePermission, permissionProcedure } from './permissionProcedures';
 
-const rolesManagementProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const db = await ensureDatabaseAvailable();
-  if (!(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'roles.manage'))) {
-    throw new Error('لا تملك صلاحية إدارة الأدوار والصلاحيات');
-  }
-  return next();
-});
+const rolesViewProcedure = permissionProcedure('roles.view', 'عرض الأدوار والصلاحيات');
 
 const roleAuditProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   const db = await ensureDatabaseAvailable();
@@ -38,20 +33,18 @@ const roleInput = z.object({
 });
 
 export const roleManagementRouter = router({
-  list: rolesManagementProcedure.query(async () =>
-    listRoleDefinitions(await ensureDatabaseAvailable())
-  ),
+  list: rolesViewProcedure.query(async () => listRoleDefinitions(await ensureDatabaseAvailable())),
   listAssignable: protectedProcedure.query(async ({ ctx }) => {
+    await assertRolePermission(ctx.user, 'users.assign_role', 'إسناد الأدوار للمستخدمين');
     const db = await ensureDatabaseAvailable();
-    if (
-      !(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'users.manage')) &&
-      !(await hasRolePermission(db, ctx.user.id, ctx.user.role, 'roles.manage'))
-    ) {
-      throw new Error('لا تملك صلاحية إسناد الأدوار');
-    }
     return listRoleDefinitions(db, false);
   }),
-  save: rolesManagementProcedure.input(roleInput).mutation(async ({ input, ctx }) => {
+  save: protectedProcedure.input(roleInput).mutation(async ({ input, ctx }) => {
+    await assertRolePermission(
+      ctx.user,
+      input.id ? 'roles.update' : 'roles.create',
+      input.id ? 'تعديل الأدوار والصلاحيات' : 'إنشاء أدوار جديدة'
+    );
     const id = await saveRoleDefinition(await ensureDatabaseAvailable(), input, {
       id: ctx.user.id,
       name: ctx.user.name,
