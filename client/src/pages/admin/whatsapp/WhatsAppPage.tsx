@@ -59,6 +59,8 @@ export default function WhatsAppPage() {
 function WhatsAppContent() {
   const { can } = useRolePermissions();
   const canAssignConversations = can('communications.assign');
+  const canViewAutoReply = can('communications.automation.view');
+  const canManageAutoReply = can('communications.automation.manage');
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -145,7 +147,9 @@ function WhatsAppContent() {
     enabled: canAssignConversations,
   });
   const { data: autoReplyRulesData, refetch: refetchAutoReplyRules } =
-    trpc.whatsapp.autoReply.getAutoReplyRules.useQuery();
+    trpc.whatsapp.autoReply.getAutoReplyRules.useQuery(undefined, {
+      enabled: canViewAutoReply,
+    });
   const autoReplyRules = autoReplyRulesData?.rules;
 
   // Mutations for new message
@@ -464,11 +468,16 @@ function WhatsAppContent() {
         />
 
         <AutoReplyDialog
-          open={autoReplyDialogOpen}
+          open={canViewAutoReply && autoReplyDialogOpen}
           onOpenChange={handleCloseAutoReply}
           autoReplyRules={autoReplyRules}
-          onToggleRule={(ruleId, enabled) => toggleAutoReplyMutation.mutate({ ruleId, enabled })}
+          onToggleRule={(ruleId, enabled) => {
+            if (canManageAutoReply) {
+              toggleAutoReplyMutation.mutate({ ruleId, enabled });
+            }
+          }}
           isPending={toggleAutoReplyMutation.isPending}
+          readOnly={!canManageAutoReply}
         />
 
         <NotesDialog
@@ -577,7 +586,7 @@ function WhatsAppContent() {
                     onToggleImportant={(id) =>
                       handleToggleImportant(conversations, id, refetchConversations)
                     }
-                    onAutoReplyClick={handleOpenAutoReply}
+                    onAutoReplyClick={canViewAutoReply ? handleOpenAutoReply : undefined}
                     onOpenNotes={(id) => {
                       const conv = conversations?.find((c) => c.id === id);
                       if (conv) {
@@ -613,7 +622,7 @@ function WhatsAppContent() {
                       onToggleImportant={(id) =>
                         handleToggleImportant(conversations, id, refetchConversations)
                       }
-                      onAutoReplyClick={handleOpenAutoReply}
+                      onAutoReplyClick={canViewAutoReply ? handleOpenAutoReply : undefined}
                       onOpenNotes={(id) => {
                         const conv = conversations?.find((c) => c.id === id);
                         if (conv) {
@@ -678,7 +687,7 @@ function WhatsAppContent() {
                   onToggleImportant={(id) =>
                     handleToggleImportant(conversations, id, refetchConversations)
                   }
-                  onAutoReplyClick={handleOpenAutoReply}
+                  onAutoReplyClick={canViewAutoReply ? handleOpenAutoReply : undefined}
                   onOpenNotes={(id) => {
                     const conv = conversations?.find((c) => c.id === id);
                     handleOpenNotes(conv?.notes || '');

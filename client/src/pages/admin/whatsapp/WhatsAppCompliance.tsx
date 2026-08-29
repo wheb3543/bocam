@@ -15,6 +15,8 @@ interface BlockedPhone {
 type BlockReason = 'manual' | 'opt_out' | 'spam' | 'invalid';
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { PermissionHint } from '@/components/PermissionHint';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,15 +71,29 @@ export default function WhatsAppCompliance() {
   const [filterReason, setFilterReason] = useState<string>('all');
   const [optOutPhone, setOptOutPhone] = useState('');
   const [optOutReason, setOptOutReason] = useState('');
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canViewSecurity = can('communications.security.view');
+  const canManageSecurity = can('communications.security.manage');
+  const canViewAudit = can('audit.view');
+  const canExportAudit = can('audit.export');
 
   // Queries
-  const securityStatsQuery = trpc.whatsapp.security.getSecurityStats.useQuery();
-  const auditStatsQuery = trpc.whatsapp.getAuditStats.useQuery();
-  const blockedPhonesQuery = trpc.whatsapp.security.getBlockedPhones.useQuery();
-  const optOutRequestsQuery = trpc.whatsapp.security.getOptOutRequests.useQuery();
+  const securityStatsQuery = trpc.whatsapp.security.getSecurityStats.useQuery(undefined, {
+    enabled: canViewSecurity,
+  });
+  const auditStatsQuery = trpc.whatsapp.getAuditStats.useQuery(undefined, {
+    enabled: canViewAudit,
+  });
+  const blockedPhonesQuery = trpc.whatsapp.security.getBlockedPhones.useQuery(undefined, {
+    enabled: canViewSecurity,
+  });
+  const optOutRequestsQuery = trpc.whatsapp.security.getOptOutRequests.useQuery(undefined, {
+    enabled: canViewSecurity,
+  });
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
+    enabled: canViewSecurity,
     onAccountUpdate: useCallback(
       (event: AccountUpdateEvent) => {
         toast.info(`تحديث الحساب: ${event.eventType}`);
@@ -97,10 +113,14 @@ export default function WhatsAppCompliance() {
   // Mutations
   const blockPhoneMutation = trpc.whatsapp.security.blockPhone.useMutation();
   const unblockPhoneMutation = trpc.whatsapp.security.unblockPhone.useMutation();
-  const validateComplianceQuery = trpc.whatsapp.security.validateMetaCompliance.useQuery({
-    message: '',
-  });
-  const exportAuditQuery = trpc.whatsapp.exportAuditLogs.useQuery({ phone: undefined });
+  const validateComplianceQuery = trpc.whatsapp.security.validateMetaCompliance.useQuery(
+    { message: '' },
+    { enabled: canViewSecurity }
+  );
+  const exportAuditQuery = trpc.whatsapp.exportAuditLogs.useQuery(
+    { phone: undefined },
+    { enabled: canExportAudit }
+  );
   const handleOptOutMutation = trpc.whatsapp.security.handleOptOutRequest.useMutation({
     onSuccess: () => {
       toast.success('تم معالجة طلب إلغاء الاشتراك');
@@ -113,6 +133,10 @@ export default function WhatsAppCompliance() {
   });
 
   const handleBlockPhone = async () => {
+    if (!canManageSecurity) {
+      toast.error('لا تملك صلاحية إدارة أمان WhatsApp');
+      return;
+    }
     if (!blockPhone) {
       toast.error('يرجى إدخال رقم الهاتف');
       return;
@@ -140,6 +164,10 @@ export default function WhatsAppCompliance() {
   };
 
   const handleUnblockPhone = async (phone: string) => {
+    if (!canManageSecurity) {
+      toast.error('لا تملك صلاحية إدارة أمان WhatsApp');
+      return;
+    }
     setIsLoading(true);
     try {
       const result = await unblockPhoneMutation.mutateAsync({ phone });
@@ -158,6 +186,10 @@ export default function WhatsAppCompliance() {
   };
 
   const handleValidateCompliance = async () => {
+    if (!canViewSecurity) {
+      toast.error('لا تملك صلاحية عرض امتثال WhatsApp');
+      return;
+    }
     if (!messageToValidate) {
       toast.error('يرجى إدخال الرسالة');
       return;
@@ -182,6 +214,10 @@ export default function WhatsAppCompliance() {
   };
 
   const handleExportAudit = async () => {
+    if (!canExportAudit) {
+      toast.error('لا تملك صلاحية تصدير سجل التدقيق');
+      return;
+    }
     setIsLoading(true);
     try {
       const result = await exportAuditQuery.refetch();
@@ -210,12 +246,18 @@ export default function WhatsAppCompliance() {
 
   const handleRefresh = () => {
     securityStatsQuery.refetch();
-    auditStatsQuery.refetch();
+    if (canViewAudit) {
+      auditStatsQuery.refetch();
+    }
     blockedPhonesQuery.refetch();
     optOutRequestsQuery.refetch();
   };
 
   const handleOptOut = async () => {
+    if (!canManageSecurity) {
+      toast.error('لا تملك صلاحية إدارة أمان WhatsApp');
+      return;
+    }
     if (!optOutPhone) {
       toast.error('يرجى إدخال رقم الهاتف');
       return;
@@ -316,6 +358,28 @@ export default function WhatsAppCompliance() {
     },
   ];
 
+  if (permissionsLoading) {
+    return (
+      <DashboardLayout pageTitle="الامتثال والأمان" pageDescription="جارٍ التحقق من الصلاحيات">
+        <div />
+      </DashboardLayout>
+    );
+  }
+
+  if (!canViewSecurity) {
+    return (
+      <DashboardLayout
+        pageTitle="الامتثال والأمان"
+        pageDescription="إدارة الامتثال مع معايير Meta والأمان"
+      >
+        <PermissionHint
+          message="تحتاج إلى صلاحية عرض أمان WhatsApp والامتثال للوصول إلى هذه الصفحة."
+          label="الوصول إلى الأمان والامتثال مقيّد"
+        />
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout
       pageTitle="الامتثال والأمان"
@@ -327,6 +391,13 @@ export default function WhatsAppCompliance() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">الامتثال والأمان</h1>
             <p className="text-muted-foreground text-sm">إدارة الامتثال مع معايير Meta والأمان</p>
+            {!canManageSecurity && (
+              <PermissionHint
+                message="يمكنك العرض فقط؛ تتطلب إجراءات الحظر ومعالجة Opt-out صلاحية إدارة أمان WhatsApp."
+                label="إجراءات الإدارة مقيّدة"
+                className="mt-2"
+              />
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
@@ -532,7 +603,11 @@ export default function WhatsAppCompliance() {
               </div>
 
               <div className="flex items-end">
-                <Button onClick={handleBlockPhone} disabled={isLoading} className="w-full">
+                <Button
+                  onClick={handleBlockPhone}
+                  disabled={!canManageSecurity || isLoading}
+                  className="w-full"
+                >
                   {isLoading ? 'جاري...' : 'حظر الرقم'}
                 </Button>
               </div>
@@ -580,6 +655,7 @@ export default function WhatsAppCompliance() {
                         variant="destructive"
                         size="sm"
                         onClick={() => handleUnblockPhone(phone.phone || '')}
+                        disabled={!canManageSecurity || isLoading}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -606,7 +682,11 @@ export default function WhatsAppCompliance() {
             <CardDescription>تصدير سجل العمليات الكامل</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleExportAudit} disabled={isLoading} className="w-full">
+            <Button
+              onClick={handleExportAudit}
+              disabled={!canExportAudit || isLoading}
+              className="w-full"
+            >
               <Download className="w-4 h-4 mr-2" />
               {isLoading ? 'جاري التصدير...' : 'تحميل السجل (CSV)'}
             </Button>
@@ -629,6 +709,7 @@ export default function WhatsAppCompliance() {
                 placeholder="7XXXXXXXX"
                 value={optOutPhone}
                 onChange={(e) => setOptOutPhone(processPhoneInput(e.target.value))}
+                disabled={!canManageSecurity}
                 dir="ltr"
                 className="mt-1"
               />
@@ -639,12 +720,13 @@ export default function WhatsAppCompliance() {
                 placeholder="سبب إلغاء الاشتراك"
                 value={optOutReason}
                 onChange={(e) => setOptOutReason(e.target.value)}
+                disabled={!canManageSecurity}
                 className="mt-1"
               />
             </div>
             <Button
               onClick={handleOptOut}
-              disabled={handleOptOutMutation.isPending}
+              disabled={!canManageSecurity || handleOptOutMutation.isPending}
               className="w-full"
             >
               {handleOptOutMutation.isPending ? 'جاري المعالجة...' : 'معالجة الطلب'}

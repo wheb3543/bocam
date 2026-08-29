@@ -1,4 +1,5 @@
-import { router, protectedProcedure } from '../_core/trpc';
+import { router } from '../_core/trpc';
+import { permissionProcedure } from './permissionProcedures';
 import { z } from 'zod';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { eq } from 'drizzle-orm';
@@ -18,7 +19,10 @@ export const whatsappTemplateTestRouter = router({
   /**
    * اختبار إرسال قالب الترحيب المخصص بهوية المستشفى
    */
-  sendWelcomeGreeting: protectedProcedure
+  sendWelcomeGreeting: permissionProcedure(
+    'communications.testing.send',
+    'إرسال رسالة ترحيب تجريبية عبر WhatsApp'
+  )
     .input(
       z.object({
         phone: z.string().min(9).max(15),
@@ -97,7 +101,10 @@ export const whatsappTemplateTestRouter = router({
   /**
    * قائمة بجميع القوالب المتاحة والمعتمدة
    */
-  listApprovedTemplates: protectedProcedure.query(async () => {
+  listApprovedTemplates: permissionProcedure(
+    'communications.testing.view',
+    'عرض قوالب WhatsApp المعتمدة للاختبار'
+  ).query(async () => {
     try {
       const db = await ensureDatabaseAvailable();
 
@@ -143,7 +150,7 @@ export const whatsappTemplateTestRouter = router({
   /**
    * اختبار إرسال أي قالب معتمد
    */
-  sendTemplate: protectedProcedure
+  sendTemplate: permissionProcedure('communications.testing.send', 'إرسال قالب تجريبي عبر WhatsApp')
     .input(
       z.object({
         phone: z.string().min(9).max(15),
@@ -233,7 +240,10 @@ export const whatsappTemplateTestRouter = router({
   /**
    * الحصول على تفاصيل قالب معين
    */
-  getTemplateDetails: protectedProcedure
+  getTemplateDetails: permissionProcedure(
+    'communications.testing.view',
+    'عرض تفاصيل قالب WhatsApp للاختبار'
+  )
     .input(z.object({ templateName: z.string() }))
     .query(async ({ input }) => {
       try {

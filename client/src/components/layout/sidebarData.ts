@@ -156,12 +156,14 @@ export const allNavItems: NavItem[] = [
     title: 'الرد التلقائي',
     href: '/admin/whatsapp/auto-reply',
     icon: MessageSquare,
+    requiredPermission: 'communications.automation.view',
   },
   {
     id: 'whatsapp-compliance',
     title: 'الأمان والامتثال',
     href: '/admin/whatsapp/compliance',
     icon: SettingsIcon,
+    requiredPermission: 'communications.security.view',
   },
   {
     id: 'whatsapp-appointments',
@@ -181,6 +183,7 @@ export const allNavItems: NavItem[] = [
     title: 'تكاملات الحساب',
     href: '/admin/whatsapp/integration',
     icon: Smartphone,
+    requiredPermission: 'communications.testing.view',
   },
   {
     id: 'whatsapp-account-health',
@@ -199,6 +202,7 @@ export const allNavItems: NavItem[] = [
     title: 'اشتراكات Webhooks',
     href: '/admin/whatsapp/subscriptions',
     icon: Users,
+    requiredPermission: 'communications.consents.view',
   },
   {
     id: 'whatsapp-webhook-inspector',
@@ -383,12 +387,14 @@ export const allToolsGroups: NavGroup[] = [
         title: 'الرد التلقائي',
         href: '/admin/whatsapp/auto-reply',
         icon: MessageSquare,
+        requiredPermission: 'communications.automation.view',
       },
       {
         id: 'whatsapp-compliance',
         title: 'الأمان والامتثال',
         href: '/admin/whatsapp/compliance',
         icon: SettingsIcon,
+        requiredPermission: 'communications.security.view',
       },
       {
         id: 'whatsapp-appointments',
@@ -408,6 +414,7 @@ export const allToolsGroups: NavGroup[] = [
         title: 'تكاملات الحساب',
         href: '/admin/whatsapp/integration',
         icon: Smartphone,
+        requiredPermission: 'communications.testing.view',
       },
       {
         id: 'whatsapp-account-health',
@@ -426,6 +433,7 @@ export const allToolsGroups: NavGroup[] = [
         title: 'اشتراكات Webhooks',
         href: '/admin/whatsapp/subscriptions',
         icon: Users,
+        requiredPermission: 'communications.consents.view',
       },
       {
         id: 'whatsapp-webhook-inspector',

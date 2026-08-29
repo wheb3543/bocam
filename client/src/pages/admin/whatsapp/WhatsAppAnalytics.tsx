@@ -61,6 +61,7 @@ export default function WhatsAppAnalytics() {
   const canViewAnalytics = can('reports.view');
   const canExportAnalytics = can('reports.export');
   const canViewCommunication = can('communications.view');
+  const canViewAutoReply = can('communications.automation.view');
 
   // Queries
   const analyticsQueryOptions = { enabled: !arePermissionsLoading && canViewAnalytics };
@@ -69,7 +70,7 @@ export default function WhatsAppAnalytics() {
     analyticsQueryOptions
   );
   const autoReplyRulesQuery = trpc.whatsapp.autoReply.getAutoReplyRules.useQuery(undefined, {
-    enabled: !arePermissionsLoading && canViewAnalytics && canViewCommunication,
+    enabled: !arePermissionsLoading && canViewAnalytics && canViewCommunication && canViewAutoReply,
   });
   const messageStatsQuery = trpc.whatsapp.getMessageStats.useQuery(
     undefined,

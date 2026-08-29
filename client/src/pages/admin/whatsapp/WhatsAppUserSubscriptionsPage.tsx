@@ -19,9 +19,12 @@ import {
 import { toast } from 'sonner';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 export default function WhatsAppUserSubscriptionsPage() {
-  const { can } = useRolePermissions();
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canViewConsents = can('communications.consents.view');
+  const canManageConsents = can('communications.consents.manage');
   const canViewWebhookLogs = can('integrations.logs.view');
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,12 +36,12 @@ export default function WhatsAppUserSubscriptionsPage() {
     refetch,
   } = trpc.whatsapp.userSubscriptions.getAll.useQuery(
     { optInType, limit: 100 },
-    { refetchInterval: 30000 }
+    { enabled: canViewConsents, refetchInterval: 30000 }
   );
 
   const { data: stats, refetch: refetchStats } = trpc.whatsapp.userSubscriptions.getStats.useQuery(
     undefined,
-    { refetchInterval: 30000 }
+    { enabled: canViewConsents, refetchInterval: 30000 }
   );
 
   const {
@@ -47,12 +50,12 @@ export default function WhatsAppUserSubscriptionsPage() {
     refetch: refetchWebhook,
   } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
     { category: 'subscriptions', limit: 50 },
-    { enabled: canViewWebhookLogs, refetchInterval: 30000 }
+    { enabled: canViewConsents && canViewWebhookLogs, refetchInterval: 30000 }
   );
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
-    enabled: canViewWebhookLogs,
+    enabled: canViewConsents && canViewWebhookLogs,
     onAccountUpdate: useCallback(
       (event: AccountUpdateEvent) => {
         toast.info(`تحديث الحساب: ${event.eventType}`);
@@ -76,6 +79,10 @@ export default function WhatsAppUserSubscriptionsPage() {
   });
 
   const handleRefresh = () => {
+    if (!canViewConsents) {
+      toast.error('لا تملك صلاحية عرض اشتراكات WhatsApp');
+      return;
+    }
     refetch();
     refetchStats();
     refetchWebhook();
@@ -83,6 +90,10 @@ export default function WhatsAppUserSubscriptionsPage() {
   };
 
   const handleUpdateStatus = (phone: string, status: 'opted_in' | 'opted_out') => {
+    if (!canManageConsents) {
+      toast.error('لا تملك صلاحية تعديل اشتراكات WhatsApp');
+      return;
+    }
     updateStatusMutation.mutate({
       phoneNumber: phone,
       status,
@@ -104,6 +115,21 @@ export default function WhatsAppUserSubscriptionsPage() {
       })
     : [];
 
+  if (permissionsLoading) {
+    return <div className="container mx-auto py-6 px-4" dir="rtl" />;
+  }
+
+  if (!canViewConsents) {
+    return (
+      <div className="container mx-auto py-6 px-4" dir="rtl">
+        <PermissionHint
+          message="تحتاج إلى صلاحية عرض موافقات واشتراكات WhatsApp للوصول إلى هذه الصفحة."
+          label="الوصول إلى الاشتراكات مقيّد"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-6 px-4" dir="rtl">
       <div className="flex items-center justify-between mb-6">
@@ -112,8 +138,15 @@ export default function WhatsAppUserSubscriptionsPage() {
           <p className="text-gray-600 mt-1">
             إدارة اشتراكات المستخدمين في WhatsApp (Opt-in/Opt-out)
           </p>
+          {!canManageConsents && (
+            <PermissionHint
+              message="يمكنك العرض فقط؛ يتطلب تغيير Opt-in/Opt-out صلاحية إدارة موافقات WhatsApp."
+              label="تعديلات الاشتراك مقيّدة"
+              className="mt-2"
+            />
+          )}
         </div>
-        <Button onClick={handleRefresh} variant="outline" className="gap-2">
+        <Button onClick={handleRefresh} variant="outline" className="gap-2" disabled={isLoading}>
           <RefreshCw className="h-4 w-4" />
           تحديث
         </Button>
@@ -263,7 +296,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                                 onClick={() =>
                                   handleUpdateStatus(sub.phoneNumber as string, 'opted_out')
                                 }
-                                disabled={updateStatusMutation.isPending}
+                                disabled={!canManageConsents || updateStatusMutation.isPending}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
                                 إلغاء الاشتراك
@@ -276,7 +309,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                                 onClick={() =>
                                   handleUpdateStatus(sub.phoneNumber as string, 'opted_in')
                                 }
-                                disabled={updateStatusMutation.isPending}
+                                disabled={!canManageConsents || updateStatusMutation.isPending}
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
                                 اشتراك

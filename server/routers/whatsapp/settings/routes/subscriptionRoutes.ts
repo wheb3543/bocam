@@ -3,14 +3,15 @@
  * مسارات الاشتراكات لواتساب
  */
 
-import { protectedProcedure, router } from '../../../../_core/trpc';
+import { router } from '../../../../_core/trpc';
+import { permissionProcedure } from '../../../permissionProcedures';
 import { TRPCError } from '@trpc/server';
 import { ensureDatabaseAvailable } from '../../../../_core/databaseGuard';
 import * as db from '../../../../database/db';
 import { z } from 'zod';
 
 export const subscriptionRouter = router({
-  getAll: protectedProcedure
+  getAll: permissionProcedure('communications.consents.view', 'عرض اشتراكات وموافقات WhatsApp')
     .input(
       z
         .object({
@@ -44,7 +45,10 @@ export const subscriptionRouter = router({
       return query.orderBy(desc(whatsappUserOptIns.createdAt)).limit(input?.limit || 100);
     }),
 
-  updateStatus: protectedProcedure
+  updateStatus: permissionProcedure(
+    'communications.consents.manage',
+    'تعديل اشتراكات وموافقات WhatsApp'
+  )
     .input(
       z.object({
         phoneNumber: z.string(),
@@ -113,7 +117,10 @@ export const subscriptionRouter = router({
       }
     ),
 
-  getStats: protectedProcedure.query(async () => {
+  getStats: permissionProcedure(
+    'communications.consents.view',
+    'عرض إحصاءات اشتراكات WhatsApp'
+  ).query(async () => {
     const dbConn = await db.getDb();
     if (!dbConn) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة' });

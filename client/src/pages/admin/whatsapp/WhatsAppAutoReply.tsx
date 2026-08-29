@@ -11,17 +11,25 @@ import { Input } from '@/components/ui/input';
 import { Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 export default function WhatsAppAutoReply() {
   const [autoReplyTrigger, setAutoReplyTrigger] = useState('');
   const [autoReplyResponse, setAutoReplyResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canViewAutoReply = can('communications.automation.view');
+  const canManageAutoReply = can('communications.automation.manage');
 
   // Queries
-  const autoReplyRulesQuery = trpc.whatsapp.autoReply.getAutoReplyRules.useQuery();
+  const autoReplyRulesQuery = trpc.whatsapp.autoReply.getAutoReplyRules.useQuery(undefined, {
+    enabled: canViewAutoReply,
+  });
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
+    enabled: canViewAutoReply,
     onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
       toast.info(`تحديث الحساب: ${event.eventType}`);
     }, []),
@@ -39,6 +47,10 @@ export default function WhatsAppAutoReply() {
   });
 
   const handleAddAutoReply = async () => {
+    if (!canManageAutoReply) {
+      toast.error('لا تملك صلاحية إدارة قواعد الرد الآلي في WhatsApp');
+      return;
+    }
     if (!autoReplyTrigger || !autoReplyResponse) {
       toast.error('يرجى إدخال المحفز والرد');
       return;
@@ -69,6 +81,10 @@ export default function WhatsAppAutoReply() {
   };
 
   const handleDeleteAutoReply = async (ruleId: number) => {
+    if (!canManageAutoReply) {
+      toast.error('لا تملك صلاحية إدارة قواعد الرد الآلي في WhatsApp');
+      return;
+    }
     try {
       const result = await deleteAutoReplyMutation.mutateAsync({ ruleId });
       if (result.success) {
@@ -80,12 +96,34 @@ export default function WhatsAppAutoReply() {
     }
   };
 
+  if (permissionsLoading) {
+    return <div className="space-y-6" />;
+  }
+
+  if (!canViewAutoReply) {
+    return (
+      <div className="space-y-6">
+        <PermissionHint
+          message="تحتاج إلى صلاحية عرض قواعد الرد الآلي في WhatsApp للوصول إلى هذه الصفحة."
+          label="الوصول إلى الرد الآلي مقيّد"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">قواعد الرد التلقائي</h1>
         <p className="text-muted-foreground">إضافة قواعد للرد التلقائي على الرسائل الواردة</p>
+        {!canManageAutoReply && (
+          <PermissionHint
+            message="يمكنك عرض القواعد فقط؛ تتطلب الإضافة والتعديل والحذف صلاحية إدارة الرد الآلي."
+            label="تعديلات الرد الآلي مقيّدة"
+            className="mt-2"
+          />
+        )}
       </div>
 
       {/* Stats Card */}
@@ -116,6 +154,7 @@ export default function WhatsAppAutoReply() {
                 placeholder="مثال: مرحبا"
                 value={autoReplyTrigger}
                 onChange={(e) => setAutoReplyTrigger(e.target.value)}
+                disabled={!canManageAutoReply}
                 className="mt-1"
               />
             </div>
@@ -126,12 +165,17 @@ export default function WhatsAppAutoReply() {
                 placeholder="مثال: أهلا وسهلا"
                 value={autoReplyResponse}
                 onChange={(e) => setAutoReplyResponse(e.target.value)}
+                disabled={!canManageAutoReply}
                 className="mt-1"
               />
             </div>
           </div>
 
-          <Button onClick={handleAddAutoReply} disabled={isLoading} className="w-full">
+          <Button
+            onClick={handleAddAutoReply}
+            disabled={!canManageAutoReply || isLoading}
+            className="w-full"
+          >
             {isLoading ? 'جاري الإضافة...' : 'إضافة قاعدة'}
           </Button>
         </CardContent>
@@ -164,7 +208,7 @@ export default function WhatsAppAutoReply() {
                           enabled: !rule.isActive,
                         })
                       }
-                      disabled={toggleAutoReplyMutation.isPending}
+                      disabled={!canManageAutoReply || toggleAutoReplyMutation.isPending}
                     >
                       {rule.isActive ? 'تعطيل' : 'تفعيل'}
                     </Button>
@@ -172,6 +216,7 @@ export default function WhatsAppAutoReply() {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDeleteAutoReply(rule.id)}
+                      disabled={!canManageAutoReply || deleteAutoReplyMutation.isPending}
                     >
                       حذف
                     </Button>

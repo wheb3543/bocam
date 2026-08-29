@@ -250,6 +250,7 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/whatsapp/auto-reply',
         icon: SettingsIcon,
         feature: 'whatsapp',
+        requiredPermission: 'communications.automation.view',
       },
       {
         id: 'whatsapp-analytics',
@@ -271,6 +272,7 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/whatsapp/compliance',
         icon: Shield,
         feature: 'whatsapp',
+        requiredPermission: 'communications.security.view',
       },
       {
         id: 'whatsapp-appointments',
@@ -285,6 +287,7 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/whatsapp/integration',
         icon: Cloud,
         feature: 'whatsapp',
+        requiredPermission: 'communications.testing.view',
       },
       {
         id: 'whatsapp-costs',

@@ -28,6 +28,8 @@ import {
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { PermissionHint } from '@/components/PermissionHint';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
 
 interface SentMessage {
@@ -61,33 +63,46 @@ export default function WhatsAppIntegration() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [sentMessages, setSentMessages] = useState<SentMessage[]>([]);
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
+  const canViewTesting = can('communications.testing.view');
+  const canSendTesting = can('communications.testing.send');
+  const canViewSecurity = can('communications.security.view');
 
   // Queries
   const {
     data: templates,
     isLoading: templatesLoading,
     refetch: refetchTemplates,
-  } = trpc.whatsappTemplateTest.listApprovedTemplates.useQuery();
+  } = trpc.whatsappTemplateTest.listApprovedTemplates.useQuery(undefined, {
+    enabled: canViewTesting,
+  });
   const { data: templateDetails, isLoading: _detailsLoading } =
     trpc.whatsappTemplateTest.getTemplateDetails.useQuery(
       { templateName },
-      { enabled: !!templateName }
+      { enabled: canViewTesting && !!templateName }
     );
 
   // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
   useWhatsAppSSE({
+    enabled: canViewTesting,
     onAccountUpdate: useCallback((event: AccountUpdateEvent) => {
       toast.info(`تحديث الحساب: ${event.eventType}`);
     }, []),
   });
 
-  const { data: securityStats } = trpc.whatsapp.security.getSecurityStats.useQuery();
+  const { data: securityStats } = trpc.whatsapp.security.getSecurityStats.useQuery(undefined, {
+    enabled: canViewSecurity,
+  });
 
   // Mutations
   const sendWelcomeGreeting = trpc.whatsappTemplateTest.sendWelcomeGreeting.useMutation();
   const sendTemplate = trpc.whatsappTemplateTest.sendTemplate.useMutation();
 
   const handleSendWelcome = async () => {
+    if (!canSendTesting) {
+      toast.error('لا تملك صلاحية إرسال رسائل اختبار WhatsApp');
+      return;
+    }
     if (!phone || !fullName) {
       toast.error('يرجى ملء جميع الحقول المطلوبة');
       return;
@@ -134,7 +149,11 @@ export default function WhatsAppIntegration() {
   };
 
   const handleSendTemplate = async () => {
-    if (!phone) {
+    if (!canSendTesting) {
+      toast.error('لا تملك صلاحية إرسال رسائل اختبار WhatsApp');
+      return;
+    }
+    if (!phone || !templateName) {
       toast.error('يرجى إدخال رقم الهاتف');
       return;
     }
@@ -214,6 +233,25 @@ export default function WhatsAppIntegration() {
     return d.toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short' });
   };
 
+  if (permissionsLoading) {
+    return (
+      <DashboardLayout pageTitle="تكامل WhatsApp" pageDescription="جارٍ التحقق من الصلاحيات">
+        <div />
+      </DashboardLayout>
+    );
+  }
+
+  if (!canViewTesting) {
+    return (
+      <DashboardLayout pageTitle="تكامل WhatsApp" pageDescription="أدوات اختبار قوالب WhatsApp">
+        <PermissionHint
+          message="تحتاج إلى صلاحية عرض أدوات اختبار WhatsApp للوصول إلى هذه الصفحة."
+          label="الوصول إلى أدوات الاختبار مقيّد"
+        />
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout
       pageTitle="تكامل WhatsApp Cloud API"
@@ -232,6 +270,13 @@ export default function WhatsAppIntegration() {
                   تكامل WhatsApp Cloud API
                 </h1>
                 <p className="text-sm text-gray-600 mt-1">إرسال رسائل معتمدة من Meta إلى عملائك</p>
+                {!canSendTesting && (
+                  <PermissionHint
+                    message="يمكنك مراجعة القوالب فقط؛ يتطلب الإرسال صلاحية إرسال رسائل اختبار WhatsApp."
+                    label="الإرسال مقيّد"
+                    className="mt-2"
+                  />
+                )}
               </div>
             </div>
             <Button
@@ -369,7 +414,13 @@ export default function WhatsAppIntegration() {
 
                   <Button
                     onClick={handleSendWelcome}
-                    disabled={isLoading || sendWelcomeGreeting.isPending || !phone || !fullName}
+                    disabled={
+                      !canSendTesting ||
+                      isLoading ||
+                      sendWelcomeGreeting.isPending ||
+                      !phone ||
+                      !fullName
+                    }
                     className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
                     size="lg"
                   >
@@ -536,7 +587,7 @@ export default function WhatsAppIntegration() {
                     {/* Send Button */}
                     <Button
                       onClick={handleSendTemplate}
-                      disabled={isLoading || sendTemplate.isPending}
+                      disabled={!canSendTesting || isLoading || sendTemplate.isPending}
                       className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
                       size="lg"
                     >

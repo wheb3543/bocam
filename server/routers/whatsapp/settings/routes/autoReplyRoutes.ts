@@ -3,11 +3,15 @@
  * مسارات الرد التلقائي لواتساب
  */
 
-import { protectedProcedure, router } from '../../../../_core/trpc';
+import { router } from '../../../../_core/trpc';
+import { permissionProcedure } from '../../../permissionProcedures';
 import { z } from 'zod';
 
 export const autoReplyRouter = router({
-  addAutoReplyRule: protectedProcedure
+  addAutoReplyRule: permissionProcedure(
+    'communications.automation.manage',
+    'إنشاء قواعد الرد الآلي في WhatsApp'
+  )
     .input(
       z.object({
         name: z.string().min(1),
@@ -43,19 +47,28 @@ export const autoReplyRouter = router({
       }
     ),
 
-  deleteAutoReplyRule: protectedProcedure
+  deleteAutoReplyRule: permissionProcedure(
+    'communications.automation.manage',
+    'حذف قواعد الرد الآلي في WhatsApp'
+  )
     .input(z.object({ ruleId: z.number() }))
     .mutation(async ({ input }: { input: { ruleId: number } }) => {
       const { deleteAutoReplyRule } = await import('../../../../services/whatsappAutoReply');
       return deleteAutoReplyRule(input.ruleId);
     }),
 
-  getAutoReplyRules: protectedProcedure.query(async () => {
+  getAutoReplyRules: permissionProcedure(
+    'communications.automation.view',
+    'عرض قواعد الرد الآلي في WhatsApp'
+  ).query(async () => {
     const { getAutoReplyRules } = await import('../../../../services/whatsappAutoReply');
     return getAutoReplyRules();
   }),
 
-  toggleAutoReplyRule: protectedProcedure
+  toggleAutoReplyRule: permissionProcedure(
+    'communications.automation.manage',
+    'تفعيل قواعد الرد الآلي في WhatsApp'
+  )
     .input(
       z.object({
         ruleId: z.number(),
