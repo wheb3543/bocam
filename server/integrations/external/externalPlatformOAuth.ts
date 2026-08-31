@@ -320,6 +320,7 @@ export async function completeExternalPlatformOAuth(input: {
   if (!credentials || !oauthState.connectionId) {
     throw new Error(`إعدادات تطبيق ${input.provider} غير مكتملة.`);
   }
+  const connectionId = oauthState.connectionId;
   try {
     const token = await exchangeCode({
       provider: input.provider,
@@ -330,12 +331,16 @@ export async function completeExternalPlatformOAuth(input: {
       codeVerifier: oauthState.codeVerifier,
     });
     const scopes = token.scope?.split(/\s+/).filter(Boolean) ?? oauthState.requestedScopes;
+    const accessToken = token.access_token;
+    if (!accessToken) {
+      throw new Error(`رمز وصول ${input.provider} غير متاح بعد التفويض.`);
+    }
     await storeIntegrationTokens({
-      connectionId: oauthState.connectionId,
+      connectionId,
       tokens: [
         {
           type: 'access',
-          value: token.access_token!,
+          value: accessToken,
           expiresAt: expiration(token.expires_in),
           scopes,
         },
@@ -352,7 +357,7 @@ export async function completeExternalPlatformOAuth(input: {
       ],
     });
     await completeIntegrationConnection({
-      connectionId: oauthState.connectionId,
+      connectionId,
       displayName: input.provider,
       grantedScopes: scopes,
       expiresAt: expiration(token.expires_in),
@@ -360,12 +365,12 @@ export async function completeExternalPlatformOAuth(input: {
     });
     await discoverPrimaryAsset({
       provider: input.provider,
-      connectionId: oauthState.connectionId,
-      accessToken: token.access_token!,
+      connectionId,
+      accessToken,
     });
     await createIntegrationAuditEvent({
       provider: input.provider,
-      connectionId: oauthState.connectionId,
+      connectionId,
       action: 'oauth.social.completed',
       status: 'succeeded',
       performedByUserId: oauthState.initiatedByUserId,
@@ -375,15 +380,15 @@ export async function completeExternalPlatformOAuth(input: {
   } catch (error) {
     const message = error instanceof Error ? error.message : `تعذر إكمال تفويض ${input.provider}.`;
     await failIntegrationOauthState(stateHash, message);
-    await markIntegrationConnectionError(oauthState.connectionId, message);
+    await markIntegrationConnectionError(connectionId, message);
     void notifyIntegrationIssue({
-      connectionId: oauthState.connectionId,
+      connectionId,
       provider: input.provider,
       event: 'connection_error',
     }).catch(() => undefined);
     await createIntegrationAuditEvent({
       provider: input.provider,
-      connectionId: oauthState.connectionId,
+      connectionId,
       action: 'oauth.social.completed',
       status: 'failed',
       performedByUserId: oauthState.initiatedByUserId,

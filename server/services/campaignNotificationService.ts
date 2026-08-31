@@ -1,6 +1,8 @@
 import { and, eq, gte, inArray, isNotNull, isNull, lte } from 'drizzle-orm';
 import { campaignAlertSchedules, campaigns } from '../../drizzle/schema';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
+
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
 import { createNotification } from '../_core/notificationHelper';
 import { notifyEligibleRecipients } from './notificationPolicy';
 
@@ -50,7 +52,7 @@ export async function notifyCampaignLeaderAssigned(input: {
   });
 }
 
-async function getCampaignAlertSchedule(db: any) {
+async function getCampaignAlertSchedule(db: DbClient) {
   const [schedule] = await db.select().from(campaignAlertSchedules).limit(1);
   if (schedule) {
     return schedule;
@@ -68,7 +70,7 @@ async function getCampaignAlertSchedule(db: any) {
   )[0];
 }
 
-export async function attachCampaignAlertTask(db: any, taskUid: string) {
+export async function attachCampaignAlertTask(db: DbClient, taskUid: string) {
   const schedule = await getCampaignAlertSchedule(db);
   await db
     .update(campaignAlertSchedules)

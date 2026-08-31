@@ -75,7 +75,11 @@ export function doesRolePermissionSetGrant(
   return legacyManagementPermission ? permissions.includes(legacyManagementPermission) : false;
 }
 
-export async function ensureSystemRoleDefinitions(db: any) {
+type DbClient = Awaited<
+  ReturnType<typeof import('../_core/databaseGuard').ensureDatabaseAvailable>
+>;
+
+export async function ensureSystemRoleDefinitions(db: DbClient) {
   if (!db || typeof db.select !== 'function') {
     return;
   }
@@ -118,24 +122,42 @@ export async function ensureSystemRoleDefinitions(db: any) {
   }
 }
 
-export async function listRoleDefinitions(db: any, includeInactive = true) {
+type RoleDefinitionRow = {
+  id: number;
+  key: string;
+  name: string;
+  description: string | null;
+  baseRole: RoleBaseKey;
+  permissions: string | null;
+  isSystem: boolean;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export async function listRoleDefinitions(db: DbClient, includeInactive = true) {
   await ensureSystemRoleDefinitions(db);
   const definitions = includeInactive
     ? await db.select().from(roleDefinitions)
     : await db.select().from(roleDefinitions).where(eq(roleDefinitions.isActive, true));
   return definitions
-    .map((role: any) => ({
-      ...role,
-      permissions: normalizeRolePermissions(safeParse(role.permissions)),
-    }))
+    .map(
+      (role) =>
+        ({
+          ...role,
+          permissions: normalizeRolePermissions(safeParse(role.permissions)),
+        }) as RoleDefinitionRow & { permissions: RolePermission[] }
+    )
     .sort(
-      (a: any, b: any) =>
-        Number(b.isSystem) - Number(a.isSystem) || a.name.localeCompare(b.name, 'ar')
+      (
+        a: RoleDefinitionRow & { permissions: RolePermission[] },
+        b: RoleDefinitionRow & { permissions: RolePermission[] }
+      ) => Number(b.isSystem) - Number(a.isSystem) || a.name.localeCompare(b.name, 'ar')
     );
 }
 
 export async function saveRoleDefinition(
-  db: any,
+  db: DbClient,
   input: {
     id?: number;
     key?: string;
@@ -237,7 +259,7 @@ export async function saveRoleDefinition(
 }
 
 export async function assignRoleDefinition(
-  db: any,
+  db: DbClient,
   input: { userId: number; roleDefinitionId: number | null; actorId: number }
 ) {
   if (input.roleDefinitionId === null) {
@@ -266,7 +288,7 @@ export async function assignRoleDefinition(
 }
 
 export async function hasRolePermission(
-  db: any,
+  db: DbClient,
   userId: number,
   baseRole: string,
   permission: RolePermission
@@ -335,7 +357,10 @@ export async function hasRolePermission(
   return doesRolePermissionSetGrant(normalizeRolePermissions(fallbackPermissions), permission);
 }
 
-function safeParse(value: string) {
+function safeParse(value: string | null | undefined) {
+  if (!value) {
+    return [];
+  }
   try {
     return JSON.parse(value);
   } catch {

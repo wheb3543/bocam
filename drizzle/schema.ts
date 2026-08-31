@@ -8,10 +8,8 @@ import {
   boolean,
   index,
   decimal,
-  primaryKey,
   uniqueIndex,
 } from 'drizzle-orm/mysql-core';
-import { relations } from 'drizzle-orm';
 
 /**
  * Core user table backing auth flow.
@@ -2237,14 +2235,15 @@ export type InsertContentVersion = typeof contentVersions.$inferInsert;
  * Pages Table - جدول الصفحات
  * يخزّن معلومات الصفحات الرئيسية والفرعية مع بيانات SEO كاملة
  */
-export const pages = mysqlTable(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const pages: any = mysqlTable(
   'pages',
   {
     id: int('id').autoincrement().primaryKey(),
     name: varchar('name', { length: 255 }).notNull(),
     slug: varchar('slug', { length: 255 }).notNull().unique(),
     type: mysqlEnum('type', ['main', 'sub']).default('main').notNull(),
-    parentId: int('parentId').references((): any => pages.id, {
+    parentId: int('parentId').references(() => pages.id, {
       onDelete: 'set null',
       onUpdate: 'cascade',
     }),

@@ -23,7 +23,11 @@ type OperationalResultInput = {
  * يرسل فشل أول محاولة فقط، ثم يرسل إشعار تعافٍ واحداً عند نجاح العملية لاحقاً.
  * لا نخزن سبباً تفصيلياً أو بيانات حساسة؛ السجل مخصص لحالة التشغيل فقط.
  */
-export async function recordOperationalResult(db: any, input: OperationalResultInput) {
+type DbClient = Awaited<
+  ReturnType<typeof import('../_core/databaseGuard').ensureDatabaseAvailable>
+>;
+
+export async function recordOperationalResult(db: DbClient, input: OperationalResultInput) {
   try {
     const [existing] = await db
       .select()
@@ -69,7 +73,7 @@ export async function recordOperationalResult(db: any, input: OperationalResultI
 }
 
 async function notifyOperationalTransition(
-  db: any,
+  db: DbClient,
   input: OperationalResultInput,
   transition: 'failure' | 'recovery'
 ) {

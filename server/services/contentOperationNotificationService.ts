@@ -24,7 +24,7 @@ const operationLabels: Record<ContentOperationKind, string> = {
  * أسماء ملفات أو محتوى المستندات إلى صندوق الإشعارات كي يبقى الملخص تشغيلياً وآمناً.
  */
 export async function recordContentOperation(
-  db: any,
+  db: Awaited<ReturnType<typeof import('../_core/databaseGuard').ensureDatabaseAvailable>>,
   input: ContentOperationNotificationInput
 ): Promise<void> {
   const label = operationLabels[input.operation];

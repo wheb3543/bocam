@@ -344,7 +344,7 @@ export const approvalsRouter = router({
         offset: z.number().default(0),
       })
     )
-    .query(async ({ input, ctx }) => {
+    .query(async ({ input, ctx: _ctx }) => {
       const db = await ensureDatabaseAvailable();
 
       const conditions = [];
@@ -929,7 +929,7 @@ export const approvalsRouter = router({
         });
       }
 
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         status: input.status,
         rejectedBy: ctx.user.id,
         rejectedAt: new Date(),

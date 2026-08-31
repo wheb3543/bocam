@@ -252,13 +252,16 @@ export async function completeMetaBusinessOAuth(input: { code: string; state: st
     throw new Error('جلسة تفويض Meta غير صالحة أو منتهية. ابدأ الربط من لوحة الإدارة مجدداً.');
   }
   const app = await getMetaOAuthAppCredentials();
-  if (!app) {
-    await markIntegrationConnectionError(oauthState.connectionId!, 'بيانات تطبيق Meta غير مكتملة.');
-    void notifyIntegrationIssue({
-      connectionId: oauthState.connectionId!,
-      provider: 'meta',
-      event: 'connection_error',
-    }).catch(() => undefined);
+  const connectionId = oauthState.connectionId;
+  if (!app || !connectionId) {
+    if (connectionId) {
+      await markIntegrationConnectionError(connectionId, 'بيانات تطبيق Meta غير مكتملة.');
+      void notifyIntegrationIssue({
+        connectionId,
+        provider: 'meta',
+        event: 'connection_error',
+      }).catch(() => undefined);
+    }
     throw new Error('بيانات تطبيق Meta غير مكتملة.');
   }
 
@@ -270,7 +273,7 @@ export async function completeMetaBusinessOAuth(input: { code: string; state: st
       redirectUri: oauthState.redirectUri,
     });
     await storeIntegrationTokens({
-      connectionId: oauthState.connectionId!,
+      connectionId,
       tokens: [
         {
           type: 'access',
@@ -281,16 +284,16 @@ export async function completeMetaBusinessOAuth(input: { code: string; state: st
       ],
     });
     await completeIntegrationConnection({
-      connectionId: oauthState.connectionId!,
+      connectionId,
       displayName: 'Meta Business',
       grantedScopes: oauthState.requestedScopes,
       expiresAt: token.expiresAt,
       authorizationMethod: 'facebook_login_for_business',
     });
-    await discoverMetaAssets(oauthState.connectionId!, token.accessToken);
+    await discoverMetaAssets(connectionId, token.accessToken);
     await createIntegrationAuditEvent({
       provider: 'meta',
-      connectionId: oauthState.connectionId,
+      connectionId,
       action: 'oauth.meta_business.completed',
       status: 'succeeded',
       performedByUserId: oauthState.initiatedByUserId,
@@ -300,9 +303,9 @@ export async function completeMetaBusinessOAuth(input: { code: string; state: st
   } catch (error) {
     const message = error instanceof Error ? error.message : 'تعذر إكمال تفويض Meta.';
     await failIntegrationOauthState(stateHash, message);
-    await markIntegrationConnectionError(oauthState.connectionId!, message);
+    await markIntegrationConnectionError(connectionId, message);
     void notifyIntegrationIssue({
-      connectionId: oauthState.connectionId!,
+      connectionId,
       provider: 'meta',
       event: 'connection_error',
     }).catch(() => undefined);
@@ -378,13 +381,16 @@ export async function completeWhatsAppEmbeddedSignup(input: {
     throw new Error('جلسة ربط WhatsApp غير صالحة أو منتهية.');
   }
   const app = await getMetaOAuthAppCredentials();
-  if (!app) {
-    await markIntegrationConnectionError(oauthState.connectionId!, 'بيانات تطبيق Meta غير مكتملة.');
-    void notifyIntegrationIssue({
-      connectionId: oauthState.connectionId!,
-      provider: 'whatsapp',
-      event: 'connection_error',
-    }).catch(() => undefined);
+  const connectionId = oauthState.connectionId;
+  if (!app || !connectionId) {
+    if (connectionId) {
+      await markIntegrationConnectionError(connectionId, 'بيانات تطبيق Meta غير مكتملة.');
+      void notifyIntegrationIssue({
+        connectionId,
+        provider: 'whatsapp',
+        event: 'connection_error',
+      }).catch(() => undefined);
+    }
     throw new Error('بيانات تطبيق Meta غير مكتملة.');
   }
 
@@ -396,7 +402,7 @@ export async function completeWhatsAppEmbeddedSignup(input: {
       redirectUri: oauthState.redirectUri,
     });
     await storeIntegrationTokens({
-      connectionId: oauthState.connectionId!,
+      connectionId,
       tokens: [
         {
           type: 'business',
@@ -407,7 +413,7 @@ export async function completeWhatsAppEmbeddedSignup(input: {
       ],
     });
     await completeIntegrationConnection({
-      connectionId: oauthState.connectionId!,
+      connectionId,
       displayName: `WhatsApp Business ${input.wabaId}`,
       externalBusinessId: input.wabaId,
       grantedScopes: oauthState.requestedScopes,
@@ -415,7 +421,7 @@ export async function completeWhatsAppEmbeddedSignup(input: {
       authorizationMethod: 'whatsapp_embedded_signup',
     });
     await upsertIntegrationExternalAsset({
-      connectionId: oauthState.connectionId!,
+      connectionId,
       provider: 'whatsapp',
       assetType: 'whatsapp_business_account',
       externalAssetId: input.wabaId,
@@ -424,7 +430,7 @@ export async function completeWhatsAppEmbeddedSignup(input: {
       isSelected: true,
     });
     await upsertIntegrationExternalAsset({
-      connectionId: oauthState.connectionId!,
+      connectionId,
       provider: 'whatsapp',
       assetType: 'whatsapp_phone_number',
       externalAssetId: input.phoneNumberId,
@@ -434,7 +440,7 @@ export async function completeWhatsAppEmbeddedSignup(input: {
       isSelected: true,
     });
     await upsertIntegrationWebhookSubscription({
-      connectionId: oauthState.connectionId!,
+      connectionId,
       provider: 'whatsapp',
       callbackPath: '/api/webhooks/whatsapp',
       subscribedFields: ['messages', 'message_template_quality_update', 'account_update'],
@@ -453,9 +459,9 @@ export async function completeWhatsAppEmbeddedSignup(input: {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'تعذر إكمال WhatsApp Embedded Signup.';
     await failIntegrationOauthState(stateHash, message);
-    await markIntegrationConnectionError(oauthState.connectionId!, message);
+    await markIntegrationConnectionError(connectionId, message);
     void notifyIntegrationIssue({
-      connectionId: oauthState.connectionId!,
+      connectionId,
       provider: 'whatsapp',
       event: 'connection_error',
     }).catch(() => undefined);

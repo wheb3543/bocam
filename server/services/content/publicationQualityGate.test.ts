@@ -38,7 +38,7 @@ describe('assertPublicationQuality', () => {
 
   it('يرفض نشر صورة بلا نص بديل برمز PRECONDITION_FAILED', async () => {
     await expect(
-      assertPublicationQuality({}, {
+      assertPublicationQuality({} as never, {
         entityType: 'image',
         entityId: 41,
         candidate: imageWithoutAlt,
@@ -51,7 +51,7 @@ describe('assertPublicationQuality', () => {
   it('يسمح للمدير بتجاوز خطأ الجودة عند توثيق السبب في سجل التدقيق', async () => {
     const db = createAuditDb();
 
-    const result = await assertPublicationQuality(db, {
+    const result = await assertPublicationQuality(db as never, {
       entityType: 'image',
       entityId: 42,
       candidate: imageWithoutAlt,
@@ -76,7 +76,7 @@ describe('assertPublicationQuality', () => {
     const db = createAuditDb();
 
     await expect(
-      assertPublicationQuality(db, {
+      assertPublicationQuality(db as never, {
         entityType: 'image',
         entityId: 43,
         candidate: imageWithoutAlt,

@@ -11,8 +11,12 @@ const statusLabels: Record<string, string> = {
   cancelled: 'ملغى',
 };
 
+type DbClient = Awaited<
+  ReturnType<typeof import('../_core/databaseGuard').ensureDatabaseAvailable>
+>;
+
 export async function notifyRegistrationStatusFollowUp(
-  db: any,
+  db: DbClient,
   input: {
     source: Extract<NotificationSource, 'bookings' | 'camps' | 'offers'>;
     entityType: 'appointment' | 'camp_registration' | 'offer_lead';

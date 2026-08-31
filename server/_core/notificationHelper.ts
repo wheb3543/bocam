@@ -1,12 +1,15 @@
 /** Shared server-side helpers for the unified per-user notification inbox. */
 
 import { notifications } from '../../drizzle/schema';
+import { ensureDatabaseAvailable } from './databaseGuard';
 import type {
   NotificationPriority,
   NotificationSource,
   NotificationType,
 } from '../../shared/notifications';
 import { shouldDeliverNotification } from '../services/notificationPolicy';
+
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
 
 type NotificationOptions = {
   userId: number;
@@ -23,7 +26,7 @@ type NotificationOptions = {
   expiresAt?: Date;
 };
 
-export async function createNotification(db: any, options: NotificationOptions) {
+export async function createNotification(db: DbClient, options: NotificationOptions) {
   const source = options.source || 'system';
   const priority = options.priority || 'medium';
   if (
@@ -59,7 +62,7 @@ export async function createNotification(db: any, options: NotificationOptions) 
 }
 
 export async function createBulkNotifications(
-  db: any,
+  db: DbClient,
   userIds: number[],
   notificationOptions: Omit<NotificationOptions, 'userId'>
 ) {
@@ -87,7 +90,7 @@ function contentData(options: ContentNotificationOptions, extras: Record<string,
 const contentAction = '/admin/content/content';
 
 export async function createApprovalRequestedNotification(
-  db: any,
+  db: DbClient,
   options: ContentNotificationOptions
 ) {
   return createNotification(db, {
@@ -104,7 +107,7 @@ export async function createApprovalRequestedNotification(
 }
 
 export async function createApprovalReviewerAssignedNotification(
-  db: any,
+  db: DbClient,
   options: ContentNotificationOptions
 ) {
   return createNotification(db, {
@@ -121,7 +124,7 @@ export async function createApprovalReviewerAssignedNotification(
 }
 
 export async function createApprovalApprovedNotification(
-  db: any,
+  db: DbClient,
   options: ContentNotificationOptions
 ) {
   return createNotification(db, {
@@ -138,7 +141,7 @@ export async function createApprovalApprovedNotification(
 }
 
 export async function createApprovalRejectedNotification(
-  db: any,
+  db: DbClient,
   options: ContentNotificationOptions & { rejectionReason?: string }
 ) {
   return createNotification(db, {
@@ -155,7 +158,7 @@ export async function createApprovalRejectedNotification(
 }
 
 export async function createContentUpdatedNotification(
-  db: any,
+  db: DbClient,
   options: ContentNotificationOptions
 ) {
   return createNotification(db, {
@@ -172,7 +175,7 @@ export async function createContentUpdatedNotification(
 }
 
 export async function createContentDeletedNotification(
-  db: any,
+  db: DbClient,
   options: ContentNotificationOptions
 ) {
   return createNotification(db, {
@@ -187,7 +190,7 @@ export async function createContentDeletedNotification(
 }
 
 export async function createContentPublishedNotification(
-  db: any,
+  db: DbClient,
   options: ContentNotificationOptions
 ) {
   return createNotification(db, {

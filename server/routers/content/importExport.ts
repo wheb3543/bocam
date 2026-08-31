@@ -410,7 +410,7 @@ export const importExportRouter = router({
     try {
       await assertNoKeyConflicts(db, input);
 
-      const importResult = await db.transaction(async (tx: any) => {
+      const importResult = await db.transaction(async (tx) => {
         const pageIdMap = new Map<number, number>();
         const sectionIdMap = new Map<number, number>();
         const sectionButtonIdMap = new Map<number, number>();
@@ -440,7 +440,7 @@ export const importExportRouter = router({
           data.parentId = relationId(record.parentId, pageIdMap, 'الصفحة بالصفحة الأب');
           const result = await tx
             .insert(pages)
-            .values(data as any)
+            .values(data as never)
             .$returningId();
           pageIdMap.set(source, Number(result[0].id));
         }
@@ -451,7 +451,7 @@ export const importExportRouter = router({
           data.pageId = relationId(record.pageId, pageIdMap, 'القسم بالصفحة');
           const result = await tx
             .insert(sections)
-            .values(data as any)
+            .values(data as never)
             .$returningId();
           sectionIdMap.set(source, Number(result[0].id));
         }
@@ -462,7 +462,7 @@ export const importExportRouter = router({
           data.sectionId = relationId(record.sectionId, sectionIdMap, 'الزر بالقسم');
           const result = await tx
             .insert(sectionButtons)
-            .values(data as any)
+            .values(data as never)
             .$returningId();
           sectionButtonIdMap.set(source, Number(result[0].id));
         }
@@ -474,7 +474,7 @@ export const importExportRouter = router({
           data.sectionId = relationId(record.sectionId, sectionIdMap, 'النص بالقسم');
           const result = await tx
             .insert(textContent)
-            .values(data as any)
+            .values(data as never)
             .$returningId();
           textContentIdMap.set(source, Number(result[0].id));
         }
@@ -486,7 +486,7 @@ export const importExportRouter = router({
           data.sectionId = relationId(record.sectionId, sectionIdMap, 'الصورة بالقسم');
           const result = await tx
             .insert(images)
-            .values(data as any)
+            .values(data as never)
             .$returningId();
           imageIdMap.set(source, Number(result[0].id));
         }
@@ -495,7 +495,7 @@ export const importExportRouter = router({
           const source = sourceId(record, 'لون');
           const result = await tx
             .insert(colorScheme)
-            .values(cleanRecord(record) as any)
+            .values(cleanRecord(record) as never)
             .$returningId();
           colorIdMap.set(source, Number(result[0].id));
         }
@@ -506,7 +506,7 @@ export const importExportRouter = router({
           data.pageId = relationId(record.pageId, pageIdMap, 'إعداد SEO بالصفحة');
           const result = await tx
             .insert(seoSettings)
-            .values(data as any)
+            .values(data as never)
             .$returningId();
           seoIdMap.set(source, Number(result[0].id));
         }
@@ -530,7 +530,7 @@ export const importExportRouter = router({
           data.parentId = relationId(record.parentId, mediaFolderIdMap, 'مجلد الوسائط الأب');
           const result = await tx
             .insert(mediaFolders)
-            .values(data as any)
+            .values(data as never)
             .$returningId();
           mediaFolderIdMap.set(source, Number(result[0].id));
         }
@@ -543,7 +543,7 @@ export const importExportRouter = router({
           data.sectionId = relationId(record.sectionId, sectionIdMap, 'الوسيط بالقسم');
           const result = await tx
             .insert(media)
-            .values(data as any)
+            .values(data as never)
             .$returningId();
           mediaIdMap.set(source, Number(result[0].id));
         }
@@ -561,7 +561,7 @@ export const importExportRouter = router({
           .map((record) => cleanAuditRecord(record, entityIdMaps))
           .filter((record): record is ContentRecord => record !== null);
         if (auditRows.length) {
-          await tx.insert(contentAuditLog).values(auditRows as any);
+          await tx.insert(contentAuditLog).values(auditRows as never);
         }
         return {
           importedAuditLog: auditRows.length,

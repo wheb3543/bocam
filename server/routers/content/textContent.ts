@@ -42,11 +42,11 @@ function getAdminCacheKey(prefix: string, params: Record<string, unknown>): stri
 }
 
 async function getFromAdminCache<T>(key: string): Promise<T | null> {
-  return await cacheManager.get<T>(key);
+  return cacheManager.get<T>(key);
 }
 
 async function setAdminCache(key: string, data: unknown): Promise<void> {
-  await cacheManager.set(key, data, ADMIN_CACHE_TTL);
+  return cacheManager.set(key, data, ADMIN_CACHE_TTL);
 }
 
 /**

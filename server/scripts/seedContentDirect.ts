@@ -2539,7 +2539,7 @@ const initialImages = [
 
 async function seedInitialContent() {
   try {
-    console.log('بدء إضافة المحتوى الأولي...');
+    console.warn('بدء إضافة المحتوى الأولي...');
 
     // قراءة DATABASE_URL من متغيرات البيئة
     const databaseUrl = process.env.DATABASE_URL;
@@ -2548,13 +2548,13 @@ async function seedInitialContent() {
       process.exit(1);
     }
 
-    console.log('✅ تم العثور على DATABASE_URL');
+    console.warn('✅ تم العثور على DATABASE_URL');
 
     // إنشاء اتصال مباشر بقاعدة البيانات
     const connection = await mysql.createConnection(databaseUrl);
     const db = drizzle(connection, { schema, mode: 'default' });
 
-    console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
+    console.warn('✅ تم الاتصال بقاعدة البيانات بنجاح');
 
     for (const content of initialContent) {
       // التحقق من وجود المحتوى
@@ -2570,16 +2570,16 @@ async function seedInitialContent() {
 
       if (existing.length === 0) {
         await db.insert(schema.textContent).values(content);
-        console.log(`✅ تم إضافة: ${content.key} (${content.language})`);
+        console.warn(`✅ تم إضافة: ${content.key} (${content.language})`);
       } else {
-        console.log(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
+        console.warn(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
       }
     }
 
-    console.log('✅ تم إكمال إضافة المحتوى الأولي بنجاح');
+    console.warn('✅ تم إكمال إضافة المحتوى الأولي بنجاح');
 
     // إضافة نصوص صفحة OffersListPage
-    console.log('بدء إضافة نصوص صفحة OffersListPage...');
+    console.warn('بدء إضافة نصوص صفحة OffersListPage...');
     for (const content of offersListTexts) {
       const existing = await db
         .select()
@@ -2593,16 +2593,16 @@ async function seedInitialContent() {
 
       if (existing.length === 0) {
         await db.insert(schema.textContent).values(content);
-        console.log(`✅ تم إضافة: ${content.key} (${content.language})`);
+        console.warn(`✅ تم إضافة: ${content.key} (${content.language})`);
       } else {
-        console.log(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
+        console.warn(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
       }
     }
 
-    console.log('✅ تم إكمال إضافة نصوص صفحة OffersListPage بنجاح');
+    console.warn('✅ تم إكمال إضافة نصوص صفحة OffersListPage بنجاح');
 
     // إضافة نصوص صفحة OfferDetailPage
-    console.log('بدء إضافة نصوص صفحة OfferDetailPage...');
+    console.warn('بدء إضافة نصوص صفحة OfferDetailPage...');
     for (const content of offerDetailTexts) {
       const existing = await db
         .select()
@@ -2616,16 +2616,16 @@ async function seedInitialContent() {
 
       if (existing.length === 0) {
         await db.insert(schema.textContent).values(content);
-        console.log(`✅ تم إضافة: ${content.key} (${content.language})`);
+        console.warn(`✅ تم إضافة: ${content.key} (${content.language})`);
       } else {
-        console.log(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
+        console.warn(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
       }
     }
 
-    console.log('✅ تم إكمال إضافة نصوص صفحة OfferDetailPage بنجاح');
+    console.warn('✅ تم إكمال إضافة نصوص صفحة OfferDetailPage بنجاح');
 
     // إضافة نصوص صفحة OffersPage
-    console.log('بدء إضافة نصوص صفحة OffersPage...');
+    console.warn('بدء إضافة نصوص صفحة OffersPage...');
     for (const content of offersPageTexts) {
       const existing = await db
         .select()
@@ -2639,16 +2639,16 @@ async function seedInitialContent() {
 
       if (existing.length === 0) {
         await db.insert(schema.textContent).values(content);
-        console.log(`✅ تم إضافة: ${content.key} (${content.language})`);
+        console.warn(`✅ تم إضافة: ${content.key} (${content.language})`);
       } else {
-        console.log(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
+        console.warn(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
       }
     }
 
-    console.log('✅ تم إكمال إضافة نصوص صفحة OffersPage بنجاح');
+    console.warn('✅ تم إكمال إضافة نصوص صفحة OffersPage بنجاح');
 
     // إضافة الصور الأولية
-    console.log('بدء إضافة الصور الأولية...');
+    console.warn('بدء إضافة الصور الأولية...');
     for (const image of initialImages) {
       const existing = await db
         .select()
@@ -2657,13 +2657,13 @@ async function seedInitialContent() {
 
       if (existing.length === 0) {
         await db.insert(schema.images).values(image);
-        console.log(`✅ تم إضافة الصورة: ${image.key}`);
+        console.warn(`✅ تم إضافة الصورة: ${image.key}`);
       } else {
-        console.log(`⏭️  موجودة بالفعل: ${image.key}`);
+        console.warn(`⏭️  موجودة بالفعل: ${image.key}`);
       }
     }
 
-    console.log('✅ تم إكمال إضافة الصور الأولي بنجاح');
+    console.warn('✅ تم إكمال إضافة الصور الأولي بنجاح');
 
     // إغلاق الاتصال
     await connection.end();
@@ -2675,6 +2675,6 @@ async function seedInitialContent() {
 
 // تشغيل السكريبت
 seedInitialContent().then(() => {
-  console.log('تم الانتهاء');
+  console.warn('تم الانتهاء');
   process.exit(0);
 });

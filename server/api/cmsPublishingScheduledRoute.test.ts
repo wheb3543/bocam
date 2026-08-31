@@ -47,16 +47,25 @@ const imageDialogSource = readFileSync(
   'utf8'
 );
 
-function responseMock() {
-  const response = { status: vi.fn(), json: vi.fn() };
+type MockRequest = { body?: unknown; query?: Record<string, string | string[] | undefined>; headers?: Record<string, string> };
+type MockResponse = { status: ReturnType<typeof vi.fn>; json: ReturnType<typeof vi.fn> };
+
+function responseMock(): MockResponse {
+  const response: MockResponse = { status: vi.fn(), json: vi.fn() };
   response.status.mockReturnValue(response);
   return response;
 }
 
 function scheduledHandler() {
   const router = createCmsPublishingScheduledRouter();
-  const layer = router.stack.find((entry: any) => entry.route?.path === '/api/scheduled/cms-publish');
-  return layer?.route?.stack[0]?.handle as (req: any, res: any, next: any) => Promise<void>;
+  const layer = router.stack.find(
+    (entry: { route?: { path?: string } }) => entry.route?.path === '/api/scheduled/cms-publish'
+  );
+  return layer?.route?.stack[0]?.handle as unknown as (
+    req: MockRequest,
+    res: MockResponse,
+    next: () => void
+  ) => Promise<void>;
 }
 
 describe('النشر المؤجل لمحتوى CMS', () => {
@@ -65,7 +74,7 @@ describe('النشر المؤجل لمحتوى CMS', () => {
     mocks.publishDueCmsContent.mockResolvedValue({ inspected: 1, published: { pages: 1 } });
     const response = responseMock();
 
-    await scheduledHandler()({} as any, response as any, vi.fn());
+    await scheduledHandler()({}, response, vi.fn());
 
     expect(mocks.publishDueCmsContent).toHaveBeenCalledWith('task_cms_001');
     expect(response.json).toHaveBeenCalledWith(
@@ -77,7 +86,7 @@ describe('النشر المؤجل لمحتوى CMS', () => {
     mocks.authenticateRequest.mockResolvedValue({ isCron: false });
     const response = responseMock();
 
-    await scheduledHandler()({} as any, response as any, vi.fn());
+    await scheduledHandler()({}, response, vi.fn());
 
     expect(response.status).toHaveBeenCalledWith(403);
     expect(response.json).toHaveBeenCalledWith({ error: 'cron-only' });

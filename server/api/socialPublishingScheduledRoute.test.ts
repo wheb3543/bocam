@@ -16,8 +16,11 @@ vi.mock('../database/db/metaOperations', () => ({
 
 import { createSocialPublishingScheduledRouter } from './socialPublishingScheduledRoute';
 
-function responseMock() {
-  const response = {
+type MockRequest = { body?: unknown; query?: Record<string, string | string[] | undefined>; headers?: Record<string, string> };
+type MockResponse = { status: ReturnType<typeof vi.fn>; json: ReturnType<typeof vi.fn> };
+
+function responseMock(): MockResponse {
+  const response: MockResponse = {
     status: vi.fn(),
     json: vi.fn(),
   };
@@ -27,8 +30,14 @@ function responseMock() {
 
 function scheduledHandler() {
   const router = createSocialPublishingScheduledRouter();
-  const layer = router.stack.find((entry: any) => entry.route?.path === '/api/scheduled/social-publish');
-  return layer?.route?.stack[0]?.handle as (req: any, res: any, next: any) => Promise<void>;
+  const layer = router.stack.find(
+    (entry: { route?: { path?: string } }) => entry.route?.path === '/api/scheduled/social-publish'
+  );
+  return layer?.route?.stack[0]?.handle as unknown as (
+    req: MockRequest,
+    res: MockResponse,
+    next: () => void
+  ) => Promise<void>;
 }
 
 describe('social publishing scheduled route', () => {
@@ -39,7 +48,7 @@ describe('social publishing scheduled route', () => {
     const response = responseMock();
     const handler = scheduledHandler();
 
-    await handler({} as any, response as any, vi.fn());
+    await handler({}, response, vi.fn());
 
     expect(mocks.dispatchDueSocialPublishPosts).toHaveBeenCalledWith('task_publish_001');
     expect(mocks.dispatchQueuedMetaConversionEvents).toHaveBeenCalledWith();
@@ -58,7 +67,7 @@ describe('social publishing scheduled route', () => {
     const response = responseMock();
     const handler = scheduledHandler();
 
-    await handler({} as any, response as any, vi.fn());
+    await handler({}, response, vi.fn());
 
     expect(response.status).toHaveBeenCalledWith(403);
     expect(response.json).toHaveBeenCalledWith({ error: 'cron-only' });

@@ -27,11 +27,11 @@ function getCacheKey(prefix: string, params: Record<string, unknown>): string {
 }
 
 async function getFromCache<T>(key: string): Promise<T | null> {
-  return await cacheManager.get<T>(key);
+  return cacheManager.get<T>(key);
 }
 
 async function setCache(key: string, data: unknown): Promise<void> {
-  await cacheManager.set(key, data, CACHE_TTL);
+  return cacheManager.set(key, data, CACHE_TTL);
 }
 
 /**
@@ -467,7 +467,7 @@ export const publicContentRouter = router({
         conditions.push(eq(sections.pageId, input.pageId));
       }
       if (input.type) {
-        conditions.push(eq(sections.type, input.type as any));
+        conditions.push(eq(sections.type, input.type as (typeof sections.type.enumValues)[number]));
       }
 
       const limit = input.limit || 50;

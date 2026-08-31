@@ -31,11 +31,14 @@ describe('Meta payload fixtures', () => {
 
   it('keeps the first attachment URL while exposing the documented multiple-attachments gap', () => {
     const [event] = eventFor('messenger-multiple-attachments');
+    if (!event) {
+      throw new Error('fixture missing');
+    }
     expect(event).toMatchObject({
       content: 'مرفق: image',
       mediaUrl: 'https://example.invalid/meta-test/image.avif',
     });
-    const raw = JSON.parse(event!.rawPayload);
+    const raw = JSON.parse(event.rawPayload);
     expect(raw.entry[0].messaging[0].message.attachments).toHaveLength(3);
   });
 

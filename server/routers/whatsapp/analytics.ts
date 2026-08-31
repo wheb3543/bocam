@@ -1,4 +1,4 @@
-import { protectedProcedure, router } from '../../_core/trpc';
+import { router } from '../../_core/trpc';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
 import { z } from 'zod';
 import { createLogger } from '../../_core/logger';

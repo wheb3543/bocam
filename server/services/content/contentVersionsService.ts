@@ -6,6 +6,9 @@
 import { contentVersions } from '../../../drizzle/schema';
 import { eq, desc, and, max } from 'drizzle-orm';
 import { createLogger } from '../../_core/logger';
+import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
+
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
 
 const logger = createLogger('contentVersionsService');
 
@@ -21,11 +24,11 @@ export class ContentVersionsService {
    */
 
   async createVersion(
-    db: any,
+    db: DbClient,
     params: {
       entityType: ContentVersionEntityType;
       entityId: number;
-      data: any;
+      data: unknown;
       userId?: number;
       reason?: string;
     }
@@ -56,7 +59,7 @@ export class ContentVersionsService {
           reason: params.reason,
           createdAt: new Date(),
         })
-        .returning();
+        .$returningId();
 
       logger.info('Created new content version', {
         entityType: params.entityType,
@@ -76,7 +79,7 @@ export class ContentVersionsService {
    */
 
   async getVersions(
-    db: any,
+    db: DbClient,
     params: {
       entityType: ContentVersionEntityType;
       entityId: number;
@@ -94,7 +97,7 @@ export class ContentVersionsService {
         )
         .orderBy(desc(contentVersions.versionNumber));
 
-      return versions.map((version: any) => ({
+      return versions.map((version: { data: string } & Record<string, unknown>) => ({
         ...version,
         data: JSON.parse(version.data),
       }));
@@ -107,8 +110,7 @@ export class ContentVersionsService {
   /**
    * الحصول على نسخة محددة
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getVersion(db: any, versionId: number) {
+  async getVersion(db: DbClient, versionId: number) {
     try {
       const [version] = await db
         .select()
@@ -134,7 +136,7 @@ export class ContentVersionsService {
    */
 
   async getLatestVersion(
-    db: any,
+    db: DbClient,
     params: {
       entityType: ContentVersionEntityType;
       entityId: number;
@@ -170,8 +172,7 @@ export class ContentVersionsService {
   /**
    * حذف نسخة محددة
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async deleteVersion(db: any, versionId: number) {
+  async deleteVersion(db: DbClient, versionId: number) {
     try {
       await db.delete(contentVersions).where(eq(contentVersions.id, versionId));
 
@@ -187,7 +188,7 @@ export class ContentVersionsService {
    */
 
   async deleteAllVersions(
-    db: any,
+    db: DbClient,
     params: {
       entityType: ContentVersionEntityType;
       entityId: number;

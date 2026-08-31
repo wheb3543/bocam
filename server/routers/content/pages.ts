@@ -25,8 +25,10 @@ import { contentVersionsService } from '../../services/content/contentVersionsSe
 
 const logger = createLogger('pages');
 
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
+
 async function savePageVersion(
-  db: any,
+  db: DbClient,
   page: typeof pages.$inferSelect,
   userId: number | undefined,
   reason: string
@@ -47,11 +49,11 @@ function getAdminCacheKey(prefix: string, params: Record<string, unknown>): stri
 }
 
 async function getFromAdminCache<T>(key: string): Promise<T | null> {
-  return await cacheManager.get<T>(key);
+  return cacheManager.get<T>(key);
 }
 
 async function setAdminCache(key: string, data: unknown): Promise<void> {
-  await cacheManager.set(key, data, ADMIN_CACHE_TTL);
+  return cacheManager.set(key, data, ADMIN_CACHE_TTL);
 }
 
 /**

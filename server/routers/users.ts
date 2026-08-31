@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { roleDefinitions, userRoleAssignments, users } from '../../drizzle/schema';
-import { protectedProcedure, router } from '../_core/trpc';
+import { router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcryptjs';

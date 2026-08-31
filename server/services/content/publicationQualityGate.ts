@@ -39,6 +39,22 @@ type PublishCandidate = {
   robots?: string | null;
 };
 
+type SelectQueryBuilder = {
+  from: (...args: unknown[]) => {
+    where: (...args: unknown[]) => Promise<unknown[]> | unknown[];
+  };
+};
+
+type DatabaseLike = {
+  select?: (...args: unknown[]) => SelectQueryBuilder;
+  insert?: (...args: unknown[]) => { values: (...args: unknown[]) => unknown };
+  update?: (...args: unknown[]) => {
+    set: (...args: unknown[]) => { where: (...args: unknown[]) => unknown };
+  };
+  delete?: (...args: unknown[]) => { where: (...args: unknown[]) => unknown };
+  transaction?: (...args: unknown[]) => Promise<unknown>;
+};
+
 type SeoPageProfile = 'main' | 'sub' | 'general';
 
 const seoQualityProfiles: Record<
@@ -70,7 +86,10 @@ const seoQualityProfiles: Record<
   },
 };
 
-async function getSeoPageProfile(db: any, candidate: PublishCandidate): Promise<SeoPageProfile> {
+async function getSeoPageProfile(
+  db: DatabaseLike,
+  candidate: PublishCandidate
+): Promise<SeoPageProfile> {
   if (!candidate.pageId || !db?.select) {
     return 'general';
   }
@@ -217,7 +236,7 @@ function inlineIssues(entityType: CmsPublishEntityType, candidate: PublishCandid
  * المفقود يمنعان النشر إلا بتجاوز إداري موثق.
  */
 export async function evaluatePublicationQuality(
-  db: any,
+  db: DatabaseLike,
   entityType: CmsPublishEntityType,
   candidate: PublishCandidate
 ): Promise<PublicationQualityIssue[]> {
@@ -228,8 +247,11 @@ export async function evaluatePublicationQuality(
   }
 
   if (entityType === 'page' && candidate.id) {
-    const pageImages = await db
-      .select()
+    const select = db.select;
+    if (!select) {
+      return issues;
+    }
+    const pageImages = await select()
       .from(images)
       .where(
         and(
@@ -252,8 +274,11 @@ export async function evaluatePublicationQuality(
 
   const sectionId = entityType === 'section' ? candidate.id : candidate.sectionId;
   if (sectionId) {
-    const buttons = await db
-      .select()
+    const select = db.select;
+    if (!select) {
+      return issues;
+    }
+    const buttons = await select()
       .from(sectionButtons)
       .where(
         and(
@@ -264,7 +289,7 @@ export async function evaluatePublicationQuality(
       );
 
     for (const button of buttons) {
-      if (hasInvalidLink(button.link)) {
+      if (hasInvalidLink(String(button.link ?? ''))) {
         issues.push({
           code: 'section-button-link-invalid',
           message: `زر القسم «${button.textAr || button.textEn}» يحتوي رابطاً غير صالح.`,
@@ -274,8 +299,11 @@ export async function evaluatePublicationQuality(
   }
 
   if (entityType === 'page' && candidate.id) {
-    const pageSections = await db
-      .select({ id: sections.id })
+    const select = db.select;
+    if (!select) {
+      return issues;
+    }
+    const pageSections = await select({ id: sections.id })
       .from(sections)
       .where(
         and(
@@ -287,8 +315,11 @@ export async function evaluatePublicationQuality(
       );
     const ids = pageSections.map((section: { id: number }) => section.id);
     if (ids.length) {
-      const buttons = await db
-        .select()
+      const select = db.select;
+      if (!select) {
+        return issues;
+      }
+      const buttons = await select()
         .from(sectionButtons)
         .where(
           and(
@@ -298,7 +329,7 @@ export async function evaluatePublicationQuality(
           )
         );
       for (const button of buttons) {
-        if (hasInvalidLink(button.link)) {
+        if (hasInvalidLink(String(button.link ?? ''))) {
           issues.push({
             code: 'section-button-link-invalid',
             message: `زر قسم منشور «${button.textAr || button.textEn}» يحتوي رابطاً غير صالح.`,
@@ -312,7 +343,7 @@ export async function evaluatePublicationQuality(
 }
 
 export async function assertPublicationQuality(
-  db: any,
+  db: DatabaseLike,
   options: {
     entityType: CmsPublishEntityType;
     entityId?: number;
@@ -349,7 +380,11 @@ export async function assertPublicationQuality(
   }
 
   if (options.entityId) {
-    await db.insert(contentAuditLog).values({
+    const insert = db.insert;
+    if (!insert) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'قاعدة البيانات غير متاحة.' });
+    }
+    await insert(contentAuditLog).values({
       entityType:
         options.entityType === 'textContent'
           ? 'text'

@@ -27,16 +27,6 @@ export type IntegrationAssetType =
   | 'organization'
   | 'channel';
 
-type IntegrationConnectionStatus =
-  | 'draft'
-  | 'authorization_pending'
-  | 'connected'
-  | 'reauthorization_required'
-  | 'expired'
-  | 'revoked'
-  | 'error'
-  | 'disconnected';
-
 type TokenType = 'access' | 'refresh' | 'business' | 'system';
 
 async function requireDb() {

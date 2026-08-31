@@ -35,6 +35,12 @@ export async function submitAppointment({
 }) {
   const normalizedPhone = normalizePhoneNumber(input.phone as string);
   const _db = await getDb();
+  if (!_db) {
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'تعذر الوصول إلى قاعدة البيانات عند إنشاء الموعد',
+    });
+  }
 
   // Get or create campaign by slug
   let campaign = await getCampaignBySlug(input.campaignSlug as string);

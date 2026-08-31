@@ -22,7 +22,6 @@ import {
   seoSettings,
   type SEOSettings,
 } from '../../../drizzle/schema';
-import { createLogger } from '../../_core/logger';
 import { invalidateSEOCache } from '../public/content';
 import { auditLogService } from '../../services/content/auditLogService';
 import {
@@ -31,7 +30,6 @@ import {
   getPublicationQualityScore,
 } from '../../services/content/publicationQualityGate';
 
-const logger = createLogger('seoSettings');
 const seoStatusSchema = z.enum(['draft', 'published', 'archived']);
 
 const seoSettingsSchema = z.object({
@@ -54,8 +52,10 @@ const seoSettingsSchema = z.object({
   qualityOverrideReason: z.string().max(500).optional(),
 });
 
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
+
 async function saveSeoVersion(
-  db: any,
+  db: DbClient,
   seo: SEOSettings,
   userId: number | undefined,
   reason: string
@@ -76,7 +76,7 @@ async function saveSeoVersion(
   });
 }
 
-async function getSeoOrThrow(db: any, id: number): Promise<SEOSettings> {
+async function getSeoOrThrow(db: DbClient, id: number): Promise<SEOSettings> {
   const [seo] = await db
     .select()
     .from(seoSettings)

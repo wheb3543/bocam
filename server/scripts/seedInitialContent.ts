@@ -308,7 +308,7 @@ const initialContent = [
 
 async function seedInitialContent() {
   try {
-    console.log('بدء إضافة المحتوى الأولي...');
+    console.warn('بدء إضافة المحتوى الأولي...');
     const db = await getDb();
 
     if (!db) {
@@ -325,13 +325,13 @@ async function seedInitialContent() {
 
       if (existing.length === 0) {
         await db.insert(textContent).values(content);
-        console.log(`✅ تم إضافة: ${content.key} (${content.language})`);
+        console.warn(`✅ تم إضافة: ${content.key} (${content.language})`);
       } else {
-        console.log(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
+        console.warn(`⏭️  موجود بالفعل: ${content.key} (${content.language})`);
       }
     }
 
-    console.log('✅ تم إكمال إضافة المحتوى الأولي بنجاح');
+    console.warn('✅ تم إكمال إضافة المحتوى الأولي بنجاح');
   } catch (error) {
     console.error('❌ خطأ في إضافة المحتوى الأولي:', error);
     process.exit(1);
@@ -340,6 +340,6 @@ async function seedInitialContent() {
 
 // تشغيل السكريبت
 seedInitialContent().then(() => {
-  console.log('تم الانتهاء');
+  console.warn('تم الانتهاء');
   process.exit(0);
 });

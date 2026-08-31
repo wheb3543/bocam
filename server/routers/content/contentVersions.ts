@@ -546,7 +546,7 @@ export const contentVersionsRouter = router({
       const db = await ensureDatabaseAvailable();
       const version = await contentVersionsService.getVersion(db, input.versionId);
 
-      await db.transaction(async (tx: any) => {
+      await db.transaction(async (tx) => {
         await restoreVersionData(
           tx,
           version.entityType,

@@ -185,7 +185,9 @@ function toPreviewFields(entityType: TrashEntityType, record: Record<string, unk
   ];
 }
 
-async function getDeletedRecord(db: any, entityType: TrashEntityType, id: number) {
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
+
+async function getDeletedRecord(db: DbClient, entityType: TrashEntityType, id: number) {
   if (entityType === 'textContent') {
     return (
       await db
@@ -240,8 +242,10 @@ async function getDeletedRecord(db: any, entityType: TrashEntityType, id: number
   )[0];
 }
 
+type TransactionClient = Parameters<Parameters<DbClient['transaction']>[0]>[0];
+
 async function restoreDeletedEntity(
-  tx: any,
+  tx: TransactionClient,
   entityType: TrashEntityType,
   id: number,
   userId: number
@@ -299,20 +303,23 @@ async function restoreDeletedEntity(
     return false;
   }
 
-  await contentVersionsService.createVersion(tx, {
-    entityType: restoreConfig.versionEntityType,
-    entityId: id,
-    data: current,
-    userId,
-    reason: restoreConfig.versionReason,
-  });
+  await contentVersionsService.createVersion(
+    tx as Parameters<typeof contentVersionsService.createVersion>[0],
+    {
+      entityType: restoreConfig.versionEntityType,
+      entityId: id,
+      data: current,
+      userId,
+      reason: restoreConfig.versionReason,
+    }
+  );
 
   const restoredValue = { ...current, deletedAt: null, status: 'draft', publishedAt: null };
   await tx
     .update(restoreConfig.table)
     .set({ deletedAt: null, status: 'draft', publishedAt: null })
     .where(eq(restoreConfig.table.id, id));
-  await auditLogService.logChange(tx, {
+  await auditLogService.logChange(tx as Parameters<typeof auditLogService.logChange>[0], {
     entityType: restoreConfig.auditEntityType,
     entityId: id,
     action: 'update',
@@ -504,7 +511,7 @@ export const trashRouter = router({
       const restored: Array<{ entityType: TrashEntityType; id: number }> = [];
       const skipped: Array<{ entityType: TrashEntityType; id: number; reason: string }> = [];
 
-      await db.transaction(async (tx: any) => {
+      await db.transaction(async (tx) => {
         for (const item of uniqueItems) {
           const wasRestored = await restoreDeletedEntity(tx, item.entityType, item.id, ctx.user.id);
           if (wasRestored) {

@@ -25,7 +25,11 @@ function dateParts(timezone: string) {
   return { date: `${get('year')}-${get('month')}-${get('day')}`, hour: Number(get('hour')) };
 }
 
-export async function getNotificationDigestSchedule(db: any) {
+type DbClient = Awaited<
+  ReturnType<typeof import('../_core/databaseGuard').ensureDatabaseAvailable>
+>;
+
+export async function getNotificationDigestSchedule(db: DbClient) {
   const [schedule] = await db.select().from(notificationDigestSchedules).limit(1);
   if (schedule) {
     return schedule;
@@ -44,7 +48,7 @@ export async function getNotificationDigestSchedule(db: any) {
 }
 
 export async function updateNotificationDigestSchedule(
-  db: any,
+  db: DbClient,
   input: Pick<NotificationDigestScheduleSettings, 'enabled' | 'deliveryHour' | 'timezone'> & {
     updatedBy: number;
   }
@@ -63,7 +67,7 @@ export async function updateNotificationDigestSchedule(
   return getNotificationDigestSchedule(db);
 }
 
-export async function attachNotificationDigestTask(db: any, taskUid: string) {
+export async function attachNotificationDigestTask(db: DbClient, taskUid: string) {
   const schedule = await getNotificationDigestSchedule(db);
   await db
     .update(notificationDigestSchedules)
@@ -73,7 +77,7 @@ export async function attachNotificationDigestTask(db: any, taskUid: string) {
 }
 
 export async function createUnreadNotificationDigest(
-  db: any,
+  db: DbClient,
   userId: number,
   options: { automatic: boolean }
 ) {

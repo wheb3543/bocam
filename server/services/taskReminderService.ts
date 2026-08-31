@@ -12,7 +12,11 @@ function targetFor(kind: 'follow_up' | 'task') {
     : { entityType: 'task', actionUrl: '/admin/teams/digital-marketing' };
 }
 
-export async function getTaskReminderSchedule(db: any) {
+type DbClient = Awaited<
+  ReturnType<typeof import('../_core/databaseGuard').ensureDatabaseAvailable>
+>;
+
+export async function getTaskReminderSchedule(db: DbClient) {
   const [schedule] = await db.select().from(taskReminderSchedules).limit(1);
   if (schedule) {
     return schedule;
@@ -30,7 +34,7 @@ export async function getTaskReminderSchedule(db: any) {
   )[0];
 }
 
-export async function attachTaskReminderTask(db: any, taskUid: string) {
+export async function attachTaskReminderTask(db: DbClient, taskUid: string) {
   const schedule = await getTaskReminderSchedule(db);
   await db
     .update(taskReminderSchedules)
@@ -40,7 +44,7 @@ export async function attachTaskReminderTask(db: any, taskUid: string) {
 }
 
 export async function notifyTaskAssignment(
-  db: any,
+  db: DbClient,
   input: {
     kind: 'follow_up' | 'task';
     taskId: number;
@@ -68,7 +72,7 @@ export async function notifyTaskAssignment(
 }
 
 async function notifyTaskTiming(
-  db: any,
+  db: DbClient,
   input: {
     kind: 'follow_up' | 'task';
     taskId: number;

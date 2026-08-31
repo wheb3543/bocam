@@ -12,6 +12,8 @@ import {
   textContent,
 } from '../../../drizzle/schema';
 import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
+
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
 import { createLogger } from '../../_core/logger';
 import {
   invalidateImagesCache,
@@ -45,7 +47,7 @@ function emptyPurgeCounters(): PurgeCounters {
   return { textContent: 0, image: 0, seo: 0, page: 0, section: 0, sectionButton: 0 };
 }
 
-export async function getCmsTrashRetentionPolicy(db: any) {
+export async function getCmsTrashRetentionPolicy(db: DbClient) {
   const [policy] = await db
     .select()
     .from(cmsTrashRetentionPolicies)
@@ -89,11 +91,19 @@ async function invalidatePurgedEntityCaches(entityTypes: Set<CmsTrashEntityType>
   }
 }
 
+type CmsTrashTable =
+  | typeof sectionButtons
+  | typeof textContent
+  | typeof images
+  | typeof seoSettings
+  | typeof sections
+  | typeof pages;
+
 async function purgeEntityType(
-  tx: any,
+  tx: Parameters<Parameters<DbClient['transaction']>[0]>[0],
   options: {
     entityType: CmsTrashEntityType;
-    table: any;
+    table: CmsTrashTable;
     versionEntityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
     auditEntityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
     approvalEntityType: CmsTrashEntityType;
@@ -102,12 +112,18 @@ async function purgeEntityType(
     retentionDays: number;
   }
 ) {
-  const candidates = await tx
+  const candidates = (await tx
     .select()
     .from(options.table)
-    .where(and(isNotNull(options.table.deletedAt), lte(options.table.deletedAt, options.cutoff)));
+    .where(
+      and(isNotNull(options.table.deletedAt), lte(options.table.deletedAt, options.cutoff))
+    )) as Array<{
+    id: number;
+    deletedAt: Date | null;
+    status: string;
+  }>;
 
-  const candidateIds = candidates.map((record: { id: number }) => record.id);
+  const candidateIds = candidates.map((record) => record.id);
   const blockedIds = new Set<number>();
   if (candidateIds.length > 0 && options.entityType === 'page') {
     const [linkedSections, linkedText, linkedImages] = await Promise.all([
@@ -152,7 +168,9 @@ async function purgeEntityType(
       }
     );
   }
-  const records = candidates.filter((record: { id: number }) => !blockedIds.has(record.id));
+  const records = (
+    candidates as Array<{ id: number; deletedAt: Date | null; status: string }>
+  ).filter((record) => !blockedIds.has(record.id));
 
   if (records.length === 0) {
     return { count: 0, deletedVersions: 0, deletedApprovals: 0 };
@@ -200,7 +218,7 @@ async function purgeEntityType(
     records.map((record: { id: number; deletedAt: Date | null; status: string }) => ({
       entityType: options.auditEntityType,
       entityId: record.id,
-      action: 'delete',
+      action: 'delete' as const,
       oldValue: JSON.stringify({
         finalDeletion: true,
         deletedAt: record.deletedAt,
@@ -247,43 +265,48 @@ export async function purgeExpiredCmsTrash(
   }
 
   const cutoff = new Date(now.getTime() - policy.retentionDays * 24 * 60 * 60 * 1000);
-  const result = await db.transaction(async (tx: any) => {
-    const entityOptions = [
+  const result = await db.transaction(async (tx) => {
+    const entityOptions: Array<{
+      entityType: CmsTrashEntityType;
+      table: CmsTrashTable;
+      versionEntityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
+      auditEntityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
+    }> = [
       {
-        entityType: 'sectionButton' as const,
+        entityType: 'sectionButton',
         table: sectionButtons,
-        versionEntityType: 'sectionButton' as const,
-        auditEntityType: 'sectionButton' as const,
+        versionEntityType: 'sectionButton',
+        auditEntityType: 'sectionButton',
       },
       {
-        entityType: 'textContent' as const,
+        entityType: 'textContent',
         table: textContent,
-        versionEntityType: 'text' as const,
-        auditEntityType: 'text' as const,
+        versionEntityType: 'text',
+        auditEntityType: 'text',
       },
       {
-        entityType: 'image' as const,
+        entityType: 'image',
         table: images,
-        versionEntityType: 'image' as const,
-        auditEntityType: 'image' as const,
+        versionEntityType: 'image',
+        auditEntityType: 'image',
       },
       {
-        entityType: 'seo' as const,
+        entityType: 'seo',
         table: seoSettings,
-        versionEntityType: 'seo' as const,
-        auditEntityType: 'seo' as const,
+        versionEntityType: 'seo',
+        auditEntityType: 'seo',
       },
       {
-        entityType: 'section' as const,
+        entityType: 'section',
         table: sections,
-        versionEntityType: 'section' as const,
-        auditEntityType: 'section' as const,
+        versionEntityType: 'section',
+        auditEntityType: 'section',
       },
       {
-        entityType: 'page' as const,
+        entityType: 'page',
         table: pages,
-        versionEntityType: 'page' as const,
-        auditEntityType: 'page' as const,
+        versionEntityType: 'page',
+        auditEntityType: 'page',
       },
     ];
     const purged = emptyPurgeCounters();

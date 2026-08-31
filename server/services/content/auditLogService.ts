@@ -6,6 +6,9 @@
 import { contentAuditLog } from '../../../drizzle/schema';
 import { eq, desc, and, gte, lte } from 'drizzle-orm';
 import { createLogger } from '../../_core/logger';
+import { ensureDatabaseAvailable } from '../../_core/databaseGuard';
+
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
 
 const logger = createLogger('auditLogService');
 
@@ -29,7 +32,7 @@ export class AuditLogService {
    */
 
   async logChange(
-    db: any,
+    db: DbClient,
     params: {
       entityType:
         'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton' | 'operation';
@@ -46,8 +49,8 @@ export class AuditLogService {
         entityType: params.entityType,
         entityId: params.entityId,
         action: params.action,
-        oldValue: params.oldValue ? JSON.stringify(params.oldValue) : null,
-        newValue: params.newValue ? JSON.stringify(params.newValue) : null,
+        oldValue: params.oldValue ?? null,
+        newValue: params.newValue ?? null,
         userId: params.userId,
         reason: params.reason,
         createdAt: new Date(),
@@ -61,8 +64,7 @@ export class AuditLogService {
   /**
    * الحصول على سجل التغييرات مع الفلاتر
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getAuditLog(db: any, filters?: AuditLogFilters) {
+  async getAuditLog(db: DbClient, filters?: AuditLogFilters) {
     try {
       const conditions = [];
 
@@ -104,8 +106,7 @@ export class AuditLogService {
   /**
    * الحصول على عدد السجلات
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getAuditLogCount(db: any, filters?: AuditLogFilters) {
+  async getAuditLogCount(db: DbClient, filters?: AuditLogFilters) {
     try {
       const conditions = [];
 
@@ -136,19 +137,17 @@ export class AuditLogService {
   /**
    * تصدير السجل
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async exportAuditLog(db: any, filters?: AuditLogFilters) {
+  async exportAuditLog(db: DbClient, filters?: AuditLogFilters) {
     try {
       const logs = await this.getAuditLog(db, filters);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return logs.map((log: any) => ({
+      return logs.map((log: Record<string, unknown>) => ({
         id: log.id,
         entityType: log.entityType,
         entityId: log.entityId,
         action: log.action,
-        oldValue: log.oldValue ? JSON.parse(log.oldValue) : null,
-        newValue: log.newValue ? JSON.parse(log.newValue) : null,
+        oldValue: typeof log.oldValue === 'string' ? JSON.parse(log.oldValue) : null,
+        newValue: typeof log.newValue === 'string' ? JSON.parse(log.newValue) : null,
         userId: log.userId,
         reason: log.reason,
         createdAt: log.createdAt,

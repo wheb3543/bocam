@@ -1,4 +1,4 @@
-import { protectedProcedure, router, requireWhatsAppFeature } from '../../_core/trpc';
+import { router, requireWhatsAppFeature } from '../../_core/trpc';
 import { TRPCError } from '@trpc/server';
 import * as db from '../../database/db';
 import { z } from 'zod';

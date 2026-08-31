@@ -169,8 +169,12 @@ export async function saveNotificationSystemSettings(value: unknown) {
   return normalized;
 }
 
+type DbClient = Awaited<
+  ReturnType<typeof import('../_core/databaseGuard').ensureDatabaseAvailable>
+>;
+
 export async function shouldDeliverNotification(
-  db: any,
+  db: DbClient,
   input: {
     userId: number;
     source: NotificationSource;
@@ -206,7 +210,7 @@ export async function shouldDeliverNotification(
 }
 
 export async function notifyEligibleRecipients(
-  db: any,
+  db: DbClient,
   input: {
     source: NotificationSource;
     type: NotificationType;

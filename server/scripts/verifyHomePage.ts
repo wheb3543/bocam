@@ -48,7 +48,7 @@ const homepageTexts = {
 
 async function verifyHomePage() {
   try {
-    console.log('🔍 بدء التحقق من نصوص الصفحة الرئيسية...\n');
+    console.warn('🔍 بدء التحقق من نصوص الصفحة الرئيسية...\n');
 
     const databaseUrl = process.env.DATABASE_URL;
     if (!databaseUrl) {
@@ -65,8 +65,8 @@ async function verifyHomePage() {
     const missingTexts: string[] = [];
 
     for (const [section, keys] of Object.entries(homepageTexts)) {
-      console.log(`\n📁 قسم ${section.toUpperCase()}:`);
-      console.log(
+      console.warn(`\n📁 قسم ${section.toUpperCase()}:`);
+      console.warn(
         `   المتوقع: ${keys.length} نص × ${languages.length} لغة = ${keys.length * languages.length}`
       );
 
@@ -87,28 +87,28 @@ async function verifyHomePage() {
           if (content.length > 0) {
             sectionFound++;
             totalFound++;
-            console.log(`   ✅ ${fullKey}`);
+            console.warn(`   ✅ ${fullKey}`);
           } else {
             missingTexts.push(fullKey);
-            console.log(`   ❌ ${fullKey} - مفقود`);
+            console.warn(`   ❌ ${fullKey} - مفقود`);
           }
         }
       }
 
-      console.log(`   الموجود: ${sectionFound}/${keys.length * languages.length}`);
+      console.warn(`   الموجود: ${sectionFound}/${keys.length * languages.length}`);
     }
 
-    console.log('\n' + '='.repeat(50));
-    console.log(`📊 ملخص الصفحة الرئيسية:`);
-    console.log(`   المتوقع: ${totalExpected} نص`);
-    console.log(`   الموجود: ${totalFound} نص`);
-    console.log(`   مفقود: ${totalExpected - totalFound} نص`);
+    console.warn('\n' + '='.repeat(50));
+    console.warn(`📊 ملخص الصفحة الرئيسية:`);
+    console.warn(`   المتوقع: ${totalExpected} نص`);
+    console.warn(`   الموجود: ${totalFound} نص`);
+    console.warn(`   مفقود: ${totalExpected - totalFound} نص`);
 
     if (missingTexts.length > 0) {
-      console.log('\n❌ النصوص المفقودة:');
-      missingTexts.forEach((text) => console.log(`   - ${text}`));
+      console.warn('\n❌ النصوص المفقودة:');
+      missingTexts.forEach((text) => console.warn(`   - ${text}`));
     } else {
-      console.log('\n✅ جميع نصوص الصفحة الرئيسية موجودة في قاعدة البيانات');
+      console.warn('\n✅ جميع نصوص الصفحة الرئيسية موجودة في قاعدة البيانات');
     }
 
     await connection.end();

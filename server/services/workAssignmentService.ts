@@ -14,7 +14,11 @@ const assignmentConfig: Record<
   lead: { source: 'leads', actionUrl: '/admin/bookings/leads', label: 'العميل المحتمل' },
 };
 
-export async function listAssignableUsers(db: any, requiredPermission: RolePermission) {
+type DbClient = Awaited<
+  ReturnType<typeof import('../_core/databaseGuard').ensureDatabaseAvailable>
+>;
+
+export async function listAssignableUsers(db: DbClient, requiredPermission: RolePermission) {
   const activeUsers = await db
     .select({ id: users.id, name: users.name, username: users.username, role: users.role })
     .from(users)
@@ -29,7 +33,7 @@ export async function listAssignableUsers(db: any, requiredPermission: RolePermi
 }
 
 export async function assertAssignableUser(
-  db: any,
+  db: DbClient,
   userId: number | null,
   requiredPermission: RolePermission
 ) {
@@ -48,7 +52,7 @@ export async function assertAssignableUser(
 }
 
 export async function notifyWorkAssignment(
-  db: any,
+  db: DbClient,
   input: { kind: AssignmentKind; entityId: number; assignedUserId: number; actorUserId: number }
 ) {
   if (input.assignedUserId === input.actorUserId) {

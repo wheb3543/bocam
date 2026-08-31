@@ -41,8 +41,10 @@ const sectionButtonSchema = z.object({
 
 type SectionButtonRow = typeof sectionButtons.$inferSelect;
 
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
+
 async function saveButtonVersion(
-  db: any,
+  db: DbClient,
   button: SectionButtonRow,
   userId: number | undefined,
   reason: string
@@ -66,7 +68,7 @@ async function saveButtonVersion(
   });
 }
 
-async function getButtonOrThrow(db: any, id: number): Promise<SectionButtonRow> {
+async function getButtonOrThrow(db: DbClient, id: number): Promise<SectionButtonRow> {
   const [button] = await db
     .select()
     .from(sectionButtons)

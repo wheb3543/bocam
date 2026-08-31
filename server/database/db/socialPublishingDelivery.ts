@@ -15,8 +15,6 @@ import { decryptMetaSetting, encryptMetaSetting } from '../../integrations/meta/
 import { getIntegrationToken } from './integrationConnections';
 import { getDb } from './connection';
 
-type DeliveryStatus = 'queued' | 'processing' | 'succeeded' | 'failed' | 'cancelled';
-
 async function requireDb() {
   const db = await getDb();
   if (!db) {
@@ -119,11 +117,15 @@ export async function enqueueSocialPublishDeliveryJobs(postId: number, runAfter 
     if (!eligible) {
       continue;
     }
+    const connectionId = account?.connectionId;
+    if (!connectionId) {
+      continue;
+    }
     await db
       .insert(integrationDeliveryJobs)
       .values({
         destinationId: destination.id,
-        connectionId: account!.connectionId,
+        connectionId,
         status: 'queued',
         runAfter,
         idempotencyKey: destination.idempotencyKey,

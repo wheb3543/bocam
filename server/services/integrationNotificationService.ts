@@ -40,7 +40,9 @@ export async function notifyIntegrationIssue(input: {
   });
 }
 
-export async function getIntegrationAlertSchedule(db: any) {
+type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
+
+export async function getIntegrationAlertSchedule(db: DbClient) {
   const [schedule] = await db.select().from(integrationAlertSchedules).limit(1);
   if (schedule) {
     return schedule;
@@ -58,7 +60,7 @@ export async function getIntegrationAlertSchedule(db: any) {
   )[0];
 }
 
-export async function attachIntegrationAlertTask(db: any, taskUid: string) {
+export async function attachIntegrationAlertTask(db: DbClient, taskUid: string) {
   const schedule = await getIntegrationAlertSchedule(db);
   await db
     .update(integrationAlertSchedules)

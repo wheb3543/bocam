@@ -80,7 +80,9 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
   it('يعرض التفضيلات الشخصية في الملف الشخصي والسياسة النظامية للمسؤولين', () => {
     expect(profileSource).toContain('NotificationPreferencesCard');
     expect(settingsPageSource).toContain('SystemNotificationSettingsCard');
-    expect(settingsPageSource).toContain("user?.role === 'admin'");
+    expect(settingsPageSource).toContain('useRolePermissions');
+    expect(settingsPageSource).toContain("can('notifications.settings.manage')");
+    expect(settingsPageSource).not.toContain("user?.role === 'admin'");
   });
 
   it('يربط إنشاء الموعد والمخيم والعرض بسياسة الإشعارات دون تعطيل التسجيل', () => {

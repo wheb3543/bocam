@@ -32,8 +32,8 @@ describe('فصل صلاحيات التكاملات الخادمية', () => {
     expect(metaSyncSource).toContain("permissionProcedure('integrations.sync.manage'");
     expect(metaSyncSource).toContain("'communications.templates.manage'");
     expect(metaSyncSource).not.toContain('accessTokenPrefix');
-    expect(whatsappConnectionSource).toContain("permissionProcedure('integrations.view'");
-    expect(whatsappConnectionSource).toContain("permissionProcedure('integrations.connect'");
+    expect(whatsappConnectionSource).toMatch(/permissionProcedure\s*\(\s*'integrations\.view'/);
+    expect(whatsappConnectionSource).toMatch(/permissionProcedure\s*\(\s*'integrations\.connect'/);
     expect(whatsappConnectionSource).toContain("'integrations.webhooks.manage'");
     expect(webhookSource).toContain("permissionProcedure('integrations.logs.view'");
     expect(webhookSource).toContain("'integrations.webhooks.manage'");

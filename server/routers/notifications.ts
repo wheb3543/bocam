@@ -7,15 +7,14 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { and, desc, eq, gt, isNotNull, isNull, lt, or } from 'drizzle-orm';
-import { notifications, teams, users } from '../../drizzle/schema';
-import { adminProcedure, protectedProcedure, router } from '../_core/trpc';
+import { notifications, teams } from '../../drizzle/schema';
+import { router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
   NOTIFICATION_PRIORITIES,
   NOTIFICATION_PREFERENCE_KEY,
   NOTIFICATION_RECIPIENT_ROLES,
   NOTIFICATION_SOURCES,
-  NOTIFICATION_SYSTEM_SETTINGS_KEY,
   NOTIFICATION_TYPES,
 } from '../../shared/notifications';
 import { setUserPreference } from '../database/db';
