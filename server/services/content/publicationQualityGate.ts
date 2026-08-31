@@ -39,20 +39,12 @@ type PublishCandidate = {
   robots?: string | null;
 };
 
-type SelectQueryBuilder = {
-  from: (...args: unknown[]) => {
-    where: (...args: unknown[]) => Promise<unknown[]> | unknown[];
-  };
-};
-
 type DatabaseLike = {
-  select?: (...args: unknown[]) => SelectQueryBuilder;
-  insert?: (...args: unknown[]) => { values: (...args: unknown[]) => unknown };
-  update?: (...args: unknown[]) => {
-    set: (...args: unknown[]) => { where: (...args: unknown[]) => unknown };
-  };
-  delete?: (...args: unknown[]) => { where: (...args: unknown[]) => unknown };
-  transaction?: (...args: unknown[]) => Promise<unknown>;
+  select?: Function;
+  insert?: Function;
+  update?: Function;
+  delete?: Function;
+  transaction?: Function;
 };
 
 type SeoPageProfile = 'main' | 'sub' | 'general';

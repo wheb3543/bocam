@@ -18,10 +18,12 @@ vi.mock('../../database/db', () => ({
 
 import { publishingRouter } from './publishing';
 
-type TestUserContext = { user: { id: number; role: 'staff' | 'manager' | 'viewer' } };
-const staffContext = { user: { id: 41, role: 'staff' } } as TestUserContext;
-const managerContext = { user: { id: 42, role: 'manager' } } as TestUserContext;
-const viewerContext = { user: { id: 43, role: 'viewer' } } as TestUserContext;
+type _TestUserContext = {
+  user: { id: number; role: 'staff' | 'manager' | 'viewer' };
+};
+const staffContext = { user: { id: 41, role: 'staff' } } as never;
+const managerContext = { user: { id: 42, role: 'manager' } } as never;
+const viewerContext = { user: { id: 43, role: 'viewer' } } as never;
 
 describe('publishingRouter', () => {
   beforeEach(() => {

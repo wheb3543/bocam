@@ -304,7 +304,7 @@ async function restoreDeletedEntity(
   }
 
   await contentVersionsService.createVersion(
-    tx as Parameters<typeof contentVersionsService.createVersion>[0],
+    tx as unknown as Parameters<typeof contentVersionsService.createVersion>[0],
     {
       entityType: restoreConfig.versionEntityType,
       entityId: id,
@@ -319,15 +319,18 @@ async function restoreDeletedEntity(
     .update(restoreConfig.table)
     .set({ deletedAt: null, status: 'draft', publishedAt: null })
     .where(eq(restoreConfig.table.id, id));
-  await auditLogService.logChange(tx as Parameters<typeof auditLogService.logChange>[0], {
-    entityType: restoreConfig.auditEntityType,
-    entityId: id,
-    action: 'update',
-    userId,
-    oldValue: JSON.stringify(current),
-    newValue: JSON.stringify(restoredValue),
-    reason: 'استعادة من سلة المحذوفات الموحدة كمسودة',
-  });
+  await auditLogService.logChange(
+    tx as unknown as Parameters<typeof auditLogService.logChange>[0],
+    {
+      entityType: restoreConfig.auditEntityType,
+      entityId: id,
+      action: 'update',
+      userId,
+      oldValue: JSON.stringify(current),
+      newValue: JSON.stringify(restoredValue),
+      reason: 'استعادة من سلة المحذوفات الموحدة كمسودة',
+    }
+  );
 
   return true;
 }
