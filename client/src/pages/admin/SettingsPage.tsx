@@ -1,4 +1,3 @@
-import { useAuth } from '@/_core/hooks/useAuth';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { SystemNotificationSettingsCard } from '@/components/notification/SystemNotificationSettingsCard';
 
