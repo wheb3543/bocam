@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../../database/db', () => ({
+  getDb: vi.fn().mockResolvedValue(null),
   completeIntegrationConnection: mocks.completeConnection,
   consumeIntegrationOauthState: mocks.consumeState,
   createIntegrationAuditEvent: mocks.createAudit,

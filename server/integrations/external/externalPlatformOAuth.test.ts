@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../../database/db', () => ({
+  getDb: vi.fn().mockResolvedValue(null),
   getSocialPlatformOAuthCredentials: mocks.getCredentials,
   createIntegrationConnection: mocks.createConnection,
   createIntegrationOauthState: mocks.createState,

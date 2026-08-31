@@ -36,6 +36,8 @@ const mocks = vi.hoisted(() => {
     threadDetailQuery: vi.fn(() => ({ data: undefined, isLoading: false, isFetching: false, refetch: vi.fn() })),
     markReadMutate: vi.fn(),
     starMutate: vi.fn(),
+    archiveMutate: vi.fn(),
+    deleteMutate: vi.fn(),
     workflowMutateAsync: vi.fn().mockResolvedValue({ success: true }),
     replyMutateAsync: vi.fn().mockResolvedValue({ externalItemId: 'reply-1' }),
     privateReplyMutateAsync: vi.fn().mockResolvedValue({ externalMessageId: 'message-1' }),
@@ -66,6 +68,8 @@ vi.mock('@/lib/api/trpc', () => ({
       thread: { useQuery: mocks.threadDetailQuery },
       markRead: { useMutation: () => ({ mutate: mocks.markReadMutate }) },
       setStarred: { useMutation: () => ({ mutate: mocks.starMutate }) },
+      archive: { useMutation: () => ({ mutate: mocks.archiveMutate }) },
+      delete: { useMutation: () => ({ mutate: mocks.deleteMutate }) },
       updateCommentWorkflow: { useMutation: () => ({ mutateAsync: mocks.workflowMutateAsync, isPending: false }) },
       replyToComment: { useMutation: () => ({ mutateAsync: mocks.replyMutateAsync, isPending: false }) },
       sendCommentPrivateReply: { useMutation: () => ({ mutateAsync: mocks.privateReplyMutateAsync, isPending: false }) },
@@ -77,6 +81,21 @@ vi.mock('@/lib/api/trpc', () => ({
 }));
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+
+vi.mock('@/hooks/auth/useRolePermissions', () => ({
+  useRolePermissions: () => ({
+    can: (permission: string) =>
+      [
+        'communications.reply',
+        'communications.assign',
+        'communications.manage',
+        'communications.archive',
+        'communications.delete',
+      ].includes(permission),
+    permissions: [],
+    isLoading: false,
+  }),
+}));
 
 describe('MessagesPage', () => {
   beforeEach(() => {
@@ -99,6 +118,8 @@ describe('MessagesPage', () => {
     mocks.threadDetailQuery.mockImplementation(() => ({ data: undefined, isLoading: false, isFetching: false, refetch: vi.fn() }));
     mocks.markReadMutate.mockClear();
     mocks.starMutate.mockClear();
+    mocks.archiveMutate.mockClear();
+    mocks.deleteMutate.mockClear();
     mocks.workflowMutateAsync.mockClear();
     mocks.replyMutateAsync.mockClear();
     mocks.privateReplyMutateAsync.mockClear();

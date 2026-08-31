@@ -6,6 +6,13 @@
 import { vi, afterEach } from 'vitest';
 import '@testing-library/jest-dom';
 
+process.env.LICENSE_HARDWARE_ID = '42004E494300';
+process.env.DATABASE_URL ??= 'mysql://root:@127.0.0.1:3306/bocam';
+process.env.OAUTH_SERVER_URL ??= 'https://api.manus.im';
+process.env.VITE_OAUTH_SERVER_URL ??= 'https://api.manus.im';
+process.env.VITE_APP_ID ??= 'bocam-local-test';
+process.env.META_APP_ID ??= 'bocam-local-test';
+
 // ============================================================================
 // Mock لـ localStorage
 // ============================================================================

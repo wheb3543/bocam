@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../database/db', () => ({
+  getDb: vi.fn().mockResolvedValue(null),
   disconnectIntegrationConnection: mocks.disconnect,
   getIntegrationConnectionsOverview: mocks.overview,
   setIntegrationAssetSelected: mocks.selectAsset,

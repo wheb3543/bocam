@@ -11,7 +11,10 @@ const mocks = vi.hoisted(() => ({
   cancelSocialPublishSchedule: vi.fn(),
 }));
 
-vi.mock('../../database/db', () => mocks);
+vi.mock('../../database/db', () => ({
+  getDb: vi.fn().mockResolvedValue(null),
+  ...mocks,
+}));
 
 import { publishingRouter } from './publishing';
 

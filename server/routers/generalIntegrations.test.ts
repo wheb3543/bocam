@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../database/db', () => ({
+  getDb: vi.fn().mockResolvedValue(null),
   getSocialPlatformIntegrationStatuses: mocks.getStatuses,
   saveSocialPlatformIntegrationSettings: mocks.saveSettings,
 }));

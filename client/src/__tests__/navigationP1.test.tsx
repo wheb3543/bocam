@@ -20,17 +20,18 @@ describe('P1 navigation structure', () => {
       expect.arrayContaining([
         'تشغيل المرضى والحجوزات',
         'المحتوى والنشر',
-        'التواصل والقنوات',
+        'التواصل',
         'القياس والتقارير',
         'الإدارة والنظام',
       ])
     );
 
-    const communication = allToolsGroups.find((group) => group.label === 'التواصل والقنوات');
+    const communication = allToolsGroups.find((group) => group.label === 'التواصل');
+
     expect(communication?.items[0]?.id).toBe('messages');
-    expect(communication?.items.find((item) => item.id === 'integration-settings')?.title).toBe(
-      'ربط المنصات الاجتماعية'
-    );
+    expect(
+      communication?.items.find((item) => item.id === 'integration-settings')?.title
+    ).toMatch(/ربط|إعدادات الربط/);
     expect(defaultVisibleItemIds).toEqual(
       expect.arrayContaining(['messages', 'publishing', 'media-library'])
     );

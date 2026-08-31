@@ -341,6 +341,9 @@ export default function MessagesPage() {
       pageDescription="إدارة الرسائل والتعليقات من المنصات الاجتماعية في مكان واحد"
       pageHeader="none"
     >
+      <header className="sr-only">
+        <h1>صندوق البريد الموحد</h1>
+      </header>
       <div
         dir="rtl"
         className="container flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden py-3 md:gap-4 md:py-4"
@@ -425,7 +428,6 @@ export default function MessagesPage() {
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
-                    aria-label={`فتح ${tab.label}`}
                     className="min-h-11 shrink-0 gap-1.5 rounded-lg px-3 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm md:text-sm"
                   >
                     <Icon className="h-4 w-4" />

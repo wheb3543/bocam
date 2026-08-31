@@ -6,7 +6,9 @@ const routerDbMocks = vi.hoisted(() => ({
   updateSocialInboxAccount: vi.fn().mockResolvedValue({ success: true }),
   listSocialInboxThreads: vi.fn().mockResolvedValue([]),
   getSocialInboxStats: vi.fn().mockResolvedValue({ total: 0, unread: 0, messages: 0, comments: 0 }),
-  getSocialInboxThreadById: vi.fn().mockResolvedValue(null),
+  getSocialInboxThreadById: vi.fn().mockResolvedValue({
+    thread: { id: 7, channelType: 'message', assignedToUserId: null },
+  }),
   markSocialInboxThreadRead: vi.fn().mockResolvedValue({ success: true }),
   setSocialInboxThreadStarred: vi.fn().mockResolvedValue({ success: true }),
   assignSocialInboxThread: vi.fn().mockResolvedValue({ success: true }),
@@ -18,6 +20,7 @@ vi.mock('./database/db/connection', () => ({
 
 vi.mock('./database/db', () => ({
   ...routerDbMocks,
+  getDb: vi.fn().mockResolvedValue(null),
   getUserById: vi.fn(),
 }));
 
