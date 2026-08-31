@@ -74,7 +74,7 @@ interface SEOListProps {
   onApprovalSubmitted?: () => void;
   createMutation: { isPending: boolean };
   updateMutation: { isPending: boolean };
-  restoreMutation: { isPending: boolean };
+  restoreMutation?: { isPending: boolean };
 }
 
 /**
@@ -117,7 +117,6 @@ export function SEOList({
   onApprovalSubmitted,
   createMutation,
   updateMutation,
-  restoreMutation,
 }: SEOListProps) {
   const seoInsightsById = new Map(reportRows.map((row) => [row.id, row]));
   const handleCreateDialogOpenChange = (open: boolean) => {

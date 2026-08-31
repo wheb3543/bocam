@@ -87,7 +87,6 @@ export default function MetaIntegrationSettingsPage() {
   const [callbackUrl, setCallbackUrl] = useState('');
   const [oauthCallbackUrl, setOauthCallbackUrl] = useState('');
   const canViewIntegrations = can('integrations.view');
-  const canConnectIntegrations = can('integrations.connect');
   const canManageCredentials = can('integrations.credentials.manage');
   const isSystemAdmin = user?.role === 'admin';
   const statusQuery = trpc.metaIntegration.status.useQuery(undefined, {
@@ -180,11 +179,14 @@ export default function MetaIntegrationSettingsPage() {
   };
 
   const clearTestData = () => {
-    if (
-      window.confirm(
+    const shouldClear = (() => {
+      // eslint-disable-next-line no-alert
+      return window.confirm(
         'سيُحذف فقط كل ما يحمل بادئة sgh-meta-test- من حسابات وعناصر اختبار Meta. هل تريد المتابعة؟'
-      )
-    ) {
+      );
+    })();
+
+    if (shouldClear) {
       clearTestDataMutation.mutate();
     }
   };

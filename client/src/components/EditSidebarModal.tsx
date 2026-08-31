@@ -2,7 +2,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronDown, ChevronUp, GripVertical, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import type { NavItem, NavGroup } from '@/components/layout/sidebarData';
 import { cn } from '@/lib/utils';

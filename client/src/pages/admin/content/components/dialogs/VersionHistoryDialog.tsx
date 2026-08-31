@@ -50,14 +50,18 @@ export function VersionHistoryDialog({
 }: VersionHistoryDialogProps) {
   const { getVersions, restoreVersion, deleteVersion } = useContentVersions();
   const { data: versions, isLoading } = getVersions({ entityType, entityId });
+  const versionList = (versions as Version[] | undefined) ?? [];
   const [compareVersions, setCompareVersions] = useState<{ v1: Version; v2: Version } | null>(null);
 
   const handleRestore = async (version: Version) => {
-    if (
-      !confirm(
+    const shouldRestore = (() => {
+      // eslint-disable-next-line no-alert
+      return window.confirm(
         `هل تريد استعادة النسخة ${version.versionNumber}؟ ستُنشأ نسخة أمان تلقائية قبل الاستعادة.`
-      )
-    ) {
+      );
+    })();
+
+    if (!shouldRestore) {
       return;
     }
 
@@ -182,7 +186,7 @@ export function VersionHistoryDialog({
             </div>
           ) : (
             <div className="space-y-3">
-              {versions.map((version: Version) => (
+              {versionList.map((version) => (
                 <div
                   key={version.id}
                   className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
@@ -228,9 +232,9 @@ export function VersionHistoryDialog({
                         size="sm"
                         variant="outline"
                         onClick={() =>
-                          handleCompare(version, versions[versions.indexOf(version) - 1])
+                          handleCompare(version, versionList[versionList.indexOf(version) - 1])
                         }
-                        disabled={!versions[versions.indexOf(version) - 1]}
+                        disabled={!versionList[versionList.indexOf(version) - 1]}
                         className="flex items-center gap-1"
                       >
                         <GitCompareArrows className="h-4 w-4" />

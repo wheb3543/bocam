@@ -107,9 +107,15 @@ export default function LeadsManagementPage() {
     isLoading: leadsLoading,
     refetch: refetchLeads,
   } = trpc.leads.list.useQuery();
-  const { data: assignableUsers = [] } = trpc.leads.assignableUsers.useQuery(undefined, {
-    enabled: canAssignLeads,
-  });
+  const assignableUsers = (
+    (trpc.leads.assignableUsers.useQuery(undefined, {
+      enabled: canAssignLeads,
+    }).data ?? []) as Array<{ id: number; name?: string | null; username?: string | null }>
+  ).map((user) => ({
+    id: user.id,
+    name: user.name ?? null,
+    username: user.username ?? null,
+  }));
   const { data: stats } = trpc.leads.stats.useQuery();
 
   const updateStatusMutation = trpc.leads.updateStatus.useMutation({

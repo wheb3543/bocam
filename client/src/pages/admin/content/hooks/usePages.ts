@@ -178,7 +178,8 @@ export function usePages() {
   const pagination = getContentListPagination<Page>(pagesData);
 
   // Query for main pages (for parent selection)
-  const { data: mainPages } = trpc.content.pages.getMainPages.useQuery();
+  const { data: mainPagesRaw } = trpc.content.pages.getMainPages.useQuery();
+  const mainPages = (mainPagesRaw ?? []) as Array<{ id: number; name: string }>;
 
   // Mutations
   const createMutation = trpc.content.pages.create.useMutation({

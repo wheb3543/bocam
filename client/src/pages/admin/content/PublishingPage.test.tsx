@@ -96,7 +96,11 @@ describe('PublishingPage', () => {
     render(React.createElement(PublishingPage));
     fireEvent.change(screen.getByLabelText('عنوان داخلي للمحتوى'), { target: { value: 'إطلاق خدمة جديدة' } });
     fireEvent.change(screen.getByPlaceholderText('اكتب الرسالة الأساسية. ستُنشأ منها نسخة قابلة للتخصيص لكل منصة.'), { target: { value: 'تفاصيل الخدمة الجديدة' } });
-    fireEvent.click(screen.getByText('hero.avif').closest('button')!);
+    const heroButton = screen.getByText('hero.avif').closest('button');
+    if (!heroButton) {
+      throw new Error('Expected hero media button');
+    }
+    fireEvent.click(heroButton);
     fireEvent.click(screen.getByRole('button', { name: 'حفظ المسودة' }));
 
     expect(mocks.createDraft).toHaveBeenCalledWith({

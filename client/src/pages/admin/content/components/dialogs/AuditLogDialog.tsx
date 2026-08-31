@@ -70,6 +70,7 @@ export function AuditLogDialog({ open, onOpenChange, initialEntityType }: AuditL
     entityType: entityTypeFilter === 'all' ? undefined : (entityTypeFilter as EntityType),
     action: actionFilter === 'all' ? undefined : (actionFilter as AuditAction),
   });
+  const normalizedAuditLogs = (auditLogs as unknown as AuditLogEntry[]) ?? [];
 
   const handleExport = () => {
     if (!exportData) {
@@ -77,7 +78,8 @@ export function AuditLogDialog({ open, onOpenChange, initialEntityType }: AuditL
     }
 
     // إنشاء ملف CSV وتحميله
-    const blob = new Blob([exportData as string], { type: 'text/csv' });
+    const csv = typeof exportData === 'string' ? exportData : JSON.stringify(exportData, null, 2);
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -195,7 +197,7 @@ export function AuditLogDialog({ open, onOpenChange, initialEntityType }: AuditL
             </div>
           ) : (
             <div className="space-y-3">
-              {auditLogs.map((log: AuditLogEntry) => (
+              {normalizedAuditLogs.map((log) => (
                 <div
                   key={log.id}
                   className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"

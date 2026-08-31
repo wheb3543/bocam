@@ -31,6 +31,15 @@ interface Section {
   subtitleEn: string | null;
 }
 
+interface PublicImageEntry {
+  url: string;
+  altAr?: string | null;
+  altEn?: string | null;
+  key?: string;
+  section?: string | null;
+  sectionName?: string | null;
+}
+
 /**
  * صفحة ديناميكية للصفحات العامة
  * Dynamic Page for Public Pages
@@ -126,7 +135,7 @@ export default function DynamicPage() {
   }
 
   // استخراج المحتوى النصي حسب القسم والنوع
-  const getTextContent = (section: string, type: string, key?: string) => {
+  const getTextContent = (section: string, type: string, key?: string): string => {
     if (!pageContent?.textContents) {
       return '';
     }
@@ -136,29 +145,54 @@ export default function DynamicPage() {
           (item.sectionName === section || item.section === section) &&
           item.type === type &&
           (!key || item.key === key)
-      )?.content || ''
+      )?.content ?? ''
     );
   };
 
   // استخراج الصور حسب القسم
-  const getImage = (section: string, key?: string) => {
+  const getImage = (section: string, key?: string): PublicImageEntry | null => {
     if (!pageContent?.images) {
       return null;
     }
-    return pageContent.images.find(
+    const match = pageContent.images.find(
       (item) =>
         (item.sectionName === section || item.section === section) && (!key || item.key === key)
-    );
+    ) as Record<string, unknown> | undefined;
+
+    if (!match) {
+      return null;
+    }
+
+    return {
+      url: String(match.url ?? ''),
+      altAr: typeof match.altAr === 'string' ? match.altAr : null,
+      altEn: typeof match.altEn === 'string' ? match.altEn : null,
+      key: typeof match.key === 'string' ? match.key : undefined,
+      section: typeof match.section === 'string' ? match.section : null,
+      sectionName: typeof match.sectionName === 'string' ? match.sectionName : null,
+    };
   };
 
   // استخراج أزرار قسم معين
-  const getSectionButtons = (sectionId: number) => {
+  const getSectionButtons = (sectionId: number): SectionButton[] => {
     if (!pageContent?.sectionButtons) {
       return [];
     }
-    return pageContent.sectionButtons.filter(
-      (item) => item.sectionId === sectionId && item.isActive === 'yes'
-    );
+    return (pageContent.sectionButtons as Record<string, unknown>[])
+      .filter((item) => {
+        const record = item as Record<string, unknown>;
+        return Number(record.sectionId) === sectionId && record.isActive === 'yes';
+      })
+      .map((item) => {
+        const record = item as Record<string, unknown>;
+        return {
+          id: Number(record.id ?? 0),
+          textAr: String(record.textAr ?? ''),
+          textEn: String(record.textEn ?? ''),
+          link: String(record.link ?? '#'),
+          style: (record.style as SectionButton['style']) ?? 'primary',
+        };
+      });
   };
 
   // مكونات الأقسام
@@ -291,7 +325,7 @@ export default function DynamicPage() {
                       {img && (
                         <img
                           src={img.url}
-                          alt={language === 'ar' ? img.altAr : img.altEn}
+                          alt={language === 'ar' ? (img.altAr ?? '') : (img.altEn ?? '')}
                           className="w-full h-48 object-cover"
                         />
                       )}
@@ -322,7 +356,7 @@ export default function DynamicPage() {
               {singleImage && (
                 <img
                   src={singleImage.url}
-                  alt={language === 'ar' ? singleImage.altAr : singleImage.altEn}
+                  alt={language === 'ar' ? (singleImage.altAr ?? '') : (singleImage.altEn ?? '')}
                   className="max-w-4xl mx-auto rounded-lg shadow-lg"
                 />
               )}
@@ -592,7 +626,9 @@ export default function DynamicPage() {
                       {memberImg && (
                         <img
                           src={memberImg.url}
-                          alt={language === 'ar' ? memberImg.altAr : memberImg.altEn}
+                          alt={
+                            language === 'ar' ? (memberImg.altAr ?? '') : (memberImg.altEn ?? '')
+                          }
                           className="w-32 h-32 mx-auto rounded-full object-cover mb-4"
                         />
                       )}
@@ -629,7 +665,9 @@ export default function DynamicPage() {
                       {galleryImg && (
                         <img
                           src={galleryImg.url}
-                          alt={language === 'ar' ? galleryImg.altAr : galleryImg.altEn}
+                          alt={
+                            language === 'ar' ? (galleryImg.altAr ?? '') : (galleryImg.altEn ?? '')
+                          }
                           className="w-full h-full object-cover hover:scale-105 transition-transform"
                         />
                       )}
@@ -689,7 +727,9 @@ export default function DynamicPage() {
                       {sliderImg && (
                         <img
                           src={sliderImg.url}
-                          alt={language === 'ar' ? sliderImg.altAr : sliderImg.altEn}
+                          alt={
+                            language === 'ar' ? (sliderImg.altAr ?? '') : (sliderImg.altEn ?? '')
+                          }
                           className="w-full h-64 object-cover"
                         />
                       )}

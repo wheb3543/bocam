@@ -29,14 +29,13 @@ import { PreviewSection } from './PreviewSection';
 import { PreviewFeatures } from './PreviewFeatures';
 import type { TextContent, Image, ColorScheme } from '../../types/content.types';
 import type { Page } from '../../hooks/usePages';
-import type { Section } from '../../hooks/useSections';
 
 interface ContentPreviewPanelProps {
   textContents: TextContent[];
   images: Image[];
   colorSchemes: ColorScheme[];
   pages?: Page[];
-  sections?: Section[];
+  sections?: Array<{ id: number; name: string; pageId?: number | null; type?: string | null }>;
   isVisible: boolean;
   onToggle: () => void;
   onRefresh: () => void;
@@ -57,7 +56,6 @@ export function ContentPreviewPanel({
   images,
   colorSchemes,
   pages = [],
-  sections = [],
   isVisible,
   onToggle,
   onRefresh,
@@ -116,123 +114,6 @@ export function ContentPreviewPanel({
 
   // Get selected page sections
   const selectedPage = pages.find((p) => p.id === selectedPageId);
-  const pageSections = selectedPage
-    ? sections
-        .filter((s) => s.pageId === selectedPageId && s.isActive === 'yes')
-        .sort((a, b) => a.sortOrder - b.sortOrder)
-    : [];
-
-  // استخراج المحتوى النصي حسب القسم والنوع
-  const getTextContent = (section: string, type: string, key?: string) => {
-    return (
-      activeTextContents.find(
-        (item) => item.section === section && item.type === type && (!key || item.key === key)
-      )?.content || ''
-    );
-  };
-
-  // استخراج الصور حسب القسم
-  const getImage = (section: string, key?: string) => {
-    return activeImages.find((item) => item.section === section && (!key || item.key === key));
-  };
-
-  // مكونات الأقسام (نسخة مبسطة من PagePreview)
-  const renderSection = (section: Section) => {
-    switch (section.type) {
-      case 'hero': {
-        const heroImage = getImage(section.name, 'background');
-        return (
-          <div
-            key={section.id}
-            className="py-8 px-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 rounded-lg mb-4 relative overflow-hidden"
-          >
-            {heroImage && (
-              <img
-                src={heroImage.url}
-                alt={heroImage.altAr || heroImage.altEn || 'Hero Image'}
-                className="absolute inset-0 w-full h-full object-cover opacity-20"
-              />
-            )}
-            <div className="text-center relative z-10">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                {getTextContent(section.name, 'title')}
-              </h3>
-              <p className="text-base text-gray-700 dark:text-gray-300 mb-3">
-                {getTextContent(section.name, 'subtitle')}
-              </p>
-              <Button size="sm">{getTextContent(section.name, 'button')}</Button>
-            </div>
-          </div>
-        );
-      }
-
-      case 'text':
-        return (
-          <div key={section.id} className="py-6 px-4 bg-white dark:bg-gray-900 rounded-lg mb-4">
-            <div>
-              <h3 className="text-lg font-bold text-center mb-3 text-gray-900 dark:text-white">
-                {getTextContent(section.name, 'title')}
-              </h3>
-              <p className="text-sm text-gray-700 dark:text-gray-300 text-center">
-                {getTextContent(section.name, 'text')}
-              </p>
-            </div>
-          </div>
-        );
-
-      case 'features':
-        return (
-          <div key={section.id} className="py-6 px-4 bg-white dark:bg-gray-900 rounded-lg mb-4">
-            <h3 className="text-lg font-bold text-center mb-4 text-gray-900 dark:text-white">
-              {getTextContent(section.name, 'title')}
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-start space-x-2 space-x-reverse">
-                  <div className="h-4 w-4 rounded-full bg-green-500 flex-shrink-0 mt-1" />
-                  <div>
-                    <h4 className="text-sm font-bold mb-1 text-gray-900 dark:text-white">
-                      {getTextContent(section.name, 'title', `${section.name}.feature${i}`)}
-                    </h4>
-                    <p className="text-xs text-gray-700 dark:text-gray-300">
-                      {getTextContent(section.name, 'text', `${section.name}.feature${i}`)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'cta':
-        return (
-          <div key={section.id} className="py-6 px-4 bg-blue-600 dark:bg-blue-700 rounded-lg mb-4">
-            <div className="text-center">
-              <h3 className="text-lg font-bold mb-3 text-white">
-                {getTextContent(section.name, 'title')}
-              </h3>
-              <Button size="sm" variant="secondary">
-                {getTextContent(section.name, 'button')}
-              </Button>
-            </div>
-          </div>
-        );
-
-      default:
-        return (
-          <div key={section.id} className="py-6 px-4 bg-white dark:bg-gray-900 rounded-lg mb-4">
-            <div>
-              <h3 className="text-lg font-bold text-center mb-3 text-gray-900 dark:text-white">
-                {language === 'ar' ? section.titleAr : section.titleEn}
-              </h3>
-              <p className="text-sm text-gray-700 dark:text-gray-300 text-center">
-                {language === 'ar' ? section.subtitleAr : section.subtitleEn}
-              </p>
-            </div>
-          </div>
-        );
-    }
-  };
 
   // Device width mapping
   const deviceWidths = {

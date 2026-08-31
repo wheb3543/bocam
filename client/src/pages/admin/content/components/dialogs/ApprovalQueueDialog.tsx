@@ -59,6 +59,16 @@ interface ApprovalQueuePanelProps {
 }
 
 /** يعرض طابور المراجعة داخل النافذة أو صفحة المراجعة المخصصة، مع حراسة استعلامات مستقلة. */
+const confirmAction = (message: string) => {
+  // eslint-disable-next-line no-alert
+  return window.confirm(message);
+};
+
+const promptAction = (message: string) => {
+  // eslint-disable-next-line no-alert
+  return window.prompt(message);
+};
+
 export function ApprovalQueuePanel({ isActive = true }: ApprovalQueuePanelProps) {
   const { can } = useRolePermissions();
   const canReviewContent = can('content.review');
@@ -77,7 +87,7 @@ export function ApprovalQueuePanel({ isActive = true }: ApprovalQueuePanelProps)
   const refresh = () => pendingQuery.refetch();
 
   const approve = async (id: number) => {
-    if (!confirm('هل تريد اعتماد هذا الطلب؟')) {
+    if (!confirmAction('هل تريد اعتماد هذا الطلب؟')) {
       return;
     }
     setBusyId(id);
@@ -93,7 +103,7 @@ export function ApprovalQueuePanel({ isActive = true }: ApprovalQueuePanelProps)
   };
 
   const reject = async (id: number) => {
-    const rejectionReason = window.prompt('أدخل سبب الرفض ليصل إلى صاحب الطلب:');
+    const rejectionReason = promptAction('أدخل سبب الرفض ليصل إلى صاحب الطلب:');
     if (rejectionReason === null) {
       return;
     }

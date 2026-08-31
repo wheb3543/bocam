@@ -16,15 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  TrendingUp,
-  Users,
-  Target,
-  CheckCircle2,
-  AlertCircle,
-  RefreshCw,
-  Download,
-} from 'lucide-react';
+import { Users, Target, CheckCircle2, AlertCircle, RefreshCw, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import type { DateRange } from './bi/types/bi.types';
 import { getDateRange, formatDailyChartData } from './bi/utils/biHelpers';

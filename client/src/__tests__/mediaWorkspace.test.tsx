@@ -73,7 +73,10 @@ describe('Media library workspace', () => {
 
     const treeExpander = container.querySelector('[role="button"]');
     expect(treeExpander).toBeTruthy();
-    fireEvent.click(treeExpander!);
+    if (!treeExpander) {
+      throw new Error('Expected tree expander');
+    }
+    fireEvent.click(treeExpander);
     expect(screen.getByRole('button', { name: 'طي الكل' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'طي الكل' }));
     expect(screen.queryByRole('button', { name: 'طي الكل' })).toBeNull();

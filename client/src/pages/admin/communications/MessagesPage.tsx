@@ -735,9 +735,14 @@ export default function MessagesPage() {
                               className="h-9 w-9 text-destructive hover:text-destructive"
                               disabled={deleteMutation.isPending}
                               onClick={() => {
-                                if (
-                                  window.confirm('سيُحذف سجل المحادثة نهائياً. هل تريد المتابعة؟')
-                                ) {
+                                const shouldDelete = (() => {
+                                  // eslint-disable-next-line no-alert
+                                  return window.confirm(
+                                    'سيُحذف سجل المحادثة نهائياً. هل تريد المتابعة؟'
+                                  );
+                                })();
+
+                                if (shouldDelete) {
                                   deleteMutation.mutate({ id: selectedThread.id });
                                 }
                               }}

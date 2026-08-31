@@ -1,10 +1,10 @@
-import { useAuth } from '@/_core/hooks/useAuth';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { SystemNotificationSettingsCard } from '@/components/notification/SystemNotificationSettingsCard';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 export default function SettingsPage() {
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  const { can } = useRolePermissions();
+  const canManageNotifications = can('notifications.settings.manage');
 
   return (
     <DashboardLayout pageTitle="الإعدادات" pageDescription="إدارة إعدادات النظام">
@@ -16,7 +16,7 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        {isAdmin ? (
+        {canManageNotifications ? (
           <SystemNotificationSettingsCard />
         ) : (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">

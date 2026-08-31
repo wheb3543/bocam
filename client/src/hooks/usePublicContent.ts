@@ -5,7 +5,6 @@
 
 import { trpc } from '@/lib/api/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { toast } from 'sonner';
 
 interface TextContentItem {
   id: number;
@@ -342,10 +341,10 @@ export function usePublicPageContentByPageId(pageId: number, language?: 'ar' | '
     data:
       | {
           textContents: TextContentItem[];
-          images: any[];
-          colors: any[];
+          images: Array<Record<string, unknown>>;
+          colors: Array<Record<string, unknown>>;
           sections: SectionItem[];
-          sectionButtons: any[];
+          sectionButtons: Array<Record<string, unknown>>;
         }
       | undefined;
     isLoading: boolean;

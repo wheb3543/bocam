@@ -19,7 +19,6 @@ import {
   UserRoundCheck,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { toast } from 'sonner';
 import { platformConfig, type Platform } from './socialInboxConfig';
 
 type CommentMetadata = {
@@ -627,9 +626,12 @@ export default function MetaCommentContextsPanel({
                           disabled={
                             isTestContext || isActionPending || selectedContext.items.length === 0
                           }
-                          onClick={() =>
-                            void onEnrich(selectedContext.id, selectedContext.items[0]!.id)
-                          }
+                          onClick={() => {
+                            const firstItemId = selectedContext.items[0]?.id;
+                            if (typeof firstItemId === 'number') {
+                              void onEnrich(selectedContext.id, firstItemId);
+                            }
+                          }}
                         >
                           <Sparkles className="h-3.5 w-3.5" /> إثراء
                         </Button>

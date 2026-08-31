@@ -74,12 +74,9 @@ export default function AppointmentsManagementPage() {
   const canDeleteAppointments = can('appointments.delete');
   const canAssignAppointments = can('appointments.assign');
   const utils = trpc.useUtils();
-  const { data: appointmentAssignees = [] } = trpc.appointments.assignableUsers.useQuery(
-    undefined,
-    {
-      enabled: canAssignAppointments,
-    }
-  );
+  const appointmentAssignees = (trpc.appointments.assignableUsers.useQuery(undefined, {
+    enabled: canAssignAppointments,
+  }).data ?? []) as Array<{ id: number; name?: string | null; username?: string | null }>;
   const assignAppointmentMutation = trpc.appointments.assign.useMutation({
     onSuccess: () => {
       utils.appointments.listPaginated.invalidate();

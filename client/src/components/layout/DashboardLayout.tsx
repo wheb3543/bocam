@@ -5,7 +5,7 @@ export default function DashboardLayout({
   children,
   pageTitle,
   pageDescription,
-  pageHeader = 'standard',
+  pageHeader: _pageHeader = 'standard',
 }: {
   children: React.ReactNode;
   pageTitle?: string;

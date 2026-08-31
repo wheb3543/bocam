@@ -68,7 +68,10 @@ function formatDate(value: Date | string | null | undefined) {
 }
 
 function PlatformMark({ platform, compact = false }: { platform: Platform; compact?: boolean }) {
-  const entry = platformCatalog.find((item) => item.id === platform)!;
+  const entry = platformCatalog.find((item) => item.id === platform);
+  if (!entry) {
+    return null;
+  }
   return (
     <span className="inline-flex items-center gap-2" title={entry.label}>
       <span

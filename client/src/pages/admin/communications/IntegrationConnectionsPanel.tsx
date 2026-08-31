@@ -404,7 +404,14 @@ export function IntegrationConnectionsPanel() {
                         size="sm"
                         className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
                         onClick={() => {
-                          if (window.confirm('هل تريد إلغاء هذا الربط؟ لن يحذف المحتوى الداخلي.')) {
+                          const shouldDisconnect = (() => {
+                            // eslint-disable-next-line no-alert
+                            return window.confirm(
+                              'هل تريد إلغاء هذا الربط؟ لن يحذف المحتوى الداخلي.'
+                            );
+                          })();
+
+                          if (shouldDisconnect) {
                             disconnectMutation.mutate({ connectionId: connection.id });
                           }
                         }}

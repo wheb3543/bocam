@@ -608,7 +608,6 @@ export default function ContentManagementPage() {
               }}
               createMutation={seo.createMutation}
               updateMutation={seo.updateMutation}
-              restoreMutation={seo.restoreMutation}
             />
           )}
         </ContentTabs>
