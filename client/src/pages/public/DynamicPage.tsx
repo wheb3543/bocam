@@ -40,6 +40,33 @@ interface PublicImageEntry {
   sectionName?: string | null;
 }
 
+export function getSafeNavigationTarget(target?: string | null): string | null {
+  const value = target?.trim();
+  if (!value) {
+    return null;
+  }
+
+  if (value.startsWith('/') || value.startsWith('#')) {
+    return value;
+  }
+
+  if (/^(mailto:|tel:)/i.test(value)) {
+    return value;
+  }
+
+  if (/^javascript:/i.test(value) || /^data:/i.test(value)) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(value, window.location.origin);
+    const allowedProtocols = new Set(['http:', 'https:', 'mailto:', 'tel:']);
+    return allowedProtocols.has(parsed.protocol) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * صفحة ديناميكية للصفحات العامة
  * Dynamic Page for Public Pages
@@ -231,7 +258,12 @@ export default function DynamicPage() {
                               : 'ghost'
                       }
                       className="text-lg px-8 py-6"
-                      onClick={() => (window.location.href = button.link)}
+                      onClick={() => {
+                        const safeTarget = getSafeNavigationTarget(button.link);
+                        if (safeTarget) {
+                          window.location.href = safeTarget;
+                        }
+                      }}
                     >
                       {language === 'ar' ? button.textAr : button.textEn}
                     </Button>
@@ -411,7 +443,12 @@ export default function DynamicPage() {
                               : 'ghost'
                       }
                       className="text-lg px-8 py-6"
-                      onClick={() => (window.location.href = button.link)}
+                      onClick={() => {
+                        const safeTarget = getSafeNavigationTarget(button.link);
+                        if (safeTarget) {
+                          window.location.href = safeTarget;
+                        }
+                      }}
                     >
                       {language === 'ar' ? button.textAr : button.textEn}
                     </Button>
@@ -593,7 +630,12 @@ export default function DynamicPage() {
                                   : 'ghost'
                           }
                           className="w-full"
-                          onClick={() => (window.location.href = button.link)}
+                          onClick={() => {
+                            const safeTarget = getSafeNavigationTarget(button.link);
+                            if (safeTarget) {
+                              window.location.href = safeTarget;
+                            }
+                          }}
                         >
                           {language === 'ar' ? button.textAr : button.textEn}
                         </Button>
