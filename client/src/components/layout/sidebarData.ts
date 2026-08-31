@@ -221,9 +221,10 @@ export const allNavItems: NavItem[] = [
   { id: 'support', title: 'الدعم الفني', href: '/admin/support', icon: CircleHelp },
   {
     id: 'integration-settings',
-    title: 'ربط المنصات الاجتماعية',
+    title: 'إعدادات الربط',
     href: '/admin/communications/integration-settings',
     icon: Shield,
+    allowedRoles: ['admin'],
     requiredPermission: 'integrations.view',
   },
   {
@@ -341,7 +342,7 @@ export const allToolsGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'التواصل والقنوات',
+    label: 'التواصل',
     icon: MessageCircle,
     items: [
       {
@@ -474,7 +475,7 @@ export const allToolsGroups: NavGroup[] = [
       },
       {
         id: 'integration-settings',
-        title: 'ربط المنصات الاجتماعية',
+        title: 'إعدادات الربط',
         href: '/admin/communications/integration-settings',
         icon: Shield,
         allowedRoles: ['admin'],

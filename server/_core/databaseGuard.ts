@@ -4,8 +4,10 @@
  */
 
 import { TRPCError } from '@trpc/server';
-import { getDb } from '../database/db';
+import * as databaseDbModule from '../database/db';
 import type { Database } from '../database/db/connection';
+
+const getDb = databaseDbModule.getDb as ((() => Promise<Database | null>) | undefined) | null;
 
 /**
  * التحقق من توفر قاعدة البيانات
@@ -13,7 +15,8 @@ import type { Database } from '../database/db/connection';
  * @returns قاعدة البيانات المتاحة
  */
 export async function ensureDatabaseAvailable(): Promise<Database> {
-  const db = await getDb();
+  const getDbFn = typeof getDb === 'function' ? getDb : async () => null;
+  const db = await getDbFn();
   // During tests, bypass DB availability to avoid breaking unit tests
   // when a real database is not present in the test environment.
   if (!db) {
@@ -35,6 +38,7 @@ export async function ensureDatabaseAvailable(): Promise<Database> {
         groupBy: (...args: unknown[]) => QueryThenable;
         where: (...args: unknown[]) => QueryThenable;
         orderBy: (...args: unknown[]) => QueryThenable;
+        innerJoin: (...args: unknown[]) => QueryThenable;
         leftJoin: (...args: unknown[]) => QueryThenable;
         offset: (...args: unknown[]) => QueryThenable;
         from?: (...args: unknown[]) => QueryThenable;
@@ -49,6 +53,7 @@ export async function ensureDatabaseAvailable(): Promise<Database> {
         groupBy: () => terminalThenable,
         where: () => terminalThenable,
         orderBy: () => terminalThenable,
+        innerJoin: () => terminalThenable,
         leftJoin: () => terminalThenable,
         offset: () => terminalThenable,
       };
@@ -57,6 +62,7 @@ export async function ensureDatabaseAvailable(): Promise<Database> {
         from: () => terminalThenable,
         where: () => terminalThenable,
         orderBy: () => terminalThenable,
+        innerJoin: () => terminalThenable,
         leftJoin: () => terminalThenable,
         offset: () => terminalThenable,
         groupBy: () => terminalThenable,
@@ -71,6 +77,7 @@ export async function ensureDatabaseAvailable(): Promise<Database> {
         where: () => QueryThenable;
         orderBy: () => QueryThenable;
         groupBy: () => QueryThenable;
+        innerJoin: () => QueryThenable;
         leftJoin: () => QueryThenable;
         limit: () => Promise<Rows>;
         offset: () => QueryThenable;
@@ -84,6 +91,7 @@ export async function ensureDatabaseAvailable(): Promise<Database> {
         where: () => makeChain(),
         orderBy: () => makeChain(),
         groupBy: () => makeChain(),
+        innerJoin: () => makeChain(),
         leftJoin: () => makeChain(),
         limit: () => Promise.resolve([]),
         offset: () => makeChain(),

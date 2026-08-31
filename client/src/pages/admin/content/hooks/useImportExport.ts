@@ -91,15 +91,18 @@ export function useImportExport() {
     }
   };
 
-  const previewImport = async (data: unknown): Promise<ImportPreview> => {
-    return (await previewImportMutation.mutateAsync(asImportPayload(data))) as ImportPreview;
+  const previewImport = async (importData: unknown): Promise<ImportPreview> => {
+    if (!importData || typeof importData !== 'object' || Array.isArray(importData)) {
+      throw new Error('ملف الاستيراد يجب أن يكون كائن JSON صالحاً.');
+    }
+    return (await previewImportMutation.mutateAsync(importData)) as ImportPreview;
   };
 
-  const confirmImport = async (data: unknown): Promise<ImportResult> => {
+  const confirmImport = async (importData: unknown): Promise<ImportResult> => {
     setIsImporting(true);
     try {
       const result = (await importMutation.mutateAsync({
-        ...asImportPayload(data),
+        ...asImportPayload(importData),
         confirm: true,
       })) as ImportResult;
       await utils.invalidate();

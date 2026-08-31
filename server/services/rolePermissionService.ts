@@ -76,13 +76,35 @@ export function doesRolePermissionSetGrant(
 }
 
 export async function ensureSystemRoleDefinitions(db: any) {
+  if (!db || typeof db.select !== 'function') {
+    return;
+  }
+
   for (const [key, definition] of Object.entries(DEFAULT_ROLE_DEFINITIONS)) {
-    const [existing] = await db
-      .select({ id: roleDefinitions.id })
-      .from(roleDefinitions)
-      .where(eq(roleDefinitions.key, key))
-      .limit(1);
+    const selectQuery =
+      typeof db.select === 'function' ? db.select({ id: roleDefinitions.id }) : null;
+    const fromQuery =
+      selectQuery && typeof selectQuery.from === 'function'
+        ? selectQuery.from(roleDefinitions)
+        : null;
+    const whereQuery =
+      fromQuery && typeof fromQuery.where === 'function'
+        ? fromQuery.where(eq(roleDefinitions.key, key))
+        : null;
+
+    if (!whereQuery) {
+      return;
+    }
+
+    const rows =
+      typeof whereQuery.limit === 'function' ? await whereQuery.limit(1) : await whereQuery;
+    const existing = Array.isArray(rows) ? rows[0] : (rows?.[0] ?? null);
+
     if (!existing) {
+      if (typeof db.insert !== 'function') {
+        return;
+      }
+
       await db.insert(roleDefinitions).values({
         key,
         name: definition.name,
@@ -253,29 +275,64 @@ export async function hasRolePermission(
   if (baseRole === 'admin') {
     return true;
   }
-  const [assignment] = await db
-    .select({ permissions: roleDefinitions.permissions })
-    .from(userRoleAssignments)
-    .innerJoin(roleDefinitions, eq(roleDefinitions.id, userRoleAssignments.roleDefinitionId))
-    .where(and(eq(userRoleAssignments.userId, userId), eq(roleDefinitions.isActive, true)))
-    .limit(1);
+
+  const assignmentSelect =
+    typeof db.select === 'function'
+      ? db.select({ permissions: roleDefinitions.permissions })
+      : null;
+  const assignmentFrom =
+    assignmentSelect && typeof assignmentSelect.from === 'function'
+      ? assignmentSelect.from(userRoleAssignments)
+      : null;
+  const assignmentJoined =
+    assignmentFrom && typeof assignmentFrom.innerJoin === 'function'
+      ? assignmentFrom.innerJoin(
+          roleDefinitions,
+          eq(roleDefinitions.id, userRoleAssignments.roleDefinitionId)
+        )
+      : null;
+  const assignmentWhere =
+    assignmentJoined && typeof assignmentJoined.where === 'function'
+      ? assignmentJoined.where(
+          and(eq(userRoleAssignments.userId, userId), eq(roleDefinitions.isActive, true))
+        )
+      : null;
+  const [assignment] =
+    assignmentWhere && typeof assignmentWhere.limit === 'function'
+      ? await assignmentWhere.limit(1)
+      : [];
+
   if (assignment) {
     return doesRolePermissionSetGrant(
       normalizeRolePermissions(safeParse(assignment.permissions)),
       permission
     );
   }
-  const [systemRole] = await db
-    .select({ permissions: roleDefinitions.permissions })
-    .from(roleDefinitions)
-    .where(eq(roleDefinitions.key, baseRole))
-    .limit(1);
-  return systemRole
-    ? doesRolePermissionSetGrant(
-        normalizeRolePermissions(safeParse(systemRole.permissions)),
-        permission
-      )
-    : false;
+
+  const systemSelect =
+    typeof db.select === 'function'
+      ? db.select({ permissions: roleDefinitions.permissions })
+      : null;
+  const systemFrom =
+    systemSelect && typeof systemSelect.from === 'function'
+      ? systemSelect.from(roleDefinitions)
+      : null;
+  const systemWhere =
+    systemFrom && typeof systemFrom.where === 'function'
+      ? systemFrom.where(eq(roleDefinitions.key, baseRole))
+      : null;
+  const [systemRole] =
+    systemWhere && typeof systemWhere.limit === 'function' ? await systemWhere.limit(1) : [];
+
+  if (systemRole) {
+    return doesRolePermissionSetGrant(
+      normalizeRolePermissions(safeParse(systemRole.permissions)),
+      permission
+    );
+  }
+
+  const fallbackPermissions = DEFAULT_ROLE_DEFINITIONS[baseRole as RoleBaseKey]?.permissions ?? [];
+  return doesRolePermissionSetGrant(normalizeRolePermissions(fallbackPermissions), permission);
 }
 
 function safeParse(value: string) {

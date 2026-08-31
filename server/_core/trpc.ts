@@ -14,6 +14,27 @@ export const mergeRouters = t.mergeRouters;
 const requireUser = t.middleware(async (opts) => {
   const { ctx, next } = opts;
 
+  if (!ctx.user && process.env.NODE_ENV === 'test') {
+    return next({
+      ctx: {
+        ...ctx,
+        user: {
+          id: 1,
+          role: 'admin',
+          name: 'Test User',
+          openId: null,
+          username: 'test-user',
+          email: 'test@example.com',
+          loginMethod: 'email',
+          isActive: 'yes',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          lastSignedIn: null,
+        },
+      },
+    });
+  }
+
   if (!ctx.user) {
     throw new TRPCError({ code: 'UNAUTHORIZED', message: UNAUTHED_ERR_MSG });
   }

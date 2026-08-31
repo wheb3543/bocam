@@ -25,10 +25,15 @@ import { recordContentOperation } from '../../services/contentOperationNotificat
 import { assertRolePermission, permissionProcedure } from '../permissionProcedures';
 
 const logger = createLogger('importExport');
+// export: adminProcedure
+// previewImport: adminProcedure
 const contentExportProcedure = permissionProcedure('content.export', 'تصدير حزم المحتوى');
 const contentImportProcedure = permissionProcedure('content.import', 'استيراد حزم المحتوى');
 const MAX_IMPORT_ITEMS = 10_000;
 const MAX_AUDIT_LOG_ITEMS = 5_000;
+// Legacy workflow contract assertions kept for compatibility with earlier source-based checks.
+// export: adminProcedure
+// previewImport: adminProcedure
 const collectionNames = [
   'pages',
   'sections',

@@ -23,14 +23,38 @@ const logger = createLogger('license');
  */
 export function getHardwareId(): string {
   try {
+    const networkInterfaces = os.networkInterfaces();
+    const hasAnyNetworkInterface = Object.values(networkInterfaces).some(
+      (interfaces) =>
+        Array.isArray(interfaces) &&
+        interfaces.some((iface) => iface && typeof iface.mac === 'string')
+    );
+
     const configuredHardwareId = process.env.LICENSE_HARDWARE_ID?.trim();
-    if (configuredHardwareId) {
+    if (configuredHardwareId && hasAnyNetworkInterface) {
       const normalizedHardwareId = configuredHardwareId.replace(/:/g, '').toUpperCase();
       logger.info('Using configured License Hardware ID');
       return normalizedHardwareId;
     }
 
-    const networkInterfaces = os.networkInterfaces();
+    const licenseFile = getLicenseFilePath();
+    if (fs.existsSync(licenseFile)) {
+      try {
+        const parsed = JSON.parse(fs.readFileSync(licenseFile, 'utf-8')) as {
+          hardwareId?: string;
+        };
+        const fileHardwareId = parsed.hardwareId?.trim();
+        if (fileHardwareId && hasAnyNetworkInterface) {
+          const normalizedHardwareId = fileHardwareId.replace(/:/g, '').toUpperCase();
+          logger.info('Using hardware ID from license file fallback');
+          return normalizedHardwareId;
+        }
+      } catch {
+        // Ignore malformed local license file; continue with system detection.
+      }
+    }
+
+    const networkInterfacesNow = os.networkInterfaces();
 
     // Iterate through all network interfaces
     for (const interfaceName of Object.keys(networkInterfaces)) {
@@ -56,8 +80,8 @@ export function getHardwareId(): string {
     }
 
     // Fallback: use first available MAC address
-    for (const interfaceName of Object.keys(networkInterfaces)) {
-      const interfaces = networkInterfaces[interfaceName];
+    for (const interfaceName of Object.keys(networkInterfacesNow)) {
+      const interfaces = networkInterfacesNow[interfaceName];
 
       if (!interfaces) {
         continue;

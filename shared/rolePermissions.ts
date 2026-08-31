@@ -633,6 +633,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<
       'content.review',
       'content.manage',
       'content.publish',
+      'content.schedule',
       'media.view',
       'media.upload',
       'media.delete',
@@ -669,6 +670,8 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<
     permissions: [
       'dashboard.view',
       'content.view',
+      'content.create',
+      'content.update',
       'media.view',
       'appointments.view',
       'appointments.create',
@@ -717,7 +720,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<
   viewer: {
     name: 'مشاهد',
     description: 'عرض المعلومات المصرح بها فقط.',
-    permissions: ['dashboard.view', 'content.view', 'media.view', 'reports.view'],
+    permissions: ['dashboard.view', 'media.view', 'reports.view'],
   },
   user: {
     name: 'مستخدم',

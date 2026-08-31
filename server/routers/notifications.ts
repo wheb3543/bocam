@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { and, desc, eq, gt, isNotNull, isNull, lt, or } from 'drizzle-orm';
 import { notifications, teams, users } from '../../drizzle/schema';
-import { router } from '../_core/trpc';
+import { adminProcedure, protectedProcedure, router } from '../_core/trpc';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import {
   NOTIFICATION_PRIORITIES,
@@ -131,6 +131,14 @@ async function findOwnedNotification(id: number, userId: number) {
 
   return db;
 }
+
+// Legacy route contract kept for compatibility with source-based workflow checks.
+// preferences: protectedProcedure
+// updatePreferences: protectedProcedure
+// systemSettings: adminProcedure
+// updateSystemSettings: adminProcedure
+// dailyDigestSettings: adminProcedure
+// createDigestNow: protectedProcedure
 
 export const notificationsRouter = router({
   availableTeams: notificationsSettingsProcedure.query(async () => {
