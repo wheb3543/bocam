@@ -3,6 +3,7 @@ import { useAuth } from '@/_core/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import OffersManagement from '@/components/offer/OffersManagement';
@@ -16,7 +17,12 @@ export default function ManagementPage() {
 
   const _logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
-      toast.success('تم تسجيل الخروج بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تسجيل الخروج بنجاح',
+        description: 'تمت إعادة توجيهك إلى الصفحة الرئيسية.',
+        redirect: '/',
+      });
       setLocation('/');
     },
   });

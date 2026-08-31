@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import type { TextContent, TextContentFormData } from '../types/content.types';
 import { initialTextContentFormData } from '../types/content.types';
@@ -57,7 +58,12 @@ export function useTextContent() {
   // Mutations
   const createMutation = trpc.content.textContent.create.useMutation({
     onSuccess: () => {
-      toast.success('تم إنشاء المحتوى النصي بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم إنشاء المحتوى النصي بنجاح',
+        description: 'تم حفظ محتوى الصفحة بنجاح.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialTextContentFormData);
@@ -76,7 +82,12 @@ export function useTextContent() {
 
   const updateMutation = trpc.content.textContent.update.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث المحتوى النصي بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث المحتوى النصي بنجاح',
+        description: 'تم حفظ آخر تغييرات المحتوى النصي.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedTextContent(null);

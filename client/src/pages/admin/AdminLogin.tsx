@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import CentralLicenseRequestDialog from '@/components/license/CentralLicenseRequestDialog';
 import { Loader2, User, Lock, Shield, Heart, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 
 export default function AdminLogin() {
   const [, navigate] = useLocation();
@@ -39,13 +40,19 @@ export default function AdminLogin() {
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: async (data) => {
-      toast.success(`مرحباً ${data.user.name || data.user.username}! تم تسجيل الدخول بنجاح`);
       const refreshedLicense = await licenseInfo.refetch();
       if (refreshedLicense.data?.isValid) {
+        emitToastHash({
+          kind: 'success',
+          message: `مرحباً ${data.user.name || data.user.username}! تم تسجيل الدخول بنجاح`,
+          description: 'تمت إعادة توجيهك إلى لوحة الإدارة.',
+          redirect: '/admin',
+        });
         navigate('/admin');
         return;
       }
 
+      toast.success(`مرحباً ${data.user.name || data.user.username}! تم تسجيل الدخول بنجاح`);
       setLicenseRequestOpen(true);
     },
     onError: (err) => {

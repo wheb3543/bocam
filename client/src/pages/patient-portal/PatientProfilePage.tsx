@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,9 +18,11 @@ import {
   Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 
 export default function PatientProfilePage() {
+  const [, navigate] = useLocation();
   const { formatPhoneDisplay } = usePhoneFormat();
   const utils = trpc.useUtils();
   const [isEditing, setIsEditing] = useState(false);
@@ -34,14 +37,24 @@ export default function PatientProfilePage() {
 
   const logoutMutation = trpc.patientPortal.logout.useMutation({
     onSuccess: () => {
-      toast.success('تم تسجيل الخروج');
-      window.location.href = '/patient-portal/login';
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تسجيل الخروج',
+        description: 'تم تسجيل الخروج بنجاح من البوابة.',
+        redirect: '/patient-portal/login',
+      });
+      navigate('/patient-portal/login');
     },
   });
 
   const updateProfileMutation = trpc.patientPortal.updateProfile.useMutation({
     onSuccess: async () => {
-      toast.success('تم تحديث بياناتك بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث بياناتك بنجاح',
+        description: 'تم حفظ بياناتك الشخصية الأخيرة.',
+        redirect: '/patient-portal/profile',
+      });
       setIsEditing(false);
       await utils.patientPortal.me.invalidate();
     },
@@ -69,7 +82,9 @@ export default function PatientProfilePage() {
     );
   }
 
-  if (!patient) {return null;}
+  if (!patient) {
+    return null;
+  }
 
   const handleSave = () => {
     const fullName = form.fullName.trim();

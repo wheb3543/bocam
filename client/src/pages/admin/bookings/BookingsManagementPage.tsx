@@ -35,6 +35,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Users, UserCheck, Calendar, TrendingUp, Plus, BarChart3, CheckSquare } from 'lucide-react';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { useFilterUtils } from '@/hooks/table/useFilterUtils';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/_core/hooks/useAuth';
@@ -159,7 +160,12 @@ export default function BookingsManagementPage() {
   // === Lead Status Update ===
   const updateStatusMutation = trpc.leads.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث حالة العميل بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث حالة العميل بنجاح',
+        description: 'تم حفظ حالة العميل الأخيرة.',
+        redirect: '/admin/bookings',
+      });
       refetchLeads();
       setStatusDialogOpen(false);
       setSelectedLead(null);
@@ -174,7 +180,12 @@ export default function BookingsManagementPage() {
   // === Appointment Status Update ===
   const updateAppointmentStatusMutation = trpc.appointments.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث حالة الموعد بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث حالة الموعد بنجاح',
+        description: 'تم حفظ حالة الموعد الجديدة بنجاح.',
+        redirect: '/admin/bookings',
+      });
       utils.appointments.listPaginated.invalidate();
       setAppointmentStatusDialogOpen(false);
       setSelectedAppointment(null);

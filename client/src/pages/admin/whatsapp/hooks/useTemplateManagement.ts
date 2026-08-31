@@ -5,6 +5,7 @@
 import { useState, useMemo } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import type { Template, TemplateStats } from '../types/template.types';
 
 export function useTemplateManagement() {
@@ -45,7 +46,12 @@ export function useTemplateManagement() {
       const message =
         (result as { message?: string; synced?: number }).message ||
         `تمت المزامنة: ${(result as { synced?: number }).synced} قالب جديد`;
-      toast.success(message);
+      emitToastHash({
+        kind: 'success',
+        message,
+        description: 'تمت مزامنة قوالب WhatsApp من Meta بنجاح.',
+        redirect: '/admin/whatsapp/templates',
+      });
       refetch();
     },
     onError: (error: unknown) =>
@@ -54,7 +60,12 @@ export function useTemplateManagement() {
 
   const createMutation = trpc.whatsapp.templates.create.useMutation({
     onSuccess: () => {
-      toast.success('تم إنشاء القالب بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم إنشاء القالب بنجاح',
+        description: 'تم حفظ القالب الجديد في إدارة القوالب.',
+        redirect: '/admin/whatsapp/templates',
+      });
       setIsCreateOpen(false);
       resetForm();
       refetch();
@@ -65,7 +76,12 @@ export function useTemplateManagement() {
 
   const updateMutation = trpc.whatsapp.templates.update.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث القالب بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث القالب بنجاح',
+        description: 'تم حفظ التغييرات الأخيرة على القالب.',
+        redirect: '/admin/whatsapp/templates',
+      });
       setIsEditOpen(false);
       resetForm();
       refetch();
@@ -76,7 +92,12 @@ export function useTemplateManagement() {
 
   const deleteMutation = trpc.whatsapp.templates.delete.useMutation({
     onSuccess: () => {
-      toast.success('تم حذف القالب');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم حذف القالب',
+        description: 'تم حذف القالب بنجاح من إدارة قوالب WhatsApp.',
+        redirect: '/admin/whatsapp/templates',
+      });
       refetch();
     },
     onError: (error: unknown) =>
@@ -85,7 +106,12 @@ export function useTemplateManagement() {
 
   const sendTemplateMutation = trpc.whatsapp.sendTemplate.useMutation({
     onSuccess: () => {
-      toast.success('✅ تم إرسال القالب بنجاح! تحقق من هاتفك.');
+      emitToastHash({
+        kind: 'success',
+        message: '✅ تم إرسال القالب بنجاح',
+        description: 'تحقق من هاتفك لتلقي الرسالة.',
+        redirect: '/admin/whatsapp/templates',
+      });
       setIsTestOpen(false);
       setTestPhone('');
     },

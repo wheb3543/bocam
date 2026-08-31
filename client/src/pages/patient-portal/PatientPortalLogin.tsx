@@ -29,6 +29,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import PageLayout from '@/components/layout/PageLayout';
 import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
@@ -64,7 +65,12 @@ export default function PatientPortalLogin() {
 
   const sendOtpMutation = trpc.patientPortal.sendOtp.useMutation({
     onSuccess: () => {
-      toast.success('تم إرسال رمز التحقق إلى هاتفك');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم إرسال رمز التحقق إلى هاتفك',
+        description: 'يرجى إدخال الرمز لاستكمال تسجيل الدخول.',
+        redirect: '/patient-portal/login',
+      });
       setStep('otp');
     },
     onError: (err) => {
@@ -75,10 +81,20 @@ export default function PatientPortalLogin() {
   const verifyOtpMutation = trpc.patientPortal.verifyOtp.useMutation({
     onSuccess: (data) => {
       if (data.needsRegistration) {
-        toast.info('يرجى إكمال بيانات التسجيل');
+        emitToastHash({
+          kind: 'info',
+          message: 'يرجى إكمال بيانات التسجيل',
+          description: 'أكمل بياناتك لإتمام إنشاء الحساب.',
+          redirect: '/patient-portal/login',
+        });
         setStep('register');
       } else {
-        toast.success('تم تسجيل الدخول بنجاح');
+        emitToastHash({
+          kind: 'success',
+          message: 'تم تسجيل الدخول بنجاح',
+          description: 'مرحباً بك في بوابة المريض.',
+          redirect: '/patient-portal/home',
+        });
         navigate('/patient-portal/home');
       }
     },
@@ -89,7 +105,12 @@ export default function PatientPortalLogin() {
 
   const registerMutation = trpc.patientPortal.register.useMutation({
     onSuccess: () => {
-      toast.success('تم إنشاء حسابك بنجاح! مرحباً بك');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم إنشاء حسابك بنجاح',
+        description: 'مرحباً بك في بوابة المريض.',
+        redirect: '/patient-portal/home',
+      });
       navigate('/patient-portal/home');
     },
     onError: (err) => {
@@ -99,7 +120,12 @@ export default function PatientPortalLogin() {
 
   const loginWithPasswordMutation = trpc.patientPortal.loginWithPassword.useMutation({
     onSuccess: () => {
-      toast.success('تم تسجيل الدخول بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تسجيل الدخول بنجاح',
+        description: 'مرحباً بك في بوابة المريض.',
+        redirect: '/patient-portal/home',
+      });
       navigate('/patient-portal/home');
     },
     onError: (err) => {

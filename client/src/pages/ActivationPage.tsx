@@ -16,6 +16,7 @@ import {
   Server,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 
 type PendingRequest = { requestId: number; expiresAt: string; status: 'pending' } | null;
 
@@ -99,7 +100,12 @@ export default function ActivationPage() {
 
   useEffect(() => {
     if (licenseInfo?.isValid) {
-      toast.success('الترخيص المحلي صالح بالفعل');
+      emitToastHash({
+        kind: 'success',
+        message: 'الترخيص المحلي صالح بالفعل',
+        description: 'تمت إعادة توجيهك إلى الصفحة الرئيسية.',
+        redirect: '/',
+      });
       navigate('/');
     }
   }, [licenseInfo?.isValid, navigate]);

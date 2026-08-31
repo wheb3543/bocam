@@ -37,6 +37,7 @@ import {
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
@@ -73,14 +74,24 @@ export default function PatientDashboard() {
 
   const logoutMutation = trpc.patientPortal.logout.useMutation({
     onSuccess: () => {
-      toast.success('تم تسجيل الخروج');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تسجيل الخروج',
+        description: 'تم تسجيل الخروج بنجاح من بوابة المريض.',
+        redirect: '/patient-portal/login',
+      });
       navigate('/patient-portal/login');
     },
   });
 
   const updateProfileMutation = trpc.patientPortal.updateProfile.useMutation({
     onSuccess: async () => {
-      toast.success('تم تحديث بياناتك بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث بياناتك بنجاح',
+        description: 'تم حفظ تغييرات ملفك الشخصي.',
+        redirect: '/patient-portal/home',
+      });
       setIsEditingProfile(false);
       await utils.patientPortal.me.invalidate();
     },

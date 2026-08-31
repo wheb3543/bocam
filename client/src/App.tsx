@@ -5,9 +5,11 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import AdminContentSkeleton from '@/components/layout/AdminContentSkeleton';
 const NotFound = lazy(() => import('@/pages/NotFound'));
 import { Route, Switch, useLocation } from 'wouter';
+import { toast } from 'sonner';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { consumeToastHash } from './lib/toastHashRouter';
 const DashboardShell = lazy(() => import('@/components/layout/DashboardShell'));
 import { UpdateProgressModal } from '@/components/update/UpdateProgressModal';
 import { MandatoryUpdateModal } from '@/components/update/MandatoryUpdateModal';
@@ -453,10 +455,46 @@ function Router() {
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
+  const [, navigate] = useLocation();
+
   // Initialize UTM tracking on mount
   useEffect(() => {
     initializeTracking();
   }, []);
+
+  useEffect(() => {
+    const payload = consumeToastHash();
+    if (!payload) {
+      return;
+    }
+
+    const options = payload.description ? { description: payload.description } : undefined;
+
+    switch (payload.kind) {
+      case 'success':
+        toast.success(payload.message ?? 'تمت العملية بنجاح', options);
+        break;
+      case 'error':
+        toast.error(payload.message ?? 'حدث خطأ', options);
+        break;
+      case 'warning':
+        toast.warning(payload.message ?? 'تنبيه', options);
+        break;
+      case 'info':
+      default:
+        toast.info(payload.message ?? 'معلومة', options);
+        break;
+    }
+
+    const redirectPath = payload.redirect;
+    if (redirectPath) {
+      const timer = window.setTimeout(() => {
+        navigate(redirectPath);
+      }, 400);
+
+      return () => window.clearTimeout(timer);
+    }
+  }, [navigate]);
 
   const { isMandatoryUpdate, isUpdateInProgress } = useUpdateChecker();
   const [showProgressModal, setShowProgressModal] = useState(false);

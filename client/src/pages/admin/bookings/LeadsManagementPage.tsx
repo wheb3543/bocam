@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import LeadStatsCards from '@/components/lead/LeadStatsCards';
 import Pagination from '@/components/table/Pagination';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { exportToExcel, formatLeadsForExport } from '@/lib/export/exportToExcel';
 import { useFilterUtils, type DateFilterPreset } from '@/hooks/table/useFilterUtils';
 import { useAuth } from '@/_core/hooks/useAuth';
@@ -113,7 +114,12 @@ export default function LeadsManagementPage() {
 
   const updateStatusMutation = trpc.leads.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث حالة العميل بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث حالة العميل بنجاح',
+        description: 'تم حفظ حالة العميل الأخيرة بنجاح.',
+        redirect: '/admin/bookings',
+      });
       refetchLeads();
       setStatusDialogOpen(false);
       setSelectedLead(null);
@@ -124,7 +130,12 @@ export default function LeadsManagementPage() {
   });
   const assignLeadMutation = trpc.leads.assign.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث مسؤول المتابعة');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث مسؤول المتابعة',
+        description: 'تم إسناد العميل إلى المسؤول المختار.',
+        redirect: '/admin/bookings',
+      });
       refetchLeads();
     },
     onError: (error) => toast.error(`تعذر إسناد العميل: ${error.message}`),

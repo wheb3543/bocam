@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { getContentListData, getContentListPagination } from '../utils/listResponse';
 import { getPublicationQualityIssues } from '../utils/publicationQuality';
@@ -218,7 +219,12 @@ export function useSections() {
   // Mutations
   const createMutation = trpc.content.sections.create.useMutation({
     onSuccess: () => {
-      toast.success('تم إنشاء القسم بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم إنشاء القسم بنجاح',
+        description: 'تم حفظ القسم الجديد بنجاح.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialSectionFormData);
@@ -237,7 +243,12 @@ export function useSections() {
 
   const updateMutation = trpc.content.sections.update.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث القسم بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث القسم بنجاح',
+        description: 'تم حفظ تغييرات القسم الأخيرة.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedSection(null);

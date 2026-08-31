@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import type { Image, ImageFormData } from '../types/content.types';
 import { initialImageFormData } from '../types/content.types';
@@ -49,7 +50,12 @@ export function useImages() {
   // Mutations
   const createMutation = trpc.content.images.create.useMutation({
     onSuccess: () => {
-      toast.success('تم إضافة الصورة بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم إضافة الصورة بنجاح',
+        description: 'تم حفظ الصورة في المحتوى بنجاح.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialImageFormData);
@@ -68,7 +74,12 @@ export function useImages() {
 
   const updateMutation = trpc.content.images.update.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث الصورة بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث الصورة بنجاح',
+        description: 'تم حفظ تغييرات الصورة الأخيرة.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedImage(null);

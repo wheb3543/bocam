@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import type { Section } from './useSections';
 import type { TextContent, Image } from '../types/content.types';
@@ -182,7 +183,12 @@ export function usePages() {
   // Mutations
   const createMutation = trpc.content.pages.create.useMutation({
     onSuccess: () => {
-      toast.success('تم إنشاء الصفحة بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم إنشاء الصفحة بنجاح',
+        description: 'تم حفظ الصفحة بنجاح. يمكنك متابعة التعديل أو العودة إلى الشاشة السابقة.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialPageFormData);
@@ -201,7 +207,12 @@ export function usePages() {
 
   const updateMutation = trpc.content.pages.update.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث الصفحة بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث الصفحة بنجاح',
+        description: 'تم حفظ التغييرات الأخيرة على الصفحة.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedPage(null);

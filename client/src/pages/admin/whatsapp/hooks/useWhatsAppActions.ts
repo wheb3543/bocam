@@ -6,6 +6,7 @@
 import { useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { Conversation } from '../types/whatsapp.types';
 
 export function useWhatsAppActions() {
@@ -24,28 +25,48 @@ export function useWhatsAppActions() {
 
   const assignConversationMutation = trpc.whatsapp.conversations.assignToUser.useMutation({
     onSuccess: () => {
-      toast.success('تم تعيين المحادثة');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تعيين المحادثة',
+        description: 'تم تعيين المحادثة بنجاح للمستخدم.',
+        redirect: '/admin/whatsapp',
+      });
     },
     onError: () => toast.error('فشل تعيين المحادثة'),
   });
 
   const bulkArchiveMutation = trpc.whatsapp.conversations.bulkArchive.useMutation({
     onSuccess: () => {
-      toast.success('تم أرشفة المحادثات');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم أرشفة المحادثات',
+        description: 'تمت أرشفة المحادثات المحددة بنجاح.',
+        redirect: '/admin/whatsapp',
+      });
     },
     onError: () => toast.error('فشل أرشفة المحادثات'),
   });
 
   const bulkMarkImportantMutation = trpc.whatsapp.conversations.bulkMarkImportant.useMutation({
     onSuccess: () => {
-      toast.success('تم تعيين المحادثات كمهمة');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تعيين المحادثات كمهمة',
+        description: 'تم تحديد المحادثات كمحادثات مهمة.',
+        redirect: '/admin/whatsapp',
+      });
     },
     onError: () => toast.error('فشل تعيين المحادثات كمهمة'),
   });
 
   const deleteConversationMutation = trpc.whatsapp.conversations.delete.useMutation({
     onSuccess: () => {
-      toast.success('تم حذف المحادثة');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم حذف المحادثة',
+        description: 'تم حذف المحادثة بنجاح.',
+        redirect: '/admin/whatsapp',
+      });
     },
     onError: (error) => {
       if (error.message?.includes('FORBIDDEN')) {

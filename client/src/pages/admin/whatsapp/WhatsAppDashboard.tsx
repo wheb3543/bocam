@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, CheckCircle2, Clock, Send, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { Link } from 'wouter';
 import {
   useWhatsAppSSE,
@@ -113,10 +114,20 @@ function WhatsAppDashboardContent() {
       });
 
       if (result.success) {
-        toast.success('تم إرسال الرسالة بنجاح!');
+        emitToastHash({
+          kind: 'success',
+          message: 'تم إرسال الرسالة بنجاح',
+          description: 'تم تسليم الرسالة بنجاح عبر واتساب.',
+          redirect: '/admin/whatsapp',
+        });
         setTestMessage('');
       } else {
-        toast.error('فشل إرسال الرسالة');
+        emitToastHash({
+          kind: 'error',
+          message: 'فشل إرسال الرسالة',
+          description: 'تعذر إرسال الرسالة عبر واتساب.',
+          redirect: '/admin/whatsapp',
+        });
       }
     } catch {
       toast.error('حدث خطأ أثناء إرسال الرسالة');
@@ -138,9 +149,19 @@ function WhatsAppDashboardContent() {
       });
 
       if (result.success) {
-        toast.success(result.message || 'تم اختبار الاتصال بنجاح!');
+        emitToastHash({
+          kind: 'success',
+          message: result.message || 'تم اختبار الاتصال بنجاح',
+          description: 'تم التحقق من جاهزية الاتصال بنجاح.',
+          redirect: '/admin/whatsapp',
+        });
       } else {
-        toast.error(result.error || 'فشل اختبار الاتصال');
+        emitToastHash({
+          kind: 'error',
+          message: result.error || 'فشل اختبار الاتصال',
+          description: 'تعذر اختبار الاتصال مع واتساب.',
+          redirect: '/admin/whatsapp',
+        });
       }
     } catch {
       toast.error('حدث خطأ أثناء اختبار الاتصال');

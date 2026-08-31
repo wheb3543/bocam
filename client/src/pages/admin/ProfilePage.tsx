@@ -1,5 +1,6 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -7,11 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { trpc } from '@/lib/api/trpc';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { toast } from 'sonner';
 import { Loader2, User, Mail, Shield, Calendar } from 'lucide-react';
 import { NotificationPreferencesCard } from '@/components/notification/NotificationPreferencesCard';
 
 export default function ProfilePage() {
+  const [, setLocation] = useLocation();
   const { formatDate } = useFormatDate();
   const { user, loading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -21,13 +24,16 @@ export default function ProfilePage() {
   const updateProfileMutation = trpc.auth.updateProfile.useMutation({
     onSuccess: (updatedUser: unknown) => {
       const user = updatedUser as { name?: string; email?: string };
-      toast.success('تم تحديث الملف الشخصي بنجاح');
       setIsEditing(false);
-      // Update local state
       setName(user.name || '');
       setEmail(user.email || '');
-      // Reload page to update auth context
-      window.location.reload();
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث الملف الشخصي بنجاح',
+        description: 'تم حفظ تغييرات ملفك الشخصي.',
+        redirect: '/admin/profile',
+      });
+      setLocation('/admin/profile');
     },
     onError: (error: unknown) => {
       const msg = error instanceof Error ? error.message : 'فشل تحديث الملف الشخصي';

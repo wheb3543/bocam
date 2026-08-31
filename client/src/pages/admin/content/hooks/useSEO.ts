@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import type { SEOSettings, SEOSettingsFormData } from '../types/content.types';
@@ -16,7 +17,7 @@ function toSeoPayload(formData: SEOSettingsFormData) {
   return {
     pageKey: formData.pageKey.trim() || null,
     pageId: formData.pageId ?? null,
-    slug: formData.slug.trim() || null,
+    slug: formData.slug || undefined,
     language: formData.language,
     title: formData.title.trim() || null,
     description: formData.description.trim() || null,
@@ -90,7 +91,12 @@ export function useSEO() {
   // Mutations
   const createMutation = trpc.content.seoSettings.create.useMutation({
     onSuccess: () => {
-      toast.success('تم إنشاء إعدادات SEO بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم إنشاء إعدادات SEO بنجاح',
+        description: 'تم حفظ إعدادات SEO وربطها بالصفحة.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsCreateDialogOpen(false);
       setFormData(initialSEOSettingsFormData);
@@ -110,7 +116,12 @@ export function useSEO() {
 
   const updateMutation = trpc.content.seoSettings.update.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث إعدادات SEO بنجاح');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث إعدادات SEO بنجاح',
+        description: 'تم حفظ تغييرات إعدادات محرك البحث.',
+        redirect: '/admin/content/content',
+      });
       setQualityIssues([]);
       setIsEditDialogOpen(false);
       setSelectedSEOSettings(null);

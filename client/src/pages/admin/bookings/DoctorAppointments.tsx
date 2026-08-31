@@ -21,6 +21,7 @@ import {
 import { trpc } from '@/lib/api/trpc';
 import { Loader2, CheckCircle2, Phone, Mail, MapPin, Stethoscope } from 'lucide-react';
 import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { getCompanySlogan, COMPANY_ARABIC_NAME } from '@/const';
 
@@ -76,7 +77,12 @@ function DoctorAppointmentsContent() {
         eventId: apptEventId,
       });
 
-      toast.success('تم حجز الموعد بنجاح!');
+      emitToastHash({
+        kind: 'success',
+        message: 'تم حجز الموعد بنجاح!',
+        description: 'سيتم توجيهك إلى صفحة الشكر.',
+        redirect: '/thank-you',
+      });
       setLocation('/thank-you');
     },
     onError: (error: unknown) => {
