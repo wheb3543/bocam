@@ -1,6 +1,7 @@
 import { Phone, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { safeNavigate } from '@/lib/safeNavigation';
 
 interface ActionButtonsProps {
   phoneNumber: string;
@@ -18,7 +19,7 @@ export default function ActionButtons({
   variant = 'ghost',
 }: ActionButtonsProps) {
   const handleCall = () => {
-    window.location.href = `tel:${phoneNumber}`;
+    safeNavigate(`tel:${phoneNumber}`);
   };
 
   const handleWhatsApp = () => {

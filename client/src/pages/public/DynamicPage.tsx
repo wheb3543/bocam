@@ -12,6 +12,24 @@ import { useParams } from 'wouter';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
+import { getSafeNavigationTarget, safeNavigate } from '@/lib/safeNavigation';
+
+function getActionButtonClasses(style: SectionButton['style']) {
+  const baseClasses =
+    'w-full sm:w-auto min-h-[48px] text-sm sm:text-base px-5 sm:px-7 py-3 sm:py-4 rounded-xl font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2';
+
+  switch (style) {
+    case 'secondary':
+      return `${baseClasses} bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 focus-visible:ring-slate-400`;
+    case 'outline':
+      return `${baseClasses} bg-transparent text-slate-900 border border-slate-300 hover:bg-slate-100 focus-visible:ring-slate-400 dark:text-white dark:border-slate-600 dark:hover:bg-slate-800`;
+    case 'ghost':
+      return `${baseClasses} bg-transparent text-slate-700 hover:bg-slate-100 focus-visible:ring-slate-400 dark:text-slate-200 dark:hover:bg-slate-800`;
+    case 'primary':
+    default:
+      return `${baseClasses} bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 focus-visible:ring-blue-500 shadow-blue-200 dark:shadow-blue-900/20`;
+  }
+}
 
 interface SectionButton {
   id: number;
@@ -40,32 +58,7 @@ interface PublicImageEntry {
   sectionName?: string | null;
 }
 
-export function getSafeNavigationTarget(target?: string | null): string | null {
-  const value = target?.trim();
-  if (!value) {
-    return null;
-  }
-
-  if (value.startsWith('/') || value.startsWith('#')) {
-    return value;
-  }
-
-  if (/^(mailto:|tel:)/i.test(value)) {
-    return value;
-  }
-
-  if (/^javascript:/i.test(value) || /^data:/i.test(value)) {
-    return null;
-  }
-
-  try {
-    const parsed = new URL(value, window.location.origin);
-    const allowedProtocols = new Set(['http:', 'https:', 'mailto:', 'tel:']);
-    return allowedProtocols.has(parsed.protocol) ? value : null;
-  } catch {
-    return null;
-  }
-}
+export { getSafeNavigationTarget };
 
 /**
  * صفحة ديناميكية للصفحات العامة
@@ -230,23 +223,24 @@ export default function DynamicPage() {
         return (
           <section
             key={section.id}
-            className="py-20 px-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800"
+            className="py-14 px-4 sm:py-20 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800"
           >
             <div className="max-w-7xl mx-auto text-center">
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 leading-tight">
                 {getTextContent(section.name, 'title')}
               </h1>
-              <p className="text-xl text-gray-700 dark:text-gray-300 mb-8">
+              <p className="text-base sm:text-xl text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 leading-relaxed">
                 {getTextContent(section.name, 'subtitle')}
               </p>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+              <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
                 {getTextContent(section.name, 'description')}
               </p>
-              <div className="flex gap-4 justify-center flex-wrap">
+              <div className="flex flex-col gap-3 justify-center sm:flex-row sm:flex-wrap">
                 {heroButtons.length > 0 ? (
                   heroButtons.map((button: SectionButton) => (
                     <Button
                       key={button.id}
+                      type="button"
                       size="lg"
                       variant={
                         button.style === 'primary'
@@ -257,19 +251,18 @@ export default function DynamicPage() {
                               ? 'outline'
                               : 'ghost'
                       }
-                      className="text-lg px-8 py-6"
-                      onClick={() => {
-                        const safeTarget = getSafeNavigationTarget(button.link);
-                        if (safeTarget) {
-                          window.location.href = safeTarget;
-                        }
-                      }}
+                      className={getActionButtonClasses(button.style)}
+                      onClick={() => safeNavigate(button.link)}
                     >
                       {language === 'ar' ? button.textAr : button.textEn}
                     </Button>
                   ))
                 ) : (
-                  <Button size="lg" className="text-lg px-8 py-6">
+                  <Button
+                    type="button"
+                    size="lg"
+                    className="w-full sm:w-auto min-h-[48px] text-sm sm:text-base px-5 sm:px-7 py-3 sm:py-4 rounded-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm hover:from-blue-700 hover:to-indigo-700"
+                  >
                     {getTextContent(section.name, 'button')}
                   </Button>
                 )}
@@ -281,12 +274,15 @@ export default function DynamicPage() {
 
       case 'text':
         return (
-          <section key={section.id} className="py-16 px-4 bg-white dark:bg-gray-900">
+          <section
+            key={section.id}
+            className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-white dark:bg-gray-900"
+          >
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-gray-900 dark:text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
-              <p className="text-lg text-gray-700 dark:text-gray-300 max-w-3xl mx-auto text-center">
+              <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 max-w-3xl mx-auto text-center leading-relaxed">
                 {getTextContent(section.name, 'text')}
               </p>
             </div>
@@ -295,15 +291,21 @@ export default function DynamicPage() {
 
       case 'text-cards':
         return (
-          <section key={section.id} className="py-16 px-4 bg-gray-50 dark:bg-gray-800">
+          <section
+            key={section.id}
+            className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800"
+          >
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
-                    <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
+                  <div
+                    key={i}
+                    className="bg-white dark:bg-gray-700 p-5 sm:p-6 rounded-xl shadow-md"
+                  >
+                    <h3 className="text-lg sm:text-xl font-bold mb-3 text-gray-900 dark:text-white">
                       {getTextContent(section.name, 'title', `${section.name}.card${i}`)}
                     </h3>
                     <p className="text-gray-700 dark:text-gray-300">
@@ -318,15 +320,18 @@ export default function DynamicPage() {
 
       case 'stats-cards':
         return (
-          <section key={section.id} className="py-16 px-4 bg-gray-50 dark:bg-gray-800">
+          <section
+            key={section.id}
+            className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800"
+          >
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="text-center">
-                    <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                  <div key={i} className="text-center p-3 sm:p-0">
+                    <div className="text-3xl sm:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                       {getTextContent(section.name, 'text', `${section.name}.stat${i}`)}
                     </div>
                     <p className="text-gray-700 dark:text-gray-300">
@@ -341,18 +346,21 @@ export default function DynamicPage() {
 
       case 'image-cards':
         return (
-          <section key={section.id} className="py-16 px-4 bg-white dark:bg-gray-900">
+          <section
+            key={section.id}
+            className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-white dark:bg-gray-900"
+          >
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 {[1, 2, 3].map((i) => {
                   const img = getImage(section.name, `${section.name}.card${i}`);
                   return (
                     <div
                       key={i}
-                      className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden shadow-md"
+                      className="bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden shadow-md"
                     >
                       {img && (
                         <img
@@ -380,19 +388,22 @@ export default function DynamicPage() {
       case 'image': {
         const singleImage = getImage(section.name);
         return (
-          <section key={section.id} className="py-16 px-4 bg-gray-50 dark:bg-gray-800">
+          <section
+            key={section.id}
+            className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800"
+          >
             <div className="max-w-7xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-gray-900 dark:text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
               {singleImage && (
                 <img
                   src={singleImage.url}
                   alt={language === 'ar' ? (singleImage.altAr ?? '') : (singleImage.altEn ?? '')}
-                  className="max-w-4xl mx-auto rounded-lg shadow-lg"
+                  className="max-w-full sm:max-w-4xl mx-auto rounded-xl shadow-lg"
                 />
               )}
-              <p className="text-lg text-gray-700 dark:text-gray-300 mt-8 max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 mt-6 sm:mt-8 max-w-2xl mx-auto leading-relaxed">
                 {getTextContent(section.name, 'description')}
               </p>
             </div>
@@ -402,13 +413,13 @@ export default function DynamicPage() {
 
       case 'video':
         return (
-          <section key={section.id} className="py-16 px-4 bg-gray-900">
+          <section key={section.id} className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-gray-900">
             <div className="max-w-7xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-8 text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
-              <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
-                <p className="text-gray-400">
+              <div className="aspect-video bg-gray-800 rounded-xl flex items-center justify-center">
+                <p className="text-sm sm:text-base text-gray-400 px-4">
                   {getTextContent(section.name, 'description') || 'Video placeholder'}
                 </p>
               </div>
@@ -419,19 +430,23 @@ export default function DynamicPage() {
       case 'cta': {
         const ctaButtons = getSectionButtons(section.id);
         return (
-          <section key={section.id} className="py-16 px-4 bg-blue-600 dark:bg-blue-700">
+          <section
+            key={section.id}
+            className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-blue-600 dark:bg-blue-700"
+          >
             <div className="max-w-7xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-8 text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
-              <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+              <p className="text-base sm:text-xl text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
                 {getTextContent(section.name, 'description')}
               </p>
-              <div className="flex gap-4 justify-center flex-wrap">
+              <div className="flex flex-col gap-3 justify-center sm:flex-row sm:flex-wrap">
                 {ctaButtons.length > 0 ? (
                   ctaButtons.map((button: SectionButton) => (
                     <Button
                       key={button.id}
+                      type="button"
                       size="lg"
                       variant={
                         button.style === 'primary'
@@ -442,19 +457,19 @@ export default function DynamicPage() {
                               ? 'outline'
                               : 'ghost'
                       }
-                      className="text-lg px-8 py-6"
-                      onClick={() => {
-                        const safeTarget = getSafeNavigationTarget(button.link);
-                        if (safeTarget) {
-                          window.location.href = safeTarget;
-                        }
-                      }}
+                      className={getActionButtonClasses(button.style)}
+                      onClick={() => safeNavigate(button.link)}
                     >
                       {language === 'ar' ? button.textAr : button.textEn}
                     </Button>
                   ))
                 ) : (
-                  <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
+                  <Button
+                    type="button"
+                    size="lg"
+                    variant="secondary"
+                    className="w-full sm:w-auto min-h-[48px] text-sm sm:text-base px-5 sm:px-7 py-3 sm:py-4 rounded-xl font-semibold"
+                  >
                     {getTextContent(section.name, 'button')}
                   </Button>
                 )}
@@ -466,15 +481,18 @@ export default function DynamicPage() {
 
       case 'features':
         return (
-          <section key={section.id} className="py-16 px-4 bg-white dark:bg-gray-900">
+          <section
+            key={section.id}
+            className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-white dark:bg-gray-900"
+          >
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="flex items-start space-x-4 space-x-reverse">
-                    <div className="flex-shrink-0">
+                  <div key={i} className="flex items-start gap-3 sm:gap-4">
+                    <div className="flex-shrink-0 mt-0.5">
                       <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
@@ -494,14 +512,20 @@ export default function DynamicPage() {
 
       case 'testimonials':
         return (
-          <section key={section.id} className="py-16 px-4 bg-gray-50 dark:bg-gray-800">
+          <section
+            key={section.id}
+            className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800"
+          >
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+                  <div
+                    key={i}
+                    className="bg-white dark:bg-gray-700 p-5 sm:p-6 rounded-xl shadow-md"
+                  >
                     <div className="flex items-center mb-4">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star key={star} className="h-5 w-5 text-yellow-400 fill-current" />
@@ -522,9 +546,12 @@ export default function DynamicPage() {
 
       case 'faq':
         return (
-          <section key={section.id} className="py-16 px-4 bg-white dark:bg-gray-900">
+          <section
+            key={section.id}
+            className="py-12 px-4 sm:py-16 sm:px-6 lg:px-8 bg-white dark:bg-gray-900"
+          >
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white">
                 {getTextContent(section.name, 'title')}
               </h2>
               <div className="space-y-4">
@@ -630,12 +657,7 @@ export default function DynamicPage() {
                                   : 'ghost'
                           }
                           className="w-full"
-                          onClick={() => {
-                            const safeTarget = getSafeNavigationTarget(button.link);
-                            if (safeTarget) {
-                              window.location.href = safeTarget;
-                            }
-                          }}
+                          onClick={() => safeNavigate(button.link)}
                         >
                           {language === 'ar' ? button.textAr : button.textEn}
                         </Button>

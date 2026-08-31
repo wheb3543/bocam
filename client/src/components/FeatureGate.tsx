@@ -20,6 +20,7 @@ import { useLicense } from '@/hooks/integrations/useLicense';
 import { Lock, Crown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { safeNavigate } from '@/lib/safeNavigation';
 import { cn } from '@/lib/utils';
 
 /**
@@ -102,7 +103,7 @@ function LockedFeatureCard({
             className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             onClick={() => {
               if (upgradeLink) {
-                window.location.href = upgradeLink;
+                safeNavigate(upgradeLink);
               } else {
                 // Default action: show contact info
                 // eslint-disable-next-line no-alert -- Intentional user notification
@@ -161,7 +162,7 @@ function LockedFeatureInline({
           className="flex-shrink-0"
           onClick={() => {
             if (upgradeLink) {
-              window.location.href = upgradeLink;
+              safeNavigate(upgradeLink);
             }
           }}
         >
