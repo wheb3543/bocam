@@ -247,6 +247,7 @@ export default function PatientPortalLogin() {
                     dir="ltr"
                     inputMode="numeric"
                     maxLength={15}
+                    aria-label="رقم الهاتف"
                   />
                 </div>
 
@@ -446,6 +447,7 @@ export default function PatientPortalLogin() {
                       dir="ltr"
                       inputMode="numeric"
                       maxLength={15}
+                      aria-label="رقم الهاتف"
                     />
                   </div>
 

@@ -126,53 +126,64 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
       </a>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 border-b bg-white/95 dark:bg-gray-900/90 backdrop-blur safe-top">
-        <div className="h-14 px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 min-w-0">
-            {backHref ? (
-              <Link href={backHref}>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            ) : (
-              <div className="h-9 w-9 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <Home className="h-4 w-4 text-green-600 dark:text-green-400" />
+      <header className="fixed top-0 left-0 right-0 z-40 border-b border-green-100 bg-white/90 dark:border-gray-800 dark:bg-gray-900/90 backdrop-blur-xl safe-top">
+        <div className="mx-auto max-w-5xl px-3 sm:px-4">
+          <div className="flex h-16 items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2.5">
+              {backHref ? (
+                <Link href={backHref}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-full bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-300"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-green-100 to-emerald-100 text-green-700 shadow-sm dark:from-green-900/40 dark:to-emerald-900/20 dark:text-green-300">
+                  <Home className="h-4 w-4" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-foreground">{pageTitle}</p>
+                <p className="truncate text-[11px] text-muted-foreground">
+                  مرحباً {patient.fullName}
+                </p>
               </div>
-            )}
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{pageTitle}</p>
-              <p className="text-[11px] text-muted-foreground truncate">
-                مرحباً {patient.fullName}
-              </p>
+            </div>
+            <div className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300">
+              بوابة المريض
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main id="main-content" className="pt-16 pb-24 px-3 sm:px-4" role="main">
-        <div className="max-w-4xl mx-auto pt-3">
-          <PrivacyPolicyUpdateAlert />
+      <main id="main-content" className="px-3 pb-24 pt-20 sm:px-4 sm:pt-20" role="main">
+        <div className="mx-auto max-w-5xl">
+          <div className="pt-1">
+            <PrivacyPolicyUpdateAlert />
+          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location}
+              initial={{ opacity: 0, x: slideFrom }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -slideFrom }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="mx-auto max-w-5xl"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </div>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location}
-            initial={{ opacity: 0, x: slideFrom }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -slideFrom }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="max-w-4xl mx-auto"
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
       </main>
 
       {shouldShowFab && (
         <Link href="/doctors">
           <Button
-            className="fixed bottom-20 left-4 z-40 h-12 w-12 rounded-full shadow-lg bg-green-600 hover:bg-green-700 safe-bottom"
+            className="fixed bottom-24 left-4 z-40 h-12 w-12 rounded-full bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg shadow-green-500/30 hover:from-green-700 hover:to-emerald-700 safe-bottom"
             size="icon"
             aria-label="حجز موعد جديد"
           >
@@ -183,19 +194,21 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
 
       {/* Navigation */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 dark:bg-gray-900/95 backdrop-blur safe-bottom"
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-green-100 bg-white/95 dark:border-gray-800 dark:bg-gray-900/95 backdrop-blur-xl safe-bottom"
         role="navigation"
         aria-label="التنقل في بوابة المريض"
       >
-        <div className="grid grid-cols-5 h-16 max-w-4xl mx-auto">
+        <div className="mx-auto grid h-16 max-w-5xl grid-cols-5 px-2">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activeKey === item.key;
             return (
               <Link key={item.key} href={item.href}>
                 <button
-                  className={`h-full w-full flex flex-col items-center justify-center gap-1 transition-colors ${
-                    isActive ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
+                  className={`flex h-full w-full flex-col items-center justify-center gap-1 rounded-t-2xl transition-all duration-200 ${
+                    isActive
+                      ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
                 >
