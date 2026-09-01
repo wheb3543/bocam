@@ -416,106 +416,130 @@ export default function PatientPortalLogin() {
                 </CardTitle>
                 <CardDescription>أكمل بياناتك لإنشاء حسابك في بوابة المريض</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
-                <div>
-                  <Label htmlFor="fullName" className="text-sm font-medium">
-                    الاسم الكامل <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="fullName"
-                    placeholder="أدخل اسمك الكامل"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="mt-1 h-10 sm:h-11"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="age" className="text-sm font-medium">
-                      العمر
-                    </Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      placeholder="العمر"
-                      value={age}
-                      onChange={(e) => setAge(e.target.value)}
-                      className="mt-1 h-10 sm:h-11"
-                      min={1}
-                      max={150}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">
-                      الجنس <span className="text-red-500">*</span>
-                    </Label>
-                    <Select value={gender} onValueChange={(v) => setGender(v as 'male' | 'female')}>
-                      <SelectTrigger className="mt-1 h-10 sm:h-11">
-                        <SelectValue placeholder="اختر" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="male">ذكر</SelectItem>
-                        <SelectItem value="female">أنثى</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="address" className="text-sm font-medium">
-                    العنوان
-                  </Label>
-                  <Input
-                    id="address"
-                    placeholder="المدينة - الحي"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="mt-1 h-10 sm:h-11"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email" className="text-sm font-medium">
-                    البريد الإلكتروني (اختياري)
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="example@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1 h-10 sm:h-11"
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="registerPassword" className="text-sm font-medium">
-                    كلمة المرور <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="registerPassword"
-                    type="password"
-                    placeholder="أدخل كلمة المرور (6 أحرف على الأقل)"
-                    value={registerPassword}
-                    onChange={(e) => setRegisterPassword(e.target.value)}
-                    className="mt-1 h-10 sm:h-11"
-                  />
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    سيتم استخدام هذه الكلمة للدخول المباشر بدون رمز التحقق
+              <CardContent className="space-y-4 sm:space-y-5">
+                <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-green-50 p-3 sm:p-4 dark:border-emerald-900/40 dark:from-emerald-950/20 dark:via-background dark:to-green-950/15">
+                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
+                    معلومات الحساب
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    أكمل بياناتك الأساسية لإنشاء حسابك في بوابة المريض.
                   </p>
                 </div>
 
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" onClick={() => setStep('otp')} className="flex-1 h-11">
+                <div className="space-y-4 rounded-2xl border border-border/80 bg-card/80 p-3 sm:p-4">
+                  <div>
+                    <Label htmlFor="fullName" className="text-sm font-medium">
+                      الاسم الكامل <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="fullName"
+                      placeholder="أدخل اسمك الكامل"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="mt-1.5 h-11 sm:h-12 border-emerald-200 focus-visible:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="age" className="text-sm font-medium">
+                        العمر
+                      </Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        placeholder="العمر"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                        className="mt-1.5 h-11 sm:h-12 border-emerald-200 focus-visible:ring-emerald-500"
+                        min={1}
+                        max={150}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">
+                        الجنس <span className="text-red-500">*</span>
+                      </Label>
+                      <Select
+                        value={gender}
+                        onValueChange={(v) => setGender(v as 'male' | 'female')}
+                      >
+                        <SelectTrigger className="mt-1.5 h-11 sm:h-12 border-emerald-200 focus:ring-emerald-500">
+                          <SelectValue placeholder="اختر" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">ذكر</SelectItem>
+                          <SelectItem value="female">أنثى</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 rounded-2xl border border-border/80 bg-card/80 p-3 sm:p-4">
+                  <div>
+                    <Label htmlFor="address" className="text-sm font-medium">
+                      العنوان
+                    </Label>
+                    <Input
+                      id="address"
+                      placeholder="المدينة - الحي"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="mt-1.5 h-11 sm:h-12 border-emerald-200 focus-visible:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email" className="text-sm font-medium">
+                      البريد الإلكتروني (اختياري)
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="example@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-1.5 h-11 sm:h-12 border-emerald-200 focus-visible:ring-emerald-500"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3 rounded-2xl border border-border/80 bg-card/80 p-3 sm:p-4">
+                  <div>
+                    <Label htmlFor="registerPassword" className="text-sm font-medium">
+                      كلمة المرور <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="registerPassword"
+                      type="password"
+                      placeholder="أدخل كلمة المرور (6 أحرف على الأقل)"
+                      value={registerPassword}
+                      onChange={(e) => setRegisterPassword(e.target.value)}
+                      className="mt-1.5 h-11 sm:h-12 border-emerald-200 focus-visible:ring-emerald-500"
+                    />
+                  </div>
+                  <p className="rounded-xl bg-emerald-50 px-3 py-2 text-[11px] leading-5 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
+                    سيتم استخدام هذه الكلمة للدخول المباشر بدون رمز التحقق.
+                  </p>
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep('otp')}
+                    className="flex-1 h-11 rounded-xl border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 dark:bg-background dark:text-emerald-300"
+                  >
                     <ArrowRight className="h-4 w-4 ml-1" />
                     رجوع
                   </Button>
                   <Button
                     onClick={handleRegister}
-                    disabled={registerMutation.isPending || !fullName || !gender}
-                    className="flex-1 h-11 bg-green-600 hover:bg-green-700 font-semibold"
+                    disabled={
+                      registerMutation.isPending || !fullName || !gender || !registerPassword
+                    }
+                    className="flex-1 h-11 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 font-semibold shadow-sm"
                   >
                     {registerMutation.isPending ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
