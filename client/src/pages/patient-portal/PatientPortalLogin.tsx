@@ -40,7 +40,7 @@ type LoginMethod = 'otp' | 'password';
 export default function PatientPortalLogin() {
   const [, navigate] = useLocation();
   const [step, setStep] = useState<Step>('phone');
-  const [loginMethod, setLoginMethod] = useState<LoginMethod>('otp');
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>('password');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
@@ -324,6 +324,19 @@ export default function PatientPortalLogin() {
                       ) : (
                         <>تسجيل الدخول</>
                       )}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setStep('register');
+                        setOtp('');
+                      }}
+                      className="w-full h-11 sm:h-12 text-base font-semibold"
+                    >
+                      <UserPlus className="h-4 w-4 ml-1" />
+                      إنشاء حساب جديد
                     </Button>
                   </>
                 )}
