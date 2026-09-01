@@ -1,7 +1,51 @@
 // Service Worker for SGH Admin Dashboard PWA
 // مستقل تماماً عن Service Worker التطبيق العام
-const CACHE_NAME = 'sgh-admin-v2';
-const RUNTIME_CACHE = 'sgh-admin-runtime-v2';
+const CACHE_NAME = 'sgh-admin-v3';
+const RUNTIME_CACHE = 'sgh-admin-runtime-v3';
+const CACHE_TTL_MS = 60 * 60 * 1000;
+
+function isAdminRouteUrl(urlString) {
+  try {
+    const url = new URL(urlString);
+    return url.pathname === '/admin' || url.pathname.startsWith('/admin/');
+  } catch {
+    return false;
+  }
+}
+
+function withCacheTimestamp(response) {
+  if (!response || !response.headers) {
+    return response;
+  }
+
+  const headers = new globalThis.Headers(response.headers);
+  headers.set('x-cache-timestamp', String(Date.now()));
+
+  return new globalThis.Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+function isFreshCacheEntry(response, ttlMs = CACHE_TTL_MS) {
+  const timestamp = Number(response?.headers?.get('x-cache-timestamp') ?? '0');
+  return Number.isFinite(timestamp) && Date.now() - timestamp < ttlMs;
+}
+
+function normalizeNotificationTarget(targetUrl) {
+  try {
+    const normalized = new URL(targetUrl, self.location.origin);
+    if (!['http:', 'https:'].includes(normalized.protocol)) {
+      return `${self.location.origin}/admin`;
+    }
+    return normalized.origin === self.location.origin
+      ? normalized.toString()
+      : `${self.location.origin}/admin`;
+  } catch {
+    return `${self.location.origin}/admin`;
+  }
+}
 
 // الملفات الأساسية لتطبيق الإدارة
 // NOTE: لا تُضف favicon.ico هنا - قد يُعيد redirect إلى CDN خارجي ويُسبب CORS error
@@ -65,9 +109,17 @@ self.addEventListener('activate', (event) => {
 });
 
 // ===== Fetch Event =====
+function shouldBypassCache(request) {
+  return request.method !== 'GET' || request.cache === 'only-if-cached';
+}
+
 self.addEventListener('fetch', (event) => {
   // Skip cross-origin requests entirely - don't try to cache external CDN resources
   if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  if (shouldBypassCache(event.request)) {
     return;
   }
 
@@ -90,13 +142,13 @@ self.addEventListener('fetch', (event) => {
         .then((response) => {
           const responseClone = response.clone();
           caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(event.request, responseClone);
+            cache.put(event.request, withCacheTimestamp(responseClone));
           });
           return response;
         })
         .catch(() => {
           return caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
+            if (cachedResponse && isFreshCacheEntry(cachedResponse)) {
               return cachedResponse;
             }
             return caches.match('/admin');
@@ -106,10 +158,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for static assets
+  // Cache-first for static assets with TTL
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
+      if (cachedResponse && isFreshCacheEntry(cachedResponse)) {
         return cachedResponse;
       }
       return fetch(event.request).then((response) => {
@@ -118,7 +170,7 @@ self.addEventListener('fetch', (event) => {
         }
         const responseClone = response.clone();
         caches.open(RUNTIME_CACHE).then((cache) => {
-          cache.put(event.request, responseClone);
+          cache.put(event.request, withCacheTimestamp(responseClone));
         });
         return response;
       });
@@ -159,15 +211,15 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   if (event.action === 'open' || !event.action) {
-    const targetUrl = event.notification.data?.url || '/admin';
+    const rawTarget = event.notification.data?.url || '/admin';
+    const targetUrl = normalizeNotificationTarget(rawTarget);
+
     event.waitUntil(
       clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
         // Focus existing admin window if open
         for (const client of clientList) {
-          if (
-            (client.url.includes('/admin') || client.url.includes('/admin')) &&
-            'focus' in client
-          ) {
+          const clientUrl = typeof client.url === 'string' ? client.url : '';
+          if (isAdminRouteUrl(clientUrl) && 'focus' in client) {
             client.navigate(targetUrl);
             return client.focus();
           }
@@ -213,7 +265,7 @@ async function syncAdminData() {
     // Notify all admin clients that sync is complete
     const clientList = await clients.matchAll({ type: 'window' });
     clientList.forEach((client) => {
-      if (client.url.includes('/admin') || client.url.includes('/admin')) {
+      if (isAdminRouteUrl(client.url)) {
         client.postMessage({ type: 'SYNC_COMPLETE' });
       }
     });

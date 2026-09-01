@@ -20,6 +20,7 @@ export default function OfflinePage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [cachedAppointments, setCachedAppointments] = useState<CachedAppointment[]>([]);
   const [lastSync, setLastSync] = useState<string | null>(null);
+  const dashboardHomePath = window.location.pathname.startsWith('/admin') ? '/admin' : '/';
 
   const loadCachedData = useCallback(async () => {
     try {
@@ -110,14 +111,26 @@ export default function OfflinePage() {
       <main className="container py-6 sm:py-8 md:py-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Status Card */}
-          <Card className="border-2">
+          <Card
+            className={`border-2 ${
+              isOnline
+                ? 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-800 dark:bg-emerald-950/20'
+                : 'border-red-200 bg-red-50/70 dark:border-red-800 dark:bg-red-950/20'
+            }`}
+          >
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
-                <div className={`rounded-full p-4 ${isOnline ? 'bg-green-100' : 'bg-red-100'}`}>
+                <div
+                  className={`rounded-full p-4 ${
+                    isOnline
+                      ? 'bg-emerald-100 dark:bg-emerald-900/30'
+                      : 'bg-red-100 dark:bg-red-900/30'
+                  }`}
+                >
                   {isOnline ? (
-                    <RefreshCw className="h-12 w-12 text-green-600" />
+                    <RefreshCw className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
                   ) : (
-                    <WifiOff className="h-12 w-12 text-red-600" />
+                    <WifiOff className="h-12 w-12 text-red-600 dark:text-red-400" />
                   )}
                 </div>
               </div>
@@ -130,19 +143,22 @@ export default function OfflinePage() {
                   : 'أنت غير متصل بالإنترنت حالياً. يمكنك عرض البيانات المحفوظة محلياً أدناه.'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex justify-center gap-4">
-              <Button onClick={handleRefresh} size="lg">
+            <CardContent className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+              <Button onClick={handleRefresh} size="lg" className="w-full sm:w-auto">
                 <RefreshCw className="h-5 w-5 mr-2" />
                 {isOnline ? 'تحديث الصفحة' : 'إعادة المحاولة'}
               </Button>
               {isOnline && (
                 <Button
-                  onClick={() => (window.location.href = '/admin')}
+                  onClick={() => (window.location.href = dashboardHomePath)}
                   variant="outline"
                   size="lg"
+                  className="w-full sm:w-auto"
                 >
                   <Calendar className="h-5 w-5 mr-2" />
-                  العودة للوحة التحكم
+                  {dashboardHomePath === '/admin'
+                    ? 'العودة للوحة التحكم'
+                    : 'العودة للصفحة الرئيسية'}
                 </Button>
               )}
             </CardContent>
