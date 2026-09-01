@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import type { RouterInputs } from '@/types/trpc';
 import type { User, UserFormData } from '../types/user.types';
 import { roleLabels } from '../types/user.types';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
 interface UseUsersProps {
   searchQuery: string;
@@ -18,8 +19,16 @@ interface UseUsersProps {
 }
 
 export function useUsers({ searchQuery, roleFilter, statusFilter, userTable }: UseUsersProps) {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewAccessRequests = can('users.access_requests.view');
+  const canDecideAccessRequests = can('users.access_requests.decide');
   const { data: users, isLoading, refetch } = trpc.users.getAll.useQuery();
-  const { data: accessRequests, refetch: refetchRequests } = trpc.accessRequests.pending.useQuery();
+  const { data: accessRequests, refetch: refetchRequests } = trpc.accessRequests.pending.useQuery(
+    undefined,
+    {
+      enabled: !arePermissionsLoading && canViewAccessRequests,
+    }
+  );
 
   const approveMutation = trpc.accessRequests.approve.useMutation({
     onSuccess: () => {
@@ -152,6 +161,9 @@ export function useUsers({ searchQuery, roleFilter, statusFilter, userTable }: U
   return {
     users,
     accessRequests,
+    canViewAccessRequests,
+    canDecideAccessRequests,
+    arePermissionsLoading,
     filteredUsers,
     isLoading,
     totalUsers,

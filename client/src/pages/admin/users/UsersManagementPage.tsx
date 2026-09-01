@@ -27,6 +27,7 @@ import RolesPermissionsPanel from './components/RolesPermissionsPanel';
 import RoleAuditPanel from './components/RoleAuditPanel';
 import { useUsers } from './hooks/useUsers';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
 
 // تعريف أعمدة جدول طلبات الوصول
 const requestColumns: ColumnConfig[] = [
@@ -158,6 +159,8 @@ export default function UsersManagementPage() {
   const { can, isLoading: permissionsLoading } = useRolePermissions();
   const canViewRoleAudit = !permissionsLoading && can('audit.view');
   const canViewRoles = !permissionsLoading && can('roles.view');
+  const canViewAccessRequests = !permissionsLoading && can('users.access_requests.view');
+  const canDecideAccessRequests = !permissionsLoading && can('users.access_requests.decide');
   const [activeSection, setActiveSection] = useState<ActiveSection>('users');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -180,6 +183,12 @@ export default function UsersManagementPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!permissionsLoading && !canViewAccessRequests && activeSection === 'requests') {
+      setActiveSection('users');
+    }
+  }, [activeSection, canViewAccessRequests, permissionsLoading]);
+
   // useTableFeatures hook
   const userTable = useTableFeatures({
     tableKey: 'users',
@@ -196,6 +205,9 @@ export default function UsersManagementPage() {
 
   const {
     accessRequests,
+    canViewAccessRequests: canViewRequestsFromHook,
+    canDecideAccessRequests: canDecideRequestsFromHook,
+    arePermissionsLoading,
     filteredUsers,
     isLoading,
     totalUsers,
@@ -289,17 +301,19 @@ export default function UsersManagementPage() {
             <Users className="w-4 h-4 ml-2" />
             إدارة المستخدمين
           </Button>
-          <Button
-            variant={activeSection === 'requests' ? 'default' : 'outline'}
-            onClick={() => setActiveSection('requests')}
-            className="flex-1 sm:flex-none relative"
-          >
-            <UserCheck className="w-4 h-4 ml-2" />
-            طلبات التصريح
-            {accessRequests && accessRequests.length > 0 && (
-              <Badge className="mr-2 bg-red-500 text-white">{accessRequests.length}</Badge>
-            )}
-          </Button>
+          {canViewRequestsFromHook ? (
+            <Button
+              variant={activeSection === 'requests' ? 'default' : 'outline'}
+              onClick={() => setActiveSection('requests')}
+              className="flex-1 sm:flex-none relative"
+            >
+              <UserCheck className="w-4 h-4 ml-2" />
+              طلبات التصريح
+              {accessRequests && accessRequests.length > 0 && (
+                <Badge className="mr-2 bg-red-500 text-white">{accessRequests.length}</Badge>
+              )}
+            </Button>
+          ) : null}
           {canViewRoles ? (
             <Button
               variant={activeSection === 'roles' ? 'default' : 'outline'}
@@ -400,11 +414,17 @@ export default function UsersManagementPage() {
         )}
 
         {/* Access Requests Section */}
-        {activeSection === 'requests' && (
+        {activeSection === 'requests' && canViewRequestsFromHook && (
           <Card>
             <CardHeader>
               <CardTitle>طلبات التصريح المعلقة</CardTitle>
               <CardDescription>مراجعة والموافقة على طلبات الوصول الجديدة</CardDescription>
+              {!canDecideRequestsFromHook && (
+                <PermissionHint
+                  message="يمكنك عرض الطلبات فقط؛ يتطلب القبول أو الرفض صلاحية اتخاذ قرار في طلبات الوصول."
+                  label="القرار مقيّد"
+                />
+              )}
             </CardHeader>
             <CardContent>
               {!accessRequests || accessRequests.length === 0 ? (
@@ -423,6 +443,7 @@ export default function UsersManagementPage() {
                   onApprove={(requestId) => approveMutation.mutate({ requestId })}
                   onReject={(requestId) => rejectMutation.mutate({ requestId })}
                   isPending={approveMutation.isPending || rejectMutation.isPending}
+                  canDecide={canDecideRequestsFromHook}
                   formatPhoneDisplay={formatPhoneDisplay}
                 />
               )}

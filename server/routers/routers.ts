@@ -237,15 +237,17 @@ export const appRouter = router({
   }),
 
   accessRequests: router({
-    list: adminProcedure.query(async () => {
+    list: permissionProcedure('users.access_requests.view', 'عرض طلبات الوصول').query(async () => {
       return getAllAccessRequests();
     }),
 
-    pending: adminProcedure.query(async () => {
-      return getPendingAccessRequests();
-    }),
+    pending: permissionProcedure('users.access_requests.view', 'عرض طلبات الوصول المعلقة').query(
+      async () => {
+        return getPendingAccessRequests();
+      }
+    ),
 
-    approve: adminProcedure
+    approve: permissionProcedure('users.access_requests.decide', 'اتخاذ قرار في طلبات الوصول')
       .input(z.object({ requestId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         const approved = await approveAccessRequest(input.requestId, ctx.user.id);
@@ -272,7 +274,7 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    reject: adminProcedure
+    reject: permissionProcedure('users.access_requests.decide', 'اتخاذ قرار في طلبات الوصول')
       .input(z.object({ requestId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         await rejectAccessRequest(input.requestId, ctx.user.id);

@@ -24,6 +24,7 @@ interface AccessRequestsTableProps {
   onApprove: (requestId: number) => void;
   onReject: (requestId: number) => void;
   isPending: boolean;
+  canDecide: boolean;
   formatPhoneDisplay: (phone: string) => string;
 }
 
@@ -34,6 +35,7 @@ const AccessRequestsTable = memo(function AccessRequestsTable({
   onApprove,
   onReject,
   isPending,
+  canDecide,
   formatPhoneDisplay,
 }: AccessRequestsTableProps) {
   return (
@@ -49,16 +51,14 @@ const AccessRequestsTable = memo(function AccessRequestsTable({
           <TableRow>
             {requestTable.visibleColumnOrder.map((colKey) => {
               const col = requestColumns.find((c) => c.key === colKey);
-              if (!col || !requestTable.visibleColumns[colKey]) {return null;}
+              if (!col || !requestTable.visibleColumns[colKey]) {
+                return null;
+              }
               return (
                 <ResizableHeaderCell
                   key={colKey}
                   columnKey={colKey}
-                  width={
-                    requestTable.columnWidths.columnWidths[colKey] ||
-                    col.defaultWidth ||
-                    150
-                  }
+                  width={requestTable.columnWidths.columnWidths[colKey] || col.defaultWidth || 150}
                   minWidth={col.minWidth || 80}
                   maxWidth={col.maxWidth || 500}
                   onResize={requestTable.columnWidths.handleResize}
@@ -74,16 +74,14 @@ const AccessRequestsTable = memo(function AccessRequestsTable({
           {sortedRequests.map((request) => (
             <TableRow key={request.id}>
               {requestTable.visibleColumnOrder.map((colKey) => {
-                if (!requestTable.visibleColumns[colKey]) {return null;}
+                if (!requestTable.visibleColumns[colKey]) {
+                  return null;
+                }
 
                 switch (colKey) {
                   case 'name':
                     return (
-                      <FrozenTableCell
-                        key={colKey}
-                        columnKey={colKey}
-                        className="font-medium"
-                      >
+                      <FrozenTableCell key={colKey} columnKey={colKey} className="font-medium">
                         {request.name}
                       </FrozenTableCell>
                     );
@@ -137,7 +135,7 @@ const AccessRequestsTable = memo(function AccessRequestsTable({
                             size="sm"
                             variant="default"
                             onClick={() => onApprove(request.id)}
-                            disabled={isPending}
+                            disabled={!canDecide || isPending}
                           >
                             <UserCheck className="w-4 h-4 ml-1" />
                             موافقة
@@ -146,7 +144,7 @@ const AccessRequestsTable = memo(function AccessRequestsTable({
                             size="sm"
                             variant="destructive"
                             onClick={() => onReject(request.id)}
-                            disabled={isPending}
+                            disabled={!canDecide || isPending}
                           >
                             <UserX className="w-4 h-4 ml-1" />
                             رفض
@@ -164,9 +162,7 @@ const AccessRequestsTable = memo(function AccessRequestsTable({
       </ResizableTable>
 
       {/* Results Count */}
-      <div className="text-sm text-muted-foreground">
-        عرض {sortedRequests.length} طلب معلق
-      </div>
+      <div className="text-sm text-muted-foreground">عرض {sortedRequests.length} طلب معلق</div>
     </>
   );
 });
