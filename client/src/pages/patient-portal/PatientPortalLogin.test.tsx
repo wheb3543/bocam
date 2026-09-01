@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mockNavigate, mockUseQuery, mockUseMutation } = vi.hoisted(() => ({
@@ -52,5 +52,15 @@ describe('PatientPortalLogin', () => {
     expect(screen.getByLabelText('رقم الهاتف')).toBeInTheDocument();
     expect(screen.getByLabelText('كلمة المرور')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'إنشاء حساب جديد' })).toBeInTheDocument();
+  });
+
+  it('shows the phone number field inside the registration form', () => {
+    render(<PatientPortalLogin />);
+
+    fireEvent.change(screen.getByLabelText('رقم الهاتف'), { target: { value: '771234567' } });
+    fireEvent.click(screen.getByRole('button', { name: 'إنشاء حساب جديد' }));
+
+    expect(screen.getByLabelText('رقم الهاتف')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('771234567')).toBeInTheDocument();
   });
 });

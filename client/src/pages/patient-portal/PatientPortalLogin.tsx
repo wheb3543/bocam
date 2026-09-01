@@ -164,6 +164,11 @@ export default function PatientPortalLogin() {
   };
 
   const handleRegister = () => {
+    const phoneValidation = validateYemeniPhone(phone);
+    if (!phoneValidation.valid) {
+      toast.error(phoneValidation.message || 'يرجى إدخال رقم هاتف صحيح');
+      return;
+    }
     if (!fullName || fullName.length < 3) {
       toast.error('يرجى إدخال الاسم الكامل (3 أحرف على الأقل)');
       return;
@@ -427,6 +432,23 @@ export default function PatientPortalLogin() {
                 </div>
 
                 <div className="space-y-4 rounded-2xl border border-border/80 bg-card/80 p-3 sm:p-4">
+                  <div>
+                    <Label htmlFor="registerPhone" className="text-sm font-medium">
+                      رقم الهاتف <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="registerPhone"
+                      type="tel"
+                      placeholder="مثال: 771234567"
+                      value={phone}
+                      onChange={(e) => setPhone(processPhoneInput(e.target.value))}
+                      className="mt-1.5 h-11 sm:h-12 border-emerald-200 focus-visible:ring-emerald-500"
+                      dir="ltr"
+                      inputMode="numeric"
+                      maxLength={15}
+                    />
+                  </div>
+
                   <div>
                     <Label htmlFor="fullName" className="text-sm font-medium">
                       الاسم الكامل <span className="text-red-500">*</span>
