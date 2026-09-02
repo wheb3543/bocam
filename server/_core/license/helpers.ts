@@ -115,6 +115,21 @@ export function getHardwareId(): string {
  * @returns Path to license.json file
  */
 export function getLicenseFilePath(): string {
+  const envLicensePath = process.env.LICENSE_PATH?.trim();
+  if (envLicensePath) {
+    return path.isAbsolute(envLicensePath)
+      ? envLicensePath
+      : path.resolve(process.cwd(), envLicensePath);
+  }
+
+  const tenantRootLicense = process.env.TENANT_ROOT?.trim();
+  if (tenantRootLicense) {
+    const tenantLicense = path.join(tenantRootLicense, 'license.json');
+    if (fs.existsSync(tenantLicense)) {
+      return tenantLicense;
+    }
+  }
+
   // Check current directory first
   const currentDirLicense = path.join(process.cwd(), 'license.json');
   if (fs.existsSync(currentDirLicense)) {

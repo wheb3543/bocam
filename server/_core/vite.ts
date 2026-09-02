@@ -44,6 +44,31 @@ export async function setupVite(app: Express, server: Server) {
 
       // always reload the index.html file from disk incase it changes
       let template = await fs.promises.readFile(templatePath, 'utf-8');
+      const tenantSnapshot = {
+        tenantId: process.env.TENANT_ID || '',
+        companyName: process.env.COMPANY_NAME || '',
+        companyArabicName: process.env.COMPANY_ARABIC_NAME || '',
+        companyEnglishName: process.env.COMPANY_ENGLISH_NAME || '',
+        companyLogo: process.env.COMPANY_LOGO || '',
+        companyPhone: process.env.COMPANY_PHONE || '',
+        companyEmail: process.env.COMPANY_EMAIL || '',
+        companyAddress: process.env.COMPANY_ADDRESS || '',
+        companySlogan: process.env.COMPANY_SLOGAN_AR || process.env.COMPANY_SLOGAN_EN || '',
+        facebookUrl: process.env.FACEBOOK_URL || '',
+        instagramUrl: process.env.INSTAGRAM_URL || '',
+        twitterUrl: process.env.TWITTER_URL || '',
+        linkedinUrl: process.env.LINKEDIN_URL || '',
+      };
+
+      const tenantScript = `
+        <script>
+          window.__BOCAM_TENANT__ = Object.assign({}, window.__BOCAM_TENANT__ || {}, ${JSON.stringify(
+            tenantSnapshot
+          )});
+        </script>
+      `;
+
+      template = template.replace('<head>', `<head>${tenantScript}`);
       template = template.replace(`src="/src/main.tsx"`, `src="/src/main.tsx?v=${nanoid()}"`);
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ 'Content-Type': 'text/html' }).end(page);
@@ -123,6 +148,12 @@ export function serveStatic(app: Express) {
     });
     res.sendFile(swFile);
   });
+
+  const tenantUploadPath = process.env.FILE_UPLOAD_PATH?.trim();
+  if (tenantUploadPath && fs.existsSync(tenantUploadPath)) {
+    app.use('/uploads', express.static(tenantUploadPath, { index: false }));
+    logger.info(`Serving tenant uploads from ${tenantUploadPath}`);
+  }
 
   // Serve static files (this handles all other assets)
   // Add Cache-Control headers for static assets

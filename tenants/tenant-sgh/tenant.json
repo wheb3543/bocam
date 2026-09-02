@@ -1,0 +1,12 @@
+{
+  "tenantId": "tenant-sgh",
+  "clientName": "المستشفى السعودي الألماني",
+  "clientNameEn": "Saudi German Hospital",
+  "status": "draft",
+  "domain": "sgh.local",
+  "dbName": "bocam_sgh",
+  "licenseType": "trial",
+  "createdAt": "2026-09-02T00:00:00.000Z",
+  "updatedAt": "2026-09-02T00:00:00.000Z",
+  "notes": "Tenant template for the Saudi German Hospital instance. Replace values with production info when final deployment is commissioned."
+}

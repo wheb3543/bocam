@@ -16,28 +16,33 @@
 
 /**
  * Company name (English)
+ * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_NAME = process.env.COMPANY_NAME || 'App';
+export const COMPANY_NAME = process.env.COMPANY_NAME || 'BOCAM';
 
 /**
  * Company name (Arabic)
+ * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_ARABIC_NAME = process.env.COMPANY_ARABIC_NAME || 'تطبيق';
+export const COMPANY_ARABIC_NAME = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
 
 /**
  * Company slogan (Arabic)
+ * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_SLOGAN_AR = process.env.COMPANY_SLOGAN_AR || 'نرعاكم كأهالينا';
+export const COMPANY_SLOGAN_AR = process.env.COMPANY_SLOGAN_AR || 'نظام إدارة متكامل';
 
 /**
  * Company slogan (English)
+ * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_SLOGAN_EN = process.env.COMPANY_SLOGAN_EN || 'Caring like family';
+export const COMPANY_SLOGAN_EN = process.env.COMPANY_SLOGAN_EN || 'Integrated management system';
 
 /**
  * Company name (English) - preferred for international contexts
+ * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_ENGLISH_NAME = process.env.COMPANY_ENGLISH_NAME || 'App';
+export const COMPANY_ENGLISH_NAME = process.env.COMPANY_ENGLISH_NAME || 'BOCAM';
 
 /**
  * Company logo path
