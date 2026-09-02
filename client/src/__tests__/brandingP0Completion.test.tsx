@@ -9,9 +9,9 @@ const integrationSettingsSource = readFileSync(
 );
 
 describe('P0 brand and page-shell completion', () => {
-  it('uses SGH branding fallbacks instead of a generic app identity', () => {
-    expect(APP_TITLE).toContain('المستشفى السعودي الألماني');
-    expect(APP_LOGO).toMatch(/SGH|logo-color|logo/);
+  it('uses tenant-backed branding values', () => {
+    expect(APP_TITLE).toBeTruthy();
+    expect(APP_LOGO).toBeTruthy();
   });
 
   it('applies the shared SGH page header and a clear unconfigured connection state', () => {

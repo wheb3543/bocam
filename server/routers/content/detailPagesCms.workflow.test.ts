@@ -64,7 +64,7 @@ describe('تكامل CMS لصفحات التفاصيل', () => {
     expect(privacyPolicySource).toContain('privacy.${key}.${language}');
     expect(privacyPolicySource).toContain("t('rights.heading', '11. حقوقك بموجب نظام حماية البيانات الشخصية (PDPL)')");
     expect(privacyPolicySource).toContain("t('cookies.table.required', 'إلزامي؟')");
-    expect(privacyPolicySource).toContain("t('contact.emailAddress', 'DPO@sghsanaa.net')");
+    expect(privacyPolicySource).toContain("t('contact.emailAddress', COMPANY_EMAIL || 'support@example.com')");
     expect(privacyPolicySource).toContain("dir={copy.language === 'ar' ? 'rtl' : 'ltr'}");
   });
 

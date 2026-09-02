@@ -51,6 +51,7 @@ import { toast } from 'sonner';
 import { printReceipt } from '@/components/booking/PrintReceipt';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useLicense } from '@/hooks/integrations/useLicense';
+import { COMPANY_PHONE } from '@/const';
 
 export default function ManualRegistrationForm() {
   const { user } = useAuth();
@@ -521,7 +522,8 @@ export default function ManualRegistrationForm() {
         <DialogHeader>
           <DialogTitle>تسجيل حجز يدوي</DialogTitle>
           <DialogDescription>
-            إضافة حجز تم استلامه عبر الهاتف (8000018) مباشرة في النظام
+            إضافة حجز تم استلامه عبر الهاتف ({COMPANY_PHONE || 'رقم الاتصال غير متوفر'}) مباشرة في
+            النظام
           </DialogDescription>
         </DialogHeader>
 

@@ -143,7 +143,7 @@ function DoctorAppointmentsContent() {
   };
 
   const selectedDoctor = doctors?.find((d: Doctor) => d.id === parseInt(formData.doctorId));
-  const contactPhone = COMPANY_PHONE || '8000018';
+  const contactPhone = COMPANY_PHONE || 'رقم الاتصال غير متوفر';
   const contactEmail = COMPANY_EMAIL || 'info@company.com';
 
   return (

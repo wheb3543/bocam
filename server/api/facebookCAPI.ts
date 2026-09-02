@@ -237,7 +237,7 @@ export async function sendCAPIEvent(options: CAPIEventOptions): Promise<void> {
   // ── Build custom_data object ───────────────────────────────────────────────
   // Include lead_event_source as required by Meta for CRM events
   const builtCustomData: Record<string, unknown> = {
-    lead_event_source: 'SGH CRM Portal',
+    lead_event_source: process.env.COMPANY_NAME || 'CRM Portal',
     event_source: 'crm',
   };
 

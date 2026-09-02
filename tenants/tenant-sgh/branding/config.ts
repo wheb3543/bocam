@@ -46,6 +46,7 @@ export const branding: BrandingConfig = {
     sloganEn: 'Exceptional Healthcare',
     email: 'info@sgh.example.com',
     phone: '+966500000000',
+    city: 'صنعاء',
     addressAr: 'صنعاء - اليمن',
     addressEn: 'Sanaa - Yemen',
   },

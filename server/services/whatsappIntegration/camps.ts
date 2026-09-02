@@ -149,7 +149,7 @@ export async function sendCampRegistrationStatusUpdate(
           reg.fullName,
           campData.name,
           reason || 'لم يتم تحديد السبب',
-          process.env.COMPANY_PHONE || '8000018',
+          process.env.COMPANY_PHONE || '',
         ];
         break;
 

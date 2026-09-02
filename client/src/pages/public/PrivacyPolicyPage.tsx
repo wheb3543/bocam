@@ -85,7 +85,7 @@ export default function PrivacyPolicyPage() {
 
 function PrivacyPolicyContent({ copy }: { copy: PrivacyCopy }) {
   const { t } = copy;
-  const contactPhone = t('contact.phoneNumber', COMPANY_PHONE || '+966500000000');
+  const contactPhone = t('contact.phoneNumber', COMPANY_PHONE || 'رقم الاتصال غير متوفر');
   const contactEmail = t('contact.emailAddress', COMPANY_EMAIL || 'support@example.com');
 
   const dataCards = [

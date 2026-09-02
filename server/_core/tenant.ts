@@ -221,6 +221,7 @@ export async function applyTenantRuntimeConfig(): Promise<{
       COMPANY_EMAIL: clientBranding.email || process.env.COMPANY_EMAIL,
       COMPANY_ADDRESS:
         clientBranding.addressEn || clientBranding.addressAr || process.env.COMPANY_ADDRESS,
+      COMPANY_CITY: clientBranding.city || process.env.COMPANY_CITY,
       COMPANY_SLOGAN_AR: clientBranding.sloganAr || process.env.COMPANY_SLOGAN_AR,
       COMPANY_SLOGAN_EN: clientBranding.sloganEn || process.env.COMPANY_SLOGAN_EN,
       FACEBOOK_URL: branding?.contact?.facebook || process.env.FACEBOOK_URL,

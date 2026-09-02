@@ -1,8 +1,8 @@
 {
-  "id": "sgh-public-app-v1",
-  "name": "منصة الحجز - المستشفى السعودي الألماني",
-  "short_name": "SGH صنعاء",
-  "description": "منصة الحجز الإلكترونية للمستشفى السعودي الألماني - صنعاء. احجز موعدك مع أفضل الأطباء",
+  "id": "bocam-public-app-v1",
+  "name": "منصة الحجز",
+  "short_name": "منصة الحجز",
+  "description": "منصة الحجز الإلكترونية. احجز موعدك مع أفضل الأطباء",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

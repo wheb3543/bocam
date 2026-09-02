@@ -30,6 +30,7 @@ import {
   APP_LOGO,
   APP_TITLE,
   COMPANY_PHONE,
+  COMPANY_CITY,
   COMPANY_ARABIC_NAME,
   COMPANY_NAME,
   getCompanySlogan,
@@ -259,7 +260,9 @@ export default function HomePage() {
   // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
   const title = heroTitle?.data?.[0]?.content || getCompanySlogan();
   const subtitle = heroSubtitle?.data?.[0]?.content || 'خدمات طبية متميزة بأعلى معايير الجودة';
-  const description = heroDescription?.data?.[0]?.content || 'احجز موعدك مع أفضل الأطباء في صنعاء';
+  const description =
+    heroDescription?.data?.[0]?.content ||
+    `احجز موعدك مع أفضل الأطباء${COMPANY_CITY ? ` في ${COMPANY_CITY}` : ''}`;
   const buttonText = heroButtonText?.data?.[0]?.content || 'احجز موعدك الآن';
 
   // استخدام الصور من قاعدة البيانات أو القيم الافتراضية
@@ -449,16 +452,19 @@ export default function HomePage() {
   return (
     <>
       <SEO
-        title={homeSEO?.title || `${COMPANY_ARABIC_NAME} - صنعاء | احجز موعدك الآن`}
+        title={
+          homeSEO?.title ||
+          `${COMPANY_ARABIC_NAME}${COMPANY_CITY ? ` - ${COMPANY_CITY}` : ''} | احجز موعدك الآن`
+        }
         description={
           homeSEO?.description ||
-          `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME} بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: ${COMPANY_PHONE}`
+          `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME}${COMPANY_CITY ? ` بـ ${COMPANY_CITY}` : ''}. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.${COMPANY_PHONE ? ` اتصل الآن: ${COMPANY_PHONE}` : ''}`
         }
         image={homeSEO?.ogImage || APP_LOGO}
         canonicalUrl={homeSEO?.canonicalUrl || undefined}
         keywords={
           homeSEO?.keywords ||
-          `${COMPANY_ARABIC_NAME}, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية, ${COMPANY_PHONE}`
+          `${COMPANY_ARABIC_NAME}${COMPANY_CITY ? `, ${COMPANY_CITY}` : ''}, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية${COMPANY_PHONE ? `, ${COMPANY_PHONE}` : ''}`
         }
         ogTitle={homeSEO?.ogTitle || undefined}
         ogDescription={homeSEO?.ogDescription || undefined}

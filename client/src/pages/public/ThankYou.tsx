@@ -66,7 +66,7 @@ export default function ThankYou() {
     campLabel: thankYouText('details.camp.label', 'المخيم:'),
     preferredDateLabel: thankYouText('details.preferredDate.label', 'الموعد المفضل:'),
     contactTitle: thankYouText('contact.title', 'للاستفسارات العاجلة'),
-    contactPhone: thankYouText('contact.phone', '8000018'),
+    contactPhone: thankYouText('contact.phone', 'رقم الاتصال غير متوفر'),
     contactAvailability: thankYouText(
       'contact.availability',
       'الرقم المجاني - متاح على مدار الساعة'

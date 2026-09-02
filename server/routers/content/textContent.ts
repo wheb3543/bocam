@@ -1322,7 +1322,7 @@ export const textContentRouter = router({
       {
         key: 'about.image.caption.ar',
         language: 'ar',
-        content: 'المستشفى السعودي الألماني - صنعاء',
+        content: `${process.env.COMPANY_ARABIC_NAME || 'BOCAM'}${process.env.COMPANY_CITY ? ` - ${process.env.COMPANY_CITY}` : ''}`,
         section: 'about',
         pageId: homepageId,
         type: 'text' as const,

@@ -19,8 +19,8 @@
         var path = window.location.pathname;
         var isAdmin = path.startsWith('/admin') || path.startsWith('/dashboard');
         var tenant = window.__BOCAM_TENANT__ || {};
-        var tenantName = tenant.companyArabicName || tenant.companyName || 'المستشفى السعودي الألماني';
-        var tenantTitle = tenant.companyEnglishName || tenant.companyName || 'Saudi German Hospital';
+        var tenantName = tenant.companyArabicName || tenant.companyName || 'BOCAM';
+        var tenantTitle = tenant.companyEnglishName || tenant.companyName || 'BOCAM';
 
         if (tenantName) {
           document.title = tenantName;
@@ -35,7 +35,7 @@
           document.getElementById('pwa-manifest').href = '/manifest-admin.json';
           var themeColor = document.querySelector('meta[name="theme-color"]');
           if (themeColor) themeColor.content = '#1e40af';
-          if (!tenantName) document.title = '\u0644\u0648\u062d\u0629 \u062a\u062d\u0643\u0645 SGH';
+          if (!tenantName) document.title = 'لوحة التحكم';
         } else if (tenantTitle) {
           document.title = tenantTitle;
         }
@@ -46,45 +46,42 @@
     <meta name="theme-color" content="#00A651" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="SGH صنعاء" />
+    <meta name="apple-mobile-web-app-title" content="منصة الحجز" />
     <meta name="mobile-web-app-capable" content="yes" />
-
-    <!-- Meta Domain Verification - sghsanaa.com -->
-    <meta name="facebook-domain-verification" content="dffx9wkmz2qq0g1b8yjrtmp3qhb38b" />
 
     <!-- SEO Meta Tags -->
     <meta
       name="description"
-      content="احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: 8000018"
+      content="منصة حجز المواعيد والخدمات الطبية"
     />
     <meta
       name="keywords"
-      content="المستشفى السعودي الألماني, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية, 8000018"
+      content="حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية"
     />
-    <meta name="author" content="المستشفى السعودي الألماني - صنعاء" />
+    <meta name="author" content="BOCAM" />
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="المستشفى السعودي الألماني - صنعاء" />
-    <meta property="og:title" content="المستشفى السعودي الألماني - صنعاء | احجز موعدك الآن" />
+    <meta property="og:site_name" content="منصة الحجز" />
+    <meta property="og:title" content="منصة الحجز | احجز موعدك الآن" />
     <meta
       property="og:description"
-      content="احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: 8000018"
+      content="منصة حجز المواعيد والخدمات الطبية"
     />
-    <meta property="og:image" content="https://sghsanaa.manus.space/assets/logo-color.png" />
+    <meta property="og:image" content="/assets/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:url" content="https://sghsanaa.manus.space" />
+    <meta property="og:url" content="/" />
     <meta property="og:locale" content="ar_YE" />
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="المستشفى السعودي الألماني - صنعاء | احجز موعدك الآن" />
+    <meta name="twitter:title" content="منصة الحجز | احجز موعدك الآن" />
     <meta
       name="twitter:description"
-      content="احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: 8000018"
+      content="منصة حجز المواعيد والخدمات الطبية"
     />
-    <meta name="twitter:image" content="https://sghsanaa.manus.space/assets/logo-color.png" />
+    <meta name="twitter:image" content="/assets/og-image.jpg" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

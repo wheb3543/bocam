@@ -48,7 +48,7 @@ function _formatDateTime(date: Date): string {
  */
 function addHeader(doc: PDFDocumentInstance, metadata: ExportMetadata) {
   // شعار المستشفى (سيتم تحميله من الملف)
-  const logoPath = '/home/ubuntu/sgh-crm-portal/client/public/sgh-logo-full.png';
+  const logoPath = path.join(process.env.TENANT_ROOT || process.cwd(), 'branding', 'logo.png');
 
   try {
     // إضافة الشعار على اليمين
@@ -58,7 +58,7 @@ function addHeader(doc: PDFDocumentInstance, metadata: ExportMetadata) {
   }
 
   // معلومات الاتصال على اليسار
-  const companyPhone = process.env.COMPANY_PHONE || '8000018';
+  const companyPhone = process.env.COMPANY_PHONE || 'رقم الاتصال غير متوفر';
   const companyEmail = process.env.COMPANY_EMAIL || 'info@example.com';
 
   doc

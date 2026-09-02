@@ -79,6 +79,8 @@ export const COMPANY_ADDRESS = readTenantValue(
   import.meta.env.VITE_COMPANY_ADDRESS || ''
 );
 
+export const COMPANY_CITY = readTenantValue('companyCity', import.meta.env.VITE_COMPANY_CITY || '');
+
 /**
  * Company slogan/tagline
  * Safe default only when no tenant runtime config is available.

@@ -96,7 +96,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-2 sm:gap-2.5 justify-center sm:justify-start">
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 shrink-0" />
-                <span>{COMPANY_ADDRESS || 'صنعاء - اليمن'}</span>
+                <span>{COMPANY_ADDRESS || 'العنوان غير متوفر حالياً'}</span>
               </div>
               <div className="flex items-center gap-2 sm:gap-2.5 justify-center sm:justify-start">
                 <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 shrink-0" />

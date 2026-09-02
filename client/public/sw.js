@@ -178,7 +178,7 @@ self.addEventListener('fetch', (event) => {
 
 // ===== Push Notifications (Public App) =====
 self.addEventListener('push', (event) => {
-  let data = { title: 'المستشفى السعودي الألماني', body: 'إشعار جديد', url: '/', type: 'general' };
+  let data = { title: 'BOCAM', body: 'إشعار جديد', url: '/', type: 'general' };
   try {
     if (event.data) {
       data = { ...data, ...JSON.parse(event.data.text()) };
@@ -201,9 +201,7 @@ self.addEventListener('push', (event) => {
     ],
   };
 
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'المستشفى السعودي الألماني', options)
-  );
+  event.waitUntil(self.registration.showNotification(data.title || 'BOCAM', options));
 });
 
 // ===== Notification Click =====

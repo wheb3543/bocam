@@ -199,8 +199,8 @@ function DoctorDetailContent({ slug }: { slug: string }) {
     ? `${doctor.name} - ${doctor.specialty} | ${COMPANY_ARABIC_NAME}`
     : `الأطباء | ${COMPANY_ARABIC_NAME}`;
 
-  const contactPhone = COMPANY_PHONE || '8000018';
-  const contactPhoneDigits = contactPhone.replace(/\D/g, '') || '8000018';
+  const contactPhone = COMPANY_PHONE || 'رقم الاتصال غير متوفر';
+  const contactPhoneDigits = COMPANY_PHONE.replace(/\D/g, '');
   const seoDescription = doctor
     ? `احجز موعدك مع ${doctor.name}، ${doctor.specialty} في ${COMPANY_ARABIC_NAME}. ${doctor.bio || 'خدمات طبية متميزة ورعاية شاملة'}. اتصل الآن: ${contactPhone}`
     : `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME}`;

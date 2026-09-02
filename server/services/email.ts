@@ -185,8 +185,8 @@ export function generateNewLeadEmail(lead: {
           <p>${companyName}</p>
           <p>${companySlogan}</p>
           <p style="margin-top: 10px;">
-            <a href="tel:${(process.env.COMPANY_PHONE || '8000018').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
-              الرقم المجاني: ${process.env.COMPANY_PHONE || '8000018'}
+            <a href="tel:${(process.env.COMPANY_PHONE || '').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
+              ${process.env.COMPANY_PHONE ? `الرقم: ${process.env.COMPANY_PHONE}` : 'رقم الاتصال غير متوفر'}
             </a>
           </p>
         </div>
@@ -375,8 +375,8 @@ export async function sendNewAppointmentEmail(params: {
           <p>${companyName}</p>
           <p>${companySlogan}</p>
           <p style="margin-top: 10px;">
-            <a href="tel:${(process.env.COMPANY_PHONE || COMPANY_EMAIL || '8000018').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
-              الرقم المجاني: ${process.env.COMPANY_PHONE || '8000018'}
+            <a href="tel:${(process.env.COMPANY_PHONE || '').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
+              ${process.env.COMPANY_PHONE ? `الرقم: ${process.env.COMPANY_PHONE}` : 'رقم الاتصال غير متوفر'}
             </a>
           </p>
         </div>

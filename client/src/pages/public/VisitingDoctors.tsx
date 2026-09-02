@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { trpc } from '@/lib/api/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
+import { COMPANY_PHONE } from '@/const';
 
 export default function VisitingDoctors() {
   return (
@@ -58,7 +59,7 @@ function VisitingDoctorsContent() {
           title: 'Visiting Doctors',
           description: 'Specialized consultants from various medical fields at your service',
           contactLabel: 'For bookings and inquiries:',
-          phone: '8000018',
+          phone: COMPANY_PHONE || 'رقم الاتصال غير متوفر',
           search: 'Search for a doctor or specialty...',
           allSpecialties: 'All specialties',
           resultsSuffix: 'visiting doctors available',
@@ -75,7 +76,7 @@ function VisitingDoctorsContent() {
           title: 'الأطباء الزائرين',
           description: 'استشاريون متخصصون من مختلف التخصصات الطبية لخدمتكم',
           contactLabel: 'للحجز والاستفسار:',
-          phone: '8000018',
+          phone: COMPANY_PHONE || 'رقم الاتصال غير متوفر',
           search: 'ابحث عن طبيب أو تخصص...',
           allSpecialties: 'جميع التخصصات',
           resultsSuffix: 'طبيب زائر متاح',

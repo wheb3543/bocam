@@ -1,5 +1,11 @@
 import { useEffect } from 'react';
-import { COMPANY_ARABIC_NAME, COMPANY_ENGLISH_NAME, COMPANY_PHONE, COMPANY_SLOGAN } from '@/config';
+import {
+  COMPANY_ARABIC_NAME,
+  COMPANY_CITY,
+  COMPANY_ENGLISH_NAME,
+  COMPANY_PHONE,
+  COMPANY_SLOGAN,
+} from '@/config';
 
 interface SEOProps {
   title?: string;
@@ -22,13 +28,13 @@ interface SEOProps {
  * Handles Open Graph, Twitter Cards, and standard meta tags
  */
 export default function SEO({
-  title = `${COMPANY_ARABIC_NAME} - صنعاء | احجز موعدك الآن`,
-  description = `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME} بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: ${COMPANY_PHONE || '8000018'}`,
+  title = `${COMPANY_ARABIC_NAME}${COMPANY_CITY ? ` - ${COMPANY_CITY}` : ''} | احجز موعدك الآن`,
+  description = `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME}${COMPANY_CITY ? ` بـ ${COMPANY_CITY}` : ''}. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.${COMPANY_PHONE ? ` اتصل الآن: ${COMPANY_PHONE}` : ''}`,
   image = '/assets/og-image.jpg',
   url,
   canonicalUrl,
   type = 'website',
-  keywords = `${COMPANY_ARABIC_NAME}, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية`,
+  keywords = `${COMPANY_ARABIC_NAME}${COMPANY_CITY ? `, ${COMPANY_CITY}` : ''}, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية`,
   ogTitle,
   ogDescription,
   ogImage,
@@ -70,7 +76,10 @@ export default function SEO({
     updateMetaTag('meta[property="og:image"]', ogImage || image);
     updateMetaTag('meta[property="og:url"]', currentUrl);
     updateMetaTag('meta[property="og:type"]', type);
-    updateMetaTag('meta[property="og:site_name"]', `${COMPANY_ARABIC_NAME} - صنعاء`);
+    updateMetaTag(
+      'meta[property="og:site_name"]',
+      `${COMPANY_ARABIC_NAME}${COMPANY_CITY ? ` - ${COMPANY_CITY}` : ''}`
+    );
     updateMetaTag('meta[property="og:locale"]', locale);
 
     // Twitter Card tags

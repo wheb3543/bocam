@@ -47,16 +47,16 @@
 }
 
 :root {
-  /* Saudi German Hospital Brand Colors */
-  --sgh-blue: oklch(0.623 0.15 220);
-  --sgh-green: oklch(0.623 0.15 145);
-  --primary: var(--sgh-blue);
+  /* Shared brand colors */
+  --brand-blue: oklch(0.623 0.15 220);
+  --brand-green-tone: oklch(0.623 0.15 145);
+  --primary: var(--brand-blue);
   --primary-foreground: oklch(0.99 0 0); /* White - improved contrast */
-  --brand-green: var(--sgh-green);
+  --brand-green: var(--brand-green-tone);
   --sidebar-primary: oklch(0.623 0.15 220);
   --sidebar-primary-foreground: oklch(0.99 0 0); /* Improved contrast */
-  --chart-1: var(--sgh-blue);
-  --chart-2: var(--sgh-green);
+  --chart-1: var(--brand-blue);
+  --chart-2: var(--brand-green-tone);
   --chart-3: oklch(0.523 0.15 220);
   --chart-4: oklch(0.523 0.15 145);
   --chart-5: oklch(0.723 0.15 220);

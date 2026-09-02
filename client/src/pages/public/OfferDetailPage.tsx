@@ -581,8 +581,8 @@ function OfferDetailContent({ slug }: { slug: string }) {
     ? `${offer.title} | ${COMPANY_ARABIC_NAME}`
     : `العروض الطبية | ${COMPANY_ARABIC_NAME}`;
 
-  const contactPhone = COMPANY_PHONE || '8000018';
-  const contactPhoneDigits = contactPhone.replace(/\D/g, '') || '8000018';
+  const contactPhone = COMPANY_PHONE || 'رقم الاتصال غير متوفر';
+  const contactPhoneDigits = COMPANY_PHONE.replace(/\D/g, '');
   const seoDescription = offer
     ? `${(offer.description || offer.title).substring(0, 150)}... احجز الآن واستفد من عرضنا الخاص. اتصل: ${contactPhone}`
     : `عروض طبية مميزة بأسعار تنافسية في ${COMPANY_ARABIC_NAME}`;

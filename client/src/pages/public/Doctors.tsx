@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 import { trpc } from '@/lib/api/trpc';
 import { Loader2, Search, Stethoscope, Calendar, User } from 'lucide-react';
-import { getCompanyName } from '@/const';
+import { COMPANY_CITY, getCompanyName } from '@/const';
 import PageLayout from '@/components/layout/PageLayout';
 import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
@@ -30,7 +30,10 @@ export default function Doctors() {
   return (
     <PageLayout
       title={doctorsSEO?.title || `الأطباء - ${companyName}`}
-      description={doctorsSEO?.description || `احجز موعدك مع أفضل الأطباء في ${companyName} بصنعاء`}
+      description={
+        doctorsSEO?.description ||
+        `احجز موعدك مع أفضل الأطباء في ${companyName}${COMPANY_CITY ? ` بـ ${COMPANY_CITY}` : ''}`
+      }
       keywords={doctorsSEO?.keywords || 'أطباء, استشاريين, تخصصات طبية, حجز موعد'}
     >
       <DoctorsContent />

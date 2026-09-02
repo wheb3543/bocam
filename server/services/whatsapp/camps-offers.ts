@@ -16,7 +16,7 @@ import type {
 import { handleServiceError } from '../../_core/errorHandler';
 
 const companyName = COMPANY_ARABIC_NAME || 'BOCAM';
-const companyPhone = COMPANY_PHONE || '8000018';
+const companyPhone = COMPANY_PHONE || 'رقم الاتصال غير متوفر';
 const publicWebsite = process.env.PUBLIC_APP_URL || 'https://example.com';
 
 // تأكيد تسجيل المخيم

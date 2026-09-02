@@ -168,7 +168,7 @@ function CampDetailContent({ slug }: { slug: string }) {
     expiredButton: detailText('expired.button', 'عودة إلى المخيمات'),
     contactTitle: detailText('contact.title', 'للاستفسارات والمزيد من المعلومات'),
     contactDescription: detailText('contact.description', 'اتصل بنا على الرقم المجاني'),
-    contactPhone: detailText('contact.phone', COMPANY_PHONE || '8000018'),
+    contactPhone: detailText('contact.phone', COMPANY_PHONE || 'رقم الاتصال غير متوفر'),
     contactWhatsapp: detailText('contact.whatsapp', 'واتساب'),
     contactWhatsappMessage: detailText(
       'contact.whatsapp.message',
@@ -182,7 +182,7 @@ function CampDetailContent({ slug }: { slug: string }) {
     alertError: detailText('alert.error', 'حدث خطأ أثناء التسجيل'),
   };
 
-  const contactPhoneDigits = (copy.contactPhone || '8000018').replace(/\D/g, '') || '8000018';
+  const contactPhoneDigits = (copy.contactPhone || COMPANY_PHONE).replace(/\D/g, '');
 
   const { user } = useAuth();
   const { data: availableDates } = trpc.camps.getAvailableDates.useQuery(
@@ -382,7 +382,7 @@ function CampDetailContent({ slug }: { slug: string }) {
   const seoTitle = camp ? `${camp.name} | ${companyName}` : `المخيمات الطبية | ${companyName}`;
 
   const seoDescription = camp
-    ? `${(camp.description || camp.name).substring(0, 150)}... سجل الآن في مخيمنا الطبي المجاني. اتصل: 8000018`
+    ? `${(camp.description || camp.name).substring(0, 150)}... سجل الآن في مخيمنا الطبي المجاني.${COMPANY_PHONE ? ` اتصل: ${COMPANY_PHONE}` : ''}`
     : `مخيمات طبية مجانية لخدمة المجتمع في ${companyName}`;
 
   // Loading Skeleton
@@ -1149,15 +1149,17 @@ function CampDetailContent({ slug }: { slug: string }) {
               <Phone className="h-4 w-4" />
               {copy.contactPhone}
             </a>
-            <a
-              href={`https://wa.me/9678000018?text=${encodeURIComponent(copy.contactWhatsappMessage)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-2.5 rounded-full font-bold text-sm hover:bg-white/20 transition-colors"
-            >
-              <MessageSquare className="h-4 w-4" />
-              {copy.contactWhatsapp}
-            </a>
+            {contactPhoneDigits && (
+              <a
+                href={`https://wa.me/${contactPhoneDigits}?text=${encodeURIComponent(copy.contactWhatsappMessage)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-2.5 rounded-full font-bold text-sm hover:bg-white/20 transition-colors"
+              >
+                <MessageSquare className="h-4 w-4" />
+                {copy.contactWhatsapp}
+              </a>
+            )}
           </div>
         </div>
       </section>

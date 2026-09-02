@@ -53,6 +53,7 @@ export async function setupVite(app: Express, server: Server) {
         companyPhone: process.env.COMPANY_PHONE || '',
         companyEmail: process.env.COMPANY_EMAIL || '',
         companyAddress: process.env.COMPANY_ADDRESS || '',
+        companyCity: process.env.COMPANY_CITY || '',
         companySlogan: process.env.COMPANY_SLOGAN_AR || process.env.COMPANY_SLOGAN_EN || '',
         facebookUrl: process.env.FACEBOOK_URL || '',
         instagramUrl: process.env.INSTAGRAM_URL || '',

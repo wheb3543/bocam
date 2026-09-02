@@ -13,7 +13,7 @@ import { meta } from '../api/MetaApiService';
 import { COMPANY_ARABIC_NAME, COMPANY_PHONE, COMPANY_SLOGAN_AR } from '@shared/config';
 
 const companyName = COMPANY_ARABIC_NAME || 'BOCAM';
-const companyPhone = COMPANY_PHONE || '8000018';
+const companyPhone = COMPANY_PHONE || 'رقم الاتصال غير متوفر';
 const companySlogan = COMPANY_SLOGAN_AR || 'نظام إدارة متكامل';
 
 /**

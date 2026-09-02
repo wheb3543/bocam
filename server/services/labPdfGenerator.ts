@@ -87,7 +87,7 @@ function addLabHeader(
     RESULT_DATE: string | Date;
   }
 ) {
-  const logoPath = path.join(process.cwd(), 'client', 'public', 'SGHHospitalColorBilingual.png');
+  const logoPath = path.join(process.env.TENANT_ROOT || process.cwd(), 'branding', 'logo.png');
   try {
     doc.image(logoPath, doc.page.width - 200, 30, { width: 150 });
   } catch (error) {
@@ -95,7 +95,7 @@ function addLabHeader(
   }
 
   const companyName = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
-  const companyPhone = process.env.COMPANY_PHONE || '8000018';
+  const companyPhone = process.env.COMPANY_PHONE || 'رقم الاتصال غير متوفر';
   const companyEmail = process.env.COMPANY_EMAIL || 'info@example.com';
 
   doc
