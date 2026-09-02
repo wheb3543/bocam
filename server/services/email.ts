@@ -3,8 +3,11 @@
  * Sends email notifications to hospital staff when new leads are registered
  */
 
-import { COMPANY_SLOGAN_AR, COMPANY_ARABIC_NAME } from '@shared/config';
+import { COMPANY_SLOGAN_AR, COMPANY_ARABIC_NAME, COMPANY_EMAIL } from '@shared/config';
 import { createLogger } from '../_core/logger';
+
+const companyName = COMPANY_ARABIC_NAME || 'BOCAM';
+const companySlogan = COMPANY_SLOGAN_AR || 'نظام إدارة متكامل';
 
 const logger = createLogger('email');
 
@@ -116,7 +119,7 @@ export function generateNewLeadEmail(lead: {
       <div class="container">
         <div class="header">
           <h1>🎉 تسجيل عميل جديد</h1>
-          <p>المستشفى السعودي الألماني - صنعاء</p>
+          <p>${companyName}</p>
         </div>
         <div class="content">
           <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
@@ -179,11 +182,11 @@ export function generateNewLeadEmail(lead: {
           </p>
         </div>
         <div class="footer">
-          <p>${COMPANY_ARABIC_NAME}</p>
-          <p>${COMPANY_SLOGAN_AR}</p>
+          <p>${companyName}</p>
+          <p>${companySlogan}</p>
           <p style="margin-top: 10px;">
-            <a href="tel:8000018" style="color: #00A3E0; text-decoration: none;">
-              الرقم المجاني: 8000018
+            <a href="tel:${(process.env.COMPANY_PHONE || '8000018').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
+              الرقم المجاني: ${process.env.COMPANY_PHONE || '8000018'}
             </a>
           </p>
         </div>
@@ -207,11 +210,11 @@ export async function sendNewLeadNotification(lead: {
 }): Promise<boolean> {
   const emailHtml = generateNewLeadEmail(lead);
 
-  // TODO: Replace with actual hospital email address
-  const hospitalEmail = process.env.HOSPITAL_EMAIL || 'info@sgh-sanaa.com';
+  const recipientEmail =
+    process.env.HOSPITAL_EMAIL || process.env.COMPANY_EMAIL || COMPANY_EMAIL || 'info@example.com';
 
   return sendEmail({
-    to: hospitalEmail,
+    to: recipientEmail,
     subject: `تسجيل جديد: ${lead.fullName} - ${lead.campaignName}`,
     html: emailHtml,
   });
@@ -295,7 +298,7 @@ export async function sendNewAppointmentEmail(params: {
       <div class="container">
         <div class="header">
           <h1>📅 حجز موعد جديد</h1>
-          <p>المستشفى السعودي الألماني - صنعاء</p>
+          <p>${companyName}</p>
         </div>
         <div class="content">
           <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
@@ -369,11 +372,11 @@ export async function sendNewAppointmentEmail(params: {
           </p>
         </div>
         <div class="footer">
-          <p>${COMPANY_ARABIC_NAME}</p>
-          <p>${COMPANY_SLOGAN_AR}</p>
+          <p>${companyName}</p>
+          <p>${companySlogan}</p>
           <p style="margin-top: 10px;">
-            <a href="tel:8000018" style="color: #00A3E0; text-decoration: none;">
-              الرقم المجاني: 8000018
+            <a href="tel:${(process.env.COMPANY_PHONE || COMPANY_EMAIL || '8000018').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
+              الرقم المجاني: ${process.env.COMPANY_PHONE || '8000018'}
             </a>
           </p>
         </div>
@@ -382,10 +385,11 @@ export async function sendNewAppointmentEmail(params: {
     </html>
   `;
 
-  const hospitalEmail = process.env.HOSPITAL_EMAIL || 'info@sgh-sanaa.com';
+  const recipientEmail =
+    process.env.HOSPITAL_EMAIL || process.env.COMPANY_EMAIL || COMPANY_EMAIL || 'info@example.com';
 
   return sendEmail({
-    to: hospitalEmail,
+    to: recipientEmail,
     subject: `حجز موعد جديد: ${appointment.fullName} - ${appointment.doctorName}`,
     html: emailHtml,
   });

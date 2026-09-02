@@ -7,8 +7,12 @@
  */
 
 import { sendWhatsAppTextMessage, formatPhoneNumber } from './whatsappCloudAPI';
-import { COMPANY_SLOGAN_AR } from '@shared/config';
+import { COMPANY_ARABIC_NAME, COMPANY_PHONE, COMPANY_SLOGAN_AR } from '@shared/config';
 import { createLogger } from '../_core/logger';
+
+const companyName = COMPANY_ARABIC_NAME || 'BOCAM';
+const companyPhone = COMPANY_PHONE || '8000018';
+const companySlogan = COMPANY_SLOGAN_AR || 'نظام إدارة متكامل';
 
 const logger = createLogger('whatsapp');
 
@@ -49,13 +53,13 @@ export async function sendWelcomeMessage(lead: {
 }): Promise<boolean> {
   const defaultMessage = `مرحباً ${lead.fullName}،
 
-شكراً لتسجيلك في ${lead.campaignName} بالمستشفى السعودي الألماني - صنعاء.
+شكراً لتسجيلك في ${lead.campaignName} بـ ${companyName}.
 
 سنتواصل معك قريباً لتحديد موعدك وتقديم الخدمة المطلوبة.
 
-للاستفسارات العاجلة، يمكنك التواصل معنا على الرقم المجاني: 8000018
+للاستفسارات العاجلة، يمكنك التواصل معنا على الرقم المجاني: ${companyPhone}
 
-${COMPANY_SLOGAN_AR} 💚`;
+${companySlogan} 💚`;
 
   const message = lead.welcomeMessage || defaultMessage;
 
@@ -87,15 +91,14 @@ ${
     : ''
 }
 
-📍 الموقع: المستشفى السعودي الألماني - صنعاء
-شارع الستين الشمالي (بين جولة عمران وجولة الجمنة)
+📍 الموقع: ${companyName}
 
 يرجى الحضور قبل الموعد بـ 15 دقيقة.
 
-للاستفسارات: 8000018
+للاستفسارات: ${companyPhone}
 
-${COMPANY_SLOGAN_AR} 💚
-المستشفى السعودي الألماني`;
+${companySlogan} 💚
+${companyName}`;
 
   return sendWhatsAppMessage({
     to: lead.phone,

@@ -5,6 +5,7 @@
 
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { COMPANY_ARABIC_NAME, COMPANY_PHONE } from '@shared/config';
 import { sendWhatsAppTextMessage } from '../whatsappCloudAPI';
 import { saveNotification, validateAndNormalizePhone } from './helpers';
 import type {
@@ -13,6 +14,10 @@ import type {
   SendResult,
 } from './types';
 import { handleServiceError } from '../../_core/errorHandler';
+
+const companyName = COMPANY_ARABIC_NAME || 'BOCAM';
+const companyPhone = COMPANY_PHONE || '8000018';
+const publicWebsite = process.env.PUBLIC_APP_URL || 'https://example.com';
 
 // تأكيد تسجيل المخيم
 export async function sendCampRegistrationConfirmation(
@@ -35,7 +40,7 @@ ${params.campLocation ? `📍 الموقع: ${params.campLocation}` : ''}
 
 سيتم التواصل معك قريباً لتأكيد التفاصيل.
 
-📞 للاستفسار: 8000018`.trim();
+📞 للاستفسار: ${companyPhone}`.trim();
 
     const result = await sendWhatsAppTextMessage(normalizedPhone, message);
 
@@ -84,8 +89,8 @@ ${priceInfo}
 
 سيتم التواصل معك قريباً لتأكيد الحجز وترتيب الموعد.
 
-📞 للاستفسار: 8000018
-🌐 www.sgh-sanaa.com`.trim();
+📞 للاستفسار: ${companyPhone}
+🌐 ${publicWebsite}`.trim();
 
     const result = await sendWhatsAppTextMessage(normalizedPhone, message);
 

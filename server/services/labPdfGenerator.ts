@@ -94,12 +94,16 @@ function addLabHeader(
     console.warn('Could not load logo:', error);
   }
 
+  const companyName = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
+  const companyPhone = process.env.COMPANY_PHONE || '8000018';
+  const companyEmail = process.env.COMPANY_EMAIL || 'info@example.com';
+
   doc
     .fontSize(10)
     .font(AMIRI_REGULAR)
-    .text('المستشفى السعودي الألماني - صنعاء', 50, 40, { align: 'left' })
-    .text('8000018', 50, 55, { align: 'left' })
-    .text('info@sghsanaa.net', 50, 70, { align: 'left' });
+    .text(companyName, 50, 40, { align: 'left' })
+    .text(companyPhone, 50, 55, { align: 'left' })
+    .text(companyEmail, 50, 70, { align: 'left' });
 
   doc
     .moveTo(50, 100)

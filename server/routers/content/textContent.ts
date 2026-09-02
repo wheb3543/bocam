@@ -903,23 +903,23 @@ export const textContentRouter = router({
     let homepageId: number;
 
     if (existingPages.length === 0) {
+      const tenantArabicName = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
+      const tenantEnglishName = process.env.COMPANY_ENGLISH_NAME || 'BOCAM';
+      const tenantCity = process.env.COMPANY_CITY || 'صنعاء';
+
       const insertResult = await db.insert(pages).values({
         name: 'الصفحة الرئيسية',
         slug: 'home',
         type: 'main',
         parentId: null,
-        titleAr: 'المستشفى السعودي الألماني - صنعاء',
-        titleEn: 'Saudi German Hospital – Sana’a',
-        metaTitleAr: 'المستشفى السعودي الألماني - صنعاء | احجز موعدك الآن',
-        metaTitleEn: 'Saudi German Hospital – Sana’a | Book Your Appointment Now',
-        metaDescriptionAr:
-          'احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.',
-        metaDescriptionEn:
-          'Book your appointment with the best doctors at Saudi German Hospital – Sana’a. Excellent medical services, special offers, and free medical camps.',
-        keywordsAr:
-          'المستشفى السعودي الألماني, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية',
-        keywordsEn:
-          'Saudi German Hospital, Sana’a, book appointment, doctors, medical offers, health camps, medical consultations',
+        titleAr: `${tenantArabicName} - ${tenantCity}`,
+        titleEn: `${tenantEnglishName} – ${tenantCity}`,
+        metaTitleAr: `${tenantArabicName} - ${tenantCity} | احجز موعدك الآن`,
+        metaTitleEn: `${tenantEnglishName} – ${tenantCity} | Book Your Appointment Now`,
+        metaDescriptionAr: `احجز موعدك مع أفضل الأطباء في ${tenantArabicName} ${tenantCity}. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.`,
+        metaDescriptionEn: `Book your appointment with the best doctors at ${tenantEnglishName} – ${tenantCity}. Excellent medical services, special offers, and free medical camps.`,
+        keywordsAr: `${tenantArabicName}, ${tenantCity}, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية`,
+        keywordsEn: `${tenantEnglishName}, ${tenantCity}, book appointment, doctors, medical offers, health camps, medical consultations`,
         isActive: 'yes',
         sortOrder: 1,
         status: 'published',
@@ -939,17 +939,18 @@ export const textContentRouter = router({
       .where(and(eq(seoSettings.slug, 'home'), eq(seoSettings.language, 'ar')))
       .limit(1);
     if (homepageSeo.length === 0) {
+      const tenantArabicName = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
+      const tenantCity = process.env.COMPANY_CITY || 'صنعاء';
+
       await db.insert(seoSettings).values({
         pageId: homepageId,
         pageKey: 'home',
         slug: 'home',
         language: 'ar',
-        title: 'المستشفى السعودي الألماني - صنعاء | احجز موعدك الآن',
-        description:
-          'احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.',
-        keywords:
-          'المستشفى السعودي الألماني, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية',
-        canonicalUrl: 'https://sghcrm-efgar5cn.manus.space/',
+        title: `${tenantArabicName} - ${tenantCity} | احجز موعدك الآن`,
+        description: `احجز موعدك مع أفضل الأطباء في ${tenantArabicName} ${tenantCity}. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.`,
+        keywords: `${tenantArabicName}, ${tenantCity}, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية`,
+        canonicalUrl: 'https://example.com/',
         robots: 'index,follow',
         isActive: 'yes',
       });
@@ -1143,7 +1144,7 @@ export const textContentRouter = router({
       {
         key: 'about.title.ar',
         language: 'ar',
-        content: 'عن المستشفى السعودي الألماني - صنعاء',
+        content: `عن ${process.env.COMPANY_ARABIC_NAME || 'BOCAM'} - ${process.env.COMPANY_CITY || 'صنعاء'}`,
         section: 'about',
         pageId: homepageId,
         type: 'title' as const,
@@ -1151,7 +1152,7 @@ export const textContentRouter = router({
       {
         key: 'about.title.en',
         language: 'en',
-        content: 'About Saudi German Hospital – Sana’a',
+        content: `About ${process.env.COMPANY_ENGLISH_NAME || 'BOCAM'} – ${process.env.COMPANY_CITY || "Sana'a"}`,
         section: 'about',
         pageId: homepageId,
         type: 'title' as const,

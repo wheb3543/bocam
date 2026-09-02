@@ -26,6 +26,7 @@ import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from './whatsapp
 import { createLogger } from '../_core/logger';
 
 const logger = createLogger('whatsappMessageDispatcher');
+const defaultBrandName = process.env.TENANT_NAME || process.env.COMPANY_ARABIC_NAME || 'BOCAM';
 
 export type EntityType = 'appointment' | 'camp_registration' | 'offer_lead';
 export type TriggerEvent =
@@ -119,8 +120,7 @@ function buildTemplateDisplayContent(
 ): string {
   // خريطة القوالب المعروفة مع نصوصها الفعلية
   const templateTexts: Record<string, string> = {
-    appointment_confirmation:
-      'مرحباً {name}، تم استلام طلب حجزك في المستشفى السعودي الألماني - صنعاء.\n\nتفاصيل الحجز:\n📅 التاريخ والوقت: {date}\n👨‍⚕️ الطبيب: {doctor}\n🏥 الخدمة: {service}\n\nسيتم التواصل معك قريباً لتأكيد الموعد.',
+    appointment_confirmation: `مرحباً {name}، تم استلام طلب حجزك في ${defaultBrandName}.\n\nتفاصيل الحجز:\n📅 التاريخ والوقت: {date}\n👨‍⚕️ الطبيب: {doctor}\n🏥 الخدمة: {service}\n\nسيتم التواصل معك قريباً لتأكيد الموعد.`,
     camp_reg_verification:
       'مرحباً {name}، تم استلام طلب تسجيلك في {camp_name}.\n\nتفاصيل التسجيل:\n📅 التاريخ: {date}\n⏰ الوقت: {time}\n📍 الموقع: {location}\n\nيرجى تأكيد حضورك بالضغط على الزر أدناه.',
     camp_reg_confirmed:

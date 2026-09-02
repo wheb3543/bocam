@@ -5,6 +5,7 @@
 
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { COMPANY_ARABIC_NAME, COMPANY_PHONE } from '@shared/config';
 import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from '../whatsappCloudAPI';
 import { saveNotification, validateAndNormalizePhone } from './helpers';
 import type {
@@ -14,6 +15,10 @@ import type {
   SendResult,
 } from './types';
 import { handleServiceError } from '../../_core/errorHandler';
+
+const companyName = COMPANY_ARABIC_NAME || 'BOCAM';
+const companyPhone = COMPANY_PHONE || '8000018';
+const publicWebsite = process.env.PUBLIC_APP_URL || 'https://example.com';
 
 // تأكيد الحجز: مواعيد الأطباء
 export async function sendAppointmentConfirmation(
@@ -49,7 +54,7 @@ export async function sendAppointmentConfirmation(
       console.warn(
         `[WhatsApp Appointments] Template appointment_confirmation failed (${result.error}), falling back to text message`
       );
-      const message = `مرحباً ${params.patientName} 👋\n\n✅ تم تأكيد موعدك في المستشفى السعودي الألماني\n\n📋 تفاصيل الموعد:\n👨‍⚕️ الطبيب: ${params.doctorName}\n🏥 القسم: ${params.department}\n📅 التاريخ: ${appointmentDate}\n⏰ الوقت: ${appointmentTimeStr}\n\n⚠️ يرجى الحضور قبل 15 دقيقة من الموعد\n\n📞 للاستفسار: 8000018`;
+      const message = `مرحباً ${params.patientName} 👋\n\n✅ تم تأكيد موعدك في ${companyName}\n\n📋 تفاصيل الموعد:\n👨‍⚕️ الطبيب: ${params.doctorName}\n🏥 القسم: ${params.department}\n📅 التاريخ: ${appointmentDate}\n⏰ الوقت: ${appointmentTimeStr}\n\n⚠️ يرجى الحضور قبل 15 دقيقة من الموعد\n\n📞 للاستفسار: ${companyPhone}`;
       result = await sendWhatsAppTextMessage(normalizedPhone, message);
       usedTemplate = 'text_fallback';
     }
@@ -118,7 +123,7 @@ export async function sendAppointmentReminder(
       console.warn(
         `[WhatsApp Appointments] Template appointment_reminder failed (${result.error}), falling back to text message`
       );
-      const fallbackMsg = `⏰ تذكير بموعدك\n\n${params.patientName}، موعدك مع د. ${params.doctorName} ${reminderText}\n🕐 الوقت: ${appointmentTimeStr}\n\nيرجى الحضور قبل 15 دقيقة\n📞 للإلغاء أو التعديل: 8000018`;
+      const fallbackMsg = `⏰ تذكير بموعدك\n\n${params.patientName}، موعدك مع د. ${params.doctorName} ${reminderText}\n🕐 الوقت: ${appointmentTimeStr}\n\nيرجى الحضور قبل 15 دقيقة\n📞 للإلغاء أو التعديل: ${companyPhone}`;
       result = await sendWhatsAppTextMessage(normalizedPhone, fallbackMsg);
       usedTemplate = 'text_fallback';
     }
@@ -161,8 +166,8 @@ export async function sendAppointmentFollowup(
 نرجو تقييم تجربتك معنا:
 ⭐ ممتاز | 👍 جيد | 👎 يحتاج تحسين
 
-📞 للحجز مجدداً: 8000018
-🌐 www.sgh-sanaa.com`.trim();
+📞 للحجز مجدداً: ${companyPhone}
+🌐 ${publicWebsite}`.trim();
 
     const result = await sendWhatsAppTextMessage(normalizedPhone, message);
 

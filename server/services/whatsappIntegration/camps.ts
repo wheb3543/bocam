@@ -145,7 +145,12 @@ export async function sendCampRegistrationStatusUpdate(
 
       case 'cancelled':
         templateName = 'camp_cancellation_ar';
-        parameters = [reg.fullName, campData.name, reason || 'لم يتم تحديد السبب', '8000018'];
+        parameters = [
+          reg.fullName,
+          campData.name,
+          reason || 'لم يتم تحديد السبب',
+          process.env.COMPANY_PHONE || '8000018',
+        ];
         break;
 
       default:

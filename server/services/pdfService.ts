@@ -58,11 +58,14 @@ function addHeader(doc: PDFDocumentInstance, metadata: ExportMetadata) {
   }
 
   // معلومات الاتصال على اليسار
+  const companyPhone = process.env.COMPANY_PHONE || '8000018';
+  const companyEmail = process.env.COMPANY_EMAIL || 'info@example.com';
+
   doc
     .fontSize(10)
     .font(AMIRI_REGULAR)
-    .text('8000018', 50, 40, { align: 'left' })
-    .text('info@sghsanaa.net', 50, 55, { align: 'left' });
+    .text(companyPhone, 50, 40, { align: 'left' })
+    .text(companyEmail, 50, 55, { align: 'left' });
 
   // خط فاصل
   doc

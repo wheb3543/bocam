@@ -242,7 +242,7 @@ export async function scheduleAppointmentReminder1h(appointmentId: number) {
 
     const tmpl = template[0];
 
-    const parameters = [apt.fullName, '8000018'];
+    const parameters = [apt.fullName, process.env.COMPANY_PHONE || '8000018'];
 
     const result = await sendTemplateMessage({
       phone: apt.phone,
@@ -341,7 +341,7 @@ export async function sendAppointmentStatusUpdate(
             ? new Date(apt.appointmentDate).toLocaleDateString('ar-YE')
             : 'قريباً',
           reason || 'لم يتم تحديد السبب',
-          '8000018',
+          process.env.COMPANY_PHONE || '8000018',
         ];
         break;
 
@@ -359,7 +359,7 @@ export async function sendAppointmentStatusUpdate(
 
       case 'completed':
         templateName = 'appointment_status_completed_ar';
-        parameters = [apt.fullName, '8000018'];
+        parameters = [apt.fullName, process.env.COMPANY_PHONE || '8000018'];
         break;
 
       default:

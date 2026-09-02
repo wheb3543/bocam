@@ -10,7 +10,11 @@ import { normalizePhoneNumber } from '../database/db';
 import { sendWhatsAppTextMessage } from './whatsappCloudAPI';
 import { ENV } from '../_core/env';
 import { meta } from '../api/MetaApiService';
-import { COMPANY_SLOGAN_AR } from '@shared/config';
+import { COMPANY_ARABIC_NAME, COMPANY_PHONE, COMPANY_SLOGAN_AR } from '@shared/config';
+
+const companyName = COMPANY_ARABIC_NAME || 'BOCAM';
+const companyPhone = COMPANY_PHONE || '8000018';
+const companySlogan = COMPANY_SLOGAN_AR || 'نظام إدارة متكامل';
 
 /**
  * Send a simple text message via Cloud API
@@ -55,13 +59,13 @@ export async function sendWelcomeMessage(params: {
 }): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const message = `مرحباً ${params.fullName}،
 
-شكراً لتسجيلك في ${params.campaignName} بالمستشفى السعودي الألماني - صنعاء.
+شكراً لتسجيلك في ${params.campaignName} بـ ${companyName}.
 
 سنتواصل معك قريباً لتحديد موعدك.
 
-للاستفسارات: 8000018
+للاستفسارات: ${companyPhone}
 
-${COMPANY_SLOGAN_AR} 💚`;
+${companySlogan} 💚`;
 
   return sendTextMessage(params.phone, message, { priority: 'high' });
 }
@@ -83,13 +87,13 @@ export async function sendBookingConfirmation(params: {
 ${params.doctorName ? `👨‍⚕️ الطبيب: ${params.doctorName}` : ''}
 ${params.appointmentDate && params.appointmentTime ? `📅 التاريخ: ${params.appointmentDate}\n🕐 الوقت: ${params.appointmentTime}` : ''}
 
-📍 الموقع: المستشفى السعودي الألماني - صنعاء
+📍 الموقع: ${companyName}
 
 يرجى الحضور قبل الموعد بـ 15 دقيقة.
 
-للاستفسارات: 8000018
+للاستفسارات: ${companyPhone}
 
-${COMPANY_SLOGAN_AR} 💚`;
+${companySlogan} 💚`;
 
   return sendTextMessage(params.phone, message, { priority: 'high' });
 }

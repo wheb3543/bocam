@@ -4,6 +4,7 @@ import { processIncomingMessage } from '../../../services/whatsappAutoReply';
 import { updateWhatsAppUserOptIn, createWhatsAppUserOptIn } from '../../../database/db';
 
 const logger = createLogger('textMessageHandler');
+const companyName = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
 
 /**
  * معالجة الرسائل النصية الواردة
@@ -82,7 +83,7 @@ async function handleOptOut(phone: string): Promise<void> {
     // إرسال رسالة تأكيد إلغاء الاشتراك
     await sendWhatsAppTextMessage(
       phone,
-      'تم إلغاء اشتراكك في رسائل المستشفى السعودي الألماني. لن تتلقى رسائل ترويجية بعد الآن.\n\nللاشتراك مجدداً، أرسل كلمة: مرحبا'
+      `تم إلغاء اشتراكك في رسائل ${companyName}. لن تتلقى رسائل ترويجية بعد الآن.\n\nللاشتراك مجدداً، أرسل كلمة: مرحبا`
     );
 
     // تحديث حالة الاشتراك في قاعدة البيانات
