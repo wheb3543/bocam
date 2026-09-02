@@ -55,6 +55,16 @@ export async function setupVite(app: Express, server: Server) {
         companyAddress: process.env.COMPANY_ADDRESS || '',
         companyCity: process.env.COMPANY_CITY || '',
         companySlogan: process.env.COMPANY_SLOGAN_AR || process.env.COMPANY_SLOGAN_EN || '',
+        theme: {
+          primary: process.env.TENANT_THEME_PRIMARY || '',
+          secondary: process.env.TENANT_THEME_SECONDARY || '',
+          accent: process.env.TENANT_THEME_ACCENT || '',
+          background: process.env.TENANT_THEME_BACKGROUND || '',
+          text: process.env.TENANT_THEME_TEXT || '',
+          success: process.env.TENANT_THEME_SUCCESS || '',
+          danger: process.env.TENANT_THEME_DANGER || '',
+          warning: process.env.TENANT_THEME_WARNING || '',
+        },
         facebookUrl: process.env.FACEBOOK_URL || '',
         instagramUrl: process.env.INSTAGRAM_URL || '',
         twitterUrl: process.env.TWITTER_URL || '',
@@ -66,6 +76,12 @@ export async function setupVite(app: Express, server: Server) {
           window.__BOCAM_TENANT__ = Object.assign({}, window.__BOCAM_TENANT__ || {}, ${JSON.stringify(
             tenantSnapshot
           )});
+          var tenantTheme = window.__BOCAM_TENANT__.theme || {};
+          Object.keys(tenantTheme).forEach(function (key) {
+            if (tenantTheme[key]) {
+              document.documentElement.style.setProperty('--tenant-' + key, tenantTheme[key]);
+            }
+          });
         </script>
       `;
 

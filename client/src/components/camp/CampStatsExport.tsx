@@ -4,7 +4,13 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useAuth } from '@/_core/hooks/useAuth';
-import { APP_LOGO, COMPANY_PHONE, COMPANY_ARABIC_NAME } from '@/const';
+import {
+  APP_LOGO,
+  BRAND_PRIMARY_COLOR,
+  BRAND_SECONDARY_COLOR,
+  COMPANY_PHONE,
+  COMPANY_ARABIC_NAME,
+} from '@/const';
 import { getCompanySlogan } from '@/const';
 
 interface CampStatsExportProps {
@@ -47,7 +53,10 @@ export default function CampStatsExport({
 
   const handleExport = () => {
     const data = {
-      camp: selectedCamp === 'all' ? 'all' : camps?.find((c) => c.id?.toString() === selectedCamp)?.name,
+      camp:
+        selectedCamp === 'all'
+          ? 'all'
+          : camps?.find((c) => c.id?.toString() === selectedCamp)?.name,
       statistics: {
         total: stats.totalRegistrations,
         pending: stats.pendingCount,
@@ -126,7 +135,7 @@ export default function CampStatsExport({
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 3px solid #00a651;
+            border-bottom: 3px solid ${BRAND_PRIMARY_COLOR};
           }
           
           .header img {
@@ -138,7 +147,7 @@ export default function CampStatsExport({
           .header .phone {
             font-size: 24px;
             font-weight: bold;
-            color: #00a651;
+            color: ${BRAND_PRIMARY_COLOR};
           }
           
           .report-title {
@@ -192,7 +201,7 @@ export default function CampStatsExport({
             font-weight: bold;
             margin-bottom: 15px;
             color: #333;
-            border-bottom: 2px solid #00a651;
+            border-bottom: 2px solid ${BRAND_PRIMARY_COLOR};
             padding-bottom: 8px;
           }
           
@@ -210,7 +219,7 @@ export default function CampStatsExport({
           }
           
           .data-table th {
-            background-color: #00a651;
+            background-color: ${BRAND_PRIMARY_COLOR};
             color: white;
             font-weight: bold;
           }
@@ -222,7 +231,7 @@ export default function CampStatsExport({
           .footer {
             margin-top: 30px;
             padding-top: 15px;
-            border-top: 2px solid #00a651;
+            border-top: 2px solid ${BRAND_PRIMARY_COLOR};
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -231,7 +240,7 @@ export default function CampStatsExport({
           .slogan {
             font-size: 18px;
             font-weight: bold;
-            color: #0088cc;
+            color: ${BRAND_SECONDARY_COLOR};
           }
           
           .meta {

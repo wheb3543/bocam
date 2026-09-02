@@ -50,10 +50,10 @@
   /* Shared brand colors */
   --brand-blue: oklch(0.623 0.15 220);
   --brand-green-tone: oklch(0.623 0.15 145);
-  --primary: var(--brand-blue);
+  --primary: var(--tenant-primary, var(--brand-blue));
   --primary-foreground: oklch(0.99 0 0); /* White - improved contrast */
-  --brand-green: var(--brand-green-tone);
-  --sidebar-primary: oklch(0.623 0.15 220);
+  --brand-green: var(--tenant-secondary, var(--brand-green-tone));
+  --sidebar-primary: var(--tenant-primary, var(--brand-blue));
   --sidebar-primary-foreground: oklch(0.99 0 0); /* Improved contrast */
   --chart-1: var(--brand-blue);
   --chart-2: var(--brand-green-tone);
@@ -61,17 +61,17 @@
   --chart-4: oklch(0.523 0.15 145);
   --chart-5: oklch(0.723 0.15 220);
   --radius: 0.65rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.2 0.015 65); /* Darker for better contrast */
+  --background: var(--tenant-background, oklch(1 0 0));
+  --foreground: var(--tenant-text, oklch(0.2 0.015 65)); /* Darker for better contrast */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.2 0.015 65); /* Darker for better contrast */
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0.015 65); /* Darker for better contrast */
-  --secondary: oklch(0.98 0.001 286.375);
+  --secondary: var(--tenant-secondary, oklch(0.98 0.001 286.375));
   --secondary-foreground: oklch(0.35 0.015 65); /* Darker for better contrast */
   --muted: oklch(0.967 0.001 286.375);
   --muted-foreground: oklch(0.45 0.016 285.938); /* Darker for better contrast */
-  --accent: oklch(0.967 0.001 286.375);
+  --accent: var(--tenant-accent, oklch(0.967 0.001 286.375));
   --accent-foreground: oklch(0.12 0.005 285.823); /* Darker for better contrast */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0); /* Improved contrast */
@@ -86,7 +86,7 @@
   --sidebar-ring: oklch(0.623 0.15 220);
 
   /* WhatsApp-specific colors for consistency - improved contrast */
-  --whatsapp-green: oklch(0.623 0.15 145);
+  --whatsapp-green: var(--tenant-success, oklch(0.623 0.15 145));
   --whatsapp-green-light: oklch(0.85 0.08 145);
   --whatsapp-green-dark: oklch(0.45 0.12 145);
   --whatsapp-emerald: oklch(0.65 0.14 150);
@@ -122,9 +122,9 @@
 }
 
 .dark {
-  --primary: oklch(0.623 0.15 220); /* SGH Blue - improved contrast */
+  --primary: var(--tenant-primary, oklch(0.623 0.15 220));
   --primary-foreground: oklch(0.99 0 0); /* White - improved contrast */
-  --secondary: oklch(0.623 0.15 145); /* SGH Green - improved contrast */
+  --secondary: var(--tenant-secondary, oklch(0.623 0.15 145));
   --secondary-foreground: oklch(0.99 0 0); /* White - improved contrast */
   --sidebar-primary: oklch(0.623 0.15 220);
   --sidebar-primary-foreground: oklch(0.99 0 0); /* Improved contrast */

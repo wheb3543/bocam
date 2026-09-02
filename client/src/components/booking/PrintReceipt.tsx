@@ -5,6 +5,8 @@ import {
   COMPANY_PHONE,
   COMPANY_ARABIC_NAME,
   COMPANY_NAME,
+  BRAND_PRIMARY_COLOR,
+  BRAND_SECONDARY_COLOR,
   getCompanySlogan,
 } from '@/const';
 
@@ -195,7 +197,7 @@ export function printReceipt(data: PrintReceiptProps['data'], userName: string) 
           justify-content: space-between;
           align-items: center;
           margin-bottom: 15px;
-          border-bottom: 2px solid #00a651;
+          border-bottom: 2px solid ${BRAND_PRIMARY_COLOR};
           padding-bottom: 10px;
         }
         
@@ -208,7 +210,7 @@ export function printReceipt(data: PrintReceiptProps['data'], userName: string) 
         .header .phone {
           font-size: 18px;
           font-weight: bold;
-          color: #00a651;
+          color: ${BRAND_PRIMARY_COLOR};
         }
         
         .receipt-number {
@@ -251,14 +253,14 @@ export function printReceipt(data: PrintReceiptProps['data'], userName: string) 
         .footer {
           margin-top: 15px;
           padding-top: 12px;
-          border-top: 1px dashed #00a651;
+          border-top: 1px dashed ${BRAND_PRIMARY_COLOR};
         }
         
         .slogan {
           text-align: center;
           font-size: 13px;
           font-weight: bold;
-          color: #0088cc;
+          color: ${BRAND_SECONDARY_COLOR};
           margin-bottom: 8px;
         }
         

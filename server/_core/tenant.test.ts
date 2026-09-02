@@ -47,7 +47,7 @@ describe('tenant runtime loader', () => {
 
     fs.writeFileSync(
       path.join(tenantDir, 'branding', 'config.ts'),
-      `export type BrandingConfig = { client: { nameEn: string; nameAr: string; email: string; phone: string; sloganEn: string; sloganAr: string } };
+      `export type BrandingConfig = { client: { nameEn: string; nameAr: string; email: string; phone: string; sloganEn: string; sloganAr: string }; theme: { primary: string; secondary: string } };
 
 export const branding = {
   tenantId: 'tenant-demo',
@@ -58,6 +58,10 @@ export const branding = {
     phone: '+966500000001',
     sloganEn: 'Excellence in care',
     sloganAr: 'تميز في الرعاية',
+  },
+  theme: {
+    primary: '#123456',
+    secondary: '#654321',
   },
 };
 
@@ -94,6 +98,8 @@ export default branding;
     expect(process.env.DB_NAME).toBe('example_db');
     expect(process.env.COMPANY_EMAIL).toBe('hello@example.com');
     expect(process.env.COMPANY_PHONE).toBe('+966500000001');
+    expect(process.env.TENANT_THEME_PRIMARY).toBe('#123456');
+    expect(process.env.TENANT_THEME_SECONDARY).toBe('#654321');
     expect(process.env.DATABASE_URL).toBe('mysql://root@tenant-db:3307/example_db');
     expect(process.env.FILE_UPLOAD_PATH).toBe(path.resolve(tempRoot, 'tenants', 'tenant-demo', 'uploads'));
   });

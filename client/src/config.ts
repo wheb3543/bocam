@@ -20,6 +20,15 @@ const readTenantValue = (key: string, fallback: string): string => {
   return typeof value === 'string' && value.trim() ? value : fallback;
 };
 
+const readTenantThemeValue = (key: string, fallback: string): string => {
+  const theme = (runtimeTenant as Record<string, unknown>).theme;
+  const value = theme && typeof theme === 'object' ? (theme as Record<string, unknown>)[key] : null;
+  return typeof value === 'string' && value.trim() ? value : fallback;
+};
+
+export const BRAND_PRIMARY_COLOR = readTenantThemeValue('primary', '#00A651');
+export const BRAND_SECONDARY_COLOR = readTenantThemeValue('secondary', '#0088CC');
+
 /**
  * Company name (English)
  * Safe default only when no tenant runtime config is available.
