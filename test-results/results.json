@@ -1,6 +1,6 @@
 {
-  "numTotalTestSuites": 6,
-  "numPassedTestSuites": 6,
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
   "numTotalTests": 4,
@@ -24,79 +24,61 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1788289142401,
+  "startTime": 1788312270231,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["PatientHomePage"],
-          "fullName": "PatientHomePage shows a polished patient overview summary",
+          "ancestorTitles": ["tenant runtime loader"],
+          "fullName": "tenant runtime loader resolves the active tenant directory from the environment",
           "status": "passed",
-          "title": "shows a polished patient overview summary",
-          "duration": 188.96833900000001,
+          "title": "resolves the active tenant directory from the environment",
+          "duration": 5.272709000000077,
           "failureMessages": [],
-          "location": { "line": 39, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1788289145538,
-      "endTime": 1788289145726.9683,
-      "status": "passed",
-      "message": "",
-      "name": "/Users/applestore/Documents/GitHub/bocam/client/src/pages/patient-portal/PatientHomePage.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["Patient portal list pages"],
-          "fullName": "Patient portal list pages shows polished patient appointment and result headers",
-          "status": "passed",
-          "title": "shows polished patient appointment and result headers",
-          "duration": 122.09884299999976,
-          "failureMessages": [],
-          "location": { "line": 65, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1788289145562,
-      "endTime": 1788289145684.0989,
-      "status": "passed",
-      "message": "",
-      "name": "/Users/applestore/Documents/GitHub/bocam/client/src/pages/patient-portal/PatientPortalLists.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["PatientPortalLogin"],
-          "fullName": "PatientPortalLogin shows phone and password login plus a create account button",
-          "status": "passed",
-          "title": "shows phone and password login plus a create account button",
-          "duration": 201.59613100000024,
-          "failureMessages": [],
-          "location": { "line": 49, "column": 3 },
+          "location": { "line": 83, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["PatientPortalLogin"],
-          "fullName": "PatientPortalLogin shows the phone number field inside the registration form",
+          "ancestorTitles": ["tenant runtime loader"],
+          "fullName": "tenant runtime loader loads tenant env and branding values before the app starts",
           "status": "passed",
-          "title": "shows the phone number field inside the registration form",
-          "duration": 113.10914099999991,
+          "title": "loads tenant env and branding values before the app starts",
+          "duration": 7.075125000000071,
           "failureMessages": [],
-          "location": { "line": 57, "column": 3 },
+          "location": { "line": 87, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["tenant runtime loader"],
+          "fullName": "tenant runtime loader uses the tenant license path configured at runtime",
+          "status": "passed",
+          "title": "uses the tenant license path configured at runtime",
+          "duration": 2.015373999999838,
+          "failureMessages": [],
+          "location": { "line": 101, "column": 3 },
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": ["tenant runtime loader"],
+          "fullName": "tenant runtime loader rejects upload paths that escape the tenant directory",
+          "status": "passed",
+          "title": "rejects upload paths that escape the tenant directory",
+          "duration": 2.9090340000000197,
+          "failureMessages": [],
+          "location": { "line": 108, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1788289145803,
-      "endTime": 1788289146118.1091,
+      "startTime": 1788312272321,
+      "endTime": 1788312272338.909,
       "status": "passed",
       "message": "",
-      "name": "/Users/applestore/Documents/GitHub/bocam/client/src/pages/patient-portal/PatientPortalLogin.test.tsx"
+      "name": "/Users/applestore/Documents/GitHub/bocam/server/_core/tenant.test.ts"
     }
   ]
 }
