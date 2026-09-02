@@ -2,6 +2,7 @@ import { AlertTriangle, Clock3, Eye } from 'lucide-react';
 import { useParams } from 'wouter';
 import { useDraftPreview } from '@/hooks/usePublicContent';
 import SEO from '@/components/SEO';
+import { COMPANY_ARABIC_NAME, COMPANY_ENGLISH_NAME } from '@/const';
 
 type PreviewSection = {
   id: number;
@@ -144,7 +145,9 @@ export default function DraftPreviewPage() {
       </div>
       <header className="border-b bg-background px-5 py-6">
         <div className="mx-auto max-w-7xl">
-          <p className="text-sm font-medium text-primary">SGH</p>
+          <p className="text-sm font-medium text-primary">
+            {isArabic ? COMPANY_ARABIC_NAME : COMPANY_ENGLISH_NAME || 'BOCAM'}
+          </p>
           <h1 className="mt-1 text-2xl font-bold">{title}</h1>
         </div>
       </header>

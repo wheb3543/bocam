@@ -11,47 +11,82 @@
  * Company-related configuration and branding
  */
 
+const runtimeTenant =
+  ((globalThis as Record<string, unknown>)?.__BOCAM_TENANT__ as
+    Record<string, string> | undefined) ?? {};
+
+const readTenantValue = (key: string, fallback: string): string => {
+  const value = runtimeTenant[key];
+  return typeof value === 'string' && value.trim() ? value : fallback;
+};
+
 /**
  * Company name (English)
+ * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_NAME = import.meta.env.VITE_COMPANY_NAME || 'Saudi German Hospital – Sana’a';
+export const COMPANY_NAME = readTenantValue(
+  'companyName',
+  import.meta.env.VITE_COMPANY_NAME || 'BOCAM'
+);
 
 /**
  * Company name (Arabic)
+ * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_ARABIC_NAME =
-  import.meta.env.VITE_COMPANY_ARABIC_NAME || 'المستشفى السعودي الألماني - صنعاء';
+export const COMPANY_ARABIC_NAME = readTenantValue(
+  'companyArabicName',
+  import.meta.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM'
+);
 
 /**
  * Company name (English) - preferred for international contexts
+ * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_ENGLISH_NAME =
-  import.meta.env.VITE_COMPANY_ENGLISH_NAME || 'Saudi German Hospital – Sana’a';
+export const COMPANY_ENGLISH_NAME = readTenantValue(
+  'companyEnglishName',
+  import.meta.env.VITE_COMPANY_ENGLISH_NAME || 'BOCAM'
+);
 
 /**
  * Company logo path
  */
-export const COMPANY_LOGO = import.meta.env.VITE_COMPANY_LOGO || '/assets/logo-color.png';
+export const COMPANY_LOGO = readTenantValue(
+  'companyLogo',
+  import.meta.env.VITE_COMPANY_LOGO || '/assets/logo-color.png'
+);
 
 /**
  * Company phone number
  */
-export const COMPANY_PHONE = import.meta.env.VITE_COMPANY_PHONE || '';
+export const COMPANY_PHONE = readTenantValue(
+  'companyPhone',
+  import.meta.env.VITE_COMPANY_PHONE || ''
+);
 
 /**
  * Company email address
  */
-export const COMPANY_EMAIL = import.meta.env.VITE_COMPANY_EMAIL || '';
+export const COMPANY_EMAIL = readTenantValue(
+  'companyEmail',
+  import.meta.env.VITE_COMPANY_EMAIL || ''
+);
 
 /**
  * Company physical address
  */
-export const COMPANY_ADDRESS = import.meta.env.VITE_COMPANY_ADDRESS || '';
+export const COMPANY_ADDRESS = readTenantValue(
+  'companyAddress',
+  import.meta.env.VITE_COMPANY_ADDRESS || ''
+);
 
 /**
  * Company slogan/tagline
+ * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_SLOGAN = import.meta.env.VITE_COMPANY_SLOGAN || 'نرعاكم كأهالينا';
+export const COMPANY_SLOGAN = readTenantValue(
+  'companySlogan',
+  import.meta.env.VITE_COMPANY_SLOGAN || 'نظام إدارة متكامل'
+);
 
 /**
  * Privacy-policy version requiring a renewed visitor acknowledgement when changed.
@@ -67,22 +102,25 @@ export const PRIVACY_POLICY_VERSION = '2026-03-01';
 /**
  * Facebook page URL
  */
-export const FACEBOOK_URL = import.meta.env.VITE_FACEBOOK_URL || '';
+export const FACEBOOK_URL = readTenantValue('facebookUrl', import.meta.env.VITE_FACEBOOK_URL || '');
 
 /**
  * Instagram profile URL
  */
-export const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || '';
+export const INSTAGRAM_URL = readTenantValue(
+  'instagramUrl',
+  import.meta.env.VITE_INSTAGRAM_URL || ''
+);
 
 /**
  * Twitter/X profile URL
  */
-export const TWITTER_URL = import.meta.env.VITE_TWITTER_URL || '';
+export const TWITTER_URL = readTenantValue('twitterUrl', import.meta.env.VITE_TWITTER_URL || '');
 
 /**
  * LinkedIn company page URL
  */
-export const LINKEDIN_URL = import.meta.env.VITE_LINKEDIN_URL || '';
+export const LINKEDIN_URL = readTenantValue('linkedinUrl', import.meta.env.VITE_LINKEDIN_URL || '');
 
 /**
  * Meta Pixel Configuration

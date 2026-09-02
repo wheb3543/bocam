@@ -168,7 +168,7 @@ export default function Navbar() {
                 {COMPANY_ARABIC_NAME}
               </h2>
               <p className="text-[9px] sm:text-[10px] text-muted-foreground dark:text-muted-foreground">
-                نرعاكم كأهالينا
+                {getCompanySlogan()}
               </p>
             </div>
           </div>

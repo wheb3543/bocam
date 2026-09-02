@@ -12,6 +12,7 @@ import type { NavItem } from '../sidebarData';
 import SidebarBadge from './SidebarBadge';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { APP_LOGO, COMPANY_ARABIC_NAME } from '@/const';
 
 interface DesktopSidebarProps {
   shouldShowText: boolean;
@@ -54,16 +55,18 @@ export default function DesktopSidebar({
       {/* Logo + Hospital Name */}
       <div className="flex items-center gap-3 py-3 px-3 border-b border-gray-100 dark:border-gray-700">
         <img
-          src="/icon-72x72.png"
-          alt="المستشفى السعودي الألماني"
+          src={APP_LOGO}
+          alt={COMPANY_ARABIC_NAME}
           className="h-10 w-10 object-contain flex-shrink-0"
         />
         {shouldShowText && (
           <div className="flex-1 min-w-0">
             <h2 className="text-sm font-bold text-foreground dark:text-gray-100 truncate">
-              المستشفى السعودي الألماني
+              {COMPANY_ARABIC_NAME}
             </h2>
-            <p className="text-xs text-muted-foreground dark:text-gray-400 truncate">صنعاء</p>
+            <p className="text-xs text-muted-foreground dark:text-gray-400 truncate">
+              {COMPANY_ARABIC_NAME}
+            </p>
           </div>
         )}
       </div>

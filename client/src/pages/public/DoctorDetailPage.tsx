@@ -44,6 +44,7 @@ import { toast } from 'sonner';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { usePatientStorage } from '@/hooks/data/usePatientStorage';
 import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking';
+import { COMPANY_ARABIC_NAME, COMPANY_ENGLISH_NAME, COMPANY_PHONE } from '@/const';
 
 export default function DoctorDetailPage() {
   const [, params] = useRoute('/doctors/:slug');
@@ -195,12 +196,14 @@ function DoctorDetailContent({ slug }: { slug: string }) {
   };
 
   const seoTitle = doctor
-    ? `${doctor.name} - ${doctor.specialty} | المستشفى السعودي الألماني`
-    : 'الأطباء | المستشفى السعودي الألماني';
+    ? `${doctor.name} - ${doctor.specialty} | ${COMPANY_ARABIC_NAME}`
+    : `الأطباء | ${COMPANY_ARABIC_NAME}`;
 
+  const contactPhone = COMPANY_PHONE || '8000018';
+  const contactPhoneDigits = contactPhone.replace(/\D/g, '') || '8000018';
   const seoDescription = doctor
-    ? `احجز موعدك مع ${doctor.name}، ${doctor.specialty} في المستشفى السعودي الألماني. ${doctor.bio || 'خدمات طبية متميزة ورعاية شاملة'}. اتصل الآن: 8000018`
-    : 'احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني';
+    ? `احجز موعدك مع ${doctor.name}، ${doctor.specialty} في ${COMPANY_ARABIC_NAME}. ${doctor.bio || 'خدمات طبية متميزة ورعاية شاملة'}. اتصل الآن: ${contactPhone}`
+    : `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME}`;
 
   // Loading Skeleton
   if (isLoading) {
@@ -373,10 +376,10 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                       <div>
                         <p className="text-xs text-muted-foreground">للحجز والاستفسار</p>
                         <a
-                          href="tel:8000018"
+                          href={`tel:${contactPhoneDigits}`}
                           className="font-semibold text-foreground hover:text-green-600 text-sm"
                         >
-                          8000018
+                          {contactPhone}
                         </a>
                       </div>
                     </div>
@@ -404,14 +407,14 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                         احجز موعد
                       </Button>
                     </a>
-                    <a href={getCallLink('8000018')}>
+                    <a href={getCallLink(contactPhoneDigits)}>
                       <Button size="sm" variant="outline" className="gap-1.5 text-sm border-border">
                         <Phone className="h-3.5 w-3.5" />
                         اتصل الآن
                       </Button>
                     </a>
                     <a
-                      href={`https://wa.me/9678000018?text=${encodeURIComponent(`مرحباً، أود حجز موعد مع ${doctor.name}`)}`}
+                      href={`https://wa.me/${contactPhoneDigits}?text=${encodeURIComponent(`مرحباً، أود حجز موعد مع ${doctor.name}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -752,8 +755,11 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
                   <p className="text-xs text-muted-foreground text-center pt-1">
                     أو اتصل بنا مباشرة على{' '}
-                    <a href="tel:8000018" className="text-green-600 font-semibold hover:underline">
-                      8000018
+                    <a
+                      href={`tel:${contactPhoneDigits}`}
+                      className="text-green-600 font-semibold hover:underline"
+                    >
+                      {contactPhone}
                     </a>
                   </p>
                 </form>

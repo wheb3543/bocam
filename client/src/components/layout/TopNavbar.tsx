@@ -58,9 +58,7 @@ export default function TopNavbar({
               )}
             </div>
           ) : (
-            <p className="hidden text-sm font-medium text-muted-foreground sm:block">
-              بوابة SGH CRM
-            </p>
+            <p className="hidden text-sm font-medium text-muted-foreground sm:block">{APP_TITLE}</p>
           )}
         </div>
 

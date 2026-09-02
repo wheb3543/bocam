@@ -18,13 +18,26 @@
       (function () {
         var path = window.location.pathname;
         var isAdmin = path.startsWith('/admin') || path.startsWith('/dashboard');
+        var tenant = window.__BOCAM_TENANT__ || {};
+        var tenantName = tenant.companyArabicName || tenant.companyName || 'المستشفى السعودي الألماني';
+        var tenantTitle = tenant.companyEnglishName || tenant.companyName || 'Saudi German Hospital';
+
+        if (tenantName) {
+          document.title = tenantName;
+        }
+
+        if (tenant.companyLogo) {
+          var favicon = document.querySelector('link[rel="icon"]');
+          if (favicon) favicon.href = tenant.companyLogo;
+        }
+
         if (isAdmin) {
           document.getElementById('pwa-manifest').href = '/manifest-admin.json';
-          // Also update theme-color for admin
           var themeColor = document.querySelector('meta[name="theme-color"]');
           if (themeColor) themeColor.content = '#1e40af';
-          // Update title
-          document.title = '\u0644\u0648\u062d\u0629 \u062a\u062d\u0643\u0645 SGH';
+          if (!tenantName) document.title = '\u0644\u0648\u062d\u0629 \u062a\u062d\u0643\u0645 SGH';
+        } else if (tenantTitle) {
+          document.title = tenantTitle;
         }
       })();
     </script>

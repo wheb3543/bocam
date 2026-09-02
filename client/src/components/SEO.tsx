@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { COMPANY_ARABIC_NAME, COMPANY_ENGLISH_NAME, COMPANY_PHONE, COMPANY_SLOGAN } from '@/config';
 
 interface SEOProps {
   title?: string;
@@ -21,13 +22,13 @@ interface SEOProps {
  * Handles Open Graph, Twitter Cards, and standard meta tags
  */
 export default function SEO({
-  title = 'المستشفى السعودي الألماني - صنعاء | احجز موعدك الآن',
-  description = 'احجز موعدك مع أفضل الأطباء في المستشفى السعودي الألماني بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: 8000018',
+  title = `${COMPANY_ARABIC_NAME} - صنعاء | احجز موعدك الآن`,
+  description = `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME} بصنعاء. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية. اتصل الآن: ${COMPANY_PHONE || '8000018'}`,
   image = '/assets/og-image.jpg',
   url,
   canonicalUrl,
   type = 'website',
-  keywords = 'المستشفى السعودي الألماني, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية',
+  keywords = `${COMPANY_ARABIC_NAME}, صنعاء, حجز موعد, أطباء, عروض طبية, مخيمات صحية, استشارات طبية`,
   ogTitle,
   ogDescription,
   ogImage,
@@ -35,7 +36,7 @@ export default function SEO({
   structuredData,
   locale = 'ar_YE',
 }: SEOProps) {
-  const currentUrl = url || `https://sghsanaa.net${window.location.pathname}`;
+  const currentUrl = url || `${window.location.origin}${window.location.pathname}`;
   const resolvedCanonicalUrl = canonicalUrl || currentUrl;
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export default function SEO({
     updateMetaTag('meta[property="og:image"]', ogImage || image);
     updateMetaTag('meta[property="og:url"]', currentUrl);
     updateMetaTag('meta[property="og:type"]', type);
-    updateMetaTag('meta[property="og:site_name"]', 'المستشفى السعودي الألماني - صنعاء');
+    updateMetaTag('meta[property="og:site_name"]', `${COMPANY_ARABIC_NAME} - صنعاء`);
     updateMetaTag('meta[property="og:locale"]', locale);
 
     // Twitter Card tags

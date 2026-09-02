@@ -1,3 +1,5 @@
+import { COMPANY_ARABIC_NAME, COMPANY_ENGLISH_NAME } from '@/const';
+
 // Extend jsPDF type to include autoTable
 type JsPDFInstance = {
   autoTable: (options: unknown) => JsPDFInstance;
@@ -74,7 +76,7 @@ export const exportToPDF = async (
   // معلومات المستشفى
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('المستشفى السعودي الألماني - صنعاء', doc.internal.pageSize.getWidth() / 2, 28, {
+  doc.text(COMPANY_ARABIC_NAME || 'BOCAM', doc.internal.pageSize.getWidth() / 2, 28, {
     align: 'center',
   });
 
@@ -232,7 +234,7 @@ export const exportToExcel = async (
 
   // إضافة العنوان
   statsSheet.mergeCells('A1:B1');
-  statsSheet.getCell('A1').value = 'تقرير الحجوزات والمواعيد - المستشفى السعودي الألماني - صنعاء';
+  statsSheet.getCell('A1').value = `تقرير الحجوزات والمواعيد - ${COMPANY_ARABIC_NAME || 'BOCAM'}`;
   statsSheet.getCell('A1').font = { bold: true, size: 14 };
   statsSheet.getCell('A1').alignment = { horizontal: 'center' };
 

@@ -4,6 +4,7 @@
  */
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { APP_LOGO } from '@/const';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -154,9 +155,9 @@ export default function AdminLogin() {
           <div className="text-center mb-6 sm:mb-8">
             <div className="relative inline-block mb-4">
               <img
-                src="/sgh-logo-full.png"
-                alt="شعار المستشفى"
-                className="h-16 sm:h-20 mx-auto animate-logo-float"
+                src={APP_LOGO}
+                alt="شعار المؤسسة"
+                className="h-16 sm:h-20 mx-auto animate-logo-float object-contain"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-400 opacity-0 blur-xl animate-logo-glow" />
             </div>

@@ -22,6 +22,7 @@
 
 import { useState } from 'react';
 import { Download, X, Smartphone, Share2, Plus } from 'lucide-react';
+import { APP_TITLE, COMPANY_ARABIC_NAME } from '@/const';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -50,7 +51,7 @@ export default function InstallPWAButton({
 
   const [showIOSGuide, setShowIOSGuide] = useState(false);
 
-  const appName = appType === 'admin' ? 'لوحة تحكم SGH' : 'المستشفى السعودي الألماني';
+  const appName = appType === 'admin' ? APP_TITLE : COMPANY_ARABIC_NAME;
 
   // لا تعرض الزر إذا:
   // - التطبيق مثبت بالفعل

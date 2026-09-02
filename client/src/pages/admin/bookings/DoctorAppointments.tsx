@@ -23,7 +23,14 @@ import { Loader2, CheckCircle2, Phone, Mail, MapPin, Stethoscope } from 'lucide-
 import { toast } from 'sonner';
 import { emitToastHash } from '@/lib/toastHashRouter';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
-import { getCompanySlogan, COMPANY_ARABIC_NAME } from '@/const';
+import {
+  getCompanySlogan,
+  COMPANY_ARABIC_NAME,
+  COMPANY_PHONE,
+  COMPANY_EMAIL,
+  COMPANY_ADDRESS,
+  APP_LOGO,
+} from '@/const';
 
 interface Doctor {
   id?: number;
@@ -136,6 +143,8 @@ function DoctorAppointmentsContent() {
   };
 
   const selectedDoctor = doctors?.find((d: Doctor) => d.id === parseInt(formData.doctorId));
+  const contactPhone = COMPANY_PHONE || '8000018';
+  const contactEmail = COMPANY_EMAIL || 'info@company.com';
 
   return (
     <>
@@ -145,14 +154,14 @@ function DoctorAppointmentsContent() {
           <div className="container py-4">
             <div className="flex items-center justify-between">
               <img
-                src="/assets/new-logo.png"
-                alt="المستشفى السعودي الألماني"
-                className="h-16 md:h-20"
+                src={APP_LOGO}
+                alt={COMPANY_ARABIC_NAME}
+                className="h-16 md:h-20 object-contain"
               />
               <div className="text-left">
                 <div className="flex items-center gap-2 text-primary font-bold text-xl md:text-2xl">
                   <Phone className="w-5 h-5" />
-                  <span>8000018</span>
+                  <span>{contactPhone}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">الرقم المجاني</p>
               </div>
@@ -419,22 +428,22 @@ function DoctorAppointmentsContent() {
                   <CardContent className="pt-6 text-center">
                     <Phone className="w-12 h-12 mx-auto mb-4 text-primary" />
                     <h3 className="font-bold mb-2">الرقم المجاني</h3>
-                    <p className="text-2xl font-bold text-primary">8000018</p>
+                    <p className="text-2xl font-bold text-primary">{contactPhone}</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <Mail className="w-12 h-12 mx-auto mb-4 text-primary" />
                     <h3 className="font-bold mb-2">البريد الإلكتروني</h3>
-                    <p className="text-sm">info@sgh-sanaa.com</p>
+                    <p className="text-sm">{contactEmail}</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <MapPin className="w-12 h-12 mx-auto mb-4 text-primary" />
                     <h3 className="font-bold mb-2">العنوان</h3>
-                    <p className="text-sm">صنعاء - شارع الستين الشمالي</p>
-                    <p className="text-xs text-muted-foreground">بين جولة عمران وجولة الجمنة</p>
+                    <p className="text-sm">{COMPANY_ADDRESS || 'العنوان غير متوفر حالياً'}</p>
+                    <p className="text-xs text-muted-foreground">{COMPANY_ARABIC_NAME}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -447,7 +456,7 @@ function DoctorAppointmentsContent() {
           <div className="container text-center">
             <img
               src="/assets/logo-white.png"
-              alt="المستشفى السعودي الألماني"
+              alt={COMPANY_ARABIC_NAME || 'BOCAM'}
               className="h-16 mx-auto mb-4"
             />
             <p className="text-lg font-semibold mb-2">{getCompanySlogan()}</p>

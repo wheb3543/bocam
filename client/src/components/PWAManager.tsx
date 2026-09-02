@@ -11,6 +11,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import { Download, X, Smartphone, Share2, Plus, Bell, Zap, Monitor } from 'lucide-react';
+import { APP_TITLE, COMPANY_ARABIC_NAME } from '@/const';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { usePWAInstall, type PWAAppType } from '@/hooks/integrations/usePWAInstall';
@@ -195,7 +196,7 @@ function PWAInstallSystem({ appType }: { appType: PWAAppType }) {
       <InstallGuideDialog
         open={showIOSGuide}
         onClose={() => setShowIOSGuide(false)}
-        appName={isAdmin ? 'لوحة تحكم SGH' : 'المستشفى السعودي الألماني'}
+        appName={isAdmin ? APP_TITLE : COMPANY_ARABIC_NAME}
         isIOS={isIOS}
         isAdmin={isAdmin}
       />
@@ -261,7 +262,7 @@ function PWAInstallBanner({
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-inner">
               <img
                 src={isAdmin ? '/icon-admin-72x72.png' : '/icon-72x72.png'}
-                alt={isAdmin ? 'لوحة تحكم SGH' : 'المستشفى السعودي الألماني'}
+                alt={isAdmin ? APP_TITLE : COMPANY_ARABIC_NAME}
                 width={44}
                 height={44}
                 className="h-11 w-11 object-contain rounded-xl"
@@ -277,7 +278,7 @@ function PWAInstallBanner({
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-lg leading-tight">
-                {isAdmin ? 'لوحة تحكم SGH' : 'المستشفى السعودي الألماني'}
+                {isAdmin ? APP_TITLE : COMPANY_ARABIC_NAME}
               </h3>
               <p className="text-sm text-white/75 mt-0.5">
                 {isAdmin ? 'إدارة الحجوزات والمواعيد' : 'احجز مواعيدك وتابع عروضنا'}
@@ -465,8 +466,8 @@ function InstallGuideDialog({
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              لتثبيت {isAdmin ? 'لوحة تحكم SGH' : 'تطبيق المستشفى'} على جهازك، استخدم زر التثبيت في
-              شريط عنوان المتصفح
+              لتثبيت {isAdmin ? APP_TITLE : 'تطبيق المستشفى'} على جهازك، استخدم زر التثبيت في شريط
+              عنوان المتصفح
             </p>
             <div className="space-y-3 py-2">
               <div className="flex items-start gap-3">

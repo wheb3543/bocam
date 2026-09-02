@@ -38,6 +38,7 @@ import { usePatientStorage } from '@/hooks/data/usePatientStorage';
 import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking';
 import { usePublicTextContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { COMPANY_ARABIC_NAME, COMPANY_ENGLISH_NAME, COMPANY_PHONE } from '@/const';
 
 export default function OfferDetailPage() {
   const params = useParams();
@@ -577,12 +578,14 @@ function OfferDetailContent({ slug }: { slug: string }) {
   };
 
   const seoTitle = offer
-    ? `${offer.title} | المستشفى السعودي الألماني`
-    : 'العروض الطبية | المستشفى السعودي الألماني';
+    ? `${offer.title} | ${COMPANY_ARABIC_NAME}`
+    : `العروض الطبية | ${COMPANY_ARABIC_NAME}`;
 
+  const contactPhone = COMPANY_PHONE || '8000018';
+  const contactPhoneDigits = contactPhone.replace(/\D/g, '') || '8000018';
   const seoDescription = offer
-    ? `${(offer.description || offer.title).substring(0, 150)}... احجز الآن واستفد من عرضنا الخاص. اتصل: 8000018`
-    : 'عروض طبية مميزة بأسعار تنافسية في المستشفى السعودي الألماني';
+    ? `${(offer.description || offer.title).substring(0, 150)}... احجز الآن واستفد من عرضنا الخاص. اتصل: ${contactPhone}`
+    : `عروض طبية مميزة بأسعار تنافسية في ${COMPANY_ARABIC_NAME}`;
 
   // Loading Skeleton
   if (isLoading) {
@@ -1052,8 +1055,11 @@ function OfferDetailContent({ slug }: { slug: string }) {
 
                   <p className="text-xs text-muted-foreground text-center pt-1">
                     {formContact}{' '}
-                    <a href="tel:8000018" className="text-green-600 font-semibold hover:underline">
-                      8000018
+                    <a
+                      href={`tel:${contactPhoneDigits}`}
+                      className="text-green-600 font-semibold hover:underline"
+                    >
+                      {contactPhone}
                     </a>
                   </p>
                 </form>
@@ -1096,14 +1102,14 @@ function OfferDetailContent({ slug }: { slug: string }) {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
-              href={getCallLink('8000018')}
+              href={getCallLink(contactPhoneDigits)}
               className="inline-flex items-center gap-2 bg-white dark:bg-card text-green-600 px-5 py-2.5 rounded-full font-bold text-sm hover:bg-muted transition-colors shadow-lg"
             >
               <Phone className="h-4 w-4" />
-              8000018
+              {contactPhone}
             </a>
             <a
-              href={`https://wa.me/9678000018?text=${encodeURIComponent(contactWhatsappMessage)}`}
+              href={`https://wa.me/${contactPhoneDigits}?text=${encodeURIComponent(contactWhatsappMessage)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-2.5 rounded-full font-bold text-sm hover:bg-white/20 transition-colors"

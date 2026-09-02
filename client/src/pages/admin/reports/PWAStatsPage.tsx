@@ -29,6 +29,7 @@ import {
 import { toast } from 'sonner';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { PermissionHint } from '@/components/PermissionHint';
+import { APP_TITLE, COMPANY_ARABIC_NAME } from '@/const';
 
 export default function PWAStatsPage() {
   const { can, isLoading: arePermissionsLoading } = useRolePermissions();
@@ -225,7 +226,7 @@ export default function PWAStatsPage() {
               ) : (
                 <div className="text-3xl font-bold text-blue-600">{publicTotal}</div>
               )}
-              <p className="text-xs text-muted-foreground mt-1">المستشفى السعودي الألماني</p>
+              <p className="text-xs text-muted-foreground mt-1">{COMPANY_ARABIC_NAME}</p>
             </CardContent>
           </Card>
 
@@ -242,7 +243,7 @@ export default function PWAStatsPage() {
               ) : (
                 <div className="text-3xl font-bold text-indigo-600">{adminTotal}</div>
               )}
-              <p className="text-xs text-muted-foreground mt-1">لوحة تحكم SGH</p>
+              <p className="text-xs text-muted-foreground mt-1">{APP_TITLE}</p>
             </CardContent>
           </Card>
         </div>

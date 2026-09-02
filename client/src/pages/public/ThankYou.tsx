@@ -16,6 +16,7 @@ import { Link, useLocation } from 'wouter';
 import { useEffect, useState } from 'react';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { APP_LOGO, COMPANY_ARABIC_NAME } from '@/const';
 
 interface BookingInfo {
   type: string;
@@ -77,9 +78,9 @@ export default function ThankYou() {
       thankYouText('next.step3', 'سنرسل لك رسالة تأكيد عبر الواتساب'),
     ],
     homeAction: thankYouText('action.home', 'العودة للصفحة الرئيسية'),
-    brandName: thankYouText('brand.name', 'المستشفى السعودي الألماني'),
+    brandName: thankYouText('brand.name', COMPANY_ARABIC_NAME),
     brandSlogan: thankYouText('brand.slogan', 'نهتم بصحتكم'),
-    brandLogoAlt: thankYouText('brand.logoAlt', 'المستشفى السعودي الألماني'),
+    brandLogoAlt: thankYouText('brand.logoAlt', COMPANY_ARABIC_NAME),
   };
 
   useEffect(() => {
@@ -259,7 +260,7 @@ export default function ThankYou() {
 
           <div className="mt-4 sm:mt-6 md:mt-8 pt-4 sm:pt-6 border-t border-border">
             <img
-              src="/assets/new-logo.png"
+              src={APP_LOGO}
               alt={copy.brandLogoAlt}
               className="h-10 sm:h-12 md:h-16 mx-auto mb-2 sm:mb-3"
             />

@@ -13,6 +13,7 @@ import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { APP_TITLE, COMPANY_ARABIC_NAME, COMPANY_EMAIL, COMPANY_PHONE } from '@/const';
 
 type PublicPageTextContent = {
   key: string;
@@ -61,7 +62,7 @@ function BulletList({ items, color = 'text-green-600' }: { items: string[]; colo
 
 export default function PrivacyPolicyPage() {
   const copy = usePrivacyCopy();
-  const browserTitle = copy.t('meta.browserTitle', 'سياسة الخصوصية | بوابة SGH CRM');
+  const browserTitle = copy.t('meta.browserTitle', `سياسة الخصوصية | ${APP_TITLE}`);
 
   useEffect(() => {
     document.title = browserTitle;
@@ -70,7 +71,7 @@ export default function PrivacyPolicyPage() {
 
   return (
     <PageLayout
-      title={copy.t('meta.pageTitle', 'سياسة الخصوصية - المستشفى السعودي الألماني')}
+      title={copy.t('meta.pageTitle', `سياسة الخصوصية - ${COMPANY_ARABIC_NAME}`)}
       description={copy.t(
         'meta.description',
         'سياسة حماية البيانات الشخصية والخصوصية وفقاً لنظام حماية البيانات في المملكة العربية السعودية'
@@ -84,8 +85,8 @@ export default function PrivacyPolicyPage() {
 
 function PrivacyPolicyContent({ copy }: { copy: PrivacyCopy }) {
   const { t } = copy;
-  const contactPhone = t('contact.phoneNumber', '+967 734000018');
-  const contactEmail = t('contact.emailAddress', 'DPO@sghsanaa.net');
+  const contactPhone = t('contact.phoneNumber', COMPANY_PHONE || '+966500000000');
+  const contactEmail = t('contact.emailAddress', COMPANY_EMAIL || 'support@example.com');
 
   const dataCards = [
     {
@@ -221,7 +222,7 @@ function PrivacyPolicyContent({ copy }: { copy: PrivacyCopy }) {
         subtitle={t('hero.lastUpdated', 'آخر تحديث: مارس 2026')}
         description={t(
           'hero.description',
-          'يلتزم المستشفى السعودي الألماني بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL)'
+          `يلتزم ${COMPANY_ARABIC_NAME || 'BOCAM'} بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL)`
         )}
         badge={{ text: t('badge', 'حماية البيانات'), icon: Shield }}
         backgroundGradient="from-green-800 to-green-600"
@@ -239,7 +240,7 @@ function PrivacyPolicyContent({ copy }: { copy: PrivacyCopy }) {
               <p className="text-sm sm:text-base">
                 {t(
                   'intro.paragraph1',
-                  'يلتزم المستشفى السعودي الألماني بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL) وأفضل الممارسات الدولية. تُوضّح هذه السياسة كيفية جمع بياناتك واستخدامها وتخزينها ومشاركتها، وكيف نضمن التعامل معها بمسؤولية وشفافية تامة.'
+                  `يلتزم ${COMPANY_ARABIC_NAME || 'BOCAM'} بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL) وأفضل الممارسات الدولية. تُوضّح هذه السياسة كيفية جمع بياناتك واستخدامها وتخزينها ومشاركتها، وكيف نضمن التعامل معها بمسؤولية وشفافية تامة.`
                 )}
               </p>
               <p className="text-sm sm:text-base mt-3">
@@ -299,7 +300,7 @@ function PrivacyPolicyContent({ copy }: { copy: PrivacyCopy }) {
                 <p className="text-sm sm:text-base mb-3">
                   {t(
                     'whatsapp.intro',
-                    'يستخدم المستشفى السعودي الألماني واجهة برمجة تطبيقات واتساب للأعمال المُقدَّمة من شركة Meta Platforms, Inc. لأغراض التواصل مع المرضى والمستخدمين، وتشمل:'
+                    `يستخدم ${COMPANY_ARABIC_NAME || 'BOCAM'} واجهة برمجة تطبيقات واتساب للأعمال المُقدَّمة من شركة Meta Platforms, Inc. لأغراض التواصل مع المرضى والمستخدمين، وتشمل:`
                   )}
                 </p>
                 <BulletList
@@ -557,7 +558,7 @@ function PrivacyPolicyContent({ copy }: { copy: PrivacyCopy }) {
               <p className="text-sm sm:text-base mb-4">
                 {t(
                   'contact.body',
-                  'إذا كنت ترغب في ممارسة أي من حقوقك المتعلقة بحماية البيانات، أو إذا كنت تعتقد أن بياناتك الشخصية قد تعرضت لسوء المعالجة، يمكنك التواصل مع مسؤول حماية البيانات في المستشفى السعودي الألماني:'
+                  `إذا كنت ترغب في ممارسة أي من حقوقك المتعلقة بحماية البيانات، أو إذا كنت تعتقد أن بياناتك الشخصية قد تعرضت لسوء المعالجة، يمكنك التواصل مع مسؤول حماية البيانات في ${COMPANY_ARABIC_NAME || 'BOCAM'}:`
                 )}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -8,6 +8,7 @@ import ScrollReveal from '@/components/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { COMPANY_ARABIC_NAME } from '@/const';
 
 type PublicPageTextContent = {
   key: string;
@@ -39,7 +40,7 @@ export default function PrivacyPolicyChangelogPage() {
   const { t } = copy;
   const browserTitle = t(
     'meta.browserTitle',
-    'سجل تغييرات سياسة الخصوصية | المستشفى السعودي الألماني'
+    `سجل تغييرات سياسة الخصوصية | ${COMPANY_ARABIC_NAME}`
   );
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function PrivacyPolicyChangelogPage() {
       title={t('meta.pageTitle', 'سجل تغييرات سياسة الخصوصية')}
       description={t(
         'meta.description',
-        'اطلع على الإصدارات والتحديثات المنشورة لسياسة خصوصية المستشفى السعودي الألماني.'
+        `اطلع على الإصدارات والتحديثات المنشورة لسياسة خصوصية ${COMPANY_ARABIC_NAME}.`
       )}
       keywords={t('meta.keywords', 'سجل الخصوصية, تحديثات السياسة, حماية البيانات')}
     >

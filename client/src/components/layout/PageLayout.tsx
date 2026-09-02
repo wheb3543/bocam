@@ -6,6 +6,7 @@
  */
 
 import { ReactNode } from 'react';
+import { APP_LOGO } from '@/const';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
@@ -27,7 +28,7 @@ export default function PageLayout({
   title,
   description,
   keywords,
-  image = '/sgh-logo-full.png',
+  image = APP_LOGO || '/assets/logo-color.png',
   showInstallPWA = true,
   showBackToTop: _showBackToTop = true,
   className = '',

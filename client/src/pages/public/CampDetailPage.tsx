@@ -44,6 +44,7 @@ import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking'
 import { useAuth } from '@/_core/hooks/useAuth';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { APP_LOGO, COMPANY_ARABIC_NAME, COMPANY_PHONE } from '@/const';
 import {
   Select,
   SelectContent,
@@ -167,7 +168,7 @@ function CampDetailContent({ slug }: { slug: string }) {
     expiredButton: detailText('expired.button', 'عودة إلى المخيمات'),
     contactTitle: detailText('contact.title', 'للاستفسارات والمزيد من المعلومات'),
     contactDescription: detailText('contact.description', 'اتصل بنا على الرقم المجاني'),
-    contactPhone: detailText('contact.phone', '8000018'),
+    contactPhone: detailText('contact.phone', COMPANY_PHONE || '8000018'),
     contactWhatsapp: detailText('contact.whatsapp', 'واتساب'),
     contactWhatsappMessage: detailText(
       'contact.whatsapp.message',
@@ -180,6 +181,8 @@ function CampDetailContent({ slug }: { slug: string }) {
     alertSuccess: detailText('alert.success', 'تم تسجيلك بنجاح! سنتواصل معك قريباً'),
     alertError: detailText('alert.error', 'حدث خطأ أثناء التسجيل'),
   };
+
+  const contactPhoneDigits = (copy.contactPhone || '8000018').replace(/\D/g, '') || '8000018';
 
   const { user } = useAuth();
   const { data: availableDates } = trpc.camps.getAvailableDates.useQuery(
@@ -484,7 +487,11 @@ function CampDetailContent({ slug }: { slug: string }) {
               {/* Badge + CTA */}
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                  <img src="/assets/new-logo.png" alt="شعار المستشفى" className="h-4 w-4" />
+                  <img
+                    src={APP_LOGO}
+                    alt={COMPANY_ARABIC_NAME}
+                    className="h-4 w-4 object-contain"
+                  />
                   <span className="text-sm font-semibold">{copy.heroBadge}</span>
                 </div>
                 <a href="#registration-form">
@@ -738,9 +745,9 @@ function CampDetailContent({ slug }: { slug: string }) {
               <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white p-4 sm:p-5 md:p-6">
                 <div className="flex items-center gap-2.5 sm:gap-3">
                   <img
-                    src="/assets/new-logo.png"
-                    alt="شعار المستشفى"
-                    className="h-6 w-6 sm:h-8 sm:w-8"
+                    src={APP_LOGO}
+                    alt={COMPANY_ARABIC_NAME}
+                    className="h-6 w-6 sm:h-8 sm:w-8 object-contain"
                   />
                   <div>
                     <CardTitle className="text-base sm:text-lg md:text-xl">

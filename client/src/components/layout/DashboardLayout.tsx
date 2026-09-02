@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { APP_TITLE } from '@/const';
 import TopNavbar from './TopNavbar';
 
 export default function DashboardLayout({
@@ -18,7 +19,7 @@ export default function DashboardLayout({
 }) {
   // Update document title dynamically based on pageTitle prop
   useEffect(() => {
-    const baseTitle = 'لوحة تحكم SGH';
+    const baseTitle = APP_TITLE || 'لوحة التحكم';
     if (pageTitle) {
       document.title = `${pageTitle} | ${baseTitle}`;
     } else {
