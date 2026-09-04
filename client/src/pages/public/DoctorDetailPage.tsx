@@ -44,7 +44,7 @@ import { toast } from 'sonner';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { usePatientStorage } from '@/hooks/data/usePatientStorage';
 import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking';
-import { COMPANY_ARABIC_NAME, COMPANY_ENGLISH_NAME, COMPANY_PHONE } from '@/const';
+import { COMPANY_ARABIC_NAME, COMPANY_PHONE } from '@/const';
 
 export default function DoctorDetailPage() {
   const [, params] = useRoute('/doctors/:slug');

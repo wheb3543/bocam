@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { systemRouter } from '../_core/systemRouter';
-import { adminProcedure, protectedProcedure, router } from '../_core/trpc';
+import { protectedProcedure, router } from '../_core/trpc';
 import {
   getAllAccessRequests,
   getPendingAccessRequests,

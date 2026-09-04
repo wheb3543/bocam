@@ -160,7 +160,6 @@ export default function UsersManagementPage() {
   const canViewRoleAudit = !permissionsLoading && can('audit.view');
   const canViewRoles = !permissionsLoading && can('roles.view');
   const canViewAccessRequests = !permissionsLoading && can('users.access_requests.view');
-  const canDecideAccessRequests = !permissionsLoading && can('users.access_requests.decide');
   const [activeSection, setActiveSection] = useState<ActiveSection>('users');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -207,7 +206,6 @@ export default function UsersManagementPage() {
     accessRequests,
     canViewAccessRequests: canViewRequestsFromHook,
     canDecideAccessRequests: canDecideRequestsFromHook,
-    arePermissionsLoading,
     filteredUsers,
     isLoading,
     totalUsers,

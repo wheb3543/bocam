@@ -5,7 +5,7 @@ import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { applyTenantRuntimeConfig } from './tenant';
 
 const logger = {
-  info: (...args: unknown[]) => console.info(...args),
+  info: (...args: unknown[]) => console.warn(...args),
   error: (...args: unknown[]) => console.error(...args),
 };
 

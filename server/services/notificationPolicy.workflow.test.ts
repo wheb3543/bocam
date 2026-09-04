@@ -256,8 +256,12 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
     );
     expect(accessRequestDataSource).toContain("event: 'access_request_submitted'");
     expect(accessRequestDataSource).toContain("source: 'security'");
-    expect(accessRequestRouterSource).toContain('approve: adminProcedure');
-    expect(accessRequestRouterSource).toContain('reject: adminProcedure');
+    expect(accessRequestRouterSource).toContain(
+      "approve: permissionProcedure('users.access_requests.decide'"
+    );
+    expect(accessRequestRouterSource).toContain(
+      "reject: permissionProcedure('users.access_requests.decide'"
+    );
     expect(accessRequestRouterSource).toContain("event: 'access_request_approved'");
   });
 

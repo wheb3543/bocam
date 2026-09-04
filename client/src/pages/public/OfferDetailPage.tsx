@@ -38,7 +38,7 @@ import { usePatientStorage } from '@/hooks/data/usePatientStorage';
 import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking';
 import { usePublicTextContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { COMPANY_ARABIC_NAME, COMPANY_ENGLISH_NAME, COMPANY_PHONE } from '@/const';
+import { COMPANY_ARABIC_NAME, COMPANY_PHONE } from '@/const';
 
 export default function OfferDetailPage() {
   const params = useParams();

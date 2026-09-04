@@ -9,7 +9,7 @@ type AppointmentFilter = 'upcoming' | 'past';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Clock3 } from 'lucide-react';
+import { Loader2, Calendar } from 'lucide-react';
 import AppointmentCard from '@/components/patient/AppointmentCard';
 
 export default function PatientAppointmentsPage() {

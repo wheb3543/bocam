@@ -5,6 +5,15 @@ import dotenv from 'dotenv';
 
 export const DEFAULT_TENANT_ID = 'tenant-sgh';
 
+type TenantBranding = {
+  client?: Record<string, string>;
+  brand?: Record<string, string>;
+  default?: { client?: Record<string, string> };
+  theme?: Record<string, string>;
+  seo?: { logoPath?: string };
+  contact?: Record<string, string>;
+};
+
 export function resolveTenantRoot(): string {
   const explicitTenantPath = (process.env.TENANT_PATH || '').trim();
   const tenantId = (process.env.TENANT_ID || process.env.TENANT || DEFAULT_TENANT_ID).trim();
@@ -81,7 +90,7 @@ async function loadBrandingConfig(tenantRoot: string) {
       return null;
     }
 
-    const branding = Function(`"use strict"; return (${objectLiteral});`)() as Record<string, any>;
+    const branding = Function(`"use strict"; return (${objectLiteral});`)() as TenantBranding;
     return branding;
   } catch {
     return null;
@@ -166,7 +175,7 @@ function resolveTenantPathValue(
 export async function applyTenantRuntimeConfig(): Promise<{
   tenantRoot: string;
   tenantId: string;
-  branding: Record<string, any> | null;
+  branding: TenantBranding | null;
 }> {
   const tenantRoot = resolveTenantRoot();
   const tenantEnvPath = path.join(tenantRoot, '.env');

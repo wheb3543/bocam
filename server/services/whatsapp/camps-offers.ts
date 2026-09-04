@@ -5,7 +5,7 @@
 
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { COMPANY_ARABIC_NAME, COMPANY_PHONE } from '@shared/config';
+import { COMPANY_PHONE } from '@shared/config';
 import { sendWhatsAppTextMessage } from '../whatsappCloudAPI';
 import { saveNotification, validateAndNormalizePhone } from './helpers';
 import type {
@@ -15,7 +15,6 @@ import type {
 } from './types';
 import { handleServiceError } from '../../_core/errorHandler';
 
-const companyName = COMPANY_ARABIC_NAME || 'BOCAM';
 const companyPhone = COMPANY_PHONE || 'رقم الاتصال غير متوفر';
 const publicWebsite = process.env.PUBLIC_APP_URL || 'https://example.com';
 

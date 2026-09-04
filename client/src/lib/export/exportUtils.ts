@@ -1,4 +1,4 @@
-import { COMPANY_ARABIC_NAME, COMPANY_ENGLISH_NAME } from '@/const';
+import { COMPANY_ARABIC_NAME } from '@/const';
 
 // Extend jsPDF type to include autoTable
 type JsPDFInstance = {

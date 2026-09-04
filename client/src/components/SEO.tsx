@@ -1,11 +1,5 @@
 import { useEffect } from 'react';
-import {
-  COMPANY_ARABIC_NAME,
-  COMPANY_CITY,
-  COMPANY_ENGLISH_NAME,
-  COMPANY_PHONE,
-  COMPANY_SLOGAN,
-} from '@/config';
+import { COMPANY_ARABIC_NAME, COMPANY_CITY, COMPANY_PHONE } from '@/config';
 
 interface SEOProps {
   title?: string;
