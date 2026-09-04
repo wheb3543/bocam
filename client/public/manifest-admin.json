@@ -168,14 +168,14 @@
   "prefer_related_applications": false,
   "screenshots": [
     {
-      "src": "/screenshot-admin-mobile.png",
+      "src": "/tenant-assets/screenshot-admin-mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "لوحة تحكم SGH - الجوال"
     },
     {
-      "src": "/screenshot-admin-desktop.png",
+      "src": "/tenant-assets/screenshot-admin-desktop.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",

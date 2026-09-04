@@ -111,14 +111,14 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshot-mobile.png",
+      "src": "/tenant-assets/screenshot-mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "الصفحة الرئيسية للتطبيق"
     },
     {
-      "src": "/screenshot-desktop.png",
+      "src": "/tenant-assets/screenshot-desktop.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
