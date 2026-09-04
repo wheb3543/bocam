@@ -306,7 +306,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                   <div className="relative">
                     <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-48 md:h-48 rounded-2xl overflow-hidden border-2 border-gray-100 shadow-md">
                       <img
-                        src={doctor.image || '/images/default-doctor.jpg'}
+                        src={doctor.image || '/tenant-assets/default-doctor.svg'}
                         alt={doctor.name}
                         className="w-full h-full object-cover"
                       />

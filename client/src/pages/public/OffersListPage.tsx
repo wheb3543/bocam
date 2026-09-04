@@ -178,7 +178,7 @@ function OffersListContent() {
               alt={offer.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               onError={(e) => {
-                e.currentTarget.src = '/images/default-offer.jpg';
+                e.currentTarget.src = '/tenant-assets/default-offer.svg';
               }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

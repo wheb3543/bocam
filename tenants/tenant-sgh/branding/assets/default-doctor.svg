@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="title desc">
+  <title id="title">Default doctor image</title>
+  <desc id="desc">A neutral doctor profile illustration</desc>
+  <rect width="800" height="800" fill="#EAF3FF"/>
+  <circle cx="400" cy="280" r="132" fill="#0F4C81"/>
+  <circle cx="400" cy="245" r="72" fill="#F8FAFC"/>
+  <path d="M215 700c18-166 88-250 185-250s167 84 185 250" fill="#16A34A"/>
+  <path d="M335 450h130v112c0 32-29 58-65 58s-65-26-65-58z" fill="#F4C542"/>
+  <path d="M300 548h200M400 520v180" stroke="#FFFFFF" stroke-width="18" opacity=".85"/>
+  <circle cx="400" cy="400" r="28" fill="#F4C542"/>
+</svg>

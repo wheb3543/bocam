@@ -24,7 +24,7 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1788392466775,
+  "startTime": 1788487145558,
   "success": true,
   "testResults": [
     {
@@ -34,7 +34,7 @@
           "fullName": "tenant runtime loader resolves the active tenant directory from the environment",
           "status": "passed",
           "title": "resolves the active tenant directory from the environment",
-          "duration": 6.288006000000223,
+          "duration": 7.616210000000137,
           "failureMessages": [],
           "location": { "line": 87, "column": 3 },
           "meta": {},
@@ -45,7 +45,7 @@
           "fullName": "tenant runtime loader loads tenant env and branding values before the app starts",
           "status": "passed",
           "title": "loads tenant env and branding values before the app starts",
-          "duration": 6.970667999999932,
+          "duration": 8.451680000000124,
           "failureMessages": [],
           "location": { "line": 91, "column": 3 },
           "meta": {},
@@ -56,7 +56,7 @@
           "fullName": "tenant runtime loader uses the tenant license path configured at runtime",
           "status": "passed",
           "title": "uses the tenant license path configured at runtime",
-          "duration": 2.0199179999999615,
+          "duration": 2.1044740000002093,
           "failureMessages": [],
           "location": { "line": 107, "column": 3 },
           "meta": {},
@@ -67,15 +67,15 @@
           "fullName": "tenant runtime loader rejects upload paths that escape the tenant directory",
           "status": "passed",
           "title": "rejects upload paths that escape the tenant directory",
-          "duration": 2.7334169999999176,
+          "duration": 4.495346000000154,
           "failureMessages": [],
           "location": { "line": 114, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1788392469681,
-      "endTime": 1788392469698.7334,
+      "startTime": 1788487148684,
+      "endTime": 1788487148706.4954,
       "status": "passed",
       "message": "",
       "name": "/Users/applestore/Documents/GitHub/bocam/server/_core/tenant.test.ts"

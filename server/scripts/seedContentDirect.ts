@@ -2515,7 +2515,7 @@ const initialImages = [
   },
   {
     key: 'about.hospital.ar',
-    url: '/assets/images/hospital.jpg',
+    url: '/tenant-assets/hospital.svg',
     alt: 'صورة المستشفى',
     section: 'about',
     width: 1200,
@@ -2526,7 +2526,7 @@ const initialImages = [
   },
   {
     key: 'about.hospital.en',
-    url: '/assets/images/hospital.jpg',
+    url: '/tenant-assets/hospital.svg',
     alt: 'Hospital Image',
     section: 'about',
     width: 1200,

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Healthcare booking platform</title>
+  <desc id="desc">A clean healthcare themed fallback image</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F4C81"/>
+      <stop offset="1" stop-color="#16A34A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="1010" cy="110" r="210" fill="#FFFFFF" opacity=".1"/>
+  <circle cx="160" cy="570" r="260" fill="#FFFFFF" opacity=".08"/>
+  <rect x="92" y="125" width="130" height="380" rx="65" fill="#FFFFFF" opacity=".16"/>
+  <rect x="42" y="250" width="230" height="130" rx="65" fill="#FFFFFF" opacity=".16"/>
+  <circle cx="160" cy="315" r="86" fill="#FFFFFF" opacity=".94"/>
+  <path d="M160 260v110M105 315h110" stroke="#0F4C81" stroke-width="24" stroke-linecap="round"/>
+  <text x="350" y="300" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="68" font-weight="700">Healthcare</text>
+  <text x="350" y="380" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="68" font-weight="700">Appointments</text>
+  <rect x="355" y="430" width="300" height="8" rx="4" fill="#F4C542"/>
+</svg>

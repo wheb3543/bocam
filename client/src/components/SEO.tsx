@@ -30,7 +30,7 @@ interface SEOProps {
 export default function SEO({
   title = `${COMPANY_ARABIC_NAME}${COMPANY_CITY ? ` - ${COMPANY_CITY}` : ''} | احجز موعدك الآن`,
   description = `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME}${COMPANY_CITY ? ` بـ ${COMPANY_CITY}` : ''}. خدمات طبية متميزة، عروض خاصة، ومخيمات صحية مجانية.${COMPANY_PHONE ? ` اتصل الآن: ${COMPANY_PHONE}` : ''}`,
-  image = '/assets/og-image.jpg',
+  image = '/tenant-assets/og-image.svg',
   url,
   canonicalUrl,
   type = 'website',

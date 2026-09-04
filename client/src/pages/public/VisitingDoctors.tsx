@@ -269,11 +269,11 @@ function VisitingDoctorsContent() {
                         <div className="relative flex-shrink-0">
                           <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-3 border-green-500 shadow-lg">
                             <img
-                              src={doctor.image || '/images/default-doctor.jpg'}
+                              src={doctor.image || '/tenant-assets/default-doctor.svg'}
                               alt={doctor.name}
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                e.currentTarget.src = '/images/default-doctor.jpg';
+                                e.currentTarget.src = '/tenant-assets/default-doctor.svg';
                               }}
                             />
                           </div>
