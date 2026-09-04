@@ -48,10 +48,10 @@ const PRECACHE_URLS = [
   '/',
   '/offline',
   '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
-  '/apple-touch-icon.png',
-  '/favicon.ico',
+  '/tenant-assets/icon-192x192.png',
+  '/tenant-assets/icon-512x512.png',
+  '/tenant-assets/apple-touch-icon.png',
+  '/tenant-assets/favicon.ico',
 ];
 
 // ===== Install Event =====
@@ -189,14 +189,14 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: '/icon-192x192.png',
-    badge: '/icon-72x72.png',
+    icon: '/tenant-assets/icon-192x192.png',
+    badge: '/tenant-assets/icon-72x72.png',
     vibrate: [200, 100, 200],
     tag: `sgh-public-${data.type || 'notification'}`,
     requireInteraction: false,
     data: { url: data.url || '/' },
     actions: [
-      { action: 'open', title: 'فتح', icon: '/icon-72x72.png' },
+      { action: 'open', title: 'فتح', icon: '/tenant-assets/icon-72x72.png' },
       { action: 'close', title: 'إغلاق' },
     ],
   };

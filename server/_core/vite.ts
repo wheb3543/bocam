@@ -9,6 +9,10 @@ import { createLogger } from './logger';
 const logger = createLogger('vite');
 
 export async function setupVite(app: Express, server: Server) {
+  app.use(
+    '/tenant-assets',
+    express.static(path.join(process.env.TENANT_ROOT || process.cwd(), 'branding', 'assets'))
+  );
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -97,6 +101,10 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
+  app.use(
+    '/tenant-assets',
+    express.static(path.join(process.env.TENANT_ROOT || process.cwd(), 'branding', 'assets'))
+  );
   const distPath =
     process.env.NODE_ENV === 'development'
       ? path.resolve(import.meta.dirname, '../..', 'dist', 'public')

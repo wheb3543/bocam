@@ -261,7 +261,9 @@ function PWAInstallBanner({
           <div className="flex items-center gap-4 mb-5">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-inner">
               <img
-                src={isAdmin ? '/icon-admin-72x72.png' : '/icon-72x72.png'}
+                src={
+                  isAdmin ? '/tenant-assets/icon-admin-72x72.png' : '/tenant-assets/icon-72x72.png'
+                }
                 alt={isAdmin ? APP_TITLE : COMPANY_ARABIC_NAME}
                 width={44}
                 height={44}

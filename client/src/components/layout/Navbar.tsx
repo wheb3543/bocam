@@ -87,7 +87,7 @@ export default function Navbar() {
             {/* Logo and Title */}
             <Link href="/">
               <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 hover:opacity-80 transition-opacity cursor-pointer">
-                <img src="/icon-72x72.png" alt={APP_TITLE} className="h-6 w-auto" />
+                <img src="/tenant-assets/icon-72x72.png" alt={APP_TITLE} className="h-6 w-auto" />
                 <div className="hidden xs:block sm:block">
                   <h1 className="text-[11px] sm:text-sm md:text-lg font-bold text-green-900 dark:text-green-400 leading-tight line-clamp-1">
                     {APP_TITLE}
@@ -162,7 +162,7 @@ export default function Navbar() {
         {/* Menu Header */}
         <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border dark:border-gray-700">
           <div className="flex items-center gap-2">
-            <img src="/icon-72x72.png" alt={APP_TITLE} className="h-8 w-auto" />
+            <img src="/tenant-assets/icon-72x72.png" alt={APP_TITLE} className="h-8 w-auto" />
             <div>
               <h2 className="text-xs sm:text-sm font-bold text-green-900 dark:text-green-400 leading-tight">
                 {COMPANY_ARABIC_NAME}

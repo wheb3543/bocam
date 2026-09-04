@@ -61,7 +61,7 @@ export const COMPANY_ENGLISH_NAME = readTenantValue(
  */
 export const COMPANY_LOGO = readTenantValue(
   'companyLogo',
-  import.meta.env.VITE_COMPANY_LOGO || '/assets/logo-color.png'
+  import.meta.env.VITE_COMPANY_LOGO || '/tenant-assets/logo-color.png'
 );
 
 /**

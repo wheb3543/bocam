@@ -48,7 +48,12 @@ function _formatDateTime(date: Date): string {
  */
 function addHeader(doc: PDFDocumentInstance, metadata: ExportMetadata) {
   // شعار المستشفى (سيتم تحميله من الملف)
-  const logoPath = path.join(process.env.TENANT_ROOT || process.cwd(), 'branding', 'logo.png');
+  const logoPath = path.join(
+    process.env.TENANT_ROOT || process.cwd(),
+    'branding',
+    'assets',
+    'logo-color.png'
+  );
 
   try {
     // إضافة الشعار على اليمين

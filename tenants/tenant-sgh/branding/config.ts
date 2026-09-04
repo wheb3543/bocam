@@ -60,8 +60,8 @@ export const branding: BrandingConfig = {
   seo: {
     siteTitle: 'المستشفى السعودي الألماني',
     metaDescription: 'منصة حجز المواعيد والخدمات الطبية للمستشفى السعودي الألماني',
-    logoPath: '/tenants/tenant-sgh/branding/logo.svg',
-    faviconPath: '/tenants/tenant-sgh/branding/favicon.svg',
+    logoPath: '/tenant-assets/logo-color.png',
+    faviconPath: '/tenant-assets/favicon.ico',
   },
   homepage: {
     heroTitleAr: 'احجز موعدك الآن',

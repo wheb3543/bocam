@@ -217,7 +217,9 @@ function DoctorAppointmentsContent() {
                       <div className="aspect-square rounded-lg overflow-hidden mb-3">
                         <img
                           src={
-                            typeof doctor.image === 'string' ? doctor.image : '/assets/new-logo.png'
+                            typeof doctor.image === 'string'
+                              ? doctor.image
+                              : '/tenant-assets/new-logo.png'
                           }
                           alt={doctor.name || 'طبيب'}
                           className="w-full h-full object-cover"
@@ -256,7 +258,7 @@ function DoctorAppointmentsContent() {
                     {selectedDoctor && (
                       <div className="bg-primary/5 p-4 rounded-lg flex items-center gap-4">
                         <img
-                          src={selectedDoctor.image || '/assets/new-logo.png'}
+                          src={selectedDoctor.image || '/tenant-assets/new-logo.png'}
                           alt={selectedDoctor.name}
                           className="w-16 h-16 rounded-full object-cover"
                         />
@@ -455,7 +457,7 @@ function DoctorAppointmentsContent() {
         <footer className="bg-primary text-white py-8">
           <div className="container text-center">
             <img
-              src="/assets/logo-white.png"
+              src="/tenant-assets/logo-white.png"
               alt={COMPANY_ARABIC_NAME || 'BOCAM'}
               className="h-16 mx-auto mb-4"
             />

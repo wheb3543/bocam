@@ -9,9 +9,9 @@ const RUNTIME_CACHE = 'sgh-admin-runtime-v2';
 const PRECACHE_URLS = [
   '/admin',
   '/manifest-admin.json',
-  '/icon-admin-192x192.png',
-  '/icon-admin-512x512.png',
-  '/apple-touch-icon.png',
+  '/tenant-assets/icon-admin-192x192.png',
+  '/tenant-assets/icon-admin-512x512.png',
+  '/tenant-assets/apple-touch-icon.png',
 ];
 
 // ===== Install Event =====
@@ -139,14 +139,14 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: '/icon-admin-192x192.png',
-    badge: '/icon-admin-72x72.png',
+    icon: '/tenant-assets/icon-admin-192x192.png',
+    badge: '/tenant-assets/icon-admin-72x72.png',
     vibrate: [200, 100, 200, 100, 200],
     tag: `sgh-admin-${data.type || 'notification'}`,
     requireInteraction: true,
     data: { url: data.url || '/admin' },
     actions: [
-      { action: 'open', title: 'فتح', icon: '/icon-admin-72x72.png' },
+      { action: 'open', title: 'فتح', icon: '/tenant-assets/icon-admin-72x72.png' },
       { action: 'close', title: 'إغلاق' },
     ],
   };

@@ -87,7 +87,12 @@ function addLabHeader(
     RESULT_DATE: string | Date;
   }
 ) {
-  const logoPath = path.join(process.env.TENANT_ROOT || process.cwd(), 'branding', 'logo.png');
+  const logoPath = path.join(
+    process.env.TENANT_ROOT || process.cwd(),
+    'branding',
+    'assets',
+    'logo-color.png'
+  );
   try {
     doc.image(logoPath, doc.page.width - 200, 30, { width: 150 });
   } catch (error) {

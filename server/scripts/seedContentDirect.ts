@@ -2493,7 +2493,7 @@ const offersPageTexts = [
 const initialImages = [
   {
     key: 'hero.logo.ar',
-    url: '/assets/images/logo.png',
+    url: '/tenant-assets/logo-color.png',
     alt: 'شعار المستشفى',
     section: 'hero',
     width: 200,
@@ -2504,7 +2504,7 @@ const initialImages = [
   },
   {
     key: 'hero.logo.en',
-    url: '/assets/images/logo.png',
+    url: '/tenant-assets/logo-color.png',
     alt: 'Hospital Logo',
     section: 'hero',
     width: 200,

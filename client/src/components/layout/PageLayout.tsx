@@ -28,7 +28,7 @@ export default function PageLayout({
   title,
   description,
   keywords,
-  image = APP_LOGO || '/assets/logo-color.png',
+  image = APP_LOGO || '/tenant-assets/logo-color.png',
   showInstallPWA = true,
   showBackToTop: _showBackToTop = true,
   className = '',
