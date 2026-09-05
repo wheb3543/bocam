@@ -124,10 +124,7 @@ export function getLicenseFilePath(): string {
 
   const tenantRootLicense = process.env.TENANT_ROOT?.trim();
   if (tenantRootLicense) {
-    const tenantLicense = path.join(tenantRootLicense, 'license.json');
-    if (fs.existsSync(tenantLicense)) {
-      return tenantLicense;
-    }
+    return path.join(tenantRootLicense, 'license.json');
   }
 
   // Check current directory first

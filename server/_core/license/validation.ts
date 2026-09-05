@@ -107,7 +107,7 @@ function validateHardwareId(payload: LicensePayload): boolean {
     });
     logger.error('To fix this issue:');
     logger.error('1. Generate a new license for this machine');
-    logger.error('2. Run: pnpm license:generate <hardwareId> <expiry> <features>');
+    logger.error('2. Request a new license from the configured Idea Hub instance');
     logger.error('');
     return false;
   }

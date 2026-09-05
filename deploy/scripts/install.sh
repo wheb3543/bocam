@@ -248,55 +248,6 @@ generate_hardware_id() {
     echo ""
 }
 
-generate_license_keys() {
-    print_info "Generating license keys..."
-    
-    # Check if license-keys directory exists
-    if [ -d "license-keys" ]; then
-        print_warning "License keys already exist"
-        read -p "Regenerate license keys? (y/n) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            return
-        fi
-        rm -rf license-keys
-    fi
-    
-    # Generate key pair
-    pnpm license:generate-keys
-    
-    print_success "License keys generated successfully"
-    echo ""
-}
-
-generate_test_license() {
-    print_info "Generating test license..."
-    
-    # Get Hardware ID
-    HARDWARE_ID=$(node -e "
-    const os = require('os');
-    const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)) {
-        for (const iface of interfaces[name]) {
-            if (iface.family === 'IPv4' && !iface.internal) {
-                console.log(iface.mac.replace(/:/g, '').toUpperCase());
-                process.exit(0);
-            }
-        }
-    }
-    process.exit(1);
-    ")
-    
-    # Calculate expiry date (1 year from now)
-    EXPIRY_TIMESTAMP=$(date -d "+1 year" +%s 2>/dev/null || date -v+1y +%s 2>/dev/null || echo "1811376000")
-    
-    # Generate license
-    pnpm license:generate "$HARDWARE_ID" "$EXPIRY_TIMESTAMP" "*"
-    
-    print_success "Test license generated (valid for 1 year)"
-    echo ""
-}
-
 ################################################################################
 # Summary
 ################################################################################
@@ -313,7 +264,7 @@ print_summary() {
     echo "  3. Run: pnpm build && pnpm start  (Production mode)"
     echo ""
     echo "License Information:"
-    echo "  - Hardware ID: Use the ID shown above for license generation"
+    echo "  - License: Configure IDEA_HUB_URL and IDEA_HUB_SYSTEM_ID, then activate from the app"
     echo "  - License Keys: Generated in license-keys/ directory"
     echo "  - Test License: Generated in license.json (for testing only)"
     echo ""
@@ -343,11 +294,6 @@ main() {
     install_dependencies
     setup_environment
     setup_database
-    
-    # License setup
-    generate_hardware_id
-    generate_license_keys
-    generate_test_license
     
     # Summary
     print_summary

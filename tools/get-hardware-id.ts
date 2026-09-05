@@ -56,7 +56,7 @@ try {
   console.log('🔍 Hardware ID:', hardwareId);
   console.log('');
   console.log('📋 Usage:');
-  console.log('   pnpm license:generate "' + hardwareId + '" <expiryTimestamp> "*"');
+  console.log('   Configure the hardware ID in the Idea Hub activation request');
   console.log('');
   console.log('📅 Calculate expiry timestamp:');
   console.log('   - 30 days: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60)');
@@ -64,7 +64,7 @@ try {
   console.log('');
   console.log('🔢 Example (1 year from now):');
   const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60;
-  console.log('   pnpm license:generate "' + hardwareId + '" ' + oneYearFromNow + ' "*"');
+  console.log('   Configure the hardware ID in the Idea Hub activation request');
   console.log('');
 } catch (error) {
   console.error('❌ Error getting Hardware ID:', error);

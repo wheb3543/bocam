@@ -7,7 +7,6 @@
  * - checkFeature: التحقق من ميزة معينة
  * - getFeatures: الحصول على جميع الميزات المفعلة
  * - checkLicenseExists: التحقق من وجود ملف الترخيص
- * - saveLicense: حفظ ملف الترخيص
  *
  * @module useLicense.test
  */
@@ -205,80 +204,4 @@ describe('useLicense Hook - License Tests', () => {
     });
   });
 
-  describe('saveLicense function', () => {
-    it('يجب أن يحفظ ملف الترخيص بنجاح', () => {
-      // Arrange
-      const mockSaveLicense = vi.fn();
-      mockSaveLicense.mockReturnValue({
-        success: true,
-        message: 'تم حفظ الترخيص بنجاح',
-      });
-
-      const licenseData = {
-        key: 'test-license-key',
-        hardwareId: 'TEST-HARDWARE-ID',
-        expiryDate: '2025-01-01',
-        features: ['feature1', 'feature2'],
-        issuedAt: '2024-01-01',
-        version: '1.0',
-      };
-
-      // Act
-      const result = mockSaveLicense(licenseData);
-
-      // Assert
-      expect(result.success).toBe(true);
-      expect(result.message).toBeDefined();
-    });
-
-    it('يجب أن يفشل عند عدم تطابق معرف الجهاز', () => {
-      // Arrange
-      const mockSaveLicense = vi.fn();
-      mockSaveLicense.mockReturnValue({
-        success: false,
-        error: 'Hardware ID mismatch',
-      });
-
-      const licenseData = {
-        key: 'test-license-key',
-        hardwareId: 'DIFFERENT-HARDWARE-ID',
-        expiryDate: '2025-01-01',
-        features: ['feature1', 'feature2'],
-        issuedAt: '2024-01-01',
-        version: '1.0',
-      };
-
-      // Act
-      const result = mockSaveLicense(licenseData);
-
-      // Assert
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Hardware ID mismatch');
-    });
-
-    it('يجب أن يفشل مع بيانات ترخيص غير صالحة', () => {
-      // Arrange
-      const mockSaveLicense = vi.fn();
-      mockSaveLicense.mockReturnValue({
-        success: false,
-        error: 'Invalid license data',
-      });
-
-      const invalidLicenseData = {
-        key: '',
-        hardwareId: '',
-        expiryDate: '',
-        features: [],
-        issuedAt: '',
-        version: '',
-      };
-
-      // Act
-      const result = mockSaveLicense(invalidLicenseData);
-
-      // Assert
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Invalid license data');
-    });
-  });
 });

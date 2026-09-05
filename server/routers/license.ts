@@ -27,8 +27,6 @@ import {
   requestCentralLicense,
   requestCentralSupportTicket,
 } from '../_core/centralLicenseRequest';
-import fs from 'fs';
-import path from 'path';
 
 /**
  * License router with public and protected procedures
@@ -340,65 +338,6 @@ export const licenseRouter = router({
         return {
           success: false,
           error: error instanceof Error ? error.message : 'تعذر التحقق من حالة طلب تفعيل الميزة',
-        };
-      }
-    }),
-
-  /**
-   * Save license file (public)
-   * Used during activation to save the license
-   */
-  saveLicense: publicProcedure
-    .input(
-      z.object({
-        key: z.string(),
-        hardwareId: z.string(),
-        expiryDate: z.string(),
-        features: z.array(z.string()),
-        issuedAt: z.string(),
-        version: z.string(),
-      })
-    )
-    .mutation(({ input }) => {
-      try {
-        const licensePath = path.join(process.cwd(), 'license.json');
-
-        // Validate the license data
-        if (!input.key || !input.hardwareId || !input.expiryDate || !input.features) {
-          throw new Error('Invalid license data');
-        }
-
-        // Verify hardware ID matches current machine
-        const currentHardwareId = getHardwareId();
-        if (input.hardwareId !== currentHardwareId) {
-          throw new Error(
-            `Hardware ID mismatch. Expected: ${currentHardwareId}, Got: ${input.hardwareId}`
-          );
-        }
-
-        // Save license file
-        const licenseData = {
-          key: input.key,
-          hardwareId: input.hardwareId,
-          expiryDate: input.expiryDate,
-          features: input.features,
-          issuedAt: input.issuedAt,
-          version: input.version,
-        };
-
-        fs.writeFileSync(licensePath, JSON.stringify(licenseData, null, 2));
-
-        // Validate the saved license
-        const licenseInfo = validateLicense();
-
-        return {
-          success: true,
-          licenseInfo,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Failed to save license',
         };
       }
     }),
