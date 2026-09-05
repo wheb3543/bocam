@@ -118,7 +118,37 @@ export async function ensureSystemRoleDefinitions(db: DbClient) {
         isSystem: true,
         isActive: true,
       });
+      continue;
     }
+
+    const expectedPermissions = normalizeRolePermissions(definition.permissions);
+    const existingPermissions = normalizeRolePermissions(safeParse(existing.permissions));
+    const needsSync =
+      existing.name !== definition.name ||
+      existing.description !== definition.description ||
+      existing.baseRole !== (key as RoleBaseKey) ||
+      JSON.stringify(existingPermissions) !== JSON.stringify(expectedPermissions);
+
+    if (!needsSync) {
+      continue;
+    }
+
+    if (typeof db.update !== 'function') {
+      return;
+    }
+
+    await db
+      .update(roleDefinitions)
+      .set({
+        key,
+        name: definition.name,
+        description: definition.description,
+        baseRole: key as RoleBaseKey,
+        permissions: JSON.stringify(expectedPermissions),
+        isSystem: true,
+        isActive: true,
+      })
+      .where(eq(roleDefinitions.id, existing.id));
   }
 }
 

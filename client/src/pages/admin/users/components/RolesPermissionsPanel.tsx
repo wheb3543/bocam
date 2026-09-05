@@ -73,6 +73,8 @@ const emptyRole = (): RoleForm => ({
   isActive: true,
 });
 
+const allPermissionGroups = () => new Set(ROLE_PERMISSION_GROUPS.map((group) => group.key));
+
 export default function RolesPermissionsPanel() {
   const utils = trpc.useUtils();
   const { can, isLoading: arePermissionsLoading } = useRolePermissions();
@@ -86,7 +88,7 @@ export default function RolesPermissionsPanel() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<RoleForm>(emptyRole);
   const [permissionSearch, setPermissionSearch] = useState('');
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(allPermissionGroups);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [copiedFromRole, setCopiedFromRole] = useState<string | null>(null);
   const [copiedFromRoleId, setCopiedFromRoleId] = useState<number | null>(null);
@@ -113,7 +115,7 @@ export default function RolesPermissionsPanel() {
     setCopiedFromRoleId(null);
     setPermissionSearch('');
     setShowSelectedOnly(false);
-    setExpandedGroups(new Set());
+    setExpandedGroups(allPermissionGroups());
     setForm({
       id: role.id,
       key: role.key,
@@ -218,7 +220,7 @@ export default function RolesPermissionsPanel() {
                 setCopiedFromRole(null);
                 setPermissionSearch('');
                 setShowSelectedOnly(false);
-                setExpandedGroups(new Set());
+                setExpandedGroups(allPermissionGroups());
                 setOpen(true);
               }}
             >

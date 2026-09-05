@@ -668,6 +668,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<
       'reports.view',
       'reports.export',
       'notifications.view',
+      'registrations.view',
     ],
   },
   staff: {
@@ -690,6 +691,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<
       'communications.view',
       'communications.reply',
       'communications.manage',
+      'registrations.view',
     ],
   },
   team_leader: {
@@ -706,6 +708,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<
       'media.view',
       'media.upload',
       'media.manage',
+      'appointments.view',
       'leads.view',
       'leads.create',
       'leads.update',
@@ -721,6 +724,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<
       'campaigns.update',
       'campaigns.manage',
       'reports.view',
+      'registrations.view',
     ],
   },
   viewer: {

@@ -11,6 +11,8 @@ const DetailedStatsCards = lazy(() => import('@/components/dashboard/DetailedSta
 const DashboardCharts = lazy(() => import('@/components/dashboard/DashboardCharts'));
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdminPageHeader from '@/components/layout/AdminPageHeader';
+import { PermissionHint } from '@/components/PermissionHint';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { useLicense } from '@/hooks/integrations/useLicense';
 import {
   Bell,
@@ -49,9 +51,37 @@ function DashboardSection({
   );
 }
 
+const OPERATIONAL_DASHBOARD_PERMISSIONS = [
+  'leads.view',
+  'appointments.view',
+  'registrations.view',
+] as const;
+
+function RestrictedDashboardWidget() {
+  return (
+    <Card className="border-amber-200 bg-amber-50/60 shadow-sm">
+      <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <div>
+          <p className="font-semibold text-foreground">بيانات التشغيل مقيّدة</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            تحتاج هذه البطاقة إلى صلاحيات عرض العملاء والمواعيد والتسجيلات.
+          </p>
+        </div>
+        <PermissionHint
+          label="الصلاحيات المطلوبة"
+          message="leads.view و appointments.view و registrations.view"
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminDashboard() {
   const { hasFeature, isLicenseValid } = useLicense();
+  const { can, isLoading: permissionsLoading } = useRolePermissions();
   const analyticsAvailable = hasFeature('analytics') && isLicenseValid;
+  const operationalWidgetsAvailable =
+    !permissionsLoading && OPERATIONAL_DASHBOARD_PERMISSIONS.every((permission) => can(permission));
 
   return (
     <DashboardLayout
@@ -188,7 +218,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Detailed Stats Cards */}
-        {analyticsAvailable && (
+        {analyticsAvailable && operationalWidgetsAvailable ? (
           <ErrorBoundary
             title="تعذر تحميل لوحة الإحصائيات"
             message="لم نتمكن من تحميل قسم الإحصائيات. يرجى المحاولة مرة أخرى."
@@ -205,7 +235,9 @@ export default function AdminDashboard() {
               <DetailedStatsCards />
             </Suspense>
           </ErrorBoundary>
-        )}
+        ) : analyticsAvailable ? (
+          <RestrictedDashboardWidget />
+        ) : null}
 
         {/* Quick Patient Search & Manual Registration */}
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.72fr)]">
@@ -279,7 +311,11 @@ export default function AdminDashboard() {
                   />
                 }
               >
-                <NotificationCenter />
+                {operationalWidgetsAvailable ? (
+                  <NotificationCenter />
+                ) : (
+                  <RestrictedDashboardWidget />
+                )}
               </Suspense>
             </ErrorBoundary>
           </div>
@@ -301,7 +337,7 @@ export default function AdminDashboard() {
                   />
                 }
               >
-                <SourceAnalytics />
+                {operationalWidgetsAvailable ? <SourceAnalytics /> : <RestrictedDashboardWidget />}
               </Suspense>
             </ErrorBoundary>
           </div>

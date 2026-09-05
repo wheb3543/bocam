@@ -8,6 +8,7 @@ import {
   boolean,
   index,
   decimal,
+  foreignKey,
   uniqueIndex,
 } from 'drizzle-orm/mysql-core';
 
@@ -2936,9 +2937,7 @@ export const integrationConnectionTokens = mysqlTable(
   'integration_connection_tokens',
   {
     id: int('id').autoincrement().primaryKey(),
-    connectionId: int('connectionId')
-      .notNull()
-      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    connectionId: int('connectionId').notNull(),
     tokenType: mysqlEnum('tokenType', ['access', 'refresh', 'business', 'system']).notNull(),
     tokenEncrypted: text('tokenEncrypted').notNull(),
     tokenExpiresAt: timestamp('tokenExpiresAt'),
@@ -2949,6 +2948,13 @@ export const integrationConnectionTokens = mysqlTable(
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
   },
   (table) => ({
+    connectionFk: foreignKey({
+      name: 'integration_connection_tokens_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
     connectionTokenUnique: uniqueIndex('integrationConnectionTokens_connection_token_unique').on(
       table.connectionId,
       table.tokenType
@@ -2967,9 +2973,7 @@ export const integrationExternalAssets = mysqlTable(
   'integration_external_assets',
   {
     id: int('id').autoincrement().primaryKey(),
-    connectionId: int('connectionId')
-      .notNull()
-      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    connectionId: int('connectionId').notNull(),
     provider: mysqlEnum('provider', [
       'meta',
       'whatsapp',
@@ -3004,6 +3008,13 @@ export const integrationExternalAssets = mysqlTable(
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
   },
   (table) => ({
+    connectionFk: foreignKey({
+      name: 'integration_external_assets_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
     providerAssetUnique: uniqueIndex('integrationExternalAssets_provider_asset_unique').on(
       table.provider,
       table.externalAssetId
@@ -3046,16 +3057,20 @@ export const integrationOauthStates = mysqlTable(
     initiatedByUserId: int('initiatedByUserId')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    connectionId: int('connectionId').references(() => integrationConnections.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
+    connectionId: int('connectionId'),
     expiresAt: timestamp('expiresAt').notNull(),
     consumedAt: timestamp('consumedAt'),
     failureReason: text('failureReason'),
     createdAt: timestamp('createdAt').defaultNow().notNull(),
   },
   (table) => ({
+    connectionFk: foreignKey({
+      name: 'integration_oauth_states_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
     stateUnique: uniqueIndex('integrationOauthStates_state_unique').on(table.stateHash),
     expirationIdx: index('integrationOauthStates_expiration_idx').on(table.expiresAt),
     actorIdx: index('integrationOauthStates_actor_idx').on(table.initiatedByUserId),
@@ -3072,13 +3087,8 @@ export const integrationWebhookSubscriptions = mysqlTable(
   'integration_webhook_subscriptions',
   {
     id: int('id').autoincrement().primaryKey(),
-    connectionId: int('connectionId')
-      .notNull()
-      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    assetId: int('assetId').references(() => integrationExternalAssets.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
+    connectionId: int('connectionId').notNull(),
+    assetId: int('assetId'),
     provider: mysqlEnum('provider', [
       'meta',
       'whatsapp',
@@ -3100,6 +3110,20 @@ export const integrationWebhookSubscriptions = mysqlTable(
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
   },
   (table) => ({
+    connectionFk: foreignKey({
+      name: 'integration_webhook_subscriptions_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    assetFk: foreignKey({
+      name: 'integration_webhook_subscriptions_asset_fk',
+      columns: [table.assetId],
+      foreignColumns: [integrationExternalAssets.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
     connectionAssetIdx: index('integrationWebhookSubscriptions_connection_asset_idx').on(
       table.connectionId,
       table.assetId
@@ -3119,13 +3143,8 @@ export const integrationDeliveryJobs = mysqlTable(
   'integration_delivery_jobs',
   {
     id: int('id').autoincrement().primaryKey(),
-    destinationId: int('destinationId')
-      .notNull()
-      .references(() => socialPublishDestinations.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    connectionId: int('connectionId').references(() => integrationConnections.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
+    destinationId: int('destinationId').notNull(),
+    connectionId: int('connectionId'),
     status: mysqlEnum('status', ['queued', 'processing', 'succeeded', 'failed', 'cancelled'])
       .default('queued')
       .notNull(),
@@ -3140,6 +3159,20 @@ export const integrationDeliveryJobs = mysqlTable(
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
   },
   (table) => ({
+    destinationFk: foreignKey({
+      name: 'integration_delivery_jobs_destination_fk',
+      columns: [table.destinationId],
+      foreignColumns: [socialPublishDestinations.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    connectionFk: foreignKey({
+      name: 'integration_delivery_jobs_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
     destinationUnique: uniqueIndex('integrationDeliveryJobs_destination_unique').on(
       table.destinationId
     ),
@@ -3169,14 +3202,8 @@ export const integrationAuditEvents = mysqlTable(
       'youtube',
       'tiktok',
     ]).notNull(),
-    connectionId: int('connectionId').references(() => integrationConnections.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
-    assetId: int('assetId').references(() => integrationExternalAssets.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
+    connectionId: int('connectionId'),
+    assetId: int('assetId'),
     action: varchar('action', { length: 120 }).notNull(),
     status: mysqlEnum('status', ['started', 'succeeded', 'failed', 'skipped']).notNull(),
     correlationId: varchar('correlationId', { length: 255 }),
@@ -3189,6 +3216,20 @@ export const integrationAuditEvents = mysqlTable(
     createdAt: timestamp('createdAt').defaultNow().notNull(),
   },
   (table) => ({
+    connectionFk: foreignKey({
+      name: 'integration_audit_events_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+    assetFk: foreignKey({
+      name: 'integration_audit_events_asset_fk',
+      columns: [table.assetId],
+      foreignColumns: [integrationExternalAssets.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
     providerActionIdx: index('integrationAuditEvents_provider_action_idx').on(
       table.provider,
       table.action
@@ -3206,13 +3247,8 @@ export const metaLeadForms = mysqlTable(
   'meta_lead_forms',
   {
     id: int('id').autoincrement().primaryKey(),
-    connectionId: int('connectionId')
-      .notNull()
-      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    pageAssetId: int('pageAssetId').references(() => integrationExternalAssets.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
+    connectionId: int('connectionId').notNull(),
+    pageAssetId: int('pageAssetId'),
     externalFormId: varchar('externalFormId', { length: 255 }).notNull(),
     externalPageId: varchar('externalPageId', { length: 255 }).notNull(),
     displayName: varchar('displayName', { length: 255 }),
@@ -3228,8 +3264,22 @@ export const metaLeadForms = mysqlTable(
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
   },
   (table) => ({
+    connectionFk: foreignKey({
+      name: 'meta_lead_forms_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
     formUnique: uniqueIndex('metaLeadForms_external_form_unique').on(table.externalFormId),
     connectionIdx: index('metaLeadForms_connection_idx').on(table.connectionId),
+    pageAssetFk: foreignKey({
+      name: 'meta_lead_forms_page_asset_fk',
+      columns: [table.pageAssetId],
+      foreignColumns: [integrationExternalAssets.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
   })
 );
 
@@ -3238,9 +3288,7 @@ export const metaLeadEvents = mysqlTable(
   'meta_lead_events',
   {
     id: int('id').autoincrement().primaryKey(),
-    connectionId: int('connectionId')
-      .notNull()
-      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    connectionId: int('connectionId').notNull(),
     leadFormId: int('leadFormId').references(() => metaLeadForms.id, {
       onDelete: 'set null',
       onUpdate: 'cascade',
@@ -3262,6 +3310,13 @@ export const metaLeadEvents = mysqlTable(
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
   },
   (table) => ({
+    connectionFk: foreignKey({
+      name: 'meta_lead_events_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
     leadUnique: uniqueIndex('metaLeadEvents_external_lead_unique').on(table.externalLeadId),
     eventUnique: uniqueIndex('metaLeadEvents_event_key_unique').on(table.eventKey),
     statusIdx: index('metaLeadEvents_status_idx').on(table.status, table.receivedAt),
@@ -3273,13 +3328,8 @@ export const metaConversionEvents = mysqlTable(
   'meta_conversion_events',
   {
     id: int('id').autoincrement().primaryKey(),
-    connectionId: int('connectionId')
-      .notNull()
-      .references(() => integrationConnections.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    datasetAssetId: int('datasetAssetId').references(() => integrationExternalAssets.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
+    connectionId: int('connectionId').notNull(),
+    datasetAssetId: int('datasetAssetId'),
     eventName: varchar('eventName', { length: 100 }).notNull(),
     eventId: varchar('eventId', { length: 255 }).notNull(),
     payloadEncrypted: text('payloadEncrypted').notNull(),
@@ -3296,8 +3346,22 @@ export const metaConversionEvents = mysqlTable(
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
   },
   (table) => ({
+    connectionFk: foreignKey({
+      name: 'meta_conversion_events_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
     eventUnique: uniqueIndex('metaConversionEvents_event_unique').on(table.eventId),
     dispatchIdx: index('metaConversionEvents_dispatch_idx').on(table.status, table.runAfter),
+    datasetAssetFk: foreignKey({
+      name: 'meta_conversion_events_dataset_fk',
+      columns: [table.datasetAssetId],
+      foreignColumns: [integrationExternalAssets.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
   })
 );
 
@@ -3309,14 +3373,8 @@ export const socialPublishAccounts = mysqlTable(
   'social_publish_accounts',
   {
     id: int('id').autoincrement().primaryKey(),
-    connectionId: int('connectionId').references(() => integrationConnections.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
-    integrationAssetId: int('integrationAssetId').references(() => integrationExternalAssets.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
+    connectionId: int('connectionId'),
+    integrationAssetId: int('integrationAssetId'),
     platform: mysqlEnum('platform', [
       'facebook',
       'instagram',
@@ -3358,6 +3416,20 @@ export const socialPublishAccounts = mysqlTable(
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
   },
   (table) => ({
+    connectionFk: foreignKey({
+      name: 'social_publish_accounts_connection_fk',
+      columns: [table.connectionId],
+      foreignColumns: [integrationConnections.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+    assetFk: foreignKey({
+      name: 'social_publish_accounts_asset_fk',
+      columns: [table.integrationAssetId],
+      foreignColumns: [integrationExternalAssets.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
     platformStatusIdx: index('socialPublishAccounts_platform_status_idx').on(
       table.platform,
       table.connectionStatus
@@ -3470,13 +3542,8 @@ export const socialPublishDestinations = mysqlTable(
   'social_publish_destinations',
   {
     id: int('id').autoincrement().primaryKey(),
-    postId: int('postId')
-      .notNull()
-      .references(() => socialPublishPosts.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    accountId: int('accountId').references(() => socialPublishAccounts.id, {
-      onDelete: 'set null',
-      onUpdate: 'cascade',
-    }),
+    postId: int('postId').notNull(),
+    accountId: int('accountId'),
     platform: mysqlEnum('platform', [
       'facebook',
       'instagram',
@@ -3512,6 +3579,20 @@ export const socialPublishDestinations = mysqlTable(
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
   },
   (table) => ({
+    postFk: foreignKey({
+      name: 'social_publish_destinations_post_fk',
+      columns: [table.postId],
+      foreignColumns: [socialPublishPosts.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+    accountFk: foreignKey({
+      name: 'social_publish_destinations_account_fk',
+      columns: [table.accountId],
+      foreignColumns: [socialPublishAccounts.id],
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
     postIdx: index('socialPublishDestinations_post_idx').on(table.postId),
     accountIdx: index('socialPublishDestinations_account_idx').on(table.accountId),
     platformStatusIdx: index('socialPublishDestinations_platform_status_idx').on(
@@ -3534,9 +3615,7 @@ export const socialPublishAttempts = mysqlTable(
   'social_publish_attempts',
   {
     id: int('id').autoincrement().primaryKey(),
-    destinationId: int('destinationId')
-      .notNull()
-      .references(() => socialPublishDestinations.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    destinationId: int('destinationId').notNull(),
     operation: mysqlEnum('operation', [
       'validate',
       'upload',
@@ -3558,6 +3637,13 @@ export const socialPublishAttempts = mysqlTable(
     createdAt: timestamp('createdAt').defaultNow().notNull(),
   },
   (table) => ({
+    destinationFk: foreignKey({
+      name: 'social_publish_attempts_destination_fk',
+      columns: [table.destinationId],
+      foreignColumns: [socialPublishDestinations.id],
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
     destinationCreatedIdx: index('socialPublishAttempts_destination_created_idx').on(
       table.destinationId,
       table.createdAt

@@ -112,7 +112,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
     const groups = source('shared/rolePermissions.ts');
 
-    expect(rolesPanel).toContain('useState<Set<string>>(() => new Set())');
+    expect(rolesPanel).toContain('useState<Set<string>>');
     expect(rolesPanel).toContain('toggleGroupExpanded');
     expect(rolesPanel).toContain('aria-expanded={isExpanded}');
     expect(rolesPanel).toContain('h-[min(92vh,760px)]');

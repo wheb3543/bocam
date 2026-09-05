@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { doesRolePermissionSetGrant, normalizeRolePermissions } from './rolePermissionService';
 import {
+  DEFAULT_ROLE_DEFINITIONS,
   ROLE_PERMISSION_GROUPS,
   ROLE_PERMISSION_LABELS,
   ROLE_PERMISSIONS,
@@ -90,6 +91,68 @@ describe('إدارة الأدوار والصلاحيات', () => {
     expect(ROLE_PERMISSION_LABELS['integrations.webhooks.manage']).toContain('Webhook');
     expect(ROLE_PERMISSION_LABELS['operations.purge']).toContain('الحذف النهائي');
     expect(ROLE_PERMISSION_LABELS['content.translations.manage']).toContain('ترجمات');
+  });
+
+  it('يمنح أدوار التشغيل الأساسية صلاحية عرض التسجيلات اللازمة للوحة التحكم', () => {
+    expect(DEFAULT_ROLE_DEFINITIONS.manager.permissions).toContain('registrations.view');
+    expect(DEFAULT_ROLE_DEFINITIONS.staff.permissions).toContain('registrations.view');
+    expect(DEFAULT_ROLE_DEFINITIONS.team_leader.permissions).toContain('registrations.view');
+    expect(DEFAULT_ROLE_DEFINITIONS.team_leader.permissions).toContain('appointments.view');
+  });
+
+  it('يحدّث تعريفات الأدوار النظامية الموجودة عندما تكون صلاحياتها قديمة', async () => {
+    const updateCalls: Array<{ key: string; permissions: string; name: string }> = [];
+    const db = {
+      select() {
+        return {
+          from() {
+            return {
+              where() {
+                return {
+                  limit: async () => [
+                    {
+                      id: 1,
+                      key: 'manager',
+                      name: 'مدير',
+                      description: 'قيمة قديمة',
+                      permissions: JSON.stringify(['dashboard.view']),
+                      baseRole: 'manager',
+                      isSystem: true,
+                      isActive: true,
+                    },
+                  ],
+                };
+              },
+            };
+          },
+        };
+      },
+      update() {
+        return {
+          set(value: { key?: string; name?: string; description?: string; permissions?: string }) {
+            updateCalls.push({
+              key: value.key ?? 'manager',
+              permissions: value.permissions ?? '[]',
+              name: value.name ?? 'مدير',
+            });
+            return {
+              where: async () => undefined,
+            };
+          },
+        };
+      },
+      insert() {
+        return {
+          values: async () => undefined,
+        };
+      },
+    } as any;
+
+    const { ensureSystemRoleDefinitions } = await import('./rolePermissionService');
+    await ensureSystemRoleDefinitions(db);
+
+    expect(updateCalls.some((call) => call.key === 'manager')).toBe(true);
+    expect(updateCalls.some((call) => call.permissions.includes('registrations.view'))).toBe(true);
   });
 
   it('يربط تعريف الدور وتعيينه بإجراءات خادمية محمية ولا يعتمد على الواجهة فقط', () => {
