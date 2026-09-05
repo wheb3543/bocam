@@ -50,7 +50,11 @@ export async function setupVite(app: Express, server: Server) {
       let template = await fs.promises.readFile(templatePath, 'utf-8');
       const tenantSnapshot = {
         tenantId: process.env.TENANT_ID || '',
-        companyName: process.env.VITE_COMPANY_NAME || '',
+        companyName:
+          process.env.VITE_COMPANY_NAME ||
+          process.env.VITE_COMPANY_ENGLISH_NAME ||
+          process.env.VITE_COMPANY_ARABIC_NAME ||
+          '',
         companyArabicName: process.env.VITE_COMPANY_ARABIC_NAME || '',
         companyEnglishName: process.env.VITE_COMPANY_ENGLISH_NAME || '',
         companyLogo: process.env.VITE_COMPANY_LOGO || '',

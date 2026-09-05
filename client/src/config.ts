@@ -33,7 +33,10 @@ export const BRAND_SECONDARY_COLOR = readTenantThemeValue('secondary', '#0088CC'
  * Company name (English)
  * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_NAME = readTenantValue('companyName', 'BOCAM');
+export const COMPANY_NAME = readTenantValue(
+  'companyName',
+  readTenantValue('companyEnglishName', 'BOCAM')
+);
 
 /**
  * Company name (Arabic)

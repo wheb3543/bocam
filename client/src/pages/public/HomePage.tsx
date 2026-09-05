@@ -251,7 +251,6 @@ export default function HomePage() {
   });
 
   // Images
-  const { data: heroLogo } = usePublicImages({ key: `hero.logo.${language}`, section: 'hero' });
   const { data: aboutHospitalImage } = usePublicImages({
     key: `about.hospital.${language}`,
     section: 'about',
@@ -266,8 +265,8 @@ export default function HomePage() {
   const buttonText = heroButtonText?.data?.[0]?.content || 'احجز موعدك الآن';
 
   // استخدام الصور من قاعدة البيانات أو القيم الافتراضية
-  const logoUrl = heroLogo?.data?.[0]?.url || APP_LOGO;
-  const logoAlt = heroLogo?.data?.[0]?.alt || APP_TITLE;
+  const logoUrl = APP_LOGO;
+  const logoAlt = APP_TITLE;
   const hospitalImageUrl = aboutHospitalImage?.data?.[0]?.url || APP_LOGO;
   const hospitalImageAlt = aboutHospitalImage?.data?.[0]?.alt || `صورة ${COMPANY_ARABIC_NAME}`;
 

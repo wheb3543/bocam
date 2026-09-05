@@ -30,7 +30,7 @@ export function resolveTenantRoot(): string {
 }
 
 function extractBrandingObjectLiteral(source: string): string | null {
-  const marker = 'export const branding =';
+  const marker = 'export const branding';
   const index = source.indexOf(marker);
   if (index === -1) {
     return null;
