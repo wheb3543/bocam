@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 6,
-  "numPassedTestSuites": 6,
+  "numTotalTestSuites": 4,
+  "numPassedTestSuites": 4,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 9,
-  "numPassedTests": 9,
+  "numTotalTests": 7,
+  "numPassedTests": 7,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,7 +24,7 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1788602936489,
+  "startTime": 1788638369357,
   "success": true,
   "testResults": [
     {
@@ -34,7 +34,7 @@
           "fullName": "tenant runtime loader resolves the active tenant directory from the environment",
           "status": "passed",
           "title": "resolves the active tenant directory from the environment",
-          "duration": 16.707046000000446,
+          "duration": 4.210822999999891,
           "failureMessages": [],
           "location": { "line": 87, "column": 3 },
           "meta": {},
@@ -45,7 +45,7 @@
           "fullName": "tenant runtime loader loads tenant env and branding values before the app starts",
           "status": "passed",
           "title": "loads tenant env and branding values before the app starts",
-          "duration": 12.906881000000794,
+          "duration": 5.310117999999875,
           "failureMessages": [],
           "location": { "line": 91, "column": 3 },
           "meta": {},
@@ -56,7 +56,7 @@
           "fullName": "tenant runtime loader uses the tenant license path configured at runtime",
           "status": "passed",
           "title": "uses the tenant license path configured at runtime",
-          "duration": 2.4186339999996562,
+          "duration": 2.225544000000127,
           "failureMessages": [],
           "location": { "line": 107, "column": 3 },
           "meta": {},
@@ -67,49 +67,18 @@
           "fullName": "tenant runtime loader rejects upload paths that escape the tenant directory",
           "status": "passed",
           "title": "rejects upload paths that escape the tenant directory",
-          "duration": 2.6396340000001146,
+          "duration": 2.980536999999913,
           "failureMessages": [],
           "location": { "line": 114, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1788602942515,
-      "endTime": 1788602942549.6396,
+      "startTime": 1788638371859,
+      "endTime": 1788638371873.9805,
       "status": "passed",
       "message": "",
       "name": "/Users/applestore/Documents/GitHub/bocam/server/_core/tenant.test.ts"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["P0 brand and page-shell completion"],
-          "fullName": "P0 brand and page-shell completion uses tenant-backed branding values",
-          "status": "passed",
-          "title": "uses tenant-backed branding values",
-          "duration": 4.2411339999998745,
-          "failureMessages": [],
-          "location": { "line": 12, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["P0 brand and page-shell completion"],
-          "fullName": "P0 brand and page-shell completion applies the shared SGH page header and a clear unconfigured connection state",
-          "status": "passed",
-          "title": "applies the shared SGH page header and a clear unconfigured connection state",
-          "duration": 1.2696249999999054,
-          "failureMessages": [],
-          "location": { "line": 17, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1788602942461,
-      "endTime": 1788602942466.2695,
-      "status": "passed",
-      "message": "",
-      "name": "/Users/applestore/Documents/GitHub/bocam/client/src/__tests__/brandingP0Completion.test.tsx"
     },
     {
       "assertionResults": [
@@ -118,7 +87,7 @@
           "fullName": "P0 interface foundation provides SGH branding fallbacks when company environment values are absent",
           "status": "passed",
           "title": "provides SGH branding fallbacks when company environment values are absent",
-          "duration": 3.0203449999999066,
+          "duration": 2.136633999999958,
           "failureMessages": [],
           "location": { "line": 12, "column": 3 },
           "meta": {},
@@ -129,7 +98,7 @@
           "fullName": "P0 interface foundation renders the unified administrative page hierarchy with optional status and actions",
           "status": "passed",
           "title": "renders the unified administrative page hierarchy with optional status and actions",
-          "duration": 333.990777,
+          "duration": 174.25271999999995,
           "failureMessages": [],
           "location": { "line": 18, "column": 3 },
           "meta": {},
@@ -140,15 +109,15 @@
           "fullName": "P0 interface foundation renders accessible dashboard and workspace loading skeletons",
           "status": "passed",
           "title": "renders accessible dashboard and workspace loading skeletons",
-          "duration": 31.898282999999537,
+          "duration": 20.408258999999816,
           "failureMessages": [],
           "location": { "line": 35, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1788602942947,
-      "endTime": 1788602943316.8982,
+      "startTime": 1788638372088,
+      "endTime": 1788638372284.4082,
       "status": "passed",
       "message": "",
       "name": "/Users/applestore/Documents/GitHub/bocam/client/src/__tests__/uiP0.test.tsx"
