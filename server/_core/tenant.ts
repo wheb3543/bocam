@@ -196,9 +196,10 @@ export async function applyTenantRuntimeConfig(): Promise<{
       };
       tenantId = tenantJson.tenantId || tenantId;
       process.env.TENANT_ID = tenantId;
-      process.env.TENANT_NAME = tenantJson.clientName || process.env.TENANT_NAME || tenantId;
-      process.env.TENANT_NAME_EN =
-        tenantJson.clientNameEn || process.env.TENANT_NAME_EN || tenantId;
+      process.env.VITE_COMPANY_ARABIC_NAME =
+        tenantJson.clientName || process.env.VITE_COMPANY_ARABIC_NAME || tenantId;
+      process.env.VITE_COMPANY_ENGLISH_NAME =
+        tenantJson.clientNameEn || process.env.VITE_COMPANY_ENGLISH_NAME || tenantId;
     } catch {
       process.env.TENANT_ID = tenantId;
     }
@@ -221,18 +222,19 @@ export async function applyTenantRuntimeConfig(): Promise<{
 
   if (clientBranding) {
     applyMappedEnvValues({
-      COMPANY_NAME: clientBranding.nameEn || clientBranding.name || process.env.COMPANY_NAME,
-      COMPANY_ARABIC_NAME:
-        clientBranding.nameAr || clientBranding.name || process.env.COMPANY_ARABIC_NAME,
-      COMPANY_ENGLISH_NAME: clientBranding.nameEn || process.env.COMPANY_ENGLISH_NAME,
-      COMPANY_LOGO: branding?.seo?.logoPath || process.env.COMPANY_LOGO,
-      COMPANY_PHONE: clientBranding.phone || process.env.COMPANY_PHONE,
-      COMPANY_EMAIL: clientBranding.email || process.env.COMPANY_EMAIL,
-      COMPANY_ADDRESS:
-        clientBranding.addressEn || clientBranding.addressAr || process.env.COMPANY_ADDRESS,
+      VITE_COMPANY_NAME:
+        clientBranding.nameEn || clientBranding.name || process.env.VITE_COMPANY_NAME,
+      VITE_COMPANY_ARABIC_NAME:
+        clientBranding.nameAr || clientBranding.name || process.env.VITE_COMPANY_ARABIC_NAME,
+      VITE_COMPANY_ENGLISH_NAME: clientBranding.nameEn || process.env.VITE_COMPANY_ENGLISH_NAME,
+      VITE_COMPANY_LOGO: branding?.seo?.logoPath || process.env.VITE_COMPANY_LOGO,
+      VITE_COMPANY_PHONE: clientBranding.phone || process.env.VITE_COMPANY_PHONE,
+      VITE_COMPANY_EMAIL: clientBranding.email || process.env.VITE_COMPANY_EMAIL,
+      VITE_COMPANY_ADDRESS:
+        clientBranding.addressEn || clientBranding.addressAr || process.env.VITE_COMPANY_ADDRESS,
       COMPANY_CITY: clientBranding.city || process.env.COMPANY_CITY,
-      COMPANY_SLOGAN_AR: clientBranding.sloganAr || process.env.COMPANY_SLOGAN_AR,
-      COMPANY_SLOGAN_EN: clientBranding.sloganEn || process.env.COMPANY_SLOGAN_EN,
+      VITE_COMPANY_SLOGAN: clientBranding.sloganAr || process.env.VITE_COMPANY_SLOGAN,
+      VITE_COMPANY_SLOGAN_EN: clientBranding.sloganEn || process.env.VITE_COMPANY_SLOGAN_EN,
       TENANT_THEME_PRIMARY: branding?.theme?.primary || process.env.TENANT_THEME_PRIMARY,
       TENANT_THEME_SECONDARY: branding?.theme?.secondary || process.env.TENANT_THEME_SECONDARY,
       TENANT_THEME_ACCENT: branding?.theme?.accent || process.env.TENANT_THEME_ACCENT,
@@ -241,10 +243,10 @@ export async function applyTenantRuntimeConfig(): Promise<{
       TENANT_THEME_SUCCESS: branding?.theme?.success || process.env.TENANT_THEME_SUCCESS,
       TENANT_THEME_DANGER: branding?.theme?.danger || process.env.TENANT_THEME_DANGER,
       TENANT_THEME_WARNING: branding?.theme?.warning || process.env.TENANT_THEME_WARNING,
-      FACEBOOK_URL: branding?.contact?.facebook || process.env.FACEBOOK_URL,
-      INSTAGRAM_URL: branding?.contact?.instagram || process.env.INSTAGRAM_URL,
-      TWITTER_URL: branding?.contact?.twitter || process.env.TWITTER_URL,
-      LINKEDIN_URL: branding?.contact?.linkedin || process.env.LINKEDIN_URL,
+      VITE_FACEBOOK_URL: branding?.contact?.facebook || process.env.VITE_FACEBOOK_URL,
+      VITE_INSTAGRAM_URL: branding?.contact?.instagram || process.env.VITE_INSTAGRAM_URL,
+      VITE_TWITTER_URL: branding?.contact?.twitter || process.env.VITE_TWITTER_URL,
+      VITE_LINKEDIN_URL: branding?.contact?.linkedin || process.env.VITE_LINKEDIN_URL,
     });
   }
 

@@ -143,7 +143,7 @@ export async function sendOfferLeadStatusUpdate(
           lead.fullName,
           offerData.title || 'عرض خاص',
           offerData.endDate ? new Date(offerData.endDate).toLocaleDateString('ar-YE') : 'قريباً',
-          process.env.COMPANY_PHONE || '',
+          process.env.VITE_COMPANY_PHONE || '',
         ];
         break;
 

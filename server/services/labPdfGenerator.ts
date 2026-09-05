@@ -99,9 +99,9 @@ function addLabHeader(
     console.warn('Could not load logo:', error);
   }
 
-  const companyName = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
-  const companyPhone = process.env.COMPANY_PHONE || 'رقم الاتصال غير متوفر';
-  const companyEmail = process.env.COMPANY_EMAIL || 'info@example.com';
+  const companyName = process.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM';
+  const companyPhone = process.env.VITE_COMPANY_PHONE || 'رقم الاتصال غير متوفر';
+  const companyEmail = process.env.VITE_COMPANY_EMAIL || 'info@example.com';
 
   doc
     .fontSize(10)

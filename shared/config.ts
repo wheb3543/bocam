@@ -18,51 +18,52 @@
  * Company name (English)
  * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_NAME = process.env.COMPANY_NAME || 'BOCAM';
+export const COMPANY_NAME = process.env.VITE_COMPANY_NAME || 'BOCAM';
 
 /**
  * Company name (Arabic)
  * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_ARABIC_NAME = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
+export const COMPANY_ARABIC_NAME = process.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM';
 
 /**
  * Company slogan (Arabic)
  * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_SLOGAN_AR = process.env.COMPANY_SLOGAN_AR || 'نظام إدارة متكامل';
+export const COMPANY_SLOGAN_AR = process.env.VITE_COMPANY_SLOGAN || 'نظام إدارة متكامل';
 
 /**
  * Company slogan (English)
  * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_SLOGAN_EN = process.env.COMPANY_SLOGAN_EN || 'Integrated management system';
+export const COMPANY_SLOGAN_EN =
+  process.env.VITE_COMPANY_SLOGAN_EN || 'Integrated management system';
 
 /**
  * Company name (English) - preferred for international contexts
  * Safe fallback only for development/tests. Production branding should be loaded from the active tenant.
  */
-export const COMPANY_ENGLISH_NAME = process.env.COMPANY_ENGLISH_NAME || 'BOCAM';
+export const COMPANY_ENGLISH_NAME = process.env.VITE_COMPANY_ENGLISH_NAME || 'BOCAM';
 
 /**
  * Company logo path
  */
-export const COMPANY_LOGO = process.env.COMPANY_LOGO || '/logos/default.png';
+export const COMPANY_LOGO = process.env.VITE_COMPANY_LOGO || '/logos/default.png';
 
 /**
  * Company phone number
  */
-export const COMPANY_PHONE = process.env.COMPANY_PHONE || '';
+export const COMPANY_PHONE = process.env.VITE_COMPANY_PHONE || '';
 
 /**
  * Company email address
  */
-export const COMPANY_EMAIL = process.env.COMPANY_EMAIL || '';
+export const COMPANY_EMAIL = process.env.VITE_COMPANY_EMAIL || '';
 
 /**
  * Company physical address
  */
-export const COMPANY_ADDRESS = process.env.COMPANY_ADDRESS || '';
+export const COMPANY_ADDRESS = process.env.VITE_COMPANY_ADDRESS || '';
 
 /**
  * Social Media URLs
@@ -72,22 +73,22 @@ export const COMPANY_ADDRESS = process.env.COMPANY_ADDRESS || '';
 /**
  * Facebook page URL
  */
-export const FACEBOOK_URL = process.env.FACEBOOK_URL || '';
+export const FACEBOOK_URL = process.env.VITE_FACEBOOK_URL || '';
 
 /**
  * Instagram profile URL
  */
-export const INSTAGRAM_URL = process.env.INSTAGRAM_URL || '';
+export const INSTAGRAM_URL = process.env.VITE_INSTAGRAM_URL || '';
 
 /**
  * Twitter/X profile URL
  */
-export const TWITTER_URL = process.env.TWITTER_URL || '';
+export const TWITTER_URL = process.env.VITE_TWITTER_URL || '';
 
 /**
  * LinkedIn company page URL
  */
-export const LINKEDIN_URL = process.env.LINKEDIN_URL || '';
+export const LINKEDIN_URL = process.env.VITE_LINKEDIN_URL || '';
 
 /**
  * Meta Pixel Configuration

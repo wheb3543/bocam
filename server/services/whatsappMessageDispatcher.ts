@@ -26,7 +26,7 @@ import { sendWhatsAppTextMessage, sendWhatsAppTemplateMessage } from './whatsapp
 import { createLogger } from '../_core/logger';
 
 const logger = createLogger('whatsappMessageDispatcher');
-const defaultBrandName = process.env.TENANT_NAME || process.env.COMPANY_ARABIC_NAME || 'BOCAM';
+const defaultBrandName = process.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM';
 
 export type EntityType = 'appointment' | 'camp_registration' | 'offer_lead';
 export type TriggerEvent =

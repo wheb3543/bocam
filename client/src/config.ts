@@ -33,71 +33,49 @@ export const BRAND_SECONDARY_COLOR = readTenantThemeValue('secondary', '#0088CC'
  * Company name (English)
  * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_NAME = readTenantValue(
-  'companyName',
-  import.meta.env.VITE_COMPANY_NAME || 'BOCAM'
-);
+export const COMPANY_NAME = readTenantValue('companyName', 'BOCAM');
 
 /**
  * Company name (Arabic)
  * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_ARABIC_NAME = readTenantValue(
-  'companyArabicName',
-  import.meta.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM'
-);
+export const COMPANY_ARABIC_NAME = readTenantValue('companyArabicName', 'BOCAM');
 
 /**
  * Company name (English) - preferred for international contexts
  * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_ENGLISH_NAME = readTenantValue(
-  'companyEnglishName',
-  import.meta.env.VITE_COMPANY_ENGLISH_NAME || 'BOCAM'
-);
+export const COMPANY_ENGLISH_NAME = readTenantValue('companyEnglishName', 'BOCAM');
 
 /**
  * Company logo path
  */
-export const COMPANY_LOGO = readTenantValue(
-  'companyLogo',
-  import.meta.env.VITE_COMPANY_LOGO || '/tenant-assets/logo-color.png'
-);
+export const COMPANY_LOGO = readTenantValue('companyLogo', '/tenant-assets/logo-color.png');
 
 /**
  * Company phone number
  */
-export const COMPANY_PHONE = readTenantValue(
-  'companyPhone',
-  import.meta.env.VITE_COMPANY_PHONE || ''
-);
+export const COMPANY_PHONE = readTenantValue('companyPhone', '');
 
 /**
  * Company email address
  */
-export const COMPANY_EMAIL = readTenantValue(
-  'companyEmail',
-  import.meta.env.VITE_COMPANY_EMAIL || ''
-);
+export const COMPANY_EMAIL = readTenantValue('companyEmail', '');
 
 /**
  * Company physical address
  */
-export const COMPANY_ADDRESS = readTenantValue(
-  'companyAddress',
-  import.meta.env.VITE_COMPANY_ADDRESS || ''
-);
+export const COMPANY_ADDRESS = readTenantValue('companyAddress', '');
 
-export const COMPANY_CITY = readTenantValue('companyCity', import.meta.env.VITE_COMPANY_CITY || '');
+export const COMPANY_CITY = readTenantValue('companyCity', '');
 
 /**
  * Company slogan/tagline
  * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_SLOGAN = readTenantValue(
-  'companySlogan',
-  import.meta.env.VITE_COMPANY_SLOGAN || 'نظام إدارة متكامل'
-);
+export const COMPANY_SLOGAN = readTenantValue('companySlogan', 'نظام إدارة متكامل');
+
+export const COMPANY_SLOGAN_EN = readTenantValue('companySloganEn', 'Integrated management system');
 
 /**
  * Privacy-policy version requiring a renewed visitor acknowledgement when changed.
@@ -113,25 +91,22 @@ export const PRIVACY_POLICY_VERSION = '2026-03-01';
 /**
  * Facebook page URL
  */
-export const FACEBOOK_URL = readTenantValue('facebookUrl', import.meta.env.VITE_FACEBOOK_URL || '');
+export const FACEBOOK_URL = readTenantValue('facebookUrl', '');
 
 /**
  * Instagram profile URL
  */
-export const INSTAGRAM_URL = readTenantValue(
-  'instagramUrl',
-  import.meta.env.VITE_INSTAGRAM_URL || ''
-);
+export const INSTAGRAM_URL = readTenantValue('instagramUrl', '');
 
 /**
  * Twitter/X profile URL
  */
-export const TWITTER_URL = readTenantValue('twitterUrl', import.meta.env.VITE_TWITTER_URL || '');
+export const TWITTER_URL = readTenantValue('twitterUrl', '');
 
 /**
  * LinkedIn company page URL
  */
-export const LINKEDIN_URL = readTenantValue('linkedinUrl', import.meta.env.VITE_LINKEDIN_URL || '');
+export const LINKEDIN_URL = readTenantValue('linkedinUrl', '');
 
 /**
  * Meta Pixel Configuration

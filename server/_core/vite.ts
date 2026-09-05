@@ -50,15 +50,16 @@ export async function setupVite(app: Express, server: Server) {
       let template = await fs.promises.readFile(templatePath, 'utf-8');
       const tenantSnapshot = {
         tenantId: process.env.TENANT_ID || '',
-        companyName: process.env.COMPANY_NAME || '',
-        companyArabicName: process.env.COMPANY_ARABIC_NAME || '',
-        companyEnglishName: process.env.COMPANY_ENGLISH_NAME || '',
-        companyLogo: process.env.COMPANY_LOGO || '',
-        companyPhone: process.env.COMPANY_PHONE || '',
-        companyEmail: process.env.COMPANY_EMAIL || '',
-        companyAddress: process.env.COMPANY_ADDRESS || '',
+        companyName: process.env.VITE_COMPANY_NAME || '',
+        companyArabicName: process.env.VITE_COMPANY_ARABIC_NAME || '',
+        companyEnglishName: process.env.VITE_COMPANY_ENGLISH_NAME || '',
+        companyLogo: process.env.VITE_COMPANY_LOGO || '',
+        companyPhone: process.env.VITE_COMPANY_PHONE || '',
+        companyEmail: process.env.VITE_COMPANY_EMAIL || '',
+        companyAddress: process.env.VITE_COMPANY_ADDRESS || '',
         companyCity: process.env.COMPANY_CITY || '',
-        companySlogan: process.env.COMPANY_SLOGAN_AR || process.env.COMPANY_SLOGAN_EN || '',
+        companySlogan: process.env.VITE_COMPANY_SLOGAN || process.env.VITE_COMPANY_SLOGAN_EN || '',
+        companySloganEn: process.env.VITE_COMPANY_SLOGAN_EN || '',
         theme: {
           primary: process.env.TENANT_THEME_PRIMARY || '',
           secondary: process.env.TENANT_THEME_SECONDARY || '',
@@ -69,10 +70,10 @@ export async function setupVite(app: Express, server: Server) {
           danger: process.env.TENANT_THEME_DANGER || '',
           warning: process.env.TENANT_THEME_WARNING || '',
         },
-        facebookUrl: process.env.FACEBOOK_URL || '',
-        instagramUrl: process.env.INSTAGRAM_URL || '',
-        twitterUrl: process.env.TWITTER_URL || '',
-        linkedinUrl: process.env.LINKEDIN_URL || '',
+        facebookUrl: process.env.VITE_FACEBOOK_URL || '',
+        instagramUrl: process.env.VITE_INSTAGRAM_URL || '',
+        twitterUrl: process.env.VITE_TWITTER_URL || '',
+        linkedinUrl: process.env.VITE_LINKEDIN_URL || '',
       };
 
       const tenantScript = `

@@ -42,13 +42,13 @@ export const branding: BrandingConfig = {
   client: {
     nameAr: 'المستشفى السعودي الألماني',
     nameEn: 'Saudi German Hospital',
-    sloganAr: 'رعاية صحية مميزة',
-    sloganEn: 'Exceptional Healthcare',
-    email: 'info@sgh.example.com',
-    phone: '+966500000000',
+    sloganAr: 'نرعاكم كأهالينا',
+    sloganEn: 'Caring like family',
+    email: 'info@sgh.ye',
+    phone: '8000018',
     city: 'صنعاء',
     addressAr: 'صنعاء - اليمن',
-    addressEn: 'Sanaa - Yemen',
+    addressEn: "Sana'a, Yemen",
   },
   theme: {
     primary: '#0F4C81',
@@ -72,8 +72,8 @@ export const branding: BrandingConfig = {
   contact: {
     facebook: 'https://facebook.com/sgh',
     instagram: 'https://instagram.com/sgh',
-    twitter: 'https://twitter.com/sgh',
-    linkedin: 'https://linkedin.com/company/sgh',
+    twitter: '',
+    linkedin: '',
   },
 };
 

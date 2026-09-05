@@ -185,8 +185,8 @@ export function generateNewLeadEmail(lead: {
           <p>${companyName}</p>
           <p>${companySlogan}</p>
           <p style="margin-top: 10px;">
-            <a href="tel:${(process.env.COMPANY_PHONE || '').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
-              ${process.env.COMPANY_PHONE ? `الرقم: ${process.env.COMPANY_PHONE}` : 'رقم الاتصال غير متوفر'}
+            <a href="tel:${(process.env.VITE_COMPANY_PHONE || '').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
+              ${process.env.VITE_COMPANY_PHONE ? `الرقم: ${process.env.VITE_COMPANY_PHONE}` : 'رقم الاتصال غير متوفر'}
             </a>
           </p>
         </div>
@@ -211,7 +211,10 @@ export async function sendNewLeadNotification(lead: {
   const emailHtml = generateNewLeadEmail(lead);
 
   const recipientEmail =
-    process.env.HOSPITAL_EMAIL || process.env.COMPANY_EMAIL || COMPANY_EMAIL || 'info@example.com';
+    process.env.HOSPITAL_EMAIL ||
+    process.env.VITE_COMPANY_EMAIL ||
+    COMPANY_EMAIL ||
+    'info@example.com';
 
   return sendEmail({
     to: recipientEmail,
@@ -375,8 +378,8 @@ export async function sendNewAppointmentEmail(params: {
           <p>${companyName}</p>
           <p>${companySlogan}</p>
           <p style="margin-top: 10px;">
-            <a href="tel:${(process.env.COMPANY_PHONE || '').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
-              ${process.env.COMPANY_PHONE ? `الرقم: ${process.env.COMPANY_PHONE}` : 'رقم الاتصال غير متوفر'}
+            <a href="tel:${(process.env.VITE_COMPANY_PHONE || '').replace(/\s+/g, '')}" style="color: #00A3E0; text-decoration: none;">
+              ${process.env.VITE_COMPANY_PHONE ? `الرقم: ${process.env.VITE_COMPANY_PHONE}` : 'رقم الاتصال غير متوفر'}
             </a>
           </p>
         </div>
@@ -386,7 +389,10 @@ export async function sendNewAppointmentEmail(params: {
   `;
 
   const recipientEmail =
-    process.env.HOSPITAL_EMAIL || process.env.COMPANY_EMAIL || COMPANY_EMAIL || 'info@example.com';
+    process.env.HOSPITAL_EMAIL ||
+    process.env.VITE_COMPANY_EMAIL ||
+    COMPANY_EMAIL ||
+    'info@example.com';
 
   return sendEmail({
     to: recipientEmail,

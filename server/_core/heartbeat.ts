@@ -32,6 +32,9 @@ interface HeartbeatData {
   timezone: string;
   features: string[];
   signature: string; // توقيع رقمي للتحقق من صحة البيانات
+  systemId?: number;
+  instanceName?: string;
+  serverUrl?: string;
 }
 
 /**
@@ -88,6 +91,17 @@ function collectHeartbeatData(): HeartbeatData {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       features: licenseInfo.features,
       signature,
+      systemId: Number(process.env.IDEA_HUB_SYSTEM_ID ?? 0) || undefined,
+      instanceName: (
+        process.env.TENANT_ID ||
+        process.env.VITE_COMPANY_ENGLISH_NAME ||
+        'bocam'
+      ).trim(),
+      serverUrl: (
+        process.env.BOCAM_PUBLIC_URL ||
+        process.env.SERVER_URL ||
+        'http://localhost:3000'
+      ).trim(),
     };
   } catch (error) {
     logger.error('Error collecting heartbeat data:', error);
@@ -129,6 +143,9 @@ async function sendHeartbeat(): Promise<boolean> {
         status: 'online',
         version: heartbeatData.licenseVersion,
         timestamp: Date.now(),
+        systemId: heartbeatData.systemId,
+        instanceName: heartbeatData.instanceName,
+        serverUrl: heartbeatData.serverUrl,
       }),
       signal: controller.signal,
     });

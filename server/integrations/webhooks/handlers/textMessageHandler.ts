@@ -4,7 +4,7 @@ import { processIncomingMessage } from '../../../services/whatsappAutoReply';
 import { updateWhatsAppUserOptIn, createWhatsAppUserOptIn } from '../../../database/db';
 
 const logger = createLogger('textMessageHandler');
-const companyName = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
+const companyName = process.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM';
 
 /**
  * معالجة الرسائل النصية الواردة

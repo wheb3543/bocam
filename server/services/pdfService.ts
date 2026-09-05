@@ -63,8 +63,8 @@ function addHeader(doc: PDFDocumentInstance, metadata: ExportMetadata) {
   }
 
   // معلومات الاتصال على اليسار
-  const companyPhone = process.env.COMPANY_PHONE || 'رقم الاتصال غير متوفر';
-  const companyEmail = process.env.COMPANY_EMAIL || 'info@example.com';
+  const companyPhone = process.env.VITE_COMPANY_PHONE || 'رقم الاتصال غير متوفر';
+  const companyEmail = process.env.VITE_COMPANY_EMAIL || 'info@example.com';
 
   doc
     .fontSize(10)

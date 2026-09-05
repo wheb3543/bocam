@@ -903,8 +903,8 @@ export const textContentRouter = router({
     let homepageId: number;
 
     if (existingPages.length === 0) {
-      const tenantArabicName = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
-      const tenantEnglishName = process.env.COMPANY_ENGLISH_NAME || 'BOCAM';
+      const tenantArabicName = process.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM';
+      const tenantEnglishName = process.env.VITE_COMPANY_ENGLISH_NAME || 'BOCAM';
       const tenantCity = process.env.COMPANY_CITY || 'صنعاء';
 
       const insertResult = await db.insert(pages).values({
@@ -939,7 +939,7 @@ export const textContentRouter = router({
       .where(and(eq(seoSettings.slug, 'home'), eq(seoSettings.language, 'ar')))
       .limit(1);
     if (homepageSeo.length === 0) {
-      const tenantArabicName = process.env.COMPANY_ARABIC_NAME || 'BOCAM';
+      const tenantArabicName = process.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM';
       const tenantCity = process.env.COMPANY_CITY || 'صنعاء';
 
       await db.insert(seoSettings).values({
@@ -1144,7 +1144,7 @@ export const textContentRouter = router({
       {
         key: 'about.title.ar',
         language: 'ar',
-        content: `عن ${process.env.COMPANY_ARABIC_NAME || 'BOCAM'} - ${process.env.COMPANY_CITY || 'صنعاء'}`,
+        content: `عن ${process.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM'} - ${process.env.COMPANY_CITY || 'صنعاء'}`,
         section: 'about',
         pageId: homepageId,
         type: 'title' as const,
@@ -1152,7 +1152,7 @@ export const textContentRouter = router({
       {
         key: 'about.title.en',
         language: 'en',
-        content: `About ${process.env.COMPANY_ENGLISH_NAME || 'BOCAM'} – ${process.env.COMPANY_CITY || "Sana'a"}`,
+        content: `About ${process.env.VITE_COMPANY_ENGLISH_NAME || 'BOCAM'} – ${process.env.COMPANY_CITY || "Sana'a"}`,
         section: 'about',
         pageId: homepageId,
         type: 'title' as const,
@@ -1322,7 +1322,7 @@ export const textContentRouter = router({
       {
         key: 'about.image.caption.ar',
         language: 'ar',
-        content: `${process.env.COMPANY_ARABIC_NAME || 'BOCAM'}${process.env.COMPANY_CITY ? ` - ${process.env.COMPANY_CITY}` : ''}`,
+        content: `${process.env.VITE_COMPANY_ARABIC_NAME || 'BOCAM'}${process.env.COMPANY_CITY ? ` - ${process.env.COMPANY_CITY}` : ''}`,
         section: 'about',
         pageId: homepageId,
         type: 'text' as const,

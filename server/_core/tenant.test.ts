@@ -34,8 +34,8 @@ describe('tenant runtime loader', () => {
       path.join(tenantDir, '.env'),
       [
         'TENANT_ID=tenant-demo',
-        'COMPANY_NAME=Example Clinic',
-        'COMPANY_ARABIC_NAME=عيادة مثال',
+        'VITE_COMPANY_NAME=Example Clinic',
+        'VITE_COMPANY_ARABIC_NAME=عيادة مثال',
         'DB_HOST=tenant-db',
         'DB_PORT=3307',
         'DB_NAME=example_db',
@@ -71,8 +71,8 @@ export default branding;
 
     process.env.TENANT_ID = 'tenant-demo';
     process.env.TENANT_PATH = tenantDir;
-    delete process.env.COMPANY_NAME;
-    delete process.env.COMPANY_ARABIC_NAME;
+    delete process.env.VITE_COMPANY_NAME;
+    delete process.env.VITE_COMPANY_ARABIC_NAME;
     delete process.env.DB_HOST;
     delete process.env.DB_PORT;
     delete process.env.DB_NAME;
@@ -91,13 +91,13 @@ export default branding;
   it('loads tenant env and branding values before the app starts', async () => {
     await applyTenantRuntimeConfig();
 
-    expect(process.env.COMPANY_NAME).toBe('Example Clinic');
-    expect(process.env.COMPANY_ARABIC_NAME).toBe('عيادة مثال');
+    expect(process.env.VITE_COMPANY_NAME).toBe('Example Clinic');
+    expect(process.env.VITE_COMPANY_ARABIC_NAME).toBe('عيادة مثال');
     expect(process.env.DB_HOST).toBe('tenant-db');
     expect(process.env.DB_PORT).toBe('3307');
     expect(process.env.DB_NAME).toBe('example_db');
-    expect(process.env.COMPANY_EMAIL).toBe('hello@example.com');
-    expect(process.env.COMPANY_PHONE).toBe('+966500000001');
+    expect(process.env.VITE_COMPANY_EMAIL).toBe('hello@example.com');
+    expect(process.env.VITE_COMPANY_PHONE).toBe('+966500000001');
     expect(process.env.TENANT_THEME_PRIMARY).toBe('#123456');
     expect(process.env.TENANT_THEME_SECONDARY).toBe('#654321');
     expect(process.env.DATABASE_URL).toBe('mysql://root@tenant-db:3307/example_db');
