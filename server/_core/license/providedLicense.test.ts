@@ -6,7 +6,7 @@ import { getHardwareId, verifySignature } from './helpers';
 
 describe('provided production license', () => {
   it('has a valid signature and enables all licensed features', () => {
-    const licensePath = path.join(process.cwd(), 'license.json');
+    const licensePath = path.join(process.cwd(), 'tenants', 'tenant-sgh', 'license.json');
     const license = JSON.parse(fs.readFileSync(licensePath, 'utf-8')) as { key: string };
     const result = verifySignature(license.key);
 

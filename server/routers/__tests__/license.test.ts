@@ -25,7 +25,7 @@ describe('License Router - License Tests', () => {
       vi.spyOn(fs, 'existsSync').mockReturnValue(true);
 
       // Act
-      const exists = fs.existsSync('license.json');
+      const exists = fs.existsSync('tenants/tenant-sgh/license.json');
 
       // Assert
       expect(exists).toBe(true);
@@ -36,7 +36,7 @@ describe('License Router - License Tests', () => {
       vi.spyOn(fs, 'existsSync').mockReturnValue(false);
 
       // Act
-      const exists = fs.existsSync('license.json');
+      const exists = fs.existsSync('tenants/tenant-sgh/license.json');
 
       // Assert
       expect(exists).toBe(false);

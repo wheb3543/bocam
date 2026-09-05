@@ -1,0 +1,16 @@
+{
+  "key": "eyJwYXlsb2FkIjp7ImhpZCI6IjY2Qjk1RDFDQjlBOCIsImV4cCI6MTgyMDE4ODc5OSwiZmVhdCI6WyJyZXBvcnRzIiwid2hhdHNhcHAiLCJwYXRpZW50X3BvcnRhbCIsImNhbXBzIiwib2ZmZXJzIiwiYW5hbHl0aWNzIiwiYXBwb2ludG1lbnRzIl0sImlhdCI6MTc4ODYwMjY1NCwidmVyIjoiMS4wLjAifSwic2lnbmF0dXJlIjoiVlVENE90SVlBaVB0WXBDeXZFN3haZFRSMDBWVUQvRWVReUJsd2E3bE5TUGh3T3B6U3ZaL1pCK1kxVUlOdjMrRkhoRFVIQUJpSUc4WGxFRGExdGFiRHVKMUJKdVNhc1dmSFVBL2xYcC9XNlV3QjFhT000RzFaYnFYKzdLc283Vi9VY3RmbzRBaCtWWTRodjdMM3UrNWNxeWxGRTVZMlBUWjhhVVhjV0RPNk5TTjVDLzNXNW0vaHhQMnNrRVAwWGVEbEd5ZnFoekF6dnM1UVhMblRIOWxpL1RwcEN1ZjFWVjc4SEMrc25DT010b0JrS3NGb1BBOFRabjN2RHBmWnBneG9JZXdVZlVaRll4NFpZamx5Vk43eitKTTd1bDgwalJVejZzLzhWWEtJbnEraGNVeEhWVnBuZHYwdml4T2xXYU5DanFza2l2N29oMFR4UUlkMTU1VG1nPT0ifQ==",
+  "hardwareId": "66B95D1CB9A8",
+  "expiryDate": "2027-09-05T23:59:59.999Z",
+  "features": [
+    "reports",
+    "whatsapp",
+    "patient_portal",
+    "camps",
+    "offers",
+    "analytics",
+    "appointments"
+  ],
+  "issuedAt": "2026-09-05T10:04:14.182Z",
+  "version": "1.0.0"
+}

@@ -190,11 +190,11 @@ docker-compose restart mysql
 ### مشاكل في الترخيص:
 
 ```bash
-# التحقق من وجود ملف الترخيص
-docker-compose exec bocam-crm ls -la /app/license.json
+# التحقق من وجود ملف ترخيص العميل
+docker-compose exec bocam-crm ls -la /app/tenants/tenant-sgh/license.json
 
-# عرض ملف الترخيص
-docker-compose exec bocam-crm cat /app/license.json
+# عرض ملف ترخيص العميل
+docker-compose exec bocam-crm cat /app/tenants/tenant-sgh/license.json
 
 # التحقق من المفاتيح
 docker-compose exec bocam-crm ls -la /app/license-keys/

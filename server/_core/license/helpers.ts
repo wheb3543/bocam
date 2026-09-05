@@ -110,7 +110,7 @@ export function getHardwareId(): string {
  * Get license file path
  *
  * Returns the path to the license.json file.
- * First checks current directory, then checks root directory.
+ * Uses the configured tenant path, then the active tenant root.
  *
  * @returns Path to license.json file
  */
@@ -127,20 +127,8 @@ export function getLicenseFilePath(): string {
     return path.join(tenantRootLicense, 'license.json');
   }
 
-  // Check current directory first
-  const currentDirLicense = path.join(process.cwd(), 'license.json');
-  if (fs.existsSync(currentDirLicense)) {
-    return currentDirLicense;
-  }
-
-  // Check root directory
-  const rootDirLicense = path.join(process.cwd(), '..', 'license.json');
-  if (fs.existsSync(rootDirLicense)) {
-    return rootDirLicense;
-  }
-
-  // Return default path in current directory
-  return currentDirLicense;
+  const tenantId = process.env.TENANT_ID?.trim() || 'tenant-sgh';
+  return path.resolve(process.cwd(), 'tenants', tenantId, 'license.json');
 }
 
 /**

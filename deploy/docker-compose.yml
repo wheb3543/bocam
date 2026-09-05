@@ -29,8 +29,8 @@ services:
       - META_PIXEL_ID=${META_PIXEL_ID}
       - META_ACCESS_TOKEN=${META_ACCESS_TOKEN}
     volumes:
-      # Mount license file
-      - ../license.json:/app/license.json:ro
+      # Mount the active tenant license file
+      - ../tenants/tenant-sgh/license.json:/app/tenants/tenant-sgh/license.json:ro
       # Mount license keys
       - ../license-keys:/app/license-keys:ro
       # Mount last successful run for heartbeat
