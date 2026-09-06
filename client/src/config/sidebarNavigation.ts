@@ -1,5 +1,4 @@
 import {
-  LayoutDashboard,
   Settings as SettingsIcon,
   Send,
   MessageSquare,
@@ -35,6 +34,7 @@ import {
   RotateCw,
   MoreHorizontal,
   Cloud,
+  Activity,
 } from 'lucide-react';
 import type { RolePermission } from '../../../shared/rolePermissions';
 
@@ -201,6 +201,7 @@ export const allToolsGroups: NavGroup[] = [
         feature: 'patient_portal',
       },
       { id: 'tasks', title: 'المهام', href: '/admin/bookings/tasks', icon: CheckSquare },
+      { id: 'support', title: 'تذاكر الدعم', href: '/admin/support', icon: Headphones },
       {
         id: 'camp-stats',
         title: 'إحصائيات المخيمات',
@@ -216,6 +217,12 @@ export const allToolsGroups: NavGroup[] = [
     items: [
       { id: 'management', title: 'الإدارة', href: '/admin/management', icon: SettingsIcon },
       { id: 'content', title: 'المحتوى', href: '/admin/content/content', icon: FileEdit },
+      {
+        id: 'media-library',
+        title: 'مكتبة الوسائط',
+        href: '/admin/content/media-library',
+        icon: FolderKanban,
+      },
       { id: 'publishing', title: 'النشر', href: '/admin/content/publishing', icon: Send },
     ],
   },
@@ -228,6 +235,13 @@ export const allToolsGroups: NavGroup[] = [
         title: 'واتساب',
         href: '/admin/whatsapp',
         icon: MessageCircle,
+        feature: 'whatsapp',
+      },
+      {
+        id: 'whatsapp-dashboard',
+        title: 'لوحة واتساب',
+        href: '/admin/whatsapp/whatsapp-dashboard',
+        icon: Gauge,
         feature: 'whatsapp',
       },
       {
@@ -318,6 +332,41 @@ export const allToolsGroups: NavGroup[] = [
         feature: 'whatsapp',
       },
       {
+        id: 'whatsapp-account-health',
+        title: 'صحة حساب واتساب',
+        href: '/admin/whatsapp/account-health',
+        icon: Activity,
+        feature: 'whatsapp',
+      },
+      {
+        id: 'whatsapp-phone-quality',
+        title: 'جودة الرقم',
+        href: '/admin/whatsapp/phone-quality',
+        icon: Smartphone,
+        feature: 'whatsapp',
+      },
+      {
+        id: 'whatsapp-subscriptions',
+        title: 'اشتراكات واتساب',
+        href: '/admin/whatsapp/subscriptions',
+        icon: Users,
+        feature: 'whatsapp',
+      },
+      {
+        id: 'whatsapp-webhook-inspector',
+        title: 'فاحص Webhook',
+        href: '/admin/whatsapp/webhook-inspector',
+        icon: Shield,
+        feature: 'whatsapp',
+      },
+      {
+        id: 'whatsapp-lab-results',
+        title: 'نتائج المختبر عبر واتساب',
+        href: '/admin/whatsapp/lab-results',
+        icon: FileText,
+        feature: 'whatsapp',
+      },
+      {
         id: 'messages',
         title: 'صندوق البريد الموحد',
         href: '/admin/communications/messages',
@@ -328,6 +377,18 @@ export const allToolsGroups: NavGroup[] = [
         title: 'إعدادات الرسائل',
         href: '/admin/message-settings',
         icon: SettingsIcon,
+      },
+      {
+        id: 'integration-settings',
+        title: 'إعدادات التكاملات',
+        href: '/admin/communications/integration-settings',
+        icon: Cloud,
+      },
+      {
+        id: 'meta-settings',
+        title: 'إعدادات Meta',
+        href: '/admin/communications/meta-settings',
+        icon: Cloud,
       },
     ],
   },
@@ -383,6 +444,13 @@ export const allToolsGroups: NavGroup[] = [
     icon: SettingsIcon,
     items: [
       { id: 'profile', title: 'الملف الشخصي', href: '/admin/profile', icon: User },
+      {
+        id: 'notifications',
+        title: 'الإشعارات',
+        href: '/admin/notifications',
+        icon: MessageCircle,
+      },
+      { id: 'offline', title: 'وضع عدم الاتصال', href: '/admin/offline', icon: Cloud },
       { id: 'users', title: 'المستخدمين', href: '/admin/users/users', icon: Users },
       {
         id: 'campaigns',
@@ -420,12 +488,6 @@ export const allToolsGroups: NavGroup[] = [
         title: 'إعدادات متقدمة',
         href: '/admin/advanced-settings',
         icon: MoreHorizontal,
-      },
-      {
-        id: 'departments-specialties',
-        title: 'الأقسام والتخصصات',
-        href: '/admin/departments-specialties',
-        icon: LayoutDashboard,
       },
     ],
   },

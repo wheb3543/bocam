@@ -1,8 +1,8 @@
 import { useLocation } from 'wouter';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useNotificationSound } from '@/hooks/integrations/useNotificationSound';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useRecentlyUsed } from '@/hooks/data/useRecentlyUsed';
+import InstallPWAButton from '@/components/InstallPWAButton';
 import { useEffect, useRef, useCallback } from 'react';
 import { APP_LOGO, COMPANY_ARABIC_NAME } from '@/const';
 import {
@@ -25,19 +25,7 @@ import { useSidebarNavigation } from '@/hooks/layout/useSidebarNavigation';
 import SidebarBadge from '@/components/layout/SidebarBadge';
 import SortableEditItem from '@/components/layout/SortableEditItem';
 import type { NavItem } from '@/config/sidebarNavigation';
-import {
-  Menu,
-  X,
-  Search,
-  GripVertical,
-  Check,
-  Volume2,
-  VolumeX,
-  Sun,
-  Moon,
-  ChevronDown,
-  Settings as SettingsIcon,
-} from 'lucide-react';
+import { Menu, X, Search, GripVertical, Check, ChevronDown, HelpCircle } from 'lucide-react';
 
 interface DashboardSidebarProps {
   currentPath: string;
@@ -50,8 +38,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
 
   const sidebarNav = useSidebarNavigation(currentPath);
 
-  const { soundEnabled, toggleSound } = useNotificationSound();
-  const { theme, toggleTheme } = useTheme();
+  const { addRecentlyUsed, recentlyUsed } = useRecentlyUsed();
 
   // DnD sensors
   const sensors = useSensors(
@@ -114,13 +101,19 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
 
   const handleNavClick = useCallback(
     (href: string) => {
+      const item = sidebarNav.allAvailableNavItems.find((navItem) => navItem.href === href);
+      if (item) {
+        addRecentlyUsed({ id: item.id, title: item.title, href: item.href });
+      }
       setLocation(href);
       sidebarNav.setMobileOpen(false);
       sidebarNav.setAllToolsOpen(false);
       sidebarNav.setEditMode(false);
     },
-    [setLocation, sidebarNav]
+    [addRecentlyUsed, setLocation, sidebarNav]
   );
+
+  const mobileNavItems = sidebarNav.primaryNavItems.slice(0, 4);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -166,8 +159,8 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
       </div>
 
       {/* Primary Nav Items */}
-      <ScrollArea className="flex-1 py-0.5">
-        <nav className="flex flex-col items-center gap-0 px-1">
+      <ScrollArea dir="ltr" className="min-h-0 flex-1 py-0.5">
+        <nav dir="rtl" className="flex flex-col items-center gap-0 px-1">
           {sidebarNav.primaryNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = isItemActive(item.href);
@@ -214,6 +207,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
 
       {/* Bottom Actions */}
       <div className="flex flex-col items-center gap-0 px-1 py-1 border-t border-gray-100 dark:border-gray-700">
+        <InstallPWAButton appType="admin" variant="sidebar" />
         {/* All Tools Button */}
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
@@ -235,78 +229,24 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
           </TooltipContent>
         </Tooltip>
 
-        {/* Notification Sound Toggle */}
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <button
-              onClick={toggleSound}
-              className={cn(
-                'w-full flex flex-col items-center gap-0 py-1.5 px-0.5 rounded-md transition-all duration-150',
-                soundEnabled
-                  ? 'text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20'
-                  : 'text-muted-foreground hover:bg-muted/50 hover:text-muted-foreground dark:text-muted-foreground dark:hover:bg-gray-800 dark:hover:text-muted-foreground'
-              )}
-            >
-              {soundEnabled ? (
-                <Volume2 className="h-[18px] w-[18px]" />
-              ) : (
-                <VolumeX className="h-[18px] w-[18px]" />
-              )}
-              <span className="text-[8px] font-medium mt-0.5">
-                {soundEnabled ? 'التنبيه' : 'صامت'}
-              </span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="text-xs">
-            {soundEnabled ? 'إيقاف صوت التنبيه' : 'تفعيل صوت التنبيه'}
-          </TooltipContent>
-        </Tooltip>
-
-        {/* Dark Mode Toggle */}
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <button
-              onClick={toggleTheme}
-              className={cn(
-                'w-full flex flex-col items-center gap-0 py-1.5 px-0.5 rounded-md transition-all duration-150',
-                theme === 'dark'
-                  ? 'text-amber-400 hover:bg-amber-50/10'
-                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground dark:hover:bg-gray-800'
-              )}
-            >
-              {theme === 'dark' ? (
-                <Sun className="h-[18px] w-[18px]" />
-              ) : (
-                <Moon className="h-[18px] w-[18px]" />
-              )}
-              <span className="text-[8px] font-medium mt-0.5">
-                {theme === 'dark' ? 'مضيء' : 'مظلم'}
-              </span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="text-xs">
-            {theme === 'dark' ? 'التبديل إلى الوضع المضيء' : 'التبديل إلى الوضع المظلم'}
-          </TooltipContent>
-        </Tooltip>
-
         {/* Settings */}
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
             <button
-              onClick={() => handleNavClick('/admin/settings')}
+              onClick={() => handleNavClick('/admin/support')}
               className={cn(
                 'w-full flex flex-col items-center gap-0 py-1.5 px-0.5 rounded-md transition-all duration-150',
-                isItemActive('/admin/settings')
+                isItemActive('/admin/support')
                   ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30'
                   : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground dark:text-muted-foreground dark:hover:bg-gray-800 dark:hover:text-gray-300'
               )}
             >
-              <SettingsIcon className="h-[18px] w-[18px]" />
-              <span className="text-[8px] font-medium mt-0.5">الإعدادات</span>
+              <HelpCircle className="h-[18px] w-[18px]" />
+              <span className="text-[8px] font-medium mt-0.5">المساعدة</span>
             </button>
           </TooltipTrigger>
           <TooltipContent side="left" className="text-xs">
-            الإعدادات
+            المساعدة
           </TooltipContent>
         </Tooltip>
       </div>
@@ -370,6 +310,35 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
           </div>
         )}
 
+        {!sidebarNav.editMode && recentlyUsed.length > 0 && (
+          <div className="border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-bold text-foreground dark:text-gray-100">
+                المستخدمة مؤخرًا
+              </span>
+              <span className="text-[10px] text-muted-foreground">آخر 5 صفحات</span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {recentlyUsed.map((item) => {
+                const RecentIcon = sidebarNav.allAvailableNavItems.find(
+                  (navItem) => navItem.id === item.id
+                )?.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleNavClick(item.href)}
+                    className="flex min-w-[116px] shrink-0 items-center gap-2 rounded-lg border border-border bg-muted/40 px-2.5 py-2 text-right text-xs text-foreground hover:bg-muted"
+                  >
+                    {RecentIcon ? <RecentIcon className="h-4 w-4 shrink-0 text-primary" /> : null}
+                    <span className="truncate">{item.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Edit Mode Header */}
         {sidebarNav.editMode && (
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
@@ -400,14 +369,17 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
         )}
 
         {/* Tools List / Edit List */}
-        <ScrollArea className="flex-1">
+        <div
+          dir="ltr"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]"
+        >
           {sidebarNav.editMode ? (
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-              <div className="py-2 px-3">
+              <div dir="rtl" className="py-2 px-3">
                 {sidebarNav.editingItemIds.length > 0 && (
                   <>
                     <div className="text-[10px] font-bold text-muted-foreground dark:text-muted-foreground uppercase tracking-wider px-2 py-1 mb-1 flex items-center gap-1">
@@ -419,7 +391,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
                       strategy={verticalListSortingStrategy}
                     >
                       {sidebarNav.editingItemIds
-                        .map((id) => sidebarNav.primaryNavItems.find((item) => item.id === id))
+                        .map((id) => sidebarNav.allAvailableNavItems.find((item) => item.id === id))
                         .filter((item): item is NavItem => item !== undefined)
                         .map((item) => (
                           <SortableEditItem
@@ -437,7 +409,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
                 <div className="text-[10px] font-bold text-muted-foreground dark:text-muted-foreground uppercase tracking-wider px-2 py-1 mb-1 mt-3">
                   متاح للإضافة
                 </div>
-                {sidebarNav.primaryNavItems
+                {sidebarNav.allAvailableNavItems
                   .filter((item) => !sidebarNav.editingItemIds.includes(item.id))
                   .map((item) => (
                     <SortableEditItem
@@ -451,15 +423,20 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
               </div>
             </DndContext>
           ) : (
-            <div className="py-2">
+            <div dir="rtl" className="space-y-3 p-3">
               {sidebarNav.searchedToolsGroups.map((group) => (
-                <div key={group.label} className="mb-4">
+                <section
+                  key={group.label}
+                  className="overflow-hidden rounded-xl border border-border/80 bg-muted/20 shadow-sm dark:bg-gray-950/40"
+                >
                   <button
                     onClick={() => sidebarNav.toggleGroup(group.label)}
-                    className="w-full flex items-center justify-between px-4 py-2 text-sm font-semibold text-foreground dark:text-gray-300 hover:bg-muted dark:hover:bg-gray-800 transition-colors"
+                    className="sticky top-0 z-10 flex w-full items-center justify-between border-b border-border/70 bg-muted/80 px-4 py-3 text-sm font-bold text-foreground backdrop-blur dark:bg-gray-800/90 dark:text-gray-100"
                   >
                     <div className="flex items-center gap-2">
-                      <group.icon className="h-4 w-4" />
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <group.icon className="h-4 w-4" />
+                      </span>
                       {group.label}
                     </div>
                     <ChevronDown
@@ -470,7 +447,7 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
                     />
                   </button>
                   {sidebarNav.expandedGroups[group.label] && (
-                    <div className="mt-1 space-y-0.5">
+                    <div className="space-y-1 p-2">
                       {group.items.map((item) => {
                         const Icon = item.icon;
                         const isActive = isItemActive(item.href);
@@ -479,28 +456,29 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
                             key={item.id}
                             onClick={() => handleNavClick(item.href)}
                             className={cn(
-                              'w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors',
+                              'w-full flex items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-sm transition-colors',
                               isActive
-                                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                                : 'text-muted-foreground hover:bg-muted dark:hover:bg-gray-800'
+                                ? 'border-blue-200 bg-blue-50 font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                                : 'text-muted-foreground hover:border-border hover:bg-background dark:hover:bg-gray-800'
                             )}
                           >
-                            <Icon className="h-4 w-4" />
+                            <Icon className="h-4 w-4 shrink-0" />
                             <span>{item.title}</span>
                           </button>
                         );
                       })}
                     </div>
                   )}
-                </div>
+                </section>
               ))}
             </div>
           )}
-        </ScrollArea>
+        </div>
 
         {/* Edit Mode Toggle */}
         {!sidebarNav.editMode && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+            <InstallPWAButton appType="admin" variant="sidebar" />
             <button
               onClick={sidebarNav.startEditMode}
               className="w-full text-xs px-3 py-2 rounded-md text-muted-foreground hover:bg-muted dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
@@ -514,10 +492,57 @@ export default function DashboardSidebar({ currentPath }: DashboardSidebarProps)
     </>
   );
 
+  const renderMobileBottomNav = () => (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-lg lg:hidden"
+      dir="rtl"
+    >
+      <div className="flex h-[4.5rem] w-full items-center justify-around gap-1 px-2">
+        {mobileNavItems.map((item) => {
+          const Icon = item.icon;
+          const active = isItemActive(item.href);
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleNavClick(item.href)}
+              className={cn(
+                'flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px]',
+                active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'
+              )}
+              aria-current={active ? 'page' : undefined}
+            >
+              <Icon className={cn('h-6 w-6', active && 'stroke-[2.5]')} />
+              <span className="max-w-full truncate">{item.title}</span>
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => handleNavClick('/admin/support')}
+          className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] text-muted-foreground hover:bg-muted"
+          aria-label="المساعدة"
+        >
+          <HelpCircle className="h-6 w-6" />
+          <span>المساعدة</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => sidebarNav.setAllToolsOpen(true)}
+          className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] text-muted-foreground hover:bg-muted"
+        >
+          <Menu className="h-6 w-6" />
+          <span>المزيد</span>
+        </button>
+      </div>
+    </nav>
+  );
+
   return (
     <>
       {renderDesktopSlimSidebar()}
       {renderAllToolsPanel()}
+      {renderMobileBottomNav()}
     </>
   );
 }

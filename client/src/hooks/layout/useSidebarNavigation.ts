@@ -26,6 +26,13 @@ export function useSidebarNavigation(currentPath: string) {
   const canLoadAnyBadge =
     can('leads.view') || can('tasks.view') || can('communications.view') || can('users.manage');
 
+  const canAccessNavItem = useCallback(
+    (item: NavItem) =>
+      (!item.feature || hasFeature(item.feature)) &&
+      (!item.requiredPermission || (!arePermissionsLoading && can(item.requiredPermission))),
+    [arePermissionsLoading, can, hasFeature]
+  );
+
   // Fetch sidebar badge counts (auto-refresh every 60 seconds)
   const { data: badgeCounts } = trpc.sidebarBadges.useQuery(undefined, {
     enabled: !arePermissionsLoading && canLoadAnyBadge,
@@ -52,23 +59,30 @@ export function useSidebarNavigation(currentPath: string) {
     [badgeCounts]
   );
 
-  // العناصر الرئيسية المعروضة في الشريط الضيق (مع التحقق من الميزات)
-  const primaryNavItems = useMemo(() => {
-    return visibleItemIds
-      .map((id) => allNavItems.find((item) => item.id === id))
-      .filter((item): item is NavItem => item !== undefined)
-      .filter((item) => !item.feature || hasFeature(item.feature));
-  }, [visibleItemIds, hasFeature]);
-
   // تصفية مجموعات الأدوات بناءً على الميزات
   const filteredToolsGroups = useMemo(() => {
     return allToolsGroups
       .map((group) => ({
         ...group,
-        items: group.items.filter((item) => !item.feature || hasFeature(item.feature)),
+        items: group.items.filter((item) => canAccessNavItem(item)),
       }))
       .filter((group) => group.items.length > 0);
-  }, [hasFeature]);
+  }, [canAccessNavItem]);
+
+  // جميع صفحات الإدارة المتاحة، مجمعة من الأقسام مع إزالة التكرارات.
+  const allAvailableNavItems = useMemo(() => {
+    const items = [allNavItems[0], ...filteredToolsGroups.flatMap((group) => group.items)];
+    return Array.from(new Map(items.map((item) => [item.id, item])).values());
+  }, [filteredToolsGroups]);
+
+  // العناصر الرئيسية المعروضة في الشريط الضيق.
+  const primaryNavItems = useMemo(
+    () =>
+      visibleItemIds
+        .map((id) => allAvailableNavItems.find((item) => item.id === id))
+        .filter((item): item is NavItem => item !== undefined),
+    [allAvailableNavItems, visibleItemIds]
+  );
 
   // تصفية مجموعات الأدوات بناءً على البحث
   const searchedToolsGroups = useMemo(() => {
@@ -129,8 +143,7 @@ export function useSidebarNavigation(currentPath: string) {
 
   // Save visible items
   const saveVisibleItems = useCallback(() => {
-    const newVisibleIds = [...DEFAULT_VISIBLE_IDS, ...editingItemIds];
-    const uniqueIds = Array.from(new Set(newVisibleIds));
+    const uniqueIds = Array.from(new Set(['home', ...editingItemIds]));
     saveVisibleItemIds(uniqueIds);
     setVisibleItemIds(uniqueIds);
     setEditMode(false);
@@ -140,13 +153,13 @@ export function useSidebarNavigation(currentPath: string) {
   // Cancel edit mode
   const cancelEditMode = useCallback(() => {
     setEditMode(false);
-    setEditingItemIds(visibleItemIds.filter((id) => !DEFAULT_VISIBLE_IDS.includes(id)));
+    setEditingItemIds(visibleItemIds);
   }, [visibleItemIds]);
 
   // Enter edit mode
   const startEditMode = useCallback(() => {
     setEditMode(true);
-    setEditingItemIds(visibleItemIds.filter((id) => !DEFAULT_VISIBLE_IDS.includes(id)));
+    setEditingItemIds(visibleItemIds);
   }, [visibleItemIds]);
 
   return {
@@ -163,6 +176,8 @@ export function useSidebarNavigation(currentPath: string) {
     primaryNavItems,
     filteredToolsGroups,
     searchedToolsGroups,
+    allAvailableNavItems,
+    canAccessNavItem,
     badgeCounts,
 
     // Actions

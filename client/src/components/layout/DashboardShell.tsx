@@ -1,11 +1,10 @@
-import { lazy, Suspense } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { APP_LOGO, APP_TITLE, getLocalLoginUrl } from '@/const';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 
-// Lazy load sidebar to defer loading heavy navigation component
-const DashboardSidebarV2 = lazy(() => import('./DashboardSidebarV2'));
+// Temporary desktop comparison: use the legacy sidebar while evaluating it.
+import DashboardSidebar from './DashboardSidebar';
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -50,14 +49,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
   return (
     <div className="min-h-screen bg-muted/50 dark:bg-gray-950 flex" dir="rtl">
-      {/* Sidebar - Meta Business Suite Style V2 */}
-      <Suspense
-        fallback={
-          <div className="w-[60px] lg:w-64 border-l border-border dark:border-gray-700 bg-white dark:bg-gray-900 animate-pulse" />
-        }
-      >
-        <DashboardSidebarV2 currentPath={location} />
-      </Suspense>
+      {/* Temporary legacy desktop sidebar */}
+      <DashboardSidebar currentPath={location} />
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
