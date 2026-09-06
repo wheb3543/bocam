@@ -1,5 +1,4 @@
 import { useAuth } from '@/_core/hooks/useAuth';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,9 +13,8 @@ import { useLocation } from 'wouter';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useNotificationSound } from '@/hooks/integrations/useNotificationSound';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import GlobalSearch from '@/components/GlobalSearch';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { NotificationCenter } from '@/components/NotificationCenter';
+import { Button } from '@/components/ui/button';
 import { APP_LOGO, APP_TITLE } from '@/const';
 import { SupportRequestDialog } from '@/components/SupportRequestDialog';
 
@@ -62,17 +60,12 @@ export default function TopNavbar({
           )}
         </div>
 
-        {/* Left Actions: Global Search + Sound + Theme + User */}
+        {/* Actions: support request and user menu */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Global Search */}
-          <GlobalSearch />
-
           <SupportRequestDialog />
 
-          {/* Notification Center */}
           <NotificationCenter />
 
-          {/* Sound Control */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggleSound}>
@@ -84,7 +77,6 @@ export default function TopNavbar({
             </TooltipContent>
           </Tooltip>
 
-          {/* Theme Toggle */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggleTheme}>
@@ -95,9 +87,6 @@ export default function TopNavbar({
               <p>{theme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}</p>
             </TooltipContent>
           </Tooltip>
-
-          {/* Language Switcher */}
-          <LanguageSwitcher />
 
           {/* User Dropdown */}
           <DropdownMenu>
