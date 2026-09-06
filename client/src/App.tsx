@@ -11,6 +11,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { consumeToastHash } from './lib/toastHashRouter';
 const DashboardShell = lazy(() => import('@/components/layout/DashboardShell'));
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { UpdateProgressModal } from '@/components/update/UpdateProgressModal';
 import { MandatoryUpdateModal } from '@/components/update/MandatoryUpdateModal';
 import { OptionalUpdateBanner } from '@/components/update/OptionalUpdateBanner';
@@ -130,6 +131,10 @@ const AdvancedSettingsPage = lazy(() => import('./pages/admin/AdvancedSettingsPa
 const NotificationsPage = lazy(() => import('./pages/admin/NotificationsPage'));
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 
+function AdminPageHeader({ title, children }: { title: string; children: React.ReactNode }) {
+  return <DashboardLayout pageTitle={title}>{children}</DashboardLayout>;
+}
+
 // Prefetch critical pages for better performance
 function PrefetchRoutes() {
   const [location] = useLocation();
@@ -239,7 +244,11 @@ function Router() {
                 <Route path={'/admin/profile'} component={ProfilePage} />
                 <Route path={'/admin/support'} component={SupportTicketsPage} />
                 <Route path={'/admin/management'} component={ManagementPage} />
-                <Route path={'/admin/notifications'} component={NotificationsPage} />
+                <Route path={'/admin/notifications'}>
+                  <AdminPageHeader title="مركز الإشعارات">
+                    <NotificationsPage />
+                  </AdminPageHeader>
+                </Route>
                 <Route path={'/admin/content/content'} component={ContentManagementPage} />
                 <Route path={'/admin/content/media-library'} component={MediaLibraryPage} />
                 <Route path={'/admin/users/users'} component={UsersManagementPage} />
@@ -271,12 +280,16 @@ function Router() {
                 </Route>
                 <Route path={'/admin/whatsapp/broadcast'}>
                   <ProtectedRoute feature="whatsapp">
-                    <WhatsAppBroadcast />
+                    <AdminPageHeader title="البث الجماعي">
+                      <WhatsAppBroadcast />
+                    </AdminPageHeader>
                   </ProtectedRoute>
                 </Route>
                 <Route path={'/admin/whatsapp/auto-reply'}>
                   <ProtectedRoute feature="whatsapp">
-                    <WhatsAppAutoReply />
+                    <AdminPageHeader title="قواعد الرد التلقائي">
+                      <WhatsAppAutoReply />
+                    </AdminPageHeader>
                   </ProtectedRoute>
                 </Route>
                 <Route path={'/admin/whatsapp/compliance'}>
@@ -296,22 +309,30 @@ function Router() {
                 </Route>
                 <Route path={'/admin/whatsapp/account-health'}>
                   <ProtectedRoute feature="whatsapp">
-                    <WhatsAppAccountHealthPage />
+                    <AdminPageHeader title="صحة الحساب والأمان">
+                      <WhatsAppAccountHealthPage />
+                    </AdminPageHeader>
                   </ProtectedRoute>
                 </Route>
                 <Route path={'/admin/whatsapp/phone-quality'}>
                   <ProtectedRoute feature="whatsapp">
-                    <WhatsAppPhoneQualityPage />
+                    <AdminPageHeader title="جودة رقم الهاتف">
+                      <WhatsAppPhoneQualityPage />
+                    </AdminPageHeader>
                   </ProtectedRoute>
                 </Route>
                 <Route path={'/admin/whatsapp/subscriptions'}>
                   <ProtectedRoute feature="whatsapp">
-                    <WhatsAppUserSubscriptionsPage />
+                    <AdminPageHeader title="اشتراكات المستخدمين">
+                      <WhatsAppUserSubscriptionsPage />
+                    </AdminPageHeader>
                   </ProtectedRoute>
                 </Route>
                 <Route path={'/admin/whatsapp/webhook-inspector'}>
                   <ProtectedRoute feature="whatsapp">
-                    <WhatsAppWebhookInspectorPage />
+                    <AdminPageHeader title="فاحص أحداث Webhook">
+                      <WhatsAppWebhookInspectorPage />
+                    </AdminPageHeader>
                   </ProtectedRoute>
                 </Route>
                 <Route path={'/admin/whatsapp/costs'}>

@@ -105,7 +105,10 @@ export default function WhatsAppReferralsPage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      pageTitle="إحالات WhatsApp"
+      pageDescription="عرض وتحليل الإحالات من الإعلانات والمصادر الأخرى"
+    >
       <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
