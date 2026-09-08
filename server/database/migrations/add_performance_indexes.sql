@@ -1,5 +1,8 @@
--- Performance Indexes Migration
--- إضافة الفهارس لتحسين أداء قاعدة البيانات
+-- FROZEN: This legacy migration is intentionally disabled.
+-- Do not execute it until schema review is complete.
+-- The statements below are retained for audit history only.
+
+/*
 
 -- Indexes for users table
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -70,3 +73,4 @@ CREATE INDEX IF NOT EXISTS idx_appointments_patient_status ON appointments(patie
 CREATE INDEX IF NOT EXISTS idx_appointments_date_status ON appointments(date, status);
 CREATE INDEX IF NOT EXISTS idx_users_role_active ON users(role, isActive);
 CREATE INDEX IF NOT EXISTS idx_campaigns_status_dates ON campaigns(status, startDate, endDate);
+*/

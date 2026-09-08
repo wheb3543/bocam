@@ -20,6 +20,8 @@ const connectionConfig = {
   },
 };
 
+const FROZEN_MIGRATIONS = new Set(['add_performance_indexes.sql']);
+
 async function runMigrations() {
   let connection;
   try {
@@ -30,11 +32,17 @@ async function runMigrations() {
     const migrationsDir = './server/database/migrations';
     const files = readdirSync(migrationsDir)
       .filter(file => file.endsWith('.sql'))
-      .filter(file => file !== 'add_performance_indexes.sql') // تخطي هذا الملف لأنه يستخدم صيغة غير مدعومة
+      .filter(file => {
+        if (FROZEN_MIGRATIONS.has(file)) {
+          console.log(`⏸️  تم تجميد migration وتجاوزها: ${file}`);
+          return false;
+        }
+        return true;
+      })
       .filter(file => file !== 'fix_pages_column_order.sql') // تشغيل هذا الملف يدوياً لأنه يحتاج على إعادة ترتيب الأعمدة
       .sort();
 
-    console.log(`📂 العثور على ${files.length} ملفات migrations (تم تخطي add_performance_indexes.sql و fix_pages_column_order.sql)`);
+    console.log(`📂 العثور على ${files.length} ملفات migrations (تم استثناء migration المجمدة)`);
 
     for (const file of files) {
       const filePath = join(migrationsDir, file);

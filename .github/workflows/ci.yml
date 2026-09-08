@@ -133,6 +133,9 @@ jobs:
       - name: Verify unused exports audit
         run: pnpm exports:check
 
+      - name: Verify migration references match schema
+        run: pnpm schema:migrations:check
+
       - name: Publish quality baseline
         uses: actions/upload-artifact@v4
         with:

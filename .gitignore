@@ -11,6 +11,7 @@ out/
 
 # Local backups (حظر مجلد النسخ الاحتياطية)
 backups/
+artifacts/phase-zero/
 
 # Update files (حظر مجلد التحديثات)
 updates/
