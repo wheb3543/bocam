@@ -2,7 +2,9 @@
 
 **تاريخ المراجعة:** 8 سبتمبر 2026  
 **النطاق:** `drizzle/schema.ts`، `drizzle/relations.ts`، ملفات SQL في `drizzle/migrations/` و`server/database/migrations/`، واستعلامات `server/database/db/` و`server/routers/`.  
-**الحالة:** مراجعة ثابتة، دون تعديل المخطط أو تنفيذ migration على قاعدة بيانات.
+**الحالة:** مراجعة ثابتة مع تنفيذ ضوابط المرحلة الصفرية؛ لم يتم تعديل `schema.ts` أو تطبيق migration تغيّر المخطط.
+
+**آخر تحديث:** 8 سبتمبر 2026. تم تجميد migration الفهارس legacy، وإضافة فحص CI لمراجع migrations، وإضافة أداة توليد backup وorphan counts و`EXPLAIN` baseline عبر `pnpm db:phase-zero`. القياسات المنفذة محليًا baseline تقنية وليست اعتمادًا لبيانات الإنتاج؛ يجب إعادة تشغيل الأداة على staging قريب من الإنتاج قبل اعتماد أي فهارس أو Foreign Keys.
 
 ## الخلاصة
 
@@ -48,12 +50,14 @@
 
 ### المرحلة 0: قياس وحماية
 
-1. تجميد `server/database/migrations/add_performance_indexes.sql` ومنع تشغيله تلقائيًا حتى يمر تدقيق schema.
-2. أخذ نسخة احتياطية واستخراج orphan counts لكل حقل مرجعي مرشح.
-3. تشغيل `EXPLAIN` على الاستعلامات المذكورة مع بيانات staging قريبة من الإنتاج.
-4. إضافة اختبار CI يقارن أسماء الأعمدة المستخدمة في migrations مع schema الحالي.
+1. ✅ تم تجميد `server/database/migrations/add_performance_indexes.sql`، ويقوم runner بتجاوزه صراحةً.
+2. ✅ أداة `pnpm db:phase-zero` تنشئ نسخة احتياطية وتستخرج orphan counts لكل حقل مرجعي مرشح. آخر تشغيل محلي قاس 13 علاقة، وكانت جميع القيم المقاسة `0`.
+3. ⚠️ تم تشغيل `EXPLAIN` وزمن التنفيذ لأربع استعلامات baseline محليًا. الاعتماد النهائي يتطلب إعادة التشغيل على staging ببيانات قريبة من الإنتاج وحفظ artifacts في مخزن الأدلة.
+4. ✅ أضيف فحص CI عبر `pnpm schema:migrations:check` لمقارنة migrations التنفيذية اليدوية مع `drizzle/schema.ts`، ونجح محليًا مع 106 جداول.
 
-**معيار القبول:** لا migration تشير إلى جدول أو عمود غير موجود، وتوجد baseline لأزمنة الاستعلامات وحجم orphan records.
+**حالة معيار القبول:** فحص المراجع وbaseline التقنية مكتملان محليًا؛ يبقى اعتماد staging القريب من الإنتاج لإثبات أزمنة الاستعلامات وحجم orphan records الفعلي.
+
+**التنفيذ والتشغيل:** التفاصيل ومخرجات الأداة موثقة في [PHASE_ZERO_DATABASE_BASELINE.md](PHASE_ZERO_DATABASE_BASELINE.md). لا تُحفظ النسخ الاحتياطية أو نتائج القياس داخل Git؛ تُحفظ في مخزن أدلة staging.
 
 ### المرحلة 1: فهارس منخفضة المخاطر
 
@@ -109,7 +113,13 @@
 
 ## حدود المراجعة
 
-- لم يتم الاتصال بقاعدة بيانات إنتاج، لذلك لا توجد cardinality أو EXPLAIN فعلية.
+- تم تشغيل baseline محليًا، لكن لم يتم الاتصال بقاعدة بيانات إنتاج أو staging قريب من الإنتاج؛ لذلك لا تمثل الأزمنة الحالية p95/p99 أو cardinality الإنتاج.
 - لا يمكن إثبات أن كل فهرس زائد أو ناقص دون إحصاءات استخدام حقيقية.
-- لا تمثل قراءة الاستعلامات وحدها قياسًا زمنيًا؛ يجب اعتماد p95/p99 من staging/production.
-- لم يتم تعديل `schema.ts` أو أي migration في هذه المهمة.
+- أداة baseline تقيس زمن تنفيذ عينة استعلام واحدة وتكتب خطة `EXPLAIN` وعدد الصفوف؛ يجب تكرار القياس على staging واعتماد p95/p99 قبل قرارات الفهرسة.
+- لم يتم تعديل `schema.ts` أو تطبيق migration تغيّر بنية قاعدة البيانات؛ تم فقط تجميد migration legacy وإضافة أدوات وفحوص حماية.
+
+## مراجع تنفيذ المرحلة الصفرية
+
+- [PHASE_ZERO_DATABASE_BASELINE.md](PHASE_ZERO_DATABASE_BASELINE.md)
+- `pnpm schema:migrations:check`
+- `pnpm db:phase-zero`
