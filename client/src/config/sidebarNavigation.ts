@@ -36,6 +36,7 @@ import {
   Cloud,
   Activity,
 } from 'lucide-react';
+import { SOCIAL_INBOX_ALLOWED_ROLES } from '@shared/socialInboxAccess';
 import type { RolePermission } from '../../../shared/rolePermissions';
 
 export interface NavItem {
@@ -46,6 +47,7 @@ export interface NavItem {
   hasDot?: boolean;
   id: string;
   feature?: string;
+  allowedRoles?: readonly string[];
   requiredPermission?: RolePermission;
 }
 
@@ -71,7 +73,7 @@ export const DEFAULT_VISIBLE_IDS = [
 
 export const STORAGE_KEY = 'sgh-sidebar-visible-items';
 
-export const allNavItems: NavItem[] = [
+const primaryNavItems: NavItem[] = [
   {
     id: 'home',
     title: 'الرئيسية',
@@ -371,6 +373,7 @@ export const allToolsGroups: NavGroup[] = [
         title: 'صندوق البريد الموحد',
         href: '/admin/communications/messages',
         icon: MessageSquare,
+        allowedRoles: SOCIAL_INBOX_ALLOWED_ROLES,
       },
       {
         id: 'message-settings',
@@ -380,9 +383,10 @@ export const allToolsGroups: NavGroup[] = [
       },
       {
         id: 'integration-settings',
-        title: 'إعدادات التكاملات',
+        title: 'إعدادات الربط',
         href: '/admin/communications/integration-settings',
         icon: Cloud,
+        allowedRoles: ['admin'],
       },
       {
         id: 'meta-settings',
@@ -492,3 +496,14 @@ export const allToolsGroups: NavGroup[] = [
     ],
   },
 ];
+
+// The flat registry is derived from the grouped registry so every navigation
+// consumer resolves the same item definition and permission metadata.
+export const allNavItems: NavItem[] = Array.from(
+  new Map(
+    [primaryNavItems[0], ...allToolsGroups.flatMap((group) => group.items)].map((item) => [
+      item.id,
+      item,
+    ])
+  ).values()
+);
