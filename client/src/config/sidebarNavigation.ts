@@ -112,6 +112,7 @@ const primaryNavItems: NavItem[] = [
     title: 'ملفات العملاء',
     href: '/admin/bookings/customers',
     icon: Contact,
+    requiredPermission: 'customers.view',
   },
   {
     id: 'tasks',
@@ -194,7 +195,13 @@ export const allToolsGroups: NavGroup[] = [
         icon: Tent,
         feature: 'camps',
       },
-      { id: 'customers', title: 'ملفات العملاء', href: '/admin/bookings/customers', icon: Contact },
+      {
+        id: 'customers',
+        title: 'ملفات العملاء',
+        href: '/admin/bookings/customers',
+        icon: Contact,
+        requiredPermission: 'customers.view',
+      },
       {
         id: 'patient-results',
         title: 'نتائج بوابة المريض',
@@ -245,6 +252,7 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/whatsapp/whatsapp-dashboard',
         icon: Gauge,
         feature: 'whatsapp',
+        requiredPermission: 'reports.view',
       },
       {
         id: 'whatsapp-templates',
@@ -257,6 +265,7 @@ export const allToolsGroups: NavGroup[] = [
         id: 'whatsapp-connection',
         title: 'اتصال واتساب',
         href: '/admin/whatsapp/connection',
+        requiredPermission: 'media.view',
         icon: Cloud,
         feature: 'whatsapp',
       },
@@ -353,6 +362,7 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/whatsapp/subscriptions',
         icon: Users,
         feature: 'whatsapp',
+        requiredPermission: 'communications.consents.view',
       },
       {
         id: 'whatsapp-webhook-inspector',
@@ -360,6 +370,7 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/whatsapp/webhook-inspector',
         icon: Shield,
         feature: 'whatsapp',
+        requiredPermission: 'integrations.logs.view',
       },
       {
         id: 'whatsapp-lab-results',
@@ -387,6 +398,7 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/communications/integration-settings',
         icon: Cloud,
         allowedRoles: ['admin'],
+        requiredPermission: 'integrations.view',
       },
       {
         id: 'meta-settings',
@@ -431,6 +443,7 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/reports/reports',
         icon: FileText,
         feature: 'reports',
+        requiredPermission: 'reports.view',
       },
       {
         id: 'analytics',
@@ -438,9 +451,22 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/reports/analytics',
         icon: BarChart3,
         feature: 'reports',
+        requiredPermission: 'reports.view',
       },
-      { id: 'bi', title: 'تحليلات الأعمال', href: '/admin/reports/bi', icon: PieChart },
-      { id: 'pwa-stats', title: 'إحصائيات PWA', href: '/admin/reports/pwa-stats', icon: Gauge },
+      {
+        id: 'bi',
+        title: 'تحليلات الأعمال',
+        href: '/admin/reports/bi',
+        icon: PieChart,
+        requiredPermission: 'reports.view',
+      },
+      {
+        id: 'pwa-stats',
+        title: 'إحصائيات PWA',
+        href: '/admin/reports/pwa-stats',
+        icon: Gauge,
+        requiredPermission: 'reports.view',
+      },
     ],
   },
   {
@@ -482,6 +508,7 @@ export const allToolsGroups: NavGroup[] = [
         title: 'إعدادات التتبع',
         href: '/admin/tracking-settings',
         icon: SettingsIcon,
+        requiredPermission: 'settings.tracking.manage',
       },
       { id: 'settings', title: 'الإعدادات', href: '/admin/settings', icon: SettingsIcon },
       { id: 'updates', title: 'إدارة التحديثات', href: '/admin/system/updates', icon: RotateCw },

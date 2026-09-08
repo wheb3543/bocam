@@ -166,7 +166,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     const patientResults = source('client/src/pages/admin/shared/PatientResultsAdminPage.tsx');
     const auditLog = source('client/src/components/AuditLogSection.tsx');
     const sidebar = source('client/src/components/layout/DashboardSidebarV2.tsx');
-    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+    const sidebarData = source('client/src/config/sidebarNavigation.ts');
 
     expect(customers).toContain("const canViewCustomers = can('customers.view')");
     expect(customers).toContain("const canExportCustomers = can('customers.export')");
@@ -219,7 +219,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     );
     const mediaPicker = source('client/src/components/form/MediaPicker.tsx');
     const desktopSidebar = source('client/src/components/layout/sidebar/DesktopSidebar.tsx');
-    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+    const sidebarData = source('client/src/config/sidebarNavigation.ts');
 
     expect(notificationsPage).toContain("const canViewNotifications = can('notifications.view')");
     expect(notificationsPage).toContain("const canMarkNotifications = can('notifications.mark_read')");
@@ -246,7 +246,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     const accountHealth = source('client/src/pages/admin/whatsapp/WhatsAppAccountHealthPage.tsx');
     const phoneQuality = source('client/src/pages/admin/whatsapp/WhatsAppPhoneQualityPage.tsx');
     const subscriptions = source('client/src/pages/admin/whatsapp/WhatsAppUserSubscriptionsPage.tsx');
-    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+    const sidebarData = source('client/src/config/sidebarNavigation.ts');
 
     expect(webhookInspector).toContain("const canViewWebhookLogs = can('integrations.logs.view')");
     expect(webhookInspector).toContain("const canManageWebhooks = can('integrations.webhooks.manage')");
@@ -273,7 +273,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     const trackingSettings = source('client/src/pages/admin/TrackingSettingsPage.tsx');
     const sidebarNavigation = source('client/src/hooks/layout/useSidebarNavigation.ts');
     const sound = source('client/src/hooks/integrations/useNotificationSound.ts');
-    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+    const sidebarData = source('client/src/config/sidebarNavigation.ts');
 
     expect(dashboardCharts).toContain("const canViewReports = can('reports.view')");
     expect(dashboardCharts).toContain('لوحة الرسوم غير متاحة لهذا الدور');
@@ -305,7 +305,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
     const usersPage = source('client/src/pages/admin/users/UsersManagementPage.tsx');
     const messageSettings = source('client/src/pages/admin/MessageSettingsPage.tsx');
     const whatsappAppointments = source('client/src/pages/admin/whatsapp/WhatsAppAppointments.tsx');
-    const sidebarData = source('client/src/components/layout/sidebarData.ts');
+    const sidebarData = source('client/src/config/sidebarNavigation.ts');
 
     expect(campaignLinks).toContain("const canViewCampaigns = can('campaigns.view')");
     expect(campaignLinks).toContain("const canManageLinks = can('campaigns.links.manage')");

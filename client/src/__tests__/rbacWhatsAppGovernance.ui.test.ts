@@ -51,7 +51,7 @@ describe('P1-E WhatsApp governance UI authorization', () => {
   });
 
   it('adds permission-aware navigation entries for P1-E pages', () => {
-    const sidebar = read('client/src/components/layout/sidebarData.ts');
+    const sidebar = read('client/src/config/sidebarNavigation.ts');
     const configurable = read('client/src/config/sidebarNavigation.ts');
 
     for (const source of [sidebar, configurable]) {

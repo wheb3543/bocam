@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const sidebarSource = readFileSync(
-  resolve(process.cwd(), 'client/src/components/layout/sidebarData.ts'),
+  resolve(process.cwd(), 'client/src/config/sidebarNavigation.ts'),
   'utf8'
 );
 const editableNavigationSource = readFileSync(
