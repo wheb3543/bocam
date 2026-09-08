@@ -4,7 +4,7 @@
 **النطاق:** `drizzle/schema.ts`، `drizzle/relations.ts`، ملفات SQL في `drizzle/migrations/` و`server/database/migrations/`، واستعلامات `server/database/db/` و`server/routers/`.  
 **الحالة:** مراجعة ثابتة مع تنفيذ ضوابط المرحلة الصفرية؛ لم يتم تعديل `schema.ts` أو تطبيق migration تغيّر المخطط.
 
-**آخر تحديث:** 8 سبتمبر 2026. تم تجميد migration الفهارس legacy، وإضافة فحص CI لمراجع migrations، وإضافة أداة توليد backup وorphan counts و`EXPLAIN` baseline عبر `pnpm db:phase-zero`. القياسات المنفذة محليًا baseline تقنية وليست اعتمادًا لبيانات الإنتاج؛ يجب إعادة تشغيل الأداة على staging قريب من الإنتاج قبل اعتماد أي فهارس أو Foreign Keys.
+**آخر تحديث:** 8 سبتمبر 2026. تم تجميد migration الفهارس legacy، وإضافة فحص CI لمراجع migrations، وإضافة أدوات seed محلية وقياس متكرر لـorphan counts و`EXPLAIN` عبر `pnpm db:phase-zero`. القياسات المنفذة محليًا baseline تقنية وليست اعتمادًا لبيانات الإنتاج؛ يجب إعادة تشغيل الأداة على staging قريب من الإنتاج قبل اعتماد أي فهارس أو Foreign Keys.
 
 ## الخلاصة
 
@@ -52,10 +52,10 @@
 
 1. ✅ تم تجميد `server/database/migrations/add_performance_indexes.sql`، ويقوم runner بتجاوزه صراحةً.
 2. ✅ تم تشغيل seed المحلي الشامل ثم `pnpm db:seed:empty`، فأصبحت الجداول المحلية populated في 107/107 جدولًا. أداة `pnpm db:phase-zero` استخرجت orphan counts لـ13 علاقة، وكانت جميع القيم المقاسة `0`.
-3. ⚠️ تم تشغيل `EXPLAIN` وزمن التنفيذ لأربع استعلامات baseline محليًا. الاعتماد النهائي يتطلب إعادة التشغيل على staging ببيانات قريبة من الإنتاج وحفظ artifacts في مخزن الأدلة.
+3. ✅ تم تشغيل `EXPLAIN` وقياس 30 تكرارًا بعد warmup لخمس جداول محلية ذات حجم مستهدف 1000 سجل (`leads` و`appointments` و`campRegistrations` و`tasks`). سجلت الاستعلامات p95 محليًا بين 2.018ms و4.587ms، مع 50 صفًا لكل استعلام. الاعتماد النهائي يتطلب إعادة التشغيل على staging ببيانات قريبة من الإنتاج وحفظ artifacts في مخزن الأدلة.
 4. ✅ أضيف فحص CI عبر `pnpm schema:migrations:check` لمقارنة migrations التنفيذية اليدوية مع `drizzle/schema.ts`، ونجح محليًا مع 106 جداول.
 
-**حالة معيار القبول:** فحص المراجع وbaseline التقنية مكتملان محليًا؛ يبقى اعتماد staging القريب من الإنتاج لإثبات أزمنة الاستعلامات وحجم orphan records الفعلي.
+**حالة معيار القبول:** فحص المراجع وbaseline التقنية مكتملان محليًا، وorphan counts يساوي صفرًا في 13 علاقة؛ يبقى اعتماد staging القريب من الإنتاج لإثبات أزمنة الاستعلامات وحجم orphan records الفعلي.
 
 **التنفيذ والتشغيل:** التفاصيل ومخرجات الأداة موثقة في [PHASE_ZERO_DATABASE_BASELINE.md](PHASE_ZERO_DATABASE_BASELINE.md). لا تُحفظ النسخ الاحتياطية أو نتائج القياس داخل Git؛ تُحفظ في مخزن أدلة staging.
 

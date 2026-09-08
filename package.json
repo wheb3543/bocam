@@ -37,6 +37,7 @@
     "db:seed": "tsx server/scripts/seedContentDirect.ts",
     "db:seed:all": "node scripts/seed-all-tables.mjs",
     "db:seed:empty": "node scripts/seed-empty-tables.mjs",
+    "db:seed:production-like": "node scripts/seed-production-like.mjs",
     "db:seed:homepage": "tsx scripts/seed-homepage.ts",
     "db:seed:homepage:manual": "tsx scripts/add-homepage-content-manually.ts",
     "docker:build": "docker build -t sgh-crm-portal .",
