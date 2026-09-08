@@ -2,9 +2,7 @@ import { useAuth } from '@/_core/hooks/useAuth';
 import { APP_LOGO, APP_TITLE, getLocalLoginUrl } from '@/const';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
-
-// Temporary desktop comparison: use the legacy sidebar while evaluating it.
-import DashboardSidebar from './DashboardSidebar';
+import AdminTopNavigation from './AdminTopNavigation';
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -48,14 +46,9 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   }
 
   return (
-    <div className="min-h-screen bg-muted/50 dark:bg-gray-950 flex" dir="rtl">
-      {/* Temporary legacy desktop sidebar */}
-      <DashboardSidebar currentPath={location} />
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
-        {children}
-      </div>
+    <div className="min-h-screen bg-muted/50 dark:bg-gray-950" dir="rtl">
+      <AdminTopNavigation currentPath={location} />
+      <main className="min-w-0">{children}</main>
     </div>
   );
 }
