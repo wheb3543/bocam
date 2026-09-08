@@ -3,6 +3,8 @@ import { APP_LOGO, APP_TITLE, getLocalLoginUrl } from '@/const';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import AdminTopNavigation from './AdminTopNavigation';
+import AdminTabs from './AdminTabs';
+import { useAdminTabs } from '@/hooks/layout/useAdminTabs';
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -11,6 +13,8 @@ interface DashboardShellProps {
 export default function DashboardShell({ children }: DashboardShellProps) {
   const { loading, user } = useAuth();
   const [location] = useLocation();
+  const { tabs, activeTabId, closeTab } = useAdminTabs(location);
+  const [, setLocation] = useLocation();
 
   if (loading) {
     return (
@@ -48,6 +52,16 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   return (
     <div className="min-h-screen bg-muted/50 dark:bg-gray-950" dir="rtl">
       <AdminTopNavigation currentPath={location} />
+      <AdminTabs
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onClose={(tab) => {
+          const fallbackTab = closeTab(tab.id);
+          if (tab.id === activeTabId && fallbackTab) {
+            setLocation(fallbackTab.href);
+          }
+        }}
+      />
       <main className="min-w-0">{children}</main>
     </div>
   );
