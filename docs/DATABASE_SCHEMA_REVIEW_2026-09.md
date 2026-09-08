@@ -51,7 +51,7 @@
 ### المرحلة 0: قياس وحماية
 
 1. ✅ تم تجميد `server/database/migrations/add_performance_indexes.sql`، ويقوم runner بتجاوزه صراحةً.
-2. ✅ أداة `pnpm db:phase-zero` تنشئ نسخة احتياطية وتستخرج orphan counts لكل حقل مرجعي مرشح. آخر تشغيل محلي قاس 13 علاقة، وكانت جميع القيم المقاسة `0`.
+2. ✅ تم تشغيل seed المحلي الشامل ثم `pnpm db:seed:empty`، فأصبحت الجداول المحلية populated في 107/107 جدولًا. أداة `pnpm db:phase-zero` استخرجت orphan counts لـ13 علاقة، وكانت جميع القيم المقاسة `0`.
 3. ⚠️ تم تشغيل `EXPLAIN` وزمن التنفيذ لأربع استعلامات baseline محليًا. الاعتماد النهائي يتطلب إعادة التشغيل على staging ببيانات قريبة من الإنتاج وحفظ artifacts في مخزن الأدلة.
 4. ✅ أضيف فحص CI عبر `pnpm schema:migrations:check` لمقارنة migrations التنفيذية اليدوية مع `drizzle/schema.ts`، ونجح محليًا مع 106 جداول.
 
