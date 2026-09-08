@@ -9,6 +9,13 @@ vi.mock('@/hooks/integrations/useLicense', () => ({
   useLicense: () => ({ hasFeature: () => false, isLicenseValid: false }),
 }));
 
+vi.mock('@/hooks/auth/useRolePermissions', () => ({
+  useRolePermissions: () => ({
+    can: () => true,
+    isLoading: false,
+  }),
+}));
+
 vi.mock('@/components/form/ManualRegistrationForm', () => ({
   default: () => <div>نموذج التسجيل التجريبي</div>,
 }));

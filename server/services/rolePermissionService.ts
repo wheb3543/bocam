@@ -86,7 +86,20 @@ export async function ensureSystemRoleDefinitions(db: DbClient) {
 
   for (const [key, definition] of Object.entries(DEFAULT_ROLE_DEFINITIONS)) {
     const selectQuery =
-      typeof db.select === 'function' ? db.select({ id: roleDefinitions.id }) : null;
+      typeof db.select === 'function'
+        ? db.select({
+            id: roleDefinitions.id,
+            key: roleDefinitions.key,
+            name: roleDefinitions.name,
+            description: roleDefinitions.description,
+            baseRole: roleDefinitions.baseRole,
+            permissions: roleDefinitions.permissions,
+            isSystem: roleDefinitions.isSystem,
+            isActive: roleDefinitions.isActive,
+            createdAt: roleDefinitions.createdAt,
+            updatedAt: roleDefinitions.updatedAt,
+          })
+        : null;
     const fromQuery =
       selectQuery && typeof selectQuery.from === 'function'
         ? selectQuery.from(roleDefinitions)

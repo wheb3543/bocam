@@ -47,6 +47,39 @@ pnpm test:coverage
 pnpm test -- --testNamePattern="اسم الاختبار"
 ```
 
+### اختبارات المسارات الحرجة
+
+هذه الاختبارات هي الحد الأدنى الذي يجب تشغيله عند تعديل المصادقة أو الصلاحيات أو الترخيص أو لوحة العمليات أو تكاملات المحتوى:
+
+```bash
+# صلاحيات الأدوار ومزامنة التعريفات
+pnpm exec vitest run server/services/rolePermissionService.workflow.test.ts
+
+# الترخيص والتوقيع وHardware ID والميزات
+pnpm exec vitest run server/_core/license/providedLicense.test.ts server/_core/license/helpers.rotation.test.ts
+
+# لوحة العمليات والصلاحيات المرتبطة بها
+pnpm exec vitest run client/src/__tests__/dashboardWorkspace.test.tsx
+
+# تدفقات CMS والموافقات والنشر
+pnpm exec vitest run server/routers/content --reporter=dot
+
+# صلاحيات التواصل وWhatsApp وSocial Inbox
+pnpm exec vitest run server/routers/rbac.*.workflow.test.ts server/integrations --reporter=dot
+
+# بوابة المريض والمواعيد والنتائج
+pnpm exec vitest run client/src/pages/patient-portal client/src/__tests__/patient* --reporter=dot
+```
+
+يجب أن يمر `pnpm check` و`pnpm lint` و`pnpm test` قبل الدمج. يثبت CI هذه الأوامر كـ baseline، ويتحقق من عدم تقادم التقرير المولد عبر `pnpm quality:check`.
+
+### توليد مؤشرات الجودة
+
+```bash
+pnpm quality:report  # تحديث docs/PROJECT_QUALITY_CURRENT.md
+pnpm quality:check   # يفشل إذا كان التقرير المولد غير محدث
+```
+
 ---
 
 ## 📁 هيكل ملفات الاختبار

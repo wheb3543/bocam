@@ -1,7 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { doesRolePermissionSetGrant, normalizeRolePermissions } from './rolePermissionService';
+import {
+  doesRolePermissionSetGrant,
+  ensureSystemRoleDefinitions,
+  normalizeRolePermissions,
+} from './rolePermissionService';
 import {
   DEFAULT_ROLE_DEFINITIONS,
   ROLE_PERMISSION_GROUPS,
@@ -146,9 +150,8 @@ describe('إدارة الأدوار والصلاحيات', () => {
           values: async () => undefined,
         };
       },
-    } as any;
+    } as unknown as Parameters<typeof ensureSystemRoleDefinitions>[0];
 
-    const { ensureSystemRoleDefinitions } = await import('./rolePermissionService');
     await ensureSystemRoleDefinitions(db);
 
     expect(updateCalls.some((call) => call.key === 'manager')).toBe(true);

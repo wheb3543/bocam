@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22.13.0'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -49,7 +49,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22.13.0'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -73,7 +73,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22.13.0'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -85,6 +85,18 @@ jobs:
       - name: Run tests with coverage
         run: pnpm test:coverage
 
+      - name: Check coverage baseline
+        run: pnpm coverage:check
+
+      - name: Upload coverage baseline artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-baseline
+          path: |
+            coverage/
+            docs/COVERAGE_BASELINE.md
+            docs/COVERAGE_BASELINE.json
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         with:
@@ -92,6 +104,43 @@ jobs:
           files: ./coverage/coverage-final.json
           flags: unittests
           name: codecov-umbrella
+
+  quality-baseline:
+    name: Quality Baseline
+    runs-on: ubuntu-latest
+    needs: [lint, type-check, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify generated quality report
+        run: pnpm quality:check
+
+      - name: Verify unused exports audit
+        run: pnpm exports:check
+
+      - name: Publish quality baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-baseline
+          path: |
+            docs/PROJECT_QUALITY_CURRENT.md
+            docs/UNUSED_EXPORTS_AUDIT.md
+            docs/UNUSED_EXPORTS_AUDIT.json
 
   security-scan:
     name: Security Scan
@@ -108,7 +157,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22.13.0'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -143,7 +192,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22.13.0'
           cache: 'pnpm'
 
       - name: Install dependencies
