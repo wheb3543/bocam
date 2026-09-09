@@ -23,10 +23,14 @@ describe('التحقق المرحلي لتخطيط الإدارة', () => {
   it('keeps the tab strip scrollable and routes tab changes through wouter', () => {
     const tabs = readSource('client/src/components/layout/AdminTabs.tsx');
     const shell = readSource('client/src/components/layout/DashboardShell.tsx');
+    const sidebar = readSource('client/src/components/layout/DashboardSidebarV2.tsx');
 
     expect(tabs).toContain('overflow-x-auto');
     expect(tabs).toContain('setLocation(tab.href)');
     expect(shell).toContain('setLocation(fallbackTab.href)');
+    expect(sidebar).toContain("import { useLocation } from 'wouter';");
+    expect(sidebar).toContain('setLocation(href)');
+    expect(sidebar).not.toContain('window.location.href = href');
   });
 
   it('renders direct pages and nested page menus from the central hierarchy', () => {

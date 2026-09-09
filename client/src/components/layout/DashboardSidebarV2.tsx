@@ -1,5 +1,6 @@
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocation } from 'wouter';
 import { useSidebarState } from '@/hooks/ui/useSidebarState';
 import { useRecentlyUsed } from '@/hooks/data/useRecentlyUsed';
 import AllToolsDrawer from '@/components/AllToolsDrawer';
@@ -19,6 +20,7 @@ import {
 
 export default function DashboardSidebarV2({ currentPath }: { currentPath: string }) {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const { can, isLoading: arePermissionsLoading } = useRolePermissions();
   const { shouldShowText, handleMouseEnter, handleMouseLeave, closeMobile } = useSidebarState();
 
@@ -146,11 +148,11 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
       if (item) {
         addRecentlyUsed({ id: item.id, title: item.title, href: item.href });
       }
-      window.location.href = href;
+      setLocation(href);
       closeMobile();
       setAllToolsOpen(false);
     },
-    [addRecentlyUsed, closeMobile]
+    [addRecentlyUsed, closeMobile, setLocation]
   );
 
   // ============================================
