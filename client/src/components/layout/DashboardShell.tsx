@@ -2,15 +2,13 @@ import { useAuth } from '@/_core/hooks/useAuth';
 import { APP_LOGO, APP_TITLE, getLocalLoginUrl } from '@/const';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
+import AdminContentSkeleton from './AdminContentSkeleton';
 import AdminTabs from './AdminTabs';
 import DashboardSidebarV2 from './DashboardSidebarV2';
+import AdminWorkspace from './AdminWorkspace';
 import { useAdminTabs } from '@/hooks/layout/useAdminTabs';
 
-interface DashboardShellProps {
-  children: React.ReactNode;
-}
-
-export default function DashboardShell({ children }: DashboardShellProps) {
+export default function DashboardShell() {
   const { loading, user } = useAuth();
   const [location] = useLocation();
   const { tabs, activeTabId, closeTab } = useAdminTabs(location);
@@ -65,7 +63,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             }}
           />
           <main className="min-w-0 flex-1" data-testid="admin-content">
-            {children}
+            <AdminWorkspace tabs={tabs} activeTabId={activeTabId} />
+            {tabs.length === 0 ? <AdminContentSkeleton variant="workspace" /> : null}
           </main>
         </div>
       </div>

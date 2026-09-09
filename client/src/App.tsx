@@ -3,7 +3,6 @@ import { useEffect, lazy, Suspense, useState } from 'react';
 import { initializeTracking } from './lib/tracking/tracking';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AdminContentSkeleton from '@/components/layout/AdminContentSkeleton';
-import AdminContentRoutes from '@/components/layout/AdminContentRoutes';
 const NotFound = lazy(() => import('@/pages/NotFound'));
 import { Route, Switch, useLocation } from 'wouter';
 import { toast } from 'sonner';
@@ -157,9 +156,7 @@ function Router() {
         {/* Keep the administrative chrome mounted while only content routes change. */}
         <Route path="/admin/*?">
           <Suspense fallback={<AdminContentSkeleton variant="workspace" />}>
-            <DashboardShell>
-              <AdminContentRoutes />
-            </DashboardShell>
+            <DashboardShell />
           </Suspense>
         </Route>
         <Route path={'/patient-portal/login'} component={PatientPortalLogin} />

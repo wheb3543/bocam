@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+import { lazy, type ReactNode } from 'react';
 import { Route, Switch } from 'wouter';
 import DashboardLayout from './DashboardLayout';
 import ProtectedRoute from './ProtectedRoute';
@@ -77,6 +77,226 @@ const BackupManagementPage = lazy(() => import('@/pages/admin/system/BackupManag
 
 function AdminPageHeader({ title, children }: { title: string; children: React.ReactNode }) {
   return <DashboardLayout pageTitle={title}>{children}</DashboardLayout>;
+}
+
+export function renderAdminPage(path: string): ReactNode {
+  switch (path === '/admin/' ? '/admin' : path) {
+    case '/admin':
+      return <AdminDashboard />;
+    case '/admin/offline':
+      return <OfflinePage />;
+    case '/admin/profile':
+      return <ProfilePage />;
+    case '/admin/support':
+      return <SupportTicketsPage />;
+    case '/admin/management':
+      return <ManagementPage />;
+    case '/admin/notifications':
+      return (
+        <AdminPageHeader title="مركز الإشعارات">
+          <NotificationsPage />
+        </AdminPageHeader>
+      );
+    case '/admin/content/content':
+      return <ContentManagementPage />;
+    case '/admin/content/media-library':
+      return <MediaLibraryPage />;
+    case '/admin/users/users':
+      return <UsersManagementPage />;
+    case '/admin/content/publishing':
+      return <PublishingPage />;
+    case '/admin/whatsapp':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppPage />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/whatsapp-dashboard':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppDashboard />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/templates':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppTemplatesPage />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/connection':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppConnectionPage />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/analytics':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppAnalytics />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/broadcast':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <AdminPageHeader title="البث الجماعي">
+            <WhatsAppBroadcast />
+          </AdminPageHeader>
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/auto-reply':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <AdminPageHeader title="قواعد الرد التلقائي">
+            <WhatsAppAutoReply />
+          </AdminPageHeader>
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/compliance':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppCompliance />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/appointments':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppAppointments />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/integration':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppIntegration />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/account-health':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <AdminPageHeader title="صحة الحساب والأمان">
+            <WhatsAppAccountHealthPage />
+          </AdminPageHeader>
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/phone-quality':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <AdminPageHeader title="جودة رقم الهاتف">
+            <WhatsAppPhoneQualityPage />
+          </AdminPageHeader>
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/subscriptions':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <AdminPageHeader title="اشتراكات المستخدمين">
+            <WhatsAppUserSubscriptionsPage />
+          </AdminPageHeader>
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/webhook-inspector':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <AdminPageHeader title="فاحص أحداث Webhook">
+            <WhatsAppWebhookInspectorPage />
+          </AdminPageHeader>
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/costs':
+      return <WhatsAppCostsPage />;
+    case '/admin/whatsapp/orders':
+      return <WhatsAppOrdersPage />;
+    case '/admin/whatsapp/products':
+      return <WhatsAppProductsPage />;
+    case '/admin/whatsapp/referrals':
+      return <WhatsAppReferralsPage />;
+    case '/admin/whatsapp/lab-results':
+      return <WhatsAppLabResultsPage />;
+    case '/admin/communications/messages':
+      return <MessagesPage />;
+    case '/admin/communications/integration-settings':
+    case '/admin/communications/meta-settings':
+      return <MetaIntegrationSettingsPage />;
+    case '/admin/message-settings':
+      return <MessageSettingsPage />;
+    case '/admin/reports/reports':
+      return (
+        <ProtectedRoute feature="reports">
+          <ReportsPage />
+        </ProtectedRoute>
+      );
+    case '/admin/campaigns/campaigns':
+      return <CampaignsPage />;
+    case '/admin/reports/analytics':
+      return (
+        <ProtectedRoute feature="reports">
+          <AnalyticsPage />
+        </ProtectedRoute>
+      );
+    case '/admin/reports/bi':
+      return <BIPage />;
+    case '/admin/tracking-settings':
+      return <TrackingSettingsPage />;
+    case '/admin/reports/camp-stats':
+      return (
+        <ProtectedRoute feature="camps">
+          <CampStatsPage />
+        </ProtectedRoute>
+      );
+    case '/admin/bookings':
+      return <BookingsManagementPage />;
+    case '/admin/bookings/leads':
+      return <LeadsManagementPage />;
+    case '/admin/bookings/appointments':
+      return <AppointmentsManagementPage />;
+    case '/admin/bookings/offer-leads':
+      return (
+        <ProtectedRoute feature="offers">
+          <OfferLeadsPage />
+        </ProtectedRoute>
+      );
+    case '/admin/bookings/camp-registrations':
+      return (
+        <ProtectedRoute feature="camps">
+          <CampRegistrationsPage />
+        </ProtectedRoute>
+      );
+    case '/admin/bookings/customers':
+      return <CustomersPage />;
+    case '/admin/bookings/patient-results':
+      return (
+        <ProtectedRoute feature="patient_portal">
+          <PatientResultsAdminPage />
+        </ProtectedRoute>
+      );
+    case '/admin/bookings/tasks':
+      return <TasksPage />;
+    case '/admin/teams/digital-marketing':
+      return <DigitalMarketingTasksPage />;
+    case '/admin/teams/media':
+      return <MediaTeamPage />;
+    case '/admin/teams/field-marketing':
+      return <FieldMarketingTeamPage />;
+    case '/admin/teams/customer-service':
+      return <CustomerServiceTeamPage />;
+    case '/admin/campaigns/projects':
+      return <CampaignsPage />;
+    case '/admin/campaigns/review-approval':
+      return <ReviewApprovalPage />;
+    case '/admin/reports/pwa-stats':
+      return <PWAStatsPage />;
+    case '/admin/settings':
+      return <SettingsPage />;
+    case '/admin/system/updates':
+      return <UpdateManagementPage />;
+    case '/admin/system/status':
+      return <SystemStatusPage />;
+    case '/admin/system/backups':
+      return <BackupManagementPage />;
+    case '/admin/advanced-settings':
+      return <AdvancedSettingsPage />;
+    default:
+      return null;
+  }
 }
 
 export default function AdminContentRoutes() {
