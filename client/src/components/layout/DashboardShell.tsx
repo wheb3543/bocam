@@ -2,8 +2,8 @@ import { useAuth } from '@/_core/hooks/useAuth';
 import { APP_LOGO, APP_TITLE, getLocalLoginUrl } from '@/const';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
-import AdminTopNavigation from './AdminTopNavigation';
 import AdminTabs from './AdminTabs';
+import DashboardSidebarV2 from './DashboardSidebarV2';
 import { useAdminTabs } from '@/hooks/layout/useAdminTabs';
 
 interface DashboardShellProps {
@@ -50,19 +50,25 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   }
 
   return (
-    <div className="min-h-screen bg-muted/50 dark:bg-gray-950" dir="rtl">
-      <AdminTopNavigation currentPath={location} />
-      <AdminTabs
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onClose={(tab) => {
-          const fallbackTab = closeTab(tab.id);
-          if (tab.id === activeTabId && fallbackTab) {
-            setLocation(fallbackTab.href);
-          }
-        }}
-      />
-      <main className="min-w-0">{children}</main>
+    <div className="min-h-screen bg-muted/50 dark:bg-gray-950" dir="rtl" data-testid="admin-shell">
+      <div className="flex min-h-screen">
+        <DashboardSidebarV2 currentPath={location} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AdminTabs
+            tabs={tabs}
+            activeTabId={activeTabId}
+            onClose={(tab) => {
+              const fallbackTab = closeTab(tab.id);
+              if (tab.id === activeTabId && fallbackTab) {
+                setLocation(fallbackTab.href);
+              }
+            }}
+          />
+          <main className="min-w-0 flex-1" data-testid="admin-content">
+            {children}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useEffect, lazy, Suspense, useState } from 'react';
 import { initializeTracking } from './lib/tracking/tracking';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AdminContentSkeleton from '@/components/layout/AdminContentSkeleton';
+import AdminContentRoutes from '@/components/layout/AdminContentRoutes';
 const NotFound = lazy(() => import('@/pages/NotFound'));
 import { Route, Switch, useLocation } from 'wouter';
 import { toast } from 'sonner';
@@ -11,7 +12,6 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { consumeToastHash } from './lib/toastHashRouter';
 const DashboardShell = lazy(() => import('@/components/layout/DashboardShell'));
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { UpdateProgressModal } from '@/components/update/UpdateProgressModal';
 import { MandatoryUpdateModal } from '@/components/update/MandatoryUpdateModal';
 import { OptionalUpdateBanner } from '@/components/update/OptionalUpdateBanner';
@@ -22,7 +22,6 @@ const HomePage = lazy(() => import('./pages/public/HomePage'));
 const ThankYou = lazy(() => import('./pages/public/ThankYou'));
 const DynamicPage = lazy(() => import('./pages/public/DynamicPage'));
 const DraftPreviewPage = lazy(() => import('./pages/public/DraftPreviewPage'));
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const Doctors = lazy(() => import('./pages/public/Doctors'));
 const Unauthorized = lazy(() => import('./pages/Unauthorized'));
 const AccessRequest = lazy(() => import('./pages/AccessRequest'));
@@ -34,69 +33,11 @@ const CampDetailPage = lazy(() => import('./pages/public/CampDetailPage'));
 const VisitingDoctors = lazy(() => import('./pages/public/VisitingDoctors'));
 const OfflinePage = lazy(() => import('./pages/OfflinePage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
-const ProfilePage = lazy(() => import('./pages/admin/ProfilePage'));
-const SupportTicketsPage = lazy(() => import('./pages/admin/SupportTicketsPage'));
-const ManagementPage = lazy(() => import('./pages/admin/ManagementPage'));
-const ContentManagementPage = lazy(() => import('./pages/admin/content/ContentManagementPage'));
-const MediaLibraryPage = lazy(() => import('./pages/admin/media/MediaLibraryPage'));
-const UsersManagementPage = lazy(() => import('./pages/admin/users/UsersManagementPage'));
-const PublishingPage = lazy(() => import('./pages/admin/content/PublishingPage'));
-const WhatsAppPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppPage'));
-const WhatsAppTemplatesPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppTemplatesPage'));
-const WhatsAppConnectionPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppConnectionPage'));
-const WhatsAppDashboard = lazy(() => import('./pages/admin/whatsapp/WhatsAppDashboard'));
-const WhatsAppAnalytics = lazy(() => import('./pages/admin/whatsapp/WhatsAppAnalytics'));
-const WhatsAppBroadcast = lazy(() => import('./pages/admin/whatsapp/WhatsAppBroadcast'));
-const WhatsAppAutoReply = lazy(() => import('./pages/admin/whatsapp/WhatsAppAutoReply'));
-const WhatsAppCompliance = lazy(() => import('./pages/admin/whatsapp/WhatsAppCompliance'));
-const WhatsAppAppointments = lazy(() => import('./pages/admin/whatsapp/WhatsAppAppointments'));
-const WhatsAppIntegration = lazy(() => import('./pages/admin/whatsapp/WhatsAppIntegration'));
-const WhatsAppAccountHealthPage = lazy(
-  () => import('./pages/admin/whatsapp/WhatsAppAccountHealthPage')
-);
-const WhatsAppPhoneQualityPage = lazy(
-  () => import('./pages/admin/whatsapp/WhatsAppPhoneQualityPage')
-);
-const WhatsAppUserSubscriptionsPage = lazy(
-  () => import('./pages/admin/whatsapp/WhatsAppUserSubscriptionsPage')
-);
-const WhatsAppWebhookInspectorPage = lazy(
-  () => import('./pages/admin/whatsapp/WhatsAppWebhookInspectorPage')
-);
-const WhatsAppCostsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppCostsPage'));
-const WhatsAppOrdersPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppOrdersPage'));
-const WhatsAppProductsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppProductsPage'));
-const WhatsAppReferralsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppReferralsPage'));
-const WhatsAppLabResultsPage = lazy(() => import('./pages/admin/whatsapp/WhatsAppLabResultsPage'));
-const MessagesPage = lazy(() => import('./pages/admin/communications/MessagesPage'));
-const MetaIntegrationSettingsPage = lazy(
-  () => import('./pages/admin/communications/MetaIntegrationSettingsPage')
-);
-const ReportsPageNew = lazy(() => import('./pages/admin/reports/ReportsPage'));
-const AnalyticsPage = lazy(() => import('./pages/admin/reports/AnalyticsPage'));
-const CampStatsPage = lazy(() => import('./pages/admin/reports/CampStatsPage'));
-const BookingsManagementPage = lazy(() => import('./pages/admin/bookings/BookingsManagementPage'));
-const LeadsManagementPage = lazy(() => import('./pages/admin/bookings/LeadsManagementPage'));
-const AppointmentsManagementPage = lazy(
-  () => import('./pages/admin/bookings/AppointmentsManagementPage')
-);
-const OfferLeadsPage = lazy(() => import('./pages/admin/bookings/OfferLeadsPage'));
-const CampRegistrationsPage = lazy(() => import('./pages/admin/bookings/CampRegistrationsPage'));
-const CustomersPage = lazy(() => import('./pages/admin/bookings/CustomersPage'));
-const TasksPage = lazy(() => import('./pages/admin/bookings/TasksPage'));
 import PWAManager from './components/PWAManager';
 import MetaPixel from './components/MetaPixel';
 import OfflineIndicator from './components/OfflineIndicator';
 import CookieConsentBanner from './components/CookieConsentBanner';
 import PrivacyPolicyConsentBanner from './components/PrivacyPolicyConsentBanner';
-const MediaTeamPage = lazy(() => import('./pages/admin/teams/MediaTeamPage'));
-const FieldMarketingTeamPage = lazy(() => import('./pages/admin/teams/FieldMarketingTeamPage'));
-const CustomerServiceTeamPage = lazy(() => import('./pages/admin/teams/CustomerServiceTeamPage'));
-const ReviewApprovalPage = lazy(() => import('./pages/admin/campaigns/ReviewApprovalPage'));
-const CampaignsPage = lazy(() => import('./pages/admin/campaigns/CampaignsPage'));
-const DigitalMarketingTasksPage = lazy(
-  () => import('./pages/admin/campaigns/DigitalMarketingTasksPage')
-);
 const PatientPortalLogin = lazy(() => import('./pages/patient-portal/PatientPortalLogin'));
 const PatientDashboard = lazy(() => import('./pages/patient-portal/PatientDashboard'));
 const PatientHomePage = lazy(() => import('./pages/patient-portal/PatientHomePage'));
@@ -112,28 +53,13 @@ const PatientResultsPage = lazy(() => import('./pages/patient-portal/PatientResu
 const PatientResultDetailsPage = lazy(
   () => import('./pages/patient-portal/PatientResultDetailsPage')
 );
-const PatientResultsAdminPage = lazy(() => import('./pages/admin/shared/PatientResultsAdminPage'));
 const PatientProfilePage = lazy(() => import('./pages/patient-portal/PatientProfilePage'));
 const PatientPortalLayout = lazy(() => import('./components/patient/PatientPortalLayout'));
-const MessageSettingsPage = lazy(() => import('./pages/admin/MessageSettingsPage'));
-const PWAStatsPage = lazy(() => import('./pages/admin/reports/PWAStatsPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/public/PrivacyPolicyPage'));
 const PrivacyPolicyChangelogPage = lazy(() => import('./pages/public/PrivacyPolicyChangelogPage'));
-const BIPage = lazy(() => import('./pages/admin/reports/BIPage'));
-const TrackingSettingsPage = lazy(() => import('./pages/admin/TrackingSettingsPage'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 const FeatureLockedPage = lazy(() => import('./pages/admin/shared/FeatureLockedPage'));
 const ActivationPage = lazy(() => import('./pages/ActivationPage'));
-const UpdateManagementPage = lazy(() => import('./pages/admin/system/UpdateManagementPage'));
-const SystemStatusPage = lazy(() => import('./pages/admin/system/SystemStatusPage'));
-const BackupManagementPage = lazy(() => import('./pages/admin/system/BackupManagementPage'));
-const AdvancedSettingsPage = lazy(() => import('./pages/admin/AdvancedSettingsPage'));
-const NotificationsPage = lazy(() => import('./pages/admin/NotificationsPage'));
-import ProtectedRoute from '@/components/layout/ProtectedRoute';
-
-function AdminPageHeader({ title, children }: { title: string; children: React.ReactNode }) {
-  return <DashboardLayout pageTitle={title}>{children}</DashboardLayout>;
-}
 
 // Prefetch critical pages for better performance
 function PrefetchRoutes() {
@@ -228,209 +154,14 @@ function Router() {
           <FeatureLockedPage />
         </Route>
 
-        {/* Admin routes with persistent sidebar */}
-        <Route path="/admin">
-          <Suspense fallback={<AdminContentSkeleton />}>
-            <DashboardShell>
-              <AdminDashboard />
-            </DashboardShell>
-          </Suspense>
-        </Route>
-        <Route path="/admin/*">
+        {/* Keep the administrative chrome mounted while only content routes change. */}
+        <Route path="/admin/*?">
           <Suspense fallback={<AdminContentSkeleton variant="workspace" />}>
             <DashboardShell>
-              <Switch>
-                <Route path={'/admin/offline'} component={OfflinePage} />
-                <Route path={'/admin/profile'} component={ProfilePage} />
-                <Route path={'/admin/support'} component={SupportTicketsPage} />
-                <Route path={'/admin/management'} component={ManagementPage} />
-                <Route path={'/admin/notifications'}>
-                  <AdminPageHeader title="مركز الإشعارات">
-                    <NotificationsPage />
-                  </AdminPageHeader>
-                </Route>
-                <Route path={'/admin/content/content'} component={ContentManagementPage} />
-                <Route path={'/admin/content/media-library'} component={MediaLibraryPage} />
-                <Route path={'/admin/users/users'} component={UsersManagementPage} />
-                <Route path={'/admin/content/publishing'} component={PublishingPage} />
-                <Route path={'/admin/whatsapp'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/whatsapp-dashboard'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppDashboard />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/templates'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppTemplatesPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/connection'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppConnectionPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/analytics'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppAnalytics />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/broadcast'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <AdminPageHeader title="البث الجماعي">
-                      <WhatsAppBroadcast />
-                    </AdminPageHeader>
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/auto-reply'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <AdminPageHeader title="قواعد الرد التلقائي">
-                      <WhatsAppAutoReply />
-                    </AdminPageHeader>
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/compliance'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppCompliance />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/appointments'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppAppointments />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/integration'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppIntegration />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/account-health'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <AdminPageHeader title="صحة الحساب والأمان">
-                      <WhatsAppAccountHealthPage />
-                    </AdminPageHeader>
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/phone-quality'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <AdminPageHeader title="جودة رقم الهاتف">
-                      <WhatsAppPhoneQualityPage />
-                    </AdminPageHeader>
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/subscriptions'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <AdminPageHeader title="اشتراكات المستخدمين">
-                      <WhatsAppUserSubscriptionsPage />
-                    </AdminPageHeader>
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/webhook-inspector'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <AdminPageHeader title="فاحص أحداث Webhook">
-                      <WhatsAppWebhookInspectorPage />
-                    </AdminPageHeader>
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/costs'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppCostsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/orders'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppOrdersPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/products'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppProductsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/referrals'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppReferralsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/whatsapp/lab-results'}>
-                  <ProtectedRoute feature="whatsapp">
-                    <WhatsAppLabResultsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/communications/messages'} component={MessagesPage} />
-                <Route
-                  path={'/admin/communications/integration-settings'}
-                  component={MetaIntegrationSettingsPage}
-                />
-                <Route
-                  path={'/admin/communications/meta-settings'}
-                  component={MetaIntegrationSettingsPage}
-                />
-                <Route path={'/admin/message-settings'} component={MessageSettingsPage} />
-                <Route path={'/admin/reports/reports'}>
-                  <ProtectedRoute feature="reports">
-                    <ReportsPageNew />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/campaigns/campaigns'} component={CampaignsPage} />
-                <Route path={'/admin/reports/analytics'}>
-                  <ProtectedRoute feature="reports">
-                    <AnalyticsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/reports/bi'} component={BIPage} />
-                <Route path={'/admin/tracking-settings'} component={TrackingSettingsPage} />
-                <Route path={'/admin/reports/camp-stats'}>
-                  <ProtectedRoute feature="camps">
-                    <CampStatsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/bookings'} component={BookingsManagementPage} />
-                <Route path={'/admin/bookings/leads'} component={LeadsManagementPage} />
-                <Route
-                  path={'/admin/bookings/appointments'}
-                  component={AppointmentsManagementPage}
-                />
-                <Route path={'/admin/bookings/offer-leads'}>
-                  <ProtectedRoute feature="offers">
-                    <OfferLeadsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/bookings/camp-registrations'}>
-                  <ProtectedRoute feature="camps">
-                    <CampRegistrationsPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/bookings/customers'} component={CustomersPage} />
-                <Route path={'/admin/bookings/patient-results'}>
-                  <ProtectedRoute feature="patient_portal">
-                    <PatientResultsAdminPage />
-                  </ProtectedRoute>
-                </Route>
-                <Route path={'/admin/bookings/tasks'} component={TasksPage} />
-                <Route
-                  path={'/admin/teams/digital-marketing'}
-                  component={DigitalMarketingTasksPage}
-                />
-                <Route path={'/admin/teams/media'} component={MediaTeamPage} />
-                <Route path={'/admin/teams/field-marketing'} component={FieldMarketingTeamPage} />
-                <Route path={'/admin/teams/customer-service'} component={CustomerServiceTeamPage} />
-                <Route path={'/admin/campaigns/projects'} component={CampaignsPage} />
-                <Route path={'/admin/campaigns/review-approval'} component={ReviewApprovalPage} />
-                <Route path={'/admin/reports/pwa-stats'} component={PWAStatsPage} />
-                <Route path={'/admin/settings'} component={SettingsPage} />
-                <Route path={'/admin/system/updates'} component={UpdateManagementPage} />
-                <Route path={'/admin/system/status'} component={SystemStatusPage} />
-                <Route path={'/admin/system/backups'} component={BackupManagementPage} />
-                <Route path={'/admin/advanced-settings'} component={AdvancedSettingsPage} />
-              </Switch>
+              <AdminContentRoutes />
             </DashboardShell>
           </Suspense>
         </Route>
-
         <Route path={'/patient-portal/login'} component={PatientPortalLogin} />
         <Route path={'/patient-portal/admin'} component={PatientDashboard} />
 

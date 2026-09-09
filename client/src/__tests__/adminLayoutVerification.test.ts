@@ -6,24 +6,27 @@ const readSource = (relativePath: string) =>
   readFileSync(resolve(process.cwd(), relativePath), 'utf8');
 
 describe('التحقق المرحلي لتخطيط الإدارة', () => {
-  it('uses the RTL top navigation and no longer mounts the legacy sidebar', () => {
+  it('uses the persistent sidebar shell and keeps content routes separate', () => {
     const shell = readSource('client/src/components/layout/DashboardShell.tsx');
-    const topNavigation = readSource('client/src/components/layout/AdminTopNavigation.tsx');
+    const app = readSource('client/src/App.tsx');
+    const contentRoutes = readSource('client/src/components/layout/AdminContentRoutes.tsx');
 
-    expect(shell).toContain("import AdminTopNavigation from './AdminTopNavigation';");
-    expect(shell).not.toContain("import DashboardSidebar from './DashboardSidebar';");
-    expect(topNavigation).toContain('dir="rtl"');
-    expect(topNavigation).toContain('sticky top-0');
+    expect(shell).toContain("import DashboardSidebarV2 from './DashboardSidebarV2';");
+    expect(shell).toContain("import AdminTabs from './AdminTabs';");
+    expect(shell).toContain('data-testid="admin-shell"');
+    expect(shell).toContain('data-testid="admin-content"');
+    expect(app).toContain('<Route path="/admin/*?">');
+    expect(app).toContain('<AdminContentRoutes />');
+    expect(contentRoutes).toContain('<Route path="/admin" component={AdminDashboard} />');
   });
 
-  it('keeps the navigation usable on narrow screens and exposes keyboard dismissal', () => {
-    const mainNavigation = readSource('client/src/components/layout/AdminMainNavigation.tsx');
+  it('keeps the tab strip scrollable and routes tab changes through wouter', () => {
     const tabs = readSource('client/src/components/layout/AdminTabs.tsx');
-    const topNavigation = readSource('client/src/components/layout/AdminTopNavigation.tsx');
+    const shell = readSource('client/src/components/layout/DashboardShell.tsx');
 
-    expect(mainNavigation).toContain('overflow-x-auto');
     expect(tabs).toContain('overflow-x-auto');
-    expect(topNavigation).toContain("event.key === 'Escape'");
+    expect(tabs).toContain('setLocation(tab.href)');
+    expect(shell).toContain('setLocation(fallbackTab.href)');
   });
 
   it('renders direct pages and nested page menus from the central hierarchy', () => {
