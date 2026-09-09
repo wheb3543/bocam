@@ -95,6 +95,22 @@ const writeStoredTabs = (tabs: AdminTab[]) => {
   }
 };
 
+export const appendAdminTab = (tabs: AdminTab[], tab: AdminTab | null) => {
+  if (!tab || tabs.some((currentTab) => currentTab.id === tab.id)) {
+    return tabs;
+  }
+  return [...tabs, tab];
+};
+
+const areAdminTabsEqual = (first: AdminTab[], second: AdminTab[]) =>
+  first.length === second.length &&
+  first.every(
+    (tab, index) =>
+      tab.id === second[index]?.id &&
+      tab.title === second[index]?.title &&
+      tab.href === second[index]?.href
+  );
+
 export function useAdminTabs(currentPath: string) {
   const { user } = useAuth();
   const { hasFeature, isLoading: areFeaturesLoading } = useLicense();
@@ -135,15 +151,24 @@ export function useAdminTabs(currentPath: string) {
     }
 
     const restoredTabs = sanitizeStoredAdminTabs(readStoredTabs(), accessibleItems);
-    const currentTab = activeItem ? toTab(activeItem) : null;
-    const nextTabs = currentTab
-      ? restoredTabs.some((tab) => tab.id === currentTab.id)
-        ? restoredTabs
-        : [...restoredTabs, currentTab]
-      : restoredTabs;
+    setTabs((currentTabs) => {
+      const baseTabs =
+        currentTabs.length > 0
+          ? sanitizeStoredAdminTabs(currentTabs, accessibleItems)
+          : restoredTabs;
+      const nextTabs = baseTabs.length > 0 ? baseTabs : [toTab(accessibleItems[0])];
+      return areAdminTabsEqual(currentTabs, nextTabs) ? currentTabs : nextTabs;
+    });
+  }, [accessibleItems, navigationReady]);
 
-    setTabs(nextTabs.length > 0 ? nextTabs : [toTab(accessibleItems[0])]);
-  }, [accessibleItems, activeItem, navigationReady]);
+  useEffect(() => {
+    if (!navigationReady || !activeItem) {
+      return;
+    }
+
+    const currentTab = toTab(activeItem);
+    setTabs((currentTabs) => appendAdminTab(currentTabs, currentTab));
+  }, [activeItem, navigationReady]);
 
   useEffect(() => {
     if (tabs.length > 0) {
@@ -158,11 +183,7 @@ export function useAdminTabs(currentPath: string) {
         return null;
       }
       const tab = toTab(item);
-      setTabs((currentTabs) =>
-        currentTabs.some((currentTab) => currentTab.id === tab.id)
-          ? currentTabs
-          : [...currentTabs, tab]
-      );
+      setTabs((currentTabs) => appendAdminTab(currentTabs, tab));
       return tab;
     },
     [accessibleItems]
