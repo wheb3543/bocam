@@ -50,4 +50,16 @@ describe('التحقق المرحلي لتخطيط الإدارة', () => {
     expect(pageMenu).toContain('subsection.items.map');
     expect(navigation).toContain('TASK_DEPARTMENTS');
   });
+
+  it('avoids native browser navigation when moving within admin routes', () => {
+    const dashboard = readSource('client/src/pages/admin/AdminDashboard.tsx');
+    const tracking = readSource('client/src/pages/admin/TrackingSettingsPage.tsx');
+    const notificationSound = readSource('client/src/hooks/integrations/useNotificationSound.ts');
+
+    expect(dashboard).not.toContain('<a href="/admin/communications/messages"');
+    expect(dashboard).not.toContain('<a href="/admin/content/publishing"');
+    expect(tracking).not.toContain('<a href="/admin/reports/bi"');
+    expect(notificationSound).not.toContain("window.location.href = '/admin/whatsapp'");
+    expect(notificationSound).toContain('setLocation');
+  });
 });

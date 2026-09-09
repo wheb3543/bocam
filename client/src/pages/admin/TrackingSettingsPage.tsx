@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { PermissionHint } from '@/components/PermissionHint';
+import { useLocation } from 'wouter';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -105,6 +106,7 @@ function EnvVarRow({
 
 export default function TrackingSettingsPage() {
   const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const [, setLocation] = useLocation();
   const canManageTracking = can('settings.tracking.manage');
   // Detect which env vars are configured (frontend-accessible ones only)
   const pixelId = import.meta.env.VITE_META_PIXEL_ID;
@@ -278,9 +280,13 @@ export default function TrackingSettingsPage() {
               <Info className="h-4 w-4" />
               <AlertDescription className="text-sm">
                 <strong>ملاحظة:</strong> إحصائيات الأحداث التفصيلية متاحة في{' '}
-                <a href="/admin/reports/bi" className="text-blue-600 hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setLocation('/admin/reports/bi')}
+                  className="text-blue-600 hover:underline underline-offset-2"
+                >
                   صفحة تحليلات الأعمال (BI)
-                </a>{' '}
+                </button>{' '}
                 و{' '}
                 <a
                   href="https://www.facebook.com/events_manager2"

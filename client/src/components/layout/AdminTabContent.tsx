@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import type { AdminTab } from '@/hooks/layout/useAdminTabs';
 import { renderAdminPage } from './AdminContentRoutes';
+import AdminContentSkeleton from './AdminContentSkeleton';
 
 interface AdminTabContentProps {
   tab: AdminTab;
@@ -16,7 +17,9 @@ export default function AdminTabContent({ tab, active, renderContent }: AdminTab
       aria-hidden={!active}
       className="min-w-0 flex-1"
     >
-      {renderContent ? renderContent(tab) : renderAdminPage(tab.href)}
+      <Suspense fallback={<AdminContentSkeleton variant="workspace" />}>
+        {renderContent ? renderContent(tab) : renderAdminPage(tab.href)}
+      </Suspense>
     </div>
   );
 }

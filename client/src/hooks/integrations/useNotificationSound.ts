@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { useLocation } from 'wouter';
 
 const SOUND_ENABLED_KEY = 'sgh-notification-sound-enabled';
 const POLLING_INTERVAL = 15_000; // 15 seconds for faster detection
@@ -71,6 +72,7 @@ function playNotificationSound() {
  */
 export function useNotificationSound() {
   const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const [, setLocation] = useLocation();
   const canViewCommunications = can('communications.view');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
     try {
@@ -168,7 +170,7 @@ export function useNotificationSound() {
         action: {
           label: 'عرض',
           onClick: () => {
-            window.location.href = '/admin/whatsapp';
+            setLocation('/admin/whatsapp');
           },
         },
         icon: '💬',
@@ -177,7 +179,7 @@ export function useNotificationSound() {
 
     // Update previous count
     prevWhatsappCountRef.current = currentWhatsappCount;
-  }, [badgeCounts, soundEnabled]);
+  }, [badgeCounts, setLocation, soundEnabled]);
 
   return {
     soundEnabled,
