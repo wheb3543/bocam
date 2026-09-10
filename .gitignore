@@ -71,6 +71,7 @@ coverage/
 
 # Client release artifacts
 release/
+bocam-client-release.zip
 
 # Misc
 .cache/
