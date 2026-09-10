@@ -1,10 +1,10 @@
 {
-  "numTotalTestSuites": 4,
-  "numPassedTestSuites": 4,
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
   "numFailedTestSuites": 0,
   "numPendingTestSuites": 0,
-  "numTotalTests": 9,
-  "numPassedTests": 9,
+  "numTotalTests": 2,
+  "numPassedTests": 2,
   "numFailedTests": 0,
   "numPendingTests": 0,
   "numTodoTests": 0,
@@ -24,125 +24,39 @@
     "updated": 0,
     "didUpdate": false
   },
-  "startTime": 1788925560799,
+  "startTime": 1789082026705,
   "success": true,
   "testResults": [
     {
       "assertionResults": [
         {
-          "ancestorTitles": ["AdminWorkspace"],
-          "fullName": "AdminWorkspace keeps opened page instances mounted and preserves their input state",
+          "ancestorTitles": ["domain-bound licenses"],
+          "fullName": "domain-bound licenses accepts a licensed domain matching the deployment domain",
           "status": "passed",
-          "title": "keeps opened page instances mounted and preserves their input state",
-          "duration": 54.434703000000354,
+          "title": "accepts a licensed domain matching the deployment domain",
+          "duration": 6.360231999999996,
           "failureMessages": [],
-          "location": { "line": 29, "column": 3 },
+          "location": { "line": 27, "column": 3 },
           "meta": {},
           "tags": []
         },
         {
-          "ancestorTitles": ["AdminWorkspace"],
-          "fullName": "AdminWorkspace unmounts only the tab removed from the open tabs list",
+          "ancestorTitles": ["domain-bound licenses"],
+          "fullName": "domain-bound licenses rejects a licensed domain that differs from the deployment domain",
           "status": "passed",
-          "title": "unmounts only the tab removed from the open tabs list",
-          "duration": 5.5223510000000715,
+          "title": "rejects a licensed domain that differs from the deployment domain",
+          "duration": 1.9535520000003999,
           "failureMessages": [],
-          "location": { "line": 56, "column": 3 },
+          "location": { "line": 33, "column": 3 },
           "meta": {},
           "tags": []
         }
       ],
-      "startTime": 1788925564689,
-      "endTime": 1788925564749.5225,
+      "startTime": 1789082029574,
+      "endTime": 1789082029582.9536,
       "status": "passed",
       "message": "",
-      "name": "/Users/applestore/Documents/GitHub/bocam/client/src/components/layout/AdminWorkspace.test.tsx"
-    },
-    {
-      "assertionResults": [
-        {
-          "ancestorTitles": ["admin tab state"],
-          "fullName": "admin tab state opens a tab for a direct link using the canonical navigation item",
-          "status": "passed",
-          "title": "opens a tab for a direct link using the canonical navigation item",
-          "duration": 2.710877999999866,
-          "failureMessages": [],
-          "location": { "line": 16, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["admin tab state"],
-          "fullName": "admin tab state restores valid tabs, removes legacy paths, deduplicates, and keeps home first",
-          "status": "passed",
-          "title": "restores valid tabs, removes legacy paths, deduplicates, and keeps home first",
-          "duration": 0.6507900000001428,
-          "failureMessages": [],
-          "location": { "line": 26, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["admin tab state"],
-          "fullName": "admin tab state rejects paths that are not present in the canonical registry",
-          "status": "passed",
-          "title": "rejects paths that are not present in the canonical registry",
-          "duration": 0.6772320000000036,
-          "failureMessages": [],
-          "location": { "line": 37, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["admin tab state"],
-          "fullName": "admin tab state does not persist malformed stored tab data as valid navigation",
-          "status": "passed",
-          "title": "does not persist malformed stored tab data as valid navigation",
-          "duration": 0.6186250000000655,
-          "failureMessages": [],
-          "location": { "line": 42, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["admin tab state"],
-          "fullName": "admin tab state closes a tab and selects the nearest valid fallback without closing home",
-          "status": "passed",
-          "title": "closes a tab and selects the nearest valid fallback without closing home",
-          "duration": 0.6211719999996603,
-          "failureMessages": [],
-          "location": { "line": 54, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["admin tab state"],
-          "fullName": "admin tab state keeps the same tab collection when the current tab is already open",
-          "status": "passed",
-          "title": "keeps the same tab collection when the current tab is already open",
-          "duration": 0.3850859999997738,
-          "failureMessages": [],
-          "location": { "line": 68, "column": 3 },
-          "meta": {},
-          "tags": []
-        },
-        {
-          "ancestorTitles": ["admin tab state"],
-          "fullName": "admin tab state adds a new tab once without changing the existing tab order",
-          "status": "passed",
-          "title": "adds a new tab once without changing the existing tab order",
-          "duration": 0.3474850000002334,
-          "failureMessages": [],
-          "location": { "line": 74, "column": 3 },
-          "meta": {},
-          "tags": []
-        }
-      ],
-      "startTime": 1788925563301,
-      "endTime": 1788925563307.385,
-      "status": "passed",
-      "message": "",
-      "name": "/Users/applestore/Documents/GitHub/bocam/client/src/hooks/layout/useAdminTabs.test.ts"
+      "name": "/Users/applestore/Documents/GitHub/bocam/server/_core/license/validation.test.ts"
     }
   ]
 }
