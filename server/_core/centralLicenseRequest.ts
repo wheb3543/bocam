@@ -28,6 +28,7 @@ type PendingFeatureRequest = PendingLicenseRequest & {
 export type CentralLicenseFile = {
   key: string;
   hardwareId: string;
+  domain?: string;
   expiryDate: string;
   features: string[];
   issuedAt: string;

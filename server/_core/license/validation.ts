@@ -116,6 +116,36 @@ function validateHardwareId(payload: LicensePayload): boolean {
   return true;
 }
 
+function normalizeDomain(value: string): string {
+  const candidate = value.trim().toLowerCase();
+  try {
+    return new URL(candidate.includes('://') ? candidate : `https://${candidate}`).hostname;
+  } catch {
+    return candidate.split('/')[0].split(':')[0];
+  }
+}
+
+function validateDomain(payload: LicensePayload): boolean {
+  const configuredDomain =
+    process.env.LICENSE_DOMAIN?.trim() ||
+    process.env.BOCAM_PUBLIC_URL?.trim() ||
+    process.env.SERVER_URL?.trim();
+  if (!configuredDomain) {
+    return true;
+  }
+
+  const licensedDomain = payload.domain?.trim();
+  if (!licensedDomain || normalizeDomain(licensedDomain) !== normalizeDomain(configuredDomain)) {
+    logValidationError('domain_mismatch', 'License domain does not match deployment domain', {
+      Expected: configuredDomain,
+      Licensed: licensedDomain || 'missing',
+    });
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Validate expiry date
  *
@@ -189,6 +219,10 @@ export function validateLicensePayload(payload: LicensePayload): LicenseInfo {
   // Validate hardware ID
   if (!validateHardwareId(payload)) {
     return createInvalidLicenseInfo('Hardware ID mismatch', payload, currentHardwareId);
+  }
+
+  if (!validateDomain(payload)) {
+    return createInvalidLicenseInfo('License domain mismatch', payload, currentHardwareId);
   }
 
   // Validate expiry date

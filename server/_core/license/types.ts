@@ -8,6 +8,7 @@
  */
 export interface LicensePayload {
   hid: string; // Hardware ID
+  domain?: string; // Bound deployment domain
   exp: number; // Expiry timestamp
   feat: string[]; // Enabled features
   iat: number; // Issued at timestamp
@@ -53,6 +54,7 @@ export interface SignatureVerificationResult {
 export type ValidationErrorType =
   | 'signature_invalid'
   | 'hardware_id_mismatch'
+  | 'domain_mismatch'
   | 'license_expired'
   | 'no_features_enabled'
   | 'file_not_found'
