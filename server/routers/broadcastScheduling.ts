@@ -7,7 +7,7 @@ import { router, protectedProcedure } from '../_core/trpc';
 import { z } from 'zod';
 import { broadcastSchedulerService } from '../services/broadcastSchedulerService';
 import { TRPCError } from '@trpc/server';
-import { parse as parseCookie } from 'cookie';
+import { parseCookie } from 'cookie';
 import { COOKIE_NAME } from '@shared/const';
 import { listHeartbeatJobs } from '../_core/heartbeatJobs';
 
