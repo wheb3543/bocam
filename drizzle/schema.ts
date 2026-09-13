@@ -844,25 +844,37 @@ export type InsertWhatsAppTemplate = typeof whatsappTemplates.$inferInsert;
  * WhatsApp Broadcasts table - stores broadcast campaigns
  * جدول الرسائل الجماعية - يخزن حملات الرسائل الجماعية
  */
-export const whatsappBroadcasts = mysqlTable('whatsapp_broadcasts', {
-  id: int('id').autoincrement().primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
-  message: text('message').notNull(),
-  templateId: int('templateId'),
-  targetFilter: text('targetFilter'), // JSON filter criteria
-  recipientCount: int('recipientCount').default(0).notNull(),
-  sentCount: int('sentCount').default(0).notNull(),
-  deliveredCount: int('deliveredCount').default(0).notNull(),
-  readCount: int('readCount').default(0).notNull(),
-  failedCount: int('failedCount').default(0).notNull(),
-  status: mysqlEnum('status', ['draft', 'scheduled', 'sending', 'completed', 'failed'])
-    .default('draft')
-    .notNull(),
-  scheduledAt: timestamp('scheduledAt'),
-  completedAt: timestamp('completedAt'),
-  createdBy: int('createdBy').notNull(),
-  createdAt: timestamp('createdAt').defaultNow().notNull(),
-});
+export const whatsappBroadcasts = mysqlTable(
+  'whatsapp_broadcasts',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    name: varchar('name', { length: 255 }).notNull(),
+    message: text('message').notNull(),
+    templateId: int('templateId'),
+    targetFilter: text('targetFilter'), // JSON filter criteria
+    recipientCount: int('recipientCount').default(0).notNull(),
+    sentCount: int('sentCount').default(0).notNull(),
+    deliveredCount: int('deliveredCount').default(0).notNull(),
+    readCount: int('readCount').default(0).notNull(),
+    failedCount: int('failedCount').default(0).notNull(),
+    status: mysqlEnum('status', ['draft', 'scheduled', 'sending', 'completed', 'failed'])
+      .default('draft')
+      .notNull(),
+    scheduledAt: timestamp('scheduledAt'),
+    recipientSnapshot: text('recipientSnapshot'),
+    headerImageUrl: varchar('headerImageUrl', { length: 2000 }),
+    scheduleCronTaskUid: varchar('scheduleCronTaskUid', { length: 65 }),
+    completedAt: timestamp('completedAt'),
+    createdBy: int('createdBy').notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+  },
+  (table) => ({
+    scheduleCronTaskUidIdx: index('whatsapp_broadcasts_schedule_cron_task_uid_idx').on(
+      table.scheduleCronTaskUid
+    ),
+    scheduledAtIdx: index('whatsapp_broadcasts_scheduled_at_idx').on(table.scheduledAt),
+  })
+);
 
 export type WhatsAppBroadcast = typeof whatsappBroadcasts.$inferSelect;
 export type InsertWhatsAppBroadcast = typeof whatsappBroadcasts.$inferInsert;
@@ -3657,3 +3669,195 @@ export const socialPublishAttempts = mysqlTable(
 
 export type SocialPublishAttempt = typeof socialPublishAttempts.$inferSelect;
 export type InsertSocialPublishAttempt = typeof socialPublishAttempts.$inferInsert;
+
+/**
+ * Broadcast Recipients table - يخزن المستقبلين في كل بث
+ * تتبع كل مستقبل على حدة مع معلومات التصفية والمتغيرات
+ */
+export const broadcastRecipients = mysqlTable(
+  'broadcast_recipients',
+  {
+    id: int('id').autoincrement().primaryKey(),
+
+    // الربط مع البث
+    broadcastId: int('broadcastId').notNull(),
+
+    // معلومات الاتصال
+    phoneNumber: varchar('phoneNumber', { length: 20 }).notNull(),
+    fullName: varchar('fullName', { length: 255 }),
+    email: varchar('email', { length: 320 }),
+
+    // معلومات المصدر
+    recipientType: mysqlEnum('recipientType', [
+      'appointment',
+      'camp_registration',
+      'offer_lead',
+      'lead',
+    ]).notNull(),
+    recipientId: int('recipientId').notNull(),
+
+    // معلومات إضافية
+    sourceId: int('sourceId'), // appointmentId, campRegistrationId, offerLeadId, leadId
+    sourceType: mysqlEnum('sourceType', [
+      'appointment',
+      'camp_registration',
+      'offer_lead',
+      'lead',
+    ]).notNull(),
+
+    // حالة الإرسال
+    status: mysqlEnum('status', ['pending', 'sent', 'delivered', 'read', 'failed'])
+      .default('pending')
+      .notNull(),
+
+    // متغيرات القالب (JSON)
+    templateVariables: text('templateVariables'), // JSON
+
+    // التوقيتات
+    sentAt: timestamp('sentAt'),
+    deliveredAt: timestamp('deliveredAt'),
+    readAt: timestamp('readAt'),
+    errorInfo: text('errorInfo'),
+
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    broadcastIdx: index('broadcast_recipients_broadcastId_idx').on(table.broadcastId),
+    phoneIdx: index('broadcast_recipients_phone_idx').on(table.phoneNumber),
+    statusIdx: index('broadcast_recipients_status_idx').on(table.status),
+    recipientTypeIdx: index('broadcast_recipients_type_idx').on(table.recipientType),
+  })
+);
+
+export type BroadcastRecipient = typeof broadcastRecipients.$inferSelect;
+export type InsertBroadcastRecipient = typeof broadcastRecipients.$inferInsert;
+
+/**
+ * Broadcast Recipient Results table - نتائج الإرسال التفصيلية
+ * تتبع تفاصيل كل رسالة مرسلة من Meta
+ */
+export const broadcastRecipientResults = mysqlTable(
+  'broadcast_recipient_results',
+  {
+    id: int('id').autoincrement().primaryKey(),
+
+    // الربط
+    broadcastId: int('broadcastId').notNull(),
+    recipientId: int('recipientId').notNull(),
+
+    // معرف الرسالة من Meta
+    whatsappMessageId: varchar('whatsappMessageId', { length: 255 }),
+
+    // حالة الإرسال
+    status: mysqlEnum('status', ['sent', 'delivered', 'read', 'failed']).default('sent').notNull(),
+
+    // معلومات الخطأ
+    errorCode: varchar('errorCode', { length: 50 }),
+    errorMessage: text('errorMessage'),
+
+    // التوقيتات
+    sentAt: timestamp('sentAt'),
+    deliveredAt: timestamp('deliveredAt'),
+    readAt: timestamp('readAt'),
+
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    broadcastIdx: index('broadcast_recipient_results_broadcastId_idx').on(table.broadcastId),
+    statusIdx: index('broadcast_recipient_results_status_idx').on(table.status),
+  })
+);
+
+export type BroadcastRecipientResult = typeof broadcastRecipientResults.$inferSelect;
+export type InsertBroadcastRecipientResult = typeof broadcastRecipientResults.$inferInsert;
+
+/**
+ * Contact Exports table - تسجيل عمليات تصدير الجهات
+ */
+export const contactExports = mysqlTable(
+  'contact_exports',
+  {
+    id: int('id').autoincrement().primaryKey(),
+
+    // نوع التصدير
+    exportType: mysqlEnum('exportType', ['vcf', 'csv', 'google_sync']).notNull(),
+
+    // معايير التصفية المستخدمة
+    filterCriteria: text('filterCriteria'), // JSON
+
+    // النتائج
+    totalContacts: int('totalContacts').default(0).notNull(),
+    exportedContacts: int('exportedContacts').default(0).notNull(),
+    failedContacts: int('failedContacts').default(0).notNull(),
+
+    // معلومات الملف
+    fileUrl: varchar('fileUrl', { length: 500 }),
+    fileKey: varchar('fileKey', { length: 500 }),
+
+    // الحالة
+    status: mysqlEnum('status', ['pending', 'processing', 'completed', 'failed'])
+      .default('pending')
+      .notNull(),
+    errorInfo: text('errorInfo'),
+
+    // المستخدم
+    createdBy: int('createdBy').notNull(),
+
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    completedAt: timestamp('completedAt'),
+  },
+  (table) => ({
+    statusIdx: index('contact_exports_status_idx').on(table.status),
+    createdAtIdx: index('contact_exports_createdAt_idx').on(table.createdAt),
+  })
+);
+
+export type ContactExport = typeof contactExports.$inferSelect;
+export type InsertContactExport = typeof contactExports.$inferInsert;
+
+/**
+ * Contact Sync Logs table - سجلات مزامنة Google Contacts
+ */
+export const contactSyncLogs = mysqlTable(
+  'contact_sync_logs',
+  {
+    id: int('id').autoincrement().primaryKey(),
+
+    // نوع المزامنة
+    syncType: mysqlEnum('syncType', [
+      'export_to_google',
+      'import_from_google',
+      'sync_bidirectional',
+    ]).notNull(),
+
+    // النتائج
+    totalContacts: int('totalContacts').default(0).notNull(),
+    syncedContacts: int('syncedContacts').default(0).notNull(),
+    failedContacts: int('failedContacts').default(0).notNull(),
+
+    // الحالة
+    status: mysqlEnum('status', ['pending', 'processing', 'completed', 'failed'])
+      .default('pending')
+      .notNull(),
+    errorInfo: text('errorInfo'),
+
+    // حساب Google
+    googleAccountEmail: varchar('googleAccountEmail', { length: 320 }),
+
+    // المستخدم
+    createdBy: int('createdBy').notNull(),
+
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    completedAt: timestamp('completedAt'),
+  },
+  (table) => ({
+    syncTypeIdx: index('contact_sync_logs_syncType_idx').on(table.syncType),
+    statusIdx: index('contact_sync_logs_status_idx').on(table.status),
+    createdAtIdx: index('contact_sync_logs_createdAt_idx').on(table.createdAt),
+  })
+);
+
+export type ContactSyncLog = typeof contactSyncLogs.$inferSelect;
+export type InsertContactSyncLog = typeof contactSyncLogs.$inferInsert;

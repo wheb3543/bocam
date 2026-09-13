@@ -28,6 +28,7 @@ async function startServer() {
     { createCampaignAlertScheduledRouter },
     { createAppointmentReminderScheduledRouter },
     { createUpdateCheckScheduledRouter },
+    { createScheduledBroadcastRouter },
     { createWhatsAppSseRouter },
     { appRouter },
     { createContext },
@@ -68,6 +69,7 @@ async function startServer() {
     import('../api/campaignAlertScheduledRoute'),
     import('../api/appointmentReminderScheduledRoute'),
     import('../api/updateCheckScheduledRoute'),
+    import('../api/scheduledBroadcastRoute'),
     import('../integrations/whatsappSse'),
     import('../routers/routers'),
     import('./context'),
@@ -148,6 +150,7 @@ async function startServer() {
   app.use(createCampaignAlertScheduledRouter());
   app.use(createAppointmentReminderScheduledRouter());
   app.use(createUpdateCheckScheduledRouter());
+  app.use(createScheduledBroadcastRouter());
   app.use(createWhatsAppSseRouter());
   setupHealthCheckRoutes(app);
   setupSwaggerDocs(app);

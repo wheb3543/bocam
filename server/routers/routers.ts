@@ -35,6 +35,11 @@ import { leadsRouter } from './leads';
 import { contentRouter } from './content';
 import { publicContentRouter } from './public/content';
 import { notificationsRouter } from './notifications';
+import { broadcastRouter } from './broadcasts';
+import { broadcastDataV2Router } from './broadcastDataV2';
+import { broadcastExecuteRouter } from './broadcastExecute';
+import { broadcastSchedulingRouter } from './broadcastScheduling';
+import { googleSyncRouter } from './googleSync';
 
 import { getCombinedSocialMediaStats } from '../api/metaGraphAPI';
 import { runDeactivationJobs } from '../tasks/cron/deactivateExpired';
@@ -58,6 +63,11 @@ import { hasRolePermission } from '../services/rolePermissionService';
 const logger = createLogger('routers');
 
 export const appRouter = router({
+  broadcast: broadcastRouter,
+  broadcastData: broadcastDataV2Router,
+  broadcastExecute: broadcastExecuteRouter,
+  broadcastScheduling: broadcastSchedulingRouter,
+  googleSync: googleSyncRouter,
   campaigns: campaignsRouter,
   tasks: tasksRouter,
   system: systemRouter,
