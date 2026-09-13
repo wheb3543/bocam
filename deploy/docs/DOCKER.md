@@ -1,5 +1,16 @@
 # دليل Docker - BOCAM CRM Platform
 
+| الخاصية | القيمة |
+| :--- | :--- |
+| **الحالة (Status)** | `working` |
+| **الجمهور المستهدف (Audience)** | `operations` / `devops` |
+| **المجال (Domain)** | `operations` |
+| **المالك (Owner)** | `devops` |
+| **تاريخ آخر مراجعة (Last Reviewed)** | 2026-09-13 |
+
+> [!NOTE]
+> هذا المستند يعتبر دليلاً تشغيلياً مفصلاً لتشغيل المنصة عبر Docker؛ المرجع التقني والتشغيلي المعتمد والشامل هو [المرجع التشغيلي المعتمد: العمليات والنشر والمراقبة](../../docs/domains/OPERATIONS_DEPLOYMENT_MONITORING_RUNTIME_REFERENCE.md).
+
 ## نظرة عامة
 
 هذا الدليل يشرح كيفية تشغيل BOCAM CRM Platform باستخدام Docker و Docker Compose.

@@ -1,7 +1,16 @@
-# توثيق الهوكات (Hooks) - بوابة المستشفى السعودي الألماني
+# توثيق الخطافات (Hooks Reference) - BOCAM CRM
 
-**تاريخ التحديث:** 23 فبراير 2026  
-**المشروع:** sgh-crm-portal
+## بيانات الحوكمة والمطابقة
+
+| الحقل | القيمة المعتمدة |
+|---|---|
+| **الحالة** | `canonical` |
+| **الجمهور** | مطور، مهندس واجهة، مراجع برمجيات |
+| **المجال** | `frontend-platform` (Hooks & State) |
+| **المصدر** | `client/src/hooks/`, `client/src/_core/hooks/` |
+| **آخر مراجعة** | 2026-09-13 |
+| **المالك** | Frontend Engineering & Design System Team |
+| **البديل** | المرجع الأساسي المحدث في [docs/domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md](../domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md) |
 
 ---
 

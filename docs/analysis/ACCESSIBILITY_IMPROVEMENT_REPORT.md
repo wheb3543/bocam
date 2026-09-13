@@ -1,8 +1,16 @@
 # تقرير تحسين إمكانية الوصول - BOCAM CRM
 
-**التاريخ:** 12 يوليو 2026  
-**الإصدار:** 1.0.0  
-**الهدف:** تحليل حالة إمكانية الوصول الحالية وإنشاء خطة تحسين شاملة للوصول إلى معايير WCAG 2.1 Level AA
+## بيانات الحوكمة والمطابقة
+
+| الحقل | القيمة المعتمدة |
+|---|---|
+| **الحالة** | `canonical` |
+| **الجمهور** | مطور، مهندس واجهة، مسؤول إمكانية الوصول وامتثال WCAG |
+| **المجال** | `frontend-platform` (Accessibility & WCAG 2.1 AA) |
+| **المصدر** | `client/src/lib/accessibility.ts`, `client/src/__tests__/accessibility.test.tsx`, `e2e/accessibility.spec.ts` |
+| **آخر مراجعة** | 2026-09-13 |
+| **المالك** | Frontend Engineering & Design System Team |
+| **البديل** | المرجع الأساسي المحدث في [docs/domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md](../domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md) |
 
 ---
 

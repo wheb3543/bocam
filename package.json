@@ -27,6 +27,7 @@
     "test:report": "vitest run --reporter=verbose --reporter=json --outputFile=test-results/results.json",
     "quality:report": "node scripts/generate-quality-report.mjs",
     "quality:check": "node scripts/generate-quality-report.mjs --check",
+    "docs:check": "node scripts/validate-documentation-registry.mjs",
     "schema:migrations:check": "node scripts/check-migration-schema.mjs",
     "db:phase-zero": "node scripts/database-phase-zero.mjs",
     "exports:audit": "node scripts/audit-unused-exports.mjs",

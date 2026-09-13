@@ -79,10 +79,10 @@
 **الهيكل:**
 ```
 client/src/
-├── pages/              # 50+ صفحة
+├── pages/              # صفحات عامة وإدارية وبوابة مريض
 │   ├── public/         # الصفحات العامة (الهبوط، الأطباء، العروض)
 │   ├── admin/          # الصفحات الإدارية
-│   └── patient/        # صفحات بوابة المريض
+│   └── patient-portal/ # صفحات بوابة المريض
 ├── components/         # مكونات قابلة لإعادة الاستخدام
 │   ├── ui/             # مكونات shadcn/ui
 │   ├── layout/         # مكونات التخطيط
@@ -116,7 +116,7 @@ server/
 │   ├── context.ts      # سياق الطلب
 │   ├── oauth.ts        # مصادقة OAuth
 │   └── systemRouter.ts # مسارات النظام
-├── routers/            # 28+ tRPC router
+├── routers/            # tRPC routers grouped in appRouter by domain
 │   ├── appointments.ts # إدارة المواعيد
 │   ├── campaigns.ts    # إدارة الحملات
 │   ├── whatsapp.ts     # خدمات WhatsApp
@@ -366,10 +366,10 @@ SGH CRM Portal is built on a modern architecture based on **Full-Stack TypeScrip
 **Structure:**
 ```
 client/src/
-├── pages/              # 50+ pages
+├── pages/              # Public, admin, and patient portal pages
 │   ├── public/         # Public pages (landing, doctors, offers)
 │   ├── admin/          # Admin pages
-│   └── patient/        # Patient portal pages
+│   └── patient-portal/ # Patient portal pages
 ├── components/         # Reusable components
 │   ├── ui/             # shadcn/ui components
 │   ├── layout/         # Layout components
@@ -398,7 +398,7 @@ server/
 │   ├── context.ts      # Request context
 │   ├── oauth.ts        # OAuth authentication
 │   └── systemRouter.ts # System routes
-├── routers/            # 28+ tRPC routers
+├── routers/            # tRPC routers grouped in appRouter by domain
 │   ├── appointments.ts # Appointment management
 │   ├── campaigns.ts    # Campaign management
 │   ├── whatsapp.ts     # WhatsApp services

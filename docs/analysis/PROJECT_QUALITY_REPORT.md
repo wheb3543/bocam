@@ -1,10 +1,22 @@
-# تقرير جودة المشروع - BOCAM CRM
+# تقرير جودة المشروع - BOCAM
 
-**التاريخ:** 12 يوليو 2026  
+## بيانات الحوكمة والمطابقة
+
+| الحقل | القيمة المعتمدة |
+|---|---|
+| **الحالة** | `canonical` |
+| **الجمهور** | مطور، مهندس جودة، مسؤول البنية التحتية، مدير المشروع |
+| **المجال** | `testing-quality` (تقرير جودة الكود والاعتماديات) |
+| **المصدر** | `scripts/generate-quality-report.mjs`, `package.json`, `.github/workflows/ci.yml` |
+| **آخر مراجعة** | 2026-09-13 |
+| **المالك** | QA & Core Infrastructure Engineering Team |
+| **البديل** | المرجع الأساسي المحدث في [docs/domains/TESTING_QUALITY_RUNTIME_REFERENCE.md](../domains/TESTING_QUALITY_RUNTIME_REFERENCE.md) |
+
+**التاريخ الأصلي:** 12 يوليو 2026  
 **الإصدار:** 1.1.0  
 **الهدف:** تقييم جودة المشروع وتحديد ما تبقى للوصول للمعايير العالمية
 
-> **لقطة تحقق حالية - 7 سبتمبر 2026:** تم تنفيذ `pnpm check` و`pnpm lint` و`pnpm test` من نسخة المشروع الحالية. النتائج: TypeScript **0 أخطاء**، ESLint **0 أخطاء و0 تحذيرات**، والاختبارات **1,249/1,249 ناجحة في 164 ملفًا**. الأرقام التاريخية أدناه محفوظة كسجل زمني. المؤشرات الآلية الحالية في [PROJECT_QUALITY_CURRENT.md](PROJECT_QUALITY_CURRENT.md)، والتحليل التفصيلي في [PROJECT_STATISTICAL_ANALYSIS_2026-09.md](PROJECT_STATISTICAL_ANALYSIS_2026-09.md).
+> **لقطة تحقق حالية - 7 سبتمبر 2026:** تم تنفيذ `pnpm check` و`pnpm lint` و`pnpm test` من نسخة المشروع الحالية. النتائج: TypeScript **0 أخطاء**، ESLint **0 أخطاء و0 تحذيرات**، والاختبارات **1,249/1,249 ناجحة في 164 ملفًا**. الأرقام التاريخية أدناه محفوظة كسجل زمني. المؤشرات الآلية الحالية في [PROJECT_QUALITY_CURRENT.md](./PROJECT_QUALITY_CURRENT.md)، والتحليل التفصيلي في [PROJECT_STATISTICAL_ANALYSIS_2026-09.md](./PROJECT_STATISTICAL_ANALYSIS_2026-09.md).
 
 ---
 

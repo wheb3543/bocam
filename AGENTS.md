@@ -10,7 +10,7 @@ This repository is a full-stack CRM and patient operations platform built with R
 - `drizzle/` — schema and migration assets
 - `docs/` — project documentation and operational guides
 
-Use the repo documentation as the source of truth for product behavior and operational details: [README.md](README.md), [docs/COMMANDS_REFERENCE.md](docs/COMMANDS_REFERENCE.md).
+Use the repo documentation as the source of truth for product behavior and operational details: [README.md](./README.md), [docs/COMMANDS_REFERENCE.md](./docs/COMMANDS_REFERENCE.md).
 
 ## Terminal workflow
 
@@ -58,6 +58,6 @@ Use `pnpm` for all package management and scripts. Do not replace repository com
 
 ## Useful references
 
-- [README.md](README.md)
-- [docs/COMMANDS_REFERENCE.md](docs/COMMANDS_REFERENCE.md)
-- [package.json](package.json)
+- [README.md](./README.md)
+- [docs/COMMANDS_REFERENCE.md](./docs/COMMANDS_REFERENCE.md)
+- [package.json](./package.json)

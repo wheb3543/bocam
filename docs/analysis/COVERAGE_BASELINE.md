@@ -1,8 +1,20 @@
 # Coverage Baseline
 
+## بيانات الحوكمة والمطابقة
+
+| الحقل | القيمة المعتمدة |
+|---|---|
+| **الحالة** | `generated` |
+| **الجمهور** | مطور، مهندس DevOps، مهندس جودة |
+| **المجال** | `testing-quality` (خط أساس قياس التغطية في CI) |
+| **المصدر** | `coverage/coverage-final.json`, `scripts/coverage-baseline.mjs` |
+| **آخر مراجعة** | 2026-09-13 |
+| **المالك** | QA & Core Infrastructure Engineering Team |
+| **البديل** | المرجع الأساسي المحدث في [docs/domains/TESTING_QUALITY_RUNTIME_REFERENCE.md](../domains/TESTING_QUALITY_RUNTIME_REFERENCE.md) |
+
 > تم توليد هذا الملف بواسطة `pnpm coverage:baseline` من `coverage/coverage-final.json`.
 
-**آخر قياس:** 2026-09-07T23:28:33.357Z
+**آخر قياس مسجل:** 2026-09-07T23:28:33.357Z
 
 ## التغطية العامة
 

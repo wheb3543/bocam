@@ -19,6 +19,9 @@ jobs:
       - name: "📥 استنساخ الكود (Checkout Code)"
         uses: actions/checkout@v4
 
+      - name: "📚 التحقق من سجل الوثائق (Validate Documentation Registry)"
+        run: node scripts/validate-documentation-registry.mjs
+
       - name: "🔗 تشغيل فحص الروابط (Run Link Check)"
         uses: tcort/markdown-link-check@v1
         with:

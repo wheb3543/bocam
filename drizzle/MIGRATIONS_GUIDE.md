@@ -2,9 +2,9 @@
 
 ## نظرة عامة | Overview
 
-يحتوي مجلد `drizzle/` على 64 ملف migration تتبع تغييرات قاعدة البيانات. معظم الملفات من 0002 إلى 0063 هي placeholder migrations (no-op) تم إنشاؤها للحفاظ على تسلسل الـ migration journal.
+يحتوي مجلد `drizzle/` على 110 ملفات SQL عند آخر مراجعة. لا يُفترض أن عدد الملفات يساوي عدد تغييرات schema الفعلية؛ توجد ملفات placeholder وملفات ذات أرقام متقاربة، ويجب فحص المحتوى و`meta/_journal.json` قبل تصنيف أي ملف.
 
-This folder contains 64 migration files that track database changes. Most files from 0002 to 0063 are placeholder migrations (no-op) created to preserve the migration journal sequence.
+This folder contains 110 SQL migration files at the time of review. The file count is not the count of effective schema changes; inspect each file and `meta/_journal.json` before classifying migrations as no-op or effective.
 
 ---
 
@@ -97,9 +97,9 @@ These files are placeholder migrations (no-op) created to preserve the migration
 
 ## مجلد meta/ | meta/ Folder
 
-يحتوي مجلد `meta/` على 60 ملف snapshot.json وملف _journal.json. هذه الملفات تستخدم بواسطة Drizzle ORM لتتبع حالة الـ migrations.
+يحتوي مجلد `meta/` على ملفات snapshot.json وملف `_journal.json`. عند آخر مراجعة يحتوي journal على 105 إدخالات، بينما توجد ملفات SQL مساعدة أو تاريخية خارج journal؛ يجب عدم مساواة الرقمين.
 
-The `meta/` folder contains 60 snapshot.json files and a _journal.json file. These files are used by Drizzle ORM to track migration state.
+The `meta/` folder contains snapshot files and `_journal.json`. At the time of review, the journal contains 105 entries while helper or historical SQL files exist outside the journal; the two counts must not be treated as equivalent.
 
 ### _journal.json
 - **الوصف**: سجل الـ migrations

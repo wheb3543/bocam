@@ -1,6 +1,18 @@
 # معمارية التشغيل دون اتصال وتطبيقات الويب التقدمية | PWA & Offline Architecture Guide
 
-يوضح هذا المستند التصميم الهندسي والمعماري لميزات تطبيقات الويب التقدمية (PWA) والتشغيل دون اتصال (Offline-first / Hybrid Offline) المعتمد في منصة **SGH CRM Portal**. يرتكز التصميم على استخدام عاملي خدمة (**Dual-Service Workers Pattern**) منفصلين كلياً لعزل بيئة بوابة المرضى العامة عن بيئة لوحة التحكم الإدارية.
+## بيانات الحوكمة والمطابقة
+
+| الحقل | القيمة المعتمدة |
+|---|---|
+| **الحالة** | `canonical` |
+| **الجمهور** | مطور، مهندس واجهة، مهندس تشغيل |
+| **المجال** | `frontend-platform` (PWA & Offline) |
+| **المصدر** | `client/public/sw.js`, `client/public/sw-admin.js`, `client/public/manifest.json`, `client/src/components/PWAManager.tsx`, `client/src/pages/OfflinePage.tsx` |
+| **آخر مراجعة** | 2026-09-13 |
+| **المالك** | Frontend Engineering & Design System Team |
+| **البديل** | المرجع الأساسي المحدث في [docs/domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md](../domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md) |
+
+يوضح هذا المستند التصميم الهندسي والمعماري لميزات تطبيقات الويب التقدمية (PWA) والتشغيل دون اتصال (Offline-first / Hybrid Offline) المعتمد في منصة **BOCAM CRM**. يرتكز التصميم على استخدام عاملي خدمة (**Dual-Service Workers Pattern**) منفصلين كلياً لعزل بيئة بوابة المرضى العامة عن بيئة لوحة التحكم الإدارية.
 
 ---
 

@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![Saudi German Hospital](client/public/SGHHospitalColorBilingual.png)
-
 **منصة CRM طبية متكاملة لإدارة الحملات التسويقية وحجوزات المرضى وتكامل WhatsApp**
 
 **Comprehensive Medical CRM Platform for Marketing Campaigns, Patient Appointments & WhatsApp Integration**
@@ -13,9 +11,11 @@
 [![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue)]()
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](docs/development/CONTRIBUTING.md)
 
 [العربية](#arabic) | [English](#english)
+
+> **مرجع النظام الحالي:** الاسم المعتمد في وثائق المشروع هو BOCAM CRM. يظهر SGH CRM Portal في بعض الملفات كاسم تاريخي أو تجاري. راجع [تعريف النظام](./docs/SYSTEM_DEFINITION.md) و[خريطة المسارات](./docs/SYSTEM_ROUTE_MAP.md) و[قاموس المصطلحات](./docs/SYSTEM_GLOSSARY.md) قبل الاعتماد على أرقام أو ميزات تفصيلية.
 
 </div>
 
@@ -155,7 +155,7 @@
 ### 🚀 التثبيت والتشغيل السريع
 
 للحصول على دليل تثبيت وتشغيل مفصل لبيئات التطوير والإنتاج، يرجى مراجعة:
-👉 **[دليل التثبيت والتشغيل الشامل (docs/installation/INSTALLATION_GUIDE.md)](docs/installation/INSTALLATION_GUIDE.md)**
+👉 **[دليل التثبيت والتشغيل الشامل (docs/installation/INSTALLATION_GUIDE.md)](./docs/installation/INSTALLATION_GUIDE.md)**
 
 #### 1. استنساخ المستودع
 
@@ -210,7 +210,7 @@ sgh-crm-portal/
 ├── client/                     # تطبيق الواجهة الأمامية (React, TypeScript)
 │   ├── public/                 # الملفات الثابتة (PWA Manifest, Service Workers)
 │   └── src/                    # كود مصدر الواجهة الأمامية
-│       ├── pages/              # مكونات الصفحات (50+ صفحة)
+│       ├── pages/              # صفحات عامة وإدارية وبوابة مريض (انظر خريطة المسارات)
 │       │   ├── public/         # الصفحات العامة
 │       │   └── admin/          # الصفحات الإدارية
 │       │       ├── bookings/   # إدارة الحجوزات والمواعيد
@@ -222,7 +222,7 @@ sgh-crm-portal/
 ├── server/                     # الخادم الخلفي (Node.js, Express, tRPC)
 │   ├── api/                    # واجهات Meta APIs و Webhooks
 │   ├── database/               # إعدادات قاعدة البيانات و Drizzle ORM
-│   ├── routers/                # مسارات tRPC (Auth, WhatsApp, Patients, Reports)
+│   ├── routers/                # راوترات tRPC مجمعة في appRouter حسب المجال
 │   ├── services/               # خدمات العمليات (WhatsApp, Email, Telegram, PDF)
 │   ├── integrations/           # تكاملات خارجية (Webhooks, SSE, Queues)
 │   └── tasks/                  # المهام المجدولة (Cron Jobs)
@@ -254,19 +254,21 @@ sgh-crm-portal/
 
 تم تنظيم وثائق المشروع بشكل احترافي لتسهيل الوصول إلى المعلومات المطلوبة. للاطلاع على الفهرس الكامل:
 
-👉 **[فهرس الوثائق (docs/README.md)](docs/README.md)**
+👉 **[فهرس الوثائق (docs/README.md)](./docs/README.md)**
+
+للتعريف المطابق للتنفيذ الحالي، راجع [تعريف النظام](./docs/SYSTEM_DEFINITION.md) و[خريطة المسارات](./docs/SYSTEM_ROUTE_MAP.md). أما التفاصيل المتخصصة فتتبع مراحل [الخطة التنفيذية](./docs/DOCUMENTATION_EXECUTION_PLAN.md).
 
 ### الأقسام الرئيسية للتوثيق:
 
 | القسم | الوصف | الرابط |
 |-------|-------|--------|
-| **مقدمة عن النظام** | نظرة عامة وسياسات المشروع | [docs/introduction/](docs/introduction/) |
-| **البنية الهندسية** | مخطط ERD، معمارية PWA، التخزين المؤقت | [docs/architecture/](docs/architecture/) |
-| **دليل التثبيت** | تثبيت بيئة التطوير والإنتاج | [docs/installation/](docs/installation/) |
-| **مرجع API** | توثيق واجهات tRPC و REST | [docs/api/](docs/api/) |
-| **نظام الترخيص** | التراخيص المزدوجة والأمان | [docs/licensing/](docs/licensing/) |
-| **أدلة المستخدم** | دليل الاستخدام الشامل والصيانة | [docs/guides/](docs/guides/) |
-| **معايير التطوير** | دليل المساهمة ومعايير الكود | [docs/development/](docs/development/) |
+| **مقدمة عن النظام** | نظرة عامة وسياسات المشروع | [docs/introduction/](./docs/introduction) |
+| **البنية الهندسية** | مخطط ERD، معمارية PWA، التخزين المؤقت | [docs/architecture/](./docs/architecture) |
+| **دليل التثبيت** | تثبيت بيئة التطوير والإنتاج | [docs/installation/](./docs/installation) |
+| **مرجع API** | توثيق واجهات tRPC و REST | [docs/api/](./docs/api) |
+| **نظام الترخيص** | التراخيص المزدوجة والأمان | [docs/licensing/](./docs/licensing) |
+| **أدلة المستخدم** | دليل الاستخدام الشامل والصيانة | [docs/guides/](./docs/guides) |
+| **معايير التطوير** | دليل المساهمة ومعايير الكود | [docs/development/](./docs/development) |
 
 ---
 
@@ -278,20 +280,20 @@ sgh-crm-portal/
 2. **القسم المحمي والتجاري (Proprietary License):** يشمل الأنظمة المتقدمة مثل **نظام WhatsApp المتكامل (14 صفحة)**، **نظام التقارير والإحصائيات (4 صفحات)**، و**بوابة المرضى المتقدمة (10 صفحات)**. هذا القسم مرخص تجارياً ومحمي بموجب حقوق شركة **IdeaHub**، ومزود بنظام حماية برمجية وربط عتادي (Hardware ID).
 
 لمزيد من التفاصيل القانونية والتقنية حول كيفية إعداد وتوليد تراخيص التشغيل، يرجى مراجعة الدليل التفصيلي:
-👉 **[دليل التراخيص والأمان المخصص (docs/licensing/LICENSE_GUIDE.md)](docs/licensing/LICENSE_GUIDE.md)**
+👉 **[دليل التراخيص والأمان المخصص (docs/licensing/LICENSE_GUIDE.md)](./docs/licensing/LICENSE_GUIDE.md)**
 
 ---
 
 ## 🤝 المساهمة
 
 نرحب بجميع المساهمات! يرجى الاطلاع على دليل المساهمة للمزيد من التفاصيل:
-👉 **[دليل المساهمة (docs/development/CONTRIBUTING.md)](docs/development/CONTRIBUTING.md)**
+👉 **[دليل المساهمة (docs/development/CONTRIBUTING.md)](./docs/development/CONTRIBUTING.md)**
 
 ---
 
 ## 📄 الترخيص
 
-هذا المشروع مرخص بموجب **ترخيص مزدوج** - راجع ملف [LICENSE](LICENSE) للتفاصيل.
+هذا المشروع مرخص بموجب **ترخيص مزدوج** - راجع ملف [LICENSE](./LICENSE) للتفاصيل.
 
 ---
 
@@ -336,10 +338,10 @@ The application will be available at `http://localhost:3000`
 ### Documentation
 
 For comprehensive documentation, please visit:
-👉 **[Documentation Index (docs/README.md)](docs/README.md)**
+👉 **[Documentation Index (docs/README.md)](./docs/README.md)**
 
-> Note: Some advanced user guides are currently planned or under construction and may be added to `docs/guides/` later, including campaign management, appointment scheduling, task/project management, team management, WhatsApp broadcast/auto-replies, and patient portal usage.
+> Note: Detailed domain documentation is being verified against the current codebase by domain-specific phases. The system definition and route map describe the current implemented boundaries; they do not replace detailed domain references.
 
 ### License
 
-This project is **dual-licensed** - see the [LICENSE](LICENSE) file for details.
+This project is **dual-licensed** - see the [LICENSE](./LICENSE) file for details.

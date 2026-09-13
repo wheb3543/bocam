@@ -5,7 +5,7 @@
 **نطاق الفحص:** المستودع الحالي كما هو، مع استبعاد `node_modules` و`coverage` و`dist` من إحصاءات المصدر.  
 **درجة الثقة:** عالية للأعداد المستخرجة آليًا، ومتوسطة للتصنيفات الدلالية، ومنخفضة للتقديرات البشرية مثل ساعات العمل.
 
-**المؤشرات الآلية الحالية:** [PROJECT_QUALITY_CURRENT.md](PROJECT_QUALITY_CURRENT.md) يتم توليده عبر `pnpm quality:report` والتحقق منه في CI عبر `pnpm quality:check`.
+**المؤشرات الآلية الحالية:** [PROJECT_QUALITY_CURRENT.md](./PROJECT_QUALITY_CURRENT.md) يتم توليده عبر `pnpm quality:report` والتحقق منه في CI عبر `pnpm quality:check`.
 
 ## 1. الملخص التنفيذي
 
@@ -110,7 +110,7 @@ BOCAM هو نظام ويب متكامل لإدارة عمليات المرضى �
 | منها مستخدم داخل الملف فقط | 68 | كود مستخدم، لكن `export` قد يكون زائدًا |
 | مرشح بلا استخدام داخلي أو خارجي ظاهر | 10 | يحتاج موافقة مالك الوحدة قبل الحذف |
 
-هذه الأرقام ناتجة عن [UNUSED_EXPORTS_AUDIT.md](UNUSED_EXPORTS_AUDIT.md) باستخدام TypeScript AST. تمت مراجعة القرارات: الـ68 المستخدمة داخليًا تُحفظ ويُراجع فقط ضرورتها كتصدير، والـ10 بلا استخدام ظاهر مرشحة للمراجعة قبل الحذف، والـ265 الملتبسة تُحفظ مع قرار مراجعة موثق. التصنيف محصور في نطاق `client/src/components` و`client/src/hooks` ولا يمثل إذنًا آليًا بالحذف.
+هذه الأرقام ناتجة عن [UNUSED_EXPORTS_AUDIT.md](./UNUSED_EXPORTS_AUDIT.md) باستخدام TypeScript AST. تمت مراجعة القرارات: الـ68 المستخدمة داخليًا تُحفظ ويُراجع فقط ضرورتها كتصدير، والـ10 بلا استخدام ظاهر مرشحة للمراجعة قبل الحذف، والـ265 الملتبسة تُحفظ مع قرار مراجعة موثق. التصنيف محصور في نطاق `client/src/components` و`client/src/hooks` ولا يمثل إذنًا آليًا بالحذف.
 
 ### 3.5 قاعدة البيانات
 
@@ -219,11 +219,11 @@ BOCAM هو نظام ويب متكامل لإدارة عمليات المرضى �
 
 - أظهر تدقيق AST 78 تصديرًا بلا استخدام خارجي ظاهر، لكن 68 منها مستخدمة داخل ملفاتها؛ تبقى 10 فقط مرشحة للمراجعة قبل الحذف، بينما 265 حالة غير مباشرة موثقة بقرار الاحتفاظ والمراجعة.
 - سجل Git لا يكفي لمعرفة الفريق الإداري أو ساعات العمل أو توزيع المسؤوليات.
-- بعض تقارير الجودة السابقة تستخدم أرقامًا تاريخية؛ لذلك أصبح [PROJECT_QUALITY_CURRENT.md](PROJECT_QUALITY_CURRENT.md) مصدر المؤشرات الآلية الحالية.
+- بعض تقارير الجودة السابقة تستخدم أرقامًا تاريخية؛ لذلك أصبح [PROJECT_QUALITY_CURRENT.md](./PROJECT_QUALITY_CURRENT.md) مصدر المؤشرات الآلية الحالية.
 - الملفات الكبيرة والتكاملات الكثيرة قد تجعل onboarding والصيانة أبطأ.
 - تعدد مكتبات Redis/Bull ووجود `bcrypt` و`bcryptjs` يستحق مراجعة لتقليل البدائل غير الضرورية.
 - لا توجد من هذه القراءة وحدها أدلة كافية على اختبارات حمل، contract testing، disaster recovery مجرّب، أو قياسات Lighthouse وSLO.
-- توجد فجوات علاقات وفهارس واستعلامات ثقيلة موثقة بخطة تنفيذ في [DATABASE_SCHEMA_REVIEW_2026-09.md](DATABASE_SCHEMA_REVIEW_2026-09.md).
+- توجد فجوات علاقات وفهارس واستعلامات ثقيلة موثقة بخطة تنفيذ في [DATABASE_SCHEMA_REVIEW_2026-09.md](./DATABASE_SCHEMA_REVIEW_2026-09.md).
 
 ### منخفضة أو تحسينات طويلة المدى
 
@@ -265,14 +265,14 @@ BOCAM هو نظام ويب متكامل لإدارة عمليات المرضى �
 
 1. ✅ اعتماد نجاح `pnpm check` و`pnpm lint` و`pnpm test` كـ baseline موثق في CI.
 2. ✅ ربط تقرير الجودة بمولد إحصاءات دوري عبر `pnpm quality:report` و`pnpm quality:check`.
-3. ✅ توثيق أسماء الاختبارات الحرجة ومسارات تشغيلها في [TESTING_GUIDE.md](guides/TESTING_GUIDE.md).
-4. ✅ تثبيت baseline التغطية عبر `pnpm test:coverage` و`pnpm coverage:baseline`، مع حفظ النسب في [COVERAGE_BASELINE.md](COVERAGE_BASELINE.md) و[COVERAGE_BASELINE.json](COVERAGE_BASELINE.json)، وفحص عدم الانخفاض عبر `pnpm coverage:check` ورفع النتائج كـ CI artifacts.
-5. ✅ تنفيذ تدقيق AST للتصديرات في المكونات والهوكات عبر `pnpm exports:audit`، مع تصنيف النتائج في [UNUSED_EXPORTS_AUDIT.md](UNUSED_EXPORTS_AUDIT.md) و[UNUSED_EXPORTS_AUDIT.json](UNUSED_EXPORTS_AUDIT.json)، والتحقق من ثبات قائمة النتائج المؤكدة عبر `pnpm exports:check`.
+3. ✅ توثيق أسماء الاختبارات الحرجة ومسارات تشغيلها في [TESTING_GUIDE.md](../guides/TESTING_GUIDE.md).
+4. ✅ تثبيت baseline التغطية عبر `pnpm test:coverage` و`pnpm coverage:baseline`، مع حفظ النسب في [COVERAGE_BASELINE.md](./COVERAGE_BASELINE.md) و[COVERAGE_BASELINE.json](../COVERAGE_BASELINE.json)، وفحص عدم الانخفاض عبر `pnpm coverage:check` ورفع النتائج كـ CI artifacts.
+5. ✅ تنفيذ تدقيق AST للتصديرات في المكونات والهوكات عبر `pnpm exports:audit`، مع تصنيف النتائج في [UNUSED_EXPORTS_AUDIT.md](./UNUSED_EXPORTS_AUDIT.md) و[UNUSED_EXPORTS_AUDIT.json](../UNUSED_EXPORTS_AUDIT.json)، والتحقق من ثبات قائمة النتائج المؤكدة عبر `pnpm exports:check`.
 
 ### الأولوية الأولى: خلال أسبوع
 
-1. **مراجعة نتائج التصديرات:** ✅ مكتمل؛ تم فحص الـ78 نتيجة يدويًا، وتوثيق أن 68 منها مستخدمة داخليًا و10 مرشحة للمراجعة قبل الحذف، كما تم تحويل الـ265 حالة الملتبسة إلى قرارات احتفاظ ومراجعة في [UNUSED_EXPORTS_AUDIT.md](UNUSED_EXPORTS_AUDIT.md). الخطوة المتبقية اختيارية وتحتاج موافقة مالكي الوحدات قبل إزالة أي `export`.
-2. **مراجعة مخطط البيانات:** ✅ مكتمل في [DATABASE_SCHEMA_REVIEW_2026-09.md](DATABASE_SCHEMA_REVIEW_2026-09.md). تم توثيق 4 محاور رئيسية: ترحيل فهارس غير متوافق، علاقات بلا FK، استعلامات ثقيلة، وفهارس مركبة ناقصة، مع خطة migration مرحلية دون تعديل عشوائي للمخطط.
+1. **مراجعة نتائج التصديرات:** ✅ مكتمل؛ تم فحص الـ78 نتيجة يدويًا، وتوثيق أن 68 منها مستخدمة داخليًا و10 مرشحة للمراجعة قبل الحذف، كما تم تحويل الـ265 حالة الملتبسة إلى قرارات احتفاظ ومراجعة في [UNUSED_EXPORTS_AUDIT.md](./UNUSED_EXPORTS_AUDIT.md). الخطوة المتبقية اختيارية وتحتاج موافقة مالكي الوحدات قبل إزالة أي `export`.
+2. **مراجعة مخطط البيانات:** ✅ مكتمل في [DATABASE_SCHEMA_REVIEW_2026-09.md](./DATABASE_SCHEMA_REVIEW_2026-09.md). تم توثيق 4 محاور رئيسية: ترحيل فهارس غير متوافق، علاقات بلا FK، استعلامات ثقيلة، وفهارس مركبة ناقصة، مع خطة migration مرحلية دون تعديل عشوائي للمخطط.
 
 ### الأولوية الثانية: خلال شهر
 
@@ -300,7 +300,7 @@ BOCAM هو نظام ويب متكامل لإدارة عمليات المرضى �
 - `pnpm test`: 1,249 ناجحة من 1,249 في 164 ملفًا مكتشفًا أثناء التشغيل.
 - تم إصلاح أخطاء مزامنة تعريفات الأدوار، واختبار لوحة الإدارة، واختباري الترخيص، وتحذيرات ESLint المرتبطة بها.
 - تمت مراجعة نتائج تدقيق التصديرات يدويًا في 8 سبتمبر 2026: 68 تصديرًا مستخدم داخليًا مع مراجعة ضرورة `export`، و10 مرشحة قبل الحذف، و265 حالة غير مباشرة موثقة بالاحتفاظ والمراجعة.
-- تمت مراجعة مخطط البيانات والاستعلامات في 8 سبتمبر 2026، مع حفظ قائمة المشكلات وخطة migration في [DATABASE_SCHEMA_REVIEW_2026-09.md](DATABASE_SCHEMA_REVIEW_2026-09.md) دون تعديل schema أو قاعدة البيانات.
+- تمت مراجعة مخطط البيانات والاستعلامات في 8 سبتمبر 2026، مع حفظ قائمة المشكلات وخطة migration في [DATABASE_SCHEMA_REVIEW_2026-09.md](./DATABASE_SCHEMA_REVIEW_2026-09.md) دون تعديل schema أو قاعدة البيانات.
 - يحتوي CI على job `quality-baseline` يعتمد على jobs الفحص الثلاثة، ويتحقق من `pnpm quality:check` ويرفع التقرير الحالي كـ artifact.
 - يحتوي CI على فحص `pnpm exports:check` ويرفع تقرير تدقيق التصديرات بصيغتي Markdown وJSON ضمن artifact الجودة.
 - تقرير تدقيق التصديرات يتضمن عمود قرار لكل نتيجة، ويفصل بين الكود غير المستخدم والتصدير الزائد والاستخدام غير المباشر.
@@ -309,14 +309,14 @@ BOCAM هو نظام ويب متكامل لإدارة عمليات المرضى �
 
 ## 11. المراجع الداخلية
 
-- [README.md](../README.md)
-- [package.json](../package.json)
-- [App.tsx](../client/src/App.tsx)
-- [schema.ts](../drizzle/schema.ts)
-- [PROJECT_QUALITY_REPORT.md](PROJECT_QUALITY_REPORT.md)
-- [COMPREHENSIVE_CODE_AUDIT_2026.md](analysis/COMPREHENSIVE_CODE_AUDIT_2026.md)
-- [CODE_COMPLEXITY_ANALYSIS.md](CODE_COMPLEXITY_ANALYSIS.md)
-- [COMMANDS_REFERENCE.md](COMMANDS_REFERENCE.md)
-- [DATABASE_SCHEMA_REVIEW_2026-09.md](DATABASE_SCHEMA_REVIEW_2026-09.md)
+- [README.md](../../README.md)
+- [package.json](../../package.json)
+- [App.tsx](../../client/src/App.tsx)
+- [schema.ts](../../drizzle/schema.ts)
+- [PROJECT_QUALITY_REPORT.md](./PROJECT_QUALITY_REPORT.md)
+- [COMPREHENSIVE_CODE_AUDIT_2026.md](./COMPREHENSIVE_CODE_AUDIT_2026.md)
+- [CODE_COMPLEXITY_ANALYSIS.md](./CODE_COMPLEXITY_ANALYSIS.md)
+- [COMMANDS_REFERENCE.md](../COMMANDS_REFERENCE.md)
+- [DATABASE_SCHEMA_REVIEW_2026-09.md](./DATABASE_SCHEMA_REVIEW_2026-09.md)
 
 **الخلاصة النهائية:** BOCAM مشروع طموح وواسع وله قيمة تشغيلية واضحة، ويظهر جهدًا هندسيًا حقيقيًا يتجاوز CRUD التقليدي. لكي ينتقل من “منصة قوية قابلة للتشغيل” إلى “منتج مؤسسي موثوق عالميًا”، الأولوية ليست إضافة ميزات جديدة؛ بل جعل الفحوصات خضراء، خفض التعقيد، إثبات الأمن والامتثال، وقياس الأداء والتعافي في بيئة قريبة من الإنتاج.

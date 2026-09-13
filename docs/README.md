@@ -1,467 +1,128 @@
-# فهرس الوثائق | Documentation Index
+# فهرس وثائق BOCAM
 
-[العربية](#arabic) | [English](#english)
+**الحالة:** `working`  
+**آخر مراجعة:** 2026-09-12  
+**مصدر الفهرسة:** `docs/DOCUMENTATION_REGISTRY.json`
 
----
+هذا هو المدخل المركزي لوثائق المشروع. تُصنف الوثائق حسب الجمهور والحالة والمجال، ولا تُعتبر أي وثيقة مرجعًا نهائيًا قبل أن تحمل الحالة `canonical` في سجل الوثائق وبعد مراجعتها مقابل الكود والاختبارات.
 
-<a name="arabic"></a>
+## حوكمة الوثائق
 
-## 📚 مرحباً بك في وثائق SGH CRM Portal
+- [سجل الوثائق](./DOCUMENTATION_REGISTRY.json) - سجل قابل للتوليد لكل ملفات Markdown وMDX.
+- [مصفوفة التغطية](./DOCUMENTATION_COVERAGE_MATRIX.md) - الربط بين الكود والاختبارات والوثائق والمالك.
+- [سجل التعارضات](./DOCUMENTATION_CONFLICTS.md) - التكرار والروابط القديمة والقرارات المؤجلة.
+- [سياسة التوثيق](./introduction/DOCUMENTATION_POLICY.md) - قواعد كتابة وتحديث الوثائق.
+- [مصفوفة متغيرات البيئة](./ENVIRONMENT_VARIABLES.md) - المتغيرات حسب الإلزام والبيئة والسرية.
+- [مرجع الهوية والصلاحيات](./AUTHENTICATION_RBAC.md) - المصادقة والجلسات وRBAC وحواجز الميزات.
+- [مرجع تشغيل الترخيص](./licensing/LICENSE_RUNTIME_REFERENCE.md) - التحقق المحلي وFeature Gates وheartbeat والطلبات المركزية.
+- [مرجع مخطط قاعدة البيانات الحالي](./architecture/DATABASE_SCHEMA_RUNTIME_REFERENCE.md) - خط أساس schema والعلاقات والترحيلات.
+- [مرجع API وWebhooks الحالي](./api/API_RUNTIME_REFERENCE.md) - مسارات tRPC وREST والحماية والحدود.
+- [تقرير إغلاق المرحلة 6](./phases/PHASE_6_API_WEBHOOKS_CLOSURE.md) - نتائج مراجعة API وWebhooks والاختبارات.
+- [مرجع المواعيد والحجوزات الحالي](./domains/APPOINTMENTS_RUNTIME_REFERENCE.md) - دورة الحجز والحالات والصلاحيات.
+- [مرجع المرضى وبوابة المريض](./domains/PATIENT_PORTAL_RUNTIME_REFERENCE.md) - OTP والجلسات والنتائج وعزل البيانات.
+- [مرجع الحملات والعملاء المحتملين](./domains/CAMPAIGNS_LEADS_RUNTIME_REFERENCE.md) - دورة الحملة وlead وUTM والصلاحيات.
+- [مرجع العروض والمخيمات والأطباء](./domains/OFFERS_CAMPS_DOCTORS_RUNTIME_REFERENCE.md) - دورة الكتالوج الطبي والتسجيلات والرسائل.
+- [التقرير الختامي لحوكمة التوثيق والاستدامة والتسليم النهائي](./FINAL_DOCUMENTATION_GOVERNANCE_SUSTAINABILITY_REPORT.md) - ملخص إنجاز كافة مراحل التوثيق (0–19) وقواعد الاستدامة ومنع التراجع.
+- [تقرير إغلاق المرحلة 19 والتسليم النهائي](./phases/PHASE_19_FINAL_REVIEW_GOVERNANCE_SUSTAINABILITY_CLOSURE.md) - الإغلاق الرسمي لجميع مراحل خطة التوثيق.
+- [مرجع العمليات والنشر والمراقبة](./domains/OPERATIONS_DEPLOYMENT_MONITORING_RUNTIME_REFERENCE.md) - معمارية الحاويات وDocker وNginx وSSL والنسخ الاحتياطي والمراقبة.
+- [تقرير إغلاق المرحلة 18](./phases/PHASE_18_OPERATIONS_DEPLOYMENT_MONITORING_CLOSURE.md) - نتائج مراجعة العمليات والنشر والمراقبة.
+- [مرجع الاختبارات وهندسة الجودة](./domains/TESTING_QUALITY_RUNTIME_REFERENCE.md) - هرم الاختبارات وإعدادات Vitest وPlaywright وبوابات CI.
+- [تقرير إغلاق المرحلة 17](./phases/PHASE_17_TESTING_QUALITY_CLOSURE.md) - نتائج مراجعة الاختبارات وهندسة الجودة ومصفوفة التغطية.
+- [مرجع الواجهة المشتركة وPWA والوصول](./domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md) - معمارية الواجهة والإطار الإداري والـ PWA وWCAG 2.1 AA.
+- [تقرير إغلاق المرحلة 16](./phases/PHASE_16_FRONTEND_PLATFORM_CLOSURE.md) - نتائج مراجعة الواجهة المشتركة وPWA وإمكانية الوصول.
+- [تقرير إغلاق المرحلة 15](./phases/PHASE_15_ANALYTICS_REPORTING_TRACKING_CLOSURE.md) - نتائج مراجعة التقارير والتحليلات والتتبع.
+- [تقرير إغلاق المرحلة 10](./phases/PHASE_10_OFFERS_CAMPS_DOCTORS_CLOSURE.md) - نتائج مراجعة العروض والمخيمات والأطباء والاختبارات.
+- [تقرير إغلاق المرحلة 9](./phases/PHASE_9_CAMPAIGNS_LEADS_CLOSURE.md) - نتائج مراجعة الحملات والـleads والاختبارات.
+- [تقرير إغلاق المرحلة 8](./phases/PHASE_8_PATIENTS_PORTAL_CLOSURE.md) - نتائج مراجعة المرضى والبوابة والاختبارات.
+- [تقرير إغلاق المرحلة 7](./phases/PHASE_7_APPOINTMENTS_CLOSURE.md) - نتائج مراجعة المواعيد والحجوزات والاختبارات.
+- [تقرير إغلاق المرحلة 5](./phases/PHASE_5_DATABASE_CLOSURE.md) - نتائج المقارنة الحية ومراجعة الترحيلات.
+- [الخطة التنفيذية](./DOCUMENTATION_EXECUTION_PLAN.md) - مراحل تحديث التوثيق حسب المجال.
+- [خطة المرحلة 0](./phases/PHASE_0_DOCUMENTATION_GOVERNANCE_PLAN.md) - خطة تأسيس الحوكمة والمصفوفة.
 
-هذا الدليل الشامل يغطي جميع جوانب منصة SGH CRM Portal - منصة CRM طبية متكاملة لإدارة الحملات التسويقية، حجوزات المرضى، وتكامل WhatsApp.
+## مسارات القراءة
 
-### 🗂️ هيكل الوثائق
+### للمطور الجديد
 
-تم تنظيم الوثائق في مجلدات فرعية حسب النوع:
+1. [دليل التثبيت](./installation/INSTALLATION_GUIDE.md)
+2. [مرجع الأوامر](./COMMANDS_REFERENCE.md)
+3. [البنية المعمارية](./architecture/ARCHITECTURE.md)
+4. [دليل الاختبارات](./archive/TESTING_GUIDE_CONCISE.md)
+5. [دليل المساهمة](./development/CONTRIBUTING.md)
 
-```
-docs/
-├── guides/ (أدلة المستخدم)
-│   ├── USAGE_GUIDE.md
-│   ├── PATIENT_PORTAL_GUIDE.md
-│   ├── TESTING_GUIDE.md
-│   ├── TROUBLESHOOTING.md
-│   ├── userGuide.md
-│   ├── EXPORT_FEATURE_GUIDE.md
-│   └── QUICK_TEST.md
-├── architecture/ (البنية المعمارية)
-│   ├── ARCHITECTURE.md
-│   ├── DATABASE_SCHEMA.md
-│   └── CACHING.md
-├── api/ (توثيق API)
-│   ├── META_INTEGRATION_GUIDE.md
-│   ├── WEBHOOK_FIX_SUMMARY.md
-│   ├── WHATSAPP_INTEGRATION_GUIDE.md
-│   ├── WEBHOOK_DIAGNOSTICS.md
-│   └── CHANGELOG_WEBHOOK_FIX.md
-├── performance/ (الأداء)
-│   ├── PERFORMANCE_GUIDE.md
-│   └── PERFORMANCE_REPORT.md
-├── analysis/ (التحليلات والتقارير)
-│   ├── ./analysis/AUDIT_AND_IMPROVEMENT_PLAN.md
-│   ├── ./analysis/SYSTEM_REPORT.md
-│   ├── WHATSAPP_SERVICES_ANALYSIS_REPORT.md
-│   ├── ./analysis/IMPROVEMENT_ANALYSIS.md
-│   ├── PRESENTATION_SUMMARY.md
-│   ├── ANALYSIS_NOTES.md
-│   ├── AUDIT_RESULTS.md
-│   ├── table-audit-report.md
-│   └── pages-inventory.md
-├── saas/ (توثيق SaaS)
-│   ├── SAAS_CHANGES_EXPLANATION.md
-│   ├── SAAS_SERVICE_ISOLATION.md
-│   ├── SAAS_WORKFLOW_EXPLANATION.md
-│   └── SAAS_FIXED_VARIABLE_SERVICES.md
-├── whatsapp/ (توثيق واتساب)
-│   ├── ./whatsapp/WHATSAPP_NOTIFICATIONS_DOCUMENTATION.md
-│   ├── ./whatsapp/WHATSAPP_PAGES_ANALYSIS.md
-│   ├── WHATSAPP_TEMPLATES_REQUIRED.md
-│   ├── WHATSAPP_TODO.md
-│   ├── whatsapp-api-research-findings.md
-│   ├── whatsapp-business-api-setup-guide.md
-│   ├── whatsapp-fixes-technical-report.md
-│   ├── whatsapp-improvements-plan.md
-│   ├── whatsapp-marketing-messages-requirements.md
-│   ├── whatsapp-pages-to-review.md
-│   └── whatsapp-template-categories-analysis.md
-├── implementation/ (خطوات التنفيذ)
-│   ├── IMPLEMENTATION_PLAN.md
-│   ├── PHASE_ONE_IMPLEMENTATION.md
-│   ├── PHASE_ZERO_IMPLEMENTATION.md
-│   ├── PHASE_ZERO_SUMMARY.md
-│   └── PLAN.md
-├── archive/ (الأرشيف القديم)
-│   ├── FIX_SUMMARY.txt
-│   ├── IMPROVEMENTS_TODO.md
-│   ├── SPECIFICATIONS.md
-│   ├── TEMPLATE_TABLES_DOCUMENTATION.md
-│   ├── VISION_DOCUMENT.md
-│   ├── todo.md
-│   └── test-webhook.sh
-├── README.md
-├── COMPONENTS.md
-├── HOOKS_DOCUMENTATION.md
-└── CODE_OF_CONDUCT.md
-```
+### للمطورين ومراجعي الكود
 
----
+- [البنية المعمارية](./architecture/ARCHITECTURE.md)
+- [مخطط قاعدة البيانات](./architecture/DATABASE_SCHEMA.md)
+- [مخطط ERD](./architecture/DATABASE_ERD.md)
+- [مرجع REST وtRPC](./api/REST_TRPC_API.md)
+- [دليل التخزين المؤقت](./architecture/CACHING.md)
+- [دليل PWA والعمل دون اتصال](./architecture/PWA_OFFLINE_ARCHITECTURE.md)
+- [معايير أسلوب الكود](./development/CODE_STYLE_GUIDELINES.md)
 
-## 📖 دروس تعليمية (Tutorials)
+### للمشغلين وفرق العمليات
 
-دروس توجيهية للمبتدئين للبدء مع النظام.
+- [المرجع التشغيلي المعتمد: العمليات والنشر والمراقبة](./domains/OPERATIONS_DEPLOYMENT_MONITORING_RUNTIME_REFERENCE.md)
+- [دليل النشر الأساسي](../deploy/README.md)
+- [دليل Docker](../deploy/docs/DOCKER.md)
+- [دليل الصيانة](../deploy/docs/MAINTENANCE_GUIDE.md)
+- [إدارة النسخ الاحتياطية](../deploy/backup/README.md)
+- [المراقبة](../deploy/monitoring/README.md)
+- [دليل الترحيلات](../drizzle/MIGRATIONS_GUIDE.md)
 
-### [دليل التثبيت](./INSTALLATION_GUIDE.md)
-تعلم كيفية تثبيت وتشغيل SGH CRM Portal على بيئة التطوير الخاصة بك.
+### للمستخدمين والمسؤولين
 
-**ماذا ستتعلم:**
-- المتطلبات الأساسية (Node.js, pnpm, MySQL)
-- خطوات التثبيت التفصيلية
-- إعداد متغيرات البيئة
-- استكشاف الأخطاء الشائعة
+- [دليل الاستخدام](./guides/USAGE_GUIDE.md)
+- [دليل بوابة المريض](./guides/PATIENT_PORTAL_GUIDE.md)
+- [دليل WhatsApp للمستخدم](./guides/WHATSAPP_USER_GUIDE.md)
+- [دليل التصدير](./guides/EXPORT_FEATURE_GUIDE.md)
+- [استكشاف الأخطاء](./guides/TROUBLESHOOTING.md)
 
-### [دليل البداية السريعة](../QUICK_TEST.md)
-ابدأ بسرعة مع دليل الاختبار السريع.
+## المجالات الرئيسية
 
----
+| المجال | نقطة الدخول الحالية | مرحلة التحديث |
+|---|---|---:|
+| النظام والحدود | [README الجذر](../README.md) و[المعمارية](./architecture/ARCHITECTURE.md) | 1 |
+| التثبيت والبيئات | [installation](./installation) و[deploy](../deploy/README.md) | 2 |
+| المصادقة وRBAC | [الأمان](./introduction/SECURITY.md) وتقارير RBAC | 3 |
+| الترخيص والامتثال | [دليل الترخيص](./licensing/LICENSE_GUIDE.md) | 4 |
+| البيانات والترحيلات | [مرجع مخطط قاعدة البيانات الحالي](./architecture/DATABASE_SCHEMA_RUNTIME_REFERENCE.md) و[تقرير الإغلاق](./phases/PHASE_5_DATABASE_CLOSURE.md) | 5 |
+| API وWebhooks | [مرجع API وWebhooks الحالي](./api/API_RUNTIME_REFERENCE.md) | 6 |
+| المواعيد والحجوزات | [مرجع المواعيد والحجوزات الحالي](./domains/APPOINTMENTS_RUNTIME_REFERENCE.md) | 7 |
+| المرضى والبوابة | [مرجع المرضى وبوابة المريض](./domains/PATIENT_PORTAL_RUNTIME_REFERENCE.md) | 8 |
+| الحملات والعملاء المحتملون | [مرجع الحملات والعملاء المحتملين](./domains/CAMPAIGNS_LEADS_RUNTIME_REFERENCE.md) | 9 |
+| WhatsApp | [تكامل WhatsApp](./api/WHATSAPP_INTEGRATION.md) | 12 |
+| Meta وSocial | [تكامل Meta](./api/META_INTEGRATION_GUIDE.md) | 13 |
+| إدارة المحتوى والوسائط | [توثيق إدارة المحتوى](./CONTENT_MANAGEMENT_README.md) | 14 |
+| التقارير والتتبع | [تقارير التحليل](./analysis) | 15 |
+| الواجهة وPWA والوصول | [مرجع الواجهة المشتركة وPWA والوصول](./domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md) | 16 |
+| الاختبارات والجودة | [مرجع الاختبارات وهندسة الجودة](./domains/TESTING_QUALITY_RUNTIME_REFERENCE.md) | 17 |
+| العمليات والنشر | [مرجع العمليات والنشر والمراقبة](./domains/OPERATIONS_DEPLOYMENT_MONITORING_RUNTIME_REFERENCE.md) و[حزمة النشر](../deploy/README.md) | 18 |
+| حوكمة التوثيق والاستدامة | [التقرير الختامي لحوكمة التوثيق والاستدامة](./FINAL_DOCUMENTATION_GOVERNANCE_SUSTAINABILITY_REPORT.md) و[مصفوفة التغطية](./DOCUMENTATION_COVERAGE_MATRIX.md) | 19 |
 
-## 🎯 أدلة كيفية (How-to Guides)
+## التقارير والخطط
 
-أدلة عملية لإنجاز مهام محددة.
+التقارير والخطط لا تُعد تلقائيًا مراجع تشغيلية. راجع حالتها في [سجل الوثائق](./DOCUMENTATION_REGISTRY.json) قبل الاعتماد عليها.
 
-### إدارة الحملات
-- [دليل إدارة الحملات](../docs/CAMPAIGNS_GUIDE.md) - إنشاء وإدارة الحملات التسويقية
-- [تتبع UTM Parameters](../docs/UTM_TRACKING.md) - تحليل مصادر الزيارات
+- [تقارير التحليل](./analysis)
+- [خطط التنفيذ](./implementation)
+- [تقارير الأداء](./performance)
+- [البحث والمصادر](./research)
+- [توثيق SaaS](./saas)
+- [التوثيق التاريخي](./archive)
 
-### إدارة المواعيد
-- [إدارة مواعيد الأطباء](../docs/APPOINTMENTS_GUIDE.md) - حجز وإدارة المواعيد
-- [جدولة المواعيد التلقائية](../docs/APPOINTMENT_SCHEDULING.md) - إعداد التذكيرات التلقائية
+## قواعد الفهرسة
 
-### إدارة المهام
-- [إدارة المهام والمشاريع](../docs/TASKS_GUIDE.md) - إنشاء وتتبع المهام
-- [إدارة الفرق](../docs/TEAMS_GUIDE.md) - تنظيم الفرق والأدوار
+- لا تضف رابطًا لملف غير موجود.
+- لا تستخدم `final` أو `latest` بدل حالة الوثيقة.
+- اربط الوثيقة القديمة ببديلها قبل وسمها `deprecated`.
+- أضف أي وثيقة جديدة إلى سجل الوثائق عبر `pnpm docs:check`.
+- عند تغيير API أو schema أو صلاحيات أو بيئة تشغيل، راجع الوثائق المرتبطة في مصفوفة التغطية.
 
-### WhatsApp
-- [دليل WhatsApp الشامل](./WHATSAPP_INTEGRATION_GUIDE.md) - تكامل WhatsApp Business API
-- [إرسال الرسائل الجماعية](./WHATSAPP_BROADCAST.md) - البث الجماعي للحملات
-- [الردود التلقائية](./WHATSAPP_AUTO_REPLY.md) - إعداد الردود التلقائية
+## التحقق المحلي
 
-### بوابة المريض
-- [دليل بوابة المريض](./PATIENT_PORTAL_GUIDE.md) - استخدام بوابة المريض
-
----
-
-## 📚 مراجع (Reference)
-
-معلومات تقنية مفصلة للمطورين.
-
-### [البنية المعمارية](../docs/ARCHITECTURE.md)
-فهم البنية المعمارية للنظام.
-
-**المحتوى:**
-- مخطط البنية العامة
-- مكونات النظام (Frontend, Backend, Database)
-- تدفق البيانات
-- إجراءات الأمان
-- تحسينات الأداء
-
-### [مخطط قاعدة البيانات](../docs/DATABASE_SCHEMA.md)
-مرجع كامل لجميع جداول قاعدة البيانات.
-
-**المحتوى:**
-- 40+ جدول مع تفاصيل الأعمدة
-- العلاقات بين الجداول
-- الفهارس والقيود
-- أمثلة الاستخدام
-
-### [مرجع API](../docs/API_REFERENCE.md)
-توثيق كامل لـ tRPC endpoints.
-
-**المحتوى:**
-- جميع الـ routers والـ procedures
-- أنواع المدخلات والمخرجات
-- أمثلة الاستخدام
-
-### [دليل النشر](../docs/DEPLOYMENT.md)
-دليل نشر النظام على بيئة الإنتاج.
-
-**المحتوى:**
-- متطلبات الخادم
-- خطوات النشر
-- إعداد HTTPS
-- النسخ الاحتياطي
-
----
-
-## 🧠 شروحات (Explanation)
-
-فهم أعمق لمفاهيم النظام.
-
-### مفاهيم النظام
-- [نظام الصلاحيات](./PERMISSIONS.md) - فهم نظام الأدوار والصلاحيات
-- [تتبع التحويلات](./CONVERSION_TRACKING.md) - كيفية عمل تتبع التحويلات
-- [تكامل Meta](./api/META_INTEGRATION_GUIDE.md) - تكامل Meta Pixel و Conversion API
-
-### أفضل الممارسات
-- [أمن البيانات](./DATA_SECURITY.md) - حماية بيانات المرضى
-- [تحسين الأداء](./PERFORMANCE_GUIDE.md) - تحسين أداء النظام
-- [استكشاف الأخطاء](./TROUBLESHOOTING.md) - حل المشاكل الشائعة
-- [دليل الاختبار](./TESTING_GUIDE.md) - كتابة وتشغيل الاختبارات
-
----
-
-## 📋 الوثائق الرئيسية في الجذر
-
-هذه الملفات موجودة في المجلد الرئيسي للمشروع:
-
-| الملف | الوصف |
-|-------|-------|
-| [README.md](../README.md) | نظرة عامة على المشروع |
-| [CHANGELOG.md](../CHANGELOG.md) | سجل التغييرات |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | دليل المساهمة |
-| [SECURITY.md](./SECURITY.md) | سياسة الأمان |
-| [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md) | دليل التثبيت |
-| [LICENSE](../LICENSE) | ترخيص MIT |
-
----
-
-## 🔗 روابط سريعة
-
-### للمطورين الجدد
-1. ابدأ بـ [دليل التثبيت](./INSTALLATION_GUIDE.md)
-2. اقرأ [البنية المعمارية](../docs/ARCHITECTURE.md)
-3. استكشف [مخطط قاعدة البيانات](../docs/DATABASE_SCHEMA.md)
-
-### للمسؤولين
-1. [دليل المستخدم](../userGuide.md)
-2. [سياسة الأمان](./SECURITY.md)
-3. [دليل النشر](./DEPLOYMENT.md)
-
-### للمساهمين
-1. [دليل المساهمة](./CONTRIBUTING.md)
-2. [معايير الكود](./CONTRIBUTING.md#معايير-الكود)
-3. [دليل الاختبار](./TESTING_GUIDE.md)
-
----
-
-## 📞 الدعم
-
-للحصول على المساعدة:
-- **GitHub Issues:** [إنشاء مشكلة](https://github.com/wheb3543/bocam/issues)
-- **البريد الإلكتروني:** abood22828@gmail.com
-
----
-
-<a name="english"></a>
-
-## 📚 Welcome to SGH CRM Portal Documentation
-
-This comprehensive guide covers all aspects of the SGH CRM Portal - an integrated medical CRM platform for marketing campaign management, patient appointments, and WhatsApp integration.
-
-### 🗂️ Documentation Structure
-
-Documentation is organized in subdirectories by type:
-
-```
-docs/
-├── guides/ (User Guides)
-│   ├── USAGE_GUIDE.md
-│   ├── PATIENT_PORTAL_GUIDE.md
-│   ├── TESTING_GUIDE.md
-│   ├── TROUBLESHOOTING.md
-│   ├── userGuide.md
-│   ├── EXPORT_FEATURE_GUIDE.md
-│   └── QUICK_TEST.md
-├── architecture/ (Architecture)
-│   ├── ARCHITECTURE.md
-│   ├── DATABASE_SCHEMA.md
-│   └── CACHING.md
-├── api/ (API Documentation)
-│   ├── META_INTEGRATION_GUIDE.md
-│   ├── WEBHOOK_FIX_SUMMARY.md
-│   ├── WHATSAPP_INTEGRATION_GUIDE.md
-│   ├── WEBHOOK_DIAGNOSTICS.md
-│   └── CHANGELOG_WEBHOOK_FIX.md
-├── performance/ (Performance)
-│   ├── PERFORMANCE_GUIDE.md
-│   └── PERFORMANCE_REPORT.md
-├── analysis/ (Analysis & Reports)
-│   ├── ./analysis/AUDIT_AND_IMPROVEMENT_PLAN.md
-│   ├── ./analysis/SYSTEM_REPORT.md
-│   ├── WHATSAPP_SERVICES_ANALYSIS_REPORT.md
-│   ├── ./analysis/IMPROVEMENT_ANALYSIS.md
-│   ├── PRESENTATION_SUMMARY.md
-│   ├── ANALYSIS_NOTES.md
-│   ├── AUDIT_RESULTS.md
-│   ├── table-audit-report.md
-│   └── pages-inventory.md
-├── saas/ (SaaS Documentation)
-│   ├── SAAS_CHANGES_EXPLANATION.md
-│   ├── SAAS_SERVICE_ISOLATION.md
-│   ├── SAAS_WORKFLOW_EXPLANATION.md
-│   └── SAAS_FIXED_VARIABLE_SERVICES.md
-├── whatsapp/ (WhatsApp Documentation)
-│   ├── ./whatsapp/WHATSAPP_NOTIFICATIONS_DOCUMENTATION.md
-│   ├── ./whatsapp/WHATSAPP_PAGES_ANALYSIS.md
-│   ├── WHATSAPP_TEMPLATES_REQUIRED.md
-│   ├── WHATSAPP_TODO.md
-│   ├── whatsapp-api-research-findings.md
-│   ├── whatsapp-business-api-setup-guide.md
-│   ├── whatsapp-fixes-technical-report.md
-│   ├── whatsapp-improvements-plan.md
-│   ├── whatsapp-marketing-messages-requirements.md
-│   ├── whatsapp-pages-to-review.md
-│   └── whatsapp-template-categories-analysis.md
-├── implementation/ (Implementation Plans)
-│   ├── IMPLEMENTATION_PLAN.md
-│   ├── PHASE_ONE_IMPLEMENTATION.md
-│   ├── PHASE_ZERO_IMPLEMENTATION.md
-│   ├── PHASE_ZERO_SUMMARY.md
-│   └── PLAN.md
-├── archive/ (Old Archive)
-│   ├── FIX_SUMMARY.txt
-│   ├── IMPROVEMENTS_TODO.md
-│   ├── SPECIFICATIONS.md
-│   ├── TEMPLATE_TABLES_DOCUMENTATION.md
-│   ├── VISION_DOCUMENT.md
-│   ├── todo.md
-│   └── test-webhook.sh
-├── README.md
-├── COMPONENTS.md
-├── HOOKS_DOCUMENTATION.md
-└── CODE_OF_CONDUCT.md
+```bash
+pnpm docs:check
+pnpm format:check
 ```
 
----
-
-## 📖 Tutorials
-
-Learning-oriented lessons for beginners.
-
-### [Installation Guide](./INSTALLATION_GUIDE.md)
-Learn how to install and run SGH CRM Portal in your development environment.
-
-**What you'll learn:**
-- Prerequisites (Node.js, pnpm, MySQL)
-- Step-by-step installation
-- Environment configuration
-- Common troubleshooting
-
-### [Quick Start Guide](../QUICK_TEST.md)
-Get started quickly with the quick test guide.
-
----
-
-## 🎯 How-to Guides
-
-Practical guides for accomplishing specific tasks.
-
-### Campaign Management
-- [Campaign Management Guide](../docs/CAMPAIGNS_GUIDE.md) - Create and manage marketing campaigns
-- [UTM Tracking](../docs/UTM_TRACKING.md) - Analyze traffic sources
-
-### Appointment Management
-- [Doctor Appointments](../docs/APPOINTMENTS_GUIDE.md) - Book and manage appointments
-- [Appointment Scheduling](../docs/APPOINTMENT_SCHEDULING.md) - Setup automatic reminders
-
-### Task Management
-- [Tasks & Projects](../docs/TASKS_GUIDE.md) - Create and track tasks
-- [Team Management](../docs/TEAMS_GUIDE.md) - Organize teams and roles
-
-### WhatsApp
-- [WhatsApp Complete Guide](../docs/WHATSAPP_INTEGRATION_GUIDE.md) - WhatsApp Business API integration
-- [Broadcast Messaging](../docs/WHATSAPP_BROADCAST.md) - Mass messaging for campaigns
-- [Auto Replies](../docs/WHATSAPP_AUTO_REPLY.md) - Setup automatic replies
-
-### Patient Portal
-- [Patient Portal Guide](../docs/PATIENT_PORTAL_GUIDE.md) - Using the patient portal
-
----
-
-## 📚 References
-
-Detailed technical information for developers.
-
-### [Architecture](../docs/ARCHITECTURE.md)
-Understand the system architecture.
-
-**Contents:**
-- Overall architecture diagram
-- System components (Frontend, Backend, Database)
-- Data flow
-- Security measures
-- Performance optimizations
-
-### [Database Schema](../docs/DATABASE_SCHEMA.md)
-Complete reference for all database tables.
-
-**Contents:**
-- 40+ tables with column details
-- Table relationships
-- Indexes and constraints
-- Usage examples
-
-### [API Reference](../docs/API_REFERENCE.md)
-Complete tRPC endpoints documentation.
-
-**Contents:**
-- All routers and procedures
-- Input/output types
-- Usage examples
-
-### [Deployment Guide](./DEPLOYMENT.md)
-Guide for deploying to production.
-
-**Contents:**
-- Server requirements
-- Deployment steps
-- HTTPS setup
-- Backup strategies
-
----
-
-## 🧠 Explanation
-
-Deeper understanding of system concepts.
-
-### System Concepts
-- [Permission System](./PERMISSIONS.md) - Understanding roles and permissions
-- [Conversion Tracking](./CONVERSION_TRACKING.md) - How conversion tracking works
-- [Meta Integration](./api/META_INTEGRATION_GUIDE.md) - Meta Pixel and Conversion API integration
-
-### Best Practices
-- [Data Security](./DATA_SECURITY.md) - Protecting patient data
-- [Performance Optimization](./PERFORMANCE_GUIDE.md) - Optimizing system performance
-- [Troubleshooting](./TROUBLESHOOTING.md) - Solving common issues
-- [Testing Guide](./TESTING_GUIDE.md) - Writing and running tests
-
----
-
-## 📋 Root Documentation Files
-
-These files are located in the project root:
-
-| File | Description |
-|------|-------------|
-| [README.md](../README.md) | Project overview |
-| [CHANGELOG.md](../CHANGELOG.md) | Changelog |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Contributing guide |
-| [SECURITY.md](./SECURITY.md) | Security policy |
-| [INSTALLATION_GUIDE.md](./INSTALLATION_GUIDE.md) | Installation guide |
-| [LICENSE](../LICENSE) | MIT License |
-
----
-
-## 🔗 Quick Links
-
-### For New Developers
-1. Start with [Installation Guide](./INSTALLATION_GUIDE.md)
-2. Read [Architecture](../docs/ARCHITECTURE.md)
-3. Explore [Database Schema](../docs/DATABASE_SCHEMA.md)
-
-### For Administrators
-1. [User Guide](../userGuide.md)
-2. [Security Policy](./SECURITY.md)
-3. [Deployment Guide](./DEPLOYMENT.md)
-
-### For Contributors
-1. [Contributing Guide](./CONTRIBUTING.md)
-2. [Code Standards](./CONTRIBUTING.md#code-standards)
-3. [Testing Guide](./TESTING_GUIDE.md)
-
----
-
-## 📞 Support
-
-For help:
-- **GitHub Issues:** [Create an issue](https://github.com/wheb3543/bocam/issues)
-- **Email:** abood22828@gmail.com
-
----
-
-<div align="center">
-
-**نرعاكم كأهالينا - Caring like family**
-
-Made with ❤️ by Abdullkwy Alhatef
-
-</div>
+لا يغني فحص السجل عن مراجعة محتوى الوثيقة مقابل الكود. التغطية التفصيلية تتم في مراحل المجالات المحددة في [الخطة التنفيذية](./DOCUMENTATION_EXECUTION_PLAN.md).

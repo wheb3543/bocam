@@ -1,5 +1,17 @@
 # دليل الاختبارات - Testing Guide
 
+## بيانات الحوكمة والمطابقة
+
+| الحقل | القيمة المعتمدة |
+|---|---|
+| **الحالة** | `canonical` |
+| **الجمهور** | مطور، مهندس جودة، مراجع برمجيات |
+| **المجال** | `testing-quality` (دليل كتابة وتشغيل الاختبارات) |
+| **المصدر** | `vitest.config.ts`, `playwright.config.ts`, `vitest.setup.ts`, `client/**/__tests__`, `server/**/__tests__`, `e2e/` |
+| **آخر مراجعة** | 2026-09-13 |
+| **المالك** | QA & Core Infrastructure Engineering Team |
+| **البديل** | المرجع الأساسي المحدث في [docs/domains/TESTING_QUALITY_RUNTIME_REFERENCE.md](../domains/TESTING_QUALITY_RUNTIME_REFERENCE.md) |
+
 ## نظرة عامة
 
 هذا الدليل يشرح كيفية كتابة وتشغيل وصيانة الاختبارات في مشروع Bocam.

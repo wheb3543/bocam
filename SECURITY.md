@@ -1,5 +1,9 @@
 # Security Policy
 
+> **Implementation status:** For the current authentication and authorization behavior, use [the Authentication and RBAC reference](./docs/AUTHENTICATION_RBAC.md). This policy contains project guidance and must not be read as proof that every listed security feature is implemented.
+
+> **Licensing status:** For the current licensing and runtime-protection behavior, use [the licensing runtime reference](./docs/licensing/LICENSE_RUNTIME_REFERENCE.md). The code currently supports local validation, feature gates, heartbeat, and central requests; it does not establish a universal Kill Switch, legal license classification, or regulatory compliance by itself.
+
 ## Supported Versions
 
 | Version | Supported          |
@@ -52,7 +56,7 @@ If you discover a security vulnerability in this project, please report it respo
 
 ## Security Features
 
-### Implemented
+### Implemented or source-backed
 
 - **Authentication**: OAuth 2.0 with JWT tokens
 - **Authorization**: Role-based access control (RBAC)
@@ -62,11 +66,13 @@ If you discover a security vulnerability in this project, please report it respo
 - **Security Headers**: Helmet.js for security headers
 - **SQL Injection Prevention**: Drizzle ORM with parameterized queries
 - **XSS Protection**: Content Security Policy (CSP)
-- **CSRF Protection**: Token-based CSRF protection
+- **Licensing validation**: RSA-PSS/SHA-256 signature validation, Hardware ID, expiry, domain, and feature checks; see the licensing runtime reference
 
-### Planned
+### Not established by this policy
 
-- [ ] Two-factor authentication (2FA)
+- [ ] Two-factor authentication (2FA) - not verified as a general user feature
+- [ ] Universal licensing Kill Switch or guaranteed shutdown on invalid licenses
+- [ ] HIPAA/GDPR or other regulatory compliance certification
 - [ ] Security audit logging
 - [ ] Automated security scanning in CI/CD
 - [ ] Dependency vulnerability scanning

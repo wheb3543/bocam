@@ -26,10 +26,10 @@
 
 قبل المساهمة، يرجى:
 
-1. **قراءة الوثائق**: تأكد من قراءة [README.md](README.md) و [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) لفهم المشروع وبنيته
+1. **قراءة الوثائق**: تأكد من قراءة [README.md](../README.md) و [INSTALLATION_GUIDE.md](../installation/INSTALLATION_GUIDE.md) لفهم المشروع وبنيته
 2. **البحث عن المشاكل الموجودة**: تحقق من [Issues](https://github.com/wheb3543/bocam/issues) للتأكد من عدم وجود مشكلة مماثلة
 3. **فهم معايير الكود**: راجع قسم "معايير الكود" أدناه
-4. **إعداد بيئة التطوير**: اتبع تعليمات التثبيت في [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md)
+4. **إعداد بيئة التطوير**: اتبع تعليمات التثبيت في [INSTALLATION_GUIDE.md](../installation/INSTALLATION_GUIDE.md)
 
 ### 🚀 كيفية المساهمة
 
@@ -398,10 +398,10 @@ We welcome all contributions that help improve this project! Whether you want to
 
 Before contributing, please:
 
-1. **Read the documentation**: Make sure to read [README.md](README.md) and [Installation Guide](INSTALLATION_GUIDE.md) to understand the project and its structure
+1. **Read the documentation**: Make sure to read [README.md](../README.md) and [Installation Guide](../installation/INSTALLATION_GUIDE.md) to understand the project and its structure
 2. **Search existing issues**: Check [Issues](https://github.com/wheb3543/bocam/issues) to ensure there isn't a similar issue
 3. **Understand code standards**: Review the "Code Standards" section below
-4. **Setup development environment**: Follow installation instructions in [Installation Guide](INSTALLATION_GUIDE.md)
+4. **Setup development environment**: Follow installation instructions in [Installation Guide](../installation/INSTALLATION_GUIDE.md)
 
 ### 🚀 How to Contribute
 

@@ -40,4 +40,4 @@
 - pnpm test
 
 
-المؤشرات الوظيفية والتقييمات التحليلية موثقة في [PROJECT_STATISTICAL_ANALYSIS_2026-09.md](PROJECT_STATISTICAL_ANALYSIS_2026-09.md).
+المؤشرات الوظيفية والتقييمات التحليلية موثقة في [PROJECT_STATISTICAL_ANALYSIS_2026-09.md](./PROJECT_STATISTICAL_ANALYSIS_2026-09.md).

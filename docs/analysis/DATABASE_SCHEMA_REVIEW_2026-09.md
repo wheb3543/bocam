@@ -57,7 +57,7 @@
 
 **حالة معيار القبول:** فحص المراجع وbaseline التقنية مكتملان محليًا، وorphan counts يساوي صفرًا في 13 علاقة؛ يبقى اعتماد staging القريب من الإنتاج لإثبات أزمنة الاستعلامات وحجم orphan records الفعلي.
 
-**التنفيذ والتشغيل:** التفاصيل ومخرجات الأداة موثقة في [PHASE_ZERO_DATABASE_BASELINE.md](PHASE_ZERO_DATABASE_BASELINE.md). لا تُحفظ النسخ الاحتياطية أو نتائج القياس داخل Git؛ تُحفظ في مخزن أدلة staging.
+**التنفيذ والتشغيل:** التفاصيل ومخرجات الأداة موثقة في [PHASE_ZERO_DATABASE_BASELINE.md](./PHASE_ZERO_DATABASE_BASELINE.md). لا تُحفظ النسخ الاحتياطية أو نتائج القياس داخل Git؛ تُحفظ في مخزن أدلة staging.
 
 ### المرحلة 1: فهارس منخفضة المخاطر
 
@@ -120,6 +120,6 @@
 
 ## مراجع تنفيذ المرحلة الصفرية
 
-- [PHASE_ZERO_DATABASE_BASELINE.md](PHASE_ZERO_DATABASE_BASELINE.md)
+- [PHASE_ZERO_DATABASE_BASELINE.md](./PHASE_ZERO_DATABASE_BASELINE.md)
 - `pnpm schema:migrations:check`
 - `pnpm db:phase-zero`

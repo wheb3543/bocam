@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const { execSync } = require('child_process');
 const path = require('path');
+const mysql = require('mysql2/promise');
+const ts = require('typescript');
+require('dotenv').config({ quiet: true });
 
 const rawArgs = process.argv.slice(2);
 const args = {};
@@ -24,78 +26,67 @@ const user = args.user || 'root';
 
 function parseSchemaTs(filePath) {
   const src = fs.readFileSync(filePath, 'utf8');
+  const sourceFile = ts.createSourceFile(filePath, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   const tables = {};
-  const lines = src.split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const m = line.match(/export const\s+(\w+)\s*=\s*mysqlTable\(\s*"([\w_]+)"\s*,\s*\{/);
-    if (m) {
-      const varName = m[1];
-      const tableName = m[2];
-      const cols = {};
-      i++; // move after opening line
-      // collect until matching closing brace at column object level
-      for (; i < lines.length; i++) {
-        const l = lines[i];
-        if (/^\s*}\s*(,|\)|;)/.test(l)) {
-          break;
-        }
-        const colMatch = l.match(/\s*([a-zA-Z0-9_]+)\s*:\s*([a-zA-Z0-9_]+)\(([^)]*)\)(.*)/);
-        if (colMatch) {
-          const colVar = colMatch[1];
-          const fn = colMatch[2];
-          const fnArgs = colMatch[3];
-          const rest = colMatch[4] || '';
-          // attempt to determine a type string
-          let typeStr = fn;
-          if (fn === 'varchar') {
-            const len =
-              fnArgs.match(/\{\s*length\s*:\s*(\d+)\s*\}/) ||
-              fnArgs.match(/\s*"?\w+"?\s*,\s*\{\s*length\s*:\s*(\d+)\s*\}/) ||
-              fnArgs.match(/(\d+)/);
-            const lnum = len ? len[1] : '255';
-            typeStr = `varchar(${lnum})`;
-          } else if (fn === 'int') {
-            typeStr = 'int';
-          } else if (fn === 'text') {
-            typeStr = 'text';
-          } else if (fn === 'timestamp') {
-            typeStr = 'timestamp';
-          } else if (fn === 'boolean') {
-            typeStr = 'tinyint(1)';
-          } else if (fn === 'decimal') {
-            const prec = fnArgs.match(/\{\s*precision\s*:\s*(\d+)\s*,\s*scale\s*:\s*(\d+)\s*\}/);
-            typeStr = prec ? `decimal(${prec[1]},${prec[2]})` : 'decimal';
-          } else if (fn === 'mysqlEnum') {
-            typeStr = 'enum';
-          } else {
-            typeStr = fn;
-          }
-          // check for .notNull() or .default
-          const notNull = /\.notNull\(\)/.test(rest);
-          const defMatch = rest.match(/\.default\(([^)]+)\)/);
-          const def = defMatch ? defMatch[1].trim() : null;
-          cols[colVar] = { expectedType: typeStr, notNull, default: def, raw: l.trim() };
-        }
+  const columnCall = (initializer) => {
+    let current = initializer;
+    while (current) {
+      if (ts.isCallExpression(current)) {
+        if (ts.isIdentifier(current.expression)) return current;
+        current = current.expression;
+      } else if (ts.isPropertyAccessExpression(current)) {
+        current = current.expression;
+      } else {
+        return null;
       }
-      tables[tableName] = cols;
     }
-  }
+    return null;
+  };
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'mysqlTable' &&
+      ts.isStringLiteral(node.arguments[0]) &&
+      ts.isObjectLiteralExpression(node.arguments[1])
+    ) {
+      const cols = {};
+      for (const property of node.arguments[1].properties) {
+        if (!ts.isPropertyAssignment(property) || !property.name) continue;
+        const call = columnCall(property.initializer);
+        if (!call || !ts.isIdentifier(call.expression)) continue;
+        const fn = call.expression.text;
+        const text = property.initializer.getText(sourceFile);
+        const argsText = call.arguments.map((argument) => argument.getText(sourceFile)).join(',');
+        let expectedType = fn;
+        if (fn === 'varchar') expectedType = `varchar(${argsText.match(/length\s*:\s*(\d+)/)?.[1] || '255'})`;
+        if (fn === 'boolean') expectedType = 'tinyint(1)';
+        if (fn === 'decimal') expectedType = `decimal(${argsText.match(/precision\s*:\s*(\d+).*scale\s*:\s*(\d+)/)?.slice(1).join(',') || ''})`;
+        if (fn === 'mysqlEnum') expectedType = 'enum';
+        cols[property.name.getText(sourceFile).replace(/["']/g, '')] = {
+          expectedType,
+          notNull: text.includes('.notNull()') || text.includes('.primaryKey()'),
+          raw: text,
+        };
+      }
+      tables[node.arguments[0].text] = cols;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
   return tables;
 }
 
-function getActualColumns(db, host, port, user) {
-  const sql = `SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='${db}' ORDER BY TABLE_NAME, ORDINAL_POSITION;`;
-  const cmd = `mysql -h${host} -P${port} -u${user} -N -e "${sql.replace(/"/g, '\\"')}"`;
-  const out = execSync(cmd, { encoding: 'utf8' });
-  const rows = out
-    .trim()
-    .split('\n')
-    .filter(Boolean)
-    .map((r) => r.split('\t'));
+async function getActualColumns(db, host, port, user, password, uri) {
+  const sql = `SELECT TABLE_NAME AS table_name, COLUMN_NAME AS column_name, COLUMN_TYPE AS column_type, IS_NULLABLE AS is_nullable, COLUMN_DEFAULT AS column_default, EXTRA AS extra FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME, ORDINAL_POSITION;`;
+  const connection = await mysql.createConnection(
+    uri || { host, port: Number(port), user, password: password || undefined, database: db }
+  );
+  const [rows] = await connection.query(sql);
+  await connection.end();
   const res = {};
   for (const r of rows) {
-    const [table, col, colType, isNullable, colDefault, extra] = r;
+    const { table_name: table, column_name: col, column_type: colType, is_nullable: isNullable, column_default: colDefault, extra } = r;
     res[table] = res[table] || {};
     res[table][col] = { columnType: colType, isNullable, columnDefault: colDefault, extra };
   }
@@ -159,7 +150,7 @@ function compare(expected, actual) {
   return report;
 }
 
-(function main() {
+(async function main() {
   const schemaPath = path.join(__dirname, '..', 'drizzle', 'schema.ts');
   if (!fs.existsSync(schemaPath)) {
     console.error('schema.ts not found at', schemaPath);
@@ -168,7 +159,7 @@ function compare(expected, actual) {
   const expected = parseSchemaTs(schemaPath);
   let actual;
   try {
-    actual = getActualColumns(db, host, port, user);
+    actual = await getActualColumns(db, host, port, user, args.password, args.url || process.env.DATABASE_URL);
   } catch (err) {
     console.error('Failed to query information_schema:', err.message);
     process.exit(1);

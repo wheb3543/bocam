@@ -1,8 +1,20 @@
 # تقرير نهائي لتحسين تغطية الاختبارات
 # Final Test Coverage Improvement Report
 
-**التاريخ:** 11 يوليو 2026  
-**المشروع:** Bocam - نظام إدارة العيادات الطبية
+## بيانات الحوكمة والمطابقة
+
+| الحقل | القيمة المعتمدة |
+|---|---|
+| **الحالة** | `canonical` |
+| **الجمهور** | مطور، مهندس جودة، مسؤول بنية الاختبارات |
+| **المجال** | `testing-quality` (سجل تحسين تغطية الاختبارات) |
+| **المصدر** | `vitest.config.ts`, `coverage/`, `scripts/coverage-baseline.mjs` |
+| **آخر مراجعة** | 2026-09-13 |
+| **المالك** | QA & Core Infrastructure Engineering Team |
+| **البديل** | المرجع الأساسي المحدث في [docs/domains/TESTING_QUALITY_RUNTIME_REFERENCE.md](../domains/TESTING_QUALITY_RUNTIME_REFERENCE.md) |
+
+**التاريخ الأصلي:** 11 يوليو 2026  
+**المشروع:** BOCAM CRM 
 
 ## ملخص تنفيذي
 
