@@ -35,6 +35,11 @@ import {
   MoreHorizontal,
   Cloud,
   Activity,
+  Cpu,
+  Bot,
+  LayoutDashboard,
+  ShieldCheck,
+  LineChart,
 } from 'lucide-react';
 import { SOCIAL_INBOX_ALLOWED_ROLES } from '@shared/socialInboxAccess';
 import type { RolePermission } from '../../../shared/rolePermissions';
@@ -245,6 +250,46 @@ export const allToolsGroups: NavGroup[] = [
         href: '/admin/whatsapp',
         icon: MessageCircle,
         feature: 'whatsapp',
+      },
+      {
+        id: 'whatsapp-operations',
+        title: 'مركز العمليات',
+        href: '/admin/whatsapp/operations',
+        icon: Cpu,
+        feature: 'whatsapp',
+        requiredPermission: 'communications.reply',
+      },
+      {
+        id: 'whatsapp-automation',
+        title: 'مركز الأتمتة',
+        href: '/admin/whatsapp/automation',
+        icon: Bot,
+        feature: 'whatsapp',
+        requiredPermission: 'communications.automation.view',
+      },
+      {
+        id: 'whatsapp-campaign-center',
+        title: 'مركز الحملات',
+        href: '/admin/whatsapp/campaigns',
+        icon: LayoutDashboard,
+        feature: 'whatsapp',
+        requiredPermission: 'communications.templates.manage',
+      },
+      {
+        id: 'whatsapp-governance',
+        title: 'مركز الحوكمة',
+        href: '/admin/whatsapp/governance',
+        icon: ShieldCheck,
+        feature: 'whatsapp',
+        requiredPermission: 'integrations.logs.view',
+      },
+      {
+        id: 'whatsapp-analytics-center',
+        title: 'مركز التحليلات',
+        href: '/admin/whatsapp/analytics',
+        icon: LineChart,
+        feature: 'whatsapp',
+        requiredPermission: 'reports.view',
       },
       {
         id: 'whatsapp-dashboard',

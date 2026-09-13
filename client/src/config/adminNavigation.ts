@@ -63,6 +63,17 @@ export const ADMIN_NAVIGATION_SECTIONS: AdminNavigationSection[] = [
     items: navigationItems('messages', 'whatsapp'),
     subsections: [
       {
+        id: 'unified-centers',
+        label: 'المراكز الموحدة (الجديد)',
+        items: navigationItems(
+          'whatsapp-operations',
+          'whatsapp-automation',
+          'whatsapp-campaign-center',
+          'whatsapp-governance',
+          'whatsapp-analytics-center'
+        ),
+      },
+      {
         id: 'messaging',
         label: 'إدارة المراسلات',
         items: navigationItems(
