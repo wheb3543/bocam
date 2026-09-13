@@ -110,10 +110,14 @@ export async function handleWebhookPost(req: Request, res: Response): Promise<vo
       }
     }
 
-    res.status(200).json({ status: 'ok' });
+    if (!res.headersSent) {
+      res.status(200).json({ status: 'ok' });
+    }
   } catch (error) {
     logger.error('Error handling webhook:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 }
 

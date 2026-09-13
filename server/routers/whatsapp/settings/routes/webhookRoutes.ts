@@ -100,6 +100,28 @@ export const webhookRouter = router({
     return db.getUniqueEventTypes();
   }),
 
+  getFlowEvents: webhookLogsProcedure
+    .input(
+      z
+        .object({
+          flowId: z.string().optional(),
+          limit: z.number().int().min(1).max(200).default(100),
+        })
+        .optional()
+    )
+    .query(async ({ input }) => {
+      const dbConn = await ensureDatabaseAvailable();
+      const { whatsappFlowEvents } = await import('../../../../../drizzle/schema');
+      const { desc, eq } = await import('drizzle-orm');
+      const query = input?.flowId
+        ? dbConn
+            .select()
+            .from(whatsappFlowEvents)
+            .where(eq(whatsappFlowEvents.flowId, input.flowId))
+        : dbConn.select().from(whatsappFlowEvents);
+      return query.orderBy(desc(whatsappFlowEvents.createdAt)).limit(input?.limit || 100);
+    }),
+
   markAsProcessed: webhooksManagementProcedure
     .input(z.object({ id: z.number(), handlerExists: z.boolean().default(true) }))
     .mutation(async ({ input }: { input: { id: number; handlerExists: boolean } }) => {
@@ -137,6 +159,7 @@ export const webhookRouter = router({
           'security',
           'quality',
           'subscriptions',
+          'flows',
         ]),
         limit: z.number().int().min(1).max(100).default(50),
       })
@@ -153,7 +176,8 @@ export const webhookRouter = router({
             | 'account'
             | 'security'
             | 'quality'
-            | 'subscriptions';
+            | 'subscriptions'
+            | 'flows';
           limit: number;
         };
       }) => {
@@ -167,7 +191,7 @@ export const webhookRouter = router({
         const { whatsappWebhookEvents } = await import('../../../../../drizzle/schema');
         const { like, desc } = await import('drizzle-orm');
 
-        const categoryPatterns = {
+        const categoryPatterns: Record<string, string> = {
           messages: 'message%',
           templates: 'message_template%',
           template_status: 'template_status%',
@@ -175,12 +199,13 @@ export const webhookRouter = router({
           security: 'security',
           quality: 'quality%',
           subscriptions: 'opt%',
+          flows: 'flows',
         };
 
         const events = await dbConn
           .select()
           .from(whatsappWebhookEvents)
-          .where(like(whatsappWebhookEvents.eventType, categoryPatterns[input.category]))
+          .where(like(whatsappWebhookEvents.eventType, categoryPatterns[input.category] || 'flows'))
           .orderBy(desc(whatsappWebhookEvents.createdAt))
           .limit(input.limit);
         return events.map(toWebhookEventSummary);

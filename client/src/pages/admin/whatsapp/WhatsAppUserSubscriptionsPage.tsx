@@ -153,7 +153,10 @@ export default function WhatsAppUserSubscriptionsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div
+        className="sgh-compact-stat-grid mb-5 grid grid-cols-2 sm:mb-6 sm:grid-cols-2 lg:grid-cols-4"
+        aria-label="ملخص اشتراكات واتساب"
+      >
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -241,7 +244,7 @@ export default function WhatsAppUserSubscriptionsPage() {
           {canViewWebhookLogs && <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>}
         </TabsList>
 
-        <TabsContent value={activeTab}>
+        {activeTab !== 'webhook-events' && (
           <Card>
             <CardHeader>
               <CardTitle>قائمة الاشتراكات</CardTitle>
@@ -254,7 +257,7 @@ export default function WhatsAppUserSubscriptionsPage() {
                 <div className="text-center py-8">جاري التحميل...</div>
               ) : filteredSubscriptions && filteredSubscriptions.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full min-w-[650px]">
                     <thead>
                       <tr className="border-b">
                         <th className="text-right py-3 px-4">رقم الهاتف</th>
@@ -329,7 +332,7 @@ export default function WhatsAppUserSubscriptionsPage() {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
 
         {canViewWebhookLogs && (
           <TabsContent value="webhook-events">

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { useLocation } from 'wouter';
+import { Link } from 'wouter';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -78,7 +78,6 @@ function RestrictedDashboardWidget() {
 }
 
 export default function AdminDashboard() {
-  const [, setLocation] = useLocation();
   const { hasFeature, isLicenseValid } = useLicense();
   const { can, isLoading: permissionsLoading } = useRolePermissions();
   const analyticsAvailable = hasFeature('analytics') && isLicenseValid;
@@ -110,20 +109,17 @@ export default function AdminDashboard() {
           }
           actions={
             <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-              <Button
-                variant="outline"
-                className="min-h-10 flex-1 sm:flex-none"
-                onClick={() => setLocation('/admin/communications/messages')}
-              >
-                <MessageSquare className="ml-2 h-4 w-4" />
-                صندوق البريد
+              <Button asChild variant="outline" className="min-h-10 flex-1 sm:flex-none">
+                <Link href="/admin/communications/messages">
+                  <MessageSquare className="ml-2 h-4 w-4" />
+                  صندوق البريد
+                </Link>
               </Button>
-              <Button
-                className="min-h-10 flex-1 sm:flex-none"
-                onClick={() => setLocation('/admin/content/publishing')}
-              >
-                <Send className="ml-2 h-4 w-4" />
-                إنشاء منشور
+              <Button asChild className="min-h-10 flex-1 sm:flex-none">
+                <Link href="/admin/content/publishing">
+                  <Send className="ml-2 h-4 w-4" />
+                  إنشاء منشور
+                </Link>
               </Button>
             </div>
           }

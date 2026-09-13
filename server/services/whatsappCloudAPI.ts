@@ -175,7 +175,8 @@ export function parseWhatsAppError(errorData: Record<string, unknown>): {
  */
 export async function sendWhatsAppTextMessage(
   phone: string,
-  message: string
+  message: string,
+  options: { replyToMessageId?: string } = {}
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
@@ -189,7 +190,7 @@ export async function sendWhatsAppTextMessage(
   const formattedPhone = formatPhoneNumber(phone);
   logger.info(`Sending text to ${formattedPhone}:`, message.substring(0, 50) + '...');
 
-  const result = await meta.sendWhatsAppText(phoneNumberId, formattedPhone, message);
+  const result = await meta.sendWhatsAppText(phoneNumberId, formattedPhone, message, options);
 
   if (!result.success) {
     logger.error(`Error:`, result.error);
@@ -200,14 +201,15 @@ export async function sendWhatsAppTextMessage(
   return result;
 }
 
-interface TemplateMessage {
+export interface TemplateMessage {
   templateName: string;
   languageCode: string;
-  components: Array<{
+  components?: Array<{
     type: string;
     parameters?: Array<Record<string, unknown>>;
     sub_type?: string;
-    index?: number;
+    index?: string | number;
+    [key: string]: unknown;
   }>;
 }
 
@@ -218,7 +220,7 @@ interface TemplateMessage {
 export async function sendWhatsAppTemplateMessage(
   phone: string,
   template: TemplateMessage,
-  _options?: { category?: 'marketing' | 'utility' | 'authentication' }
+  options?: { category?: 'marketing' | 'utility' | 'authentication'; replyToMessageId?: string }
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
@@ -237,7 +239,8 @@ export async function sendWhatsAppTemplateMessage(
     formattedPhone,
     template.templateName,
     template.languageCode,
-    template.components
+    template.components,
+    { replyToMessageId: options?.replyToMessageId }
   );
 
   if (!result.success) {
@@ -320,7 +323,8 @@ export function validatePhoneNumber(phone: string): {
 export async function sendWhatsAppImageMessage(
   phone: string,
   imageRef: string,
-  caption?: string
+  caption?: string,
+  options: { replyToMessageId?: string } = {}
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
@@ -334,7 +338,13 @@ export async function sendWhatsAppImageMessage(
   const formattedPhone = formatPhoneNumber(phone);
   logger.info(`Sending image to ${formattedPhone}:`, imageRef.substring(0, 50) + '...');
 
-  const result = await meta.sendWhatsAppImage(phoneNumberId, formattedPhone, imageRef, caption);
+  const result = await meta.sendWhatsAppImage(
+    phoneNumberId,
+    formattedPhone,
+    imageRef,
+    caption,
+    options
+  );
 
   if (!result.success) {
     logger.error(`Error:`, result.error);
@@ -351,7 +361,8 @@ export async function sendWhatsAppImageMessage(
 export async function sendWhatsAppVideoMessage(
   phone: string,
   videoRef: string,
-  caption?: string
+  caption?: string,
+  options: { replyToMessageId?: string } = {}
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
@@ -365,7 +376,13 @@ export async function sendWhatsAppVideoMessage(
   const formattedPhone = formatPhoneNumber(phone);
   logger.info(`Sending video to ${formattedPhone}:`, videoRef.substring(0, 50) + '...');
 
-  const result = await meta.sendWhatsAppVideo(phoneNumberId, formattedPhone, videoRef, caption);
+  const result = await meta.sendWhatsAppVideo(
+    phoneNumberId,
+    formattedPhone,
+    videoRef,
+    caption,
+    options
+  );
 
   if (!result.success) {
     logger.error(`Error:`, result.error);
@@ -381,7 +398,8 @@ export async function sendWhatsAppVideoMessage(
  */
 export async function sendWhatsAppAudioMessage(
   phone: string,
-  audioRef: string
+  audioRef: string,
+  options: { replyToMessageId?: string } = {}
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
@@ -395,7 +413,7 @@ export async function sendWhatsAppAudioMessage(
   const formattedPhone = formatPhoneNumber(phone);
   logger.info(`Sending audio to ${formattedPhone}:`, audioRef.substring(0, 50) + '...');
 
-  const result = await meta.sendWhatsAppAudio(phoneNumberId, formattedPhone, audioRef);
+  const result = await meta.sendWhatsAppAudio(phoneNumberId, formattedPhone, audioRef, options);
 
   if (!result.success) {
     logger.error(`Error:`, result.error);
@@ -412,7 +430,8 @@ export async function sendWhatsAppAudioMessage(
 export async function sendWhatsAppDocumentMessage(
   phone: string,
   documentRef: string,
-  filename?: string
+  filename?: string,
+  options: { replyToMessageId?: string } = {}
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
@@ -430,7 +449,8 @@ export async function sendWhatsAppDocumentMessage(
     phoneNumberId,
     formattedPhone,
     documentRef,
-    filename
+    filename,
+    options
   );
 
   if (!result.success) {

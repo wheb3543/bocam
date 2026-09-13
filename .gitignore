@@ -70,6 +70,8 @@ pnpm-debug.log*
 # Testing
 coverage/
 .nyc_output/
+test-results/
+stats.html
 
 # Client release artifacts
 release/

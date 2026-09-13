@@ -34,7 +34,7 @@ export default function WhatsAppConnectionPage() {
   );
 }
 
-function WhatsAppConnectionContent() {
+export function WhatsAppConnectionContent() {
   const { can, isLoading: arePermissionsLoading } = useRolePermissions();
   const canViewIntegrations = can('integrations.view');
   const {

@@ -5,7 +5,7 @@
 
 import { TRPCError } from '@trpc/server';
 import * as db from '../../../database/db';
-import { logOperation, validate24HourWindow, sendMessageByType } from '../utils/messageHelpers';
+import { logOperation, sendMessageByType } from '../utils/messageHelpers';
 import { checkRateLimit } from '../utils/rateLimiter';
 
 interface Context {
@@ -50,18 +50,32 @@ export const messageRoutes = {
       }
 
       // Server-side 24-hour window validation
-      await validate24HourWindow(conversationId, async (id: number) => {
-        const msg = await db.getLatestInboundWhatsAppMessage(id);
-        if (!msg) {
-          return null;
-        }
-        return {
-          sentAt: msg.sentAt || undefined,
-          createdAt: msg.createdAt || undefined,
-        };
+      const { assertWhatsAppCustomerServiceWindow } =
+        await import('../../../services/whatsappSendingPolicy');
+      const latestInbound = await db.getLatestInboundWhatsAppMessage(conversationId);
+      const latestInboundAt = latestInbound?.sentAt
+        ? new Date(latestInbound.sentAt)
+        : latestInbound?.createdAt
+          ? new Date(latestInbound.createdAt)
+          : null;
+      assertWhatsAppCustomerServiceWindow({
+        messageType:
+          messageType as import('../../../services/whatsappSendingPolicy').WhatsAppOutboundMessageType,
+        latestInboundAt,
       });
 
-      const result = await sendMessageByType(conv.phoneNumber, messageType, mediaId, message);
+      let replyToWhatsAppMessageId: string | undefined;
+      if (replyToMessageId) {
+        const parentMsg = await db.getWhatsAppMessageById(replyToMessageId);
+        if (parentMsg?.whatsappMessageId) {
+          replyToWhatsAppMessageId = parentMsg.whatsappMessageId;
+        }
+      }
+
+      const result = await sendMessageByType(conv.phoneNumber, messageType, mediaId, message, {
+        replyToMessageId: replyToWhatsAppMessageId,
+        voice: messageType === 'audio' ? true : undefined,
+      });
 
       if (result.success) {
         await db.createWhatsAppMessage({
@@ -122,9 +136,12 @@ export const messageRoutes = {
 
     try {
       const { uploadWhatsAppMedia } = await import('../../../services/whatsappCloudAPI');
+      const { prepareWhatsAppAudioUpload } =
+        await import('../../../services/whatsappAudioTranscoding');
 
       const buffer = Buffer.from(fileBuffer, 'base64');
-      const result = await uploadWhatsAppMedia(buffer, mimeType);
+      const prepared = await prepareWhatsAppAudioUpload(buffer, mimeType);
+      const result = await uploadWhatsAppMedia(prepared.buffer, prepared.mimeType);
 
       return result;
     } catch (error: unknown) {

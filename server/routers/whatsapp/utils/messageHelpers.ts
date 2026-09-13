@@ -44,7 +44,8 @@ export async function sendMessageByType(
   phoneNumber: string,
   messageType: string,
   mediaId: string | undefined,
-  message: string
+  message: string,
+  options?: { replyToMessageId?: string; voice?: boolean }
 ): Promise<{ success: boolean; messageId?: string }> {
   const {
     sendWhatsAppTextMessage,
@@ -56,15 +57,15 @@ export async function sendMessageByType(
 
   if (mediaId && messageType !== 'text') {
     if (messageType === 'image') {
-      return sendWhatsAppImageMessage(phoneNumber, mediaId, message);
+      return sendWhatsAppImageMessage(phoneNumber, mediaId, message, options);
     } else if (messageType === 'video') {
-      return sendWhatsAppVideoMessage(phoneNumber, mediaId, message);
+      return sendWhatsAppVideoMessage(phoneNumber, mediaId, message, options);
     } else if (messageType === 'audio') {
-      return sendWhatsAppAudioMessage(phoneNumber, mediaId);
+      return sendWhatsAppAudioMessage(phoneNumber, mediaId, options);
     } else if (messageType === 'document') {
-      return sendWhatsAppDocumentMessage(phoneNumber, mediaId, message);
+      return sendWhatsAppDocumentMessage(phoneNumber, mediaId, message, options);
     }
   }
 
-  return sendWhatsAppTextMessage(phoneNumber, message);
+  return sendWhatsAppTextMessage(phoneNumber, message, options);
 }

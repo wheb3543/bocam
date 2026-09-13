@@ -1,0 +1,45 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { createOperationalCostSummary } from '@/lib/whatsappOperationalCostSummary';
+
+const readSource = (relativePath: string) =>
+  readFileSync(resolve(process.cwd(), relativePath), 'utf8');
+
+describe('ملخص تكلفة التشغيل ومراقبة SSE', () => {
+  it('يحسب الملخص الموحد من صفوف التكلفة الفعلية دون قيم افتراضية مخترعة', () => {
+    const summary = createOperationalCostSummary([
+      { id: 1, conversationCost: 0.4, billable: true },
+      { id: 2, conversationCost: 1.6, billable: true },
+      { id: 3, conversationCost: 0, billable: false },
+    ]);
+
+    expect(summary.totalCost).toBe(2);
+    expect(summary.averageCost).toBeCloseTo(2 / 3);
+    expect(summary.conversationCount).toBe(3);
+    expect(summary.billableCount).toBe(2);
+    expect(summary.highCostCount).toBe(1);
+    expect(summary.highCostTotal).toBe(1.6);
+  });
+
+  it('يستهلك التبويبان الملخص المشترك ويعرض المركز حالة الاتصال والعداد', () => {
+    const health = readSource('client/src/pages/admin/whatsapp/WhatsAppAccountHealthPage.tsx');
+    const quality = readSource('client/src/pages/admin/whatsapp/WhatsAppPhoneQualityPage.tsx');
+    const center = readSource('client/src/pages/admin/whatsapp/WhatsAppOperationsCenter.tsx');
+    const monitor = readSource('client/src/components/WhatsAppSSEMonitor.tsx');
+    const provider = readSource('client/src/hooks/useWhatsAppOperationsSSE.tsx');
+
+    expect(health).toContain('useWhatsAppOperationalCostSummary');
+    expect(quality).toContain('useWhatsAppOperationalCostSummary');
+    expect(health).toContain('WhatsAppOperationalCostSummary');
+    expect(quality).toContain('WhatsAppOperationalCostSummary');
+    expect(center).toContain('WhatsAppSSEMonitor');
+    expect(monitor).toContain('SSE:');
+    expect(monitor).toContain('حدث مستلم');
+    expect(provider).toContain('costsQuery');
+    expect(provider).toContain('lastEventAt');
+    expect(readSource('client/src/components/WhatsAppOperationalCostSummary.tsx')).toContain(
+      'آخر {summary.conversationCount} محادثة في النطاق'
+    );
+  });
+});

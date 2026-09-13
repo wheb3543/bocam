@@ -485,6 +485,10 @@ export function useWhatsAppSSE({
     enabled && conversationId ? `/api/whatsapp/stream/${conversationId}` : null,
     handleConversationEvent
   );
+
+  return {
+    isConnected: enabled,
+  };
 }
 
 export default useWhatsAppSSE;

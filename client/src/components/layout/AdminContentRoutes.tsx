@@ -17,7 +17,22 @@ const WhatsAppPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppPage'));
 const WhatsAppTemplatesPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppTemplatesPage'));
 const WhatsAppConnectionPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppConnectionPage'));
 const WhatsAppDashboard = lazy(() => import('@/pages/admin/whatsapp/WhatsAppDashboard'));
-const WhatsAppAnalytics = lazy(() => import('@/pages/admin/whatsapp/WhatsAppAnalytics'));
+const WhatsAppOperationsCenter = lazy(
+  () => import('@/pages/admin/whatsapp/WhatsAppOperationsCenter')
+);
+const WhatsAppAutomationCenter = lazy(
+  () => import('@/pages/admin/whatsapp/WhatsAppAutomationCenter')
+);
+const WhatsAppCampaignCenter = lazy(() => import('@/pages/admin/whatsapp/WhatsAppCampaignCenter'));
+const WhatsAppGovernanceCenter = lazy(
+  () => import('@/pages/admin/whatsapp/WhatsAppGovernanceCenter')
+);
+const WhatsAppAnalyticsCenter = lazy(
+  () => import('@/pages/admin/whatsapp/WhatsAppAnalyticsCenter')
+);
+const WhatsAppLegacyTransitionPage = lazy(
+  () => import('@/pages/admin/whatsapp/WhatsAppLegacyTransitionPage')
+);
 const WhatsAppBroadcast = lazy(() => import('@/pages/admin/whatsapp/WhatsAppBroadcast'));
 const WhatsAppAutoReply = lazy(() => import('@/pages/admin/whatsapp/WhatsAppAutoReply'));
 const WhatsAppCompliance = lazy(() => import('@/pages/admin/whatsapp/WhatsAppCompliance'));
@@ -36,9 +51,6 @@ const WhatsAppWebhookInspectorPage = lazy(
   () => import('@/pages/admin/whatsapp/WhatsAppWebhookInspectorPage')
 );
 const WhatsAppCostsPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppCostsPage'));
-const WhatsAppOrdersPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppOrdersPage'));
-const WhatsAppProductsPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppProductsPage'));
-const WhatsAppReferralsPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppReferralsPage'));
 const WhatsAppLabResultsPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppLabResultsPage'));
 const MessagesPage = lazy(() => import('@/pages/admin/communications/MessagesPage'));
 const MessageSettingsPage = lazy(() => import('@/pages/admin/MessageSettingsPage'));
@@ -132,7 +144,31 @@ export function renderAdminPage(path: string): ReactNode {
     case '/admin/whatsapp/analytics':
       return (
         <ProtectedRoute feature="whatsapp">
-          <WhatsAppAnalytics />
+          <WhatsAppAnalyticsCenter />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/operations':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppOperationsCenter />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/automation':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppAutomationCenter />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/campaigns':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppCampaignCenter />
+        </ProtectedRoute>
+      );
+    case '/admin/whatsapp/governance':
+      return (
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppGovernanceCenter />
         </ProtectedRoute>
       );
     case '/admin/whatsapp/broadcast':
@@ -204,11 +240,9 @@ export function renderAdminPage(path: string): ReactNode {
     case '/admin/whatsapp/costs':
       return <WhatsAppCostsPage />;
     case '/admin/whatsapp/orders':
-      return <WhatsAppOrdersPage />;
     case '/admin/whatsapp/products':
-      return <WhatsAppProductsPage />;
     case '/admin/whatsapp/referrals':
-      return <WhatsAppReferralsPage />;
+      return <WhatsAppLegacyTransitionPage />;
     case '/admin/whatsapp/lab-results':
       return <WhatsAppLabResultsPage />;
     case '/admin/communications/messages':
@@ -338,7 +372,27 @@ export default function AdminContentRoutes() {
       </Route>
       <Route path="/admin/whatsapp/analytics">
         <ProtectedRoute feature="whatsapp">
-          <WhatsAppAnalytics />
+          <WhatsAppAnalyticsCenter />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/whatsapp/operations">
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppOperationsCenter />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/whatsapp/automation">
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppAutomationCenter />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/whatsapp/campaigns">
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppCampaignCenter />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/whatsapp/governance">
+        <ProtectedRoute feature="whatsapp">
+          <WhatsAppGovernanceCenter />
         </ProtectedRoute>
       </Route>
       <Route path="/admin/whatsapp/broadcast">
@@ -399,9 +453,9 @@ export default function AdminContentRoutes() {
         </ProtectedRoute>
       </Route>
       <Route path="/admin/whatsapp/costs" component={WhatsAppCostsPage} />
-      <Route path="/admin/whatsapp/orders" component={WhatsAppOrdersPage} />
-      <Route path="/admin/whatsapp/products" component={WhatsAppProductsPage} />
-      <Route path="/admin/whatsapp/referrals" component={WhatsAppReferralsPage} />
+      <Route path="/admin/whatsapp/orders" component={WhatsAppLegacyTransitionPage} />
+      <Route path="/admin/whatsapp/products" component={WhatsAppLegacyTransitionPage} />
+      <Route path="/admin/whatsapp/referrals" component={WhatsAppLegacyTransitionPage} />
       <Route path="/admin/whatsapp/lab-results" component={WhatsAppLabResultsPage} />
       <Route path="/admin/communications/messages" component={MessagesPage} />
       <Route

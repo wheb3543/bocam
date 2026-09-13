@@ -23,202 +23,130 @@ import {
   BusinessProfileUpdateEvent,
   BusinessAccountUpdateEvent,
 } from '@/hooks/integrations/useWhatsAppSSE';
+import { Link } from 'wouter';
+import { useWhatsAppOperationsSSE } from '@/contexts/WhatsAppOperationsSSEContext';
+import { WhatsAppOperationalCostSummary } from '@/components/WhatsAppOperationalCostSummary';
+import { useWhatsAppOperationalCostSummary } from '@/hooks/useWhatsAppOperationalCostSummary';
+import { toWhatsAppSeverityInput } from '@/lib/whatsappOperationsFilters';
+import { getWhatsAppOperationDetails } from '@/lib/whatsappOperationsPayload';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 
-interface LiveAlert {
-  alertType: string;
-  severity: string;
-  details?: unknown;
-  timestamp: string;
-}
-
-interface Conversation {
-  id: number;
-  phoneNumber: string;
-  customerName: string | null;
-  lastMessage: string | null;
-  lastMessageAt: Date | null;
-  unreadCount: number;
-  isImportant: number;
-  isArchived: number;
-  leadId: number | null;
-  appointmentId: number | null;
-  offerLeadId: number | null;
-  campRegistrationId: number | null;
-  assignedToUserId: number | null;
-  notes: string | null;
-  conversationIdMeta: string | null;
-  originType: string | null;
-  expirationTimestamp: Date | null;
-  pricingModel: string | null;
-  billable: boolean;
-  pricingCategory: string | null;
-  totalCost: number;
-  messageCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  [key: string]: unknown;
-}
-
-interface _Alert {
-  id: number;
-  alertType: string;
-  severity: string;
-  details: string | null;
-  resolved: boolean;
-  createdAt: string | Date;
-  [key: string]: unknown;
-}
-
-interface _SecurityEvent {
-  id: number;
-  eventType: string;
-  details: string | null;
-  severity: string;
-  phoneNumber?: string | null;
-  createdAt: string | Date;
-  [key: string]: unknown;
-}
-
-interface WebhookEvent {
-  id: number;
-  eventType: string;
-  subType?: string | null;
-  phoneNumber?: string | null;
-  createdAt: string | Date;
-  [key: string]: unknown;
-}
-
 export default function WhatsAppAccountHealthPage() {
+  const operationsSse = useWhatsAppOperationsSSE();
   const { can } = useRolePermissions();
+  const canViewSecurity = can('communications.security.view');
+  const canManageSecurity = can('communications.security.manage');
   const canViewWebhookLogs = can('integrations.logs.view');
+  void canViewWebhookLogs;
+
   const [activeTab, setActiveTab] = useState('alerts');
   const [severityFilter, setSeverityFilter] = useState<string | null>(null);
+  const severityInput = toWhatsAppSeverityInput(severityFilter);
 
   // حالة التنبيهات المباشرة عبر SSE
-  const [liveAlerts, setLiveAlerts] = useState<LiveAlert[]>([]);
+  const [liveAlerts, setLiveAlerts] = useState<
+    Array<{
+      alertType: string;
+      severity: string;
+      details?: unknown;
+      timestamp: string;
+    }>
+  >([]);
   const [hasNewCritical, setHasNewCritical] = useState(false);
 
-  // accountHealth feature removed in refactored router
-  // const {
-  //   data: alerts,
-  //   isLoading: alertsLoading,
-  //   refetch: refetchAlerts,
-  // } = trpc.whatsapp.accountHealth.getAlerts.useQuery(
-  //   { resolved: false, limit: 50, severity: severityFilter as 'low' | 'medium' | 'high' | 'critical' | undefined },
-  //   { refetchInterval: 120000 }
-  // );
-
-  // const {
-  //   data: securityEvents,
-  //   isLoading: securityLoading,
-  //   refetch: refetchSecurity,
-  // } = trpc.whatsapp.accountHealth.getSecurityEvents.useQuery(
-  //   { limit: 50, severity: severityFilter as 'low' | 'medium' | 'high' | 'critical' | undefined },
-  //   { refetchInterval: 120000 }
-  // );
-
   const {
-    data: accountWebhookEvents,
-    isLoading: webhookLoading,
-    refetch: refetchWebhook,
-  } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
-    { category: 'account', limit: 50 },
-    { enabled: canViewWebhookLogs, refetchInterval: 120000 }
+    data: alerts,
+    isLoading: alertsLoading,
+    refetch: refetchAlerts,
+  } = trpc.whatsapp.accountHealth.getAlerts.useQuery(
+    { ...severityInput, resolved: false, limit: 50 },
+    { enabled: canViewSecurity, refetchInterval: 120000 }
   );
 
   const {
-    data: securityWebhookEvents,
-    isLoading: securityWebhookLoading,
-    refetch: refetchSecurityWebhook,
-  } = trpc.whatsapp.webhookEvents.getEventsByCategory.useQuery(
-    { category: 'security', limit: 50 },
-    { enabled: canViewWebhookLogs, refetchInterval: 120000 }
+    data: securityEvents,
+    isLoading: securityLoading,
+    refetch: refetchSecurity,
+  } = trpc.whatsapp.accountHealth.getSecurityEvents.useQuery(
+    { ...severityInput, limit: 50 },
+    { enabled: canViewSecurity, refetchInterval: 120000 }
   );
 
-  // استعلامات جديدة للتنبيهات الذكية
-  const { data: conversations } = trpc.whatsapp.conversations.list.useQuery();
+  const { data: alertStats, refetch: refetchAlertStats } =
+    trpc.whatsapp.accountHealth.getAlertStats.useQuery(undefined, {
+      enabled: canViewSecurity,
+      refetchInterval: 120000,
+    });
 
-  const { data: conversationCosts } = trpc.whatsapp.getConversationCosts.useQuery(
-    {},
-    { refetchInterval: 120000 }
-  );
+  const { data: customerServiceWindow, refetch: refetchCustomerServiceWindow } =
+    trpc.whatsapp.accountHealth.getCustomerServiceWindow.useQuery(undefined, {
+      enabled: canViewSecurity,
+      refetchInterval: 120000,
+    });
 
-  // SSE: تحديث فوري عند وصول أحداث الحساب الجديدة
+  const { summary: costSummary, isLoading: isCostSummaryLoading } =
+    useWhatsAppOperationalCostSummary();
+
+  // يبقى الاشتراك المحلي للمسار القديم فقط؛ المركز الموحد يوفر اشتراكاً واحداً.
   useWhatsAppSSE({
-    enabled: canViewWebhookLogs,
+    enabled: !operationsSse && canViewSecurity,
     onAccountReviewUpdate: useCallback(
       (event: AccountReviewUpdateEvent) => {
         toast.info(`تحديث مراجعة الحساب: ${event.status}`);
-        // refetchAlerts(); // Feature removed in refactored router
-        refetchWebhook();
+        refetchAlerts();
+        refetchAlertStats();
+        refetchCustomerServiceWindow();
       },
-      [refetchWebhook]
+      [refetchAlertStats, refetchAlerts, refetchCustomerServiceWindow]
     ),
     onAccountUpdate: useCallback(
       (event: AccountUpdateEvent) => {
         toast.info(`تحديث الحساب: ${event.eventType}`);
-        // refetchAlerts(); // Feature removed in refactored router
-        refetchWebhook();
+        refetchAlerts();
+        refetchAlertStats();
+        refetchCustomerServiceWindow();
       },
-      [refetchWebhook]
+      [refetchAlertStats, refetchAlerts, refetchCustomerServiceWindow]
     ),
     onBusinessProfileUpdate: useCallback(
       (event: BusinessProfileUpdateEvent) => {
         toast.info(`تحديث الملف التجاري: ${event.eventType}`);
-        // refetchAlerts(); // Feature removed in refactored router
-        refetchWebhook();
+        refetchAlerts();
+        refetchAlertStats();
+        refetchCustomerServiceWindow();
       },
-      [refetchWebhook]
+      [refetchAlertStats, refetchAlerts, refetchCustomerServiceWindow]
     ),
     onBusinessAccountUpdate: useCallback(
       (event: BusinessAccountUpdateEvent) => {
         toast.info(`تحديث حساب الأعمال: ${event.eventType}`);
-        // refetchAlerts(); // Feature removed in refactored router
-        refetchWebhook();
+        refetchAlerts();
+        refetchAlertStats();
+        refetchCustomerServiceWindow();
       },
-      [refetchWebhook]
+      [refetchAlertStats, refetchAlerts, refetchCustomerServiceWindow]
     ),
   });
 
-  // حساب التنبيهات الذكية
-  const windowExpiredConversations = Array.isArray(conversations)
-    ? conversations.filter((c: Conversation) => {
-        if (!c.lastMessageAt) {
-          return false;
-        }
-        const hoursSinceLastMessage =
-          (Date.now() - new Date(c.lastMessageAt).getTime()) / (1000 * 60 * 60);
-        return hoursSinceLastMessage > 24;
-      })
-    : [];
+  const windowExpiredConversations = customerServiceWindow?.items || [];
+  const highCostConversations = costSummary.highCostConversations;
 
-  const highCostConversations = Array.isArray(conversationCosts)
-    ? conversationCosts.filter((c) => (c.totalCost || 0) > 1.0)
-    : [];
+  const resolveAlertMutation = trpc.whatsapp.accountHealth.resolveAlert.useMutation({
+    onSuccess: () => {
+      toast.success('تم تحديث حالة التنبيه');
+      refetchAlerts();
+      refetchAlertStats();
+    },
+    onError: () => {
+      toast.error('فشل تحديث حالة التنبيه');
+    },
+  });
 
-  const totalHighCost = highCostConversations.reduce(
-    (sum: number, c) => sum + (c.totalCost || 0),
-    0
-  );
-
-  // resolveAlert feature removed in refactored router
-  // const resolveAlertMutation = trpc.whatsapp.accountHealth.resolveAlert.useMutation({
-  //   onSuccess: () => {
-  //     toast.success('تم تحديث حالة التنبيه');
-  //     refetchAlerts();
-  //   },
-  //   onError: () => {
-  //     toast.error('فشل تحديث حالة التنبيه');
-  //   },
-  // });
-
-  // ── SSE: تنبيهات فورية من الـ webhook ──────────────────────────────────────
+  // توافق المسار القديم: التنبيهات تأتي من المركز داخل صفحة العمليات
   useWhatsAppSSE({
-    enabled: canViewWebhookLogs,
+    enabled: !operationsSse && canViewSecurity,
     onAccountAlert: useCallback(
       (event: { alertType: string; severity: string; details?: unknown; timestamp: string }) => {
-        // إضافة التنبيه للقائمة المحلية فوراً
         setLiveAlerts((prev) => [
           {
             alertType: event.alertType,
@@ -226,19 +154,18 @@ export default function WhatsAppAccountHealthPage() {
             details: event.details,
             timestamp: event.timestamp,
           },
-          ...prev.slice(0, 9), // نحتفظ بآخر 10 تنبيهات
+          ...prev.slice(0, 9),
         ]);
 
-        // تنبيه بصري للتنبيهات الحرجة
         if (event.severity === 'critical' || event.severity === 'high') {
           setHasNewCritical(true);
         }
 
-        // تحديث البيانات من الـ DB
-        // refetchAlerts(); // Feature removed in refactored router
-        // refetchSecurity(); // Feature removed in refactored router
+        refetchAlerts();
+        refetchSecurity();
+        refetchAlertStats();
       },
-      []
+      [refetchAlertStats, refetchAlerts, refetchSecurity]
     ),
   });
 
@@ -272,17 +199,14 @@ export default function WhatsAppAccountHealthPage() {
     }
   };
 
-  const _handleResolveAlert = (_alertId: number) => {
-    // Feature removed in refactored router
-    toast.error('ميزة حل التنبيهات غير متوفرة في الإصدار الحالي');
-    // resolveAlertMutation.mutate({ id: alertId, resolvedBy: 1 }); // TODO: Get actual user ID
+  const handleResolveAlert = (alertId: number) => {
+    resolveAlertMutation.mutate({ id: alertId });
   };
 
   const handleRefresh = () => {
-    // refetchAlerts(); // Feature removed in refactored router
-    // refetchSecurity(); // Feature removed in refactored router
-    refetchWebhook();
-    refetchSecurityWebhook();
+    refetchAlerts();
+    refetchSecurity();
+    refetchCustomerServiceWindow();
     toast.success('تم تحديث البيانات');
   };
 
@@ -298,7 +222,7 @@ export default function WhatsAppAccountHealthPage() {
             <RefreshCw className="h-4 w-4" />
             تحديث
           </Button>
-          {hasNewCritical && (
+          {(operationsSse?.hasNewCritical ?? hasNewCritical) && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg animate-pulse">
               <BellRing className="h-4 w-4 text-red-600" />
               <span className="text-sm font-medium text-red-700">تنبيه حرج جديد!</span>
@@ -306,29 +230,34 @@ export default function WhatsAppAccountHealthPage() {
                 size="sm"
                 variant="ghost"
                 className="h-6 w-6 p-0 text-red-600"
-                onClick={() => setHasNewCritical(false)}
+                onClick={() =>
+                  operationsSse ? operationsSse.dismissCritical() : setHasNewCritical(false)
+                }
               >
                 ×
               </Button>
             </div>
           )}
-          {liveAlerts.length > 0 && (
+          {(operationsSse?.liveAlerts ?? liveAlerts).length > 0 && (
             <Badge className="bg-green-500 text-white gap-1">
               <Zap className="h-3 w-3" />
-              {liveAlerts.length} مباشر
+              {(operationsSse?.liveAlerts ?? liveAlerts).length} مباشر
             </Badge>
           )}
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div
+        className="sgh-compact-stat-grid mb-5 grid grid-cols-2 sm:mb-6 lg:grid-cols-4"
+        aria-label="ملخص صحة حساب واتساب"
+      >
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">تنبيهات حرجة</p>
-                <p className="text-2xl font-bold text-red-600">0</p>
+                <p className="text-2xl font-bold text-red-600">{alertStats?.criticalOpen || 0}</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-red-500" />
             </div>
@@ -340,7 +269,7 @@ export default function WhatsAppAccountHealthPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">تنبيهات عالية</p>
-                <p className="text-2xl font-bold text-orange-600">0</p>
+                <p className="text-2xl font-bold text-orange-600">{alertStats?.highOpen || 0}</p>
               </div>
               <AlertCircle className="h-8 w-8 text-orange-500" />
             </div>
@@ -352,9 +281,7 @@ export default function WhatsAppAccountHealthPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">أحداث أمان</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {securityWebhookEvents?.length || 0}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{alertStats?.securityTotal || 0}</p>
               </div>
               <Shield className="h-8 w-8 text-blue-500" />
             </div>
@@ -366,7 +293,9 @@ export default function WhatsAppAccountHealthPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">تم حلها</p>
-                <p className="text-2xl font-bold text-green-600">0</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {alertStats?.resolvedTotal || 0}
+                </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
@@ -382,7 +311,7 @@ export default function WhatsAppAccountHealthPage() {
               <div>
                 <p className="text-sm text-gray-600">نافذة 24 ساعة منتهية</p>
                 <p className="text-2xl font-bold text-amber-600">
-                  {windowExpiredConversations.length}
+                  {customerServiceWindow?.count || 0}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">محادثة خارج النافذة</p>
               </div>
@@ -390,138 +319,122 @@ export default function WhatsAppAccountHealthPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
 
-        <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">تكاليف مرتفعة</p>
-                <p className="text-2xl font-bold text-red-600">
-                  ${typeof totalHighCost === 'number' ? totalHighCost.toFixed(2) : '0.00'}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {highCostConversations.length} محادثة مكلفة
-                </p>
-              </div>
-              <DollarSign className="h-8 w-8 text-red-500" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="mb-6">
+        <WhatsAppOperationalCostSummary summary={costSummary} isLoading={isCostSummaryLoading} />
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 mb-4">
-        <Button
-          variant={severityFilter === null ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSeverityFilter(null)}
-        >
-          الكل
-        </Button>
-        <Button
-          variant={severityFilter === 'critical' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSeverityFilter('critical')}
-          className="bg-red-100 hover:bg-red-200 text-red-700"
-        >
-          حرجة
-        </Button>
-        <Button
-          variant={severityFilter === 'high' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSeverityFilter('high')}
-          className="bg-orange-100 hover:bg-orange-200 text-orange-700"
-        >
-          عالية
-        </Button>
-        <Button
-          variant={severityFilter === 'medium' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSeverityFilter('medium')}
-          className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700"
-        >
-          متوسطة
-        </Button>
-        <Button
-          variant={severityFilter === 'low' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSeverityFilter('low')}
-          className="bg-blue-100 hover:bg-blue-200 text-blue-700"
-        >
-          منخفضة
-        </Button>
+      <div className="-mx-1 mb-4 overflow-x-auto pb-1">
+        <div className="flex w-max min-w-max gap-2 px-1">
+          <Button
+            variant={severityFilter === null ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSeverityFilter(null)}
+          >
+            الكل
+          </Button>
+          <Button
+            variant={severityFilter === 'critical' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSeverityFilter('critical')}
+            className="text-red-600"
+          >
+            حرجة ({alertStats?.criticalOpen || 0})
+          </Button>
+          <Button
+            variant={severityFilter === 'high' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSeverityFilter('high')}
+            className="text-orange-600"
+          >
+            عالية ({alertStats?.highOpen || 0})
+          </Button>
+          <Button
+            variant={severityFilter === 'medium' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSeverityFilter('medium')}
+            className="text-yellow-600"
+          >
+            متوسطة ({alertStats?.mediumOpen || 0})
+          </Button>
+          <Button
+            variant={severityFilter === 'low' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSeverityFilter('low')}
+            className="text-blue-600"
+          >
+            منخفضة ({alertStats?.lowOpen || 0})
+          </Button>
+        </div>
       </div>
 
-      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
-          <TabsTrigger value="alerts">تنبيهات الحساب</TabsTrigger>
+          <TabsTrigger value="alerts">التنبيهات المفتوحة</TabsTrigger>
           <TabsTrigger value="smart-alerts">تنبيهات ذكية</TabsTrigger>
-          {canViewWebhookLogs && <TabsTrigger value="security">أحداث الأمان</TabsTrigger>}
-          {canViewWebhookLogs && <TabsTrigger value="webhook-events">أحداث Webhook</TabsTrigger>}
+          <TabsTrigger value="security">أحداث الأمان</TabsTrigger>
         </TabsList>
 
         <TabsContent value="alerts">
           <Card>
             <CardHeader>
-              <CardTitle>تنبيهات الحساب</CardTitle>
-              <CardDescription>تنبيهات مهمة من Meta حول حالة الحساب</CardDescription>
+              <CardTitle>التنبيهات</CardTitle>
+              <CardDescription>تنبيهات تتطلب انتباهك أو إجراء منك</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* تنبيهات مباشرة عبر SSE */}
-              {liveAlerts.length > 0 && (
-                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Zap className="h-4 w-4 text-amber-600" />
-                    <span className="text-sm font-semibold text-amber-700">
-                      تنبيهات مباشرة ({liveAlerts.length})
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 text-xs text-amber-600 mr-auto"
-                      onClick={() => setLiveAlerts([])}
-                    >
-                      مسح
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {liveAlerts.map((alert, i) => (
-                      <div
-                        key={i}
-                        className={`flex items-center gap-2 text-sm p-2 rounded ${
-                          alert.severity === 'critical'
-                            ? 'bg-red-100 text-red-800'
-                            : alert.severity === 'high'
-                              ? 'bg-orange-100 text-orange-800'
-                              : alert.severity === 'medium'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-blue-100 text-blue-800'
-                        }`}
-                      >
-                        {getSeverityIcon(alert.severity)}
-                        <span className="font-medium">{alert.alertType}</span>
-                        <Badge className={`text-xs ${getSeverityColor(alert.severity)}`}>
-                          {alert.severity}
-                        </Badge>
-                        <span className="text-xs opacity-70 mr-auto">
-                          {new Date(alert.timestamp).toLocaleTimeString('ar-SA')}
-                        </span>
+              {alertsLoading ? (
+                <div className="text-center py-8">جاري التحميل...</div>
+              ) : alerts && alerts.length > 0 ? (
+                <div className="space-y-4">
+                  {alerts.map((alert: Record<string, unknown>) => (
+                    <div key={alert.id as number} className="p-4 border rounded-lg bg-white">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          {getSeverityIcon(alert.severity as string)}
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold">{alert.alertType as string}</h4>
+                              <Badge className={getSeverityColor(alert.severity as string)}>
+                                {alert.severity as string}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {getWhatsAppOperationDetails(alert.details as string)}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                              {new Date(alert.createdAt as string | Date).toLocaleString('ar-SA')}
+                            </p>
+                          </div>
+                        </div>
+                        {!alert.resolved && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleResolveAlert(alert.id as number)}
+                            disabled={!canManageSecurity || resolveAlertMutation.isPending}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            تحديد كمحلول
+                          </Button>
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                  <p>لا توجد تنبيهات حالياً</p>
                 </div>
               )}
-              <div className="text-center py-8 text-muted-foreground">
-                ميزة تنبيهات الحساب غير متوفرة في الإصدار الحالي
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="smart-alerts">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 24-Hour Window Alerts */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -533,35 +446,39 @@ export default function WhatsAppAccountHealthPage() {
               <CardContent>
                 {windowExpiredConversations.length > 0 ? (
                   <div className="space-y-3">
-                    {windowExpiredConversations.slice(0, 5).map((conv: Conversation) => (
+                    {windowExpiredConversations.map((conv: Record<string, unknown>) => (
                       <div
-                        key={conv.id}
+                        key={conv.id as number}
                         className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg"
                       >
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-semibold text-sm">
-                              {conv.customerName ?? 'عميل جديد'}
+                              {(conv.customerName as string) || 'عميل جديد'}
                             </p>
                             <p className="text-xs text-gray-600" dir="ltr">
-                              {conv.phoneNumber ?? ''}
+                              {conv.phoneNumber as string}
                             </p>
                           </div>
                           <Badge className="bg-amber-100 text-amber-800">
-                            {conv.lastMessageAt
-                              ? Math.floor(
-                                  (Date.now() - new Date(conv.lastMessageAt).getTime()) /
-                                    (1000 * 60 * 60)
-                                )
-                              : 0}{' '}
+                            انتهت منذ{' '}
+                            {Math.max(
+                              0,
+                              Math.floor(
+                                (Date.now() -
+                                  new Date(conv.expirationTimestamp as string | Date).getTime()) /
+                                  (1000 * 60 * 60)
+                              )
+                            )}{' '}
                             ساعة
                           </Badge>
                         </div>
                       </div>
                     ))}
-                    {windowExpiredConversations.length > 5 && (
+                    {(customerServiceWindow?.count || 0) > windowExpiredConversations.length && (
                       <p className="text-xs text-center text-gray-500">
-                        +{windowExpiredConversations.length - 5} محادثة أخرى
+                        +{(customerServiceWindow?.count || 0) - windowExpiredConversations.length}{' '}
+                        محادثة أخرى
                       </p>
                     )}
                   </div>
@@ -574,7 +491,6 @@ export default function WhatsAppAccountHealthPage() {
               </CardContent>
             </Card>
 
-            {/* High Cost Alerts */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -593,13 +509,13 @@ export default function WhatsAppAccountHealthPage() {
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-semibold text-sm">{conv.phoneNumber ?? ''}</p>
+                            <p className="font-semibold text-sm">{conv.phoneNumber}</p>
                             <p className="text-xs text-gray-600">
-                              {conv.pricingModel ?? 'غير محدد'}
+                              {conv.pricingModel || 'غير محدد'}
                             </p>
                           </div>
                           <Badge className="bg-red-100 text-red-800">
-                            ${(conv.totalCost || 0).toFixed(2)}
+                            ${Number(conv.conversationCost || 0).toFixed(2)}
                           </Badge>
                         </div>
                       </div>
@@ -621,126 +537,75 @@ export default function WhatsAppAccountHealthPage() {
           </div>
         </TabsContent>
 
-        {canViewWebhookLogs && (
-          <TabsContent value="security">
-            <Card>
-              <CardHeader>
-                <CardTitle>أحداث الأمان</CardTitle>
-                <CardDescription>أحداث أمان متعلقة بحساب WhatsApp</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {securityWebhookLoading ? (
-                  <div className="text-center py-8">جاري التحميل...</div>
-                ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
-                  <div className="space-y-4">
-                    {securityWebhookEvents.map((event: WebhookEvent) => (
-                      <div key={event.id} className="p-4 border rounded-lg bg-white">
-                        <div className="flex items-start gap-3">
-                          <Shield className="h-5 w-5 text-blue-500" />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-semibold">{event.eventType}</h4>
-                            </div>
-                            {event.phoneNumber && (
-                              <p className="text-sm text-gray-600 mt-1">
-                                الرقم: {event.phoneNumber}
-                              </p>
-                            )}
-                            <p className="text-xs text-gray-400 mt-2">
-                              {new Date(event.createdAt).toLocaleString('ar-SA')}
-                            </p>
+        <TabsContent value="security">
+          <Card>
+            <CardHeader>
+              <CardTitle>أحداث الأمان</CardTitle>
+              <CardDescription>أحداث أمان متعلقة بحساب WhatsApp</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {securityLoading ? (
+                <div className="text-center py-8">جاري التحميل...</div>
+              ) : securityEvents && securityEvents.length > 0 ? (
+                <div className="space-y-4">
+                  {securityEvents.map((event: Record<string, unknown>) => (
+                    <div key={event.id as number} className="p-4 border rounded-lg bg-white">
+                      <div className="flex items-start gap-3">
+                        <Shield className="h-5 w-5 text-blue-500" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{event.eventType as string}</h4>
+                            <Badge className={getSeverityColor(event.severity as string)}>
+                              {event.severity as string}
+                            </Badge>
                           </div>
+                          {Boolean(event.phoneNumber) && (
+                            <p className="text-sm text-gray-600 mt-1">
+                              الرقم: {event.phoneNumber as string}
+                            </p>
+                          )}
+                          <p className="text-sm text-gray-600 mt-1">
+                            {getWhatsAppOperationDetails(event.details as string)}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Shield className="h-12 w-12 mx-auto mb-2 text-green-500" />
-                    <p>لا توجد أحداث أمان حالياً</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Shield className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                  <p>لا توجد أحداث أمان حالياً</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        {canViewWebhookLogs && (
-          <TabsContent value="webhook-events">
-            <Card>
-              <CardHeader>
-                <CardTitle>ملخص أحداث Webhook</CardTitle>
-                <CardDescription>ملخصات آمنة لأحداث الحساب والأمان الواردة من Meta</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="account">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="account">أحداث الحساب</TabsTrigger>
-                    <TabsTrigger value="security">أحداث الأمان</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="account">
-                    {webhookLoading ? (
-                      <div className="text-center py-8">جاري التحميل...</div>
-                    ) : accountWebhookEvents && accountWebhookEvents.length > 0 ? (
-                      <div className="space-y-3">
-                        {accountWebhookEvents.map((event: WebhookEvent) => (
-                          <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4 className="font-semibold text-sm">{event.eventType}</h4>
-                                {event.subType && (
-                                  <Badge variant="outline" className="text-xs mt-1">
-                                    {event.subType}
-                                  </Badge>
-                                )}
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <p>لا توجد أحداث حساب حالياً</p>
-                      </div>
-                    )}
-                  </TabsContent>
-                  <TabsContent value="security">
-                    {securityWebhookLoading ? (
-                      <div className="text-center py-8">جاري التحميل...</div>
-                    ) : securityWebhookEvents && securityWebhookEvents.length > 0 ? (
-                      <div className="space-y-3">
-                        {securityWebhookEvents.map((event: WebhookEvent) => (
-                          <div key={event.id} className="p-3 border rounded-lg bg-gray-50">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4 className="font-semibold text-sm">{event.eventType}</h4>
-                                {event.subType && (
-                                  <Badge variant="outline" className="text-xs mt-1">
-                                    {event.subType}
-                                  </Badge>
-                                )}
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                {new Date(event.createdAt as string | Date).toLocaleString('ar-SA')}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <p>لا توجد أحداث أمان حالياً</p>
-                      </div>
-                    )}
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        )}
+        <Card className="border-dashed bg-muted/20 mt-6">
+          <CardHeader>
+            <CardTitle>سجل الأحداث الفني</CardTitle>
+            <CardDescription>
+              تُراجع أحداث Webhook الخام للحساب والأمان من تبويب التشخيص المركزي لتفادي تكرار
+              السجلات.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button asChild variant="outline">
+              <Link href="/admin/whatsapp/operations?tab=webhooks&category=account">
+                فتح أحداث الحساب
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/admin/whatsapp/operations?tab=webhooks&category=security">
+                فتح أحداث الأمان
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       </Tabs>
     </div>
   );

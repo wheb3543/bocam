@@ -31,7 +31,7 @@ export default function WhatsAppTemplatesPage() {
 }
 
 // ─── Main Content ────────────────────────────────────────────────────────────────
-function WhatsAppTemplatesContent() {
+export function WhatsAppTemplatesContent() {
   const templateManagement = useTemplateManagement();
 
   // SSE: تحديث فوري عند وصول أحداث القوالب الجديدة

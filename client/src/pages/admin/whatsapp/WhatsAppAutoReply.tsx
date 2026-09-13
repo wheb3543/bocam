@@ -11,10 +11,24 @@ import { Input } from '@/components/ui/input';
 import { Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWhatsAppSSE, AccountUpdateEvent } from '@/hooks/integrations/useWhatsAppSSE';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { PermissionHint } from '@/components/PermissionHint';
 
 export default function WhatsAppAutoReply() {
+  return (
+    <DashboardLayout
+      pageTitle="قواعد الرد التلقائي"
+      pageDescription="إدارة قواعد الرد التلقائي على رسائل واتساب الواردة"
+    >
+      <div className="container mx-auto w-full max-w-[1440px] py-3 sm:py-5" dir="rtl">
+        <WhatsAppAutoReplyContent />
+      </div>
+    </DashboardLayout>
+  );
+}
+
+export function WhatsAppAutoReplyContent() {
   const [autoReplyTrigger, setAutoReplyTrigger] = useState('');
   const [autoReplyResponse, setAutoReplyResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);

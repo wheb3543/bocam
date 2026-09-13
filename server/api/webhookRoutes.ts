@@ -86,15 +86,44 @@ export function createWebhookRouter(): Router {
    */
   router.get('/api/whatsapp/media/:mediaId', requireAuth, async (req: Request, res: Response) => {
     try {
-      const { mediaId } = req.params;
-      const accessToken = ENV.metaAccessToken;
+      const rawMediaId = req.params.mediaId;
+      const mediaId = Array.isArray(rawMediaId) ? rawMediaId[0] : rawMediaId;
+      if (!mediaId || !/^\d+$/.test(mediaId)) {
+        res.status(400).json({ error: 'Invalid media ID' });
+        return;
+      }
 
+      const isDownloadRequest = req.query.download === '1';
+      const cacheKey = typeof req.query.cacheKey === 'string' ? req.query.cacheKey : null;
+
+      if (cacheKey) {
+        const { readCachedIncomingWhatsAppMedia } =
+          await import('../services/whatsappIncomingMediaCache');
+        const cachedMedia = await readCachedIncomingWhatsAppMedia(cacheKey);
+        if (cachedMedia) {
+          res.setHeader('Content-Type', cachedMedia.mimeType);
+          res.setHeader('Cache-Control', 'private, no-store');
+          res.setHeader(
+            'Content-Disposition',
+            isDownloadRequest ? `attachment; filename="whatsapp-media-${mediaId}"` : 'inline'
+          );
+          res.send(Buffer.from(cachedMedia.bytes));
+          return;
+        }
+      }
+
+      const accessToken = ENV.metaAccessToken;
       if (!accessToken) {
         res.status(500).json({ error: 'metaAccessToken not configured' });
         return;
       }
 
-      const mediaResponse = await fetch(`https://graph.facebook.com/v25.0/${mediaId}`, {
+      const mediaInfoUrl = new URL(`https://graph.facebook.com/v25.0/${mediaId}`);
+      if (process.env.WHATSAPP_PHONE_NUMBER_ID) {
+        mediaInfoUrl.searchParams.set('phone_number_id', process.env.WHATSAPP_PHONE_NUMBER_ID);
+      }
+
+      const mediaResponse = await fetch(mediaInfoUrl.toString(), {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
@@ -103,12 +132,20 @@ export function createWebhookRouter(): Router {
         return;
       }
 
-      const mediaData = await mediaResponse.json();
+      const mediaData = (await mediaResponse.json()) as { url?: string; filename?: string };
       const mediaUrl = mediaData.url;
+
+      if (!mediaUrl) {
+        res.status(404).json({ error: 'Media URL not found' });
+        return;
+      }
 
       // Download the actual media file
       const fileResponse = await fetch(mediaUrl, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'User-Agent': 'curl/7.64.1',
+        },
       });
 
       if (!fileResponse.ok) {
@@ -119,7 +156,14 @@ export function createWebhookRouter(): Router {
       // Set appropriate headers
       const contentType = fileResponse.headers.get('content-type') || 'application/octet-stream';
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.setHeader('Cache-Control', 'private, no-store');
+      const safeFilename = String(mediaData.filename || `whatsapp-media-${mediaId}`)
+        .replace(/[^\w.\-\u0600-\u06FF]/g, '_')
+        .slice(0, 120);
+      res.setHeader(
+        'Content-Disposition',
+        isDownloadRequest ? `attachment; filename="${safeFilename}"` : 'inline'
+      );
 
       // Stream the file
       const buffer = await fileResponse.arrayBuffer();
@@ -170,89 +214,131 @@ export function createWebhookRouter(): Router {
    */
   router.post('/api/webhooks/whatsapp', async (req: Request, res: Response) => {
     try {
-      // ✅ التحقق من التوقيع قبل معالجة أي حدث
+      // 1. ✅ التحقق من التوقيع قبل معالجة أي حدث
       if (!verifyWebhookSignature(req)) {
         logger.error('❌ Invalid signature — request rejected');
         res.status(403).json({ error: 'Invalid signature' });
         return;
       }
 
-      // Always respond 200 immediately to Meta (they retry on non-200)
-      res.status(200).json({ success: true });
-
       const body = req.body;
       if (!body) {
         logger.error('Empty payload received');
+        res.status(200).json({ success: true });
         return;
       }
 
       if (body.object !== 'whatsapp_business_account') {
         logger.info('Ignoring non-WhatsApp webhook');
+        res.status(200).json({ success: true });
         return;
       }
 
       logger.info('Received webhook event for object:', body.object);
 
-      // تسجيل الحدث في قاعدة البيانات للتحليل
-      try {
-        const { createWhatsAppWebhookEvent } = await import('../database/db');
-        const { entry } = body;
-        if (entry && Array.isArray(entry)) {
-          for (const item of entry) {
-            const { changes } = item;
-            if (changes && Array.isArray(changes)) {
-              for (const change of changes) {
-                const { field, value } = change;
-                if (value) {
-                  // استخراج رقم الهاتف من الرسائل إذا وجد
-                  let phoneNumber = null;
-                  if (field === 'messages' && value.messages && value.messages.length > 0) {
-                    phoneNumber = value.messages[0].from || null;
-                  }
+      // 2. ✅ التحقق من ربط الحساب (WABA & Phone Number ID Binding)
+      const wabaId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || process.env.META_WABA_ID || '';
+      const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
+      if (wabaId && phoneNumberId) {
+        const { validateWhatsAppWebhookAccountBinding } =
+          await import('../integrations/webhooks/whatsappWebhookAccountBinding');
+        const bindingResult = validateWhatsAppWebhookAccountBinding(body, {
+          wabaId,
+          phoneNumberId,
+        });
+        if (!bindingResult.valid) {
+          logger.warn(`[WhatsApp Webhook] Account binding rejected: ${bindingResult.reason}`);
+          res.status(200).json({ success: false, reason: bindingResult.reason });
+          return;
+        }
+      }
 
-                  logger.info(`Logging event: ${field}, phone: ${phoneNumber}`);
-                  const result = await createWhatsAppWebhookEvent({
-                    eventType: field,
-                    subType: value.statuses ? 'status' : value.messages ? 'message' : undefined,
-                    phoneNumber,
-                    rawPayload: JSON.stringify(value),
-                  });
-                  logger.info(`Event logged successfully:`, result);
+      // 3. ✅ منع التكرار والتعارض عبر حجز وتصفية الرسائل (Deduplication lease)
+      const {
+        filterDuplicateWhatsAppDeliveries,
+        markWhatsAppWebhookDeliveriesProcessed,
+        markWhatsAppWebhookDeliveriesFailed,
+      } = await import('../integrations/webhooks/whatsappWebhookDedup');
 
-                  // 🔔 Publish SSE event to global channel for webhook events
-                  try {
-                    publish(GLOBAL_CHANNEL, 'webhook_event', {
-                      eventType: field,
+      const { body: dedupedBody, stats } = await filterDuplicateWhatsAppDeliveries(body);
+      if (stats.skippedMessages > 0 || stats.skippedStatuses > 0) {
+        logger.info(
+          `[WhatsApp Webhook] Deduplication skipped: ${stats.skippedMessages} msgs, ${stats.skippedStatuses} statuses`
+        );
+      }
+
+      // الرد بـ 200 فوراً لـ Meta لتجنب الـ timeout وإعادة الإرسال غير الضرورية
+      res.status(200).json({ success: true });
+
+      // إذا كانت جميع الرسائل والحالات مكررة ومحجوزة مسبقاً، ننهي المعالجة دون تكرار الآثار الجانبية
+      if (
+        stats.acceptedMessages === 0 &&
+        stats.acceptedStatuses === 0 &&
+        (stats.skippedMessages > 0 || stats.skippedStatuses > 0)
+      ) {
+        return;
+      }
+
+      // معالجة الحدث غير المتزامنة مع ضمان تحديث حالة التسليم (Processed / Failed)
+      (async () => {
+        try {
+          const { createWhatsAppWebhookEvent } = await import('../database/db');
+          const { entry } = dedupedBody;
+          if (entry && Array.isArray(entry)) {
+            for (const item of entry) {
+              const { changes } = item;
+              if (changes && Array.isArray(changes)) {
+                for (const change of changes) {
+                  const { field, value } = change;
+                  if (value) {
+                    let phoneNumber = null;
+                    if (field === 'messages' && value.messages && value.messages.length > 0) {
+                      phoneNumber = value.messages[0].from || null;
+                    }
+
+                    const eventType = field || 'unknown';
+                    logger.info(`Logging event: ${eventType}, phone: ${phoneNumber}`);
+                    await createWhatsAppWebhookEvent({
+                      eventType,
                       subType: value.statuses ? 'status' : value.messages ? 'message' : undefined,
                       phoneNumber,
                       rawPayload: JSON.stringify(value),
-                      handlerExists: true,
-                      processed: true,
-                      timestamp: new Date().toISOString(),
                     });
-                  } catch (error) {
-                    logger.error('Error publishing webhook event SSE:', error);
+
+                    // 🔔 Publish SSE event to global channel for webhook events
+                    try {
+                      publish(GLOBAL_CHANNEL, 'webhook_event', {
+                        eventType,
+                        subType: value.statuses ? 'status' : value.messages ? 'message' : undefined,
+                        phoneNumber,
+                        rawPayload: JSON.stringify(value),
+                        handlerExists: true,
+                        processed: true,
+                        timestamp: new Date().toISOString(),
+                      });
+                    } catch (publishError) {
+                      logger.error('Error publishing webhook event SSE:', publishError);
+                    }
                   }
                 }
               }
             }
           }
-        }
-      } catch (error) {
-        logger.error('Error logging webhook event:', error);
-      }
 
-      // معالجة الحدث باستخدام المعالج المتقدم من whatsappWebhookRefactored.ts
-      await handleWebhookPost(req, res);
+          // معالجة الرسائل والقوالب وحفظها
+          await handleWebhookPost({ ...req, body: dedupedBody } as Request, res);
+
+          // إتمام حجز الرسائل بنجاح
+          await markWhatsAppWebhookDeliveriesProcessed(stats.acceptedDeliveryKeys);
+        } catch (error) {
+          logger.error('Async webhook processing failed:', error);
+          await markWhatsAppWebhookDeliveriesFailed(stats.acceptedDeliveryKeys, error);
+        }
+      })();
     } catch (error) {
       logger.error('Error processing webhook:', error);
-      // Don't throw - we already sent 200 to Meta
-      // Log detailed error information for debugging
-      if (error instanceof Error) {
-        logger.error('Error details:', {
-          message: error.message,
-          stack: error.stack,
-        });
+      if (!res.headersSent) {
+        res.status(200).json({ success: false });
       }
     }
   });

@@ -43,6 +43,7 @@ export {
   getWhatsAppMessagesByConversation,
   getLatestInboundWhatsAppMessage,
   getWhatsAppMessageByWhatsAppId,
+  getWhatsAppMessageById,
   createWhatsAppMessage,
   updateWhatsAppMessage,
   getAllWhatsAppTemplates,

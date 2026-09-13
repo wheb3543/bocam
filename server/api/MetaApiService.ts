@@ -213,8 +213,13 @@ class MetaApiService {
   // ══════════════════════════════════════════════════════════════════════════════
 
   /** إرسال رسالة نصية عبر WhatsApp Cloud API */
-  async sendWhatsAppText(phoneNumberId: string, to: string, text: string) {
-    return sendWhatsAppText(phoneNumberId, to, text, this.post.bind(this));
+  async sendWhatsAppText(
+    phoneNumberId: string,
+    to: string,
+    text: string,
+    options: { replyToMessageId?: string } = {}
+  ) {
+    return sendWhatsAppText(phoneNumberId, to, text, this.post.bind(this), options);
   }
 
   /** إرسال رسالة قالب عبر WhatsApp Cloud API */
@@ -223,7 +228,8 @@ class MetaApiService {
     to: string,
     templateName: string,
     languageCode: string,
-    components: Record<string, unknown>[] = []
+    components: Record<string, unknown>[] = [],
+    options: { replyToMessageId?: string } = {}
   ) {
     return sendWhatsAppTemplate(
       phoneNumberId,
@@ -231,7 +237,8 @@ class MetaApiService {
       templateName,
       languageCode,
       components,
-      this.post.bind(this)
+      this.post.bind(this),
+      options
     );
   }
 
@@ -245,18 +252,35 @@ class MetaApiService {
   }
 
   /** إرسال رسالة صورة عبر WhatsApp Cloud API */
-  async sendWhatsAppImage(phoneNumberId: string, to: string, imageRef: string, caption?: string) {
-    return sendWhatsAppImage(phoneNumberId, to, imageRef, caption, this.post.bind(this));
+  async sendWhatsAppImage(
+    phoneNumberId: string,
+    to: string,
+    imageRef: string,
+    caption?: string,
+    options: { replyToMessageId?: string } = {}
+  ) {
+    return sendWhatsAppImage(phoneNumberId, to, imageRef, caption, this.post.bind(this), options);
   }
 
   /** إرسال رسالة فيديو عبر WhatsApp Cloud API */
-  async sendWhatsAppVideo(phoneNumberId: string, to: string, videoRef: string, caption?: string) {
-    return sendWhatsAppVideo(phoneNumberId, to, videoRef, caption, this.post.bind(this));
+  async sendWhatsAppVideo(
+    phoneNumberId: string,
+    to: string,
+    videoRef: string,
+    caption?: string,
+    options: { replyToMessageId?: string } = {}
+  ) {
+    return sendWhatsAppVideo(phoneNumberId, to, videoRef, caption, this.post.bind(this), options);
   }
 
   /** إرسال رسالة صوت عبر WhatsApp Cloud API */
-  async sendWhatsAppAudio(phoneNumberId: string, to: string, audioRef: string) {
-    return sendWhatsAppAudio(phoneNumberId, to, audioRef, this.post.bind(this));
+  async sendWhatsAppAudio(
+    phoneNumberId: string,
+    to: string,
+    audioRef: string,
+    options: { replyToMessageId?: string } = {}
+  ) {
+    return sendWhatsAppAudio(phoneNumberId, to, audioRef, this.post.bind(this), options);
   }
 
   /** إرسال رسالة مستند عبر WhatsApp Cloud API */
@@ -264,9 +288,17 @@ class MetaApiService {
     phoneNumberId: string,
     to: string,
     documentRef: string,
-    filename?: string
+    filename?: string,
+    options: { replyToMessageId?: string } = {}
   ) {
-    return sendWhatsAppDocument(phoneNumberId, to, documentRef, filename, this.post.bind(this));
+    return sendWhatsAppDocument(
+      phoneNumberId,
+      to,
+      documentRef,
+      filename,
+      this.post.bind(this),
+      options
+    );
   }
 
   /** رفع ملف وسائط إلى WhatsApp Media API */

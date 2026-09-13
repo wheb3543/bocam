@@ -28,6 +28,8 @@ export interface RetryConfig {
 export interface MediaOptions {
   caption?: string;
   filename?: string;
+  voice?: boolean;
+  replyToMessageId?: string;
 }
 
 export interface WhatsAppMessageResult {

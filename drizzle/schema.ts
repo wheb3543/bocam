@@ -1797,6 +1797,73 @@ export type WhatsappWebhookEvent = typeof whatsappWebhookEvents.$inferSelect;
 export type InsertWhatsappWebhookEvent = typeof whatsappWebhookEvents.$inferInsert;
 
 /**
+ * WhatsApp Webhook Deliveries table - سجل تسليم واستئجار معالجة أحداث Webhook
+ * يضمن عدم تكرار المعالجة ومنع التزامن عبر آلية التأجير (lease-based concurrency locking)
+ */
+export const whatsappWebhookDeliveries = mysqlTable(
+  'whatsapp_webhook_deliveries',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    deliveryKey: varchar('deliveryKey', { length: 64 }).notNull().unique(),
+    eventType: varchar('eventType', { length: 16 }).notNull(),
+    metaMessageId: varchar('metaMessageId', { length: 255 }).notNull(),
+    /** processing يمنع التزامن؛ failed يسمح لإعادة تسليم Meta بالمحاولة مجدداً. */
+    processingStatus: varchar('processingStatus', { length: 16 }).default('processing').notNull(),
+    attempts: int('attempts').default(1).notNull(),
+    processingStartedAt: timestamp('processingStartedAt').defaultNow().notNull(),
+    processedAt: timestamp('processedAt'),
+    lastError: varchar('lastError', { length: 1000 }),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    metaMessageIdIdx: index('whatsapp_webhook_deliveries_metaMessageId_idx').on(
+      table.metaMessageId
+    ),
+    statusStartedIdx: index('whatsapp_webhook_deliveries_statusStarted_idx').on(
+      table.processingStatus,
+      table.processingStartedAt
+    ),
+  })
+);
+
+export type WhatsAppWebhookDelivery = typeof whatsappWebhookDeliveries.$inferSelect;
+export type InsertWhatsAppWebhookDelivery = typeof whatsappWebhookDeliveries.$inferInsert;
+
+/**
+ * WhatsApp Flow Events - أحداث تدفقات WhatsApp Flows المنظمة
+ * لا يحتفظ رد النموذج بقيمه الحساسة، بل بمفاتيحه فقط حفاظاً على الخصوصية.
+ */
+export const whatsappFlowEvents = mysqlTable(
+  'whatsapp_flow_events',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    flowId: varchar('flowId', { length: 255 }),
+    eventName: varchar('eventName', { length: 100 }).notNull(),
+    status: varchar('status', { length: 100 }),
+    availability: varchar('availability', { length: 100 }),
+    latencyMs: int('latencyMs'),
+    errorCode: varchar('errorCode', { length: 100 }),
+    errorMessage: varchar('errorMessage', { length: 1000 }),
+    contextMessageId: varchar('contextMessageId', { length: 255 }),
+    responseKeys: text('responseKeys'),
+    flowTokenHash: varchar('flowTokenHash', { length: 64 }),
+    rawPayload: text('rawPayload'),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+  },
+  (table) => ({
+    flowCreatedIdx: index('whatsapp_flow_events_flowCreated_idx').on(table.flowId, table.createdAt),
+    eventCreatedIdx: index('whatsapp_flow_events_eventCreated_idx').on(
+      table.eventName,
+      table.createdAt
+    ),
+  })
+);
+
+export type WhatsAppFlowEvent = typeof whatsappFlowEvents.$inferSelect;
+export type InsertWhatsAppFlowEvent = typeof whatsappFlowEvents.$inferInsert;
+
+/**
  * WhatsApp Contacts - جهات الاتصال المرسلة من المستخدمين
  */
 export const whatsappContacts = mysqlTable('whatsapp_contacts', {

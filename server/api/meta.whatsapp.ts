@@ -48,12 +48,22 @@ function buildMediaPayload(
     mediaObject.filename = options.filename;
   }
 
-  return {
+  if (mediaType === 'audio' && options.voice) {
+    mediaObject.voice = true;
+  }
+
+  const payload: Record<string, unknown> = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
     type: mediaType,
     [mediaType]: mediaObject,
   };
+
+  if (options.replyToMessageId) {
+    payload.context = { message_id: options.replyToMessageId };
+  }
+
+  return payload;
 }
 
 /**
@@ -66,15 +76,22 @@ export async function sendWhatsAppText(
   postFn: (
     endpoint: string,
     payload: Record<string, unknown>
-  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>
+  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>,
+  options: { replyToMessageId?: string } = {}
 ): Promise<WhatsAppMessageResult> {
-  const res = await postFn(`${phoneNumberId}/messages`, {
+  const payload: Record<string, unknown> = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
     to,
     type: 'text',
     text: { preview_url: false, body: text },
-  });
+  };
+
+  if (options.replyToMessageId) {
+    payload.context = { message_id: options.replyToMessageId };
+  }
+
+  const res = await postFn(`${phoneNumberId}/messages`, payload);
   if (!res.ok) {
     const errMsg = formatMetaError(res.error || { code: 0, message: 'Unknown error' });
     console.error(`[MetaApiService] sendWhatsAppText failed:`, JSON.stringify(res.error));
@@ -98,7 +115,8 @@ export async function sendWhatsAppTemplate(
   postFn: (
     endpoint: string,
     payload: Record<string, unknown>
-  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>
+  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>,
+  options: { replyToMessageId?: string } = {}
 ): Promise<WhatsAppTemplateResult> {
   const payload: Record<string, unknown> = {
     messaging_product: 'whatsapp',
@@ -109,6 +127,9 @@ export async function sendWhatsAppTemplate(
   };
   if (components.length > 0) {
     (payload as { template: { components?: unknown[] } }).template.components = components;
+  }
+  if (options.replyToMessageId) {
+    payload.context = { message_id: options.replyToMessageId };
   }
 
   logger.info(`Sending template "${templateName}" (lang: ${languageCode}) to ${to}`);
@@ -170,11 +191,12 @@ export async function sendWhatsAppImage(
   postFn: (
     endpoint: string,
     payload: Record<string, unknown>
-  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>
+  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>,
+  options: { replyToMessageId?: string } = {}
 ): Promise<WhatsAppMessageResult> {
   const payload = {
     to,
-    ...buildMediaPayload('image', imageRef, { caption }),
+    ...buildMediaPayload('image', imageRef, { caption, ...options }),
   };
 
   const res = await postFn(`${phoneNumberId}/messages`, payload);
@@ -199,11 +221,12 @@ export async function sendWhatsAppVideo(
   postFn: (
     endpoint: string,
     payload: Record<string, unknown>
-  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>
+  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>,
+  options: { replyToMessageId?: string } = {}
 ): Promise<WhatsAppMessageResult> {
   const payload = {
     to,
-    ...buildMediaPayload('video', videoRef, { caption }),
+    ...buildMediaPayload('video', videoRef, { caption, ...options }),
   };
 
   const res = await postFn(`${phoneNumberId}/messages`, payload);
@@ -227,11 +250,12 @@ export async function sendWhatsAppAudio(
   postFn: (
     endpoint: string,
     payload: Record<string, unknown>
-  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>
+  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>,
+  options: { replyToMessageId?: string } = {}
 ): Promise<WhatsAppMessageResult> {
   const payload = {
     to,
-    ...buildMediaPayload('audio', audioRef),
+    ...buildMediaPayload('audio', audioRef, { voice: true, ...options }),
   };
 
   const res = await postFn(`${phoneNumberId}/messages`, payload);
@@ -256,11 +280,12 @@ export async function sendWhatsAppDocument(
   postFn: (
     endpoint: string,
     payload: Record<string, unknown>
-  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>
+  ) => Promise<{ ok: boolean; error?: unknown; data?: unknown }>,
+  options: { replyToMessageId?: string } = {}
 ): Promise<WhatsAppMessageResult> {
   const payload = {
     to,
-    ...buildMediaPayload('document', documentRef, { filename }),
+    ...buildMediaPayload('document', documentRef, { filename, ...options }),
   };
 
   const res = await postFn(`${phoneNumberId}/messages`, payload);
@@ -286,6 +311,7 @@ export async function uploadWhatsAppMedia(
   try {
     const url = `${GRAPH_API_BASE}/${phoneNumberId}/media`;
     const formData = new FormData();
+    formData.append('messaging_product', 'whatsapp');
     const uint8Array = new Uint8Array(fileBuffer);
     formData.append('file', new Blob([uint8Array], { type: mimeType }), 'media');
 

@@ -36,16 +36,6 @@ import {
 } from '@/hooks/integrations/useWhatsAppSSE';
 import { toast } from 'sonner';
 import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-} from 'recharts';
-import {
   Shield,
   AlertTriangle,
   CheckCircle,
@@ -61,6 +51,17 @@ import {
 } from 'lucide-react';
 
 export default function WhatsAppCompliance() {
+  return (
+    <DashboardLayout
+      pageTitle="الامتثال والأمان"
+      pageDescription="إدارة الأرقام المحظورة وسجلات الأمان لـ WhatsApp"
+    >
+      <WhatsAppComplianceContent />
+    </DashboardLayout>
+  );
+}
+
+export function WhatsAppComplianceContent() {
   const [blockPhone, setBlockPhone] = useState('');
   const [blockReason, setBlockReason] = useState<'opt_out' | 'spam' | 'manual' | 'invalid'>(
     'manual'
@@ -302,333 +303,259 @@ export default function WhatsAppCompliance() {
   const auditStats = auditStatsQuery.data?.stats;
   const totalMessages = auditStats?.totalMessages || 0;
   const errorCount = auditStats?.errorCount || 0;
+  const hasAuditedMessages = totalMessages > 0;
   const compliantPercentage =
-    totalMessages > 0 ? Math.round(((totalMessages - errorCount) / totalMessages) * 100) : 100;
+    totalMessages > 0 ? Math.round(((totalMessages - errorCount) / totalMessages) * 100) : null;
   const nonCompliantPercentage =
-    totalMessages > 0 ? Math.round((errorCount / totalMessages) * 100) : 0;
-
-  const _complianceData = [
-    { name: 'متوافق', value: compliantPercentage },
-    { name: 'غير متوافق', value: nonCompliantPercentage },
-  ];
-
-  // Sample data for trend chart (audit logs are in-memory, so using sample data)
-  const auditTrendData = [
-    {
-      date: 'الاثنين',
-      sent: auditStats?.sentMessages || 0,
-      received: auditStats?.receivedMessages || 0,
-      errors: auditStats?.errorCount || 0,
-    },
-    {
-      date: 'الثلاثاء',
-      sent: auditStats?.sentMessages || 0,
-      received: auditStats?.receivedMessages || 0,
-      errors: auditStats?.errorCount || 0,
-    },
-    {
-      date: 'الأربعاء',
-      sent: auditStats?.sentMessages || 0,
-      received: auditStats?.receivedMessages || 0,
-      errors: auditStats?.errorCount || 0,
-    },
-    {
-      date: 'الخميس',
-      sent: auditStats?.sentMessages || 0,
-      received: auditStats?.receivedMessages || 0,
-      errors: auditStats?.errorCount || 0,
-    },
-    {
-      date: 'الجمعة',
-      sent: auditStats?.sentMessages || 0,
-      received: auditStats?.receivedMessages || 0,
-      errors: auditStats?.errorCount || 0,
-    },
-    {
-      date: 'السبت',
-      sent: auditStats?.sentMessages || 0,
-      received: auditStats?.receivedMessages || 0,
-      errors: auditStats?.errorCount || 0,
-    },
-    {
-      date: 'الأحد',
-      sent: auditStats?.sentMessages || 0,
-      received: auditStats?.receivedMessages || 0,
-      errors: auditStats?.errorCount || 0,
-    },
-  ];
+    totalMessages > 0 ? Math.round((errorCount / totalMessages) * 100) : null;
 
   if (permissionsLoading) {
-    return (
-      <DashboardLayout pageTitle="الامتثال والأمان" pageDescription="جارٍ التحقق من الصلاحيات">
-        <div />
-      </DashboardLayout>
-    );
+    return <div />;
   }
 
   if (!canViewSecurity) {
     return (
-      <DashboardLayout
-        pageTitle="الامتثال والأمان"
-        pageDescription="إدارة الامتثال مع معايير Meta والأمان"
-      >
-        <PermissionHint
-          message="تحتاج إلى صلاحية عرض أمان WhatsApp والامتثال للوصول إلى هذه الصفحة."
-          label="الوصول إلى الأمان والامتثال مقيّد"
-        />
-      </DashboardLayout>
+      <PermissionHint
+        message="تحتاج إلى صلاحية عرض أمان WhatsApp والامتثال للوصول إلى هذه الصفحة."
+        label="الوصول إلى الأمان والامتثال مقيّد"
+      />
     );
   }
 
   return (
-    <DashboardLayout
-      pageTitle="الامتثال والأمان"
-      pageDescription="إدارة الامتثال مع معايير Meta والأمان"
-    >
-      <div className="space-y-6">
-        {/* Header with Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">الامتثال والأمان</h1>
-            <p className="text-muted-foreground text-sm">إدارة الامتثال مع معايير Meta والأمان</p>
-            {!canManageSecurity && (
-              <PermissionHint
-                message="يمكنك العرض فقط؛ تتطلب إجراءات الحظر ومعالجة Opt-out صلاحية إدارة أمان WhatsApp."
-                label="إجراءات الإدارة مقيّدة"
-                className="mt-2"
-              />
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-              <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
-              تحديث
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportData}>
-              <Download className="w-4 h-4 ml-2" />
-              تصدير
-            </Button>
-          </div>
+    <div className="space-y-6">
+      {/* Header with Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">الامتثال والأمان</h1>
+          <p className="text-muted-foreground text-sm">إدارة الامتثال مع معايير Meta والأمان</p>
+          {!canManageSecurity && (
+            <PermissionHint
+              message="يمكنك العرض فقط؛ تتطلب إجراءات الحظر ومعالجة Opt-out صلاحية إدارة أمان WhatsApp."
+              label="إجراءات الإدارة مقيّدة"
+              className="mt-2"
+            />
+          )}
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Ban className="w-4 h-4 text-red-500" />
-                الأرقام المحظورة
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {securityStatsQuery.data?.stats?.blockedPhones || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">رقم محظور</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Users className="w-4 h-4 text-orange-500" />
-                طلبات الإلغاء
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {securityStatsQuery.data?.stats?.optOutCount || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">طلب إلغاء</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <FileText className="w-4 h-4 text-blue-500" />
-                الرسائل المرسلة
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {auditStatsQuery.data?.stats?.sentMessages || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">رسالة</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <XCircle className="w-4 h-4 text-red-500" />
-                الأخطاء
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {auditStatsQuery.data?.stats?.errorCount || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">خطأ</p>
-            </CardContent>
-          </Card>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+            <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
+            تحديث
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportData}>
+            <Download className="w-4 h-4 ml-2" />
+            تصدير
+          </Button>
         </div>
+      </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Audit Trend */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="w-5 h-5" />
-                اتجاه العمليات (آخر 7 أيام)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={auditTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="sent" stroke="#3b82f6" name="مرسلة" />
-                  <Line type="monotone" dataKey="received" stroke="#10b981" name="مستقبلة" />
-                  <Line type="monotone" dataKey="errors" stroke="#ef4444" name="أخطاء" />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Compliance Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5" />
-                حالة الامتثال
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span>متوافق</span>
-                  </div>
-                  <span className="font-bold">{compliantPercentage}%</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <XCircle className="w-5 h-5 text-red-600" />
-                    <span>غير متوافق</span>
-                  </div>
-                  <span className="font-bold">{nonCompliantPercentage}%</span>
-                </div>
-
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-900">
-                    ✅ تم فحص {totalMessages} رسالة ضد معايير Meta
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Compliance Validator */}
+      {/* Stats Cards */}
+      <div
+        className="sgh-compact-stat-grid grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4"
+        aria-label="ملخص امتثال واتساب"
+      >
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              فحص الامتثال
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Ban className="w-4 h-4 text-red-500" />
+              الأرقام المحظورة
             </CardTitle>
-            <CardDescription>تحقق من توافق الرسالة مع معايير Meta</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">الرسالة</label>
-              <Textarea
-                placeholder="أدخل الرسالة للتحقق من امتثالها..."
-                value={messageToValidate}
-                onChange={(e) => setMessageToValidate(e.target.value)}
-                className="mt-1"
-                rows={4}
-              />
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {securityStatsQuery.data?.stats?.blockedPhones || 0}
             </div>
-
-            <Button onClick={handleValidateCompliance} disabled={isLoading} className="w-full">
-              {isLoading ? 'جاري الفحص...' : 'فحص الامتثال'}
-            </Button>
+            <p className="text-xs text-muted-foreground">رقم محظور</p>
           </CardContent>
         </Card>
 
-        {/* Block Phone */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Users className="w-4 h-4 text-orange-500" />
+              طلبات الإلغاء
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {securityStatsQuery.data?.stats?.optOutCount || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">طلب إلغاء</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <FileText className="w-4 h-4 text-blue-500" />
+              الرسائل المرسلة
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {auditStatsQuery.data?.stats?.sentMessages || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">رسالة</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <XCircle className="w-4 h-4 text-red-500" />
+              الأخطاء
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {auditStatsQuery.data?.stats?.errorCount || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">خطأ</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Audit Trend */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5" />
-              إدارة الأرقام المحظورة
+              <Eye className="w-5 h-5" />
+              ملخص سجل التدقيق الموثّق
             </CardTitle>
-            <CardDescription>حظر أو إلغاء حظر أرقام الهاتف</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium">رقم الهاتف</label>
-                <Input
-                  placeholder="967777165305"
-                  value={blockPhone}
-                  onChange={(e) => setBlockPhone(e.target.value)}
-                  className="mt-1"
-                />
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+              <div className="rounded-lg bg-muted/50 p-3 sm:p-4">
+                <p className="text-xs text-muted-foreground sm:text-sm">رسائل مرسلة</p>
+                <p className="mt-1 text-xl font-bold sm:text-2xl">
+                  {auditStats?.sentMessages || 0}
+                </p>
               </div>
-
-              <div>
-                <label className="text-sm font-medium">السبب</label>
-                <Select
-                  value={blockReason}
-                  onValueChange={(value: BlockReason) => setBlockReason(value)}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="manual">يدوي</SelectItem>
-                    <SelectItem value="opt_out">إلغاء الاشتراك</SelectItem>
-                    <SelectItem value="spam">رسائل عشوائية</SelectItem>
-                    <SelectItem value="invalid">رقم غير صحيح</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="rounded-lg bg-muted/50 p-3 sm:p-4">
+                <p className="text-xs text-muted-foreground sm:text-sm">رسائل مستقبلة</p>
+                <p className="mt-1 text-xl font-bold sm:text-2xl">
+                  {auditStats?.receivedMessages || 0}
+                </p>
               </div>
-
-              <div className="flex items-end">
-                <Button
-                  onClick={handleBlockPhone}
-                  disabled={!canManageSecurity || isLoading}
-                  className="w-full"
-                >
-                  {isLoading ? 'جاري...' : 'حظر الرقم'}
-                </Button>
+              <div className="col-span-2 rounded-lg bg-muted/50 p-3 sm:col-span-1 sm:p-4">
+                <p className="text-xs text-muted-foreground sm:text-sm">أخطاء مسجلة</p>
+                <p className="mt-1 text-xl font-bold sm:text-2xl">{auditStats?.errorCount || 0}</p>
               </div>
             </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              لا يعرض المركز اتجاهاً زمنياً قبل توفر سجل يومي حقيقي؛ استخدم التصدير لمراجعة الأحداث
+              المتاحة.
+            </p>
+          </CardContent>
+        </Card>
 
-            {/* Search and Filter */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1">
-                <Input
-                  placeholder="بحث برقم الهاتف..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full"
-                />
+        {/* Compliance Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              حالة الامتثال
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {!hasAuditedMessages ? (
+                <div className="rounded-lg border border-dashed border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900">
+                  لا توجد رسائل مدققة ضمن السجل الحالي؛ ستظهر نسبة الامتثال بعد توفر رسائل قابلة
+                  للمراجعة.
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span>متوافق</span>
+                    </div>
+                    <span className="font-bold">{compliantPercentage}%</span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <XCircle className="w-5 h-5 text-red-600" />
+                      <span>غير متوافق</span>
+                    </div>
+                    <span className="font-bold">{nonCompliantPercentage}%</span>
+                  </div>
+                </>
+              )}
+
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-900">
+                  {hasAuditedMessages
+                    ? `✅ تم فحص ${totalMessages} رسالة ضد معايير Meta`
+                    : 'لم تُسجل رسائل قابلة للتدقيق بعد.'}
+                </p>
               </div>
-              <Select value={filterReason} onValueChange={setFilterReason}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="فلترة حسب السبب" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Compliance Validator */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="w-5 h-5" />
+            فحص الامتثال
+          </CardTitle>
+          <CardDescription>تحقق من توافق الرسالة مع معايير Meta</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">الرسالة</label>
+            <Textarea
+              placeholder="أدخل الرسالة للتحقق من امتثالها..."
+              value={messageToValidate}
+              onChange={(e) => setMessageToValidate(e.target.value)}
+              className="mt-1"
+              rows={4}
+            />
+          </div>
+
+          <Button onClick={handleValidateCompliance} disabled={isLoading} className="w-full">
+            {isLoading ? 'جاري الفحص...' : 'فحص الامتثال'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Block Phone */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" />
+            إدارة الأرقام المحظورة
+          </CardTitle>
+          <CardDescription>حظر أو إلغاء حظر أرقام الهاتف</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium">رقم الهاتف</label>
+              <Input
+                placeholder="967777165305"
+                value={blockPhone}
+                onChange={(e) => setBlockPhone(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">السبب</label>
+              <Select
+                value={blockReason}
+                onValueChange={(value: BlockReason) => setBlockReason(value)}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">الكل</SelectItem>
                   <SelectItem value="manual">يدوي</SelectItem>
                   <SelectItem value="opt_out">إلغاء الاشتراك</SelectItem>
                   <SelectItem value="spam">رسائل عشوائية</SelectItem>
@@ -637,103 +564,137 @@ export default function WhatsAppCompliance() {
               </Select>
             </div>
 
-            {/* Blocked Phones List */}
-            {filteredPhones.length > 0 ? (
-              <div className="mt-6 space-y-2">
-                <h3 className="font-semibold">الأرقام المحظورة ({filteredPhones.length}):</h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {filteredPhones.map((phone: BlockedPhone) => (
-                    <div
-                      key={phone.phone}
-                      className="flex items-center justify-between p-3 bg-muted rounded-lg"
-                    >
-                      <div>
-                        <p className="font-medium text-sm">{phone.phone}</p>
-                        <p className="text-xs text-muted-foreground">{phone.reason}</p>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleUnblockPhone(phone.phone || '')}
-                        disabled={!canManageSecurity || isLoading}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+            <div className="flex items-end">
+              <Button
+                onClick={handleBlockPhone}
+                disabled={!canManageSecurity || isLoading}
+                className="w-full"
+              >
+                {isLoading ? 'جاري...' : 'حظر الرقم'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Search and Filter */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1">
+              <Input
+                placeholder="بحث برقم الهاتف..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <Select value={filterReason} onValueChange={setFilterReason}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="فلترة حسب السبب" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">الكل</SelectItem>
+                <SelectItem value="manual">يدوي</SelectItem>
+                <SelectItem value="opt_out">إلغاء الاشتراك</SelectItem>
+                <SelectItem value="spam">رسائل عشوائية</SelectItem>
+                <SelectItem value="invalid">رقم غير صحيح</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Blocked Phones List */}
+          {filteredPhones.length > 0 ? (
+            <div className="mt-6 space-y-2">
+              <h3 className="font-semibold">الأرقام المحظورة ({filteredPhones.length}):</h3>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {filteredPhones.map((phone: BlockedPhone) => (
+                  <div
+                    key={phone.phone}
+                    className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{phone.phone}</p>
+                      <p className="text-xs text-muted-foreground">{phone.reason}</p>
                     </div>
-                  ))}
-                </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleUnblockPhone(phone.phone || '')}
+                      disabled={!canManageSecurity || isLoading}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <div className="mt-6 text-center py-8 text-muted-foreground">
-                <Ban className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>لا توجد أرقام محظورة</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Audit Log Export */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="w-5 h-5" />
-              سجل العمليات
-            </CardTitle>
-            <CardDescription>تصدير سجل العمليات الكامل</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              onClick={handleExportAudit}
-              disabled={!canExportAudit || isLoading}
-              className="w-full"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              {isLoading ? 'جاري التصدير...' : 'تحميل السجل (CSV)'}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Opt-Out Request Handler */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              معالجة طلبات إلغاء الاشتراك
-            </CardTitle>
-            <CardDescription>معالجة طلبات إلغاء الاشتراك من المستخدمين</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">رقم الهاتف</label>
-              <Input
-                placeholder="7XXXXXXXX"
-                value={optOutPhone}
-                onChange={(e) => setOptOutPhone(processPhoneInput(e.target.value))}
-                disabled={!canManageSecurity}
-                dir="ltr"
-                className="mt-1"
-              />
             </div>
-            <div>
-              <label className="text-sm font-medium">السبب (اختياري)</label>
-              <Input
-                placeholder="سبب إلغاء الاشتراك"
-                value={optOutReason}
-                onChange={(e) => setOptOutReason(e.target.value)}
-                disabled={!canManageSecurity}
-                className="mt-1"
-              />
+          ) : (
+            <div className="mt-6 text-center py-8 text-muted-foreground">
+              <Ban className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>لا توجد أرقام محظورة</p>
             </div>
-            <Button
-              onClick={handleOptOut}
-              disabled={!canManageSecurity || handleOptOutMutation.isPending}
-              className="w-full"
-            >
-              {handleOptOutMutation.isPending ? 'جاري المعالجة...' : 'معالجة الطلب'}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Audit Log Export */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="w-5 h-5" />
+            سجل العمليات
+          </CardTitle>
+          <CardDescription>تصدير سجل العمليات الكامل</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            onClick={handleExportAudit}
+            disabled={!canExportAudit || isLoading}
+            className="w-full"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {isLoading ? 'جاري التصدير...' : 'تحميل السجل (CSV)'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Opt-Out Request Handler */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            معالجة طلبات إلغاء الاشتراك
+          </CardTitle>
+          <CardDescription>معالجة طلبات إلغاء الاشتراك من المستخدمين</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">رقم الهاتف</label>
+            <Input
+              placeholder="7XXXXXXXX"
+              value={optOutPhone}
+              onChange={(e) => setOptOutPhone(processPhoneInput(e.target.value))}
+              disabled={!canManageSecurity}
+              dir="ltr"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">السبب (اختياري)</label>
+            <Input
+              placeholder="سبب إلغاء الاشتراك"
+              value={optOutReason}
+              onChange={(e) => setOptOutReason(e.target.value)}
+              disabled={!canManageSecurity}
+              className="mt-1"
+            />
+          </div>
+          <Button
+            onClick={handleOptOut}
+            disabled={!canManageSecurity || handleOptOutMutation.isPending}
+            className="w-full"
+          >
+            {handleOptOutMutation.isPending ? 'جاري المعالجة...' : 'معالجة الطلب'}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
