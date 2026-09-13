@@ -2,7 +2,7 @@
 
 **الحالة:** `working`  
 **المجال:** Authentication & RBAC  
-**آخر مراجعة:** 2026-09-11  
+**آخر مراجعة:** 2026-09-13  
 **المصادر:** `server/_core/context.ts`، `server/_core/oauth.ts`، `server/_core/sdk.ts`، `server/_core/cookies.ts`، `server/_core/trpc.ts`، `server/routers/auth.ts`، `server/routers/permissionProcedures.ts`، `server/services/rolePermissionService.ts`، `shared/rolePermissions.ts`
 
 ## 1. طبقات الوصول
@@ -89,6 +89,16 @@
 الأدوار الأساسية الحالية هي: `admin`, `manager`, `staff`, `team_leader`, `viewer`, و`user`. مصدر القائمة الكاملة للصلاحيات وتسمياتها ومجموعاتها وتعريفاتها الافتراضية هو `shared/rolePermissions.ts`.
 
 توجد صلاحيات دقيقة للمستخدمين والأدوار والمحتوى والوسائط والمواعيد والعملاء المحتملين والاتصالات والحملات والتقارير والمهام والإشعارات والتكاملات والخصوصية والعمليات والكتالوج والتسجيلات والعملاء والمرضى.
+
+**صلاحيات WhatsApp المضافة في المرحلتين (2026-09-13):**
+
+| المركز | الصلاحيات المطلوبة |
+|---|---|
+| Operations Center | `whatsapp.send`, `whatsapp.conversations.view` |
+| Automation Center | `whatsapp.auto_reply.manage`, `whatsapp.flows.manage` |
+| Campaign Center | `whatsapp.templates.view`, `whatsapp.broadcast.send` |
+| Governance Center | `integrations.logs.view`, `integrations.webhooks.manage` |
+| Analytics Center | `whatsapp.analytics.view`, `whatsapp.costs.view` |
 
 لا يتم اعتبار الصلاحية موثقة بالكامل لمجرد وجودها في الكتالوج؛ يجب ربطها بحارس خادمي أو تسجيلها كصلاحية مستقبلية/غير مستخدمة في مصفوفة التغطية.
 

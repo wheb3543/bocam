@@ -57,14 +57,18 @@
 - **إدارة الملف الشخصي**
 - **تطبيق PWA** للتثبيت على الجوال مع دعم عدم الاتصال
 
-#### 💬 تكامل WhatsApp Business API
+#### 💬 تكامل WhatsApp Business API (Meta Cloud API)
 - **إرسال الرسائل التلقائية** (تأكيد الحجز، تذكيرات، متابعة)
 - **لوحة محادثات متكاملة** مع فريق خدمة العملاء
 - **الردود التلقائية** على الكلمات المفتاحية
-- **البث الجماعي** للحملات التسويقية
-- **إدارة القوالب** المعتمدة من Meta
-- **تتبع جودة المحادثات** والتكاليف
-- **جدولة الرسائل** التلقائية
+- **البث الجماعي المتقدم** للحملات التسويقية مع تتبع فردي لكل مستلم
+- **إدارة القوالب** المعتمدة من Meta واقتراح المحتوى التلقائي
+- **تتبع جودة المحادثات** والتكاليف والفوترة
+- **جدولة الرسائل** التلقائية عبر Heartbeat Jobs
+- **المراكز الخمسة الموحدة للعمليات** (Operations, Automation, Campaigns, Governance, Analytics)
+- **موثوقية Webhooks** بآلية Idempotency والتأجير الموزع (Distributed Leasing)
+- **مزامنة جهات الاتصال** مع Google Contacts وتصدير VCF/CSV
+- **تحويل الصوتيات** تلقائياً إلى `ogg/opus` المتوافق مع Meta Cloud API
 
 #### 📊 نظام إدارة المهام والمشاريع
 - **إنشاء المشاريع** وربطها بالحملات
@@ -118,7 +122,7 @@
 
 #### Database
 - **MySQL/TiDB** - قاعدة البيانات الرئيسية
-- **40+ جدول** يغطي جميع جوانب النظام
+- **46+ جدول** يغطي جميع جوانب النظام (أُضيف 6 جداول جديدة في المرحلتين الأولى والثانية)
 
 #### Ops & Backup
 - **Backup & Updater Orchestration** - نسخ احتياطي موحد وتحديثات خادم مُنسقة عبر `server/_core` وعمليات `pm2/systemd` المدعومة
@@ -309,7 +313,7 @@ sgh-crm-portal/
 - **Appointments & Bookings:** Doctor appointment booking (22+ specialists), status tracking, waitlist management, automatic reminders, and source tracking.
 - **Admin Dashboard (Mini-CRM):** Lead management, medical offers, charity camps, saved filters, statistical dashboards, and audit logging.
 - **Patient Portal:** Secure OTP login, appointment viewing, medical results (lab, radiology, reports), profile management, and PWA with offline support.
-- **WhatsApp Business API:** Automatic messages, integrated chat dashboard, auto-replies, broadcasts, template management, cost tracking, and message scheduling.
+- **WhatsApp Business API (Meta Cloud API):** Automatic messages, integrated chat dashboard, auto-replies, advanced broadcast campaigns with per-recipient tracking, template management, cost tracking, scheduled messages, and the 5 Unified Operations Centers (Operations, Automation, Campaigns, Governance, Analytics) with full RBAC.
 - **Task & Project Management:** Projects linked to campaigns, task management with priorities and deadlines, deliverables review, comments, and time tracking.
 - **Team & User Management:** Role-based access control (Admin, Manager, Team Leader, Staff, Viewer), team management, access requests, and UI customization.
 - **Integrations:** Meta Pixel & Conversion API, WhatsApp Cloud API, Email Notifications, Google Analytics, PWA.
@@ -318,7 +322,7 @@ sgh-crm-portal/
 
 - **Frontend:** React 19, TypeScript 5.9, Tailwind CSS 4, TanStack Query, Wouter, shadcn/ui, Zod, Recharts, Framer Motion
 - **Backend:** Node.js, Express.js, tRPC 11, Drizzle ORM, BullMQ, Redis
-- **Database:** MySQL/TiDB (40+ tables)
+- **Database:** MySQL/TiDB (46+ tables)
 - **Auth & Security:** Manus OAuth, JWT, bcrypt, RSA-2048 hardware-bound licensing
 - **DevOps:** Vite, Vitest, Playwright, Docker, GitHub Actions
 

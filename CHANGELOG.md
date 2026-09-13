@@ -12,6 +12,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-09-13
+
+### Added | الإضافات
+
+#### 📡 المرحلة الثانية: منظومة WhatsApp وتكامل Meta Cloud API المتقدم
+
+##### قاعدة البيانات
+- **`whatsappWebhookDeliveries`** - جدول التسليمات والتأجير المتزامن للـ Webhooks (Idempotency + Distributed Leasing)
+- **`whatsappFlowEvents`** - تسجيل وتتبع أداء نماذج WhatsApp Flows التفاعلية
+
+##### طبقة الموثوقية والأمان
+- **`whatsappWebhookDedup.ts`** - منع التكرار والتأجير المتزامن بآلية استعادة التأجير المنتهي الصلاحية
+- **`whatsappWebhookAccountBinding.ts`** - التحقق من مطابقة `wabaId`/`phoneNumberId` قبل معالجة أي حدث واردة
+- **`whatsappMediaReference.ts`** + **`whatsappIncomingMediaCache.ts`** - حفظ وتخزين مؤقت مسبق لمعرفات الوسائط الواردة
+- **`whatsappSendingPolicy.ts`** - سياسة إرسال موحدة تتحقق من نافذة خدمة العملاء (24 ساعة) وحالة الحساب
+- **`whatsappAudioTranscoding.ts`** + **`whatsappMediaValidation.ts`** - تحويل تلقائي إلى `audio/ogg; codecs=opus` متوافق مع Meta Cloud API
+
+##### المراكز الخمسة الموحدة للعمليات (5 Unified Operations Centers)
+- **`WhatsAppOperationsCenter`** (`/admin/whatsapp/operations`) - مركز العمليات التشغيلية، الإرسال المباشر، ومراقبة الاتصال والتسليم
+- **`WhatsAppAutomationCenter`** (`/admin/whatsapp/automation`) - أتمتة الردود، معالجة رسائل المواعيد، وتدفقات WhatsApp Flows
+- **`WhatsAppCampaignCenter`** (`/admin/whatsapp/campaigns`) - إدارة القوالب، إطلاق حملات البث، ومتابعة الوصول
+- **`WhatsAppGovernanceCenter`** (`/admin/whatsapp/governance`) - فاحص Webhooks مع حجب `rawPayload`، تدقيق الامتثال، مراقبة جودة الأرقام
+- **`WhatsAppAnalyticsCenter`** (`/admin/whatsapp/analytics`) - تحليلات التكاليف والفوترة، استخدام المحادثات، معدلات الأداء
+
+##### RBAC وحماية الصلاحيات
+- تطبيق كامل لحراسة `permissionProcedure` على جميع المراكز الخمسة الجديدة
+- حجب وتأمين `rawPayload` في فاحص Webhooks وفرض `integrations.logs.view` و`integrations.webhooks.manage`
+
+---
+
+#### 📤 المرحلة الأولى: البث المتقدم وإدارة جهات الاتصال
+
+##### قاعدة البيانات
+- **توسيع `whatsappBroadcasts`**: إضافة `recipientSnapshot`, `headerImageUrl`, `scheduleCronTaskUid`, وفهارس استعلام `scheduleCronTaskUidIdx`, `scheduledAtIdx`
+- **`broadcastRecipients`** - تتبع فردي لكل مستلم لكل حملة بث (الحالة، الإرسال، التسليم، القراءة، الخطأ)
+- **`broadcastRecipientResults`** - حفظ استجابات ومعرفات رسائل Meta Cloud API الرسمية
+- **`contactExports`** - سجل ملفات التصدير (VCF 3.0 + CSV) مع مطابقة الفلاتر
+- **`contactSyncLogs`** - سجل عمليات المزامنة مع Google Contacts
+
+##### الخدمات الخلفية
+- **`broadcastRecipientService.ts`** - تجميع جهات الاتصال من 4 مصادر (المواعيد، المخيمات، العروض، العملاء المحتملون) مع تطبيع الأرقام وإزالة التكرار
+- **`broadcastExecutionServiceV2.ts`** - إرسال قوالب Meta Cloud API مع فحص SSRF للصور واستخراج لواحق الأزرار الديناميكية
+- **`broadcastSchedulerService.ts`** - إدارة مهام البث المجدول عبر `heartbeatJobs.ts`
+- **`contactExportService.ts`** - تصدير VCF 3.0 و CSV بترويسات عربية
+- **`googleContactsSyncService.ts`** - مزامنة مع Google People API
+
+##### مسارات tRPC الخمسة
+- `broadcast`, `broadcastData`, `broadcastExecute`, `broadcastScheduling`, `googleSync` - مسجلة في `routers.ts`
+
+##### واجهة المستخدم (5-Tab Advanced Hub)
+- تبويب إعداد البث مع اقتراح محتوى تلقائي ومعاينة العداد الفعلي
+- تبويب البث المجدول مع تتبع مهام Heartbeat
+- تبويب البث المرسل مع تتبع تفصيلي لكل مستلم
+- تبويب التقارير ببطاقات إحصائية شاملة
+- تبويب إدارة الجهات مع تصدير VCF/CSV والمزامنة مع Google
+
+### Verified | التحقق
+
+- ✅ `pnpm check` - نجاح كامل بدون أي خطأ في الأنواع البرمجية
+- ✅ `pnpm test` - **1,326 اختباراً / 187 ملف اختبار** - 100% نجاح
+- ✅ `pnpm build` - نجاح بناء كامل في 43.6 ثانية
+
+---
+
 ## [1.4.0] - 2026-07-01
 
 ### Added | الإضافات

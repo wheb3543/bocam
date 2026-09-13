@@ -2,7 +2,7 @@
 
 **الحالة:** `working`  
 **المجال:** Overview  
-**آخر مراجعة:** 2026-09-11  
+**آخر مراجعة:** 2026-09-13  
 **المصدر الأساسي:** `client/src/App.tsx` و`client/src/components/layout/AdminContentRoutes.tsx`
 
 ## المسارات العامة والنظامية
@@ -37,7 +37,7 @@
 | الأساس والإدارة | `/admin`, `/admin/offline`, `/admin/profile`, `/admin/support`, `/admin/management`, `/admin/notifications`, `/admin/settings`, `/admin/advanced-settings` |
 | المحتوى والوسائط | `/admin/content/content`, `/admin/content/media-library`, `/admin/content/publishing` |
 | المستخدمون | `/admin/users/users` |
-| WhatsApp | `/admin/whatsapp`, `/admin/whatsapp/whatsapp-dashboard`, `/admin/whatsapp/templates`, `/admin/whatsapp/connection`, `/admin/whatsapp/analytics`, `/admin/whatsapp/broadcast`, `/admin/whatsapp/auto-reply`, `/admin/whatsapp/compliance`, `/admin/whatsapp/appointments`, `/admin/whatsapp/integration`, `/admin/whatsapp/account-health`, `/admin/whatsapp/phone-quality`, `/admin/whatsapp/subscriptions`, `/admin/whatsapp/webhook-inspector`, `/admin/whatsapp/costs`, `/admin/whatsapp/orders`, `/admin/whatsapp/products`, `/admin/whatsapp/referrals`, `/admin/whatsapp/lab-results` |
+| WhatsApp | `/admin/whatsapp`, `/admin/whatsapp/whatsapp-dashboard`, `/admin/whatsapp/templates`, `/admin/whatsapp/connection`, `/admin/whatsapp/analytics`, `/admin/whatsapp/broadcast`, `/admin/whatsapp/auto-reply`, `/admin/whatsapp/compliance`, `/admin/whatsapp/appointments`, `/admin/whatsapp/integration`, `/admin/whatsapp/account-health`, `/admin/whatsapp/phone-quality`, `/admin/whatsapp/subscriptions`, `/admin/whatsapp/webhook-inspector`, `/admin/whatsapp/costs`, `/admin/whatsapp/orders`, `/admin/whatsapp/products`, `/admin/whatsapp/referrals`, `/admin/whatsapp/lab-results`, `/admin/whatsapp/operations`¹, `/admin/whatsapp/automation`¹, `/admin/whatsapp/campaigns`¹, `/admin/whatsapp/governance`¹, `/admin/whatsapp/analytics`¹ |
 | الاتصالات | `/admin/communications/messages`, `/admin/communications/integration-settings`, `/admin/communications/meta-settings`, `/admin/message-settings` |
 | التقارير والتتبع | `/admin/reports/reports`, `/admin/reports/analytics`, `/admin/reports/bi`, `/admin/reports/camp-stats`, `/admin/reports/pwa-stats`, `/admin/tracking-settings` |
 | الحملات والمشاريع | `/admin/campaigns/campaigns`, `/admin/campaigns/projects`, `/admin/campaigns/review-approval` |
@@ -54,3 +54,12 @@
 ## قاعدة المصدر
 
 هذه الخريطة تصف المسارات المعرفة في المصدر وقت المراجعة. عند إضافة مسار، يجب تحديثها ومصفوفة التغطية في نفس التغيير أو تسجيل النقص في سجل التعارضات.
+
+> ¹ المراكز الخمسة الموحدة المضافة في **المرحلة الثانية (2026-09-13)**:
+> - `/admin/whatsapp/operations` - مركز العمليات التشغيلية
+> - `/admin/whatsapp/automation` - مركز الأتمتة ومعالجة WhatsApp Flows
+> - `/admin/whatsapp/campaigns` - مركز حملات البث وإدارة القوالب
+> - `/admin/whatsapp/governance` - مركز الحوكمة وفاحص Webhooks
+> - `/admin/whatsapp/analytics` - مركز تحليلات التكاليف والأداء
+>
+> جميع المراكز الخمسة محمية بـ `permissionProcedure` في الخادم وبـ `useRolePermissions` في الواجهة.
