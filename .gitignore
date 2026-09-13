@@ -34,6 +34,8 @@ node_modules/
 # License files - keep private
 license-keys/
 license.json
+**/license.json
+tenants/**/license.json
 license-files/
 .idea-hub-license-request.json
 
