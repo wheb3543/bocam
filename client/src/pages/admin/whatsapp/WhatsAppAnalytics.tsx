@@ -7,6 +7,7 @@ import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeatureGate from '@/components/FeatureGate';
+import { Link } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -492,11 +493,14 @@ export function WhatsAppAnalyticsContent() {
         <div className="grid grid-cols-1 gap-6">
           {/* Cost Trend Chart */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5" />
                 اتجاه التكاليف
               </CardTitle>
+              <Button asChild variant="outline" size="sm" className="h-7 text-xs gap-1">
+                <Link href="/admin/whatsapp/analytics?tab=costs">تقرير التكاليف المفصل ⬅️</Link>
+              </Button>
             </CardHeader>
             <CardContent className="pt-0">
               {conversationCosts.length > 0 ? (
@@ -527,11 +531,16 @@ export function WhatsAppAnalyticsContent() {
 
         {/* Template Performance Table */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
               أداء القوالب
             </CardTitle>
+            <Button asChild variant="outline" size="sm" className="h-7 text-xs gap-1">
+              <Link href="/admin/whatsapp/campaigns?tab=templates">
+                مكتبة القوالب في مركز الحملات ⬅️
+              </Link>
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">

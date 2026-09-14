@@ -6,6 +6,7 @@
 
 import React, { ChangeEvent, useMemo, useState } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { Link } from 'wouter';
 
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
@@ -1493,6 +1494,17 @@ export function BroadcastsContent() {
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-6" dir="rtl">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border bg-muted/30 p-3.5 text-xs gap-2">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-primary" />
+              <span className="text-muted-foreground font-medium">
+                هل تبحث عن مؤشرات أداء القناة الشاملة ومعدلات الاستجابة والتكاليف؟
+              </span>
+            </div>
+            <Button asChild size="sm" variant="outline" className="text-xs h-8 gap-1.5 w-fit">
+              <Link href="/admin/whatsapp/analytics">فتح مركز التحليلات الموحد 📊</Link>
+            </Button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {[
               ['الحملات', reportTotals.campaigns, 'text-primary'],

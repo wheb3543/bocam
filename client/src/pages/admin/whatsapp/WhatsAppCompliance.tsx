@@ -17,6 +17,7 @@ type BlockReason = 'manual' | 'opt_out' | 'spam' | 'invalid';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { PermissionHint } from '@/components/PermissionHint';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { Link } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -665,6 +666,16 @@ export function WhatsAppComplianceContent() {
           <CardDescription>معالجة طلبات إلغاء الاشتراك من المستخدمين</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="rounded-lg bg-muted/40 p-3 text-xs border border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <span className="text-muted-foreground">
+              سجل المرضى الكامل وقوائم المشتركين والمنسحبين تُدار بشكل مركزي في تبويب الموافقات.
+            </span>
+            <Button asChild size="sm" variant="outline" className="text-xs h-7 gap-1 w-fit">
+              <Link href="/admin/whatsapp/governance?tab=subscriptions">
+                فتح تبويب الموافقات والانسحاب ⬅️
+              </Link>
+            </Button>
+          </div>
           <div>
             <label className="text-sm font-medium">رقم الهاتف</label>
             <Input

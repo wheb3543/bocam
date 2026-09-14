@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { Link } from 'wouter';
 import type { ReactNode } from 'react';
 import {
   Users,
@@ -345,6 +347,20 @@ export default function WhatsAppUserSubscriptionsPage() {
                 <CardDescription>ملخصات آمنة لأحداث الاشتراك الواردة من Meta</CardDescription>
               </CardHeader>
               <CardContent>
+                <Alert className="mb-4 bg-muted/40 border-primary/20">
+                  <Activity className="h-4 w-4 text-primary" />
+                  <AlertTitle className="text-sm font-semibold">
+                    سجل أحداث اشتراكات Webhook
+                  </AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-1">
+                    <span>يعرض هذا التبويب حصرياً إشعارات تفضيلات الاشتراكات الواردة من Meta.</span>
+                    <Button asChild size="sm" variant="outline" className="text-xs h-7 gap-1 w-fit">
+                      <Link href="/admin/whatsapp/operations?tab=webhooks&category=user_preferences">
+                        فتح فاحص Webhook الشامل ⬅️
+                      </Link>
+                    </Button>
+                  </AlertDescription>
+                </Alert>
                 {webhookLoading ? (
                   <div className="text-center py-8">جاري التحميل...</div>
                 ) : subscriptionWebhookEvents && subscriptionWebhookEvents.length > 0 ? (
