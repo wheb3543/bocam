@@ -64,7 +64,7 @@ export const ADMIN_NAVIGATION_SECTIONS: AdminNavigationSection[] = [
     subsections: [
       {
         id: 'unified-centers',
-        label: 'المراكز الموحدة (الجديد)',
+        label: 'المراكز الموحدة',
         items: navigationItems(
           'whatsapp-operations',
           'whatsapp-automation',
@@ -74,50 +74,13 @@ export const ADMIN_NAVIGATION_SECTIONS: AdminNavigationSection[] = [
         ),
       },
       {
-        id: 'messaging',
-        label: 'إدارة المراسلات',
+        id: 'channel-services',
+        label: 'الخدمات والإعدادات',
         items: navigationItems(
-          'whatsapp-templates',
-          'whatsapp-broadcast',
-          'whatsapp-auto-reply',
-          'whatsapp-appointments',
-          'message-settings'
-        ),
-      },
-      {
-        id: 'communication-analytics',
-        label: 'التحليلات والتكلفة',
-        items: navigationItems('whatsapp-dashboard', 'whatsapp-analytics', 'whatsapp-costs'),
-      },
-      {
-        id: 'communication-integrations',
-        label: 'الحساب والتكامل',
-        items: navigationItems(
-          'whatsapp-connection',
-          'whatsapp-integration',
-          'whatsapp-account-health',
-          'whatsapp-phone-quality'
-        ),
-      },
-      {
-        id: 'communication-governance',
-        label: 'الحوكمة الفنية',
-        items: navigationItems(
-          'whatsapp-compliance',
-          'whatsapp-subscriptions',
-          'whatsapp-webhook-inspector',
+          'whatsapp-lab-results',
+          'message-settings',
           'integration-settings',
           'meta-settings'
-        ),
-      },
-      {
-        id: 'whatsapp-services',
-        label: 'خدمات WhatsApp',
-        items: navigationItems(
-          'whatsapp-orders',
-          'whatsapp-products',
-          'whatsapp-referrals',
-          'whatsapp-lab-results'
         ),
       },
     ],

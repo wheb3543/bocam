@@ -1,5 +1,5 @@
 import { lazy, type ReactNode } from 'react';
-import { Route, Switch } from 'wouter';
+import { Redirect, Route, Switch } from 'wouter';
 import DashboardLayout from './DashboardLayout';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -14,9 +14,6 @@ const MediaLibraryPage = lazy(() => import('@/pages/admin/media/MediaLibraryPage
 const UsersManagementPage = lazy(() => import('@/pages/admin/users/UsersManagementPage'));
 const PublishingPage = lazy(() => import('@/pages/admin/content/PublishingPage'));
 const WhatsAppPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppPage'));
-const WhatsAppTemplatesPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppTemplatesPage'));
-const WhatsAppConnectionPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppConnectionPage'));
-const WhatsAppDashboard = lazy(() => import('@/pages/admin/whatsapp/WhatsAppDashboard'));
 const WhatsAppOperationsCenter = lazy(
   () => import('@/pages/admin/whatsapp/WhatsAppOperationsCenter')
 );
@@ -33,24 +30,7 @@ const WhatsAppAnalyticsCenter = lazy(
 const WhatsAppLegacyTransitionPage = lazy(
   () => import('@/pages/admin/whatsapp/WhatsAppLegacyTransitionPage')
 );
-const WhatsAppBroadcast = lazy(() => import('@/pages/admin/whatsapp/WhatsAppBroadcast'));
-const WhatsAppAutoReply = lazy(() => import('@/pages/admin/whatsapp/WhatsAppAutoReply'));
-const WhatsAppCompliance = lazy(() => import('@/pages/admin/whatsapp/WhatsAppCompliance'));
-const WhatsAppAppointments = lazy(() => import('@/pages/admin/whatsapp/WhatsAppAppointments'));
 const WhatsAppIntegration = lazy(() => import('@/pages/admin/whatsapp/WhatsAppIntegration'));
-const WhatsAppAccountHealthPage = lazy(
-  () => import('@/pages/admin/whatsapp/WhatsAppAccountHealthPage')
-);
-const WhatsAppPhoneQualityPage = lazy(
-  () => import('@/pages/admin/whatsapp/WhatsAppPhoneQualityPage')
-);
-const WhatsAppUserSubscriptionsPage = lazy(
-  () => import('@/pages/admin/whatsapp/WhatsAppUserSubscriptionsPage')
-);
-const WhatsAppWebhookInspectorPage = lazy(
-  () => import('@/pages/admin/whatsapp/WhatsAppWebhookInspectorPage')
-);
-const WhatsAppCostsPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppCostsPage'));
 const WhatsAppLabResultsPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppLabResultsPage'));
 const MessagesPage = lazy(() => import('@/pages/admin/communications/MessagesPage'));
 const MessageSettingsPage = lazy(() => import('@/pages/admin/MessageSettingsPage'));
@@ -124,23 +104,11 @@ export function renderAdminPage(path: string): ReactNode {
         </ProtectedRoute>
       );
     case '/admin/whatsapp/whatsapp-dashboard':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppDashboard />
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp" />;
     case '/admin/whatsapp/templates':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppTemplatesPage />
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/campaigns?tab=templates" />;
     case '/admin/whatsapp/connection':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppConnectionPage />
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/operations?tab=connection" />;
     case '/admin/whatsapp/analytics':
       return (
         <ProtectedRoute feature="whatsapp">
@@ -172,33 +140,13 @@ export function renderAdminPage(path: string): ReactNode {
         </ProtectedRoute>
       );
     case '/admin/whatsapp/broadcast':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="البث الجماعي">
-            <WhatsAppBroadcast />
-          </AdminPageHeader>
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/campaigns?tab=campaigns" />;
     case '/admin/whatsapp/auto-reply':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="قواعد الرد التلقائي">
-            <WhatsAppAutoReply />
-          </AdminPageHeader>
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/automation?tab=rules" />;
     case '/admin/whatsapp/compliance':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppCompliance />
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/governance?tab=compliance" />;
     case '/admin/whatsapp/appointments':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppAppointments />
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/automation?tab=notifications" />;
     case '/admin/whatsapp/integration':
       return (
         <ProtectedRoute feature="whatsapp">
@@ -206,39 +154,15 @@ export function renderAdminPage(path: string): ReactNode {
         </ProtectedRoute>
       );
     case '/admin/whatsapp/account-health':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="صحة الحساب والأمان">
-            <WhatsAppAccountHealthPage />
-          </AdminPageHeader>
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/operations?tab=health" />;
     case '/admin/whatsapp/phone-quality':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="جودة رقم الهاتف">
-            <WhatsAppPhoneQualityPage />
-          </AdminPageHeader>
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/operations?tab=quality" />;
     case '/admin/whatsapp/subscriptions':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="اشتراكات المستخدمين">
-            <WhatsAppUserSubscriptionsPage />
-          </AdminPageHeader>
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/governance?tab=subscriptions" />;
     case '/admin/whatsapp/webhook-inspector':
-      return (
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="فاحص أحداث Webhook">
-            <WhatsAppWebhookInspectorPage />
-          </AdminPageHeader>
-        </ProtectedRoute>
-      );
+      return <Redirect to="/admin/whatsapp/operations?tab=webhooks" />;
     case '/admin/whatsapp/costs':
-      return <WhatsAppCostsPage />;
+      return <Redirect to="/admin/whatsapp/analytics?tab=costs" />;
     case '/admin/whatsapp/orders':
     case '/admin/whatsapp/products':
     case '/admin/whatsapp/referrals':
@@ -356,19 +280,13 @@ export default function AdminContentRoutes() {
         </ProtectedRoute>
       </Route>
       <Route path="/admin/whatsapp/whatsapp-dashboard">
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppDashboard />
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp" />
       </Route>
       <Route path="/admin/whatsapp/templates">
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppTemplatesPage />
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/campaigns?tab=templates" />
       </Route>
       <Route path="/admin/whatsapp/connection">
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppConnectionPage />
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/operations?tab=connection" />
       </Route>
       <Route path="/admin/whatsapp/analytics">
         <ProtectedRoute feature="whatsapp">
@@ -396,28 +314,16 @@ export default function AdminContentRoutes() {
         </ProtectedRoute>
       </Route>
       <Route path="/admin/whatsapp/broadcast">
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="البث الجماعي">
-            <WhatsAppBroadcast />
-          </AdminPageHeader>
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/campaigns?tab=campaigns" />
       </Route>
       <Route path="/admin/whatsapp/auto-reply">
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="قواعد الرد التلقائي">
-            <WhatsAppAutoReply />
-          </AdminPageHeader>
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/automation?tab=rules" />
       </Route>
       <Route path="/admin/whatsapp/compliance">
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppCompliance />
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/governance?tab=compliance" />
       </Route>
       <Route path="/admin/whatsapp/appointments">
-        <ProtectedRoute feature="whatsapp">
-          <WhatsAppAppointments />
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/automation?tab=notifications" />
       </Route>
       <Route path="/admin/whatsapp/integration">
         <ProtectedRoute feature="whatsapp">
@@ -425,34 +331,20 @@ export default function AdminContentRoutes() {
         </ProtectedRoute>
       </Route>
       <Route path="/admin/whatsapp/account-health">
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="صحة الحساب والأمان">
-            <WhatsAppAccountHealthPage />
-          </AdminPageHeader>
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/operations?tab=health" />
       </Route>
       <Route path="/admin/whatsapp/phone-quality">
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="جودة رقم الهاتف">
-            <WhatsAppPhoneQualityPage />
-          </AdminPageHeader>
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/operations?tab=quality" />
       </Route>
       <Route path="/admin/whatsapp/subscriptions">
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="اشتراكات المستخدمين">
-            <WhatsAppUserSubscriptionsPage />
-          </AdminPageHeader>
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/governance?tab=subscriptions" />
       </Route>
       <Route path="/admin/whatsapp/webhook-inspector">
-        <ProtectedRoute feature="whatsapp">
-          <AdminPageHeader title="فاحص أحداث Webhook">
-            <WhatsAppWebhookInspectorPage />
-          </AdminPageHeader>
-        </ProtectedRoute>
+        <Redirect to="/admin/whatsapp/operations?tab=webhooks" />
       </Route>
-      <Route path="/admin/whatsapp/costs" component={WhatsAppCostsPage} />
+      <Route path="/admin/whatsapp/costs">
+        <Redirect to="/admin/whatsapp/analytics?tab=costs" />
+      </Route>
       <Route path="/admin/whatsapp/orders" component={WhatsAppLegacyTransitionPage} />
       <Route path="/admin/whatsapp/products" component={WhatsAppLegacyTransitionPage} />
       <Route path="/admin/whatsapp/referrals" component={WhatsAppLegacyTransitionPage} />

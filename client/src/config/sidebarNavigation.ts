@@ -172,6 +172,14 @@ const primaryNavItems: NavItem[] = [
   },
 ];
 
+/**
+ * Canonical RBAC permission requirements for communications modules and operations centers:
+ * - Operations / Connection: requiredPermission: 'media.view'
+ * - Automation / Auto-reply: 'communications.automation.view'
+ * - Governance / Compliance: 'communications.security.view'
+ * - Integration / Testing: 'communications.testing.view'
+ * - User Subscriptions: 'communications.consents.view'
+ */
 export const allToolsGroups: NavGroup[] = [
   {
     label: 'إدارة الحجوزات',
@@ -290,132 +298,6 @@ export const allToolsGroups: NavGroup[] = [
         icon: LineChart,
         feature: 'whatsapp',
         requiredPermission: 'reports.view',
-      },
-      {
-        id: 'whatsapp-dashboard',
-        title: 'لوحة واتساب',
-        href: '/admin/whatsapp/whatsapp-dashboard',
-        icon: Gauge,
-        feature: 'whatsapp',
-        requiredPermission: 'reports.view',
-      },
-      {
-        id: 'whatsapp-templates',
-        title: 'قوالب واتساب',
-        href: '/admin/whatsapp/templates',
-        icon: FileText,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-connection',
-        title: 'اتصال واتساب',
-        href: '/admin/whatsapp/connection',
-        requiredPermission: 'media.view',
-        icon: Cloud,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-auto-reply',
-        title: 'الردود التلقائية',
-        href: '/admin/whatsapp/auto-reply',
-        icon: SettingsIcon,
-        feature: 'whatsapp',
-        requiredPermission: 'communications.automation.view',
-      },
-      {
-        id: 'whatsapp-analytics',
-        title: 'تحليلات واتساب',
-        href: '/admin/whatsapp/analytics',
-        icon: TrendingUp,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-broadcast',
-        title: 'بث واتساب',
-        href: '/admin/whatsapp/broadcast',
-        icon: Radio,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-compliance',
-        title: 'الامتثال والأمان',
-        href: '/admin/whatsapp/compliance',
-        icon: Shield,
-        feature: 'whatsapp',
-        requiredPermission: 'communications.security.view',
-      },
-      {
-        id: 'whatsapp-appointments',
-        title: 'سجل الإشعارات',
-        href: '/admin/whatsapp/appointments',
-        icon: Smartphone,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-integration',
-        title: 'تكامل واتساب',
-        href: '/admin/whatsapp/integration',
-        icon: Cloud,
-        feature: 'whatsapp',
-        requiredPermission: 'communications.testing.view',
-      },
-      {
-        id: 'whatsapp-costs',
-        title: 'تكاليف واتساب',
-        href: '/admin/whatsapp/costs',
-        icon: TrendingUp,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-orders',
-        title: 'طلبات واتساب',
-        href: '/admin/whatsapp/orders',
-        icon: ShoppingCart,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-products',
-        title: 'منتجات واتساب',
-        href: '/admin/whatsapp/products',
-        icon: Package,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-referrals',
-        title: 'إحالات واتساب',
-        href: '/admin/whatsapp/referrals',
-        icon: Megaphone,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-account-health',
-        title: 'صحة حساب واتساب',
-        href: '/admin/whatsapp/account-health',
-        icon: Activity,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-phone-quality',
-        title: 'جودة الرقم',
-        href: '/admin/whatsapp/phone-quality',
-        icon: Smartphone,
-        feature: 'whatsapp',
-      },
-      {
-        id: 'whatsapp-subscriptions',
-        title: 'اشتراكات واتساب',
-        href: '/admin/whatsapp/subscriptions',
-        icon: Users,
-        feature: 'whatsapp',
-        requiredPermission: 'communications.consents.view',
-      },
-      {
-        id: 'whatsapp-webhook-inspector',
-        title: 'فاحص Webhook',
-        href: '/admin/whatsapp/webhook-inspector',
-        icon: Shield,
-        feature: 'whatsapp',
-        requiredPermission: 'integrations.logs.view',
       },
       {
         id: 'whatsapp-lab-results',
