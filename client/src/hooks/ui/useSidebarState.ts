@@ -1,41 +1,41 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'wouter';
+import { useState, useCallback } from 'react';
 
 /**
  * Hook مشترك لإدارة حالة الشريط الجانبي (expanded/collapsed)
  *
- * السلوك الديناميكي (Meta Business Suite Style):
- * - في الصفحة الرئيسية (/admin): الشريط مفتوح بالكامل (expanded)
- * - في باقي الصفحات: الشريط مطوي (collapsed)
- * - عند hover: يتمدد مؤقتاً ليظهر النصوص
+ * السلوك:
+ * - يتم الفتح والطي حصرياً عبر زر التحكم.
+ * - لا يتم فرضه مفتوحاً في الصفحة الرئيسية.
+ * - تم إلغاء التمدد عند تمرير الماوس (hover).
+ * - يتم حفظ تفضيل المستخدم في localStorage.
  *
  * @returns {object} - حالة الشريط ودوال التحكم
  */
 export function useSidebarState() {
-  const [location] = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem('bocam_sidebar_expanded');
+      return stored !== null ? JSON.parse(stored) : false;
+    } catch {
+      return false;
+    }
+  });
+
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // تحديد ما إذا كنا في الصفحة الرئيسية
-  const isHomePage = location === '/admin' || location === '/admin/';
-
-  // تحديث حالة الشريط بناءً على الصفحة الحالية
-  useEffect(() => {
-    setIsExpanded(isHomePage);
-    setIsHovered(false);
-  }, [isHomePage]);
-
-  // دوال التحكم
-  const handleMouseEnter = useCallback(() => {
-    if (!isHomePage) {
-      setIsHovered(true);
-    }
-  }, [isHomePage]);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('bocam_sidebar_expanded', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   }, []);
+
+  // دوال الـ hover أصبحت no-op للتوافق العكسي
+  const handleMouseEnter = useCallback(() => {}, []);
+  const handleMouseLeave = useCallback(() => {}, []);
 
   const toggleMobile = useCallback(() => {
     setIsMobileOpen((prev) => !prev);
@@ -45,15 +45,16 @@ export function useSidebarState() {
     setIsMobileOpen(false);
   }, []);
 
-  // حالة العرض النهائية: مفتوح إذا كان expanded أو hovered
-  const shouldShowText = isExpanded || isHovered;
+  // حالة العرض النهائية: تعتمد حصرياً على حالة الزر isExpanded
+  const shouldShowText = isExpanded;
 
   return {
     isExpanded,
-    isHovered,
+    isHovered: false,
     isMobileOpen,
     shouldShowText,
-    isHomePage,
+    isHomePage: false,
+    toggleExpanded,
     handleMouseEnter,
     handleMouseLeave,
     toggleMobile,

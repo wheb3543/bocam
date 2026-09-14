@@ -22,7 +22,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { can, isLoading: arePermissionsLoading } = useRolePermissions();
-  const { shouldShowText, handleMouseEnter, handleMouseLeave, closeMobile } = useSidebarState();
+  const { shouldShowText, toggleExpanded, closeMobile } = useSidebarState();
 
   const { addRecentlyUsed } = useRecentlyUsed();
   const canAccessInbox = canAccessSocialInbox(user?.role);
@@ -165,8 +165,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
       isItemActive={isItemActive}
       getBadgeCount={getBadgeCount}
       handleNavClick={handleNavClick}
-      handleMouseEnter={handleMouseEnter}
-      handleMouseLeave={handleMouseLeave}
+      onToggleExpand={toggleExpanded}
       onAllToolsClick={() => setAllToolsOpen(!allToolsOpen)}
       onEditClick={() => setEditSidebarOpen(true)}
       allToolsOpen={allToolsOpen}

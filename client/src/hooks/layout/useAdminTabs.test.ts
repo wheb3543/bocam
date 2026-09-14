@@ -4,6 +4,7 @@ import {
   appendAdminTab,
   closeAdminTabState,
   findAdminTabForPath,
+  reorderAdminTabsState,
   sanitizeStoredAdminTabs,
 } from './useAdminTabs';
 import { allNavItems } from '@/config/sidebarNavigation';
@@ -23,20 +24,26 @@ describe('admin tab state', () => {
     });
   });
 
-  it('restores valid tabs, removes legacy paths, deduplicates, and keeps home first', () => {
+  it('restores valid tabs, removes legacy paths, and deduplicates without forced home pinning', () => {
     const restored = sanitizeStoredAdminTabs([
       { href: '/admin/reports/reports' },
       { href: '/admin/reports/reports' },
       { href: '/admin/removed-page' },
-      { href: '/admin' },
+      { href: '/system/dashboard' },
     ]);
 
-    expect(restored.map((tab) => tab.id)).toEqual(['home', 'reports']);
+    expect(restored.map((tab) => tab.id)).toEqual(['reports', 'home']);
   });
 
-  it('rejects paths that are not present in the canonical registry', () => {
+  it('rejects paths that are not present in the canonical registry and ensures /system and /admin have no tabs', () => {
     expect(findAdminTabForPath('/admin/legacy-page')).toBeNull();
-    expect(findAdminTabForPath('/admin/')).toMatchObject({ id: 'home', href: '/admin' });
+    expect(findAdminTabForPath('/admin/')).toBeNull();
+    expect(findAdminTabForPath('/admin')).toBeNull();
+    expect(findAdminTabForPath('/system')).toBeNull();
+    expect(findAdminTabForPath('/system/dashboard')).toMatchObject({
+      id: 'home',
+      href: '/system/dashboard',
+    });
   });
 
   it('does not persist malformed stored tab data as valid navigation', () => {
@@ -48,12 +55,12 @@ describe('admin tab state', () => {
     const parsed = JSON.parse(localStorage.getItem(ADMIN_TABS_STORAGE_KEY) ?? '[]');
     const restored = sanitizeStoredAdminTabs(parsed, allNavItems);
 
-    expect(restored.map((tab) => tab.id)).toEqual(['home', 'settings']);
+    expect(restored.map((tab) => tab.id)).toEqual(['settings']);
   });
 
-  it('closes a tab and selects the nearest valid fallback without closing home', () => {
+  it('closes a tab including home and selects the nearest valid fallback', () => {
     const tabs = [
-      { id: 'home', title: 'الرئيسية', href: '/admin' },
+      { id: 'home', title: 'الرئيسية', href: '/system/dashboard' },
       { id: 'reports', title: 'التقارير', href: '/admin/reports/reports' },
       { id: 'settings', title: 'الإعدادات', href: '/admin/settings' },
     ];
@@ -62,17 +69,20 @@ describe('admin tab state', () => {
       tabs: [tabs[0], tabs[2]],
       fallbackTab: tabs[0],
     });
-    expect(closeAdminTabState(tabs, 'home')).toEqual({ tabs, fallbackTab: null });
+    expect(closeAdminTabState(tabs, 'home')).toMatchObject({
+      tabs: [tabs[1], tabs[2]],
+      fallbackTab: tabs[1],
+    });
   });
 
   it('keeps the same tab collection when the current tab is already open', () => {
-    const tabs = [{ id: 'home', title: 'الرئيسية', href: '/admin' }];
+    const tabs = [{ id: 'home', title: 'الرئيسية', href: '/system/dashboard' }];
 
     expect(appendAdminTab(tabs, tabs[0])).toBe(tabs);
   });
 
   it('adds a new tab once without changing the existing tab order', () => {
-    const tabs = [{ id: 'home', title: 'الرئيسية', href: '/admin' }];
+    const tabs = [{ id: 'home', title: 'الرئيسية', href: '/system/dashboard' }];
     const reportsTab = {
       id: 'reports',
       title: 'التقارير',
@@ -83,5 +93,19 @@ describe('admin tab state', () => {
 
     expect(nextTabs).toEqual([tabs[0], reportsTab]);
     expect(appendAdminTab(nextTabs, reportsTab)).toBe(nextTabs);
+  });
+
+  it('reorders tabs smoothly via reorderAdminTabsState', () => {
+    const tabs = [
+      { id: 'home', title: 'لوحة التحكم', href: '/system/dashboard' },
+      { id: 'reports', title: 'التقارير', href: '/admin/reports/reports' },
+      { id: 'settings', title: 'الإعدادات', href: '/admin/settings' },
+    ];
+
+    const reordered = reorderAdminTabsState(tabs, 'settings', 'home');
+    expect(reordered.map((t) => t.id)).toEqual(['settings', 'home', 'reports']);
+
+    const sameOrder = reorderAdminTabsState(tabs, 'home', 'home');
+    expect(sameOrder).toBe(tabs);
   });
 });

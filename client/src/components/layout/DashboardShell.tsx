@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { APP_LOGO, APP_TITLE, getLocalLoginUrl } from '@/const';
 import { Button } from '@/components/ui/button';
@@ -6,13 +7,19 @@ import AdminContentSkeleton from './AdminContentSkeleton';
 import AdminTabs from './AdminTabs';
 import DashboardSidebarV2 from './DashboardSidebarV2';
 import AdminWorkspace from './AdminWorkspace';
+import SystemLandingPage from '@/pages/admin/system/SystemLandingPage';
 import { useAdminTabs } from '@/hooks/layout/useAdminTabs';
 
 export default function DashboardShell() {
   const { loading, user } = useAuth();
-  const [location] = useLocation();
-  const { tabs, activeTabId, closeTab } = useAdminTabs(location);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const { tabs, activeTabId, closeTab, reorderTabs } = useAdminTabs(location);
+
+  useEffect(() => {
+    if (location === '/admin' || location === '/admin/') {
+      setLocation('/system');
+    }
+  }, [location, setLocation]);
 
   if (loading) {
     return (
@@ -48,25 +55,40 @@ export default function DashboardShell() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/50 dark:bg-gray-950" dir="rtl" data-testid="admin-shell">
-      <div className="flex min-h-screen">
-        <DashboardSidebarV2 currentPath={location} />
-        <div className="flex min-w-0 flex-1 flex-col">
+    <div
+      className="h-screen overflow-hidden bg-muted/50 dark:bg-gray-950 flex"
+      dir="rtl"
+      data-testid="admin-shell"
+    >
+      <DashboardSidebarV2 currentPath={location} />
+      <div className="flex h-screen flex-1 flex-col overflow-hidden min-w-0">
+        <div className="shrink-0 z-20">
           <AdminTabs
             tabs={tabs}
             activeTabId={activeTabId}
+            onReorder={reorderTabs}
             onClose={(tab) => {
               const fallbackTab = closeTab(tab.id);
-              if (tab.id === activeTabId && fallbackTab) {
-                setLocation(fallbackTab.href);
+              if (tab.id === activeTabId) {
+                if (fallbackTab) {
+                  setLocation(fallbackTab.href);
+                } else {
+                  setLocation('/system');
+                }
               }
             }}
           />
-          <main className="min-w-0 flex-1" data-testid="admin-content">
-            <AdminWorkspace tabs={tabs} activeTabId={activeTabId} />
-            {tabs.length === 0 ? <AdminContentSkeleton variant="workspace" /> : null}
-          </main>
         </div>
+        <main
+          className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden"
+          data-testid="admin-content"
+        >
+          {location === '/system' || activeTabId === null || tabs.length === 0 ? (
+            <SystemLandingPage onOpenTab={(href) => setLocation(href)} />
+          ) : (
+            <AdminWorkspace tabs={tabs} activeTabId={activeTabId} />
+          )}
+        </main>
       </div>
     </div>
   );

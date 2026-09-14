@@ -32,7 +32,7 @@ export default function AdminLogin() {
     }
 
     if (licenseInfo.data?.isValid) {
-      navigate('/admin');
+      navigate('/system');
       return;
     }
 
@@ -46,10 +46,10 @@ export default function AdminLogin() {
         emitToastHash({
           kind: 'success',
           message: `مرحباً ${data.user.name || data.user.username}! تم تسجيل الدخول بنجاح`,
-          description: 'تمت إعادة توجيهك إلى لوحة الإدارة.',
-          redirect: '/admin',
+          description: 'تمت إعادة توجيهك إلى نظام بوكام.',
+          redirect: '/system',
         });
-        navigate('/admin');
+        navigate('/system');
         return;
       }
 

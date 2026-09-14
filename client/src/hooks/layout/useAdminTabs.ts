@@ -18,7 +18,15 @@ interface StoredAdminTab {
 
 export const ADMIN_TABS_STORAGE_KEY = 'bocam-admin-tabs';
 
-const normalizePath = (path: string) => (path === '/admin/' ? '/admin' : path);
+export const normalizePath = (path: string) => {
+  if (path === '/admin/' || path === '/admin') {
+    return '/system';
+  }
+  if (path.endsWith('/') && path.length > 1) {
+    return path.slice(0, -1);
+  }
+  return path;
+};
 
 const toTab = (item: NavItem): AdminTab => ({
   id: item.id,
@@ -55,19 +63,10 @@ export const sanitizeStoredAdminTabs = (
     tabs.push(toTab(item));
   }
 
-  const homeItem = validItems.get('/admin');
-  if (homeItem) {
-    return [toTab(homeItem), ...tabs.filter((tab) => tab.id !== homeItem.id)];
-  }
-
   return tabs;
 };
 
 export const closeAdminTabState = (tabs: AdminTab[], tabId: string) => {
-  if (tabId === 'home') {
-    return { tabs, fallbackTab: null };
-  }
-
   const index = tabs.findIndex((tab) => tab.id === tabId);
   if (index === -1) {
     return { tabs, fallbackTab: null };
@@ -77,6 +76,25 @@ export const closeAdminTabState = (tabs: AdminTab[], tabId: string) => {
   const fallbackTab = tabs[index - 1] ?? tabs[index + 1] ?? remainingTabs[0] ?? null;
 
   return { tabs: remainingTabs, fallbackTab };
+};
+
+export const reorderAdminTabsState = (
+  tabs: AdminTab[],
+  sourceId: string,
+  targetId: string
+): AdminTab[] => {
+  if (sourceId === targetId) {
+    return tabs;
+  }
+  const sourceIndex = tabs.findIndex((tab) => tab.id === sourceId);
+  const targetIndex = tabs.findIndex((tab) => tab.id === targetId);
+  if (sourceIndex === -1 || targetIndex === -1) {
+    return tabs;
+  }
+  const nextTabs = [...tabs];
+  const [moved] = nextTabs.splice(sourceIndex, 1);
+  nextTabs.splice(targetIndex, 0, moved);
+  return nextTabs;
 };
 
 const readStoredTabs = () => {
@@ -156,8 +174,7 @@ export function useAdminTabs(currentPath: string) {
         currentTabs.length > 0
           ? sanitizeStoredAdminTabs(currentTabs, accessibleItems)
           : restoredTabs;
-      const nextTabs = baseTabs.length > 0 ? baseTabs : [toTab(accessibleItems[0])];
-      return areAdminTabsEqual(currentTabs, nextTabs) ? currentTabs : nextTabs;
+      return areAdminTabsEqual(currentTabs, baseTabs) ? currentTabs : baseTabs;
     });
   }, [accessibleItems, navigationReady]);
 
@@ -171,9 +188,7 @@ export function useAdminTabs(currentPath: string) {
   }, [activeItem, navigationReady]);
 
   useEffect(() => {
-    if (tabs.length > 0) {
-      writeStoredTabs(tabs);
-    }
+    writeStoredTabs(tabs);
   }, [tabs]);
 
   const openTab = useCallback(
@@ -192,17 +207,22 @@ export function useAdminTabs(currentPath: string) {
   const closeTab = useCallback(
     (tabId: string) => {
       const nextState = closeAdminTabState(tabs, tabId);
-      setTabs(nextState.tabs.length > 0 ? nextState.tabs : [toTab(accessibleItems[0])]);
+      setTabs(nextState.tabs);
       return nextState.fallbackTab;
     },
-    [accessibleItems, tabs]
+    [tabs]
   );
+
+  const reorderTabs = useCallback((sourceId: string, targetId: string) => {
+    setTabs((currentTabs) => reorderAdminTabsState(currentTabs, sourceId, targetId));
+  }, []);
 
   return {
     tabs,
     activeTabId: activeItem?.id ?? null,
     openTab,
     closeTab,
+    reorderTabs,
     isReady: navigationReady,
   };
 }

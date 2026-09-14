@@ -42,7 +42,7 @@ export default function DashboardLayout({
       </a>
 
       {/* Header with Top Navbar */}
-      <header>
+      <header className="sticky top-0 z-10 shrink-0">
         <TopNavbar
           pageTitle={pageTitle}
           pageDescription={pageDescription}

@@ -6,7 +6,15 @@
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Settings as SettingsIcon, Menu, Pencil, HelpCircle, Bell } from 'lucide-react';
+import {
+  Settings as SettingsIcon,
+  Menu,
+  Pencil,
+  HelpCircle,
+  Bell,
+  ChevronRight,
+  ChevronLeft,
+} from 'lucide-react';
 import InstallPWAButton from '@/components/InstallPWAButton';
 import type { NavItem } from '../sidebarData';
 import SidebarBadge from './SidebarBadge';
@@ -20,8 +28,9 @@ interface DesktopSidebarProps {
   isItemActive: (href: string) => boolean;
   getBadgeCount: (itemId: string) => number;
   handleNavClick: (href: string) => void;
-  handleMouseEnter: () => void;
-  handleMouseLeave: () => void;
+  onToggleExpand?: () => void;
+  handleMouseEnter?: () => void;
+  handleMouseLeave?: () => void;
   onAllToolsClick: () => void;
   onEditClick: () => void;
   allToolsOpen: boolean;
@@ -33,8 +42,7 @@ export default function DesktopSidebar({
   isItemActive,
   getBadgeCount,
   handleNavClick,
-  handleMouseEnter,
-  handleMouseLeave,
+  onToggleExpand,
   onAllToolsClick,
   onEditClick,
   allToolsOpen,
@@ -44,30 +52,62 @@ export default function DesktopSidebar({
   const { data: unreadCount } = useUnreadCount(canViewNotifications);
   return (
     <aside
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       className={cn(
-        'hidden lg:flex flex-col h-screen sticky top-0 bg-white dark:bg-gray-900 border-l border-border dark:border-gray-700 z-30 transition-all duration-300 ease-in-out',
+        'hidden lg:flex flex-col h-screen sticky top-0 bg-white dark:bg-gray-900 border-l border-border dark:border-gray-700 z-30 transition-all duration-300 ease-in-out select-none',
         shouldShowText ? 'w-64' : 'w-[72px]'
       )}
       dir="rtl"
     >
-      {/* Logo + Hospital Name */}
-      <div className="flex items-center gap-3 py-3 px-3 border-b border-gray-100 dark:border-gray-700">
-        <img
-          src={APP_LOGO}
-          alt={COMPANY_ARABIC_NAME}
-          className="h-10 w-10 object-contain flex-shrink-0"
-        />
-        {shouldShowText && (
-          <div className="flex-1 min-w-0">
-            <h2 className="text-sm font-bold text-foreground dark:text-gray-100 truncate">
-              {COMPANY_ARABIC_NAME}
-            </h2>
-            <p className="text-xs text-muted-foreground dark:text-gray-400 truncate">
-              {COMPANY_ARABIC_NAME}
-            </p>
-          </div>
+      {/* Logo + Hospital Name + Toggle Button */}
+      <div
+        className={cn(
+          'flex items-center py-3 border-b border-gray-100 dark:border-gray-700 transition-all duration-200',
+          shouldShowText ? 'justify-between px-3' : 'flex-col gap-2 px-2'
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => handleNavClick('/system')}
+          className="flex items-center gap-2.5 min-w-0 text-right focus:outline-none hover:opacity-80 transition-opacity cursor-pointer"
+          title="شاشة النظام الرئيسية"
+        >
+          <img
+            src={APP_LOGO}
+            alt={COMPANY_ARABIC_NAME}
+            className="h-8 w-8 object-contain flex-shrink-0"
+          />
+          {shouldShowText && (
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm font-bold text-foreground dark:text-gray-100 truncate">
+                {COMPANY_ARABIC_NAME}
+              </h2>
+              <p className="text-xs text-muted-foreground dark:text-gray-400 truncate">
+                نظام بوكام
+              </p>
+            </div>
+          )}
+        </button>
+
+        {onToggleExpand && (
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={onToggleExpand}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border border-border/40"
+                aria-label={shouldShowText ? 'طي القائمة الجانبية' : 'توسيع القائمة الجانبية'}
+              >
+                {shouldShowText ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              {shouldShowText ? 'طي القائمة الجانبية' : 'توسيع القائمة الجانبية'}
+            </TooltipContent>
+          </Tooltip>
         )}
       </div>
 

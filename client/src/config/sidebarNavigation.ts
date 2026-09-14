@@ -40,6 +40,7 @@ import {
   LayoutDashboard,
   ShieldCheck,
   LineChart,
+  Sparkles,
 } from 'lucide-react';
 import { SOCIAL_INBOX_ALLOWED_ROLES } from '@shared/socialInboxAccess';
 import type { RolePermission } from '../../../shared/rolePermissions';
@@ -81,8 +82,8 @@ export const STORAGE_KEY = 'sgh-sidebar-visible-items';
 const primaryNavItems: NavItem[] = [
   {
     id: 'home',
-    title: 'الرئيسية',
-    href: '/admin',
+    title: 'لوحة التحكم',
+    href: '/system/dashboard',
     icon: Home,
   },
   {
@@ -455,7 +456,7 @@ export const allToolsGroups: NavGroup[] = [
 // consumer resolves the same item definition and permission metadata.
 export const allNavItems: NavItem[] = Array.from(
   new Map(
-    [primaryNavItems[0], ...allToolsGroups.flatMap((group) => group.items)].map((item) => [
+    [...primaryNavItems, ...allToolsGroups.flatMap((group) => group.items)].map((item) => [
       item.id,
       item,
     ])

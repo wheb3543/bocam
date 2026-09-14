@@ -42,7 +42,7 @@ describe('P1 navigation structure', () => {
     render(
       <MobileBottomNav
         bottomNavItems={bottomNavItems}
-        isItemActive={(href) => href === '/admin'}
+        isItemActive={(href) => href === '/system/dashboard' || href === '/admin'}
         getBadgeCount={(id) => (id === 'home' ? 2 : 0)}
         handleNavClick={onNavigate}
         onMoreClick={vi.fn()}
@@ -52,7 +52,7 @@ describe('P1 navigation structure', () => {
     const home = screen.getByRole('button', { name: 'الرئيسية، 2 إشعارات غير مقروءة' });
     expect(home.getAttribute('aria-current')).toBe('page');
     fireEvent.click(home);
-    expect(onNavigate).toHaveBeenCalledWith('/admin');
+    expect(onNavigate).toHaveBeenCalledWith('/system/dashboard');
     expect(screen.getByRole('button', { name: 'المزيد من الأدوات' })).toBeTruthy();
   });
 });

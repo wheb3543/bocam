@@ -3,6 +3,7 @@ import { Redirect, Route, Switch } from 'wouter';
 import DashboardLayout from './DashboardLayout';
 import ProtectedRoute from './ProtectedRoute';
 
+const SystemLandingPage = lazy(() => import('@/pages/admin/system/SystemLandingPage'));
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 const OfflinePage = lazy(() => import('@/pages/OfflinePage'));
 const SettingsPage = lazy(() => import('@/pages/admin/SettingsPage'));
@@ -72,7 +73,11 @@ function AdminPageHeader({ title, children }: { title: string; children: React.R
 }
 
 export function renderAdminPage(path: string): ReactNode {
-  switch (path === '/admin/' ? '/admin' : path) {
+  const normalized = path === '/admin/' ? '/admin' : path;
+  switch (normalized) {
+    case '/system':
+      return <SystemLandingPage />;
+    case '/system/dashboard':
     case '/admin':
       return <AdminDashboard />;
     case '/admin/offline':
@@ -260,6 +265,10 @@ export function renderAdminPage(path: string): ReactNode {
 export default function AdminContentRoutes() {
   return (
     <Switch>
+      <Route path="/system">
+        <SystemLandingPage />
+      </Route>
+      <Route path="/system/dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/offline" component={OfflinePage} />
       <Route path="/admin/profile" component={ProfilePage} />

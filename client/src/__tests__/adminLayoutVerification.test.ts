@@ -24,13 +24,13 @@ describe('التحقق المرحلي لتخطيط الإدارة', () => {
     expect(contentRoutes).toContain('export function renderAdminPage');
   });
 
-  it('keeps the tab strip scrollable and routes tab changes through wouter', () => {
+  it('keeps the tab strip responsive without horizontal scroll and routes tab changes through wouter', () => {
     const tabs = readSource('client/src/components/layout/AdminTabs.tsx');
     const shell = readSource('client/src/components/layout/DashboardShell.tsx');
     const sidebar = readSource('client/src/components/layout/DashboardSidebarV2.tsx');
     const tabContent = readSource('client/src/components/layout/AdminTabContent.tsx');
 
-    expect(tabs).toContain('overflow-x-auto');
+    expect(tabs).toContain('overflow-hidden');
     expect(tabs).toContain('setLocation(tab.href)');
     expect(shell).toContain('setLocation(fallbackTab.href)');
     expect(tabContent).toContain('hidden={!active}');

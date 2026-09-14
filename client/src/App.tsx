@@ -72,8 +72,9 @@ function PrefetchRoutes() {
       import('./pages/public/CampsListPage');
     }
 
-    // Prefetch admin dashboard when on admin routes
-    if (location.startsWith('/admin')) {
+    // Prefetch admin dashboard and system showcase when on admin or system routes
+    if (location.startsWith('/admin') || location.startsWith('/system')) {
+      import('./pages/admin/system/SystemLandingPage');
       import('./pages/admin/AdminDashboard');
       import('./pages/admin/SettingsPage');
       import('./pages/admin/bookings/BookingsManagementPage');
@@ -155,6 +156,11 @@ function Router() {
 
         {/* Keep the administrative chrome mounted while only content routes change. */}
         <Route path="/admin/*?">
+          <Suspense fallback={<AdminContentSkeleton variant="workspace" />}>
+            <DashboardShell />
+          </Suspense>
+        </Route>
+        <Route path="/system/*?">
           <Suspense fallback={<AdminContentSkeleton variant="workspace" />}>
             <DashboardShell />
           </Suspense>
