@@ -1,63 +1,22 @@
 # AGENTS.md
 
-## Project overview
+## System: BOCAM (بُوكَام) Healthcare Platform
+An integrated platform comprising 5 core functional subsystems:
+- **[B] Booking & Smart Scheduling**: Smart scheduling and capacity control across clinics, doctors, and medical field camps.
+- **[O] Omni-channel Inbox**: Unified messaging inbox aggregating WhatsApp, Facebook, Instagram, Telegram, and SMS.
+- **[C] Customer Relationship & Patient Portal**: Healthcare CRM paired with a digital patient portal for medical records (EMR), lab results, and radiology reports.
+- **[A] Automated CMS**: Institutional organization portal and automated healthcare educational blog.
+- **[M] Media Social & Tasks**: Social media hub combined with multi-department administrative task assignment, tracking, and staff performance evaluation.
 
-This repository is a full-stack CRM and patient operations platform built with React, TypeScript, Express, Drizzle ORM, and a MySQL/TiDB-backed data layer. The most important working areas are:
+## Stack & Structure
+React + TS + Tailwind (`client/src/`), Express (`server/`), Drizzle ORM (`drizzle/`), MySQL/TiDB.
+- Node `>=22.13.0` | Package manager: `pnpm` only.
+- Docs: `package.json`, [README.md](./README.md), [docs/COMMANDS_REFERENCE.md](./docs/COMMANDS_REFERENCE.md).
 
-- `client/src/` — frontend application and UI
-- `server/_core/` — server runtime and core bootstrapping
-- `server/` — backend modules, routers, services, and scripts
-- `drizzle/` — schema and migration assets
-- `docs/` — project documentation and operational guides
-
-Use the repo documentation as the source of truth for product behavior and operational details: [README.md](./README.md), [docs/COMMANDS_REFERENCE.md](./docs/COMMANDS_REFERENCE.md).
-
-## Terminal workflow
-
-Use `pnpm` for all package management and scripts. Do not replace repository commands with `npm` or `yarn` unless the task specifically requires it.
-
-### Core commands
-
-- Install dependencies: `pnpm install`
-- Start dev server: `pnpm dev`
-- Fast dev mode: `pnpm dev:fast`
-- Build app: `pnpm build`
-- Start production build: `pnpm start`
-- Type-check: `pnpm check`
-- Lint: `pnpm lint`
-- Auto-fix lint issues: `pnpm lint:fix`
-- Format code: `pnpm format`
-- Test suite: `pnpm test`
-- Watch tests: `pnpm test:watch`
-- Coverage: `pnpm test:coverage`
-- DB generate: `pnpm db:generate`
-- DB migrate: `pnpm db:migrate`
-- DB sync schema: `pnpm db:push`
-- DB seed: `pnpm db:seed`
-
-### Environment and safety conventions
-
-- This repo expects Node.js >= 22.13.0 and uses `pnpm` as the package manager.
-- The dev and start scripts run environment validation first (`scripts/check-env.mjs`), so keep `.env` configuration aligned with the app requirements before runtime commands.
-- Prefer existing scripts from `package.json` over ad hoc shell commands or custom one-off scripts.
-- Verify with the smallest relevant command before claiming a fix works: type-check, lint, targeted tests, or the repo test command if the change is broader.
-
-## Architecture and development conventions
-
-- Frontend work belongs in `client/src/` and should align with the existing React + TypeScript + Tailwind setup.
-- Backend changes usually live under `server/` and should respect the current structured router/service architecture.
-- Database changes should be reflected in Drizzle schema/migrations rather than being patched in place without migration planning.
-- Keep changes consistent with the project’s existing patterns; prefer minimally invasive edits and avoid introducing parallel conventions.
-
-## Suggested agent behavior
-
-- Before writing code, read the closest existing implementation and mirror the local patterns.
-- If you need to validate behavior, run the narrowest relevant command and only broaden if necessary.
-- When a task involves terminal commands, prioritize the repo’s `pnpm` scripts and existing docs over improvised commands.
-- If there is uncertainty around setup, refer to the docs and existing scripts instead of guessing a command.
-
-## Useful references
-
-- [README.md](./README.md)
-- [docs/COMMANDS_REFERENCE.md](./docs/COMMANDS_REFERENCE.md)
-- [package.json](./package.json)
+## Critical Rules & Engineering Standards
+1. **Domain Context**: Respect module boundaries according to the target BOCAM subsystem.
+2. **Industry Best Practices**: Adhere strictly to global software standards (Clean Code, SOLID, DRY, modular design, and strict TypeScript typing—strictly avoid `any`).
+3. **Documentation & Comments**: Write self-documenting code with meaningful naming; add concise comments explaining the *why* (business intent and edge cases) rather than the *what*; use TSDoc/JSDoc for exported APIs, services, and complex utilities.
+4. **Security & Data Integrity**: Follow OWASP best practices, strict schema validation (Zod), and privacy safeguards when dealing with healthcare/patient records.
+5. **Database**: Always manage schema/migrations via Drizzle in `drizzle/`; never alter DB directly.
+6. **Environment & Verification**: Ensure `.env` is valid (`scripts/check-env.mjs`); run the narrowest relevant validation command (type-check, lint, or targeted test) before finishing.
