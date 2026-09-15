@@ -43,7 +43,7 @@ import {
   usePublicSEOSettings,
 } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
-import HospitalParallaxHero from '@/components/public/HospitalParallaxHero';
+import HospitalCinematicTour from '@/components/public/HospitalCinematicTour';
 
 export default function HomePage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -529,8 +529,8 @@ export default function HomePage() {
           )}
         </button>
 
-        {/* ── Hero Section: 3D Parallax مع صورة المستشفى ── */}
-        <HospitalParallaxHero
+        {/* ── Hero Section: جولة سينمائية داخل المستشفى ── */}
+        <HospitalCinematicTour
           title={title}
           subtitle={subtitle}
           description={description}
