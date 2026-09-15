@@ -211,6 +211,9 @@ importers:
       jspdf-autotable:
         specifier: ^5.0.8
         version: 5.0.8(jspdf@4.2.1)
+      lottie-react:
+        specifier: ^3.1.2
+        version: 3.1.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       lucide-react:
         specifier: ^1.24.0
         version: 1.25.0(react@19.2.7)
@@ -322,13 +325,13 @@ importers:
         version: 4.3.3(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
       '@testing-library/dom':
         specifier: ^10.4.1
-        version: 10.4.1
+        version: 10.4.2
       '@testing-library/jest-dom':
         specifier: ^6.9.1
-        version: 6.10.0(@testing-library/dom@10.4.1)
+        version: 6.10.0(@testing-library/dom@10.4.2)
       '@testing-library/react':
         specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.7(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 16.3.2(@testing-library/dom@10.4.2)(@types/react-dom@19.2.7(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@types/adm-zip':
         specifier: ^0.5.8
         version: 0.5.8
@@ -4327,10 +4330,10 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@testing-library/dom@10.4.1':
+  '@testing-library/dom@10.4.2':
     resolution:
       {
-        integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==,
+        integrity: sha512-yzr2S9HyAIdhz2/6qHgbs665Q7PKVcDF05vsOlHPxG1mo36gKVesdYVeDLnXgfjJ03CrKRk08knc6+E/9m8v2Q==,
       }
     engines: { node: '>=18' }
 
@@ -9291,6 +9294,21 @@ packages:
         integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==,
       }
     hasBin: true
+
+  lottie-react@3.1.2:
+    resolution:
+      {
+        integrity: sha512-otbTz+Kk1ksYzcWFAlcH8xFGBWkW/hUNEHy6gLvYf7kgEkZxyPT8lXJeBu/5o0xo0cdMwvd/lwkpuXCTSQmJdQ==,
+      }
+    peerDependencies:
+      react: ^18.2.0 || ^19.0.0
+      react-dom: ^18.2.0 || ^19.0.0
+
+  lottie-web@5.13.0:
+    resolution:
+      {
+        integrity: sha512-+gfBXl6sxXMPe8tKQm7qzLnUy5DUPJPKIyRHwtpCpyUEYjHYRJC/5gjUvdkuO2c3JllrPtHXH5UJJK8LRYl5yQ==,
+      }
 
   lru-cache@11.2.5:
     resolution:
@@ -15045,7 +15063,7 @@ snapshots:
       '@tanstack/query-core': 5.101.2
       react: 19.2.7
 
-  '@testing-library/dom@10.4.1':
+  '@testing-library/dom@10.4.2':
     dependencies:
       '@babel/code-frame': 7.27.1
       '@babel/runtime': 7.28.4
@@ -15056,20 +15074,20 @@ snapshots:
       picocolors: 1.1.1
       pretty-format: 27.5.1
 
-  '@testing-library/jest-dom@6.10.0(@testing-library/dom@10.4.1)':
+  '@testing-library/jest-dom@6.10.0(@testing-library/dom@10.4.2)':
     dependencies:
       '@adobe/css-tools': 4.4.4
-      '@testing-library/dom': 10.4.1
+      '@testing-library/dom': 10.4.2
       aria-query: 5.3.2
       css.escape: 1.5.1
       dom-accessibility-api: 0.6.3
       picocolors: 1.1.1
       redent: 3.0.0
 
-  '@testing-library/react@16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.7(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@testing-library/react@16.3.2(@testing-library/dom@10.4.2)(@types/react-dom@19.2.7(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@babel/runtime': 7.28.4
-      '@testing-library/dom': 10.4.1
+      '@testing-library/dom': 10.4.2
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
     optionalDependencies:
@@ -18246,6 +18264,14 @@ snapshots:
   loose-envify@1.4.0:
     dependencies:
       js-tokens: 4.0.0
+
+  lottie-react@3.1.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+    dependencies:
+      lottie-web: 5.13.0
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+
+  lottie-web@5.13.0: {}
 
   lru-cache@11.2.5: {}
 

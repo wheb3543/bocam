@@ -43,7 +43,7 @@ import {
   usePublicSEOSettings,
 } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
-import HospitalCinematicTour from '@/components/public/HospitalCinematicTour';
+import HospitalGeometric3D from '@/components/public/HospitalGeometric3D';
 
 export default function HomePage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -529,8 +529,8 @@ export default function HomePage() {
           )}
         </button>
 
-        {/* ── Hero Section: جولة سينمائية داخل المستشفى ── */}
-        <HospitalCinematicTour
+        {/* ── Hero Section: جولة هندسية ثلاثية الأبعاد ── */}
+        <HospitalGeometric3D
           title={title}
           subtitle={subtitle}
           description={description}
