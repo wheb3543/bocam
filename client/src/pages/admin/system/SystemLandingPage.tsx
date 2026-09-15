@@ -1,26 +1,18 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import {
-  Activity,
-  ArrowLeft,
-  Bot,
+  BarChart3,
   Calendar,
   CheckCircle2,
-  FileSpreadsheet,
-  Globe,
-  Layers,
+  CheckSquare,
+  Contact,
   LayoutDashboard,
   MessageCircle,
   Radio,
-  Server,
   ShieldCheck,
   Sparkles,
-  Users,
   Zap,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { APP_LOGO, APP_TITLE, COMPANY_ARABIC_NAME } from '@/const';
 
 interface SystemLandingPageProps {
@@ -43,299 +35,170 @@ export default function SystemLandingPage({ onOpenTab }: SystemLandingPageProps 
     document.title = 'نظام بوكام | المنصة الموحدة';
   }, []);
 
-  const coreModules = [
+  const quickLaunchItems = [
     {
       id: 'dashboard',
-      title: 'لوحة التحكم الإدارية',
-      description: 'إحصائيات آنية، متابعة أداء الفرق، ومؤشرات الأداء التشغيلي المباشر للعيادات.',
-      icon: LayoutDashboard,
-      color: 'from-blue-500 to-indigo-600',
-      badge: 'المركز الرئيسي',
+      title: 'لوحة التحكم',
+      subtitle: 'المؤشرات والقيادة اليومية',
       href: '/system/dashboard',
+      icon: LayoutDashboard,
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      iconBg: 'bg-blue-50 dark:bg-blue-950/60 border-blue-200/60 dark:border-blue-800/40',
+      hoverBorder: 'hover:border-blue-500/50 hover:bg-blue-50/40 dark:hover:bg-blue-950/30',
     },
     {
       id: 'whatsapp',
-      title: 'منظومة واتساب السحابية',
-      description:
-        'تكامل مباشر مع Meta Cloud API لإرسال الحملات، الأتمتة، وإدارة المحادثات الذكية.',
-      icon: MessageCircle,
-      color: 'from-emerald-500 to-teal-600',
-      badge: 'Meta Cloud API',
+      title: 'منظومة واتساب',
+      subtitle: 'المحادثات والأتمتة السحابية',
       href: '/admin/whatsapp',
+      icon: MessageCircle,
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg:
+        'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200/60 dark:border-emerald-800/40',
+      hoverBorder:
+        'hover:border-emerald-500/50 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/30',
     },
     {
-      id: 'bookings',
-      title: 'إدارة الحجوزات والمرضى',
-      description: 'جدولة مواعيد الأطباء، متابعة العملاء المحتملين، والعروض والمخيمات الطبية.',
+      id: 'appointments',
+      title: 'مواعيد الأطباء',
+      subtitle: 'جدولة العيادات والحجوزات',
+      href: '/admin/bookings/appointments',
       icon: Calendar,
-      color: 'from-violet-500 to-purple-600',
-      badge: 'العمليات السريرية',
-      href: '/admin/bookings',
+      iconColor: 'text-violet-600 dark:text-violet-400',
+      iconBg: 'bg-violet-50 dark:bg-violet-950/60 border-violet-200/60 dark:border-violet-800/40',
+      hoverBorder: 'hover:border-violet-500/50 hover:bg-violet-50/40 dark:hover:bg-violet-950/30',
+    },
+    {
+      id: 'customers',
+      title: 'ملفات المرضى',
+      subtitle: 'السجلات والبيانات الطبية',
+      href: '/admin/bookings/customers',
+      icon: Contact,
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'bg-amber-50 dark:bg-amber-950/60 border-amber-200/60 dark:border-amber-800/40',
+      hoverBorder: 'hover:border-amber-500/50 hover:bg-amber-50/40 dark:hover:bg-amber-950/30',
     },
     {
       id: 'reports',
-      title: 'التقارير وذكاء الأعمال',
-      description: 'تحليلات مالية، أداء الحملات التسويقية، ومؤشرات تحويل العملاء بدقة متقدمة.',
-      icon: FileSpreadsheet,
-      color: 'from-amber-500 to-orange-600',
-      badge: 'BI & Analytics',
+      title: 'التقارير والتحليلات',
+      subtitle: 'ذكاء الأعمال والإحصاءات',
       href: '/admin/reports/reports',
+      icon: BarChart3,
+      iconColor: 'text-teal-600 dark:text-teal-400',
+      iconBg: 'bg-teal-50 dark:bg-teal-950/60 border-teal-200/60 dark:border-teal-800/40',
+      hoverBorder: 'hover:border-teal-500/50 hover:bg-teal-50/40 dark:hover:bg-teal-950/30',
     },
     {
-      id: 'teams',
-      title: 'إدارة الفرق والمهام',
-      description: 'توزيع المهام التشغيلية، متابعة فريق التسويق، وخدمة العملاء على مدار الساعة.',
-      icon: Users,
-      color: 'from-cyan-500 to-blue-600',
-      badge: 'التعاون التشغيلي',
+      id: 'tasks',
+      title: 'المهام التشغيلية',
+      subtitle: 'متابعة وتوزيع أعمال الفرق',
       href: '/admin/bookings/tasks',
-    },
-    {
-      id: 'governance',
-      title: 'الأمان والحوكمة والامتثال',
-      description: 'إدارة الصلاحيات الدقيقة للكوادر، تشفير البيانات، والامتثال لسياسات الخصوصية.',
-      icon: ShieldCheck,
-      color: 'from-rose-500 to-red-600',
-      badge: 'أمان معتمد',
-      href: '/admin/settings',
-    },
-  ];
-
-  const systemHighlights = [
-    {
-      label: 'محرك تشغيل متكامل',
-      value: 'BOCAM Core 3.0',
-      icon: Server,
-    },
-    {
-      label: 'التكامل السحابي المباشر',
-      value: 'Meta Official API',
-      icon: Radio,
-    },
-    {
-      label: 'حماية وتشفير البيانات',
-      value: 'Enterprise Grade',
-      icon: ShieldCheck,
-    },
-    {
-      label: 'معدل الجاهزية والتشغيل',
-      value: '99.9% Uptime',
-      icon: Zap,
+      icon: CheckSquare,
+      iconColor: 'text-rose-600 dark:text-rose-400',
+      iconBg: 'bg-rose-50 dark:bg-rose-950/60 border-rose-200/60 dark:border-rose-800/40',
+      hoverBorder: 'hover:border-rose-500/50 hover:bg-rose-50/40 dark:hover:bg-rose-950/30',
     },
   ];
 
   return (
     <div
-      className="relative min-h-full w-full overflow-hidden bg-linear-to-b from-background via-muted/20 to-muted/40 p-4 md:p-8 lg:p-10 space-y-10"
       dir="rtl"
+      className="relative flex h-full min-h-[calc(100vh-60px)] w-full items-center justify-center p-2 sm:p-4 select-none overflow-hidden"
     >
-      {/* Hero Showcase Section */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-linear-to-br from-primary/10 via-primary/5 to-background p-6 md:p-12 shadow-lg">
-        {/* Subtle background glowing orbs */}
-        <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
+      {/* البطاقة المركزية الرئيسية بتصميم أنيق ومقتبس من معمارية SystemWelcomeCanvas */}
+      <div className="relative flex w-full max-w-5xl flex-col items-center justify-center overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-background to-muted/40 p-6 sm:p-8 lg:p-10 shadow-xl shadow-stone-900/[0.04] dark:shadow-none backdrop-blur-md max-h-full">
+        {/* عناصر توهج جمالية هادئة في خلفية البطاقة */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl dark:bg-primary/15"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/10"
+        />
 
-        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="space-y-5 text-center lg:text-right max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
-              <Sparkles className="h-3.5 w-3.5 animate-pulse" />
-              <span>المنصة الذكية الرائدة لإدارة الرعاية الطبية</span>
-              <Badge
-                variant="secondary"
-                className="bg-primary/20 text-primary hover:bg-primary/20 text-[10px] px-2 py-0"
-              >
-                BOCAM v3.0
-              </Badge>
-            </div>
-
-            <div className="space-y-2">
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground">
-                نظام{' '}
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 via-indigo-600 to-teal-500">
-                  بوكام
-                </span>{' '}
-                المتكامل
-              </h1>
-              <p className="text-lg md:text-xl font-medium text-muted-foreground">
-                {COMPANY_ARABIC_NAME || APP_TITLE} — منظومة شاملة للعمليات السريرية، المواعيد
-                الذكية، وحملات التواصل المتقدمة.
-              </p>
-            </div>
-
-            <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">
-              حل متقدم ومصمم خصيصاً للارتقاء بجودة الخدمات الطبية، أتمتة تدفقات المرضى، وربط كافة
-              أقسام المركز الطبي في واجهة تشغيل موحدة وذكية.
-            </p>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
-              <Button
-                size="lg"
-                onClick={() => handleNavigate('/system/dashboard')}
-                className="gap-2 text-base font-bold shadow-md hover:shadow-lg transition-all"
-              >
-                <LayoutDashboard className="h-5 w-5" />
-                <span>الدخول إلى لوحة التحكم الإدارية</span>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => handleNavigate('/admin/whatsapp')}
-                className="gap-2 text-base border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-700 dark:text-emerald-400"
-              >
-                <MessageCircle className="h-5 w-5" />
-                <span>مركز واتساب السحابي</span>
-              </Button>
-            </div>
+        <div className="relative z-10 mx-auto w-full text-center flex flex-col items-center justify-center h-full">
+          {/* شارة وهوية النظام */}
+          <div className="mx-auto mb-3 flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-3xl border border-border/90 bg-card/95 p-3 shadow-xl shadow-stone-900/[0.06] backdrop-blur-md transition-transform duration-300 hover:scale-105">
+            <img
+              src={APP_LOGO}
+              alt="شعار نظام بوكام"
+              className="h-full w-full object-contain drop-shadow-xs"
+            />
           </div>
 
-          {/* Brand Showcase Card */}
-          <div className="w-full lg:w-auto flex justify-center">
-            <div className="relative rounded-2xl border border-border/80 bg-card/90 backdrop-blur-md p-6 shadow-xl max-w-sm w-full space-y-5">
-              <div className="flex items-center gap-4 border-b border-border/60 pb-4">
-                <img
-                  src={APP_LOGO}
-                  alt="BOCAM Logo"
-                  className="h-16 w-16 object-contain rounded-xl p-1 bg-muted/30 border border-border/40 shadow-xs"
-                />
-                <div>
-                  <h3 className="font-bold text-lg text-foreground">نظام بوكام</h3>
-                  <p className="text-xs text-muted-foreground font-mono">BOCAM HEALTH OS</p>
-                  <div className="flex items-center gap-1.5 mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-                    <span>النظام نشط ومتصل</span>
-                  </div>
-                </div>
-              </div>
+          {/* العنوان الترحيبي الرئيسي */}
+          <h1 className="mt-2 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-foreground drop-shadow-sm flex flex-col items-center justify-center leading-tight">
+            <span className="text-transparent bg-clip-text bg-gradient-to-l from-primary via-blue-600 to-teal-600 dark:from-primary dark:to-teal-400 mb-1">
+              بوكام BOCAM
+            </span>
+            <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-foreground mt-1">
+              للمستشفيات
+            </span>
+          </h1>
 
-              <div className="space-y-3 text-xs">
-                <div className="flex items-center justify-between py-1.5 border-b border-border/40">
-                  <span className="text-muted-foreground">حالة الترخيص</span>
-                  <Badge
-                    variant="outline"
-                    className="border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
-                  >
-                    مفعل وموثق
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-border/40">
-                  <span className="text-muted-foreground">خدمة Meta Cloud</span>
-                  <span className="font-medium text-foreground">متصلة رسمياً</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-border/40">
-                  <span className="text-muted-foreground">تشفير البيانات</span>
-                  <span className="font-medium text-foreground">AES-256 Cloud</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5">
-                  <span className="text-muted-foreground">بوابة المريض PWA</span>
-                  <span className="font-medium text-emerald-600 dark:text-emerald-400">متاحة</span>
-                </div>
-              </div>
-
-              <Button
-                variant="secondary"
-                size="sm"
-                className="w-full text-xs"
-                onClick={() => handleNavigate('/system/dashboard')}
-              >
-                فتح مركز القيادة اليومي
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Highlights Bar */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {systemHighlights.map((highlight, index) => {
-          const Icon = highlight.icon;
-          return (
-            <Card key={index} className="border-border/60 bg-card/60 backdrop-blur-xs">
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">{highlight.label}</p>
-                  <p className="text-sm md:text-base font-bold text-foreground truncate">
-                    {highlight.value}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Core Pillars / Launchpad Cards */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-3">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold text-foreground flex items-center gap-2">
-              <Layers className="h-5 w-5 text-primary" />
-              <span>مراكز وأعمدة نظام بوكام</span>
-            </h2>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              الوصول المباشر إلى المنظومات التشغيلية والإدارية المتكاملة
+          {/* النص الوصفي الهادئ */}
+          <div className="mt-4 text-xs sm:text-sm md:text-base leading-relaxed font-semibold text-muted-foreground max-w-3xl mx-auto space-y-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary shadow-xs">
+              <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+              <span>نظام سحابي</span>
+            </span>
+            <p className="mt-2 text-balance leading-relaxed">
+              النظام هو احد انظمه بوكام المتخصص في اداره القنوات الرقميه لشركات و المؤسسات في مختلف
+              القطاعات وكذالك اداره العمليات الداخليه واداره الاقسام والموضفين عبر نضام اداره المهام
+              واداره علاقات العملاء واداره التسويق واداره منصات التواصل الاجتماعي و الموقع
+              الالكتروني وكذالك يحتوي على موقع الكتروني.
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleNavigate('/system/dashboard')}
-            className="self-start sm:self-auto gap-1 text-xs"
-          >
-            <span>لوحة التحكم الشاملة</span>
-            <ArrowLeft className="h-3.5 w-3.5" />
-          </Button>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {coreModules.map((module) => {
-            const Icon = module.icon;
-            return (
-              <div
-                key={module.id}
-                onClick={() => handleNavigate(module.href)}
-                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div
-                    className={`p-3 rounded-xl bg-linear-to-br ${module.color} text-white shadow-xs`}
+          {/* لوحة الوصول السريع (Quick Launchpad Grid) */}
+          <div className="mt-6 w-full max-w-4xl rounded-2xl border border-border/80 bg-card/70 p-3 sm:p-4 shadow-xs backdrop-blur-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {quickLaunchItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleNavigate(item.href)}
+                    className={`group flex items-center gap-3 rounded-xl border border-border/70 bg-background/80 p-2.5 sm:p-3 text-right transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-md hover:-translate-y-0.5 ${item.hoverBorder}`}
                   >
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <Badge variant="outline" className="text-xs font-normal border-border/80">
-                    {module.badge}
-                  </Badge>
-                </div>
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${item.iconBg} ${item.iconColor} shadow-2xs group-hover:scale-110 transition-transform duration-200`}
+                    >
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="block text-[11px] sm:text-sm font-black text-foreground group-hover:text-primary transition-colors truncate">
+                        {item.title}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-                <div className="mt-4 space-y-2">
-                  <h3 className="font-bold text-base md:text-lg text-foreground group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>{module.title}</span>
-                    <ArrowLeft className="h-4 w-4 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 text-primary" />
-                  </h3>
-                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-                    {module.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          {/* مؤشرات الحالة الفنية والاستقرار */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-[10px] sm:text-xs font-bold">
+            <span className="inline-flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800/60 shadow-2xs">
+              <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+              النظام جاهز ومستقر
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800/60 shadow-2xs">
+              <Zap className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+              استجابة لحظية فائقة
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800/60 shadow-2xs">
+              <ShieldCheck className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+              تشفير وأمان معتمد
+            </span>
+          </div>
+
+          <div className="mt-6 text-[10px] sm:text-xs font-semibold text-muted-foreground/60 tracking-wide">
+            صنع بواسطة: آيديا للاستشارات والحلول التسويقية والرقمية
+          </div>
         </div>
-      </div>
-
-      {/* Footer Brand Info */}
-      <div className="border-t border-border/60 pt-6 pb-2 text-center text-xs text-muted-foreground space-y-1">
-        <p className="font-semibold text-foreground">
-          نظام بوكام (BOCAM) لإدارة العمليات والأنشطة الطبية السحابية
-        </p>
-        <p>
-          جميع الحقوق محفوظة © {new Date().getFullYear()} — تم التطوير بأحدث تقنيات الويب السحابية
-          المتكاملة
-        </p>
       </div>
     </div>
   );

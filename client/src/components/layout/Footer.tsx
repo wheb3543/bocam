@@ -110,6 +110,9 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} {APP_TITLE}. جميع الحقوق محفوظة.
           </p>
+          <p className="mt-1 text-green-300/80 font-medium">
+            صنع بواسطة: آيديا للاستشارات والحلول التسويقية والرقمية
+          </p>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
             <Link href="/privacy-policy">
               <span className="hover:text-green-200 transition-colors cursor-pointer">

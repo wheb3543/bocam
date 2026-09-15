@@ -42,7 +42,7 @@ export const COMPANY_NAME = readTenantValue(
  * Company name (Arabic)
  * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_ARABIC_NAME = readTenantValue('companyArabicName', 'BOCAM');
+export const COMPANY_ARABIC_NAME = readTenantValue('companyArabicName', 'بوكام BOCAM للمستشفيات');
 
 /**
  * Company name (English) - preferred for international contexts
@@ -76,7 +76,7 @@ export const COMPANY_CITY = readTenantValue('companyCity', '');
  * Company slogan/tagline
  * Safe default only when no tenant runtime config is available.
  */
-export const COMPANY_SLOGAN = readTenantValue('companySlogan', 'نظام إدارة متكامل');
+export const COMPANY_SLOGAN = readTenantValue('companySlogan', 'نظام سحابي');
 
 export const COMPANY_SLOGAN_EN = readTenantValue('companySloganEn', 'Integrated management system');
 

@@ -1,21 +1,21 @@
-# SGH CRM Portal | بوابة إدارة علاقات العملاء - المستشفى السعودي الألماني
+# نظام بوكام BOCAM للمستشفيات | منصة إدارة متكاملة
 
 <div align="center">
 
-**منصة CRM طبية متكاملة لإدارة الحملات التسويقية وحجوزات المرضى وتكامل WhatsApp**
+**نظام سحابي، وهو أحد أنظمة بوكام المتخصصة في إدارة القنوات الرقمية للشركات والمؤسسات في مختلف القطاعات، وكذلك إدارة العمليات الداخلية وإدارة الأقسام والموظفين عبر نظام إدارة المهام، وإدارة علاقات العملاء وإدارة التسويق وإدارة منصات التواصل الاجتماعي والموقع الإلكتروني.**
 
-**Comprehensive Medical CRM Platform for Marketing Campaigns, Patient Appointments & WhatsApp Integration**
+**BOCAM Cloud Medical System - Comprehensive Management Platform**
 
 [![License: Dual](https://img.shields.io/badge/License-MIT%20%26%20Proprietary-orange.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D22.13.0-brightgreen)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue)]()
+[![Version](https://img.shields.io/badge/version-3.0.0-blue)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](docs/development/CONTRIBUTING.md)
 
 [العربية](#arabic) | [English](#english)
 
-> **مرجع النظام الحالي:** الاسم المعتمد في وثائق المشروع هو BOCAM CRM. يظهر SGH CRM Portal في بعض الملفات كاسم تاريخي أو تجاري. راجع [تعريف النظام](./docs/SYSTEM_DEFINITION.md) و[خريطة المسارات](./docs/SYSTEM_ROUTE_MAP.md) و[قاموس المصطلحات](./docs/SYSTEM_GLOSSARY.md) قبل الاعتماد على أرقام أو ميزات تفصيلية.
+> **صنع بواسطة:** آيديا للاستشارات والحلول التسويقية والرقمية.
 
 </div>
 
@@ -25,7 +25,7 @@
 
 ## 📋 نظرة عامة
 
-منصة CRM طبية متكاملة تم تطويرها خصيصاً للمستشفى السعودي الألماني - صنعاء. توفر النظام إدارة شاملة للحملات التسويقية، حجوزات المرضى، تكامل WhatsApp Business API، بوابة المريض الإلكترونية، ونظام متكامل لإدارة المهام والفرق.
+منصة متكاملة سحابية توفر إدارة شاملة للعمليات السريرية، المواعيد الذكية، تنسيق تدفقات المرضى وحملات التواصل المتقدمة. تم تطوير النظام بواسطة **آيديا للاستشارات والحلول التسويقية والرقمية**.
 
 ### ✨ الميزات الرئيسية
 
