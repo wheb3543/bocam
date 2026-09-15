@@ -474,7 +474,7 @@ export default function HomePage() {
         locale={language === 'ar' ? 'ar_YE' : 'en_US'}
       />
       <div
-        className={`min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 relative overflow-hidden ${!animationsEnabled ? 'animations-disabled' : ''}`}
+        className={`min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 relative overflow-x-clip ${!animationsEnabled ? 'animations-disabled' : ''}`}
         dir="rtl"
       >
         {/* Skip Links */}

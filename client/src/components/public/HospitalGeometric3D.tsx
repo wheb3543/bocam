@@ -189,13 +189,13 @@ export default function HospitalGeometric3D({
   const cameraOriginX = useTransform(
     smoothProgress,
     [0.0, 0.22, 0.44, 0.65, 0.85, 1.0],
-    ['50%', '42%', '76%', '34%', '48%', '50%']
+    [0.5, 0.42, 0.76, 0.34, 0.48, 0.5]
   );
 
   const cameraOriginY = useTransform(
     smoothProgress,
     [0.0, 0.22, 0.44, 0.65, 0.85, 1.0],
-    ['50%', '76%', '52%', '36%', '18%', '50%']
+    [0.5, 0.76, 0.52, 0.36, 0.18, 0.5]
   );
 
   const cameraRotateX = useTransform(
@@ -423,10 +423,8 @@ export default function HospitalGeometric3D({
             className="relative w-full h-full max-w-5xl rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-cyan-500/20 bg-black/40 backdrop-blur-sm"
             style={{
               scale: cameraScale,
-              transformOrigin: useTransform(
-                [cameraOriginX, cameraOriginY],
-                ([ox, oy]) => `${ox} ${oy}`
-              ),
+              originX: cameraOriginX,
+              originY: cameraOriginY,
               rotateX: cameraRotateX,
               rotateY: cameraRotateY,
             }}
