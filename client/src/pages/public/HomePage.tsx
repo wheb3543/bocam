@@ -43,6 +43,7 @@ import {
   usePublicSEOSettings,
 } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import HospitalParallaxHero from '@/components/public/HospitalParallaxHero';
 
 export default function HomePage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -528,132 +529,13 @@ export default function HomePage() {
           )}
         </button>
 
-        {/* Hero Section */}
-        <section
-          id="main-content"
-          className="py-12 sm:py-16 md:py-24 bg-gradient-to-br from-green-600 via-green-700 to-blue-600 text-white overflow-hidden relative min-h-[700px]"
-        >
-          {/* Animated Images Background */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {/* Floating Medical Images */}
-            {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute animate-float-image"
-                style={{
-                  left: `${15 + i * 20}%`,
-                  top: `${15 + i * 15}%`,
-                  animationDelay: `${i * 0.8}s`,
-                  animationDuration: `${12 + i}s`,
-                }}
-              >
-                <div className="relative">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border-2 border-white/20">
-                    {i % 3 === 0 && (
-                      <Stethoscope className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white/80" />
-                    )}
-                    {i % 3 === 1 && (
-                      <Heart className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white/80" />
-                    )}
-                    {i % 3 === 2 && (
-                      <Activity className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white/80" />
-                    )}
-                  </div>
-                  <div className="absolute inset-0 bg-white/20 blur-xl animate-glow" />
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Animated Heart Effect */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {/* Green Ribbon - from right */}
-            <div className="absolute bottom-0 right-0 w-full h-full">
-              <div
-                className="absolute bottom-0 right-0 w-32 h-96 bg-gradient-to-l from-green-400 to-green-300 opacity-20 animate-ribbon-green"
-                style={{
-                  animation: 'ribbonGreen 6s ease-in-out infinite',
-                  clipPath:
-                    'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
-                  borderRadius: '50%',
-                  filter: 'blur(2px)',
-                  boxShadow: '0 0 30px rgba(34, 197, 94, 0.5)',
-                }}
-              ></div>
-            </div>
-            {/* Blue Ribbon - from right */}
-            <div className="absolute bottom-0 right-0 w-full h-full">
-              <div
-                className="absolute bottom-0 right-0 w-32 h-96 bg-gradient-to-l from-blue-400 to-blue-300 opacity-20 animate-ribbon-blue"
-                style={{
-                  animation: 'ribbonBlue 6s ease-in-out infinite',
-                  animationDelay: '0.5s',
-                  clipPath:
-                    'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
-                  borderRadius: '50%',
-                  filter: 'blur(2px)',
-                  boxShadow: '0 0 30px rgba(59, 130, 246, 0.5)',
-                }}
-              ></div>
-            </div>
-            {/* Heart Icon at Center Top */}
-            <div className="absolute top-20 left-1/2 -translate-x-1/2 animate-heart-pulse">
-              <div className="relative">
-                <Heart className="h-8 w-8 text-green-300 opacity-30" />
-                <div className="absolute inset-0 bg-green-300 opacity-20 blur-xl animate-glow" />
-              </div>
-            </div>
-          </div>
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
-          <div className="container mx-auto px-4 sm:px-6 relative">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="relative inline-block mb-6 sm:mb-8 md:mb-10">
-                <img
-                  src={logoUrl}
-                  alt={logoAlt}
-                  className="h-20 sm:h-24 md:h-32 lg:h-36 w-auto mx-auto animate-logo-float"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-400 opacity-0 blur-2xl animate-logo-glow" />
-              </div>
-              <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight px-1 animate-text-shimmer bg-gradient-to-r from-white via-green-100 to-white bg-clip-text text-transparent bg-[length:200%_auto]">
-                {title}
-              </h1>
-              <p className="text-base sm:text-xl md:text-3xl mb-2 sm:mb-3 text-green-100 font-semibold">
-                {COMPANY_NAME}
-              </p>
-              <p className="text-sm sm:text-lg md:text-2xl mb-6 sm:mb-8 md:mb-10 text-blue-100 font-medium">
-                {subtitle}
-              </p>
-              <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto px-2 text-white/95 bg-black/20 rounded-lg p-4">
-                {description}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-3 sm:px-0">
-                <Link href="/doctors">
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto bg-white dark:bg-card text-green-600 hover:bg-green-50 text-base sm:text-lg font-semibold shadow-xl hover:shadow-2xl hover:shadow-green-500/30 hover:scale-105 transition-all h-12 sm:h-14 px-6 sm:px-8"
-                    aria-label={buttonText}
-                  >
-                    {buttonText}
-                    <ArrowLeft
-                      className="mr-2 h-5 w-5 sm:h-6 sm:w-6 rotate-180"
-                      aria-hidden="true"
-                    />
-                  </Button>
-                </Link>
-                <a href={`tel:${COMPANY_PHONE}`} className="w-full sm:w-auto">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto border-2 border-white/90 text-white hover:bg-white/20 text-base sm:text-lg font-medium backdrop-blur-sm h-12 sm:h-14 px-6 sm:px-8 hover:scale-105 transition-all"
-                    aria-label={`اتصل بالمستشفى على الرقم ${COMPANY_PHONE}`}
-                  >
-                    اتصل بنا: {COMPANY_PHONE}
-                  </Button>
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* ── Hero Section: 3D Parallax مع صورة المستشفى ── */}
+        <HospitalParallaxHero
+          title={title}
+          subtitle={subtitle}
+          description={description}
+          buttonText={buttonText}
+        />
 
         {/* Section Divider */}
         <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent my-0"></div>
