@@ -15,6 +15,7 @@ import { UpdateProgressModal } from '@/components/update/UpdateProgressModal';
 import { MandatoryUpdateModal } from '@/components/update/MandatoryUpdateModal';
 import { OptionalUpdateBanner } from '@/components/update/OptionalUpdateBanner';
 import { useUpdateChecker } from '@/hooks/integrations/useUpdateChecker';
+import { BookingModal } from '@/components/booking/BookingModal';
 import { trpc } from '@/lib/api/trpc';
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./pages/public/HomePage'));
@@ -283,6 +284,7 @@ function App() {
             <OptionalUpdateBanner />
             <UpdateProgressModal open={showProgressModal} onOpenChange={setShowProgressModal} />
             <MandatoryUpdateModal open={showMandatoryModal} onOpenChange={setShowMandatoryModal} />
+            <BookingModal />
             <PrefetchRoutes />
             <Router />
           </TooltipProvider>

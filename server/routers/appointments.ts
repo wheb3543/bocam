@@ -48,6 +48,11 @@ export const appointmentsRouter = router({
         procedure: z.string().optional(),
         preferredDate: z.string().optional(),
         preferredTime: z.string().optional(),
+        slotStartTime: z.string().optional(),
+        slotEndTime: z.string().optional(),
+        departmentId: z.number().optional(),
+        patientId: z.number().optional(),
+        leadId: z.number().optional(),
         additionalNotes: z.string().optional(),
         patientMessage: z.string().max(500).optional(),
         campaignSlug: z.string(),
@@ -220,5 +225,54 @@ export const appointmentsRouter = router({
       // Invalidate appointment caches after deletion
       invalidateAppointmentCaches();
       return { success: true };
+    }),
+
+  /**
+   * جلب الفترات الزمنية المتاحة للطبيب في تاريخ معين
+   */
+  getAvailableSlots: publicProcedure
+    .input(
+      z.object({
+        doctorId: z.number().int().positive(),
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'صيغة التاريخ يجب أن تكون YYYY-MM-DD'),
+      })
+    )
+    .query(async ({ input }) => {
+      const { getAvailableSlots } = await import('../services/schedulingService');
+      return getAvailableSlots(input.doctorId, input.date);
+    }),
+
+  /**
+   * جلب تفاصيل دوام الطبيب واستثناءاته للوحة الإدارة
+   */
+  getDoctorSchedule: appointmentsViewProcedure
+    .input(z.object({ doctorId: z.number().int().positive() }))
+    .query(async ({ input }) => {
+      const { getDoctorScheduleDetails } = await import('../services/schedulingService');
+      return getDoctorScheduleDetails(input.doctorId);
+    }),
+
+  /**
+   * تحديث أوقات دوام وسعة الطبيب الأسبوعية
+   */
+  updateDoctorSchedule: appointmentsUpdateProcedure
+    .input(
+      z.object({
+        doctorId: z.number().int().positive(),
+        schedules: z.array(
+          z.object({
+            dayOfWeek: z.number().min(0).max(6),
+            startTime: z.string().regex(/^\d{2}:\d{2}$/),
+            endTime: z.string().regex(/^\d{2}:\d{2}$/),
+            slotDurationMinutes: z.number().min(5).max(180).optional(),
+            maxCapacityPerSlot: z.number().min(1).max(50).optional(),
+            isActive: z.boolean().optional(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { saveDoctorWeeklySchedules } = await import('../services/schedulingService');
+      return saveDoctorWeeklySchedules(input.doctorId, input.schedules);
     }),
 });

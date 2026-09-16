@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TableBody, TableHeader, TableRow } from '@/components/ui/table';
-import { Stethoscope, Edit, Copy, Trash2 } from 'lucide-react';
+import { Stethoscope, Edit, Copy, Trash2, Calendar } from 'lucide-react';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import {
   ResizableTable,
@@ -149,6 +149,7 @@ interface DoctorTableProps {
   onDuplicate: (doctor: Doctor) => void;
   onDelete: (doctor: Doctor) => void;
   onAdd: () => void;
+  onConfigureSchedule?: (doctor: Doctor) => void;
   canCreate?: boolean;
   canUpdate?: boolean;
   canPublish?: boolean;
@@ -165,6 +166,7 @@ export function DoctorTable({
   onDuplicate,
   onDelete,
   onAdd,
+  onConfigureSchedule,
   canCreate = false,
   canUpdate = false,
   canPublish = false,
@@ -426,6 +428,17 @@ export function DoctorTable({
                             ) : (
                               <span className="text-emerald-600">تفعيل</span>
                             )}
+                          </Button>
+                        ) : null}
+                        {canUpdate && onConfigureSchedule ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                            onClick={() => onConfigureSchedule(doctor)}
+                            title="جدول الدوام والسعة"
+                          >
+                            <Calendar className="h-3.5 w-3.5" />
                           </Button>
                         ) : null}
                         {canUpdate ? (

@@ -5,13 +5,15 @@
  * Enhanced responsive design for all screen sizes
  */
 import { useState, useEffect, useRef } from 'react';
-import { Phone, Menu, X, ChevronLeft } from 'lucide-react';
+import { Phone, Menu, X, ChevronLeft, CalendarCheck2 } from 'lucide-react';
 import { APP_TITLE, COMPANY_PHONE, COMPANY_ARABIC_NAME, getCompanySlogan } from '@/const';
 import { Link } from 'wouter';
 import InstallPWAButton from '@/components/InstallPWAButton';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
 export default function Navbar() {
+  const { openBookingModal } = useBookingModal();
   const location = window.location.pathname;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -121,6 +123,16 @@ export default function Navbar() {
               {/* Language Switcher */}
               <LanguageSwitcher />
 
+              {/* Quick Smart Booking Button */}
+              <button
+                type="button"
+                onClick={() => openBookingModal()}
+                className="hidden lg:flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
+              >
+                <CalendarCheck2 className="size-4" />
+                <span>احجز موعدك</span>
+              </button>
+
               {/* Patient Portal Button - Desktop only */}
               <Link
                 href="/patient-portal/login"
@@ -202,6 +214,17 @@ export default function Navbar() {
 
         {/* Menu Footer - Contact */}
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 border-t border-border dark:border-gray-700">
+          <button
+            type="button"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              openBookingModal();
+            }}
+            className="flex items-center justify-center gap-2 w-full mb-2 bg-emerald-600 text-white py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm shadow-sm hover:bg-emerald-700 transition-colors"
+          >
+            <CalendarCheck2 className="h-4 w-4" />
+            <span>احجز موعدك الآن</span>
+          </button>
           <a
             href={`tel:${COMPANY_PHONE}`}
             className="flex items-center justify-center gap-2 w-full bg-green-600 text-white py-2.5 sm:py-3 rounded-lg sm:rounded-xl hover:bg-green-700 transition-colors font-semibold text-sm sm:text-base"

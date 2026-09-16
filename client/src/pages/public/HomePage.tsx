@@ -44,6 +44,7 @@ import {
 } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
 import HospitalGeometric3D from '@/components/public/HospitalGeometric3D';
+import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
 export default function HomePage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -53,6 +54,7 @@ export default function HomePage() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const statsRef = useState({ doctors: 22, specialties: 15, patients: 1000 })[0];
+  const { openBookingModal } = useBookingModal();
 
   // الحصول على اللغة الحالية
   const { language } = useLanguage();
@@ -795,16 +797,15 @@ export default function HomePage() {
                 `فريقنا الطبي المتميز من الأطباء والاستشاريين في انتظارك. احجز موعدك الآن أو اتصل بنا على الرقم المجاني ${COMPANY_PHONE} للاستفسار والحصول على المعلومات الطبية التي تحتاجها.`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center px-3 sm:px-0">
-              <Link href="/doctors">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto bg-white dark:bg-card text-green-600 hover:bg-green-50 text-base sm:text-lg md:text-xl font-semibold shadow-xl hover:shadow-2xl hover:shadow-green-500/30 hover:scale-105 transition-all h-12 sm:h-14 px-8 sm:px-10"
-                  aria-label="احجز موعدك مع أفضل الأطباء"
-                >
-                  {ctaBookButton?.data?.[0]?.content || 'احجز موعدك'}
-                  <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                onClick={() => openBookingModal()}
+                className="w-full sm:w-auto bg-white dark:bg-card text-green-600 hover:bg-green-50 text-base sm:text-lg md:text-xl font-semibold shadow-xl hover:shadow-2xl hover:shadow-green-500/30 hover:scale-105 transition-all h-12 sm:h-14 px-8 sm:px-10"
+                aria-label="احجز موعدك مع أفضل الأطباء"
+              >
+                {ctaBookButton?.data?.[0]?.content || 'احجز موعدك'}
+                <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+              </Button>
               <a href={`tel:${COMPANY_PHONE}`} className="w-full sm:w-auto">
                 <Button
                   size="lg"

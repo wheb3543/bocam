@@ -15,6 +15,7 @@ import { campsRouter } from './camps';
 import { offerLeadsRouter } from './offerLeads';
 import { campRegistrationsRouter } from './campRegistrations';
 import { doctorsRouter } from './doctors';
+import { departmentsRouter } from './departments';
 import { usersRouter } from './users';
 import { reportsRouter } from './reports';
 import { campaignsRouter } from './campaigns';
@@ -213,6 +214,9 @@ export const appRouter = router({
 
   // Doctors router
   doctors: doctorsRouter,
+
+  // Departments router
+  departments: departmentsRouter,
 
   // Appointments router
   appointments: appointmentsRouter,

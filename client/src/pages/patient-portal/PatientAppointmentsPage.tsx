@@ -9,14 +9,31 @@ type AppointmentFilter = 'upcoming' | 'past';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar } from 'lucide-react';
+import { Loader2, Calendar, CalendarPlus } from 'lucide-react';
 import AppointmentCard from '@/components/patient/AppointmentCard';
+import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
 export default function PatientAppointmentsPage() {
   const [, navigate] = useLocation();
   const { formatDate } = useFormatDate();
   const [filter, setFilter] = useState<AppointmentFilter>('upcoming');
+  const { data: patient } = trpc.patientPortal.me.useQuery();
   const { data: appointments, isLoading } = trpc.patientPortal.myAppointments.useQuery();
+  const { openBookingModal } = useBookingModal();
+
+  const handleNewBooking = () => {
+    openBookingModal({
+      prefill: patient
+        ? {
+            fullName: patient.fullName || undefined,
+            phone: patient.phone || undefined,
+            gender: (patient.gender as 'male' | 'female') || undefined,
+            age: patient.age || undefined,
+            patientId: patient.id,
+          }
+        : undefined,
+    });
+  };
 
   const statusBadge = (status: string) => {
     const map: Record<
@@ -79,8 +96,18 @@ export default function PatientAppointmentsPage() {
               <h2 className="mt-1 text-xl font-black text-foreground">جدول المواعيد</h2>
             </div>
           </div>
-          <div className="rounded-full bg-white/80 px-2.5 py-1 text-xs font-medium text-emerald-700 shadow-sm dark:bg-background/50 dark:text-emerald-300">
-            {totalCount} إجمالي
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-white/80 px-2.5 py-1 text-xs font-medium text-emerald-700 shadow-sm dark:bg-background/50 dark:text-emerald-300">
+              {totalCount} إجمالي
+            </div>
+            <Button
+              size="sm"
+              onClick={handleNewBooking}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl gap-1.5 text-xs font-bold h-8 px-3 shadow-xs cursor-pointer"
+            >
+              <CalendarPlus className="size-3.5" />
+              <span>حجز موعد</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -123,6 +150,14 @@ export default function PatientAppointmentsPage() {
           <Calendar className="mx-auto mb-3 h-10 w-10 text-emerald-400 opacity-80" />
           <p className="text-base font-bold text-foreground">لا توجد مواعيد في هذا القسم</p>
           <p className="mt-1 text-sm">سنظهر لك المواعيد الجديدة فور إضافتها.</p>
+          <Button
+            size="sm"
+            onClick={handleNewBooking}
+            className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl gap-1.5 text-xs font-bold shadow-xs cursor-pointer"
+          >
+            <CalendarPlus className="size-3.5" />
+            <span>احجز موعدك الآن</span>
+          </Button>
         </div>
       ) : (
         <div className="space-y-3">

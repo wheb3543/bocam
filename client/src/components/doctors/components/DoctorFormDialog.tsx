@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2, Edit, Plus } from 'lucide-react';
 import ImageUpload from '@/components/form/ImageUpload';
+import { trpc } from '@/lib/api/trpc';
 import type { DoctorFormData } from '../types/doctor.types';
 
 interface DoctorFormDialogProps {
@@ -46,6 +47,10 @@ export function DoctorFormDialog({
   isPending,
   onNameChange,
 }: DoctorFormDialogProps) {
+  const { data: departments } = trpc.departments.list.useQuery(undefined, {
+    enabled: open,
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
@@ -115,6 +120,35 @@ export function DoctorFormDialog({
             <div className="space-y-1.5">
               <Label
                 className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="department"
+              >
+                القسم الطبي
+              </Label>
+              <Select
+                value={formData.departmentId ? String(formData.departmentId) : 'none'}
+                onValueChange={(val) =>
+                  onFormDataChange({
+                    ...formData,
+                    departmentId: val === 'none' ? null : Number(val),
+                  })
+                }
+              >
+                <SelectTrigger id="department">
+                  <SelectValue placeholder="اختر القسم الطبي" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">بدون قسم محدد</SelectItem>
+                  {departments?.map((dept) => (
+                    <SelectItem key={dept.id} value={String(dept.id)}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
                 htmlFor="specialty"
               >
                 التخصص *
@@ -126,6 +160,9 @@ export function DoctorFormDialog({
                 placeholder="أخصائي القلب والأوعية الدموية"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label
                 className="text-right block text-xs font-medium text-muted-foreground"
@@ -272,6 +309,49 @@ export function DoctorFormDialog({
               </Select>
             </div>
           </div>
+
+          {formData.isVisiting === 'yes' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <div className="space-y-1.5">
+                <Label
+                  className="text-right block text-xs font-medium text-amber-800 dark:text-amber-300"
+                  htmlFor="visitingStartDate"
+                >
+                  تاريخ بداية الزيارة
+                </Label>
+                <Input
+                  id="visitingStartDate"
+                  type="date"
+                  value={formData.visitingStartDate || ''}
+                  onChange={(e) =>
+                    onFormDataChange({
+                      ...formData,
+                      visitingStartDate: e.target.value || null,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label
+                  className="text-right block text-xs font-medium text-amber-800 dark:text-amber-300"
+                  htmlFor="visitingEndDate"
+                >
+                  تاريخ نهاية الزيارة
+                </Label>
+                <Input
+                  id="visitingEndDate"
+                  type="date"
+                  value={formData.visitingEndDate || ''}
+                  onChange={(e) =>
+                    onFormDataChange({
+                      ...formData,
+                      visitingEndDate: e.target.value || null,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">

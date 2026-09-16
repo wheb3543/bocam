@@ -93,6 +93,7 @@ export interface Doctor {
   name: string;
   slug: string;
   specialty: string;
+  departmentId?: number | null;
   image: string | null;
   bio: string | null;
   experience: string | null;
@@ -100,6 +101,8 @@ export interface Doctor {
   consultationFee: string | null;
   procedures: string | null;
   isVisiting: 'yes' | 'no';
+  visitingStartDate?: Date | string | null;
+  visitingEndDate?: Date | string | null;
   available: 'yes' | 'no';
   createdAt: Date;
   updatedAt: Date;
@@ -109,6 +112,9 @@ export interface Appointment {
   id: number;
   campaignId: number;
   doctorId: number;
+  patientId?: number | null;
+  departmentId?: number | null;
+  leadId?: number | null;
   fullName: string;
   phone: string;
   email: string | null;
@@ -117,6 +123,8 @@ export interface Appointment {
   procedure: string | null;
   preferredDate: string | null;
   preferredTime: string | null;
+  slotStartTime?: string | null;
+  slotEndTime?: string | null;
   appointmentDate: Date | null;
   additionalNotes: string | null;
   staffNotes: string | null;
@@ -148,6 +156,7 @@ export interface Appointment {
 export interface AppointmentWithDoctor extends Omit<Appointment, 'gender'> {
   doctorName?: string | null;
   doctorSpecialty?: string | null;
+  departmentName?: string | null;
   gender?: 'male' | 'female' | null; // Make gender optional for API responses
   assignedToUserId?: number | null;
 }

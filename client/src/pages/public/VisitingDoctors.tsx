@@ -16,6 +16,7 @@ import { trpc } from '@/lib/api/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { COMPANY_PHONE } from '@/const';
+import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
 export default function VisitingDoctors() {
   return (
@@ -37,6 +38,7 @@ type VisitingDoctor = {
   available?: string | null;
   experience?: string | null;
   consultationFee?: number | string | null;
+  departmentId?: number | null;
 };
 
 type PublicPageTextContent = {
@@ -47,6 +49,7 @@ type PublicPageTextContent = {
 function VisitingDoctorsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('all');
+  const { openBookingModal } = useBookingModal();
   const { language } = useLanguage();
   const pageContentQuery = usePublicPageContent('visiting-doctors', language) as {
     data?: { textContents: PublicPageTextContent[] };
@@ -318,7 +321,17 @@ function VisitingDoctorsContent() {
                         )}
                       </div>
 
-                      <Button className="w-full bg-green-600 hover:bg-green-700 mt-2 sm:mt-4 group-hover:shadow-lg transition-all text-xs sm:text-sm h-8 sm:h-9 md:h-10">
+                      <Button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openBookingModal({
+                            doctorId: doctor.id,
+                            departmentId: doctor.departmentId || undefined,
+                          });
+                        }}
+                        className="w-full bg-green-600 hover:bg-green-700 mt-2 sm:mt-4 group-hover:shadow-lg transition-all text-xs sm:text-sm h-8 sm:h-9 md:h-10"
+                      >
                         <Calendar className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         {bookingCta}
                       </Button>

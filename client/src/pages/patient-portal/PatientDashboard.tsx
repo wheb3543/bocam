@@ -42,6 +42,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import PrivacyPolicyUpdateAlert from '@/components/patient/PrivacyPolicyUpdateAlert';
+import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
 export default function PatientDashboard() {
   const { formatPhoneDisplay } = usePhoneFormat();
@@ -59,6 +60,21 @@ export default function PatientDashboard() {
 
   // Check auth
   const { data: patient, isLoading: authLoading } = trpc.patientPortal.me.useQuery();
+  const { openBookingModal } = useBookingModal();
+
+  const handleNewBooking = () => {
+    openBookingModal({
+      prefill: patient
+        ? {
+            fullName: patient.fullName || undefined,
+            phone: patient.phone || undefined,
+            gender: (patient.gender as 'male' | 'female') || undefined,
+            age: patient.age || undefined,
+            patientId: patient.id,
+          }
+        : undefined,
+    });
+  };
 
   // Fetch data
   const { data: appointments, isLoading: appointmentsLoading } =
@@ -325,15 +341,14 @@ export default function PatientDashboard() {
                   <div className="text-center py-6 text-muted-foreground">
                     <Calendar className="h-8 w-8 mx-auto mb-2 opacity-40" />
                     <p className="text-sm">لا توجد مواعيد حالياً</p>
-                    <Link href="/doctors">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-3 text-green-600 border-green-200"
-                      >
-                        احجز موعدك الآن
-                      </Button>
-                    </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNewBooking}
+                      className="mt-3 text-green-600 border-green-200"
+                    >
+                      احجز موعدك الآن
+                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -442,14 +457,13 @@ export default function PatientDashboard() {
           <TabsContent value="appointments" className="mt-4 space-y-3">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-sm sm:text-base font-semibold">جميع المواعيد والحجوزات</h2>
-              <Link href="/doctors">
-                <Button
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm h-8 sm:h-9"
-                >
-                  حجز جديد
-                </Button>
-              </Link>
+              <Button
+                size="sm"
+                onClick={handleNewBooking}
+                className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm h-8 sm:h-9 cursor-pointer"
+              >
+                حجز جديد
+              </Button>
             </div>
 
             {/* Doctor Appointments */}

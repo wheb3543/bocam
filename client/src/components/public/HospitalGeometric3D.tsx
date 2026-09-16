@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react';
+import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
 interface HospitalGeometric3DProps {
   title?: string;
@@ -251,14 +252,10 @@ export default function HospitalGeometric3D({
     window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
   };
 
+  const { openBookingModal } = useBookingModal();
+
   const scrollToBooking = () => {
-    const bookingElem =
-      document.getElementById('booking-section') || document.getElementById('appointment-section');
-    if (bookingElem) {
-      bookingElem.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.location.href = '/appointments';
-    }
+    openBookingModal();
   };
 
   return (

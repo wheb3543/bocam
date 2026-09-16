@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { useConfirmDialog } from '@/hooks/ui/useConfirmDialog';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { useTableFeatures } from '@/hooks/table/useTableFeatures';
 import { useDoctorManagement } from './doctors/hooks/useDoctorManagement';
 import { DoctorStatsCards } from './doctors/components/DoctorStatsCards';
 import { DoctorFormDialog } from './doctors/components/DoctorFormDialog';
+import { DoctorScheduleDialog } from './doctors/components/DoctorScheduleDialog';
 import { DoctorTable } from './doctors/components/DoctorTable';
 import { doctorColumns } from './doctors/components/DoctorTable';
 import type { Doctor } from './doctors/types/doctor.types';
@@ -15,6 +17,7 @@ import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { PermissionHint } from '@/components/PermissionHint';
 
 export default function DoctorsManagement() {
+  const [scheduleDoctor, setScheduleDoctor] = useState<Doctor | null>(null);
   const deleteConfirm = useConfirmDialog<Doctor>();
   const doctorManagement = useDoctorManagement();
   const { can } = useRolePermissions();
@@ -107,6 +110,7 @@ export default function DoctorsManagement() {
           onDuplicate={doctorManagement.handleDuplicate}
           onDelete={(doctor) => deleteConfirm.openConfirm(doctor)}
           onAdd={() => doctorManagement.handleOpenDialog()}
+          onConfigureSchedule={(doctor) => setScheduleDoctor(doctor)}
           canCreate={canCreate}
           canUpdate={canUpdate}
           canPublish={canPublish}
@@ -114,6 +118,15 @@ export default function DoctorsManagement() {
           canDelete={canDelete}
         />
       </div>
+
+      {/* Doctor Schedule & Capacity Dialog */}
+      {canUpdate ? (
+        <DoctorScheduleDialog
+          open={!!scheduleDoctor}
+          onOpenChange={(open) => !open && setScheduleDoctor(null)}
+          doctor={scheduleDoctor}
+        />
+      ) : null}
 
       {/* Add/Edit Dialog */}
       {canCreate || canUpdate ? (

@@ -16,6 +16,9 @@ export interface Doctor {
   experience?: string | null;
   available?: 'yes' | 'no' | null;
   isVisiting?: 'yes' | 'no' | null;
+  departmentId?: number | null;
+  visitingStartDate?: string | Date | null;
+  visitingEndDate?: string | Date | null;
   status?: string | null;
   createdAt?: string | Date | null;
   [key: string]: unknown;
@@ -31,7 +34,10 @@ export interface DoctorFormData {
   languages: string;
   consultationFee: string;
   procedures: string;
+  departmentId?: number | null;
   isVisiting: 'yes' | 'no';
+  visitingStartDate?: string | null;
+  visitingEndDate?: string | null;
   available: 'yes' | 'no';
 }
 
@@ -45,7 +51,10 @@ export const initialFormData: DoctorFormData = {
   languages: '',
   consultationFee: '',
   procedures: '',
+  departmentId: null,
   isVisiting: 'no',
+  visitingStartDate: null,
+  visitingEndDate: null,
   available: 'yes',
 };
 

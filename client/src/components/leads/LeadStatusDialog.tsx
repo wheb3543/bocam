@@ -10,11 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Phone, Mail, User, MessageSquare, Loader2 } from 'lucide-react';
+import { Phone, Mail, User, MessageSquare, Loader2, CalendarPlus } from 'lucide-react';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { SOURCE_LABELS } from '@shared/sources';
 import type { UnifiedLead } from '@shared/types';
+import ConvertLeadToAppointmentDialog from './ConvertLeadToAppointmentDialog';
 
 const statusLabels: Record<string, string> = {
   new: 'جديد',
@@ -90,6 +91,7 @@ export default function LeadStatusDialog({
   const [newStatus, setNewStatus] = useState('');
   const [statusNotes, setStatusNotes] = useState('');
   const [assignedToUserId, setAssignedToUserId] = useState('');
+  const [showConvertDialog, setShowConvertDialog] = useState(false);
 
   // Reset state when lead changes
   const handleOpenChange = (isOpen: boolean) => {
@@ -125,188 +127,215 @@ export default function LeadStatusDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="text-base">تحديث حالة العميل</DialogTitle>
-          <DialogDescription>قم بتحديث حالة العميل وإضافة ملاحظات إذا لزم الأمر</DialogDescription>
-        </DialogHeader>
-        {lead && (
-          <div className="space-y-4">
-            {/* Lead info card */}
-            <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`p-1.5 rounded-lg ${(statusConfig[lead.status] || statusConfig.new).bg}`}
-                  >
-                    <User
-                      className={`w-4 h-4 ${(statusConfig[lead.status] || statusConfig.new).text}`}
-                    />
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-base">تحديث حالة العميل</DialogTitle>
+            <DialogDescription>
+              قم بتحديث حالة العميل وإضافة ملاحظات إذا لزم الأمر
+            </DialogDescription>
+          </DialogHeader>
+          {lead && (
+            <div className="space-y-4">
+              {/* Lead info card */}
+              <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`p-1.5 rounded-lg ${(statusConfig[lead.status] || statusConfig.new).bg}`}
+                    >
+                      <User
+                        className={`w-4 h-4 ${(statusConfig[lead.status] || statusConfig.new).text}`}
+                      />
+                    </div>
+                    <p className="font-semibold text-sm">{lead.fullName}</p>
                   </div>
-                  <p className="font-semibold text-sm">{lead.fullName}</p>
+                  <Badge
+                    className={`${(statusConfig[lead.status] || statusConfig.new).bg} ${(statusConfig[lead.status] || statusConfig.new).text} border ${(statusConfig[lead.status] || statusConfig.new).border} text-[10px]`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${(statusConfig[lead.status] || statusConfig.new).dot} ml-1.5 inline-block`}
+                    />
+                    {statusLabels[lead.status] || lead.status}
+                  </Badge>
                 </div>
-                <Badge
-                  className={`${(statusConfig[lead.status] || statusConfig.new).bg} ${(statusConfig[lead.status] || statusConfig.new).text} border ${(statusConfig[lead.status] || statusConfig.new).border} text-[10px]`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${(statusConfig[lead.status] || statusConfig.new).dot} ml-1.5 inline-block`}
-                  />
-                  {statusLabels[lead.status] || lead.status}
-                </Badge>
-              </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <Phone className="w-3 h-3 text-muted-foreground" />
-                  <span dir="ltr" className="font-mono">
-                    {formatPhoneDisplay(lead.phone)}
-                  </span>
-                </div>
-                {lead.email && (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                   <div className="flex items-center gap-1.5">
-                    <Mail className="w-3 h-3 text-muted-foreground" />
-                    <span className="truncate">{lead.email}</span>
+                    <Phone className="w-3 h-3 text-muted-foreground" />
+                    <span dir="ltr" className="font-mono">
+                      {formatPhoneDisplay(lead.phone)}
+                    </span>
+                  </div>
+                  {lead.email && (
+                    <div className="flex items-center gap-1.5">
+                      <Mail className="w-3 h-3 text-muted-foreground" />
+                      <span className="truncate">{lead.email}</span>
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-muted-foreground">النوع:</span>{' '}
+                    <span className="font-medium">
+                      {lead.type === 'appointment'
+                        ? 'موعد طبيب'
+                        : lead.type === 'offer'
+                          ? 'عرض'
+                          : 'مخيم'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">المصدر:</span>{' '}
+                    <span className="font-medium">
+                      {lead.source ? SOURCE_LABELS[lead.source] || lead.source : '-'}
+                    </span>
+                  </div>
+                </div>
+                {lead.notes && (
+                  <div className="text-xs bg-background/60 rounded p-2 border border-dashed">
+                    <span className="font-medium">الملاحظات:</span> {lead.notes}
                   </div>
                 )}
-                <div>
-                  <span className="text-muted-foreground">النوع:</span>{' '}
-                  <span className="font-medium">
-                    {lead.type === 'appointment'
-                      ? 'موعد طبيب'
-                      : lead.type === 'offer'
-                        ? 'عرض'
-                        : 'مخيم'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">المصدر:</span>{' '}
-                  <span className="font-medium">
-                    {lead.source ? SOURCE_LABELS[lead.source] || lead.source : '-'}
-                  </span>
-                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  تاريخ التسجيل:{' '}
+                  {(() => {
+                    try {
+                      const date = lead.createdAt ? new Date(lead.createdAt) : null;
+                      return formatDateTime(date);
+                    } catch {
+                      return 'غير متوفر';
+                    }
+                  })()}
+                </p>
               </div>
-              {lead.notes && (
-                <div className="text-xs bg-background/60 rounded p-2 border border-dashed">
-                  <span className="font-medium">الملاحظات:</span> {lead.notes}
+
+              {canAssign && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">المسؤول عن المتابعة</Label>
+                  <select
+                    value={assignedToUserId}
+                    disabled={isAssigning}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      setAssignedToUserId(value);
+                      onAssign?.(value ? Number(value) : null);
+                    }}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    aria-label="تعيين مسؤول للعميل المحتمل"
+                  >
+                    <option value="">غير معيّن</option>
+                    {assignableUsers.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name || user.username || `مستخدم #${user.id}`}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               )}
-              <p className="text-[10px] text-muted-foreground">
-                تاريخ التسجيل:{' '}
-                {(() => {
-                  try {
-                    const date = lead.createdAt ? new Date(lead.createdAt) : null;
-                    return formatDateTime(date);
-                  } catch {
-                    return 'غير متوفر';
-                  }
-                })()}
-              </p>
-            </div>
 
-            {canAssign && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">المسؤول عن المتابعة</Label>
-                <select
-                  value={assignedToUserId}
-                  disabled={isAssigning}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setAssignedToUserId(value);
-                    onAssign?.(value ? Number(value) : null);
-                  }}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  aria-label="تعيين مسؤول للعميل المحتمل"
+              {/* Quick actions */}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-9 text-xs gap-1.5"
+                  onClick={() => (window.location.href = `tel:${formatPhoneDisplay(lead.phone)}`)}
                 >
-                  <option value="">غير معيّن</option>
-                  {assignableUsers.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name || user.username || `مستخدم #${user.id}`}
-                    </option>
-                  ))}
-                </select>
+                  <Phone className="w-3.5 h-3.5" />
+                  اتصال
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-9 text-xs gap-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                  onClick={() => {
+                    const msg = encodeURIComponent(
+                      `مرحباً ${lead.fullName}، نود التواصل معك بخصوص استفسارك.`
+                    );
+                    window.open(
+                      `https://wa.me/${lead.phone.replace(/^0+/, '')}?text=${msg}`,
+                      '_blank'
+                    );
+                  }}
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  واتساب
+                </Button>
               </div>
-            )}
 
-            {/* Quick actions */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 h-9 text-xs gap-1.5"
-                onClick={() => (window.location.href = `tel:${formatPhoneDisplay(lead.phone)}`)}
-              >
-                <Phone className="w-3.5 h-3.5" />
-                اتصال
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 h-9 text-xs gap-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
-                onClick={() => {
-                  const msg = encodeURIComponent(
-                    `مرحباً ${lead.fullName}، نود التواصل معك بخصوص استفسارك.`
-                  );
-                  window.open(
-                    `https://wa.me/${lead.phone.replace(/^0+/, '')}?text=${msg}`,
-                    '_blank'
-                  );
-                }}
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-                واتساب
-              </Button>
-            </div>
+              {/* Convert to Appointment CTA */}
+              {canUpdateStatus && lead.status !== 'booked' && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    onOpenChange(false);
+                    setShowConvertDialog(true);
+                  }}
+                  className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 gap-1.5 text-xs font-bold py-2 rounded-xl"
+                >
+                  <CalendarPlus className="size-4" />
+                  <span>تحويل العميل إلى موعد مؤكد واختيار الوقت</span>
+                </Button>
+              )}
 
-            {canUpdateStatus && (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">الحالة الجديدة</Label>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                    {STATUS_BUTTONS.map((s) => (
-                      <button
-                        key={s.value}
-                        type="button"
-                        onClick={() => setNewStatus(s.value)}
-                        className={`text-[10px] py-2 px-1 rounded-lg border-2 transition-all text-center leading-tight ${
-                          newStatus === s.value
-                            ? `border-${s.color}-500 bg-${s.color}-50 text-${s.color}-700 font-semibold ring-1 ring-${s.color}-200`
-                            : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
+              {canUpdateStatus && (
+                <>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">الحالة الجديدة</Label>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                      {STATUS_BUTTONS.map((s) => (
+                        <button
+                          key={s.value}
+                          type="button"
+                          onClick={() => setNewStatus(s.value)}
+                          className={`text-[10px] py-2 px-1 rounded-lg border-2 transition-all text-center leading-tight ${
+                            newStatus === s.value
+                              ? `border-${s.color}-500 bg-${s.color}-50 text-${s.color}-700 font-semibold ring-1 ring-${s.color}-200`
+                              : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
+                          }`}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">ملاحظات (اختياري)</Label>
-                  <Textarea
-                    placeholder="أضف ملاحظات..."
-                    value={statusNotes}
-                    onChange={(e) => setStatusNotes(e.target.value)}
-                    rows={3}
-                    className="resize-none"
-                  />
-                </div>
-                <div className="flex justify-end gap-2 pt-2 border-t">
-                  <Button variant="outline" size="sm" onClick={handleCancel}>
-                    إلغاء
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSubmit}
-                    disabled={!newStatus || isPending}
-                    className="gap-1.5"
-                  >
-                    {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                    تحديث الحالة
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">ملاحظات (اختياري)</Label>
+                    <Textarea
+                      placeholder="أضف ملاحظات..."
+                      value={statusNotes}
+                      onChange={(e) => setStatusNotes(e.target.value)}
+                      rows={3}
+                      className="resize-none"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 pt-2 border-t">
+                    <Button variant="outline" size="sm" onClick={handleCancel}>
+                      إلغاء
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSubmit}
+                      disabled={!newStatus || isPending}
+                      className="gap-1.5"
+                    >
+                      {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                      تحديث الحالة
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <ConvertLeadToAppointmentDialog
+        open={showConvertDialog}
+        onOpenChange={setShowConvertDialog}
+        lead={lead}
+      />
+    </>
   );
 }

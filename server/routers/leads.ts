@@ -16,6 +16,7 @@ import {
   getLeadsByCampaign,
   createCampaign,
   normalizePhoneNumber,
+  createAppointment,
 } from '../database/db';
 import { notifyOwner } from '../_core/notification';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
@@ -28,6 +29,7 @@ import {
   sendBookingConfirmation,
   sendCustomMessage,
 } from '../services/whatsapp';
+import { validateSlotAvailability, ensurePatientAccount } from '../services/schedulingService';
 import { permissionProcedure } from './permissionProcedures';
 import {
   assertAssignableUser,
@@ -376,5 +378,124 @@ export const leadsRouter = router({
       }
 
       return { success };
+    }),
+
+  convertToAppointment: leadsUpdateProcedure
+    .input(
+      z.object({
+        leadId: z.number(),
+        doctorId: z.number(),
+        departmentId: z.number().optional(),
+        appointmentDate: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, 'يجب أن يكون التاريخ بصيغة YYYY-MM-DD'),
+        slotStartTime: z.string().regex(/^\d{2}:\d{2}$/, 'يجب أن يكون وقت البدء بصيغة HH:mm'),
+        slotEndTime: z
+          .string()
+          .regex(/^\d{2}:\d{2}$/)
+          .optional(),
+        procedure: z.string().optional(),
+        notes: z.string().optional(),
+        sendWhatsAppConfirmation: z.boolean().default(true),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const lead = await getLeadById(input.leadId);
+      if (!lead) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'العميل المحتمل غير موجود' });
+      }
+
+      // 1. Validate slot availability
+      const availability = await validateSlotAvailability(
+        input.doctorId,
+        input.appointmentDate,
+        input.slotStartTime
+      );
+
+      if (!availability.valid) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: availability.message || 'الفترة الزمنية المختارة غير متاحة للحجز',
+        });
+      }
+
+      const effectiveEndTime = input.slotEndTime || availability.slotEndTime;
+
+      // 2. Ensure patient account exists (auto-link / auto-provision)
+      const patient = await ensurePatientAccount({
+        phone: lead.phone,
+        fullName: lead.fullName,
+        email: lead.email || undefined,
+      });
+
+      // 3. Create appointment record
+      const appointmentResult = await createAppointment({
+        campaignId: lead.campaignId || 1,
+        doctorId: input.doctorId,
+        departmentId: input.departmentId,
+        patientId: patient?.id,
+        leadId: lead.id,
+        fullName: lead.fullName,
+        phone: lead.phone,
+        email: lead.email || undefined,
+        preferredDate: input.appointmentDate,
+        preferredTime: input.slotStartTime,
+        slotStartTime: input.slotStartTime,
+        slotEndTime: effectiveEndTime,
+        appointmentDate: new Date(`${input.appointmentDate}T${input.slotStartTime}:00`),
+        procedure: input.procedure,
+        notes: input.notes,
+        status: 'confirmed',
+        source: 'lead_conversion',
+        confirmedAt: new Date(),
+      });
+
+      const appointmentId = appointmentResult?.insertId;
+
+      // 4. Update lead status to 'booked'
+      const updatedNotes = input.notes
+        ? `${lead.notes ? `${lead.notes}\n` : ''}تم التحويل إلى موعد مؤكد #${appointmentId || ''}: ${input.notes}`
+        : lead.notes;
+
+      await updateLead(lead.id, {
+        status: 'booked',
+        notes: updatedNotes,
+      });
+
+      // 5. Create lead status history & audit log
+      await createLeadStatusHistory({
+        leadId: lead.id,
+        userId: ctx.user.id,
+        oldStatus: lead.status,
+        newStatus: 'booked',
+        notes: `تم تحويل العميل المحتمل إلى موعد مؤكد برقم #${appointmentId || ''}`,
+      });
+
+      await createAuditLog({
+        entityType: 'lead',
+        entityId: lead.id,
+        action: 'convert_to_appointment',
+        oldValue: lead.status,
+        newValue: 'booked',
+        userId: ctx.user?.id,
+        userName: ctx.user?.name,
+        notes: `تم تحويل العميل المحتمل إلى موعد مؤكد لدى الطبيب #${input.doctorId}`,
+      });
+
+      // 6. Send WhatsApp confirmation if requested
+      if (input.sendWhatsAppConfirmation) {
+        void sendBookingConfirmation({
+          phone: lead.phone,
+          fullName: lead.fullName,
+          appointmentDate: input.appointmentDate,
+          appointmentTime: input.slotStartTime,
+        }).catch(() => undefined);
+      }
+
+      return {
+        success: true,
+        appointmentId,
+        message: 'تم تحويل العميل المحتمل إلى موعد بنجاح',
+      };
     }),
 });

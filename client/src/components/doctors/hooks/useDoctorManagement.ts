@@ -81,12 +81,28 @@ export function useDoctorManagement() {
     resetManualEdit();
   };
 
+  function formatDateForInput(val: unknown): string | null {
+    if (!val) {
+      return null;
+    }
+    if (val instanceof Date) {
+      return val.toISOString().split('T')[0];
+    }
+    if (typeof val === 'string') {
+      return val.includes('T') ? val.split('T')[0] : val;
+    }
+    return null;
+  }
+
   const handleDuplicate = (doctor: Doctor) => {
     setEditingDoctor(null);
     setFormData({
       name: (doctor.name || '') + ' (نسخة)',
       slug: (doctor.slug || '') + '-copy',
       specialty: doctor.specialty || '',
+      departmentId: doctor.departmentId ?? null,
+      visitingStartDate: formatDateForInput(doctor.visitingStartDate),
+      visitingEndDate: formatDateForInput(doctor.visitingEndDate),
       image: doctor.image || '',
       bio: doctor.bio || '',
       experience: doctor.experience || '',
@@ -106,6 +122,9 @@ export function useDoctorManagement() {
         name: doctor.name || '',
         slug: doctor.slug || '',
         specialty: doctor.specialty || '',
+        departmentId: doctor.departmentId ?? null,
+        visitingStartDate: formatDateForInput(doctor.visitingStartDate),
+        visitingEndDate: formatDateForInput(doctor.visitingEndDate),
         image: doctor.image || '',
         bio: doctor.bio || '',
         experience: doctor.experience || '',

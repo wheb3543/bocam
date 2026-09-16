@@ -23,6 +23,9 @@ import {
   Globe,
   CreditCard,
   MessageSquare,
+  Sun,
+  Moon,
+  AlertCircle,
 } from 'lucide-react';
 import { getCompleteTrackingData } from '@/lib/tracking/tracking';
 import { trackViewContent } from '@/components/MetaPixel';
@@ -95,6 +98,13 @@ function DoctorDetailContent({ slug }: { slug: string }) {
     patientMessage: '',
   });
 
+  const [selectedSlotEndTime, setSelectedSlotEndTime] = useState<string>('');
+  const { data: slotData, isLoading: isLoadingSlots } =
+    trpc.appointments.getAvailableSlots.useQuery(
+      { doctorId: doctor?.id || 0, date: formData.preferredDate },
+      { enabled: !!doctor?.id && !!formData.preferredDate }
+    );
+
   const [submitted, setSubmitted] = useState(false);
   const [, setLocation] = useLocation();
 
@@ -144,6 +154,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
       await submitAppointment.mutateAsync({
         doctorId: doctor.id,
+        departmentId: doctor.departmentId || undefined,
         fullName: formData.fullName,
         phone: formData.phone,
         email: formData.email || undefined,
@@ -152,6 +163,8 @@ function DoctorDetailContent({ slug }: { slug: string }) {
         procedure: formData.procedure || undefined,
         preferredDate: formData.preferredDate,
         preferredTime: formData.preferredTime || undefined,
+        slotStartTime: formData.preferredTime || undefined,
+        slotEndTime: selectedSlotEndTime || undefined,
         additionalNotes: formData.additionalNotes || undefined,
         patientMessage: formData.patientMessage || undefined,
         campaignSlug: `doctor-${slug}`,
@@ -692,12 +705,77 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                       type="date"
                       enterKeyHint="next"
                       value={formData.preferredDate}
-                      onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          preferredDate: e.target.value,
+                          preferredTime: '',
+                        });
+                        setSelectedSlotEndTime('');
+                      }}
                       required
                       min={new Date().toISOString().split('T')[0]}
                       className="mt-1.5 h-11"
                     />
                   </div>
+
+                  {formData.preferredDate && (
+                    <div className="space-y-2 pt-1">
+                      <Label className="text-sm font-medium text-foreground flex items-center justify-between">
+                        <span>الفترات الزمنية المتاحة:</span>
+                        {isLoadingSlots && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Loader2 className="size-3 animate-spin text-green-600" /> جاري فحص
+                            السعة...
+                          </span>
+                        )}
+                      </Label>
+
+                      {slotData && !slotData.isWorking ? (
+                        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs flex items-center gap-2">
+                          <AlertCircle className="size-4 shrink-0" />
+                          <span>{slotData.reason || 'الطبيب غير متاح في هذا التاريخ'}</span>
+                        </div>
+                      ) : slotData?.slots && slotData.slots.length > 0 ? (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-h-36 overflow-y-auto p-1 border rounded-xl bg-muted/20">
+                          {slotData.slots.map((slot) => {
+                            const isSelected = formData.preferredTime === slot.slotStartTime;
+                            return (
+                              <button
+                                key={slot.slotStartTime}
+                                type="button"
+                                disabled={!slot.isAvailable}
+                                onClick={() => {
+                                  setFormData({ ...formData, preferredTime: slot.slotStartTime });
+                                  setSelectedSlotEndTime(slot.slotEndTime);
+                                }}
+                                className={`p-1.5 rounded-lg border text-xs text-center transition-all ${
+                                  isSelected
+                                    ? 'bg-green-600 text-white border-green-600 font-bold shadow-xs'
+                                    : slot.isAvailable
+                                      ? 'bg-card hover:bg-green-50 dark:hover:bg-green-950/20 border-border text-foreground'
+                                      : 'bg-muted/30 text-muted-foreground/40 border-border/40 cursor-not-allowed'
+                                }`}
+                              >
+                                <div className="font-semibold">
+                                  {slot.slotStartTime} {slot.period === 'morning' ? 'ص' : 'م'}
+                                </div>
+                                <div className="text-[10px] opacity-80">
+                                  {slot.isAvailable ? 'متاح' : 'محجوز'}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        !isLoadingSlots && (
+                          <p className="text-xs text-muted-foreground">
+                            لا توجد فترات محددة لهذا اليوم
+                          </p>
+                        )
+                      )}
+                    </div>
+                  )}
 
                   {/* حقل الرسالة الاختياري */}
                   <div>

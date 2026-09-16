@@ -68,10 +68,47 @@ export async function submitAppointment({
     'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
   const statusTimestamps = buildStatusTimestamps(initialStatus);
 
+  // Validate slot availability if slot time is specified
+  let slotEndTime = input.slotEndTime as string | undefined;
+  if (input.slotStartTime && input.preferredDate) {
+    const { validateSlotAvailability } = await import('../../../services/schedulingService');
+    const slotValidation = await validateSlotAvailability(
+      input.doctorId as number,
+      input.preferredDate as string,
+      input.slotStartTime as string
+    );
+    if (!slotValidation.valid) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: slotValidation.message || 'الفترة الزمنية المختارة غير متاحة',
+      });
+    }
+    slotEndTime = slotValidation.slotEndTime;
+  }
+
+  // Ensure patient account exists (Auto-provisioning)
+  let patientId = input.patientId as number | undefined;
+  if (!patientId) {
+    const { ensurePatientAccount } = await import('../../../services/schedulingService');
+    const patientRecord = await ensurePatientAccount({
+      phone: normalizedPhone,
+      fullName: input.fullName as string,
+      age: input.age as number | undefined,
+      gender: input.gender as 'male' | 'female' | undefined,
+      email: input.email as string | undefined,
+    });
+    if (patientRecord) {
+      patientId = patientRecord.id;
+    }
+  }
+
   // Create appointment
   const result = await createAppointment({
     campaignId: campaign.id,
     doctorId: input.doctorId as number,
+    departmentId: input.departmentId as number | undefined,
+    patientId,
+    leadId: input.leadId as number | undefined,
     fullName: input.fullName as string,
     phone: normalizedPhone,
     email: input.email as string | undefined,
@@ -80,6 +117,8 @@ export async function submitAppointment({
     procedure: input.procedure as string | undefined,
     preferredDate: input.preferredDate as string | undefined,
     preferredTime: input.preferredTime as string | undefined,
+    slotStartTime: input.slotStartTime as string | undefined,
+    slotEndTime,
     additionalNotes: input.additionalNotes as string | undefined,
     patientMessage: input.patientMessage as string | undefined,
     status: initialStatus,

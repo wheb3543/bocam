@@ -21,6 +21,7 @@ import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
 import { usePublicSEOSettings, usePublicTextContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
 export default function Doctors() {
   const companyName = getCompanyName('ar');
@@ -43,6 +44,7 @@ export default function Doctors() {
 
 function DoctorsContent() {
   const [, setLocation] = useLocation();
+  const { openBookingModal } = useBookingModal();
   const [searchTerm, setSearchTerm] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState<string>('all');
 
@@ -260,7 +262,10 @@ function DoctorsContent() {
                           className="w-full mt-0.5 sm:mt-1 bg-emerald-600 hover:bg-emerald-700 text-[10px] sm:text-xs md:text-sm h-7 sm:h-8 md:h-9"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setLocation(`/doctors/${doctor.slug}`);
+                            openBookingModal({
+                              doctorId: doctor.id,
+                              departmentId: doctor.departmentId || undefined,
+                            });
                           }}
                         >
                           <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />

@@ -235,6 +235,25 @@ export type Setting = typeof settings.$inferSelect;
 export type InsertSetting = typeof settings.$inferInsert;
 
 /**
+ * Departments table - stores medical departments and clinics
+ */
+export const departments = mysqlTable('departments', {
+  id: int('id').autoincrement().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  nameEn: varchar('nameEn', { length: 255 }),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  description: text('description'),
+  icon: varchar('icon', { length: 100 }),
+  sortOrder: int('sortOrder').default(0).notNull(),
+  isActive: boolean('isActive').default(true).notNull(),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+
+export type Department = typeof departments.$inferSelect;
+export type InsertDepartment = typeof departments.$inferInsert;
+
+/**
  * Doctors table - stores information about hospital doctors
  */
 export const doctors = mysqlTable('doctors', {
@@ -242,6 +261,7 @@ export const doctors = mysqlTable('doctors', {
   name: varchar('name', { length: 255 }).notNull(),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   specialty: varchar('specialty', { length: 255 }).notNull(),
+  departmentId: int('departmentId'), // Optional link to department
   image: varchar('image', { length: 500 }),
   bio: text('bio'),
   experience: varchar('experience', { length: 255 }),
@@ -249,6 +269,8 @@ export const doctors = mysqlTable('doctors', {
   consultationFee: varchar('consultationFee', { length: 100 }),
   procedures: text('procedures'), // JSON array of available procedures
   isVisiting: mysqlEnum('isVisiting', ['yes', 'no']).default('no').notNull(), // Visiting doctor flag
+  visitingStartDate: timestamp('visitingStartDate'), // Start date for visiting doctor campaign
+  visitingEndDate: timestamp('visitingEndDate'), // End date for visiting doctor campaign
   available: mysqlEnum('available', ['yes', 'no']).default('yes').notNull(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
@@ -256,6 +278,56 @@ export const doctors = mysqlTable('doctors', {
 
 export type Doctor = typeof doctors.$inferSelect;
 export type InsertDoctor = typeof doctors.$inferInsert;
+
+/**
+ * Doctor Schedules table - stores weekly working hours and capacity per doctor
+ */
+export const doctorSchedules = mysqlTable(
+  'doctorSchedules',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    doctorId: int('doctorId').notNull(),
+    dayOfWeek: int('dayOfWeek').notNull(), // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    startTime: varchar('startTime', { length: 10 }).notNull(), // "09:00"
+    endTime: varchar('endTime', { length: 10 }).notNull(), // "17:00"
+    slotDurationMinutes: int('slotDurationMinutes').default(30).notNull(),
+    maxCapacityPerSlot: int('maxCapacityPerSlot').default(1).notNull(),
+    isActive: boolean('isActive').default(true).notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    doctorIdIdx: index('doctorSchedules_doctorId_idx').on(table.doctorId),
+  })
+);
+
+export type DoctorSchedule = typeof doctorSchedules.$inferSelect;
+export type InsertDoctorSchedule = typeof doctorSchedules.$inferInsert;
+
+/**
+ * Doctor Schedule Exceptions table - stores vacations, leaves, or custom working hours for specific dates
+ */
+export const doctorScheduleExceptions = mysqlTable(
+  'doctorScheduleExceptions',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    doctorId: int('doctorId').notNull(),
+    exceptionDate: varchar('exceptionDate', { length: 20 }).notNull(), // YYYY-MM-DD
+    isOff: boolean('isOff').default(true).notNull(), // true = vacation/off, false = custom hours
+    customStartTime: varchar('customStartTime', { length: 10 }),
+    customEndTime: varchar('customEndTime', { length: 10 }),
+    reason: varchar('reason', { length: 255 }),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    doctorIdIdx: index('doctorScheduleExceptions_doctorId_idx').on(table.doctorId),
+    exceptionDateIdx: index('doctorScheduleExceptions_date_idx').on(table.exceptionDate),
+  })
+);
+
+export type DoctorScheduleException = typeof doctorScheduleExceptions.$inferSelect;
+export type InsertDoctorScheduleException = typeof doctorScheduleExceptions.$inferInsert;
 
 /**
  * Appointments table - stores appointment bookings
@@ -266,6 +338,9 @@ export const appointments = mysqlTable(
     id: int('id').autoincrement().primaryKey(),
     campaignId: int('campaignId').notNull(),
     doctorId: int('doctorId').notNull(),
+    departmentId: int('departmentId'), // Optional link to department
+    patientId: int('patientId'), // Optional standard link to patients table
+    leadId: int('leadId'), // Optional link to originating lead if converted
     fullName: varchar('fullName', { length: 255 }).notNull(),
     phone: varchar('phone', { length: 20 }).notNull(),
     email: varchar('email', { length: 320 }),
@@ -274,6 +349,8 @@ export const appointments = mysqlTable(
     procedure: text('procedure'), // Selected procedure
     preferredDate: varchar('preferredDate', { length: 50 }),
     preferredTime: varchar('preferredTime', { length: 50 }),
+    slotStartTime: varchar('slotStartTime', { length: 10 }), // Scheduled slot start time e.g. "09:30"
+    slotEndTime: varchar('slotEndTime', { length: 10 }), // Scheduled slot end time e.g. "10:00"
     appointmentDate: timestamp('appointmentDate'), // Confirmed appointment date/time
     patientMessage: text('patientMessage'), // رسالة المريض الاختيارية
     notes: text('notes'), // Patient notes
@@ -316,6 +393,8 @@ export const appointments = mysqlTable(
     statusIdx: index('appointments_status_idx').on(table.status),
     createdAtIdx: index('appointments_createdAt_idx').on(table.createdAt),
     doctorIdIdx: index('appointments_doctorId_idx').on(table.doctorId),
+    patientIdIdx: index('appointments_patientId_idx').on(table.patientId),
+    appointmentDateIdx: index('appointments_appointmentDate_idx').on(table.appointmentDate),
   })
 );
 

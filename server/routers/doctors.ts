@@ -51,14 +51,23 @@ export const doctorsRouter = router({
         languages: z.string().optional(),
         consultationFee: z.string().optional(),
         procedures: z.string().optional(),
+        departmentId: z.number().nullable().optional(),
         isVisiting: z.enum(['yes', 'no']).default('no'),
+        visitingStartDate: z.string().nullable().optional(),
+        visitingEndDate: z.string().nullable().optional(),
         available: z.enum(['yes', 'no']).default('yes'),
       })
     )
     .mutation(async ({ input }) => {
       const db = await ensureDatabaseAvailable();
 
-      const doctor = await db.insert(doctors).values(input);
+      const valuesToInsert = {
+        ...input,
+        visitingStartDate: input.visitingStartDate ? new Date(input.visitingStartDate) : null,
+        visitingEndDate: input.visitingEndDate ? new Date(input.visitingEndDate) : null,
+      };
+
+      const doctor = await db.insert(doctors).values(valuesToInsert);
 
       // Invalidate doctors list cache
       serverCache.invalidate(CacheKeys.doctorsList());
@@ -80,7 +89,10 @@ export const doctorsRouter = router({
         languages: z.string().optional(),
         consultationFee: z.string().optional(),
         procedures: z.string().optional(),
+        departmentId: z.number().nullable().optional(),
         isVisiting: z.enum(['yes', 'no']),
+        visitingStartDate: z.string().nullable().optional(),
+        visitingEndDate: z.string().nullable().optional(),
         available: z.enum(['yes', 'no']),
       })
     )
@@ -88,8 +100,13 @@ export const doctorsRouter = router({
       const db = await ensureDatabaseAvailable();
 
       const { id, ...data } = input;
+      const valuesToUpdate = {
+        ...data,
+        visitingStartDate: data.visitingStartDate ? new Date(data.visitingStartDate) : null,
+        visitingEndDate: data.visitingEndDate ? new Date(data.visitingEndDate) : null,
+      };
 
-      await db.update(doctors).set(data).where(eq(doctors.id, id));
+      await db.update(doctors).set(valuesToUpdate).where(eq(doctors.id, id));
 
       // Invalidate doctors list cache
       serverCache.invalidate(CacheKeys.doctorsList());
