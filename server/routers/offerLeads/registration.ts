@@ -92,6 +92,20 @@ export const offerRegistrationRouter = router({
         ...offerStatusTimestamps,
       });
 
+      // Ensure patient profile exists in patients table for seamless portal login
+      try {
+        const { ensurePatientAccount } = await import('../../services/schedulingService');
+        await ensurePatientAccount({
+          phone: normalizedPhone,
+          fullName: input.fullName,
+          gender: input.gender as 'male' | 'female' | undefined,
+          age: input.age,
+          email: input.email,
+        });
+      } catch (error) {
+        logger.warn('Failed to auto-provision patient account for offer lead:', error);
+      }
+
       // Get offer details for notification
       const { offers } = await import('../../../drizzle/schema');
       const [offer] = await db.select().from(offers).where(eq(offers.id, input.offerId)).limit(1);

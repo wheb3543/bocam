@@ -1,10 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockNavigate, mockAppointmentsQuery, mockResultsQuery } = vi.hoisted(() => ({
+const { mockNavigate, mockAppointmentsQuery, mockResultsQuery, mockMeQuery } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
   mockAppointmentsQuery: vi.fn(),
   mockResultsQuery: vi.fn(),
+  mockMeQuery: vi.fn(),
 }));
 
 vi.mock('wouter', () => ({
@@ -14,6 +15,7 @@ vi.mock('wouter', () => ({
 vi.mock('@/lib/api/trpc', () => ({
   trpc: {
     patientPortal: {
+      me: { useQuery: mockMeQuery },
       myAppointments: { useQuery: mockAppointmentsQuery },
       myResults: { useQuery: mockResultsQuery },
     },
@@ -32,6 +34,10 @@ import PatientResultsPage from './PatientResultsPage';
 describe('Patient portal list pages', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockMeQuery.mockReturnValue({
+      data: null,
+      isLoading: false,
+    });
     mockAppointmentsQuery.mockReturnValue({
       data: [
         {

@@ -118,6 +118,7 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
     expect(analytics).toContain('getMessageStats: reportsViewProcedure');
     expect(analytics).toContain('exportAuditLogs: auditExportProcedure');
     expect(messages).toContain("getBroadcastStats: reportsViewProcedure");
-    expect(templates).toContain('getTemplatePerformance: reportsViewProcedure');
+    expect(analytics).toContain('getTemplatePerformance: reportsViewProcedure');
+    expect(templates).toContain('communicationTemplatesProcedure');
   });
 });

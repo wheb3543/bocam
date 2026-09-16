@@ -303,7 +303,8 @@ export const patientPortalRouter = router({
 
   // الحصول على حجوزات المريض (مواعيد الأطباء)
   myAppointments: patientProcedure.query(async ({ ctx }) => {
-    return getPatientAppointments((ctx as { patient: { phone: string } }).patient.phone);
+    const patient = (ctx as { patient: { id: number; phone: string } }).patient;
+    return getPatientAppointments(patient.phone, patient.id);
   }),
 
   // الحصول على حجوزات العروض

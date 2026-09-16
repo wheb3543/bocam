@@ -64,6 +64,20 @@ export const campRegistrationRouter = router({
       preferredTimeSlot: assignedTimeSlot,
     });
 
+    // Ensure patient profile exists in patients table for seamless portal login
+    try {
+      const { ensurePatientAccount } = await import('../../services/schedulingService');
+      await ensurePatientAccount({
+        phone: normalizedPhone,
+        fullName: input.fullName,
+        gender: input.gender as 'male' | 'female' | undefined,
+        age: input.age,
+        email: input.email,
+      });
+    } catch (error) {
+      logger.warn('Failed to auto-provision patient account for camp registration:', error);
+    }
+
     const { camps } = await import('../../../drizzle/schema');
     const [camp] = await db.select().from(camps).where(eq(camps.id, input.campId)).limit(1);
 

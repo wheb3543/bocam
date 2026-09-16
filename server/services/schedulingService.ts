@@ -403,3 +403,58 @@ export async function saveDoctorWeeklySchedules(
 
   return { success: true };
 }
+
+/**
+ * Add or replace a doctor's schedule exception (e.g., leave, holiday, custom day)
+ */
+export async function addDoctorScheduleException(
+  doctorId: number,
+  data: {
+    exceptionDate: string;
+    isOff?: boolean;
+    customStartTime?: string;
+    customEndTime?: string;
+    reason?: string;
+  }
+) {
+  const db = await ensureDatabaseAvailable();
+
+  // Delete any existing exception for that specific date first
+  await db
+    .delete(doctorScheduleExceptions)
+    .where(
+      and(
+        eq(doctorScheduleExceptions.doctorId, doctorId),
+        eq(doctorScheduleExceptions.exceptionDate, data.exceptionDate)
+      )
+    );
+
+  const [res] = await db.insert(doctorScheduleExceptions).values({
+    doctorId,
+    exceptionDate: data.exceptionDate,
+    isOff: data.isOff !== false,
+    customStartTime: data.customStartTime || null,
+    customEndTime: data.customEndTime || null,
+    reason: data.reason || null,
+  });
+
+  return { success: true, id: res.insertId };
+}
+
+/**
+ * Delete a doctor's schedule exception
+ */
+export async function deleteDoctorScheduleException(doctorId: number, exceptionId: number) {
+  const db = await ensureDatabaseAvailable();
+
+  await db
+    .delete(doctorScheduleExceptions)
+    .where(
+      and(
+        eq(doctorScheduleExceptions.id, exceptionId),
+        eq(doctorScheduleExceptions.doctorId, doctorId)
+      )
+    );
+
+  return { success: true };
+}

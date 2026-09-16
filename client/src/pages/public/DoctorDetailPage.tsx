@@ -23,8 +23,6 @@ import {
   Globe,
   CreditCard,
   MessageSquare,
-  Sun,
-  Moon,
   AlertCircle,
 } from 'lucide-react';
 import { getCompleteTrackingData } from '@/lib/tracking/tracking';
@@ -333,10 +331,15 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                 {/* Doctor Info */}
                 <div className="md:col-span-2 space-y-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded-full font-medium">
                         طبيب معتمد
                       </span>
+                      {doctor.isVisiting === 'yes' && (
+                        <span className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 px-2.5 py-1 rounded-full font-medium">
+                          طبيب زائر
+                        </span>
+                      )}
                     </div>
                     <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground mb-1">
                       {doctor.name}
@@ -354,6 +357,34 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
                   {/* Info Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    {doctor.isVisiting === 'yes' &&
+                      doctor.visitingStartDate &&
+                      doctor.visitingEndDate && (
+                        <div className="flex items-center gap-3 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/50 p-3 rounded-xl sm:col-span-2">
+                          <div className="bg-purple-100 dark:bg-purple-900/50 p-2 rounded-lg flex-shrink-0">
+                            <Calendar className="h-4 w-4 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-purple-700 dark:text-purple-300 font-medium">
+                              فترة زيارة الطبيب
+                            </p>
+                            <p className="font-semibold text-purple-950 dark:text-purple-100 text-sm">
+                              من{' '}
+                              {new Date(doctor.visitingStartDate).toLocaleDateString('ar-YE', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                              })}{' '}
+                              إلى{' '}
+                              {new Date(doctor.visitingEndDate).toLocaleDateString('ar-YE', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     {doctor.experience && (
                       <div className="flex items-center gap-3 bg-muted/50 p-3 rounded-xl">
                         <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">

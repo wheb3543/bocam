@@ -275,4 +275,46 @@ export const appointmentsRouter = router({
       const { saveDoctorWeeklySchedules } = await import('../services/schedulingService');
       return saveDoctorWeeklySchedules(input.doctorId, input.schedules);
     }),
+
+  /**
+   * إضافة استثناء/إجازة لتاريخ محدد لطبيب
+   */
+  addDoctorScheduleException: appointmentsUpdateProcedure
+    .input(
+      z.object({
+        doctorId: z.number().int().positive(),
+        exceptionDate: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, 'صيغة التاريخ يجب أن تكون YYYY-MM-DD'),
+        isOff: z.boolean().default(true),
+        customStartTime: z
+          .string()
+          .regex(/^\d{2}:\d{2}$/)
+          .optional(),
+        customEndTime: z
+          .string()
+          .regex(/^\d{2}:\d{2}$/)
+          .optional(),
+        reason: z.string().max(255).optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { addDoctorScheduleException } = await import('../services/schedulingService');
+      return addDoctorScheduleException(input.doctorId, input);
+    }),
+
+  /**
+   * حذف استثناء تاريخ لطبيب
+   */
+  deleteDoctorScheduleException: appointmentsUpdateProcedure
+    .input(
+      z.object({
+        doctorId: z.number().int().positive(),
+        exceptionId: z.number().int().positive(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { deleteDoctorScheduleException } = await import('../services/schedulingService');
+      return deleteDoctorScheduleException(input.doctorId, input.exceptionId);
+    }),
 });

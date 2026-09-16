@@ -1,4 +1,4 @@
-import { eq, and, gt, desc } from 'drizzle-orm';
+import { eq, and, or, gt, desc } from 'drizzle-orm';
 import { getDb } from './connection';
 import { normalizePhoneNumber } from './whatsapp';
 import {
@@ -223,17 +223,21 @@ export async function verifyPatientPassword(
 
 // ============ Patient Appointments ============
 
-export async function getPatientAppointments(phone: string) {
+export async function getPatientAppointments(phone: string, patientId?: number) {
   const db = await getDb();
   if (!db) {
     return [];
   }
   const normalizedPhone = normalizePatientPhone(phone);
+  const condition =
+    patientId && patientId > 0
+      ? or(eq(appointments.patientId, patientId), eq(appointments.phone, normalizedPhone))
+      : eq(appointments.phone, normalizedPhone);
 
   const result = await db
     .select()
     .from(appointments)
-    .where(eq(appointments.phone, normalizedPhone))
+    .where(condition)
     .orderBy(desc(appointments.createdAt));
 
   return result;

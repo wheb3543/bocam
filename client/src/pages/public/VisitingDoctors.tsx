@@ -39,6 +39,8 @@ type VisitingDoctor = {
   experience?: string | null;
   consultationFee?: number | string | null;
   departmentId?: number | null;
+  visitingStartDate?: string | Date | null;
+  visitingEndDate?: string | Date | null;
 };
 
 type PublicPageTextContent = {
@@ -320,6 +322,24 @@ function VisitingDoctorsContent() {
                           </div>
                         )}
                       </div>
+
+                      {doctor.visitingStartDate && doctor.visitingEndDate && (
+                        <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-purple-800 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/50 px-2.5 py-1.5 rounded-lg">
+                          <Calendar className="h-3.5 w-3.5 text-purple-600 shrink-0" />
+                          <span className="font-medium">
+                            فترة الزيارة:{' '}
+                            {new Date(doctor.visitingStartDate).toLocaleDateString('ar-YE', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}{' '}
+                            -{' '}
+                            {new Date(doctor.visitingEndDate).toLocaleDateString('ar-YE', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}
+                          </span>
+                        </div>
+                      )}
 
                       <Button
                         onClick={(e) => {
