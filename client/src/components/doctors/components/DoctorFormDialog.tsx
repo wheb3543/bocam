@@ -35,6 +35,7 @@ interface DoctorFormDialogProps {
   onSubmit: () => void;
   isPending: boolean;
   onNameChange?: (value: string) => void;
+  doctorType?: 'regular' | 'visiting' | 'all';
 }
 
 export function DoctorFormDialog({
@@ -46,10 +47,13 @@ export function DoctorFormDialog({
   onSubmit,
   isPending,
   onNameChange,
+  doctorType,
 }: DoctorFormDialogProps) {
   const { data: departments } = trpc.departments.list.useQuery(undefined, {
     enabled: open,
   });
+
+  const isVisitingDoctor = doctorType === 'visiting' || formData.isVisiting === 'yes';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -57,20 +61,42 @@ export function DoctorFormDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div
-              className={`h-8 w-8 rounded-lg flex items-center justify-center ${mode === 'edit' ? 'bg-blue-50' : 'bg-emerald-50'}`}
+              className={`h-8 w-8 rounded-lg flex items-center justify-center ${
+                mode === 'edit'
+                  ? 'bg-blue-50 dark:bg-blue-900/30'
+                  : isVisitingDoctor
+                    ? 'bg-purple-50 dark:bg-purple-900/30'
+                    : 'bg-emerald-50 dark:bg-emerald-900/30'
+              }`}
             >
               {mode === 'edit' ? (
-                <Edit className="h-4 w-4 text-blue-600" />
+                <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               ) : (
-                <Plus className="h-4 w-4 text-emerald-600" />
+                <Plus
+                  className={`h-4 w-4 ${
+                    isVisitingDoctor
+                      ? 'text-purple-600 dark:text-purple-400'
+                      : 'text-emerald-600 dark:text-emerald-400'
+                  }`}
+                />
               )}
             </div>
-            {mode === 'edit' ? 'تعديل بيانات الطبيب' : 'إضافة طبيب جديد'}
+            {mode === 'edit'
+              ? isVisitingDoctor
+                ? 'تعديل بيانات الطبيب الزائر'
+                : 'تعديل بيانات الطبيب'
+              : isVisitingDoctor
+                ? 'إضافة طبيب زائر جديد'
+                : 'إضافة طبيب جديد'}
           </DialogTitle>
           <DialogDescription>
             {mode === 'edit'
-              ? 'قم بتعديل بيانات الطبيب في النموذج أدناه'
-              : 'أدخل بيانات الطبيب الجديد في النموذج أدناه'}
+              ? isVisitingDoctor
+                ? 'قم بتعديل بيانات الطبيب الزائر وتواريخ الزيارة في النموذج أدناه'
+                : 'قم بتعديل بيانات الطبيب في النموذج أدناه'
+              : isVisitingDoctor
+                ? 'أدخل بيانات الطبيب الزائر وفترة وتفاصيل الزيارة في النموذج أدناه'
+                : 'أدخل بيانات الطبيب الجديد في النموذج أدناه'}
           </DialogDescription>
         </DialogHeader>
 

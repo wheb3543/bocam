@@ -55,9 +55,10 @@ export default function ManagementPage() {
           onValueChange={setActiveTab}
           className="flex h-full min-h-0 flex-col gap-3"
         >
-          <TabsList className="mx-auto grid w-full max-w-3xl shrink-0 grid-cols-2 sm:grid-cols-4">
+          <TabsList className="mx-auto grid w-full max-w-4xl shrink-0 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
             <TabsTrigger value="departments">الأقسام الطبية</TabsTrigger>
             <TabsTrigger value="doctors">إدارة الأطباء</TabsTrigger>
+            <TabsTrigger value="visitingDoctors">الأطباء الزائرين</TabsTrigger>
             <TabsTrigger value="offers">إدارة العروض</TabsTrigger>
             <TabsTrigger value="camps">إدارة المخيمات</TabsTrigger>
           </TabsList>
@@ -67,7 +68,11 @@ export default function ManagementPage() {
           </TabsContent>
 
           <TabsContent value="doctors" className="mt-0 min-h-0 flex-1">
-            <DoctorsManagement />
+            <DoctorsManagement doctorType="regular" />
+          </TabsContent>
+
+          <TabsContent value="visitingDoctors" className="mt-0 min-h-0 flex-1">
+            <DoctorsManagement doctorType="visiting" />
           </TabsContent>
 
           <TabsContent value="offers" className="mt-0 min-h-0 flex-1">

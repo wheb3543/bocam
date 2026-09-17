@@ -136,11 +136,16 @@ function DoctorsContent() {
     return String(d.id) === departmentParam || d.slug === departmentParam;
   });
 
-  // Filter doctors based on search, specialty, and department
+  // Filter doctors based on search, specialty, and department (regular clinic doctors only)
   const filteredDoctors = Array.isArray(doctors)
     ? doctors.filter((doctor) => {
         // Only show available doctors
         if (doctor.available !== 'yes') {
+          return false;
+        }
+
+        // Exclude visiting doctors (they have their own dedicated page /visiting-doctors)
+        if (doctor.isVisiting === 'yes') {
           return false;
         }
 
@@ -164,11 +169,18 @@ function DoctorsContent() {
       })
     : [];
 
-  // Get unique specialties for filter
+  // Count available visiting doctors for optional discovery banner
+  const visitingDoctorsCount = Array.isArray(doctors)
+    ? doctors.filter((d) => d.available === 'yes' && d.isVisiting === 'yes').length
+    : 0;
+
+  // Get unique specialties for filter (regular clinic doctors only)
   const specialties = Array.from(
     new Set(
       Array.isArray(doctors)
-        ? doctors.filter((d) => d.available === 'yes').map((d) => d.specialty)
+        ? doctors
+            .filter((d) => d.available === 'yes' && d.isVisiting !== 'yes')
+            .map((d) => d.specialty)
         : []
     )
   );
@@ -214,6 +226,24 @@ function DoctorsContent() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Quick Link to Visiting Doctors */}
+                {visitingDoctorsCount > 0 && (
+                  <div className="mt-3 pt-3 border-t border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                      <span>هل تبحث عن الاستشاريين والأطباء الزائرين للمركز؟</span>
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLocation('/visiting-doctors')}
+                      className="h-7 text-xs border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300 dark:hover:bg-purple-950/40 rounded-lg gap-1.5 self-start sm:self-auto"
+                    >
+                      <span>عرض الأطباء الزائرين ({visitingDoctorsCount})</span>
+                    </Button>
+                  </div>
+                )}
               </div>
             </AnimatedCard>
 

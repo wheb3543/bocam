@@ -101,6 +101,15 @@ export const doctorColumns: ColumnConfig[] = [
     sortType: 'string',
   },
   {
+    key: 'visitingDates',
+    label: 'فترة الزيارة',
+    defaultVisible: false,
+    defaultWidth: 160,
+    minWidth: 120,
+    maxWidth: 280,
+    sortable: false,
+  },
+  {
     key: 'status',
     label: 'الحالة',
     defaultVisible: true,
@@ -117,6 +126,73 @@ export const doctorColumns: ColumnConfig[] = [
     minWidth: 100,
     maxWidth: 250,
     sortType: 'date',
+  },
+  {
+    key: 'actions',
+    label: 'الإجراءات',
+    defaultVisible: true,
+    defaultWidth: 180,
+    minWidth: 140,
+    maxWidth: 300,
+    sortable: false,
+  },
+];
+
+// تعريف أعمدة جدول الأطباء الزائرين المخصصة
+export const visitingDoctorColumns: ColumnConfig[] = [
+  {
+    key: 'name',
+    label: 'اسم الطبيب الزائر',
+    defaultVisible: true,
+    defaultWidth: 200,
+    minWidth: 150,
+    maxWidth: 400,
+    sortType: 'string',
+  },
+  {
+    key: 'specialty',
+    label: 'التخصص الاستشاري',
+    defaultVisible: true,
+    defaultWidth: 180,
+    minWidth: 120,
+    maxWidth: 350,
+    sortType: 'string',
+  },
+  {
+    key: 'visitingDates',
+    label: 'فترة الزيارة',
+    defaultVisible: true,
+    defaultWidth: 190,
+    minWidth: 140,
+    maxWidth: 300,
+    sortable: false,
+  },
+  {
+    key: 'experience',
+    label: 'الخبرة والمؤهلات',
+    defaultVisible: true,
+    defaultWidth: 130,
+    minWidth: 90,
+    maxWidth: 250,
+    sortType: 'string',
+  },
+  {
+    key: 'consultationFee',
+    label: 'رسوم الاستشارة',
+    defaultVisible: true,
+    defaultWidth: 120,
+    minWidth: 90,
+    maxWidth: 200,
+    sortType: 'number',
+  },
+  {
+    key: 'status',
+    label: 'الحالة',
+    defaultVisible: true,
+    defaultWidth: 100,
+    minWidth: 80,
+    maxWidth: 180,
+    sortType: 'string',
   },
   {
     key: 'actions',
@@ -205,6 +281,8 @@ export function DoctorTable({
           return item.consultationFee;
         case 'isVisiting':
           return item.isVisiting ? 'نعم' : 'لا';
+        case 'visitingDates':
+          return item.visitingStartDate ? String(item.visitingStartDate) : '';
         case 'status':
           return item.status;
         default:
@@ -346,6 +424,34 @@ export function DoctorTable({
                       >
                         {doctor.isVisiting === 'yes' ? 'زائر' : 'مقيم'}
                       </Badge>
+                    </FrozenTableCell>
+                  );
+                case 'visitingDates':
+                  if (
+                    doctor.isVisiting === 'yes' &&
+                    (doctor.visitingStartDate || doctor.visitingEndDate)
+                  ) {
+                    return (
+                      <FrozenTableCell key={colKey} columnKey={colKey}>
+                        <div className="flex flex-col text-xs text-purple-700 dark:text-purple-300 font-medium">
+                          <span>
+                            {doctor.visitingStartDate
+                              ? formatDate(new Date(doctor.visitingStartDate))
+                              : '—'}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            إلى{' '}
+                            {doctor.visitingEndDate
+                              ? formatDate(new Date(doctor.visitingEndDate))
+                              : '—'}
+                          </span>
+                        </div>
+                      </FrozenTableCell>
+                    );
+                  }
+                  return (
+                    <FrozenTableCell key={colKey} columnKey={colKey}>
+                      <span className="text-muted-foreground text-xs">—</span>
                     </FrozenTableCell>
                   );
                 case 'slug':

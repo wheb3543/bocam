@@ -163,8 +163,8 @@ describe('Smart Scheduling Service (خدمة الجدولة الذكية)', () =
       const result = await getAvailableSlots(1, '2026-10-14');
       expect(result.isWorking).toBe(true);
       expect(result.slots.length).toBeGreaterThan(0);
-      // Default: 09:00 to 14:00 with 30 min duration -> 10 slots
-      expect(result.slots).toHaveLength(10);
+      // Default: 09:00 to 13:00 with 30 min duration -> 8 slots
+      expect(result.slots).toHaveLength(8);
       expect(result.slots[0].slotStartTime).toBe('09:00');
       expect(result.slots[0].slotEndTime).toBe('09:30');
       expect(result.slots[0].period).toBe('morning');

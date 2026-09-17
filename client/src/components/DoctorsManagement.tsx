@@ -10,16 +10,23 @@ import { useDoctorManagement } from './doctors/hooks/useDoctorManagement';
 import { DoctorStatsCards } from './doctors/components/DoctorStatsCards';
 import { DoctorFormDialog } from './doctors/components/DoctorFormDialog';
 import { DoctorScheduleDialog } from './doctors/components/DoctorScheduleDialog';
-import { DoctorTable } from './doctors/components/DoctorTable';
-import { doctorColumns } from './doctors/components/DoctorTable';
+import {
+  DoctorTable,
+  doctorColumns,
+  visitingDoctorColumns,
+} from './doctors/components/DoctorTable';
 import type { Doctor } from './doctors/types/doctor.types';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { PermissionHint } from '@/components/PermissionHint';
 
-export default function DoctorsManagement() {
+export interface DoctorsManagementProps {
+  doctorType?: 'regular' | 'visiting' | 'all';
+}
+
+export default function DoctorsManagement({ doctorType = 'all' }: DoctorsManagementProps = {}) {
   const [scheduleDoctor, setScheduleDoctor] = useState<Doctor | null>(null);
   const deleteConfirm = useConfirmDialog<Doctor>();
-  const doctorManagement = useDoctorManagement();
+  const doctorManagement = useDoctorManagement({ doctorType });
   const { can } = useRolePermissions();
   const canCreate = can('catalog.create');
   const canUpdate = can('catalog.update');
@@ -27,10 +34,14 @@ export default function DoctorsManagement() {
   const canArchive = can('catalog.archive');
   const canDelete = can('catalog.delete');
 
+  const isVisiting = doctorType === 'visiting';
+  const activeColumns = isVisiting ? visitingDoctorColumns : doctorColumns;
+  const tableKey = isVisiting ? 'visiting_doctors' : 'doctors';
+
   // === useTableFeatures hook ===
   const doctorTable = useTableFeatures({
-    tableKey: 'doctors',
-    columns: doctorColumns,
+    tableKey,
+    columns: activeColumns,
     defaultFrozenColumns: ['name'],
   });
 
@@ -72,7 +83,7 @@ export default function DoctorsManagement() {
     <div className="flex h-full min-h-0 flex-col gap-3">
       {/* Stats Cards */}
       <div className="shrink-0">
-        <DoctorStatsCards stats={doctorManagement.doctorStats} />
+        <DoctorStatsCards stats={doctorManagement.doctorStats} doctorType={doctorType} />
       </div>
 
       {/* Toolbar */}
@@ -81,7 +92,11 @@ export default function DoctorsManagement() {
           <div className="relative flex-1 w-full max-w-md">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="البحث بالاسم، التخصص، أو اللغات..."
+              placeholder={
+                isVisiting
+                  ? 'البحث في الأطباء الزائرين بالاسم، التخصص...'
+                  : 'البحث بالاسم، التخصص، أو اللغات...'
+              }
               value={doctorManagement.searchTerm}
               onChange={(e) => doctorManagement.setSearchTerm(e.target.value)}
               className="pr-10"
@@ -92,10 +107,16 @@ export default function DoctorsManagement() {
         {canCreate ? (
           <Button onClick={() => doctorManagement.handleOpenDialog()} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 ml-2" />
-            إضافة طبيب جديد
+            {isVisiting ? 'إضافة طبيب زائر جديد' : 'إضافة طبيب جديد'}
           </Button>
         ) : (
-          <PermissionHint message="تحتاج إلى صلاحية إنشاء الكتالوج لإضافة طبيب أو نسخ بياناته." />
+          <PermissionHint
+            message={
+              isVisiting
+                ? 'تحتاج إلى صلاحية إنشاء الكتالوج لإضافة طبيب زائر أو نسخ بياناته.'
+                : 'تحتاج إلى صلاحية إنشاء الكتالوج لإضافة طبيب أو نسخ بياناته.'
+            }
+          />
         )}
       </div>
 
@@ -141,6 +162,7 @@ export default function DoctorsManagement() {
             doctorManagement.createMutation.isPending || doctorManagement.updateMutation.isPending
           }
           onNameChange={doctorManagement.autoGenerateSlug}
+          doctorType={doctorType}
         />
       ) : null}
 
@@ -150,14 +172,14 @@ export default function DoctorsManagement() {
           open={deleteConfirm.isOpen}
           onOpenChange={() => deleteConfirm.closeConfirm()}
           itemName={deleteConfirm.item?.name || undefined}
-          itemType="الطبيب"
+          itemType={isVisiting ? 'الطبيب الزائر' : 'الطبيب'}
           onConfirm={() => {
             if (deleteConfirm.item && deleteConfirm.item.id) {
               doctorManagement.deleteMutation.mutate({ id: deleteConfirm.item.id });
             }
           }}
           isLoading={doctorManagement.deleteMutation.isPending}
-          confirmText="حذف الطبيب"
+          confirmText={isVisiting ? 'حذف الطبيب الزائر' : 'حذف الطبيب'}
         />
       ) : null}
     </div>

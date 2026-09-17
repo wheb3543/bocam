@@ -10,11 +10,21 @@ import type { Doctor, DoctorFormData } from '../types/doctor.types';
 import { initialFormData } from '../types/doctor.types';
 import { calculateDoctorStats } from '../utils/doctorHelpers';
 
-export function useDoctorManagement() {
+export interface UseDoctorManagementOptions {
+  doctorType?: 'regular' | 'visiting' | 'all';
+}
+
+export function useDoctorManagement(options?: UseDoctorManagementOptions) {
+  const doctorType = options?.doctorType || 'all';
+  const defaultIsVisiting: 'yes' | 'no' = doctorType === 'visiting' ? 'yes' : 'no';
+
   // Dialog states
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
-  const [formData, setFormData] = useState<DoctorFormData>(initialFormData);
+  const [formData, setFormData] = useState<DoctorFormData>(() => ({
+    ...initialFormData,
+    isVisiting: defaultIsVisiting,
+  }));
   const [searchTerm, setSearchTerm] = useState('');
 
   // Slug auto-generation hook
@@ -24,7 +34,21 @@ export function useDoctorManagement() {
   );
 
   // Queries
-  const { data: doctors, isLoading, refetch } = trpc.doctors.list.useQuery();
+  const { data: allDoctors, isLoading, refetch } = trpc.doctors.list.useQuery();
+
+  // Filter doctors based on doctorType
+  const doctors = useMemo(() => {
+    if (!allDoctors) {
+      return [];
+    }
+    if (doctorType === 'regular') {
+      return allDoctors.filter((d) => d.isVisiting !== 'yes');
+    }
+    if (doctorType === 'visiting') {
+      return allDoctors.filter((d) => d.isVisiting === 'yes');
+    }
+    return allDoctors;
+  }, [allDoctors, doctorType]);
 
   // Stats
   const doctorStats = useMemo(() => calculateDoctorStats(doctors), [doctors]);
@@ -76,7 +100,10 @@ export function useDoctorManagement() {
 
   // Handlers
   const resetForm = () => {
-    setFormData(initialFormData);
+    setFormData({
+      ...initialFormData,
+      isVisiting: defaultIsVisiting,
+    });
     setEditingDoctor(null);
     resetManualEdit();
   };
@@ -109,7 +136,7 @@ export function useDoctorManagement() {
       languages: doctor.languages || '',
       consultationFee: doctor.consultationFee || '',
       procedures: doctor.procedures || '',
-      isVisiting: (doctor.isVisiting as 'yes' | 'no') || 'no',
+      isVisiting: (doctor.isVisiting as 'yes' | 'no') || defaultIsVisiting,
       available: 'yes',
     });
     setDialogOpen(true);
@@ -131,7 +158,7 @@ export function useDoctorManagement() {
         languages: doctor.languages || '',
         consultationFee: doctor.consultationFee || '',
         procedures: doctor.procedures || '',
-        isVisiting: (doctor.isVisiting as 'yes' | 'no') || 'no',
+        isVisiting: (doctor.isVisiting as 'yes' | 'no') || defaultIsVisiting,
         available: (doctor.available as 'yes' | 'no') || 'yes',
       });
     } else {
