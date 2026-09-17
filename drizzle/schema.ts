@@ -290,6 +290,13 @@ export const doctorSchedules = mysqlTable(
     dayOfWeek: int('dayOfWeek').notNull(), // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     startTime: varchar('startTime', { length: 10 }).notNull(), // "09:00"
     endTime: varchar('endTime', { length: 10 }).notNull(), // "17:00"
+    // Dual shift support (Morning & Evening)
+    isMorningActive: boolean('isMorningActive').default(true).notNull(),
+    morningStartTime: varchar('morningStartTime', { length: 10 }).default('09:00').notNull(),
+    morningEndTime: varchar('morningEndTime', { length: 10 }).default('13:00').notNull(),
+    isEveningActive: boolean('isEveningActive').default(false).notNull(),
+    eveningStartTime: varchar('eveningStartTime', { length: 10 }).default('16:00').notNull(),
+    eveningEndTime: varchar('eveningEndTime', { length: 10 }).default('20:00').notNull(),
     slotDurationMinutes: int('slotDurationMinutes').default(30).notNull(),
     maxCapacityPerSlot: int('maxCapacityPerSlot').default(1).notNull(),
     isActive: boolean('isActive').default(true).notNull(),

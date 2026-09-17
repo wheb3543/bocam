@@ -264,6 +264,28 @@ export const appointmentsRouter = router({
             dayOfWeek: z.number().min(0).max(6),
             startTime: z.string().regex(/^\d{2}:\d{2}$/),
             endTime: z.string().regex(/^\d{2}:\d{2}$/),
+            isMorningActive: z.boolean().optional(),
+            morningStartTime: z
+              .string()
+              .regex(/^\d{2}:\d{2}$/)
+              .optional()
+              .nullable(),
+            morningEndTime: z
+              .string()
+              .regex(/^\d{2}:\d{2}$/)
+              .optional()
+              .nullable(),
+            isEveningActive: z.boolean().optional(),
+            eveningStartTime: z
+              .string()
+              .regex(/^\d{2}:\d{2}$/)
+              .optional()
+              .nullable(),
+            eveningEndTime: z
+              .string()
+              .regex(/^\d{2}:\d{2}$/)
+              .optional()
+              .nullable(),
             slotDurationMinutes: z.number().min(5).max(180).optional(),
             maxCapacityPerSlot: z.number().min(1).max(50).optional(),
             isActive: z.boolean().optional(),
@@ -277,30 +299,78 @@ export const appointmentsRouter = router({
     }),
 
   /**
-   * إضافة استثناء/إجازة لتاريخ محدد لطبيب
+   * إضافة استثناء/إجازة لتاريخ محدد أو نطاق تواريخ لطبيب
    */
   addDoctorScheduleException: appointmentsUpdateProcedure
     .input(
-      z.object({
-        doctorId: z.number().int().positive(),
-        exceptionDate: z
-          .string()
-          .regex(/^\d{4}-\d{2}-\d{2}$/, 'صيغة التاريخ يجب أن تكون YYYY-MM-DD'),
-        isOff: z.boolean().default(true),
-        customStartTime: z
-          .string()
-          .regex(/^\d{2}:\d{2}$/)
-          .optional(),
-        customEndTime: z
-          .string()
-          .regex(/^\d{2}:\d{2}$/)
-          .optional(),
-        reason: z.string().max(255).optional(),
-      })
+      z
+        .object({
+          doctorId: z.number().int().positive(),
+          exceptionDate: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/, 'صيغة التاريخ يجب أن تكون YYYY-MM-DD')
+            .optional(),
+          startDate: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/, 'صيغة التاريخ يجب أن تكون YYYY-MM-DD')
+            .optional(),
+          endDate: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/, 'صيغة التاريخ يجب أن تكون YYYY-MM-DD')
+            .optional(),
+          isOff: z.boolean().default(true),
+          customStartTime: z
+            .string()
+            .regex(/^\d{2}:\d{2}$/)
+            .optional()
+            .nullable(),
+          customEndTime: z
+            .string()
+            .regex(/^\d{2}:\d{2}$/)
+            .optional()
+            .nullable(),
+          reason: z.string().max(255).optional().nullable(),
+        })
+        .refine((data) => Boolean(data.exceptionDate || data.startDate), {
+          message: 'يجب تحديد تاريخ الاستثناء أو تاريخ البداية والنهاية',
+        })
     )
     .mutation(async ({ input }) => {
       const { addDoctorScheduleException } = await import('../services/schedulingService');
       return addDoctorScheduleException(input.doctorId, input);
+    }),
+
+  /**
+   * فحص تعارض المواعيد المحجوزة مسبقاً مع فترة إجازة/استثناء مقترحة
+   */
+  checkScheduleConflict: appointmentsUpdateProcedure
+    .input(
+      z.object({
+        doctorId: z.number().int().positive(),
+        startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'صيغة التاريخ يجب أن تكون YYYY-MM-DD'),
+        endDate: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, 'صيغة التاريخ يجب أن تكون YYYY-MM-DD')
+          .optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      const { checkDoctorScheduleConflicts } = await import('../services/schedulingService');
+      return checkDoctorScheduleConflicts(input.doctorId, input.startDate, input.endDate);
+    }),
+
+  /**
+   * جلب دوام الطبيب والاستثناءات القادمة للواجهة العامة (بدون تفاصيل إدارية حساسة)
+   */
+  getDoctorPublicSchedule: publicProcedure
+    .input(
+      z.object({
+        doctorId: z.number().int().positive(),
+      })
+    )
+    .query(async ({ input }) => {
+      const { getDoctorPublicScheduleDetails } = await import('../services/schedulingService');
+      return getDoctorPublicScheduleDetails(input.doctorId);
     }),
 
   /**

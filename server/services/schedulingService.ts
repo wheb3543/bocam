@@ -44,7 +44,8 @@ export interface DaySlotsResult {
 function generateTimeSlots(
   startTime: string,
   endTime: string,
-  durationMinutes: number
+  durationMinutes: number,
+  forcedPeriod?: 'morning' | 'evening'
 ): { start: string; end: string; period: 'morning' | 'evening' }[] {
   const slots: { start: string; end: string; period: 'morning' | 'evening' }[] = [];
 
@@ -63,7 +64,7 @@ function generateTimeSlots(
 
     const startStr = `${String(sH).padStart(2, '0')}:${String(sM).padStart(2, '0')}`;
     const endStr = `${String(eH).padStart(2, '0')}:${String(eM).padStart(2, '0')}`;
-    const period = sH < 13 ? 'morning' : 'evening';
+    const period = forcedPeriod || (sH < 13 ? 'morning' : 'evening');
 
     slots.push({
       start: startStr,
@@ -164,27 +165,47 @@ export async function getAvailableSlots(
     )
     .limit(1);
 
-  // Determine effective working hours
-  let startTime = schedule?.startTime;
-  let endTime = schedule?.endTime;
-  let slotDuration = schedule?.slotDurationMinutes || 30;
-  let capacityPerSlot = schedule?.maxCapacityPerSlot || 1;
+  // 4. Generate all raw slots for the day (supporting Morning & Evening dual shifts)
+  let rawSlots: { start: string; end: string; period: 'morning' | 'evening' }[] = [];
+  const slotDuration = schedule?.slotDurationMinutes || 30;
+  const capacityPerSlot = schedule?.maxCapacityPerSlot || 1;
 
   if (exception && !exception.isOff && exception.customStartTime && exception.customEndTime) {
-    startTime = exception.customStartTime;
-    endTime = exception.customEndTime;
-  }
+    rawSlots = generateTimeSlots(exception.customStartTime, exception.customEndTime, slotDuration);
+  } else if (schedule) {
+    const morningActive = schedule.isMorningActive;
+    const eveningActive = schedule.isEveningActive;
 
-  // If no schedule exists, provide standard clinic fallback if available, or mark as off
-  if (!startTime || !endTime) {
+    if (morningActive) {
+      const mSlots = generateTimeSlots(
+        schedule.morningStartTime,
+        schedule.morningEndTime,
+        slotDuration,
+        'morning'
+      );
+      rawSlots.push(...mSlots);
+    }
+
+    if (eveningActive) {
+      const eSlots = generateTimeSlots(
+        schedule.eveningStartTime,
+        schedule.eveningEndTime,
+        slotDuration,
+        'evening'
+      );
+      rawSlots.push(...eSlots);
+    }
+
+    // Fallback if neither morning nor evening is marked active, but schedule.isActive was true
+    if (!morningActive && !eveningActive && schedule.startTime && schedule.endTime) {
+      rawSlots = generateTimeSlots(schedule.startTime, schedule.endTime, slotDuration);
+    }
+  } else {
     // Default fallback: If it's a weekday (Sat-Thu in Yemen: 0,1,2,3,4,6) and no custom schedule is set,
-    // provide default clinic hours (09:00 - 14:00) so doctors without custom schedules are still bookable
+    // provide default clinic morning hours (09:00 - 13:00) so doctors without custom schedules are still bookable
     if (dayOfWeek !== 5) {
       // 5 = Friday (عطلة الجمعة)
-      startTime = '09:00';
-      endTime = '14:00';
-      slotDuration = 30;
-      capacityPerSlot = 1;
+      rawSlots = generateTimeSlots('09:00', '13:00', 30, 'morning');
     } else {
       return {
         ...baseResult,
@@ -193,8 +214,12 @@ export async function getAvailableSlots(
     }
   }
 
-  // 4. Generate all raw slots for the day
-  const rawSlots = generateTimeSlots(startTime, endTime, slotDuration);
+  if (rawSlots.length === 0) {
+    return {
+      ...baseResult,
+      reason: 'لا توجد فترات عمل متاحة للطبيب في هذا اليوم',
+    };
+  }
 
   // 5. Fetch existing active bookings for this doctor on this day
   const activeBookings = await db
@@ -366,14 +391,20 @@ export async function getDoctorScheduleDetails(doctorId: number) {
 }
 
 /**
- * Save or replace doctor's weekly schedules
+ * Save or replace doctor's weekly schedules (supporting Morning & Evening dual shifts)
  */
 export async function saveDoctorWeeklySchedules(
   doctorId: number,
   schedulesList: {
     dayOfWeek: number;
-    startTime: string;
-    endTime: string;
+    startTime?: string;
+    endTime?: string;
+    isMorningActive?: boolean;
+    morningStartTime?: string | null;
+    morningEndTime?: string | null;
+    isEveningActive?: boolean;
+    eveningStartTime?: string | null;
+    eveningEndTime?: string | null;
     slotDurationMinutes?: number;
     maxCapacityPerSlot?: number;
     isActive?: boolean;
@@ -390,14 +421,30 @@ export async function saveDoctorWeeklySchedules(
 
   // Insert new schedules
   for (const s of schedulesList) {
+    const isMorning = s.isMorningActive ?? true;
+    const isEvening = s.isEveningActive ?? false;
+    const mStart = s.morningStartTime || '09:00';
+    const mEnd = s.morningEndTime || '13:00';
+    const eStart = s.eveningStartTime || '16:00';
+    const eEnd = s.eveningEndTime || '20:00';
+
+    const fallbackStart = isMorning ? mStart : eStart;
+    const fallbackEnd = isEvening ? eEnd : mEnd;
+
     await db.insert(doctorSchedules).values({
       doctorId,
       dayOfWeek: s.dayOfWeek,
-      startTime: s.startTime,
-      endTime: s.endTime,
+      startTime: s.startTime || fallbackStart,
+      endTime: s.endTime || fallbackEnd,
+      isMorningActive: isMorning,
+      morningStartTime: mStart,
+      morningEndTime: mEnd,
+      isEveningActive: isEvening,
+      eveningStartTime: eStart,
+      eveningEndTime: eEnd,
       slotDurationMinutes: s.slotDurationMinutes || 30,
       maxCapacityPerSlot: s.maxCapacityPerSlot || 1,
-      isActive: s.isActive !== false,
+      isActive: s.isActive !== false && (isMorning || isEvening),
     });
   }
 
@@ -405,40 +452,144 @@ export async function saveDoctorWeeklySchedules(
 }
 
 /**
- * Add or replace a doctor's schedule exception (e.g., leave, holiday, custom day)
+ * Helper to generate date strings between startDate and endDate inclusive
+ */
+function getDatesInRange(startDateStr: string, endDateStr: string): string[] {
+  const dates: string[] = [];
+  const start = new Date(`${startDateStr}T00:00:00`);
+  const end = new Date(`${endDateStr}T00:00:00`);
+
+  if (start > end) {
+    return [startDateStr];
+  }
+
+  const maxDays = 90;
+  const current = new Date(start);
+  let count = 0;
+
+  while (current <= end && count < maxDays) {
+    const y = current.getFullYear();
+    const m = String(current.getMonth() + 1).padStart(2, '0');
+    const d = String(current.getDate()).padStart(2, '0');
+    dates.push(`${y}-${m}-${d}`);
+    current.setDate(current.getDate() + 1);
+    count++;
+  }
+
+  return dates;
+}
+
+/**
+ * Add or replace a doctor's schedule exception (supports single date or date range)
  */
 export async function addDoctorScheduleException(
   doctorId: number,
   data: {
-    exceptionDate: string;
+    exceptionDate?: string;
+    startDate?: string;
+    endDate?: string;
     isOff?: boolean;
-    customStartTime?: string;
-    customEndTime?: string;
-    reason?: string;
+    customStartTime?: string | null;
+    customEndTime?: string | null;
+    reason?: string | null;
   }
 ) {
   const db = await ensureDatabaseAvailable();
 
-  // Delete any existing exception for that specific date first
-  await db
-    .delete(doctorScheduleExceptions)
+  const datesToProcess =
+    data.startDate && data.endDate
+      ? getDatesInRange(data.startDate, data.endDate)
+      : data.exceptionDate
+        ? [data.exceptionDate]
+        : [];
+
+  if (datesToProcess.length === 0) {
+    throw new Error('يرجى تحديد تاريخ أو نطاق تواريخ للاستثناء');
+  }
+
+  for (const dateStr of datesToProcess) {
+    // Delete any existing exception for that specific date first
+    await db
+      .delete(doctorScheduleExceptions)
+      .where(
+        and(
+          eq(doctorScheduleExceptions.doctorId, doctorId),
+          eq(doctorScheduleExceptions.exceptionDate, dateStr)
+        )
+      );
+
+    await db.insert(doctorScheduleExceptions).values({
+      doctorId,
+      exceptionDate: dateStr,
+      isOff: data.isOff !== false,
+      customStartTime: data.customStartTime || null,
+      customEndTime: data.customEndTime || null,
+      reason: data.reason || null,
+    });
+  }
+
+  return { success: true, count: datesToProcess.length };
+}
+
+/**
+ * Check for conflicting active appointments when adding an exception/leave
+ */
+export async function checkDoctorScheduleConflicts(
+  doctorId: number,
+  startDate: string,
+  endDate?: string
+) {
+  const db = await ensureDatabaseAvailable();
+
+  const dates = endDate ? getDatesInRange(startDate, endDate) : [startDate];
+
+  if (dates.length === 0) {
+    return { hasConflicts: false, conflictCount: 0, conflicts: [] };
+  }
+
+  const conflictingAppointments = await db
+    .select({
+      id: appointments.id,
+      fullName: appointments.fullName,
+      phone: appointments.phone,
+      preferredDate: appointments.preferredDate,
+      preferredTime: appointments.preferredTime,
+      slotStartTime: appointments.slotStartTime,
+      appointmentDate: appointments.appointmentDate,
+      status: appointments.status,
+    })
+    .from(appointments)
     .where(
       and(
-        eq(doctorScheduleExceptions.doctorId, doctorId),
-        eq(doctorScheduleExceptions.exceptionDate, data.exceptionDate)
+        eq(appointments.doctorId, doctorId),
+        sql`${appointments.status} NOT IN ('cancelled', 'completed')`,
+        or(
+          sql`${appointments.preferredDate} IN (${sql.join(
+            dates.map((d) => sql`${d}`),
+            sql`, `
+          )})`,
+          sql`DATE(${appointments.appointmentDate}) IN (${sql.join(
+            dates.map((d) => sql`${d}`),
+            sql`, `
+          )})`
+        )
       )
     );
 
-  const [res] = await db.insert(doctorScheduleExceptions).values({
-    doctorId,
-    exceptionDate: data.exceptionDate,
-    isOff: data.isOff !== false,
-    customStartTime: data.customStartTime || null,
-    customEndTime: data.customEndTime || null,
-    reason: data.reason || null,
-  });
-
-  return { success: true, id: res.insertId };
+  return {
+    hasConflicts: conflictingAppointments.length > 0,
+    conflictCount: conflictingAppointments.length,
+    conflicts: conflictingAppointments.map((app) => ({
+      id: app.id,
+      fullName: app.fullName,
+      phone: app.phone,
+      date:
+        app.preferredDate ||
+        (app.appointmentDate ? new Date(app.appointmentDate).toISOString().split('T')[0] : ''),
+      time: app.slotStartTime || app.preferredTime || '',
+      status: app.status,
+    })),
+  };
 }
 
 /**
@@ -457,4 +608,113 @@ export async function deleteDoctorScheduleException(doctorId: number, exceptionI
     );
 
   return { success: true };
+}
+
+export interface DoctorPublicScheduleDetails {
+  doctorId: number;
+  doctorName: string;
+  specialty: string;
+  isVisiting: boolean;
+  visitingStartDate?: string | null;
+  visitingEndDate?: string | null;
+  workingDays: {
+    dayOfWeek: number;
+    dayName: string;
+    isMorningActive: boolean;
+    morningHours?: string;
+    isEveningActive: boolean;
+    eveningHours?: string;
+    slotDurationMinutes: number;
+  }[];
+  upcomingLeaves: {
+    date: string;
+    reason?: string | null;
+  }[];
+}
+
+const ARABIC_DAYS: Record<number, string> = {
+  0: 'الأحد',
+  1: 'الإثنين',
+  2: 'الثلاثاء',
+  3: 'الأربعاء',
+  4: 'الخميس',
+  5: 'الجمعة',
+  6: 'السبت',
+};
+
+/**
+ * Get public doctor schedule and upcoming holidays/leaves
+ */
+export async function getDoctorPublicScheduleDetails(
+  doctorId: number
+): Promise<DoctorPublicScheduleDetails | null> {
+  const db = await ensureDatabaseAvailable();
+
+  const [doctor] = await db
+    .select({
+      id: doctors.id,
+      name: doctors.name,
+      specialty: doctors.specialty,
+      isVisiting: doctors.isVisiting,
+      visitingStartDate: doctors.visitingStartDate,
+      visitingEndDate: doctors.visitingEndDate,
+    })
+    .from(doctors)
+    .where(eq(doctors.id, doctorId))
+    .limit(1);
+
+  if (!doctor) {
+    return null;
+  }
+
+  const schedules = await db
+    .select()
+    .from(doctorSchedules)
+    .where(and(eq(doctorSchedules.doctorId, doctorId), eq(doctorSchedules.isActive, true)))
+    .orderBy(doctorSchedules.dayOfWeek);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const exceptions = await db
+    .select()
+    .from(doctorScheduleExceptions)
+    .where(
+      and(
+        eq(doctorScheduleExceptions.doctorId, doctorId),
+        eq(doctorScheduleExceptions.isOff, true),
+        sql`${doctorScheduleExceptions.exceptionDate} >= ${todayStr}`
+      )
+    )
+    .orderBy(doctorScheduleExceptions.exceptionDate)
+    .limit(10);
+
+  const workingDays = schedules.map((s) => ({
+    dayOfWeek: s.dayOfWeek,
+    dayName: ARABIC_DAYS[s.dayOfWeek] || `يوم ${s.dayOfWeek}`,
+    isMorningActive: s.isMorningActive,
+    morningHours: s.isMorningActive ? `${s.morningStartTime} - ${s.morningEndTime}` : undefined,
+    isEveningActive: s.isEveningActive,
+    eveningHours: s.isEveningActive ? `${s.eveningStartTime} - ${s.eveningEndTime}` : undefined,
+    slotDurationMinutes: s.slotDurationMinutes,
+  }));
+
+  const upcomingLeaves = exceptions.map((e) => ({
+    date: e.exceptionDate,
+    reason: e.reason,
+  }));
+
+  return {
+    doctorId: doctor.id,
+    doctorName: doctor.name,
+    specialty: doctor.specialty,
+    isVisiting: doctor.isVisiting === 'yes',
+    visitingStartDate: doctor.visitingStartDate
+      ? new Date(doctor.visitingStartDate).toISOString().split('T')[0]
+      : null,
+    visitingEndDate: doctor.visitingEndDate
+      ? new Date(doctor.visitingEndDate).toISOString().split('T')[0]
+      : null,
+    workingDays,
+    upcomingLeaves,
+  };
 }

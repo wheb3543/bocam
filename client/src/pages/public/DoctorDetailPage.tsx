@@ -24,11 +24,14 @@ import {
   CreditCard,
   MessageSquare,
   AlertCircle,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { getCompleteTrackingData } from '@/lib/tracking/tracking';
 import { trackViewContent } from '@/components/MetaPixel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -67,6 +70,10 @@ function DoctorDetailContent({ slug }: { slug: string }) {
   const { data: doctor, isLoading } = trpc.doctors.getBySlug.useQuery(
     { slug },
     { enabled: !!slug && slug !== ':slug' }
+  );
+  const { data: publicSchedule } = trpc.appointments.getDoctorPublicSchedule.useQuery(
+    { doctorId: doctor?.id || 0 },
+    { enabled: !!doctor?.id }
   );
   const submitAppointment = trpc.appointments.submit.useMutation();
 
@@ -553,6 +560,136 @@ function DoctorDetailContent({ slug }: { slug: string }) {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Clinic Schedule & Working Hours Section */}
+      <section className="pb-4 sm:pb-6 md:pb-10">
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="bg-white dark:bg-card rounded-2xl shadow-sm border border-border/50 p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b">
+              <div>
+                <h2 className="text-base sm:text-xl font-bold text-foreground flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-emerald-600" />
+                  <span>جدول وأوقات دوام العيادة</span>
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  أيام وساعات استقبال الحالات الطبية في عيادة {doctor.name}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Sun className="h-3.5 w-3.5 text-amber-500" />
+                  فترة صباحية
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Moon className="h-3.5 w-3.5 text-indigo-500" />
+                  فترة مسائية
+                </span>
+              </div>
+            </div>
+
+            {/* Upcoming Leaves / Holiday alert if any */}
+            {publicSchedule?.upcomingLeaves && publicSchedule.upcomingLeaves.length > 0 && (
+              <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 flex items-start gap-2.5 text-xs text-amber-900 dark:text-amber-200">
+                <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-semibold">تنويه إجازات العيادة القادمة:</span>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {publicSchedule.upcomingLeaves.map((leave, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded text-[11px]"
+                      >
+                        {leave.date} {leave.reason ? `(${leave.reason})` : ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Weekly Schedule Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2.5">
+              {[
+                { day: 6, name: 'السبت' },
+                { day: 0, name: 'الأحد' },
+                { day: 1, name: 'الإثنين' },
+                { day: 2, name: 'الثلاثاء' },
+                { day: 3, name: 'الأربعاء' },
+                { day: 4, name: 'الخميس' },
+                { day: 5, name: 'الجمعة' },
+              ].map(({ day, name }) => {
+                const shift = publicSchedule?.workingDays?.find((s) => s.dayOfWeek === day);
+                const isWorking = Boolean(
+                  shift && (shift.isMorningActive || shift.isEveningActive)
+                );
+
+                return (
+                  <div
+                    key={day}
+                    className={`p-3 rounded-xl border flex flex-col justify-between transition-all ${
+                      isWorking
+                        ? 'bg-card border-border/70 hover:border-emerald-500/40'
+                        : 'bg-muted/30 border-dashed border-border/40 opacity-70'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between pb-1.5 border-b border-border/30">
+                      <span className="font-bold text-xs sm:text-sm text-foreground">{name}</span>
+                      {isWorking ? (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-1 py-0 bg-emerald-500/10 text-emerald-700 border-emerald-300 dark:text-emerald-300"
+                        >
+                          متاح
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] px-1 py-0 text-muted-foreground"
+                        >
+                          عطلة
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="pt-2 space-y-1.5 text-xs">
+                      {isWorking && shift ? (
+                        <>
+                          {shift.isMorningActive && shift.morningHours && (
+                            <div className="flex items-center justify-between text-[11px] bg-amber-500/5 p-1 rounded">
+                              <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400">
+                                <Sun className="h-3 w-3" /> صباحي:
+                              </span>
+                              <span className="font-mono text-muted-foreground dir-ltr">
+                                {shift.morningHours}
+                              </span>
+                            </div>
+                          )}
+
+                          {shift.isEveningActive && shift.eveningHours && (
+                            <div className="flex items-center justify-between text-[11px] bg-indigo-500/5 p-1 rounded">
+                              <span className="flex items-center gap-1 text-indigo-700 dark:text-indigo-400">
+                                <Moon className="h-3 w-3" /> مسائي:
+                              </span>
+                              <span className="font-mono text-muted-foreground dir-ltr">
+                                {shift.eveningHours}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="py-2 text-center text-muted-foreground text-[11px] italic">
+                          مغلق
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
