@@ -5,8 +5,8 @@ import {
   leadStatusLabels as statusLabels,
   leadStatusColors as statusColors,
 } from '@/hooks/data/useStatusLabels';
-import LeadCard from '@/components/lead/LeadCard';
-import LeadStatsCards from '@/components/lead/LeadStatsCards';
+import LeadCard from './LeadCard';
+import LeadStatsCards from './LeadStatsCards';
 import MultiSelect from '@/components/form/MultiSelect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

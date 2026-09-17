@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import OfferLeadsManagement from '@/components/offer/OfferLeadsManagement';
+import { OfferLeadsManagement } from '@/components/offer';
 import { DateRangePicker } from '@/components/form/DateRangePicker';
 
 export default function OfferLeadsPage() {

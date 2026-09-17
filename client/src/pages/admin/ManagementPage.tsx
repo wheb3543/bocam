@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { emitToastHash } from '@/lib/toastHashRouter';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import OffersManagement from '@/components/offer/OffersManagement';
+import { OffersManagement } from '@/components/offer';
 import CampsManagement from '@/components/camp/CampsManagement';
 import DoctorsManagement from '@/components/DoctorsManagement';
 import DepartmentsTab from '@/components/departments/DepartmentsTab';
