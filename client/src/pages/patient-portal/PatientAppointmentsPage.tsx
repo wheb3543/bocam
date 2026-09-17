@@ -11,12 +11,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Calendar, CalendarPlus } from 'lucide-react';
 import AppointmentCard from '@/components/patient/AppointmentCard';
+import FamilyMembersFilter from '@/components/patient/FamilyMembersFilter';
 import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
 export default function PatientAppointmentsPage() {
   const [, navigate] = useLocation();
   const { formatDate } = useFormatDate();
   const [filter, setFilter] = useState<AppointmentFilter>('upcoming');
+  const [selectedMemberId, setSelectedMemberId] = useState<number | 'all'>('all');
   const { data: patient } = trpc.patientPortal.me.useQuery();
   const { data: appointments, isLoading } = trpc.patientPortal.myAppointments.useQuery();
   const { openBookingModal } = useBookingModal();
@@ -51,25 +53,56 @@ export default function PatientAppointmentsPage() {
     return <Badge variant={info.variant}>{info.label}</Badge>;
   };
 
+  // إحصائيات المواعيد لكل فرد من الأسرة
+  const memberCounts = useMemo(() => {
+    const counts: Record<number | 'all', number> = { all: appointments?.length || 0 };
+    if (appointments) {
+      appointments.forEach((apt) => {
+        if (apt.patientId) {
+          counts[apt.patientId] = (counts[apt.patientId] || 0) + 1;
+        }
+      });
+    }
+    return counts;
+  }, [appointments]);
+
   const filtered = useMemo(() => {
     const now = new Date();
     const all = appointments || [];
-    const upcoming = all
-      .filter((apt) => new Date(apt.appointmentDate || apt.createdAt) >= now)
+
+    // تصفية حسب فرد العائلة المختار أولاً
+    const memberFiltered =
+      selectedMemberId === 'all' ? all : all.filter((apt) => apt.patientId === selectedMemberId);
+
+    // تصنيف المواعيد بدقة:
+    // المواعيد القادمة: تاريخها مستقبلي وليست ملغاة أو مكتملة
+    const upcoming = memberFiltered
+      .filter((apt) => {
+        const isPastDate = new Date(apt.appointmentDate || apt.createdAt) < now;
+        const isClosed = apt.status === 'cancelled' || apt.status === 'completed';
+        return !isPastDate && !isClosed;
+      })
       .sort(
         (a, b) =>
           new Date(a.appointmentDate || a.createdAt).getTime() -
           new Date(b.appointmentDate || b.createdAt).getTime()
       );
-    const past = all
-      .filter((apt) => new Date(apt.appointmentDate || apt.createdAt) < now)
+
+    // المواعيد السابقة: انقضى تاريخها أو انتهت/أُلغيت
+    const past = memberFiltered
+      .filter((apt) => {
+        const isPastDate = new Date(apt.appointmentDate || apt.createdAt) < now;
+        const isClosed = apt.status === 'cancelled' || apt.status === 'completed';
+        return isPastDate || isClosed;
+      })
       .sort(
         (a, b) =>
           new Date(b.appointmentDate || b.createdAt).getTime() -
           new Date(a.appointmentDate || a.createdAt).getTime()
       );
+
     return filter === 'upcoming' ? upcoming : past;
-  }, [appointments, filter]);
+  }, [appointments, selectedMemberId, filter]);
 
   const totalCount = appointments?.length ?? 0;
 
@@ -112,8 +145,17 @@ export default function PatientAppointmentsPage() {
         </div>
       </div>
 
+      {/* شريط أفراد العائلة */}
+      <FamilyMembersFilter
+        selectedMemberId={selectedMemberId}
+        onSelectMember={setSelectedMemberId}
+        counts={memberCounts}
+      />
+
       <div className="rounded-2xl border border-emerald-100 bg-white/80 px-3 py-2 shadow-sm dark:border-emerald-900/30 dark:bg-background/40">
-        <p className="text-sm font-bold text-foreground">المواعيد القادمة</p>
+        <p className="text-sm font-bold text-foreground">
+          {filter === 'upcoming' ? 'المواعيد القادمة والنشطة' : 'سجل المواعيد السابقة والأرشيف'}
+        </p>
       </div>
 
       <div className="rounded-2xl border border-emerald-100 bg-white/80 p-1.5 shadow-sm dark:border-emerald-900/30 dark:bg-background/40">

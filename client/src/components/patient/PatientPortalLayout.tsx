@@ -5,6 +5,7 @@ import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowRight, Home, Calendar, Gift, FileText, User, Plus } from 'lucide-react';
 import PrivacyPolicyUpdateAlert from './PrivacyPolicyUpdateAlert';
+import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
 type PatientPortalLayoutProps = {
   children: ReactNode;
@@ -83,6 +84,7 @@ const PAGE_ORDER: Record<string, number> = {
 export default function PatientPortalLayout({ children }: PatientPortalLayoutProps) {
   const [location, navigate] = useLocation();
   const { data: patient, isLoading } = trpc.patientPortal.me.useQuery();
+  const { openBookingModal } = useBookingModal();
   const previousOrder = useRef<number>(PAGE_ORDER.home);
 
   const activeKey = useMemo(() => resolveActiveKey(location), [location]);
@@ -111,6 +113,18 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
   const currentOrder = PAGE_ORDER[activeKey] ?? PAGE_ORDER.home;
   const slideFrom = currentOrder >= previousOrder.current ? 28 : -28;
   previousOrder.current = currentOrder;
+
+  const handleFabClick = () => {
+    openBookingModal({
+      prefill: {
+        fullName: patient.fullName || undefined,
+        phone: patient.phone || undefined,
+        gender: (patient.gender as 'male' | 'female') || undefined,
+        age: patient.age || undefined,
+        patientId: patient.id,
+      },
+    });
+  };
 
   return (
     <div
@@ -181,15 +195,14 @@ export default function PatientPortalLayout({ children }: PatientPortalLayoutPro
       </main>
 
       {shouldShowFab && (
-        <Link href="/doctors">
-          <Button
-            className="fixed bottom-24 left-4 z-40 h-12 w-12 rounded-full bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg shadow-green-500/30 hover:from-green-700 hover:to-emerald-700 safe-bottom"
-            size="icon"
-            aria-label="حجز موعد جديد"
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
-        </Link>
+        <Button
+          onClick={handleFabClick}
+          className="fixed bottom-24 left-4 z-40 h-12 w-12 rounded-full bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg shadow-green-500/30 hover:from-green-700 hover:to-emerald-700 safe-bottom"
+          size="icon"
+          aria-label="حجز موعد جديد"
+        >
+          <Plus className="h-5 w-5" />
+        </Button>
       )}
 
       {/* Navigation */}

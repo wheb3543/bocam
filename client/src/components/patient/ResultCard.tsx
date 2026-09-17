@@ -1,11 +1,28 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FlaskConical, ScanLine, ClipboardList, FileText, ChevronLeft } from 'lucide-react';
+import { FlaskConical, ScanLine, ClipboardList, FileText, ChevronLeft, User } from 'lucide-react';
 import { ReactNode } from 'react';
 import type { PatientResult } from '@shared/types';
+import {
+  RELATIONSHIP_LABELS,
+  getRelationshipBadgeStyle,
+} from '@/components/patient/FamilyMembersFilter';
+
+type ExtendedResult = Omit<Partial<PatientResult>, 'resultDate' | 'createdAt'> & {
+  id: number;
+  title: string;
+  resultType: 'lab' | 'radiology' | 'report';
+  status: string;
+  doctorName?: string | null;
+  beneficiaryName?: string;
+  relationship?: string;
+  resultDate?: string | Date | null;
+  createdAt?: string | Date;
+  fileUrl?: string | null;
+};
 
 type ResultCardProps = {
-  result: PatientResult;
+  result: ExtendedResult;
   statusBadge: (status: string) => ReactNode;
   formatDate: (value: string | Date) => string;
   onOpenDetails?: () => void;
@@ -26,23 +43,41 @@ export default function ResultCard({
       <ClipboardList className="h-4 w-4 text-amber-500" />
     );
 
+  const isFamilyMember = result.relationship && result.relationship !== 'self';
+  const relLabel = result.relationship
+    ? RELATIONSHIP_LABELS[result.relationship] || result.relationship
+    : null;
+
   return (
-    <Card className="rounded-2xl shadow-sm border-green-100 dark:border-gray-700">
+    <Card className="rounded-2xl shadow-sm border-emerald-100 dark:border-gray-700 hover:border-emerald-200 transition-all">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-2 min-w-0 flex-1">
-            <div className="mt-0.5">{icon}</div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{result.title}</p>
-              {result.doctorName && (
-                <p className="text-xs text-muted-foreground mt-0.5">د. {result.doctorName}</p>
+          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+            <div className="mt-0.5 shrink-0 rounded-xl bg-muted/60 p-2">{icon}</div>
+            <div className="min-w-0 space-y-1">
+              <p className="text-sm font-bold truncate text-foreground">{result.title}</p>
+              {result.beneficiaryName && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <User className="h-3 w-3 text-muted-foreground/70" />
+                  <span className="font-medium text-foreground/80">{result.beneficiaryName}</span>
+                  {isFamilyMember && relLabel && (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-md border font-normal ${getRelationshipBadgeStyle(
+                        result.relationship
+                      )}`}
+                    >
+                      {relLabel}
+                    </span>
+                  )}
+                </div>
               )}
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {formatDate(result.resultDate || result.createdAt || new Date())}
-              </p>
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                {result.doctorName && <p>د. {result.doctorName}</p>}
+                <p>{formatDate(result.resultDate || result.createdAt || new Date())}</p>
+              </div>
             </div>
           </div>
-          {statusBadge(result.status)}
+          <div className="shrink-0">{statusBadge(result.status)}</div>
         </div>
 
         <div className="mt-3 flex items-center gap-2">

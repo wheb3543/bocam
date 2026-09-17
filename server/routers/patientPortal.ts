@@ -17,6 +17,9 @@ import {
   getPatientResults,
   getFamilyMembersForPatient,
   updatePatientRelationship,
+  addFamilyMemberForPatient,
+  updateFamilyMemberForPatient,
+  changePatientPassword,
   sanitizePatient,
 } from '../database/db/patients';
 import { meta } from '../api/MetaApiService';
@@ -175,7 +178,7 @@ export const patientPortalRouter = router({
     .input(
       z.object({
         phone: z.string().min(9).max(15),
-        code: z.string().length(6),
+        code: z.string().optional(),
         fullName: z.string().min(3, 'الاسم يجب أن يكون 3 أحرف على الأقل'),
         address: z.string().optional(),
         age: z.number().min(1).max(150).optional(),
@@ -185,12 +188,19 @@ export const patientPortalRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Verify OTP first
-      const isValid = await verifyOtp(input.phone, input.code);
-      if (!isValid) {
+      // إذا تم تزويد رمز التحقق، نتحقق منه
+      if (input.code && input.code.trim()) {
+        const isValid = await verifyOtp(input.phone, input.code.trim());
+        if (!isValid) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'رمز التحقق غير صحيح أو منتهي الصلاحية',
+          });
+        }
+      } else if (!input.password || input.password.length < 6) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'رمز التحقق غير صحيح أو منتهي الصلاحية',
+          message: 'يرجى تعيين كلمة مرور من 6 أحرف على الأقل لإتمام التسجيل',
         });
       }
 
@@ -291,7 +301,8 @@ export const patientPortalRouter = router({
     if (!patient?.isActive) {
       return null;
     }
-    return sanitizePatient(patient);
+    const safe = sanitizePatient(patient);
+    return safe ? { ...safe, hasPassword: !!patient.password } : null;
   }),
 
   // تسجيل الخروج
@@ -316,6 +327,46 @@ export const patientPortalRouter = router({
         input
       );
       return sanitizePatient(updated);
+    }),
+
+  // تعيين أو تغيير كلمة المرور للمريض
+  changePassword: patientProcedure
+    .input(
+      z.object({
+        currentPassword: z.string().optional(),
+        newPassword: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const patient = (ctx as { patient: { id: number; phone: string; password?: string | null } })
+        .patient;
+
+      // إذا كان للمريض كلمة مرور سابقة، نتحقق من صحة كلمة المرور الحالية
+      if (patient.password) {
+        if (!input.currentPassword) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'يرجى إدخال كلمة المرور الحالية لتأكيد التغيير',
+          });
+        }
+        const verifyResult = await verifyPatientPassword(patient.phone, input.currentPassword);
+        if (!verifyResult.success) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'كلمة المرور الحالية غير صحيحة',
+          });
+        }
+      }
+
+      const success = await changePatientPassword(patient.id, input.newPassword);
+      if (!success) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'تعذر تحديث كلمة المرور',
+        });
+      }
+
+      return { success: true, message: 'تم تحديث كلمة المرور بنجاح' };
     }),
 
   // الحصول على أفراد العائلة المرتبطين بالحساب
@@ -348,6 +399,66 @@ export const patientPortalRouter = router({
     .mutation(async ({ ctx, input }) => {
       const patient = (ctx as { patient: { id: number } }).patient;
       return updatePatientRelationship(patient.id, input.relatedPatientId, input.relationship);
+    }),
+
+  // إضافة فرد جديد للعائلة
+  addFamilyMember: patientProcedure
+    .input(
+      z.object({
+        fullName: z.string().min(3, 'الاسم يجب أن يكون 3 أحرف على الأقل'),
+        gender: z.enum(['male', 'female']),
+        age: z.number().min(1).max(150).optional(),
+        relationship: z.enum([
+          'self',
+          'father',
+          'mother',
+          'son',
+          'daughter',
+          'husband',
+          'wife',
+          'brother',
+          'sister',
+          'grandfather',
+          'grandmother',
+          'other',
+        ]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const patient = (ctx as { patient: { id: number } }).patient;
+      return addFamilyMemberForPatient(patient.id, input);
+    }),
+
+  // تحديث بيانات فرد العائلة بالكامل (الاسم، الجنس، العمر، صلة القرابة)
+  updateFamilyMember: patientProcedure
+    .input(
+      z.object({
+        relatedPatientId: z.number(),
+        fullName: z.string().min(3, 'الاسم يجب أن يكون 3 أحرف على الأقل').optional(),
+        gender: z.enum(['male', 'female']).optional(),
+        age: z.number().min(1).max(150).optional(),
+        relationship: z
+          .enum([
+            'self',
+            'father',
+            'mother',
+            'son',
+            'daughter',
+            'husband',
+            'wife',
+            'brother',
+            'sister',
+            'grandfather',
+            'grandmother',
+            'other',
+          ])
+          .optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const patient = (ctx as { patient: { id: number } }).patient;
+      const { relatedPatientId, ...data } = input;
+      return updateFamilyMemberForPatient(patient.id, relatedPatientId, data);
     }),
 
   // الحصول على حجوزات المريض وجميع أفراد عائلته (مواعيد الأطباء)

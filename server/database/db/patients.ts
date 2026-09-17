@@ -9,6 +9,10 @@ import {
   appointments,
   offerLeads,
   campRegistrations,
+  doctors,
+  departments,
+  offers,
+  camps,
   type Patient,
   type PatientRelationship,
 } from '../../../drizzle/schema';
@@ -338,6 +342,126 @@ export async function updatePatientRelationship(
   return { success: true };
 }
 
+/**
+ * Add a new family member under primary patient
+ */
+export async function addFamilyMemberForPatient(
+  primaryPatientId: number,
+  data: {
+    fullName: string;
+    gender: 'male' | 'female';
+    age?: number;
+    relationship: PatientRelationship['relationship'];
+  }
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+  const primary = await getPatientById(primaryPatientId);
+  if (!primary) {
+    throw new Error('Primary patient not found');
+  }
+
+  const insertResult = await db.insert(patients).values({
+    fullName: data.fullName,
+    phone: primary.phone,
+    gender: data.gender,
+    age: data.age || null,
+    isActive: true,
+  });
+
+  const relatedPatientId = Number(insertResult[0].insertId);
+
+  await db.insert(patientRelationships).values({
+    primaryPatientId,
+    relatedPatientId,
+    relationship: data.relationship,
+  });
+
+  return {
+    id: relatedPatientId,
+    fullName: data.fullName,
+    phone: primary.phone,
+    gender: data.gender,
+    age: data.age || null,
+    relationship: data.relationship,
+    isPrimary: false,
+  };
+}
+
+/**
+ * Update family member profile and relationship
+ */
+export async function updateFamilyMemberForPatient(
+  primaryPatientId: number,
+  relatedPatientId: number,
+  data: {
+    fullName?: string;
+    gender?: 'male' | 'female';
+    age?: number;
+    relationship?: PatientRelationship['relationship'];
+  }
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+
+  const [existingRel] = await db
+    .select()
+    .from(patientRelationships)
+    .where(
+      and(
+        eq(patientRelationships.primaryPatientId, primaryPatientId),
+        eq(patientRelationships.relatedPatientId, relatedPatientId)
+      )
+    )
+    .limit(1);
+
+  if (!existingRel) {
+    throw new Error('Family member not linked to this account');
+  }
+
+  const patientUpdates: Partial<{
+    fullName: string;
+    gender: 'male' | 'female';
+    age: number | null;
+    updatedAt: Date;
+  }> = {};
+
+  if (data.fullName) {
+    patientUpdates.fullName = data.fullName;
+  }
+  if (data.gender) {
+    patientUpdates.gender = data.gender;
+  }
+  if (data.age !== undefined) {
+    patientUpdates.age = data.age;
+  }
+
+  if (Object.keys(patientUpdates).length > 0) {
+    patientUpdates.updatedAt = new Date();
+    await db.update(patients).set(patientUpdates).where(eq(patients.id, relatedPatientId));
+  }
+
+  if (data.relationship) {
+    await db
+      .update(patientRelationships)
+      .set({ relationship: data.relationship, updatedAt: new Date() })
+      .where(eq(patientRelationships.id, existingRel.id));
+  }
+
+  const updatedPatient = await getPatientById(relatedPatientId);
+  return {
+    id: relatedPatientId,
+    fullName: updatedPatient?.fullName,
+    gender: updatedPatient?.gender,
+    age: updatedPatient?.age,
+    relationship: data.relationship || existingRel.relationship,
+  };
+}
+
 // ============ Patient Appointments ============
 
 export async function getPatientAppointments(phone: string, patientIds?: number | number[]) {
@@ -359,13 +483,27 @@ export async function getPatientAppointments(phone: string, patientIds?: number 
     condition = eq(appointments.phone, normalizedPhone);
   }
 
-  const result = await db
-    .select()
+  const rows = await db
+    .select({
+      appointment: appointments,
+      doctorName: doctors.name,
+      doctorSpecialty: doctors.specialty,
+      doctorImage: doctors.image,
+      departmentName: departments.name,
+    })
     .from(appointments)
+    .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
+    .leftJoin(departments, eq(appointments.departmentId, departments.id))
     .where(condition)
     .orderBy(desc(appointments.createdAt));
 
-  return result;
+  return rows.map((r) => ({
+    ...r.appointment,
+    doctorName: r.doctorName || undefined,
+    doctorSpecialty: r.doctorSpecialty || undefined,
+    doctorImage: r.doctorImage || undefined,
+    departmentName: r.departmentName || undefined,
+  }));
 }
 
 // ============ Patient Offer Leads ============
@@ -377,13 +515,22 @@ export async function getPatientOfferLeads(phone: string) {
   }
   const normalizedPhone = normalizePatientPhone(phone);
 
-  const result = await db
-    .select()
+  const rows = await db
+    .select({
+      lead: offerLeads,
+      offerTitle: offers.title,
+      offerImage: offers.imageUrl,
+    })
     .from(offerLeads)
+    .leftJoin(offers, eq(offerLeads.offerId, offers.id))
     .where(eq(offerLeads.phone, normalizedPhone))
     .orderBy(desc(offerLeads.createdAt));
 
-  return result;
+  return rows.map((r) => ({
+    ...r.lead,
+    offerTitle: r.offerTitle || undefined,
+    offerImage: r.offerImage || undefined,
+  }));
 }
 
 // ============ Patient Camp Registrations ============
@@ -395,13 +542,40 @@ export async function getPatientCampRegistrations(phone: string) {
   }
   const normalizedPhone = normalizePatientPhone(phone);
 
-  const result = await db
-    .select()
+  const rows = await db
+    .select({
+      registration: campRegistrations,
+      campName: camps.name,
+      campImage: camps.imageUrl,
+    })
     .from(campRegistrations)
+    .leftJoin(camps, eq(campRegistrations.campId, camps.id))
     .where(eq(campRegistrations.phone, normalizedPhone))
     .orderBy(desc(campRegistrations.createdAt));
 
-  return result;
+  return rows.map((r) => ({
+    ...r.registration,
+    campName: r.campName || undefined,
+    campImage: r.campImage || undefined,
+  }));
+}
+
+// ============ Change Patient Password ============
+
+export async function changePatientPassword(
+  patientId: number,
+  newPasswordPlain: string
+): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    return false;
+  }
+  const hashedPassword = await bcrypt.hash(newPasswordPlain, 10);
+  await db
+    .update(patients)
+    .set({ password: hashedPassword, updatedAt: new Date() })
+    .where(eq(patients.id, patientId));
+  return true;
 }
 
 // ============ Patient Results ============

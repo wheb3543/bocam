@@ -16,6 +16,12 @@ import {
   Sparkles,
 } from 'lucide-react';
 import AnimatedCard from '@/components/AnimatedCard';
+import { useBookingModal } from '@/hooks/booking/useBookingModal';
+import { COMPANY_PHONE } from '@/const';
+import {
+  RELATIONSHIP_LABELS,
+  getRelationshipBadgeStyle,
+} from '@/components/patient/FamilyMembersFilter';
 
 export default function PatientHomePage() {
   const { formatDate } = useFormatDate();
@@ -24,6 +30,21 @@ export default function PatientHomePage() {
     trpc.patientPortal.myAppointments.useQuery();
   const { data: results, isLoading: resultsLoading } = trpc.patientPortal.myResults.useQuery();
   const { data: offers, isLoading: offersLoading } = trpc.patientPortal.myOfferBookings.useQuery();
+  const { openBookingModal } = useBookingModal();
+
+  const handleNewBooking = () => {
+    openBookingModal({
+      prefill: patient
+        ? {
+            fullName: patient.fullName || undefined,
+            phone: patient.phone || undefined,
+            gender: (patient.gender as 'male' | 'female') || undefined,
+            age: patient.age || undefined,
+            patientId: patient.id,
+          }
+        : undefined,
+    });
+  };
 
   const latestAppointment = appointments?.[0];
   const latestResult = results?.[0];
@@ -117,9 +138,32 @@ export default function PatientHomePage() {
                 </div>
               ) : latestAppointment ? (
                 <div className="space-y-1">
-                  <p className="font-medium text-foreground">
-                    {latestAppointment.fullName || 'موعد طبي'}
-                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-medium text-foreground truncate">
+                      {latestAppointment.doctorName
+                        ? `د. ${latestAppointment.doctorName}`
+                        : latestAppointment.departmentName || 'موعد طبي'}
+                    </p>
+                    {latestAppointment.relationship &&
+                      latestAppointment.relationship !== 'self' && (
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold shrink-0 ${getRelationshipBadgeStyle(
+                            latestAppointment.relationship
+                          )}`}
+                        >
+                          {RELATIONSHIP_LABELS[latestAppointment.relationship] ||
+                            latestAppointment.relationship}
+                        </span>
+                      )}
+                  </div>
+                  {(latestAppointment.beneficiaryName || latestAppointment.fullName) && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      المستفيد:{' '}
+                      <span className="font-medium text-foreground/80">
+                        {latestAppointment.beneficiaryName || latestAppointment.fullName}
+                      </span>
+                    </p>
+                  )}
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock3 className="h-3.5 w-3.5" />
                     <span>
@@ -151,7 +195,27 @@ export default function PatientHomePage() {
                 </div>
               ) : latestResult ? (
                 <div className="space-y-1">
-                  <p className="font-medium text-foreground">{latestResult.title}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-medium text-foreground truncate">{latestResult.title}</p>
+                    {latestResult.relationship && latestResult.relationship !== 'self' && (
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold shrink-0 ${getRelationshipBadgeStyle(
+                          latestResult.relationship
+                        )}`}
+                      >
+                        {RELATIONSHIP_LABELS[latestResult.relationship] ||
+                          latestResult.relationship}
+                      </span>
+                    )}
+                  </div>
+                  {latestResult.beneficiaryName && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      المستفيد:{' '}
+                      <span className="font-medium text-foreground/80">
+                        {latestResult.beneficiaryName}
+                      </span>
+                    </p>
+                  )}
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock3 className="h-3.5 w-3.5" />
                     <span>{formatDate(latestResult.resultDate || latestResult.createdAt)}</span>
@@ -181,7 +245,15 @@ export default function PatientHomePage() {
                 </div>
               ) : latestOffer ? (
                 <div className="space-y-1">
-                  <p className="font-medium text-foreground">{latestOffer.fullName || 'حجز عرض'}</p>
+                  <p className="font-medium text-foreground truncate">
+                    {latestOffer.offerTitle || 'حجز عرض'}
+                  </p>
+                  {latestOffer.fullName && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      المستفيد:{' '}
+                      <span className="font-medium text-foreground/80">{latestOffer.fullName}</span>
+                    </p>
+                  )}
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock3 className="h-3.5 w-3.5" />
                     <span>{formatDate(latestOffer.createdAt)}</span>
@@ -196,12 +268,13 @@ export default function PatientHomePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Link href="/doctors">
-          <Button className="h-12 w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg shadow-emerald-500/20 transition hover:from-emerald-700 hover:to-green-700">
-            <Plus className="ml-1 h-4 w-4" />
-            حجز موعد
-          </Button>
-        </Link>
+        <Button
+          onClick={handleNewBooking}
+          className="h-12 w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg shadow-emerald-500/20 transition hover:from-emerald-700 hover:to-green-700"
+        >
+          <Plus className="ml-1 h-4 w-4" />
+          حجز موعد
+        </Button>
         <Link href="/patient-portal/results">
           <Button
             variant="outline"
@@ -211,7 +284,14 @@ export default function PatientHomePage() {
             نتائجي
           </Button>
         </Link>
-        <Link href="/patient-portal/profile">
+        <a
+          href={`https://wa.me/967${COMPANY_PHONE.replace(/\D/g, '').replace(/^0+/, '')}?text=${encodeURIComponent(
+            'مرحباً، أود الاستفسار عبر بوابة المريض'
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full"
+        >
           <Button
             variant="outline"
             className="h-12 w-full rounded-2xl border-sky-200 bg-white text-sky-700 shadow-sm transition hover:bg-sky-50 dark:bg-background dark:text-sky-300"
@@ -219,7 +299,7 @@ export default function PatientHomePage() {
             <Phone className="ml-1 h-4 w-4" />
             تواصل معنا
           </Button>
-        </Link>
+        </a>
       </div>
 
       <div className="rounded-[28px] border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 p-4 shadow-sm dark:border-emerald-900/30 dark:from-emerald-950/15 dark:to-green-950/10">

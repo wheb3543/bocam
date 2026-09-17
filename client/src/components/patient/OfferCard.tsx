@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Gift } from 'lucide-react';
 
 interface Offer {
+  offerTitle?: string;
+  offerImage?: string;
   fullName?: string;
   createdAt?: string | Date;
   status?: string;
@@ -15,22 +17,29 @@ type OfferCardProps = {
 };
 
 export default function OfferCard({ item, formatDate }: OfferCardProps) {
+  const title = item.offerTitle || 'حجز عرض طبي';
+
   return (
     <Card className="overflow-hidden rounded-[24px] border border-sky-100 bg-gradient-to-r from-sky-50 via-white to-blue-50 shadow-sm transition hover:shadow-md dark:border-sky-900/30 dark:from-sky-950/10 dark:via-background dark:to-blue-950/10">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 space-y-1">
             <div className="flex items-center gap-2">
-              <div className="rounded-xl bg-sky-100 p-1.5 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
-                <Gift className="h-3.5 w-3.5" />
+              <div className="rounded-xl bg-sky-100 p-1.5 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 shrink-0">
+                <Gift className="h-4 w-4" />
               </div>
-              <p className="text-sm font-bold text-foreground">{item.fullName || 'حجز عرض'}</p>
+              <p className="text-sm font-bold text-foreground truncate">{title}</p>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              {formatDate(item.createdAt || new Date())}
+            {item.fullName && (
+              <p className="text-xs text-muted-foreground">
+                المستفيد: <span className="font-medium text-foreground/80">{item.fullName}</span>
+              </p>
+            )}
+            <p className="text-[11px] text-muted-foreground">
+              تاريخ الحجز: {formatDate(item.createdAt || new Date())}
             </p>
           </div>
-          <Badge className="rounded-full border-sky-200 bg-sky-100 px-2 py-1 text-[11px] font-bold text-sky-700 dark:border-sky-800 dark:bg-sky-900/20 dark:text-sky-300">
+          <Badge className="rounded-full border-sky-200 bg-sky-100 px-2 py-1 text-[11px] font-bold text-sky-700 dark:border-sky-800 dark:bg-sky-900/20 dark:text-sky-300 shrink-0">
             {item.status || 'new'}
           </Badge>
         </div>

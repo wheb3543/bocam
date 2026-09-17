@@ -1,11 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockNavigate, mockAppointmentsQuery, mockResultsQuery, mockMeQuery } = vi.hoisted(() => ({
+const {
+  mockNavigate,
+  mockAppointmentsQuery,
+  mockResultsQuery,
+  mockMeQuery,
+  mockFamilyMembersQuery,
+} = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
   mockAppointmentsQuery: vi.fn(),
   mockResultsQuery: vi.fn(),
   mockMeQuery: vi.fn(),
+  mockFamilyMembersQuery: vi.fn(),
 }));
 
 vi.mock('wouter', () => ({
@@ -18,6 +25,7 @@ vi.mock('@/lib/api/trpc', () => ({
       me: { useQuery: mockMeQuery },
       myAppointments: { useQuery: mockAppointmentsQuery },
       myResults: { useQuery: mockResultsQuery },
+      getFamilyMembers: { useQuery: mockFamilyMembersQuery },
     },
   },
 }));
@@ -36,6 +44,10 @@ describe('Patient portal list pages', () => {
     vi.clearAllMocks();
     mockMeQuery.mockReturnValue({
       data: null,
+      isLoading: false,
+    });
+    mockFamilyMembersQuery.mockReturnValue({
+      data: [],
       isLoading: false,
     });
     mockAppointmentsQuery.mockReturnValue({
@@ -74,6 +86,6 @@ describe('Patient portal list pages', () => {
 
     expect(screen.getByText('مواعيدك')).toBeInTheDocument();
     expect(screen.getByText('نتائجك')).toBeInTheDocument();
-    expect(screen.getByText('المواعيد القادمة')).toBeInTheDocument();
+    expect(screen.getByText(/المواعيد القادمة/)).toBeInTheDocument();
   });
 });

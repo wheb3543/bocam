@@ -183,7 +183,7 @@ export default function PatientPortalLogin() {
     }
     registerMutation.mutate({
       phone,
-      code: otp,
+      code: otp || undefined,
       fullName,
       address: address || undefined,
       age: age ? parseInt(age) : undefined,
@@ -552,7 +552,7 @@ export default function PatientPortalLogin() {
                 <div className="flex gap-2 pt-1">
                   <Button
                     variant="outline"
-                    onClick={() => setStep('otp')}
+                    onClick={() => setStep(otp ? 'otp' : 'phone')}
                     className="flex-1 h-11 rounded-xl border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 dark:bg-background dark:text-emerald-300"
                   >
                     <ArrowRight className="h-4 w-4 ml-1" />
