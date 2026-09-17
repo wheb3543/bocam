@@ -1,5 +1,5 @@
 import { Users, Loader2 } from 'lucide-react';
-import LeadCard from '@/components/lead/LeadCard';
+import LeadCard from './LeadCard';
 import EmptyState from '@/components/EmptyState';
 import type { UnifiedLead } from '@shared/types';
 

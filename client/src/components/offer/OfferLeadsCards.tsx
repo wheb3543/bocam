@@ -1,4 +1,4 @@
-import OfferLeadCard from '@/components/offer/OfferLeadCard';
+import OfferLeadCard from './OfferLeadCard';
 import type { RouterOutputs } from '@/types/trpc';
 
 type OfferLead = RouterOutputs['offerLeads']['listPaginated']['data'][number];

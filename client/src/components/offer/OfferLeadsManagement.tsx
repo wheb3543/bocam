@@ -2,8 +2,8 @@ import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { SOURCE_LABELS } from '@shared/sources';
 import { useOfferLeads } from '@/hooks/offer/useOfferLeads';
-import OfferStatsCards from '@/components/offer/OfferStatsCards';
-import OfferLeadCard from '@/components/offer/OfferLeadCard';
+import OfferStatsCards from './OfferStatsCards';
+import OfferLeadCard from './OfferLeadCard';
 import BulkActionsManager from '@/components/BulkActionsManager';
 import Pagination from '@/components/table/Pagination';
 import {

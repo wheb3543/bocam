@@ -1,7 +1,13 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { trpc } from '@/lib/api/trpc';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import LeadStatsCards from '@/components/lead/LeadStatsCards';
+import {
+  LeadStatsCards,
+  LeadFilters,
+  LeadTableDesktop,
+  LeadStatusDialog,
+  LeadMobileCards,
+} from '@/components/lead';
 import Pagination from '@/components/table/Pagination';
 import { toast } from 'sonner';
 import { emitToastHash } from '@/lib/toastHashRouter';
@@ -10,12 +16,6 @@ import { useFilterUtils, type DateFilterPreset } from '@/hooks/table/useFilterUt
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { usePagination } from '@/hooks/table/usePagination';
-import {
-  LeadFilters,
-  LeadTableDesktop,
-  LeadStatusDialog,
-  LeadMobileCards,
-} from '@/components/leads';
 import FilterPresets from '@/components/FilterPresets';
 import type { UnifiedLead } from '@shared/types';
 

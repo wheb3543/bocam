@@ -27,7 +27,9 @@ export default function PendingRequestsNotification() {
 
   // Get last 5 pending requests
   const pendingRequests = useMemo(() => {
-    if (!unifiedLeads) {return [];}
+    if (!unifiedLeads) {
+      return [];
+    }
 
     const pending = unifiedLeads.filter((lead) => lead.status === 'pending');
 
@@ -38,14 +40,22 @@ export default function PendingRequestsNotification() {
   }, [unifiedLeads]);
 
   const totalPending = useMemo(() => {
-    if (!unifiedLeads) {return 0;}
+    if (!unifiedLeads) {
+      return 0;
+    }
     return unifiedLeads.filter((lead) => lead.status === 'pending').length;
   }, [unifiedLeads]);
 
   const handleRequestClick = (request: Request) => {
-    // Navigate to bookings management page
-    // The page will need to handle highlighting the selected request
-    setLocation(`/admin/bookings?id=${request.id}&type=${request.type}`);
+    if (request.type === 'appointment') {
+      setLocation('/admin/bookings/appointments');
+    } else if (request.type === 'offer') {
+      setLocation('/admin/bookings/offer-leads');
+    } else if (request.type === 'camp') {
+      setLocation('/admin/bookings/camp-registrations');
+    } else {
+      setLocation(`/admin/bookings?id=${request.id}&type=${request.type}`);
+    }
   };
 
   return (

@@ -33,7 +33,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Users, UserCheck, Calendar, TrendingUp, Plus, BarChart3, CheckSquare } from 'lucide-react';
+import {
+  Users,
+  UserCheck,
+  Calendar,
+  TrendingUp,
+  Plus,
+  BarChart3,
+  CheckSquare,
+  ExternalLink,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { emitToastHash } from '@/lib/toastHashRouter';
 import { useFilterUtils } from '@/hooks/table/useFilterUtils';
@@ -350,11 +359,32 @@ export default function BookingsManagementPage() {
           )}
 
           {activeTab === 'appointments' && (
-            <AppointmentsTab
-              appointmentFilter={appointmentFilter}
-              dateRange={dateRange}
-              onOpenAppointmentDialog={openAppointmentDialog}
-            />
+            <div className="flex flex-col h-full gap-2">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 text-xs text-blue-800 dark:text-blue-300 shrink-0">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span>
+                    تتوفر شاشة مواعيد الأطباء الكاملة مع التقويم التفاعلي وتعيين الأطباء المباشر.
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation('/admin/bookings/appointments')}
+                  className="h-7 text-xs gap-1.5 bg-white dark:bg-card border-blue-300 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100"
+                >
+                  <span>عرض التقويم والشاشة المتقدمة</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <div className="min-h-0 flex-1">
+                <AppointmentsTab
+                  appointmentFilter={appointmentFilter}
+                  dateRange={dateRange}
+                  onOpenAppointmentDialog={openAppointmentDialog}
+                />
+              </div>
+            </div>
           )}
 
           {activeTab === 'offerLeads' && (

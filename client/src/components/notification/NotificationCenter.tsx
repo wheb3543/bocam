@@ -106,8 +106,16 @@ export default function NotificationCenter() {
   };
 
   const handleItemClick = (type: string) => {
-    // Navigate to bookings management page with the appropriate tab
-    setLocation(`/admin/bookings?tab=${type}`);
+    // Navigate directly to the dedicated management page
+    if (type === 'appointments') {
+      setLocation('/admin/bookings/appointments');
+    } else if (type === 'offerLeads') {
+      setLocation('/admin/bookings/offer-leads');
+    } else if (type === 'campRegistrations') {
+      setLocation('/admin/bookings/camp-registrations');
+    } else {
+      setLocation(`/admin/bookings?tab=${type}`);
+    }
   };
 
   const sections = [
@@ -223,7 +231,9 @@ export default function NotificationCenter() {
             const Icon = section.icon;
             const isExpanded = expandedSections[section.id];
 
-            if (section.count === 0) {return null;}
+            if (section.count === 0) {
+              return null;
+            }
 
             return (
               <Card
