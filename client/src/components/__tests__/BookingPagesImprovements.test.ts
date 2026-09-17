@@ -244,7 +244,6 @@ describe('Fixed booking table workspaces', () => {
   );
   const campPage = readFile(path.join(pagesDir, 'admin/bookings/CampRegistrationsPage.tsx'));
   const offerPage = readFile(path.join(pagesDir, 'admin/bookings/OfferLeadsPage.tsx'));
-  const bookingsPage = readFile(path.join(pagesDir, 'admin/bookings/BookingsManagementPage.tsx'));
   const leadsPage = readFile(path.join(pagesDir, 'admin/bookings/LeadsManagementPage.tsx'));
   const leadsTab = readFile(path.join(componentsDir, 'lead/LeadsTab.tsx'));
   const appointmentsTab = readFile(path.join(componentsDir, 'booking/AppointmentsTab.tsx'));
@@ -252,7 +251,7 @@ describe('Fixed booking table workspaces', () => {
   const campManagement = readFile(path.join(componentsDir, 'camp/CampRegistrationsManagement.tsx'));
 
   it('keeps each targeted workspace within the available viewport height', () => {
-    [appointmentsPage, campPage, offerPage, bookingsPage, leadsPage].forEach((content) => {
+    [appointmentsPage, campPage, offerPage, leadsPage].forEach((content) => {
       expect(content).toContain('h-[calc(100dvh-4.25rem)]');
       expect(content).toContain('overflow-hidden');
     });

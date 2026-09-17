@@ -41,7 +41,6 @@ const MetaIntegrationSettingsPage = lazy(
 const ReportsPage = lazy(() => import('@/pages/admin/reports/ReportsPage'));
 const AnalyticsPage = lazy(() => import('@/pages/admin/reports/AnalyticsPage'));
 const CampStatsPage = lazy(() => import('@/pages/admin/reports/CampStatsPage'));
-const BookingsManagementPage = lazy(() => import('@/pages/admin/bookings/BookingsManagementPage'));
 const LeadsManagementPage = lazy(() => import('@/pages/admin/bookings/LeadsManagementPage'));
 const AppointmentsManagementPage = lazy(
   () => import('@/pages/admin/bookings/AppointmentsManagementPage')
@@ -206,7 +205,7 @@ export function renderAdminPage(path: string): ReactNode {
         </ProtectedRoute>
       );
     case '/admin/bookings':
-      return <BookingsManagementPage />;
+      return <Redirect to="/admin/bookings/appointments" />;
     case '/admin/bookings/leads':
       return <LeadsManagementPage />;
     case '/admin/bookings/appointments':
@@ -383,7 +382,9 @@ export default function AdminContentRoutes() {
           <CampStatsPage />
         </ProtectedRoute>
       </Route>
-      <Route path="/admin/bookings" component={BookingsManagementPage} />
+      <Route path="/admin/bookings">
+        <Redirect to="/admin/bookings/appointments" />
+      </Route>
       <Route path="/admin/bookings/leads" component={LeadsManagementPage} />
       <Route path="/admin/bookings/appointments" component={AppointmentsManagementPage} />
       <Route path="/admin/bookings/offer-leads">

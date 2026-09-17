@@ -43,6 +43,7 @@ import {
   LayoutList,
   Calendar,
 } from 'lucide-react';
+import ManualRegistrationForm from '@/components/form/ManualRegistrationForm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -160,6 +161,7 @@ export default function AppointmentsManagementPage() {
         <div className="shrink-0 space-y-3">
           {/* Quick actions row */}
           <div className="flex flex-wrap items-center gap-2">
+            <ManualRegistrationForm />
             <div className="flex-1" />
             <Button
               variant="outline"

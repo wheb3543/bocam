@@ -157,7 +157,7 @@ export const WHATSAPP_ROUTE_OWNERSHIP: readonly WhatsAppRouteOwnership[] = [
     label: 'طلبات واتساب',
     owner: 'crm',
     transition: 'relocate',
-    targetPath: '/admin/bookings',
+    targetPath: '/admin/bookings/appointments',
     rationale:
       'الطلب حالة متابعة عميل وليست إعداداً للقناة؛ يعرض الرابط القديم انتقالاً واضحاً إلى CRM.',
   },
@@ -175,7 +175,7 @@ export const WHATSAPP_ROUTE_OWNERSHIP: readonly WhatsAppRouteOwnership[] = [
     label: 'منتجات واتساب',
     owner: 'crm',
     transition: 'freeze',
-    targetPath: '/admin/bookings',
+    targetPath: '/admin/bookings/appointments',
     rationale:
       'لا تملك الصفحة حالياً مصدراً حقيقياً للكتالوج؛ يعرض الرابط القديم حالة غير مفعّلة بدلاً من بيانات ثابتة حتى ربط بيانات فعلية.',
   },

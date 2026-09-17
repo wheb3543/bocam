@@ -187,14 +187,13 @@ export const allToolsGroups: NavGroup[] = [
     icon: ClipboardList,
     defaultOpen: true,
     items: [
-      { id: 'bookings', title: 'الحجوزات', href: '/admin/bookings', icon: FolderKanban },
-      { id: 'leads', title: 'العملاء المحتملين', href: '/admin/bookings/leads', icon: UserCheck },
       {
         id: 'appointments',
         title: 'مواعيد الأطباء',
         href: '/admin/bookings/appointments',
         icon: Calendar,
       },
+      { id: 'leads', title: 'العملاء المحتملين', href: '/admin/bookings/leads', icon: UserCheck },
       {
         id: 'offer-leads',
         title: 'عروض العملاء',

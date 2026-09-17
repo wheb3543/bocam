@@ -54,7 +54,7 @@ export default function PendingRequestsNotification() {
     } else if (request.type === 'camp') {
       setLocation('/admin/bookings/camp-registrations');
     } else {
-      setLocation(`/admin/bookings?id=${request.id}&type=${request.type}`);
+      setLocation('/admin/bookings/appointments');
     }
   };
 
@@ -103,7 +103,7 @@ export default function PendingRequestsNotification() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="cursor-pointer justify-center text-sm text-primary"
-                  onClick={() => setLocation('/admin/bookings')}
+                  onClick={() => setLocation('/admin/bookings/appointments')}
                 >
                   عرض جميع الطلبات ({totalPending})
                 </DropdownMenuItem>

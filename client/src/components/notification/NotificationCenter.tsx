@@ -114,7 +114,7 @@ export default function NotificationCenter() {
     } else if (type === 'campRegistrations') {
       setLocation('/admin/bookings/camp-registrations');
     } else {
-      setLocation(`/admin/bookings?tab=${type}`);
+      setLocation('/admin/bookings/appointments');
     }
   };
 

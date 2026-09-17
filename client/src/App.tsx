@@ -81,7 +81,7 @@ function PrefetchRoutes() {
       import('./pages/admin/system/SystemLandingPage');
       import('./pages/admin/AdminDashboard');
       import('./pages/admin/SettingsPage');
-      import('./pages/admin/bookings/BookingsManagementPage');
+      import('./pages/admin/bookings/AppointmentsManagementPage');
       import('./pages/admin/reports/ReportsPage');
     }
 

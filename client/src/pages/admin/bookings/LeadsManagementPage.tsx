@@ -124,7 +124,7 @@ export default function LeadsManagementPage() {
         kind: 'success',
         message: 'تم تحديث حالة العميل بنجاح',
         description: 'تم حفظ حالة العميل الأخيرة بنجاح.',
-        redirect: '/admin/bookings',
+        redirect: '/admin/bookings/leads',
       });
       refetchLeads();
       setStatusDialogOpen(false);
@@ -140,7 +140,7 @@ export default function LeadsManagementPage() {
         kind: 'success',
         message: 'تم تحديث مسؤول المتابعة',
         description: 'تم إسناد العميل إلى المسؤول المختار.',
-        redirect: '/admin/bookings',
+        redirect: '/admin/bookings/leads',
       });
       refetchLeads();
     },

@@ -9,7 +9,7 @@ const transitionByPath = {
     title: 'طلبات واتساب انتقلت إلى CRM',
     description: 'تُدار حالات متابعة العملاء والحجوزات من مركز CRM الموحد لضمان عدم تكرار السجلات.',
     action: 'فتح إدارة الحجوزات',
-    href: '/admin/bookings',
+    href: '/admin/bookings/appointments',
     icon: ClipboardList,
   },
   '/admin/whatsapp/referrals': {
