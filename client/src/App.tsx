@@ -4,7 +4,7 @@ import { initializeTracking } from './lib/tracking/tracking';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AdminContentSkeleton from '@/components/layout/AdminContentSkeleton';
 const NotFound = lazy(() => import('@/pages/NotFound'));
-import { Route, Switch, useLocation } from 'wouter';
+import { Redirect, Route, Switch, useLocation } from 'wouter';
 import { toast } from 'sonner';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -173,9 +173,10 @@ function Router() {
         </Route>
         <Route path={'/patient-portal/login'} component={PatientPortalLogin} />
         <Route path={'/patient-portal/admin'} component={PatientDashboard} />
+        <Route path={'/patient-portal/dashboard'} component={PatientDashboard} />
 
         {/* Patient Portal PWA Routes with Layout */}
-        <Route path="/patient-portal">
+        <Route path="/patient-portal/*?">
           <Suspense
             fallback={
               <div className="flex items-center justify-center min-h-screen">
@@ -185,6 +186,12 @@ function Router() {
           >
             <PatientPortalLayout>
               <Switch>
+                <Route path="/patient-portal">
+                  <Redirect to="/patient-portal/home" />
+                </Route>
+                <Route path="/patient-portal/">
+                  <Redirect to="/patient-portal/home" />
+                </Route>
                 <Route path="/patient-portal/home" component={PatientHomePage} />
                 <Route path="/patient-portal/appointments" component={PatientAppointmentsPage} />
                 <Route
@@ -196,6 +203,7 @@ function Router() {
                 <Route path="/patient-portal/results" component={PatientResultsPage} />
                 <Route path="/patient-portal/results/:id" component={PatientResultDetailsPage} />
                 <Route path="/patient-portal/profile" component={PatientProfilePage} />
+                <Route component={NotFound} />
               </Switch>
             </PatientPortalLayout>
           </Suspense>
