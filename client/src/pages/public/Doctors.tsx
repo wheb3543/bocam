@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, useSearch } from 'wouter';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { trpc } from '@/lib/api/trpc';
-import { Loader2, Search, Stethoscope, Calendar, User } from 'lucide-react';
+import { Loader2, Search, Stethoscope, Calendar, User, Building2, X } from 'lucide-react';
 import { COMPANY_CITY, getCompanyName } from '@/const';
 import PageLayout from '@/components/layout/PageLayout';
 import HeroSection from '@/components/HeroSection';
@@ -44,6 +44,9 @@ export default function Doctors() {
 
 function DoctorsContent() {
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
+  const searchParams = new URLSearchParams(searchString);
+  const departmentParam = searchParams.get('department');
   const { openBookingModal } = useBookingModal();
   const [searchTerm, setSearchTerm] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState<string>('all');
@@ -124,12 +127,29 @@ function DoctorsContent() {
   // Fetch doctors list (only available doctors)
   const { data: doctors, isLoading } = trpc.doctors.list.useQuery();
 
-  // Filter doctors based on search and specialty
+  // Fetch departments to resolve department name when filtered
+  const { data: departments } = trpc.departments.list.useQuery();
+  const selectedDepartment = departments?.find((d) => {
+    if (!departmentParam) {
+      return false;
+    }
+    return String(d.id) === departmentParam || d.slug === departmentParam;
+  });
+
+  // Filter doctors based on search, specialty, and department
   const filteredDoctors = Array.isArray(doctors)
     ? doctors.filter((doctor) => {
         // Only show available doctors
         if (doctor.available !== 'yes') {
           return false;
+        }
+
+        // Department filter
+        if (departmentParam) {
+          const targetDeptId = selectedDepartment ? selectedDepartment.id : Number(departmentParam);
+          if (doctor.departmentId !== targetDeptId) {
+            return false;
+          }
         }
 
         // Search filter
@@ -196,6 +216,30 @@ function DoctorsContent() {
                 </div>
               </div>
             </AnimatedCard>
+
+            {/* Active Department Filter Banner */}
+            {Boolean(departmentParam) && (
+              <div className="mt-3.5 flex items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200">
+                <div className="flex items-center gap-2.5 text-xs sm:text-sm">
+                  <Building2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span>
+                    عرض أطباء قسم:{' '}
+                    <strong className="font-bold text-emerald-800 dark:text-emerald-300">
+                      {selectedDepartment?.name || `قسم #${departmentParam}`}
+                    </strong>
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLocation('/doctors')}
+                  className="h-8 px-3 text-xs text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-xl gap-1.5 font-medium"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>عرض جميع الأطباء</span>
+                </Button>
+              </div>
+            )}
           </div>
         </section>
       </ScrollReveal>
@@ -285,6 +329,19 @@ function DoctorsContent() {
                 <p className="text-xs sm:text-base text-muted-foreground dark:text-muted-foreground mt-1 sm:mt-2">
                   {emptyDescriptionText}
                 </p>
+                {Boolean(departmentParam) && (
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLocation('/doctors')}
+                      className="rounded-xl gap-2 text-xs"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      <span>إلغاء التصفية وعرض جميع الأطباء</span>
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

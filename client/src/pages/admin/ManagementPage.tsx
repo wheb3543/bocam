@@ -8,11 +8,12 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import OffersManagement from '@/components/offer/OffersManagement';
 import CampsManagement from '@/components/camp/CampsManagement';
 import DoctorsManagement from '@/components/DoctorsManagement';
+import DepartmentsTab from '@/components/departments/DepartmentsTab';
 
 export default function ManagementPage() {
   const { user, loading, error } = useAuth();
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState('offers');
+  const [activeTab, setActiveTab] = useState('departments');
 
   const _logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -43,7 +44,10 @@ export default function ManagementPage() {
   }
 
   return (
-    <DashboardLayout pageTitle="الإدارة" pageDescription="إدارة العروض والمخيمات والأطباء">
+    <DashboardLayout
+      pageTitle="الإدارة"
+      pageDescription="إدارة الأقسام والعيادات والأطباء والعروض والمخيمات"
+    >
       {/* Main Content */}
       <main className="container h-[calc(100dvh-4.25rem)] min-h-0 overflow-hidden py-3 sm:py-4">
         <Tabs
@@ -51,11 +55,20 @@ export default function ManagementPage() {
           onValueChange={setActiveTab}
           className="flex h-full min-h-0 flex-col gap-3"
         >
-          <TabsList className="mx-auto grid w-full max-w-2xl shrink-0 grid-cols-3">
+          <TabsList className="mx-auto grid w-full max-w-3xl shrink-0 grid-cols-2 sm:grid-cols-4">
+            <TabsTrigger value="departments">الأقسام الطبية</TabsTrigger>
+            <TabsTrigger value="doctors">إدارة الأطباء</TabsTrigger>
             <TabsTrigger value="offers">إدارة العروض</TabsTrigger>
             <TabsTrigger value="camps">إدارة المخيمات</TabsTrigger>
-            <TabsTrigger value="doctors">إدارة الأطباء</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="departments" className="mt-0 min-h-0 flex-1">
+            <DepartmentsTab />
+          </TabsContent>
+
+          <TabsContent value="doctors" className="mt-0 min-h-0 flex-1">
+            <DoctorsManagement />
+          </TabsContent>
 
           <TabsContent value="offers" className="mt-0 min-h-0 flex-1">
             <OffersManagement />
@@ -63,10 +76,6 @@ export default function ManagementPage() {
 
           <TabsContent value="camps" className="mt-0 min-h-0 flex-1">
             <CampsManagement />
-          </TabsContent>
-
-          <TabsContent value="doctors" className="mt-0 min-h-0 flex-1">
-            <DoctorsManagement />
           </TabsContent>
         </Tabs>
       </main>

@@ -22,6 +22,8 @@ const HomePage = lazy(() => import('./pages/public/HomePage'));
 const ThankYou = lazy(() => import('./pages/public/ThankYou'));
 const DynamicPage = lazy(() => import('./pages/public/DynamicPage'));
 const DraftPreviewPage = lazy(() => import('./pages/public/DraftPreviewPage'));
+const DepartmentsPage = lazy(() => import('./pages/public/DepartmentsPage'));
+const DepartmentDetailPage = lazy(() => import('./pages/public/DepartmentDetailPage'));
 const Doctors = lazy(() => import('./pages/public/Doctors'));
 const Unauthorized = lazy(() => import('./pages/Unauthorized'));
 const AccessRequest = lazy(() => import('./pages/AccessRequest'));
@@ -68,6 +70,7 @@ function PrefetchRoutes() {
   useEffect(() => {
     // Prefetch public pages when on home page
     if (location === '/') {
+      import('./pages/public/DepartmentsPage');
       import('./pages/public/Doctors');
       import('./pages/public/OffersListPage');
       import('./pages/public/CampsListPage');
@@ -137,6 +140,8 @@ function Router() {
         <Route path={'/'} component={HomePage} />
         <Route path={'/preview/:token'} component={DraftPreviewPage} />
         <Route path={'/page/:slug'} component={DynamicPage} />
+        <Route path={'/departments'} component={DepartmentsPage} />
+        <Route path={'/departments/:slug'} component={DepartmentDetailPage} />
         <Route path={'/doctors'} component={Doctors} />
         <Route path={'/visiting-doctors'} component={VisitingDoctors} />
 
