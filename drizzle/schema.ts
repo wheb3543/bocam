@@ -1452,8 +1452,8 @@ export const patients = mysqlTable(
     id: int('id').autoincrement().primaryKey(),
     /** الاسم الكامل */
     fullName: varchar('fullName', { length: 255 }).notNull(),
-    /** رقم الهاتف (فريد - يستخدم لتسجيل الدخول) */
-    phone: varchar('phone', { length: 20 }).notNull().unique(),
+    /** رقم الهاتف (مشترك بين أفراد الأسرة - يستخدم لتسجيل الدخول للحساب الأساسي) */
+    phone: varchar('phone', { length: 20 }).notNull(),
     /** كلمة المرور (للدخول المباشر بدون OTP) */
     password: varchar('password', { length: 255 }),
     /** العنوان */
@@ -1473,11 +1473,57 @@ export const patients = mysqlTable(
   },
   (table) => ({
     phoneIdx: index('patients_phone_idx').on(table.phone),
+    phoneNameIdx: index('idx_patients_phone_name').on(table.phone, table.fullName),
   })
 );
 
 export type Patient = typeof patients.$inferSelect;
 export type InsertPatient = typeof patients.$inferInsert;
+
+/**
+ * جدول علاقات أفراد العائلة - يربط الحساب الأساسي بالأفراد التابعين
+ * Patient Relationships table - links primary patient account to family dependents
+ */
+export const patientRelationships = mysqlTable(
+  'patientRelationships',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    /** معرف الحساب الأساسي (ولي الأمر / صاحب الحساب) */
+    primaryPatientId: int('primaryPatientId').notNull(),
+    /** معرف فرد العائلة التابع */
+    relatedPatientId: int('relatedPatientId').notNull(),
+    /** صلة القرابة */
+    relationship: mysqlEnum('relationship', [
+      'self',
+      'father',
+      'mother',
+      'son',
+      'daughter',
+      'husband',
+      'wife',
+      'brother',
+      'sister',
+      'grandfather',
+      'grandmother',
+      'other',
+    ])
+      .default('other')
+      .notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    primaryPatientIdx: index('patient_rel_primary_idx').on(table.primaryPatientId),
+    relatedPatientIdx: index('patient_rel_related_idx').on(table.relatedPatientId),
+    uniqueRelIdx: uniqueIndex('patient_rel_unique_idx').on(
+      table.primaryPatientId,
+      table.relatedPatientId
+    ),
+  })
+);
+
+export type PatientRelationship = typeof patientRelationships.$inferSelect;
+export type InsertPatientRelationship = typeof patientRelationships.$inferInsert;
 
 /**
  * جدول رموز التحقق للمرضى - يخزن رموز OTP لتسجيل الدخول

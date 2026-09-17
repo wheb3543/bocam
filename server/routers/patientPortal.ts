@@ -15,6 +15,8 @@ import {
   getPatientOfferLeads,
   getPatientCampRegistrations,
   getPatientResults,
+  getFamilyMembersForPatient,
+  updatePatientRelationship,
   sanitizePatient,
 } from '../database/db/patients';
 import { meta } from '../api/MetaApiService';
@@ -301,10 +303,58 @@ export const patientPortalRouter = router({
       return sanitizePatient(updated);
     }),
 
-  // الحصول على حجوزات المريض (مواعيد الأطباء)
+  // الحصول على أفراد العائلة المرتبطين بالحساب
+  getFamilyMembers: patientProcedure.query(async ({ ctx }) => {
+    const patient = (ctx as { patient: { id: number } }).patient;
+    return getFamilyMembersForPatient(patient.id);
+  }),
+
+  // تحديث صلة القرابة لفرد من العائلة
+  updateFamilyRelationship: patientProcedure
+    .input(
+      z.object({
+        relatedPatientId: z.number(),
+        relationship: z.enum([
+          'self',
+          'father',
+          'mother',
+          'son',
+          'daughter',
+          'husband',
+          'wife',
+          'brother',
+          'sister',
+          'grandfather',
+          'grandmother',
+          'other',
+        ]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const patient = (ctx as { patient: { id: number } }).patient;
+      return updatePatientRelationship(patient.id, input.relatedPatientId, input.relationship);
+    }),
+
+  // الحصول على حجوزات المريض وجميع أفراد عائلته (مواعيد الأطباء)
   myAppointments: patientProcedure.query(async ({ ctx }) => {
-    const patient = (ctx as { patient: { id: number; phone: string } }).patient;
-    return getPatientAppointments(patient.phone, patient.id);
+    const patient = (ctx as { patient: { id: number; phone: string; fullName: string } }).patient;
+    const members = await getFamilyMembersForPatient(patient.id);
+    const memberMap = new Map<number, { fullName: string; relationship: string }>();
+    const patientIds = members.map((m) => {
+      memberMap.set(m.id, { fullName: m.fullName, relationship: m.relationship });
+      return m.id;
+    });
+
+    const rawAppointments = await getPatientAppointments(patient.phone, patientIds);
+
+    return rawAppointments.map((apt) => {
+      const memberInfo = apt.patientId ? memberMap.get(apt.patientId) : undefined;
+      return {
+        ...apt,
+        beneficiaryName: apt.fullName || memberInfo?.fullName || patient.fullName,
+        relationship: memberInfo?.relationship || (apt.patientId === patient.id ? 'self' : 'other'),
+      };
+    });
   }),
 
   // الحصول على حجوزات العروض
@@ -317,8 +367,25 @@ export const patientPortalRouter = router({
     return getPatientCampRegistrations((ctx as { patient: { phone: string } }).patient.phone);
   }),
 
-  // الحصول على النتائج والتقارير
+  // الحصول على النتائج والتقارير للحساب الأساسي وجميع أفراد العائلة
   myResults: patientProcedure.query(async ({ ctx }) => {
-    return getPatientResults((ctx as { patient: { id: number } }).patient.id);
+    const patient = (ctx as { patient: { id: number } }).patient;
+    const members = await getFamilyMembersForPatient(patient.id);
+    const memberMap = new Map<number, { fullName: string; relationship: string }>();
+    const patientIds = members.map((m) => {
+      memberMap.set(m.id, { fullName: m.fullName, relationship: m.relationship });
+      return m.id;
+    });
+
+    const rawResults = await getPatientResults(patientIds);
+
+    return rawResults.map((res) => {
+      const memberInfo = memberMap.get(res.patientId);
+      return {
+        ...res,
+        beneficiaryName: memberInfo?.fullName || 'غير معروف',
+        relationship: memberInfo?.relationship || (res.patientId === patient.id ? 'self' : 'other'),
+      };
+    });
   }),
 });

@@ -10,11 +10,14 @@ import {
   doctorSchedules,
   doctorScheduleExceptions,
   patients,
+  patientRelationships,
   type Patient,
+  type InsertPatient,
 } from '../../drizzle/schema';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { createLogger } from '../_core/logger';
 import { normalizePhoneNumber } from '../database/db';
+import { normalizeArabicText } from '../utils/textNormalization';
 
 const logger = createLogger('schedulingService');
 
@@ -319,8 +322,15 @@ export async function validateSlotAvailability(
 }
 
 /**
- * Ensure patient record exists in `patients` table (Auto-provisioning)
- * Returns the matched or newly created Patient
+ * Ensure patient record exists in `patients` table (Auto-provisioning with Family Member Support)
+ * 1. Normalizes phone via normalizePhoneNumber and name via normalizeArabicText.
+ * 2. Fetches all patients sharing this normalized phone.
+ * 3. Matches existing patient by normalized name.
+ * 4. If matched: returns patient (and updates missing age/gender/email if provided).
+ * 5. If new family member with shared phone:
+ *    - Creates a new patient record with their distinct name, age, and gender.
+ *    - Links them automatically to the primary patient (first registered with this phone) in `patientRelationships`.
+ *    - Returns the new patient record for independent patientId assignment.
  */
 export async function ensurePatientAccount(data: {
   phone: string;
@@ -331,23 +341,54 @@ export async function ensurePatientAccount(data: {
 }): Promise<Patient | null> {
   const db = await ensureDatabaseAvailable();
   const normalizedPhone = normalizePhoneNumber(data.phone);
+  const normalizedInputName = normalizeArabicText(data.fullName);
 
   try {
-    // Check if patient already exists
-    const [existing] = await db
+    // Fetch all existing patients registered with this phone
+    const existingPatients = await db
       .select()
       .from(patients)
       .where(eq(patients.phone, normalizedPhone))
-      .limit(1);
+      .orderBy(patients.id);
 
-    if (existing) {
-      return existing;
+    // Look for exact/normalized match on name
+    const matched = existingPatients.find(
+      (p) => normalizeArabicText(p.fullName) === normalizedInputName
+    );
+
+    if (matched) {
+      // Update missing demographic fields if supplied
+      const updates: Partial<InsertPatient> = {};
+      if (
+        (matched.age === null || matched.age === undefined) &&
+        data.age !== undefined &&
+        data.age !== null
+      ) {
+        updates.age = data.age;
+      }
+      if (!matched.email && data.email) {
+        updates.email = data.email;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await db.update(patients).set(updates).where(eq(patients.id, matched.id));
+        const [refreshed] = await db
+          .select()
+          .from(patients)
+          .where(eq(patients.id, matched.id))
+          .limit(1);
+        return refreshed || matched;
+      }
+      return matched;
     }
 
-    // Auto-create new patient record
+    // Identify primary patient (the first patient registered with this phone number)
+    const primaryPatient = existingPatients.length > 0 ? existingPatients[0] : null;
+
+    // Auto-create new patient record for the family member
     const [inserted] = await db.insert(patients).values({
       phone: normalizedPhone,
-      fullName: data.fullName,
+      fullName: data.fullName.trim(),
       gender: data.gender || 'male',
       age: data.age,
       email: data.email,
@@ -357,8 +398,37 @@ export async function ensurePatientAccount(data: {
     const newId = Number(inserted.insertId);
     const [newPatient] = await db.select().from(patients).where(eq(patients.id, newId)).limit(1);
 
-    logger.info(`Auto-created patient record #${newId} for ${normalizedPhone}`);
-    return newPatient || null;
+    if (!newPatient) {
+      return null;
+    }
+
+    // Automatically establish relationship with primary patient if applicable
+    if (primaryPatient && primaryPatient.id !== newPatient.id) {
+      const [existingRel] = await db
+        .select()
+        .from(patientRelationships)
+        .where(
+          and(
+            eq(patientRelationships.primaryPatientId, primaryPatient.id),
+            eq(patientRelationships.relatedPatientId, newPatient.id)
+          )
+        )
+        .limit(1);
+
+      if (!existingRel) {
+        await db.insert(patientRelationships).values({
+          primaryPatientId: primaryPatient.id,
+          relatedPatientId: newPatient.id,
+          relationship: 'other',
+        });
+        logger.info(
+          `Auto-linked family member #${newPatient.id} (${newPatient.fullName}) to primary patient #${primaryPatient.id} (${primaryPatient.fullName})`
+        );
+      }
+    }
+
+    logger.info(`Auto-created patient record #${newId} for ${normalizedPhone} (${data.fullName})`);
+    return newPatient;
   } catch (error) {
     logger.error('Failed to ensure patient account:', error);
     return null;

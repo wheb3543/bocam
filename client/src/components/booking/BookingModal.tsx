@@ -20,12 +20,29 @@ import {
   CalendarCheck2,
   Sparkles,
   Search,
+  Users,
+  UserPlus,
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { useBookingModal } from '@/hooks/booking/useBookingModal';
 import { usePatientStorage } from '@/hooks/data/usePatientStorage';
 import { useLocation } from 'wouter';
+
+const RELATIONSHIP_LABELS: Record<string, string> = {
+  self: 'أنا (الأساسي)',
+  father: 'الأب',
+  mother: 'الأم',
+  son: 'الابن',
+  daughter: 'الابنة',
+  husband: 'الزوج',
+  wife: 'الزوجة',
+  brother: 'الأخ',
+  sister: 'الأخت',
+  grandfather: 'الجد',
+  grandmother: 'الجدة',
+  other: 'فرد عائلة',
+};
 
 // Arabic day names
 const ARABIC_DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
@@ -56,6 +73,7 @@ function formatDisplayDate(dateStr: string): string {
 }
 
 export function BookingModal() {
+  const utils = trpc.useUtils();
   const {
     isOpen,
     doctorId: initialDoctorId,
@@ -82,6 +100,9 @@ export function BookingModal() {
   } | null>(null);
   const [doctorSearch, setDoctorSearch] = useState<string>('');
 
+  // Beneficiary / Family member selection
+  const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState<number | 'new' | null>(null);
+
   // Patient details form
   const [fullName, setFullName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
@@ -98,6 +119,13 @@ export function BookingModal() {
     date?: string;
     time?: string;
   } | null>(null);
+
+  // Family members query (when patient is authenticated in portal)
+  const { data: familyMembers } = trpc.patientPortal.getFamilyMembers.useQuery(undefined, {
+    staleTime: 60 * 1000,
+    enabled: isOpen,
+    retry: false,
+  });
 
   // Fetch departments & doctors
   const { data: departmentsData } = trpc.departments.list.useQuery(undefined, {
@@ -143,6 +171,12 @@ export function BookingModal() {
       setAge(prefill?.age ? String(prefill.age) : '');
       setNotes(prefill?.notes || '');
       setPhoneError('');
+
+      if (prefill?.patientId) {
+        setSelectedBeneficiaryId(prefill.patientId);
+      } else {
+        setSelectedBeneficiaryId(null);
+      }
 
       if (initialDepartmentId) {
         setSelectedDepartmentId(initialDepartmentId);
@@ -299,6 +333,8 @@ export function BookingModal() {
       });
 
       setStep(4);
+      void utils.patientPortal.getFamilyMembers.invalidate();
+      void utils.patientPortal.myAppointments.invalidate();
       toast.success('تم تسجيل وحجز موعدك بنجاح!');
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'فشل إتمام الحجز. يرجى المحاولة لاحقاً';
@@ -726,6 +762,86 @@ export function BookingModal() {
 
               {/* Form Fields */}
               <div className="space-y-3">
+                {/* Family Member / Beneficiary Selector */}
+                {familyMembers && familyMembers.length > 0 && (
+                  <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                        <Users className="size-3.5 text-primary" />
+                        <span>من هو المستفيد من هذا الموعد؟</span>
+                      </label>
+                      <span className="text-[10px] text-muted-foreground font-medium">
+                        الملف العائلي
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {familyMembers.map((member) => {
+                        const isSelected = selectedBeneficiaryId === member.id;
+                        const relLabel =
+                          RELATIONSHIP_LABELS[member.relationship] || member.relationship;
+                        return (
+                          <button
+                            key={member.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedBeneficiaryId(member.id);
+                              setFullName(member.fullName);
+                              if (member.gender) {
+                                setGender(member.gender as 'male' | 'female');
+                              }
+                              if (member.age) {
+                                setAge(String(member.age));
+                              }
+                            }}
+                            className={`px-2.5 py-1.5 rounded-lg text-xs transition-all border flex items-center gap-1.5 cursor-pointer ${
+                              isSelected
+                                ? 'bg-primary text-primary-foreground border-primary font-bold shadow-xs'
+                                : 'bg-card text-foreground border-border hover:bg-muted/50'
+                            }`}
+                          >
+                            <span>{member.fullName}</span>
+                            <span
+                              className={`text-[10px] px-1.5 py-0.2 rounded-full border ${
+                                isSelected
+                                  ? 'bg-white/20 text-white border-white/30'
+                                  : 'bg-muted text-muted-foreground border-border/50'
+                              }`}
+                            >
+                              {relLabel}
+                            </span>
+                          </button>
+                        );
+                      })}
+
+                      {/* New Family Member Option */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedBeneficiaryId('new');
+                          setFullName('');
+                          setAge('');
+                        }}
+                        className={`px-2.5 py-1.5 rounded-lg text-xs transition-all border flex items-center gap-1 cursor-pointer ${
+                          selectedBeneficiaryId === 'new'
+                            ? 'bg-primary text-primary-foreground border-primary font-bold shadow-xs'
+                            : 'bg-card text-foreground border-border hover:bg-muted/50'
+                        }`}
+                      >
+                        <UserPlus className="size-3" />
+                        <span>فرد عائلة جديد</span>
+                      </button>
+                    </div>
+
+                    {selectedBeneficiaryId === 'new' && (
+                      <p className="text-[11px] text-primary bg-primary/10 p-2 rounded-lg mt-1">
+                        سيتم تسجيل بيانات فرد العائلة الجديد وربطه تلقائياً بحسابك العائلي الموحد
+                        تحت نفس رقم الهاتف.
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {/* Full Name */}
                 <div>
                   <label className="text-xs font-semibold text-foreground block mb-1.5">

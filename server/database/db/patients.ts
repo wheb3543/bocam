@@ -1,14 +1,16 @@
-import { eq, and, or, gt, desc } from 'drizzle-orm';
+import { eq, and, or, gt, desc, inArray } from 'drizzle-orm';
 import { getDb } from './connection';
 import { normalizePhoneNumber } from './whatsapp';
 import {
   patients,
   patientOtps,
   patientResults,
+  patientRelationships,
   appointments,
   offerLeads,
   campRegistrations,
   type Patient,
+  type PatientRelationship,
 } from '../../../drizzle/schema';
 import bcrypt from 'bcrypt';
 
@@ -221,18 +223,141 @@ export async function verifyPatientPassword(
   return { success: isValid, hasPassword: true };
 }
 
+// ============ Family Relationships ============
+
+export interface FamilyMember {
+  id: number;
+  fullName: string;
+  phone: string;
+  age: number | null;
+  gender: 'male' | 'female';
+  email: string | null;
+  relationship: PatientRelationship['relationship'];
+  isPrimary: boolean;
+}
+
+/**
+ * Get primary patient and all linked family members
+ */
+export async function getFamilyMembersForPatient(
+  primaryPatientId: number
+): Promise<FamilyMember[]> {
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+
+  const primary = await getPatientById(primaryPatientId);
+  if (!primary) {
+    return [];
+  }
+
+  const relationships = await db
+    .select()
+    .from(patientRelationships)
+    .where(eq(patientRelationships.primaryPatientId, primaryPatientId));
+
+  const relMap = new Map<number, PatientRelationship['relationship']>();
+  const relatedIds: number[] = [];
+  for (const r of relationships) {
+    relMap.set(r.relatedPatientId, r.relationship);
+    relatedIds.push(r.relatedPatientId);
+  }
+
+  let relatedPatients: Patient[] = [];
+  if (relatedIds.length > 0) {
+    relatedPatients = await db.select().from(patients).where(inArray(patients.id, relatedIds));
+  }
+
+  const members: FamilyMember[] = [
+    {
+      id: primary.id,
+      fullName: primary.fullName,
+      phone: primary.phone,
+      age: primary.age,
+      gender: primary.gender,
+      email: primary.email,
+      relationship: 'self',
+      isPrimary: true,
+    },
+  ];
+
+  for (const rp of relatedPatients) {
+    members.push({
+      id: rp.id,
+      fullName: rp.fullName,
+      phone: rp.phone,
+      age: rp.age,
+      gender: rp.gender,
+      email: rp.email,
+      relationship: relMap.get(rp.id) || 'other',
+      isPrimary: false,
+    });
+  }
+
+  return members;
+}
+
+/**
+ * Update family member relationship (e.g. set relationship to 'son', 'wife', etc.)
+ */
+export async function updatePatientRelationship(
+  primaryPatientId: number,
+  relatedPatientId: number,
+  relationship: PatientRelationship['relationship']
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+
+  const [existing] = await db
+    .select()
+    .from(patientRelationships)
+    .where(
+      and(
+        eq(patientRelationships.primaryPatientId, primaryPatientId),
+        eq(patientRelationships.relatedPatientId, relatedPatientId)
+      )
+    )
+    .limit(1);
+
+  if (existing) {
+    await db
+      .update(patientRelationships)
+      .set({ relationship, updatedAt: new Date() })
+      .where(eq(patientRelationships.id, existing.id));
+  } else {
+    await db.insert(patientRelationships).values({
+      primaryPatientId,
+      relatedPatientId,
+      relationship,
+    });
+  }
+
+  return { success: true };
+}
+
 // ============ Patient Appointments ============
 
-export async function getPatientAppointments(phone: string, patientId?: number) {
+export async function getPatientAppointments(phone: string, patientIds?: number | number[]) {
   const db = await getDb();
   if (!db) {
     return [];
   }
   const normalizedPhone = normalizePatientPhone(phone);
-  const condition =
-    patientId && patientId > 0
-      ? or(eq(appointments.patientId, patientId), eq(appointments.phone, normalizedPhone))
-      : eq(appointments.phone, normalizedPhone);
+
+  let condition;
+  if (Array.isArray(patientIds) && patientIds.length > 0) {
+    condition = or(
+      inArray(appointments.patientId, patientIds),
+      eq(appointments.phone, normalizedPhone)
+    );
+  } else if (typeof patientIds === 'number' && patientIds > 0) {
+    condition = or(eq(appointments.patientId, patientIds), eq(appointments.phone, normalizedPhone));
+  } else {
+    condition = eq(appointments.phone, normalizedPhone);
+  }
 
   const result = await db
     .select()
@@ -281,16 +406,26 @@ export async function getPatientCampRegistrations(phone: string) {
 
 // ============ Patient Results ============
 
-export async function getPatientResults(patientId: number) {
+export async function getPatientResults(patientIds: number | number[]) {
   const db = await getDb();
   if (!db) {
     return [];
   }
 
+  let condition;
+  if (Array.isArray(patientIds)) {
+    if (patientIds.length === 0) {
+      return [];
+    }
+    condition = inArray(patientResults.patientId, patientIds);
+  } else {
+    condition = eq(patientResults.patientId, patientIds);
+  }
+
   const result = await db
     .select()
     .from(patientResults)
-    .where(eq(patientResults.patientId, patientId))
+    .where(condition)
     .orderBy(desc(patientResults.createdAt));
 
   return result;

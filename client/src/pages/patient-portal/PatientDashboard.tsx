@@ -4,8 +4,8 @@
  * يعرض حجوزات المريض ومواعيده ونتائجه وتقاريره
  */
 import { useFormatDate } from '@/hooks/export/useFormatDate';
-import { useState, useEffect } from 'react';
-import { useLocation, Link } from 'wouter';
+import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
 import type { OfferLead } from '@shared/types';
 
@@ -21,6 +21,7 @@ import {
   FileText,
   Heart,
   User,
+  Users,
   LogOut,
   ClipboardList,
   Stethoscope,
@@ -36,6 +37,20 @@ import {
   Save,
   X,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import { emitToastHash } from '@/lib/toastHashRouter';
 import Navbar from '@/components/layout/Navbar';
@@ -43,6 +58,35 @@ import Footer from '@/components/layout/Footer';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import PrivacyPolicyUpdateAlert from '@/components/patient/PrivacyPolicyUpdateAlert';
 import { useBookingModal } from '@/hooks/booking/useBookingModal';
+
+const RELATIONSHIP_LABELS: Record<string, { label: string; color: string }> = {
+  self: { label: 'أنا (الأساسي)', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  father: { label: 'الأب', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  mother: { label: 'الأم', color: 'bg-pink-50 text-pink-700 border-pink-200' },
+  son: { label: 'الابن', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  daughter: { label: 'الابنة', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  husband: { label: 'الزوج', color: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+  wife: { label: 'الزوجة', color: 'bg-rose-50 text-rose-700 border-rose-200' },
+  brother: { label: 'الأخ', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  sister: { label: 'الأخت', color: 'bg-violet-50 text-violet-700 border-violet-200' },
+  grandfather: { label: 'الجد', color: 'bg-teal-50 text-teal-700 border-teal-200' },
+  grandmother: { label: 'الجدة', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  other: { label: 'فرد عائلة', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+};
+
+const RELATIONSHIP_OPTIONS = [
+  { value: 'son', label: 'الابن' },
+  { value: 'daughter', label: 'الابنة' },
+  { value: 'wife', label: 'الزوجة' },
+  { value: 'husband', label: 'الزوج' },
+  { value: 'father', label: 'الأب' },
+  { value: 'mother', label: 'الأم' },
+  { value: 'brother', label: 'الأخ' },
+  { value: 'sister', label: 'الأخت' },
+  { value: 'grandfather', label: 'الجد' },
+  { value: 'grandmother', label: 'الجدة' },
+  { value: 'other', label: 'فرد عائلة آخر' },
+];
 
 export default function PatientDashboard() {
   const { formatPhoneDisplay } = usePhoneFormat();
@@ -58,25 +102,24 @@ export default function PatientDashboard() {
     email: '',
   });
 
+  // Family members state
+  const [selectedMemberId, setSelectedMemberId] = useState<'all' | number>('all');
+  const [editingRelationshipMember, setEditingRelationshipMember] = useState<{
+    relatedPatientId: number;
+    fullName: string;
+    currentRelationship: string;
+  } | null>(null);
+  const [newRelationship, setNewRelationship] = useState<string>('other');
+
   // Check auth
   const { data: patient, isLoading: authLoading } = trpc.patientPortal.me.useQuery();
   const { openBookingModal } = useBookingModal();
 
-  const handleNewBooking = () => {
-    openBookingModal({
-      prefill: patient
-        ? {
-            fullName: patient.fullName || undefined,
-            phone: patient.phone || undefined,
-            gender: (patient.gender as 'male' | 'female') || undefined,
-            age: patient.age || undefined,
-            patientId: patient.id,
-          }
-        : undefined,
-    });
-  };
-
   // Fetch data
+  const { data: familyMembers } = trpc.patientPortal.getFamilyMembers.useQuery(undefined, {
+    enabled: !!patient,
+  });
+
   const { data: appointments, isLoading: appointmentsLoading } =
     trpc.patientPortal.myAppointments.useQuery(undefined, { enabled: !!patient });
   const { data: offerBookings, isLoading: _offersLoading } =
@@ -87,6 +130,65 @@ export default function PatientDashboard() {
     undefined,
     { enabled: !!patient }
   );
+
+  // Filter appointments and results by selected family member
+  const filteredAppointments = useMemo(() => {
+    if (!appointments) {
+      return [];
+    }
+    if (selectedMemberId === 'all') {
+      return appointments;
+    }
+    return appointments.filter((apt) => apt.patientId === selectedMemberId);
+  }, [appointments, selectedMemberId]);
+
+  const filteredResults = useMemo(() => {
+    if (!results) {
+      return [];
+    }
+    if (selectedMemberId === 'all') {
+      return results;
+    }
+    return results.filter((res) => res.patientId === selectedMemberId);
+  }, [results, selectedMemberId]);
+
+  const updateRelationshipMutation = trpc.patientPortal.updateFamilyRelationship.useMutation({
+    onSuccess: async () => {
+      toast.success('تم تحديث صلة القرابة بنجاح');
+      setEditingRelationshipMember(null);
+      await utils.patientPortal.getFamilyMembers.invalidate();
+      await utils.patientPortal.myAppointments.invalidate();
+      await utils.patientPortal.myResults.invalidate();
+    },
+    onError: (err) => {
+      toast.error(err.message || 'فشل تحديث صلة القرابة');
+    },
+  });
+
+  const handleNewBooking = () => {
+    const selectedMember =
+      selectedMemberId !== 'all' ? familyMembers?.find((m) => m.id === selectedMemberId) : null;
+
+    openBookingModal({
+      prefill: selectedMember
+        ? {
+            fullName: selectedMember.fullName || undefined,
+            phone: patient?.phone || undefined,
+            gender: (selectedMember.gender as 'male' | 'female') || undefined,
+            age: selectedMember.age || undefined,
+            patientId: selectedMember.id,
+          }
+        : patient
+          ? {
+              fullName: patient.fullName || undefined,
+              phone: patient.phone || undefined,
+              gender: (patient.gender as 'male' | 'female') || undefined,
+              age: patient.age || undefined,
+              patientId: patient.id,
+            }
+          : undefined,
+    });
+  };
 
   const logoutMutation = trpc.patientPortal.logout.useMutation({
     onSuccess: () => {
@@ -245,6 +347,146 @@ export default function PatientDashboard() {
           </div>
         </div>
 
+        {/* Family Members Bar */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-emerald-100 dark:border-gray-700 p-4 sm:p-5 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <Users className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <h2 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+                  الملف العائلي الموحد
+                  {familyMembers && familyMembers.length > 1 && (
+                    <Badge
+                      variant="secondary"
+                      className="text-[11px] px-2 py-0 bg-emerald-50 text-emerald-700 border-emerald-200"
+                    >
+                      {familyMembers.length} أفراد
+                    </Badge>
+                  )}
+                </h2>
+                <p className="text-[11px] sm:text-xs text-muted-foreground">
+                  استعراض وإدارة مواعيد وتقارير أفراد العائلة المسجلين بنفس رقم الهاتف
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                openBookingModal({
+                  prefill: {
+                    phone: patient.phone || undefined,
+                  },
+                });
+              }}
+              className="text-xs text-emerald-600 border-emerald-200 hover:bg-emerald-50 h-8 self-start sm:self-auto cursor-pointer"
+            >
+              <Users className="h-3.5 w-3.5 ml-1" />
+              حجز لفرد عائلة جديد
+            </Button>
+          </div>
+
+          {/* Family Chips */}
+          <div className="flex items-center gap-2 overflow-x-auto pt-3 pb-1 scrollbar-thin">
+            {/* All filter */}
+            <button
+              type="button"
+              onClick={() => setSelectedMemberId('all')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 border cursor-pointer ${
+                selectedMemberId === 'all'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  : 'bg-gray-50 dark:bg-gray-900/50 text-muted-foreground border-transparent hover:border-gray-200'
+              }`}
+            >
+              <span>الجميع (الكل)</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                  selectedMemberId === 'all'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                {(appointments?.length || 0) + (results?.length || 0)}
+              </span>
+            </button>
+
+            {/* Members */}
+            {familyMembers?.map((member) => {
+              const isSelected = selectedMemberId === member.id;
+              const relInfo = RELATIONSHIP_LABELS[member.relationship] || {
+                label: member.relationship,
+                color: 'bg-gray-100 text-gray-700 border-gray-200',
+              };
+              const memberApptsCount =
+                appointments?.filter((a) => a.patientId === member.id).length || 0;
+              const memberResultsCount =
+                results?.filter((r) => r.patientId === member.id).length || 0;
+
+              return (
+                <div
+                  key={member.id}
+                  className={`flex items-center gap-1 pl-1.5 pr-2.5 py-1 rounded-xl text-xs transition-all shrink-0 border ${
+                    isSelected
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                      : 'bg-gray-50 dark:bg-gray-900/50 text-foreground border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMemberId(member.id)}
+                    className="flex items-center gap-1.5 cursor-pointer text-right"
+                  >
+                    <span className="font-semibold">{member.fullName}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full border ${
+                        isSelected ? 'bg-white/20 text-white border-white/30' : relInfo.color
+                      }`}
+                    >
+                      {relInfo.label}
+                    </span>
+                    {(memberApptsCount > 0 || memberResultsCount > 0) && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                          isSelected
+                            ? 'bg-black/20 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-muted-foreground'
+                        }`}
+                      >
+                        {memberApptsCount + memberResultsCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {!member.isPrimary && (
+                    <button
+                      type="button"
+                      title="تعديل صلة القرابة"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingRelationshipMember({
+                          relatedPatientId: member.id,
+                          fullName: member.fullName,
+                          currentRelationship: member.relationship,
+                        });
+                        setNewRelationship(member.relationship || 'other');
+                      }}
+                      className={`p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'text-white/80 hover:text-white'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Quick Stats */}
         <PrivacyPolicyUpdateAlert />
 
@@ -253,9 +495,13 @@ export default function PatientDashboard() {
             <CardContent className="p-3 sm:p-4 text-center">
               <Stethoscope className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400 mx-auto mb-1" />
               <p className="text-lg sm:text-xl font-bold text-foreground">
-                {appointments?.length || 0}
+                {selectedMemberId === 'all'
+                  ? appointments?.length || 0
+                  : filteredAppointments.length}
               </p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">مواعيد</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
+                {selectedMemberId === 'all' ? 'مواعيد (الكل)' : 'مواعيد'}
+              </p>
             </CardContent>
           </Card>
           <Card className="border-green-100 dark:border-gray-700">
@@ -279,8 +525,12 @@ export default function PatientDashboard() {
           <Card className="border-green-100 dark:border-gray-700">
             <CardContent className="p-3 sm:p-4 text-center">
               <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 dark:text-amber-400 mx-auto mb-1" />
-              <p className="text-lg sm:text-xl font-bold text-foreground">{results?.length || 0}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">نتائج وتقارير</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground">
+                {selectedMemberId === 'all' ? results?.length || 0 : filteredResults.length}
+              </p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
+                {selectedMemberId === 'all' ? 'نتائج وتقارير' : 'نتائج الفرد'}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -337,28 +587,49 @@ export default function PatientDashboard() {
                   <div className="flex justify-center py-4">
                     <Loader2 className="h-5 w-5 animate-spin text-green-600" />
                   </div>
-                ) : !appointments?.length ? (
+                ) : !filteredAppointments?.length ? (
                   <div className="text-center py-6 text-muted-foreground">
                     <Calendar className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                    <p className="text-sm">لا توجد مواعيد حالياً</p>
+                    <p className="text-sm">
+                      {selectedMemberId === 'all'
+                        ? 'لا توجد مواعيد حالياً'
+                        : 'لا توجد مواعيد لهذا الفرد حالياً'}
+                    </p>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleNewBooking}
-                      className="mt-3 text-green-600 border-green-200"
+                      className="mt-3 text-green-600 border-green-200 cursor-pointer"
                     >
                       احجز موعدك الآن
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {appointments.slice(0, 3).map((apt) => (
+                    {filteredAppointments.slice(0, 3).map((apt) => (
                       <div
                         key={apt.id}
                         className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50"
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium truncate">{'موعد طبي'}</p>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="text-xs sm:text-sm font-semibold truncate">
+                              {'موعد طبي'}
+                            </p>
+                            {apt.beneficiaryName && (
+                              <span
+                                className={`text-[10px] px-1.5 py-0.2 rounded border font-medium ${
+                                  RELATIONSHIP_LABELS[apt.relationship]?.color ||
+                                  'bg-gray-100 text-gray-700 border-gray-200'
+                                }`}
+                              >
+                                {apt.beneficiaryName}
+                                {apt.relationship && apt.relationship !== 'self'
+                                  ? ` (${RELATIONSHIP_LABELS[apt.relationship]?.label || apt.relationship})`
+                                  : ''}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Clock className="h-3 w-3" />
                             {formatDate(
@@ -370,14 +641,14 @@ export default function PatientDashboard() {
                         {statusBadge(apt.status as string)}
                       </div>
                     ))}
-                    {appointments.length > 3 && (
+                    {filteredAppointments.length > 3 && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full text-green-600"
+                        className="w-full text-green-600 cursor-pointer"
                         onClick={() => setActiveTab('appointments')}
                       >
-                        عرض الكل ({appointments.length})
+                        عرض الكل ({filteredAppointments.length})
                       </Button>
                     )}
                   </div>
@@ -398,15 +669,19 @@ export default function PatientDashboard() {
                   <div className="flex justify-center py-4">
                     <Loader2 className="h-5 w-5 animate-spin text-green-600" />
                   </div>
-                ) : !results?.length ? (
+                ) : !filteredResults?.length ? (
                   <div className="text-center py-6 text-muted-foreground">
                     <FileText className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                    <p className="text-sm">لا توجد نتائج حالياً</p>
+                    <p className="text-sm">
+                      {selectedMemberId === 'all'
+                        ? 'لا توجد نتائج حالياً'
+                        : 'لا توجد نتائج لهذا الفرد حالياً'}
+                    </p>
                     <p className="text-xs mt-1">ستظهر هنا نتائج التحاليل والأشعة والتقارير</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {results.slice(0, 3).map((res) => (
+                    {filteredResults.slice(0, 3).map((res) => (
                       <div
                         key={res.id}
                         className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50"
@@ -422,7 +697,22 @@ export default function PatientDashboard() {
                             <ClipboardList className="h-4 w-4 text-amber-500 flex-shrink-0" />
                           )}
                           <div className="min-w-0">
-                            <p className="text-xs sm:text-sm font-medium truncate">{res.title}</p>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="text-xs sm:text-sm font-medium truncate">{res.title}</p>
+                              {res.beneficiaryName && (
+                                <span
+                                  className={`text-[10px] px-1.5 py-0.2 rounded border font-medium ${
+                                    RELATIONSHIP_LABELS[res.relationship]?.color ||
+                                    'bg-gray-100 text-gray-700 border-gray-200'
+                                  }`}
+                                >
+                                  {res.beneficiaryName}
+                                  {res.relationship && res.relationship !== 'self'
+                                    ? ` (${RELATIONSHIP_LABELS[res.relationship]?.label || res.relationship})`
+                                    : ''}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px] sm:text-xs text-muted-foreground">
                               {formatDate(
                                 (res.resultDate as Date | string | null) ||
@@ -473,18 +763,34 @@ export default function PatientDashboard() {
               </div>
             ) : (
               <>
-                {appointments && appointments.length > 0 && (
+                {filteredAppointments && filteredAppointments.length > 0 && (
                   <div>
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
                       <Stethoscope className="h-3.5 w-3.5" /> مواعيد الأطباء
                     </h3>
                     <div className="space-y-2">
-                      {appointments.map((apt) => (
+                      {filteredAppointments.map((apt) => (
                         <Card key={apt.id} className="border-green-50 dark:border-gray-700">
                           <CardContent className="p-3 sm:p-4">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium">{'موعد طبي'}</p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="text-sm font-semibold">{'موعد طبي'}</p>
+                                  {apt.beneficiaryName && (
+                                    <Badge
+                                      variant="outline"
+                                      className={`text-[11px] py-0.5 px-2 font-medium ${
+                                        RELATIONSHIP_LABELS[apt.relationship]?.color ||
+                                        'bg-gray-100 text-gray-700'
+                                      }`}
+                                    >
+                                      {apt.beneficiaryName}
+                                      {apt.relationship && apt.relationship !== 'self'
+                                        ? ` (${RELATIONSHIP_LABELS[apt.relationship]?.label || apt.relationship})`
+                                        : ' (الأساسي)'}
+                                    </Badge>
+                                  )}
+                                </div>
                                 <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-[10px] sm:text-xs text-muted-foreground">
                                   <span className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
@@ -560,13 +866,15 @@ export default function PatientDashboard() {
                   </div>
                 )}
 
-                {!appointments?.length && !offerBookings?.length && !campRegistrations?.length && (
-                  <div className="text-center py-10 text-muted-foreground">
-                    <Calendar className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm font-medium">لا توجد حجوزات أو مواعيد</p>
-                    <p className="text-xs mt-1">يمكنك حجز موعد من صفحة الأطباء أو العروض</p>
-                  </div>
-                )}
+                {!filteredAppointments?.length &&
+                  !offerBookings?.length &&
+                  !campRegistrations?.length && (
+                    <div className="text-center py-10 text-muted-foreground">
+                      <Calendar className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                      <p className="text-sm font-medium">لا توجد حجوزات أو مواعيد</p>
+                      <p className="text-xs mt-1">يمكنك حجز موعد من صفحة الأطباء أو العروض</p>
+                    </div>
+                  )}
               </>
             )}
           </TabsContent>
@@ -577,29 +885,49 @@ export default function PatientDashboard() {
               <div className="flex justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-green-600" />
               </div>
-            ) : !results?.length ? (
+            ) : !filteredResults?.length ? (
               <div className="text-center py-10 text-muted-foreground">
                 <FileText className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm font-medium">لا توجد نتائج أو تقارير</p>
+                <p className="text-sm font-medium">
+                  {selectedMemberId === 'all'
+                    ? 'لا توجد نتائج أو تقارير'
+                    : 'لا توجد نتائج أو تقارير لهذا الفرد'}
+                </p>
                 <p className="text-xs mt-1">ستظهر هنا نتائج التحاليل والأشعة والتقارير الطبية</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {/* Lab Results */}
-                {results.filter((r) => r.resultType === 'lab').length > 0 && (
+                {filteredResults.filter((r) => r.resultType === 'lab').length > 0 && (
                   <div>
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
                       <FlaskConical className="h-3.5 w-3.5 text-blue-500" /> نتائج التحاليل
                     </h3>
                     <div className="space-y-2">
-                      {results
+                      {filteredResults
                         .filter((r) => r.resultType === 'lab')
                         .map((res) => (
                           <Card key={res.id} className="border-blue-50 dark:border-gray-700">
                             <CardContent className="p-3 sm:p-4">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium">{res.title}</p>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <p className="text-sm font-medium">{res.title}</p>
+                                    {res.beneficiaryName && (
+                                      <Badge
+                                        variant="outline"
+                                        className={`text-[10px] py-0 px-1.5 font-medium ${
+                                          RELATIONSHIP_LABELS[res.relationship]?.color ||
+                                          'bg-gray-100 text-gray-700'
+                                        }`}
+                                      >
+                                        {res.beneficiaryName}
+                                        {res.relationship && res.relationship !== 'self'
+                                          ? ` (${RELATIONSHIP_LABELS[res.relationship]?.label || res.relationship})`
+                                          : ' (الأساسي)'}
+                                      </Badge>
+                                    )}
+                                  </div>
                                   {(res['doctorName'] as string | null) && (
                                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
                                       د. {res['doctorName'] as string}
@@ -635,20 +963,36 @@ export default function PatientDashboard() {
                 )}
 
                 {/* Radiology */}
-                {results.filter((r) => r.resultType === 'radiology').length > 0 && (
+                {filteredResults.filter((r) => r.resultType === 'radiology').length > 0 && (
                   <div className="mt-4">
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
                       <ScanLine className="h-3.5 w-3.5 text-purple-500" /> نتائج الأشعة
                     </h3>
                     <div className="space-y-2">
-                      {results
+                      {filteredResults
                         .filter((r) => r.resultType === 'radiology')
                         .map((res) => (
                           <Card key={res.id} className="border-purple-50 dark:border-gray-700">
                             <CardContent className="p-3 sm:p-4">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium">{res.title}</p>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <p className="text-sm font-medium">{res.title}</p>
+                                    {res.beneficiaryName && (
+                                      <Badge
+                                        variant="outline"
+                                        className={`text-[10px] py-0 px-1.5 font-medium ${
+                                          RELATIONSHIP_LABELS[res.relationship]?.color ||
+                                          'bg-gray-100 text-gray-700'
+                                        }`}
+                                      >
+                                        {res.beneficiaryName}
+                                        {res.relationship && res.relationship !== 'self'
+                                          ? ` (${RELATIONSHIP_LABELS[res.relationship]?.label || res.relationship})`
+                                          : ' (الأساسي)'}
+                                      </Badge>
+                                    )}
+                                  </div>
                                   {(res['doctorName'] as string | null) && (
                                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
                                       د. {res['doctorName'] as string}
@@ -684,20 +1028,36 @@ export default function PatientDashboard() {
                 )}
 
                 {/* Reports */}
-                {results.filter((r) => r.resultType === 'report').length > 0 && (
+                {filteredResults.filter((r) => r.resultType === 'report').length > 0 && (
                   <div className="mt-4">
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1">
                       <ClipboardList className="h-3.5 w-3.5 text-amber-500" /> التقارير الطبية
                     </h3>
                     <div className="space-y-2">
-                      {results
+                      {filteredResults
                         .filter((r) => r.resultType === 'report')
                         .map((res) => (
                           <Card key={res.id} className="border-amber-50 dark:border-gray-700">
                             <CardContent className="p-3 sm:p-4">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium">{res.title}</p>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <p className="text-sm font-medium">{res.title}</p>
+                                    {res.beneficiaryName && (
+                                      <Badge
+                                        variant="outline"
+                                        className={`text-[10px] py-0 px-1.5 font-medium ${
+                                          RELATIONSHIP_LABELS[res.relationship]?.color ||
+                                          'bg-gray-100 text-gray-700'
+                                        }`}
+                                      >
+                                        {res.beneficiaryName}
+                                        {res.relationship && res.relationship !== 'self'
+                                          ? ` (${RELATIONSHIP_LABELS[res.relationship]?.label || res.relationship})`
+                                          : ' (الأساسي)'}
+                                      </Badge>
+                                    )}
+                                  </div>
                                   {(res['doctorName'] as string | null) && (
                                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
                                       د. {res['doctorName'] as string}
@@ -906,6 +1266,85 @@ export default function PatientDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Edit Family Relationship Dialog */}
+        <Dialog
+          open={!!editingRelationshipMember}
+          onOpenChange={(open) => !open && setEditingRelationshipMember(null)}
+        >
+          <DialogContent className="sm:max-w-md" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-emerald-600" />
+                تحديد صلة القرابة
+              </DialogTitle>
+              <DialogDescription>
+                تحديد صلة القرابة لـ{' '}
+                <span className="font-semibold text-foreground">
+                  {editingRelationshipMember?.fullName}
+                </span>{' '}
+                بحساب صاحب الرقم.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>صلة القرابة</Label>
+                <Select value={newRelationship} onValueChange={setNewRelationship}>
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue placeholder="اختر صلة القرابة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RELATIONSHIP_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setEditingRelationshipMember(null)}
+                className="cursor-pointer"
+              >
+                إلغاء
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 cursor-pointer"
+                disabled={updateRelationshipMutation.isPending}
+                onClick={() => {
+                  if (!editingRelationshipMember) {
+                    return;
+                  }
+                  updateRelationshipMutation.mutate({
+                    relatedPatientId: editingRelationshipMember.relatedPatientId,
+                    relationship: newRelationship as
+                      | 'self'
+                      | 'father'
+                      | 'mother'
+                      | 'son'
+                      | 'daughter'
+                      | 'husband'
+                      | 'wife'
+                      | 'brother'
+                      | 'sister'
+                      | 'grandfather'
+                      | 'grandmother'
+                      | 'other',
+                  });
+                }}
+              >
+                {updateRelationshipMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  'حفظ التعديل'
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
 
       <Footer />
