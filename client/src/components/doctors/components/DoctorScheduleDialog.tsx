@@ -398,7 +398,7 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="sm:max-w-3xl md:max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
@@ -468,8 +468,8 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                     >
                       <div className="flex flex-col gap-3">
                         {/* Day header: switch, day name, slot & capacity settings */}
-                        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/40">
-                          <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2.5 border-b border-border/40">
+                          <div className="flex items-center gap-2.5">
                             <Switch
                               id={`switch-${day.dayOfWeek}`}
                               checked={day.isActive}
@@ -477,13 +477,13 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                             />
                             <Label
                               htmlFor={`switch-${day.dayOfWeek}`}
-                              className="font-semibold text-sm cursor-pointer flex items-center gap-2"
+                              className="font-bold text-sm cursor-pointer flex items-center gap-2"
                             >
                               <span>{day.dayName}</span>
                               {day.dayOfWeek === 5 && (
                                 <Badge
                                   variant="outline"
-                                  className="text-[10px] py-0 px-1 text-muted-foreground"
+                                  className="text-[10px] py-0 px-1.5 text-muted-foreground"
                                 >
                                   عطلة
                                 </Badge>
@@ -492,9 +492,9 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                           </div>
 
                           {day.isActive && (
-                            <div className="flex items-center gap-3 text-xs">
+                            <div className="flex items-center gap-4 text-xs">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-muted-foreground">مدة الفترة:</span>
+                                <span className="text-muted-foreground">مدة الجلسة:</span>
                                 <Input
                                   type="number"
                                   min={10}
@@ -508,9 +508,9 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                                       Number(e.target.value)
                                     )
                                   }
-                                  className="h-7 text-xs w-16"
+                                  className="h-8 text-xs w-16 text-center font-mono"
                                 />
-                                <span className="text-[10px] text-muted-foreground">د</span>
+                                <span className="text-[11px] text-muted-foreground">دقيقة</span>
                               </div>
 
                               <div className="flex items-center gap-1.5">
@@ -527,9 +527,9 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                                       Number(e.target.value)
                                     )
                                   }
-                                  className="h-7 text-xs w-14"
+                                  className="h-8 text-xs w-14 text-center font-mono"
                                 />
-                                <span className="text-[10px] text-muted-foreground">مريض</span>
+                                <span className="text-[11px] text-muted-foreground">مريض</span>
                               </div>
                             </div>
                           )}
@@ -537,18 +537,18 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
 
                         {/* Dual Shifts Configuration */}
                         {day.isActive ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                             {/* Morning Shift */}
                             <div
-                              className={`p-2.5 rounded-lg border text-xs transition-colors ${
+                              className={`p-3 rounded-xl border text-xs transition-colors ${
                                 day.isMorningActive
-                                  ? 'bg-amber-500/5 border-amber-500/25'
+                                  ? 'bg-amber-500/5 border-amber-500/30 shadow-xs'
                                   : 'bg-muted/10 border-border/40 opacity-60'
                               }`}
                             >
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-1.5 font-medium text-amber-700 dark:text-amber-400">
-                                  <Sun className="h-3.5 w-3.5 text-amber-500" />
+                              <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-border/30">
+                                <div className="flex items-center gap-1.5 font-semibold text-amber-800 dark:text-amber-300">
+                                  <Sun className="h-4 w-4 text-amber-500" />
                                   <span>الفترة الصباحية</span>
                                 </div>
                                 <Switch
@@ -560,11 +560,14 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                               </div>
 
                               {day.isMorningActive ? (
-                                <div className="flex items-center gap-2">
-                                  <div className="flex-1 space-y-1">
-                                    <span className="text-[10px] text-muted-foreground">من</span>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                  <div className="space-y-1">
+                                    <span className="text-[11px] text-muted-foreground font-medium block">
+                                      من:
+                                    </span>
                                     <Input
                                       type="time"
+                                      dir="ltr"
                                       value={day.morningStartTime}
                                       onChange={(e) =>
                                         handleFieldChange(
@@ -573,14 +576,16 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                                           e.target.value
                                         )
                                       }
-                                      className="h-7 text-xs w-full"
+                                      className="h-8 text-xs font-mono text-center w-full px-2"
                                     />
                                   </div>
-                                  <span className="text-muted-foreground pt-4">-</span>
-                                  <div className="flex-1 space-y-1">
-                                    <span className="text-[10px] text-muted-foreground">إلى</span>
+                                  <div className="space-y-1">
+                                    <span className="text-[11px] text-muted-foreground font-medium block">
+                                      إلى:
+                                    </span>
                                     <Input
                                       type="time"
+                                      dir="ltr"
                                       value={day.morningEndTime}
                                       onChange={(e) =>
                                         handleFieldChange(
@@ -589,7 +594,7 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                                           e.target.value
                                         )
                                       }
-                                      className="h-7 text-xs w-full"
+                                      className="h-8 text-xs font-mono text-center w-full px-2"
                                     />
                                   </div>
                                 </div>
@@ -602,15 +607,15 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
 
                             {/* Evening Shift */}
                             <div
-                              className={`p-2.5 rounded-lg border text-xs transition-colors ${
+                              className={`p-3 rounded-xl border text-xs transition-colors ${
                                 day.isEveningActive
-                                  ? 'bg-indigo-500/5 border-indigo-500/25'
+                                  ? 'bg-indigo-500/5 border-indigo-500/30 shadow-xs'
                                   : 'bg-muted/10 border-border/40 opacity-60'
                               }`}
                             >
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-1.5 font-medium text-indigo-700 dark:text-indigo-400">
-                                  <Moon className="h-3.5 w-3.5 text-indigo-500" />
+                              <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-border/30">
+                                <div className="flex items-center gap-1.5 font-semibold text-indigo-800 dark:text-indigo-300">
+                                  <Moon className="h-4 w-4 text-indigo-500" />
                                   <span>الفترة المسائية</span>
                                 </div>
                                 <Switch
@@ -622,11 +627,14 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                               </div>
 
                               {day.isEveningActive ? (
-                                <div className="flex items-center gap-2">
-                                  <div className="flex-1 space-y-1">
-                                    <span className="text-[10px] text-muted-foreground">من</span>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                  <div className="space-y-1">
+                                    <span className="text-[11px] text-muted-foreground font-medium block">
+                                      من:
+                                    </span>
                                     <Input
                                       type="time"
+                                      dir="ltr"
                                       value={day.eveningStartTime}
                                       onChange={(e) =>
                                         handleFieldChange(
@@ -635,14 +643,16 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                                           e.target.value
                                         )
                                       }
-                                      className="h-7 text-xs w-full"
+                                      className="h-8 text-xs font-mono text-center w-full px-2"
                                     />
                                   </div>
-                                  <span className="text-muted-foreground pt-4">-</span>
-                                  <div className="flex-1 space-y-1">
-                                    <span className="text-[10px] text-muted-foreground">إلى</span>
+                                  <div className="space-y-1">
+                                    <span className="text-[11px] text-muted-foreground font-medium block">
+                                      إلى:
+                                    </span>
                                     <Input
                                       type="time"
+                                      dir="ltr"
                                       value={day.eveningEndTime}
                                       onChange={(e) =>
                                         handleFieldChange(
@@ -651,7 +661,7 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                                           e.target.value
                                         )
                                       }
-                                      className="h-7 text-xs w-full"
+                                      className="h-8 text-xs font-mono text-center w-full px-2"
                                     />
                                   </div>
                                 </div>
@@ -798,16 +808,18 @@ export function DoctorScheduleDialog({ open, onOpenChange, doctor }: DoctorSched
                       <div className="flex items-center gap-2">
                         <Input
                           type="time"
+                          dir="ltr"
                           value={exceptionStartTime}
                           onChange={(e) => setExceptionStartTime(e.target.value)}
-                          className="h-8 text-xs w-24"
+                          className="h-8 text-xs font-mono text-center w-28"
                         />
                         <span className="text-xs text-muted-foreground">-</span>
                         <Input
                           type="time"
+                          dir="ltr"
                           value={exceptionEndTime}
                           onChange={(e) => setExceptionEndTime(e.target.value)}
-                          className="h-8 text-xs w-24"
+                          className="h-8 text-xs font-mono text-center w-28"
                         />
                       </div>
                     )}
