@@ -59,6 +59,7 @@ export async function createContext(opts: CreateExpressContextOptions): Promise<
 
   // Try local auth first (username/password)
   const cookies = parseCookies(opts.req.headers.cookie);
+  (opts.req as unknown as { cookies: Record<string, string> }).cookies = cookies;
   const localToken = cookies[COOKIE_NAME];
   if (localToken) {
     const decoded = verifyLocalAuthToken(localToken);

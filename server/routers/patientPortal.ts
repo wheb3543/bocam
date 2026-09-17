@@ -53,9 +53,24 @@ function verifyPatientToken(token: string): { patientId: number; phone: string }
   }
 }
 
+function getPatientToken(req: {
+  cookies?: Record<string, string>;
+  headers?: { cookie?: string };
+}): string | null {
+  if (req.cookies?.[PATIENT_COOKIE_NAME]) {
+    return req.cookies[PATIENT_COOKIE_NAME];
+  }
+  const cookieHeader = req.headers?.cookie;
+  if (!cookieHeader) {
+    return null;
+  }
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${PATIENT_COOKIE_NAME}=([^;]+)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 // Patient authenticated procedure
 const patientProcedure = publicProcedure.use(async ({ ctx, next }) => {
-  const token = ctx.req.cookies?.[PATIENT_COOKIE_NAME];
+  const token = getPatientToken(ctx.req);
   if (!token) {
     throw new TRPCError({ code: 'UNAUTHORIZED', message: 'يرجى تسجيل الدخول أولاً' });
   }
@@ -262,7 +277,7 @@ export const patientPortalRouter = router({
 
   // الحصول على بيانات المريض الحالي
   me: publicProcedure.query(async ({ ctx }) => {
-    const token = ctx.req.cookies?.[PATIENT_COOKIE_NAME];
+    const token = getPatientToken(ctx.req);
     if (!token) {
       return null;
     }
