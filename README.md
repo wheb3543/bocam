@@ -265,8 +265,7 @@ bocam/
 ├── deploy/                     # حزمة النشر والإنتاج
 ├── drizzle/                    # مخططات وقواعد البيانات (Modular Schemas in schema/ & Migrations)
 ├── e2e/                        # اختبارات E2E (Playwright)
-├── mocks/                      # بيانات وهمية للاختبارات
-├── testing/                    # أدوات الاختبار المخصصة وقواعد البيانات الوهمية (testing/utils)
+├── testing/                    # أدوات الاختبار والمحاكاة الموحدة (testing/utils, testing/mocks)
 └── scripts/                    # سكريبتات مصنفة وظيفياً (seed, database, qa, admin, release)
 ```
 

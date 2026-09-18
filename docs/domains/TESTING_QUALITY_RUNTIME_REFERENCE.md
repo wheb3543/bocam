@@ -114,17 +114,18 @@
 
 | المجال الوظيفي | ملفات الاختبار الأساسية | الوثيقة المرجعية المعتمدة |
 |---|---|---|
-| **المصادقة وRBAC** | `server/routers/__tests__/auth.test.ts`, `server/routers/rbac.*.test.ts`, `client/src/_core/hooks/__tests__/useAuth.test.ts`, `e2e/auth.spec.ts` | [docs/AUTHENTICATION_RBAC.md](../AUTHENTICATION_RBAC.md) |
-| **الترخيص وحماية التشغيل** | `server/_core/__tests__/license.test.ts`, `server/_core/license/validation.test.ts`, `client/src/hooks/integrations/__tests__/useLicense.test.ts` | [docs/licensing/LICENSE_RUNTIME_REFERENCE.md](../licensing/LICENSE_RUNTIME_REFERENCE.md) |
-| **المواعيد والحجوزات** | `server/routers/__tests__/appointments.test.ts`, `client/src/__tests__/AppointmentsTab.test.ts` | [docs/domains/APPOINTMENTS_RUNTIME_REFERENCE.md](./APPOINTMENTS_RUNTIME_REFERENCE.md) |
-| **المرضى وبوابة المريض** | `server/database/db/__tests__/patients.test.ts`, `client/src/pages/patient-portal/*.test.tsx`, `e2e/patient-portal.spec.ts` | [docs/domains/PATIENT_PORTAL_RUNTIME_REFERENCE.md](./PATIENT_PORTAL_RUNTIME_REFERENCE.md) |
-| **الحملات والعملاء المحتملون** | `server/routers/__tests__/campaigns.test.ts`, `server/routers/__tests__/leads.test.ts` | [docs/domains/CAMPAIGNS_LEADS_RUNTIME_REFERENCE.md](./CAMPAIGNS_LEADS_RUNTIME_REFERENCE.md) |
-| **العروض والمخيمات والأطباء** | `server/routers/__tests__/camps.test.ts`, `server/routers/__tests__/offers.test.ts`, `server/routers/__tests__/doctors.test.ts` | [docs/domains/OFFERS_CAMPS_DOCTORS_RUNTIME_REFERENCE.md](./OFFERS_CAMPS_DOCTORS_RUNTIME_REFERENCE.md) |
-| **WhatsApp وWebhooks** | `server/routers/__tests__/whatsapp.test.ts`, `server/integrations/webhooks/__tests__/whatsappWebhook.test.ts`, `e2e/whatsapp.spec.ts` | [docs/api/WHATSAPP_INTEGRATION.md](../api/WHATSAPP_INTEGRATION.md) |
-| **Meta وSocial Inbox** | `server/api/__tests__/webhookRoutes.test.ts`, `server/api/metaSocialWebhookRoute.test.ts` | [docs/api/META_INTEGRATION_GUIDE.md](../api/META_INTEGRATION_GUIDE.md) |
-| **إدارة المحتوى والوسائط** | `client/src/pages/admin/content/__tests__/*.test.ts`, `client/src/pages/admin/media/*.test.ts` | [docs/CONTENT_MANAGEMENT_README.md](../CONTENT_MANAGEMENT_README.md) |
-| **التقارير والتتبع** | `client/src/__tests__/dashboardCharts.test.ts`, `client/src/__tests__/tracking.test.ts` | [docs/PHASE_15_ANALYTICS_REPORTING_TRACKING_CLOSURE.md](../phases/PHASE_15_ANALYTICS_REPORTING_TRACKING_CLOSURE.md) |
-| **الواجهة المشتركة وPWA والوصول** | `client/src/__tests__/adminLayoutVerification.test.ts`, `client/src/__tests__/darkMode.test.ts`, `e2e/accessibility.spec.ts` | [docs/domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md](./FRONTEND_PLATFORM_RUNTIME_REFERENCE.md) |
+| **المصادقة وRBAC** | `server/modules/07-users-rbac/__tests__/*.test.ts`, `server/routers/rbac.*.workflow.test.ts`, `client/src/core/hooks/__tests__/useRolePermissions.test.ts`, `e2e/auth.spec.ts` | [docs/AUTHENTICATION_RBAC.md](../AUTHENTICATION_RBAC.md) |
+| **الترخيص وحماية التشغيل** | `server/_core/__tests__/license.test.ts`, `server/subsystems/licensing/__tests__/validation.test.ts`, `client/src/core/hooks/__tests__/useLicense.test.ts` | [docs/licensing/LICENSE_RUNTIME_REFERENCE.md](../licensing/LICENSE_RUNTIME_REFERENCE.md) |
+| **المواعيد والحجوزات** | `server/modules/01-booking-scheduling/__tests__/appointments.test.ts`, `client/src/apps/admin/modules/01-booking-scheduling/__tests__/AppointmentsTab.test.ts` | [docs/domains/APPOINTMENTS_RUNTIME_REFERENCE.md](./APPOINTMENTS_RUNTIME_REFERENCE.md) |
+| **المرضى وبوابة المريض** | `server/modules/02-crm-patients/__tests__/patients.db.test.ts`, `client/src/pages/patient-portal/*.test.tsx`, `e2e/patient-portal.spec.ts` | [docs/domains/PATIENT_PORTAL_RUNTIME_REFERENCE.md](./PATIENT_PORTAL_RUNTIME_REFERENCE.md) |
+| **الحملات والعملاء المحتملون** | `server/modules/04-marketing-publishing/__tests__/campaigns.test.ts`, `server/modules/01-booking-scheduling/__tests__/leads.test.ts` | [docs/domains/CAMPAIGNS_LEADS_RUNTIME_REFERENCE.md](./CAMPAIGNS_LEADS_RUNTIME_REFERENCE.md) |
+| **العروض والمخيمات والأطباء** | `server/modules/01-booking-scheduling/__tests__/camps.test.ts`, `offers.test.ts`, `doctors.test.ts` | [docs/domains/OFFERS_CAMPS_DOCTORS_RUNTIME_REFERENCE.md](./OFFERS_CAMPS_DOCTORS_RUNTIME_REFERENCE.md) |
+| **WhatsApp وWebhooks** | `server/modules/03-omni-inbox/__tests__/whatsapp.test.ts`, `server/integrations/webhooks/__tests__/whatsappWebhook.test.ts`, `e2e/whatsapp.spec.ts` | [docs/api/WHATSAPP_INTEGRATION.md](../api/WHATSAPP_INTEGRATION.md) |
+| **Meta وSocial Inbox** | `server/api/webhooks/webhookRoutes.test.ts`, `server/api/webhooks/metaSocialWebhookRoute.test.ts`, `server/modules/03-omni-inbox/__tests__/socialInbox.test.ts` | [docs/api/META_INTEGRATION_GUIDE.md](../api/META_INTEGRATION_GUIDE.md) |
+| **إدارة المحتوى والوسائط** | `server/modules/05-cms-portal/__tests__/*.test.ts`, `client/src/apps/admin/modules/05-cms-portal/__tests__/*.test.ts` | [docs/CONTENT_MANAGEMENT_README.md](../CONTENT_MANAGEMENT_README.md) |
+| **التقارير والتتبع** | `client/src/apps/admin/modules/01-booking-scheduling/__tests__/dashboardCharts.test.ts`, `tracking.test.ts` | [docs/PHASE_15_ANALYTICS_REPORTING_TRACKING_CLOSURE.md](../phases/PHASE_15_ANALYTICS_REPORTING_TRACKING_CLOSURE.md) |
+| **الواجهة المشتركة وPWA والوصول** | `client/src/core/testing/__tests__/adminLayoutVerification.test.ts`, `darkMode.test.ts`, `e2e/accessibility.spec.ts` | [docs/domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md](./FRONTEND_PLATFORM_RUNTIME_REFERENCE.md) |
+| **أدوات الاختبار والمحاكاة الموحدة** | `testing/utils/`, `testing/mocks/` | [docs/architecture/ARCHITECTURE.md](../architecture/ARCHITECTURE.md) |
 
 ---
 
