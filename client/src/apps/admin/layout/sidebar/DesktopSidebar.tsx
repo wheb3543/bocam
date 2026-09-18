@@ -322,7 +322,7 @@ export default function DesktopSidebar({
           <nav className="flex flex-col gap-1 px-2">
             {searchQuery.trim() ? (
               /* Search results */
-              <div className="space-y-1 py-1 max-h-[calc(100vh-280px)] overflow-y-auto overscroll-contain custom-scrollbar pr-1 pl-1">
+              <div className="space-y-1 py-1">
                 <div className="px-2 pb-1 text-[11px] font-semibold text-muted-foreground">
                   نتائج البحث ({searchResults.length})
                 </div>
@@ -423,61 +423,54 @@ export default function DesktopSidebar({
                       </div>
                     </button>
 
-                    {/* Sub-items Container with vertical scrolling */}
+                    {/* Sub-items Container */}
                     {isOpen && (
-                      <div className="mt-0.5 mr-3 pr-1.5 border-r border-gray-200/60 dark:border-gray-800 transition-all duration-200">
-                        <div
-                          className="max-h-56 overflow-y-auto overscroll-contain custom-scrollbar pl-1 pr-1 space-y-0.5 scroll-smooth"
-                          style={{ scrollbarWidth: 'thin' }}
-                          tabIndex={0}
-                          aria-label={`عناصر ${group.label}`}
-                        >
-                          {group.items.map((item) => {
-                            const ItemIcon = item.icon;
-                            const isActive = isItemActive(item.href);
-                            const badge = getBadgeCount(item.id);
+                      <div className="mt-0.5 mr-3 pr-2.5 border-r border-gray-200/60 dark:border-gray-800 space-y-0.5 transition-all duration-200">
+                        {group.items.map((item) => {
+                          const ItemIcon = item.icon;
+                          const isActive = isItemActive(item.href);
+                          const badge = getBadgeCount(item.id);
 
-                            return (
-                              <button
-                                key={item.id}
-                                type="button"
-                                onClick={() => handleNavClick(item.href)}
-                                className={cn(
-                                  'relative w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all duration-150 text-right cursor-pointer',
-                                  isActive
-                                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold'
-                                    : 'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
-                                )}
-                              >
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <ItemIcon
-                                    className={cn(
-                                      'h-3.5 w-3.5 shrink-0',
-                                      isActive
-                                        ? 'text-blue-600 dark:text-blue-400 stroke-[2.5]'
-                                        : 'text-muted-foreground'
-                                    )}
-                                  />
-                                  <span className="truncate">{item.title}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                  {badge > 0 && (
-                                    <span className="text-[10px] font-bold text-red-500 bg-red-50 dark:bg-red-900/30 px-1.5 py-0.5 rounded-full">
-                                      {badge}
-                                    </span>
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => handleNavClick(item.href)}
+                              className={cn(
+                                'relative w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all duration-150 text-right cursor-pointer',
+                                isActive
+                                  ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold'
+                                  : 'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
+                              )}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <ItemIcon
+                                  className={cn(
+                                    'h-3.5 w-3.5 shrink-0',
+                                    isActive
+                                      ? 'text-blue-600 dark:text-blue-400 stroke-[2.5]'
+                                      : 'text-muted-foreground'
                                   )}
-                                  {!badge && item.hasDot && (
-                                    <span className="h-1.5 w-1.5 bg-red-500 rounded-full animate-pulse" />
-                                  )}
-                                </div>
-                                {/* Active indicator bar */}
-                                {isActive && (
-                                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-600 rounded-l-full" />
+                                />
+                                <span className="truncate">{item.title}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {badge > 0 && (
+                                  <span className="text-[10px] font-bold text-red-500 bg-red-50 dark:bg-red-900/30 px-1.5 py-0.5 rounded-full">
+                                    {badge}
+                                  </span>
                                 )}
-                              </button>
-                            );
-                          })}
-                        </div>
+                                {!badge && item.hasDot && (
+                                  <span className="h-1.5 w-1.5 bg-red-500 rounded-full animate-pulse" />
+                                )}
+                              </div>
+                              {/* Active indicator bar */}
+                              {isActive && (
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-600 rounded-l-full" />
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
