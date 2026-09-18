@@ -4,7 +4,7 @@
 **الجمهور:** المسؤولون، المطورون، مشغلو المحتوى، ومشغلو التتبّع
 **المجال:** Offers, Camps & Doctors
 **آخر مراجعة:** 2026-09-12
-**المصادر:** `server/routers/offers.ts`، `server/routers/camps.ts`، `server/routers/doctors.ts`، `server/routers/offerLeads/registration.ts`، `server/routers/campRegistrations/registration.ts`، `drizzle/schema.ts`، الصفحات العامة `client/src/pages/public/*`، الاختبارات المرتبطة
+**المصادر:** `server/modules/01-booking-scheduling/routers/` (`offers.ts`, `camps.ts`, `doctors.ts`, `offerLeads/`, `campRegistrations/` وجسورها في `server/routers/`)، `drizzle/schema.ts`، الصفحات العامة في `client/src/apps/public/modules/`، صفحات الإدارة في `client/src/apps/admin/modules/01-booking-scheduling/`، الاختبارات المرتبطة
 
 > هذا المرجع يصف السلوك المثبت في الكود الحالي. لا يثبت أسعارًا أو عائدًا أو KPI تجاريًا إلا إذا كانت هناك مصادر تنفيذية منفصلة وموثقة في مراحل لاحقة.
 

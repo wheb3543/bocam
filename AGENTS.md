@@ -13,9 +13,14 @@ An integrated platform comprising 5 core functional subsystems:
   - **Core Foundation (`@core/*`)**: UI primitives, feedback, contexts, hooks, animations, system pages, PWA, and common utilities.
   - **Functional Portals (`@apps/*`)**: 4 standalone portals: `public/`, `patient-portal/`, `doctor-portal/`, and `admin/`.
   - **Admin Subsystem (`@apps/admin/modules/`)**: 10 cohesive modules (01 to 10) with co-located components, embedded reports, and domain settings.
-- **Backend (`server/`)**: Express + tRPC 11, Drizzle ORM (`drizzle/`), MySQL/TiDB, Redis caching & BullMQ queues.
+- **Backend (`server/`)**: Express + tRPC 11, Drizzle ORM (`drizzle/`), MySQL/TiDB, Redis caching & BullMQ queues in a symmetrical modular architecture:
+  - **Core Runtime (`server/_core/`)**: Express server, tRPC engines, DatabaseGuard, Structured Logger, and Rate Limiters.
+  - **Autonomous Subsystems (`server/subsystems/`)**: Independent subsystems: `backup/`, `auto-update/`, and `licensing/`.
+  - **Domain Modules (`server/modules/`)**: 8 cohesive domain modules (01 to 10) matching the frontend admin subsystems, with co-located routers, domain services, and unit tests.
+  - **API Endpoints (`server/api/`)**: Categorized endpoints: `cron/`, `webhooks/`, `oauth/`, `meta/`, and `upload/`.
+  - **Infrastructure Layers**: `server/database/` (Drizzle client & repositories), `server/integrations/` (Meta, WhatsApp, SSE), and `server/services/` (cross-cutting caching, notifications, and queues).
 - Node `>=22.13.0` | Package manager: `pnpm` only.
-- Docs: `package.json`, [README.md](./README.md), [docs/architecture/FRONTEND_MODULAR_ARCHITECTURE.md](./docs/architecture/FRONTEND_MODULAR_ARCHITECTURE.md), [docs/COMMANDS_REFERENCE.md](./docs/COMMANDS_REFERENCE.md).
+- Docs: `package.json`, [README.md](./README.md), [docs/architecture/FRONTEND_MODULAR_ARCHITECTURE.md](./docs/architecture/FRONTEND_MODULAR_ARCHITECTURE.md), [docs/architecture/SERVER_MODULAR_ARCHITECTURE.md](./docs/architecture/SERVER_MODULAR_ARCHITECTURE.md), [docs/COMMANDS_REFERENCE.md](./docs/COMMANDS_REFERENCE.md).
 
 ## Critical Rules & Engineering Standards
 1. **Domain Context**: Respect module boundaries according to the target BOCAM subsystem.

@@ -4,7 +4,7 @@
 **الجمهور:** المرضى والمسؤولون والمطورون وفريق الأمان
 **المجال:** Patients & Patient Portal
 **آخر مراجعة:** 2026-09-12
-**المصادر:** `server/routers/patientPortal.ts`، `server/routers/patientResults.ts`، `server/database/db/patients.ts`، صفحات `client/src/pages/patient-portal/`، اختبارات patient portal وpatients DB
+**المصادر:** `server/modules/02-crm-patients/routers/` (`patientPortalRouter.ts`, `patientResults.ts`, `customers.ts` وجسور `server/routers/`)، `server/database/db/patients.ts`، صفحات `client/src/apps/patient-portal/`، اختبارات patient portal وpatients DB
 
 > هذا المرجع يصف السلوك المثبت في الكود. لا يثبت تشفيرًا شاملاً أو امتثالًا قانونيًا أو تسجيلًا كاملًا لكل دخول ما لم يوجد مصدر تنفيذ واختبار.
 

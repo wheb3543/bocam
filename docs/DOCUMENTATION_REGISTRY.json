@@ -1338,6 +1338,7 @@
       ],
       "related_documents": [
         "docs/architecture/ARCHITECTURE.md",
+        "docs/architecture/SERVER_MODULAR_ARCHITECTURE.md",
         "docs/domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md",
         "README.md"
       ],

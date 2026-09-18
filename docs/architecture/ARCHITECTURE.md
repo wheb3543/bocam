@@ -112,43 +112,50 @@ client/src/
 - **Express.js** - إطار العمل
 - **tRPC 11** - API آمن نوعياً
 - **Drizzle ORM** - إدارة قاعدة البيانات
+- **BullMQ & Redis** - نظام الطوابير والتخزين المؤقت
 
-**ملاحظات تنفيذية (محدث):**
-- `server/services/redis.ts` و `server/_core/cacheHelper.ts` توفران طبقة كاش مركزية مبنية على Redis مع فصل بين اتصال الطوابير (BullMQ) واتصال الكاش لتحسين الأداء.
-- راوترات الـ tRPC منظمة كـ `server/routers/*` مع تقسيم منطقي (مثال: `server/routers/whatsapp/*` يحتوي على `conversations`, `messages`, `templates`, `analytics`, `settings`).
-- معالجة Webhooks مركَّزة في `server/integrations/webhooks/` مع نقطة دخول HTTP في `server/api/webhookRoutes.ts` (مطلوب من Meta). هذا يفصل بين مسارات الـ tRPC الداخلية ونقاط النهاية العامة للـ Webhooks.
+**المعمارية المعيارية للخادم (Modular Server Architecture):**
+تعتمد معمارية الخادم على بنية معيارية ثلاثية الطبقات متناظرة مع الواجهة الأمامية:
+1. **النواة التأسيسية الصلبة (`server/_core/`)**: خادم Express، محرك tRPC، حارس قاعدة البيانات (`DatabaseGuard`)، مسجل الأحداث المهيكل (`logger`)، ومحددات المعدل.
+2. **الأنظمة الفرعية المستقلة (`server/subsystems/`)**: أنظمة مستقلة تماماً تشمل النسخ الاحتياطي (`backup/`)، فاحص التحديثات (`auto-update/`)، والترخيص الرقمي المشفر (`licensing/`).
+3. **الوحدات النطاقية الثماني (`server/modules/`)**: متناظرة تماماً مع بوابات الإدارة في الواجهة الأمامية من 01 حتى 10، وتجمع الموجهات والخدمات الخاصة بكل نطاق.
+4. **واجهات API المصنفة (`server/api/`)**: مصنفة حسب الغرض التشغيلي: المهام المجدولة (`cron/`)، خطافات الويب (`webhooks/`)، المصادقة (`oauth/`)، تكاملات ميتا (`meta/`)، ورفع الملفات (`upload/`).
+5. **طبقة البنية التحتية المشتركة**: تشمل مستودعات وقواعد البيانات (`database/`)، التكاملات المباشرة (`integrations/`)، والخدمات المشتركة (`services/`).
+6. **التوافق التام وجسور الترحيل**: يستورد موجه الخادم الرئيسي `server/routers/routers.ts` مباشرة من وحدات `server/modules/*`، مع إبقاء شبكة جسور التوافق المرحلية (`Re-export Bridges`) لضمان عدم انقطاع أي استيرادات سابقة.
+
+> 📖 للمزيد من التفاصيل المعمارية الدقيقة وجداول المكونات، راجع: **[المعمارية المعيارية للخادم الخلفي (docs/architecture/SERVER_MODULAR_ARCHITECTURE.md)](./SERVER_MODULAR_ARCHITECTURE.md)**.
 
 **الهيكل:**
 ```
 server/
-├── _core/              # الإعداد الأساسي
-│   ├── trpc.ts         # إعداد tRPC
-│   ├── context.ts      # سياق الطلب
-│   ├── oauth.ts        # مصادقة OAuth
-│   └── systemRouter.ts # مسارات النظام
-├── routers/            # tRPC routers grouped in appRouter by domain
-│   ├── appointments.ts # إدارة المواعيد
-│   ├── campaigns.ts    # إدارة الحملات
-│   ├── whatsapp.ts     # خدمات WhatsApp
-│   └── ...
-├── services/           # خدمات الأعمال
-│   ├── whatsapp/       # خدمات WhatsApp
-│   │   ├── whatsappService.ts
-│   │   ├── whatsappTemplates.ts
-│   │   ├── whatsappBroadcast.ts
-│   │   └── ...
-│   └── meta/           # خدمات Meta
-├── database/           # وظائف قاعدة البيانات
-│   └── db/             # وظائف قاعدة البيانات
-├── config/             # ملفات الإعداد
-├── tasks/              # المهام المجدولة
-│   └── cron/           # المهام المجدولة
-├── integrations/        # التكاملات الخارجية
-│   ├── queues/         # طوابير BullMQ
-│   └── webhooks/       # معالجات webhooks
-├── api/                # واجهات برمجة التطبيقات
-└── assets/             # الأصول الثابتة
+├── _core/                      # النواة التأسيسية الصلبة (خادم Express، tRPC، السجلات، الحراسة)
+├── subsystems/                 # الأنظمة الفرعية المستقلة (backup, auto-update, licensing)
+│   ├── backup/                 # نظام النسخ الاحتياطي والاستعادة الذرية
+│   ├── auto-update/            # محرك فحص وتطبيق التحديثات وقفل الصيانة
+│   └── licensing/              # إدارة التراخيص الرقمية وبصمة العتاد ومركز الدعم
+├── modules/                    # الوحدات النطاقية الثماني المتناظرة مع الواجهة (01 إلى 10)
+│   ├── 01-booking-scheduling/  # الحجوزات، المواعيد، العروض، والمخيمات
+│   ├── 02-crm-patients/        # إدارة وسجلات المرضى، الملف الطبي، ونتائج المختبر
+│   ├── 03-omni-inbox/          # محادثات واتساب، الصندوق الاجتماعي، والعمليات
+│   ├── 04-marketing-publishing/# الحملات الإعلانية، المشاريع، وتتبع العائد (ROAS)
+│   ├── 05-cms-portal/          # بوابة المحتوى الطبي، المقالات، والوسائط
+│   ├── 06-tasks-projects/      # مهام الموظفين، تقييم الأداء، وفرق العمل
+│   ├── 07-users-rbac/          # إدارة المستخدمين، الأدوار، ومصفوفة الصلاحيات
+│   └── 10-system-settings/     # إعدادات النظام، سجلات التدقيق، والتقارير
+├── api/                        # واجهات API المصنفة
+│   ├── cron/                   # مسارات المهام المجدولة المحمية
+│   ├── webhooks/               # مستقبلات إشعارات Meta و WhatsApp
+│   ├── oauth/                  # تدفقات مصادقة المنصات الخارجية
+│   ├── meta/                   # عملاء Meta Graph API و Cloud API
+│   └── upload/                 # مسارات وتصاريح رفع الوسائط والملفات
+├── database/                   # طبقة الاتصال بقاعدة البيانات ومستودعات الاستعلام
+├── routers/                    # موجه الخادم الرئيسي tRPC وجسور التوافق الخلفي
+├── services/                   # خدمات العمليات المشتركة (Redis, PubSub, Storage, Notifications)
+├── integrations/               # تكاملات خارجية (Meta, Webhooks, SSE, Queues)
+├── tasks/                      # طوابير المعالجة والمهام المجدولة (cron, queues)
+└── assets/                     # الأصول الثابتة والخطوط ومفاتيح التشفير
 ```
+
 
 ### 3. قاعدة البيانات (Database)
 

@@ -125,7 +125,7 @@
 - **46+ جدول** يغطي جميع جوانب النظام (أُضيف 6 جداول جديدة في المرحلتين الأولى والثانية)
 
 #### Ops & Backup
-- **Backup & Updater Orchestration** - نسخ احتياطي موحد وتحديثات خادم مُنسقة عبر `server/_core` وعمليات `pm2/systemd` المدعومة
+- **Backup & Updater Orchestration** - نسخ احتياطي موحد وتحديثات خادم مُنسقة كأنظمة فرعية مستقلة عبر `server/subsystems/` وعمليات `pm2/systemd` المدعومة
 
 #### Authentication & Security
 - **Manus OAuth** - نظام المصادقة
@@ -237,12 +237,23 @@ bocam/
 │       ├── main.tsx            # نقطة انطلاق التطبيق في الـ DOM
 │       └── index.css           # ملف الأنماط والمتغيرات التصميمية المركزية
 ├── server/                     # الخادم الخلفي (Node.js, Express, tRPC)
-│   ├── api/                    # واجهات Meta APIs و Webhooks
-│   ├── database/               # إعدادات قاعدة البيانات و Drizzle ORM
-│   ├── routers/                # راوترات tRPC مجمعة في appRouter حسب المجال
-│   ├── services/               # خدمات العمليات (WhatsApp, Email, Telegram, PDF)
-│   ├── integrations/           # تكاملات خارجية (Webhooks, SSE, Queues)
-│   └── tasks/                  # المهام المجدولة (Cron Jobs)
+│   ├── _core/                  # النواة التأسيسية الصلبة (خادم Express، tRPC، السجلات، الحراسة)
+│   ├── subsystems/             # الأنظمة الفرعية المستقلة (backup, auto-update, licensing)
+│   ├── modules/                # الوحدات النطاقية الثماني المتناظرة مع الواجهة (01 إلى 10)
+│   │   ├── 01-booking-scheduling/     # الحجوزات، المواعيد، العروض، والمخيمات
+│   │   ├── 02-crm-patients/           # إدارة وسجلات المرضى، الملف الطبي، ونتائج المختبر
+│   │   ├── 03-omni-inbox/             # محادثات واتساب، الصندوق الاجتماعي، والعمليات
+│   │   ├── 04-marketing-publishing/   # الحملات الإعلانية، المشاريع، وتتبع العائد (ROAS)
+│   │   ├── 05-cms-portal/             # بوابة المحتوى الطبي، المقالات، والوسائط
+│   │   ├── 06-tasks-projects/         # مهام الموظفين، تقييم الأداء، وفرق العمل
+│   │   ├── 07-users-rbac/             # إدارة المستخدمين، الأدوار، ومصفوفة الصلاحيات
+│   │   └── 10-system-settings/        # إعدادات النظام، سجلات التدقيق، والتقارير
+│   ├── api/                    # واجهات API المصنفة (cron, webhooks, oauth, meta, upload)
+│   ├── database/               # إعدادات قاعدة البيانات، Drizzle ORM، ومستودعات الاستعلام
+│   ├── routers/                # مجمع مسارات tRPC المعياري وشبكة جسور التوافق الخلفي
+│   ├── services/               # خدمات العمليات المشتركة (Redis, PubSub, Storage, Notifications)
+│   ├── integrations/           # تكاملات خارجية (Meta, Webhooks, SSE, Queues)
+│   └── tasks/                  # المهام المجدولة وطوابير BullMQ (cron, queues)
 ├── docs/                       # وثائق المشروع الشاملة
 │   ├── architecture/           # البنية الهندسية، معمارية الواجهة، ERD، و PWA
 │   ├── domains/                # مراجع التشغيل للمجالات الوظيفية

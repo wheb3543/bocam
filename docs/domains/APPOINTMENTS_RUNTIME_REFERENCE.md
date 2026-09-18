@@ -4,7 +4,7 @@
 **الجمهور:** المسؤولون والمطورون وموظفو الحجز
 **المجال:** Appointments & Bookings
 **آخر مراجعة:** 2026-09-12
-**المصادر:** `server/routers/appointments.ts`، `server/routers/appointments/routes/`، `server/database/db/appointments.ts`، `server/tasks/cron/appointmentReminders.ts`، مكونات `client/src/components/booking/`، `server/routers/__tests__/appointments.test.ts`
+**المصادر:** `server/modules/01-booking-scheduling/routers/appointments/` (وجسر `server/routers/appointments.ts`)، `server/database/db/appointments.ts`، `server/tasks/cron/appointmentReminders.ts`، مكونات `client/src/apps/admin/modules/01-booking-scheduling/` (وجسور `client/src/components/booking/`)، `server/routers/__tests__/appointments.test.ts`
 
 > هذا المرجع يصف السلوك الحالي من الكود. لا يضيف قواعد تجارية غير مثبتة، ولا يثبت أن كل ميزة مذكورة في دليل المستخدم متاحة للمريض.
 

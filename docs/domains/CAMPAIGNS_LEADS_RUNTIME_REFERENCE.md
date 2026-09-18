@@ -4,7 +4,7 @@
 **الجمهور:** مسؤولو التسويق والمطورون ومشغلو المتابعة
 **المجال:** Campaigns & Leads
 **آخر مراجعة:** 2026-09-12
-**المصادر:** `server/routers/campaigns.ts`، `server/routers/leads.ts`، `server/database/db/campaigns.ts`، `server/database/db/leads.ts`، خدمة إشعارات الحملات، صفحات الحملات والعملاء المحتملين، الاختبارات المرتبطة
+**المصادر:** `server/modules/04-marketing-publishing/routers/campaigns.ts` و `server/modules/01-booking-scheduling/routers/leads.ts` (مع جسور `server/routers/`)، `server/database/db/campaigns.ts`، `server/database/db/leads.ts`، خدمة إشعارات الحملات، صفحات الحملات والعملاء المحتملين في `client/src/apps/admin/modules/`، الاختبارات المرتبطة
 
 > هذا المرجع يصف السلوك الحالي ولا يحول أسماء الحقول أو KPI إلى ضمانات تجارية غير مثبتة.
 
