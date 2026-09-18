@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canAccessSocialInbox, SOCIAL_INBOX_ALLOWED_ROLES } from './socialInboxAccess';
+import { canAccessSocialInbox, SOCIAL_INBOX_ALLOWED_ROLES } from '../socialInboxAccess';
 
 describe('social inbox access policy', () => {
   it('allows the operational roles that manage social conversations', () => {

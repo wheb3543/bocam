@@ -7,8 +7,8 @@ const mocks = vi.hoisted(() => ({
   publishDueCmsContent: vi.fn(),
 }));
 
-vi.mock('../_core/sdk', () => ({ sdk: { authenticateRequest: mocks.authenticateRequest } }));
-vi.mock('../services/content/deferredPublicationService', () => ({
+vi.mock('../../_core/sdk', () => ({ sdk: { authenticateRequest: mocks.authenticateRequest } }));
+vi.mock('../../services/content/deferredPublicationService', () => ({
   publishDueCmsContent: mocks.publishDueCmsContent,
 }));
 

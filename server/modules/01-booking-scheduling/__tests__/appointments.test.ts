@@ -15,8 +15,8 @@ vi.mock('../../../services/email');
 vi.mock('../../../services/whatsapp');
 vi.mock('../../../services/telegram');
 vi.mock('../../../services/cache');
-vi.mock('./auditLogs');
-vi.mock('../../api/facebookCAPI');
+vi.mock('../../../routers/auditLogs');
+vi.mock('../../../api/facebookCAPI');
 vi.mock('../../../services/whatsappMessageDispatcher');
 
 // Define Mock type for vitest

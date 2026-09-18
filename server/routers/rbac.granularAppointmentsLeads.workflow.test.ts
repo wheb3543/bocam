@@ -6,7 +6,7 @@ const source = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf
 
 describe('الإنفاذ التفصيلي للمواعيد والعملاء المحتملين', () => {
   it('يفصل عرض وتعديل وإلغاء وحذف المواعيد على الخادم', () => {
-    const appointmentsSource = source('server/modules/01-booking-scheduling/routers/appointments');
+    const appointmentsSource = source('server/modules/01-booking-scheduling/routers/appointments.ts');
 
     expect(appointmentsSource).toContain("permissionProcedure('appointments.view'");
     expect(appointmentsSource).toContain("permissionProcedure('appointments.update'");
@@ -29,7 +29,7 @@ describe('الإنفاذ التفصيلي للمواعيد والعملاء ال
   });
 
   it('يحمي إسناد المواعيد والعملاء المحتملين ويتحقق من أهلية المسؤول المحدد', () => {
-    const appointmentsSource = source('server/modules/01-booking-scheduling/routers/appointments');
+    const appointmentsSource = source('server/modules/01-booking-scheduling/routers/appointments.ts');
     const leadsSource = source('server/modules/01-booking-scheduling/routers/leads.ts');
     const assignmentService = source('server/modules/06-tasks-projects/services/workAssignmentService.ts');
 

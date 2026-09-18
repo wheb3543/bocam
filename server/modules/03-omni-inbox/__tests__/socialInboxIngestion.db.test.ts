@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const getDbMock = vi.hoisted(() => vi.fn());
 
-vi.mock('./connection', () => ({ getDb: getDbMock }));
+vi.mock('../../../database/db/connection', () => ({ getDb: getDbMock }));
 
-import { clearMetaSocialInboxTestData, ingestMetaSocialInboxEvent } from './socialInbox';
+import { clearMetaSocialInboxTestData, ingestMetaSocialInboxEvent } from '../../../database/db/socialInbox';
 
 describe('Meta event ingestion idempotency', () => {
   beforeEach(() => {

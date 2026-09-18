@@ -6,7 +6,7 @@ import {
   getInsertedBroadcastId,
   normalizeWhatsAppRecipientPhone,
   validatePublicHeaderImageUrl,
-} from '../services/broadcastExecutionServiceV2';
+} from "../services/broadcastExecutionServiceV2";
 
 describe("getInsertedBroadcastId", () => {
   it("reads MySQL result headers returned as an array by Drizzle", () => {

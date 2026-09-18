@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { meta } from '../MetaApiService';
+import { meta } from './MetaApiService';
 
 // Mock dependencies
 vi.mock('../../_core/logger', () => ({

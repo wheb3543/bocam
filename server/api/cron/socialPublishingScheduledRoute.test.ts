@@ -6,11 +6,11 @@ const mocks = vi.hoisted(() => ({
   dispatchQueuedMetaConversionEvents: vi.fn(),
 }));
 
-vi.mock('../_core/sdk', () => ({ sdk: { authenticateRequest: mocks.authenticateRequest } }));
-vi.mock('../database/db/socialPublishing', () => ({
+vi.mock('../../_core/sdk', () => ({ sdk: { authenticateRequest: mocks.authenticateRequest } }));
+vi.mock('../../database/db/socialPublishing', () => ({
   dispatchDueSocialPublishPosts: mocks.dispatchDueSocialPublishPosts,
 }));
-vi.mock('../database/db/metaOperations', () => ({
+vi.mock('../../database/db/metaOperations', () => ({
   dispatchQueuedMetaConversionEvents: mocks.dispatchQueuedMetaConversionEvents,
 }));
 

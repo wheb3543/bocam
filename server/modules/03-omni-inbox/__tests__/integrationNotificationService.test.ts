@@ -5,14 +5,14 @@ const mocks = vi.hoisted(() => ({
   notifyEligibleRecipients: vi.fn(),
 }));
 
-vi.mock('../_core/databaseGuard', () => ({
+vi.mock('../../../_core/databaseGuard', () => ({
   ensureDatabaseAvailable: mocks.ensureDatabaseAvailable,
 }));
-vi.mock('./notificationPolicy', () => ({
+vi.mock('../../../services/notificationPolicy', () => ({
   notifyEligibleRecipients: mocks.notifyEligibleRecipients,
 }));
 
-import { notifyIntegrationIssue } from './integrationNotificationService';
+import { notifyIntegrationIssue } from '../../../services/integrationNotificationService';
 
 describe('integration notification service', () => {
   beforeEach(() => {

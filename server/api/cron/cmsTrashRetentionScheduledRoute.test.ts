@@ -7,8 +7,8 @@ const mocks = vi.hoisted(() => ({
   purgeExpiredCmsTrash: vi.fn(),
 }));
 
-vi.mock('../_core/sdk', () => ({ sdk: { authenticateRequest: mocks.authenticateRequest } }));
-vi.mock('../services/content/trashRetentionService', () => ({
+vi.mock('../../_core/sdk', () => ({ sdk: { authenticateRequest: mocks.authenticateRequest } }));
+vi.mock('../../services/content/trashRetentionService', () => ({
   purgeExpiredCmsTrash: mocks.purgeExpiredCmsTrash,
 }));
 

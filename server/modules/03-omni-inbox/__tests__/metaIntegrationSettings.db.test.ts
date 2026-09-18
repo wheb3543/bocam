@@ -3,10 +3,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const getDbMock = vi.hoisted(() => vi.fn());
 const ensureAccountMock = vi.hoisted(() => vi.fn());
 
-vi.mock('./connection', () => ({ getDb: getDbMock }));
-vi.mock('./socialInbox', () => ({ ensureSocialInboxAccount: ensureAccountMock }));
+vi.mock('../../../database/db/connection', () => ({ getDb: getDbMock }));
+vi.mock('../../../database/db/socialInbox', () => ({ ensureSocialInboxAccount: ensureAccountMock }));
 
-import { saveMetaIntegrationSettings } from './metaIntegrationSettings';
+import { saveMetaIntegrationSettings } from '../../../database/db/metaIntegrationSettings';
 
 const testJwtSecret = 'test-jwt-secret-is-longer-than-thirty-two-characters';
 

@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   cancelSocialPublishSchedule: vi.fn(),
 }));
 
-vi.mock('../../database/db', () => ({
+vi.mock('../../../../database/db', () => ({
   getDb: vi.fn().mockResolvedValue(null),
   ...mocks,
 }));

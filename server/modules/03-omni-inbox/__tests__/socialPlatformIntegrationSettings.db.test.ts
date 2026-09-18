@@ -2,9 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const getDbMock = vi.hoisted(() => vi.fn());
 
-vi.mock('./connection', () => ({ getDb: getDbMock }));
+vi.mock('../../../database/db/connection', () => ({ getDb: getDbMock }));
 
-import { saveSocialPlatformIntegrationSettings } from './socialPlatformIntegrationSettings';
+import { saveSocialPlatformIntegrationSettings } from '../../../database/db/socialPlatformIntegrationSettings';
 
 const testJwtSecret = 'test-jwt-secret-is-longer-than-thirty-two-characters';
 

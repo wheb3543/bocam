@@ -19,8 +19,8 @@ interface TestData {
 }
 
 // Mock useDebounce to return value immediately for testing
-vi.mock('../useDebounce', () => ({
-  useDebounce: (value: string) => value,
+vi.mock('../data/useDebounce', () => ({
+  useDebounce: vi.fn((val) => val),
 }));
 
 describe('useFilterUtils', () => {

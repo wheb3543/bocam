@@ -7,14 +7,14 @@ import { describe, it, expect, vi } from 'vitest';
 import { createWhatsAppSseRouter } from '../whatsappSse';
 
 // Mock pubsub module
-vi.mock('../_core/pubsub', () => ({
+vi.mock('../../_core/pubsub', () => ({
   subscribe: vi.fn(() => vi.fn()),
   channelForConversation: vi.fn((id) => `conversation:${id}`),
   channelForUser: vi.fn((id) => `user:${id}`),
 }));
 
 // Mock logger module
-vi.mock('../_core/logger', () => ({
+vi.mock('../../_core/logger', () => ({
   createLogger: vi.fn(() => ({
     info: vi.fn(),
     warn: vi.fn(),

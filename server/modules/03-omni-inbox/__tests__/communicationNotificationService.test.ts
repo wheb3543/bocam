@@ -7,19 +7,19 @@ const mocks = vi.hoisted(() => ({
   getSocialInboxThreadById: vi.fn(),
 }));
 
-vi.mock('../_core/notificationHelper', () => ({ createNotification: mocks.createNotification }));
-vi.mock('../database/db', () => ({
+vi.mock('../../../_core/notificationHelper', () => ({ createNotification: mocks.createNotification }));
+vi.mock('../../../database/db', () => ({
   getDb: mocks.getDb,
   getSocialInboxThreadById: mocks.getSocialInboxThreadById,
 }));
-vi.mock('./notificationPolicy', () => ({ notifyEligibleRecipients: mocks.notifyEligibleRecipients }));
+vi.mock('../../../services/notificationPolicy', () => ({ notifyEligibleRecipients: mocks.notifyEligibleRecipients }));
 
 import {
   notifySocialInboxAssignment,
   notifyStoredSocialInboxInbound,
   notifyWhatsAppAssignment,
   notifyWhatsAppInbound,
-} from './communicationNotificationService';
+} from '../../../services/communicationNotificationService';
 
 const db = {} as never;
 

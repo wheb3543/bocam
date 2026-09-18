@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   enrich: vi.fn(),
 }));
 
-vi.mock('../database/db', () => ({
+vi.mock('../../../database/db', () => ({
   getDb: vi.fn().mockResolvedValue({}),
   assignSocialInboxThread: vi.fn(),
   createSocialInboxAccount: vi.fn(),
@@ -32,14 +32,14 @@ vi.mock('../database/db', () => ({
   updateSocialInboxCommentWorkflow: mocks.updateWorkflow,
 }));
 
-vi.mock('../services/rolePermissionService', () => ({
+vi.mock('../../../services/rolePermissionService', () => ({
   hasRolePermission: vi.fn().mockResolvedValue(true),
 }));
 
-vi.mock('../database/db/metaIntegrationSettings', () => ({ getMetaWebhookCredentials: mocks.getCredentials }));
-vi.mock('../database/db/socialInbox', () => ({ clearMetaSocialInboxTestData: vi.fn() }));
-vi.mock('../integrations/meta/seedMetaSocialInboxTestData', () => ({ seedMetaSocialInboxTestData: vi.fn() }));
-vi.mock('../integrations/meta/socialInboxMetaActions', () => ({
+vi.mock('../../../database/db/metaIntegrationSettings', () => ({ getMetaWebhookCredentials: mocks.getCredentials }));
+vi.mock('../../../database/db/socialInbox', () => ({ clearMetaSocialInboxTestData: vi.fn() }));
+vi.mock('../../../integrations/meta/seedMetaSocialInboxTestData', () => ({ seedMetaSocialInboxTestData: vi.fn() }));
+vi.mock('../../../integrations/meta/socialInboxMetaActions', () => ({
   replyToMetaComment: mocks.reply,
   setMetaCommentHidden: mocks.hide,
   sendMetaCommentPrivateReply: mocks.privateReply,

@@ -4,7 +4,7 @@ const insertedRows: Record<string, unknown>[] = [];
 const processImageMock = vi.fn();
 const storagePutMock = vi.fn();
 
-vi.mock('../_core/databaseGuard', () => ({
+vi.mock('../../_core/databaseGuard', () => ({
   ensureDatabaseAvailable: async () => ({
     select: () => ({
       from: () => ({
@@ -24,15 +24,15 @@ vi.mock('../_core/databaseGuard', () => ({
   }),
 }));
 
-vi.mock('../services/storage', () => ({
+vi.mock('../../services/storage', () => ({
   storagePut: (...args: unknown[]) => storagePutMock(...args),
 }));
 
-vi.mock('../services/imageProcessor', () => ({
+vi.mock('../../services/imageProcessor', () => ({
   processImageToAvif: (...args: unknown[]) => processImageMock(...args),
 }));
 
-vi.mock('../../drizzle/schema', () => ({
+vi.mock('../../../drizzle/schema', () => ({
   images: {},
   media: {},
   mediaFolders: { id: 'id', path: 'path' },

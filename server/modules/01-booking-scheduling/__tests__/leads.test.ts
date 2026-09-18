@@ -14,7 +14,7 @@ vi.mock('../../../_core/notification');
 vi.mock('../../../services/email');
 vi.mock('../../../services/telegram');
 vi.mock('../../../services/whatsapp');
-vi.mock('./auditLogs');
+vi.mock('../../../routers/auditLogs');
 
 // Define Mock type for vitest
 type MockedFunction = ReturnType<typeof vi.fn> & {

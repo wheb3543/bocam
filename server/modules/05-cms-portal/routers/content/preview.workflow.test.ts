@@ -10,7 +10,7 @@ const publicContentSource = readFileSync(
   resolve(process.cwd(), 'server/routers/public/content.ts'),
   'utf8'
 );
-const schemaSource = readFileSync(resolve(process.cwd(), 'drizzle/schema.ts'), 'utf8');
+const schemaSource = readFileSync(resolve(process.cwd(), 'drizzle/schema/05-cms-portal.ts'), 'utf8');
 const previewPageSource = readFileSync(
   resolve(process.cwd(), 'client/src/apps/public/modules/05-content-and-legal/pages/DraftPreviewPage.tsx'),
   'utf8'
