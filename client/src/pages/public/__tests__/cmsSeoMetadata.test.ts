@@ -1,9 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const homePageSource = readFileSync(resolve(process.cwd(), 'client/src/pages/public/HomePage.tsx'), 'utf8');
-const dynamicPageSource = readFileSync(resolve(process.cwd(), 'client/src/pages/public/DynamicPage.tsx'), 'utf8');
+const homePagePath = existsSync(resolve(process.cwd(), 'client/src/apps/public/modules/01-home/pages/HomePage.tsx'))
+  ? resolve(process.cwd(), 'client/src/apps/public/modules/01-home/pages/HomePage.tsx')
+  : resolve(process.cwd(), 'client/src/pages/public/HomePage.tsx');
+
+const dynamicPagePath = existsSync(resolve(process.cwd(), 'client/src/apps/public/modules/05-content-and-legal/pages/DynamicCmsPage.tsx'))
+  ? resolve(process.cwd(), 'client/src/apps/public/modules/05-content-and-legal/pages/DynamicCmsPage.tsx')
+  : resolve(process.cwd(), 'client/src/pages/public/DynamicPage.tsx');
+
+const homePageSource = readFileSync(homePagePath, 'utf8');
+const dynamicPageSource = readFileSync(dynamicPagePath, 'utf8');
 const seoComponentSource = readFileSync(resolve(process.cwd(), 'client/src/components/SEO.tsx'), 'utf8');
 
 describe('SEO المنشور من CMS', () => {

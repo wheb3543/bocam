@@ -1,0 +1,520 @@
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+
+interface Camp {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  imageUrl: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  isActive: boolean;
+  freeOffers: string | null;
+  discountedOffers: string | null;
+  availableProcedures: string | null;
+  galleryImages: string | null;
+  morningTime: string | null;
+  eveningTime: string | null;
+  dailyCapacity: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
+import { useAuth } from '@/_core/hooks/useAuth';
+import { getCompanyName } from '@/const';
+import { Button } from '@/components/ui/button';
+import { CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import {
+  Loader2,
+  Search,
+  Heart,
+  Calendar,
+  ArrowLeft,
+  Clock,
+  CheckCircle2,
+  Users,
+} from 'lucide-react';
+import PageLayout from '@/components/layout/PageLayout';
+import HeroSection from '@/components/HeroSection';
+import AnimatedCard from '@/components/AnimatedCard';
+import SectionDivider from '@/components/SectionDivider';
+import ReadingProgressBar from '@/components/ReadingProgressBar';
+import BackToTopButton from '@/components/BackToTopButton';
+import ScrollReveal from '@/components/ScrollReveal';
+import { usePublicTextContent } from '@/hooks/usePublicContent';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+export default function CampsListPage() {
+  const companyName = getCompanyName('ar');
+  return (
+    <PageLayout
+      title={`المخيمات الطبية الخيرية - ${companyName}`}
+      description="مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين"
+      keywords="مخيمات طبية, خيرية, مجانية, مسؤولية مجتمعية"
+    >
+      <CampsListContent />
+    </PageLayout>
+  );
+}
+
+function CampsListContent() {
+  const companyName = getCompanyName('ar');
+  const { formatDate } = useFormatDate();
+  const [, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // الحصول على اللغة الحالية
+  const { language } = useLanguage();
+
+  // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
+  const { data: campsTitle } = usePublicTextContent({
+    key: `camps.title.${language}`,
+    section: 'camps',
+    type: 'title',
+  });
+  const { data: campsDescription } = usePublicTextContent({
+    key: `camps.description.${language}`,
+    section: 'camps',
+    type: 'description',
+  });
+  const { data: campsBadge } = usePublicTextContent({
+    key: `camps.badge.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+
+  const { data: campsAboutTitle } = usePublicTextContent({
+    key: `camps.about.title.${language}`,
+    section: 'camps',
+    type: 'title',
+  });
+  const { data: campsAboutDescription } = usePublicTextContent({
+    key: `camps.about.description.${language}`,
+    section: 'camps',
+    type: 'description',
+  });
+  const { data: campsSearchPlaceholder } = usePublicTextContent({
+    key: `camps.search.placeholder.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsTabActive } = usePublicTextContent({
+    key: `camps.tab.active.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsTabExpired } = usePublicTextContent({
+    key: `camps.tab.expired.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsEmptyActiveTitle } = usePublicTextContent({
+    key: `camps.empty.active.title.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsEmptyActiveDescription } = usePublicTextContent({
+    key: `camps.empty.active.description.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsEmptyExpiredTitle } = usePublicTextContent({
+    key: `camps.empty.expired.title.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsEmptyExpiredDescription } = usePublicTextContent({
+    key: `camps.empty.expired.description.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardExpiredBadge } = usePublicTextContent({
+    key: `camps.card.expired.badge.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardCharityBadge } = usePublicTextContent({
+    key: `camps.card.charity.badge.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardRegistrations } = usePublicTextContent({
+    key: `camps.card.registrations.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardConfirmed } = usePublicTextContent({
+    key: `camps.card.confirmed.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardAttended } = usePublicTextContent({
+    key: `camps.card.attended.${language}`,
+    section: 'camps',
+    type: 'text',
+  });
+  const { data: campsCardViewDetails } = usePublicTextContent({
+    key: `camps.card.view.details.${language}`,
+    section: 'camps',
+    type: 'button',
+  });
+  const { data: campsCardRegister } = usePublicTextContent({
+    key: `camps.card.register.${language}`,
+    section: 'camps',
+    type: 'button',
+  });
+
+  // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
+  const title = campsTitle?.data?.[0]?.content || 'المخيمات الطبية الخيرية';
+  const description =
+    campsDescription?.data?.[0]?.content ||
+    'مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين';
+  const badgeText = campsBadge?.data?.[0]?.content || 'مخيمات خيرية';
+  const aboutTitle = campsAboutTitle?.data?.[0]?.content || 'عن المخيمات الطبية الخيرية';
+  const aboutDescription =
+    campsAboutDescription?.data?.[0]?.content ||
+    `يأتي تنظيم المخيمات الطبية الخيرية ضمن مبادرات ${companyName} في إطار المسؤولية المجتمعية، حيث نسعى لتقديم خدمات طبية عالية الجودة للمحتاجين والمستحقين بأسعار رمزية أو مجاناً. يشرف على المخيمات نخبة من أفضل الأطباء والجراحين المتخصصين، مع توفير أحدث الأجهزة والتقنيات الطبية.`;
+  const searchPlaceholder = campsSearchPlaceholder?.data?.[0]?.content || 'ابحث عن مخيم...';
+  const tabActiveText = campsTabActive?.data?.[0]?.content || 'الجارية';
+  const tabExpiredText = campsTabExpired?.data?.[0]?.content || 'المنتهية';
+  const emptyActiveTitle =
+    campsEmptyActiveTitle?.data?.[0]?.content || 'لا توجد مخيمات جارية حالياً';
+  const emptyActiveDescription =
+    campsEmptyActiveDescription?.data?.[0]?.content ||
+    'تابعنا للحصول على آخر التحديثات عن المخيمات القادمة';
+  const emptyExpiredTitle = campsEmptyExpiredTitle?.data?.[0]?.content || 'لا توجد مخيمات منتهية';
+  const emptyExpiredDescription =
+    campsEmptyExpiredDescription?.data?.[0]?.content || 'سيتم عرض المخيمات المنتهية هنا';
+  const cardExpiredBadge = campsCardExpiredBadge?.data?.[0]?.content || 'منتهي';
+  const cardCharityBadge = campsCardCharityBadge?.data?.[0]?.content || 'مخيم خيري';
+  const cardRegistrations = campsCardRegistrations?.data?.[0]?.content || 'تسجيل';
+  const cardConfirmed = campsCardConfirmed?.data?.[0]?.content || 'مؤكد';
+  const cardAttended = campsCardAttended?.data?.[0]?.content || 'حضر';
+  const cardViewDetails = campsCardViewDetails?.data?.[0]?.content || 'عرض التفاصيل';
+  const cardRegister = campsCardRegister?.data?.[0]?.content || 'سجّل الآن';
+
+  const { user } = useAuth();
+  const { data: camps, isLoading } = trpc.camps.getAll.useQuery();
+  // استعلام محمي - يعمل فقط للمستخدمين المسجلين لتجنب خطأ UNAUTHORIZED
+  const { data: registrations } = trpc.campRegistrations.list.useQuery(undefined, {
+    enabled: !!user,
+  });
+
+  // Separate active and expired camps based on endDate
+  const now = new Date();
+  const activeCamps = Array.isArray(camps)
+    ? camps.filter((camp) => {
+        if (!camp.endDate) {
+          return true;
+        }
+        return new Date(camp.endDate) >= now;
+      })
+    : [];
+  const expiredCamps = Array.isArray(camps)
+    ? camps.filter((camp) => {
+        if (!camp.endDate) {
+          return false;
+        }
+        return new Date(camp.endDate) < now;
+      })
+    : [];
+
+  const filteredActiveCamps = activeCamps.filter((camp) =>
+    camp.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredExpiredCamps = expiredCamps.filter((camp) =>
+    camp.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Calculate registration stats for each camp
+  const getCampStats = (campId: number) => {
+    const campRegistrations = Array.isArray(registrations)
+      ? registrations.filter((r) => r.campId === campId)
+      : [];
+    const total = campRegistrations.length;
+    const confirmed = campRegistrations.filter(
+      (r) => r.status === 'confirmed' || r.status === 'attended' || r.status === 'completed'
+    ).length;
+    const attended = campRegistrations.filter(
+      (r) => r.status === 'attended' || r.status === 'completed'
+    ).length;
+    return { total, confirmed, attended };
+  };
+
+  const CampCard = ({
+    camp,
+    isExpired = false,
+    index = 0,
+  }: {
+    camp: Camp;
+    isExpired?: boolean;
+    index?: number;
+  }) => {
+    const stats = getCampStats(camp.id ?? 0);
+
+    return (
+      <AnimatedCard
+        key={camp.id}
+        className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-t-4 border-red-500 overflow-hidden"
+        delay={index * 0.1}
+        onClick={() => setLocation(`/camps/${camp.slug || camp.id}`)}
+      >
+        <CardContent className="p-0">
+          {camp.imageUrl ? (
+            <div className="relative h-44 sm:h-56 md:h-64 overflow-hidden">
+              <img
+                src={camp.imageUrl}
+                alt={camp.name}
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
+                <div
+                  className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}
+                >
+                  {isExpired ? (
+                    <>
+                      <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                      {cardExpiredBadge}
+                    </>
+                  ) : (
+                    <>
+                      <Heart className="h-3 w-3 sm:h-4 sm:w-4 fill-white" />
+                      {cardCharityBadge}
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5 md:p-6">
+                <h3 className="text-base sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-2">
+                  {camp.name}
+                </h3>
+              </div>
+            </div>
+          ) : (
+            <div className="relative h-44 sm:h-56 md:h-64 bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
+              <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
+                <div
+                  className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}
+                >
+                  {isExpired ? (
+                    <>
+                      <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                      {cardExpiredBadge}
+                    </>
+                  ) : (
+                    <>
+                      <Heart className="h-3 w-3 sm:h-4 sm:w-4 fill-white" />
+                      {cardCharityBadge}
+                    </>
+                  )}
+                </div>
+              </div>
+              <Heart className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 text-white/30 fill-white/30" />
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5 md:p-6">
+                <h3 className="text-base sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 line-clamp-2">
+                  {camp.name}
+                </h3>
+              </div>
+            </div>
+          )}
+
+          <div className="p-3.5 sm:p-5 md:p-6">
+            {camp.description && (
+              <p className="text-muted-foreground mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3 text-right text-xs sm:text-sm md:text-base">
+                {camp.description}
+              </p>
+            )}
+
+            {/* Registration Stats */}
+            {stats.total > 0 && (
+              <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {stats.total} {cardRegistrations}
+                </Badge>
+                {stats.confirmed > 0 && (
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 border-green-500 text-green-600"
+                  >
+                    <CheckCircle2 className="h-3 w-3" />
+                    {stats.confirmed} {cardConfirmed}
+                  </Badge>
+                )}
+                {stats.attended > 0 && (
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 border-blue-500 text-blue-600"
+                  >
+                    <Clock className="h-3 w-3" />
+                    {stats.attended} {cardAttended}
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {(camp.startDate || camp.endDate) && (
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs md:text-sm text-muted-foreground mb-3 sm:mb-4">
+                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>
+                  {camp.startDate && formatDate(camp.startDate)}
+                  {camp.startDate && camp.endDate && ' - '}
+                  {camp.endDate && formatDate(camp.endDate)}
+                </span>
+              </div>
+            )}
+
+            <Button
+              className={`w-full text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11 ${isExpired ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700'}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setLocation(`/camps/${camp.slug || camp.id}`);
+              }}
+            >
+              {isExpired ? cardViewDetails : cardRegister}
+              <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+            </Button>
+          </div>
+        </CardContent>
+      </AnimatedCard>
+    );
+  };
+
+  return (
+    <div className="space-y-6" dir="rtl">
+      <ReadingProgressBar color="purple" />
+
+      {/* Hero Section */}
+      <HeroSection
+        title={title}
+        description={description}
+        badge={{ text: badgeText, icon: Heart }}
+        backgroundGradient="from-red-600 via-red-700 to-orange-600"
+      />
+
+      {/* About Section */}
+      <ScrollReveal delay={0.1}>
+        <section className="py-6 sm:py-8 md:py-12 bg-white dark:bg-card">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6">
+                {aboutTitle}
+              </h2>
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-foreground leading-relaxed text-right px-1">
+                {aboutDescription}
+              </p>
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
+
+      <SectionDivider color="gray" />
+
+      {/* Search Section */}
+      <ScrollReveal delay={0.2}>
+        <section className="py-4 sm:py-6 md:py-8 bg-muted/50">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="max-w-2xl mx-auto relative">
+              <Search className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pr-9 sm:pr-12 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg text-right"
+              />
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
+
+      {/* Camps Tabs */}
+      <ScrollReveal delay={0.3}>
+        <section className="py-6 sm:py-10 md:py-16">
+          <div className="container mx-auto px-4 sm:px-6">
+            {isLoading ? (
+              <div className="flex justify-center items-center min-h-[300px] sm:min-h-[400px]">
+                <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-green-600" />
+              </div>
+            ) : (
+              <Tabs defaultValue="active" className="w-full" dir="rtl">
+                <TabsList className="grid w-full max-w-sm sm:max-w-md mx-auto grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
+                  <TabsTrigger
+                    value="active"
+                    className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm"
+                  >
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span>
+                      {tabActiveText} ({filteredActiveCamps?.length || 0})
+                    </span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="expired"
+                    className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm"
+                  >
+                    <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span>
+                      {tabExpiredText} ({filteredExpiredCamps?.length || 0})
+                    </span>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="active">
+                  {filteredActiveCamps && filteredActiveCamps.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                      {filteredActiveCamps.map((camp, index) => (
+                        <CampCard key={camp.id} camp={camp} isExpired={false} index={index} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 sm:py-16">
+                      <Heart className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-gray-300 mb-3 sm:mb-4" />
+                      <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">
+                        {emptyActiveTitle}
+                      </h3>
+                      <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+                        {emptyActiveDescription}
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="expired">
+                  {filteredExpiredCamps && filteredExpiredCamps.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                      {filteredExpiredCamps.map((camp, index) => (
+                        <CampCard key={camp.id} camp={camp} isExpired={true} index={index} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 sm:py-16">
+                      <CheckCircle2 className="h-16 w-16 sm:h-24 sm:w-24 mx-auto text-gray-300 mb-3 sm:mb-4" />
+                      <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">
+                        {emptyExpiredTitle}
+                      </h3>
+                      <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+                        {emptyExpiredDescription}
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            )}
+          </div>
+        </section>
+      </ScrollReveal>
+
+      <BackToTopButton threshold={300} />
+    </div>
+  );
+}
