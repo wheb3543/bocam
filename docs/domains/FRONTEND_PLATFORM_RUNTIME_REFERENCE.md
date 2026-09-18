@@ -7,8 +7,8 @@
 | **الحالة** | `canonical` |
 | **الجمهور** | مطور، مراجع واجهة، فريق أمان، مسؤول وصول، مهندس تشغيل |
 | **المجال** | `frontend-platform` (الواجهة المشتركة، PWA، وإمكانية الوصول) |
-| **المصدر** | `client/src/components/ui/`, `client/src/components/layout/`, `client/src/contexts/`, `client/src/hooks/`, `client/src/lib/`, `client/public/`, `client/src/index.css`, `client/src/App.tsx`, `client/src/main.tsx` |
-| **آخر مراجعة** | 2026-09-13 |
+| **المصدر** | `client/src/core/`, `client/src/apps/`, `client/public/`, `client/src/index.css`, `client/src/App.tsx`, `client/src/main.tsx` |
+| **آخر مراجعة** | 2026-09-18 |
 | **المالك** | Frontend Engineering & Design System Team |
 | **البديل** | لا يوجد (المرجع الشامل المعتمد لسلوك طبقة الواجهة المشتركة وPWA والوصول) |
 
@@ -16,7 +16,7 @@
 
 ## 1. المعمارية العامة لطبقة الواجهة (Frontend Architecture)
 
-تعتمد الواجهة الأمامية لنظام **BOCAM CRM** على تقنيات React 19، TypeScript، Tailwind CSS v4، ومكتبة التوجيه الخفيفة `wouter`. ترتبط الواجهة بالخادم عبر طبقة tRPC المنمطة بالكامل مع مكتبة `@tanstack/react-query` لإدارة التخزين المؤقت وحالة الطلبات.
+تعتمد الواجهة الأمامية لنظام **BOCAM CRM** على تقنيات React 19، TypeScript، Tailwind CSS v4، ومكتبة التوجيه الخفيفة `wouter` في معمارية معيارية ثلاثية الطبقات: النواة التأسيسية (`@core/*`)، والبوابات الوظيفية الأربع (`@apps/*`)، والوحدات الإدارية المتخصصة. ترتبط الواجهة بالخادم عبر طبقة tRPC المنمطة بالكامل مع مكتبة `@tanstack/react-query` لإدارة التخزين المؤقت وحالة الطلبات.
 
 ```
                               ┌────────────────────────────────────────┐
@@ -29,22 +29,22 @@
                               │ ErrorBoundary > Theme > Language > Tip │
                               └──────────────────┬─────────────────────┘
                                                  │
-          ┌──────────────────────────────────────┼──────────────────────────────────────┐
-          │                                      │                                      │
-┌─────────▼─────────┐                  ┌─────────▼─────────┐                  ┌─────────▼─────────┐
-│   Public Portal   │                  │  Admin Workspace  │                  │  Patient Portal   │
-│  (Marketing/SEO)  │                  │  (DashboardShell) │                  │  (Mobile-first)   │
-│   PageLayout.tsx  │                  │ AdminTabs + Worksp│                  │ PatientPortalLay  │
-└─────────┬─────────┘                  └─────────┬─────────┘                  └─────────┬─────────┘
-          │                                      │                                      │
-          └──────────────────────────────────────┼──────────────────────────────────────┘
+        ┌───────────────────┬────────────────────┴───────────────────┬───────────────────┐
+        │                   │                                        │                   │
+┌───────▼───────┐   ┌───────▼───────┐                        ┌───────▼───────┐   ┌───────▼───────┐
+│ Public Portal │   │Patient Portal │                        │ Doctor Portal │   │Admin Workspace│
+│(Marketing/SEO)│   │ (Mobile-first)│                        │(Clinical/Desk)│   │(10 Modules/BI)│
+│ PageLayout.tsx│   │PatientLayout  │                        │ DoctorLayout  │   │DashboardShell │
+└───────┬───────┘   └───────┬───────┘                        └───────┬───────┘   └───────┬───────┘
+        │                   │                                        │                   │
+        └───────────────────┴────────────────────┬───────────────────┴───────────────────┘
                                                  │
                               ┌──────────────────▼─────────────────────┐
-                              │         Shared System Layers           │
-                              │  - UI Components (Radix + Tailwind v4) │
+                              │      Core Foundation (@core/*)         │
+                              │  - UI Primitives (@core/components/ui) │
                               │  - Dual PWA Workers (sw.js / sw-admin) │
                               │  - A11y & ARIA Helpers (WCAG 2.1 AA)   │
-                              │  - Offline & IndexedDB Fallbacks       │
+                              │  - Feedback, Modals, Banners & Contexts│
                               └────────────────────────────────────────┘
 ```
 
@@ -224,18 +224,18 @@
 
 ## 8. دليل الخطافات والسياقات الأساسية (Hooks & Contexts Catalog)
 
-| الخطاف / السياق | المسار | الوظيفة ودور التشغيل |
+| الخطاف / السياق | المسار المعياري المحدث | الوظيفة ودور التشغيل |
 |---|---|---|
-| `LanguageContext` / `useLanguage` | `client/src/contexts/LanguageContext.tsx` | إدارة لغة التطبيق (`ar`/`en`) وتوجيه الصفحة (`rtl`/`ltr`) وحفظها في التخزين المحلي |
-| `ThemeContext` / `useTheme` | `client/src/contexts/ThemeContext.tsx` | إدارة الوضع الليلي/النهاري مع التبديل السلس عبر `.theme-transition` |
-| `useAuth` | `client/src/_core/hooks/useAuth.ts` | توفير بيانات المستخدم الحالي، حالة التحميل، دوال تسجيل الدخول والخروج عبر tRPC |
-| `useTableFeatures` | `client/src/hooks/table/useTableFeatures.ts` | نظام موحد للجداول: فرز، إخفاء/إظهار الأعمدة، تجميد الأعمدة، إعادة الترتيب والتحجيم |
-| `usePWAInstall` | `client/src/hooks/integrations/usePWAInstall.ts` | إدارة دورة حياة تثبيت PWA، كشف نظام iOS، وحفظ حالة التجاهل |
-| `useAdminTabs` | `client/src/hooks/layout/useAdminTabs.ts` | فتح وإغلاق وتتبع التبويبات المتعددة في مساحة العمل الإدارية |
-| `useSidebarNotifications` | `client/src/hooks/layout/useSidebarNotifications.ts` | جلب وإدارة شارات العدادات والتنبيهات المباشرة في القائمة الجانبية |
-| `useLicense` | `client/src/hooks/integrations/useLicense.ts` | التحقق من تفعيل الميزات البرمجية وفق الترخيص الرقمي المعتمد |
-| `useFormatDate` | `client/src/hooks/export/useFormatDate.ts` | تنسيق التواريخ وفق التقويم المحلي والمنطقة الزمنية المعتمدة للعيادات |
-| `useFilterUtils` | `client/src/hooks/table/useFilterUtils.ts` | فلاتر الجداول المتقدمة والبحث المتعدد وحفظ الفلاتر المفضلة |
+| `LanguageContext` / `useLanguage` | `client/src/core/contexts/LanguageContext.tsx` | إدارة لغة التطبيق (`ar`/`en`) وتوجيه الصفحة (`rtl`/`ltr`) وحفظها في التخزين المحلي |
+| `ThemeContext` / `useTheme` | `client/src/core/contexts/ThemeContext.tsx` | إدارة الوضع الليلي/النهاري مع التبديل السلس عبر `.theme-transition` |
+| `useAuth` | `client/src/core/hooks/useAuth.ts` | توفير بيانات المستخدم الحالي، حالة التحميل، دوال تسجيل الدخول والخروج عبر tRPC |
+| `useTableFeatures` | `client/src/apps/admin/shared/hooks/useTableFeatures.ts` | نظام موحد للجداول: فرز، إخفاء/إظهار الأعمدة، تجميد الأعمدة، وإعادة الترتيب |
+| `usePWAInstall` | `client/src/core/hooks/usePWAInstall.ts` | إدارة دورة حياة تثبيت PWA، كشف نظام iOS، وحفظ حالة التجاهل |
+| `useAdminTabs` | `client/src/apps/admin/layout/useAdminTabs.ts` | فتح وإغلاق وتتبع التبويبات المتعددة في مساحة العمل الإدارية |
+| `useSidebarNotifications` | `client/src/apps/admin/layout/useSidebarNotifications.ts` | جلب وإدارة شارات العدادات والتنبيهات المباشرة في القائمة الجانبية |
+| `useLicense` | `client/src/core/hooks/useLicense.ts` | التحقق من تفعيل الميزات البرمجية وفق الترخيص الرقمي المعتمد |
+| `useFormatDate` | `client/src/core/hooks/useFormatDate.ts` | تنسيق التواريخ وفق التقويم المحلي والمنطقة الزمنية المعتمدة للعيادات |
+| `useFilterUtils` | `client/src/apps/admin/shared/hooks/useFilterUtils.ts` | فلاتر الجداول المتقدمة والبحث المتعدد وحفظ الفلاتر المفضلة |
 
 ---
 

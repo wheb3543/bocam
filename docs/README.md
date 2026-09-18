@@ -51,7 +51,9 @@
 
 ### للمطورين ومراجعي الكود
 
-- [البنية المعمارية](./architecture/ARCHITECTURE.md)
+- [البنية المعمارية العامة](./architecture/ARCHITECTURE.md)
+- [المعمارية المعيارية للواجهة الأمامية](./architecture/FRONTEND_MODULAR_ARCHITECTURE.md)
+- [مرجع الواجهة المشتركة وPWA والوصول](./domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md)
 - [مخطط قاعدة البيانات](./architecture/DATABASE_SCHEMA.md)
 - [مخطط ERD](./architecture/DATABASE_ERD.md)
 - [مرجع REST وtRPC](./api/REST_TRPC_API.md)

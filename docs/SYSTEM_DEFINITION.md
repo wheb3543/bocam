@@ -2,12 +2,12 @@
 
 **الحالة:** `working`  
 **المجال:** Overview  
-**آخر مراجعة:** 2026-09-11  
-**مصادر التحقق:** `client/src/App.tsx`, `client/src/components/layout/AdminContentRoutes.tsx`, `server/_core/index.ts`, `server/routers/routers.ts`, `server/_core/trpc.ts`
+**آخر مراجعة:** 2026-09-18  
+**مصادر التحقق:** `client/src/App.tsx`, `client/src/apps/admin/layout/AdminContentRoutes.tsx`, `server/_core/index.ts`, `server/routers/routers.ts`, `server/_core/trpc.ts`
 
 ## الهوية والنطاق
 
-BOCAM CRM هو نظام عمليات وCRM طبي بواجهة عامة، ولوحة إدارة داخلية، وبوابة مريض، مع خدمات خلفية لإدارة الحملات والحجوزات والمرضى والمحتوى والاتصالات والتكاملات الخارجية.
+BOCAM CRM هو نظام عمليات وCRM طبي متكامل يضم 4 بوابات وظيفية: بوابة تعريفية عامة، ولوحة إدارة وتشغيل داخلية، وبوابة مريض رقمية، وبوابة للكادر الطبي، مع خدمات خلفية لإدارة الحملات والحجوزات والمرضى والمحتوى والاتصالات والتكاملات الخارجية.
 
 يظهر الاسم التاريخي **SGH CRM Portal** في بعض الوثائق والواجهات، لكنه ليس نظامًا مختلفًا. إلى أن يعتمد قرار تجاري آخر، يستخدم التوثيق اسم **BOCAM CRM** كاسم المشروع، ويذكر SGH CRM Portal كاسم تاريخي أو تجاري عند الحاجة.
 
@@ -18,8 +18,9 @@ BOCAM CRM هو نظام عمليات وCRM طبي بواجهة عامة، ولو
 | عامة | `/` و`/doctors` و`/offers` و`/camps` و`/page/:slug` | عرض المحتوى العام والخدمات والأطباء والعروض والمخيمات |
 | تفعيل | `/activation` | التحقق من صلاحية الترخيص قبل إتاحة معظم التطبيق |
 | دخول الإدارة | `/admin-login` | نقطة دخول تسجيل دخول الإدارة |
-| إدارة | `/admin/*` | إدارة العمليات والمحتوى والاتصالات والتقارير والنظام |
+| إدارة | `/admin/*` | إدارة العمليات والمحتوى والاتصالات والتقارير والنظام (10 وحدات) |
 | بوابة المريض | `/patient-portal/*` | دخول المريض وعرض المواعيد والنتائج والملف والعروض والمخيمات |
+| بوابة الطبيب | `/doctor-portal/*` | دخول الكادر الطبي، إدارة العيادة وطابور المرضى |
 | نظامية | `/offline` و`/404` و`/unauthorized` و`/feature-locked/:feature` | حالات عدم الاتصال، عدم العثور، عدم التفويض، وقفل الميزات |
 
 ## تدفق الطلب عالي المستوى
@@ -27,14 +28,15 @@ BOCAM CRM هو نظام عمليات وCRM طبي بواجهة عامة، ولو
 ```mermaid
 flowchart LR
     Browser[React client] --> Router[Wouter routes]
-    Router --> Public[Public pages]
-    Router --> Admin[Admin shell]
+    Router --> Public[Public portal]
+    Router --> Admin[Admin workspace]
     Router --> Patient[Patient portal]
+    Router --> Doctor[Doctor portal]
     Router --> License[License gate]
     Admin --> TRPC[tRPC client]
     Patient --> TRPC
+    Doctor --> TRPC
     Public --> TRPC
-    TRPC --> Server[Express server]
     Server --> REST[OAuth, uploads, webhooks, scheduled routes]
     Server --> Procedures[tRPC appRouter]
     Procedures --> Services[Business services]
@@ -46,7 +48,7 @@ flowchart LR
 
 | الطبقة | المسؤولية الحالية | مصدر التحقق |
 |---|---|---|
-| `client/src/` | صفحات React، التوجيه، layouts، hooks، contexts، مكونات الواجهة، PWA | `client/src/App.tsx` وبنية client |
+| `client/src/` | معمارية معيارية ثلاثية الطبقات: النواة المشتركة (`core/`)، والبوابات الأربع (`apps/`)، والوحدات الإدارية العشر (`admin/modules/`) | `client/src/App.tsx`, `docs/architecture/FRONTEND_MODULAR_ARCHITECTURE.md` |
 | `server/_core/` | إقلاع الخادم، السياق، tRPC، middleware، الترخيص، الصحة، Vite/static | `server/_core/index.ts` و`tRPC.ts` |
 | `server/routers/` | عقود وإجراءات tRPC مجمعة في `appRouter` | `server/routers/routers.ts` |
 | `server/api/` | REST routes وOAuth وuploads وwebhooks ومسارات مجدولة | `server/_core/index.ts` |

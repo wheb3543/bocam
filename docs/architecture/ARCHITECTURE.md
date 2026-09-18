@@ -76,21 +76,31 @@
 - **Wouter** - التوجيه
 - **shadcn/ui** - مكونات الواجهة
 
-**الهيكل:**
+**الهيكل المعماري (معمارية معيارية ثلاثية الطبقات):**
 ```
 client/src/
-├── pages/              # صفحات عامة وإدارية وبوابة مريض
-│   ├── public/         # الصفحات العامة (الهبوط، الأطباء، العروض)
-│   ├── admin/          # الصفحات الإدارية
-│   └── patient-portal/ # صفحات بوابة المريض
-├── components/         # مكونات قابلة لإعادة الاستخدام
-│   ├── ui/             # مكونات shadcn/ui
-│   ├── layout/         # مكونات التخطيط
-│   └── features/       # مكونات خاصة بالميزات
-├── hooks/              # خطافات مخصصة
-├── contexts/           # سياقات React
-├── lib/                # أدوات وإعدادات
-└── _core/              # مكونات أساسية
+├── core/               # النواة التأسيسية المشتركة (@core/*)
+│   ├── api/            # تهيئة عميل tRPC والمصادقة
+│   ├── contexts/       # سياقات الثيم واللغة وحالة الاتصال
+│   ├── components/ui/  # مكتبة عناصر الواجهة الأساسية (Buttons, Dialogs, etc.)
+│   ├── feedback/       # التغذية الراجعة، الخصوصية، ومؤشرات الشبكة
+│   ├── animations/     # المؤثرات الحركية والعدادات الموحدة
+│   ├── pages/          # صفحات النظام العامة (NotFound, Unauthorized, Offline)
+│   ├── pwa/            # إدارة تطبيق الويب التقدمي (PWAManager)
+│   ├── hooks/          # الخطافات العامة الشاملة للنظام
+│   └── lib/            # الأدوات المساعدة والمكتبات المشتركة
+├── apps/               # البوابات الوظيفية الأربع للمنظومة (@apps/*)
+│   ├── public/         # البوابة التعريفية للمستشفى (5 وحدات وظيفية)
+│   ├── patient-portal/ # بوابة المريض الرقمية للنتائج والمواعيد (5 وحدات)
+│   ├── doctor-portal/  # بوابة الكادر الطبي والعيادات
+│   └── admin/          # المنظومة الإدارية والتشغيلية (10 وحدات وظيفية)
+│       ├── auth/       # المصادقة الإدارية وجلسات الموظفين
+│       ├── layout/     # هيكل لوحة التحكم، الشريط الجانبي، والتنقل
+│       ├── shared/     # المكونات والخطافات المشتركة للإدارة
+│       └── modules/    # الوحدات الوظيفية العشر لإدارة المستشفى (01-10)
+├── App.tsx             # الموجه المركزي للتطبيق العام
+├── main.tsx            # نقطة انطلاق التطبيق في الـ DOM
+└── index.css           # ملف الأنماط والمتغيرات التصميمية المركزية
 ```
 
 ### 2. الخادم (Server)
@@ -363,21 +373,31 @@ SGH CRM Portal is built on a modern architecture based on **Full-Stack TypeScrip
 - **Wouter** - Routing
 - **shadcn/ui** - UI components
 
-**Structure:**
+**Structure (3-Tier Modular Architecture):**
 ```
 client/src/
-├── pages/              # Public, admin, and patient portal pages
-│   ├── public/         # Public pages (landing, doctors, offers)
-│   ├── admin/          # Admin pages
-│   └── patient-portal/ # Patient portal pages
-├── components/         # Reusable components
-│   ├── ui/             # shadcn/ui components
-│   ├── layout/         # Layout components
-│   └── features/       # Feature-specific components
-├── hooks/              # Custom hooks
-├── contexts/           # React contexts
-├── lib/                # Utilities and configs
-└── _core/              # Core components
+├── core/               # Shared Core Foundation (@core/*)
+│   ├── api/            # tRPC client configuration and auth
+│   ├── contexts/       # Theme, language, network contexts
+│   ├── components/ui/  # Shared primitive UI components (Buttons, Dialogs, etc.)
+│   ├── feedback/       # Feedback modals, cookie/privacy banners, network badges
+│   ├── animations/     # Reusable motion wrappers and counter animations
+│   ├── pages/          # System generic pages (NotFound, Unauthorized, Offline)
+│   ├── pwa/            # Progressive Web App management (PWAManager)
+│   ├── hooks/          # System-wide reusable hooks
+│   └── lib/            # Common utilities and helper libraries
+├── apps/               # Functional Portals (@apps/*)
+│   ├── public/         # Public Institutional Portal (5 modules)
+│   ├── patient-portal/ # Digital Patient Portal (5 modules)
+│   ├── doctor-portal/  # Doctor & Medical Staff Portal
+│   └── admin/          # Hospital Operations & Admin Workspace (10 modules)
+│       ├── auth/       # Admin authentication & session handling
+│       ├── layout/     # Persistent shell, sidebar, tabs, and navigation
+│       ├── shared/     # Admin-wide shared components, tables, and hooks
+│       └── modules/    # 10 cohesive operational modules (01 to 10)
+├── App.tsx             # Application-level routing & global provider tree
+├── main.tsx            # DOM root bootstrapping & queryClient
+└── index.css           # Central stylesheet & OKLCH design tokens
 ```
 
 ### 2. Backend (Server)

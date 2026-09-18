@@ -9,9 +9,13 @@ An integrated platform comprising 5 core functional subsystems:
 - **[M] Media Social & Tasks**: Social media hub combined with multi-department administrative task assignment, tracking, and staff performance evaluation.
 
 ## Stack & Structure
-React + TS + Tailwind (`client/src/`), Express (`server/`), Drizzle ORM (`drizzle/`), MySQL/TiDB.
+- **Frontend (`client/src/`)**: React 19 + TS 5.9 + Tailwind CSS 4 in a 3-tier modular architecture:
+  - **Core Foundation (`@core/*`)**: UI primitives, feedback, contexts, hooks, animations, system pages, PWA, and common utilities.
+  - **Functional Portals (`@apps/*`)**: 4 standalone portals: `public/`, `patient-portal/`, `doctor-portal/`, and `admin/`.
+  - **Admin Subsystem (`@apps/admin/modules/`)**: 10 cohesive modules (01 to 10) with co-located components, embedded reports, and domain settings.
+- **Backend (`server/`)**: Express + tRPC 11, Drizzle ORM (`drizzle/`), MySQL/TiDB, Redis caching & BullMQ queues.
 - Node `>=22.13.0` | Package manager: `pnpm` only.
-- Docs: `package.json`, [README.md](./README.md), [docs/COMMANDS_REFERENCE.md](./docs/COMMANDS_REFERENCE.md).
+- Docs: `package.json`, [README.md](./README.md), [docs/architecture/FRONTEND_MODULAR_ARCHITECTURE.md](./docs/architecture/FRONTEND_MODULAR_ARCHITECTURE.md), [docs/COMMANDS_REFERENCE.md](./docs/COMMANDS_REFERENCE.md).
 
 ## Critical Rules & Engineering Standards
 1. **Domain Context**: Respect module boundaries according to the target BOCAM subsystem.

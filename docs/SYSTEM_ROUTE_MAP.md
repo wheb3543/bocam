@@ -2,48 +2,53 @@
 
 **الحالة:** `working`  
 **المجال:** Overview  
-**آخر مراجعة:** 2026-09-13  
-**المصدر الأساسي:** `client/src/App.tsx` و`client/src/components/layout/AdminContentRoutes.tsx`
+**آخر مراجعة:** 2026-09-18  
+**المصدر الأساسي:** `client/src/App.tsx` و`client/src/apps/admin/layout/AdminContentRoutes.tsx` (مع جسر التوافق `client/src/components/layout/AdminContentRoutes.tsx`)
 
 ## المسارات العامة والنظامية
 
-| المجموعة | المسارات الحالية |
-|---|---|
-| الترخيص والدخول | `/activation`, `/admin-login` |
-| الصفحة والمحتوى | `/`, `/page/:slug`, `/preview/:token`, `/thank-you` |
-| الأطباء | `/doctors`, `/doctors/:slug`, `/visiting-doctors` |
-| العروض | `/offers`, `/offers/:slug` |
-| المخيمات | `/camps`, `/camps/:slug` |
-| الخصوصية والوصول | `/privacy-policy`, `/privacy-policy-changelog`, `/access-request`, `/unauthorized` |
-| حالات النظام | `/offline`, `/404`, `/feature-locked/:feature` |
+| المجموعة | المسارات الحالية | الوحدة المعمارية |
+|---|---|---|
+| الترخيص والدخول | `/activation`, `/admin-login` | `@core/pages`, `@apps/admin/auth` |
+| الصفحة والمحتوى | `/`, `/page/:slug`, `/preview/:token`, `/thank-you` | `@apps/public/modules/01-landing` |
+| الأطباء | `/doctors`, `/doctors/:slug`, `/visiting-doctors` | `@apps/public/modules/02-doctors` |
+| العروض | `/offers`, `/offers/:slug` | `@apps/public/modules/03-offers` |
+| المخيمات | `/camps`, `/camps/:slug` | `@apps/public/modules/04-camps` |
+| الخصوصية والوصول | `/privacy-policy`, `/privacy-policy-changelog`, `/access-request`, `/unauthorized` | `@apps/public/modules/05-privacy`, `@core/pages` |
+| حالات النظام | `/offline`, `/404`, `/feature-locked/:feature` | `@core/pages` |
 
-## بوابة المريض
+## بوابة المريض (Patient Portal)
 
-| المجموعة | المسارات الحالية |
-|---|---|
-| الدخول والإدارة | `/patient-portal/login`, `/patient-portal/admin` |
-| الصفحة الرئيسية | `/patient-portal/home` |
-| المواعيد | `/patient-portal/appointments`, `/patient-portal/appointments/:id` |
-| العروض والمخيمات | `/patient-portal/offers`, `/patient-portal/camps` |
-| النتائج الطبية | `/patient-portal/results`, `/patient-portal/results/:id` |
-| الملف | `/patient-portal/profile` |
+| المجموعة | المسارات الحالية | الوحدة المعمارية |
+|---|---|---|
+| الدخول والإدارة | `/patient-portal/login`, `/patient-portal/admin` | `@apps/patient-portal/modules/01-auth` |
+| الصفحة الرئيسية والمواعيد | `/patient-portal/home`, `/patient-portal/appointments`, `/patient-portal/appointments/:id` | `@apps/patient-portal/modules/02-appointments` |
+| النتائج الطبية | `/patient-portal/results`, `/patient-portal/results/:id` | `@apps/patient-portal/modules/03-medical-records` |
+| العروض والمخيمات | `/patient-portal/offers`, `/patient-portal/camps` | `@apps/patient-portal/modules/04-offers-camps` |
+| الملف الشخصي | `/patient-portal/profile` | `@apps/patient-portal/modules/05-profile` |
 
-## لوحة الإدارة
+## بوابة الطبيب (Doctor Portal)
 
-يتم تركيب لوحة الإدارة تحت `/admin/*` وتحتوي المجموعات التالية في `AdminContentRoutes.tsx`:
+| المجموعة | المسارات الحالية | الوحدة المعمارية |
+|---|---|---|
+| تسجيل الدخول | `/doctor-portal/login` | `@apps/doctor-portal/modules/01-auth` |
 
-| المجموعة | المسارات الحالية |
-|---|---|
-| الأساس والإدارة | `/admin`, `/admin/offline`, `/admin/profile`, `/admin/support`, `/admin/management`, `/admin/notifications`, `/admin/settings`, `/admin/advanced-settings` |
-| المحتوى والوسائط | `/admin/content/content`, `/admin/content/media-library`, `/admin/content/publishing` |
-| المستخدمون | `/admin/users/users` |
-| WhatsApp | `/admin/whatsapp`, `/admin/whatsapp/whatsapp-dashboard`, `/admin/whatsapp/templates`, `/admin/whatsapp/connection`, `/admin/whatsapp/analytics`, `/admin/whatsapp/broadcast`, `/admin/whatsapp/auto-reply`, `/admin/whatsapp/compliance`, `/admin/whatsapp/appointments`, `/admin/whatsapp/integration`, `/admin/whatsapp/account-health`, `/admin/whatsapp/phone-quality`, `/admin/whatsapp/subscriptions`, `/admin/whatsapp/webhook-inspector`, `/admin/whatsapp/costs`, `/admin/whatsapp/orders`, `/admin/whatsapp/products`, `/admin/whatsapp/referrals`, `/admin/whatsapp/lab-results`, `/admin/whatsapp/operations`¹, `/admin/whatsapp/automation`¹, `/admin/whatsapp/campaigns`¹, `/admin/whatsapp/governance`¹, `/admin/whatsapp/analytics`¹ |
-| الاتصالات | `/admin/communications/messages`, `/admin/communications/integration-settings`, `/admin/communications/meta-settings`, `/admin/message-settings` |
-| التقارير والتتبع | `/admin/reports/reports`, `/admin/reports/analytics`, `/admin/reports/bi`, `/admin/reports/camp-stats`, `/admin/reports/pwa-stats`, `/admin/tracking-settings` |
-| الحملات والمشاريع | `/admin/campaigns/campaigns`, `/admin/campaigns/projects`, `/admin/campaigns/review-approval` |
-| الحجوزات والعملاء | `/admin/bookings`, `/admin/bookings/leads`, `/admin/bookings/appointments`, `/admin/bookings/offer-leads`, `/admin/bookings/camp-registrations`, `/admin/bookings/customers`, `/admin/bookings/patient-results`, `/admin/bookings/tasks` |
-| الفرق | `/admin/teams/digital-marketing`, `/admin/teams/media`, `/admin/teams/field-marketing`, `/admin/teams/customer-service` |
-| النظام | `/admin/system/updates`, `/admin/system/status`, `/admin/system/backups` |
+## لوحة الإدارة (Admin Workspace)
+
+يتم تركيب لوحة الإدارة تحت `/admin/*` وتتوزع عبر 10 وحدات وظيفية معيارية في `AdminContentRoutes.tsx`:
+
+| الوحدة المعمارية | المسارات الحالية المدارة | التبويبات والمراكز الرئيسية |
+|---|---|---|
+| **01-booking** (الحجوزات والجدولة) | `/admin/bookings`, `/admin/bookings/appointments`, `/admin/bookings/leads`, `/admin/bookings/offer-leads`, `/admin/bookings/camp-registrations`, `/admin/bookings/doctor-queue` | إدارة المواعيد، حجوزات العروض، تسجيلات المخيمات، طابور الطبيب |
+| **02-crm-patients** (إدارة المرضى) | `/admin/bookings/customers`, `/admin/bookings/patient-results` | سجلات المرضى الموحدة، نتائج الفحوصات والتقارير الطبية |
+| **03-omnichannel-whatsapp** (واتساب الموحد) | `/admin/whatsapp`, `/admin/whatsapp/operations`¹, `/admin/whatsapp/automation`¹, `/admin/whatsapp/campaigns`¹, `/admin/whatsapp/governance`¹, `/admin/whatsapp/analytics`¹, `/admin/whatsapp/lab-results` | Live Chat، مركز العمليات، الأتمتة، الحملات، الحوكمة، والتحليلات |
+| **04-communications-meta** (الاتصالات وميتا) | `/admin/communications/messages`, `/admin/communications/integration-settings`, `/admin/communications/meta-settings`, `/admin/message-settings` | الرسائل الموحدة، قنوات Meta، إعدادات التكامل |
+| **05-cms-media** (المحتوى والوسائط) | `/admin/content/content`, `/admin/content/media-library`, `/admin/content/publishing` | المقالات الطبية، مكتبة الوسائط، وجدولة النشر |
+| **06-campaigns-marketing** (الحملات والتسويق) | `/admin/campaigns/campaigns`, `/admin/campaigns/projects`, `/admin/campaigns/review-approval` | الحملات الإعلانية، المشاريع التسويقية، ومراجعة الاعتماد |
+| **07-tasks-teams** (المهام والفرق) | `/admin/bookings/tasks`, `/admin/teams/digital-marketing`, `/admin/teams/media`, `/admin/teams/field-marketing`, `/admin/teams/customer-service` | مهام الموظفين، فرق التسويق الرقمي، الميداني، الإعلام، وخدمة العملاء |
+| **08-reports-analytics** (التقارير وBI) | `/admin/reports/reports`, `/admin/reports/analytics`, `/admin/reports/bi`, `/admin/reports/camp-stats`, `/admin/reports/pwa-stats` | تقارير الأداء، ذكاء الأعمال، إحصائيات المخيمات وتطبيقات الويب |
+| **09-system-security** (النظام والأمان) | `/admin/system/updates`, `/admin/system/status`, `/admin/system/backups`, `/admin/users/users`, `/admin/offline`, `/admin/profile`, `/admin/support`, `/admin/management` | المستخدمون والصلاحيات، النسخ الاحتياطي، حالة الخادم، والتحديثات |
+| **10-settings-general** (الإعدادات العامة) | `/admin/settings`, `/admin/advanced-settings`, `/admin/tracking-settings`, `/admin/notifications` | إعدادات المنظومة، مفاتيح التتبع، التنبيهات، والخصائص المتقدمة |
 
 ## حواجز الوصول
 
