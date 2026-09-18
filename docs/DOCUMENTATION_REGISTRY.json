@@ -4162,6 +4162,30 @@
       "review_due": null,
       "evidence_level": "inventory-only",
       "notes": "Generated baseline; domain and ownership require phase review."
+    },
+    {
+      "path": "server/database/migrations/README.md",
+      "title": "Bootstrap Raw SQL Migrations Governance",
+      "language": "ar",
+      "domain": "database",
+      "document_type": "guide",
+      "status": "canonical",
+      "audience": "developer",
+      "owner": "Database Operations Team",
+      "source_code_paths": [
+        "server/database/migrations/"
+      ],
+      "test_paths": [
+        "scripts/database/check-migration-schema.mjs"
+      ],
+      "related_documents": [
+        "docs/architecture/DATABASE_MODULAR_SCHEMA.md"
+      ],
+      "supersedes": null,
+      "last_reviewed": "2026-09-18",
+      "review_due": "2026-12-18",
+      "evidence_level": "tested-runtime",
+      "notes": "Governance documentation for legacy bootstrap raw SQL migrations."
     }
   ]
 }
