@@ -54,7 +54,7 @@ async function startServer() {
     { createLicenseDeliveryRouter },
     { reportUnauthorizedStartup },
   ] = await Promise.all([
-    import('./oauth'),
+    import('../api/oauth'),
     import('../api/uploadRoute'),
     import('../api/webhookRoutes'),
     import('../api/metaSocialWebhookRoute'),

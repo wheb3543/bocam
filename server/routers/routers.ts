@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { systemRouter } from '../_core/systemRouter';
+import { systemRouter } from './system';
 import { protectedProcedure, router } from '../_core/trpc';
 import {
   getAllAccessRequests,
@@ -7,9 +7,9 @@ import {
   approveAccessRequest,
   rejectAccessRequest,
 } from '../database/db';
-import { notifyOwner } from '../_core/notification';
+import { notifyOwner } from '../services/notification';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
-import { createNotification } from '../_core/notificationHelper';
+import { createNotification } from '../services/notificationHelper';
 import { offersRouter } from './offers';
 import { campsRouter } from './camps';
 import { offerLeadsRouter } from './offerLeads';
