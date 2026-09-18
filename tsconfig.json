@@ -17,6 +17,8 @@
     "types": ["node", "vite/client", "vitest/globals"],
     "paths": {
       "@/*": ["./client/src/*"],
+      "@core/*": ["./client/src/core/*"],
+      "@apps/*": ["./client/src/apps/*"],
       "@shared/*": ["./shared/*"]
     }
   }

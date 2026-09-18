@@ -1,5 +1,5 @@
-export { default as AnimatedCounter } from './AnimatedCounter';
-export { default as FadeIn, StaggeredList } from './FadeIn';
-export { default as AnimatedBadge } from './AnimatedBadge';
-export { default as FlashUpdate } from './FlashUpdate';
-export { default as AnimatedProgressBar } from './AnimatedProgressBar';
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing directly from "@core/components/animations/index".
+ */
+export * from '@core/components/animations/index';

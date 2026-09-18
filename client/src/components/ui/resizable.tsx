@@ -1,7 +1,5 @@
-import * as ResizablePrimitive from 'react-resizable-panels';
-
-const ResizablePanelGroup = ResizablePrimitive;
-const ResizablePanel = ResizablePrimitive.Panel;
-const ResizableHandle = ResizablePrimitive.PanelResizeHandle;
-
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle };
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing directly from "@core/components/ui/resizable".
+ */
+export * from '@core/components/ui/resizable';
