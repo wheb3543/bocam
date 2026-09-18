@@ -54,6 +54,7 @@
 - [البنية المعمارية العامة](./architecture/ARCHITECTURE.md)
 - [المعمارية المعيارية للواجهة الأمامية](./architecture/FRONTEND_MODULAR_ARCHITECTURE.md)
 - [المعمارية المعيارية للخادم الخلفي](./architecture/SERVER_MODULAR_ARCHITECTURE.md)
+- [المعمارية المعيارية لمخطط قاعدة البيانات](./architecture/DATABASE_MODULAR_SCHEMA.md)
 - [مرجع الواجهة المشتركة وPWA والوصول](./domains/FRONTEND_PLATFORM_RUNTIME_REFERENCE.md)
 - [مخطط قاعدة البيانات](./architecture/DATABASE_SCHEMA.md)
 - [مخطط ERD](./architecture/DATABASE_ERD.md)

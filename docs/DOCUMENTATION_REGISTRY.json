@@ -1454,6 +1454,34 @@
       "notes": "Canonical blueprint for 3-tier modular backend architecture."
     },
     {
+      "path": "docs/architecture/DATABASE_MODULAR_SCHEMA.md",
+      "title": "DATABASE MODULAR SCHEMA",
+      "language": "ar",
+      "domain": "database-platform",
+      "document_type": "architecture",
+      "status": "canonical",
+      "audience": "engineers",
+      "owner": "Database & Platform Engineering Team",
+      "source_code_paths": [
+        "drizzle/schema/",
+        "drizzle/schema.ts",
+        "drizzle.config.ts"
+      ],
+      "test_paths": [
+        "server/services/rolePermissionService.workflow.test.ts"
+      ],
+      "related_documents": [
+        "docs/architecture/ARCHITECTURE.md",
+        "docs/architecture/SERVER_MODULAR_ARCHITECTURE.md",
+        "README.md"
+      ],
+      "supersedes": null,
+      "last_reviewed": "2026-09-18",
+      "review_due": "2027-03-18",
+      "evidence_level": "tested",
+      "notes": "Canonical architecture blueprint for domain-modular Drizzle database schemas."
+    },
+    {
       "path": "docs/archive/content/CONTENT_MANAGEMENT_AUDIT_REPORT.md",
       "title": "CONTENT MANAGEMENT AUDIT REPORT",
       "language": "mixed",

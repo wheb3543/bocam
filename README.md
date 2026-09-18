@@ -263,10 +263,11 @@ bocam/
 │   ├── guides/                 # أدلة المستخدم النهائي والصيانة
 │   └── development/            # معايير وأدوات التطوير
 ├── deploy/                     # حزمة النشر والإنتاج
-├── drizzle/                    # ترحيلات قاعدة البيانات (Drizzle Migrations)
+├── drizzle/                    # مخططات وقواعد البيانات (Modular Schemas in schema/ & Migrations)
 ├── e2e/                        # اختبارات E2E (Playwright)
 ├── mocks/                      # بيانات وهمية للاختبارات
-└── scripts/                    # سكريبتات CLI مساعدة
+├── testing/                    # أدوات الاختبار المخصصة وقواعد البيانات الوهمية (testing/utils)
+└── scripts/                    # سكريبتات مصنفة وظيفياً (seed, database, qa, admin, release)
 ```
 
 ---
