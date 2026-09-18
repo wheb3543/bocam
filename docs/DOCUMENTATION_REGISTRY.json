@@ -93,6 +93,33 @@
       "notes": "Generated baseline; domain and ownership require phase review."
     },
     {
+      "path": ".devin/workflows/verify.md",
+      "title": "verify",
+      "language": "mixed",
+      "domain": "testing-quality",
+      "document_type": "guide",
+      "status": "canonical",
+      "audience": "developer",
+      "owner": "QA Engineering Team",
+      "source_code_paths": [
+        "scripts/qa/"
+      ],
+      "test_paths": [
+        "scripts/qa/check-env.mjs",
+        "scripts/qa/validate-documentation-registry.mjs",
+        "scripts/database/check-migration-schema.mjs"
+      ],
+      "related_documents": [
+        "AGENTS.md",
+        ".devin/workflows/review.md"
+      ],
+      "supersedes": null,
+      "last_reviewed": "2026-09-18",
+      "review_due": "2026-12-18",
+      "evidence_level": "tested-runtime",
+      "notes": "Automated verification workflow for BOCAM quality gates."
+    },
+    {
       "path": ".github/prompts/plan-tenantArchitecture.prompt.md",
       "title": "plan tenantArchitecture.prompt",
       "language": "mixed",

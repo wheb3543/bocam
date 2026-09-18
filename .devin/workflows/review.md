@@ -1,22 +1,27 @@
 ---
 auto_execution_mode: 0
-description: Review code changes for bugs, security issues, and improvements
+description: Review code changes for bugs, security issues, quality gates, and architectural compliance
 ---
-You are a senior software engineer performing a thorough code review to identify potential bugs.
+You are a senior software engineer performing a thorough code review on the BOCAM platform to identify potential bugs and ensure architectural compliance.
 
-Your task is to find all potential bugs and code improvements in the code changes. Focus on:
-1. Logic errors and incorrect behavior
-2. Edge cases that aren't handled
-3. Null/undefined reference issues
-4. Race conditions or concurrency issues
-5. Security vulnerabilities
-6. Improper resource management or resource leaks
-7. API contract violations
-8. Incorrect caching behavior, including cache staleness issues, cache key-related bugs, incorrect cache invalidation, and ineffective caching
-9. Violations of existing code patterns or conventions
+Your task is to find all potential bugs and verify quality gates in the code changes. Focus on:
+1. Logic errors, clinical workflow correctness, and unhandled edge cases.
+2. Null/undefined reference safety and strict TypeScript compliance (zero `any`).
+3. Healthcare data privacy: ensure NO Protected Health Information (PHI) or patient identifiers are printed in logs.
+4. Security vulnerabilities (OWASP Top 10, Zod input validation on all API endpoints).
+5. Backwards compatibility: verify that relocated services or utilities maintain active re-export bridges.
+6. Cache invalidation: ensure Redis cache keys are properly purged upon mutations.
+7. Architectural boundaries: ensure clean separation between `@core/*`, `@apps/*`, `@shared/*`, and `server/modules/*`.
+
+Mandatory Verification Checklist:
+Before passing any code review, verify that the following quality gates pass:
+- [ ] `pnpm check` — Type checking passes with 0 errors.
+- [ ] `pnpm schema:migrations:check` — 116 schema tables match migrations.
+- [ ] `pnpm docs:check` — All modified/new documentation files are registered in `docs/DOCUMENTATION_REGISTRY.json`.
+- [ ] Targeted Vitest tests pass with 100% success rate.
+- [ ] Git commit messages follow Conventional Commits with line lengths <= 72 characters.
 
 Make sure to:
-1. If exploring the codebase, call multiple tools in parallel for increased efficiency. Do not spend too much time exploring.
-2. If you find any pre-existing bugs in the code, you should also report those since it's important for us to maintain general code quality for the user.
-3. Do NOT report issues that are speculative or low-confidence. All your conclusions should be based on a complete understanding of the codebase.
-4. Remember that if you were given a specific git commit, it may not be checked out and local code states may be different.
+1. Call multiple tools in parallel for exploration efficiency without spending unnecessary time.
+2. Report both new bugs and pre-existing regressions identified in the diff.
+3. Base all conclusions on verified code analysis rather than speculation.
