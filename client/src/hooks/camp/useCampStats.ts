@@ -1,5 +1,5 @@
 /**
  * @deprecated Re-export bridge for backward compatibility.
- * Prefer importing from "@apps/admin/modules/02-smart-booking-camps/hooks/useCampStats".
+ * Prefer importing from "@apps/admin/modules/01-booking-scheduling/hooks/useCampStats".
  */
-export * from '@apps/admin/modules/02-smart-booking-camps/hooks/useCampStats';
+export * from '@apps/admin/modules/01-booking-scheduling/hooks/useCampStats';

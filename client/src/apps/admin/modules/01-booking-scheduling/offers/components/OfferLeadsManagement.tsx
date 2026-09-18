@@ -1,7 +1,7 @@
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { SOURCE_LABELS } from '@shared/sources';
-import { useOfferLeads } from '@/hooks/offer/useOfferLeads';
+import { useOfferLeads } from '../../hooks/useOfferLeads';
 import OfferStatsCards from './OfferStatsCards';
 import OfferLeadCard from './OfferLeadCard';
 import BulkActionsManager from '@/components/BulkActionsManager';

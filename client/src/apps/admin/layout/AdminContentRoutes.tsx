@@ -78,7 +78,7 @@ const AppointmentsManagementPage = lazy(
   () => import('@apps/admin/modules/01-booking-scheduling/pages/AppointmentsManagementPage')
 );
 const OfferLeadsPage = lazy(
-  () => import('@apps/admin/modules/04-marketing-publishing/leads/OfferLeadsPage')
+  () => import('@apps/admin/modules/01-booking-scheduling/offers/OfferLeadsPage')
 );
 const CampRegistrationsPage = lazy(
   () => import('@apps/admin/modules/01-booking-scheduling/camps/CampRegistrationsPage')

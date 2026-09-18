@@ -8,3 +8,6 @@ export { default as CampRegistrationsPage } from './camps/CampRegistrationsPage'
 export { default as BookingAnalyticsPage } from './reports/BookingAnalyticsPage';
 export { default as CampStatsPage } from './reports/CampStatsPage';
 export { default as BookingSettingsPage } from './settings/BookingSettingsPage';
+export { default as OfferLeadsPage } from './offers/OfferLeadsPage';
+export * from './offers/components';
+export * from './hooks';

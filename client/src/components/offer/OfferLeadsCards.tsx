@@ -1,6 +1,6 @@
 /**
  * @deprecated Re-export bridge for backward compatibility.
- * Prefer importing from "@apps/admin/modules/04-marketing-publishing/leads/offers/OfferLeadsCards".
+ * Prefer importing from "@apps/admin/modules/01-booking-scheduling/offers/components/OfferLeadsCards".
  */
-export * from '@apps/admin/modules/04-marketing-publishing/leads/offers/OfferLeadsCards';
-export { default } from '@apps/admin/modules/04-marketing-publishing/leads/offers/OfferLeadsCards';
+export * from '@apps/admin/modules/01-booking-scheduling/offers/components/OfferLeadsCards';
+export { default } from '@apps/admin/modules/01-booking-scheduling/offers/components/OfferLeadsCards';
