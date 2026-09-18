@@ -39,16 +39,14 @@
 
 | الوحدة المعمارية | المسارات الحالية المدارة | التبويبات والمراكز الرئيسية |
 |---|---|---|
-| **01-booking** (الحجوزات والجدولة) | `/admin/bookings`, `/admin/bookings/appointments`, `/admin/bookings/leads`, `/admin/bookings/offer-leads`, `/admin/bookings/camp-registrations`, `/admin/bookings/doctor-queue` | إدارة المواعيد، حجوزات العروض، تسجيلات المخيمات، طابور الطبيب |
+| **01-booking-scheduling** (الحجوزات والجدولة) | `/admin/bookings`, `/admin/bookings/appointments`, `/admin/bookings/offer-leads`, `/admin/bookings/camp-registrations`, `/admin/bookings/doctor-queue` | إدارة المواعيد، حجوزات العروض، كتالوج باقات العروض، تسجيلات المخيمات، طابور الطبيب |
 | **02-crm-patients** (إدارة المرضى) | `/admin/bookings/customers`, `/admin/bookings/patient-results` | سجلات المرضى الموحدة، نتائج الفحوصات والتقارير الطبية |
-| **03-omnichannel-whatsapp** (واتساب الموحد) | `/admin/whatsapp`, `/admin/whatsapp/operations`¹, `/admin/whatsapp/automation`¹, `/admin/whatsapp/campaigns`¹, `/admin/whatsapp/governance`¹, `/admin/whatsapp/analytics`¹, `/admin/whatsapp/lab-results` | Live Chat، مركز العمليات، الأتمتة، الحملات، الحوكمة، والتحليلات |
-| **04-communications-meta** (الاتصالات وميتا) | `/admin/communications/messages`, `/admin/communications/integration-settings`, `/admin/communications/meta-settings`, `/admin/message-settings` | الرسائل الموحدة، قنوات Meta، إعدادات التكامل |
-| **05-cms-media** (المحتوى والوسائط) | `/admin/content/content`, `/admin/content/media-library`, `/admin/content/publishing` | المقالات الطبية، مكتبة الوسائط، وجدولة النشر |
-| **06-campaigns-marketing** (الحملات والتسويق) | `/admin/campaigns/campaigns`, `/admin/campaigns/projects`, `/admin/campaigns/review-approval` | الحملات الإعلانية، المشاريع التسويقية، ومراجعة الاعتماد |
-| **07-tasks-teams** (المهام والفرق) | `/admin/bookings/tasks`, `/admin/teams/digital-marketing`, `/admin/teams/media`, `/admin/teams/field-marketing`, `/admin/teams/customer-service` | مهام الموظفين، فرق التسويق الرقمي، الميداني، الإعلام، وخدمة العملاء |
-| **08-reports-analytics** (التقارير وBI) | `/admin/reports/reports`, `/admin/reports/analytics`, `/admin/reports/bi`, `/admin/reports/camp-stats`, `/admin/reports/pwa-stats` | تقارير الأداء، ذكاء الأعمال، إحصائيات المخيمات وتطبيقات الويب |
-| **09-system-security** (النظام والأمان) | `/admin/system/updates`, `/admin/system/status`, `/admin/system/backups`, `/admin/users/users`, `/admin/offline`, `/admin/profile`, `/admin/support`, `/admin/management` | المستخدمون والصلاحيات، النسخ الاحتياطي، حالة الخادم، والتحديثات |
-| **10-settings-general** (الإعدادات العامة) | `/admin/settings`, `/admin/advanced-settings`, `/admin/tracking-settings`, `/admin/notifications` | إعدادات المنظومة، مفاتيح التتبع، التنبيهات، والخصائص المتقدمة |
+| **03-omni-inbox** (واتساب وصندوق القنوات الموحد) | `/admin/whatsapp`, `/admin/whatsapp/operations`¹, `/admin/whatsapp/automation`¹, `/admin/whatsapp/campaigns`¹, `/admin/whatsapp/governance`¹, `/admin/whatsapp/analytics`¹, `/admin/whatsapp/lab-results` | Live Chat، مركز العمليات، الأتمتة، الحملات، الحوكمة، والتحليلات |
+| **04-marketing-publishing** (التسويق والحملات) | `/admin/campaigns/campaigns`, `/admin/campaigns/projects`, `/admin/campaigns/review-approval`, `/admin/bookings/leads`, `/admin/tracking-settings` | الحملات الإعلانية، المشاريع التسويقية، استقطاب العملاء المحتملين، ومراجعة الاعتماد |
+| **05-cms-portal** (المحتوى والوسائط) | `/admin/content/content`, `/admin/content/media-library`, `/admin/content/publishing` | المقالات الطبية، مكتبة الوسائط، وجدولة النشر |
+| **06-tasks-projects** (المهام والفرق) | `/admin/bookings/tasks`, `/admin/teams/digital-marketing`, `/admin/teams/media`, `/admin/teams/field-marketing`, `/admin/teams/customer-service` | مهام الموظفين، فرق التسويق الرقمي، الميداني، الإعلام، وخدمة العملاء |
+| **07-users-rbac** (المستخدمون والصلاحيات) | `/admin/users/users`, `/admin/management` | المستخدمون ومصفوفة الصلاحيات وإدارة الوصول |
+| **10-system-settings** (إعدادات النظام والتقارير) | `/admin/settings`, `/admin/advanced-settings`, `/admin/notifications`, `/admin/system/updates`, `/admin/system/status`, `/admin/system/backups`, `/admin/reports/reports`, `/admin/reports/analytics`, `/admin/reports/bi`, `/admin/reports/camp-stats`, `/admin/reports/pwa-stats`, `/admin/offline`, `/admin/profile`, `/admin/support` | إعدادات المنظومة، النسخ الاحتياطي، حالة الخادم، التقارير الشاملة، وذكاء الأعمال |
 
 ## حواجز الوصول
 
