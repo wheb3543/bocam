@@ -1,135 +1,212 @@
-/**
- * Footer Component - تذييل الصفحة
- *
- * Unified footer for all public pages with improved responsive layout
- */
-import { Phone, MapPin, Clock } from 'lucide-react';
-import {
-  APP_LOGO,
-  APP_TITLE,
-  COMPANY_PHONE,
-  COMPANY_ARABIC_NAME,
-  COMPANY_ADDRESS,
-  getCompanySlogan,
-} from '@/const';
+import { useState } from 'react';
+import { Send, ShieldCheck } from 'lucide-react';
 import { Link } from 'wouter';
-import { openPrivacyPreferences } from '@/components/PrivacyPolicyConsentBanner';
+import { openPrivacyPreferences } from '@/core/feedback/PrivacyPolicyConsentBanner';
 
 export default function Footer() {
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newsletterEmail.trim()) {
+      setSubscribed(true);
+      setNewsletterEmail('');
+    }
+  };
+
+  const navCol1 = [
+    { label: 'الصفحة الرئيسية', href: '/' },
+    { label: 'لمحة عامة', href: '/#about' },
+    { label: 'قصتنا', href: '/#about' },
+    { label: 'هدفنا ورؤيتنا', href: '/#about' },
+    { label: 'المرضى من خارج الدولة', href: '/#services' },
+  ];
+
+  const navCol2 = [
+    { label: 'خدمات الرعاية الصحية المنزلية', href: '/#services' },
+    { label: 'الأخبار', href: '/#news' },
+    { label: 'الفعاليات', href: '/#news' },
+    { label: 'العروض', href: '/offers' },
+    { label: 'المدونة الطبية', href: '/#blog' },
+  ];
+
+  const navCol3 = [
+    { label: 'الصحية للرعاية القائمة على القيمة والنتائج', href: '/#services' },
+    { label: 'الأطباء', href: '/doctors' },
+    { label: 'الأقسام', href: '/departments' },
+    { label: 'الأسئلة الشائعة', href: '/#faq' },
+    { label: 'الوظائف', href: '/careers' },
+  ];
+
   return (
-    <footer className="bg-green-900 text-white py-8 sm:py-10 md:py-12 mt-auto">
-      <div className="container mx-auto px-4 sm:px-5 md:px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
-          {/* Logo and Description */}
-          <div className="text-center sm:text-right">
-            <img
-              src={APP_LOGO}
-              alt={APP_TITLE}
-              className="h-8 sm:h-10 w-auto mx-auto sm:mx-0 mb-2 sm:mb-3"
-            />
-            <p className="text-green-100 text-xs sm:text-sm font-medium">{APP_TITLE}</p>
-            <p className="text-green-300 text-[10px] sm:text-xs mt-1 sm:mt-1.5">
-              {getCompanySlogan()}
-            </p>
-            <p className="text-green-400/70 text-[10px] sm:text-xs mt-2 sm:mt-3 leading-relaxed max-w-xs mx-auto sm:mx-0">
-              منصة الحجز الإلكترونية لـ {COMPANY_ARABIC_NAME}
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div className="text-center sm:text-right">
-            <h3 className="font-bold text-sm sm:text-base mb-3 sm:mb-4 text-green-100">
-              روابط سريعة
-            </h3>
-            <ul className="space-y-2 sm:space-y-2.5 text-green-200 text-xs sm:text-sm">
-              <li>
-                <Link href="/">
-                  <span className="hover:text-white transition-colors cursor-pointer">
-                    الرئيسية
-                  </span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/doctors">
-                  <span className="hover:text-white transition-colors cursor-pointer">الأطباء</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/visiting-doctors">
-                  <span className="hover:text-white transition-colors cursor-pointer">
-                    الأطباء الزائرين
-                  </span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/offers">
-                  <span className="hover:text-white transition-colors cursor-pointer">
-                    العروض الطبية
-                  </span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/camps">
-                  <span className="hover:text-white transition-colors cursor-pointer">
-                    المخيمات الطبية
-                  </span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div className="text-center sm:text-right">
-            <h3 className="font-bold text-sm sm:text-base mb-3 sm:mb-4 text-green-100">
-              تواصل معنا
-            </h3>
-            <div className="space-y-2.5 sm:space-y-3 text-green-200 text-xs sm:text-sm">
-              <div className="flex items-center gap-2 sm:gap-2.5 justify-center sm:justify-start">
-                <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 shrink-0" />
-                <a
-                  href={`tel:${COMPANY_PHONE}`}
-                  className="hover:text-white transition-colors font-medium"
-                  aria-label={`اتصال بخدمة العملاء والمواعيد على الرقم ${COMPANY_PHONE}`}
+    <footer className="bg-[#146c36] text-white pt-16 pb-6 select-none" dir="rtl">
+      <div className="container mx-auto px-4 lg:px-12 max-w-6xl space-y-12">
+        {/* Top Tier: Newsletter & App Download */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12 border-b border-white/20 items-start">
+          {/* Newsletter Box */}
+          <div className="space-y-3 text-right">
+            <h3 className="text-lg sm:text-xl font-bold text-white">اشترك في نشرتنا الإخبارية</h3>
+            {subscribed ? (
+              <p className="text-xs text-emerald-200 flex items-center gap-1.5 font-bold">
+                <ShieldCheck className="w-4 h-4" />
+                <span>تم الاشتراك بنجاح في النشرة الإخبارية!</span>
+              </p>
+            ) : (
+              <form onSubmit={handleSubscribe} className="flex items-center max-w-sm gap-2">
+                <input
+                  type="email"
+                  required
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  placeholder="أدخل بريدك الإلكتروني..."
+                  className="flex-1 bg-white text-slate-800 placeholder:text-slate-400 rounded-full px-4 py-2.5 text-xs outline-none shadow-xs"
+                />
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-full bg-[#00a3e0] hover:bg-[#008fc5] text-white font-bold text-xs transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
                 >
-                  {COMPANY_PHONE}
-                </a>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-2.5 justify-center sm:justify-start">
-                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 shrink-0" />
-                <span>{COMPANY_ADDRESS || 'العنوان غير متوفر حالياً'}</span>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-2.5 justify-center sm:justify-start">
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 shrink-0" />
-                <span>24/7 خدمة متواصلة</span>
-              </div>
+                  <Send className="w-3.5 h-3.5 rotate-180" />
+                  <span>اشتراك</span>
+                </button>
+              </form>
+            )}
+          </div>
+
+          {/* Mobile App Download */}
+          <div className="space-y-3 text-right md:text-left">
+            <h3 className="text-lg sm:text-xl font-bold text-white">تحميل التطبيق</h3>
+            <div className="flex flex-wrap items-center gap-3 justify-start md:justify-end">
+              <a
+                href="https://apple.co/3XqfKhK"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center gap-2 transition-all"
+              >
+                <span className="text-lg font-bold"></span>
+                <div className="text-right">
+                  <span className="block text-[9px] text-white/80 leading-none">تنزيل من</span>
+                  <span className="block text-xs font-bold text-white leading-tight">
+                    App Store
+                  </span>
+                </div>
+              </a>
+
+              <a
+                href="https://bit.ly/3GIU76j"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center gap-2 transition-all"
+              >
+                <span className="text-base font-bold text-emerald-300">▶</span>
+                <div className="text-right">
+                  <span className="block text-[9px] text-white/80 leading-none">متاح على</span>
+                  <span className="block text-xs font-bold text-white leading-tight">
+                    Google Play
+                  </span>
+                </div>
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-green-800/60 mt-6 sm:mt-8 md:mt-10 pt-4 sm:pt-6 text-center text-green-400/70 text-[10px] sm:text-xs">
-          <p>
-            © {new Date().getFullYear()} {APP_TITLE}. جميع الحقوق محفوظة.
-          </p>
-          <p className="mt-1 text-green-300/80 font-medium">
-            صنع بواسطة: آيديا للاستشارات والحلول التسويقية والرقمية
-          </p>
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+        {/* Middle Tier: 4 Columns Links */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-right text-xs">
+          {/* Column 1 */}
+          <ul className="space-y-2.5">
+            {navCol1.map((link, idx) => (
+              <li key={idx}>
+                <a
+                  href={link.href}
+                  className="text-white/90 hover:text-white hover:underline transition-colors"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* Column 2 */}
+          <ul className="space-y-2.5">
+            {navCol2.map((link, idx) => (
+              <li key={idx}>
+                <a
+                  href={link.href}
+                  className="text-white/90 hover:text-white hover:underline transition-colors"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* Column 3 */}
+          <ul className="space-y-2.5">
+            {navCol3.map((link, idx) => (
+              <li key={idx}>
+                <a
+                  href={link.href}
+                  className="text-white/90 hover:text-white hover:underline transition-colors"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* Column 4: Certificates */}
+          <div className="space-y-3">
+            <div className="bg-white p-3 rounded-xl shadow-md max-w-[180px]">
+              <img
+                src="/sgh/accreditation.jpg"
+                alt="اعتمادات المستشفى السعودي الألماني"
+                className="max-h-12 w-auto object-contain mx-auto"
+              />
+            </div>
+            <p className="text-[10px] text-white/80 leading-relaxed">
+              معتمدون من قِبل المركز السعودي لاعتماد المنشآت الصحية واللجنة الدولية المشتركة.
+            </p>
+          </div>
+        </div>
+
+        {/* Bottom Tier: Logo, Copyright & Legal Links */}
+        <div className="pt-8 border-t border-white/20 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/80">
+          <div className="flex items-center gap-3">
+            <img
+              src="/sgh/logo.svg"
+              alt="المستشفى السعودي الألماني - حائل"
+              className="h-9 w-auto filter brightness-0 invert"
+            />
+            <span className="font-bold text-white">المستشفى السعودي الألماني - حائل</span>
+          </div>
+
+          <div className="text-center">
+            <p>حقوق النشر ٢٠٢٦ جميع الحقوق محفوظة</p>
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap justify-center md:justify-end">
+            <Link href="/terms">
+              <span className="hover:text-white hover:underline cursor-pointer">
+                تعليمات الاستخدام
+              </span>
+            </Link>
+            <span>|</span>
             <Link href="/privacy-policy">
-              <span className="hover:text-green-200 transition-colors cursor-pointer">
+              <span className="hover:text-white hover:underline cursor-pointer">
                 سياسة الخصوصية
               </span>
             </Link>
-            <span aria-hidden="true">•</span>
+            <span>|</span>
             <Link href="/privacy-policy-changelog">
-              <span className="hover:text-green-200 transition-colors cursor-pointer">
+              <span className="hover:text-white hover:underline cursor-pointer">
                 سجل تغييرات الخصوصية
               </span>
             </Link>
-            <span aria-hidden="true">•</span>
+            <span>|</span>
             <button
               type="button"
               onClick={openPrivacyPreferences}
-              className="hover:text-green-200 transition-colors underline underline-offset-4"
+              className="hover:text-white hover:underline cursor-pointer"
             >
               إدارة الخصوصية
             </button>
