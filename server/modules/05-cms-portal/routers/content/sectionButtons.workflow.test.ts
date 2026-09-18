@@ -3,26 +3,26 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const routerSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/sectionButtons.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/sectionButtons.ts'),
   'utf8'
 );
 const qualitySource = readFileSync(
-  resolve(process.cwd(), 'server/services/content/publicationQualityGate.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/services/content/publicationQualityGate.ts'),
   'utf8'
 );
 const listSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/SectionButtonsList.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/components/SectionButtonsList.tsx'),
   'utf8'
 );
 const dialogSource = readFileSync(
   resolve(
     process.cwd(),
-    'client/src/pages/admin/content/components/dialogs/SectionButtonDialog.tsx'
+    'client/src/apps/admin/modules/05-cms-portal/components/dialogs/SectionButtonDialog.tsx'
   ),
   'utf8'
 );
 const approvalsSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/approvals.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/approvals.ts'),
   'utf8'
 );
 

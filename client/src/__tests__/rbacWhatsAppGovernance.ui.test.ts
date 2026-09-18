@@ -3,7 +3,7 @@ import { readSourceFile as read } from './helpers/sourceReader';
 
 describe('P1-E WhatsApp governance UI authorization', () => {
   it('gates the compliance page queries, SSE, and management actions', () => {
-    const source = read('client/src/pages/admin/whatsapp/WhatsAppCompliance.tsx');
+    const source = read('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppCompliance.tsx');
 
     expect(source).toContain("can('communications.security.view')");
     expect(source).toContain("can('communications.security.manage')");
@@ -14,7 +14,7 @@ describe('P1-E WhatsApp governance UI authorization', () => {
   });
 
   it('gates subscriptions reads and status updates', () => {
-    const source = read('client/src/pages/admin/whatsapp/WhatsAppUserSubscriptionsPage.tsx');
+    const source = read('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppUserSubscriptionsPage.tsx');
 
     expect(source).toContain("can('communications.consents.view')");
     expect(source).toContain("can('communications.consents.manage')");
@@ -24,11 +24,11 @@ describe('P1-E WhatsApp governance UI authorization', () => {
   });
 
   it('gates auto-reply and template testing controls', () => {
-    const page = read('client/src/pages/admin/whatsapp/WhatsAppPage.tsx');
-    const autoReplyPage = read('client/src/pages/admin/whatsapp/WhatsAppAutoReply.tsx');
-    const analytics = read('client/src/pages/admin/whatsapp/WhatsAppAnalytics.tsx');
-    const integration = read('client/src/pages/admin/whatsapp/WhatsAppIntegration.tsx');
-    const dialog = read('client/src/pages/admin/whatsapp/components/dialogs/AutoReplyDialog.tsx');
+    const page = read('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppPage.tsx');
+    const autoReplyPage = read('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAutoReply.tsx');
+    const analytics = read('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAnalytics.tsx');
+    const integration = read('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppIntegration.tsx');
+    const dialog = read('client/src/apps/admin/modules/03-omni-inbox/whatsapp/components/dialogs/AutoReplyDialog.tsx');
 
     expect(page).toContain("can('communications.automation.view')");
     expect(page).toContain("can('communications.automation.manage')");
@@ -49,8 +49,8 @@ describe('P1-E WhatsApp governance UI authorization', () => {
   });
 
   it('adds permission-aware navigation entries for P1-E pages', () => {
-    const sidebar = read('client/src/config/sidebarNavigation.ts');
-    const configurable = read('client/src/config/sidebarNavigation.ts');
+    const sidebar = read('client/src/apps/admin/layout/config/sidebarNavigation.ts');
+    const configurable = read('client/src/apps/admin/layout/config/sidebarNavigation.ts');
 
     for (const source of [sidebar, configurable]) {
       expect(source).toContain("'communications.automation.view'");

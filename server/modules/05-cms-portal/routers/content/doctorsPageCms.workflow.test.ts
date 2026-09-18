@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
-const doctorsPageSource = source('client/src/pages/public/Doctors.tsx');
+const doctorsPageSource = source('client/src/apps/public/modules/03-medical-directory/pages/DoctorsListPage.tsx');
 
 describe('تكامل CMS لصفحة الأطباء', () => {
   it('يقرأ SEO المنشور والنصوص التحريرية من CMS مع قيم احتياطية آمنة', () => {

@@ -7,7 +7,7 @@ import {
   type RoleBaseKey,
   type RolePermission,
 } from '../../../../shared/rolePermissions';
-import { createAuditLog } from '../../../routers/auditLogs';
+import { createAuditLog } from '../../10-system-settings/services/auditLogService';
 
 const VALID_PERMISSIONS = new Set<string>(ROLE_PERMISSIONS);
 const VALID_BASE_ROLES = new Set<string>(ROLE_BASE_KEYS);

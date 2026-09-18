@@ -7,3 +7,4 @@ export * from './services/contentOperationNotificationService';
 export * from './services/imageGeneration';
 export * from './services/imageProcessor';
 export * from './services/mediaFiles';
+export * from './services/mediaUploadPreparation';

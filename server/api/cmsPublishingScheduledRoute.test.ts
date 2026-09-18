@@ -15,35 +15,35 @@ vi.mock('../services/content/deferredPublicationService', () => ({
 import { createCmsPublishingScheduledRouter } from './cmsPublishingScheduledRoute';
 
 const qualitySource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/quality.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/quality.ts'),
   'utf8'
 );
 const deferredPublicationSource = readFileSync(
-  resolve(process.cwd(), 'server/services/content/deferredPublicationService.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/services/content/deferredPublicationService.ts'),
   'utf8'
 );
 const auditLogRouterSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/auditLog.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/auditLog.ts'),
   'utf8'
 );
 const deferredAlertsSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/DeferredPublicationAlerts.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/components/DeferredPublicationAlerts.tsx'),
   'utf8'
 );
 const pageDialogSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/dialogs/PageDialog.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/components/dialogs/PageDialog.tsx'),
   'utf8'
 );
 const textDialogSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/dialogs/TextContentDialog.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/components/dialogs/TextContentDialog.tsx'),
   'utf8'
 );
 const sectionDialogSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/dialogs/SectionDialog.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/components/dialogs/SectionDialog.tsx'),
   'utf8'
 );
 const imageDialogSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/dialogs/ImageUploadDialog.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/components/dialogs/ImageUploadDialog.tsx'),
   'utf8'
 );
 

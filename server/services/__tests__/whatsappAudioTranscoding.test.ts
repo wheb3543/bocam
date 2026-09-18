@@ -10,8 +10,8 @@ describe('تحضير التسجيل الصوتي لواتساب', () => {
   });
 
   it('يمرر التسجيل إلى محول الصوت ويحدد رسائل الصوت كرسائل voice', () => {
-    const routerSource = readFileSync('server/routers/whatsapp/routes/messageRoutes.ts', 'utf8');
-    const metaSource = readFileSync('server/api/meta.whatsapp.ts', 'utf8');
+    const routerSource = readFileSync('server/modules/03-omni-inbox/routers/whatsapp/routes/messageRoutes.ts', 'utf8');
+    const metaSource = readFileSync('server/api/meta/meta.whatsapp.ts', 'utf8');
     expect(routerSource).toContain('prepareWhatsAppAudioUpload');
     expect(metaSource).toContain(
       "buildMediaPayload('audio', audioRef, { voice: true, ...options })"

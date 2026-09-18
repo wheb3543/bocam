@@ -160,8 +160,8 @@ describe('إدارة الأدوار والصلاحيات', () => {
 
   it('يربط تعريف الدور وتعيينه بإجراءات خادمية محمية ولا يعتمد على الواجهة فقط', () => {
     const schemaSource = readFileSync(resolve(process.cwd(), 'drizzle/schema.ts'), 'utf8');
-    const usersRouterSource = readFileSync(resolve(process.cwd(), 'server/routers/users.ts'), 'utf8');
-    const roleRouterSource = readFileSync(resolve(process.cwd(), 'server/routers/roleManagement.ts'), 'utf8');
+    const usersRouterSource = readFileSync(resolve(process.cwd(), 'server/modules/07-users-rbac/routers/users.ts'), 'utf8');
+    const roleRouterSource = readFileSync(resolve(process.cwd(), 'server/modules/07-users-rbac/routers/roleManagement.ts'), 'utf8');
     expect(schemaSource).toContain("'roleDefinitions'");
     expect(schemaSource).toContain("'userRoleAssignments'");
     expect(usersRouterSource).toContain('assignRoleDefinition');

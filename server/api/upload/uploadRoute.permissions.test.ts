@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const source = readFileSync(resolve(process.cwd(), 'server/api/uploadRoute.ts'), 'utf8');
+const source = readFileSync(resolve(process.cwd(), 'server/api/upload/uploadRoute.ts'), 'utf8');
 
 describe('صلاحيات مسارات رفع وتنزيل الوسائط المباشرة', () => {
   it('يتحقق من المستخدم النشط وصلاحية الوسائط قبل استلام الملف أو تنزيل ZIP', () => {

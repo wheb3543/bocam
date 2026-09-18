@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { systemRouter } from './system';
 import { protectedProcedure, router } from '../_core/trpc';
 import {
   getAllAccessRequests,
@@ -10,55 +9,80 @@ import {
 import { notifyOwner } from '../services/notification';
 import { ensureDatabaseAvailable } from '../_core/databaseGuard';
 import { createNotification } from '../services/notificationHelper';
-import { offersRouter } from './offers';
-import { campsRouter } from './camps';
-import { offerLeadsRouter } from './offerLeads';
-import { campRegistrationsRouter } from './campRegistrations';
-import { doctorsRouter } from './doctors';
-import { departmentsRouter } from './departments';
-import { usersRouter } from './users';
-import { reportsRouter } from './reports';
-import { campaignsRouter } from './campaigns';
-import { tasksRouter } from './tasks';
-import { whatsappRouter } from './whatsapp';
-import { whatsappTemplateTestRouter } from './whatsappTemplateTest';
-import { messageSettingsRouter } from './messageSettings';
-import { socialInboxRouter } from './socialInbox';
-import { metaIntegrationRouter } from './metaIntegration';
-import { generalIntegrationsRouter } from './generalIntegrations';
-import { integrationConnectionsRouter } from './integrationConnections';
-import { metaOperationsRouter } from './metaOperations';
-import { webhooksRouter } from './webhooks';
-import { commentsRouter } from './comments';
-import { followUpTasksRouter } from './followUpTasks';
-import { appointmentsRouter } from './appointments';
-import { leadsRouter } from './leads';
-import { contentRouter } from './content';
-import { publicContentRouter } from './public/content';
+
+// Module 01: Booking & Smart Scheduling
+import {
+  appointmentsRouter,
+  campsRouter,
+  campRegistrationsRouter,
+  doctorsRouter,
+  departmentsRouter,
+  offersRouter,
+  offerLeadsRouter,
+  queueRouter,
+  leadsRouter,
+} from '../modules/01-booking-scheduling';
+
+// Module 02: CRM & Patient Portal
+import {
+  customersRouter,
+  patientPortalRouter,
+  patientResultsRouter,
+} from '../modules/02-crm-patients';
+
+// Module 03: Omni-channel Inbox
+import {
+  socialInboxRouter,
+  whatsappRouter,
+  whatsappTemplateTestRouter,
+  messageSettingsRouter,
+  commentsRouter,
+} from '../modules/03-omni-inbox';
+
+// Module 04: Marketing & Publishing
+import {
+  broadcastRouter,
+  broadcastDataV2Router,
+  broadcastExecuteRouter,
+  broadcastSchedulingRouter,
+  campaignsRouter,
+  metaIntegrationRouter,
+  metaOperationsRouter,
+  metaSyncRouter,
+} from '../modules/04-marketing-publishing';
+
+// Module 05: Automated CMS & Portal
+import { contentRouter, pwaRouter } from '../modules/05-cms-portal';
+
+// Module 06: Tasks & Team Collaboration
+import { tasksRouter, followUpTasksRouter } from '../modules/06-tasks-projects';
+
+// Module 07: Users, Roles & RBAC
+import { usersRouter, authRouter, permissionProcedure } from '../modules/07-users-rbac';
+
+// Module 10: System Settings & Governance
+import {
+  auditLogsRouter,
+  reportsRouter,
+  chartsRouter,
+  trackingRouter,
+  savedFiltersRouter,
+  integrationConnectionsRouter,
+  generalIntegrationsRouter,
+  googleSyncRouter,
+  licenseRouter,
+} from '../modules/10-system-settings';
+
+// Cross-cutting & Auxiliary Routers
+import { systemRouter } from './system';
 import { notificationsRouter } from './notifications';
-import { broadcastRouter } from './broadcasts';
-import { broadcastDataV2Router } from './broadcastDataV2';
-import { broadcastExecuteRouter } from './broadcastExecute';
-import { broadcastSchedulingRouter } from './broadcastScheduling';
-import { googleSyncRouter } from './googleSync';
+import { webhooksRouter } from './webhooks';
+import { publicContentRouter } from './public/content';
 
 import { getCombinedSocialMediaStats } from '../api/metaGraphAPI';
 import { runDeactivationJobs } from '../tasks/cron/deactivateExpired';
-import { queueRouter } from './queue';
-import { customersRouter } from './customers';
-import { auditLogsRouter } from './auditLogs';
-import { savedFiltersRouter } from './savedFilters';
-import { chartsRouter } from './charts';
-import { trackingRouter } from './tracking';
-import { patientPortalRouter } from './patientPortal';
-import { patientResultsRouter } from './patientResults';
-import { pwaRouter } from './pwa';
-import { metaSyncRouter } from './metaSync';
-import { authRouter } from './auth';
 import { generatePDF } from '../services/pdfService';
-import { licenseRouter } from './license';
 import { createLogger } from '../_core/logger';
-import { permissionProcedure } from './permissionProcedures';
 import { hasRolePermission } from '../services/rolePermissionService';
 
 const logger = createLogger('routers');

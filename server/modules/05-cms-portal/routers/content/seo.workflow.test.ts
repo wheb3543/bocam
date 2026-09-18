@@ -4,18 +4,18 @@ import { describe, expect, it } from 'vitest';
 
 const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 
-const seoRouterSource = source('server/routers/content/seo.ts');
-const qualitySource = source('server/services/content/publicationQualityGate.ts');
-const approvalsSource = source('server/routers/content/approvals.ts');
-const versionsSource = source('server/routers/content/contentVersions.ts');
-const trashSource = source('server/routers/content/trash.ts');
-const retentionSource = source('server/services/content/trashRetentionService.ts');
-const deferredSource = source('server/services/content/deferredPublicationService.ts');
+const seoRouterSource = source('server/modules/05-cms-portal/routers/content/seo.ts');
+const qualitySource = source('server/modules/05-cms-portal/services/content/publicationQualityGate.ts');
+const approvalsSource = source('server/modules/05-cms-portal/routers/content/approvals.ts');
+const versionsSource = source('server/modules/05-cms-portal/routers/content/contentVersions.ts');
+const trashSource = source('server/modules/05-cms-portal/routers/content/trash.ts');
+const retentionSource = source('server/modules/05-cms-portal/services/content/trashRetentionService.ts');
+const deferredSource = source('server/modules/05-cms-portal/services/content/deferredPublicationService.ts');
 const publicContentSource = source('server/routers/public/content.ts');
 const migrationSource = source('drizzle/0091_silly_doctor_doom.sql');
-const dialogSource = source('client/src/pages/admin/content/components/dialogs/SEODialog.tsx');
-const listSource = source('client/src/pages/admin/content/components/SEOList.tsx');
-const hookSource = source('client/src/pages/admin/content/hooks/useSEO.ts');
+const dialogSource = source('client/src/apps/admin/modules/05-cms-portal/components/dialogs/SEODialog.tsx');
+const listSource = source('client/src/apps/admin/modules/05-cms-portal/components/SEOList.tsx');
+const hookSource = source('client/src/apps/admin/modules/05-cms-portal/hooks/useSEO.ts');
 
 describe('دورة CMS لإعدادات SEO', () => {
   it('يحتوي ترحيل SEO على إضافة واحدة للحالة وترقية آمنة للسجلات القديمة', () => {

@@ -3,9 +3,9 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { toTrashItem } from './trash';
 
-const routerSource = readFileSync(resolve(process.cwd(), 'server/routers/content/trash.ts'), 'utf8');
+const routerSource = readFileSync(resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/trash.ts'), 'utf8');
 const componentSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/ContentTrashList.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/components/ContentTrashList.tsx'),
   'utf8'
 );
 

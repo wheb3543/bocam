@@ -3,10 +3,10 @@ import { readSourceFile as readSource } from './helpers/sourceReader';
 
 describe('إلغاء تكرار أحداث Webhook داخل مركز العمليات', () => {
   it('يبقي سجل Webhook الخام في التشخيص فقط ولا يجلبه تبويبا الصحة والجودة', () => {
-    const health = readSource('client/src/pages/admin/whatsapp/WhatsAppAccountHealthPage.tsx');
-    const quality = readSource('client/src/pages/admin/whatsapp/WhatsAppPhoneQualityPage.tsx');
+    const health = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAccountHealthPage.tsx');
+    const quality = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppPhoneQualityPage.tsx');
     const inspector = readSource(
-      'client/src/pages/admin/whatsapp/WhatsAppWebhookInspectorPage.tsx'
+      'client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppWebhookInspectorPage.tsx'
     );
 
     expect(health).not.toContain('accountWebhookEvents');
@@ -19,11 +19,11 @@ describe('إلغاء تكرار أحداث Webhook داخل مركز العمل�
   });
 
   it('يوفر روابط مفلترة من الصحة والجودة ويفتح التشخيص على الفئة المطلوبة', () => {
-    const health = readSource('client/src/pages/admin/whatsapp/WhatsAppAccountHealthPage.tsx');
-    const quality = readSource('client/src/pages/admin/whatsapp/WhatsAppPhoneQualityPage.tsx');
-    const operations = readSource('client/src/pages/admin/whatsapp/WhatsAppOperationsCenter.tsx');
+    const health = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAccountHealthPage.tsx');
+    const quality = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppPhoneQualityPage.tsx');
+    const operations = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppOperationsCenter.tsx');
     const inspector = readSource(
-      'client/src/pages/admin/whatsapp/WhatsAppWebhookInspectorPage.tsx'
+      'client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppWebhookInspectorPage.tsx'
     );
 
     expect(health).toContain('tab=webhooks&category=account');

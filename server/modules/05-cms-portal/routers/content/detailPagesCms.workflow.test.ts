@@ -3,28 +3,28 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const offerDetailSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/public/OfferDetailPage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/public/modules/04-camps-and-offers/pages/OfferDetailPage.tsx'),
   'utf8'
 );
 const campDetailSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/public/CampDetailPage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/public/modules/04-camps-and-offers/pages/CampDetailPage.tsx'),
   'utf8'
 );
-const thankYouSource = readFileSync(resolve(process.cwd(), 'client/src/pages/public/ThankYou.tsx'), 'utf8');
+const thankYouSource = readFileSync(resolve(process.cwd(), 'client/src/apps/public/modules/02-booking/pages/ThankYouPage.tsx'), 'utf8');
 const privacyPolicySource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/public/PrivacyPolicyPage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/public/modules/05-content-and-legal/pages/PrivacyPolicyPage.tsx'),
   'utf8'
 );
 const privacyConsentSource = readFileSync(
-  resolve(process.cwd(), 'client/src/components/PrivacyPolicyConsentBanner.tsx'),
+  resolve(process.cwd(), 'client/src/core/feedback/PrivacyPolicyConsentBanner.tsx'),
   'utf8'
 );
 const privacyChangelogSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/public/PrivacyPolicyChangelogPage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/public/modules/05-content-and-legal/pages/PrivacyPolicyChangelogPage.tsx'),
   'utf8'
 );
 const privacyDashboardAlertSource = readFileSync(
-  resolve(process.cwd(), 'client/src/components/patient/PrivacyPolicyUpdateAlert.tsx'),
+  resolve(process.cwd(), 'client/src/apps/patient-portal/modules/family/components/PrivacyPolicyUpdateAlert.tsx'),
   'utf8'
 );
 

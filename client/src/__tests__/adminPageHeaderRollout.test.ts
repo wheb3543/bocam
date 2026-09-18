@@ -1,29 +1,29 @@
 import { describe, expect, it } from 'vitest';
 import { readSourceFile as readSource } from './helpers/sourceReader';
 
-const dashboardLayoutSource = readSource('client/src/components/layout/DashboardLayout.tsx');
-const topNavbarSource = readSource('client/src/components/layout/TopNavbar.tsx');
-const messagesPageSource = readSource('client/src/pages/admin/communications/MessagesPage.tsx');
+const dashboardLayoutSource = readSource('client/src/apps/admin/layout/DashboardLayout.tsx');
+const topNavbarSource = readSource('client/src/apps/admin/layout/TopNavbar.tsx');
+const messagesPageSource = readSource('client/src/apps/admin/modules/03-omni-inbox/pages/UnifiedInboxPage.tsx');
 const commentContextsSource = readSource(
-  'client/src/pages/admin/communications/MetaCommentContextsPanel.tsx'
+  'client/src/apps/admin/modules/03-omni-inbox/settings/MetaCommentContextsPanel.tsx'
 );
-const whatsAppPageSource = readSource('client/src/pages/admin/whatsapp/WhatsAppPage.tsx');
+const whatsAppPageSource = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppPage.tsx');
 const chatAreaHeaderSource = readSource(
-  'client/src/pages/admin/whatsapp/components/shared/ChatAreaHeader.tsx'
+  'client/src/apps/admin/modules/03-omni-inbox/whatsapp/components/shared/ChatAreaHeader.tsx'
 );
-const chatInputSource = readSource('client/src/components/chat/ChatInput.tsx');
-const chatHeaderSource = readSource('client/src/components/chat/ChatHeader.tsx');
+const chatInputSource = readSource('client/src/apps/admin/modules/03-omni-inbox/components/chat/ChatInput.tsx');
+const chatHeaderSource = readSource('client/src/apps/admin/modules/03-omni-inbox/components/chat/ChatHeader.tsx');
 const conversationListSource = readSource(
-  'client/src/pages/admin/whatsapp/components/conversation/ConversationList.tsx'
+  'client/src/apps/admin/modules/03-omni-inbox/whatsapp/components/conversation/ConversationList.tsx'
 );
 const digitalMarketingTasksSource = readSource(
-  'client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx'
+  'client/src/apps/admin/modules/06-tasks-projects/pages/DigitalMarketingTasksPage.tsx'
 );
 const digitalMarketingStatsSource = readSource(
-  'client/src/pages/admin/campaigns/tasks/components/TaskStatsCards.tsx'
+  'client/src/apps/admin/modules/06-tasks-projects/tasks/components/TaskStatsCards.tsx'
 );
 const digitalMarketingKanbanSource = readSource(
-  'client/src/pages/admin/campaigns/tasks/components/KanbanColumn.tsx'
+  'client/src/apps/admin/modules/06-tasks-projects/tasks/components/KanbanColumn.tsx'
 );
 
 describe('مساحات العمل الإدارية دون بطاقة عنوان مكررة', () => {
@@ -93,16 +93,16 @@ describe('مساحات العمل الإدارية دون بطاقة عنوان 
   });
 
   it.each([
-    'client/src/pages/admin/AdminDashboard.tsx',
-    'client/src/pages/admin/communications/MessagesPage.tsx',
-    'client/src/pages/admin/content/PublishingPage.tsx',
-    'client/src/pages/admin/media/MediaLibraryPage.tsx',
-    'client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx',
-    'client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx',
-    'client/src/pages/admin/reports/BIPage.tsx',
-    'client/src/pages/admin/reports/CampStatsPage.tsx',
-    'client/src/pages/admin/reports/PWAStatsPage.tsx',
-    'client/src/pages/admin/teams/MediaTeamPage.tsx',
+    'client/src/apps/admin/modules/10-system-settings/pages/AdminDashboardPage.tsx',
+    'client/src/apps/admin/modules/03-omni-inbox/pages/UnifiedInboxPage.tsx',
+    'client/src/apps/admin/modules/04-marketing-publishing/publishing/PublishingApprovalPage.tsx',
+    'client/src/apps/admin/modules/05-cms-portal/media/MediaLibraryPage.tsx',
+    'client/src/apps/admin/modules/03-omni-inbox/settings/MetaIntegrationSettingsPage.tsx',
+    'client/src/apps/admin/modules/06-tasks-projects/pages/DigitalMarketingTasksPage.tsx',
+    'client/src/apps/admin/modules/10-system-settings/pages/BIPage.tsx',
+    'client/src/apps/admin/modules/01-booking-scheduling/reports/CampStatsPage.tsx',
+    'client/src/apps/admin/modules/10-system-settings/pages/PWAStatsPage.tsx',
+    'client/src/apps/admin/modules/06-tasks-projects/teams/MediaTeamPage.tsx',
   ])('يحافظ على الرأس المتخصص في %s', (pagePath) => {
     expect(readSource(pagePath)).toContain('pageHeader="none"');
   });

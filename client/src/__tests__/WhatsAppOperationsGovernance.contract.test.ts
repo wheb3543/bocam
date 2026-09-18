@@ -3,7 +3,7 @@ import { readSourceFile as readSource } from './helpers/sourceReader';
 
 describe('مراكز التحليلات والعمليات والحوكمة في واتساب', () => {
   it('يسجل المراكز الجديدة مع إبقاء الروابط التفصيلية القديمة صالحة', () => {
-    const adminRoutes = readSource('client/src/components/layout/AdminContentRoutes.tsx');
+    const adminRoutes = readSource('client/src/apps/admin/layout/AdminContentRoutes.tsx');
 
     expect(adminRoutes).toContain('path="/admin/whatsapp/analytics"');
     expect(adminRoutes).toContain('path="/admin/whatsapp/operations"');
@@ -21,13 +21,13 @@ describe('مراكز التحليلات والعمليات والحوكمة في
 
   it('يعيد استخدام الواجهات الأصلية في المراكز بدلاً من تكرار العقود', () => {
     const analyticsCenter = readSource(
-      'client/src/pages/admin/whatsapp/WhatsAppAnalyticsCenter.tsx'
+      'client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAnalyticsCenter.tsx'
     );
     const operationsCenter = readSource(
-      'client/src/pages/admin/whatsapp/WhatsAppOperationsCenter.tsx'
+      'client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppOperationsCenter.tsx'
     );
     const governanceCenter = readSource(
-      'client/src/pages/admin/whatsapp/WhatsAppGovernanceCenter.tsx'
+      'client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppGovernanceCenter.tsx'
     );
 
     expect(analyticsCenter).toContain('<WhatsAppAnalyticsContent />');
@@ -41,9 +41,9 @@ describe('مراكز التحليلات والعمليات والحوكمة في
   });
 
   it('لا يعرض مؤشرات تحليلية أو اتجاه تدقيق مصطنعة ويطبق فلتر التكلفة فعلياً', () => {
-    const analytics = readSource('client/src/pages/admin/whatsapp/WhatsAppAnalytics.tsx');
-    const costs = readSource('client/src/pages/admin/whatsapp/WhatsAppCostsPage.tsx');
-    const compliance = readSource('client/src/pages/admin/whatsapp/WhatsAppCompliance.tsx');
+    const analytics = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAnalytics.tsx');
+    const costs = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppCostsPage.tsx');
+    const compliance = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppCompliance.tsx');
 
     expect(analytics).not.toContain('messages: 45, response: 2.1');
     expect(analytics).not.toContain('ملصقات');
@@ -67,7 +67,7 @@ describe('مراكز التحليلات والعمليات والحوكمة في
       'server/modules/03-omni-inbox/routers/whatsapp/analytics.ts'
     );
     const accountHealth = readSource(
-      'client/src/pages/admin/whatsapp/WhatsAppAccountHealthPage.tsx'
+      'client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAccountHealthPage.tsx'
     );
     const accountHealthRoutes = readSource(
       'server/modules/03-omni-inbox/routers/whatsapp/settings/routes/accountHealthRoutes.ts'
@@ -88,11 +88,11 @@ describe('مراكز التحليلات والعمليات والحوكمة في
 
   it('ينظم واجهة الحوكمة للهاتف ويمنع تكرار قائمة الاشتراكات في سجل Webhook', () => {
     const governanceCenter = readSource(
-      'client/src/pages/admin/whatsapp/WhatsAppGovernanceCenter.tsx'
+      'client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppGovernanceCenter.tsx'
     );
-    const compliance = readSource('client/src/pages/admin/whatsapp/WhatsAppCompliance.tsx');
+    const compliance = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppCompliance.tsx');
     const subscriptions = readSource(
-      'client/src/pages/admin/whatsapp/WhatsAppUserSubscriptionsPage.tsx'
+      'client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppUserSubscriptionsPage.tsx'
     );
 
     expect(governanceCenter).toContain('max-w-[1440px]');

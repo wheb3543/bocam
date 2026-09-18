@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('صلاحيات الحملات وقنوات التواصل', () => {
   it('يفصل الحملات بين العرض والإنشاء والتعديل والحذف وربط العناصر والحقول الحساسة', () => {
-    const source = readFileSync(resolve(process.cwd(), 'server/routers/campaigns.ts'), 'utf8');
+    const source = readFileSync(resolve(process.cwd(), 'server/modules/04-marketing-publishing/routers/campaigns.ts'), 'utf8');
     expect(source).toContain("permissionProcedure('campaigns.view', 'عرض الحملات')");
     expect(source).toContain("permissionProcedure('campaigns.create', 'إنشاء الحملات')");
     expect(source).toContain("permissionProcedure('campaigns.update', 'تعديل الحملات')");
@@ -18,10 +18,10 @@ describe('صلاحيات الحملات وقنوات التواصل', () => {
   });
 
   it('يفصل إدارة الأدوار وطابور WhatsApp والمجدول إلى صلاحيات تشغيلية مستقلة', () => {
-    const roles = readFileSync(resolve(process.cwd(), 'server/routers/roleManagement.ts'), 'utf8');
-    const queue = readFileSync(resolve(process.cwd(), 'server/routers/queue.ts'), 'utf8');
+    const roles = readFileSync(resolve(process.cwd(), 'server/modules/07-users-rbac/routers/roleManagement.ts'), 'utf8');
+    const queue = readFileSync(resolve(process.cwd(), 'server/modules/01-booking-scheduling/routers/queue.ts'), 'utf8');
     const scheduler = readFileSync(
-      resolve(process.cwd(), 'server/routers/whatsapp/settings/routes/schedulerRoutes.ts'),
+      resolve(process.cwd(), 'server/modules/03-omni-inbox/routers/whatsapp/settings/routes/schedulerRoutes.ts'),
       'utf8'
     );
     const permissions = readFileSync(resolve(process.cwd(), 'shared/rolePermissions.ts'), 'utf8');
@@ -43,10 +43,10 @@ describe('صلاحيات الحملات وقنوات التواصل', () => {
   });
 
   it('يفصل عمليات WhatsApp وصندوق التواصل إلى عرض ورد وإسناد وبث وقوالب', () => {
-    const conversations = readFileSync(resolve(process.cwd(), 'server/routers/whatsapp/conversations.ts'), 'utf8');
-    const messages = readFileSync(resolve(process.cwd(), 'server/routers/whatsapp/messages.ts'), 'utf8');
-    const socialInbox = readFileSync(resolve(process.cwd(), 'server/routers/socialInbox.ts'), 'utf8');
-    const templates = readFileSync(resolve(process.cwd(), 'server/routers/whatsapp/templates.ts'), 'utf8');
+    const conversations = readFileSync(resolve(process.cwd(), 'server/modules/03-omni-inbox/routers/whatsapp/conversations.ts'), 'utf8');
+    const messages = readFileSync(resolve(process.cwd(), 'server/modules/03-omni-inbox/routers/whatsapp/messages.ts'), 'utf8');
+    const socialInbox = readFileSync(resolve(process.cwd(), 'server/modules/03-omni-inbox/routers/socialInbox.ts'), 'utf8');
+    const templates = readFileSync(resolve(process.cwd(), 'server/modules/03-omni-inbox/routers/whatsapp/templates.ts'), 'utf8');
 
     [conversations, messages, socialInbox, templates].forEach((source) => {
       expect(source).toContain("'communications.view'");

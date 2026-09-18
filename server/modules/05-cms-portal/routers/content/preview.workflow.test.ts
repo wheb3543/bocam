@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const previewRouterSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/preview.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/preview.ts'),
   'utf8'
 );
 const publicContentSource = readFileSync(
@@ -12,7 +12,7 @@ const publicContentSource = readFileSync(
 );
 const schemaSource = readFileSync(resolve(process.cwd(), 'drizzle/schema.ts'), 'utf8');
 const previewPageSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/public/DraftPreviewPage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/public/modules/05-content-and-legal/pages/DraftPreviewPage.tsx'),
   'utf8'
 );
 

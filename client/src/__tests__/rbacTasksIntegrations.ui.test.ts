@@ -3,8 +3,8 @@ import { readSourceFile as source } from './helpers/sourceReader';
 
 describe('واجهة RBAC للمهام والتكاملات', () => {
   it('تخفي إجراءات مهام المتابعة بناءً على العرض والإنشاء والإسناد والإكمال والحذف', () => {
-    const tasksSection = source('client/src/components/TasksSection.tsx');
-    const taskCount = source('client/src/components/TaskCount.tsx');
+    const tasksSection = source('client/src/apps/admin/modules/06-tasks-projects/components/TasksSection.tsx');
+    const taskCount = source('client/src/apps/admin/modules/06-tasks-projects/components/TaskCount.tsx');
 
     expect(tasksSection).toContain("const canViewTasks = can('tasks.view')");
     expect(tasksSection).toContain("const canCreateTasks = can('tasks.create')");
@@ -19,10 +19,10 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يحجب تعديل المهام عبر النموذج والقائمة وKanban عند غياب الصلاحيات المناسبة', () => {
-    const page = source('client/src/pages/admin/campaigns/DigitalMarketingTasksPage.tsx');
-    const form = source('client/src/pages/admin/campaigns/tasks/components/TaskFormDialog.tsx');
-    const list = source('client/src/pages/admin/campaigns/tasks/components/TaskListView.tsx');
-    const kanban = source('client/src/pages/admin/campaigns/tasks/components/KanbanColumn.tsx');
+    const page = source('client/src/apps/admin/modules/06-tasks-projects/pages/DigitalMarketingTasksPage.tsx');
+    const form = source('client/src/apps/admin/modules/06-tasks-projects/tasks/components/TaskFormDialog.tsx');
+    const list = source('client/src/apps/admin/modules/06-tasks-projects/tasks/components/TaskListView.tsx');
+    const kanban = source('client/src/apps/admin/modules/06-tasks-projects/tasks/components/KanbanColumn.tsx');
 
     expect(page).toContain("const canUpdateTasks = can('tasks.update')");
     expect(page).toContain('canCompleteTasks={canCompleteTasks}');
@@ -35,8 +35,8 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يفصل في واجهة التكاملات بين العرض والربط والفصل وإدارة بيانات الاعتماد', () => {
-    const settings = source('client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx');
-    const connections = source('client/src/pages/admin/communications/IntegrationConnectionsPanel.tsx');
+    const settings = source('client/src/apps/admin/modules/03-omni-inbox/settings/MetaIntegrationSettingsPage.tsx');
+    const connections = source('client/src/apps/admin/modules/03-omni-inbox/settings/IntegrationConnectionsPanel.tsx');
 
     expect(settings).toContain("const canViewIntegrations = can('integrations.view')");
     expect(settings).toContain("const canManageCredentials = can('integrations.credentials.manage')");
@@ -48,9 +48,9 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يعرض تلميح وصول موحداً عند إخفاء إجراء حساس بسبب الصلاحيات', () => {
-    const hint = source('client/src/components/PermissionHint.tsx');
-    const tasks = source('client/src/components/TasksSection.tsx');
-    const settings = source('client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx');
+    const hint = source('client/src/apps/admin/shared/feedback/PermissionHint.tsx');
+    const tasks = source('client/src/apps/admin/modules/06-tasks-projects/components/TasksSection.tsx');
+    const settings = source('client/src/apps/admin/modules/03-omni-inbox/settings/MetaIntegrationSettingsPage.tsx');
 
     expect(hint).toContain('TooltipContent');
     expect(hint).toContain('LockKeyhole');
@@ -59,9 +59,9 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يحجب إجراءات الحملات والوسائط في الواجهة وفق صلاحياتها الدقيقة', () => {
-    const campaigns = source('client/src/pages/admin/campaigns/CampaignsPage.tsx');
-    const campaignTable = source('client/src/pages/admin/campaigns/components/CampaignTable.tsx');
-    const media = source('client/src/pages/admin/media/MediaLibraryPage.tsx');
+    const campaigns = source('client/src/apps/admin/modules/04-marketing-publishing/pages/CampaignsPage.tsx');
+    const campaignTable = source('client/src/apps/admin/modules/04-marketing-publishing/components/CampaignTable.tsx');
+    const media = source('client/src/apps/admin/modules/05-cms-portal/media/MediaLibraryPage.tsx');
 
     expect(campaigns).toContain("const canViewCampaigns = can('campaigns.view')");
     expect(campaigns).toContain("const canCreateCampaigns = can('campaigns.create')");
@@ -79,13 +79,13 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يحرس واجهات الكتالوج والتسجيلات ويعرض سجل تدقيق الأدوار للمخولين فقط', () => {
-    const offers = source('client/src/components/offer/OffersManagement.tsx');
-    const camps = source('client/src/components/camp/CampsManagement.tsx');
-    const campRegistrations = source('client/src/components/camp/CampRegistrationsManagement.tsx');
-    const offerLeads = source('client/src/components/offer/OfferLeadsManagement.tsx');
-    const roleAudit = source('client/src/pages/admin/users/components/RoleAuditPanel.tsx');
-    const usersPage = source('client/src/pages/admin/users/UsersManagementPage.tsx');
-    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+    const offers = source('client/src/apps/admin/modules/01-booking-scheduling/offers/components/OffersManagement.tsx');
+    const camps = source('client/src/apps/admin/modules/01-booking-scheduling/camps/components/CampsManagement.tsx');
+    const campRegistrations = source('client/src/apps/admin/modules/01-booking-scheduling/camps/components/CampRegistrationsManagement.tsx');
+    const offerLeads = source('client/src/apps/admin/modules/01-booking-scheduling/offers/components/OfferLeadsManagement.tsx');
+    const roleAudit = source('client/src/apps/admin/modules/07-users-rbac/components/RoleAuditPanel.tsx');
+    const usersPage = source('client/src/apps/admin/modules/07-users-rbac/pages/StaffUsersPage.tsx');
+    const rolesPanel = source('client/src/apps/admin/modules/07-users-rbac/components/RolesPermissionsPanel.tsx');
 
     expect(offers).toContain("const canView = can('catalog.view')");
     expect(offers).toContain('trpc.offers.getAllAdmin.useQuery');
@@ -106,7 +106,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('ينظم محرر الأدوار في مجموعات مطوية مع تذييل ثابت وتمرير داخل قائمة الصلاحيات', () => {
-    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+    const rolesPanel = source('client/src/apps/admin/modules/07-users-rbac/components/RolesPermissionsPanel.tsx');
     const groups = source('shared/rolePermissions.ts');
 
     expect(rolesPanel).toContain('useState<Set<string>>');
@@ -132,7 +132,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يبسط حقل حالة الدور ويضعه بجوار اختيار الدور التشغيلي', () => {
-    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+    const rolesPanel = source('client/src/apps/admin/modules/07-users-rbac/components/RolesPermissionsPanel.tsx');
 
     expect(rolesPanel).toContain('id="role-active"');
     expect(rolesPanel).toContain('h-11 shrink-0 items-center gap-2');
@@ -141,7 +141,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يوحد ارتفاع حقول نموذج تفاصيل الدور', () => {
-    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+    const rolesPanel = source('client/src/apps/admin/modules/07-users-rbac/components/RolesPermissionsPanel.tsx');
     const uniformFieldHeights = rolesPanel.match(/className="h-11 transition-colors hover:border-primary\/50 hover:bg-primary\/\[0\.025\]"/g) || [];
 
     expect(uniformFieldHeights).toHaveLength(3);
@@ -150,7 +150,7 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يوحد المسافات العمودية ويضيف حالات تمرير مرئية لحقول نموذج الدور', () => {
-    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+    const rolesPanel = source('client/src/apps/admin/modules/07-users-rbac/components/RolesPermissionsPanel.tsx');
 
     expect(rolesPanel).toContain('gap-x-4 gap-y-5 sm:grid-cols-2');
     expect(rolesPanel).toContain('space-y-2.5');
@@ -159,11 +159,11 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يعكس صلاحيات P0-A في واجهات العملاء ونتائج المرضى وسجل التدقيق والتنقل', () => {
-    const customers = source('client/src/components/CustomerProfilesTab.tsx');
-    const patientResults = source('client/src/pages/admin/shared/PatientResultsAdminPage.tsx');
-    const auditLog = source('client/src/components/AuditLogSection.tsx');
-    const sidebar = source('client/src/components/layout/DashboardSidebarV2.tsx');
-    const sidebarData = source('client/src/config/sidebarNavigation.ts');
+    const customers = source('client/src/apps/admin/modules/02-crm-patients/components/CustomerProfilesTab.tsx');
+    const patientResults = source('client/src/apps/admin/modules/02-crm-patients/pages/PatientResultsAdminPage.tsx');
+    const auditLog = source('client/src/apps/admin/modules/07-users-rbac/reports/AuditLogSection.tsx');
+    const sidebar = source('client/src/apps/admin/layout/DashboardSidebarV2.tsx');
+    const sidebarData = source('client/src/apps/admin/layout/config/sidebarNavigation.ts');
 
     expect(customers).toContain("const canViewCustomers = can('customers.view')");
     expect(customers).toContain("const canExportCustomers = can('customers.export')");
@@ -180,11 +180,11 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يعكس صلاحيات P0-B في استيراد وتصدير المحتوى وتحليلات WhatsApp', () => {
-    const contentImportExport = source('client/src/pages/admin/content/components/ContentImportExport.tsx');
-    const contentPage = source('client/src/pages/admin/content/ContentManagementPage.tsx');
-    const analytics = source('client/src/pages/admin/whatsapp/WhatsAppAnalytics.tsx');
-    const dashboard = source('client/src/pages/admin/whatsapp/WhatsAppDashboard.tsx');
-    const sseHook = source('client/src/hooks/integrations/useWhatsAppSSE.ts');
+    const contentImportExport = source('client/src/apps/admin/modules/05-cms-portal/components/ContentImportExport.tsx');
+    const contentPage = source('client/src/apps/admin/modules/05-cms-portal/pages/CmsPagesManagerPage.tsx');
+    const analytics = source('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAnalytics.tsx');
+    const dashboard = source('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppDashboard.tsx');
+    const sseHook = source('client/src/apps/admin/modules/03-omni-inbox/hooks/useWhatsAppSSE.ts');
 
     expect(contentImportExport).toContain('canExport: boolean');
     expect(contentImportExport).toContain('canImport: boolean');
@@ -205,18 +205,18 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يعكس صلاحيات P1 في مراكز الإشعارات ومكتبة الوسائط ومحدد الملفات المشترك', () => {
-    const notificationsPage = source('client/src/pages/admin/NotificationsPage.tsx');
-    const notificationCenter = source('client/src/components/NotificationCenter.tsx');
-    const notificationHooks = source('client/src/hooks/useNotifications.ts');
+    const notificationsPage = source('client/src/apps/admin/modules/10-system-settings/pages/NotificationsPage.tsx');
+    const notificationCenter = source('client/src/apps/admin/shared/components/NotificationCenter.tsx');
+    const notificationHooks = source('client/src/apps/admin/shared/hooks/useNotifications.ts');
     const notificationPreferences = source(
-      'client/src/components/notification/NotificationPreferencesCard.tsx'
+      'client/src/apps/admin/modules/10-system-settings/notifications/NotificationPreferencesCard.tsx'
     );
     const notificationSettings = source(
-      'client/src/components/notification/SystemNotificationSettingsCard.tsx'
+      'client/src/apps/admin/modules/10-system-settings/notifications/SystemNotificationSettingsCard.tsx'
     );
-    const mediaPicker = source('client/src/components/form/MediaPicker.tsx');
-    const desktopSidebar = source('client/src/components/layout/sidebar/DesktopSidebar.tsx');
-    const sidebarData = source('client/src/config/sidebarNavigation.ts');
+    const mediaPicker = source('client/src/apps/admin/modules/05-cms-portal/media/MediaPicker.tsx');
+    const desktopSidebar = source('client/src/apps/admin/layout/sidebar/DesktopSidebar.tsx');
+    const sidebarData = source('client/src/apps/admin/layout/config/sidebarNavigation.ts');
 
     expect(notificationsPage).toContain("const canViewNotifications = can('notifications.view')");
     expect(notificationsPage).toContain("const canMarkNotifications = can('notifications.mark_read')");
@@ -238,12 +238,12 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يعكس صلاحيات P0-C في واجهات اتصال Meta وسجل Webhooks دون عرض الحمولة الخام', () => {
-    const webhookInspector = source('client/src/pages/admin/whatsapp/WhatsAppWebhookInspectorPage.tsx');
-    const connection = source('client/src/pages/admin/whatsapp/WhatsAppConnectionPage.tsx');
-    const accountHealth = source('client/src/pages/admin/whatsapp/WhatsAppAccountHealthPage.tsx');
-    const phoneQuality = source('client/src/pages/admin/whatsapp/WhatsAppPhoneQualityPage.tsx');
-    const subscriptions = source('client/src/pages/admin/whatsapp/WhatsAppUserSubscriptionsPage.tsx');
-    const sidebarData = source('client/src/config/sidebarNavigation.ts');
+    const webhookInspector = source('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppWebhookInspectorPage.tsx');
+    const connection = source('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppConnectionPage.tsx');
+    const accountHealth = source('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAccountHealthPage.tsx');
+    const phoneQuality = source('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppPhoneQualityPage.tsx');
+    const subscriptions = source('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppUserSubscriptionsPage.tsx');
+    const sidebarData = source('client/src/apps/admin/layout/config/sidebarNavigation.ts');
 
     expect(webhookInspector).toContain("const canViewWebhookLogs = can('integrations.logs.view')");
     expect(webhookInspector).toContain("const canManageWebhooks = can('integrations.webhooks.manage')");
@@ -262,15 +262,15 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يعكس صلاحيات P0-D في الرسوم وذكاء الأعمال وإحصاءات PWA وإعدادات التتبع والعدادات', () => {
-    const dashboardCharts = source('client/src/components/dashboard/DashboardCharts.tsx');
-    const biPage = source('client/src/pages/admin/reports/BIPage.tsx');
-    const biHook = source('client/src/pages/admin/reports/bi/hooks/useBI.ts');
-    const abandonedForms = source('client/src/pages/admin/reports/bi/components/AbandonedFormsTable.tsx');
-    const pwa = source('client/src/pages/admin/reports/PWAStatsPage.tsx');
-    const trackingSettings = source('client/src/pages/admin/TrackingSettingsPage.tsx');
-    const sidebarNavigation = source('client/src/hooks/layout/useSidebarNavigation.ts');
-    const sound = source('client/src/hooks/integrations/useNotificationSound.ts');
-    const sidebarData = source('client/src/config/sidebarNavigation.ts');
+    const dashboardCharts = source('client/src/apps/admin/modules/10-system-settings/components/DashboardCharts.tsx');
+    const biPage = source('client/src/apps/admin/modules/10-system-settings/pages/BIPage.tsx');
+    const biHook = source('client/src/apps/admin/modules/10-system-settings/bi/hooks/useBI.ts');
+    const abandonedForms = source('client/src/apps/admin/modules/10-system-settings/bi/components/AbandonedFormsTable.tsx');
+    const pwa = source('client/src/apps/admin/modules/10-system-settings/pages/PWAStatsPage.tsx');
+    const trackingSettings = source('client/src/apps/admin/modules/04-marketing-publishing/tracking/TrackingSettingsPage.tsx');
+    const sidebarNavigation = source('client/src/apps/admin/layout/hooks/useSidebarNavigation.ts');
+    const sound = source('client/src/core/hooks/useNotificationSound.ts');
+    const sidebarData = source('client/src/apps/admin/layout/config/sidebarNavigation.ts');
 
     expect(dashboardCharts).toContain("const canViewReports = can('reports.view')");
     expect(dashboardCharts).toContain('لوحة الرسوم غير متاحة لهذا الدور');
@@ -297,12 +297,12 @@ describe('واجهة RBAC للمهام والتكاملات', () => {
   });
 
   it('يعكس صلاحيات P1-C في روابط الحملات ومحرر الأدوار وطابور ومجدول WhatsApp', () => {
-    const campaignLinks = source('client/src/components/CampaignLinksManager.tsx');
-    const rolesPanel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
-    const usersPage = source('client/src/pages/admin/users/UsersManagementPage.tsx');
-    const messageSettings = source('client/src/pages/admin/MessageSettingsPage.tsx');
-    const whatsappAppointments = source('client/src/pages/admin/whatsapp/WhatsAppAppointments.tsx');
-    const sidebarData = source('client/src/config/sidebarNavigation.ts');
+    const campaignLinks = source('client/src/apps/admin/modules/04-marketing-publishing/components/CampaignLinksManager.tsx');
+    const rolesPanel = source('client/src/apps/admin/modules/07-users-rbac/components/RolesPermissionsPanel.tsx');
+    const usersPage = source('client/src/apps/admin/modules/07-users-rbac/pages/StaffUsersPage.tsx');
+    const messageSettings = source('client/src/apps/admin/modules/03-omni-inbox/settings/MessageSettingsPage.tsx');
+    const whatsappAppointments = source('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAppointments.tsx');
+    const sidebarData = source('client/src/apps/admin/layout/config/sidebarNavigation.ts');
 
     expect(campaignLinks).toContain("const canViewCampaigns = can('campaigns.view')");
     expect(campaignLinks).toContain("const canManageLinks = can('campaigns.links.manage')");

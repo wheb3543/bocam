@@ -8,9 +8,9 @@ function source(path: string) {
 
 describe('إنفاذ صلاحيات الكتالوج والتسجيلات والمحتوى', () => {
   it('يحرس إجراءات الكتالوج الفعلية بصلاحياتها الدقيقة', () => {
-    const doctors = source('server/routers/doctors.ts');
-    const offers = source('server/routers/offers.ts');
-    const camps = source('server/routers/camps.ts');
+    const doctors = source('server/modules/01-booking-scheduling/routers/doctors.ts');
+    const offers = source('server/modules/01-booking-scheduling/routers/offers.ts');
+    const camps = source('server/modules/01-booking-scheduling/routers/camps.ts');
 
     expect(doctors).toContain("permissionProcedure('catalog.create'");
     expect(doctors).toContain("permissionProcedure('catalog.publish'");
@@ -25,12 +25,12 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
 
   it('يحرس عرض وتعديل وحذف تسجيلات المخيمات والعروض', () => {
     const files = [
-      'server/routers/campRegistrations/queries.ts',
-      'server/routers/campRegistrations/status.ts',
-      'server/routers/campRegistrations/admin.ts',
-      'server/routers/offerLeads/queries.ts',
-      'server/routers/offerLeads/status.ts',
-      'server/routers/offerLeads/admin.ts',
+      'server/modules/01-booking-scheduling/routers/campRegistrations/queries.ts',
+      'server/modules/01-booking-scheduling/routers/campRegistrations/status.ts',
+      'server/modules/01-booking-scheduling/routers/campRegistrations/admin.ts',
+      'server/modules/01-booking-scheduling/routers/offerLeads/queries.ts',
+      'server/modules/01-booking-scheduling/routers/offerLeads/status.ts',
+      'server/modules/01-booking-scheduling/routers/offerLeads/admin.ts',
     ].map(source);
     expect(files.join('\n')).toContain("'registrations.view'");
     expect(files.join('\n')).toContain("'registrations.update'");
@@ -39,10 +39,10 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
   });
 
   it('يربط الجدولة بمسار خادمي ويخفي أفعال SEO والجدولة في الواجهة', () => {
-    const publishing = source('server/routers/content/publishing.ts');
-    const publishingPage = source('client/src/pages/admin/content/PublishingPage.tsx');
-    const seoList = source('client/src/pages/admin/content/components/SEOList.tsx');
-    const seoHook = source('client/src/pages/admin/content/hooks/useSEO.ts');
+    const publishing = source('server/modules/05-cms-portal/routers/content/publishing.ts');
+    const publishingPage = source('client/src/apps/admin/modules/04-marketing-publishing/publishing/PublishingApprovalPage.tsx');
+    const seoList = source('client/src/apps/admin/modules/05-cms-portal/components/SEOList.tsx');
+    const seoHook = source('client/src/apps/admin/modules/05-cms-portal/hooks/useSEO.ts');
 
     expect(publishing).toContain("permissionProcedure('content.schedule'");
     expect(publishing).toContain('schedule: publishingScheduleProcedure');
@@ -54,7 +54,7 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
   });
 
   it('ينسخ الدور إلى نموذج جديد قابل للمراجعة ولا يعدّل المصدر', () => {
-    const panel = source('client/src/pages/admin/users/components/RolesPermissionsPanel.tsx');
+    const panel = source('client/src/apps/admin/modules/07-users-rbac/components/RolesPermissionsPanel.tsx');
     expect(panel).toContain('cloneCurrentRole');
     expect(panel).toContain('id: undefined');
     expect(panel).toContain('نسخ هذا الدور');
@@ -62,8 +62,8 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
   });
 
   it('يحمي سجل تدقيق الأدوار ويسجل مصدر النسخ دون إظهار تفاصيل الصلاحيات', () => {
-    const roleRouter = source('server/routers/roleManagement.ts');
-    const roleService = source('server/services/rolePermissionService.ts');
+    const roleRouter = source('server/modules/07-users-rbac/routers/roleManagement.ts');
+    const roleService = source('server/modules/07-users-rbac/services/rolePermissionService.ts');
 
     expect(roleRouter).toContain("hasRolePermission(db, ctx.user.id, ctx.user.role, 'audit.view')");
     expect(roleRouter).toContain('audit: roleAuditProcedure');
@@ -74,9 +74,9 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
 
   it('يحرس ملفات العملاء ونتائج المرضى وسجل التدقيق وتصدير PDF بصلاحيات P0-A الدقيقة', () => {
     const permissions = source('shared/rolePermissions.ts');
-    const auditLogs = source('server/routers/auditLogs.ts');
-    const customers = source('server/routers/customers.ts');
-    const patientResults = source('server/routers/patientResults.ts');
+    const auditLogs = source('server/modules/10-system-settings/routers/auditLogs.ts');
+    const customers = source('server/modules/02-crm-patients/routers/customers.ts');
+    const patientResults = source('server/modules/02-crm-patients/routers/patientResults.ts');
     const rootRouter = source('server/routers/routers.ts');
 
     expect(permissions).toContain("'customers.view'");
@@ -99,10 +99,10 @@ describe('إنفاذ صلاحيات الكتالوج والتسجيلات وال
 
   it('يحرس استيراد وتصدير المحتوى وتحليلات WhatsApp بصلاحيات P0-B الدقيقة', () => {
     const permissions = source('shared/rolePermissions.ts');
-    const importExport = source('server/routers/content/importExport.ts');
-    const analytics = source('server/routers/whatsapp/analytics.ts');
-    const messages = source('server/routers/whatsapp/messages.ts');
-    const templates = source('server/routers/whatsapp/templates.ts');
+    const importExport = source('server/modules/05-cms-portal/routers/content/importExport.ts');
+    const analytics = source('server/modules/03-omni-inbox/routers/whatsapp/analytics.ts');
+    const messages = source('server/modules/03-omni-inbox/routers/whatsapp/messages.ts');
+    const templates = source('server/modules/03-omni-inbox/routers/whatsapp/templates.ts');
 
     expect(permissions).toContain("'content.export'");
     expect(permissions).toContain("'content.import'");

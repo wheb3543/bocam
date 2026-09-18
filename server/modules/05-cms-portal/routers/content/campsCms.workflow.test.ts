@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const pageSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/public/CampsListPage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/public/modules/04-camps-and-offers/pages/CampsListPage.tsx'),
   'utf8'
 );
 

@@ -3,11 +3,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const textRouterSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/textContent.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/textContent.ts'),
   'utf8'
 );
 const homePageSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/public/HomePage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/public/modules/01-home/pages/HomePage.tsx'),
   'utf8'
 );
 

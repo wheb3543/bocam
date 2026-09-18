@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const readRouter = (file: string) =>
-  readFileSync(resolve(process.cwd(), `server/routers/content/${file}`), 'utf8');
+  readFileSync(resolve(__dirname, file), 'utf8');
 
 describe('الإنفاذ التفصيلي لدورة المحتوى', () => {
   it('يفصل إنشاء وتعديل ونشر الصفحات والأقسام والنصوص والصور وSEO وأزرار الأقسام', () => {

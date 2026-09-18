@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { readSourceFile } from './helpers/sourceReader';
 
-const pageSource = readSourceFile('client/src/pages/admin/users/UsersManagementPage.tsx');
-const hookSource = readSourceFile('client/src/pages/admin/users/hooks/useUsers.ts');
-const tableSource = readSourceFile('client/src/pages/admin/users/components/AccessRequestsTable.tsx');
+const pageSource = readSourceFile('client/src/apps/admin/modules/07-users-rbac/pages/StaffUsersPage.tsx');
+const hookSource = readSourceFile('client/src/apps/admin/modules/07-users-rbac/hooks/useUsers.ts');
+const tableSource = readSourceFile('client/src/apps/admin/modules/07-users-rbac/components/AccessRequestsTable.tsx');
 
 describe('P1-F واجهة طلبات الوصول', () => {
   it('يوقف استعلام الطلبات ويكشف صلاحيات العرض والقرار للصفحة', () => {

@@ -1420,6 +1420,39 @@
       "notes": "Generated baseline; domain and ownership require phase review."
     },
     {
+      "path": "docs/architecture/SERVER_MODULAR_ARCHITECTURE.md",
+      "title": "SERVER MODULAR ARCHITECTURE",
+      "language": "ar",
+      "domain": "backend-platform",
+      "document_type": "architecture",
+      "status": "canonical",
+      "audience": "engineers",
+      "owner": "Backend Engineering & Platform Architecture Team",
+      "source_code_paths": [
+        "server/modules/",
+        "server/subsystems/",
+        "server/api/",
+        "server/services/",
+        "server/tasks/",
+        "server/routers/routers.ts"
+      ],
+      "test_paths": [
+        "server/subsystems/",
+        "server/modules/",
+        "server/api/"
+      ],
+      "related_documents": [
+        "docs/architecture/ARCHITECTURE.md",
+        "docs/architecture/FRONTEND_MODULAR_ARCHITECTURE.md",
+        "README.md"
+      ],
+      "supersedes": null,
+      "last_reviewed": "2026-09-18",
+      "review_due": "2027-03-18",
+      "evidence_level": "tested",
+      "notes": "Canonical blueprint for 3-tier modular backend architecture."
+    },
+    {
       "path": "docs/archive/content/CONTENT_MANAGEMENT_AUDIT_REPORT.md",
       "title": "CONTENT MANAGEMENT AUDIT REPORT",
       "language": "mixed",

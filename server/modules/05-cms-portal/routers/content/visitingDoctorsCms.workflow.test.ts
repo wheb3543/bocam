@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const pageSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/public/VisitingDoctors.tsx'),
+  resolve(process.cwd(), 'client/src/apps/public/modules/03-medical-directory/pages/VisitingDoctorsPage.tsx'),
   'utf8'
 );
 

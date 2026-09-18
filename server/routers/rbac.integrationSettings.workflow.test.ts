@@ -4,18 +4,18 @@ import { describe, expect, it } from 'vitest';
 
 describe('فصل صلاحيات التكاملات الخادمية', () => {
   it('يفصل العرض والربط والفصل وبيانات الاعتماد بدلاً من حراسة إعدادات عامة واحدة', () => {
-    const procedureSource = readFileSync(resolve(process.cwd(), 'server/routers/permissionProcedures.ts'), 'utf8');
-    const generalSource = readFileSync(resolve(process.cwd(), 'server/routers/generalIntegrations.ts'), 'utf8');
-    const connectionsSource = readFileSync(resolve(process.cwd(), 'server/routers/integrationConnections.ts'), 'utf8');
-    const metaSource = readFileSync(resolve(process.cwd(), 'server/routers/metaIntegration.ts'), 'utf8');
-    const operationsSource = readFileSync(resolve(process.cwd(), 'server/routers/metaOperations.ts'), 'utf8');
-    const metaSyncSource = readFileSync(resolve(process.cwd(), 'server/routers/metaSync.ts'), 'utf8');
+    const procedureSource = readFileSync(resolve(process.cwd(), 'server/modules/07-users-rbac/routers/permissionProcedures.ts'), 'utf8');
+    const generalSource = readFileSync(resolve(process.cwd(), 'server/modules/10-system-settings/routers/generalIntegrations.ts'), 'utf8');
+    const connectionsSource = readFileSync(resolve(process.cwd(), 'server/modules/10-system-settings/routers/integrationConnections.ts'), 'utf8');
+    const metaSource = readFileSync(resolve(process.cwd(), 'server/modules/04-marketing-publishing/routers/metaIntegration.ts'), 'utf8');
+    const operationsSource = readFileSync(resolve(process.cwd(), 'server/modules/04-marketing-publishing/routers/metaOperations.ts'), 'utf8');
+    const metaSyncSource = readFileSync(resolve(process.cwd(), 'server/modules/04-marketing-publishing/routers/metaSync.ts'), 'utf8');
     const whatsappConnectionSource = readFileSync(
-      resolve(process.cwd(), 'server/routers/whatsapp/settings/routes/connectionRoutes.ts'),
+      resolve(process.cwd(), 'server/modules/03-omni-inbox/routers/whatsapp/settings/routes/connectionRoutes.ts'),
       'utf8'
     );
     const webhookSource = readFileSync(
-      resolve(process.cwd(), 'server/routers/whatsapp/settings/routes/webhookRoutes.ts'),
+      resolve(process.cwd(), 'server/modules/03-omni-inbox/routers/whatsapp/settings/routes/webhookRoutes.ts'),
       'utf8'
     );
     expect(procedureSource).toContain('hasRolePermission');
@@ -45,8 +45,8 @@ describe('فصل صلاحيات التكاملات الخادمية', () => {
   });
 
   it('لا تعتمد صفحة الإعدادات على الدور الثابت وتفحص صلاحية الإشعارات في الواجهة', () => {
-    const settingsSource = readFileSync(resolve(process.cwd(), 'client/src/pages/admin/SettingsPage.tsx'), 'utf8');
-    const cardSource = readFileSync(resolve(process.cwd(), 'client/src/components/notification/SystemNotificationSettingsCard.tsx'), 'utf8');
+    const settingsSource = readFileSync(resolve(process.cwd(), 'client/src/apps/admin/modules/01-booking-scheduling/settings/BookingSettingsPage.tsx'), 'utf8');
+    const cardSource = readFileSync(resolve(process.cwd(), 'client/src/apps/admin/modules/10-system-settings/notifications/SystemNotificationSettingsCard.tsx'), 'utf8');
     expect(settingsSource).not.toContain("user?.role === 'admin'");
     expect(cardSource).toContain("can('notifications.settings.manage')");
     expect(cardSource).toContain('enabled: canManageNotifications');

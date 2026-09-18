@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const source = readFileSync(resolve(process.cwd(), 'server/routers/content/quality.ts'), 'utf8');
+const source = readFileSync(resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/quality.ts'), 'utf8');
 
 describe('فحص جودة المحتوى', () => {
   it('يفحص النص البديل للصور والأقسام المنشورة وأطوال SEO دون تعديل البيانات', () => {

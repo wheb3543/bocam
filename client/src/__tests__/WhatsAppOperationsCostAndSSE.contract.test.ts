@@ -19,11 +19,11 @@ describe('ملخص تكلفة التشغيل ومراقبة SSE', () => {
   });
 
   it('يستهلك التبويبان الملخص المشترك ويعرض المركز حالة الاتصال والعداد', () => {
-    const health = readSource('client/src/pages/admin/whatsapp/WhatsAppAccountHealthPage.tsx');
-    const quality = readSource('client/src/pages/admin/whatsapp/WhatsAppPhoneQualityPage.tsx');
-    const center = readSource('client/src/pages/admin/whatsapp/WhatsAppOperationsCenter.tsx');
-    const monitor = readSource('client/src/components/WhatsAppSSEMonitor.tsx');
-    const provider = readSource('client/src/hooks/useWhatsAppOperationsSSE.tsx');
+    const health = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAccountHealthPage.tsx');
+    const quality = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppPhoneQualityPage.tsx');
+    const center = readSource('client/src/apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppOperationsCenter.tsx');
+    const monitor = readSource('client/src/apps/admin/modules/03-omni-inbox/components/whatsapp/WhatsAppSSEMonitor.tsx');
+    const provider = readSource('client/src/apps/admin/modules/03-omni-inbox/hooks/useWhatsAppOperationsSSE.tsx');
 
     expect(health).toContain('useWhatsAppOperationalCostSummary');
     expect(quality).toContain('useWhatsAppOperationalCostSummary');
@@ -34,7 +34,7 @@ describe('ملخص تكلفة التشغيل ومراقبة SSE', () => {
     expect(monitor).toContain('حدث مستلم');
     expect(provider).toContain('costsQuery');
     expect(provider).toContain('lastEventAt');
-    expect(readSource('client/src/components/WhatsAppOperationalCostSummary.tsx')).toContain(
+    expect(readSource('client/src/apps/admin/modules/03-omni-inbox/components/whatsapp/WhatsAppOperationalCostSummary.tsx')).toContain(
       'آخر {summary.conversationCount} محادثة في النطاق'
     );
   });

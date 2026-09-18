@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const source = readFileSync(resolve(process.cwd(), 'server/routers/content/approvals.ts'), 'utf8');
+const source = readFileSync(resolve(__dirname, './approvals.ts'), 'utf8');
 
 describe('حماية تدفق موافقات المحتوى', () => {
   it('يحصر الإنشاء بالمحررين والموافقة أو الرفض بالمراجعين', () => {

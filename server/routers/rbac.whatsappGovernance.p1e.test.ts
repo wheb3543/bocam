@@ -5,7 +5,7 @@ const read = (path: string) => readFileSync(path, 'utf8');
 
 describe('P1-E WhatsApp governance authorization', () => {
   it('protects WhatsApp security actions with separate view/manage permissions', () => {
-    const source = read('server/routers/whatsapp/settings/routes/securityRoutes.ts');
+    const source = read('server/modules/03-omni-inbox/routers/whatsapp/settings/routes/securityRoutes.ts');
 
     expect(source).toContain("'communications.security.manage'");
     expect(source).toContain("'communications.security.view'");
@@ -16,7 +16,7 @@ describe('P1-E WhatsApp governance authorization', () => {
   });
 
   it('protects opt-in and opt-out reads separately from status changes', () => {
-    const source = read('server/routers/whatsapp/settings/routes/subscriptionRoutes.ts');
+    const source = read('server/modules/03-omni-inbox/routers/whatsapp/settings/routes/subscriptionRoutes.ts');
 
     expect(source).toContain("'communications.consents.view'");
     expect(source).toContain("'communications.consents.manage'");
@@ -27,7 +27,7 @@ describe('P1-E WhatsApp governance authorization', () => {
   });
 
   it('protects auto-reply reads separately from mutations', () => {
-    const source = read('server/routers/whatsapp/settings/routes/autoReplyRoutes.ts');
+    const source = read('server/modules/03-omni-inbox/routers/whatsapp/settings/routes/autoReplyRoutes.ts');
 
     expect(source).toContain("'communications.automation.view'");
     expect(source).toContain("'communications.automation.manage'");
@@ -38,7 +38,7 @@ describe('P1-E WhatsApp governance authorization', () => {
   });
 
   it('protects template test reads and sends independently', () => {
-    const source = read('server/routers/whatsappTemplateTest.ts');
+    const source = read('server/modules/03-omni-inbox/routers/whatsappTemplateTest.ts');
 
     expect(source).toContain("'communications.testing.view'");
     expect(source).toContain("'communications.testing.send'");

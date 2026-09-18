@@ -6,8 +6,8 @@ const readSource = (relativePath: string) => readFileSync(resolve(process.cwd(),
 
 describe('إنفاذ صلاحيات المهام والخصوصية والتكاملات', () => {
   it('يحمي إجراءات المهام الرئيسية ومهام المتابعة بالصلاحيات الدقيقة مع فحص الإسناد والإكمال', () => {
-    const tasksSource = readSource('server/routers/tasks.ts');
-    const followUpSource = readSource('server/routers/followUpTasks.ts');
+    const tasksSource = readSource('server/modules/06-tasks-projects/routers/tasks.ts');
+    const followUpSource = readSource('server/modules/06-tasks-projects/routers/followUpTasks.ts');
 
     [tasksSource, followUpSource].forEach((source) => {
       expect(source).toContain("permissionProcedure('tasks.view'");
@@ -20,7 +20,7 @@ describe('إنفاذ صلاحيات المهام والخصوصية والتكا
   });
 
   it('يحمي عناصر CMS المصنفة للخصوصية ولا يغيّر مسار المحتوى العام', () => {
-    const textContentSource = readSource('server/routers/content/textContent.ts');
+    const textContentSource = readSource('server/modules/05-cms-portal/routers/content/textContent.ts');
 
     expect(textContentSource).toContain('function isPrivacyTextContent');
     expect(textContentSource).toContain("assertRolePermission(ctx.user, 'privacy.view'");
@@ -29,8 +29,8 @@ describe('إنفاذ صلاحيات المهام والخصوصية والتكا
   });
 
   it('يحصر حفظ الأسرار في صلاحية بيانات اعتماد التكاملات', () => {
-    const generalSource = readSource('server/routers/generalIntegrations.ts');
-    const metaSource = readSource('server/routers/metaIntegration.ts');
+    const generalSource = readSource('server/modules/10-system-settings/routers/generalIntegrations.ts');
+    const metaSource = readSource('server/modules/04-marketing-publishing/routers/metaIntegration.ts');
 
     [generalSource, metaSource].forEach((source) => {
       expect(source).toContain('integrationCredentialsProcedure');

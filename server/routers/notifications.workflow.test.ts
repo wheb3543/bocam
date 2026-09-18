@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 const routerSource = readFileSync(resolve(process.cwd(), 'server/routers/notifications.ts'), 'utf8');
 const schemaSource = readFileSync(resolve(process.cwd(), 'drizzle/schema.ts'), 'utf8');
-const pageSource = readFileSync(resolve(process.cwd(), 'client/src/pages/admin/NotificationsPage.tsx'), 'utf8');
-const helperSource = readFileSync(resolve(process.cwd(), 'server/_core/notificationHelper.ts'), 'utf8');
+const pageSource = readFileSync(resolve(process.cwd(), 'client/src/apps/admin/modules/10-system-settings/pages/NotificationsPage.tsx'), 'utf8');
+const helperSource = readFileSync(resolve(process.cwd(), 'server/services/notificationHelper.ts'), 'utf8');
 
 describe('نظام الإشعارات الموحد', () => {
   it('يفصل إرسال الإشعارات عن صيانة مركز الإشعارات', () => {

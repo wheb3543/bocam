@@ -3,15 +3,15 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const routerSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/importExport.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/importExport.ts'),
   'utf8'
 );
 const componentSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/ContentImportExport.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/components/ContentImportExport.tsx'),
   'utf8'
 );
 const hookSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/hooks/useImportExport.ts'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/hooks/useImportExport.ts'),
   'utf8'
 );
 

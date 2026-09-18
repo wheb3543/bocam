@@ -6,7 +6,7 @@ const source = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf
 
 describe('الإنفاذ الدقيق للاحتفاظ بمحادثات التواصل', () => {
   it('يفصل أرشفة وحذف WhatsApp عن إجراء الإدارة العام', () => {
-    const sourceText = source('server/routers/whatsapp/conversations.ts');
+    const sourceText = source('server/modules/03-omni-inbox/routers/whatsapp/conversations.ts');
     expect(sourceText).toContain("permissionProcedure(\n  'communications.archive'");
     expect(sourceText).toContain("permissionProcedure(\n  'communications.delete'");
     expect(sourceText).toContain('archive: communicationArchiveProcedure');
@@ -15,7 +15,7 @@ describe('الإنفاذ الدقيق للاحتفاظ بمحادثات التو
   });
 
   it('يحمي أرشفة وحذف الصندوق الموحد ويسجل العملية في التدقيق', () => {
-    const sourceText = source('server/routers/socialInbox.ts');
+    const sourceText = source('server/modules/03-omni-inbox/routers/socialInbox.ts');
     expect(sourceText).toContain('archive: socialInboxArchiveProcedure');
     expect(sourceText).toContain('delete: socialInboxDeleteProcedure');
     expect(sourceText).toContain("action: input.isArchived ? 'archived' : 'unarchived'");

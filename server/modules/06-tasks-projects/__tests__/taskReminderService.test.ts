@@ -5,8 +5,8 @@ const mocks = vi.hoisted(() => ({
   ensureDatabaseAvailable: vi.fn(),
 }));
 
-vi.mock('../_core/notificationHelper', () => ({ createNotification: mocks.createNotification }));
-vi.mock('../_core/databaseGuard', () => ({ ensureDatabaseAvailable: mocks.ensureDatabaseAvailable }));
+vi.mock('../../../_core/notificationHelper', () => ({ createNotification: mocks.createNotification }));
+vi.mock('../../../_core/databaseGuard', () => ({ ensureDatabaseAvailable: mocks.ensureDatabaseAvailable }));
 
 import { notifyTaskAssignment } from '../services/taskReminderService';
 

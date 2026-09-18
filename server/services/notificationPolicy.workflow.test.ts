@@ -8,13 +8,13 @@ import {
 } from './notificationPolicy';
 
 const routerSource = readFileSync(resolve(process.cwd(), 'server/routers/notifications.ts'), 'utf8');
-const appointmentSource = readFileSync(resolve(process.cwd(), 'server/routers/appointments/routes/submitRoute.ts'), 'utf8');
-const campSource = readFileSync(resolve(process.cwd(), 'server/routers/campRegistrations/registration.ts'), 'utf8');
-const offerSource = readFileSync(resolve(process.cwd(), 'server/routers/offerLeads/registration.ts'), 'utf8');
-const helperSource = readFileSync(resolve(process.cwd(), 'server/_core/notificationHelper.ts'), 'utf8');
-const profileSource = readFileSync(resolve(process.cwd(), 'client/src/pages/admin/ProfilePage.tsx'), 'utf8');
+const appointmentSource = readFileSync(resolve(process.cwd(), 'server/modules/01-booking-scheduling/routers/appointments/routes/submitRoute.ts'), 'utf8');
+const campSource = readFileSync(resolve(process.cwd(), 'server/modules/01-booking-scheduling/routers/campRegistrations/registration.ts'), 'utf8');
+const offerSource = readFileSync(resolve(process.cwd(), 'server/modules/01-booking-scheduling/routers/offerLeads/registration.ts'), 'utf8');
+const helperSource = readFileSync(resolve(process.cwd(), 'server/services/notificationHelper.ts'), 'utf8');
+const profileSource = readFileSync(resolve(process.cwd(), 'client/src/apps/admin/modules/10-system-settings/pages/ProfilePage.tsx'), 'utf8');
 const settingsPageSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/SettingsPage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/01-booking-scheduling/settings/BookingSettingsPage.tsx'),
   'utf8'
 );
 const digestServiceSource = readFileSync(
@@ -22,27 +22,27 @@ const digestServiceSource = readFileSync(
   'utf8'
 );
 const scheduledDigestSource = readFileSync(
-  resolve(process.cwd(), 'server/api/notificationDigestScheduledRoute.ts'),
+  resolve(process.cwd(), 'server/api/cron/notificationDigestScheduledRoute.ts'),
   'utf8'
 );
 const notificationsPageSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/NotificationsPage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/10-system-settings/pages/NotificationsPage.tsx'),
   'utf8'
 );
 const notificationCenterSource = readFileSync(
-  resolve(process.cwd(), 'client/src/components/NotificationCenter.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/shared/components/NotificationCenter.tsx'),
   'utf8'
 );
 const appointmentStatusSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/appointments/routes/updateRoutes.ts'),
+  resolve(process.cwd(), 'server/modules/01-booking-scheduling/routers/appointments/routes/updateRoutes.ts'),
   'utf8'
 );
 const campStatusSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/campRegistrations/status.ts'),
+  resolve(process.cwd(), 'server/modules/01-booking-scheduling/routers/campRegistrations/status.ts'),
   'utf8'
 );
 const offerStatusSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/offerLeads/status.ts'),
+  resolve(process.cwd(), 'server/modules/01-booking-scheduling/routers/offerLeads/status.ts'),
   'utf8'
 );
 
@@ -135,11 +135,11 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
 
   it('يدعم مصدر المهام وتنبيهات الاستحقاق عبر Heartbeat آمن', () => {
     const taskReminderSource = readFileSync(
-      resolve(process.cwd(), 'server/services/taskReminderService.ts'),
+      resolve(process.cwd(), 'server/modules/06-tasks-projects/services/taskReminderService.ts'),
       'utf8'
     );
     const reminderRouteSource = readFileSync(
-      resolve(process.cwd(), 'server/api/taskReminderScheduledRoute.ts'),
+      resolve(process.cwd(), 'server/api/cron/taskReminderScheduledRoute.ts'),
       'utf8'
     );
     expect(taskReminderSource).toContain("source: 'tasks'");
@@ -151,7 +151,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
 
   it('يربط إنشاء وتغيير مرحلة العملاء المحتملين بسياسة الإشعارات الموحدة', () => {
     const leadsRouterSource = readFileSync(
-      resolve(process.cwd(), 'server/routers/leads.ts'),
+      resolve(process.cwd(), 'server/modules/01-booking-scheduling/routers/leads.ts'),
       'utf8'
     );
     expect(leadsRouterSource).toContain("source: 'leads'");
@@ -166,7 +166,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
       'utf8'
     );
     const integrationRouteSource = readFileSync(
-      resolve(process.cwd(), 'server/api/integrationAlertScheduledRoute.ts'),
+      resolve(process.cwd(), 'server/api/cron/integrationAlertScheduledRoute.ts'),
       'utf8'
     );
     expect(integrationAlertsSource).toContain("source: 'integrations'");
@@ -178,7 +178,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
 
   it('يدعم تنبيهات قيادة الحملة والنهاية والميزانية عبر مسار دوري محمي', () => {
     const campaignsRouterSource = readFileSync(
-      resolve(process.cwd(), 'server/routers/campaigns.ts'),
+      resolve(process.cwd(), 'server/modules/04-marketing-publishing/routers/campaigns.ts'),
       'utf8'
     );
     const campaignServiceSource = readFileSync(
@@ -208,7 +208,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
 
   it('يربط تعديل وفشل رسائل المواعيد بمسار تذكير Heartbeat آمن دون مؤقتات داخلية', () => {
     const appointmentUpdateSource = readFileSync(
-      resolve(process.cwd(), 'server/routers/appointments/routes/updateRoutes.ts'),
+      resolve(process.cwd(), 'server/modules/01-booking-scheduling/routers/appointments/routes/updateRoutes.ts'),
       'utf8'
     );
     const reminderSource = readFileSync(
@@ -216,7 +216,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
       'utf8'
     );
     const reminderRouteSource = readFileSync(
-      resolve(process.cwd(), 'server/api/appointmentReminderScheduledRoute.ts'),
+      resolve(process.cwd(), 'server/api/cron/appointmentReminderScheduledRoute.ts'),
       'utf8'
     );
     expect(appointmentUpdateSource).toContain("type: 'booking_schedule_changed'");
@@ -227,15 +227,15 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
 
   it('يسجل ويلخص عمليات الوسائط واستيراد وتصدير CMS مع رابط إلى سجل العملية', () => {
     const operationServiceSource = readFileSync(
-      resolve(process.cwd(), 'server/services/contentOperationNotificationService.ts'),
+      resolve(process.cwd(), 'server/modules/05-cms-portal/services/contentOperationNotificationService.ts'),
       'utf8'
     );
     const uploadRouteSource = readFileSync(
-      resolve(process.cwd(), 'server/api/uploadRoute.ts'),
+      resolve(process.cwd(), 'server/api/upload/uploadRoute.ts'),
       'utf8'
     );
     const importExportSource = readFileSync(
-      resolve(process.cwd(), 'server/routers/content/importExport.ts'),
+      resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/importExport.ts'),
       'utf8'
     );
     expect(operationServiceSource).toContain("source: 'content'");
@@ -275,7 +275,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
       'utf8'
     );
     const updateRouteSource = readFileSync(
-      resolve(process.cwd(), 'server/api/updateCheckScheduledRoute.ts'),
+      resolve(process.cwd(), 'server/api/cron/updateCheckScheduledRoute.ts'),
       'utf8'
     );
     expect(operationalServiceSource).toContain("status: 'degraded'");
@@ -291,7 +291,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
       'utf8'
     );
     const settingsSource = readFileSync(
-      resolve(process.cwd(), 'client/src/components/notification/SystemNotificationSettingsCard.tsx'),
+      resolve(process.cwd(), 'client/src/apps/admin/modules/10-system-settings/notifications/SystemNotificationSettingsCard.tsx'),
       'utf8'
     );
     expect(policySource).toContain('recipientTeamIds');
@@ -306,7 +306,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
       'utf8'
     );
     const helperSource = readFileSync(
-      resolve(process.cwd(), 'server/_core/notificationHelper.ts'),
+      resolve(process.cwd(), 'server/services/notificationHelper.ts'),
       'utf8'
     );
     const campaignSource = readFileSync(

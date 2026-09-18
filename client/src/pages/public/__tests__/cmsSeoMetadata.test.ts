@@ -6,15 +6,15 @@ import { readSourceFile } from '../../../../src/__tests__/helpers/sourceReader';
 
 const homePagePath = existsSync(resolve(process.cwd(), 'client/src/apps/public/modules/01-home/pages/HomePage.tsx'))
   ? resolve(process.cwd(), 'client/src/apps/public/modules/01-home/pages/HomePage.tsx')
-  : resolve(process.cwd(), 'client/src/pages/public/HomePage.tsx');
+  : resolve(process.cwd(), 'client/src/apps/public/modules/01-home/pages/HomePage.tsx');
 
 const dynamicPagePath = existsSync(resolve(process.cwd(), 'client/src/apps/public/modules/05-content-and-legal/pages/DynamicCmsPage.tsx'))
   ? resolve(process.cwd(), 'client/src/apps/public/modules/05-content-and-legal/pages/DynamicCmsPage.tsx')
-  : resolve(process.cwd(), 'client/src/pages/public/DynamicPage.tsx');
+  : resolve(process.cwd(), 'client/src/apps/public/modules/05-content-and-legal/pages/DynamicCmsPage.tsx');
 
 const homePageSource = readFileSync(homePagePath, 'utf8');
 const dynamicPageSource = readFileSync(dynamicPagePath, 'utf8');
-const seoComponentSource = readSourceFile('client/src/components/SEO.tsx');
+const seoComponentSource = readSourceFile('client/src/apps/admin/modules/05-cms-portal/components/SEO.tsx');
 
 describe('SEO المنشور من CMS', () => {
   it('يستهلك سجلات SEO المنشورة في الصفحة الرئيسية والصفحات ذات الرابط', () => {

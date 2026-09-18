@@ -6,7 +6,7 @@ const source = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf
 
 describe('الإنفاذ التفصيلي للمواعيد والعملاء المحتملين', () => {
   it('يفصل عرض وتعديل وإلغاء وحذف المواعيد على الخادم', () => {
-    const appointmentsSource = source('server/routers/appointments.ts');
+    const appointmentsSource = source('server/modules/01-booking-scheduling/routers/appointments');
 
     expect(appointmentsSource).toContain("permissionProcedure('appointments.view'");
     expect(appointmentsSource).toContain("permissionProcedure('appointments.update'");
@@ -19,7 +19,7 @@ describe('الإنفاذ التفصيلي للمواعيد والعملاء ال
   });
 
   it('يفصل عرض وتعديل العملاء المحتملين من الإجراءات العامة للمستخدم المسجل', () => {
-    const leadsSource = source('server/routers/leads.ts');
+    const leadsSource = source('server/modules/01-booking-scheduling/routers/leads.ts');
 
     expect(leadsSource).toContain("permissionProcedure('leads.view'");
     expect(leadsSource).toContain("permissionProcedure('leads.update'");
@@ -29,9 +29,9 @@ describe('الإنفاذ التفصيلي للمواعيد والعملاء ال
   });
 
   it('يحمي إسناد المواعيد والعملاء المحتملين ويتحقق من أهلية المسؤول المحدد', () => {
-    const appointmentsSource = source('server/routers/appointments.ts');
-    const leadsSource = source('server/routers/leads.ts');
-    const assignmentService = source('server/services/workAssignmentService.ts');
+    const appointmentsSource = source('server/modules/01-booking-scheduling/routers/appointments');
+    const leadsSource = source('server/modules/01-booking-scheduling/routers/leads.ts');
+    const assignmentService = source('server/modules/06-tasks-projects/services/workAssignmentService.ts');
 
     expect(appointmentsSource).toContain("permissionProcedure('appointments.assign'");
     expect(appointmentsSource).toContain('assign: appointmentsAssignProcedure');
@@ -43,7 +43,7 @@ describe('الإنفاذ التفصيلي للمواعيد والعملاء ال
   });
 
   it('لا يرفع صلاحية إدارة عامة قديمة إلى الحذف الحساس للمواعيد', () => {
-    const permissionsSource = source('server/services/rolePermissionService.ts');
+    const permissionsSource = source('server/modules/07-users-rbac/services/rolePermissionService.ts');
     expect(permissionsSource).toContain("'appointments.update': 'appointments.manage'");
     expect(permissionsSource).not.toContain("'appointments.delete': 'appointments.manage'");
   });

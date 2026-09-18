@@ -3,29 +3,29 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const serviceSource = readFileSync(
-  resolve(process.cwd(), 'server/services/content/contentVersionsService.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/services/content/contentVersionsService.ts'),
   'utf8'
 );
 const routerSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/contentVersions.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/contentVersions.ts'),
   'utf8'
 );
 const pagesSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/pages.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/pages.ts'),
   'utf8'
 );
 const sectionsSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/sections.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/sections.ts'),
   'utf8'
 );
 const managementSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/ContentManagementPage.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/pages/CmsPagesManagerPage.tsx'),
   'utf8'
 );
 const dialogSource = readFileSync(
   resolve(
     process.cwd(),
-    'client/src/pages/admin/content/components/dialogs/VersionHistoryDialog.tsx'
+    'client/src/apps/admin/modules/05-cms-portal/components/dialogs/VersionHistoryDialog.tsx'
   ),
   'utf8'
 );

@@ -3,26 +3,26 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const routerSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/approvals.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/approvals.ts'),
   'utf8'
 );
 const notificationHelperSource = readFileSync(
-  resolve(process.cwd(), 'server/_core/notificationHelper.ts'),
+  resolve(process.cwd(), 'server/services/notificationHelper.ts'),
   'utf8'
 );
 const dialogSource = readFileSync(
   resolve(
     process.cwd(),
-    'client/src/pages/admin/content/components/dialogs/ApprovalQueueDialog.tsx'
+    'client/src/apps/admin/modules/05-cms-portal/components/dialogs/ApprovalQueueDialog.tsx'
   ),
   'utf8'
 );
 const mediaPickerSource = readFileSync(
-  resolve(process.cwd(), 'client/src/components/form/MediaPicker.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/media/MediaPicker.tsx'),
   'utf8'
 );
 const submissionPanelSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/ApprovalSubmissionPanel.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/05-cms-portal/components/ApprovalSubmissionPanel.tsx'),
   'utf8'
 );
 

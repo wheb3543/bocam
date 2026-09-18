@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const source = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/contentVersions.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/contentVersions.ts'),
   'utf8'
 );
 

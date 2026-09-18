@@ -8,7 +8,7 @@ import {
 } from '@/components/layout/sidebarData';
 import { readSourceFile } from './helpers/sourceReader';
 
-const editSidebarModalSource = readSourceFile('client/src/components/EditSidebarModal.tsx');
+const editSidebarModalSource = readSourceFile('client/src/apps/admin/layout/components/EditSidebarModal.tsx');
 
 describe('P1 navigation structure', () => {
   it('groups administrative tools around the revised user tasks', () => {

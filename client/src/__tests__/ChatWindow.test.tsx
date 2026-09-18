@@ -12,15 +12,15 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import ChatWindow from '@/components/ChatWindow';
 
 const chatAreaHeaderSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/whatsapp/components/shared/ChatAreaHeader.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/03-omni-inbox/whatsapp/components/shared/ChatAreaHeader.tsx'),
   'utf8'
 );
 const chatInputSource = readFileSync(
-  resolve(process.cwd(), 'client/src/components/chat/ChatInput.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/03-omni-inbox/components/chat/ChatInput.tsx'),
   'utf8'
 );
 const chatHeaderSource = readFileSync(
-  resolve(process.cwd(), 'client/src/components/chat/ChatHeader.tsx'),
+  resolve(process.cwd(), 'client/src/apps/admin/modules/03-omni-inbox/components/chat/ChatHeader.tsx'),
   'utf8'
 );
 

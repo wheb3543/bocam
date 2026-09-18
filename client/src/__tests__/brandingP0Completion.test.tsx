@@ -3,7 +3,7 @@ import { APP_LOGO, APP_TITLE } from '@/const';
 import { readSourceFile } from './helpers/sourceReader';
 
 const integrationSettingsSource = readSourceFile(
-  'client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx'
+  'client/src/apps/admin/modules/03-omni-inbox/settings/MetaIntegrationSettingsPage.tsx'
 );
 
 describe('P0 brand and page-shell completion', () => {

@@ -15,7 +15,7 @@ vi.mock('../services/content/trashRetentionService', () => ({
 import { createCmsTrashRetentionScheduledRouter } from './cmsTrashRetentionScheduledRoute';
 
 const serviceSource = readFileSync(
-  resolve(process.cwd(), 'server/services/content/trashRetentionService.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/services/content/trashRetentionService.ts'),
   'utf8'
 );
 

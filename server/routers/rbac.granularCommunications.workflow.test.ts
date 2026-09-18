@@ -6,9 +6,9 @@ const source = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf
 
 describe('الإنفاذ التفصيلي لقنوات التواصل', () => {
   it('يحصر الردود ورسائل المتابعة وقوالب WhatsApp في الصلاحيات المناسبة', () => {
-    const messages = source('server/routers/whatsapp/messages.ts');
-    const templates = source('server/routers/whatsapp/templates.ts');
-    const leads = source('server/routers/leads.ts');
+    const messages = source('server/modules/03-omni-inbox/routers/whatsapp/messages.ts');
+    const templates = source('server/modules/03-omni-inbox/routers/whatsapp/templates.ts');
+    const leads = source('server/modules/01-booking-scheduling/routers/leads.ts');
 
     expect(messages).toContain('send: communicationReplyProcedure');
     expect(messages).toContain('sendBroadcast: communicationBroadcastProcedure');
@@ -21,8 +21,8 @@ describe('الإنفاذ التفصيلي لقنوات التواصل', () => {
   });
 
   it('يفصل العرض والإسناد والرد في الصندوق الموحد ومحادثات WhatsApp', () => {
-    const conversations = source('server/routers/whatsapp/conversations.ts');
-    const inbox = source('server/routers/socialInbox.ts');
+    const conversations = source('server/modules/03-omni-inbox/routers/whatsapp/conversations.ts');
+    const inbox = source('server/modules/03-omni-inbox/routers/socialInbox.ts');
 
     expect(conversations).toContain('list: communicationViewProcedure');
     expect(conversations).toContain('assignToUser: communicationAssignProcedure');
@@ -33,7 +33,7 @@ describe('الإنفاذ التفصيلي لقنوات التواصل', () => {
   });
 
   it('يحافظ على التوافق مع من كان يملك إدارة التواصل الكاملة فقط', () => {
-    const permissions = source('server/services/rolePermissionService.ts');
+    const permissions = source('server/modules/07-users-rbac/services/rolePermissionService.ts');
     expect(permissions).toContain("'communications.reply': 'communications.manage'");
     expect(permissions).toContain("'communications.broadcast': 'communications.manage'");
     expect(permissions).toContain("'communications.templates.manage': 'communications.manage'");

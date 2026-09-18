@@ -10,23 +10,23 @@ const mocks = vi.hoisted(() => ({
   invalidateAdminTextContentCache: vi.fn(),
 }));
 
-vi.mock('../../_core/databaseGuard', () => ({
+vi.mock('../../../../_core/databaseGuard', () => ({
   ensureDatabaseAvailable: mocks.ensureDatabaseAvailable,
 }));
 vi.mock('./publicationQualityGate', () => ({
   evaluatePublicationQuality: mocks.evaluatePublicationQuality,
 }));
-vi.mock('../../routers/public/content', () => ({
+vi.mock('../../../../routers/public/content', () => ({
   invalidateImagesCache: mocks.invalidateImagesCache,
   invalidateTextContentCache: mocks.invalidateTextContentCache,
 }));
-vi.mock('../../routers/content/pages', () => ({
+vi.mock('../../../../routers/content/pages', () => ({
   invalidateAdminPagesCache: mocks.invalidateAdminPagesCache,
 }));
-vi.mock('../../routers/content/sections', () => ({
+vi.mock('../../../../routers/content/sections', () => ({
   invalidateAdminSectionsCache: mocks.invalidateAdminSectionsCache,
 }));
-vi.mock('../../routers/content/textContent', () => ({
+vi.mock('../../../../routers/content/textContent', () => ({
   invalidateAdminTextContentCache: mocks.invalidateAdminTextContentCache,
 }));
 

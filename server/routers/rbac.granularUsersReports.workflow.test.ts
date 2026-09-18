@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('الإنفاذ التفصيلي للمستخدمين والتقارير', () => {
   it('يفصل إجراءات المستخدمين الخادمية بحسب الصلاحية المطلوبة', () => {
-    const source = readFileSync(resolve(process.cwd(), 'server/routers/users.ts'), 'utf8');
+    const source = readFileSync(resolve(process.cwd(), 'server/modules/07-users-rbac/routers/users.ts'), 'utf8');
     expect(source).toContain("permissionProcedure('users.view'");
     expect(source).toContain("permissionProcedure('users.create'");
     expect(source).toContain("permissionProcedure('users.update'");
@@ -17,7 +17,7 @@ describe('الإنفاذ التفصيلي للمستخدمين والتقاري�
   });
 
   it('يحمي قراءة التقارير وتصدير البيانات بصلاحيتين خادميتين منفصلتين', () => {
-    const source = readFileSync(resolve(process.cwd(), 'server/routers/reports.ts'), 'utf8');
+    const source = readFileSync(resolve(process.cwd(), 'server/modules/10-system-settings/routers/reports.ts'), 'utf8');
     expect(source).toContain("permissionProcedure('reports.view'");
     expect(source).toContain("permissionProcedure('reports.export'");
     expect(source).toContain('getBookingsReport: reportsViewProcedure');
@@ -26,9 +26,9 @@ describe('الإنفاذ التفصيلي للمستخدمين والتقاري�
   });
 
   it('يحرس الرسوم وتحليلات التتبع وإحصاءات PWA بصلاحيات العرض وسجل الفرص بصلاحيات العملاء المحتملين', () => {
-    const charts = readFileSync(resolve(process.cwd(), 'server/routers/charts.ts'), 'utf8');
-    const tracking = readFileSync(resolve(process.cwd(), 'server/routers/tracking.ts'), 'utf8');
-    const pwa = readFileSync(resolve(process.cwd(), 'server/routers/pwa.ts'), 'utf8');
+    const charts = readFileSync(resolve(process.cwd(), 'server/modules/10-system-settings/routers/charts.ts'), 'utf8');
+    const tracking = readFileSync(resolve(process.cwd(), 'server/modules/10-system-settings/routers/tracking.ts'), 'utf8');
+    const pwa = readFileSync(resolve(process.cwd(), 'server/modules/05-cms-portal/routers/pwa.ts'), 'utf8');
 
     expect(charts).toContain("permissionProcedure('reports.view', 'عرض الرسوم والتحليلات')");
     expect(charts).toContain('registrationsTrend: reportsViewProcedure');

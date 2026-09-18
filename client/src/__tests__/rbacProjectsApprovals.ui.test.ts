@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { readSourceFile } from './helpers/sourceReader';
 
-const sidebarSource = readSourceFile('client/src/config/sidebarNavigation.ts');
-const editableNavigationSource = readSourceFile('client/src/config/sidebarNavigation.ts');
-const reviewPageSource = readSourceFile('client/src/pages/admin/campaigns/ReviewApprovalPage.tsx');
-const queueSource = readSourceFile('client/src/pages/admin/content/components/dialogs/ApprovalQueueDialog.tsx');
+const sidebarSource = readSourceFile('client/src/apps/admin/layout/config/sidebarNavigation.ts');
+const editableNavigationSource = readSourceFile('client/src/apps/admin/layout/config/sidebarNavigation.ts');
+const reviewPageSource = readSourceFile('client/src/apps/admin/modules/04-marketing-publishing/publishing/ReviewApprovalPage.tsx');
+const queueSource = readSourceFile('client/src/apps/admin/modules/05-cms-portal/components/dialogs/ApprovalQueueDialog.tsx');
 
 describe('P1-D واجهات المشاريع والمراجعة والاعتماد', () => {
   it('يحمي رابط المشاريع بوصفه عرضاً للحملات في نسختي التنقل', () => {

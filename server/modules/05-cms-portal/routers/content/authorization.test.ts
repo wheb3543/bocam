@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const source = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/authorization.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/authorization.ts'),
   'utf8'
 );
 
@@ -32,7 +32,7 @@ describe('صلاحيات إدارة المحتوى', () => {
 
     for (const file of routerFiles) {
       const routerSource = readFileSync(
-        resolve(process.cwd(), `server/routers/content/${file}`),
+        resolve(__dirname, file),
         'utf8'
       );
       expect(routerSource).toContain("from './authorization'");
@@ -44,7 +44,7 @@ describe('صلاحيات إدارة المحتوى', () => {
 
   it('يفصل قراءة الوسائط ورفعها وتنظيمها وإعادة تسميتها وحذفها', () => {
     const mediaSource = readFileSync(
-      resolve(process.cwd(), 'server/routers/content/media.ts'),
+      resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/media.ts'),
       'utf8'
     );
     expect(mediaSource).toContain("permissionProcedure('media.view'");
