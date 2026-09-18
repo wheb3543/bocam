@@ -1,6 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { fireEvent, render, screen } from '@testing-library/react';
 import MobileBottomNav from '@/components/layout/sidebar/MobileBottomNav';
 import {
@@ -8,11 +6,9 @@ import {
   bottomNavItems,
   defaultVisibleItemIds,
 } from '@/components/layout/sidebarData';
+import { readSourceFile } from './helpers/sourceReader';
 
-const editSidebarModalSource = readFileSync(
-  resolve(process.cwd(), 'client/src/components/EditSidebarModal.tsx'),
-  'utf8'
-);
+const editSidebarModalSource = readSourceFile('client/src/components/EditSidebarModal.tsx');
 
 describe('P1 navigation structure', () => {
   it('groups administrative tools around the revised user tasks', () => {

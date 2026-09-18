@@ -1,0 +1,483 @@
+import { useState, useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Search, X, Users, Calendar, TrendingUp, UserCheck, Phone, Mail } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+import type {
+  LeadWithRegistrationType,
+  AppointmentWithDoctorName,
+  OfferLeadWithTitle,
+  CampRegistrationWithCampName,
+} from '@shared/types';
+
+interface GlobalSearchProps {
+  onClose?: () => void;
+}
+
+export default function GlobalSearch({ onClose }: GlobalSearchProps) {
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [, setLocation] = useLocation();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch all data
+  const { data: leads } = trpc.leads.unifiedList.useQuery();
+  const { data: appointments } = trpc.appointments.list.useQuery();
+  const { data: offerLeads } = trpc.offerLeads.list.useQuery();
+  const { data: campRegsPaged } = trpc.campRegistrations.listPaginated.useQuery({
+    page: 1,
+    limit: 400,
+  });
+  const campRegistrations = campRegsPaged?.data ?? [];
+
+  // Search results
+  const searchResults = {
+    leads:
+      (leads as unknown as LeadWithRegistrationType[])
+        ?.filter(
+          (l: LeadWithRegistrationType) =>
+            !!searchQuery &&
+            ((l.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (l.phone ?? '').toString().includes(searchQuery) ||
+              (typeof l.email === 'string' &&
+                l.email.toLowerCase().includes(searchQuery.toLowerCase())))
+        )
+        .slice(0, 3) || [],
+    appointments:
+      (appointments as unknown as AppointmentWithDoctorName[])
+        ?.filter(
+          (a: AppointmentWithDoctorName) =>
+            !!searchQuery &&
+            ((a.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (a.phone ?? '').toString().includes(searchQuery) ||
+              (typeof a.email === 'string' &&
+                a.email.toLowerCase().includes(searchQuery.toLowerCase())))
+        )
+        .slice(0, 3) || [],
+    offerLeads:
+      (offerLeads as unknown as OfferLeadWithTitle[])
+        ?.filter(
+          (o: OfferLeadWithTitle) =>
+            !!searchQuery &&
+            ((o.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (o.phone ?? '').toString().includes(searchQuery) ||
+              (typeof o.email === 'string' &&
+                o.email.toLowerCase().includes(searchQuery.toLowerCase())))
+        )
+        .slice(0, 3) || [],
+    campRegistrations:
+      (campRegistrations as unknown as CampRegistrationWithCampName[])
+        ?.filter(
+          (c: CampRegistrationWithCampName) =>
+            !!searchQuery &&
+            ((c.fullName ?? '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (c.phone ?? '').toString().includes(searchQuery))
+        )
+        .slice(0, 3) || [],
+  };
+
+  const totalResults =
+    searchResults.leads.length +
+    searchResults.appointments.length +
+    searchResults.offerLeads.length +
+    searchResults.campRegistrations.length;
+
+  // Live region announcement for screen readers
+  const [resultsAnnouncement, setResultsAnnouncement] = useState('');
+
+  useEffect(() => {
+    if (searchQuery && totalResults > 0) {
+      setResultsAnnouncement(`وجد ${totalResults} نتيجة لـ "${searchQuery}"`);
+    } else if (searchQuery && totalResults === 0) {
+      setResultsAnnouncement(`لا توجد نتائج لـ "${searchQuery}"`);
+    } else {
+      setResultsAnnouncement('');
+    }
+  }, [searchQuery, totalResults]);
+
+  // Keyboard shortcut (Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsOpen(true);
+        setTimeout(() => inputRef.current?.focus(), 100);
+      }
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        setSearchQuery('');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Click outside to close
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setSearchQuery('');
+    onClose?.();
+  };
+
+  const handleResultClick = (type: string) => {
+    handleClose();
+    // Navigate to bookings management with specific tab
+    const tabMap: Record<string, string> = {
+      leads: 'leads',
+      appointments: 'appointments',
+      offerLeads: 'offerLeads',
+      campRegistrations: 'campRegistrations',
+    };
+    setLocation(`/bookings?tab=${tabMap[type]}`);
+  };
+
+  const handleResultKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>, type: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleResultClick(type);
+    }
+  };
+
+  return (
+    <div className="relative" ref={containerRef}>
+      {/* Search Button */}
+      <Button
+        variant="outline"
+        size="sm"
+        type="button"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          setTimeout(() => inputRef.current?.focus(), 100);
+        }}
+        className="gap-2 hidden md:flex"
+        aria-label="فتح البحث العام"
+        aria-expanded={isOpen}
+        aria-controls="global-search-panel"
+        aria-haspopup="dialog"
+      >
+        <Search className="h-4 w-4" />
+        <span>بحث...</span>
+        <kbd className="hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
+          <span className="text-xs">Ctrl</span>K
+        </kbd>
+      </Button>
+
+      {/* Mobile Search Icon */}
+      <Button
+        variant="outline"
+        size="icon"
+        type="button"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          setTimeout(() => inputRef.current?.focus(), 100);
+        }}
+        className="md:hidden h-9 w-9"
+        aria-label="فتح البحث العام"
+        aria-expanded={isOpen}
+        aria-controls="global-search-panel"
+        aria-haspopup="dialog"
+      >
+        <Search className="h-4 w-4" />
+      </Button>
+
+      {/* Search Dropdown */}
+      {isOpen && (
+        <div
+          id="global-search-panel"
+          role="dialog"
+          aria-modal="false"
+          aria-label="بحث عام"
+          className="absolute left-0 top-full mt-2 w-[90vw] md:w-[500px] max-h-[80vh] overflow-y-auto bg-white dark:bg-card rounded-lg shadow-2xl border z-[100]"
+        >
+          {/* Live region for screen reader announcements */}
+          <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+            {resultsAnnouncement}
+          </div>
+
+          <div className="p-4 border-b sticky top-0 bg-white dark:bg-card">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                ref={inputRef}
+                placeholder="ابحث عن عميل، موعد، أو حجز..."
+                aria-label="حقل البحث العام"
+                aria-describedby="global-search-help"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pr-10 pl-10"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 h-6 w-6"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="مسح نص البحث"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <div className="p-4">
+            {!searchQuery ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Search className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">ابدأ الكتابة للبحث في جميع الحجوزات</p>
+                <p id="global-search-help" className="text-xs mt-1">
+                  يمكنك البحث بالاسم، رقم الهاتف، أو البريد الإلكتروني
+                </p>
+              </div>
+            ) : totalResults === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Search className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">لا توجد نتائج</p>
+                <p className="text-xs mt-1">جرب البحث بكلمات مختلفة</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Leads Results */}
+                {searchResults.leads.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="h-4 w-4 text-blue-500" />
+                      <h3 className="font-semibold text-sm">
+                        تسجيلات العملاء ({searchResults.leads.length})
+                      </h3>
+                    </div>
+                    <div className="space-y-2">
+                      {searchResults.leads.map((lead: LeadWithRegistrationType) => (
+                        <Card
+                          key={lead.id}
+                          className="cursor-pointer hover:bg-slate-50 transition-colors"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleResultClick('leads')}
+                          onKeyDown={(event) => handleResultKeyDown(event, 'leads')}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">{lead.fullName}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Phone className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground" dir="ltr">
+                                    {formatPhoneDisplay(lead.phone)}
+                                  </span>
+                                </div>
+                                {lead.email && (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Mail className="h-3 w-3 text-muted-foreground" />
+                                    <span className="text-xs text-muted-foreground">
+                                      {lead.email}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {lead.registrationType === 'appointment' && 'موعد'}
+                                {lead.registrationType === 'offer' && 'عرض'}
+                                {lead.registrationType === 'camp' && 'مخيم'}
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Appointments Results */}
+                {searchResults.appointments.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="h-4 w-4 text-green-500" />
+                      <h3 className="font-semibold text-sm">
+                        مواعيد الأطباء ({searchResults.appointments.length})
+                      </h3>
+                    </div>
+                    <div className="space-y-2">
+                      {searchResults.appointments.map((apt: AppointmentWithDoctorName) => (
+                        <Card
+                          key={apt.id}
+                          className="cursor-pointer hover:bg-slate-50 transition-colors"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleResultClick('appointments')}
+                          onKeyDown={(event) => handleResultKeyDown(event, 'appointments')}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">{apt.fullName}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Phone className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground" dir="ltr">
+                                    {formatPhoneDisplay(apt.phone)}
+                                  </span>
+                                </div>
+                                {apt.doctorName && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    الطبيب: {apt.doctorName}
+                                  </p>
+                                )}
+                              </div>
+                              <Badge
+                                variant="outline"
+                                className={
+                                  apt.status === 'pending'
+                                    ? 'bg-yellow-50 text-yellow-700'
+                                    : apt.status === 'contacted'
+                                      ? 'bg-orange-50 text-orange-700'
+                                      : apt.status === 'no_answer'
+                                        ? 'bg-gray-50 text-gray-700'
+                                        : apt.status === 'confirmed'
+                                          ? 'bg-green-50 text-green-700'
+                                          : apt.status === 'attended'
+                                            ? 'bg-teal-50 text-teal-700'
+                                            : apt.status === 'completed'
+                                              ? 'bg-blue-50 text-blue-700'
+                                              : apt.status === 'cancelled'
+                                                ? 'bg-red-50 text-red-700'
+                                                : ''
+                                }
+                              >
+                                {(() => {
+                                  const statusMap: Record<string, string> = {
+                                    pending: 'قيد الانتظار',
+                                    contacted: 'تم التواصل',
+                                    no_answer: 'لم يرد',
+                                    confirmed: 'مؤكد',
+                                    attended: 'حضر',
+                                    completed: 'مكتمل',
+                                    cancelled: 'ملغي',
+                                  };
+                                  if (apt.status && apt.status in statusMap) {
+                                    return statusMap[apt.status];
+                                  }
+                                  return apt.status;
+                                })()}
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Offer Leads Results */}
+                {searchResults.offerLeads.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="h-4 w-4 text-purple-500" />
+                      <h3 className="font-semibold text-sm">
+                        حجوزات العروض ({searchResults.offerLeads.length})
+                      </h3>
+                    </div>
+                    <div className="space-y-2">
+                      {searchResults.offerLeads.map((offer: OfferLeadWithTitle) => (
+                        <Card
+                          key={offer.id}
+                          className="cursor-pointer hover:bg-slate-50 transition-colors"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleResultClick('offerLeads')}
+                          onKeyDown={(event) => handleResultKeyDown(event, 'offerLeads')}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">{offer.fullName}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Phone className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground" dir="ltr">
+                                    {formatPhoneDisplay(offer.phone)}
+                                  </span>
+                                </div>
+                                {offer.offerTitle && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    العرض: {offer.offerTitle}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Camp Registrations Results */}
+                {searchResults.campRegistrations.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <UserCheck className="h-4 w-4 text-teal-500" />
+                      <h3 className="font-semibold text-sm">
+                        تسجيلات المخيمات ({searchResults.campRegistrations.length})
+                      </h3>
+                    </div>
+                    <div className="space-y-2">
+                      {searchResults.campRegistrations.map((camp: CampRegistrationWithCampName) => (
+                        <Card
+                          key={camp.id}
+                          className="cursor-pointer hover:bg-slate-50 transition-colors"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleResultClick('campRegistrations')}
+                          onKeyDown={(event) => handleResultKeyDown(event, 'campRegistrations')}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">{camp.fullName}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Phone className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground" dir="ltr">
+                                    {formatPhoneDisplay(camp.phone)}
+                                  </span>
+                                </div>
+                                {camp.campName && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    المخيم: {camp.campName}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

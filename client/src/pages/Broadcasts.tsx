@@ -1,6 +1,5 @@
 /**
- * Broadcasts Page - Re-export for compatibility
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/03-omni-inbox/pages/BroadcastsPage".
  */
-
-export * from './admin/whatsapp/WhatsAppBroadcast';
-export { default } from './admin/whatsapp/WhatsAppBroadcast';
+export * from '@apps/admin/modules/03-omni-inbox/pages/BroadcastsPage';

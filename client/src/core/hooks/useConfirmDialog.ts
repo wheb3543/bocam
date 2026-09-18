@@ -1,58 +1,55 @@
+import { useState, useCallback } from 'react';
+
 /**
- * useConfirmDialog Hook
- * Custom hook لإدارة حوار التأكيد
+ * useConfirmDialog - هوك لإدارة حوارات التأكيد (حذف، إلغاء، إلخ)
+ *
+ * @returns { isOpen, item, openConfirm, closeConfirm, confirm }
+ *
+ * الاستخدام:
+ * const deleteConfirm = useConfirmDialog<Offer>();
+ *
+ * // فتح حوار التأكيد:
+ * <Button onClick={() => deleteConfirm.openConfirm(offer)}>حذف</Button>
+ *
+ * // في الحوار:
+ * <Dialog open={deleteConfirm.isOpen} onOpenChange={deleteConfirm.closeConfirm}>
+ *   <DialogContent>
+ *     <p>هل أنت متأكد من حذف {deleteConfirm.item?.title}؟</p>
+ *     <Button onClick={() => deleteConfirm.confirm(() => deleteMutation.mutate(deleteConfirm.item!.id))}>
+ *       تأكيد
+ *     </Button>
+ *   </DialogContent>
+ * </Dialog>
  */
 
-import { useState } from 'react';
-
-export interface UseConfirmDialogOptions {
-  onConfirm: () => void | Promise<void>;
-  title: string;
-  description?: string;
-  confirmText?: string;
-  cancelText?: string;
-  variant?: 'default' | 'destructive';
-}
-
-export interface UseConfirmDialogReturn {
-  isOpen: boolean;
-  isLoading: boolean;
-  open: () => void;
-  close: () => void;
-  confirm: () => Promise<void>;
-}
-
-export function useConfirmDialog({
-  onConfirm,
-  title: _title,
-  description: _description,
-  confirmText: _confirmText = 'تأكيد',
-  cancelText: _cancelText = 'إلغاء',
-  variant: _variant = 'default',
-}: UseConfirmDialogOptions): UseConfirmDialogReturn {
+export function useConfirmDialog<T = unknown>() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [item, setItem] = useState<T | null>(null);
 
-  const open = () => setIsOpen(true);
-  const close = () => setIsOpen(false);
+  const openConfirm = useCallback((targetItem: T) => {
+    setItem(targetItem);
+    setIsOpen(true);
+  }, []);
 
-  const confirm = async () => {
-    setIsLoading(true);
-    try {
-      await onConfirm();
-      close();
-    } catch (error) {
-      console.error('Confirm dialog error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const closeConfirm = useCallback(() => {
+    setIsOpen(false);
+    // تأخير مسح العنصر لتجنب flicker أثناء إغلاق الحوار
+    setTimeout(() => setItem(null), 200);
+  }, []);
+
+  const confirm = useCallback(
+    (action: () => void) => {
+      action();
+      closeConfirm();
+    },
+    [closeConfirm]
+  );
 
   return {
     isOpen,
-    isLoading,
-    open,
-    close,
+    item,
+    openConfirm,
+    closeConfirm,
     confirm,
   };
 }
