@@ -13,6 +13,7 @@ import { canAccessSocialInbox } from '@shared/socialInboxAccess';
 import {
   allNavItems,
   allToolsGroups,
+  canonicalToolsGroups,
   bottomNavItems,
   defaultVisibleItemIds,
   type NavItem,
@@ -109,7 +110,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
 
   const permittedToolsGroups = useMemo(
     () =>
-      allToolsGroups
+      canonicalToolsGroups
         .map((group) => ({ ...group, items: group.items.filter(canAccessNavItem) }))
         .filter((group) => group.items.length > 0),
     [canAccessNavItem]
@@ -162,6 +163,7 @@ export default function DashboardSidebarV2({ currentPath }: { currentPath: strin
     <DesktopSidebar
       shouldShowText={shouldShowText}
       primaryNavItems={primaryNavItems}
+      toolsGroups={permittedToolsGroups}
       isItemActive={isItemActive}
       getBadgeCount={getBadgeCount}
       handleNavClick={handleNavClick}

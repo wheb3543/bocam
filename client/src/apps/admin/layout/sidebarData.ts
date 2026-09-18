@@ -12,13 +12,14 @@ import {
 } from '@/config/sidebarNavigation';
 
 export type { NavGroup, NavItem };
-export { allNavItems };
+export { allNavItems, canonicalToolGroups as canonicalToolsGroups };
 
 const compatibilityGroupLabels: Record<string, string> = {
   'إدارة الحجوزات': 'تشغيل المرضى والحجوزات',
   'إدارة المحتوى': 'المحتوى والنشر',
   'التقارير والتحليلات': 'القياس والتقارير',
   'الإدارة العامة': 'الإدارة والنظام',
+  'الإدارة والنظام': 'الإدارة والنظام',
 };
 
 export const allToolsGroups: NavGroup[] = canonicalToolGroups.map((group) => ({
