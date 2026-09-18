@@ -162,7 +162,10 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
 
   it('يربط فشل التكاملات وقرب انتهاء التفويض بمسار Heartbeat محمي', () => {
     const integrationAlertsSource = readFileSync(
-      resolve(process.cwd(), 'server/services/integrationNotificationService.ts'),
+      resolve(
+        process.cwd(),
+        'server/modules/03-omni-inbox/services/integrationNotificationService.ts'
+      ),
       'utf8'
     );
     const integrationRouteSource = readFileSync(
@@ -182,7 +185,10 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
       'utf8'
     );
     const campaignServiceSource = readFileSync(
-      resolve(process.cwd(), 'server/services/campaignNotificationService.ts'),
+      resolve(
+        process.cwd(),
+        'server/modules/04-marketing-publishing/services/campaignNotificationService.ts'
+      ),
       'utf8'
     );
     expect(campaignsRouterSource).toContain('notifyCampaignLeaderAssigned');
@@ -310,7 +316,10 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
       'utf8'
     );
     const campaignSource = readFileSync(
-      resolve(process.cwd(), 'server/services/campaignNotificationService.ts'),
+      resolve(
+        process.cwd(),
+        'server/modules/04-marketing-publishing/services/campaignNotificationService.ts'
+      ),
       'utf8'
     );
     expect(policySource).toContain('includeSourceRecipients');
