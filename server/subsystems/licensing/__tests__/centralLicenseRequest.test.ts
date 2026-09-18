@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getCentralLicenseConfiguration } from './centralLicenseRequest';
+import { getCentralLicenseConfiguration } from '../centralLicenseRequest';
 
 describe('central license request configuration', () => {
   afterEach(() => {

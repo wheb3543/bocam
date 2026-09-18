@@ -74,7 +74,7 @@ async function startServer() {
     import('../routers/routers'),
     import('./context'),
     import('./vite'),
-    import('./license'),
+    import('../subsystems/licensing/license'),
     import('./heartbeat'),
     import('./logger'),
     import('./sentry'),
@@ -82,11 +82,11 @@ async function startServer() {
     import('./swagger'),
     import('./utils/portUtils'),
     import('./middleware'),
-    import('./routes/updateRoutes'),
-    import('./routes/backupRoutes'),
+    import('../subsystems/auto-update/routes/updateRoutes'),
+    import('../subsystems/backup/routes/backupRoutes'),
     import('./routes/configRoutes'),
     import('../api/licenseDeliveryRoute'),
-    import('./unauthorizedStartupReport'),
+    import('../subsystems/licensing/unauthorizedStartupReport'),
   ]);
 
   initSentry();

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { describe, expect, it, vi } from 'vitest';
 import { validateLicense } from '../license';
-import { getHardwareId, verifySignature } from './helpers';
+import { getHardwareId, verifySignature } from '../helpers';
 
 describe('provided production license', () => {
   it('has a valid signature and enables all licensed features', () => {

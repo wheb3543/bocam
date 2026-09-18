@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { getHardwareId } from './helpers';
-import { validateLicensePayload } from './validation';
+import { getHardwareId } from '../helpers';
+import { validateLicensePayload } from '../validation';
 
 const originalLicenseDomain = process.env.LICENSE_DOMAIN;
 

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { describe, expect, it } from 'vitest';
-import { verifySignatureWithPublicKeys } from './helpers';
+import { verifySignatureWithPublicKeys } from '../helpers';
 
 function createSignedLicense(privateKey: string) {
   const payload = { hid: 'TEST-HARDWARE', exp: '2027-01-01T00:00:00.000Z', feat: ['reports'], iat: '2026-01-01T00:00:00.000Z', ver: '1.0.0' };

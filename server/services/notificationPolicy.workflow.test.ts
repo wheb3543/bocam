@@ -197,7 +197,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
       'utf8'
     );
     const backupSource = readFileSync(
-      resolve(process.cwd(), 'server/_core/backup.operations.ts'),
+      resolve(process.cwd(), 'server/subsystems/backup/backup.operations.ts'),
       'utf8'
     );
     expect(labPollerSource).toContain("source: 'operations'");
@@ -271,7 +271,7 @@ describe('سياسة تفضيلات الإشعارات وربط التسجيلا
       'utf8'
     );
     const updateCheckerSource = readFileSync(
-      resolve(process.cwd(), 'server/_core/updateChecker.ts'),
+      resolve(process.cwd(), 'server/subsystems/auto-update/updateChecker.ts'),
       'utf8'
     );
     const updateRouteSource = readFileSync(

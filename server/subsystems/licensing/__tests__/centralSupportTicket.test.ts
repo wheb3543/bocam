@@ -3,15 +3,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 vi.mock('fs', () => ({
   default: { readFileSync: vi.fn(() => JSON.stringify({ key: 'signed-local-license-key' })) },
 }));
-vi.mock('./license', () => ({
+vi.mock('../license', () => ({
   validateLicense: vi.fn(() => ({ isValid: true })),
 }));
-vi.mock('./license/helpers', () => ({
+vi.mock('../helpers', () => ({
   getHardwareId: vi.fn(() => 'HW-BOCAM-123'),
   getLicenseFilePath: vi.fn(() => '/tmp/license.json'),
 }));
 
-import { requestCentralSupportTicket } from './centralLicenseRequest';
+import { requestCentralSupportTicket } from '../centralLicenseRequest';
 
 describe('إرسال طلب الدعم المركزي من bocam', () => {
   afterEach(() => {
