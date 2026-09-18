@@ -19,7 +19,7 @@ import {
   notifyStoredSocialInboxInbound,
   notifyWhatsAppAssignment,
   notifyWhatsAppInbound,
-} from '../../../services/communicationNotificationService';
+} from '../services/communicationNotificationService';
 
 const db = {} as never;
 

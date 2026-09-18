@@ -12,7 +12,7 @@ vi.mock('../../../services/notificationPolicy', () => ({
   notifyEligibleRecipients: mocks.notifyEligibleRecipients,
 }));
 
-import { notifyIntegrationIssue } from '../../../services/integrationNotificationService';
+import { notifyIntegrationIssue } from '../services/integrationNotificationService';
 
 describe('integration notification service', () => {
   beforeEach(() => {
