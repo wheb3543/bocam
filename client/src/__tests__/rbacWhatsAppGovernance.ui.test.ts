@@ -1,7 +1,5 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-
-const read = (path: string) => readFileSync(path, 'utf8');
+import { readSourceFile as read } from './helpers/sourceReader';
 
 describe('P1-E WhatsApp governance UI authorization', () => {
   it('gates the compliance page queries, SSE, and management actions', () => {

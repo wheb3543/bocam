@@ -1,67 +1,109 @@
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster } from '@core/components/ui/sonner';
 import { useEffect, lazy, Suspense, useState } from 'react';
 import { initializeTracking } from './lib/tracking/tracking';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import AdminContentSkeleton from '@/components/layout/AdminContentSkeleton';
+import { TooltipProvider } from '@core/components/ui/tooltip';
+import AdminContentSkeleton from '@apps/admin/layout/AdminContentSkeleton';
 const NotFound = lazy(() => import('@/pages/NotFound'));
 import { Redirect, Route, Switch, useLocation } from 'wouter';
 import { toast } from 'sonner';
-import ErrorBoundary from './components/ErrorBoundary';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { LanguageProvider } from './contexts/LanguageContext';
-import { consumeToastHash } from './lib/toastHashRouter';
-const DashboardShell = lazy(() => import('@/components/layout/DashboardShell'));
-import { UpdateProgressModal } from '@/components/update/UpdateProgressModal';
-import { MandatoryUpdateModal } from '@/components/update/MandatoryUpdateModal';
-import { OptionalUpdateBanner } from '@/components/update/OptionalUpdateBanner';
+import ErrorBoundary from '@core/components/feedback/ErrorBoundary';
+import { ThemeProvider } from '@core/contexts/ThemeContext';
+import { LanguageProvider } from '@core/contexts/LanguageContext';
+import { consumeToastHash } from '@core/lib/toastHashRouter';
+const DashboardShell = lazy(() => import('@apps/admin/layout/DashboardShell'));
+import { UpdateProgressModal } from '@core/components/feedback/update/UpdateProgressModal';
+import { MandatoryUpdateModal } from '@core/components/feedback/update/MandatoryUpdateModal';
+import { OptionalUpdateBanner } from '@core/components/feedback/update/OptionalUpdateBanner';
 import { useUpdateChecker } from '@/hooks/integrations/useUpdateChecker';
-import { BookingModal } from '@/components/booking/BookingModal';
-import { trpc } from '@/lib/api/trpc';
+import { BookingModal } from '@apps/admin/modules/01-booking-scheduling/components/BookingModal';
+import { trpc } from '@core/api/trpc';
 // Lazy load pages for better performance
-const HomePage = lazy(() => import('./pages/public/HomePage'));
-const ThankYou = lazy(() => import('./pages/public/ThankYou'));
-const DynamicPage = lazy(() => import('./pages/public/DynamicPage'));
-const DraftPreviewPage = lazy(() => import('./pages/public/DraftPreviewPage'));
-const DepartmentsPage = lazy(() => import('./pages/public/DepartmentsPage'));
-const DepartmentDetailPage = lazy(() => import('./pages/public/DepartmentDetailPage'));
-const Doctors = lazy(() => import('./pages/public/Doctors'));
+const HomePage = lazy(() => import('@apps/public/modules/01-home/pages/HomePage'));
+const ThankYou = lazy(() => import('@apps/public/modules/02-booking/pages/ThankYouPage'));
+const DynamicPage = lazy(
+  () => import('@apps/public/modules/05-content-and-legal/pages/DynamicCmsPage')
+);
+const DraftPreviewPage = lazy(
+  () => import('@apps/public/modules/05-content-and-legal/pages/DraftPreviewPage')
+);
+const DepartmentsPage = lazy(
+  () => import('@apps/public/modules/03-medical-directory/pages/DepartmentsListPage')
+);
+const DepartmentDetailPage = lazy(
+  () => import('@apps/public/modules/03-medical-directory/pages/DepartmentDetailPage')
+);
+const Doctors = lazy(
+  () => import('@apps/public/modules/03-medical-directory/pages/DoctorsListPage')
+);
 const Unauthorized = lazy(() => import('./pages/Unauthorized'));
-const AccessRequest = lazy(() => import('./pages/AccessRequest'));
-const OffersListPage = lazy(() => import('./pages/public/OffersListPage'));
-const CampsListPage = lazy(() => import('./pages/public/CampsListPage'));
-const DoctorDetailPage = lazy(() => import('./pages/public/DoctorDetailPage'));
-const OfferDetailPage = lazy(() => import('./pages/public/OfferDetailPage'));
-const CampDetailPage = lazy(() => import('./pages/public/CampDetailPage'));
-const VisitingDoctors = lazy(() => import('./pages/public/VisitingDoctors'));
+const AccessRequest = lazy(() => import('@apps/admin/auth/AccessRequestPage'));
+const OffersListPage = lazy(
+  () => import('@apps/public/modules/04-camps-and-offers/pages/OffersListPage')
+);
+const CampsListPage = lazy(
+  () => import('@apps/public/modules/04-camps-and-offers/pages/CampsListPage')
+);
+const DoctorDetailPage = lazy(
+  () => import('@apps/public/modules/03-medical-directory/pages/DoctorDetailPage')
+);
+const OfferDetailPage = lazy(
+  () => import('@apps/public/modules/04-camps-and-offers/pages/OfferDetailPage')
+);
+const CampDetailPage = lazy(
+  () => import('@apps/public/modules/04-camps-and-offers/pages/CampDetailPage')
+);
+const VisitingDoctors = lazy(
+  () => import('@apps/public/modules/03-medical-directory/pages/VisitingDoctorsPage')
+);
 const OfflinePage = lazy(() => import('./pages/OfflinePage'));
-const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
+const SettingsPage = lazy(
+  () => import('@apps/admin/modules/01-booking-scheduling/settings/BookingSettingsPage')
+);
 import PWAManager from './components/PWAManager';
-import MetaPixel from './components/MetaPixel';
+import MetaPixel from '@apps/admin/modules/04-marketing-publishing/tracking/MetaPixel';
 import OfflineIndicator from './components/OfflineIndicator';
 import CookieConsentBanner from './components/CookieConsentBanner';
 import PrivacyPolicyConsentBanner from './components/PrivacyPolicyConsentBanner';
-const PatientPortalLogin = lazy(() => import('./pages/patient-portal/PatientPortalLogin'));
-const PatientDashboard = lazy(() => import('./pages/patient-portal/PatientDashboard'));
-const PatientHomePage = lazy(() => import('./pages/patient-portal/PatientHomePage'));
+const PatientPortalLogin = lazy(() => import('@apps/patient-portal/auth/PatientLoginPage'));
+const PatientDashboard = lazy(
+  () => import('@apps/patient-portal/modules/dashboard/PatientDashboardPage')
+);
+const PatientHomePage = lazy(
+  () => import('@apps/patient-portal/modules/dashboard/PatientDashboardPage')
+);
 const PatientAppointmentsPage = lazy(
-  () => import('./pages/patient-portal/PatientAppointmentsPage')
+  () => import('@apps/patient-portal/modules/appointments/pages/PatientAppointmentsPage')
 );
 const PatientAppointmentDetailsPage = lazy(
-  () => import('./pages/patient-portal/PatientAppointmentDetailsPage')
+  () => import('@apps/patient-portal/modules/appointments/pages/PatientAppointmentDetailsPage')
 );
-const PatientOffersPage = lazy(() => import('./pages/patient-portal/PatientOffersPage'));
-const PatientCampsPage = lazy(() => import('./pages/patient-portal/PatientCampsPage'));
-const PatientResultsPage = lazy(() => import('./pages/patient-portal/PatientResultsPage'));
+const PatientOffersPage = lazy(
+  () => import('@apps/patient-portal/modules/camps-offers/pages/PatientOffersPage')
+);
+const PatientCampsPage = lazy(
+  () => import('@apps/patient-portal/modules/camps-offers/pages/PatientCampsPage')
+);
+const PatientResultsPage = lazy(
+  () => import('@apps/patient-portal/modules/lab-results/pages/PatientResultsPage')
+);
 const PatientResultDetailsPage = lazy(
-  () => import('./pages/patient-portal/PatientResultDetailsPage')
+  () => import('@apps/patient-portal/modules/lab-results/pages/PatientResultDetailsPage')
 );
-const PatientProfilePage = lazy(() => import('./pages/patient-portal/PatientProfilePage'));
-const PatientPortalLayout = lazy(() => import('./components/patient/PatientPortalLayout'));
-const PrivacyPolicyPage = lazy(() => import('./pages/public/PrivacyPolicyPage'));
-const PrivacyPolicyChangelogPage = lazy(() => import('./pages/public/PrivacyPolicyChangelogPage'));
-const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
-const FeatureLockedPage = lazy(() => import('./pages/admin/shared/FeatureLockedPage'));
-const ActivationPage = lazy(() => import('./pages/ActivationPage'));
+const PatientProfilePage = lazy(
+  () => import('@apps/patient-portal/modules/family/pages/FamilyProfilePage')
+);
+const PatientPortalLayout = lazy(() => import('@apps/patient-portal/layout/PatientPortalLayout'));
+const PrivacyPolicyPage = lazy(
+  () => import('@apps/public/modules/05-content-and-legal/pages/PrivacyPolicyPage')
+);
+const PrivacyPolicyChangelogPage = lazy(
+  () => import('@apps/public/modules/05-content-and-legal/pages/PrivacyPolicyChangelogPage')
+);
+const AdminLogin = lazy(() => import('@apps/admin/auth/AdminLoginPage'));
+const FeatureLockedPage = lazy(() => import('@apps/admin/shared/feedback/FeatureLockedPage'));
+const ActivationPage = lazy(
+  () => import('@apps/admin/modules/10-system-settings/license/ActivationPage')
+);
 
 // Prefetch critical pages for better performance
 function PrefetchRoutes() {
@@ -70,26 +112,26 @@ function PrefetchRoutes() {
   useEffect(() => {
     // Prefetch public pages when on home page
     if (location === '/') {
-      import('./pages/public/DepartmentsPage');
-      import('./pages/public/Doctors');
-      import('./pages/public/OffersListPage');
-      import('./pages/public/CampsListPage');
+      import('@apps/public/modules/03-medical-directory/pages/DepartmentsListPage');
+      import('@apps/public/modules/03-medical-directory/pages/DoctorsListPage');
+      import('@apps/public/modules/04-camps-and-offers/pages/OffersListPage');
+      import('@apps/public/modules/04-camps-and-offers/pages/CampsListPage');
     }
 
     // Prefetch admin dashboard and system showcase when on admin or system routes
     if (location.startsWith('/admin') || location.startsWith('/system')) {
-      import('./pages/admin/system/SystemLandingPage');
-      import('./pages/admin/AdminDashboard');
-      import('./pages/admin/SettingsPage');
-      import('./pages/admin/bookings/AppointmentsManagementPage');
-      import('./pages/admin/reports/ReportsPage');
+      import('@apps/admin/modules/10-system-settings/pages/SystemLandingPage');
+      import('@apps/admin/modules/10-system-settings/pages/AdminDashboardPage');
+      import('@apps/admin/modules/01-booking-scheduling/settings/BookingSettingsPage');
+      import('@apps/admin/modules/01-booking-scheduling/pages/AppointmentsManagementPage');
+      import('@apps/admin/modules/10-system-settings/pages/ReportsPage');
     }
 
     // Prefetch patient portal pages when on patient portal
     if (location.startsWith('/patient-portal')) {
-      import('./pages/patient-portal/PatientHomePage');
-      import('./pages/patient-portal/PatientAppointmentsPage');
-      import('./pages/patient-portal/PatientOffersPage');
+      import('@apps/patient-portal/modules/dashboard/PatientDashboardPage');
+      import('@apps/patient-portal/modules/appointments/pages/PatientAppointmentsPage');
+      import('@apps/patient-portal/modules/camps-offers/pages/PatientOffersPage');
     }
   }, [location]);
 

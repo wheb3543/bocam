@@ -38,7 +38,7 @@ export const ADMIN_NAVIGATION_SECTIONS: AdminNavigationSection[] = [
   {
     id: 'booking-and-patients',
     label: 'الحجز والجدولة والمرضى والعملاء',
-    items: navigationItems('bookings', 'tasks'),
+    items: navigationItems('tasks'),
     subsections: [
       {
         id: 'appointments-and-bookings',

@@ -1,11 +1,9 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { APP_LOGO, APP_TITLE } from '@/const';
+import { readSourceFile } from './helpers/sourceReader';
 
-const integrationSettingsSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx'),
-  'utf8'
+const integrationSettingsSource = readSourceFile(
+  'client/src/pages/admin/communications/MetaIntegrationSettingsPage.tsx'
 );
 
 describe('P0 brand and page-shell completion', () => {

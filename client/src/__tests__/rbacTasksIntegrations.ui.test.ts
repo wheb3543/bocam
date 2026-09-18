@@ -1,8 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-
-const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
+import { readSourceFile as source } from './helpers/sourceReader';
 
 describe('واجهة RBAC للمهام والتكاملات', () => {
   it('تخفي إجراءات مهام المتابعة بناءً على العرض والإنشاء والإسناد والإكمال والحذف', () => {

@@ -1,23 +1,10 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { readSourceFile } from './helpers/sourceReader';
 
-const sidebarSource = readFileSync(
-  resolve(process.cwd(), 'client/src/config/sidebarNavigation.ts'),
-  'utf8'
-);
-const editableNavigationSource = readFileSync(
-  resolve(process.cwd(), 'client/src/config/sidebarNavigation.ts'),
-  'utf8'
-);
-const reviewPageSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/campaigns/ReviewApprovalPage.tsx'),
-  'utf8'
-);
-const queueSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/content/components/dialogs/ApprovalQueueDialog.tsx'),
-  'utf8'
-);
+const sidebarSource = readSourceFile('client/src/config/sidebarNavigation.ts');
+const editableNavigationSource = readSourceFile('client/src/config/sidebarNavigation.ts');
+const reviewPageSource = readSourceFile('client/src/pages/admin/campaigns/ReviewApprovalPage.tsx');
+const queueSource = readSourceFile('client/src/pages/admin/content/components/dialogs/ApprovalQueueDialog.tsx');
 
 describe('P1-D واجهات المشاريع والمراجعة والاعتماد', () => {
   it('يحمي رابط المشاريع بوصفه عرضاً للحملات في نسختي التنقل', () => {

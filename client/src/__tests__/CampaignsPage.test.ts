@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { readSourceFile } from './helpers/sourceReader';
 
 // Mock trpc hook
 vi.mock("@/lib/trpc", () => ({
@@ -325,13 +325,11 @@ describe("CampaignsPage - Multi-select", () => {
 });
 
 describe('CampaignsPage - مساحة العمل الداخلية', () => {
-  const pageSource = readFileSync(
-    resolve(__dirname, '../pages/admin/campaigns/CampaignsPage.tsx'),
-    'utf-8'
+  const pageSource = readSourceFile(
+    resolve(__dirname, '../pages/admin/campaigns/CampaignsPage.tsx')
   );
-  const overviewSource = readFileSync(
-    resolve(__dirname, '../pages/admin/campaigns/components/CampaignOverviewCards.tsx'),
-    'utf-8'
+  const overviewSource = readSourceFile(
+    resolve(__dirname, '../pages/admin/campaigns/components/CampaignOverviewCards.tsx')
   );
 
   it('يثبت مساحة الصفحة ويحصر التمرير في قائمة الحملات', () => {

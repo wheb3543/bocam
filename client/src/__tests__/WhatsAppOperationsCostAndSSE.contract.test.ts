@@ -1,10 +1,6 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createOperationalCostSummary } from '@/lib/whatsappOperationalCostSummary';
-
-const readSource = (relativePath: string) =>
-  readFileSync(resolve(process.cwd(), relativePath), 'utf8');
+import { readSourceFile as readSource } from './helpers/sourceReader';
 
 describe('ملخص تكلفة التشغيل ومراقبة SSE', () => {
   it('يحسب الملخص الموحد من صفوف التكلفة الفعلية دون قيم افتراضية مخترعة', () => {

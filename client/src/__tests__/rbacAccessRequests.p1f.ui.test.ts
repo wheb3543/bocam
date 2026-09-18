@@ -1,19 +1,9 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { readSourceFile } from './helpers/sourceReader';
 
-const pageSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/users/UsersManagementPage.tsx'),
-  'utf8'
-);
-const hookSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/users/hooks/useUsers.ts'),
-  'utf8'
-);
-const tableSource = readFileSync(
-  resolve(process.cwd(), 'client/src/pages/admin/users/components/AccessRequestsTable.tsx'),
-  'utf8'
-);
+const pageSource = readSourceFile('client/src/pages/admin/users/UsersManagementPage.tsx');
+const hookSource = readSourceFile('client/src/pages/admin/users/hooks/useUsers.ts');
+const tableSource = readSourceFile('client/src/pages/admin/users/components/AccessRequestsTable.tsx');
 
 describe('P1-F واجهة طلبات الوصول', () => {
   it('يوقف استعلام الطلبات ويكشف صلاحيات العرض والقرار للصفحة', () => {

@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { readSourceFile } from './helpers/sourceReader';
 
 // Mock trpc hook
 vi.mock("@/lib/trpc", () => ({
@@ -330,13 +330,11 @@ describe("TeamsPage - Team Types", () => {
 });
 
 describe('TeamsPage - مساحة عمل التسويق الرقمي المدمجة', () => {
-  const digitalMarketingSource = readFileSync(
-    resolve(__dirname, '../pages/admin/teams/DigitalMarketingTeamPage.tsx'),
-    'utf-8'
+  const digitalMarketingSource = readSourceFile(
+    resolve(__dirname, '../pages/admin/teams/DigitalMarketingTeamPage.tsx')
   );
-  const underDevelopmentSource = readFileSync(
-    resolve(__dirname, '../components/UnderDevelopmentPage.tsx'),
-    'utf-8'
+  const underDevelopmentSource = readSourceFile(
+    resolve(__dirname, '../components/UnderDevelopmentPage.tsx')
   );
 
   it('يفعّل التخطيط المدمج الخاص بفريق التسويق الرقمي', () => {
@@ -352,17 +350,14 @@ describe('TeamsPage - مساحة عمل التسويق الرقمي المدمج
 });
 
 describe('TeamsPage - مساحة عمل فريق الميديا', () => {
-  const mediaTeamSource = readFileSync(
-    resolve(__dirname, '../pages/admin/teams/MediaTeamPage.tsx'),
-    'utf-8'
+  const mediaTeamSource = readSourceFile(
+    resolve(__dirname, '../pages/admin/teams/MediaTeamPage.tsx')
   );
-  const mediaStatsSource = readFileSync(
-    resolve(__dirname, '../pages/admin/teams/media/MediaStats.tsx'),
-    'utf-8'
+  const mediaStatsSource = readSourceFile(
+    resolve(__dirname, '../pages/admin/teams/media/MediaStats.tsx')
   );
-  const kanbanColumnSource = readFileSync(
-    resolve(__dirname, '../pages/admin/teams/media/KanbanColumn.tsx'),
-    'utf-8'
+  const kanbanColumnSource = readSourceFile(
+    resolve(__dirname, '../pages/admin/teams/media/KanbanColumn.tsx')
   );
 
   it('يزيل رأس المحتوى ويثبت مساحة العمل وينقل الإجراءات إلى شريط المرشحات', () => {

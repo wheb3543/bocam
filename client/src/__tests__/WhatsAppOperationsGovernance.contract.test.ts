@@ -1,9 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-
-const readSource = (relativePath: string) =>
-  readFileSync(resolve(process.cwd(), relativePath), 'utf8');
+import { readSourceFile as readSource } from './helpers/sourceReader';
 
 describe('مراكز التحليلات والعمليات والحوكمة في واتساب', () => {
   it('يسجل المراكز الجديدة مع إبقاء الروابط التفصيلية القديمة صالحة', () => {

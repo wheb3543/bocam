@@ -3,69 +3,135 @@ import { Redirect, Route, Switch } from 'wouter';
 import DashboardLayout from './DashboardLayout';
 import ProtectedRoute from './ProtectedRoute';
 
-const SystemLandingPage = lazy(() => import('@/pages/admin/system/SystemLandingPage'));
-const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const SystemLandingPage = lazy(
+  () => import('@apps/admin/modules/10-system-settings/pages/SystemLandingPage')
+);
+const AdminDashboard = lazy(
+  () => import('@apps/admin/modules/10-system-settings/pages/AdminDashboardPage')
+);
 const OfflinePage = lazy(() => import('@/pages/OfflinePage'));
-const SettingsPage = lazy(() => import('@/pages/admin/SettingsPage'));
-const ProfilePage = lazy(() => import('@/pages/admin/ProfilePage'));
-const SupportTicketsPage = lazy(() => import('@/pages/admin/SupportTicketsPage'));
-const ManagementPage = lazy(() => import('@/pages/admin/ManagementPage'));
-const ContentManagementPage = lazy(() => import('@/pages/admin/content/ContentManagementPage'));
-const MediaLibraryPage = lazy(() => import('@/pages/admin/media/MediaLibraryPage'));
-const UsersManagementPage = lazy(() => import('@/pages/admin/users/UsersManagementPage'));
-const PublishingPage = lazy(() => import('@/pages/admin/content/PublishingPage'));
-const WhatsAppPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppPage'));
+const SettingsPage = lazy(
+  () => import('@apps/admin/modules/01-booking-scheduling/settings/BookingSettingsPage')
+);
+const ProfilePage = lazy(() => import('@apps/admin/modules/10-system-settings/pages/ProfilePage'));
+const SupportTicketsPage = lazy(
+  () => import('@apps/admin/modules/10-system-settings/license/SupportTicketsPage')
+);
+const ManagementPage = lazy(
+  () => import('@apps/admin/modules/01-booking-scheduling/pages/ManagementPage')
+);
+const ContentManagementPage = lazy(
+  () => import('@apps/admin/modules/05-cms-portal/pages/CmsPagesManagerPage')
+);
+const MediaLibraryPage = lazy(
+  () => import('@apps/admin/modules/05-cms-portal/media/MediaLibraryPage')
+);
+const UsersManagementPage = lazy(
+  () => import('@apps/admin/modules/07-users-rbac/pages/StaffUsersPage')
+);
+const PublishingPage = lazy(
+  () => import('@apps/admin/modules/04-marketing-publishing/publishing/PublishingApprovalPage')
+);
+const WhatsAppPage = lazy(() => import('@apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppPage'));
 const WhatsAppOperationsCenter = lazy(
-  () => import('@/pages/admin/whatsapp/WhatsAppOperationsCenter')
+  () => import('@apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppOperationsCenter')
 );
 const WhatsAppAutomationCenter = lazy(
-  () => import('@/pages/admin/whatsapp/WhatsAppAutomationCenter')
+  () => import('@apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAutomationCenter')
 );
-const WhatsAppCampaignCenter = lazy(() => import('@/pages/admin/whatsapp/WhatsAppCampaignCenter'));
+const WhatsAppCampaignCenter = lazy(
+  () => import('@apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppCampaignCenter')
+);
 const WhatsAppGovernanceCenter = lazy(
-  () => import('@/pages/admin/whatsapp/WhatsAppGovernanceCenter')
+  () => import('@apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppGovernanceCenter')
 );
 const WhatsAppAnalyticsCenter = lazy(
-  () => import('@/pages/admin/whatsapp/WhatsAppAnalyticsCenter')
+  () => import('@apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppAnalyticsCenter')
 );
 const WhatsAppLegacyTransitionPage = lazy(
-  () => import('@/pages/admin/whatsapp/WhatsAppLegacyTransitionPage')
+  () => import('@apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppLegacyTransitionPage')
 );
-const WhatsAppIntegration = lazy(() => import('@/pages/admin/whatsapp/WhatsAppIntegration'));
-const WhatsAppLabResultsPage = lazy(() => import('@/pages/admin/whatsapp/WhatsAppLabResultsPage'));
-const MessagesPage = lazy(() => import('@/pages/admin/communications/MessagesPage'));
-const MessageSettingsPage = lazy(() => import('@/pages/admin/MessageSettingsPage'));
+const WhatsAppIntegration = lazy(
+  () => import('@apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppIntegration')
+);
+const WhatsAppLabResultsPage = lazy(
+  () => import('@apps/admin/modules/03-omni-inbox/whatsapp/WhatsAppLabResultsPage')
+);
+const MessagesPage = lazy(() => import('@apps/admin/modules/03-omni-inbox/pages/UnifiedInboxPage'));
+const MessageSettingsPage = lazy(
+  () => import('@apps/admin/modules/03-omni-inbox/settings/MessageSettingsPage')
+);
 const MetaIntegrationSettingsPage = lazy(
-  () => import('@/pages/admin/communications/MetaIntegrationSettingsPage')
+  () => import('@apps/admin/modules/03-omni-inbox/settings/MetaIntegrationSettingsPage')
 );
-const ReportsPage = lazy(() => import('@/pages/admin/reports/ReportsPage'));
-const AnalyticsPage = lazy(() => import('@/pages/admin/reports/AnalyticsPage'));
-const CampStatsPage = lazy(() => import('@/pages/admin/reports/CampStatsPage'));
-const LeadsManagementPage = lazy(() => import('@/pages/admin/bookings/LeadsManagementPage'));
+const ReportsPage = lazy(() => import('@apps/admin/modules/10-system-settings/pages/ReportsPage'));
+const AnalyticsPage = lazy(
+  () => import('@apps/admin/modules/01-booking-scheduling/reports/BookingAnalyticsPage')
+);
+const CampStatsPage = lazy(
+  () => import('@apps/admin/modules/01-booking-scheduling/reports/CampStatsPage')
+);
+const LeadsManagementPage = lazy(
+  () => import('@apps/admin/modules/04-marketing-publishing/leads/LeadsManagementPage')
+);
 const AppointmentsManagementPage = lazy(
-  () => import('@/pages/admin/bookings/AppointmentsManagementPage')
+  () => import('@apps/admin/modules/01-booking-scheduling/pages/AppointmentsManagementPage')
 );
-const OfferLeadsPage = lazy(() => import('@/pages/admin/bookings/OfferLeadsPage'));
-const CampRegistrationsPage = lazy(() => import('@/pages/admin/bookings/CampRegistrationsPage'));
-const CustomersPage = lazy(() => import('@/pages/admin/bookings/CustomersPage'));
-const TasksPage = lazy(() => import('@/pages/admin/bookings/TasksPage'));
-const MediaTeamPage = lazy(() => import('@/pages/admin/teams/MediaTeamPage'));
-const FieldMarketingTeamPage = lazy(() => import('@/pages/admin/teams/FieldMarketingTeamPage'));
-const CustomerServiceTeamPage = lazy(() => import('@/pages/admin/teams/CustomerServiceTeamPage'));
-const ReviewApprovalPage = lazy(() => import('@/pages/admin/campaigns/ReviewApprovalPage'));
-const CampaignsPage = lazy(() => import('@/pages/admin/campaigns/CampaignsPage'));
+const OfferLeadsPage = lazy(
+  () => import('@apps/admin/modules/04-marketing-publishing/leads/OfferLeadsPage')
+);
+const CampRegistrationsPage = lazy(
+  () => import('@apps/admin/modules/01-booking-scheduling/camps/CampRegistrationsPage')
+);
+const CustomersPage = lazy(
+  () => import('@apps/admin/modules/02-crm-patients/pages/PatientsDirectoryPage')
+);
+const TasksPage = lazy(
+  () => import('@apps/admin/modules/06-tasks-projects/pages/TasksOverviewPage')
+);
+const MediaTeamPage = lazy(
+  () => import('@apps/admin/modules/06-tasks-projects/teams/MediaTeamPage')
+);
+const FieldMarketingTeamPage = lazy(
+  () => import('@apps/admin/modules/06-tasks-projects/teams/FieldMarketingTeamPage')
+);
+const CustomerServiceTeamPage = lazy(
+  () => import('@apps/admin/modules/06-tasks-projects/teams/CustomerServiceTeamPage')
+);
+const ReviewApprovalPage = lazy(
+  () => import('@apps/admin/modules/04-marketing-publishing/publishing/ReviewApprovalPage')
+);
+const CampaignsPage = lazy(
+  () => import('@apps/admin/modules/04-marketing-publishing/pages/CampaignsPage')
+);
 const DigitalMarketingTasksPage = lazy(
-  () => import('@/pages/admin/campaigns/DigitalMarketingTasksPage')
+  () => import('@apps/admin/modules/06-tasks-projects/pages/DigitalMarketingTasksPage')
 );
-const PatientResultsAdminPage = lazy(() => import('@/pages/admin/shared/PatientResultsAdminPage'));
-const PWAStatsPage = lazy(() => import('@/pages/admin/reports/PWAStatsPage'));
-const BIPage = lazy(() => import('@/pages/admin/reports/BIPage'));
-const TrackingSettingsPage = lazy(() => import('@/pages/admin/TrackingSettingsPage'));
-const AdvancedSettingsPage = lazy(() => import('@/pages/admin/AdvancedSettingsPage'));
-const NotificationsPage = lazy(() => import('@/pages/admin/NotificationsPage'));
-const UpdateManagementPage = lazy(() => import('@/pages/admin/system/UpdateManagementPage'));
-const SystemStatusPage = lazy(() => import('@/pages/admin/system/SystemStatusPage'));
-const BackupManagementPage = lazy(() => import('@/pages/admin/system/BackupManagementPage'));
+const PatientResultsAdminPage = lazy(
+  () => import('@apps/admin/modules/02-crm-patients/pages/PatientResultsAdminPage')
+);
+const PWAStatsPage = lazy(
+  () => import('@apps/admin/modules/10-system-settings/pages/PWAStatsPage')
+);
+const BIPage = lazy(() => import('@apps/admin/modules/10-system-settings/pages/BIPage'));
+const TrackingSettingsPage = lazy(
+  () => import('@apps/admin/modules/04-marketing-publishing/tracking/TrackingSettingsPage')
+);
+const AdvancedSettingsPage = lazy(
+  () => import('@apps/admin/modules/10-system-settings/pages/AdvancedSettingsPage')
+);
+const NotificationsPage = lazy(
+  () => import('@apps/admin/modules/10-system-settings/pages/NotificationsPage')
+);
+const UpdateManagementPage = lazy(
+  () => import('@apps/admin/modules/10-system-settings/updates/UpdateManagementPage')
+);
+const SystemStatusPage = lazy(
+  () => import('@apps/admin/modules/10-system-settings/pages/SystemHealthPage')
+);
+const BackupManagementPage = lazy(
+  () => import('@apps/admin/modules/10-system-settings/backups/BackupPage')
+);
 
 function AdminPageHeader({ title, children }: { title: string; children: React.ReactNode }) {
   return <DashboardLayout pageTitle={title}>{children}</DashboardLayout>;

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { readSourceFile } from '../../../../src/__tests__/helpers/sourceReader';
+
 const homePagePath = existsSync(resolve(process.cwd(), 'client/src/apps/public/modules/01-home/pages/HomePage.tsx'))
   ? resolve(process.cwd(), 'client/src/apps/public/modules/01-home/pages/HomePage.tsx')
   : resolve(process.cwd(), 'client/src/pages/public/HomePage.tsx');
@@ -12,7 +14,7 @@ const dynamicPagePath = existsSync(resolve(process.cwd(), 'client/src/apps/publi
 
 const homePageSource = readFileSync(homePagePath, 'utf8');
 const dynamicPageSource = readFileSync(dynamicPagePath, 'utf8');
-const seoComponentSource = readFileSync(resolve(process.cwd(), 'client/src/components/SEO.tsx'), 'utf8');
+const seoComponentSource = readSourceFile('client/src/components/SEO.tsx');
 
 describe('SEO المنشور من CMS', () => {
   it('يستهلك سجلات SEO المنشورة في الصفحة الرئيسية والصفحات ذات الرابط', () => {
