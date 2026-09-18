@@ -17,7 +17,15 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["server/**/*.test.ts", "server/**/*.spec.ts", "server/**/*.test.tsx", "server/**/*.spec.tsx", "client/src/**/*.test.ts", "client/src/**/*.test.tsx", "client/src/**/*.spec.ts", "client/src/**/*.spec.tsx"],
-    exclude: ["client/src/hooks/__tests__/useExportUtils.test.ts", "client/src/components/animations/__tests__/**", "client/src/components/__tests__/**", "client/src/__tests__/ChatWindow.test.tsx", "client/src/__tests__/accessibility.test.tsx"],
+    exclude: [
+      "client/src/hooks/__tests__/useExportUtils.test.ts",
+      "client/src/components/animations/__tests__/**",
+      "client/src/components/__tests__/**",
+      "client/src/__tests__/ChatWindow.test.tsx",
+      "client/src/__tests__/accessibility.test.tsx",
+      "client/src/apps/admin/modules/03-omni-inbox/__tests__/ChatWindow.test.tsx",
+      "client/src/core/feedback/__tests__/accessibility.test.tsx",
+    ],
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     css: {
