@@ -1,0 +1,336 @@
+/**
+ * Desktop Sidebar Component
+ * مكون الشريط الجانبي للسطح
+ */
+
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Settings as SettingsIcon,
+  Menu,
+  Pencil,
+  HelpCircle,
+  Bell,
+  ChevronRight,
+  ChevronLeft,
+} from 'lucide-react';
+import InstallPWAButton from '@/components/InstallPWAButton';
+import type { NavItem } from '../sidebarData';
+import SidebarBadge from './SidebarBadge';
+import { useUnreadCount } from '@/hooks/useNotifications';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { APP_LOGO, COMPANY_ARABIC_NAME } from '@/const';
+
+interface DesktopSidebarProps {
+  shouldShowText: boolean;
+  primaryNavItems: NavItem[];
+  isItemActive: (href: string) => boolean;
+  getBadgeCount: (itemId: string) => number;
+  handleNavClick: (href: string) => void;
+  onToggleExpand?: () => void;
+  handleMouseEnter?: () => void;
+  handleMouseLeave?: () => void;
+  onAllToolsClick: () => void;
+  onEditClick: () => void;
+  allToolsOpen: boolean;
+}
+
+export default function DesktopSidebar({
+  shouldShowText,
+  primaryNavItems,
+  isItemActive,
+  getBadgeCount,
+  handleNavClick,
+  onToggleExpand,
+  onAllToolsClick,
+  onEditClick,
+  allToolsOpen,
+}: DesktopSidebarProps) {
+  const { can, isLoading: arePermissionsLoading } = useRolePermissions();
+  const canViewNotifications = can('notifications.view');
+  const { data: unreadCount } = useUnreadCount(canViewNotifications);
+  return (
+    <aside
+      className={cn(
+        'hidden lg:flex flex-col h-screen sticky top-0 bg-white dark:bg-gray-900 border-l border-border dark:border-gray-700 z-30 transition-all duration-300 ease-in-out select-none',
+        shouldShowText ? 'w-64' : 'w-[72px]'
+      )}
+      dir="rtl"
+    >
+      {/* Logo + Hospital Name + Toggle Button */}
+      <div
+        className={cn(
+          'flex items-center py-3 border-b border-gray-100 dark:border-gray-700 transition-all duration-200',
+          shouldShowText ? 'justify-between px-3' : 'flex-col gap-2 px-2'
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => handleNavClick('/system')}
+          className="flex items-center gap-2.5 min-w-0 text-right focus:outline-none hover:opacity-80 transition-opacity cursor-pointer"
+          title="شاشة النظام الرئيسية"
+        >
+          <img
+            src={APP_LOGO}
+            alt={COMPANY_ARABIC_NAME}
+            className="h-8 w-8 object-contain flex-shrink-0"
+          />
+          {shouldShowText && (
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm font-bold text-foreground dark:text-gray-100 truncate">
+                {COMPANY_ARABIC_NAME}
+              </h2>
+              <p className="text-xs text-muted-foreground dark:text-gray-400 truncate">
+                نظام بوكام
+              </p>
+            </div>
+          )}
+        </button>
+
+        {onToggleExpand && (
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={onToggleExpand}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border border-border/40"
+                aria-label={shouldShowText ? 'طي القائمة الجانبية' : 'توسيع القائمة الجانبية'}
+              >
+                {shouldShowText ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              {shouldShowText ? 'طي القائمة الجانبية' : 'توسيع القائمة الجانبية'}
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
+      {/* Primary Nav Items */}
+      <ScrollArea className="flex-1 py-2">
+        <nav className="flex flex-col gap-1 px-2">
+          {primaryNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = isItemActive(item.href);
+            const badgeCount = getBadgeCount(item.id);
+
+            return (
+              <Tooltip key={item.href} delayDuration={shouldShowText ? 999999 : 300}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => handleNavClick(item.href)}
+                    className={cn(
+                      'relative w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                      shouldShowText ? 'px-3' : 'px-0 justify-center',
+                      isActive
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                        : 'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
+                    )}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <Icon
+                        className={cn(
+                          'transition-all duration-200',
+                          shouldShowText ? 'h-5 w-5' : 'h-6 w-6',
+                          isActive && 'stroke-[2.5]'
+                        )}
+                      />
+                      <SidebarBadge count={badgeCount} />
+                      {!badgeCount && item.hasDot && (
+                        <span className="absolute -top-0.5 -left-0.5 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
+                      )}
+                    </div>
+                    {shouldShowText && (
+                      <span
+                        className={cn(
+                          'text-sm truncate flex-1 text-right transition-opacity duration-200',
+                          isActive ? 'font-semibold' : 'font-medium'
+                        )}
+                      >
+                        {item.title}
+                      </span>
+                    )}
+                    {shouldShowText && badgeCount > 0 && (
+                      <span className="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded-full flex-shrink-0">
+                        {badgeCount}
+                      </span>
+                    )}
+                    {/* Active indicator bar */}
+                    {isActive && (
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-l-full" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                {!shouldShowText && (
+                  <TooltipContent side="left" className="font-medium">
+                    {item.title}
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            );
+          })}
+
+          {/* كل الأدوات و تعديل - أسفل العناصر مباشرة */}
+          <div className="border-t border-gray-100 dark:border-gray-700 my-2 pt-2">
+            {/* كل الأدوات */}
+            <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={onAllToolsClick}
+                  className={cn(
+                    'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200 mb-1',
+                    shouldShowText ? 'px-3' : 'px-0 justify-center',
+                    allToolsOpen
+                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                      : 'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
+                  )}
+                >
+                  <Menu
+                    className={cn(
+                      'flex-shrink-0 transition-all duration-200',
+                      shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                    )}
+                  />
+                  {shouldShowText && (
+                    <span className="text-sm font-medium truncate flex-1 text-right">
+                      كل الأدوات
+                    </span>
+                  )}
+                </button>
+              </TooltipTrigger>
+              {!shouldShowText && <TooltipContent side="left">كل الأدوات</TooltipContent>}
+            </Tooltip>
+
+            {/* تعديل */}
+            <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={onEditClick}
+                  className={cn(
+                    'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                    shouldShowText ? 'px-3' : 'px-0 justify-center',
+                    'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
+                  )}
+                >
+                  <Pencil
+                    className={cn(
+                      'flex-shrink-0 transition-all duration-200',
+                      shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                    )}
+                  />
+                  {shouldShowText && (
+                    <span className="text-sm font-medium truncate flex-1 text-right">تعديل</span>
+                  )}
+                </button>
+              </TooltipTrigger>
+              {!shouldShowText && <TooltipContent side="left">تعديل الشريط</TooltipContent>}
+            </Tooltip>
+          </div>
+        </nav>
+      </ScrollArea>
+
+      {/* Bottom Actions - الإعدادات والمساعدة */}
+      <div className="flex flex-col gap-1 px-2 py-2 border-t border-gray-100 dark:border-gray-700">
+        {/* الإشعارات */}
+        {!arePermissionsLoading && canViewNotifications ? (
+          <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => {
+                  handleNavClick('/admin/notifications');
+                }}
+                className={cn(
+                  'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                  shouldShowText ? 'px-3' : 'px-0 justify-center',
+                  isItemActive('/admin/notifications')
+                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
+                )}
+              >
+                <div className="relative flex-shrink-0">
+                  <Bell
+                    className={cn(
+                      'flex-shrink-0 transition-all duration-200',
+                      shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                    )}
+                  />
+                  {(unreadCount ?? 0) > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+                      {(unreadCount ?? 0) > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </div>
+                {shouldShowText && (
+                  <span className="text-sm font-medium truncate flex-1 text-right">الإشعارات</span>
+                )}
+              </button>
+            </TooltipTrigger>
+            {!shouldShowText && <TooltipContent side="left">الإشعارات</TooltipContent>}
+          </Tooltip>
+        ) : null}
+
+        {/* الإعدادات */}
+        <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => handleNavClick('/admin/settings')}
+              className={cn(
+                'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                shouldShowText ? 'px-3' : 'px-0 justify-center',
+                isItemActive('/admin/settings')
+                  ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
+              )}
+            >
+              <SettingsIcon
+                className={cn(
+                  'flex-shrink-0 transition-all duration-200',
+                  shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                )}
+              />
+              {shouldShowText && (
+                <span className="text-sm font-medium truncate flex-1 text-right">الإعدادات</span>
+              )}
+            </button>
+          </TooltipTrigger>
+          {!shouldShowText && <TooltipContent side="left">الإعدادات</TooltipContent>}
+        </Tooltip>
+
+        {/* زر تثبيت التطبيق */}
+        {shouldShowText && <InstallPWAButton appType="admin" variant="sidebar" />}
+
+        {/* المساعدة */}
+        <Tooltip delayDuration={shouldShowText ? 999999 : 300}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => {
+                /* TODO: فتح المساعدة */
+              }}
+              className={cn(
+                'w-full flex items-center gap-3 py-3 rounded-lg transition-all duration-200',
+                shouldShowText ? 'px-3' : 'px-0 justify-center',
+                'text-foreground hover:bg-muted/50 dark:text-gray-300 dark:hover:bg-gray-800'
+              )}
+            >
+              <HelpCircle
+                className={cn(
+                  'flex-shrink-0 transition-all duration-200',
+                  shouldShowText ? 'h-5 w-5' : 'h-6 w-6'
+                )}
+              />
+              {shouldShowText && (
+                <span className="text-sm font-medium truncate flex-1 text-right">المساعدة</span>
+              )}
+            </button>
+          </TooltipTrigger>
+          {!shouldShowText && <TooltipContent side="left">المساعدة</TooltipContent>}
+        </Tooltip>
+      </div>
+    </aside>
+  );
+}
