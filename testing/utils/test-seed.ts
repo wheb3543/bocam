@@ -15,7 +15,7 @@ import {
   generateMockOffers,
   generateMockUser,
   generateMockUsers,
-} from '../../mocks/data';
+} from '../mocks/data';
 import { setMockData } from './test-db';
 
 // ============================================================================

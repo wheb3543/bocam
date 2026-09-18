@@ -4,7 +4,7 @@
  */
 
 import { resetMockDatabase } from './test-db';
-import { resetMockData } from '../../mocks/trpc';
+import { resetMockData } from '../mocks/trpc';
 import { vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 
 // ============================================================================
