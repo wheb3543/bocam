@@ -192,6 +192,30 @@
       "notes": "Generated baseline; domain and ownership require phase review."
     },
     {
+      "path": "CONTRIBUTING.md",
+      "title": "Contributing Guide",
+      "language": "ar",
+      "domain": "development",
+      "document_type": "guide",
+      "status": "canonical",
+      "audience": "developer",
+      "owner": "Architecture & Engineering Team",
+      "source_code_paths": [],
+      "test_paths": [
+        "scripts/qa/validate-documentation-registry.mjs"
+      ],
+      "related_documents": [
+        "docs/development/CONTRIBUTING.md",
+        "docs/introduction/CODE_OF_CONDUCT.md",
+        "AGENTS.md"
+      ],
+      "supersedes": null,
+      "last_reviewed": "2026-09-18",
+      "review_due": "2026-12-18",
+      "evidence_level": "tested-runtime",
+      "notes": "Root portal for contributors and developers pointing to detailed guidelines."
+    },
+    {
       "path": "deploy/backup/README.md",
       "title": "README",
       "language": "mixed",

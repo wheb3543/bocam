@@ -1,5 +1,5 @@
 # ==============================================================================
-# BOCAM CRM - Code Owners File (.github/CODEOWNERS)
+# BOCAM Healthcare Platform - Code Owners File (.github/CODEOWNERS)
 # ==============================================================================
 # يحدد هذا الملف تلقائياً المراجعين والمسؤولين عن مراجعة التغييرات (Pull Requests)
 # بناءً على المجلدات والملفات التي تم تعديلها في المشروع.
@@ -11,14 +11,26 @@
 # 💻 الواجهة الأمامية (فريق تطوير الـ Frontend)
 /client/                                @frontend-team
 
-# 🗄️ الخادم والـ API (فريق تطوير الـ Backend)
+# 🗄️ الخادم والـ API والأنظمة المستقلة (فريق تطوير الـ Backend)
 /server/                                @backend-team
+
+# 🗃️ قواعد البيانات والمخططات المعيارية (Database & Schema)
+/drizzle/                               @lead-architect @backend-team
+/drizzle.config.ts                      @lead-architect @backend-team
 
 # 🔗 الهياكل والتعريفات المشتركة (Shared Core and Config)
 /shared/                                @lead-architect @backend-team @frontend-team
 /types/                                 @lead-architect @backend-team @frontend-team
 /tsconfig.json                          @lead-architect
 /vite.config.ts                         @frontend-team @lead-architect
+
+# 🛠️ السكريبتات المساعدة وأدوات المنظومة (Centralized Scripts & Operations)
+/scripts/                               @devops-team @backend-team @lead-architect
+
+# 🧪 بيئة ومحاكيات الاختبار المركزية (Unified Testing Workspace)
+/testing/                               @qa-team @lead-architect
+/vitest.config.ts                       @qa-team @lead-architect
+/playwright.config.ts                   @qa-team @lead-architect
 
 # 🚀 النشر وإعدادات التشغيل (فريق الـ DevOps والعمليات)
 /deploy/                                @devops-team
@@ -29,8 +41,14 @@
 # 🤖 الأتمتة وسير العمل والـ CI/CD
 /.github/workflows/                     @devops-team
 /.github/ISSUE_TEMPLATE/                @devops-team @product-managers
+/.github/PULL_REQUEST_TEMPLATE.md       @lead-architect @qa-team
+
+# 🧠 دستور وقواعد وكلاء الذكاء الاصطناعي (AI Agents Governance)
+/AGENTS.md                              @lead-architect
+/.devin/                                @lead-architect
 
 # 📚 الوثائق والأدلة الإرشادية
 /docs/                                  @documentation-team @product-managers
 /README.md                              @documentation-team @product-managers
+/CONTRIBUTING.md                        @documentation-team @lead-architect
 /CHANGELOG.md                           @documentation-team @product-managers

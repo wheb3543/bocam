@@ -14,14 +14,18 @@ body:
       label: "📁 الوحدة المتأثرة (Affected Module)"
       description: "ما هو القسم أو الموديول الذي واجهت فيه المشكلة؟"
       options:
-        - "💬 تكامل واتساب (WhatsApp Integration)"
-        - "📅 المواعيد والحجوزات (Appointments & Bookings)"
-        - "👥 إدارة العملاء والمهام (Leads & Tasks)"
-        - "📱 بوابة المريض (Patient Portal)"
-        - "📊 التقارير والإحصائيات (Reports & Analytics)"
-        - "🔐 نظام الترخيص والأمان (License & Security)"
-        - "🛠️ قاعدة البيانات والـ Migrations"
-        - "⚙️ الإعدادات العامة وخادم الويب"
+        - "📅 [01] المواعيد والحجوزات والجدولة الذكية والمخيمات (Booking & Scheduling)"
+        - "👥 [02] إدارة المرضى والسجل الطبي الإلكتروني (CRM & Patients / EMR)"
+        - "💬 [03] صندوق المحادثات الموحد وواتساب (Omni-channel Inbox & WhatsApp)"
+        - "📢 [04] حملات التسويق والبث والنشر (Marketing & Publishing)"
+        - "🌐 [05] إدارة المحتوى والبوابة العامة والمدونة (CMS & Public Portal)"
+        - "📋 [06] إدارة المهام والمشاريع وتقييم الأداء (Tasks & Projects)"
+        - "🔐 [07] المستخدمون والأدوار والصلاحيات (Users & RBAC)"
+        - "💳 [08] الفواتير والمدفوعات والعروض (Financial & Billing)"
+        - "📊 [09] التقارير والإحصائيات والتحليلات (Reports & Analytics)"
+        - "⚙️ [10] إعدادات النظام وسجلات التدقيق (System Settings & Audit)"
+        - "🔄 الأنظمة المستقلة: النسخ الاحتياطي، التحديث التلقائي، الترخيص (Subsystems)"
+        - "🛠️ البنية التحتية، السكريبتات، وقواعد البيانات (Infrastructure & DB)"
     validations:
       required: true
   - type: textarea

@@ -74,13 +74,19 @@ pnpm install
 # تشغيل وضع التطوير
 pnpm dev
 
-# فحص TypeScript
+# فحص سلامة الأنواع البرمجية (TypeScript)
 pnpm check
 
-# تنسيق الكود
+# فحص تطابق المخطط المعياري والترحيلات
+pnpm schema:migrations:check
+
+# فحص سجل حوكمة التوثيق
+pnpm docs:check
+
+# تنسيق الكود البرمجي
 pnpm format
 
-# تشغيل الاختبارات
+# تشغيل الاختبارات الآلية
 pnpm test
 ```
 
@@ -91,21 +97,24 @@ git add .
 git commit -m "نوع: وصف مختصر للتغيير"
 ```
 
-**أنواع Commits:**
+> ⚠️ **معيار الالتزام الإلزامي (Commitlint):**
+> يجب ألا يتجاوز طول أي سطر في رسالة الالتزام (العنوان والمتن) **72 حرفاً**.
+
+**أنواع Commits المعيارية:**
 - `feat:` - ميزة جديدة
 - `fix:` - إصلاح خطأ
 - `docs:` - تحديث الوثائق
 - `style:` - تغييرات التنسيق (لا تؤثر على الكود)
-- `refactor:` - إعادة هيكلة الكود
+- `refactor:` - إعادة هيكلة الكود دون كسر التوافق
 - `test:` - إضافة أو تحديث الاختبارات
-- `chore:` - تحديثات الصيانة
+- `chore:` - تحديثات الصيانة والتبعيات
 
-**أمثلة:**
+**أمثلة مطابقة لمعيار الـ 72 حرفاً:**
 ```bash
-git commit -m "feat: إضافة نظام تصدير البيانات إلى PDF"
-git commit -m "fix: إصلاح مشكلة عرض التاريخ في جدول المواعيد"
-git commit -m "docs: تحديث دليل التثبيت في README"
-git commit -m "refactor: تحسين أداء استعلامات قاعدة البيانات"
+git commit -m "feat: add patient report export to PDF
+
+- Implement PDF export generation for patient medical records.
+- Verified via targeted unit tests."
 ```
 
 #### 7. Push التغييرات
@@ -1209,13 +1218,10 @@ test('user registration flow', async ({ page }) => {
 
 ```bash
 # تشغيل جميع الاختبارات
-npm test
+pnpm test
 
 # تشغيل مع coverage
-npm test -- --coverage
-
-# تشغيل tests_changed فقط
-npm test -- --changed
+pnpm test -- --coverage
 ```
 
 ### 5.5 اختبار Regression
@@ -1378,7 +1384,7 @@ const value = 'new';
 
 ```bash
 # تشغيل جميع الاختبارات
-npm test
+pnpm test
 
 # اختبار manual للتأكد من عدم كسر شيء
 # run application locally
@@ -1474,7 +1480,7 @@ git rebase -i HEAD~3
     "hooks": {
       "pre-commit": "lint-staged",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-push": "npm test"
+      "pre-push": "pnpm test"
     }
   },
   "lint-staged": {
