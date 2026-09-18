@@ -74,7 +74,7 @@ test-results/
 stats.html
 
 # Client release artifacts
-release/
+/release/
 bocam-client-release.zip
 
 # Misc
