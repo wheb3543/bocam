@@ -55,20 +55,22 @@ describe('مراكز التحليلات والعمليات والحوكمة في
 
   it('يقيد إجراءات الحوكمة والتشخيص الحساسة ويستعمل المستخدم الفعلي لحل التنبيه', () => {
     const securityRoutes = readSource(
-      'server/routers/whatsapp/settings/routes/securityRoutes.ts'
+      'server/modules/03-omni-inbox/routers/whatsapp/settings/routes/securityRoutes.ts'
     );
     const subscriptionRoutes = readSource(
-      'server/routers/whatsapp/settings/routes/subscriptionRoutes.ts'
+      'server/modules/03-omni-inbox/routers/whatsapp/settings/routes/subscriptionRoutes.ts'
     );
     const webhookRoutes = readSource(
-      'server/routers/whatsapp/settings/routes/webhookRoutes.ts'
+      'server/modules/03-omni-inbox/routers/whatsapp/settings/routes/webhookRoutes.ts'
     );
-    const analyticsRoutes = readSource('server/routers/whatsapp/analytics.ts');
+    const analyticsRoutes = readSource(
+      'server/modules/03-omni-inbox/routers/whatsapp/analytics.ts'
+    );
     const accountHealth = readSource(
       'client/src/pages/admin/whatsapp/WhatsAppAccountHealthPage.tsx'
     );
     const accountHealthRoutes = readSource(
-      'server/routers/whatsapp/settings/routes/accountHealthRoutes.ts'
+      'server/modules/03-omni-inbox/routers/whatsapp/settings/routes/accountHealthRoutes.ts'
     );
 
     expect(analyticsRoutes).toContain('exportAuditLogs: auditExportProcedure');

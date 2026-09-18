@@ -14,11 +14,11 @@ const routerDbMocks = vi.hoisted(() => ({
   assignSocialInboxThread: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-vi.mock('./database/db/connection', () => ({
+vi.mock('../../../database/db/connection', () => ({
   getDb: vi.fn().mockResolvedValue(null),
 }));
 
-vi.mock('./database/db', () => ({
+vi.mock('../../../database/db', () => ({
   ...routerDbMocks,
   getDb: vi.fn().mockResolvedValue(null),
   getUserById: vi.fn(),
@@ -28,15 +28,15 @@ import {
   getSocialInboxStats,
   getSocialInboxThreadById,
   listSocialInboxThreads,
-} from './database/db/socialInbox';
-import { socialInboxRouter } from './routers/socialInbox';
+} from '../../../database/db/socialInbox';
+import { socialInboxRouter } from '../routers/socialInbox';
 
 function createCaller(role: 'admin' | 'manager' | 'team_leader' | 'staff' | 'viewer' | 'user') {
   return socialInboxRouter.createCaller({
     user: { role },
     req: {},
     res: {},
-  } as unknown as import('./_core/context').TrpcContext);
+  } as unknown as import('../../../_core/context').TrpcContext);
 }
 
 const caller = createCaller('admin');

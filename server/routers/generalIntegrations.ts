@@ -1,29 +1,5 @@
-import { z } from 'zod';
-import { router } from '../_core/trpc';
-import {
-  getSocialPlatformIntegrationStatuses,
-  saveSocialPlatformIntegrationSettings,
-} from '../database/db';
-import { permissionProcedure } from './permissionProcedures';
-
-const platformSchema = z.enum(['x', 'linkedin', 'youtube', 'tiktok']);
-const integrationsViewProcedure = permissionProcedure('integrations.view', 'عرض حالة التكاملات');
-const integrationCredentialsProcedure = permissionProcedure(
-  'integrations.credentials.manage',
-  'إدارة بيانات اعتماد التكاملات'
-);
-
-export const generalIntegrationsRouter = router({
-  status: integrationsViewProcedure.query(() => getSocialPlatformIntegrationStatuses()),
-  save: integrationCredentialsProcedure
-    .input(
-      z.object({
-        platform: platformSchema,
-        clientId: z.string().trim().max(255).optional(),
-        clientSecret: z.string().trim().max(10000).optional(),
-        requestedScopes: z.string().trim().max(2000).optional(),
-        isEnabled: z.boolean().optional(),
-      })
-    )
-    .mutation(({ ctx, input }) => saveSocialPlatformIntegrationSettings(input, ctx.user.id)),
-});
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "../modules/10-system-settings/routers/generalIntegrations".
+ */
+export * from '../modules/10-system-settings/routers/generalIntegrations';

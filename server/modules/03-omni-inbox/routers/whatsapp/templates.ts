@@ -1,0 +1,231 @@
+import { router } from '../../../../_core/trpc';
+import * as db from '../../../../database/db';
+import { ensureDatabaseAvailable } from '../../../../_core/databaseGuard';
+import { z } from 'zod';
+import { createLogger } from '../../../../_core/logger';
+import { permissionProcedure } from '../../../../routers/permissionProcedures';
+
+const logger = createLogger('whatsapp-templates');
+const communicationViewProcedure = permissionProcedure('communications.view', 'عرض قوالب WhatsApp');
+const communicationReplyProcedure = permissionProcedure(
+  'communications.reply',
+  'إرسال قوالب ورسائل WhatsApp'
+);
+const communicationTemplatesProcedure = permissionProcedure(
+  'communications.templates.manage',
+  'إدارة قوالب WhatsApp'
+);
+
+export const templatesRouter = router({
+  templates: router({
+    list: communicationViewProcedure.query(async () => {
+      return db.getAllWhatsAppTemplates();
+    }),
+
+    getById: communicationViewProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return db.getWhatsAppTemplateById(input.id);
+      }),
+
+    syncFromMeta: communicationTemplatesProcedure.mutation(async () => {
+      const wabaId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
+      const hasToken = !!process.env.META_ACCESS_TOKEN;
+      const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+      logger.info(`WABA_ID=${wabaId}, PHONE_ID=${phoneId}, HAS_TOKEN=${hasToken}`);
+
+      if (!wabaId) {
+        return {
+          success: false,
+          error: 'WHATSAPP_BUSINESS_ACCOUNT_ID غير مُعيَّن في متغيرات البيئة',
+          synced: 0,
+          updated: 0,
+        };
+      }
+      if (!hasToken) {
+        return {
+          success: false,
+          error: 'META_ACCESS_TOKEN غير مُعيَّن في متغيرات البيئة',
+          synced: 0,
+          updated: 0,
+        };
+      }
+
+      const { syncTemplatesFromMeta } = await import('../../../../services/whatsappTemplates');
+      const result = await syncTemplatesFromMeta();
+      logger.info(`Result:`, JSON.stringify(result));
+      return result;
+    }),
+
+    syncStatus: communicationTemplatesProcedure.mutation(async () => {
+      const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+      const hasToken = !!process.env.META_ACCESS_TOKEN;
+
+      if (!phoneId) {
+        return {
+          success: false,
+          error: 'WHATSAPP_PHONE_NUMBER_ID غير مُعيَّن في متغيرات البيئة',
+        };
+      }
+      if (!hasToken) {
+        return {
+          success: false,
+          error: 'META_ACCESS_TOKEN غير مُعيَّن في متغيرات البيئة',
+        };
+      }
+
+      const { syncAllTemplates } = await import('../../../../services/templateSyncService');
+      const result = await syncAllTemplates(phoneId);
+      logger.info(`Result:`, JSON.stringify(result));
+      return result;
+    }),
+
+    create: communicationTemplatesProcedure
+      .input(
+        z.object({
+          name: z.string().min(1),
+          content: z.string().min(1),
+          category: z.string(),
+          language: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { createTemplate } = await import('../../../../services/whatsappTemplates');
+        return createTemplate(input);
+      }),
+
+    update: communicationTemplatesProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          content: z.string().optional(),
+          category: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { updateTemplate } = await import('../../../../services/whatsappTemplates');
+        return updateTemplate(input.id, input);
+      }),
+
+    delete: communicationTemplatesProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteTemplate } = await import('../../../../services/whatsappTemplates');
+        return deleteTemplate(input.id);
+      }),
+  }),
+
+  sendTemplate: communicationReplyProcedure
+    .input(
+      z.object({
+        phone: z.string().min(9).max(15),
+        templateName: z.string().min(1),
+        language: z.string().optional(),
+        conversationId: z.number().optional(),
+        templateContent: z.string().optional(),
+        templateButtons: z.string().optional(),
+        headerText: z.string().optional(),
+        footerText: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { sendTemplateMessage } = await import('../../../../services/whatsappTemplates');
+      const result = await sendTemplateMessage({
+        phone: input.phone,
+        templateName: input.templateName,
+        language: input.language,
+      });
+
+      if (result.success && input.conversationId) {
+        try {
+          const { createWhatsAppMessage, updateWhatsAppConversation } =
+            await import('../../../../database/db');
+          const content = input.templateContent || `[قالب: ${input.templateName}]`;
+          const metadata = JSON.stringify({
+            templateName: input.templateName,
+            buttons: input.templateButtons ? JSON.parse(input.templateButtons) : [],
+            headerText: input.headerText || null,
+            footerText: input.footerText || null,
+          });
+          await createWhatsAppMessage({
+            conversationId: input.conversationId,
+            direction: 'outbound',
+            content,
+            messageType: 'template',
+            status: 'sent',
+            whatsappMessageId: result.messageId || null,
+            sentAt: new Date(),
+            metadata,
+          });
+          await updateWhatsAppConversation(input.conversationId, {
+            lastMessage: content.substring(0, 200),
+            lastMessageAt: new Date(),
+          });
+        } catch (err) {
+          logger.error('Failed to save template message to conversation:', err);
+        }
+      }
+
+      return result;
+    }),
+
+  getTemplates: communicationViewProcedure.query(async () => {
+    const { whatsappTemplates } = await import('../../../../../drizzle/schema');
+    const dbConn = await ensureDatabaseAvailable();
+    const templates = await dbConn.select().from(whatsappTemplates).orderBy(whatsappTemplates.name);
+    return { success: true, templates };
+  }),
+
+  getTemplateStatus: communicationViewProcedure
+    .input(z.object({ templateName: z.string() }))
+    .query(async ({ input }) => {
+      const { getTemplateStatus } = await import('../../../../services/whatsappTemplates');
+      return getTemplateStatus(input.templateName);
+    }),
+
+  sendMedia: communicationReplyProcedure
+    .input(
+      z.object({
+        phone: z.string().min(9).max(15),
+        mediaType: z.enum(['image', 'video', 'document', 'audio']),
+        mediaUrl: z.string().url(),
+        caption: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { sendMediaMessage } = await import('../../../../services/whatsappTemplates');
+      return sendMediaMessage({
+        phone: input.phone,
+        mediaType: input.mediaType,
+        mediaUrl: input.mediaUrl,
+        caption: input.caption,
+      });
+    }),
+
+  templateQuality: router({
+    getHistory: communicationViewProcedure
+      .input(
+        z
+          .object({
+            templateId: z.string().optional(),
+            limit: z.number().default(100),
+          })
+          .optional()
+      )
+      .query(async ({ input }) => {
+        const dbConn = await ensureDatabaseAvailable();
+        const { whatsappTemplateQuality } = await import('../../../../../drizzle/schema');
+        const { eq, desc } = await import('drizzle-orm');
+
+        const query = input?.templateId
+          ? dbConn
+              .select()
+              .from(whatsappTemplateQuality)
+              .where(eq(whatsappTemplateQuality.templateId, input.templateId))
+          : dbConn.select().from(whatsappTemplateQuality);
+
+        return query.orderBy(desc(whatsappTemplateQuality.createdAt)).limit(input?.limit || 100);
+      }),
+  }),
+});

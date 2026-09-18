@@ -1,13 +1,5 @@
 /**
- * WhatsApp Settings Utilities
- * أدوات إعدادات واتساب
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "../../../modules/03-omni-inbox/routers/whatsapp/settings/utils".
  */
-
-import { createLogger } from '../../../_core/logger';
-
-const logger = createLogger('whatsapp-settings');
-
-// Logging helper for sensitive operations
-export function logOperation(operation: string, userId: number, details: unknown) {
-  logger.info(`${operation} | User: ${userId} | Details:`, JSON.stringify(details));
-}
+export * from '../../../modules/03-omni-inbox/routers/whatsapp/settings/utils';

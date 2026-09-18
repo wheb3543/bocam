@@ -1,14 +1,5 @@
-import { mergeRouters } from '../../_core/trpc';
-import { conversationsRouter } from './conversations';
-import { messagesRouter } from './messages';
-import { templatesRouter } from './templates';
-import { analyticsRouter } from './analytics';
-import { settingsRouter } from './settings';
-
-export const whatsappAppRouter = mergeRouters(
-  conversationsRouter,
-  messagesRouter,
-  templatesRouter,
-  analyticsRouter,
-  settingsRouter
-);
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "../../modules/03-omni-inbox/routers/whatsapp/appRouter".
+ */
+export * from '../../modules/03-omni-inbox/routers/whatsapp/appRouter';

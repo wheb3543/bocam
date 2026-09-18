@@ -1,18 +1,5 @@
 /**
- * WhatsApp Integration Service
- * ربط التسجيلات والحجوزات مع WhatsApp Cloud API باستخدام القوالب المعتمدة من Meta
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "../modules/03-omni-inbox/services/whatsappIntegration".
  */
-
-export {
-  sendAppointmentConfirmation,
-  scheduleAppointmentReminder24h,
-  scheduleAppointmentReminder1h,
-  sendAppointmentStatusUpdate,
-} from './whatsappIntegration/appointments';
-
-export {
-  sendCampRegistrationConfirmation,
-  sendCampRegistrationStatusUpdate,
-} from './whatsappIntegration/camps';
-
-export { sendOfferLeadConfirmation, sendOfferLeadStatusUpdate } from './whatsappIntegration/offers';
+export * from '../modules/03-omni-inbox/services/whatsappIntegration';

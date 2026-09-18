@@ -1,0 +1,60 @@
+import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const source = readFileSync(
+  resolve(process.cwd(), 'server/routers/content/authorization.ts'),
+  'utf8'
+);
+
+describe('صلاحيات إدارة المحتوى', () => {
+  it('يفصل قدرات القراءة والإنشاء والتعديل والمراجعة والنشر على الخادم', () => {
+    expect(source).toContain("| 'delete'");
+    expect(source).toContain("| 'restore'");
+    expect(source).toContain("read: 'content.view'");
+    expect(source).toContain("create: 'content.create'");
+    expect(source).toContain("update: 'content.update'");
+    expect(source).toContain("delete: 'content.delete'");
+    expect(source).toContain("restore: 'content.restore'");
+    expect(source).toContain("review: 'content.review'");
+    expect(source).toContain("publish: 'content.publish'");
+    expect(source).toContain('hasRolePermission');
+    expect(source).toContain("code: 'FORBIDDEN'");
+  });
+
+  it('يفحص النشر بحسب هوية المستخدم لا بحسب اسم الدور الثابت', () => {
+    expect(source).toContain('await assertContentCapability(ctx.user, capability)');
+    expect(source).toContain('await hasRolePermission');
+  });
+
+  it('يوزع إجراءات CMS على طبقة الصلاحيات المشتركة', () => {
+    const routerFiles = ['textContent.ts', 'images.ts', 'pages.ts', 'sections.ts', 'colorScheme.ts', 'seo.ts', 'sectionButtons.ts'];
+
+    for (const file of routerFiles) {
+      const routerSource = readFileSync(
+        resolve(process.cwd(), `server/routers/content/${file}`),
+        'utf8'
+      );
+      expect(routerSource).toContain("from './authorization'");
+      expect(routerSource).toContain('contentReadProcedure');
+      expect(routerSource).toContain('contentCreateProcedure');
+      expect(routerSource).toContain('contentUpdateProcedure');
+    }
+  });
+
+  it('يفصل قراءة الوسائط ورفعها وتنظيمها وإعادة تسميتها وحذفها', () => {
+    const mediaSource = readFileSync(
+      resolve(process.cwd(), 'server/routers/content/media.ts'),
+      'utf8'
+    );
+    expect(mediaSource).toContain("permissionProcedure('media.view'");
+    expect(mediaSource).toContain("permissionProcedure('media.upload'");
+    expect(mediaSource).toContain("permissionProcedure('media.organize'");
+    expect(mediaSource).toContain("permissionProcedure('media.rename'");
+    expect(mediaSource).toContain("permissionProcedure('media.delete'");
+    expect(mediaSource).toContain('list: mediaViewProcedure');
+    expect(mediaSource).toContain('create: mediaUploadProcedure');
+    expect(mediaSource).toContain('moveMany: mediaOrganizeProcedure');
+    expect(mediaSource).toContain('deleteMany: mediaDeleteProcedure');
+  });
+});

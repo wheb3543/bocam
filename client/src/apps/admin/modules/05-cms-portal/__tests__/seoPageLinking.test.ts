@@ -15,7 +15,7 @@ const settingsSource = readFileSync(
   'utf8'
 );
 const routerSource = readFileSync(
-  resolve(process.cwd(), 'server/routers/content/seo.ts'),
+  resolve(process.cwd(), 'server/modules/05-cms-portal/routers/content/seo.ts'),
   'utf8'
 );
 
